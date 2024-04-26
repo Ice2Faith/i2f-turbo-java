@@ -1,14 +1,24 @@
 package i2f.jdbc.data;
 
+import i2f.reflect.ReflectResolver;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @author Ice2Faith
  * @date 2024/3/14 11:04
  * @desc
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class QueryResult {
     protected List<QueryColumn> columns;
     protected List<Map<String, Object>> rows;
@@ -25,45 +35,29 @@ public class QueryResult {
         return rows.get(rowIndex).get(columns.get(colIndex).getName());
     }
 
-    public List<QueryColumn> getColumns() {
-        return columns;
+    public <T> List<T> getAsBeans(Class<T> clazz) {
+        return getAsBeans(clazz, null);
     }
 
-    public void setColumns(List<QueryColumn> columns) {
-        this.columns = columns;
-    }
+    public <T> List<T> getAsBeans(Class<T> clazz, Function<String, String> columnNameMapper) {
+        List<T> ret = new LinkedList<>();
+        for (Map<String, Object> row : rows) {
+            Map<String, Object> map = row;
+            if (columnNameMapper != null) {
+                map = new LinkedHashMap<>();
+                for (Map.Entry<String, Object> entry : row.entrySet()) {
+                    map.put(columnNameMapper.apply(entry.getKey()), entry.getValue());
+                }
+            }
+            try {
+                T bean = ReflectResolver.getInstance(clazz);
+                ReflectResolver.map2bean(map, bean);
+                ret.add(bean);
+            } catch (Exception e) {
 
-    public List<Map<String, Object>> getRows() {
-        return rows;
-    }
-
-    public void setRows(List<Map<String, Object>> rows) {
-        this.rows = rows;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+            }
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        QueryResult that = (QueryResult) o;
-        return Objects.equals(columns, that.columns) &&
-                Objects.equals(rows, that.rows);
+        return ret;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(columns, rows);
-    }
-
-    @Override
-    public String toString() {
-        return "QueryResult{" +
-                "columns=" + columns +
-                ", rows=" + rows +
-                '}';
-    }
 }
