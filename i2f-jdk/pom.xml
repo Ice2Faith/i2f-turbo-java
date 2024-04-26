@@ -41,6 +41,8 @@
         <module>i2f-container-builder</module>
         <module>i2f-bindsql</module>
         <module>i2f-jdbc</module>
+        <module>i2f-convert</module>
+        <module>i2f-typeof</module>
     </modules>
 
 

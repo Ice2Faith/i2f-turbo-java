@@ -59,6 +59,11 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-convert</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-database</artifactId>
         </dependency>
 
@@ -115,6 +120,11 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-tuple</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-typeof</artifactId>
         </dependency>
 
         <dependency>

@@ -1,21 +1,15 @@
 package i2f.reflect;
 
 
+import i2f.convert.obj.ObjectConvertor;
 import i2f.lru.LruMap;
+import i2f.typeof.TypeOf;
 
 import java.io.File;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -394,7 +388,7 @@ public class ReflectResolver {
                 if (argType == null || paramType == null) {
                     continue;
                 }
-                if (!typeOf(argType, paramType)) {
+                if (!TypeOf.typeOf(argType, paramType)) {
                     return false;
                 }
             }
@@ -523,7 +517,7 @@ public class ReflectResolver {
                 if (argType == null || paramType == null) {
                     continue;
                 }
-                if (!typeOf(argType, paramType)) {
+                if (!TypeOf.typeOf(argType, paramType)) {
                     return false;
                 }
             }
@@ -657,7 +651,7 @@ public class ReflectResolver {
                         }
                     }
                     if (ok) {
-                        value = tryConvertAsType(value, setter.getParameterTypes()[0]);
+                        value = ObjectConvertor.tryConvertAsType(value, setter.getParameterTypes()[0]);
                         ret = setter.invoke(ivkObj, value);
                         success = true;
                     }
@@ -670,7 +664,7 @@ public class ReflectResolver {
             try {
                 field.setAccessible(true);
                 ret = field.get(ivkObj);
-                value = tryConvertAsType(value, field.getType());
+                value = ObjectConvertor.tryConvertAsType(value, field.getType());
                 field.set(ivkObj, value);
                 success = true;
             } catch (Throwable e) {
@@ -737,7 +731,7 @@ public class ReflectResolver {
             }
             try {
                 Object val = entry.getValue();
-                val = tryConvertAsType(val, dstField.getType());
+                val = ObjectConvertor.tryConvertAsType(val, dstField.getType());
                 valueSet(dst, dstField, val);
             } catch (Throwable e) {
 
@@ -810,7 +804,7 @@ public class ReflectResolver {
 
             try {
                 Object val = valueGet(src, srcField);
-                val = tryConvertAsType(val, dstField.getType());
+                val = ObjectConvertor.tryConvertAsType(val, dstField.getType());
                 valueSet(dst, dstField, val);
             } catch (Throwable e) {
 
@@ -820,7 +814,6 @@ public class ReflectResolver {
         return dst;
     }
 
-    private static Map<Class<?>, Class<?>> basicTypeMap = new HashMap<>();
     private static final String[] jdkPackages = {
             "java.lang.",
             "java.util.",
@@ -846,341 +839,9 @@ public class ReflectResolver {
             "javax.crypto.interfaces.",
             "javax.crypto.spec.",
     };
-    private static final Map<Class<?>, Function<BigDecimal, ?>> bigDecimalTypeConverterMap = new LinkedHashMap<>();
-    private static final Map<Class<?>, Function<Boolean, ?>> boolTypeConverterMap = new LinkedHashMap<>();
-    private static final Map<Class<?>, Function<Character, ?>> charTypeConverterMap = new LinkedHashMap<>();
-    private static final Map<Class<?>, Function<Object, Instant>> date2InstantConverterMap = new LinkedHashMap<>();
-    private static final Map<Class<?>, Function<Instant, ?>> dateTypeConverterMap = new LinkedHashMap<>();
-    private static final String[] dateFormats = {
-            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-            "yyyy-MM-dd'T'HH:mm:ss SSSZ",
-            "yyyy-MM-dd'T'HH:mm:ss.SSS",
-            "yyyy-MM-dd'T'HH:mm:ss SSS",
-            "yyyy-MM-dd'T'HH:mm:ssZ",
-            "yyyy-MM-dd'T'HH:mm:ss",
-            "yyyy-MM-dd HH:mm:ss.SSS",
-            "yyyy-MM-dd HH:mm:ss SSS",
-            "yyyy-MM-dd HH:mm:ss",
-            "yyyy-MM-dd HH:mm",
-            "yyyy-MM-dd",
-            "yyyy-MM",
-            "yyyy",
-            "yyyy/MM/dd HH:mm:ss.SSS",
-            "yyyy/MM/dd HH:mm:ss SSS",
-            "yyyy/MM/dd HH:mm:ss",
-            "yyyy/MM/dd HH:mm",
-            "yyyy/MM/dd",
-            "yyyy/MM",
-            "yyyy年MM月dd HH时mm分ss秒.SSS",
-            "yyyy年MM月dd HH时mm分ss秒 SSS",
-            "yyyy年MM月dd HH时mm分ss秒",
-            "yyyy年MM月dd HH时mm分",
-            "yyyy年MM月dd",
-            "yyyy年MM月",
-            "yyyy年",
-            "yyyyMMddHHmmssSSS",
-            "yyyyMMddHHmmss",
-            "yyyyMMddHHmm",
-            "yyyyMMdd",
-            "yyyyMM",
-            "HH:mm:ss.SSS",
-            "HH:mm:ss SSS",
-            "HH:mm:ss",
-            "HH:mm",
-            "HH时mm分ss秒.SSS",
-            "HH时mm分ss秒 SSS",
-            "HH时mm分ss秒",
-            "HH时mm分",
-            "HHmmssSSS",
-            "HHmmss",
-            "HHmm"
-    };
-
-    static {
-        basicTypeMap.put(int.class, Integer.class);
-        basicTypeMap.put(short.class, Short.class);
-        basicTypeMap.put(long.class, Long.class);
-        basicTypeMap.put(byte.class, Byte.class);
-        basicTypeMap.put(float.class, Float.class);
-        basicTypeMap.put(double.class, Double.class);
-        basicTypeMap.put(char.class, Character.class);
-        basicTypeMap.put(boolean.class, Boolean.class);
-        basicTypeMap.put(void.class, Void.class);
-
-        Map<Class<?>, Class<?>> reverseBasicTypeMap = new LinkedHashMap<>();
-        for (Map.Entry<Class<?>, Class<?>> entry : basicTypeMap.entrySet()) {
-            reverseBasicTypeMap.put(entry.getValue(), entry.getKey());
-        }
-        basicTypeMap.putAll(reverseBasicTypeMap);
 
 
-        bigDecimalTypeConverterMap.put(int.class, BigDecimal::intValue);
-        bigDecimalTypeConverterMap.put(Integer.class, BigDecimal::intValue);
-        bigDecimalTypeConverterMap.put(short.class, Number::shortValue);
-        bigDecimalTypeConverterMap.put(Short.class, Number::shortValue);
-        bigDecimalTypeConverterMap.put(long.class, Number::longValue);
-        bigDecimalTypeConverterMap.put(Long.class, Number::longValue);
-        bigDecimalTypeConverterMap.put(byte.class, Number::byteValue);
-        bigDecimalTypeConverterMap.put(Byte.class, Number::byteValue);
-        bigDecimalTypeConverterMap.put(float.class, Number::floatValue);
-        bigDecimalTypeConverterMap.put(Float.class, Number::floatValue);
-        bigDecimalTypeConverterMap.put(double.class, Number::doubleValue);
-        bigDecimalTypeConverterMap.put(Double.class, Number::doubleValue);
-        bigDecimalTypeConverterMap.put(BigInteger.class, BigDecimal::toBigInteger);
-        bigDecimalTypeConverterMap.put(BigDecimal.class, v -> v);
-        bigDecimalTypeConverterMap.put(AtomicInteger.class, v -> new AtomicInteger(v.intValue()));
-        bigDecimalTypeConverterMap.put(AtomicLong.class, v -> new AtomicLong(v.longValue()));
 
-
-        boolTypeConverterMap.put(boolean.class, v -> v);
-        boolTypeConverterMap.put(Boolean.class, v -> v);
-
-        charTypeConverterMap.put(char.class, v -> v);
-        charTypeConverterMap.put(Character.class, v -> v);
-
-        date2InstantConverterMap.put(Date.class, v -> {
-            return ((Date) v).toInstant();
-        });
-        dateTypeConverterMap.put(Date.class, Date::from);
-
-        date2InstantConverterMap.put(java.sql.Date.class, v -> {
-            return ((java.sql.Date) v).toInstant();
-        });
-        dateTypeConverterMap.put(java.sql.Date.class, java.sql.Date::from);
-
-        date2InstantConverterMap.put(Time.class, v -> {
-            return ((Time) v).toInstant();
-        });
-        dateTypeConverterMap.put(Time.class, Time::from);
-
-        date2InstantConverterMap.put(Timestamp.class, v -> {
-            return ((Timestamp) v).toInstant();
-        });
-        dateTypeConverterMap.put(Timestamp.class, Timestamp::from);
-
-        date2InstantConverterMap.put(LocalDateTime.class, v -> {
-            LocalDateTime dt = (LocalDateTime) v;
-            return dt.toInstant(ZoneId.systemDefault().getRules().getOffset(dt));
-        });
-        dateTypeConverterMap.put(LocalDateTime.class, v -> {
-            return v.atZone(ZoneId.systemDefault()).toLocalDateTime();
-        });
-
-        date2InstantConverterMap.put(LocalDate.class, v -> {
-            LocalDateTime dt = ((LocalDate) v).atStartOfDay();
-            return dt.toInstant(ZoneId.systemDefault().getRules().getOffset(dt));
-        });
-        dateTypeConverterMap.put(LocalDate.class, v -> {
-            return v.atZone(ZoneId.systemDefault()).toLocalDateTime().toLocalDate();
-        });
-
-        date2InstantConverterMap.put(LocalTime.class, v -> {
-            LocalDateTime dt = LocalDate.now().atTime((LocalTime) v);
-            return dt.toInstant(ZoneId.systemDefault().getRules().getOffset(dt));
-        });
-        dateTypeConverterMap.put(LocalTime.class, v -> {
-            return v.atZone(ZoneId.systemDefault()).toLocalDateTime().toLocalTime();
-        });
-
-        date2InstantConverterMap.put(Calendar.class, v -> {
-            Date time = ((Calendar) v).getTime();
-            return time.toInstant();
-        });
-        dateTypeConverterMap.put(Calendar.class, v -> {
-            Date dt = Date.from(v);
-            Calendar ret = Calendar.getInstance();
-            ret.setTime(dt);
-            return ret;
-        });
-
-        date2InstantConverterMap.put(Long.class, v -> {
-            Long ts = ((Long) v);
-            if (String.valueOf(ts).length() == 10) {
-                return Instant.ofEpochSecond(ts);
-            }
-            return Instant.ofEpochMilli(ts);
-        });
-        dateTypeConverterMap.put(Long.class, v -> {
-            return v.getEpochSecond();
-        });
-
-        date2InstantConverterMap.put(Instant.class, v -> {
-            Instant ts = ((Instant) v);
-            return ts;
-        });
-        dateTypeConverterMap.put(Instant.class, v -> {
-            return v;
-        });
-
-        date2InstantConverterMap.put(Clock.class, v -> {
-            Clock ts = ((Clock) v);
-            return ts.instant();
-        });
-        dateTypeConverterMap.put(Clock.class, v -> {
-            return Clock.fixed(v, ZoneId.systemDefault());
-        });
-    }
-
-    public static Object tryConvertAsType(Object val, Class<?> targetType) {
-        if (val == null) {
-            return val;
-        }
-
-        Class<?> clazz = val.getClass();
-        // 类型匹配
-        if (typeOf(clazz, targetType)) {
-            return val;
-        }
-        // 目标类型为 String ，都能转
-        if (typeOf(targetType, String.class)) {
-            return String.valueOf(val);
-        }
-
-        // 原始和目标都是 Number
-        Class<?>[] numericTypes = bigDecimalTypeConverterMap.keySet().toArray(new Class<?>[0]);
-        if (typeOfAny(clazz, numericTypes)
-                &&
-                typeOfAny(clazz, numericTypes)) {
-            BigDecimal decimal = new BigDecimal(String.valueOf(val));
-            for (Map.Entry<Class<?>, Function<BigDecimal, ?>> entry : bigDecimalTypeConverterMap.entrySet()) {
-                Class<?> itemClass = entry.getKey();
-                if (typeOf(itemClass, targetType)) {
-                    return entry.getValue().apply(decimal);
-                }
-            }
-        }
-
-        // 原始和目标都是 Boolean
-        Class<?>[] boolTypes = boolTypeConverterMap.keySet().toArray(new Class<?>[0]);
-        if (typeOfAny(clazz, boolTypes)
-                &&
-                typeOfAny(clazz, boolTypes)) {
-            boolean ok = (val == null) ? false : (Boolean) val;
-            for (Map.Entry<Class<?>, Function<Boolean, ?>> entry : boolTypeConverterMap.entrySet()) {
-                Class<?> itemClass = entry.getKey();
-                if (typeOf(itemClass, targetType)) {
-                    return entry.getValue().apply(ok);
-                }
-            }
-        }
-
-        // 原始和目标都是 Char
-        Class<?>[] charTypes = charTypeConverterMap.keySet().toArray(new Class<?>[0]);
-        if (typeOfAny(clazz, charTypes)
-                &&
-                typeOfAny(clazz, charTypes)) {
-            char ch = (val == null) ? 0 : (Character) val;
-            for (Map.Entry<Class<?>, Function<Character, ?>> entry : charTypeConverterMap.entrySet()) {
-                Class<?> itemClass = entry.getKey();
-                if (typeOf(itemClass, targetType)) {
-                    return entry.getValue().apply(ch);
-                }
-            }
-        }
-
-
-        // 日期时间类型的互转
-        Class<?>[] dateTypes = dateTypeConverterMap.keySet().toArray(new Class<?>[0]);
-        if (typeOfAny(clazz, dateTypes)
-                &&
-                typeOfAny(clazz, dateTypes)) {
-            Instant ins = null;
-            for (Map.Entry<Class<?>, Function<Object, Instant>> entry : date2InstantConverterMap.entrySet()) {
-                Class<?> itemClass = entry.getKey();
-                if (typeOf(itemClass, clazz)) {
-                    ins = entry.getValue().apply(val);
-                    break;
-                }
-            }
-
-            if (ins != null) {
-                for (Map.Entry<Class<?>, Function<Instant, ?>> entry : dateTypeConverterMap.entrySet()) {
-                    Class<?> itemClass = entry.getKey();
-                    if (typeOf(itemClass, targetType)) {
-                        return entry.getValue().apply(ins);
-                    }
-                }
-            }
-
-        }
-
-        // 字符串字面值处理
-        String valStr = String.valueOf(val);
-        if (typeOfAny(targetType, numericTypes)) {
-            BigDecimal decimal = null;
-            if (valStr.matches("[1-9]([0-9]+)?")) {
-                decimal = new BigDecimal(String.valueOf(val));
-            }
-            if (valStr.matches("(0x|0X)[a-fA-F0-9]+")) {
-                Long num = Long.valueOf(valStr.substring(2), 16);
-                decimal = new BigDecimal(num);
-            }
-            if (valStr.matches("0([0-9]+)?")) {
-                Long num = Long.valueOf(valStr.substring(2), 8);
-                decimal = new BigDecimal(String.valueOf(num));
-            }
-            if (valStr.matches("(0b|0B)[0-1]+")) {
-                Long num = Long.valueOf(valStr.substring(2), 2);
-                decimal = new BigDecimal(num);
-            }
-
-            if (decimal != null) {
-                for (Map.Entry<Class<?>, Function<BigDecimal, ?>> entry : bigDecimalTypeConverterMap.entrySet()) {
-                    Class<?> itemClass = entry.getKey();
-                    if (typeOf(itemClass, targetType)) {
-                        return entry.getValue().apply(decimal);
-                    }
-                }
-            }
-        }
-
-        // 字符串字面值
-        if (typeOfAny(targetType, boolTypes)) {
-            String str = valStr.toLowerCase();
-            if ("true".equals(str)) {
-                return true;
-            }
-            if ("false".equals(str)) {
-                return false;
-            }
-        }
-
-        // 字符串字面值
-        if (typeOfAny(targetType, charTypes)) {
-            if (valStr.length() == 1) {
-                char ch = valStr.charAt(0);
-                return ch;
-            }
-        }
-
-        // 字符串字面值
-        if (typeOfAny(targetType, dateTypes)) {
-            Date date = tryParseDate(valStr);
-            if (date != null) {
-                Instant ins = date2InstantConverterMap.get(Date.class).apply(date);
-                return dateTypeConverterMap.get(targetType).apply(ins);
-            }
-        }
-
-        return val;
-    }
-
-    public static Date tryParseDate(String valStr) {
-
-        Date date = null;
-        for (String format : dateFormats) {
-            try {
-                SimpleDateFormat fmt = new SimpleDateFormat(format);
-                date = fmt.parse(valStr);
-                if (date != null) {
-                    break;
-                }
-            } catch (Exception e) {
-
-            }
-        }
-        return date;
-    }
 
     private static LruMap<Field, Method[]> CACHE_GET_GETTER_AND_SETTER = new LruMap<>(8192);
 
@@ -1382,7 +1043,7 @@ public class ReflectResolver {
     }
 
     public static boolean isVoid(Class<?> clazz) {
-        return typeOf(clazz, Void.class) || typeOf(clazz, void.class);
+        return TypeOf.typeOf(clazz, Void.class) || TypeOf.typeOf(clazz, void.class);
     }
 
     public static boolean isArray(Class<?> clazz) {
@@ -1409,50 +1070,6 @@ public class ReflectResolver {
         Array.set(arr, index, value);
     }
 
-    public static boolean typeOfAny(Class<?> clazz, Class<?>... types) {
-        for (Class<?> item : types) {
-            if (typeOf(clazz, item)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean typeOfOnly(Class<?> clazz, Class<?> type) {
-        if (clazz == null || type == null) {
-            return false;
-        }
-
-        return type.equals(clazz) || type.isAssignableFrom(clazz);
-    }
-
-    public static boolean typeOf(Class<?> clazz, Class<?> type) {
-        if (clazz == null || type == null) {
-            return false;
-        }
-
-        if (typeOfOnly(clazz, type)) {
-            return true;
-        }
-
-        if (typeOfOnly(type, basicTypeMap.get(clazz))) {
-            return true;
-        }
-
-        if (typeOfOnly(clazz, basicTypeMap.get(type))) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public static boolean instanceOf(Object obj, Class<?> type) {
-        if (obj == null || type == null) {
-            return false;
-        }
-        Class<?> clazz = obj.getClass();
-        return typeOf(clazz, type);
-    }
 
 
     public static Set<String> getGetterNames(String fieldName) {
@@ -1565,11 +1182,11 @@ public class ReflectResolver {
             stack.addLast(ann);
             try {
                 Class<? extends Annotation> type = ann.annotationType();
-                if (typeOf(type, clazz)) {
+                if (TypeOf.typeOf(type, clazz)) {
                     ret.put((T) ann, new LinkedList<>(stack));
                 }
                 if (repeatableClass != null) {
-                    if (typeOf(type, repeatableClass)) {
+                    if (TypeOf.typeOf(type, repeatableClass)) {
                         Map<Method, Class<?>> map = getMethods(type, (e) -> e.getName().equals("value"), true);
                         if (!map.isEmpty()) {
                             Method method = map.entrySet().iterator().next().getKey();
@@ -1582,7 +1199,7 @@ public class ReflectResolver {
                                         for (int i = 0; i < len; i++) {
                                             Object item = Array.get(arr, i);
                                             if (item != null) {
-                                                if (typeOf(item.getClass(), clazz)) {
+                                                if (TypeOf.typeOf(item.getClass(), clazz)) {
                                                     ret.put((T) item, new LinkedList<>(stack));
                                                 }
                                             }
@@ -1595,12 +1212,12 @@ public class ReflectResolver {
                         }
                     }
                 }
-                if (typeOf(type, Documented.class)
-                        || typeOf(type, Inherited.class)
-                        || typeOf(type, Native.class)
-                        || typeOf(type, Repeatable.class)
-                        || typeOf(type, Retention.class)
-                        || typeOf(type, Target.class)) {
+                if (TypeOf.typeOf(type, Documented.class)
+                        || TypeOf.typeOf(type, Inherited.class)
+                        || TypeOf.typeOf(type, Native.class)
+                        || TypeOf.typeOf(type, Repeatable.class)
+                        || TypeOf.typeOf(type, Retention.class)
+                        || TypeOf.typeOf(type, Target.class)) {
                     continue;
                 }
                 Map<T, List<Annotation>> next = getAssignAnnotationsNext(type, clazz, repeatableClass, stack);
