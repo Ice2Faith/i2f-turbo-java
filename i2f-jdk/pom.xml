@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>i2f-turbo-java</artifactId>
+        <groupId>i2f.turbo</groupId>
+        <version>1.0</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>i2f-jdk</artifactId>
+
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>i2f-jdk-all</module>
+        <module>i2f-tuple</module>
+        <module>i2f-streaming</module>
+        <module>i2f-annotations</module>
+        <module>i2f-clock</module>
+        <module>i2f-bql</module>
+        <module>i2f-check</module>
+        <module>i2f-container</module>
+        <module>i2f-database</module>
+        <module>i2f-functional</module>
+        <module>i2f-jce</module>
+        <module>i2f-lambda</module>
+        <module>i2f-network</module>
+        <module>i2f-packet</module>
+        <module>i2f-reflect</module>
+        <module>i2f-trace</module>
+        <module>i2f-functional-lambda</module>
+        <module>i2f-exception</module>
+        <module>i2f-resources</module>
+        <module>i2f-lru-map</module>
+        <module>i2f-uid</module>
+        <module>i2f-atomic</module>
+        <module>i2f-array</module>
+        <module>i2f-container-builder</module>
+        <module>i2f-bindsql</module>
+        <module>i2f-jdbc</module>
+    </modules>
+
+
+</project>
