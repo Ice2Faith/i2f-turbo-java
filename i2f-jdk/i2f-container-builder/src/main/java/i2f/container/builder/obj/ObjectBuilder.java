@@ -23,6 +23,10 @@ public class ObjectBuilder<T> implements Supplier<T> {
         return obj;
     }
 
+    public <R> R getAs(Function<T, R> converter) {
+        return converter.apply(obj);
+    }
+
     public ObjectBuilder<T> then(Consumer<T> consumer) {
         consumer.accept(obj);
         return this;

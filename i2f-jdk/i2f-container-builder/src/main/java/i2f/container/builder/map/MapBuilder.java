@@ -26,6 +26,10 @@ public class MapBuilder<K, V, M extends Map<K, V>> implements Supplier<M> {
         return map;
     }
 
+    public <R> R getAs(Function<M, R> converter) {
+        return converter.apply(map);
+    }
+
     public MapBuilder<K, V, M> then(Consumer<M> consumer) {
         consumer.accept(map);
         return this;
