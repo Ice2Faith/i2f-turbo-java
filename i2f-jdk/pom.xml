@@ -43,6 +43,7 @@
         <module>i2f-jdbc</module>
         <module>i2f-convert</module>
         <module>i2f-typeof</module>
+        <module>i2f-unsafe</module>
     </modules>
 
 
