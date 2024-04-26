@@ -4,6 +4,7 @@ import i2f.bindsql.BindSql;
 import i2f.bql.bean.BeanResolver;
 import i2f.functional.IFunctional;
 import i2f.lambda.inflater.LambdaInflater;
+import i2f.reflect.ReflectResolver;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -49,8 +50,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
 
             if (bean != null) {
                 try {
-                    field.setAccessible(true);
-                    Object val = field.get(bean);
+                    Object val = ReflectResolver.valueGet(bean, field);
                     valueMap.put(colName, val);
                 } catch (Exception e) {
 
@@ -80,8 +80,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
 
                 if (item != null) {
                     try {
-                        field.setAccessible(true);
-                        Object val = field.get(item);
+                        Object val = ReflectResolver.valueGet(item, field);
                         valueMap.put(colName, val);
                     } catch (Exception e) {
 
@@ -114,8 +113,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
 
                 if (item != null) {
                     try {
-                        field.setAccessible(true);
-                        Object val = field.get(item);
+                        Object val = ReflectResolver.valueGet(item, field);
                         valueMap.put(colName, val);
                     } catch (Exception e) {
 
@@ -154,8 +152,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
 
             if (bean != null) {
                 try {
-                    field.setAccessible(true);
-                    Object val = field.get(bean);
+                    Object val = ReflectResolver.valueGet(bean, field);
                     whereMap.put(colName, val);
                 } catch (Exception e) {
 
@@ -195,8 +192,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
             String colName = fieldNameResolver.getName(field);
             if (update != null) {
                 try {
-                    field.setAccessible(true);
-                    Object val = field.get(update);
+                    Object val = ReflectResolver.valueGet(update, field);
                     updateMap.put(colName, val);
                 } catch (Exception e) {
 
@@ -205,8 +201,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
 
             if (cond != null) {
                 try {
-                    field.setAccessible(true);
-                    Object val = field.get(cond);
+                    Object val = ReflectResolver.valueGet(cond, field);
                     whereMap.put(colName, val);
                 } catch (Exception e) {
 
@@ -287,8 +282,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
             }
 
             try {
-                field.setAccessible(true);
-                Object val = field.get(bean);
+                Object val = ReflectResolver.valueGet(bean, field);
                 whereMap.put(colName, val);
             } catch (Exception e) {
 
