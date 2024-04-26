@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author Ice2Faith
@@ -18,8 +19,36 @@ public class TypeNode {
     private List<TypeNode> args = new ArrayList<>();
 
     public String simpleName() {
+        return nameString(c -> {
+            String name = c.getName();
+            if (c.isMemberClass()) {
+                String[] arr = name.split("\\.");
+                if (arr.length > 1) {
+                    return arr[arr.length - 1].replace("$", ".");
+                }
+            }
+            return c.getSimpleName();
+        });
+    }
+
+    public String importName() {
+        return nameString(c -> {
+            String name = c.getName();
+            String simpleName = c.getSimpleName();
+            if (name.equals("java.lang." + simpleName)) {
+                return simpleName;
+            }
+            return name;
+        });
+    }
+
+    public String fullName() {
+        return nameString(Class::getName);
+    }
+
+    public String nameString(Function<Class<?>, String> typeNameMapper) {
         StringBuilder builder = new StringBuilder();
-        builder.append(type.getSimpleName());
+        builder.append(typeNameMapper.apply(type));
         if (!args.isEmpty()) {
             builder.append("<");
             boolean isFirst = true;
@@ -27,7 +56,7 @@ public class TypeNode {
                 if (!isFirst) {
                     builder.append(", ");
                 }
-                builder.append(item.simpleName());
+                builder.append(item.nameString(typeNameMapper));
                 isFirst = false;
             }
             builder.append(">");
