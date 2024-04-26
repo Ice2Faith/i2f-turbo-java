@@ -211,6 +211,12 @@
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-unsafe</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdk-all</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -354,9 +360,9 @@
                             <!-- 去除maven描述信息 -->
                             <addMavenDescriptor>false</addMavenDescriptor>
                             <manifestEntries>
-                                <Maven-Group>${groupId}</Maven-Group>
-                                <Maven-Artifact>${artifactId}</Maven-Artifact>
-                                <Maven-Version>${version}</Maven-Version>
+                                <Maven-Group>${pom.groupId}</Maven-Group>
+                                <Maven-Artifact>${pom.artifactId}</Maven-Artifact>
+                                <Maven-Version>${pom.version}</Maven-Version>
                                 <Build-Time>${maven.build.timestamp}</Build-Time>
 
                                 <Root-Maven-Group>${root.maven.group}</Root-Maven-Group>
