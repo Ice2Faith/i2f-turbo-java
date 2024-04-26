@@ -1,0 +1,27 @@
+{
+  "type": "Map",
+  "args": [
+    {
+      "type": "Map.Entry",
+      "args": [
+        {
+          "type": "String",
+          "args": []
+        },
+        {
+          "type": "Object",
+          "args": []
+        }
+      ]
+    },
+    {
+      "type": "List",
+      "args": [
+        {
+          "type": "String",
+          "args": []
+        }
+      ]
+    }
+  ]
+}
