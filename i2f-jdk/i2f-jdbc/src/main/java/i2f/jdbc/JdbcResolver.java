@@ -508,7 +508,7 @@ public class JdbcResolver {
 
             List<String> columnNames = new ArrayList<>();
             for (int i = 0; i < columnCount; i++) {
-                String colName = metaData.getColumnName(i + 1);
+                String colName = metaData.getColumnLabel(i + 1);
                 if (columnNameMapper != null) {
                     colName = columnNameMapper.apply(colName);
                 }
@@ -560,11 +560,12 @@ public class JdbcResolver {
         for (int i = 0; i < columnCount; i++) {
             QueryColumn col = new QueryColumn();
             col.setIndex(i);
-            String colName = metaData.getColumnName(i + 1);
+            String colName = metaData.getColumnLabel(i + 1);
             if (columnNameMapper != null) {
                 colName = columnNameMapper.apply(colName);
             }
             col.setName(colName);
+            col.setOriginName(metaData.getColumnName(i + 1));
             col.setCatalog(metaData.getCatalogName(i + 1));
             col.setClazzName(metaData.getColumnClassName(i + 1));
             col.setDisplaySize(metaData.getColumnDisplaySize(i + 1));
