@@ -24,6 +24,10 @@ public class ListBuilder<E, C extends List<E>> implements Supplier<C> {
         return list;
     }
 
+    public <R> R getAs(Function<C, R> converter) {
+        return converter.apply(list);
+    }
+
     public ListBuilder<E, C> then(Consumer<C> consumer) {
         consumer.accept(list);
         return this;

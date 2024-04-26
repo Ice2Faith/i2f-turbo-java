@@ -26,6 +26,10 @@ public class CollectionBuilder<E, C extends Collection<E>> implements Supplier<C
         return col;
     }
 
+    public <R> R getAs(Function<C, R> converter) {
+        return converter.apply(col);
+    }
+
     public CollectionBuilder<E, C> then(Consumer<C> consumer) {
         consumer.accept(col);
         return this;
