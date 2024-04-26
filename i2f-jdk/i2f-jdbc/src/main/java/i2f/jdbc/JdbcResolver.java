@@ -1,6 +1,7 @@
 package i2f.jdbc;
 
 import i2f.bindsql.BindSql;
+import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
 import i2f.reflect.ReflectResolver;
@@ -293,7 +294,7 @@ public class JdbcResolver {
             }
             QueryColumn col = qr.getColumns().get(0);
             Object val = qr.getRows().get(0).get(col.getName());
-            return (T) ReflectResolver.tryConvertAsType(val, clazz);
+            return (T) ObjectConvertor.tryConvertAsType(val, clazz);
         }
         return null;
     }
@@ -309,7 +310,7 @@ public class JdbcResolver {
             }
             QueryColumn col = qr.getColumns().get(0);
             Object val = qr.getRows().get(0).get(col.getName());
-            return (T) ReflectResolver.tryConvertAsType(val, clazz);
+            return (T) ObjectConvertor.tryConvertAsType(val, clazz);
         }
         return null;
     }
