@@ -18,9 +18,9 @@ public class TestType {
         System.out.println(new TypeToken<Integer>() {
         }.fullType().simpleName());
         System.out.println(new TypeToken<Map<Integer, Boolean>>() {
-        }.fullType().simpleName());
+        }.fullType().importName());
         System.out.println(new TypeToken<Map<Map.Entry<Integer, String>, Boolean>>() {
-        }.fullType().simpleName());
+        }.fullType().fullName());
 
         System.out.println(TypeToken.fullFieldType(TestType.class, "list").simpleName());
         System.out.println(TypeToken.fullFieldType(TestType.class, "map").simpleName());
