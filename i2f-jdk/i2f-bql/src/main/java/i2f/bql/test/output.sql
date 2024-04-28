@@ -113,7 +113,7 @@ from dual
 union all
 select ? as username, ? as nickname, ? as age, 1 as status, now() as create_time
 from dual
-        , args = [zhang, zhang, zhang0, li, li, li1, wang, wang, wang2]
+   , args = [zhang, zhang, zhang0, li, li, li1, wang, wang, wang2]
     }
     Bql{
     sql =

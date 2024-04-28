@@ -6,6 +6,8 @@ import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.SQLBiFunction;
 import i2f.jdbc.SQLFunction;
 import i2f.jdbc.data.QueryResult;
+import i2f.page.ApiPage;
+import i2f.page.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -115,6 +117,10 @@ public class BqlTemplate {
         return list(Bql.$bean().$beanQuery(condition), (Class<T>) condition.getClass());
     }
 
+    public <T> Page<T> page(T condition, ApiPage page) throws SQLException {
+        return page(Bql.$bean().$beanQuery(condition), (Class<T>) condition.getClass(), page);
+    }
+
     public <T> List<T> list(Bql<?> bql, Class<T> clazz) throws SQLException {
         return list(bql, clazz, -1, null);
     }
@@ -126,7 +132,7 @@ public class BqlTemplate {
     public <T> List<T> list(Bql<?> bql, Class<T> clazz, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
         return bqlDelegate(bql.$$(), (conn, sql) -> {
             List<T> ret = JdbcResolver.list(conn, sql, clazz, maxCount, columnNameMapper);
-            log.debug("query list rows : {}", ret.size());
+            log.debug("query list rows is empty: {}", ret.isEmpty());
             return ret;
         });
     }
@@ -142,7 +148,31 @@ public class BqlTemplate {
     public <T> List<T> list(BindSql bql, Class<T> clazz, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
         return bqlDelegate(bql, (conn, sql) -> {
             List<T> ret = JdbcResolver.list(conn, sql, clazz, maxCount, columnNameMapper);
-            log.debug("query list rows : {}", ret.size());
+            log.debug("query list rows is empty : {}", ret.isEmpty());
+            return ret;
+        });
+    }
+
+    public <T> Page<T> page(Bql<?> bql, Class<T> clazz, ApiPage page) throws SQLException {
+        return page(bql, clazz, page, null);
+    }
+
+    public <T> Page<T> page(Bql<?> bql, Class<T> clazz, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+        return bqlDelegate(bql.$$(), (conn, sql) -> {
+            Page<T> ret = JdbcResolver.page(conn, sql, clazz, page, columnNameMapper);
+            log.debug("query page, total : {}, rows is empty : {}", ret.getTotal(), ret.getList().isEmpty());
+            return ret;
+        });
+    }
+
+    public <T> Page<T> page(BindSql bql, Class<T> clazz, ApiPage page) throws SQLException {
+        return page(bql, clazz, page, null);
+    }
+
+    public <T> Page<T> page(BindSql bql, Class<T> clazz, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+        return bqlDelegate(bql, (conn, sql) -> {
+            Page<T> ret = JdbcResolver.page(conn, sql, clazz, page, columnNameMapper);
+            log.debug("query page, total : {}, rows is empty : {}", ret.getTotal(), ret.getList().isEmpty());
             return ret;
         });
     }
@@ -182,7 +212,7 @@ public class BqlTemplate {
     public List<Map<String, Object>> list(Bql<?> bql, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
         return bqlDelegate(bql.$$(), (conn, sql) -> {
             List<Map<String, Object>> ret = JdbcResolver.list(conn, sql, maxCount, columnNameMapper);
-            log.debug("query return rows : {}", ret.size());
+            log.debug("query return rows is empty : {}", ret.isEmpty());
             return ret;
         });
     }
@@ -198,7 +228,31 @@ public class BqlTemplate {
     public List<Map<String, Object>> list(BindSql bql, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
         return bqlDelegate(bql, (conn, sql) -> {
             List<Map<String, Object>> ret = JdbcResolver.list(conn, sql, maxCount, columnNameMapper);
-            log.debug("query return rows : {}", ret.size());
+            log.debug("query return rows is empty : {}", ret.isEmpty());
+            return ret;
+        });
+    }
+
+    public Page<Map<String, Object>> page(Bql<?> bql, ApiPage page) throws SQLException {
+        return page(bql, page, null);
+    }
+
+    public Page<Map<String, Object>> page(Bql<?> bql, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+        return bqlDelegate(bql.$$(), (conn, sql) -> {
+            Page<Map<String, Object>> ret = JdbcResolver.page(conn, sql, page, columnNameMapper);
+            log.debug("query return , total : {}, rows is empty : {}", ret.getTotal(), ret.getList().isEmpty());
+            return ret;
+        });
+    }
+
+    public Page<Map<String, Object>> page(BindSql bql, ApiPage page) throws SQLException {
+        return page(bql, page, null);
+    }
+
+    public Page<Map<String, Object>> page(BindSql bql, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+        return bqlDelegate(bql, (conn, sql) -> {
+            Page<Map<String, Object>> ret = JdbcResolver.page(conn, sql, page, columnNameMapper);
+            log.debug("query return , total : {}, rows is empty : {}", ret.getTotal(), ret.getList().isEmpty());
             return ret;
         });
     }
@@ -263,7 +317,7 @@ public class BqlTemplate {
     public QueryResult queryRaw(BindSql bql, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
         return bqlDelegate(bql, (conn, sql) -> {
             QueryResult ret = JdbcResolver.query(conn, sql, maxCount, columnNameMapper);
-            log.debug("query return rows : {}", ret.getRows().size());
+            log.debug("query return rows is empty : {}", ret.getRows().isEmpty());
             return ret;
         });
     }

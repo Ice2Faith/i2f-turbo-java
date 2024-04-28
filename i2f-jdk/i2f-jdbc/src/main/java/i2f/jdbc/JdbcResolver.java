@@ -1,9 +1,13 @@
 package i2f.jdbc;
 
 import i2f.bindsql.BindSql;
+import i2f.bindsql.BindSqlWrappers;
+import i2f.bindsql.data.PageBindSql;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
+import i2f.page.ApiPage;
+import i2f.page.Page;
 import i2f.reflect.ReflectResolver;
 
 import java.sql.*;
@@ -146,7 +150,6 @@ public class JdbcResolver {
         }
     }
 
-
     public static List<Map<String, Object>> list(Connection conn, BindSql sql) throws SQLException {
         return query(conn, sql, JdbcResolver::parseResultSet).getRows();
     }
@@ -169,6 +172,37 @@ public class JdbcResolver {
 
     public static List<Map<String, Object>> list(Connection conn, String sql, List<Object> args, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
         return query(conn, sql, args, rs -> parseResultSet(rs, maxCount, columnNameMapper)).getRows();
+    }
+
+
+    public static Page<Map<String, Object>> page(Connection conn, BindSql sql, ApiPage page) throws SQLException {
+        return page(conn, sql.getSql(), sql.getArgs(), page, null);
+    }
+
+    public static Page<Map<String, Object>> page(Connection conn, BindSql sql, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+        return page(conn, sql.getSql(), sql.getArgs(), page, columnNameMapper);
+    }
+
+    public static Page<Map<String, Object>> page(Connection conn, String sql, List<Object> args, ApiPage page) throws SQLException {
+        return page(conn, sql, args, page, null);
+    }
+
+    public static Page<Map<String, Object>> page(Connection conn, String sql, List<Object> args, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+        PageBindSql pageBindSql = BindSqlWrappers.page(conn, new BindSql(sql, args), page);
+        return page(conn, pageBindSql, columnNameMapper);
+    }
+
+    public static Page<Map<String, Object>> page(Connection conn, PageBindSql pageBindSql) throws SQLException {
+        return page(conn, pageBindSql, (Function<String, String>) null);
+    }
+
+    public static Page<Map<String, Object>> page(Connection conn, PageBindSql pageBindSql, Function<String, String> columnNameMapper) throws SQLException {
+        Long total = get(conn, pageBindSql.getCountSql(), Long.class);
+        List<Map<String, Object>> rows = new ArrayList<>();
+        if (total > 0) {
+            rows = query(conn, pageBindSql.getPageSql(), rs -> parseResultSet(rs, -1, columnNameMapper)).getRows();
+        }
+        return Page.of(pageBindSql.getPage(), total, rows);
     }
 
     public static Map<String, Object> find(Connection conn, BindSql sql) throws SQLException {
@@ -238,6 +272,40 @@ public class JdbcResolver {
     public static <T> List<T> list(Connection conn, String sql, List<Object> args, Class<T> clazz, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
         return query(conn, sql, args, (rs) -> parseResultSetAsBeanList(rs, clazz, maxCount, columnNameMapper));
     }
+
+    public static <T> Page<T> page(Connection conn, BindSql sql, Class<T> clazz, ApiPage page) throws SQLException {
+        PageBindSql pageBindSql = BindSqlWrappers.page(conn, sql, page);
+        return page(conn, pageBindSql, clazz, null);
+    }
+
+    public static <T> Page<T> page(Connection conn, BindSql sql, Class<T> clazz, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+        PageBindSql pageBindSql = BindSqlWrappers.page(conn, sql, page);
+        return page(conn, pageBindSql, clazz, columnNameMapper);
+    }
+
+    public static <T> Page<T> page(Connection conn, String sql, List<Object> args, Class<T> clazz, ApiPage page) throws SQLException {
+        PageBindSql pageBindSql = BindSqlWrappers.page(conn, new BindSql(sql, args), page);
+        return page(conn, pageBindSql, clazz, null);
+    }
+
+    public static <T> Page<T> page(Connection conn, String sql, List<Object> args, Class<T> clazz, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+        PageBindSql pageBindSql = BindSqlWrappers.page(conn, new BindSql(sql, args), page);
+        return page(conn, pageBindSql, clazz, columnNameMapper);
+    }
+
+    public static <T> Page<T> page(Connection conn, PageBindSql pageBindSql, Class<T> clazz) throws SQLException {
+        return page(conn, pageBindSql, clazz, null);
+    }
+
+    public static <T> Page<T> page(Connection conn, PageBindSql pageBindSql, Class<T> clazz, Function<String, String> columnNameMapper) throws SQLException {
+        Long total = get(conn, pageBindSql.getCountSql(), Long.class);
+        List<T> rows = new ArrayList<>();
+        if (total > 0) {
+            rows = query(conn, pageBindSql.getPageSql(), (rs) -> parseResultSetAsBeanList(rs, clazz, -1, columnNameMapper));
+        }
+        return Page.of(pageBindSql.getPage(), total, rows);
+    }
+
 
     public static <T> T find(Connection conn, BindSql sql, Class<T> clazz) throws SQLException {
         List<T> list = query(conn, sql, (rs) -> parseResultSetAsBeanList(rs, clazz, 2));
