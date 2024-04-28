@@ -4,6 +4,8 @@ import com.i2f.test.data.dom.SysUserDo;
 import i2f.bql.core.bean.Bql;
 import i2f.container.builder.Builders;
 import i2f.jdbc.data.QueryResult;
+import i2f.page.ApiPage;
+import i2f.page.Page;
 import i2f.springboot.jdbc.bql.components.BqlTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -62,6 +64,9 @@ public class BqlService implements ApplicationRunner {
                 .set(SysUserDo::setUsername, "admin")
                 .get());
         System.out.println(admin);
+
+        Page<SysUserDo> page = bqlTemplate.page(new SysUserDo(), ApiPage.of(0, 2));
+        System.out.println(page);
 
     }
 }

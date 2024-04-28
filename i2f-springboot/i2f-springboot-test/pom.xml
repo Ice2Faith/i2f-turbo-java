@@ -50,6 +50,14 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jdbc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-bindsql-page</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-page</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

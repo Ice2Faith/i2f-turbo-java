@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>i2f-jdk</artifactId>
         <groupId>i2f.turbo</groupId>
+        <artifactId>i2f-jdk</artifactId>
         <version>1.0</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>i2f-jdbc</artifactId>
+    <artifactId>i2f-bindsql-page</artifactId>
 
     <dependencies>
         <dependency>
@@ -24,17 +24,12 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-reflect</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-page</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-bindsql-page</artifactId>
+            <artifactId>i2f-database-type</artifactId>
         </dependency>
     </dependencies>
 

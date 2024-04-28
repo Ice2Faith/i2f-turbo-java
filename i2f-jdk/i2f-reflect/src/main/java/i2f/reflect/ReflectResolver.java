@@ -841,8 +841,6 @@ public class ReflectResolver {
     };
 
 
-
-
     private static LruMap<Field, Method[]> CACHE_GET_GETTER_AND_SETTER = new LruMap<>(8192);
 
     public static Method[] getGetterAndSetter(Field field) {
@@ -1069,7 +1067,6 @@ public class ReflectResolver {
     public static void arraySet(Object arr, int index, Object value) {
         Array.set(arr, index, value);
     }
-
 
 
     public static Set<String> getGetterNames(String fieldName) {
