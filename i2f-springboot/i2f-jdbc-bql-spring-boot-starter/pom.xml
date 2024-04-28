@@ -54,6 +54,16 @@
             <artifactId>i2f-jdbc</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-bindsql-page</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-page</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

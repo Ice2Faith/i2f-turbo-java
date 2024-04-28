@@ -45,6 +45,9 @@
         <module>i2f-typeof</module>
         <module>i2f-unsafe</module>
         <module>i2f-thread</module>
+        <module>i2f-bindsql-page</module>
+        <module>i2f-database-type</module>
+        <module>i2f-page</module>
     </modules>
 
 
