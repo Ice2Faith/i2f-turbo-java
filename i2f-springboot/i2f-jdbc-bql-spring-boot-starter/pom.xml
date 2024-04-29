@@ -32,37 +32,38 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-            <scope>compile</scope>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-bql</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jdbc</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-bindsql-page</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-page</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -70,7 +71,7 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <archive>
                         <addMavenDescriptor>true</addMavenDescriptor>
