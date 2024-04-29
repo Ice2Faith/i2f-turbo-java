@@ -48,6 +48,15 @@
         <module>i2f-bindsql-page</module>
         <module>i2f-database-type</module>
         <module>i2f-page</module>
+        <module>i2f-proxy</module>
+        <module>i2f-spi</module>
+        <module>i2f-image</module>
+        <module>i2f-color</module>
+        <module>i2f-math</module>
+        <module>i2f-graphics-2d</module>
+        <module>i2f-graphics-3d</module>
+        <module>i2f-graphics</module>
+        <module>i2f-geo</module>
     </modules>
 
 
