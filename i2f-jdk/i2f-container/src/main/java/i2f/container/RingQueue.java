@@ -1,6 +1,7 @@
 package i2f.container;
 
-import i2f.container.reference.Reference;
+
+import i2f.reference.Reference;
 
 import java.util.Collection;
 import java.util.LinkedList;

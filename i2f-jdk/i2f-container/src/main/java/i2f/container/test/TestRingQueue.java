@@ -1,7 +1,7 @@
 package i2f.container.test;
 
 import i2f.container.RingQueue;
-import i2f.container.reference.Reference;
+import i2f.reference.Reference;
 
 import java.security.SecureRandom;
 import java.util.concurrent.CountDownLatch;

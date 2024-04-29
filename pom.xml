@@ -103,7 +103,19 @@
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-codec</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-color</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-comparator</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
@@ -175,6 +187,18 @@
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-io-stream</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-iterator</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-functional</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -200,6 +224,12 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-lambda</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-match</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
@@ -236,6 +266,12 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-reflect</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-refrence</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 

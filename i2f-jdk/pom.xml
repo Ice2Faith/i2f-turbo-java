@@ -57,6 +57,13 @@
         <module>i2f-graphics-3d</module>
         <module>i2f-graphics</module>
         <module>i2f-geo</module>
+        <module>i2f-codec</module>
+        <module>i2f-io-stream</module>
+        <module>i2f-match</module>
+        <module>i2f-iterator</module>
+        <module>i2f-refrence</module>
+        <module>i2f-comparator</module>
+        <module>i2f-serialize</module>
     </modules>
 
 

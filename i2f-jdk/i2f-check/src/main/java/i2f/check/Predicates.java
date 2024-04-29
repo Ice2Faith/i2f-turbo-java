@@ -259,4 +259,65 @@ public class Predicates {
     }
 
 
+    public static boolean isChLower(char ch) {
+        return ch >= 'a' && ch <= 'z';
+    }
+
+    public static boolean isChUpper(char ch) {
+        return ch >= 'A' && ch <= 'Z';
+    }
+
+    public static boolean isCh(char ch) {
+        return isChLower(ch) || isChUpper(ch);
+    }
+
+    public static boolean isChNum(char ch) {
+        return ch >= '0' && ch <= '9';
+    }
+
+    public static boolean isChNum(char ch, int base) {
+        if (base < 2 || base > (10 + 26)) {
+            return false;
+        }
+        if (base <= 10) {
+            if (ch >= '0' && ch <= ('0' + base - 1)) {
+                return true;
+            }
+        } else {
+            if (isChNum(ch)) {
+                return true;
+            }
+            int off = base - 10;
+            if (ch >= 'A' && ch <= ('A' + off - 1)) {
+                return true;
+            }
+            if (ch >= 'a' && ch <= ('a' + off - 1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isIn(Object tar, Object... vals) {
+        if (isEmptyArray(vals)) {
+            return false;
+        }
+        for (Object item : vals) {
+            if (isNull(tar)) {
+                if (isNull(item)) {
+                    return true;
+                }
+            } else {
+                if (tar.equals(item)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean notIn(Object tar, Object... vals) {
+        return !isIn(tar, vals);
+    }
+
 }

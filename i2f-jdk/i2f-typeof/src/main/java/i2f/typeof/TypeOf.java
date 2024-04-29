@@ -1,5 +1,7 @@
 package i2f.typeof;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,6 +12,37 @@ import java.util.Map;
  * @desc
  */
 public class TypeOf {
+    public static final Class[] BASE_TYPES_ARRAY = {
+            int.class, long.class, short.class,
+            byte.class, char.class,
+            float.class, double.class,
+            boolean.class,
+            String.class,
+            Integer.class, Long.class, Short.class,
+            Byte.class, Character.class,
+            Float.class, Double.class,
+            Boolean.class,
+            BigInteger.class, BigDecimal.class
+    };
+
+    public static final Class[] BIG_DECIMAL_COMPATIBLE_TYPES_ARRAY = {
+            int.class, long.class, short.class,
+            byte.class,
+            float.class, double.class,
+            Integer.class, Long.class, Short.class,
+            Byte.class,
+            Float.class, Double.class,
+            BigInteger.class, BigDecimal.class
+    };
+
+    public static final Class[] BIG_INTEGER_COMPATIBLE_TYPES_ARRAY = {
+            int.class, long.class, short.class,
+            byte.class,
+            Integer.class, Long.class, Short.class,
+            Byte.class,
+            BigInteger.class
+    };
+
     public static final Map<Class<?>, Class<?>> basicTypeMap;
 
     static {
@@ -34,6 +67,18 @@ public class TypeOf {
 
             basicTypeMap = Collections.unmodifiableMap(map);
         }
+    }
+
+    public static boolean isBaseType(Class<?> ckType) {
+        return typeOfAny(ckType, BASE_TYPES_ARRAY);
+    }
+
+    public static boolean isBigIntegerCompatibleType(Class<?> ckType) {
+        return typeOfAny(ckType, BIG_INTEGER_COMPATIBLE_TYPES_ARRAY);
+    }
+
+    public static boolean isBigDecimalCompatibleType(Class<?> ckType) {
+        return typeOfAny(ckType, BIG_DECIMAL_COMPATIBLE_TYPES_ARRAY);
     }
 
     public static boolean typeOfAny(Class<?> clazz, Class<?>... types) {
