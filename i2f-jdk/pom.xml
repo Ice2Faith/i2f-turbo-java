@@ -64,6 +64,7 @@
         <module>i2f-refrence</module>
         <module>i2f-comparator</module>
         <module>i2f-serialize</module>
+        <module>i2f-os</module>
     </modules>
 
 
