@@ -65,6 +65,9 @@
         <module>i2f-comparator</module>
         <module>i2f-serialize</module>
         <module>i2f-os</module>
+        <module>i2f-robot</module>
+        <module>i2f-native-windows</module>
+        <module>i2f-native-core</module>
     </modules>
 
 
