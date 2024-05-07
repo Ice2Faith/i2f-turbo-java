@@ -14,6 +14,37 @@ import java.util.List;
  */
 public class LinuxUtil {
 
+    public static double getCpuLoadPercent() {
+        LinuxTop5Dto dto = getLinuxTop5();
+        if (dto == null) {
+            return -1;
+        }
+        return dto.loadAverage1 * 100;
+    }
+
+    public static double getMemoryUsedPercent() {
+        LinuxFreeDto dto = getLinuxFree();
+        if (dto == null) {
+            return -1;
+        }
+        return (dto.memTotal - dto.memUsed) * 1.0 / dto.memTotal * 100.0;
+    }
+
+    public static double getDiskUsedPercent() {
+        double sum = 0;
+        int count = 0;
+        List<LinuxDfDto> list = getLinuxDf();
+        if (list == null || list.isEmpty()) {
+            return -1;
+        }
+        for (LinuxDfDto item : list) {
+            double rate = item.usePercent;
+            sum += rate;
+            count++;
+        }
+        return sum / count;
+    }
+
     public static LinuxIostatDto getLinuxIostatXk() {
         /**
          Linux 3.10.0-693.el7.x86_64 (dsj-hadoop-66)     02/13/2023      _x86_64_        (4 CPU)
