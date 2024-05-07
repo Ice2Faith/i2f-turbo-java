@@ -20,7 +20,7 @@ public class WindowsUtil {
         double sum = 0;
         int count = 0;
         List<WindowsCpuDto> list = getCpuInfo();
-        if (list == null) {
+        if (list == null || list.isEmpty()) {
             return -1;
         }
         for (WindowsCpuDto item : list) {
@@ -32,6 +32,9 @@ public class WindowsUtil {
 
     public static double getMemoryUsedPercent() {
         WindowsOsDto info = getOsInfo();
+        if (info == null) {
+            return -1;
+        }
         return (info.totalVisibleMemorySize - info.freePhysicalMemory) * 1.0 / info.totalVisibleMemorySize * 100;
     }
 
@@ -39,7 +42,7 @@ public class WindowsUtil {
         double sum = 0;
         int count = 0;
         List<WindowsLogicalDiskDto> list = getLogicalDiskInfo();
-        if (list == null) {
+        if (list == null || list.isEmpty()) {
             return -1;
         }
         for (WindowsLogicalDiskDto item : list) {
@@ -53,7 +56,7 @@ public class WindowsUtil {
     public static double getDiskUsedPercent(char disk) {
         String name = (disk + ":");
         List<WindowsLogicalDiskDto> list = getLogicalDiskInfo();
-        if (list == null) {
+        if (list == null || list.isEmpty()) {
             return -1;
         }
         for (WindowsLogicalDiskDto item : list) {
@@ -67,10 +70,10 @@ public class WindowsUtil {
 
 
     public static List<WindowsDesktopMonitorDto> getDesktopMonitorInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsDesktopMonitorDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
 
         List<Map<String, String>> list = getWmicList("DESKTOPMONITOR");
 
@@ -103,10 +106,11 @@ public class WindowsUtil {
 
 
     public static List<WindowsPrinterConfigDto> getPrinterConfigInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsPrinterConfigDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
+
 
         List<Map<String, String>> list = getWmicList("PRINTERCONFIG");
 
@@ -144,10 +148,11 @@ public class WindowsUtil {
     }
 
     public static List<WindowsPrinterDto> getPrinterInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsPrinterDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
+
 
         List<Map<String, String>> list = getWmicList("PRINTER");
 
@@ -206,10 +211,11 @@ public class WindowsUtil {
     }
 
     public static List<WindowsStartupDto> getStartupInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsStartupDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
+
 
         List<Map<String, String>> list = getWmicList("STARTUP");
 
@@ -232,10 +238,11 @@ public class WindowsUtil {
     }
 
     public static List<WindowsSoundDeviceDto> getSoundDeviceInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsSoundDeviceDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
+
 
         List<Map<String, String>> list = getWmicList("SOUNDDEV");
 
@@ -266,10 +273,11 @@ public class WindowsUtil {
     }
 
     public static List<WindowsProcessDto> getProcessInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsProcessDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
+
 
         List<Map<String, String>> list = getWmicList("PROCESS");
 
@@ -326,10 +334,10 @@ public class WindowsUtil {
     }
 
     public static List<WindowsNicConfigDto> getNicConfigInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsNicConfigDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
 
         List<Map<String, String>> list = getWmicList("NICCONFIG");
 
@@ -379,10 +387,10 @@ public class WindowsUtil {
     }
 
     public static List<WindowsNicDto> getNicInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsNicDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
 
         List<Map<String, String>> list = getWmicList("NIC");
 
@@ -427,10 +435,10 @@ public class WindowsUtil {
     }
 
     public static List<WindowsMemoryChipDto> getMemoryChipInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsMemoryChipDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
 
         List<Map<String, String>> list = getWmicList("MEMORYCHIP");
 
@@ -471,10 +479,10 @@ public class WindowsUtil {
     }
 
     public static List<WindowsMemCacheDto> getMemCacheInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsMemCacheDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
 
         List<Map<String, String>> list = getWmicList("MEMCACHE");
 
@@ -513,10 +521,10 @@ public class WindowsUtil {
     }
 
     public static List<WindowsLogicalDiskDto> getLogicalDiskInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsLogicalDiskDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
 
         List<Map<String, String>> list = getWmicList("LOGICALDISK");
 
@@ -555,10 +563,10 @@ public class WindowsUtil {
     }
 
     public static List<WindowsDiskDriveDto> getDiskDriveInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsDiskDriveDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
 
         List<Map<String, String>> list = getWmicList("DISKDRIVE");
 
@@ -689,10 +697,10 @@ public class WindowsUtil {
 
 
     public static List<WindowsCpuDto> getCpuInfo() {
-        if (!OsUtil.isWindows()) {
-            return null;
-        }
         List<WindowsCpuDto> ret = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return ret;
+        }
 
         List<Map<String, String>> list = getWmicList("CPU");
 
@@ -768,6 +776,9 @@ public class WindowsUtil {
 
     public static List<Map<String, String>> getWmicList(String type) {
         List<Map<String, String>> list = new ArrayList<>();
+        if (!OsUtil.isWindows()) {
+            return list;
+        }
         String rs = OsUtil.runCmd("wmic " + type + " get *").trim();
         String[] lines = rs.split("\n");
         if (lines.length > 1) {
