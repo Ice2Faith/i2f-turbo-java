@@ -243,6 +243,18 @@
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-native-core</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-native-windows</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-network</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -286,6 +298,18 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-resources</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-robot</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-serialize</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
@@ -468,6 +492,9 @@
                             <nonFilteredFileExtension>xlsx</nonFilteredFileExtension>
                             <nonFilteredFileExtension>pptx</nonFilteredFileExtension>
                             <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>lib</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>so</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>dll</nonFilteredFileExtension>
                         </nonFilteredFileExtensions>
                     </configuration>
                     <executions>
