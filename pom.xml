@@ -558,6 +558,8 @@
                         </archive>
                         <includes>
                             <include>META-INF/**/*</include>
+                            <include>**/*.dll</include>
+                            <include>**/*.so</include>
                             <include>**/*.class</include>
                             <include>**/*.xml</include>
                             <include>**/*.json</include>
