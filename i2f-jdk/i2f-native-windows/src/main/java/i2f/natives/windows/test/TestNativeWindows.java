@@ -1,9 +1,7 @@
 package i2f.natives.windows.test;
 
 import i2f.natives.windows.NativesWindows;
-import i2f.natives.windows.consts.WinCreateToolhelo32SnapshotFlag;
-import i2f.natives.windows.consts.WinDeviceCapsIndex;
-import i2f.natives.windows.consts.WinSystemMetrics;
+import i2f.natives.windows.consts.*;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -135,6 +133,21 @@ public class TestNativeWindows {
                 }
                 System.out.println(map);
             }
+        }
+
+        if (true) {
+            System.out.println("---------------");
+            long hkey = NativesWindows.regOpenKeyEx(WinRegOpenKeyHkey.HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\", 0, WinRegOpenKeySamDesired.KEY_READ);
+            int index = 0;
+            while (true) {
+                String info = NativesWindows.regEnumValue(hkey, index);
+                if (info == null) {
+                    break;
+                }
+                System.out.println(info);
+                index++;
+            }
+            NativesWindows.regCloseKey(hkey);
         }
     }
 }
