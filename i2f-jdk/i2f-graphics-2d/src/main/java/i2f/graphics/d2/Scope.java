@@ -14,6 +14,11 @@ public class Scope {
     public Point point;
     public Size size;
 
+    public Scope(double x, double y, double dx, double dy) {
+        this.point = new Point(x, y);
+        this.size = new Size(dx, dy);
+    }
+
     public Scope(Point point, Size size) {
         this.point = point;
         this.size = size;

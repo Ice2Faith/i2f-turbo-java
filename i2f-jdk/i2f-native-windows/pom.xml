@@ -13,8 +13,23 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-convert</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-native-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-graphics-2d</artifactId>
         </dependency>
     </dependencies>
 

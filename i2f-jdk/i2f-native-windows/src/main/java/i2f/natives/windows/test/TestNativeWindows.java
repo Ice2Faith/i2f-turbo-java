@@ -1,10 +1,11 @@
 package i2f.natives.windows.test;
 
-import i2f.natives.windows.NativeWindows;
+import i2f.natives.windows.NativesWindows;
 import i2f.natives.windows.consts.WinCreateToolhelo32SnapshotFlag;
 import i2f.natives.windows.consts.WinDeviceCapsIndex;
 import i2f.natives.windows.consts.WinSystemMetrics;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,42 +18,42 @@ public class TestNativeWindows {
     public static void main(String[] args) {
         if (true) {
             System.out.println("---------------------");
-            System.out.println(NativeWindows.hello());
-            System.out.println(NativeWindows.getSystemMetrics(WinSystemMetrics.SM_CXSCREEN));
-            System.out.println(NativeWindows.getSystemMetrics(WinSystemMetrics.SM_CYSCREEN));
+            System.out.println(NativesWindows.hello());
+            System.out.println(NativesWindows.getSystemMetrics(WinSystemMetrics.SM_CXSCREEN));
+            System.out.println(NativesWindows.getSystemMetrics(WinSystemMetrics.SM_CYSCREEN));
         }
 
         if (true) {
             System.out.println("---------------------");
-            long hdc = NativeWindows.getDC(0);
+            long hdc = NativesWindows.getDC(0);
             System.out.println(hdc);
-            System.out.println(NativeWindows.getDeviceCaps(hdc, WinDeviceCapsIndex.LOGPIXELSX));
-            System.out.println(NativeWindows.getDeviceCaps(hdc, WinDeviceCapsIndex.LOGPIXELSY));
+            System.out.println(NativesWindows.getDeviceCaps(hdc, WinDeviceCapsIndex.LOGPIXELSX));
+            System.out.println(NativesWindows.getDeviceCaps(hdc, WinDeviceCapsIndex.LOGPIXELSY));
 
-            NativeWindows.releaseDC(0, hdc);
+            NativesWindows.releaseDC(0, hdc);
         }
 
         if (true) {
             System.out.println("---------------------");
-            long foregroundWindow = NativeWindows.getForegroundWindow();
+            long foregroundWindow = NativesWindows.getForegroundWindow();
             System.out.println(foregroundWindow);
-            System.out.println(NativeWindows.getWindowText(foregroundWindow));
-            System.out.println(NativeWindows.getClassName(foregroundWindow));
+            System.out.println(NativesWindows.getWindowText(foregroundWindow));
+            System.out.println(NativesWindows.getClassName(foregroundWindow));
         }
 
         if (true) {
             System.out.println("---------------------");
-            long desktopWindow = NativeWindows.getDesktopWindow();
+            long desktopWindow = NativesWindows.getDesktopWindow();
             System.out.println(desktopWindow);
-            System.out.println(NativeWindows.getWindowText(desktopWindow));
-            System.out.println(NativeWindows.getClassName(desktopWindow));
+            System.out.println(NativesWindows.getWindowText(desktopWindow));
+            System.out.println(NativesWindows.getClassName(desktopWindow));
         }
 
         if (true) {
             System.out.println("---------------");
-            long hSnapshot = NativeWindows.createToolhelp32Snapshot(WinCreateToolhelo32SnapshotFlag.TH32CS_SNAPPROCESS, 0);
-            if (!NativeWindows.isInvalidHandle(hSnapshot)) {
-                String info = NativeWindows.process32First(hSnapshot);
+            long hSnapshot = NativesWindows.createToolhelp32Snapshot(WinCreateToolhelo32SnapshotFlag.TH32CS_SNAPPROCESS, 0);
+            if (!NativesWindows.isInvalidHandle(hSnapshot)) {
+                String info = NativesWindows.process32First(hSnapshot);
                 while (info != null) {
                     String[] arr = info.split(";#;");
                     Map<String, String> map = new LinkedHashMap<>();
@@ -61,17 +62,17 @@ public class TestNativeWindows {
                         map.put(pair[0], pair[1]);
                     }
                     System.out.println(map);
-                    info = NativeWindows.process32Next(hSnapshot);
+                    info = NativesWindows.process32Next(hSnapshot);
                 }
-                NativeWindows.closeHandle(hSnapshot);
+                NativesWindows.closeHandle(hSnapshot);
             }
         }
 
         if (true) {
             System.out.println("---------------");
-            long hSnapshot = NativeWindows.createToolhelp32Snapshot(WinCreateToolhelo32SnapshotFlag.TH32CS_SNAPMODULE, 0);
-            if (!NativeWindows.isInvalidHandle(hSnapshot)) {
-                String info = NativeWindows.module32First(hSnapshot);
+            long hSnapshot = NativesWindows.createToolhelp32Snapshot(WinCreateToolhelo32SnapshotFlag.TH32CS_SNAPMODULE, 0);
+            if (!NativesWindows.isInvalidHandle(hSnapshot)) {
+                String info = NativesWindows.module32First(hSnapshot);
                 while (info != null) {
                     String[] arr = info.split(";#;");
                     Map<String, String> map = new LinkedHashMap<>();
@@ -80,16 +81,16 @@ public class TestNativeWindows {
                         map.put(pair[0], pair[1]);
                     }
                     System.out.println(map);
-                    info = NativeWindows.module32Next(hSnapshot);
+                    info = NativesWindows.module32Next(hSnapshot);
                 }
-                NativeWindows.closeHandle(hSnapshot);
+                NativesWindows.closeHandle(hSnapshot);
             }
         }
         if (true) {
             System.out.println("---------------");
-            long hSnapshot = NativeWindows.createToolhelp32Snapshot(WinCreateToolhelo32SnapshotFlag.TH32CS_SNAPTHREAD, 0);
-            if (!NativeWindows.isInvalidHandle(hSnapshot)) {
-                String info = NativeWindows.thread32First(hSnapshot);
+            long hSnapshot = NativesWindows.createToolhelp32Snapshot(WinCreateToolhelo32SnapshotFlag.TH32CS_SNAPTHREAD, 0);
+            if (!NativesWindows.isInvalidHandle(hSnapshot)) {
+                String info = NativesWindows.thread32First(hSnapshot);
                 while (info != null) {
                     String[] arr = info.split(";#;");
                     Map<String, String> map = new LinkedHashMap<>();
@@ -98,15 +99,43 @@ public class TestNativeWindows {
                         map.put(pair[0], pair[1]);
                     }
                     System.out.println(map);
-                    info = NativeWindows.thread32Next(hSnapshot);
+                    info = NativesWindows.thread32Next(hSnapshot);
                 }
-                NativeWindows.closeHandle(hSnapshot);
+                NativesWindows.closeHandle(hSnapshot);
             }
         }
 
         if (true) {
-            String logicalDriveStrings = NativeWindows.getLogicalDriveStrings();
+            System.out.println("---------------");
+            String logicalDriveStrings = NativesWindows.getLogicalDriveStrings();
             System.out.println(logicalDriveStrings);
+        }
+
+        if (true) {
+            System.out.println("---------------");
+            int[] pos = NativesWindows.getCursorPos();
+            long hwnd = NativesWindows.windowFromPoint(pos[0], pos[1]);
+            String text = NativesWindows.getWindowText(hwnd);
+            String className = NativesWindows.getClassName(hwnd);
+            System.out.println(Arrays.toString(pos));
+            System.out.println(hwnd);
+            System.out.println(text);
+            System.out.println(className);
+        }
+
+        if (true) {
+            System.out.println("---------------");
+            String info = NativesWindows.getWindowInfo(NativesWindows.getDesktopWindow());
+            if (info != null) {
+                String[] arr = info.split(";#;");
+                Map<String, String> map = new LinkedHashMap<>();
+                for (String item : arr) {
+                    String[] pair = item.split(":", 2);
+                    map.put(pair[0], pair[1]);
+                }
+                System.out.println(map);
+            }
         }
     }
 }
+
