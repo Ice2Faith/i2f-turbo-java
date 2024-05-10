@@ -822,4 +822,64 @@ public class WinApi {
         return NativesWindows.setCursorPos((int) p.x, (int) p.y);
     }
 
+    public static HKey regOpenKeyEx(HKey hkey, String subKey, long ulOptions, long samDesired) {
+        long ret = NativesWindows.regOpenKeyEx(hkey.value(), subKey, ulOptions, samDesired);
+        return new HKey(ret);
+    }
+
+    public static HKey regOpenKeyEx(HKey hkey, String subKey) {
+        long ret = NativesWindows.regOpenKeyEx(hkey.value(), subKey, 0, WinRegOpenKeySamDesired.KEY_ALL_ACCESS);
+        return new HKey(ret);
+    }
+
+    public static HKey regOpenDefaultBootKey() {
+        long ret = NativesWindows.regOpenKeyEx(WinRegOpenKeyHkey.HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\", 0, WinRegOpenKeySamDesired.KEY_ALL_ACCESS);
+        return new HKey(ret);
+    }
+
+    public static RegEnumValueInfo parseRegValueInfo(String str) {
+        if (str == null) {
+            return null;
+        }
+
+        Map<String, String> map = new LinkedHashMap<>();
+        String[] arr = str.split(";#;");
+        for (String item : arr) {
+            String[] pair = item.split(":", 2);
+            map.put(pair[0], pair[1]);
+        }
+        RegEnumValueInfo ret = new RegEnumValueInfo();
+        ret.index = Converters.parseInt(map.get("index"), 0);
+        ret.szValueName = map.get("szValueName");
+        ret.reserved = Converters.parseInt(map.get("reserved"), 0);
+        ret.type = Converters.parseInt(map.get("type"), 0);
+        ret.data = map.get("data");
+
+        return ret;
+    }
+
+    public static RegEnumValueInfo regEnumValue(HKey hkey, int index) {
+        String str = NativesWindows.regEnumValue(hkey.value(), index);
+        return parseRegValueInfo(str);
+    }
+
+    public static List<RegEnumValueInfo> regEnumValues(HKey hkey) {
+        List<RegEnumValueInfo> ret = new ArrayList<>();
+        int index = 0;
+        while (true) {
+            RegEnumValueInfo info = regEnumValue(hkey, index);
+            if (info == null) {
+                break;
+            }
+            ret.add(info);
+            index++;
+        }
+        return ret;
+    }
+
+    public static boolean regCloseKey(HKey hkey) {
+        return NativesWindows.regCloseKey(hkey.value());
+    }
+
+
 }
