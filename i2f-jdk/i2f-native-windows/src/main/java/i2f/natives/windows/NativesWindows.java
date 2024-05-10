@@ -7,11 +7,10 @@ import i2f.natives.core.NativeUtil;
  * @date 2024/5/7 11:41
  * @desc
  */
-public class NativeWindows {
+public class NativesWindows {
 
     static {
         NativeUtil.loadClasspathLib("lib/NativesWindows");
-
     }
 
     public static native String hello();
@@ -180,4 +179,16 @@ public class NativeWindows {
     public static native boolean setFileAttributes(String fileName, long attribute);
 
     public static native int deleteFileToRecycleBin(String fileName);
+
+    public static native String getWindowInfo(long hwnd);
+
+    public static native int[] clientToScreen(long hwnd, int x, int y);
+
+    public static native int[] screenToClient(long hwnd, int x, int y);
+
+    public static native void keyboardEvent(int bVk, int bScan, long dwFlags);
+
+    public static native void mouseEvent(long dwFlags, int dx, int dy, int dwData);
+
+    public static native boolean setCursorPos(int x, int y);
 }
