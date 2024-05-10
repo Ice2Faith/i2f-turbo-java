@@ -191,4 +191,10 @@ public class NativesWindows {
     public static native void mouseEvent(long dwFlags, int dx, int dy, int dwData);
 
     public static native boolean setCursorPos(int x, int y);
+
+    public static native long regOpenKeyEx(long hkey, String subKey, long ulOptions, long samDesired);
+
+    public static native String regEnumValue(long hkey, int index);
+
+    public static native boolean regCloseKey(long hkey);
 }

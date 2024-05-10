@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <jni.h>
 #include <string>
+#include<xstring>
 #include<string.h>
 #include<list>
 //Ã¶¾Ù½ø³ÌÒÀÀµ
@@ -45,7 +46,7 @@ wchar_t * Utf82Unicode(const char * astr, wchar_t * wstr)
 	return wstr;
 }
 
-jstring wchar2jstring(JNIEnv* env,wchar_t * buff){
+jstring wchar2jstring(JNIEnv* env, wchar_t * buff){
 	int size = getRequireSize4Unicode2Utf8(buff);
 	char * bts = (char*)malloc(size*sizeof(char));
 	Unicode2Utf8(buff, bts);
@@ -164,7 +165,7 @@ jlong hwnd
 ) {
 	wchar_t buff[4096] = { 0 };
 	int len = GetWindowTextW(ptrOf<HWND>(hwnd), buff, 4096);
-	return wchar2jstring(env,buff);
+	return wchar2jstring(env, buff);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -177,7 +178,7 @@ jstring title
 	wchar_t* buff = jstring2wchar(env, title);
 	BOOL ret = SetWindowTextW(ptrOf<HWND>(hwnd), buff);
 	freeWchar(buff);
-	return ret==TRUE;
+	return ret == TRUE;
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -215,7 +216,7 @@ jstring content,
 jstring title,
 jint type
 ) {
-	wchar_t* content_ptr=jstring2wchar(env, content);
+	wchar_t* content_ptr = jstring2wchar(env, content);
 	wchar_t* title_ptr = jstring2wchar(env, title);
 	int ret = MessageBoxW(ptrOf<HWND>(hwnd), content_ptr, title_ptr, type);
 	freeWchar(content_ptr);
@@ -229,8 +230,8 @@ JNIEnv* env,
 jobject obj,
 jint type
 ) {
-	BOOL ret=MessageBeep(type);
-	return ret==TRUE;
+	BOOL ret = MessageBeep(type);
+	return ret == TRUE;
 }
 
 extern "C" JNIEXPORT jintArray JNICALL
@@ -259,7 +260,7 @@ jint cx,
 jint cy,
 jint flag
 ) {
-	BOOL ret=SetWindowPos(ptrOf<HWND>(hwnd), ptrOf<HWND>(hwndInsertAfter), x, y, cx, cy, flag);
+	BOOL ret = SetWindowPos(ptrOf<HWND>(hwnd), ptrOf<HWND>(hwndInsertAfter), x, y, cx, cy, flag);
 	return ret == TRUE;
 }
 
@@ -270,7 +271,7 @@ jobject obj,
 jlong hwnd,
 int cmdShow
 ) {
-	BOOL ret = ShowWindow(ptrOf<HWND>(hwnd), cmdShow); 
+	BOOL ret = ShowWindow(ptrOf<HWND>(hwnd), cmdShow);
 	return ret == TRUE;
 }
 
@@ -294,8 +295,8 @@ jstring windowName
 ) {
 	wchar_t* className_ptr = jstring2wchar(env, className);
 	wchar_t* windowName_ptr = jstring2wchar(env, windowName);
-	
-	HWND ret=FindWindowW(className_ptr,windowName_ptr);
+
+	HWND ret = FindWindowW(className_ptr, windowName_ptr);
 	freeWchar(className_ptr);
 	freeWchar(windowName_ptr);
 	return toPtr(ret);
@@ -334,7 +335,7 @@ int msg,
 jlong wParamPtr,
 jlong lParamPtr
 ) {
-	BOOL ret=PostMessageW(ptrOf<HWND>(hwnd), msg, wParamPtr, lParamPtr);
+	BOOL ret = PostMessageW(ptrOf<HWND>(hwnd), msg, wParamPtr, lParamPtr);
 	return ret == TRUE;
 }
 
@@ -357,7 +358,7 @@ jlong dwDesiredAccess,
 jboolean bInheritHandle,
 jlong dwProcessId
 ) {
-	HANDLE handle = OpenProcess(dwDesiredAccess, (bInheritHandle==true?TRUE:FALSE), dwProcessId);
+	HANDLE handle = OpenProcess(dwDesiredAccess, (bInheritHandle == true ? TRUE : FALSE), dwProcessId);
 	return toPtr(handle);
 }
 
@@ -432,7 +433,7 @@ Java_i2f_natives_windows_NativesWindows_getCurrentProcess(
 JNIEnv* env,
 jobject obj
 ) {
-	HANDLE handle=GetCurrentProcess();
+	HANDLE handle = GetCurrentProcess();
 	return toPtr(handle);
 }
 
@@ -452,12 +453,12 @@ jobject obj,
 jlong hProcess,
 jlong dwDesiredAccess
 ) {
-	HANDLE handle = NULL; 
-	BOOL ret = OpenProcessToken(ptrOf<HANDLE>(hProcess), dwDesiredAccess, &handle); 
+	HANDLE handle = NULL;
+	BOOL ret = OpenProcessToken(ptrOf<HANDLE>(hProcess), dwDesiredAccess, &handle);
 	if (ret == FALSE){
 		return toPtr(INVALID_HANDLE_VALUE);
 	}
-	return toPtr(handle); 
+	return toPtr(handle);
 }
 
 extern "C" JNIEXPORT jlongArray JNICALL
@@ -468,10 +469,10 @@ jstring pSystemName,
 jstring pName
 ) {
 	wchar_t* systemName_ptr = jstring2wchar(env, pSystemName);
-	wchar_t* name_ptr=jstring2wchar(env, pName);
+	wchar_t* name_ptr = jstring2wchar(env, pName);
 	LUID p;
-	BOOL ok=LookupPrivilegeValueW(systemName_ptr,name_ptr,&p);
-	freeWchar(systemName_ptr); 
+	BOOL ok = LookupPrivilegeValueW(systemName_ptr, name_ptr, &p);
+	freeWchar(systemName_ptr);
 	freeWchar(name_ptr);
 	if (ok == FALSE){
 		return env->NewLongArray(0);
@@ -497,8 +498,8 @@ jlong luidHighPart
 	token.Privileges[0].Luid.LowPart = luidLowPart;
 	token.Privileges[0].Luid.HighPart = luidHighPart;
 	token.Privileges[0].Attributes = attributes;
-	BOOL ret=AdjustTokenPrivileges(ptrOf<HANDLE>(tokenHandle), (disableAllPrivileges == true ? TRUE : FALSE), &token, sizeof(token), NULL, NULL);
-	return ret==TRUE;
+	BOOL ret = AdjustTokenPrivileges(ptrOf<HANDLE>(tokenHandle), (disableAllPrivileges == true ? TRUE : FALSE), &token, sizeof(token), NULL, NULL);
+	return ret == TRUE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -533,7 +534,7 @@ jobject obj,
 jlong hwnd,
 jint index
 ) {
-	LONG ret = GetWindowLongW(ptrOf<HWND>(hwnd), index); 
+	LONG ret = GetWindowLongW(ptrOf<HWND>(hwnd), index);
 	return ret;
 }
 
@@ -556,7 +557,7 @@ jlong hwnd,
 jint index,
 jlong dwNewLong
 ) {
-	LONG ret = SetWindowLongW(ptrOf<HWND>(hwnd), index,dwNewLong);
+	LONG ret = SetWindowLongW(ptrOf<HWND>(hwnd), index, dwNewLong);
 	return ret;
 }
 
@@ -581,11 +582,11 @@ jlong hwnd
 	COLORREF ref;
 	BYTE alpha;
 	DWORD flag;
-	BOOL ok=GetLayeredWindowAttributes(ptrOf<HWND>(hwnd), &ref,&alpha,&flag);
+	BOOL ok = GetLayeredWindowAttributes(ptrOf<HWND>(hwnd), &ref, &alpha, &flag);
 	if (ok == FALSE){
 		return env->NewLongArray(0);
 	}
-	jlong arr[] = { ref,alpha,flag };
+	jlong arr[] = { ref, alpha, flag };
 	jlongArray ret = env->NewLongArray(3);
 	env->SetLongArrayRegion(ret, 0, 3, arr);
 	return ret;
@@ -600,7 +601,7 @@ jint color,
 jbyte alpha,
 jlong flags
 ) {
-	BOOL ret = SetLayeredWindowAttributes(ptrOf<HWND>(hwnd), color, alpha, flags); 
+	BOOL ret = SetLayeredWindowAttributes(ptrOf<HWND>(hwnd), color, alpha, flags);
 	return ret == TRUE;
 }
 
@@ -619,11 +620,11 @@ JNIEnv* env,
 jobject obj
 ) {
 	std::list<HWND> result;
-	BOOL ok=EnumWindows(__EnumWindow_Proc, (LPARAM)&result);
+	BOOL ok = EnumWindows(__EnumWindow_Proc, (LPARAM)&result);
 	if (ok == FALSE){
 		return env->NewLongArray(0);
 	}
-	int size=result.size();
+	int size = result.size();
 	jlong* arr = (jlong*)malloc(size*sizeof(jlong));
 	for (int i = 0; i < size; i++){
 		HWND h = result.front();
@@ -643,7 +644,7 @@ jobject obj,
 jlong hwndParent
 ) {
 	std::list<HWND> result;
-	BOOL ok = EnumChildWindows(ptrOf<HWND>(hwndParent),__EnumWindow_Proc, (LPARAM)&result);
+	BOOL ok = EnumChildWindows(ptrOf<HWND>(hwndParent), __EnumWindow_Proc, (LPARAM)&result);
 	if (ok == FALSE){
 		return env->NewLongArray(0);
 	}
@@ -716,7 +717,7 @@ JNIEnv* env,
 jobject obj,
 jlong hwnd
 ) {
-	BOOL ret=SetForegroundWindow(ptrOf<HWND>(hwnd));
+	BOOL ret = SetForegroundWindow(ptrOf<HWND>(hwnd));
 	return ret == TRUE;
 }
 
@@ -725,7 +726,7 @@ Java_i2f_natives_windows_NativesWindows_getActiveWindow(
 JNIEnv* env,
 jobject obj
 ) {
-	HWND h=GetActiveWindow();
+	HWND h = GetActiveWindow();
 	return toPtr(h);
 }
 
@@ -735,7 +736,7 @@ JNIEnv* env,
 jobject obj,
 jlong hwnd
 ) {
-	HWND h=SetActiveWindow(ptrOf<HWND>(hwnd));
+	HWND h = SetActiveWindow(ptrOf<HWND>(hwnd));
 	return toPtr(h);
 }
 
@@ -746,7 +747,7 @@ jobject obj,
 jlong hwnd,
 jboolean enable
 ) {
-	BOOL ret = EnableWindow(ptrOf<HWND>(hwnd),(enable?TRUE:FALSE));
+	BOOL ret = EnableWindow(ptrOf<HWND>(hwnd), (enable ? TRUE : FALSE));
 	return ret == TRUE;
 }
 
@@ -766,8 +767,8 @@ JNIEnv* env,
 jobject obj,
 jlong hwnd
 ) {
-	HDC hdc=GetWindowDC(ptrOf<HWND>(hwnd));
-	return toPtr(hdc); 
+	HDC hdc = GetWindowDC(ptrOf<HWND>(hwnd));
+	return toPtr(hdc);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -797,7 +798,7 @@ jobject obj,
 jlong hwndParent,
 jlong hwnd
 ) {
-	BOOL ret = IsChild(ptrOf<HWND>(hwndParent),ptrOf<HWND>(hwnd));
+	BOOL ret = IsChild(ptrOf<HWND>(hwndParent), ptrOf<HWND>(hwnd));
 	return ret == TRUE;
 }
 
@@ -852,7 +853,7 @@ jstring windowText
 ) {
 	wchar_t* className_ptr = jstring2wchar(env, className);
 	wchar_t* windowText_ptr = jstring2wchar(env, windowText);
-	HWND h=FindWindowExW(ptrOf<HWND>(hwndParent), ptrOf<HWND>(hwndChildAfter), className_ptr, windowText_ptr);
+	HWND h = FindWindowExW(ptrOf<HWND>(hwndParent), ptrOf<HWND>(hwndChildAfter), className_ptr, windowText_ptr);
 	freeWchar(className_ptr);
 	freeWchar(windowText_ptr);
 	return toPtr(h);
@@ -879,7 +880,7 @@ jint width,
 jint height,
 jboolean repaint
 ) {
-	BOOL ret=MoveWindow(ptrOf<HWND>(hwnd), x, y, width, height, (repaint == true ? TRUE : FALSE));
+	BOOL ret = MoveWindow(ptrOf<HWND>(hwnd), x, y, width, height, (repaint == true ? TRUE : FALSE));
 	return ret == TRUE;
 }
 
@@ -890,8 +891,8 @@ jobject obj,
 jlong dwFlags,
 jlong processId
 ) {
-	HANDLE h = CreateToolhelp32Snapshot(dwFlags, processId); 
-	return toPtr(h); 
+	HANDLE h = CreateToolhelp32Snapshot(dwFlags, processId);
+	return toPtr(h);
 }
 
 jstring stringify_PROCESSENTRY32W(JNIEnv* env, const PROCESSENTRY32W * pe){
@@ -910,7 +911,7 @@ jlong hSnapshot
 ) {
 	PROCESSENTRY32W pe;
 	pe.dwSize = sizeof(PROCESSENTRY32W);
-	BOOL ret=Process32FirstW(ptrOf<HANDLE>(hSnapshot), &pe);
+	BOOL ret = Process32FirstW(ptrOf<HANDLE>(hSnapshot), &pe);
 	if (ret == FALSE){
 		return nullptr;
 	}
@@ -1007,7 +1008,7 @@ jlong hSnapshot
 	if (ret == FALSE){
 		return nullptr;
 	}
-	return stringify_THREADENTRY32(env, &pe); 
+	return stringify_THREADENTRY32(env, &pe);
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -1016,8 +1017,8 @@ JNIEnv* env,
 jobject obj,
 jlong hProcess
 ) {
-	DWORD code=0;
-	BOOL ret=GetExitCodeProcess(ptrOf<HANDLE>(hProcess), &code);
+	DWORD code = 0;
+	BOOL ret = GetExitCodeProcess(ptrOf<HANDLE>(hProcess), &code);
 	return code;
 }
 
@@ -1038,7 +1039,7 @@ JNIEnv* env,
 jobject obj,
 jlong hThread
 ) {
-	DWORD ret=GetLastError();
+	DWORD ret = GetLastError();
 	return ret;
 }
 
@@ -1058,7 +1059,7 @@ jobject obj,
 jlong errCode,
 jlong type
 ) {
-	SetLastErrorEx(errCode,type);
+	SetLastErrorEx(errCode, type);
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -1069,7 +1070,7 @@ jlong dwDesiredAccess,
 jboolean inheritHandle,
 jlong dwThreadId
 ) {
-	HANDLE ret = OpenThread(dwDesiredAccess, (inheritHandle==true?TRUE:FALSE), dwThreadId);
+	HANDLE ret = OpenThread(dwDesiredAccess, (inheritHandle == true ? TRUE : FALSE), dwThreadId);
 	return toPtr(ret);
 }
 
@@ -1079,7 +1080,7 @@ JNIEnv* env,
 jobject obj,
 jlong hThread
 ) {
-	DWORD ret=SuspendThread(ptrOf<HANDLE>(hThread));
+	DWORD ret = SuspendThread(ptrOf<HANDLE>(hThread));
 	return ret;
 }
 
@@ -1098,11 +1099,11 @@ Java_i2f_natives_windows_NativesWindows_getLogicalDriveStrings(
 JNIEnv* env,
 jobject obj
 ) {
-	int len=GetLogicalDriveStringsA(0, NULL);
+	int len = GetLogicalDriveStringsA(0, NULL);
 	char* buff = (char*)malloc(len*sizeof(char));
 	GetLogicalDriveStringsA(len, buff);
-	std::string str="";
-	std::string tmp="";
+	std::string str = "";
+	std::string tmp = "";
 	bool isFirst = true;
 	for (int i = 0; i < len; i++){
 		if (buff[i] == 0){
@@ -1119,7 +1120,7 @@ jobject obj
 			tmp += buff[i];
 		}
 	}
-	if (tmp.length()>0){
+	if (tmp.length() > 0){
 		if (!isFirst){
 			str += ";#;";
 		}
@@ -1135,9 +1136,9 @@ jobject obj,
 jstring rootPathName
 ) {
 	wchar_t* rootPathName_ptr = jstring2wchar(env, rootPathName);
-	UINT ret=GetDriveTypeW(rootPathName_ptr);
+	UINT ret = GetDriveTypeW(rootPathName_ptr);
 	freeWchar(rootPathName_ptr);
-	return ret; 
+	return ret;
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -1147,7 +1148,7 @@ jobject obj,
 jstring fileName
 ) {
 	wchar_t* fileName_ptr = jstring2wchar(env, fileName);
-	DWORD ret = GetFileAttributesW(fileName_ptr); 
+	DWORD ret = GetFileAttributesW(fileName_ptr);
 	freeWchar(fileName_ptr);
 	return ret;
 }
@@ -1160,7 +1161,7 @@ jstring fileName,
 jlong attribute
 ) {
 	wchar_t* fileName_ptr = jstring2wchar(env, fileName);
-	BOOL ret=SetFileAttributesW(fileName_ptr, attribute);
+	BOOL ret = SetFileAttributesW(fileName_ptr, attribute);
 	freeWchar(fileName_ptr);
 	return ret == TRUE;
 }
@@ -1178,21 +1179,21 @@ jstring fileName
 	op.pFrom = fileName_ptr;
 	op.fFlags = FOF_ALLOWUNDO | FOF_NO_UI;
 	op.fAnyOperationsAborted = true;
-	op.hNameMappings=NULL;
-	op.lpszProgressTitle=NULL;
+	op.hNameMappings = NULL;
+	op.lpszProgressTitle = NULL;
 	int ret = SHFileOperationW(&op);
 	freeWchar(fileName_ptr);
-	return ret; 
+	return ret;
 }
 
 
 jstring stringify_WINDOWINFO(JNIEnv* env, const WINDOWINFO * pe){
 	wchar_t buff[8192] = { 0 };
 	_swprintf(buff, L"cbSize:%d;#;rcWindow:%d,%d,%d,%d;#;rcClient:%d,%d,%d,%d;#;dwStyle:%d;#;dwExStyle:%d;#;dwWindowStatus:%d;#;cxWindowBorders:%d;#;cyWindowBorders:%d;#;atomWindowType:%d;#;wCreatorVersion:%d",
-		pe->cbSize, 
-		pe->rcWindow.left,pe->rcWindow.top,pe->rcWindow.right,pe->rcWindow.bottom, 
+		pe->cbSize,
+		pe->rcWindow.left, pe->rcWindow.top, pe->rcWindow.right, pe->rcWindow.bottom,
 		pe->rcClient.left, pe->rcClient.top, pe->rcClient.right, pe->rcClient.bottom,
-		pe->dwStyle, pe->dwExStyle, pe->dwWindowStatus, 
+		pe->dwStyle, pe->dwExStyle, pe->dwWindowStatus,
 		pe->cxWindowBorders, pe->cyWindowBorders,
 		pe->atomWindowType, pe->wCreatorVersion
 		);
@@ -1206,7 +1207,7 @@ jobject obj,
 jlong hwnd
 ) {
 	WINDOWINFO info = { 0 };
-	BOOL ret=GetWindowInfo(ptrOf<HWND>(hwnd), &info);
+	BOOL ret = GetWindowInfo(ptrOf<HWND>(hwnd), &info);
 	if (ret == FALSE){
 		return nullptr;
 	}
@@ -1224,7 +1225,7 @@ jint y
 	POINT p = { 0 };
 	p.x = x;
 	p.y = y;
-	BOOL ok=ClientToScreen(ptrOf<HWND>(hwnd), &p);
+	BOOL ok = ClientToScreen(ptrOf<HWND>(hwnd), &p);
 	if (ok == FALSE){
 		return env->NewIntArray(0);
 	}
@@ -1264,7 +1265,7 @@ jint bVk,
 jint bScan,
 jlong dwFlags
 ) {
-	keybd_event(bVk, bScan, dwFlags, 0); 
+	keybd_event(bVk, bScan, dwFlags, 0);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -1288,4 +1289,120 @@ jint y
 ) {
 	BOOL ret = SetCursorPos(x, y);
 	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_regOpenKeyEx(
+JNIEnv* env,
+jobject obj,
+jlong hkey,
+jstring subKey,
+jlong ulOptions,
+jlong samDesired
+) {
+	wchar_t* subKey_ptr = jstring2wchar(env, subKey);
+	HKEY key;
+	LSTATUS ret = RegOpenKeyExW(ptrOf<HKEY>(hkey), subKey_ptr, ulOptions, samDesired, &key);
+	freeWchar(subKey_ptr);
+	if (ret != ERROR_SUCCESS){
+		return 0;
+	}
+	return toPtr(key);
+}
+
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_regEnumValue(
+JNIEnv* env,
+jobject obj,
+jlong hkey,
+jint index
+) {
+	wchar_t szValueName[MAXBYTE] = { 0 };
+	DWORD chValueName = MAXBYTE;
+	DWORD reserved = 0;
+	DWORD type = 0;
+	unsigned char data[MAXBYTE] = { 0 };
+	DWORD cbData = MAXBYTE;
+
+
+	LSTATUS ret = RegEnumValueW(ptrOf<HKEY>(hkey), index, szValueName, &chValueName,&reserved, &type, data, &cbData);
+	
+	if (ret != ERROR_SUCCESS){
+		return nullptr;
+	}
+	wchar_t buff[MAXBYTE] = { 0 };
+	if (type == REG_SZ || type == REG_EXPAND_SZ || type == REG_MULTI_SZ){
+		// string
+		if (type == REG_MULTI_SZ){
+			jstring jstr = env->NewStringUTF((const char *)data);
+			wchar_t* bts = jstring2wchar(env, jstr);
+			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%s", index, szValueName, reserved, type, data);
+			freeWchar(bts);
+		}
+		else{
+			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%s", index, szValueName, reserved, type, (const wchar_t *)data);
+		}
+	}
+	else if (type == REG_DWORD || type == REG_DWORD_BIG_ENDIAN || type == REG_DWORD_LITTLE_ENDIAN){
+		// int
+		DWORD* ptr = (DWORD*)data;
+		if (type == REG_DWORD){
+			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%d", index, szValueName, reserved, type, ptr[0]);
+		}
+		else if (type == REG_DWORD_BIG_ENDIAN){
+			DWORD wd = 0;
+			for (int i = 0; i < cbData; i++){
+				wd <<= 8;
+				wd |= data[i];
+			}
+			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%d", index, szValueName, reserved, type, wd);
+		}
+		else if (type == REG_DWORD_LITTLE_ENDIAN){
+			DWORD wd = 0;
+			for (int i = cbData-1; i >=0; i--){
+				wd <<= 8;
+				wd |= data[i];
+			}
+			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%d", index, szValueName, reserved, type, wd);
+		}
+		
+	}
+	else if (type == REG_QWORD || type == REG_QWORD_LITTLE_ENDIAN){
+		// long
+		unsigned long long * ptr = (unsigned long long*)data;
+		if (type == REG_QWORD){
+			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%l64d", index, szValueName, reserved, type, ptr[0]);
+		}
+		else if (type == REG_QWORD_LITTLE_ENDIAN){
+			unsigned long long wd = 0;
+			for (int i = cbData - 1; i >= 0; i--){
+				wd <<= 8;
+				wd |= data[i];
+			}
+			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%l64d", index, szValueName, reserved, type, wd);
+		}
+	}
+	else{
+		swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:b",index, szValueName, reserved, type);
+
+		wchar_t tmp[100] = { 0 };
+		for (int i = 0; i < cbData; i++){
+			ZeroMemory(tmp, sizeof(tmp));
+			swprintf(tmp, L"%02x", (int)data[i]);
+		}
+		StrCatW(buff, tmp);
+
+	}
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_regCloseKey(
+JNIEnv* env,
+jobject obj,
+jlong hkey
+) {
+	LSTATUS ret=RegCloseKey(ptrOf<HKEY>(hkey));
+	return ret == ERROR_SUCCESS;
 }
