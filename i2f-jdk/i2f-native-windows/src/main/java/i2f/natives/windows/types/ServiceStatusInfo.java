@@ -1,5 +1,6 @@
 package i2f.natives.windows.types;
 
+import i2f.natives.windows.consts.WinServiceCurrentState;
 import lombok.Data;
 
 /**
@@ -18,4 +19,16 @@ public class ServiceStatusInfo {
     public long serviceSpecificExitCode;
     public long checkPoint;
     public long waitHint;
+
+    public boolean isStopped() {
+        return currentState == WinServiceCurrentState.SERVICE_STOPPED;
+    }
+
+    public boolean isRunning() {
+        return currentState == WinServiceCurrentState.SERVICE_RUNNING;
+    }
+
+    public boolean isPaused() {
+        return currentState == WinServiceCurrentState.SERVICE_PAUSED;
+    }
 }

@@ -215,4 +215,27 @@ public class NativesWindows {
     public static native String enumServicesStatus(long hScm, long serviceType, long serviceState);
 
     public static native boolean closeServiceHandle(long hScm);
+
+    public static native long openService(long hScm, String serviceName, long dwDesiredAccess);
+
+    public static native boolean startService(long hService, int dwNumServiceArgs, String serviceArgVectors);
+
+    public static native boolean controlService(long hService, int dwControl);
+
+    public static native boolean deleteService(long hService);
+
+    public static native String queryServiceStatus(long hService);
+
+    public static native long createService(long hScm,
+                                            String serviceName,
+                                            String displayName,
+                                            long dwDesiredAccess,
+                                            long dwServiceType,
+                                            long dwStartType,
+                                            long dwErrorControl,
+                                            String binaryPathName,
+                                            String loadOrderGroup,
+                                            String dependencies,
+                                            String serviceStartName,
+                                            String password);
 }

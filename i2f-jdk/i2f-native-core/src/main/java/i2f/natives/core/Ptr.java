@@ -22,6 +22,14 @@ public class Ptr {
         return ptr;
     }
 
+    public boolean isZero() {
+        return ptr == 0;
+    }
+
+    public boolean isNegOne() {
+        return ptr == -1;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
