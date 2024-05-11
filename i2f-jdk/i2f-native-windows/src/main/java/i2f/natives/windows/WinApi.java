@@ -210,6 +210,10 @@ public class WinApi {
         return NativesWindows.adjustProcessPrivileges(processHandle.value(), seName, enable);
     }
 
+    public static boolean adjustProcessSeDebugPrivileges(Handle processHandle) {
+        return adjustProcessPrivileges(processHandle, WinLookupPrivilegeName.SE_DEBUG_NAME, true);
+    }
+
     public static long getWindowLong(Hwnd hwnd, int index) {
         return NativesWindows.getWindowLong(hwnd.value(), index);
     }
@@ -599,6 +603,36 @@ public class WinApi {
             WinApi.closeHandle(hSnapshot);
         }
         return ret;
+    }
+
+    public static boolean suspendProcess(long processId) {
+        List<ThreadEntry32> list = listThread32(processId);
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (ThreadEntry32 item : list) {
+            if (item.th32OwnerProcessID == processId) {
+                Handle hThread = openThread(WinOpenThreadDesiredAccess.THREAD_SUSPEND_RESUME, false, item.th32ThreadID);
+                long ret = suspendThread(hThread);
+                closeHandle(hThread);
+            }
+        }
+        return true;
+    }
+
+    public static boolean resumeProcess(long processId) {
+        List<ThreadEntry32> list = listThread32(processId);
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (ThreadEntry32 item : list) {
+            if (item.th32OwnerProcessID == processId) {
+                Handle hThread = openThread(WinOpenThreadDesiredAccess.THREAD_SUSPEND_RESUME, false, item.th32ThreadID);
+                long ret = resumeThread(hThread);
+                closeHandle(hThread);
+            }
+        }
+        return true;
     }
 
     public static long getExitCodeProcess(Handle hProcess) {
