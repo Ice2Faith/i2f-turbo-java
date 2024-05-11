@@ -197,4 +197,16 @@ public class NativesWindows {
     public static native String regEnumValue(long hkey, int index);
 
     public static native boolean regCloseKey(long hkey);
+
+    public static native String regEnumKeyEx(long hkey, int index);
+
+    public static native long regCreateKeyEx(long hkey, String subKey, String className, long dwOptions, long samDesired);
+
+    public static native boolean regDeleteKey(long hkey, String subKey);
+
+    public static native String regQueryValueEx(long hkey, String valueName);
+
+    public static native boolean regSetValueEx(long hkey, String valueName, long type, String data);
+
+    public static native boolean regDeleteValue(long hkey, String valueName);
 }

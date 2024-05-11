@@ -10,8 +10,7 @@ import lombok.Data;
 @Data
 public class RegEnumValueInfo {
     public int index;
-    public String szValueName;
-    public int reserved;
+    public String valueName;
     public int type;
-    public String data;
+    public String valueData;
 }
