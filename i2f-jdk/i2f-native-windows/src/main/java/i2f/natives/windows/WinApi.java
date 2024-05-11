@@ -453,12 +453,7 @@ public class WinApi {
         if (str == null) {
             return null;
         }
-        Map<String, String> map = new LinkedHashMap<>();
-        String[] arr = str.split(";#;");
-        for (String item : arr) {
-            String[] pair = item.split(":", 2);
-            map.put(pair[0], pair[1]);
-        }
+        Map<String, String> map = getJniStringMap(str);
         ProcessEntry32 ret = new ProcessEntry32();
         ret.dwSize = Converters.parseInt(map.get("dwSize"), 0);
         ret.cntUsage = Converters.parseInt(map.get("cntUsage"), 0);
@@ -471,6 +466,16 @@ public class WinApi {
         ret.dwFlags = Converters.parseLong(map.get("dwFlags"), 0);
         ret.szExeFile = map.get("szExeFile");
         return ret;
+    }
+
+    private static Map<String, String> getJniStringMap(String str) {
+        Map<String, String> map = new LinkedHashMap<>();
+        String[] arr = str.split(";#;");
+        for (String item : arr) {
+            String[] pair = item.split(":", 2);
+            map.put(pair[0], pair[1]);
+        }
+        return map;
     }
 
     public static ProcessEntry32 process32First(Handle hSnapshot) {
@@ -506,12 +511,7 @@ public class WinApi {
         if (str == null) {
             return null;
         }
-        Map<String, String> map = new LinkedHashMap<>();
-        String[] arr = str.split(";#;");
-        for (String item : arr) {
-            String[] pair = item.split(":", 2);
-            map.put(pair[0], pair[1]);
-        }
+        Map<String, String> map = getJniStringMap(str);
         ModuleEntry32 ret = new ModuleEntry32();
         ret.dwSize = Converters.parseInt(map.get("dwSize"), 0);
         ret.th32ModuleID = Converters.parseLong(map.get("th32ModuleID"), 0);
@@ -558,12 +558,7 @@ public class WinApi {
         if (str == null) {
             return null;
         }
-        Map<String, String> map = new LinkedHashMap<>();
-        String[] arr = str.split(";#;");
-        for (String item : arr) {
-            String[] pair = item.split(":", 2);
-            map.put(pair[0], pair[1]);
-        }
+        Map<String, String> map = getJniStringMap(str);
         ThreadEntry32 ret = new ThreadEntry32();
         ret.dwSize = Converters.parseInt(map.get("dwSize"), 0);
         ret.cntUsage = Converters.parseInt(map.get("cntUsage"), 0);
@@ -712,12 +707,7 @@ public class WinApi {
         if (str == null) {
             return null;
         }
-        Map<String, String> map = new LinkedHashMap<>();
-        String[] arr = str.split(";#;");
-        for (String item : arr) {
-            String[] pair = item.split(":", 2);
-            map.put(pair[0], pair[1]);
-        }
+        Map<String, String> map = getJniStringMap(str);
         WindowInfo ret = new WindowInfo();
         ret.cbSize = Converters.parseInt(map.get("cbSize"), 0);
         ret.rcWindow = parseRect(map.get("rcWindow"));
@@ -876,12 +866,7 @@ public class WinApi {
             return null;
         }
 
-        Map<String, String> map = new LinkedHashMap<>();
-        String[] arr = str.split(";#;");
-        for (String item : arr) {
-            String[] pair = item.split(":", 2);
-            map.put(pair[0], pair[1]);
-        }
+        Map<String, String> map = getJniStringMap(str);
         RegEnumValueInfo ret = new RegEnumValueInfo();
         ret.index = Converters.parseInt(map.get("index"), 0);
         ret.valueName = map.get("valueName");
@@ -919,12 +904,7 @@ public class WinApi {
             return null;
         }
 
-        Map<String, String> map = new LinkedHashMap<>();
-        String[] arr = str.split(";#;");
-        for (String item : arr) {
-            String[] pair = item.split(":", 2);
-            map.put(pair[0], pair[1]);
-        }
+        Map<String, String> map = getJniStringMap(str);
         RegEnumKeyExInfo ret = new RegEnumKeyExInfo();
         ret.index = Converters.parseInt(map.get("index"), 0);
         ret.keyName = map.get("keyName");
@@ -972,12 +952,7 @@ public class WinApi {
             return null;
         }
 
-        Map<String, String> map = new LinkedHashMap<>();
-        String[] arr = str.split(";#;");
-        for (String item : arr) {
-            String[] pair = item.split(":", 2);
-            map.put(pair[0], pair[1]);
-        }
+        Map<String, String> map = getJniStringMap(str);
         RegValueInfo ret = new RegValueInfo();
         ret.type = Converters.parseInt(map.get("type"), 0);
         ret.valueData = map.get("valueData");
@@ -1055,12 +1030,7 @@ public class WinApi {
         if (str == null) {
             return null;
         }
-        Map<String, String> map = new LinkedHashMap<>();
-        String[] arr = str.split(";#;");
-        for (String item : arr) {
-            String[] pair = item.split(":", 2);
-            map.put(pair[0], pair[1]);
-        }
+        Map<String, String> map = getJniStringMap(str);
         ServiceStatusInfo ret = new ServiceStatusInfo();
         ret.serviceName = map.get("serviceName");
         ret.displayName = map.get("displayName");
@@ -1214,5 +1184,148 @@ public class WinApi {
                 binaryPathName, null, null,
                 null, null);
         return new ScHandle(ret);
+    }
+
+    public static Handle createFile(String filePath,
+                                    long dwDesiredAccess,
+                                    long dwShareMode,
+                                    long dwCreationDisposition,
+                                    long dwFlagAndAttributes) {
+        long ret = NativesWindows.createFile(filePath, dwDesiredAccess, dwShareMode, dwCreationDisposition, dwFlagAndAttributes);
+        return new Handle(ret);
+    }
+
+    public static Handle openFileExist(String filePath) {
+        return createFile(filePath,
+                WinGenericRights.GENERIC_READ | WinGenericRights.GENERIC_WRITE,
+                WinFileShareMode.FILE_SHARE_READ,
+                WinFileCreationDisposition.OPEN_EXISTING,
+                WinFileAttribute.FILE_ATTRIBUTE_NORMAL);
+    }
+
+    public static Handle openFileExistOrCreate(String filePath) {
+        return createFile(filePath,
+                WinGenericRights.GENERIC_READ | WinGenericRights.GENERIC_WRITE,
+                WinFileShareMode.FILE_SHARE_READ,
+                WinFileCreationDisposition.CREATE_ALWAYS,
+                WinFileAttribute.FILE_ATTRIBUTE_NORMAL);
+    }
+
+    public static Handle openFileReadOnly(String filePath) {
+        return createFile(filePath,
+                WinGenericRights.GENERIC_READ,
+                WinFileShareMode.FILE_SHARE_READ,
+                WinFileCreationDisposition.OPEN_EXISTING,
+                WinFileAttribute.FILE_ATTRIBUTE_NORMAL);
+    }
+
+    public static Handle openFileWriteOnly(String filePath) {
+        return createFile(filePath,
+                WinGenericRights.GENERIC_WRITE,
+                WinFileShareMode.FILE_SHARE_READ,
+                WinFileCreationDisposition.OPEN_EXISTING,
+                WinFileAttribute.FILE_ATTRIBUTE_NORMAL);
+    }
+
+    public static boolean flushFileBuffers(Handle hFile) {
+        return NativesWindows.flushFileBuffers(hFile.value());
+    }
+
+    public static int writeFile(Handle hFile,
+                                byte[] buff,
+                                int offset,
+                                int length) {
+        return NativesWindows.writeFile(hFile.value(), buff, offset, length);
+    }
+
+    public static int writeFile(Handle hFile,
+                                byte[] buff) {
+        return NativesWindows.writeFile(hFile.value(), buff, 0, -1);
+    }
+
+    public static int readFile(Handle hFile,
+                               byte[] buff,
+                               int offset) {
+        return NativesWindows.readFile(hFile.value(), buff, offset);
+    }
+
+    public static int readFile(Handle hFile,
+                               byte[] buff) {
+        return NativesWindows.readFile(hFile.value(), buff, 0);
+    }
+
+    public static FileAttributeExInfo parseFileAttributesExInfo(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = getJniStringMap(str);
+        FileAttributeExInfo ret = new FileAttributeExInfo();
+        ret.dwFileAttributes = Converters.parseLong(map.get("dwFileAttributes"), 0);
+        ret.ftCreationTime = Converters.parseLong(map.get("ftCreationTime"), 0);
+        ret.ftLastAccessTime = Converters.parseLong(map.get("ftLastAccessTime"), 0);
+        ret.ftLastWriteTime = Converters.parseLong(map.get("ftLastWriteTime"), 0);
+        ret.nFileSize = Converters.parseLong(map.get("nFileSize"), 0);
+        return ret;
+    }
+
+    public static FileAttributeExInfo getFileAttributesEx(String filePath) {
+        String str = NativesWindows.getFileAttributesEx(filePath);
+        return parseFileAttributesExInfo(str);
+    }
+
+    public static FileHandleInformation parseFileHandleInformationInfo(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = getJniStringMap(str);
+        FileHandleInformation ret = new FileHandleInformation();
+        ret.dwFileAttributes = Converters.parseLong(map.get("dwFileAttributes"), 0);
+        ret.ftCreationTime = Converters.parseLong(map.get("ftCreationTime"), 0);
+        ret.ftLastAccessTime = Converters.parseLong(map.get("ftLastAccessTime"), 0);
+        ret.ftLastWriteTime = Converters.parseLong(map.get("ftLastWriteTime"), 0);
+        ret.nFileSize = Converters.parseLong(map.get("nFileSize"), 0);
+        ret.dwVolumeSerialNumber = Converters.parseLong(map.get("dwVolumeSerialNumber"), 0);
+        ret.nNumberOfLinks = Converters.parseLong(map.get("nNumberOfLinks"), 0);
+        ret.nFileIndex = Converters.parseLong(map.get("nFileIndex"), 0);
+        return ret;
+    }
+
+    public static FileHandleInformation getFileInformationByHandle(Handle hFile) {
+        String str = NativesWindows.getFileInformationByHandle(hFile.value());
+        return parseFileHandleInformationInfo(str);
+    }
+
+    public static boolean setFileTime(Handle hFile,
+                                      long creationTime,
+                                      long lastAccessTime,
+                                      long lastWriteTime
+    ) {
+        return NativesWindows.setFileTime(hFile.value(), creationTime, lastAccessTime, lastWriteTime);
+    }
+
+    public static boolean setFileCreationTime(Handle hFile,
+                                              long creationTime
+    ) {
+        return NativesWindows.setFileTime(hFile.value(), creationTime, 0, 0);
+    }
+
+    public static boolean setFileLastAccessTime(Handle hFile,
+                                                long lastAccessTime
+    ) {
+        return NativesWindows.setFileTime(hFile.value(), 0, lastAccessTime, 0);
+    }
+
+    public static boolean setFileLastWriteTime(Handle hFile,
+                                               long lastWriteTime
+    ) {
+        return NativesWindows.setFileTime(hFile.value(), 0, 0, lastWriteTime);
+    }
+
+    public static boolean moveFile(String fromFilePath, String toFilePath) {
+        return NativesWindows.moveFile(fromFilePath, toFilePath);
+    }
+
+    public static boolean copyFile(String fromFilePath, String toFilePath, boolean failIfExist) {
+        return NativesWindows.copyFile(fromFilePath, toFilePath, failIfExist);
     }
 }
