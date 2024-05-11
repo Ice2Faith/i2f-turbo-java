@@ -1007,4 +1007,60 @@ public class WinApi {
         regCloseKey(hKey);
         return ret;
     }
+
+    public static ScHandle openSCManager(String machineName, String databaseName, long dwDesiredAccess) {
+        long ret = NativesWindows.openSCManager(machineName, databaseName, dwDesiredAccess);
+        return new ScHandle(ret);
+    }
+
+    public static ScHandle openSCManager(long dwDesiredAccess) {
+        return openSCManager(null, null, dwDesiredAccess);
+    }
+
+    public static ServiceStatusInfo parseEnumServiceStatusLine(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = new LinkedHashMap<>();
+        String[] arr = str.split(";#;");
+        for (String item : arr) {
+            String[] pair = item.split(":", 2);
+            map.put(pair[0], pair[1]);
+        }
+        ServiceStatusInfo ret = new ServiceStatusInfo();
+        ret.serviceName = map.get("serviceName");
+        ret.displayName = map.get("displayName");
+        ret.currentState = Converters.parseInt(map.get("currentState"), 0);
+        ret.serviceType = Converters.parseInt(map.get("serviceType"), 0);
+        ret.controlsAccepted = Converters.parseLong(map.get("controlsAccepted"), 0);
+        ret.win32ExitCode = Converters.parseLong(map.get("win32ExitCode"), 0);
+        ret.serviceSpecificExitCode = Converters.parseLong(map.get("serviceSpecificExitCode"), 0);
+        ret.checkPoint = Converters.parseLong(map.get("checkPoint"), 0);
+        ret.waitHint = Converters.parseLong(map.get("waitHint"), 0);
+        return ret;
+    }
+
+    public static List<ServiceStatusInfo> parseEnumServiceStatus(String str) {
+        if (str == null) {
+            return null;
+        }
+        String[] lines = str.split(";\\$;");
+        List<ServiceStatusInfo> ret = new ArrayList<>();
+        for (String line : lines) {
+            ServiceStatusInfo info = parseEnumServiceStatusLine(line);
+            if (info != null) {
+                ret.add(info);
+            }
+        }
+        return ret;
+    }
+
+    public static List<ServiceStatusInfo> enumServicesStatus(ScHandle hScm, long serviceType, long serviceState) {
+        String str = NativesWindows.enumServicesStatus(hScm.value(), serviceType, serviceState);
+        return parseEnumServiceStatus(str);
+    }
+
+    public static boolean closeServiceHandle(ScHandle hScm) {
+        return NativesWindows.closeServiceHandle(hScm.value());
+    }
 }
