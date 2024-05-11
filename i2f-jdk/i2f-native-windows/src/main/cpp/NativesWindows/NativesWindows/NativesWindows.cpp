@@ -1821,7 +1821,7 @@ jstring serviceArgVectors
 
 		}
 	}
-	BOOL ret = StartServiceW(ptrOf<SC_HANDLE>(hService), dwNumServiceArgs, vectors);
+	BOOL ret = StartServiceW(ptrOf<SC_HANDLE>(hService), dwNumServiceArgs, (LPCWSTR*)vectors);
 	freeWchar(serviceArgVectors_ptr);
 	if (vectors!=NULL){
 		for (int p = 0; p < dwNumServiceArgs; p++){
@@ -1895,7 +1895,7 @@ jstring serviceStartName,
 jstring password
 ) {
 	wchar_t* serviceName_ptr = jstring2wchar(env, serviceName);
-	wchar_t* displayName_ptr = jstring2wchar(env, displayName); SERVICE_AUTO_START
+	wchar_t* displayName_ptr = jstring2wchar(env, displayName); 
 	wchar_t* binaryPathName_ptr = jstring2wchar(env, binaryPathName);
 	wchar_t* loadOrderGroup_ptr = jstring2wchar(env, loadOrderGroup);
 	wchar_t* dependencies_ptr = jstring2wchar(env, dependencies);
