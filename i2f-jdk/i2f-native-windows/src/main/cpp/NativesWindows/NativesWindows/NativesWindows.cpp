@@ -1765,3 +1765,154 @@ jlong hScm
 	BOOL ret=CloseServiceHandle(ptrOf<SC_HANDLE>(hScm));
 	return ret == TRUE;
 }
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_openService(
+JNIEnv* env,
+jobject obj,
+jlong hScm,
+jstring serviceName,
+jlong dwDesiredAccess
+) {
+	wchar_t* serviceName_ptr = jstring2wchar(env, serviceName);
+	SC_HANDLE ret = OpenServiceW(ptrOf<SC_HANDLE>(hScm),serviceName_ptr,dwDesiredAccess);
+	freeWchar(serviceName_ptr);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_startService(
+JNIEnv* env,
+jobject obj,
+jlong hService,
+jint dwNumServiceArgs,
+jstring serviceArgVectors
+) {
+	wchar_t* serviceArgVectors_ptr = jstring2wchar(env, serviceArgVectors);
+	wchar_t** vectors = NULL;
+	if (dwNumServiceArgs > 0 && serviceArgVectors != nullptr){
+		vectors = (wchar_t**)malloc(sizeof(wchar_t*)*dwNumServiceArgs);
+		for (int p = 0; p < dwNumServiceArgs; p++){
+			vectors[p] = (wchar_t*)malloc(sizeof(wchar_t)* 2048);
+			ZeroMemory(vectors[p], sizeof(wchar_t)* 2048);
+		}
+		wchar_t buff[2048] = { 0 };
+		int i = 0;
+		int j = 0;
+		int k = 0;
+		while (true){
+			if (serviceArgVectors_ptr[i] == 0){
+				break;
+			}
+			if (serviceArgVectors_ptr[i] == '\n'){
+				lstrcpyW(vectors[j], buff);
+				ZeroMemory(buff, sizeof(buff));
+				k = 0;
+				j++;
+				if (j >= dwNumServiceArgs){
+					break;
+				}
+			}
+			else{
+				buff[k] = serviceArgVectors_ptr[i];
+				k++;
+			}
+			i++;
+
+		}
+	}
+	BOOL ret = StartServiceW(ptrOf<SC_HANDLE>(hService), dwNumServiceArgs, vectors);
+	freeWchar(serviceArgVectors_ptr);
+	if (vectors!=NULL){
+		for (int p = 0; p < dwNumServiceArgs; p++){
+			free(vectors[p]);
+		}
+		free(vectors);
+	}
+	return ret==TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_controlService(
+JNIEnv* env,
+jobject obj,
+jlong hService,
+jlong dwControl
+) {
+	SERVICE_STATUS serviceState;
+	BOOL ret = ControlService(ptrOf<SC_HANDLE>(hService), dwControl, &serviceState);
+	return ret==TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_deleteService(
+JNIEnv* env,
+jobject obj,
+jlong hService
+) {
+	BOOL ret = DeleteService(ptrOf<SC_HANDLE>(hService));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_queryServiceStatus(
+JNIEnv* env,
+jobject obj,
+jlong hService
+) {
+	SERVICE_STATUS serviceState;
+	BOOL ret = QueryServiceStatus(ptrOf<SC_HANDLE>(hService),&serviceState);
+	if (ret == FALSE){
+		return nullptr;
+	}
+	wchar_t buff[1024] = { 0 };
+	swprintf(buff, L"currentState:%d;#;serviceType:%d;#;controlsAccepted:%d;#;win32ExitCode:%d;#;serviceSpecificExitCode:%d;#;checkPoint:%d;#;waitHint:%d", serviceState.dwCurrentState,
+		serviceState.dwServiceType,
+		serviceState.dwControlsAccepted,
+		serviceState.dwWin32ExitCode,
+		serviceState.dwServiceSpecificExitCode,
+		serviceState.dwCheckPoint,
+		serviceState.dwWaitHint
+		);
+	return wchar2jstring(env,buff);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_createService(
+JNIEnv* env,
+jobject obj,
+jlong hScm,
+jstring serviceName,
+jstring displayName,
+jlong dwDesiredAccess,
+jlong dwServiceType,
+jlong dwStartType,
+jlong dwErrorControl,
+jstring binaryPathName,
+jstring loadOrderGroup,
+jstring dependencies,
+jstring serviceStartName,
+jstring password
+) {
+	wchar_t* serviceName_ptr = jstring2wchar(env, serviceName);
+	wchar_t* displayName_ptr = jstring2wchar(env, displayName); SERVICE_AUTO_START
+	wchar_t* binaryPathName_ptr = jstring2wchar(env, binaryPathName);
+	wchar_t* loadOrderGroup_ptr = jstring2wchar(env, loadOrderGroup);
+	wchar_t* dependencies_ptr = jstring2wchar(env, dependencies);
+	wchar_t* serviceStartName_ptr = jstring2wchar(env, serviceStartName);
+	wchar_t* password_ptr = jstring2wchar(env, password);
+	DWORD tagId = 0;
+	SC_HANDLE ret=CreateServiceW(ptrOf<SC_HANDLE>(hScm), serviceName_ptr, displayName_ptr,
+		dwDesiredAccess, dwServiceType, dwStartType, dwErrorControl,
+		binaryPathName_ptr,
+		loadOrderGroup_ptr, &tagId, dependencies_ptr,
+		serviceStartName_ptr, password_ptr);
+	freeWchar(serviceName_ptr);
+	freeWchar(displayName_ptr);
+	freeWchar(binaryPathName_ptr);
+	freeWchar(loadOrderGroup_ptr);
+	freeWchar(dependencies_ptr);
+	freeWchar(serviceStartName_ptr);
+	freeWchar(password_ptr);
+	return toPtr(ret);
+}
