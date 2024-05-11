@@ -837,7 +837,7 @@ public class WinApi {
         return new HKey(ret);
     }
 
-    public static RegEnumValueInfo parseRegValueInfo(String str) {
+    public static RegEnumValueInfo parseRegEnumValueInfo(String str) {
         if (str == null) {
             return null;
         }
@@ -850,17 +850,16 @@ public class WinApi {
         }
         RegEnumValueInfo ret = new RegEnumValueInfo();
         ret.index = Converters.parseInt(map.get("index"), 0);
-        ret.szValueName = map.get("szValueName");
-        ret.reserved = Converters.parseInt(map.get("reserved"), 0);
+        ret.valueName = map.get("valueName");
         ret.type = Converters.parseInt(map.get("type"), 0);
-        ret.data = map.get("data");
+        ret.valueData = map.get("valueData");
 
         return ret;
     }
 
     public static RegEnumValueInfo regEnumValue(HKey hkey, int index) {
         String str = NativesWindows.regEnumValue(hkey.value(), index);
-        return parseRegValueInfo(str);
+        return parseRegEnumValueInfo(str);
     }
 
     public static List<RegEnumValueInfo> regEnumValues(HKey hkey) {
@@ -881,5 +880,131 @@ public class WinApi {
         return NativesWindows.regCloseKey(hkey.value());
     }
 
+    public static RegEnumKeyExInfo parseRegEnumKeyExInfo(String str) {
+        if (str == null) {
+            return null;
+        }
 
+        Map<String, String> map = new LinkedHashMap<>();
+        String[] arr = str.split(";#;");
+        for (String item : arr) {
+            String[] pair = item.split(":", 2);
+            map.put(pair[0], pair[1]);
+        }
+        RegEnumKeyExInfo ret = new RegEnumKeyExInfo();
+        ret.index = Converters.parseInt(map.get("index"), 0);
+        ret.keyName = map.get("keyName");
+        ret.className = map.get("className");
+        ret.lastWriteTime = Converters.parseLong(map.get("lastWriteTime"), 0);
+
+        return ret;
+    }
+
+    public static RegEnumKeyExInfo regEnumKeyEx(HKey hkey, int index) {
+        String str = NativesWindows.regEnumKeyEx(hkey.value(), index);
+        return parseRegEnumKeyExInfo(str);
+    }
+
+    public static List<RegEnumKeyExInfo> regEnumKeys(HKey hkey) {
+        List<RegEnumKeyExInfo> ret = new ArrayList<>();
+        int index = 0;
+        while (true) {
+            RegEnumKeyExInfo info = regEnumKeyEx(hkey, index);
+            if (info == null) {
+                break;
+            }
+            ret.add(info);
+            index++;
+        }
+        return ret;
+    }
+
+    public static HKey regCreateKeyEx(HKey hkey, String subKey, String className, long dwOptions, long samDesired) {
+        long ret = NativesWindows.regCreateKeyEx(hkey.value(), subKey, className, dwOptions, samDesired);
+        return new HKey(ret);
+    }
+
+    public static HKey regCreateKeyEx(HKey hkey, String subKey, String className, long samDesired) {
+        long ret = NativesWindows.regCreateKeyEx(hkey.value(), subKey, className, WinRegOption.REG_OPTION_NON_VOLATILE, samDesired);
+        return new HKey(ret);
+    }
+
+    public static boolean regDeleteKey(HKey hkey, String subKey) {
+        return NativesWindows.regDeleteKey(hkey.value(), subKey);
+    }
+
+    public static RegValueInfo parseRegValueInfo(String str) {
+        if (str == null) {
+            return null;
+        }
+
+        Map<String, String> map = new LinkedHashMap<>();
+        String[] arr = str.split(";#;");
+        for (String item : arr) {
+            String[] pair = item.split(":", 2);
+            map.put(pair[0], pair[1]);
+        }
+        RegValueInfo ret = new RegValueInfo();
+        ret.type = Converters.parseInt(map.get("type"), 0);
+        ret.valueData = map.get("valueData");
+
+        return ret;
+    }
+
+    public static RegValueInfo regQueryValueEx(HKey hkey, String valueName) {
+        String str = NativesWindows.regQueryValueEx(hkey.value(), valueName);
+        return parseRegValueInfo(str);
+    }
+
+    public static boolean regSetValueEx(HKey hkey, String valueName, long type, String data) {
+        return NativesWindows.regSetValueEx(hkey.value(), valueName, type, data);
+    }
+
+    public static boolean regSetValueEx(HKey hkey, String valueName, RegValueInfo info) {
+        return NativesWindows.regSetValueEx(hkey.value(), valueName, info.type, info.valueData);
+    }
+
+    public static boolean regSetValueExString(HKey hkey, String valueName, String data) {
+        return NativesWindows.regSetValueEx(hkey.value(), valueName, WinRegValueType.REG_SZ, data);
+    }
+
+    public static boolean regSetValueExInteger(HKey hkey, String valueName, int data) {
+        return NativesWindows.regSetValueEx(hkey.value(), valueName, WinRegValueType.REG_DWORD, String.valueOf(data));
+    }
+
+    public static boolean regSetValueExLong(HKey hkey, String valueName, long data) {
+        return NativesWindows.regSetValueEx(hkey.value(), valueName, WinRegValueType.REG_QWORD, String.valueOf(data));
+    }
+
+    public static boolean regDeleteValue(HKey hkey, String valueName) {
+        return NativesWindows.regDeleteValue(hkey.value(), valueName);
+    }
+
+    public static Map<String, List<RegEnumValueInfo>> regAllBootValues() {
+        Map<String, List<RegEnumValueInfo>> ret = new LinkedHashMap<>();
+        for (int i = 0; i < WinRegBootKeys.ROOT_HKEYS.length; i++) {
+            HKey hKey = regOpenKeyEx(new HKey(WinRegBootKeys.ROOT_HKEYS[i]), WinRegBootKeys.BOOT_PATHS[i], 0, WinRegOpenKeySamDesired.KEY_READ);
+            List<RegEnumValueInfo> list = regEnumValues(hKey);
+            if (!list.isEmpty()) {
+                String key = WinRegOpenKeyHkey.NAME_MAP.get(WinRegBootKeys.ROOT_HKEYS[i]) + "\\" + WinRegBootKeys.BOOT_PATHS[i];
+                ret.put(key, list);
+            }
+            regCloseKey(hKey);
+        }
+        return ret;
+    }
+
+    public static boolean regAddBootItem(String valueName, String valueData) {
+        HKey hKey = regOpenKeyEx(new HKey(WinRegBootKeys.ROOT_HKEYS[0]), WinRegBootKeys.BOOT_PATHS[0], 0, WinRegOpenKeySamDesired.KEY_WRITE);
+        boolean ret = regSetValueExString(hKey, valueName, valueData);
+        regCloseKey(hKey);
+        return ret;
+    }
+
+    public static boolean regDeleteBootItem(String valueName) {
+        HKey hKey = regOpenKeyEx(new HKey(WinRegBootKeys.ROOT_HKEYS[0]), WinRegBootKeys.BOOT_PATHS[0], 0, WinRegOpenKeySamDesired.KEY_WRITE);
+        boolean ret = regDeleteValue(hKey, valueName);
+        regCloseKey(hKey);
+        return ret;
+    }
 }

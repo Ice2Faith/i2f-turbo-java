@@ -5,6 +5,7 @@ import i2f.natives.windows.consts.*;
 import i2f.natives.windows.types.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -142,6 +143,53 @@ public class TestWinApi {
                 index++;
             }
             WinApi.regCloseKey(hkey);
+        }
+
+        if (true) {
+            System.out.println("---------------");
+            HKey hkey = WinApi.regOpenKeyEx(new HKey(WinRegOpenKeyHkey.HKEY_CURRENT_USER), "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\", 0, WinRegOpenKeySamDesired.KEY_READ);
+            int index = 0;
+            while (true) {
+                RegEnumKeyExInfo info = WinApi.regEnumKeyEx(hkey, index);
+                if (info == null) {
+                    break;
+                }
+                System.out.println(info);
+                index++;
+            }
+            WinApi.regCloseKey(hkey);
+        }
+
+        if (true) {
+            System.out.println("---------------");
+            WinApi.regAddBootItem("notepad", "C:\\Windows\\system32\\nodepad.exe");
+        }
+
+        if (true) {
+            System.out.println("---------------");
+            Map<String, List<RegEnumValueInfo>> listMap = WinApi.regAllBootValues();
+            for (Map.Entry<String, List<RegEnumValueInfo>> entry : listMap.entrySet()) {
+                System.out.println(entry.getKey());
+                for (RegEnumValueInfo info : entry.getValue()) {
+                    System.out.println("\t" + info);
+                }
+            }
+        }
+
+        if (true) {
+            System.out.println("---------------");
+            WinApi.regDeleteBootItem("notepad");
+        }
+
+        if (true) {
+            System.out.println("---------------");
+            Map<String, List<RegEnumValueInfo>> listMap = WinApi.regAllBootValues();
+            for (Map.Entry<String, List<RegEnumValueInfo>> entry : listMap.entrySet()) {
+                System.out.println(entry.getKey());
+                for (RegEnumValueInfo info : entry.getValue()) {
+                    System.out.println("\t" + info);
+                }
+            }
         }
     }
 }

@@ -149,6 +149,21 @@ public class TestNativeWindows {
             }
             NativesWindows.regCloseKey(hkey);
         }
+
+        if (true) {
+            System.out.println("---------------");
+            long hkey = NativesWindows.regOpenKeyEx(WinRegOpenKeyHkey.HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\", 0, WinRegOpenKeySamDesired.KEY_READ);
+            int index = 0;
+            while (true) {
+                String info = NativesWindows.regEnumKeyEx(hkey, index);
+                if (info == null) {
+                    break;
+                }
+                System.out.println(info);
+                index++;
+            }
+            NativesWindows.regCloseKey(hkey);
+        }
     }
 }
 

@@ -1320,13 +1320,12 @@ jint index
 ) {
 	wchar_t szValueName[MAXBYTE] = { 0 };
 	DWORD chValueName = MAXBYTE;
-	DWORD reserved = 0;
 	DWORD type = 0;
 	unsigned char data[MAXBYTE] = { 0 };
 	DWORD cbData = MAXBYTE;
 
 
-	LSTATUS ret = RegEnumValueW(ptrOf<HKEY>(hkey), index, szValueName, &chValueName,&reserved, &type, data, &cbData);
+	LSTATUS ret = RegEnumValueW(ptrOf<HKEY>(hkey), index, szValueName, &chValueName,NULL, &type, data, &cbData);
 	
 	if (ret != ERROR_SUCCESS){
 		return nullptr;
@@ -1337,18 +1336,18 @@ jint index
 		if (type == REG_MULTI_SZ){
 			jstring jstr = env->NewStringUTF((const char *)data);
 			wchar_t* bts = jstring2wchar(env, jstr);
-			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%s", index, szValueName, reserved, type, data);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%s", index, szValueName,  type, data);
 			freeWchar(bts);
 		}
 		else{
-			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%s", index, szValueName, reserved, type, (const wchar_t *)data);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%s", index, szValueName,  type, (const wchar_t *)data);
 		}
 	}
 	else if (type == REG_DWORD || type == REG_DWORD_BIG_ENDIAN || type == REG_DWORD_LITTLE_ENDIAN){
 		// int
 		DWORD* ptr = (DWORD*)data;
 		if (type == REG_DWORD){
-			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%d", index, szValueName, reserved, type, ptr[0]);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%d", index, szValueName,  type, ptr[0]);
 		}
 		else if (type == REG_DWORD_BIG_ENDIAN){
 			DWORD wd = 0;
@@ -1356,7 +1355,7 @@ jint index
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%d", index, szValueName, reserved, type, wd);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%d", index, szValueName,  type, wd);
 		}
 		else if (type == REG_DWORD_LITTLE_ENDIAN){
 			DWORD wd = 0;
@@ -1364,7 +1363,7 @@ jint index
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%d", index, szValueName, reserved, type, wd);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%d", index, szValueName,  type, wd);
 		}
 		
 	}
@@ -1372,7 +1371,7 @@ jint index
 		// long
 		unsigned long long * ptr = (unsigned long long*)data;
 		if (type == REG_QWORD){
-			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%l64d", index, szValueName, reserved, type, ptr[0]);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%l64d", index, szValueName,  type, ptr[0]);
 		}
 		else if (type == REG_QWORD_LITTLE_ENDIAN){
 			unsigned long long wd = 0;
@@ -1380,11 +1379,11 @@ jint index
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:%l64d", index, szValueName, reserved, type, wd);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%l64d", index, szValueName,  type, wd);
 		}
 	}
 	else{
-		swprintf(buff, L"index:%d;#;szValueName:%s;#;reserved:%d;#;type:%d;#;data:b",index, szValueName, reserved, type);
+		swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:b",index, szValueName,  type);
 
 		wchar_t tmp[100] = { 0 };
 		for (int i = 0; i < cbData; i++){
@@ -1404,5 +1403,280 @@ jobject obj,
 jlong hkey
 ) {
 	LSTATUS ret=RegCloseKey(ptrOf<HKEY>(hkey));
+	return ret == ERROR_SUCCESS;
+}
+
+void filetime2timet(const FILETIME* ft, time_t * tt){
+	ULARGE_INTEGER ui;
+	ui.LowPart = ft->dwLowDateTime;
+	ui.HighPart = ft->dwHighDateTime;
+	*tt = ((long long)(ui.QuadPart - 116444736000000000) / 10000000);
+}
+
+void timet2filetime(const time_t * tt, FILETIME * ft){
+	ULARGE_INTEGER ui;
+	ui.QuadPart = (ULONGLONG)(((ULONGLONG)(*tt) * 10000000) + 116444736000000000);
+	ft->dwLowDateTime = ui.LowPart;
+	ft->dwHighDateTime = ui.HighPart;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_regEnumKeyEx(
+JNIEnv* env,
+jobject obj,
+jlong hkey,
+jint index
+) {
+	wchar_t szKeyName[MAXBYTE] = { 0 };
+	DWORD chKeyName = MAXBYTE;
+	wchar_t szClassName[MAXBYTE] = { 0 };
+	DWORD chClassName = MAXBYTE;
+
+	FILETIME lastWriteTime;
+
+	LSTATUS ret = RegEnumKeyExW(ptrOf<HKEY>(hkey), index, szKeyName, &chKeyName, NULL, szClassName, &chClassName, &lastWriteTime);
+
+	if (ret != ERROR_SUCCESS){
+		return nullptr;
+	}
+
+	time_t tt;
+	filetime2timet(&lastWriteTime, &tt);
+
+	wchar_t buff[MAXBYTE] = { 0 };
+	swprintf(buff, L"index:%d;#;keyName:%s;#;className:%s;#;lastWriteTime:%l64d", index, szKeyName, szClassName, tt);
+	
+	return wchar2jstring(env, buff);
+}
+
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_regCreateKeyEx(
+JNIEnv* env,
+jobject obj,
+jlong hkey,
+jstring subKey,
+jstring className,
+jlong dwOptions,
+jlong samDesired
+) {
+	wchar_t* subKey_ptr = jstring2wchar(env, subKey);
+	wchar_t* className_ptr = jstring2wchar(env, className);
+	HKEY result=NULL;
+	LSTATUS ret=RegCreateKeyExW(ptrOf<HKEY>(hkey), subKey_ptr, NULL, className_ptr, dwOptions, samDesired, NULL, &result, NULL);
+	if (ret != ERROR_SUCCESS){
+		return 0; 
+	}
+	freeWchar(subKey_ptr);
+	freeWchar(className_ptr);
+	return toPtr(result);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_regDeleteKey(
+JNIEnv* env,
+jobject obj,
+jlong hkey,
+jstring subKey
+) {
+	wchar_t* subKey_ptr = jstring2wchar(env, subKey);
+	LSTATUS ret=RegDeleteKeyW(ptrOf<HKEY>(hkey), subKey_ptr);
+	freeWchar(subKey_ptr);
+	return ret == ERROR_SUCCESS;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_regQueryValueEx(
+JNIEnv* env,
+jobject obj,
+jlong hkey,
+jstring valueName
+) {
+	wchar_t* valueName_ptr = jstring2wchar(env, valueName);
+
+	DWORD type = 0;
+	unsigned char data[MAXBYTE] = { 0 };
+	DWORD cbData = MAXBYTE;
+	LSTATUS ret = RegQueryValueExW(ptrOf<HKEY>(hkey), valueName_ptr, NULL, &type, data, &cbData);
+	freeWchar(valueName_ptr);
+	wchar_t buff[MAXBYTE] = { 0 };
+	if (type == REG_SZ || type == REG_EXPAND_SZ || type == REG_MULTI_SZ){
+		// string
+		if (type == REG_MULTI_SZ){
+			jstring jstr = env->NewStringUTF((const char *)data);
+			wchar_t* bts = jstring2wchar(env, jstr);
+			swprintf(buff, L"#;type:%d;#;valueData:%s",type, data);
+			freeWchar(bts);
+		}
+		else{
+			swprintf(buff, L"type:%d;#;valueData:%s", type, (const wchar_t *)data);
+		}
+	}
+	else if (type == REG_DWORD || type == REG_DWORD_BIG_ENDIAN || type == REG_DWORD_LITTLE_ENDIAN){
+		// int
+		DWORD* ptr = (DWORD*)data;
+		if (type == REG_DWORD){
+			swprintf(buff, L"type:%d;#;valueData:%d", type, ptr[0]);
+		}
+		else if (type == REG_DWORD_BIG_ENDIAN){
+			DWORD wd = 0;
+			for (int i = 0; i < cbData; i++){
+				wd <<= 8;
+				wd |= data[i];
+			}
+			swprintf(buff, L"type:%d;#;valueData:%d",type, wd);
+		}
+		else if (type == REG_DWORD_LITTLE_ENDIAN){
+			DWORD wd = 0;
+			for (int i = cbData - 1; i >= 0; i--){
+				wd <<= 8;
+				wd |= data[i];
+			}
+			swprintf(buff, L"type:%d;#;valueData:%d", type, wd);
+		}
+
+	}
+	else if (type == REG_QWORD || type == REG_QWORD_LITTLE_ENDIAN){
+		// long
+		unsigned long long * ptr = (unsigned long long*)data;
+		if (type == REG_QWORD){
+			swprintf(buff, L"type:%d;#;valueData:%l64d",type, ptr[0]);
+		}
+		else if (type == REG_QWORD_LITTLE_ENDIAN){
+			unsigned long long wd = 0;
+			for (int i = cbData - 1; i >= 0; i--){
+				wd <<= 8;
+				wd |= data[i];
+			}
+			swprintf(buff, L"type:%d;#;valueData:%l64d",type, wd);
+		}
+	}
+	else{
+		swprintf(buff, L"type:%d;#;valueData:b", type);
+
+		wchar_t tmp[100] = { 0 };
+		for (int i = 0; i < cbData; i++){
+			ZeroMemory(tmp, sizeof(tmp));
+			swprintf(tmp, L"%02x", (int)data[i]);
+		}
+		StrCatW(buff, tmp);
+
+	}
+
+	return wchar2jstring(env,buff);
+}
+
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_regSetValueEx(
+JNIEnv* env,
+jobject obj,
+jlong hkey,
+jstring valueName,
+jlong type,
+jstring data
+) {
+	wchar_t* valueName_ptr = jstring2wchar(env, valueName);
+	
+
+	unsigned char buff[MAXBYTE];
+	DWORD size = 0;
+
+	if (type == REG_SZ || type == REG_EXPAND_SZ || type == REG_MULTI_SZ){
+		wchar_t* data_ptr = jstring2wchar(env, data);
+		// string
+		if (type == REG_MULTI_SZ){
+			const char * bts = env->GetStringUTFChars(data, NULL);
+			strcpy((char *)buff, bts);
+			size = strlen((char *)buff);
+			env->ReleaseStringUTFChars(data, bts);
+		}
+		else{
+			size=lstrlenW(data_ptr)*sizeof(wchar_t);
+			lstrcpyW((wchar_t*)buff, data_ptr);
+		}
+		freeWchar(data_ptr);
+	}
+	else if (type == REG_DWORD || type == REG_DWORD_BIG_ENDIAN || type == REG_DWORD_LITTLE_ENDIAN){
+		const char * bts = env->GetStringUTFChars(data, NULL);
+		long long num = _atoi64(bts);
+		size = sizeof(DWORD);
+		// int
+		if (type == REG_DWORD){
+			((DWORD *)buff)[0] = (DWORD)num;
+		}
+		else if (type == REG_DWORD_BIG_ENDIAN){
+			DWORD p = (DWORD)num;
+			for (int i = size - 1; i >= 0; i++){
+				buff[i] = (p & 0x0ff);
+				p >>= 8;
+			}
+		}
+		else if (type == REG_DWORD_LITTLE_ENDIAN){
+			DWORD p = (DWORD)num;
+			for (int i = 0; i <size ; i++){
+				buff[i] = (p & 0x0ff);
+				p >>= 8;
+			}
+		}
+		env->ReleaseStringUTFChars(data, bts);
+	}
+	else if (type == REG_QWORD || type == REG_QWORD_LITTLE_ENDIAN){
+
+		// long
+		const char * bts = env->GetStringUTFChars(data, NULL);
+		long long num = _atoi64(bts);
+		size = sizeof(unsigned long long);
+		if (type == REG_QWORD){
+			((unsigned long long *)buff)[0] = (unsigned long long)num;
+		}
+		else if (type == REG_QWORD_LITTLE_ENDIAN){
+			unsigned long long p = (unsigned long long)num;
+			for (int i = size - 1; i >= 0; i++){
+				buff[i] = (p & 0x0ff);
+				p >>= 8;
+			}
+		}
+		env->ReleaseStringUTFChars(data, bts);
+	}
+	else{
+		const char * bts = env->GetStringUTFChars(data, NULL);
+		int len = strlen(bts);
+		const char * ptr = bts;
+		if (len % 2 != 0){
+			ptr = &(bts[1]);
+			len--;
+		}
+		size = 0;
+		char arr[3] = { 0 };
+		for (int i = 0; i + 1 < len; i+=2){
+			memset(arr, 0, 3);
+			arr[0] = ptr[i];
+			arr[1] = ptr[i + 1];
+			int v = atoi(arr);
+			buff[size] = (unsigned char)v;
+			size++;
+		}
+
+		env->ReleaseStringUTFChars(data, bts);
+	}
+
+	LSTATUS ret = RegSetValueExW(ptrOf<HKEY>(hkey), valueName_ptr,NULL,type,buff,size);
+	freeWchar(valueName_ptr);
+	
+	return ret == ERROR_SUCCESS;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_regDeleteValue(
+JNIEnv* env,
+jobject obj,
+jlong hkey,
+jstring valueName
+) {
+	wchar_t* valueName_ptr = jstring2wchar(env, valueName);
+	LSTATUS ret = RegDeleteValueW(ptrOf<HKEY>(hkey), valueName_ptr);
+	freeWchar(valueName_ptr);
+
 	return ret == ERROR_SUCCESS;
 }
