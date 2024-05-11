@@ -191,5 +191,18 @@ public class TestWinApi {
                 }
             }
         }
+
+        if (true) {
+            System.out.println("---------------");
+            ScHandle scHandle = WinApi.openSCManager(WinOpenScManagerDesiredAccess.SC_MANAGER_ENUMERATE_SERVICE);
+            List<ServiceStatusInfo> list = WinApi.enumServicesStatus(scHandle, WinEnumServiceStatusServiceType.SERVICE_TYPE_ALL, WinEnumServiceStatusServiceState.SERVICE_STATE_ALL);
+            if (list != null) {
+                for (ServiceStatusInfo info : list) {
+                    System.out.println(info);
+                }
+            }
+
+            WinApi.closeServiceHandle(scHandle);
+        }
     }
 }

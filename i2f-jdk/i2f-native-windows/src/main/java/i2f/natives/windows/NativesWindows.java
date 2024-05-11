@@ -209,4 +209,10 @@ public class NativesWindows {
     public static native boolean regSetValueEx(long hkey, String valueName, long type, String data);
 
     public static native boolean regDeleteValue(long hkey, String valueName);
+
+    public static native long openSCManager(String machineName, String databaseName, long dwDesiredAccess);
+
+    public static native String enumServicesStatus(long hScm, long serviceType, long serviceState);
+
+    public static native boolean closeServiceHandle(long hScm);
 }

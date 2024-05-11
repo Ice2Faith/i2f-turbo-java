@@ -3,7 +3,6 @@
 #include <windows.h>
 #include <jni.h>
 #include <string>
-#include<xstring>
 #include<string.h>
 #include<list>
 //枚举进程依赖
@@ -11,6 +10,9 @@
 //回收站依赖
 #include <Shlwapi.h>
 #pragma comment (lib,"Shlwapi.lib")
+// 服务管理依赖
+#include<winnt.h>//NT 系统支持
+#include<winsvc.h>//service 支持
 
 template<typename PTR>
 PTR ptrOf(jlong hwnd){
@@ -1679,4 +1681,87 @@ jstring valueName
 	freeWchar(valueName_ptr);
 
 	return ret == ERROR_SUCCESS;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_openSCManager(
+JNIEnv* env,
+jobject obj,
+jstring machineName,
+jstring databaseName,
+jlong dwDesiredAccess
+) {
+	wchar_t* machineName_ptr = jstring2wchar(env, machineName);
+	wchar_t* databaseName_ptr = jstring2wchar(env, databaseName);
+	SC_HANDLE ret = OpenSCManagerW(machineName_ptr, databaseName_ptr, dwDesiredAccess);
+	freeWchar(machineName_ptr);
+	freeWchar(databaseName_ptr); 
+
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_enumServicesStatus(
+JNIEnv* env,
+jobject obj,
+jlong hScm,
+jlong serviceType,
+jlong serviceState
+) {
+	//查询服务数量和数据量大小，使用一些错误参数获取的技巧
+	DWORD serviceCount = 0;
+	DWORD dwSize = 0;
+	BOOL ret = EnumServicesStatusW(ptrOf<SC_HANDLE>(hScm), serviceType, serviceState, NULL, 0, &dwSize, &serviceCount, NULL);
+	//定义接受数据的指针
+	LPENUM_SERVICE_STATUS lpInfo; 
+	//由于上面的查询，因为没有给定接受缓冲区，调用失败ERROR_MORE_DATA，需要更大的缓冲区
+	if (!ret && GetLastError() == ERROR_MORE_DATA)
+	{
+		//申请匹配空间
+		lpInfo = (LPENUM_SERVICE_STATUS)(new BYTE[dwSize]);
+		//获取服务数据并保存
+		ret = EnumServicesStatusW(ptrOf<SC_HANDLE>(hScm), serviceType, serviceState, (LPENUM_SERVICE_STATUS)lpInfo, dwSize, &dwSize, &serviceCount, NULL);
+		if (!ret)
+		{
+			//服务数据获取失败则关闭服务句柄
+			return nullptr;
+		}
+		wchar_t* buff = (wchar_t*)malloc(sizeof(wchar_t)*(64 * 1024 * 1024));
+		ZeroMemory(buff, sizeof(wchar_t)*(64 * 1024 * 1024));
+		wchar_t line[2048] = { 0 };
+		//遍历获得的服务，进行填充到列表
+		for (DWORD i = 0; i < serviceCount; i++)
+		{
+			ZeroMemory(line, sizeof(line));
+			if (i>0){
+				StrCatW(buff, L";$;");
+			}
+			swprintf(line, L"serviceName:%s;#;displayName:%s;#;currentState:%d;#;serviceType:%d;#;controlsAccepted:%d;#;win32ExitCode:%d;#;serviceSpecificExitCode:%d;#;checkPoint:%d;#;waitHint:%d", lpInfo[i].lpServiceName, lpInfo[i].lpDisplayName, lpInfo[i].ServiceStatus.dwCurrentState,
+				lpInfo[i].ServiceStatus.dwServiceType,
+				lpInfo[i].ServiceStatus.dwControlsAccepted,
+				lpInfo[i].ServiceStatus.dwWin32ExitCode,
+				lpInfo[i].ServiceStatus.dwServiceSpecificExitCode,
+				lpInfo[i].ServiceStatus.dwCheckPoint,
+				lpInfo[i].ServiceStatus.dwWaitHint
+				);
+			StrCatW(buff, line);
+		}
+		delete lpInfo;
+
+		jstring str= wchar2jstring(env,buff);
+
+		freeWchar(buff);
+		return str;
+	}
+	return nullptr;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_closeServiceHandle(
+JNIEnv* env,
+jobject obj,
+jlong hScm
+) {
+	BOOL ret=CloseServiceHandle(ptrOf<SC_HANDLE>(hScm));
+	return ret == TRUE;
 }
