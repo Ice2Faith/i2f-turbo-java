@@ -238,4 +238,35 @@ public class NativesWindows {
                                             String dependencies,
                                             String serviceStartName,
                                             String password);
+
+    public static native long createFile(String filePath,
+                                         long dwDesiredAccess,
+                                         long dwShareMode,
+                                         long dwCreationDisposition,
+                                         long dwFlagAndAttributes);
+
+    public static native boolean flushFileBuffers(long hFile);
+
+    public static native int writeFile(long hFile,
+                                       byte[] buff,
+                                       int offset,
+                                       int length);
+
+    public static native int readFile(long hFile,
+                                      byte[] buff,
+                                      int offset);
+
+    public static native String getFileAttributesEx(String filePath);
+
+    public static native String getFileInformationByHandle(long hFile);
+
+    public static native boolean setFileTime(long hFile,
+                                             long creationTime,
+                                             long lastAccessTime,
+                                             long lastWriteTime
+    );
+
+    public static native boolean moveFile(String fromFilePath, String toFilePath);
+
+    public static native boolean copyFile(String fromFilePath, String toFilePath, boolean failIfExist);
 }

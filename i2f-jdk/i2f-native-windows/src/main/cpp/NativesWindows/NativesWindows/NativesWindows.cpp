@@ -1327,8 +1327,8 @@ jint index
 	DWORD cbData = MAXBYTE;
 
 
-	LSTATUS ret = RegEnumValueW(ptrOf<HKEY>(hkey), index, szValueName, &chValueName,NULL, &type, data, &cbData);
-	
+	LSTATUS ret = RegEnumValueW(ptrOf<HKEY>(hkey), index, szValueName, &chValueName, NULL, &type, data, &cbData);
+
 	if (ret != ERROR_SUCCESS){
 		return nullptr;
 	}
@@ -1338,18 +1338,18 @@ jint index
 		if (type == REG_MULTI_SZ){
 			jstring jstr = env->NewStringUTF((const char *)data);
 			wchar_t* bts = jstring2wchar(env, jstr);
-			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%s", index, szValueName,  type, data);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%s", index, szValueName, type, data);
 			freeWchar(bts);
 		}
 		else{
-			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%s", index, szValueName,  type, (const wchar_t *)data);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%s", index, szValueName, type, (const wchar_t *)data);
 		}
 	}
 	else if (type == REG_DWORD || type == REG_DWORD_BIG_ENDIAN || type == REG_DWORD_LITTLE_ENDIAN){
 		// int
 		DWORD* ptr = (DWORD*)data;
 		if (type == REG_DWORD){
-			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%d", index, szValueName,  type, ptr[0]);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%d", index, szValueName, type, ptr[0]);
 		}
 		else if (type == REG_DWORD_BIG_ENDIAN){
 			DWORD wd = 0;
@@ -1357,23 +1357,23 @@ jint index
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%d", index, szValueName,  type, wd);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%d", index, szValueName, type, wd);
 		}
 		else if (type == REG_DWORD_LITTLE_ENDIAN){
 			DWORD wd = 0;
-			for (int i = cbData-1; i >=0; i--){
+			for (int i = cbData - 1; i >= 0; i--){
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%d", index, szValueName,  type, wd);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%d", index, szValueName, type, wd);
 		}
-		
+
 	}
 	else if (type == REG_QWORD || type == REG_QWORD_LITTLE_ENDIAN){
 		// long
 		unsigned long long * ptr = (unsigned long long*)data;
 		if (type == REG_QWORD){
-			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%l64d", index, szValueName,  type, ptr[0]);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%l64d", index, szValueName, type, ptr[0]);
 		}
 		else if (type == REG_QWORD_LITTLE_ENDIAN){
 			unsigned long long wd = 0;
@@ -1381,11 +1381,11 @@ jint index
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%l64d", index, szValueName,  type, wd);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%l64d", index, szValueName, type, wd);
 		}
 	}
 	else{
-		swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:b",index, szValueName,  type);
+		swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:b", index, szValueName, type);
 
 		wchar_t tmp[100] = { 0 };
 		for (int i = 0; i < cbData; i++){
@@ -1404,7 +1404,7 @@ JNIEnv* env,
 jobject obj,
 jlong hkey
 ) {
-	LSTATUS ret=RegCloseKey(ptrOf<HKEY>(hkey));
+	LSTATUS ret = RegCloseKey(ptrOf<HKEY>(hkey));
 	return ret == ERROR_SUCCESS;
 }
 
@@ -1447,7 +1447,7 @@ jint index
 
 	wchar_t buff[MAXBYTE] = { 0 };
 	swprintf(buff, L"index:%d;#;keyName:%s;#;className:%s;#;lastWriteTime:%l64d", index, szKeyName, szClassName, tt);
-	
+
 	return wchar2jstring(env, buff);
 }
 
@@ -1464,10 +1464,10 @@ jlong samDesired
 ) {
 	wchar_t* subKey_ptr = jstring2wchar(env, subKey);
 	wchar_t* className_ptr = jstring2wchar(env, className);
-	HKEY result=NULL;
-	LSTATUS ret=RegCreateKeyExW(ptrOf<HKEY>(hkey), subKey_ptr, NULL, className_ptr, dwOptions, samDesired, NULL, &result, NULL);
+	HKEY result = NULL;
+	LSTATUS ret = RegCreateKeyExW(ptrOf<HKEY>(hkey), subKey_ptr, NULL, className_ptr, dwOptions, samDesired, NULL, &result, NULL);
 	if (ret != ERROR_SUCCESS){
-		return 0; 
+		return 0;
 	}
 	freeWchar(subKey_ptr);
 	freeWchar(className_ptr);
@@ -1482,7 +1482,7 @@ jlong hkey,
 jstring subKey
 ) {
 	wchar_t* subKey_ptr = jstring2wchar(env, subKey);
-	LSTATUS ret=RegDeleteKeyW(ptrOf<HKEY>(hkey), subKey_ptr);
+	LSTATUS ret = RegDeleteKeyW(ptrOf<HKEY>(hkey), subKey_ptr);
 	freeWchar(subKey_ptr);
 	return ret == ERROR_SUCCESS;
 }
@@ -1507,7 +1507,7 @@ jstring valueName
 		if (type == REG_MULTI_SZ){
 			jstring jstr = env->NewStringUTF((const char *)data);
 			wchar_t* bts = jstring2wchar(env, jstr);
-			swprintf(buff, L"#;type:%d;#;valueData:%s",type, data);
+			swprintf(buff, L"#;type:%d;#;valueData:%s", type, data);
 			freeWchar(bts);
 		}
 		else{
@@ -1526,7 +1526,7 @@ jstring valueName
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"type:%d;#;valueData:%d",type, wd);
+			swprintf(buff, L"type:%d;#;valueData:%d", type, wd);
 		}
 		else if (type == REG_DWORD_LITTLE_ENDIAN){
 			DWORD wd = 0;
@@ -1542,7 +1542,7 @@ jstring valueName
 		// long
 		unsigned long long * ptr = (unsigned long long*)data;
 		if (type == REG_QWORD){
-			swprintf(buff, L"type:%d;#;valueData:%l64d",type, ptr[0]);
+			swprintf(buff, L"type:%d;#;valueData:%l64d", type, ptr[0]);
 		}
 		else if (type == REG_QWORD_LITTLE_ENDIAN){
 			unsigned long long wd = 0;
@@ -1550,7 +1550,7 @@ jstring valueName
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"type:%d;#;valueData:%l64d",type, wd);
+			swprintf(buff, L"type:%d;#;valueData:%l64d", type, wd);
 		}
 	}
 	else{
@@ -1565,7 +1565,7 @@ jstring valueName
 
 	}
 
-	return wchar2jstring(env,buff);
+	return wchar2jstring(env, buff);
 }
 
 
@@ -1579,7 +1579,7 @@ jlong type,
 jstring data
 ) {
 	wchar_t* valueName_ptr = jstring2wchar(env, valueName);
-	
+
 
 	unsigned char buff[MAXBYTE];
 	DWORD size = 0;
@@ -1594,7 +1594,7 @@ jstring data
 			env->ReleaseStringUTFChars(data, bts);
 		}
 		else{
-			size=lstrlenW(data_ptr)*sizeof(wchar_t);
+			size = lstrlenW(data_ptr)*sizeof(wchar_t);
 			lstrcpyW((wchar_t*)buff, data_ptr);
 		}
 		freeWchar(data_ptr);
@@ -1616,7 +1616,7 @@ jstring data
 		}
 		else if (type == REG_DWORD_LITTLE_ENDIAN){
 			DWORD p = (DWORD)num;
-			for (int i = 0; i <size ; i++){
+			for (int i = 0; i < size; i++){
 				buff[i] = (p & 0x0ff);
 				p >>= 8;
 			}
@@ -1651,7 +1651,7 @@ jstring data
 		}
 		size = 0;
 		char arr[3] = { 0 };
-		for (int i = 0; i + 1 < len; i+=2){
+		for (int i = 0; i + 1 < len; i += 2){
 			memset(arr, 0, 3);
 			arr[0] = ptr[i];
 			arr[1] = ptr[i + 1];
@@ -1663,9 +1663,9 @@ jstring data
 		env->ReleaseStringUTFChars(data, bts);
 	}
 
-	LSTATUS ret = RegSetValueExW(ptrOf<HKEY>(hkey), valueName_ptr,NULL,type,buff,size);
+	LSTATUS ret = RegSetValueExW(ptrOf<HKEY>(hkey), valueName_ptr, NULL, type, buff, size);
 	freeWchar(valueName_ptr);
-	
+
 	return ret == ERROR_SUCCESS;
 }
 
@@ -1695,7 +1695,7 @@ jlong dwDesiredAccess
 	wchar_t* databaseName_ptr = jstring2wchar(env, databaseName);
 	SC_HANDLE ret = OpenSCManagerW(machineName_ptr, databaseName_ptr, dwDesiredAccess);
 	freeWchar(machineName_ptr);
-	freeWchar(databaseName_ptr); 
+	freeWchar(databaseName_ptr);
 
 	return toPtr(ret);
 }
@@ -1713,7 +1713,7 @@ jlong serviceState
 	DWORD dwSize = 0;
 	BOOL ret = EnumServicesStatusW(ptrOf<SC_HANDLE>(hScm), serviceType, serviceState, NULL, 0, &dwSize, &serviceCount, NULL);
 	//定义接受数据的指针
-	LPENUM_SERVICE_STATUS lpInfo; 
+	LPENUM_SERVICE_STATUS lpInfo;
 	//由于上面的查询，因为没有给定接受缓冲区，调用失败ERROR_MORE_DATA，需要更大的缓冲区
 	if (!ret && GetLastError() == ERROR_MORE_DATA)
 	{
@@ -1748,7 +1748,7 @@ jlong serviceState
 		}
 		delete lpInfo;
 
-		jstring str= wchar2jstring(env,buff);
+		jstring str = wchar2jstring(env, buff);
 
 		freeWchar(buff);
 		return str;
@@ -1762,7 +1762,7 @@ JNIEnv* env,
 jobject obj,
 jlong hScm
 ) {
-	BOOL ret=CloseServiceHandle(ptrOf<SC_HANDLE>(hScm));
+	BOOL ret = CloseServiceHandle(ptrOf<SC_HANDLE>(hScm));
 	return ret == TRUE;
 }
 
@@ -1775,7 +1775,7 @@ jstring serviceName,
 jlong dwDesiredAccess
 ) {
 	wchar_t* serviceName_ptr = jstring2wchar(env, serviceName);
-	SC_HANDLE ret = OpenServiceW(ptrOf<SC_HANDLE>(hScm),serviceName_ptr,dwDesiredAccess);
+	SC_HANDLE ret = OpenServiceW(ptrOf<SC_HANDLE>(hScm), serviceName_ptr, dwDesiredAccess);
 	freeWchar(serviceName_ptr);
 	return toPtr(ret);
 }
@@ -1823,13 +1823,13 @@ jstring serviceArgVectors
 	}
 	BOOL ret = StartServiceW(ptrOf<SC_HANDLE>(hService), dwNumServiceArgs, (LPCWSTR*)vectors);
 	freeWchar(serviceArgVectors_ptr);
-	if (vectors!=NULL){
+	if (vectors != NULL){
 		for (int p = 0; p < dwNumServiceArgs; p++){
 			free(vectors[p]);
 		}
 		free(vectors);
 	}
-	return ret==TRUE;
+	return ret == TRUE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -1841,7 +1841,7 @@ jlong dwControl
 ) {
 	SERVICE_STATUS serviceState;
 	BOOL ret = ControlService(ptrOf<SC_HANDLE>(hService), dwControl, &serviceState);
-	return ret==TRUE;
+	return ret == TRUE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -1861,7 +1861,7 @@ jobject obj,
 jlong hService
 ) {
 	SERVICE_STATUS serviceState;
-	BOOL ret = QueryServiceStatus(ptrOf<SC_HANDLE>(hService),&serviceState);
+	BOOL ret = QueryServiceStatus(ptrOf<SC_HANDLE>(hService), &serviceState);
 	if (ret == FALSE){
 		return nullptr;
 	}
@@ -1874,7 +1874,7 @@ jlong hService
 		serviceState.dwCheckPoint,
 		serviceState.dwWaitHint
 		);
-	return wchar2jstring(env,buff);
+	return wchar2jstring(env, buff);
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -1895,14 +1895,14 @@ jstring serviceStartName,
 jstring password
 ) {
 	wchar_t* serviceName_ptr = jstring2wchar(env, serviceName);
-	wchar_t* displayName_ptr = jstring2wchar(env, displayName); 
+	wchar_t* displayName_ptr = jstring2wchar(env, displayName);
 	wchar_t* binaryPathName_ptr = jstring2wchar(env, binaryPathName);
 	wchar_t* loadOrderGroup_ptr = jstring2wchar(env, loadOrderGroup);
 	wchar_t* dependencies_ptr = jstring2wchar(env, dependencies);
 	wchar_t* serviceStartName_ptr = jstring2wchar(env, serviceStartName);
 	wchar_t* password_ptr = jstring2wchar(env, password);
 	DWORD tagId = 0;
-	SC_HANDLE ret=CreateServiceW(ptrOf<SC_HANDLE>(hScm), serviceName_ptr, displayName_ptr,
+	SC_HANDLE ret = CreateServiceW(ptrOf<SC_HANDLE>(hScm), serviceName_ptr, displayName_ptr,
 		dwDesiredAccess, dwServiceType, dwStartType, dwErrorControl,
 		binaryPathName_ptr,
 		loadOrderGroup_ptr, &tagId, dependencies_ptr,
@@ -1915,4 +1915,192 @@ jstring password
 	freeWchar(serviceStartName_ptr);
 	freeWchar(password_ptr);
 	return toPtr(ret);
+}
+
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_createFile(
+JNIEnv* env,
+jobject obj,
+jstring filePath,
+jlong dwDesiredAccess,
+jlong dwShareMode,
+jlong dwCreationDisposition,
+jlong dwFlagAndAttributes
+) {
+	wchar_t* filePath_ptr = jstring2wchar(env, filePath);
+	HANDLE ret = CreateFileW(filePath_ptr, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, dwFlagAndAttributes, NULL);
+	freeWchar(filePath_ptr);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_flushFileBuffers(
+JNIEnv* env,
+jobject obj,
+jlong hFile
+) {
+	BOOL ret = FlushFileBuffers(ptrOf<HANDLE>(hFile));
+	return ret == TRUE;
+}
+
+
+extern "C" JNIEXPORT jint JNICALL
+Java_i2f_natives_windows_NativesWindows_writeFile(
+JNIEnv* env,
+jobject obj,
+jlong hFile,
+jbyteArray buff,
+jint offset,
+jint length
+) {
+	const jbyte* bts = env->GetByteArrayElements(buff, NULL);
+	jsize len = env->GetArrayLength(buff);
+
+	DWORD numbers = len;
+	unsigned char * data = (unsigned char *)bts;
+	if (offset > 0){
+		data = (unsigned char *)(bts[offset]);
+	}
+	if (length > 0){
+		numbers = length;
+	}
+
+	DWORD writeNumbers = 0;
+	BOOL ret = WriteFile(ptrOf<HANDLE>(hFile), (void *)data, numbers, &writeNumbers, NULL);
+	if (ret == FALSE){
+		return -1;
+	}
+	return writeNumbers;
+}
+
+
+extern "C" JNIEXPORT jint JNICALL
+Java_i2f_natives_windows_NativesWindows_readFile(
+JNIEnv* env,
+jobject obj,
+jlong hFile,
+jbyteArray buff,
+jint offset
+) {
+	jsize len = env->GetArrayLength(buff);
+	DWORD cnLen = len;
+	if (offset > 0){
+		cnLen = len - offset;
+	}
+	unsigned char * data = (unsigned char *)malloc(sizeof(unsigned char)*cnLen);
+	DWORD readSize = 0;
+	BOOL ret = ReadFile(ptrOf<HANDLE>(hFile), (void *)data, cnLen, &readSize, NULL);
+	if (ret == FALSE){
+		return -1;
+	}
+	env->SetByteArrayRegion(buff, offset, readSize, (const jbyte *)data);
+	free(data);
+	return readSize;
+}
+
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_getFileAttributesEx(
+JNIEnv* env,
+jobject obj,
+jstring filePath
+) {
+	wchar_t* filePath_ptr = jstring2wchar(env, filePath);
+	WIN32_FILE_ATTRIBUTE_DATA fileData;
+	BOOL ret = GetFileAttributesExW(filePath_ptr, GetFileExInfoStandard, &fileData);
+	freeWchar(filePath_ptr);
+	if (ret == FALSE){
+		return nullptr;
+	}
+	DWORD dwFileAttributes;
+	time_t ftCreationTime;
+	time_t ftLastAccessTime;
+	time_t ftLastWriteTime;
+	ULONGLONG nFileSize = (((ULONGLONG)fileData.nFileSizeHigh) << 32) | fileData.nFileSizeLow;
+	filetime2timet(&fileData.ftCreationTime, &ftCreationTime);
+	filetime2timet(&fileData.ftLastAccessTime, &ftLastAccessTime);
+	filetime2timet(&fileData.ftLastWriteTime, &ftLastWriteTime);
+	wchar_t buff[1024] = { 0 };
+	swprintf(buff, L"dwFileAttributes:%d;#;ftCreationTime:%l64d;#;ftLastAccessTime:%l64d;#;ftLastWriteTime:%l64d;#;nFileSize:%l64d",
+		fileData.dwFileAttributes, ftCreationTime, ftLastAccessTime, ftLastWriteTime, nFileSize);
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_getFileInformationByHandle(
+JNIEnv* env,
+jobject obj,
+jlong hFile
+) {
+	BY_HANDLE_FILE_INFORMATION info;
+	BOOL ret = GetFileInformationByHandle(ptrOf<HANDLE>(hFile), &info);
+	if (ret == FALSE){
+		return nullptr;
+	}
+	time_t ftCreationTime;
+	time_t ftLastAccessTime;
+	time_t ftLastWriteTime;
+	DWORD nNumberOfLinks;
+
+	filetime2timet(&info.ftCreationTime, &ftCreationTime);
+	filetime2timet(&info.ftLastAccessTime, &ftLastAccessTime);
+	filetime2timet(&info.ftLastWriteTime, &ftLastWriteTime);
+	ULONGLONG nFileSize = (((ULONGLONG)info.nFileSizeHigh) << 32) | info.nFileSizeLow;
+	ULONGLONG nFileIndex = (((ULONGLONG)info.nFileIndexHigh) << 32) | info.nFileIndexLow;
+
+	wchar_t buff[1024] = { 0 };
+	swprintf(buff, L"dwFileAttributes:%d;#;ftCreationTime:%l64d;#;ftLastAccessTime:%l64d;#;ftLastWriteTime:%l64d;#;nFileSize:%l64d;#;dwVolumeSerialNumber:%d;#;nNumberOfLinks:%d;#;nFileIndex:%l64d",
+		info.dwFileAttributes, ftCreationTime, ftLastAccessTime, ftLastWriteTime, nFileSize, info.dwVolumeSerialNumber, info.nNumberOfLinks, nFileIndex);
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_setFileTime(
+JNIEnv* env,
+jobject obj,
+jlong hFile,
+jlong creationTime,
+jlong lastAccessTime,
+jlong lastWriteTime
+) {
+	FILETIME ftCreationTime;
+	FILETIME ftLastAccessTime;
+	FILETIME ftLastWriteTime;
+	timet2filetime(&creationTime, &ftCreationTime);
+	timet2filetime(&lastAccessTime, &ftLastAccessTime);
+	timet2filetime(&lastWriteTime, &ftLastWriteTime);
+	BOOL ret = SetFileTime(ptrOf<HANDLE>(hFile), (creationTime > 0 ? &ftCreationTime : NULL), (lastAccessTime > 0 ? &ftLastAccessTime : NULL), (lastWriteTime > 0 ? &ftLastWriteTime : NULL));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_moveFile(
+JNIEnv* env,
+jobject obj,
+jstring fromFilePath,
+jstring toFilePath
+) {
+	wchar_t* fromFilePath_ptr = jstring2wchar(env, fromFilePath);
+	wchar_t* toFilePath_ptr = jstring2wchar(env, toFilePath);
+	BOOL ret = MoveFileW(fromFilePath_ptr, toFilePath_ptr);
+	freeWchar(fromFilePath_ptr);
+	freeWchar(toFilePath_ptr);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_copyFile(
+JNIEnv* env,
+jobject obj,
+jstring fromFilePath,
+jstring toFilePath,
+jboolean failIfExist
+) {
+	wchar_t* fromFilePath_ptr = jstring2wchar(env, fromFilePath);
+	wchar_t* toFilePath_ptr = jstring2wchar(env, toFilePath);
+	BOOL ret = CopyFileW(fromFilePath_ptr, toFilePath_ptr, (failIfExist == true ? TRUE : FALSE));
+	freeWchar(fromFilePath_ptr);
+	freeWchar(toFilePath_ptr);
+	return ret == TRUE;
 }
