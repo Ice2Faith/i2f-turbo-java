@@ -1060,7 +1060,125 @@ public class WinApi {
         return parseEnumServiceStatus(str);
     }
 
+    public static List<ServiceStatusInfo> enumServicesStatus(long serviceType, long serviceState) {
+        ScHandle hScm = openSCManager(WinOpenScManagerDesiredAccess.SC_MANAGER_ENUMERATE_SERVICE);
+        if (hScm.isZero()) {
+            return null;
+        }
+        List<ServiceStatusInfo> ret = enumServicesStatus(hScm, serviceType, serviceState);
+        closeServiceHandle(hScm);
+        return ret;
+    }
+
     public static boolean closeServiceHandle(ScHandle hScm) {
         return NativesWindows.closeServiceHandle(hScm.value());
+    }
+
+    public static ScHandle openService(ScHandle hScm, String serviceName, long dwDesiredAccess) {
+        long ret = NativesWindows.openService(hScm.value(), serviceName, dwDesiredAccess);
+        return new ScHandle(ret);
+    }
+
+    public static boolean startService(ScHandle hService, String[] serviceArgVectors) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < serviceArgVectors.length; i++) {
+            if (i > 0) {
+                builder.append("\n");
+            }
+            String str = serviceArgVectors[i];
+            if (str == null) {
+                str = "";
+            }
+            str = str.replaceAll("\n", "");
+            builder.append(str);
+        }
+        String args = builder.toString();
+        return NativesWindows.startService(hService.value(), serviceArgVectors.length, args);
+    }
+
+    public static boolean startService(ScHandle hService) {
+        return NativesWindows.startService(hService.value(), 0, null);
+    }
+
+    public static boolean controlService(ScHandle hService, int dwControl) {
+        return NativesWindows.controlService(hService.value(), dwControl);
+    }
+
+    public static boolean stopService(ScHandle hService) {
+        return NativesWindows.controlService(hService.value(), WinControlServiceControl.SERVICE_CONTROL_STOP);
+    }
+
+    public static boolean deleteService(ScHandle hService) {
+        return NativesWindows.deleteService(hService.value());
+    }
+
+    public static ServiceStatusInfo queryServiceStatus(ScHandle hService) {
+        String str = NativesWindows.queryServiceStatus(hService.value());
+        return parseEnumServiceStatusLine(str);
+    }
+
+    public static boolean startService(String serviceName, String[] startServiceArgs) {
+        ScHandle hScm = openSCManager(WinOpenScManagerDesiredAccess.SC_MANAGER_ALL_ACCESS);
+        if (hScm.isZero()) {
+            return false;
+        }
+        ScHandle hService = openService(hScm, serviceName, WinOpenServiceDesiredAccess.SERVICE_START);
+        if (hService.isZero()) {
+            closeServiceHandle(hScm);
+            return false;
+        }
+        boolean ok = startService(hService, startServiceArgs);
+        closeServiceHandle(hService);
+        closeServiceHandle(hScm);
+        return ok;
+    }
+
+    public static boolean stopService(String serviceName) {
+        ScHandle hScm = openSCManager(WinOpenScManagerDesiredAccess.SC_MANAGER_ALL_ACCESS);
+        if (hScm.isZero()) {
+            return false;
+        }
+        ScHandle hService = openService(hScm, serviceName, WinOpenServiceDesiredAccess.SERVICE_STOP);
+        if (hService.isZero()) {
+            closeServiceHandle(hScm);
+            return false;
+        }
+        boolean ok = stopService(hService);
+        closeServiceHandle(hService);
+        closeServiceHandle(hScm);
+        return ok;
+    }
+
+    public static ScHandle createService(ScHandle hScm,
+                                         String serviceName,
+                                         String displayName,
+                                         long dwDesiredAccess,
+                                         long dwServiceType,
+                                         long dwStartType,
+                                         long dwErrorControl,
+                                         String binaryPathName,
+                                         String loadOrderGroup,
+                                         String dependencies,
+                                         String serviceStartName,
+                                         String password) {
+        long ret = NativesWindows.createService(hScm.value(), serviceName, displayName,
+                dwDesiredAccess, dwServiceType, dwStartType, dwErrorControl,
+                binaryPathName, loadOrderGroup, dependencies,
+                serviceStartName, password);
+        return new ScHandle(ret);
+    }
+
+    public static ScHandle createService(ScHandle hScm,
+                                         String serviceName,
+                                         String displayName,
+                                         String binaryPathName) {
+        long ret = NativesWindows.createService(hScm.value(), serviceName, displayName,
+                WinOpenScManagerDesiredAccess.SC_MANAGER_ALL_ACCESS,
+                WinEnumServiceStatusServiceType.SERVICE_WIN32_SHARE_PROCESS,
+                WinCreateServiceStartType.SERVICE_AUTO_START,
+                WinCreateServiceErrorControl.SERVICE_ERROR_NORMAL,
+                binaryPathName, null, null,
+                null, null);
+        return new ScHandle(ret);
     }
 }
