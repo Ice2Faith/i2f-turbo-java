@@ -19,6 +19,33 @@ public class WinApi {
     public static String hello() {
         return NativesWindows.hello();
     }
+    public static boolean kbHit(){
+        return NativesWindows.kbHit();
+    }
+
+    public static int getCh(){
+        return NativesWindows.getCh();
+    }
+
+    public static void flushStdin(){
+        NativesWindows.flushStdin();
+    }
+
+    public static void flushStdout(){
+        NativesWindows.flushStdout();
+    }
+
+    public static int rgb(int r,int g,int b){
+        return NativesWindows.rgb(r,g,b);
+    }
+
+    public static int rgbOf(int r,int g,int b){
+        return ((b&0x0ff)<<16) | ((g&0x0ff)<<8) | (r&0x0ff);
+    }
+
+    public static int[] toRgb(int color){
+        return new int[]{(color&0x0ff),((color>>>8)&0x0ff),((color>>>16)&0x0ff)};
+    }
 
     public static WcharPtr envStringToWcharPtr(String str) {
         long ret = NativesWindows.envStringToWcharPtr(str);
@@ -1517,6 +1544,7 @@ public class WinApi {
                                                     String arguments) {
         return createFileShortcutDefault(srcFilePath, lnkFileDir, arguments, null);
     }
+
     public static boolean createFileShortcutDefault(String srcFilePath,
                                                     String lnkFileDir) {
         return createFileShortcutDefault(srcFilePath, lnkFileDir, null, null);
@@ -1532,10 +1560,11 @@ public class WinApi {
 
     public static boolean createFileShortcutDesktopDefault(String srcFilePath,
                                                            String arguments) {
-        return createFileShortcutDesktopDefault(srcFilePath, arguments,null);
+        return createFileShortcutDesktopDefault(srcFilePath, arguments, null);
     }
+
     public static boolean createFileShortcutDesktopDefault(String srcFilePath) {
-        return createFileShortcutDesktopDefault(srcFilePath, null,null);
+        return createFileShortcutDesktopDefault(srcFilePath, null, null);
     }
 
     public static DiskFreeSpaceExInfo parseDiskFreeSpaceExInfo(String str) {
@@ -1550,8 +1579,165 @@ public class WinApi {
         return ret;
     }
 
-    public static DiskFreeSpaceExInfo getDiskFreeSpaceEx(String filePath){
+    public static DiskFreeSpaceExInfo getDiskFreeSpaceEx(String filePath) {
         String str = NativesWindows.getDiskFreeSpaceEx(filePath);
         return parseDiskFreeSpaceExInfo(str);
+    }
+
+    public static boolean shEmptyRecycleBin(Hwnd hwnd, String rootPath, long flags) {
+        return NativesWindows.shEmptyRecycleBin(hwnd.value(), rootPath, flags);
+    }
+
+    public static boolean shEmptyRecycleBin(Hwnd hwnd, String rootPath) {
+        return NativesWindows.shEmptyRecycleBin(hwnd.value(), rootPath,
+                WinShEmptyRecycleBinFlag.SHERB_NOCONFIRMATION
+                        | WinShEmptyRecycleBinFlag.SHERB_NOPROGRESSUI
+                        | WinShEmptyRecycleBinFlag.SHERB_NOSOUND);
+    }
+    public static boolean shEmptyRecycleBin(char disk){
+        return shEmptyRecycleBin(Hwnd.ZERO,disk+":\\");
+    }
+
+    public static boolean shEmptyRecycleBin(){
+        return shEmptyRecycleBin(Hwnd.ZERO,null);
+    }
+
+    public static int shFileOperation(
+            Hwnd hwnd,
+            long wFunc,
+            String pFrom,
+            String pTo,
+            long fFlags,
+            boolean fAnyOperationsAborted,
+            String lpszProgressTitle
+    ){
+        return NativesWindows.shFileOperation(hwnd.value(),wFunc,
+                pFrom,pTo,
+                fFlags,fAnyOperationsAborted,
+                lpszProgressTitle);
+    }
+    public static int shFileOperationDeleteToCycleBin(
+            String pFrom
+    ){
+        return NativesWindows.shFileOperation(0,
+                WinShFileOperationFunc.FO_DELETE,
+                pFrom,null,
+                WinShFileOperationFlag.FOF_ALLOWUNDO | WinShFileOperationFlag.FOF_NO_UI,
+                true,
+                null);
+    }
+
+    public static int shFileOperationCopy(
+            String pFrom,
+            String pTo
+    ){
+        return NativesWindows.shFileOperation(0,
+                WinShFileOperationFunc.FO_COPY,
+                pFrom,pTo,
+                WinShFileOperationFlag.FOF_ALLOWUNDO | WinShFileOperationFlag.FOF_NO_UI,
+                true,
+                null);
+    }
+    public static int shFileOperationMove(
+            String pFrom,
+            String pTo
+    ){
+        return NativesWindows.shFileOperation(0,
+                WinShFileOperationFunc.FO_MOVE,
+                pFrom,pTo,
+                WinShFileOperationFlag.FOF_ALLOWUNDO | WinShFileOperationFlag.FOF_NO_UI,
+                true,
+                null);
+    }
+
+    public static HMonitor monitorFromWindow(Hwnd hwnd,long dwFlags){
+        long ret = NativesWindows.monitorFromWindow(hwnd.value(), dwFlags);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorFromWindow(Hwnd hwnd){
+        long ret = NativesWindows.monitorFromWindow(hwnd.value(), WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorPrimary(){
+        Hwnd hwnd = getDesktopWindow();
+        long ret = NativesWindows.monitorFromWindow(hwnd.value(), WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
+        closeHandle(hwnd);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorFromPoint(int x,int y,long dwFlags){
+        long ret = NativesWindows.monitorFromPoint(x, y, dwFlags);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorFromPoint(int x,int y){
+        long ret = NativesWindows.monitorFromPoint(x, y, WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorFromPoint(Point p,long dwFlags){
+        long ret = NativesWindows.monitorFromPoint((int)p.x, (int)p.y, dwFlags);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorFromPoint(Point p){
+        long ret = NativesWindows.monitorFromPoint((int)p.x, (int)p.y, WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorFromRect(int left,int top,int right,int bottom,long dwFlags){
+        long ret = NativesWindows.monitorFromRect(left, top, right, bottom, dwFlags);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorFromRect(int left,int top,int right,int bottom){
+        long ret = NativesWindows.monitorFromRect(left, top, right, bottom, WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorFromRect(Rectangle rect,long dwFlags){
+        long ret = NativesWindows.monitorFromRect((int)rect.point.x,(int)rect.point.y,(int)(rect.point.x+rect.size.dx),(int)(rect.point.y+rect.size.dy), dwFlags);
+        return new HMonitor(ret);
+    }
+
+    public static HMonitor monitorFromRect(Rectangle rect){
+        long ret = NativesWindows.monitorFromRect((int)rect.point.x,(int)rect.point.y,(int)(rect.point.x+rect.size.dx),(int)(rect.point.y+rect.size.dy), WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
+        return new HMonitor(ret);
+    }
+
+    public static Point getDpiForMonitor(HMonitor hMonitor,int dpiType){
+        int[] ret = NativesWindows.getDpiForMonitor(hMonitor.value(), dpiType);
+        if(ret.length==0){
+            return null;
+        }
+        return new Point(ret[0],ret[1]);
+    }
+
+    public static int getScaleFactorForMonitor(HMonitor hMonitor){
+        return NativesWindows.getScaleFactorForMonitor(hMonitor.value());
+    }
+
+    public static int colorAdjustLuma(int color, int n, boolean fScale){
+        return NativesWindows.colorAdjustLuma(color,n,fScale);
+    }
+
+    public static int colorHLSToRGB(
+            int wHue,
+            int wLuminance,
+            int wSaturation){
+        return NativesWindows.colorHLSToRGB(wHue,wLuminance,wSaturation);
+    }
+
+    public static int[] colorRGBToHLS(int color){
+        return NativesWindows.colorRGBToHLS(color);
+    }
+
+    public static double[] hls2normalize(int[] hls){
+        return new double[]{hls[0]/240.0,hls[1]/240.0,hls[2]/240.0};
+    }
+    public static int[] hls4normalize(double[] hls){
+        return new int[]{(int)(hls[0]*240.0),(int)(hls[1]*240.0),(int)(hls[2]*240.0)};
     }
 }

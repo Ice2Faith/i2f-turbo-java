@@ -7,14 +7,12 @@ import i2f.natives.core.Ptr;
  * @date 2024/5/10 8:32
  * @desc
  */
-public class Hwnd extends Handle {
-    public Hwnd(long ptr) {
+public class HMonitor extends Handle {
+    public HMonitor(long ptr) {
         super(ptr);
     }
 
-    public Hwnd(Ptr ptr) {
+    public HMonitor(Ptr ptr) {
         super(ptr);
     }
-
-    public static final Hwnd ZERO = new Hwnd(0);
 }
