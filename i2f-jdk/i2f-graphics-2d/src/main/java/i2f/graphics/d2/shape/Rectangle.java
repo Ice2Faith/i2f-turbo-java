@@ -22,4 +22,8 @@ public class Rectangle extends Scope {
     public Rectangle(Point point, Size size) {
         super(point, size);
     }
+
+    public Rectangle(Point lt, Point rb) {
+        super(lt, rb);
+    }
 }
