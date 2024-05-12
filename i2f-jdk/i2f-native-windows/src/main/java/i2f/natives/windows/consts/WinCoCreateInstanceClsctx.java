@@ -1,0 +1,31 @@
+package i2f.natives.windows.consts;
+
+/**
+ * @author Ice2Faith
+ * @date 2024/5/12 16:36
+ * @desc
+ */
+public interface WinCoCreateInstanceClsctx {
+    long CLSCTX_INPROC_SERVER	= 0x1;
+    long CLSCTX_INPROC_HANDLER	= 0x2;
+    long CLSCTX_LOCAL_SERVER	= 0x4;
+    long CLSCTX_INPROC_SERVER16	= 0x8;
+    long CLSCTX_REMOTE_SERVER	= 0x10;
+    long CLSCTX_INPROC_HANDLER16	= 0x20;
+    long CLSCTX_RESERVED1	= 0x40;
+    long CLSCTX_RESERVED2	= 0x80;
+    long CLSCTX_RESERVED3	= 0x100;
+    long CLSCTX_RESERVED4	= 0x200;
+    long CLSCTX_NO_CODE_DOWNLOAD	= 0x400;
+    long CLSCTX_RESERVED5	= 0x800;
+    long CLSCTX_NO_CUSTOM_MARSHAL	= 0x1000;
+    long CLSCTX_ENABLE_CODE_DOWNLOAD	= 0x2000;
+    long CLSCTX_NO_FAILURE_LOG	= 0x4000;
+    long CLSCTX_DISABLE_AAA	= 0x8000;
+    long CLSCTX_ENABLE_AAA	= 0x10000;
+    long CLSCTX_FROM_DEFAULT_CONTEXT	= 0x20000;
+    long CLSCTX_ACTIVATE_32_BIT_SERVER	= 0x40000;
+    long CLSCTX_ACTIVATE_64_BIT_SERVER	= 0x80000;
+    long CLSCTX_ENABLE_CLOAKING	= 0x100000;
+    long CLSCTX_PS_DLL	= 0x8000000;
+}

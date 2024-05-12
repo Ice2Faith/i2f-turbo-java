@@ -13,6 +13,9 @@
 // 服务管理依赖
 #include<winnt.h>//NT 系统支持
 #include<winsvc.h>//service 支持
+// shell依赖
+#include <ShlObj.h>
+#pragma comment (lib,"shell32.lib")
 
 template<typename PTR>
 PTR ptrOf(jlong hwnd){
@@ -101,6 +104,25 @@ jobject /* this */) {
 	//直接返回了一个字符串，java字符串中构造就有一个以字节数组构造的
 	//这里就是字节数组构造形式
 	return env->NewStringUTF(hello.c_str());
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_envStringToWcharPtr(
+JNIEnv* env,
+jobject obj,
+jstring str
+){
+	wchar_t* ptr = jstring2wchar(env, str);
+	return toPtr(ptr);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_i2f_natives_windows_NativesWindows_envFreeWcharPtr(
+JNIEnv* env,
+jobject obj,
+jlong ptr
+){
+	freeWchar((wchar_t*)ptr);
 }
 
 extern "C" JNIEXPORT jint JNICALL
@@ -2103,4 +2125,489 @@ jboolean failIfExist
 	freeWchar(fromFilePath_ptr);
 	freeWchar(toFilePath_ptr);
 	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_coInitialize(
+JNIEnv* env,
+jobject obj
+){
+	HRESULT ret = CoInitialize(NULL);
+	return ret == S_OK;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_coInitializeEx(
+JNIEnv* env,
+jobject obj,
+jlong dwColInit
+){
+	HRESULT ret = CoInitializeEx(NULL, dwColInit);
+	return ret == S_OK;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_i2f_natives_windows_NativesWindows_coUninitialize(
+JNIEnv* env,
+jobject obj
+){
+	CoUninitialize();
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_shGetSpecialFolderLocation(
+JNIEnv* env,
+jobject obj,
+jint csidl
+){
+	LPITEMIDLIST lplist;
+	HRESULT rs = SHGetSpecialFolderLocation(NULL, csidl, &lplist);
+	if (rs != S_OK){
+		return 0;
+	}
+	return toPtr(lplist);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_i2f_natives_windows_NativesWindows_coTaskMemFree(
+JNIEnv* env,
+jobject obj,
+jlong ptr
+){
+	CoTaskMemFree((LPVOID)ptr);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_shGetPathFromIDList(
+JNIEnv* env,
+jobject obj,
+jlong lpItemIdList
+){
+	wchar_t buff[4096] = { 0 };
+	BOOL ret = SHGetPathFromIDListW(ptrOf<LPITEMIDLIST>(lpItemIdList), buff);
+	if (ret == FALSE){
+		return nullptr;
+	}
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_shGetSpecialFolderPath(
+JNIEnv* env,
+jobject obj,
+jint csidl // CSIDL_BITBUCKET
+) {
+	HRESULT rsi = CoInitialize(NULL);
+	if (rsi != S_OK){
+		return nullptr;
+	}
+
+	LPITEMIDLIST lplist;
+	HRESULT rs = SHGetSpecialFolderLocation(NULL, csidl, &lplist);
+	if (rs != S_OK){
+		CoUninitialize();
+		return nullptr;
+	}
+
+
+	wchar_t buff[4096] = { 0 };
+	BOOL ret = SHGetPathFromIDListW(lplist, buff);
+	if (ret == FALSE){
+		CoTaskMemFree(lplist);
+		CoUninitialize();
+		return nullptr;
+	}
+	CoTaskMemFree(lplist);
+	CoUninitialize();
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_getWindowsDirectory(
+JNIEnv* env,
+jobject obj
+){
+	wchar_t buff[4096] = { 0 };
+	UINT ret = GetWindowsDirectoryW(buff, 4096);
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_getSystemDirectory(
+JNIEnv* env,
+jobject obj
+){
+	wchar_t buff[4096] = { 0 };
+	UINT ret = GetSystemDirectoryW(buff, 4096);
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_getTempPath(
+JNIEnv* env,
+jobject obj
+){
+	wchar_t buff[4096] = { 0 };
+	UINT ret = GetTempPathW(4096, buff);
+	return wchar2jstring(env, buff);
+}
+
+static long long clsid_map[][2] = {
+	{ 1, (long long)&CLSID_ShellDesktop },
+	{ 2, (long long)&CLSID_ShellFSFolder },
+	{ 3, (long long)&CLSID_NetworkPlaces },
+	{ 4, (long long)&CLSID_ShellLink },
+	{ 5, (long long)&CLSID_QueryCancelAutoPlay },
+	{ 6, (long long)&CLSID_DriveSizeCategorizer },
+	{ 7, (long long)&CLSID_DriveTypeCategorizer },
+	{ 8, (long long)&CLSID_FreeSpaceCategorizer },
+	{ 9, (long long)&CLSID_TimeCategorizer },
+	{ 10, (long long)&CLSID_SizeCategorizer },
+	{ 11, (long long)&CLSID_AlphabeticalCategorizer },
+	{ 12, (long long)&CLSID_MergedCategorizer },
+	{ 13, (long long)&CLSID_ImageProperties },
+	{ 14, (long long)&CLSID_PropertiesUI },
+	{ 15, (long long)&CLSID_UserNotification },
+	{ 16, (long long)&CLSID_CDBurn },
+	{ 17, (long long)&CLSID_TaskbarList },
+	{ 18, (long long)&CLSID_StartMenuPin },
+	{ 19, (long long)&CLSID_WebWizardHost },
+	{ 20, (long long)&CLSID_PublishDropTarget },
+	{ 21, (long long)&CLSID_PublishingWizard },
+	{ 22, (long long)&CLSID_InternetPrintOrdering },
+	{ 23, (long long)&CLSID_FolderViewHost },
+	{ 24, (long long)&CLSID_ExplorerBrowser },
+	{ 25, (long long)&CLSID_ImageRecompress },
+	{ 26, (long long)&CLSID_TrayBandSiteService },
+	{ 27, (long long)&CLSID_TrayDeskBand },
+	{ 28, (long long)&CLSID_AttachmentServices },
+	{ 29, (long long)&CLSID_DocPropShellExtension },
+	{ 30, (long long)&CLSID_ShellItem },
+	{ 31, (long long)&CLSID_NamespaceWalker },
+	{ 32, (long long)&CLSID_FileOperation },
+	{ 33, (long long)&CLSID_FileOpenDialog },
+	{ 34, (long long)&CLSID_FileSaveDialog },
+	{ 35, (long long)&CLSID_KnownFolderManager },
+	{ 36, (long long)&CLSID_FSCopyHandler },
+	{ 37, (long long)&CLSID_SharingConfigurationManager },
+	{ 38, (long long)&CLSID_PreviousVersions },
+	{ 39, (long long)&CLSID_NetworkConnections },
+	{ 40, (long long)&CLSID_NamespaceTreeControl },
+	{ 41, (long long)&CLSID_IENamespaceTreeControl },
+	{ 42, (long long)&CLSID_ScheduledTasks },
+	{ 43, (long long)&CLSID_ApplicationAssociationRegistration },
+	{ 44, (long long)&CLSID_ApplicationAssociationRegistrationUI },
+	{ 45, (long long)&CLSID_SearchFolderItemFactory },
+	{ 46, (long long)&CLSID_OpenControlPanel },
+	{ 47, (long long)&CLSID_MailRecipient },
+	{ 48, (long long)&CLSID_NetworkExplorerFolder },
+	{ 49, (long long)&CLSID_DestinationList },
+	{ 50, (long long)&CLSID_ApplicationDestinations },
+	{ 51, (long long)&CLSID_ApplicationDocumentLists },
+	{ 52, (long long)&CLSID_HomeGroup },
+	{ 53, (long long)&CLSID_ShellLibrary },
+	{ 54, (long long)&CLSID_AppStartupLink },
+	{ 55, (long long)&CLSID_EnumerableObjectCollection },
+	{ 56, (long long)&CLSID_DesktopGadget },
+	{ -1, -1 },
+
+};
+
+static long long iid_map[][2] = {
+	{ 1, (long long)&IID_INewShortcutHookA },
+	{ 2, (long long)&IID_IShellBrowser },
+	{ 3, (long long)&IID_IShellView },
+	{ 4, (long long)&IID_IContextMenu },
+	{ 5, (long long)&IID_IShellIcon },
+	{ 6, (long long)&IID_IShellFolder },
+	{ 7, (long long)&IID_IShellExtInit },
+	{ 8, (long long)&IID_IShellPropSheetExt },
+	{ 9, (long long)&IID_IPersistFolder },
+	{ 10, (long long)&IID_IExtractIconA },
+	{ 11, (long long)&IID_IShellDetails },
+	{ 12, (long long)&IID_IShellLinkA },
+	{ 13, (long long)&IID_ICopyHookA },
+	{ 14, (long long)&IID_IFileViewerA },
+	{ 15, (long long)&IID_ICommDlgBrowser },
+	{ 16, (long long)&IID_IEnumIDList },
+	{ 17, (long long)&IID_IFileViewerSite },
+	{ 18, (long long)&IID_IContextMenu2 },
+	{ 19, (long long)&IID_IShellExecuteHookA },
+	{ 20, (long long)&IID_IPropSheetPage },
+	{ 21, (long long)&IID_INewShortcutHookW },
+	{ 22, (long long)&IID_IFileViewerW },
+	{ 23, (long long)&IID_IShellLinkW },
+	{ 24, (long long)&IID_IExtractIconW },
+	{ 25, (long long)&IID_IShellExecuteHookW },
+	{ 26, (long long)&IID_ICopyHookW },
+	{ 27, (long long)&IID_IRemoteComputer },
+	{ -1, -1 }
+};
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_coCreateInstance(
+JNIEnv* env,
+jobject obj,
+jlong clsid,
+jlong clsctx,
+jlong iid
+){
+	CLSID* pclsid = NULL;
+	IID* piid = NULL;
+	int i = 0;
+	while (clsid_map[i][0] > 0){
+		if (clsid_map[i][0] == clsid){
+			pclsid = (CLSID*)clsid_map[i][1];
+			break;
+		}
+		i++;
+	}
+	i = 0;
+	while (iid_map[i][0] > 0){
+		if (iid_map[i][0] == clsid){
+			piid = (IID*)iid_map[i][1];
+			break;
+		}
+		i++;
+	}
+
+	if (pclsid == NULL || piid == NULL){
+		return 0;
+	}
+
+	void * pLink=NULL;
+	HRESULT cirs = CoCreateInstance(*pclsid, NULL, clsctx, *piid, (void **)&pLink);
+	if (cirs != S_OK){
+		return 0;
+	}
+
+	return toPtr(pLink);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_coReleaseInstance(
+JNIEnv* env,
+jobject obj,
+jlong ptrInstance)
+{
+	IUnknown* ptr = ptrOf<IUnknown*>(ptrInstance);
+	ULONG ret = ptr->Release();
+	return ret;
+}
+
+static long long qi_iid_map[][2] = {
+	{ 0, (long long)&IID_IMarshal },
+	{ 1, (long long)&IID_IMarshal2 },
+	{ 2, (long long)&IID_IMalloc },
+	{ 3, (long long)&IID_IMallocSpy },
+	{ 4, (long long)&IID_IStdMarshalInfo },
+	{ 5, (long long)&IID_IExternalConnection },
+	{ 6, (long long)&IID_IMultiQI },
+	{ 7, (long long)&IID_AsyncIMultiQI },
+	{ 8, (long long)&IID_IInternalUnknown },
+	{ 9, (long long)&IID_IEnumUnknown },
+	{ 10, (long long)&IID_IBindCtx },
+	{ 11, (long long)&IID_IEnumMoniker },
+	{ 12, (long long)&IID_IRunnableObject },
+	{ 13, (long long)&IID_IRunningObjectTable },
+	{ 14, (long long)&IID_IPersist },
+	{ 15, (long long)&IID_IPersistStream },
+	{ 16, (long long)&IID_IMoniker },
+	{ 17, (long long)&IID_IROTData },
+	{ 18, (long long)&IID_IEnumString },
+	{ 19, (long long)&IID_ISequentialStream },
+	{ 20, (long long)&IID_IStream },
+	{ 21, (long long)&IID_IEnumSTATSTG },
+	{ 22, (long long)&IID_IStorage },
+	{ 23, (long long)&IID_IPersistFile },
+	{ 24, (long long)&IID_IPersistStorage },
+	{ 25, (long long)&IID_ILockBytes },
+	{ 26, (long long)&IID_IEnumFORMATETC },
+	{ 27, (long long)&IID_IEnumSTATDATA },
+	{ 28, (long long)&IID_IRootStorage },
+	{ 29, (long long)&IID_IAdviseSink },
+	{ 30, (long long)&IID_AsyncIAdviseSink },
+	{ 31, (long long)&IID_IAdviseSink2 },
+	{ 32, (long long)&IID_AsyncIAdviseSink2 },
+	{ 33, (long long)&IID_IDataObject },
+	{ 34, (long long)&IID_IDataAdviseHolder },
+	{ 35, (long long)&IID_IMessageFilter },
+	{ 36, (long long)&IID_IRpcChannelBuffer },
+	{ 37, (long long)&IID_IRpcChannelBuffer2 },
+	{ 38, (long long)&IID_IAsyncRpcChannelBuffer },
+	{ 39, (long long)&IID_IRpcChannelBuffer3 },
+	{ 40, (long long)&IID_IRpcSyntaxNegotiate },
+	{ 41, (long long)&IID_IRpcProxyBuffer },
+	{ 42, (long long)&IID_IRpcStubBuffer },
+	{ 43, (long long)&IID_IPSFactoryBuffer },
+	{ 44, (long long)&IID_IChannelHook },
+	{ 45, (long long)&IID_IClientSecurity },
+	{ 46, (long long)&IID_IServerSecurity },
+	{ 47, (long long)&IID_IClassActivator },
+	{ 48, (long long)&IID_IRpcOptions },
+	{ 49, (long long)&IID_IGlobalOptions },
+	{ 50, (long long)&IID_IFillLockBytes },
+	{ 51, (long long)&IID_IProgressNotify },
+	{ 52, (long long)&IID_ILayoutStorage },
+	{ 53, (long long)&IID_IBlockingLock },
+	{ 54, (long long)&IID_ITimeAndNoticeControl },
+	{ 55, (long long)&IID_IOplockStorage },
+	{ 56, (long long)&IID_ISurrogate },
+	{ 57, (long long)&IID_IGlobalInterfaceTable },
+	{ 58, (long long)&IID_IDirectWriterLock },
+	{ 59, (long long)&IID_ISynchronize },
+	{ 60, (long long)&IID_ISynchronizeHandle },
+	{ 61, (long long)&IID_ISynchronizeEvent },
+	{ 62, (long long)&IID_ISynchronizeContainer },
+	{ 63, (long long)&IID_ISynchronizeMutex },
+	{ 64, (long long)&IID_ICancelMethodCalls },
+	{ 65, (long long)&IID_IAsyncManager },
+	{ 66, (long long)&IID_ICallFactory },
+	{ 67, (long long)&IID_IRpcHelper },
+	{ 68, (long long)&IID_IReleaseMarshalBuffers },
+	{ 69, (long long)&IID_IWaitMultiple },
+	{ 70, (long long)&IID_IUrlMon },
+	{ 71, (long long)&IID_IForegroundTransfer },
+	{ 72, (long long)&IID_IAddrTrackingControl },
+	{ 73, (long long)&IID_IAddrExclusionControl },
+	{ 74, (long long)&IID_IPipeByte },
+	{ 75, (long long)&IID_AsyncIPipeByte },
+	{ 76, (long long)&IID_IPipeLong },
+	{ 77, (long long)&IID_AsyncIPipeLong },
+	{ 78, (long long)&IID_IPipeDouble },
+	{ 79, (long long)&IID_AsyncIPipeDouble },
+	{ 80, (long long)&IID_IThumbnailExtractor },
+	{ 81, (long long)&IID_IDummyHICONIncluder },
+	{ 85, (long long)&IID_IProcessLock },
+	{ 86, (long long)&IID_ISurrogateService },
+	{ 87, (long long)&IID_IComThreadingInfo },
+	{ 88, (long long)&IID_IProcessInitControl },
+	{ 89, (long long)&IID_IInitializeSpy },
+	{ -1, -1 }
+};
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_i2f_natives_windows_NativesWindows_coInstanceQueryInterface(
+JNIEnv* env,
+jobject obj,
+jlong ptrInstance,
+jlong iid)
+{
+	IUnknown* ptr = ptrOf<IUnknown*>(ptrInstance);
+
+	IID* piid = NULL;
+	int i = 0;
+	while (qi_iid_map[i][0] > 0){
+		if (qi_iid_map[i][0] == iid){
+			piid = (IID*)qi_iid_map[i][1];
+			break;
+		}
+		i++;
+	}
+	if (piid == NULL){
+		return 0;
+	}
+
+	void * pInterface = NULL;
+	HRESULT qirs=ptr->QueryInterface(*piid, (void **)&pInterface);
+	if (qirs != S_OK){
+		return 0;
+	}
+	return toPtr(pInterface);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_i2f_natives_windows_NativesWindows_createFileShortcut(
+JNIEnv* env,
+jobject obj,
+jstring srcFilePath,
+jstring lnkFilePath,
+jstring arguments,
+jstring workDirPath,
+jstring description,
+jstring iconPath,
+jint iconIndex,
+jint hotKeyCmd,
+jint hotKeyVk,
+jint showCmd
+){
+	IShellLinkW * pLink = NULL;
+	HRESULT cirs = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void **)&pLink);
+	if (cirs != S_OK){
+		return false;
+	}
+
+	IPersistFile * pPerFile = NULL;
+	HRESULT qirs = pLink->QueryInterface(IID_IPersistFile, (void **)&pPerFile);
+	if (qirs != S_OK){
+		pLink->Release();
+		return false;
+	}
+
+	wchar_t* srcFilePath_ptr = jstring2wchar(env, srcFilePath);
+	pLink->SetPath(srcFilePath_ptr);
+
+	wchar_t* arguments_ptr = jstring2wchar(env, arguments);
+	if (arguments_ptr != NULL){
+		pLink->SetArguments(arguments_ptr);
+	}
+
+	wchar_t* workDirPath_ptr = jstring2wchar(env, workDirPath);
+	if (workDirPath_ptr != NULL){
+		pLink->SetWorkingDirectory(workDirPath_ptr);
+	}
+
+	wchar_t* description_ptr = jstring2wchar(env, description);
+	if (description_ptr != NULL){
+		pLink->SetDescription(description_ptr);
+	}
+
+	wchar_t* iconPath_ptr = jstring2wchar(env, iconPath);
+	if (iconPath_ptr != NULL){
+		pLink->SetIconLocation(iconPath_ptr, (iconIndex > 0 ? iconIndex : 0));
+	}
+
+	
+	if (hotKeyCmd > 0 && hotKeyVk > 0){
+		pLink->SetHotkey(MAKEWORD(hotKeyVk,hotKeyCmd));
+	}
+
+	pLink->SetShowCmd(showCmd);
+
+	wchar_t* lnkFilePath_ptr = jstring2wchar(env, lnkFilePath);
+	pPerFile->Save(lnkFilePath_ptr, TRUE);
+
+
+	pPerFile->Release();
+	pLink->Release();
+
+	freeWchar(srcFilePath_ptr);
+	freeWchar(arguments_ptr);
+	freeWchar(workDirPath_ptr);
+	freeWchar(description_ptr);
+	freeWchar(iconPath_ptr);
+	freeWchar(lnkFilePath_ptr);
+
+	return true;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_i2f_natives_windows_NativesWindows_getDiskFreeSpaceEx(
+JNIEnv* env,
+jobject obj,
+jstring filePath
+){
+	ULARGE_INTEGER lpFreeBytesAvailableToCaller;
+	ULARGE_INTEGER lpTotalNumberOfBytes;
+	ULARGE_INTEGER lpTotalNumberOfFreeBytes;
+
+	wchar_t* filePath_ptr = jstring2wchar(env, filePath);
+	BOOL ret=GetDiskFreeSpaceExW(filePath_ptr,&lpFreeBytesAvailableToCaller,&lpTotalNumberOfBytes,&lpTotalNumberOfFreeBytes);
+	freeWchar(filePath_ptr);
+	if (ret == FALSE){
+		return nullptr;
+	}
+	wchar_t buff[1024] = { 0 }; 
+	swprintf(buff, L"freeBytesAvailableToCaller:%l64d;#;totalNumberOfBytes:%l64d;#;totalNumberOfFreeBytes:%l64d", lpFreeBytesAvailableToCaller, lpTotalNumberOfBytes, lpTotalNumberOfFreeBytes);
+	return wchar2jstring(env,buff);
 }
