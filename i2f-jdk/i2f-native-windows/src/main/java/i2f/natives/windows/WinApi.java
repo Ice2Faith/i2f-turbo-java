@@ -7,6 +7,7 @@ import i2f.graphics.d2.shape.Rectangle;
 import i2f.natives.windows.consts.*;
 import i2f.natives.windows.types.*;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -17,6 +18,15 @@ import java.util.*;
 public class WinApi {
     public static String hello() {
         return NativesWindows.hello();
+    }
+
+    public static WcharPtr envStringToWcharPtr(String str) {
+        long ret = NativesWindows.envStringToWcharPtr(str);
+        return new WcharPtr(ret);
+    }
+
+    public static void envFreeWcharPtr(WcharPtr ptr) {
+        NativesWindows.envFreeWcharPtr(ptr.value());
     }
 
     public static int getSystemMetrics(int metric) {
@@ -1327,5 +1337,221 @@ public class WinApi {
 
     public static boolean copyFile(String fromFilePath, String toFilePath, boolean failIfExist) {
         return NativesWindows.copyFile(fromFilePath, toFilePath, failIfExist);
+    }
+
+    public static boolean coInitialize() {
+        return NativesWindows.coInitialize();
+    }
+
+    public static boolean coInitializeEx(long dwCoInit) {
+        return NativesWindows.coInitializeEx(dwCoInit);
+    }
+
+    public static void coUninitialize() {
+        NativesWindows.coUninitialize();
+    }
+
+    public static LpItemIdList shGetSpecialFolderLocation(int csidl) {
+        long ret = NativesWindows.shGetSpecialFolderLocation(csidl);
+        return new LpItemIdList(ret);
+    }
+
+    public static String shGetPathFromIDList(LpItemIdList lpItemIdList) {
+        return NativesWindows.shGetPathFromIDList(lpItemIdList.value());
+    }
+
+    public static void coTaskMemFree(CoTaskPtr coPtr) {
+        NativesWindows.coTaskMemFree(coPtr.value());
+    }
+
+
+    public static String shGetSpecialFolderPath(int csidl) {
+        return NativesWindows.shGetSpecialFolderPath(csidl);
+    }
+
+    public static String getSpecialFolderPath(int csidl) {
+        if (!coInitialize()) {
+            return null;
+        }
+        LpItemIdList idlist = shGetSpecialFolderLocation(csidl);
+        if (idlist.isZero()) {
+            coUninitialize();
+            return null;
+        }
+        String ret = shGetPathFromIDList(idlist);
+        coTaskMemFree(idlist);
+        coUninitialize();
+        return ret;
+    }
+
+    public static String getDesktopPath() {
+        return getSpecialFolderPath(WinShGetSpecialFolderLocationCsidl.CSIDL_DESKTOP);
+    }
+
+    public static String getProgramsPath() {
+        return getSpecialFolderPath(WinShGetSpecialFolderLocationCsidl.CSIDL_PROGRAMS);
+    }
+
+    public static String shGetIeQuickLunchPath() {
+        String path = NativesWindows.shGetSpecialFolderPath(WinShGetSpecialFolderLocationCsidl.CSIDL_IE_QUICK_LUNCH);
+        return path + WinShGetSpecialFolderLocationCsidl.IE_QUICK_LUNCH_SUB_PATH;
+    }
+
+    public static String getWindowsDirectory() {
+        return NativesWindows.getWindowsDirectory();
+    }
+
+    public static String getSystemDirectory() {
+        return NativesWindows.getSystemDirectory();
+    }
+
+    public static String getTempPath() {
+        return NativesWindows.getTempPath();
+    }
+
+    public static CoIUnknownPtr coCreateInstance(long clsid, long clsctx, long iid) {
+        long ret = NativesWindows.coCreateInstance(clsid, clsctx, iid);
+        return new CoIUnknownPtr(ret);
+    }
+
+    public static long coReleaseInstance(CoIUnknownPtr ptrInstance) {
+        return NativesWindows.coReleaseInstance(ptrInstance.value());
+    }
+
+    public static CoIUnknownPtr coInstanceQueryInterface(CoIUnknownPtr ptrInstance, long iid) {
+        long ret = NativesWindows.coInstanceQueryInterface(ptrInstance.value(), iid);
+        return new CoIUnknownPtr(ret);
+    }
+
+    public static boolean createFileShortcut(
+            String srcFilePath,
+            String lnkFilePath,
+            String arguments,
+            String workDirPath,
+            String description,
+            String iconPath,
+            int iconIndex,
+            int hotKey,
+            int hotKeyVk,
+            int showCmd) {
+        return NativesWindows.createFileShortcut(srcFilePath, lnkFilePath, arguments, workDirPath, description, iconPath, iconIndex, hotKey, hotKeyVk, showCmd);
+    }
+
+    public static boolean createFileShortcut(
+            String srcFilePath,
+            String lnkFilePath,
+            String arguments,
+            String workDirPath,
+            String description,
+            int hotKey,
+            int hotKeyVk,
+            int showCmd) {
+        return NativesWindows.createFileShortcut(srcFilePath, lnkFilePath, arguments, workDirPath, description, null, 0, hotKey, hotKeyVk, showCmd);
+    }
+
+    public static boolean createFileShortcut(
+            String srcFilePath,
+            String lnkFilePath,
+            String arguments,
+            String workDirPath,
+            String description,
+            int hotKey,
+            int hotKeyVk) {
+        return NativesWindows.createFileShortcut(srcFilePath, lnkFilePath, arguments, workDirPath, description, null, 0, hotKey, hotKeyVk, WinShowWindowCmdShow.SW_SHOWNORMAL);
+    }
+
+    public static boolean createFileShortcut(
+            String srcFilePath,
+            String lnkFilePath,
+            String arguments,
+            String workDirPath,
+            String description) {
+        return NativesWindows.createFileShortcut(srcFilePath, lnkFilePath, arguments, workDirPath, description, null, 0, 0, 0, WinShowWindowCmdShow.SW_SHOWNORMAL);
+    }
+
+    public static boolean createFileShortcut(
+            String srcFilePath,
+            String lnkFilePath,
+            String arguments,
+            String workDirPath) {
+        return NativesWindows.createFileShortcut(srcFilePath, lnkFilePath, arguments, workDirPath, null, null, 0, 0, 0, WinShowWindowCmdShow.SW_SHOWNORMAL);
+    }
+
+    public static boolean createFileShortcut(
+            String srcFilePath,
+            String lnkFilePath,
+            String arguments) {
+        return NativesWindows.createFileShortcut(srcFilePath, lnkFilePath, arguments, null, null, null, 0, 0, 0, WinShowWindowCmdShow.SW_SHOWNORMAL);
+    }
+
+    public static boolean createFileShortcut(
+            String srcFilePath,
+            String lnkFilePath) {
+        return NativesWindows.createFileShortcut(srcFilePath, lnkFilePath, null, null, null, null, 0, 0, 0, WinShowWindowCmdShow.SW_SHOWNORMAL);
+    }
+
+    public static boolean createFileShortcutDefault(
+            String srcFilePath,
+            String lnkFileDir,
+            String arguments,
+            String description) {
+        File srcFile = new File(srcFilePath);
+        String srcName = srcFile.getName();
+        String srcSuffix = "";
+        int idx = srcName.lastIndexOf(".");
+        if (idx > 0) {
+            srcSuffix = srcName.substring(idx);
+            srcName = srcName.substring(0, idx);
+        }
+        File lnkFile = new File(lnkFileDir, srcName + ".lnk");
+        return NativesWindows.createFileShortcut(srcFilePath,
+                lnkFile.getAbsolutePath()
+                , arguments,
+                srcFile.getParentFile().getAbsolutePath(),
+                description, null, 0,
+                0, 0, WinShowWindowCmdShow.SW_SHOWNORMAL);
+    }
+
+    public static boolean createFileShortcutDefault(String srcFilePath,
+                                                    String lnkFileDir,
+                                                    String arguments) {
+        return createFileShortcutDefault(srcFilePath, lnkFileDir, arguments, null);
+    }
+    public static boolean createFileShortcutDefault(String srcFilePath,
+                                                    String lnkFileDir) {
+        return createFileShortcutDefault(srcFilePath, lnkFileDir, null, null);
+    }
+
+    public static boolean createFileShortcutDesktopDefault(String srcFilePath,
+                                                           String arguments,
+                                                           String description) {
+        String desktopPath = getDesktopPath();
+        File desktopFile = new File(desktopPath);
+        return createFileShortcutDefault(srcFilePath, desktopFile.getAbsolutePath(), arguments, description);
+    }
+
+    public static boolean createFileShortcutDesktopDefault(String srcFilePath,
+                                                           String arguments) {
+        return createFileShortcutDesktopDefault(srcFilePath, arguments,null);
+    }
+    public static boolean createFileShortcutDesktopDefault(String srcFilePath) {
+        return createFileShortcutDesktopDefault(srcFilePath, null,null);
+    }
+
+    public static DiskFreeSpaceExInfo parseDiskFreeSpaceExInfo(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = getJniStringMap(str);
+        DiskFreeSpaceExInfo ret = new DiskFreeSpaceExInfo();
+        ret.freeBytesAvailableToCaller = Converters.parseLong(map.get("freeBytesAvailableToCaller"), 0);
+        ret.totalNumberOfBytes = Converters.parseLong(map.get("totalNumberOfBytes"), 0);
+        ret.totalNumberOfFreeBytes = Converters.parseLong(map.get("totalNumberOfFreeBytes"), 0);
+        return ret;
+    }
+
+    public static DiskFreeSpaceExInfo getDiskFreeSpaceEx(String filePath){
+        String str = NativesWindows.getDiskFreeSpaceEx(filePath);
+        return parseDiskFreeSpaceExInfo(str);
     }
 }
