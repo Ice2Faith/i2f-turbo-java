@@ -5,6 +5,11 @@
 #include <string>
 #include<string.h>
 #include<list>
+#include<stdio.h>
+#include<conio.h>
+#include<stdlib.h>
+#define JNI_METHOD(name) Java_i2f_natives_windows_NativesWindows_##name
+
 //枚举进程依赖
 #include<TlHelp32.h>
 //回收站依赖
@@ -14,8 +19,10 @@
 #include<winnt.h>//NT 系统支持
 #include<winsvc.h>//service 支持
 // shell依赖
+#include<ShellAPI.h>
 #include <ShlObj.h>
 #pragma comment (lib,"shell32.lib")
+
 
 template<typename PTR>
 PTR ptrOf(jlong hwnd){
@@ -85,7 +92,7 @@ void freeWchar(wchar_t * ptr){
 * Java.i2f.natives.windows.NativeWindows.hello
 */
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_hello(
+JNI_METHOD(hello)(
 JNIEnv* env,
 jobject /* this */) {
 	/*
@@ -106,8 +113,73 @@ jobject /* this */) {
 	return env->NewStringUTF(hello.c_str());
 }
 
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(kbHit)(
+JNIEnv* env,
+jobject obj
+){
+	return 0!=kbhit();
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getCh)(
+JNIEnv* env,
+jobject obj
+){
+	return getch();
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(flushStdin)(
+JNIEnv* env,
+jobject obj
+){
+	fflush(stdin);
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(flushStdout)(
+JNIEnv* env,
+jobject obj
+){
+	fflush(stdout);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(rgb)(
+JNIEnv* env,
+jobject obj,
+jint r,
+jint g,
+jint b
+){
+	return RGB(r,g,b);
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(sleep)(
+JNIEnv* env,
+jobject obj,
+jint millSeconds
+){
+	Sleep(millSeconds);
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(system)(
+JNIEnv* env,
+jobject obj,
+jstring cmd
+){
+	const char * cmd_ptr = env->GetStringUTFChars(cmd, NULL);
+	system(cmd_ptr);
+	env->ReleaseStringUTFChars(cmd, cmd_ptr);
+}
+
+
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_envStringToWcharPtr(
+JNI_METHOD(envStringToWcharPtr)(
 JNIEnv* env,
 jobject obj,
 jstring str
@@ -117,7 +189,7 @@ jstring str
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_i2f_natives_windows_NativesWindows_envFreeWcharPtr(
+JNI_METHOD(envFreeWcharPtr)(
 JNIEnv* env,
 jobject obj,
 jlong ptr
@@ -126,7 +198,7 @@ jlong ptr
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_i2f_natives_windows_NativesWindows_getSystemMetrics(
+JNI_METHOD(getSystemMetrics)(
 JNIEnv* env,
 jobject obj,
 jint metric
@@ -135,7 +207,7 @@ jint metric
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getDC(
+JNI_METHOD(getDC)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -144,7 +216,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_i2f_natives_windows_NativesWindows_releaseDC(
+JNI_METHOD(releaseDC)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -155,7 +227,7 @@ jlong hdc
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_i2f_natives_windows_NativesWindows_getDeviceCaps(
+JNI_METHOD(getDeviceCaps)(
 JNIEnv* env,
 jobject obj,
 jlong hdc,
@@ -166,7 +238,7 @@ jint index
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getForegroundWindow(
+JNI_METHOD(getForegroundWindow)(
 JNIEnv* env,
 jobject obj
 ) {
@@ -174,7 +246,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getDesktopWindow(
+JNI_METHOD(getDesktopWindow)(
 JNIEnv* env,
 jobject obj
 ) {
@@ -182,7 +254,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getWindowText(
+JNI_METHOD(getWindowText)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -193,7 +265,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_setWindowText(
+JNI_METHOD(setWindowText)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -206,7 +278,7 @@ jstring title
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_windowFromPoint(
+JNI_METHOD(windowFromPoint)(
 JNIEnv* env,
 jobject obj,
 jint x,
@@ -219,7 +291,7 @@ jint y
 }
 
 extern "C" JNIEXPORT jintArray JNICALL
-Java_i2f_natives_windows_NativesWindows_getCursorPos(
+JNI_METHOD(getCursorPos)(
 JNIEnv* env,
 jobject obj
 ) {
@@ -232,7 +304,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_i2f_natives_windows_NativesWindows_messageBox(
+JNI_METHOD(messageBox)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -249,7 +321,7 @@ jint type
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_messageBeep(
+JNI_METHOD(messageBeep)(
 JNIEnv* env,
 jobject obj,
 jint type
@@ -259,7 +331,7 @@ jint type
 }
 
 extern "C" JNIEXPORT jintArray JNICALL
-Java_i2f_natives_windows_NativesWindows_getWindowRect(
+JNI_METHOD(getWindowRect)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -273,7 +345,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_setWindowPos(
+JNI_METHOD(setWindowPos)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -289,7 +361,7 @@ jint flag
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_showWindow(
+JNI_METHOD(showWindow)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -300,7 +372,7 @@ int cmdShow
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_setParent(
+JNI_METHOD(setParent)(
 JNIEnv* env,
 jobject obj,
 jlong hwndChild,
@@ -311,7 +383,7 @@ jlong hwndNewParent
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_findWindow(
+JNI_METHOD(findWindow)(
 JNIEnv* env,
 jobject obj,
 jstring className,
@@ -327,7 +399,7 @@ jstring windowName
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getWindow(
+JNI_METHOD(getWindow)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -338,7 +410,7 @@ jint cmd
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_sendMessage(
+JNI_METHOD(sendMessage)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -351,7 +423,7 @@ jlong lParamPtr
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_postMessage(
+JNI_METHOD(postMessage)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -364,7 +436,7 @@ jlong lParamPtr
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getWindowThreadProcessId(
+JNI_METHOD(getWindowThreadProcessId)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -375,7 +447,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_openProcess(
+JNI_METHOD(openProcess)(
 JNIEnv* env,
 jobject obj,
 jlong dwDesiredAccess,
@@ -387,7 +459,7 @@ jlong dwProcessId
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_isInvalidHandle(
+JNI_METHOD(isInvalidHandle)(
 JNIEnv* env,
 jobject obj,
 jlong handle
@@ -396,7 +468,7 @@ jlong handle
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_terminateProcess(
+JNI_METHOD(terminateProcess)(
 JNIEnv* env,
 jobject obj,
 jlong hProcess,
@@ -407,7 +479,7 @@ jint uExitCode
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_closeHandle(
+JNI_METHOD(closeHandle)(
 JNIEnv* env,
 jobject obj,
 jlong hObject
@@ -417,7 +489,7 @@ jlong hObject
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_i2f_natives_windows_NativesWindows_winExec(
+JNI_METHOD(winExec)(
 JNIEnv* env,
 jobject obj,
 jstring cmdLine,
@@ -430,7 +502,7 @@ jint uCmdShow
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getNextWindow(
+JNI_METHOD(getNextWindow)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -442,7 +514,7 @@ jint cmd
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getClassName(
+JNI_METHOD(getClassName)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -453,7 +525,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getCurrentProcess(
+JNI_METHOD(getCurrentProcess)(
 JNIEnv* env,
 jobject obj
 ) {
@@ -462,7 +534,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getCurrentProcessId(
+JNI_METHOD(getCurrentProcessId)(
 JNIEnv* env,
 jobject obj
 ) {
@@ -471,7 +543,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_openProcessToken(
+JNI_METHOD(openProcessToken)(
 JNIEnv* env,
 jobject obj,
 jlong hProcess,
@@ -486,7 +558,7 @@ jlong dwDesiredAccess
 }
 
 extern "C" JNIEXPORT jlongArray JNICALL
-Java_i2f_natives_windows_NativesWindows_lookupPrivilegeValue(
+JNI_METHOD(lookupPrivilegeValue)(
 JNIEnv* env,
 jobject obj,
 jstring pSystemName,
@@ -508,7 +580,7 @@ jstring pName
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_adjustTokenPrivileges(
+JNI_METHOD(adjustTokenPrivileges)(
 JNIEnv* env,
 jobject obj,
 jlong tokenHandle,
@@ -527,7 +599,7 @@ jlong luidHighPart
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_adjustProcessPrivileges(
+JNI_METHOD(adjustProcessPrivileges)(
 JNIEnv* env,
 jobject obj,
 jlong processHandle,
@@ -552,7 +624,7 @@ jboolean enable
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getWindowLong(
+JNI_METHOD(getWindowLong)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -563,7 +635,7 @@ jint index
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getClassLong(
+JNI_METHOD(getClassLong)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -574,7 +646,7 @@ jint index
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_setWindowLong(
+JNI_METHOD(setWindowLong)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -586,7 +658,7 @@ jlong dwNewLong
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_setClassLong(
+JNI_METHOD(setClassLong)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -598,7 +670,7 @@ jlong dwNewLong
 }
 
 extern "C" JNIEXPORT jlongArray JNICALL
-Java_i2f_natives_windows_NativesWindows_getLayeredWindowAttributes(
+JNI_METHOD(getLayeredWindowAttributes)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -617,7 +689,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_setLayeredWindowAttributes(
+JNI_METHOD(setLayeredWindowAttributes)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -639,7 +711,7 @@ BOOL CALLBACK __EnumWindow_Proc(HWND hWnd, LPARAM lParam)
 }
 
 extern "C" JNIEXPORT jlongArray JNICALL
-Java_i2f_natives_windows_NativesWindows_enumWindows(
+JNI_METHOD(enumWindows)(
 JNIEnv* env,
 jobject obj
 ) {
@@ -662,7 +734,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jlongArray JNICALL
-Java_i2f_natives_windows_NativesWindows_enumChildWindows(
+JNI_METHOD(enumChildWindows)(
 JNIEnv* env,
 jobject obj,
 jlong hwndParent
@@ -687,7 +759,7 @@ jlong hwndParent
 
 
 extern "C" JNIEXPORT jlongArray JNICALL
-Java_i2f_natives_windows_NativesWindows_enumThreadWindows(
+JNI_METHOD(enumThreadWindows)(
 JNIEnv* env,
 jobject obj,
 jlong threadId
@@ -712,7 +784,7 @@ jlong threadId
 
 
 extern "C" JNIEXPORT jlongArray JNICALL
-Java_i2f_natives_windows_NativesWindows_enumDesktopWindows(
+JNI_METHOD(enumDesktopWindows)(
 JNIEnv* env,
 jobject obj,
 jlong hDesktop
@@ -736,7 +808,7 @@ jlong hDesktop
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_setForegroundWindow(
+JNI_METHOD(setForegroundWindow)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -746,7 +818,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getActiveWindow(
+JNI_METHOD(getActiveWindow)(
 JNIEnv* env,
 jobject obj
 ) {
@@ -755,7 +827,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_setActiveWindow(
+JNI_METHOD(setActiveWindow)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -765,7 +837,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_enableWindow(
+JNI_METHOD(enableWindow)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -776,7 +848,7 @@ jboolean enable
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_isWindowEnabled(
+JNI_METHOD(isWindowEnabled)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -786,7 +858,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getWindowDC(
+JNI_METHOD(getWindowDC)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -796,7 +868,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_isWindowVisible(
+JNI_METHOD(isWindowVisible)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -806,7 +878,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_isWindowUnicode(
+JNI_METHOD(isWindowUnicode)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -816,7 +888,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_isChild(
+JNI_METHOD(isChild)(
 JNIEnv* env,
 jobject obj,
 jlong hwndParent,
@@ -827,7 +899,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_isIconic(
+JNI_METHOD(isIconic)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -837,7 +909,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_openIcon(
+JNI_METHOD(openIcon)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -847,7 +919,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_isZoomed(
+JNI_METHOD(isZoomed)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -857,7 +929,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getParent(
+JNI_METHOD(getParent)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -867,7 +939,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_findWindowEx(
+JNI_METHOD(findWindowEx)(
 JNIEnv* env,
 jobject obj,
 jlong hwndParent,
@@ -884,7 +956,7 @@ jstring windowText
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_windowFromDC(
+JNI_METHOD(windowFromDC)(
 JNIEnv* env,
 jobject obj,
 jlong hdc
@@ -894,7 +966,7 @@ jlong hdc
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_moveWindow(
+JNI_METHOD(moveWindow)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -909,7 +981,7 @@ jboolean repaint
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_createToolhelp32Snapshot(
+JNI_METHOD(createToolhelp32Snapshot)(
 JNIEnv* env,
 jobject obj,
 jlong dwFlags,
@@ -928,7 +1000,7 @@ jstring stringify_PROCESSENTRY32W(JNIEnv* env, const PROCESSENTRY32W * pe){
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_process32First(
+JNI_METHOD(process32First)(
 JNIEnv* env,
 jobject obj,
 jlong hSnapshot
@@ -943,7 +1015,7 @@ jlong hSnapshot
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_process32Next(
+JNI_METHOD(process32Next)(
 JNIEnv* env,
 jobject obj,
 jlong hSnapshot
@@ -966,7 +1038,7 @@ jstring stringify_MODULEENTRY32W(JNIEnv* env, const MODULEENTRY32W * pe){
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_module32First(
+JNI_METHOD(module32First)(
 JNIEnv* env,
 jobject obj,
 jlong hSnapshot
@@ -981,7 +1053,7 @@ jlong hSnapshot
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_module32Next(
+JNI_METHOD(module32Next)(
 JNIEnv* env,
 jobject obj,
 jlong hSnapshot
@@ -1006,7 +1078,7 @@ jstring stringify_THREADENTRY32(JNIEnv* env, const THREADENTRY32 * pe){
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_thread32First(
+JNI_METHOD(thread32First)(
 JNIEnv* env,
 jobject obj,
 jlong hSnapshot
@@ -1021,7 +1093,7 @@ jlong hSnapshot
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_thread32Next(
+JNI_METHOD(thread32Next)(
 JNIEnv* env,
 jobject obj,
 jlong hSnapshot
@@ -1036,7 +1108,7 @@ jlong hSnapshot
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getExitCodeProcess(
+JNI_METHOD(getExitCodeProcess)(
 JNIEnv* env,
 jobject obj,
 jlong hProcess
@@ -1047,7 +1119,7 @@ jlong hProcess
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getExitCodeThread(
+JNI_METHOD(getExitCodeThread)(
 JNIEnv* env,
 jobject obj,
 jlong hThread
@@ -1058,7 +1130,7 @@ jlong hThread
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getLastError(
+JNI_METHOD(getLastError)(
 JNIEnv* env,
 jobject obj,
 jlong hThread
@@ -1068,7 +1140,7 @@ jlong hThread
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_i2f_natives_windows_NativesWindows_setLastError(
+JNI_METHOD(setLastError)(
 JNIEnv* env,
 jobject obj,
 jlong errCode
@@ -1077,7 +1149,7 @@ jlong errCode
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_i2f_natives_windows_NativesWindows_setLastErrorEx(
+JNI_METHOD(setLastErrorEx)(
 JNIEnv* env,
 jobject obj,
 jlong errCode,
@@ -1087,7 +1159,7 @@ jlong type
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_openThread(
+JNI_METHOD(openThread)(
 JNIEnv* env,
 jobject obj,
 jlong dwDesiredAccess,
@@ -1099,7 +1171,7 @@ jlong dwThreadId
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_suspendThread(
+JNI_METHOD(suspendThread)(
 JNIEnv* env,
 jobject obj,
 jlong hThread
@@ -1109,7 +1181,7 @@ jlong hThread
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_resumeThread(
+JNI_METHOD(resumeThread)(
 JNIEnv* env,
 jobject obj,
 jlong hThread
@@ -1119,7 +1191,7 @@ jlong hThread
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getLogicalDriveStrings(
+JNI_METHOD(getLogicalDriveStrings)(
 JNIEnv* env,
 jobject obj
 ) {
@@ -1154,7 +1226,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getDriveType(
+JNI_METHOD(getDriveType)(
 JNIEnv* env,
 jobject obj,
 jstring rootPathName
@@ -1166,7 +1238,7 @@ jstring rootPathName
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_getFileAttributes(
+JNI_METHOD(getFileAttributes)(
 JNIEnv* env,
 jobject obj,
 jstring fileName
@@ -1178,7 +1250,7 @@ jstring fileName
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_setFileAttributes(
+JNI_METHOD(setFileAttributes)(
 JNIEnv* env,
 jobject obj,
 jstring fileName,
@@ -1191,7 +1263,7 @@ jlong attribute
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_i2f_natives_windows_NativesWindows_deleteFileToRecycleBin(
+JNI_METHOD(deleteFileToRecycleBin)(
 JNIEnv* env,
 jobject obj,
 jstring fileName
@@ -1225,7 +1297,7 @@ jstring stringify_WINDOWINFO(JNIEnv* env, const WINDOWINFO * pe){
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getWindowInfo(
+JNI_METHOD(getWindowInfo)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd
@@ -1239,7 +1311,7 @@ jlong hwnd
 }
 
 extern "C" JNIEXPORT jintArray JNICALL
-Java_i2f_natives_windows_NativesWindows_clientToScreen(
+JNI_METHOD(clientToScreen)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -1261,7 +1333,7 @@ jint y
 
 
 extern "C" JNIEXPORT jintArray JNICALL
-Java_i2f_natives_windows_NativesWindows_screenToClient(
+JNI_METHOD(screenToClient)(
 JNIEnv* env,
 jobject obj,
 jlong hwnd,
@@ -1282,7 +1354,7 @@ jint y
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_i2f_natives_windows_NativesWindows_keyboardEvent(
+JNI_METHOD(keyboardEvent)(
 JNIEnv* env,
 jobject obj,
 jint bVk,
@@ -1293,7 +1365,7 @@ jlong dwFlags
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_i2f_natives_windows_NativesWindows_mouseEvent(
+JNI_METHOD(mouseEvent)(
 JNIEnv* env,
 jobject obj,
 jlong dwFlags,
@@ -1305,7 +1377,7 @@ jint dwData
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_setCursorPos(
+JNI_METHOD(setCursorPos)(
 JNIEnv* env,
 jobject obj,
 jint x,
@@ -1316,7 +1388,7 @@ jint y
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_regOpenKeyEx(
+JNI_METHOD(regOpenKeyEx)(
 JNIEnv* env,
 jobject obj,
 jlong hkey,
@@ -1336,7 +1408,7 @@ jlong samDesired
 
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_regEnumValue(
+JNI_METHOD(regEnumValue)(
 JNIEnv* env,
 jobject obj,
 jlong hkey,
@@ -1421,7 +1493,7 @@ jint index
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_regCloseKey(
+JNI_METHOD(regCloseKey)(
 JNIEnv* env,
 jobject obj,
 jlong hkey
@@ -1445,7 +1517,7 @@ void timet2filetime(const time_t * tt, FILETIME * ft){
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_regEnumKeyEx(
+JNI_METHOD(regEnumKeyEx)(
 JNIEnv* env,
 jobject obj,
 jlong hkey,
@@ -1475,7 +1547,7 @@ jint index
 
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_regCreateKeyEx(
+JNI_METHOD(regCreateKeyEx)(
 JNIEnv* env,
 jobject obj,
 jlong hkey,
@@ -1497,7 +1569,7 @@ jlong samDesired
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_regDeleteKey(
+JNI_METHOD(regDeleteKey)(
 JNIEnv* env,
 jobject obj,
 jlong hkey,
@@ -1510,7 +1582,7 @@ jstring subKey
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_regQueryValueEx(
+JNI_METHOD(regQueryValueEx)(
 JNIEnv* env,
 jobject obj,
 jlong hkey,
@@ -1592,7 +1664,7 @@ jstring valueName
 
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_regSetValueEx(
+JNI_METHOD(regSetValueEx)(
 JNIEnv* env,
 jobject obj,
 jlong hkey,
@@ -1692,7 +1764,7 @@ jstring data
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_regDeleteValue(
+JNI_METHOD(regDeleteValue)(
 JNIEnv* env,
 jobject obj,
 jlong hkey,
@@ -1706,7 +1778,7 @@ jstring valueName
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_openSCManager(
+JNI_METHOD(openSCManager)(
 JNIEnv* env,
 jobject obj,
 jstring machineName,
@@ -1723,7 +1795,7 @@ jlong dwDesiredAccess
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_enumServicesStatus(
+JNI_METHOD(enumServicesStatus)(
 JNIEnv* env,
 jobject obj,
 jlong hScm,
@@ -1779,7 +1851,7 @@ jlong serviceState
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_closeServiceHandle(
+JNI_METHOD(closeServiceHandle)(
 JNIEnv* env,
 jobject obj,
 jlong hScm
@@ -1789,7 +1861,7 @@ jlong hScm
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_openService(
+JNI_METHOD(openService)(
 JNIEnv* env,
 jobject obj,
 jlong hScm,
@@ -1803,7 +1875,7 @@ jlong dwDesiredAccess
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_startService(
+JNI_METHOD(startService)(
 JNIEnv* env,
 jobject obj,
 jlong hService,
@@ -1855,7 +1927,7 @@ jstring serviceArgVectors
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_controlService(
+JNI_METHOD(controlService)(
 JNIEnv* env,
 jobject obj,
 jlong hService,
@@ -1867,7 +1939,7 @@ jlong dwControl
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_deleteService(
+JNI_METHOD(deleteService)(
 JNIEnv* env,
 jobject obj,
 jlong hService
@@ -1877,7 +1949,7 @@ jlong hService
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_queryServiceStatus(
+JNI_METHOD(queryServiceStatus)(
 JNIEnv* env,
 jobject obj,
 jlong hService
@@ -1900,7 +1972,7 @@ jlong hService
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_createService(
+JNI_METHOD(createService)(
 JNIEnv* env,
 jobject obj,
 jlong hScm,
@@ -1941,7 +2013,7 @@ jstring password
 
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_createFile(
+JNI_METHOD(createFile)(
 JNIEnv* env,
 jobject obj,
 jstring filePath,
@@ -1957,7 +2029,7 @@ jlong dwFlagAndAttributes
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_flushFileBuffers(
+JNI_METHOD(flushFileBuffers)(
 JNIEnv* env,
 jobject obj,
 jlong hFile
@@ -1968,7 +2040,7 @@ jlong hFile
 
 
 extern "C" JNIEXPORT jint JNICALL
-Java_i2f_natives_windows_NativesWindows_writeFile(
+JNI_METHOD(writeFile)(
 JNIEnv* env,
 jobject obj,
 jlong hFile,
@@ -1998,7 +2070,7 @@ jint length
 
 
 extern "C" JNIEXPORT jint JNICALL
-Java_i2f_natives_windows_NativesWindows_readFile(
+JNI_METHOD(readFile)(
 JNIEnv* env,
 jobject obj,
 jlong hFile,
@@ -2023,7 +2095,7 @@ jint offset
 
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getFileAttributesEx(
+JNI_METHOD(getFileAttributesEx)(
 JNIEnv* env,
 jobject obj,
 jstring filePath
@@ -2050,7 +2122,7 @@ jstring filePath
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getFileInformationByHandle(
+JNI_METHOD(getFileInformationByHandle)(
 JNIEnv* env,
 jobject obj,
 jlong hFile
@@ -2078,7 +2150,7 @@ jlong hFile
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_setFileTime(
+JNI_METHOD(setFileTime)(
 JNIEnv* env,
 jobject obj,
 jlong hFile,
@@ -2097,7 +2169,7 @@ jlong lastWriteTime
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_moveFile(
+JNI_METHOD(moveFile)(
 JNIEnv* env,
 jobject obj,
 jstring fromFilePath,
@@ -2112,7 +2184,7 @@ jstring toFilePath
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_copyFile(
+JNI_METHOD(copyFile)(
 JNIEnv* env,
 jobject obj,
 jstring fromFilePath,
@@ -2128,7 +2200,7 @@ jboolean failIfExist
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_coInitialize(
+JNI_METHOD(coInitialize)(
 JNIEnv* env,
 jobject obj
 ){
@@ -2137,7 +2209,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_coInitializeEx(
+JNI_METHOD(coInitializeEx)(
 JNIEnv* env,
 jobject obj,
 jlong dwColInit
@@ -2147,7 +2219,7 @@ jlong dwColInit
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_i2f_natives_windows_NativesWindows_coUninitialize(
+JNI_METHOD(coUninitialize)(
 JNIEnv* env,
 jobject obj
 ){
@@ -2155,7 +2227,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_shGetSpecialFolderLocation(
+JNI_METHOD(shGetSpecialFolderLocation)(
 JNIEnv* env,
 jobject obj,
 jint csidl
@@ -2169,7 +2241,7 @@ jint csidl
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_i2f_natives_windows_NativesWindows_coTaskMemFree(
+JNI_METHOD(coTaskMemFree)(
 JNIEnv* env,
 jobject obj,
 jlong ptr
@@ -2178,7 +2250,7 @@ jlong ptr
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_shGetPathFromIDList(
+JNI_METHOD(shGetPathFromIDList)(
 JNIEnv* env,
 jobject obj,
 jlong lpItemIdList
@@ -2192,7 +2264,7 @@ jlong lpItemIdList
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_shGetSpecialFolderPath(
+JNI_METHOD(shGetSpecialFolderPath)(
 JNIEnv* env,
 jobject obj,
 jint csidl // CSIDL_BITBUCKET
@@ -2223,7 +2295,7 @@ jint csidl // CSIDL_BITBUCKET
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getWindowsDirectory(
+JNI_METHOD(getWindowsDirectory)(
 JNIEnv* env,
 jobject obj
 ){
@@ -2233,7 +2305,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getSystemDirectory(
+JNI_METHOD(getSystemDirectory)(
 JNIEnv* env,
 jobject obj
 ){
@@ -2243,7 +2315,7 @@ jobject obj
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getTempPath(
+JNI_METHOD(getTempPath)(
 JNIEnv* env,
 jobject obj
 ){
@@ -2345,7 +2417,7 @@ static long long iid_map[][2] = {
 };
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_coCreateInstance(
+JNI_METHOD(coCreateInstance)(
 JNIEnv* env,
 jobject obj,
 jlong clsid,
@@ -2385,7 +2457,7 @@ jlong iid
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_coReleaseInstance(
+JNI_METHOD(coReleaseInstance)(
 JNIEnv* env,
 jobject obj,
 jlong ptrInstance)
@@ -2487,7 +2559,7 @@ static long long qi_iid_map[][2] = {
 };
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_i2f_natives_windows_NativesWindows_coInstanceQueryInterface(
+JNI_METHOD(coInstanceQueryInterface)(
 JNIEnv* env,
 jobject obj,
 jlong ptrInstance,
@@ -2517,7 +2589,7 @@ jlong iid)
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_i2f_natives_windows_NativesWindows_createFileShortcut(
+JNI_METHOD(createFileShortcut)(
 JNIEnv* env,
 jobject obj,
 jstring srcFilePath,
@@ -2592,7 +2664,7 @@ jint showCmd
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_i2f_natives_windows_NativesWindows_getDiskFreeSpaceEx(
+JNI_METHOD(getDiskFreeSpaceEx)(
 JNIEnv* env,
 jobject obj,
 jstring filePath
@@ -2610,4 +2682,130 @@ jstring filePath
 	wchar_t buff[1024] = { 0 }; 
 	swprintf(buff, L"freeBytesAvailableToCaller:%l64d;#;totalNumberOfBytes:%l64d;#;totalNumberOfFreeBytes:%l64d", lpFreeBytesAvailableToCaller, lpTotalNumberOfBytes, lpTotalNumberOfFreeBytes);
 	return wchar2jstring(env,buff);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(shEmptyRecycleBin)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd,
+jstring rootPath,
+jlong flags
+){
+	wchar_t* rootPath_ptr = jstring2wchar(env, rootPath);
+	HRESULT ret=SHEmptyRecycleBinW(ptrOf<HWND>(hwnd), rootPath_ptr, flags); 
+	freeWchar(rootPath_ptr); 
+	return ret == S_OK;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(shFileOperation)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd,
+jlong wFunc,
+jstring pFrom,
+jstring pTo,
+jlong fFlags,
+jboolean fAnyOperationsAborted,
+jstring lpszProgressTitle
+){
+	SHFILEOPSTRUCTW op;
+	op.hwnd = ptrOf<HWND>(hwnd);
+	op.wFunc = wFunc; 
+	op.pFrom=jstring2wchar(env,pFrom);
+	op.pTo=jstring2wchar(env,pTo);
+	op.fFlags = fFlags; 
+	op.fAnyOperationsAborted = (fAnyOperationsAborted==true?TRUE:FALSE);
+	op.hNameMappings=NULL;
+	op.lpszProgressTitle = jstring2wchar(env, lpszProgressTitle);
+	int ret=SHFileOperationW(&op);
+	freeWchar((wchar_t*)op.pFrom);
+	freeWchar((wchar_t*)op.pTo);
+	freeWchar((wchar_t*)op.lpszProgressTitle);
+	return ret; 
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(monitorFromWindow)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd,
+jlong dwFlags
+){
+	HMONITOR ret = MonitorFromWindow(ptrOf<HWND>(hwnd), dwFlags); 
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(monitorFromPoint)(
+JNIEnv* env,
+jobject obj,
+jint x,
+jint y,
+jlong dwFlags
+){
+	POINT p;
+	p.x = x;
+	p.y = y;
+	HMONITOR ret = MonitorFromPoint(p, dwFlags);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(monitorFromRect)(
+JNIEnv* env,
+jobject obj,
+jint left,
+jint top,
+jint right,
+jint bottom,
+jlong dwFlags
+){
+	RECT r;
+	r.left = left;
+	r.top = top;
+	r.right = right;
+	r.bottom = bottom;
+	HMONITOR ret = MonitorFromRect(&r, dwFlags);
+	return toPtr(ret);
+}
+
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(colorAdjustLuma)(
+JNIEnv* env,
+jobject obj,
+jint color,
+jint n,
+jboolean fScale
+){
+	COLORREF ret=ColorAdjustLuma((COLORREF)color, n, (fScale == true ? TRUE : FALSE));
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(colorHLSToRGB)(
+JNIEnv* env,
+jobject obj,
+jint wHue,
+jint wLuminance,
+jint wSaturation
+){
+	COLORREF ret=ColorHLSToRGB(wHue, wLuminance,wSaturation);
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(colorRGBToHLS)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	WORD wHue=0,  wLuminance=0,  wSaturation=0;
+	ColorRGBToHLS(color, &wHue, &wLuminance, &wSaturation);
+	jint arr[] = { wHue, wLuminance, wSaturation };
+	jintArray ret = env->NewIntArray(3);
+	env->SetIntArrayRegion(ret, 0, 3, arr);
+	return ret;
 }

@@ -7,7 +7,7 @@ import i2f.natives.core.Ptr;
  * @date 2024/5/10 8:32
  * @desc
  */
-public class Hdc extends Ptr {
+public class Hdc extends Handle {
     public Hdc(long ptr) {
         super(ptr);
     }

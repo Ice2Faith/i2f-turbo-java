@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class Scope {
-    public Point point;
-    public Size size;
+    public Point point=new Point(0,0);
+    public Size size=new Size(0,0);
 
     public Scope(double x, double y, double dx, double dy) {
         this.point = new Point(x, y);
@@ -22,5 +22,26 @@ public class Scope {
     public Scope(Point point, Size size) {
         this.point = point;
         this.size = size;
+    }
+
+    public Scope(Point lt,Point rb){
+        this.point=lt;
+        this.size=new Size(rb.x-lt.x,rb.y-lt.y);
+    }
+
+    public double left(){
+        return point.x;
+    }
+
+    public double top(){
+        return point.y;
+    }
+
+    public double right(){
+        return point.x+size.dx;
+    }
+
+    public double bottom(){
+        return point.y+size.dy;
     }
 }

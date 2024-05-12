@@ -184,6 +184,11 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-native-windows-easyx</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-packet</artifactId>
         </dependency>
 

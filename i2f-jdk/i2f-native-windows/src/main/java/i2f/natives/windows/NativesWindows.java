@@ -15,6 +15,20 @@ public class NativesWindows {
 
     public static native String hello();
 
+    public static native boolean kbHit();
+
+    public static native int getCh();
+
+    public static native void flushStdin();
+
+    public static native void flushStdout();
+
+    public static native int rgb(int r,int g,int b);
+
+    public static native void sleep(int millSeconds);
+
+    public static native void system(String cmd);
+
     public static native long envStringToWcharPtr(String str);
 
     public static native void envFreeWcharPtr(long ptr);
@@ -313,4 +327,35 @@ public class NativesWindows {
             int showCmd);
 
     public static native String getDiskFreeSpaceEx(String filePath);
+
+    public static native boolean shEmptyRecycleBin(long hwnd, String rootPath, long flags);
+
+    public static native int shFileOperation(
+            long hwnd,
+            long wFunc,
+            String pFrom,
+            String pTo,
+            long fFlags,
+            boolean fAnyOperationsAborted,
+            String lpszProgressTitle
+    );
+
+    public static native long monitorFromWindow(long hwnd, long dwFlags);
+
+    public static native long monitorFromPoint(int x, int y, long dwFlags);
+
+    public static native long monitorFromRect(int left, int top, int right, int bottom, long dwFlags);
+
+    public static native int[] getDpiForMonitor(long hMonitor, int dpiType);
+
+    public static native int getScaleFactorForMonitor(long hMonitor);
+
+    public static native int colorAdjustLuma(int color, int n, boolean fScale);
+
+    public static native int colorHLSToRGB(
+            int wHue,
+            int wLuminance,
+            int wSaturation);
+
+    public static native int[] colorRGBToHLS(int color);
 }
