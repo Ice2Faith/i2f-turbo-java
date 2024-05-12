@@ -15,6 +15,10 @@ public class NativesWindows {
 
     public static native String hello();
 
+    public static native long envStringToWcharPtr(String str);
+
+    public static native void envFreeWcharPtr(long ptr);
+
     public static native int getSystemMetrics(int metric);
 
     public static native long getDC(long hwnd);
@@ -269,4 +273,44 @@ public class NativesWindows {
     public static native boolean moveFile(String fromFilePath, String toFilePath);
 
     public static native boolean copyFile(String fromFilePath, String toFilePath, boolean failIfExist);
+
+    public static native boolean coInitialize();
+
+    public static native boolean coInitializeEx(long dwCoInit);
+
+    public static native void coUninitialize();
+
+    public static native long shGetSpecialFolderLocation(int csidl);
+
+    public static native String shGetPathFromIDList(long lpItemIdList);
+
+    public static native void coTaskMemFree(long coPtr);
+
+    public static native String shGetSpecialFolderPath(int csidl);
+
+    public static native String getWindowsDirectory();
+
+    public static native String getSystemDirectory();
+
+    public static native String getTempPath();
+
+    public static native long coCreateInstance(long clsid, long clsctx, long iid);
+
+    public static native long coReleaseInstance(long ptrInstance);
+
+    public static native long coInstanceQueryInterface(long ptrInstance, long iid);
+
+    public static native boolean createFileShortcut(
+            String srcFilePath,
+            String lnkFilePath,
+            String arguments,
+            String workDirPath,
+            String description,
+            String iconPath,
+            int iconIndex,
+            int hotKey,
+            int hotKeyVk,
+            int showCmd);
+
+    public static native String getDiskFreeSpaceEx(String filePath);
 }
