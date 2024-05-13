@@ -4,8 +4,7 @@
 #include <jni.h>
 #include <string>
 #include<string.h>
-#define JNI_CLASS_NAME Java_i2f_natives_windows_NativesWindows8_
-#define JNI_METHOD(name) JNI_CLASS_NAME##name
+#define JNI_METHOD(name) Java_i2f_natives_windows_NativesWindows8_##name
 
 // shell scale api
 #include<ShellScalingApi.h>
@@ -130,3 +129,4 @@ jlong hMonitor
 	return (int)dsf;
 
 }
+

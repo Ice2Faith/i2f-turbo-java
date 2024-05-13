@@ -1707,17 +1707,6 @@ public class WinApi {
         return new HMonitor(ret);
     }
 
-    public static Point getDpiForMonitor(HMonitor hMonitor,int dpiType){
-        int[] ret = NativesWindows.getDpiForMonitor(hMonitor.value(), dpiType);
-        if(ret.length==0){
-            return null;
-        }
-        return new Point(ret[0],ret[1]);
-    }
-
-    public static int getScaleFactorForMonitor(HMonitor hMonitor){
-        return NativesWindows.getScaleFactorForMonitor(hMonitor.value());
-    }
 
     public static int colorAdjustLuma(int color, int n, boolean fScale){
         return NativesWindows.colorAdjustLuma(color,n,fScale);
