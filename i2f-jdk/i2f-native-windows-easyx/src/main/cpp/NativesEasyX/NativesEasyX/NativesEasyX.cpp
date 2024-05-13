@@ -7,6 +7,8 @@
 #include<stdio.h>
 // easyx
 #include<graphics.h> 
+#pragma comment (lib,"EasyXw.lib")
+#pragma comment (lib,"EasyXa.lib")
 #include<conio.h>
 
 #define JNI_METHOD(name) Java_i2f_natives_windows_easyx_NativesEasyX_##name
