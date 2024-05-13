@@ -505,7 +505,7 @@ public class WinApi {
         return ret;
     }
 
-    private static Map<String, String> getJniStringMap(String str) {
+    public static Map<String, String> getJniStringMap(String str) {
         Map<String, String> map = new LinkedHashMap<>();
         String[] arr = str.split(";#;");
         for (String item : arr) {
@@ -1739,5 +1739,29 @@ public class WinApi {
     }
     public static int[] hls4normalize(double[] hls){
         return new int[]{(int)(hls[0]*240.0),(int)(hls[1]*240.0),(int)(hls[2]*240.0)};
+    }
+
+
+    public static LogFont parseLogFont(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = getJniStringMap(str);
+        LogFont ret = new LogFont();
+        ret.lfHeight = Converters.parseInt(map.get("lfHeight"), 0);
+        ret.lfWidth = Converters.parseInt(map.get("lfWidth"), 0);
+        ret.lfEscapement = Converters.parseInt(map.get("lfEscapement"), 0);
+        ret.lfOrientation = Converters.parseInt(map.get("lfOrientation"), 0);
+        ret.lfWeight = Converters.parseInt(map.get("lfWeight"), 0);
+        ret.lfItalic = Converters.parseInt(map.get("lfItalic"), 0) == 1;
+        ret.lfUnderline = Converters.parseInt(map.get("lfUnderline"), 0) == 1;
+        ret.lfStrikeOut = Converters.parseInt(map.get("lfStrikeOut"), 0) == 1;
+        ret.lfCharSet = Converters.parseInt(map.get("lfCharSet"), 0);
+        ret.lfOutPrecision = Converters.parseInt(map.get("lfOutPrecision"), 0);
+        ret.lfClipPrecision = Converters.parseInt(map.get("lfClipPrecision"), 0);
+        ret.lfQuality = Converters.parseInt(map.get("lfQuality"), 0);
+        ret.lfPitchAndFamily = Converters.parseInt(map.get("lfPitchAndFamily"), 0);
+        ret.lfFaceName = map.get("lfFaceName");
+        return ret;
     }
 }

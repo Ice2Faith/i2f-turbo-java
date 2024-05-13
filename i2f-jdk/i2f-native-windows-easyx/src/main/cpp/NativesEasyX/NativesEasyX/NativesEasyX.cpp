@@ -395,3 +395,636 @@ jstring str
 	outtextxy(x,y,str_ptr);
 	freeWchar(str_ptr);
 }
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(hslToRgb)(
+JNIEnv* env,
+jobject obj,
+jfloat h,
+jfloat s,
+jfloat l
+){
+	COLORREF ret=HSLtoRGB(h, s, l);
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(hsvToRgb)(
+JNIEnv* env,
+jobject obj,
+jfloat h,
+jfloat s,
+jfloat v
+){
+	COLORREF ret = HSVtoRGB(h, s, v);
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(bgr)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	COLORREF ret = BGR(color);
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getRValue)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	COLORREF ret = GetRValue(color);
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getGValue)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	COLORREF ret = GetGValue(color);
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getBValue)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	COLORREF ret = GetBValue(color);
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(rgbToGray)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	COLORREF ret = RGBtoGRAY(color);
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jfloatArray JNICALL
+JNI_METHOD(rgbToHsl)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	float h = 0, s = 0, l = 0;
+	RGBtoHSL(color,&h,&s,&l);
+	jfloat arr[] = { h, s, l };
+	jfloatArray ret=env->NewFloatArray(3);
+	env->SetFloatArrayRegion(ret, 0, 3, arr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jfloatArray JNICALL
+JNI_METHOD(rgbToHsv)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	float h = 0, s = 0, v = 0;
+	RGBtoHSV(color, &h, &s, &v);
+	jfloat arr[] = { h, s, v };
+	jfloatArray ret = env->NewFloatArray(3);
+	env->SetFloatArrayRegion(ret, 0, 3, arr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getBkColor)(
+JNIEnv* env,
+jobject obj
+){
+	COLORREF ret=getbkcolor();
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getBkMode)(
+JNIEnv* env,
+jobject obj
+){
+	int ret = getbkmode();
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getFillColor)(
+JNIEnv* env,
+jobject obj
+){
+	COLORREF ret = getfillcolor();
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getLineColor)(
+JNIEnv* env,
+jobject obj
+){
+	COLORREF ret = getlinecolor();
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getPolyFillMode)(
+JNIEnv* env,
+jobject obj
+){
+	int ret = getpolyfillmode();
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(setPolyFillMode)(
+JNIEnv* env,
+jobject obj,
+jint mode
+){
+	setpolyfillmode(mode);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getRop2)(
+JNIEnv* env,
+jobject obj
+){
+	int ret=getrop2();
+	return ret;
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(setRop2)(
+JNIEnv* env,
+jobject obj,
+jint mode
+){
+	setrop2(mode); 
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(clearClipRgn)(
+JNIEnv* env,
+jobject obj
+){
+	clearcliprgn();
+}
+
+extern "C" JNIEXPORT jfloatArray JNICALL
+JNI_METHOD(getAspectRatio)(
+JNIEnv* env,
+jobject obj
+){
+	float x = 0, y = 0;
+	getaspectratio(&x, &y);
+	jfloat arr[] = { x, y };
+	jfloatArray ret=env->NewFloatArray(2);
+	env->SetFloatArrayRegion(ret, 0, 2, arr);
+	return ret;
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(setAspectRatio)(
+JNIEnv* env,
+jobject obj,
+jfloat xasp,
+jfloat yasp
+){
+	setaspectratio(xasp,yasp);
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(graphDefaults)(
+JNIEnv* env,
+jobject obj
+){
+	graphdefaults();
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(setOrigin)(
+JNIEnv* env,
+jobject obj,
+jint x,
+jint y
+){
+	setorigin(x,y);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(drawText)(
+JNIEnv* env,
+jobject obj,
+jstring text,
+jint left,
+jint top,
+jint right,
+jint bottom,
+jint uFormat
+){
+	RECT r = { 0 };
+	r.left = left;
+	r.top = top;
+	r.right = right;
+	r.bottom = bottom;
+	wchar_t* text_ptr = jstring2wchar(env, text);
+	int ret=drawtext(text_ptr,&r,uFormat);
+	freeWchar(text_ptr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getTextColor)(
+JNIEnv* env,
+jobject obj
+){
+	COLORREF ret=gettextcolor();
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(textHeight)(
+JNIEnv* env,
+jobject obj,
+jstring text
+){
+	wchar_t* text_ptr = jstring2wchar(env, text);
+	int ret=textheight(text_ptr);
+	freeWchar(text_ptr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(textWidth)(
+JNIEnv* env,
+jobject obj,
+jstring text
+){
+	wchar_t* text_ptr = jstring2wchar(env, text);
+	int ret = textwidth(text_ptr);
+	freeWchar(text_ptr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getImageBuffer)(
+JNIEnv* env,
+jobject obj,
+jlong pImage
+){
+	IMAGE* ptr = ptrOf<IMAGE*>(pImage);
+	DWORD* ret=GetImageBuffer(ptr);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(setImageBufferValue)(
+JNIEnv* env,
+jobject obj,
+jlong pBuffer,
+jint index,
+jint value
+){
+	DWORD* ptr = ptrOf<DWORD*>(pBuffer);
+	ptr[index] = value;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getImageBufferValue)(
+JNIEnv* env,
+jobject obj,
+jlong pBuffer,
+jint index
+){
+	DWORD* ptr = ptrOf<DWORD*>(pBuffer);
+	return (jint)ptr[index];
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getImageHDC)(
+JNIEnv* env,
+jobject obj,
+jlong pImage
+){
+	HDC ret=GetImageHDC(ptrOf<IMAGE*>(pImage));
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getWorkingImage)(
+JNIEnv* env,
+jobject obj
+){
+	IMAGE* ret = GetWorkingImage();
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getImageHeight)(
+JNIEnv* env,
+jobject obj,
+jlong pImage
+){
+	IMAGE* ret = ptrOf<IMAGE*>(pImage);
+	return ret->getheight();
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getImageWidth)(
+JNIEnv* env,
+jobject obj,
+jlong pImage
+){
+	IMAGE* ret = ptrOf<IMAGE*>(pImage);
+	return ret->getwidth();
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(resize)(
+JNIEnv* env,
+jobject obj,
+jlong pImage,
+jint width,
+jint height
+){
+	IMAGE* ret = ptrOf<IMAGE*>(pImage);
+	Resize(ret, width, height);
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(rotateImage)(
+JNIEnv* env,
+jobject obj,
+jlong pDstImage,
+jlong pSrcImage,
+jdouble radian,
+jint bkColor,
+jboolean autosize,
+jboolean highQuality
+){
+	IMAGE* dst = ptrOf<IMAGE*>(pDstImage);
+	IMAGE* src = ptrOf<IMAGE*>(pSrcImage);
+	rotateimage(dst, src, radian, (COLORREF)bkColor, (autosize == true ? true : false), (highQuality == true ? true : false));
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(flushMouseMsgBuffer)(
+JNIEnv* env,
+jobject obj
+){
+	FlushMouseMsgBuffer();
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(mouseHit)(
+JNIEnv* env,
+jobject obj
+){
+	return MouseHit()==true;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(getMouseMsg)(
+JNIEnv* env,
+jobject obj
+){
+	MOUSEMSG msg=GetMouseMsg();
+	wchar_t buff[1024] = { 0 };
+	swprintf(buff, L"uMsg:%d;#;mkCtrl:%d;#;mkShift:%d;#;mkLButton:%d;#;mkMButton:^%d;#;mkRButton:%d;#;x:%d;#;y:%d;#;wheel:%d",
+		msg.uMsg,
+		msg.mkCtrl ? 1 : 0,
+		msg.mkShift ? 1 : 0,
+		msg.mkLButton ? 1 : 0,
+		msg.mkMButton ? 1 : 0,
+		msg.mkRButton ? 1 : 0, 
+		msg.x,
+		msg.y,
+		msg.wheel);
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(getEasyXVer)(
+JNIEnv* env,
+jobject obj
+){
+	wchar_t* ptr=GetEasyXVer();
+	return wchar2jstring(env,ptr);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getHWnd)(
+JNIEnv* env,
+jobject obj
+){
+	HWND ret = GetHWnd();
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(inputBox)(
+JNIEnv* env,
+jobject obj,
+jstring prompt,
+jstring title,
+jstring defaultText,
+jint width,
+jint height,
+jboolean onlyOk
+){
+	wchar_t buff[4096] = { 0 };
+	wchar_t* prompt_ptr = jstring2wchar(env,prompt);
+	wchar_t* title_ptr = jstring2wchar(env, title);
+	wchar_t* defaultText_ptr = jstring2wchar(env, defaultText);
+	bool ok=InputBox(buff, 4096, prompt_ptr, title_ptr, defaultText_ptr, width, height, (onlyOk==true?true:false));
+	freeWchar(prompt_ptr);
+	freeWchar(title_ptr);
+	freeWchar(defaultText_ptr);
+	if (ok==false){
+		return nullptr;
+	}
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getColor)(
+JNIEnv* env,
+jobject obj
+){
+	COLORREF ret = getcolor();
+	return (jint)ret;
+}
+
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getWidth)(
+JNIEnv* env,
+jobject obj
+){
+	int ret = getwidth();
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getHeight)(
+JNIEnv* env,
+jobject obj
+){
+	int ret = getheight();
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getMaxX)(
+JNIEnv* env,
+jobject obj
+){
+	int ret = getmaxx();
+	return (jint)ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getMaxY)(
+JNIEnv* env,
+jobject obj
+){
+	int ret = getmaxy();
+	return (jint)ret; 
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(setTextStyleLogFont)(
+JNIEnv* env,
+jobject obj,
+jint      lfHeight,
+jint      lfWidth,
+jint      lfEscapement,
+jint      lfOrientation,
+jint      lfWeight,
+jboolean      lfItalic,
+jboolean      lfUnderline,
+jboolean      lfStrikeOut,
+jint      lfCharSet,
+jint      lfOutPrecision,
+jint      lfClipPrecision,
+jint      lfQuality,
+jint      lfPitchAndFamily,
+jstring     lfFaceName
+){
+	LOGFONTW ft = { 0 }; 
+	ft.lfHeight = lfHeight;
+	ft.lfWidth = lfWidth;
+	ft.lfEscapement = lfEscapement;
+	ft.lfOrientation = lfOrientation;
+	ft.lfWeight = lfWeight;
+	ft.lfItalic = lfItalic?TRUE:FALSE;
+	ft.lfUnderline = lfUnderline?TRUE:FALSE;
+	ft.lfStrikeOut = lfStrikeOut ? TRUE : FALSE;
+	ft.lfCharSet = lfCharSet;
+	ft.lfOutPrecision = lfOutPrecision;
+	ft.lfClipPrecision = lfClipPrecision;
+	ft.lfQuality = lfQuality;
+	ft.lfPitchAndFamily = lfPitchAndFamily;
+	wchar_t* faceName_ptr = jstring2wchar(env, lfFaceName);
+	if (faceName_ptr != NULL){
+		lstrcpyW(ft.lfFaceName,faceName_ptr);
+	}
+	freeWchar(faceName_ptr);
+	settextstyle(&ft);
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(setTextStyle3)(
+JNIEnv* env,
+jobject obj,
+jint      lfHeight,
+jint      lfWidth,
+jstring     lfFaceName,
+jint      lfEscapement,
+jint      lfOrientation,
+jint      lfWeight,
+jboolean      lfItalic,
+jboolean      lfUnderline,
+jboolean      lfStrikeOut,
+jint      lfCharSet,
+jint      lfOutPrecision,
+jint      lfClipPrecision,
+jint      lfQuality,
+jint      lfPitchAndFamily
+){
+	wchar_t* faceName_ptr = jstring2wchar(env, lfFaceName);
+	settextstyle(lfHeight, lfWidth, faceName_ptr, lfEscapement, lfOrientation,
+		lfWeight, lfItalic?true:false, lfUnderline?true:false, lfStrikeOut?true:false, lfCharSet, lfOutPrecision,
+		lfClipPrecision, lfQuality, lfPitchAndFamily);
+	freeWchar(faceName_ptr);
+}
+
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(setTextStyle2)(
+JNIEnv* env,
+jobject obj,
+jint      lfHeight,
+jint      lfWidth,
+jstring     lfFaceName,
+jint      lfEscapement,
+jint      lfOrientation,
+jint      lfWeight,
+jboolean      lfItalic,
+jboolean      lfUnderline,
+jboolean      lfStrikeOut
+){
+	wchar_t* faceName_ptr = jstring2wchar(env, lfFaceName);
+	settextstyle(lfHeight, lfWidth, faceName_ptr, lfEscapement, lfOrientation,
+		lfWeight, lfItalic ? true : false, lfUnderline ? true : false, lfStrikeOut ? true : false);
+	freeWchar(faceName_ptr);
+}
+
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(setTextStyle)(
+JNIEnv* env,
+jobject obj,
+jint      lfHeight,
+jint      lfWidth,
+jstring     lfFaceName
+){
+	wchar_t* faceName_ptr = jstring2wchar(env, lfFaceName);
+	settextstyle(lfHeight, lfWidth, faceName_ptr);
+	freeWchar(faceName_ptr);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(getTxtStyle)(
+JNIEnv* env,
+jobject obj
+){
+	LOGFONTW ft = { 0 };
+	gettextstyle(&ft);
+	wchar_t buff[2048] = { 0 };
+		swprintf(buff, L"lfHeight:%d;#;lfWidth:%d;#;lfEscapement:%d;#;lfOrientation:%d;#;lfWeight:%d;#;lfItalic:%d;#;lfUnderline:%d;#;lfStrikeOut:%d;#;lfCharSet:%d;#;lfOutPrecision:%d;#;lfClipPrecision:%d;#;lfQuality:%d;#;lfPitchAndFamily:%d;#;lfFaceName:%s",
+		ft.lfHeight,
+		ft.lfWidth,
+		ft.lfEscapement,
+		ft.lfOrientation,
+		ft.lfWeight,
+		ft.lfItalic==TRUE?1:0,
+		ft.lfUnderline==TRUE?1:0,
+		ft.lfStrikeOut==TRUE?1:0,
+		ft.lfCharSet,
+		ft.lfOutPrecision,
+		ft.lfClipPrecision,
+		ft.lfQuality,
+		ft.lfPitchAndFamily,
+		ft.lfFaceName
+		);
+	return wchar2jstring(env, buff);
+}
