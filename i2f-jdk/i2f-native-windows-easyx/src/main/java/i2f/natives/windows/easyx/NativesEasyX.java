@@ -236,4 +236,143 @@ public class NativesEasyX {
     );
 
     public static native String getTxtStyle();
+
+    public static native void bar(int left, int top, int right, int bottom);
+
+    public static native void bar3d(int left, int top, int right, int bottom, int depth, int topFlag);
+
+    public static native void drawPoly(int[] points);
+
+    public static native void fillPoly(int[] points);
+
+    public static native void setWriteMode(int mode);
+
+    public static native String getFillStyle();
+
+    public static native void setFillStyle(
+            int style,
+            int hatch,
+            long pImage);
+
+    public static native void setFillStylePattern8x8(byte[] pattern8x8);
+
+    public static native String getLineStyle();
+
+    public static native void setLineStyle(int style, int thickness, int[] userType);
+
+    public static native void arc(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian);
+
+    public static native void ellipse(int left, int top, int right, int bottom);
+
+    public static native void fillEllipse(int left, int top, int right, int bottom);
+
+    public static native void clearEllipse(int left, int top, int right, int bottom);
+
+    public static native void solidEllipse(int left, int top, int right, int bottom);
+
+    public static native void pie(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian);
+
+    public static native void fillPie(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian);
+
+    public static native void clearPie(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian);
+
+    public static native void solidPie(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian);
+
+    public static native void polygon(int[] points);
+
+    public static native void fillPolygon(int[] points);
+
+    public static native void clearPolygon(int[] points);
+
+    public static native void solidPolygon(int[] points);
+
+    public static native void roundRect(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double ellipseWidth,
+            double ellipseHeight);
+
+    public static native void fillRoundRect(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double ellipseWidth,
+            double ellipseHeight);
+
+    public static native void clearRoundRect(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double ellipseWidth,
+            double ellipseHeight);
+
+    public static native void solidRoundRect(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double ellipseWidth,
+            double ellipseHeight);
+
+    public static native void floodFill(
+            int x,
+            int y,
+            int color,
+            int fillType);
+
+    public static native int getPixel(int x, int y);
+
+    public static native void putPixel(int x, int y, int color);
+
+    public static native int getX();
+
+    public static native int getY();
+
+    public static native void line(int x1, int y1, int x2, int y2);
+
+    public static native void lineRel(int dx, int dy);
+
+    public static native void lineTo(int x, int y);
+
+    public static native void moveRel(int dx, int dy);
+
+    public static native void moveTo(int x, int y);
+
+    public static native void polyBezier(int[] points);
+
+    public static native void polyLine(int[] points);
 }
