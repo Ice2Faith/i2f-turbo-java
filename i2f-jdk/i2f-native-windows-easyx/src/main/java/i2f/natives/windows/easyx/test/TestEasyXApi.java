@@ -1,6 +1,5 @@
 package i2f.natives.windows.easyx.test;
 
-import i2f.natives.windows.NativesWindows;
 import i2f.natives.windows.WinApi;
 import i2f.natives.windows.consts.WinSetBkModeMode;
 import i2f.natives.windows.easyx.EasyXApi;
@@ -55,7 +54,7 @@ public class TestEasyXApi {
         for (int i = 0; i < 50; i++) {
             int x=rand.nextInt(width);
             int y=rand.nextInt(height);
-            Thread.sleep(30);
+            WinApi.sleep(30);
             EasyXApi.setFillColor(WinApi.rgbOf(rand.nextInt(105)+150, rand.nextInt(105)+150,rand.nextInt(105)+150));
             EasyXApi.solidRectangle(x,y,x+rand.nextInt(width/2),y+rand.nextInt(height/2));
         }
