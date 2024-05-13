@@ -1,14 +1,13 @@
 package i2f.natives.windows.easyx;
 
 import i2f.convert.Converters;
+import i2f.graphics.d2.Point;
+import i2f.graphics.d2.Size;
 import i2f.graphics.d2.shape.Rectangle;
 import i2f.natives.windows.WinApi;
-import i2f.natives.windows.consts.WinBitBltRop;
-import i2f.natives.windows.consts.WinGdiColor;
+import i2f.natives.windows.consts.*;
 import i2f.natives.windows.easyx.consts.EasyXInitGraphFlag;
-import i2f.natives.windows.easyx.types.ImageBufferPtr;
-import i2f.natives.windows.easyx.types.ImagePtr;
-import i2f.natives.windows.easyx.types.MouseMsg;
+import i2f.natives.windows.easyx.types.*;
 import i2f.natives.windows.types.Hdc;
 import i2f.natives.windows.types.Hwnd;
 import i2f.natives.windows.types.LogFont;
@@ -493,5 +492,470 @@ public class EasyXApi {
     public static LogFont getTxtStyle() {
         String str = NativesEasyX.getTxtStyle();
         return WinApi.parseLogFont(str);
+    }
+
+    public static void bar(int left, int top, int right, int bottom) {
+        NativesEasyX.bar(left, top, right, bottom);
+    }
+
+    public static void bar(Rectangle rect) {
+        NativesEasyX.bar((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
+    }
+
+    public static void bar3d(int left, int top, int right, int bottom, int depth, int topFlag) {
+        NativesEasyX.bar3d(left, top, right, bottom, depth, topFlag);
+    }
+
+    public static void bar3d(Rectangle rect, int depth, int topFlag) {
+        NativesEasyX.bar3d((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), depth, topFlag);
+    }
+
+    public static void drawPoly(int[] points) {
+        NativesEasyX.drawPoly(points);
+    }
+
+    public static void drawPoly(Point[] points) {
+        int[] arr = points2flat(points);
+        NativesEasyX.drawPoly(arr);
+    }
+
+    public static void fillPoly(int[] points) {
+        NativesEasyX.fillPoly(points);
+    }
+
+    public static void fillPoly(Point[] points) {
+        int[] arr = points2flat(points);
+        NativesEasyX.fillPoly(arr);
+    }
+
+    public static int[] points2flat(Point[] points) {
+        int[] arr = new int[points.length * 2];
+        for (int i = 0; i < points.length; i++) {
+            arr[i * 2] = (int) points[i].x;
+            arr[i * 2 + 1] = (int) points[i].y;
+        }
+        return arr;
+    }
+
+    public static void setWriteMode(int mode) {
+        NativesEasyX.setWriteMode(mode);
+    }
+
+    public static FillStyle parseFillStyle(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = WinApi.getJniStringMap(str);
+        FillStyle ret = new FillStyle();
+        ret.style = Converters.parseInt(map.get("style"), 0);
+        ret.hatch = Converters.parseInt(map.get("hatch"), 0);
+        ret.ppattern = new ImagePtr(Converters.parseLong(map.get("ppattern"), 0));
+        return ret;
+    }
+
+    public static FillStyle getFillStyle() {
+        String str = NativesEasyX.getFillStyle();
+        return parseFillStyle(str);
+    }
+
+    public static void setFillStyle(
+            int style,
+            int hatch,
+            ImagePtr pImage) {
+        NativesEasyX.setFillStyle(style, hatch, pImage.value());
+    }
+
+    public static void setFillStyle(
+            int style,
+            int hatch) {
+        NativesEasyX.setFillStyle(style, hatch, 0);
+    }
+
+    public static void setFillStyle(
+            int style) {
+        NativesEasyX.setFillStyle(style, WinGdiHatchStyle.HS_HORIZONTAL, 0);
+    }
+
+    public static void setFillStyle() {
+        NativesEasyX.setFillStyle(WinGdiBrushStyle.BS_SOLID, WinGdiHatchStyle.HS_HORIZONTAL, 0);
+    }
+
+    public static void setFillStylePattern8x8(byte[] pattern8x8) {
+        NativesEasyX.setFillStylePattern8x8(pattern8x8);
+    }
+
+    public static LineStyle parseLineStyle(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = WinApi.getJniStringMap(str);
+        LineStyle ret = new LineStyle();
+        ret.style = Converters.parseInt(map.get("style"), 0);
+        ret.thickness = Converters.parseInt(map.get("thickness"), 0);
+        String userType = map.get("userType");
+        if (userType != null) {
+            String[] arr = userType.split(",");
+            ret.userType = new int[arr.length];
+            for (int i = 0; i < arr.length; i++) {
+                ret.userType[i] = Converters.parseInt(arr[i], 0);
+            }
+        }
+        return ret;
+    }
+
+    public static LineStyle getLineStyle() {
+        String str = NativesEasyX.getLineStyle();
+        return parseLineStyle(str);
+    }
+
+    public static void setLineStyle(int style, int thickness, int[] userType) {
+        NativesEasyX.setLineStyle(style, thickness, userType);
+    }
+
+    public static void setLineStyle(int style, int thickness) {
+        NativesEasyX.setLineStyle(style, thickness, null);
+    }
+
+    public static void setLineStyle(int style) {
+        NativesEasyX.setLineStyle(style, 1, null);
+    }
+
+    public static void setLineStyle() {
+        NativesEasyX.setLineStyle(WinGdiPenStyle.PS_SOLID, 1, null);
+    }
+
+    public static void arc(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.arc(left, top, right, bottom, startRadian, endRadian);
+    }
+
+    public static void arc(
+            Rectangle rect,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.arc((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), startRadian, endRadian);
+    }
+
+    public static void ellipse(int left, int top, int right, int bottom) {
+        NativesEasyX.ellipse(left, top, right, bottom);
+    }
+
+    public static void ellipse(Rectangle rect) {
+        NativesEasyX.ellipse((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
+    }
+
+    public static void fillEllipse(int left, int top, int right, int bottom) {
+        NativesEasyX.fillEllipse(left, top, right, bottom);
+    }
+
+    public static void fillEllipse(Rectangle rect) {
+        NativesEasyX.fillEllipse((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
+    }
+
+    public static void clearEllipse(int left, int top, int right, int bottom) {
+        NativesEasyX.clearEllipse(left, top, right, bottom);
+    }
+
+    public static void clearEllipse(Rectangle rect) {
+        NativesEasyX.clearEllipse((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
+    }
+
+    public static void solidEllipse(int left, int top, int right, int bottom) {
+        NativesEasyX.solidEllipse(left, top, right, bottom);
+    }
+
+    public static void solidEllipse(Rectangle rect) {
+        NativesEasyX.solidEllipse((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
+    }
+
+    public static void pie(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.pie(left, top, right, bottom, startRadian, endRadian);
+    }
+
+    public static void pie(
+            Rectangle rect,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.pie((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), startRadian, endRadian);
+    }
+
+    public static void fillPie(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.fillPie(left, top, right, bottom, startRadian, endRadian);
+    }
+
+    public static void fillPie(
+            Rectangle rect,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.fillPie((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), startRadian, endRadian);
+    }
+
+    public static void clearPie(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.clearPie(left, top, right, bottom, startRadian, endRadian);
+    }
+
+    public static void clearPie(
+            Rectangle rect,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.clearPie((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), startRadian, endRadian);
+    }
+
+    public static void solidPie(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.solidPie(left, top, right, bottom, startRadian, endRadian);
+    }
+
+    public static void solidPie(
+            Rectangle rect,
+            double startRadian,
+            double endRadian) {
+        NativesEasyX.solidPie((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), startRadian, endRadian);
+    }
+
+    public static void polygon(int[] points) {
+        NativesEasyX.polygon(points);
+    }
+
+    public static void polygon(Point[] points) {
+        int[] arr = points2flat(points);
+        NativesEasyX.polygon(arr);
+    }
+
+    public static void fillPolygon(int[] points) {
+        NativesEasyX.fillPolygon(points);
+    }
+
+    public static void fillPolygon(Point[] points) {
+        int[] arr = points2flat(points);
+        NativesEasyX.fillPolygon(arr);
+    }
+
+    public static void clearPolygon(int[] points) {
+        NativesEasyX.clearPolygon(points);
+    }
+
+    public static void clearPolygon(Point[] points) {
+        int[] arr = points2flat(points);
+        NativesEasyX.clearPolygon(arr);
+    }
+
+    public static void solidPolygon(int[] points) {
+        NativesEasyX.solidPolygon(points);
+    }
+
+    public static void solidPolygon(Point[] points) {
+        int[] arr = points2flat(points);
+        NativesEasyX.solidPolygon(arr);
+    }
+
+    public static void roundRect(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double ellipseWidth,
+            double ellipseHeight) {
+        NativesEasyX.roundRect(left, top, right, bottom, ellipseWidth, ellipseHeight);
+    }
+
+    public static void roundRect(
+            Rectangle rect,
+            double ellipseWidth,
+            double ellipseHeight) {
+        NativesEasyX.roundRect((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), ellipseWidth, ellipseHeight);
+    }
+
+    public static void fillRoundRect(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double ellipseWidth,
+            double ellipseHeight) {
+        NativesEasyX.fillRoundRect(left, top, right, bottom, ellipseWidth, ellipseHeight);
+    }
+
+    public static void fillRoundRect(
+            Rectangle rect,
+            double ellipseWidth,
+            double ellipseHeight) {
+        NativesEasyX.fillRoundRect((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), ellipseWidth, ellipseHeight);
+    }
+
+    public static void clearRoundRect(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double ellipseWidth,
+            double ellipseHeight) {
+        NativesEasyX.clearRoundRect(left, top, right, bottom, ellipseWidth, ellipseHeight);
+    }
+
+    public static void clearRoundRect(
+            Rectangle rect,
+            double ellipseWidth,
+            double ellipseHeight) {
+        NativesEasyX.clearRoundRect((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), ellipseWidth, ellipseHeight);
+    }
+
+    public static void solidRoundRect(
+            int left,
+            int top,
+            int right,
+            int bottom,
+            double ellipseWidth,
+            double ellipseHeight) {
+        NativesEasyX.solidRoundRect(left, top, right, bottom, ellipseWidth, ellipseHeight);
+    }
+
+    public static void solidRoundRect(
+            Rectangle rect,
+            double ellipseWidth,
+            double ellipseHeight) {
+        NativesEasyX.solidRoundRect((int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), ellipseWidth, ellipseHeight);
+    }
+
+    public static void floodFill(
+            int x,
+            int y,
+            int color,
+            int fillType) {
+        NativesEasyX.floodFill(x, y, color, fillType);
+    }
+
+    public static void floodFill(
+            Point p,
+            int color,
+            int fillType) {
+        NativesEasyX.floodFill((int) p.x, (int) p.y, color, fillType);
+    }
+
+    public static void floodFill(
+            int x,
+            int y,
+            int color) {
+        NativesEasyX.floodFill(x, y, color, WinGdiFloodFillType.FLOODFILLBORDER);
+    }
+
+    public static void floodFill(
+            Point p,
+            int color) {
+        NativesEasyX.floodFill((int) p.x, (int) p.y, color, WinGdiFloodFillType.FLOODFILLBORDER);
+    }
+
+    public static int getPixel(int x, int y) {
+        return NativesEasyX.getPixel(x, y);
+    }
+
+    public static int getPixel(Point p) {
+        return NativesEasyX.getPixel((int) p.x, (int) p.y);
+    }
+
+    public static void putPixel(int x, int y, int color) {
+        NativesEasyX.putPixel(x, y, color);
+    }
+
+    public static void putPixel(Point p, int color) {
+        NativesEasyX.putPixel((int) p.x, (int) p.y, color);
+    }
+
+    public static int getX() {
+        return NativesEasyX.getX();
+    }
+
+    public static int getY() {
+        return NativesEasyX.getY();
+    }
+
+    public static Point getPoint() {
+        return new Point(getX(), getY());
+    }
+
+    public static void line(int x1, int y1, int x2, int y2) {
+        NativesEasyX.line(x1, y1, x2, y2);
+    }
+
+    public static void line(Point p1, Point p2) {
+        NativesEasyX.line((int) p1.x, (int) p1.y, (int) p2.x, (int) p2.y);
+    }
+
+    public static void lineRel(int dx, int dy) {
+        NativesEasyX.lineRel(dx, dy);
+    }
+
+    public static void lineRel(Size s) {
+        NativesEasyX.lineRel((int) s.dx, (int) s.dy);
+    }
+
+    public static void lineTo(int x, int y) {
+        NativesEasyX.lineTo(x, y);
+    }
+
+    public static void lineTo(Point p) {
+        NativesEasyX.lineTo((int) p.x, (int) p.y);
+    }
+
+    public static void moveRel(int dx, int dy) {
+        NativesEasyX.moveRel(dx, dy);
+    }
+
+    public static void moveRel(Size s) {
+        NativesEasyX.moveRel((int) s.dx, (int) s.dy);
+    }
+
+    public static void moveTo(int x, int y) {
+        NativesEasyX.moveTo(x, y);
+    }
+
+    public static void moveTo(Point p) {
+        NativesEasyX.moveTo((int) p.x, (int) p.y);
+    }
+
+    public static void polyBezier(int[] points) {
+        NativesEasyX.polyBezier(points);
+    }
+
+    public static void polyBezier(Point[] points) {
+        int[] arr = points2flat(points);
+        NativesEasyX.polyBezier(arr);
+    }
+
+    public static void polyLine(int[] points) {
+        NativesEasyX.polyLine(points);
+    }
+
+    public static void polyLine(Point[] points) {
+        int[] arr = points2flat(points);
+        NativesEasyX.polyLine(arr);
     }
 }
