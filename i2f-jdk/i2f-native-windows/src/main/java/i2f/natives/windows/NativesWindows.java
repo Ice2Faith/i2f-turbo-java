@@ -346,10 +346,6 @@ public class NativesWindows {
 
     public static native long monitorFromRect(int left, int top, int right, int bottom, long dwFlags);
 
-    public static native int[] getDpiForMonitor(long hMonitor, int dpiType);
-
-    public static native int getScaleFactorForMonitor(long hMonitor);
-
     public static native int colorAdjustLuma(int color, int n, boolean fScale);
 
     public static native int colorHLSToRGB(

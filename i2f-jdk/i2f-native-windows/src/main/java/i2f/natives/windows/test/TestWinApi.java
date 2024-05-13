@@ -1,5 +1,6 @@
 package i2f.natives.windows.test;
 
+import i2f.natives.windows.Win8Api;
 import i2f.natives.windows.WinApi;
 import i2f.natives.windows.consts.*;
 import i2f.natives.windows.types.*;
@@ -203,6 +204,14 @@ public class TestWinApi {
             }
 
             WinApi.closeServiceHandle(scHandle);
+        }
+
+        if (true) {
+            System.out.println("---------------");
+            HMonitor hMonitor = WinApi.monitorPrimary();
+            int factor = Win8Api.getScaleFactorForMonitor(hMonitor);
+            System.out.println(factor);
+            WinApi.closeHandle(hMonitor);
         }
     }
 }
