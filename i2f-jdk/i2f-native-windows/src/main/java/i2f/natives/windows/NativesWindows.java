@@ -354,4 +354,67 @@ public class NativesWindows {
             int wSaturation);
 
     public static native int[] colorRGBToHLS(int color);
+
+    public static native long[] getProcessAffinityMask(long hProcess);
+
+    public static native boolean setProcessAffinityMask(long hProcess, long processAffinityMask);
+
+    public static native int getPriorityClass(long hProcess);
+
+    public static native boolean setPriorityClass(long hProcess, int dwPriorityClass);
+
+    public static native int getThreadPriority(long hThread);
+
+    public static native boolean setThreadPriority(long hThread, int priority);
+
+    public static native long setThreadAffinityMask(long hThread, long threadAffinityMask);
+
+    public static native boolean isWow64Process(long hProcess);
+
+    public static native long getCurrentThread();
+
+    public static native long getCurrentThreadId();
+
+    public static native String getCurrentDirectory();
+
+    public static native boolean setCurrentDirectory(String path);
+
+    public static native boolean createHardLink(String newFileName, String existsFileName);
+
+    public static native boolean createSymbolicLink(String symlinkFileName, String targetFileName, int dwFlags);
+
+    public static native boolean encryptFile(String fileName);
+
+    public static native boolean decryptFile(String fileName);
+
+    public static native boolean createDirectory(String fileName);
+
+    public static native boolean deleteFile(String fileName);
+
+    public static native int fileEncryptionStatus(String fileName);
+
+    public static native int getBinaryType(String fileName);
+
+    public static native boolean removeDirectory(String fileName);
+
+    public static native String getComputerNameEx(int format);
+
+    public static native long getPhysicallyInstalledSystemMemory();
+
+    public static native String globalMemoryStatusEx();
+
+    public static native boolean exitWindowsEx(int flags, int reason);
+
+    public static native String getVersionEx();
+
+    public static native boolean swapMouseButton(boolean swap);
+
+    public static native int getAsyncKeyState(int vk);
+
+    public static native int mciSendString(String command);
+
+    public static native boolean deleteObject(long hGdiObj);
+
+    public static native boolean deleteDC(long hdc);
 }
+
