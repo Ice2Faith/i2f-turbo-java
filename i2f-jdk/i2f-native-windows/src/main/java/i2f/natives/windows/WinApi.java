@@ -19,32 +19,33 @@ public class WinApi {
     public static String hello() {
         return NativesWindows.hello();
     }
-    public static boolean kbHit(){
+
+    public static boolean kbHit() {
         return NativesWindows.kbHit();
     }
 
-    public static int getCh(){
+    public static int getCh() {
         return NativesWindows.getCh();
     }
 
-    public static void flushStdin(){
+    public static void flushStdin() {
         NativesWindows.flushStdin();
     }
 
-    public static void flushStdout(){
+    public static void flushStdout() {
         NativesWindows.flushStdout();
     }
 
-    public static int rgb(int r,int g,int b){
-        return NativesWindows.rgb(r,g,b);
+    public static int rgb(int r, int g, int b) {
+        return NativesWindows.rgb(r, g, b);
     }
 
-    public static int rgbOf(int r,int g,int b){
-        return ((b&0x0ff)<<16) | ((g&0x0ff)<<8) | (r&0x0ff);
+    public static int rgbOf(int r, int g, int b) {
+        return ((b & 0x0ff) << 16) | ((g & 0x0ff) << 8) | (r & 0x0ff);
     }
 
-    public static int[] toRgb(int color){
-        return new int[]{(color&0x0ff),((color>>>8)&0x0ff),((color>>>16)&0x0ff)};
+    public static int[] toRgb(int color) {
+        return new int[]{(color & 0x0ff), ((color >>> 8) & 0x0ff), ((color >>> 16) & 0x0ff)};
     }
 
     public static WcharPtr envStringToWcharPtr(String str) {
@@ -1594,12 +1595,13 @@ public class WinApi {
                         | WinShEmptyRecycleBinFlag.SHERB_NOPROGRESSUI
                         | WinShEmptyRecycleBinFlag.SHERB_NOSOUND);
     }
-    public static boolean shEmptyRecycleBin(char disk){
-        return shEmptyRecycleBin(Hwnd.ZERO,disk+":\\");
+
+    public static boolean shEmptyRecycleBin(char disk) {
+        return shEmptyRecycleBin(Hwnd.ZERO, disk + ":\\");
     }
 
-    public static boolean shEmptyRecycleBin(){
-        return shEmptyRecycleBin(Hwnd.ZERO,null);
+    public static boolean shEmptyRecycleBin() {
+        return shEmptyRecycleBin(Hwnd.ZERO, null);
     }
 
     public static int shFileOperation(
@@ -1610,18 +1612,19 @@ public class WinApi {
             long fFlags,
             boolean fAnyOperationsAborted,
             String lpszProgressTitle
-    ){
-        return NativesWindows.shFileOperation(hwnd.value(),wFunc,
-                pFrom,pTo,
-                fFlags,fAnyOperationsAborted,
+    ) {
+        return NativesWindows.shFileOperation(hwnd.value(), wFunc,
+                pFrom, pTo,
+                fFlags, fAnyOperationsAborted,
                 lpszProgressTitle);
     }
+
     public static int shFileOperationDeleteToCycleBin(
             String pFrom
-    ){
+    ) {
         return NativesWindows.shFileOperation(0,
                 WinShFileOperationFunc.FO_DELETE,
-                pFrom,null,
+                pFrom, null,
                 WinShFileOperationFlag.FOF_ALLOWUNDO | WinShFileOperationFlag.FOF_NO_UI,
                 true,
                 null);
@@ -1630,104 +1633,106 @@ public class WinApi {
     public static int shFileOperationCopy(
             String pFrom,
             String pTo
-    ){
+    ) {
         return NativesWindows.shFileOperation(0,
                 WinShFileOperationFunc.FO_COPY,
-                pFrom,pTo,
-                WinShFileOperationFlag.FOF_ALLOWUNDO | WinShFileOperationFlag.FOF_NO_UI,
-                true,
-                null);
-    }
-    public static int shFileOperationMove(
-            String pFrom,
-            String pTo
-    ){
-        return NativesWindows.shFileOperation(0,
-                WinShFileOperationFunc.FO_MOVE,
-                pFrom,pTo,
+                pFrom, pTo,
                 WinShFileOperationFlag.FOF_ALLOWUNDO | WinShFileOperationFlag.FOF_NO_UI,
                 true,
                 null);
     }
 
-    public static HMonitor monitorFromWindow(Hwnd hwnd,long dwFlags){
+    public static int shFileOperationMove(
+            String pFrom,
+            String pTo
+    ) {
+        return NativesWindows.shFileOperation(0,
+                WinShFileOperationFunc.FO_MOVE,
+                pFrom, pTo,
+                WinShFileOperationFlag.FOF_ALLOWUNDO | WinShFileOperationFlag.FOF_NO_UI,
+                true,
+                null);
+    }
+
+    public static HMonitor monitorFromWindow(Hwnd hwnd, long dwFlags) {
         long ret = NativesWindows.monitorFromWindow(hwnd.value(), dwFlags);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorFromWindow(Hwnd hwnd){
+    public static HMonitor monitorFromWindow(Hwnd hwnd) {
         long ret = NativesWindows.monitorFromWindow(hwnd.value(), WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorPrimary(){
+    public static HMonitor monitorPrimary() {
         Hwnd hwnd = getDesktopWindow();
         long ret = NativesWindows.monitorFromWindow(hwnd.value(), WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
         closeHandle(hwnd);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorFromPoint(int x,int y,long dwFlags){
+    public static HMonitor monitorFromPoint(int x, int y, long dwFlags) {
         long ret = NativesWindows.monitorFromPoint(x, y, dwFlags);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorFromPoint(int x,int y){
+    public static HMonitor monitorFromPoint(int x, int y) {
         long ret = NativesWindows.monitorFromPoint(x, y, WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorFromPoint(Point p,long dwFlags){
-        long ret = NativesWindows.monitorFromPoint((int)p.x, (int)p.y, dwFlags);
+    public static HMonitor monitorFromPoint(Point p, long dwFlags) {
+        long ret = NativesWindows.monitorFromPoint((int) p.x, (int) p.y, dwFlags);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorFromPoint(Point p){
-        long ret = NativesWindows.monitorFromPoint((int)p.x, (int)p.y, WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
+    public static HMonitor monitorFromPoint(Point p) {
+        long ret = NativesWindows.monitorFromPoint((int) p.x, (int) p.y, WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorFromRect(int left,int top,int right,int bottom,long dwFlags){
+    public static HMonitor monitorFromRect(int left, int top, int right, int bottom, long dwFlags) {
         long ret = NativesWindows.monitorFromRect(left, top, right, bottom, dwFlags);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorFromRect(int left,int top,int right,int bottom){
+    public static HMonitor monitorFromRect(int left, int top, int right, int bottom) {
         long ret = NativesWindows.monitorFromRect(left, top, right, bottom, WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorFromRect(Rectangle rect,long dwFlags){
-        long ret = NativesWindows.monitorFromRect((int)rect.point.x,(int)rect.point.y,(int)(rect.point.x+rect.size.dx),(int)(rect.point.y+rect.size.dy), dwFlags);
+    public static HMonitor monitorFromRect(Rectangle rect, long dwFlags) {
+        long ret = NativesWindows.monitorFromRect((int) rect.point.x, (int) rect.point.y, (int) (rect.point.x + rect.size.dx), (int) (rect.point.y + rect.size.dy), dwFlags);
         return new HMonitor(ret);
     }
 
-    public static HMonitor monitorFromRect(Rectangle rect){
-        long ret = NativesWindows.monitorFromRect((int)rect.point.x,(int)rect.point.y,(int)(rect.point.x+rect.size.dx),(int)(rect.point.y+rect.size.dy), WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
+    public static HMonitor monitorFromRect(Rectangle rect) {
+        long ret = NativesWindows.monitorFromRect((int) rect.point.x, (int) rect.point.y, (int) (rect.point.x + rect.size.dx), (int) (rect.point.y + rect.size.dy), WinMonitorFromFlag.MONITOR_DEFAULTTOPRIMARY);
         return new HMonitor(ret);
     }
 
 
-    public static int colorAdjustLuma(int color, int n, boolean fScale){
-        return NativesWindows.colorAdjustLuma(color,n,fScale);
+    public static int colorAdjustLuma(int color, int n, boolean fScale) {
+        return NativesWindows.colorAdjustLuma(color, n, fScale);
     }
 
     public static int colorHLSToRGB(
             int wHue,
             int wLuminance,
-            int wSaturation){
-        return NativesWindows.colorHLSToRGB(wHue,wLuminance,wSaturation);
+            int wSaturation) {
+        return NativesWindows.colorHLSToRGB(wHue, wLuminance, wSaturation);
     }
 
-    public static int[] colorRGBToHLS(int color){
+    public static int[] colorRGBToHLS(int color) {
         return NativesWindows.colorRGBToHLS(color);
     }
 
-    public static double[] hls2normalize(int[] hls){
-        return new double[]{hls[0]/240.0,hls[1]/240.0,hls[2]/240.0};
+    public static double[] hls2normalize(int[] hls) {
+        return new double[]{hls[0] / 240.0, hls[1] / 240.0, hls[2] / 240.0};
     }
-    public static int[] hls4normalize(double[] hls){
-        return new int[]{(int)(hls[0]*240.0),(int)(hls[1]*240.0),(int)(hls[2]*240.0)};
+
+    public static int[] hls4normalize(double[] hls) {
+        return new int[]{(int) (hls[0] * 240.0), (int) (hls[1] * 240.0), (int) (hls[2] * 240.0)};
     }
 
 
@@ -1752,5 +1757,359 @@ public class WinApi {
         ret.lfPitchAndFamily = Converters.parseInt(map.get("lfPitchAndFamily"), 0);
         ret.lfFaceName = map.get("lfFaceName");
         return ret;
+    }
+
+
+    public static long[] getProcessAffinityMask(Handle hProcess) {
+        return NativesWindows.getProcessAffinityMask(hProcess.value());
+    }
+
+    public static boolean setProcessAffinityMask(Handle hProcess, long processAffinityMask) {
+        return NativesWindows.setProcessAffinityMask(hProcess.value(), processAffinityMask);
+    }
+
+    public static long[] getProcessAffinityMaskByProcessId(long processId) {
+        Handle hProcess = openProcess(WinOpenProcessDesiredAccess.PROCESS_QUERY_INFORMATION | WinOpenProcessDesiredAccess.PROCESS_QUERY_LIMITED_INFORMATION,
+                false, processId);
+        long[] ret = getProcessAffinityMask(hProcess);
+        closeHandle(hProcess);
+        return ret;
+    }
+
+    public static boolean setProcessAffinityMaskByProcessId(long processId, long processAffinityMask) {
+        Handle hProcess = openProcess(WinOpenProcessDesiredAccess.PROCESS_SET_INFORMATION,
+                false, processId);
+        boolean ret = setProcessAffinityMask(hProcess, processAffinityMask);
+        closeHandle(hProcess);
+        return ret;
+    }
+
+
+    public static int getPriorityClass(Handle hProcess) {
+        return NativesWindows.getPriorityClass(hProcess.value());
+    }
+
+    public static boolean setPriorityClass(Handle hProcess, int dwPriorityClass) {
+        return NativesWindows.setPriorityClass(hProcess.value(), dwPriorityClass);
+    }
+
+    public static int getPriorityClassByProcessId(long processId) {
+        Handle hProcess = openProcess(WinOpenProcessDesiredAccess.PROCESS_QUERY_INFORMATION | WinOpenProcessDesiredAccess.PROCESS_QUERY_LIMITED_INFORMATION,
+                false, processId);
+        int ret = getPriorityClass(hProcess);
+        closeHandle(hProcess);
+        return ret;
+    }
+
+    public static boolean setPriorityClassByProcessId(long processId, int dwPriorityClass) {
+        Handle hProcess = openProcess(WinOpenProcessDesiredAccess.PROCESS_SET_INFORMATION,
+                false, processId);
+        boolean ret = setPriorityClass(hProcess, dwPriorityClass);
+        closeHandle(hProcess);
+        return ret;
+    }
+
+
+    public static int getThreadPriority(Handle hThread) {
+        return NativesWindows.getThreadPriority(hThread.value());
+    }
+
+    public static boolean setThreadPriority(Handle hThread, int priority) {
+        return NativesWindows.setThreadPriority(hThread.value(), priority);
+    }
+
+    public static long setThreadAffinityMask(Handle hThread, long threadAffinityMask) {
+        return NativesWindows.setThreadAffinityMask(hThread.value(), threadAffinityMask);
+    }
+
+    public static boolean isWow64Process(Handle hProcess) {
+        return NativesWindows.isWow64Process(hProcess.value());
+    }
+
+    public static Handle getCurrentThread() {
+        long ret = NativesWindows.getCurrentThread();
+        return new Handle(ret);
+    }
+
+    public static long getCurrentThreadId() {
+        return NativesWindows.getCurrentThreadId();
+    }
+
+    public static String getCurrentDirectory() {
+        return NativesWindows.getCurrentDirectory();
+    }
+
+    public static boolean setCurrentDirectory(String path) {
+        return NativesWindows.setCurrentDirectory(path);
+    }
+
+    public static boolean createHardLink(String newFileName, String existsFileName) {
+        return NativesWindows.createHardLink(newFileName, existsFileName);
+    }
+
+    public static boolean createSymbolicLink(String symlinkFileName, String targetFileName, int dwFlags) {
+        return NativesWindows.createSymbolicLink(symlinkFileName, targetFileName, dwFlags);
+    }
+
+    public static boolean encryptFile(String fileName) {
+        return NativesWindows.encryptFile(fileName);
+    }
+
+    public static boolean decryptFile(String fileName) {
+        return NativesWindows.decryptFile(fileName);
+    }
+
+    public static boolean createDirectory(String fileName) {
+        return NativesWindows.createDirectory(fileName);
+    }
+
+    public static boolean deleteFile(String fileName) {
+        return NativesWindows.deleteFile(fileName);
+    }
+
+    public static int fileEncryptionStatus(String fileName) {
+        return NativesWindows.fileEncryptionStatus(fileName);
+    }
+
+    public static int getBinaryType(String fileName) {
+        return NativesWindows.getBinaryType(fileName);
+    }
+
+    public static boolean removeDirectory(String fileName) {
+        return NativesWindows.removeDirectory(fileName);
+    }
+
+    public static String getComputerNameEx(int format) {
+        return NativesWindows.getComputerNameEx(format);
+    }
+
+    public static long getPhysicallyInstalledSystemMemory() {
+        return NativesWindows.getPhysicallyInstalledSystemMemory();
+    }
+
+    public static MemoryStatusEx parseMemoryStatusEx(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = getJniStringMap(str);
+        MemoryStatusEx ret = new MemoryStatusEx();
+        ret.dwLength = Converters.parseLong(map.get("dwLength"), 0);
+        ret.dwMemoryLoad = Converters.parseLong(map.get("dwMemoryLoad"), 0);
+        ret.ullTotalPhys = Converters.parseLong(map.get("ullTotalPhys"), 0);
+        ret.ullAvailPhys = Converters.parseLong(map.get("ullAvailPhys"), 0);
+        ret.ullTotalPageFile = Converters.parseLong(map.get("ullTotalPageFile"), 0);
+        ret.ullAvailPageFile = Converters.parseLong(map.get("ullAvailPageFile"), 0);
+        ret.ullTotalVirtual = Converters.parseLong(map.get("ullTotalVirtual"), 0);
+        ret.ullAvailVirtual = Converters.parseLong(map.get("ullAvailVirtual"), 0);
+        ret.ullAvailExtendedVirtual = Converters.parseLong(map.get("ullAvailExtendedVirtual"), 0);
+        return ret;
+    }
+
+    public static MemoryStatusEx globalMemoryStatusEx() {
+        String str = NativesWindows.globalMemoryStatusEx();
+        return parseMemoryStatusEx(str);
+    }
+
+    public static boolean exitWindowsEx(int flags, int reason) {
+        return NativesWindows.exitWindowsEx(flags, reason);
+    }
+
+    public static boolean exitWindows(int flag, boolean force) {
+        OsVersionInfo info = getVersionEx();
+        //如果是高版本就先权限提升
+        if (info.dwPlatformId == WinOsVersionInfoPlatformId.VER_PLATFORM_WIN32_NT) {
+            Handle hProcess = getCurrentProcess();
+            adjustProcessPrivileges(hProcess, WinLookupPrivilegeName.SE_SHUTDOWN_NAME, true);
+            closeHandle(hProcess);
+        }
+        if (force) {
+            flag |= WinExitWindowsFlag.EWX_FORCE | WinExitWindowsFlag.EWX_FORCEIFHUNG;
+        }
+        return exitWindowsEx(flag, 0);
+    }
+
+    public static boolean shutdownWindows() {
+        return exitWindows(WinExitWindowsFlag.EWX_SHUTDOWN, true);
+    }
+
+    public static boolean rebootWindows() {
+        return exitWindows(WinExitWindowsFlag.EWX_REBOOT, true);
+    }
+
+    public static boolean logoffWindows() {
+        return exitWindows(WinExitWindowsFlag.EWX_LOGOFF, true);
+    }
+
+    public static OsVersionInfo parseOsVersionInfo(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = getJniStringMap(str);
+        OsVersionInfo ret = new OsVersionInfo();
+        ret.dwOSVersionInfoSize = Converters.parseInt(map.get("dwOSVersionInfoSize"), 0);
+        ret.dwMajorVersion = Converters.parseInt(map.get("dwMajorVersion"), 0);
+        ret.dwMinorVersion = Converters.parseInt(map.get("dwMinorVersion"), 0);
+        ret.dwBuildNumber = Converters.parseInt(map.get("dwBuildNumber"), 0);
+        ret.dwPlatformId = Converters.parseInt(map.get("dwPlatformId"), 0);
+        ret.szCSDVersion = map.get("szCSDVersion");
+
+        return ret;
+    }
+
+    public static OsVersionInfo getVersionEx() {
+        String str = NativesWindows.getVersionEx();
+        return parseOsVersionInfo(str);
+    }
+
+
+    public static void keyboardVolumeMute() {
+        keyboardClickEvent(WinKeyboardEventVk.VK_VOLUME_MUTE);
+    }
+
+    public static void keyboardVolumeUp() {
+        keyboardClickEvent(WinKeyboardEventVk.VK_VOLUME_UP);
+    }
+
+    public static void keyboardVolumeDown() {
+        keyboardClickEvent(WinKeyboardEventVk.VK_VOLUME_DOWN);
+    }
+
+    public static void keyboardVolumeToZero() {
+        for (int i = 0; i < 100; i++) {
+            sleep(30);
+            keyboardVolumeDown();
+        }
+    }
+
+    public static void keyboardVolumeToMax() {
+        for (int i = 0; i < 100; i++) {
+            sleep(30);
+            keyboardVolumeUp();
+        }
+    }
+
+    public static void keyboardVolumeToValue(int vol) {
+        keyboardVolumeToZero();
+        for (int i = 0; i < vol / 2; i++)//key once add 2% volume value on my pc
+        {
+            sleep(30);
+            keyboardVolumeUp();
+        }
+    }
+
+    public static void keyboardMediaNext() {
+        keyboardClickEvent(WinKeyboardEventVk.VK_MEDIA_NEXT_TRACK);
+    }
+
+    public static void keyboardMediaPrevious() {
+        keyboardClickEvent(WinKeyboardEventVk.VK_MEDIA_PREV_TRACK);
+    }
+
+    public static void keyboardMediaPlayPause() {
+        keyboardClickEvent(WinKeyboardEventVk.VK_MEDIA_PLAY_PAUSE);
+    }
+
+    public static void keyboardMediaStop() {
+        keyboardClickEvent(WinKeyboardEventVk.VK_MEDIA_STOP);
+    }
+
+    public static boolean swapMouseButton(boolean swap) {
+        return NativesWindows.swapMouseButton(swap);
+    }
+
+    public static int getAsyncKeyState(int vk) {
+        return NativesWindows.getAsyncKeyState(vk);
+    }
+
+    public static boolean isKeyDown(int vk) {
+        return (NativesWindows.getAsyncKeyState(vk) & 0x08000) != 0;
+    }
+
+    public static int mciSendString(String command) {
+        return NativesWindows.mciSendString(command);
+    }
+
+    public static void mciOpenMedia(String fileName) {
+        mciSendString("open \"" + fileName + "\" alias media"); // 通过别名，后续命令可以直接使用别名 media
+    }
+
+    public static void mciPlayMedia() {
+        mciSendString("play media");
+    }
+
+    public static void mciPauseMedia() {
+        mciSendString("pause media");
+    }
+
+    public static void mciStopMedia() {
+        mciSendString("stop media");
+    }
+
+    public static void mciResumeMedia() {
+        mciSendString("resume media");
+    }
+
+    public static void mciCloseMedia() {
+        mciSendString("close media");
+    }
+
+    public static void mciOpenCdAudioDoor() {
+        mciSendString("set cdaudio door open");
+    }
+
+    public static void mciCloseCdAudioDoor() {
+        mciSendString("set cdaudio door closed");
+    }
+
+    public static void lockScreen() {
+        winExec("rundll32 user32.dll,LockWorkStation", WinShowWindowCmdShow.SW_HIDE);
+    }
+
+    public static void newPhoneLink(String name, String account, String password) {
+        winExec(String.format("start rasdial %s %s %s", name, account, password), WinShowWindowCmdShow.SW_HIDE);
+    }
+
+    public static void netWirelessDisconnect() {
+        winExec("netsh wlan disconnect", WinShowWindowCmdShow.SW_HIDE);
+    }
+
+    /*
+	网卡名称，可以在这里查看：
+	控制面板\网络和 Internet\网络连接
+	*/
+    public static void netDisableNetCard(String cardName) {
+        winExec(String.format("netsh interface set interface \"%s\" disabled", cardName), WinShowWindowCmdShow.SW_HIDE);
+    }
+
+    public static void netEnableNetCard(String cardName) {
+        winExec(String.format("netsh interface set interface \"%s\" enabled", cardName), WinShowWindowCmdShow.SW_HIDE);
+    }
+
+    public static void netEnableWirelessCard() {
+        netEnableNetCard("WLAN");
+    }
+
+    public static void netDisableWirelessCard() {
+        netDisableNetCard("WLAN");
+    }
+
+    public static void screenOff() {
+        sendMessage(findWindow(null, null), WinSendMessageMsg.WM_SYSCOMMAND, WinSystemMenuCommand.SC_MONITORPOWER, WinSystemMenuCommand.MONITORPOWER_OFF);
+    }
+
+    public static void screenOn() {
+        sendMessage(findWindow(null, null), WinSendMessageMsg.WM_SYSCOMMAND, WinSystemMenuCommand.SC_MONITORPOWER, WinSystemMenuCommand.MONITORPOWER_ON);
+    }
+
+    public static void screenLowPower() {
+        sendMessage(findWindow(null, null), WinSendMessageMsg.WM_SYSCOMMAND, WinSystemMenuCommand.SC_MONITORPOWER, WinSystemMenuCommand.MONITORPOWER_POWERSAVE);
+    }
+
+    public static boolean deleteObject(HGdiObj hGdiObj) {
+        return NativesWindows.deleteObject(hGdiObj.value());
+    }
+
+    public static boolean deleteDC(Hdc hdc) {
+        return NativesWindows.deleteDC(hdc.value());
     }
 }

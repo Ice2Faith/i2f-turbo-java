@@ -8,6 +8,8 @@
 #include<stdio.h>
 #include<conio.h>
 #include<stdlib.h>
+
+
 #define JNI_METHOD(name) Java_i2f_natives_windows_NativesWindows_##name
 
 //Ã¶¾Ù½ø³ÌÒÀÀµ
@@ -22,6 +24,9 @@
 #include<ShellAPI.h>
 #include <ShlObj.h>
 #pragma comment (lib,"shell32.lib")
+// msci
+#include<mmsystem.h>
+#pragma comment(lib,"winmm.lib")
 
 
 template<typename PTR>
@@ -119,7 +124,7 @@ JNI_METHOD(kbHit)(
 JNIEnv* env,
 jobject obj
 ){
-	return 0!=kbhit();
+	return 0 != kbhit();
 }
 
 extern "C" JNIEXPORT jint JNICALL
@@ -154,7 +159,7 @@ jint r,
 jint g,
 jint b
 ){
-	return RGB(r,g,b);
+	return RGB(r, g, b);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -2447,7 +2452,7 @@ jlong iid
 		return 0;
 	}
 
-	void * pLink=NULL;
+	void * pLink = NULL;
 	HRESULT cirs = CoCreateInstance(*pclsid, NULL, clsctx, *piid, (void **)&pLink);
 	if (cirs != S_OK){
 		return 0;
@@ -2581,7 +2586,7 @@ jlong iid)
 	}
 
 	void * pInterface = NULL;
-	HRESULT qirs=ptr->QueryInterface(*piid, (void **)&pInterface);
+	HRESULT qirs = ptr->QueryInterface(*piid, (void **)&pInterface);
 	if (qirs != S_OK){
 		return 0;
 	}
@@ -2639,9 +2644,9 @@ jint showCmd
 		pLink->SetIconLocation(iconPath_ptr, (iconIndex > 0 ? iconIndex : 0));
 	}
 
-	
+
 	if (hotKeyCmd > 0 && hotKeyVk > 0){
-		pLink->SetHotkey(MAKEWORD(hotKeyVk,hotKeyCmd));
+		pLink->SetHotkey(MAKEWORD(hotKeyVk, hotKeyCmd));
 	}
 
 	pLink->SetShowCmd(showCmd);
@@ -2674,14 +2679,14 @@ jstring filePath
 	ULARGE_INTEGER lpTotalNumberOfFreeBytes;
 
 	wchar_t* filePath_ptr = jstring2wchar(env, filePath);
-	BOOL ret=GetDiskFreeSpaceExW(filePath_ptr,&lpFreeBytesAvailableToCaller,&lpTotalNumberOfBytes,&lpTotalNumberOfFreeBytes);
+	BOOL ret = GetDiskFreeSpaceExW(filePath_ptr, &lpFreeBytesAvailableToCaller, &lpTotalNumberOfBytes, &lpTotalNumberOfFreeBytes);
 	freeWchar(filePath_ptr);
 	if (ret == FALSE){
 		return nullptr;
 	}
-	wchar_t buff[1024] = { 0 }; 
+	wchar_t buff[1024] = { 0 };
 	swprintf(buff, L"freeBytesAvailableToCaller:%l64d;#;totalNumberOfBytes:%l64d;#;totalNumberOfFreeBytes:%l64d", lpFreeBytesAvailableToCaller, lpTotalNumberOfBytes, lpTotalNumberOfFreeBytes);
-	return wchar2jstring(env,buff);
+	return wchar2jstring(env, buff);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -2693,8 +2698,8 @@ jstring rootPath,
 jlong flags
 ){
 	wchar_t* rootPath_ptr = jstring2wchar(env, rootPath);
-	HRESULT ret=SHEmptyRecycleBinW(ptrOf<HWND>(hwnd), rootPath_ptr, flags); 
-	freeWchar(rootPath_ptr); 
+	HRESULT ret = SHEmptyRecycleBinW(ptrOf<HWND>(hwnd), rootPath_ptr, flags);
+	freeWchar(rootPath_ptr);
 	return ret == S_OK;
 }
 
@@ -2712,18 +2717,18 @@ jstring lpszProgressTitle
 ){
 	SHFILEOPSTRUCTW op;
 	op.hwnd = ptrOf<HWND>(hwnd);
-	op.wFunc = wFunc; 
-	op.pFrom=jstring2wchar(env,pFrom);
-	op.pTo=jstring2wchar(env,pTo);
-	op.fFlags = fFlags; 
-	op.fAnyOperationsAborted = (fAnyOperationsAborted==true?TRUE:FALSE);
-	op.hNameMappings=NULL;
+	op.wFunc = wFunc;
+	op.pFrom = jstring2wchar(env, pFrom);
+	op.pTo = jstring2wchar(env, pTo);
+	op.fFlags = fFlags;
+	op.fAnyOperationsAborted = (fAnyOperationsAborted == true ? TRUE : FALSE);
+	op.hNameMappings = NULL;
 	op.lpszProgressTitle = jstring2wchar(env, lpszProgressTitle);
-	int ret=SHFileOperationW(&op);
+	int ret = SHFileOperationW(&op);
 	freeWchar((wchar_t*)op.pFrom);
 	freeWchar((wchar_t*)op.pTo);
 	freeWchar((wchar_t*)op.lpszProgressTitle);
-	return ret; 
+	return ret;
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -2733,7 +2738,7 @@ jobject obj,
 jlong hwnd,
 jlong dwFlags
 ){
-	HMONITOR ret = MonitorFromWindow(ptrOf<HWND>(hwnd), dwFlags); 
+	HMONITOR ret = MonitorFromWindow(ptrOf<HWND>(hwnd), dwFlags);
 	return toPtr(ret);
 }
 
@@ -2780,7 +2785,7 @@ jint color,
 jint n,
 jboolean fScale
 ){
-	COLORREF ret=ColorAdjustLuma((COLORREF)color, n, (fScale == true ? TRUE : FALSE));
+	COLORREF ret = ColorAdjustLuma((COLORREF)color, n, (fScale == true ? TRUE : FALSE));
 	return (jint)ret;
 }
 
@@ -2792,7 +2797,7 @@ jint wHue,
 jint wLuminance,
 jint wSaturation
 ){
-	COLORREF ret=ColorHLSToRGB(wHue, wLuminance,wSaturation);
+	COLORREF ret = ColorHLSToRGB(wHue, wLuminance, wSaturation);
 	return (jint)ret;
 }
 
@@ -2802,10 +2807,404 @@ JNIEnv* env,
 jobject obj,
 jint color
 ){
-	WORD wHue=0,  wLuminance=0,  wSaturation=0;
+	WORD wHue = 0, wLuminance = 0, wSaturation = 0;
 	ColorRGBToHLS(color, &wHue, &wLuminance, &wSaturation);
 	jint arr[] = { wHue, wLuminance, wSaturation };
 	jintArray ret = env->NewIntArray(3);
 	env->SetIntArrayRegion(ret, 0, 3, arr);
 	return ret;
+}
+
+extern "C" JNIEXPORT jlongArray JNICALL
+JNI_METHOD(getProcessAffinityMask)(
+JNIEnv* env,
+jobject obj,
+jlong hProcess
+){
+	ULONGLONG processAffinityMask = 0, systemAffinityMask = 0;
+	BOOL ok = GetProcessAffinityMask(ptrOf<HANDLE>(hProcess), &processAffinityMask, &systemAffinityMask);
+	if (ok != TRUE){
+		return env->NewLongArray(0);
+	}
+	jlong arr[] = { processAffinityMask, systemAffinityMask };
+	jlongArray ret = env->NewLongArray(2);
+	env->SetLongArrayRegion(ret, 0, 2, arr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(setProcessAffinityMask)(
+JNIEnv* env,
+jobject obj,
+jlong hProcess,
+jlong processAffinityMask
+){
+	ULONGLONG mask = processAffinityMask;
+	BOOL ret = SetProcessAffinityMask(ptrOf<HANDLE>(hProcess), mask);
+	return ret == TRUE;
+}
+
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getPriorityClass)(
+JNIEnv* env,
+jobject obj,
+jlong hProcess
+){
+	DWORD ret = GetPriorityClass(ptrOf<HANDLE>(hProcess));
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(setPriorityClass)(
+JNIEnv* env,
+jobject obj,
+jlong hProcess,
+jint dwPriorityClass
+){
+	BOOL ret = SetPriorityClass(ptrOf<HANDLE>(hProcess), dwPriorityClass);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getThreadPriority)(
+JNIEnv* env,
+jobject obj,
+jlong hThread
+){
+	int ret = GetThreadPriority(ptrOf<HANDLE>(hThread));
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(setThreadPriority)(
+JNIEnv* env,
+jobject obj,
+jlong hThread,
+jint priority
+){
+	BOOL ret = SetThreadPriority(ptrOf<HANDLE>(hThread), priority);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(setThreadAffinityMask)(
+JNIEnv* env,
+jobject obj,
+jlong hThread,
+jlong threadAffinityMask
+){
+	DWORD_PTR ret = SetThreadAffinityMask(ptrOf<HANDLE>(hThread), threadAffinityMask);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(isWow64Process)(
+JNIEnv* env,
+jobject obj,
+jlong hProcess
+){
+	BOOL wow64 = FALSE;
+	BOOL ret = IsWow64Process(ptrOf<HANDLE>(hProcess), &wow64);
+	return wow64 == TRUE;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getCurrentThread)(
+JNIEnv* env,
+jobject obj
+){
+	HANDLE ret = GetCurrentThread();
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getCurrentThreadId)(
+JNIEnv* env,
+jobject obj
+){
+	DWORD ret = GetCurrentThreadId();
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(getCurrentDirectory)(
+JNIEnv* env,
+jobject obj
+){
+	wchar_t* buff = (wchar_t*)malloc(sizeof(wchar_t)* 8192);
+	DWORD len = GetCurrentDirectoryW(8192, buff);
+	jstring ret = wchar2jstring(env, buff);
+	free(buff);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(setCurrentDirectory)(
+JNIEnv* env,
+jobject obj,
+jstring path
+){
+	wchar_t * path_ptr = jstring2wchar(env, path);
+	BOOL ret = SetCurrentDirectoryW(path_ptr);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(createHardLink)(
+JNIEnv* env,
+jobject obj,
+jstring newFileName,
+jstring existFileName
+){
+	wchar_t* newFileName_ptr = jstring2wchar(env, newFileName);
+	wchar_t* existsFileName_ptr = jstring2wchar(env, existFileName);
+	BOOL ret = CreateHardLinkW(newFileName_ptr, existsFileName_ptr, NULL);
+	freeWchar(newFileName_ptr);
+	freeWchar(existsFileName_ptr);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(createSymbolicLink)(
+JNIEnv* env,
+jobject obj,
+jstring symlinkFileName,
+jstring targetFileName,
+jint dwFlags
+){
+	wchar_t* symlinkFileName_ptr = jstring2wchar(env, symlinkFileName);
+	wchar_t* targetFileName_ptr = jstring2wchar(env, targetFileName);
+	BOOL ret = CreateSymbolicLinkW(symlinkFileName_ptr, targetFileName_ptr, dwFlags);
+	freeWchar(symlinkFileName_ptr);
+	freeWchar(targetFileName_ptr);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(encryptFile)(
+JNIEnv* env,
+jobject obj,
+jstring fileName
+){
+	wchar_t* fileName_ptr = jstring2wchar(env, fileName);
+	BOOL ret = EncryptFileW(fileName_ptr);
+	freeWchar(fileName_ptr);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(decryptFile)(
+JNIEnv* env,
+jobject obj,
+jstring fileName
+){
+	wchar_t* fileName_ptr = jstring2wchar(env, fileName);
+	BOOL ret = DecryptFileW(fileName_ptr, 0);
+	freeWchar(fileName_ptr);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(createDirectory)(
+JNIEnv* env,
+jobject obj,
+jstring fileName
+){
+	wchar_t* fileName_ptr = jstring2wchar(env, fileName);
+	BOOL ret = CreateDirectoryW(fileName_ptr, NULL);
+	freeWchar(fileName_ptr);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(deleteFile)(
+JNIEnv* env,
+jobject obj,
+jstring fileName
+){
+	wchar_t* fileName_ptr = jstring2wchar(env, fileName);
+	BOOL ret = DeleteFileW(fileName_ptr);
+	freeWchar(fileName_ptr);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(fileEncryptionStatus)(
+JNIEnv* env,
+jobject obj,
+jstring fileName
+){
+	wchar_t* fileName_ptr = jstring2wchar(env, fileName);
+	DWORD ret = -1;
+	BOOL ok = FileEncryptionStatusW(fileName_ptr, &ret);
+	freeWchar(fileName_ptr);
+	if (ok == FALSE){
+		return -1;
+	}
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getBinaryType)(
+JNIEnv* env,
+jobject obj,
+jstring fileName
+){
+	wchar_t* fileName_ptr = jstring2wchar(env, fileName);
+	DWORD ret = -1;
+	BOOL ok = GetBinaryTypeW(fileName_ptr, &ret);
+	freeWchar(fileName_ptr);
+	if (ok == FALSE){
+		return -1;
+	}
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(removeDirectory)(
+JNIEnv* env,
+jobject obj,
+jstring fileName
+){
+	wchar_t* fileName_ptr = jstring2wchar(env, fileName);
+	BOOL ok = RemoveDirectoryW(fileName_ptr);
+	return ok == TRUE;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(getComputerNameEx)(
+JNIEnv* env,
+jobject obj,
+jint format
+){
+	wchar_t buff[1024]={0};
+	DWORD len = 1024;
+	BOOL ret=GetComputerNameExW((COMPUTER_NAME_FORMAT)format,buff,&len); 
+	if (ret == FALSE){
+		return nullptr;
+	}
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getPhysicallyInstalledSystemMemory)(
+JNIEnv* env,
+jobject obj
+){
+	ULONGLONG ret = 0;
+	BOOL ok=GetPhysicallyInstalledSystemMemory(&ret);
+	if (ok == FALSE){
+		return -1;
+	}
+	return ret;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(globalMemoryStatusEx)(
+JNIEnv* env,
+jobject obj
+){
+	MEMORYSTATUSEX ms = { 0 };
+	BOOL ret=GlobalMemoryStatusEx(&ms);
+	if (ret == FALSE){
+		return nullptr;
+	}
+	wchar_t buff[2048] = { 0 };
+	swprintf(buff, L"dwLength:%d;#;dwMemoryLoad:%d;#;ullTotalPhys:%l64d;#;ullAvailPhys:%64d;#;ullTotalPageFile:%l64d;#;ullAvailPageFile:%l64d;#;ullTotalVirtual:%l64d;#;ullAvailVirtual:%l64d;#;ullAvailExtendedVirtual:%l64d",
+		ms.dwLength,
+		ms.dwMemoryLoad,
+		ms.ullTotalPhys,
+		ms.ullAvailPhys,
+		ms.ullTotalPageFile,
+		ms.ullAvailPageFile,
+		ms.ullTotalVirtual,
+		ms.ullAvailVirtual,
+		ms.ullAvailExtendedVirtual
+		);
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(getVersionEx)(
+JNIEnv* env,
+jobject obj
+){
+	OSVERSIONINFOW osinfo = { 0 };
+	osinfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
+	BOOL ret=GetVersionExW(&osinfo);
+	if (ret == FALSE){
+		return nullptr;
+	}
+	wchar_t buff[1024] = { 0 };
+	swprintf(buff, L"dwOSVersionInfoSize:%d;#;dwMajorVersion:%d;#;dwMinorVersion:%d;#;dwBuildNumber:%d;#;dwPlatformId:%d;#;szCSDVersion:%s",
+		osinfo.dwOSVersionInfoSize,
+		osinfo.dwMajorVersion,
+		osinfo.dwMinorVersion,
+		osinfo.dwBuildNumber, 
+		osinfo.dwPlatformId,
+		osinfo.szCSDVersion);
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(exitWindowsEx)(
+JNIEnv* env,
+jobject obj,
+jint flags,
+jint reason
+){
+	BOOL ret=ExitWindowsEx(flags, reason);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(swapMouseButton)(
+JNIEnv* env,
+jobject obj,
+jboolean swap
+){
+	BOOL ret = SwapMouseButton(swap?TRUE:FALSE);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getAsyncKeyState)(
+JNIEnv* env,
+jobject obj,
+jint vk
+){
+	SHORT ret = GetAsyncKeyState(vk);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(mciSendString)(
+JNIEnv* env,
+jobject obj,
+jstring command
+){
+	wchar_t* command_ptr = jstring2wchar(env, command);
+	MCIERROR ret = mciSendStringW(command_ptr, NULL, 0, NULL);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(deleteObject)(
+JNIEnv* env,
+jobject obj,
+jlong hGdiObj
+){
+	BOOL ret=DeleteObject(ptrOf<HGDIOBJ>(hGdiObj));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(deleteDC)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = DeleteDC(ptrOf<HDC>(hdc));
+	return ret == TRUE;
 }
