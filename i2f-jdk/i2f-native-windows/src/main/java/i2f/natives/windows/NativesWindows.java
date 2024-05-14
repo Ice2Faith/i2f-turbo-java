@@ -1,5 +1,6 @@
 package i2f.natives.windows;
 
+import i2f.natives.core.MallocPtr;
 import i2f.natives.core.NativeUtil;
 
 /**
@@ -23,7 +24,7 @@ public class NativesWindows {
 
     public static native void flushStdout();
 
-    public static native int rgb(int r,int g,int b);
+    public static native int rgb(int r, int g, int b);
 
     public static native void sleep(int millSeconds);
 
@@ -416,5 +417,125 @@ public class NativesWindows {
     public static native boolean deleteObject(long hGdiObj);
 
     public static native boolean deleteDC(long hdc);
+
+    public static native int getStretchBltMode(long hdc);
+
+    public static native int setStretchBltMode(long hdc, int mode);
+
+    public static native int getMapMode(long hdc);
+
+    public static native int setMapMode(long hdc, int mode);
+
+    public static native int[] getViewportOrgEx(long hdc);
+
+    public static native int[] setViewportOrgEx(long hdc, int x, int y);
+
+    public static native int[] getViewportExtEx(long hdc);
+
+    public static native int[] setViewportExtEx(long hdc, int cx, int cy);
+
+    public static native int[] getWindowOrgEx(long hdc);
+
+    public static native int[] setWindowOrgEx(long hdc, int x, int y);
+
+    public static native int[] getWindowExtEx(long hdc);
+
+    public static native int[] setWindowExtEx(long hdc, int cx, int cy);
+
+    public static native long selectObject(long hdc, long hGdiObj);
+
+    public static native boolean bitBlt(
+            long hdc,
+            int x,
+            int y,
+            int cx,
+            int cy,
+            long hdcSrc,
+            int x1,
+            int y1,
+            long rop
+    );
+
+    public static native long createSolidBrush(int color);
+
+    public static native long createPen(int style, int width, int color);
+
+    public static native long createCompatibleDC(long hdc);
+
+    public static native long createCompatibleBitmap(long hdc, int cx, int cy);
+
+    public static native long createDIBSection(
+            long hdc,
+            long pBitmapInfo,
+            int usage,
+            long hSection,
+            int offset);
+
+    public static native void freeMallocPtr(long ptr);
+
+    public static native void deleteNewPtr(long ptr);
+
+    public static native void deleteNewArrayPtr(long ptr);
+
+    public static native long mallocBitmapInfoHeader(
+            int width,
+            int height,
+            int planes,
+            int bitCount,
+            int compression,
+            int clrUsed,
+            int sizeImage
+    );
+
+    public static native long createPatternBrush(long hBitmap);
+
+    public static native long mallocLogBrush(
+            int color,
+            int hatch,
+            int style);
+
+    public static native long createBrushIndirect(long pLogBrush);
+
+    public static native long mallocLogPen(
+            int style,
+            long widthX,
+            long widthY,
+            int color);
+
+    public static native long createPenIndirect(long pLogPen);
+
+    public static native long mallocLogFont(
+            int lfHeight,
+            int lfWidth,
+            int lfEscapement,
+            int lfOrientation,
+            int lfWeight,
+            boolean lfItalic,
+            boolean lfUnderline,
+            boolean lfStrikeOut,
+            int lfCharSet,
+            int lfOutPrecision,
+            int lfClipPrecision,
+            int lfQuality,
+            int lfPitchAndFamily,
+            String lfFaceName);
+
+    public static native long createFontIndirect(long pLogFont);
+
+    public static native boolean ellipse(long hdc,int left,int top,int right,int bottom);
+
+    public static native boolean rectangle(long hdc,int left,int top,int right,int bottom);
+
+    public static native int setBkMode(long hdc,int mode);
+
+    public static native int getBkMode(long hdc);
+
+    public static native int setBkColor(long hdc,int color);
+
+    public static native int getBkColor(long hdc);
+
+    public static native int setTextColor(long hdc,int color);
+
+    public static native int getTextColor(long hdc);
 }
 
