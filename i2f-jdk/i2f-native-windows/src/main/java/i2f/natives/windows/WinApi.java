@@ -4,8 +4,44 @@ import i2f.convert.Converters;
 import i2f.graphics.d2.Point;
 import i2f.graphics.d2.Size;
 import i2f.graphics.d2.shape.Rectangle;
-import i2f.natives.windows.consts.*;
+import i2f.natives.windows.consts.access.WinGenericRights;
+import i2f.natives.windows.consts.device.*;
+import i2f.natives.windows.consts.file.WinFileAttribute;
+import i2f.natives.windows.consts.file.WinFileCreationDisposition;
+import i2f.natives.windows.consts.file.WinFileShareMode;
+import i2f.natives.windows.consts.process.WinCreateToolhelo32SnapshotFlag;
+import i2f.natives.windows.consts.process.WinLookupPrivilegeName;
+import i2f.natives.windows.consts.process.WinOpenProcessDesiredAccess;
+import i2f.natives.windows.consts.process.WinOpenThreadDesiredAccess;
+import i2f.natives.windows.consts.register.*;
+import i2f.natives.windows.consts.service.*;
+import i2f.natives.windows.consts.shell.WinShEmptyRecycleBinFlag;
+import i2f.natives.windows.consts.shell.WinShFileOperationFlag;
+import i2f.natives.windows.consts.shell.WinShFileOperationFunc;
+import i2f.natives.windows.consts.shell.WinShGetSpecialFolderLocationCsidl;
+import i2f.natives.windows.consts.system.WinExitWindowsFlag;
+import i2f.natives.windows.consts.system.WinOsVersionInfoPlatformId;
+import i2f.natives.windows.consts.window.*;
 import i2f.natives.windows.types.*;
+import i2f.natives.windows.types.com.CoIUnknownPtr;
+import i2f.natives.windows.types.com.CoTaskPtr;
+import i2f.natives.windows.types.com.LpItemIdList;
+import i2f.natives.windows.types.file.DiskFreeSpaceExInfo;
+import i2f.natives.windows.types.file.FileAttributeExInfo;
+import i2f.natives.windows.types.file.FileHandleInformation;
+import i2f.natives.windows.types.gdi.HGdiObj;
+import i2f.natives.windows.types.gdi.Hdc;
+import i2f.natives.windows.types.gdi.LogFont;
+import i2f.natives.windows.types.process.*;
+import i2f.natives.windows.types.register.HKey;
+import i2f.natives.windows.types.register.RegEnumKeyExInfo;
+import i2f.natives.windows.types.register.RegEnumValueInfo;
+import i2f.natives.windows.types.register.RegValueInfo;
+import i2f.natives.windows.types.service.ScHandle;
+import i2f.natives.windows.types.service.ServiceStatusInfo;
+import i2f.natives.windows.types.system.MemoryStatusEx;
+import i2f.natives.windows.types.system.OsVersionInfo;
+import i2f.natives.windows.types.window.*;
 
 import java.io.File;
 import java.util.*;
@@ -824,12 +860,8 @@ public class WinApi {
         keyboardCombineEvent(WinKeyboardEventVk.VK_CONTROL, 'X');
     }
 
-    public static void sleep(int ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (Exception e) {
-
-        }
+    public static void sleep(int millSeconds) {
+        NativesWindows.sleep(millSeconds);
     }
 
     public static void mouseEvent(long dwFlags, int dx, int dy, int dwData) {
