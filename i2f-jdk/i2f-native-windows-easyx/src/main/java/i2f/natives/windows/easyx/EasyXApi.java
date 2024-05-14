@@ -5,12 +5,12 @@ import i2f.graphics.d2.Point;
 import i2f.graphics.d2.Size;
 import i2f.graphics.d2.shape.Rectangle;
 import i2f.natives.windows.WinApi;
-import i2f.natives.windows.consts.*;
+import i2f.natives.windows.consts.gdi.*;
 import i2f.natives.windows.easyx.consts.EasyXInitGraphFlag;
 import i2f.natives.windows.easyx.types.*;
-import i2f.natives.windows.types.Hdc;
-import i2f.natives.windows.types.Hwnd;
-import i2f.natives.windows.types.LogFont;
+import i2f.natives.windows.types.gdi.Hdc;
+import i2f.natives.windows.types.window.Hwnd;
+import i2f.natives.windows.types.gdi.LogFont;
 
 import java.util.Map;
 

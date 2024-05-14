@@ -1,9 +1,9 @@
 package i2f.natives.windows.easyx.test;
 
 import i2f.natives.windows.WinApi;
-import i2f.natives.windows.consts.WinSetBkModeMode;
+import i2f.natives.windows.consts.gdi.WinSetBkModeMode;
 import i2f.natives.windows.easyx.EasyXApi;
-import i2f.natives.windows.types.Hwnd;
+import i2f.natives.windows.types.window.Hwnd;
 
 import java.util.Random;
 

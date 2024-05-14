@@ -2,8 +2,27 @@ package i2f.natives.windows.test;
 
 import i2f.natives.windows.Win8Api;
 import i2f.natives.windows.WinApi;
-import i2f.natives.windows.consts.*;
+import i2f.natives.windows.consts.device.WinDeviceCapsIndex;
+import i2f.natives.windows.consts.process.WinCreateToolhelo32SnapshotFlag;
+import i2f.natives.windows.consts.register.WinRegOpenKeyHkey;
+import i2f.natives.windows.consts.register.WinRegOpenKeySamDesired;
+import i2f.natives.windows.consts.service.WinEnumServiceStatusServiceState;
+import i2f.natives.windows.consts.service.WinEnumServiceStatusServiceType;
+import i2f.natives.windows.consts.service.WinOpenScManagerDesiredAccess;
+import i2f.natives.windows.consts.window.WinSystemMetrics;
 import i2f.natives.windows.types.*;
+import i2f.natives.windows.types.gdi.Hdc;
+import i2f.natives.windows.types.process.ModuleEntry32;
+import i2f.natives.windows.types.process.ProcessEntry32;
+import i2f.natives.windows.types.process.ThreadEntry32;
+import i2f.natives.windows.types.register.HKey;
+import i2f.natives.windows.types.register.RegEnumKeyExInfo;
+import i2f.natives.windows.types.register.RegEnumValueInfo;
+import i2f.natives.windows.types.service.ScHandle;
+import i2f.natives.windows.types.service.ServiceStatusInfo;
+import i2f.natives.windows.types.window.HMonitor;
+import i2f.natives.windows.types.window.Hwnd;
+import i2f.natives.windows.types.window.WindowInfo;
 
 import java.util.List;
 import java.util.Map;

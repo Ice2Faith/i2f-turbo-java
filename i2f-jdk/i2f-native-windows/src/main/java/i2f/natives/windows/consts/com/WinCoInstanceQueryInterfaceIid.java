@@ -1,0 +1,96 @@
+package i2f.natives.windows.consts.com;
+
+/**
+ * @author Ice2Faith
+ * @date 2024/5/12 16:54
+ * @desc
+ */
+public interface WinCoInstanceQueryInterfaceIid {
+    int IID_IMarshal = 0;
+    int IID_IMarshal2 = 1;
+    int IID_IMalloc = 2;
+    int IID_IMallocSpy = 3;
+    int IID_IStdMarshalInfo = 4;
+    int IID_IExternalConnection = 5;
+    int IID_IMultiQI = 6;
+    int IID_AsyncIMultiQI = 7;
+    int IID_IInternalUnknown = 8;
+    int IID_IEnumUnknown = 9;
+    int IID_IBindCtx = 10;
+    int IID_IEnumMoniker = 11;
+    int IID_IRunnableObject = 12;
+    int IID_IRunningObjectTable = 13;
+    int IID_IPersist = 14;
+    int IID_IPersistStream = 15;
+    int IID_IMoniker = 16;
+    int IID_IROTData = 17;
+    int IID_IEnumString = 18;
+    int IID_ISequentialStream = 19;
+    int IID_IStream = 20;
+    int IID_IEnumSTATSTG = 21;
+    int IID_IStorage = 22;
+    int IID_IPersistFile = 23;
+    int IID_IPersistStorage = 24;
+    int IID_ILockBytes = 25;
+    int IID_IEnumFORMATETC = 26;
+    int IID_IEnumSTATDATA = 27;
+    int IID_IRootStorage = 28;
+    int IID_IAdviseSink = 29;
+    int IID_AsyncIAdviseSink = 30;
+    int IID_IAdviseSink2 = 31;
+    int IID_AsyncIAdviseSink2 = 32;
+    int IID_IDataObject = 33;
+    int IID_IDataAdviseHolder = 34;
+    int IID_IMessageFilter = 35;
+    int IID_IRpcChannelBuffer = 36;
+    int IID_IRpcChannelBuffer2 = 37;
+    int IID_IAsyncRpcChannelBuffer = 38;
+    int IID_IRpcChannelBuffer3 = 39;
+    int IID_IRpcSyntaxNegotiate = 40;
+    int IID_IRpcProxyBuffer = 41;
+    int IID_IRpcStubBuffer = 42;
+    int IID_IPSFactoryBuffer = 43;
+    int IID_IChannelHook = 44;
+    int IID_IClientSecurity = 45;
+    int IID_IServerSecurity = 46;
+    int IID_IClassActivator = 47;
+    int IID_IRpcOptions = 48;
+    int IID_IGlobalOptions = 49;
+    int IID_IFillLockBytes = 50;
+    int IID_IProgressNotify = 51;
+    int IID_ILayoutStorage = 52;
+    int IID_IBlockingLock = 53;
+    int IID_ITimeAndNoticeControl = 54;
+    int IID_IOplockStorage = 55;
+    int IID_ISurrogate = 56;
+    int IID_IGlobalInterfaceTable = 57;
+    int IID_IDirectWriterLock = 58;
+    int IID_ISynchronize = 59;
+    int IID_ISynchronizeHandle = 60;
+    int IID_ISynchronizeEvent = 61;
+    int IID_ISynchronizeContainer = 62;
+    int IID_ISynchronizeMutex = 63;
+    int IID_ICancelMethodCalls = 64;
+    int IID_IAsyncManager = 65;
+    int IID_ICallFactory = 66;
+    int IID_IRpcHelper = 67;
+    int IID_IReleaseMarshalBuffers = 68;
+    int IID_IWaitMultiple = 69;
+    int IID_IUrlMon = 70;
+    int IID_IForegroundTransfer = 71;
+    int IID_IAddrTrackingControl = 72;
+    int IID_IAddrExclusionControl = 73;
+    int IID_IPipeByte = 74;
+    int IID_AsyncIPipeByte = 75;
+    int IID_IPipeLong = 76;
+    int IID_AsyncIPipeLong = 77;
+    int IID_IPipeDouble = 78;
+    int IID_AsyncIPipeDouble = 79;
+    int IID_IThumbnailExtractor = 80;
+    int IID_IDummyHICONIncluder = 81;
+    int IID_IProcessLock = 85;
+    int IID_ISurrogateService = 86;
+    int IID_IComThreadingInfo = 87;
+    int IID_IProcessInitControl = 88;
+    int IID_IInitializeSpy = 89;
+}

@@ -1,7 +1,7 @@
 package i2f.natives.windows;
 
 import i2f.graphics.d2.Point;
-import i2f.natives.windows.types.HMonitor;
+import i2f.natives.windows.types.window.HMonitor;
 
 
 /**
