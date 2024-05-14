@@ -1,7 +1,11 @@
 package i2f.natives.windows.test;
 
 import i2f.natives.windows.NativesWindows;
-import i2f.natives.windows.consts.*;
+import i2f.natives.windows.consts.device.WinDeviceCapsIndex;
+import i2f.natives.windows.consts.process.WinCreateToolhelo32SnapshotFlag;
+import i2f.natives.windows.consts.register.WinRegOpenKeyHkey;
+import i2f.natives.windows.consts.register.WinRegOpenKeySamDesired;
+import i2f.natives.windows.consts.window.WinSystemMetrics;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
