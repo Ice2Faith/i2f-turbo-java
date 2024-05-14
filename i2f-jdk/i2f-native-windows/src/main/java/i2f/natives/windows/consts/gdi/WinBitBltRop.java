@@ -23,7 +23,7 @@ public interface WinBitBltRop {
     long WHITENESS = 0x00FF0062; /* dest = WHITE                    */
 // #if(WINVER >= 0x0500)
 
-    long NOMIRRORBITMAP = 0x80000000; /* Do not Mirror the bitmap in this call */
+    long NOMIRRORBITMAP = 0x80000000L; /* Do not Mirror the bitmap in this call */
     long CAPTUREBLT = 0x40000000; /* Include layered windows */
 // #endif /* WINVER >= 0x0500 */
 
