@@ -7,7 +7,6 @@ import i2f.graphics.d2.shape.Rectangle;
 import i2f.natives.core.MallocPtr;
 import i2f.natives.core.NewArrayPtr;
 import i2f.natives.core.NewPtr;
-import i2f.natives.core.Ptr;
 import i2f.natives.windows.consts.access.WinGenericRights;
 import i2f.natives.windows.consts.device.*;
 import i2f.natives.windows.consts.file.WinFileAttribute;
@@ -28,6 +27,8 @@ import i2f.natives.windows.consts.shell.WinShFileOperationFunc;
 import i2f.natives.windows.consts.shell.WinShGetSpecialFolderLocationCsidl;
 import i2f.natives.windows.consts.system.WinExitWindowsFlag;
 import i2f.natives.windows.consts.system.WinOsVersionInfoPlatformId;
+import i2f.natives.windows.types.winapp.BitmapDcPtr;
+import i2f.natives.windows.consts.winapp.WinAppCallbacker;
 import i2f.natives.windows.consts.window.*;
 import i2f.natives.windows.types.*;
 import i2f.natives.windows.types.com.CoIUnknownPtr;
@@ -2547,5 +2548,205 @@ public class WinApi {
 
     public static int getTextColor(Hdc hdc){
         return NativesWindows.getTextColor(hdc.value());
+    }
+
+    public static Rectangle getClientRect(Hwnd hwnd){
+        int[] ret = NativesWindows.getClientRect(hwnd.value());
+        if(ret.length==0){
+            return null;
+        }
+        return new Rectangle(ret[0],ret[1],ret[2]-ret[0],ret[3]-ret[1]);
+    }
+
+    public static long defWindowProc(Hwnd hwnd,long message,long wParam,long lParam){
+        return NativesWindows.defWindowProc(hwnd.value(),message,wParam,lParam);
+    }
+
+    public static HModule getModuleHandle(String moduleName){
+        long ret = NativesWindows.getModuleHandle(moduleName);
+        return new HModule(ret);
+    }
+
+    public static HIcon extractIcon(HInstance hInstance,String exeFileName,int iconIndex){
+        long ret = NativesWindows.extractIcon(hInstance.value(), exeFileName, iconIndex);
+        return new HIcon(ret);
+    }
+
+    public static boolean destroyIcon(HIcon hIcon){
+        return NativesWindows.destroyIcon(hIcon.value());
+    }
+
+    public static boolean freeConsole(){
+        return NativesWindows.freeConsole();
+    }
+
+    public static boolean allocConsole(){
+        return NativesWindows.allocConsole();
+    }
+
+    public static boolean attachConsole(long dwProcessId){
+        return NativesWindows.attachConsole(dwProcessId);
+    }
+
+    public static boolean updateWindow(Hwnd hwnd){
+        return NativesWindows.updateWindow(hwnd.value());
+    }
+
+    public static boolean invalidateRect(
+            Hwnd hwnd,
+            boolean nullRect,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            boolean erase){
+        return NativesWindows.invalidateRect(hwnd.value(),
+                nullRect,
+                left,top,right,bottom,
+                erase);
+    }
+
+    public static boolean invalidateRect(
+            Hwnd hwnd,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            boolean erase){
+        return NativesWindows.invalidateRect(hwnd.value(),
+                false,
+                left,top,right,bottom,
+                erase);
+    }
+
+    public static boolean invalidateRect(
+            Hwnd hwnd,
+            Rectangle rect,
+            boolean erase){
+        return NativesWindows.invalidateRect(hwnd.value(),
+                false,
+                (int)rect.left(),
+                (int)rect.top(),
+                (int)rect.right(),
+                (int)rect.bottom(),
+                erase);
+    }
+
+    public static boolean invalidateRect(
+            Hwnd hwnd,
+            boolean erase){
+        return NativesWindows.invalidateRect(hwnd.value(),
+                true,
+                0,0,0,0,
+                erase);
+    }
+
+    public static boolean invalidateRgn(
+            Hwnd hwnd,
+            HRgn hRgn,
+            boolean erase
+    ){
+        return NativesWindows.invalidateRgn(hwnd.value(),hRgn.value(),erase);
+    }
+
+
+    public static boolean getMessage(
+            MsgPtr pMsg,
+            Hwnd hwnd,
+            long uMsgFilterMin,
+            long uMsgFilterMax
+    ){
+        return NativesWindows.getMessage(pMsg.value(),hwnd.value(),uMsgFilterMin,uMsgFilterMax);
+    }
+
+    public static long dispatchMessage(MsgPtr pMsg){
+        return NativesWindows.dispatchMessage(pMsg.value());
+    }
+
+    public static boolean translateMessage(MsgPtr pMsg){
+        return NativesWindows.translateMessage(pMsg.value());
+    }
+
+    public static MsgPtr mallocMsg(){
+        long ret = NativesWindows.mallocMsg();
+        return new MsgPtr(ret);
+    }
+
+    public static Hwnd getConsoleWindow(){
+        long ret = NativesWindows.getConsoleWindow();
+        return new Hwnd(ret);
+    }
+
+    public static int getXLParam(long lParam){
+        return NativesWindows.getXLParam(lParam);
+    }
+
+    public static int getYLParam(long lParam){
+        return NativesWindows.getYLParam(lParam);
+    }
+
+    public static int makeWord(int a,int b){
+        return NativesWindows.makeWord(a,b);
+    }
+
+    public static int hiWord(long a){
+        return NativesWindows.hiWord(a);
+    }
+
+    public static int loWord(long a){
+        return NativesWindows.loWord(a);
+    }
+
+    public static int getRValue(int color){
+        return NativesWindows.getRValue(color);
+    }
+
+    public static int getGValue(int color){
+        return NativesWindows.getGValue(color);
+    }
+
+    public static int getBValue(int color){
+        return NativesWindows.getBValue(color);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public static HBitmap winAppCreateBitmap(int width, int height){
+        long ret = NativesWindows.winAppCreateBitmap(width, height);
+        return new HBitmap(ret);
+    }
+
+    public static void winAppResizeCompatibleDC(
+            Hdc hdc,
+            BitmapDcPtr pBDC,
+            int newWidth,
+            int newHeight,
+            int resizeMode){
+        NativesWindows.winAppResizeCompatibleDC(hdc.value(),
+                pBDC.value(),
+                newWidth,newHeight,
+                resizeMode);
+    }
+
+    public static int winAppCreateWin32App(
+            String className,
+            String windowTitle,
+            String iconFileName,
+            int nCmdShow,
+            boolean showConsole,
+            int mdcResizeMode,
+            WinAppCallbacker callbacker){
+        return NativesWindows.winAppCreateWin32App(className, windowTitle, iconFileName, nCmdShow, showConsole, mdcResizeMode, callbacker);
     }
 }

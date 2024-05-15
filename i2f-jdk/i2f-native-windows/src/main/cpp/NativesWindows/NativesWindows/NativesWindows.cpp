@@ -3759,6 +3759,298 @@ jlong hdc
 	return ret;
 }
 
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(getClientRect)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd
+){
+	RECT rect = { 0 };
+	BOOL ok = GetClientRect(ptrOf<HWND>(hwnd), &rect);
+	if (ok == FALSE){
+		return env->NewIntArray(0);
+	}
+	jint buff[] = { rect.left, rect.top, rect.right, rect.bottom };
+	jintArray ret = env->NewIntArray(4);
+	env->SetIntArrayRegion(ret, 0, 4, buff);
+	return ret;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(defWindowProc)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd,
+jlong message,
+jlong wParam,
+jlong lParam
+){
+	LRESULT ret=DefWindowProcW(ptrOf<HWND>(hwnd), message, (WPARAM)wParam, (LPARAM)lParam);
+	return ret;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getModuleHandle)(
+JNIEnv* env,
+jobject obj,
+jstring moduleName
+){
+	wchar_t* moduleName_ptr = jstring2wchar(env, moduleName);
+	HMODULE ret = GetModuleHandleW(moduleName_ptr);
+	freeWchar(moduleName_ptr);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(extractIcon)(
+JNIEnv* env,
+jobject obj,
+jlong hInstance,
+jstring exeFileName,
+jint iconIndex
+){
+	wchar_t* exeFileName_ptr = jstring2wchar(env, exeFileName);
+	HICON ret=ExtractIconW(ptrOf<HINSTANCE>(hInstance), exeFileName_ptr, iconIndex);
+	return toPtr(ret);
+}
+
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(destroyIcon)(
+JNIEnv* env,
+jobject obj,
+jlong hIcon
+){
+	BOOL ret = DestroyIcon(ptrOf<HICON>(hIcon));
+	return ret==TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(freeConsole)(
+JNIEnv* env,
+jobject obj
+){
+	BOOL ret = FreeConsole();
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(allocConsole)(
+JNIEnv* env,
+jobject obj
+){
+	BOOL ret = AllocConsole();
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(attachConsole)(
+JNIEnv* env,
+jobject obj,
+jlong dwProcessId
+){
+	BOOL ret = AttachConsole(dwProcessId);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(updateWindow)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd
+){
+	BOOL ret = UpdateWindow(ptrOf<HWND>(hwnd));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(invalidateRect)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd,
+jboolean nullRect,
+jint left,
+jint top,
+jint right,
+jint bottom,
+jboolean erase
+){
+	RECT rect = { 0 };
+	rect.left = left;
+	rect.top = top;
+	rect.right = right;
+	rect.bottom = bottom;
+	BOOL ret = InvalidateRect(ptrOf<HWND>(hwnd),(nullRect?NULL:&rect),(erase?TRUE:FALSE));
+	return ret == TRUE;
+}
+
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(invalidateRgn)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd,
+jlong hRgn,
+jboolean erase
+){
+	BOOL ret = InvalidateRgn(ptrOf<HWND>(hwnd), ptrOf<HRGN>(hRgn),(erase?TRUE:FALSE));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(getMessage)(
+JNIEnv* env,
+jobject obj,
+jlong pMsg,
+jlong hwnd,
+jlong uMsgFilterMin,
+jlong uMsgFilterMax
+){
+	BOOL ret = GetMessageW(ptrOf<MSG*>(pMsg), ptrOf<HWND>(hwnd), uMsgFilterMin, uMsgFilterMax);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(dispatchMessage)(
+JNIEnv* env,
+jobject obj,
+jlong pMsg
+){
+	LRESULT ret = DispatchMessageW(ptrOf<MSG*>(pMsg));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(translateMessage)(
+JNIEnv* env,
+jobject obj,
+jlong pMsg
+){
+	BOOL ret = TranslateMessage(ptrOf<MSG*>(pMsg));
+	return ret == TRUE;
+}
+
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(mallocMsg)(
+JNIEnv* env,
+jobject obj
+){
+	MSG* ret = (MSG*)malloc(sizeof(MSG));
+	memset(ret, 0, sizeof(MSG));
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getConsoleWindow)(
+JNIEnv* env,
+jobject obj
+){
+	HWND ret=GetConsoleWindow();
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getXLParam)(
+JNIEnv* env,
+jobject obj,
+jlong lParam
+){
+	int ret = GET_X_LPARAM((LPARAM)lParam);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getYLParam)(
+JNIEnv* env,
+jobject obj,
+jlong lParam
+){
+	int ret = GET_Y_LPARAM((LPARAM)lParam);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(makeWord)(
+JNIEnv* env,
+jobject obj,
+jint a,
+jint b
+){
+	WORD ret = MAKEWORD(a,b);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(hiWord)(
+JNIEnv* env,
+jobject obj,
+jlong a
+){
+	WORD ret = HIWORD(a);
+	return ret;
+}
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(loWord)(
+JNIEnv* env,
+jobject obj,
+jlong a
+){
+	WORD ret = LOWORD(a);
+	return ret;
+}
+
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getRValue)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	int ret = GetRValue(color);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getGValue)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	int ret = GetGValue(color);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getBValue)(
+JNIEnv* env,
+jobject obj,
+jint color
+){
+	int ret = GetBValue(color);
+	return ret;
+}
+
+
+
+
+void setWindowTransparentColor(HWND hWnd, COLORREF colorKey)
+{
+	//窗口透明
+	LONG wlong = ::GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED;
+	::SetWindowLong(hWnd, GWL_EXSTYLE, wlong);
+	//穿透点击
+	::SetLayeredWindowAttributes(hWnd, colorKey, 0, LWA_COLORKEY);
+}
+void setWindowTransparentAlpha(HWND hWnd, double transRate)
+{
+	//窗口透明
+	LONG wlong = ::GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED;
+	::SetWindowLong(hWnd, GWL_EXSTYLE, wlong);
+	//不穿透点击
+	::SetLayeredWindowAttributes(hWnd, 0x000000, (1.0 - transRate) * 255, LWA_ALPHA);
+}
+
 
 enum RESIZE_MODE{
 	RESIZE_MODE_ADAPT = 0,
@@ -3958,7 +4250,7 @@ int createWin32App(WIN32_APP_CONFIG* config){
 	wc.hIconSm = p_instance->icon;
 
 	ATOM retRc = RegisterClassExW(&wc);
-
+	
 	// 创建窗口
 	p_instance->hWnd = CreateWindowW(config->className,
 		config->windowTitle,
@@ -4011,6 +4303,7 @@ typedef struct _JNI_WINAPP_ENV{
 LRESULT jniCallbackFunc(P_WIN32_APP_INSTANCE p_instance, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
 
 	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)p_instance->callbackEnv;
+	jlong ret = appEnv->env->CallLongMethod(appEnv->callbacker, appEnv->method, toPtr(p_instance), toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam);
 
 	
 	PAINTSTRUCT ps;
@@ -4055,6 +4348,13 @@ LRESULT jniCallbackFunc(P_WIN32_APP_INSTANCE p_instance, HWND hWnd, UINT message
 							 freopen("CONIN$", "r", stdin); // 重定向标准输入
 							 freopen("CONOUT$", "w", stdout); // 重定向标准输出
 							 freopen("CONERR$", "w", stderr); // 重定向标准错误输出
+							 HWND h = GetConsoleWindow();
+							 wchar_t buff[2048] = { 0 };
+							 GetWindowTextW(hWnd, buff, 2048);
+							 lstrcatW(buff, L" - Console");
+							 SetWindowTextW(h, buff);
+							 setWindowTransparentAlpha(h, 0.25);
+							 // PostMessageW(h, WM_SETICON, ICON_BIG, (LPARAM)p_instance->icon);
 						 }
 						 else{
 							 HWND h = GetConsoleWindow();
@@ -4124,7 +4424,6 @@ LRESULT jniCallbackFunc(P_WIN32_APP_INSTANCE p_instance, HWND hWnd, UINT message
 		return DefWindowProcW(hWnd, message, wParam, lParam);
 	}
 
-	jlong ret = appEnv->env->CallLongMethod(appEnv->callbacker, appEnv->method, toPtr(p_instance), toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam);
 	return 0;
 }
 
@@ -4159,10 +4458,10 @@ jobject callbacker
 
 	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)malloc(sizeof(JNI_WINAPP_ENV));
 	memset(appEnv, 0, sizeof(JNI_WINAPP_ENV));
+	appEnv->env = env;
 	appEnv->callbacker = callbacker;
 	config.callbackEnv = appEnv;
 	config.callbackFunc = jniCallbackFunc;
-
 	appEnv->clazz = env->GetObjectClass(callbacker);
 	appEnv->method = env->GetMethodID(appEnv->clazz, "callback", "(JJJJJ)J");
 

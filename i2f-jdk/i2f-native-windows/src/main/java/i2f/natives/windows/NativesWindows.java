@@ -2,6 +2,7 @@ package i2f.natives.windows;
 
 import i2f.natives.core.MallocPtr;
 import i2f.natives.core.NativeUtil;
+import i2f.natives.windows.consts.winapp.WinAppCallbacker;
 
 /**
  * @author Ice2Faith
@@ -522,20 +523,108 @@ public class NativesWindows {
 
     public static native long createFontIndirect(long pLogFont);
 
-    public static native boolean ellipse(long hdc,int left,int top,int right,int bottom);
+    public static native boolean ellipse(long hdc, int left, int top, int right, int bottom);
 
-    public static native boolean rectangle(long hdc,int left,int top,int right,int bottom);
+    public static native boolean rectangle(long hdc, int left, int top, int right, int bottom);
 
-    public static native int setBkMode(long hdc,int mode);
+    public static native int setBkMode(long hdc, int mode);
 
     public static native int getBkMode(long hdc);
 
-    public static native int setBkColor(long hdc,int color);
+    public static native int setBkColor(long hdc, int color);
 
     public static native int getBkColor(long hdc);
 
-    public static native int setTextColor(long hdc,int color);
+    public static native int setTextColor(long hdc, int color);
 
     public static native int getTextColor(long hdc);
+
+    public static native int[] getClientRect(long hwnd);
+
+    public static native long defWindowProc(long hwnd, long message, long wParam, long lParam);
+
+    public static native long getModuleHandle(String moduleName);
+
+    public static native long extractIcon(long hInstance, String exeFileName, int iconIndex);
+
+    public static native boolean destroyIcon(long hIcon);
+
+    public static native boolean freeConsole();
+
+    public static native boolean allocConsole();
+
+    public static native boolean attachConsole(long dwProcessId);
+
+    public static native boolean updateWindow(long hwnd);
+
+    public static native boolean invalidateRect(
+            long hwnd,
+            boolean nullRect,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            boolean erase);
+
+    public static native boolean invalidateRgn(
+            long hwnd,
+            long hRgn,
+            boolean erase
+    );
+
+
+    public static native boolean getMessage(
+    long pMsg,
+    long hwnd,
+    long uMsgFilterMin,
+    long uMsgFilterMax
+    );
+
+    public static native long dispatchMessage(long pMsg);
+
+    public static native boolean translateMessage(long pMsg);
+
+    public static native long mallocMsg();
+
+    public static native long getConsoleWindow();
+
+    public static native int getXLParam(long lParam);
+
+    public static native int getYLParam(long lParam);
+
+    public static native int makeWord(int a,int b);
+
+    public static native int hiWord(long a);
+
+    public static native int loWord(long a);
+
+    public static native int getRValue(int color);
+
+    public static native int getGValue(int color);
+
+    public static native int getBValue(int color);
+
+
+
+
+
+
+    public static native long winAppCreateBitmap(int width, int height);
+
+    public static native void winAppResizeCompatibleDC(
+            long hdc,
+            long pBDC,
+            int newWidth,
+            int newHeight,
+            int resizeMode);
+
+    public static native int winAppCreateWin32App(
+            String className,
+            String windowTitle,
+            String iconFileName,
+            int nCmdShow,
+            boolean showConsole,
+            int mdcResizeMode,
+            WinAppCallbacker callbacker);
 }
 
