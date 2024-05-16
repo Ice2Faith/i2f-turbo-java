@@ -863,7 +863,21 @@ public class NativesWindows {
             long hMenu,
             long hInstance);
 
+    public static native long mallocPaintStruct();
+
+    public static native long beginPaint(long hwnd,long pPaintStruct);
+
+    public static native boolean endPaint(long hwnd,long pPaintStruct);
+
+    public static native void postQuitMessage(int exitCode);
+
     public static native void bindMessageCallbacker(long hwnd, WinMessageCallbacker callbacker);
+
+    public static native long mallocBitMapDc();
+
+    public static native String getBitmapDcInfo(long pBitmapDc);
+
+    public static native void freopenStdio();
 
     public static native long winAppCreateBitmap(int width, int height);
 
