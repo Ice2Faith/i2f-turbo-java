@@ -5198,6 +5198,89 @@ jint index
 	return toPtr(ret);
 }
 
+
+typedef struct _JNI_WINAPP_ENV{
+	JNIEnv* env;
+	jobject callbacker;
+	jclass clazz;
+	jmethodID method;
+} JNI_WINAPP_ENV, *P_JNI_WINAPP_ENV;
+
+struct _WIN32_RAW_WINDOW;
+typedef _WIN32_RAW_WINDOW WIN32_RAW_WINDOW;
+typedef _WIN32_RAW_WINDOW* P_WIN32_RAW_WINDOW;
+
+struct _WIN32_RAW_WINDOW{
+	HWND hWnd;
+	void * callbackEnv;
+	LRESULT(*callbackFunc)(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+};
+
+static std::map<HWND, P_WIN32_RAW_WINDOW> g_raw_map;
+
+
+
+// 事件分发器
+LRESULT CALLBACK dispatcherRawWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
+
+	P_WIN32_RAW_WINDOW p_instance = g_raw_map[hWnd];
+	std::map<HWND, P_WIN32_RAW_WINDOW>* p_g_wnds = &g_raw_map;
+
+	
+	if (p_instance == NULL){
+		return  DefWindowProcW(hWnd, message, wParam, lParam);
+	}
+
+	LRESULT ret = p_instance->callbackFunc(hWnd, message, wParam, lParam);
+
+	if (message == WM_DESTROY){
+		g_raw_map.erase(hWnd);
+		free(p_instance->callbackEnv);
+		free(p_instance);
+	}
+
+	return ret;
+}
+
+LRESULT jniRawCallbackFunc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
+	P_WIN32_RAW_WINDOW p_instance = g_raw_map[hWnd];
+	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)p_instance->callbackEnv;
+	
+	
+	//jlong ret = appEnv->env->CallLongMethod(appEnv->callbacker, appEnv->method, toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam);
+
+	char log[1024] = { 0 };
+	sprintf(log, "instance:%d,appEnv:%d,env:%d,callbacker:%d,method:%d,hWnd:%d,message:%d,wParam:%d,lParam:%d",
+		p_instance, appEnv, appEnv->env,
+		appEnv->callbacker, appEnv->method, toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam
+		);
+	MessageBoxA(NULL, log, "debug", MB_OK);
+
+	PAINTSTRUCT ps;
+	HDC hdc;
+
+	switch (message){
+	case WM_CREATE:
+
+		break;
+	case WM_COMMAND:
+
+		break;
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+		EndPaint(hWnd, &ps);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	
+	default:
+		return DefWindowProcW(hWnd, message, wParam, lParam);
+	}
+
+	return 0;
+}
+
 extern "C" JNIEXPORT jint JNICALL
 JNI_METHOD(registerClassEx)(
 JNIEnv* env,
@@ -5221,7 +5304,7 @@ jlong       hIconSm
 	wc.cbSize = sizeof(WNDCLASSEXW);
 
 	wc.style = style; 
-	wc.lpfnWndProc = (WNDPROC)dispatcherWndProc;
+	wc.lpfnWndProc = (WNDPROC)dispatcherRawWndProc;
 	wc.cbClsExtra = cbClsExtra;
 	wc.hInstance = ptrOf<HINSTANCE>(hInstance); 
 	wc.hIcon = ptrOf<HICON>(hIcon); 
@@ -5272,58 +5355,50 @@ jlong hInstance
 	return toPtr(ret);
 }
 
-typedef struct _JNI_WINAPP_ENV{
-	JNIEnv* env;
-	jobject callbacker;
-	jclass clazz;
-	jmethodID method;
-} JNI_WINAPP_ENV, *P_JNI_WINAPP_ENV;
 
-struct _WIN32_RAW_WINDOW;
-typedef _WIN32_RAW_WINDOW WIN32_RAW_WINDOW;
-typedef _WIN32_RAW_WINDOW* P_WIN32_RAW_WINDOW;
-
-struct _WIN32_RAW_WINDOW{
-	HWND hWnd;
-	void * callbackEnv;
-	LRESULT(*callbackFunc)(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-};
-
-static std::map<HWND, P_WIN32_RAW_WINDOW> g_raw_map;
-
-
-
-// 事件分发器
-LRESULT CALLBACK dispatcherWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
-
-	P_WIN32_RAW_WINDOW p_instance = g_raw_map[hWnd];
-	std::map<HWND, P_WIN32_RAW_WINDOW>* p_g_wnds = &g_raw_map;
-
-	if (p_instance == NULL){
-		return  DefWindowProcW(hWnd, message, wParam, lParam);
-	}
-
-	LRESULT ret=p_instance->callbackFunc(hWnd, message, wParam, lParam);
-
-	if (message == WM_DESTROY){
-		g_raw_map.erase(hWnd);
-		free(p_instance->callbackEnv);
-		free(p_instance);
-	}
-
-	return ret;
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(mallocPaintStruct)(
+JNIEnv* env,
+jobject obj
+){
+	PAINTSTRUCT* ret = (PAINTSTRUCT*)malloc(sizeof(PAINTSTRUCT));
+	memset(ret, 0, sizeof(PAINTSTRUCT));
+	return toPtr(ret);
 }
 
-LRESULT jniRawCallbackFunc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
-	P_WIN32_RAW_WINDOW p_instance = g_raw_map[hWnd];
-
-	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)p_instance->callbackEnv;
-	jlong ret = appEnv->env->CallLongMethod(appEnv->callbacker, appEnv->method, toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam);
-
-	return ret;
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(beginPaint)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd,
+jlong pPaintStruct
+){
+	HDC hdc=BeginPaint(ptrOf<HWND>(hwnd), ptrOf<PAINTSTRUCT*>(pPaintStruct));
+	return toPtr(hdc);
 }
 
-extern "C" JNIEXPORT jint JNICALL
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(endPaint)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd,
+jlong pPaintStruct
+){
+	BOOL ret=EndPaint(ptrOf<HWND>(hwnd), ptrOf<PAINTSTRUCT*>(pPaintStruct));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(postQuitMessage)(
+JNIEnv* env,
+jobject obj,
+jint exitCode
+){
+	PostQuitMessage(exitCode);
+}
+
+
+extern "C" JNIEXPORT void JNICALL
 JNI_METHOD(bindMessageCallbacker)(
 JNIEnv* env,
 jobject obj,
@@ -5334,7 +5409,7 @@ jobject callbacker
 	P_WIN32_RAW_WINDOW config = (P_WIN32_RAW_WINDOW)malloc(sizeof(WIN32_RAW_WINDOW));
 	memset(config, 0, sizeof(WIN32_RAW_WINDOW));
 	config->hWnd = ptrOf<HWND>(hwnd);
-	
+
 
 	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)malloc(sizeof(JNI_WINAPP_ENV));
 	memset(appEnv, 0, sizeof(JNI_WINAPP_ENV));
@@ -5345,11 +5420,55 @@ jobject callbacker
 	appEnv->clazz = env->GetObjectClass(callbacker);
 	appEnv->method = env->GetMethodID(appEnv->clazz, "callback", "(JJJJ)J");
 
+
 	g_raw_map[config->hWnd] = config;
 }
 
+enum RESIZE_MODE{
+	RESIZE_MODE_ADAPT = 0,
+	RESIZE_MODE_CUT = 1,
+	RESIZE_MODE_FIXED = 2
+};
+
+typedef struct _BITMAP_DC{
+	HDC hdc;
+	HBITMAP hBitMap;
+	int width;
+	int height;
+} BITMAP_DC, *P_BITMAP_DC;
 
 
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(mallocBitMapDc)(
+JNIEnv* env,
+jobject obj
+){
+	BITMAP_DC* ret = (BITMAP_DC*)malloc(sizeof(BITMAP_DC));
+	memset(ret, 0, sizeof(BITMAP_DC));
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(getBitmapDcInfo)(
+JNIEnv* env,
+jobject obj,
+long pBitmapDc
+){
+	BITMAP_DC* ret = ptrOf<BITMAP_DC*>(pBitmapDc);
+	wchar_t buff[512] = { 0 };
+	swprintf(buff, L"hdc:%l64d;#;hBitmap:%l64d;#;width:%d;#;height:%d", toPtr(ret->hdc), toPtr(ret->hBitMap), ret->width, ret->height);
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(freopenStdio)(
+JNIEnv* env,
+jobject obj
+){
+	freopen("CONIN$", "r", stdin); // 重定向标准输入
+	freopen("CONOUT$", "w", stdout); // 重定向标准输出
+	freopen("CONERR$", "w", stderr); // 重定向标准错误输出
+}
 
 
 
@@ -5373,18 +5492,7 @@ void setWindowTransparentAlpha(HWND hWnd, double transRate)
 }
 
 
-enum RESIZE_MODE{
-	RESIZE_MODE_ADAPT = 0,
-	RESIZE_MODE_CUT = 1,
-	RESIZE_MODE_FIXED = 2
-};
 
-typedef struct _BITMAP_DC{
-	HDC hdc;
-	HBITMAP hBitMap;
-	int width;
-	int height;
-} BITMAP_DC, *P_BITMAP_DC;
 
 
 struct _WIN32_APP_CONFIG;
@@ -5651,6 +5759,7 @@ LRESULT jniCallbackFunc(P_WIN32_APP_INSTANCE p_instance, HWND hWnd, UINT message
 		if (p_instance->icon != NULL){
 			DestroyIcon(p_instance->icon);
 		}
+		DeleteObject(p_instance->mdc.hBitMap);
 		free(p_instance->callbackEnv);
 		free(p_instance);
 		free(appEnv);
@@ -5703,7 +5812,7 @@ LRESULT jniCallbackFunc(P_WIN32_APP_INSTANCE p_instance, HWND hWnd, UINT message
 						 HBRUSH brush = CreateSolidBrush(0xffffff);
 						 HGDIOBJ oldBrush = SelectObject(p_instance->mdc.hdc, brush);
 						 Rectangle(p_instance->mdc.hdc, -1, -1, p_instance->mdc.width + 1, p_instance->mdc.height + 1);
-						 SelectObject(p_instance->mdc.hdc, brush);
+						 SelectObject(p_instance->mdc.hdc, oldBrush);
 						 DeleteObject(brush);
 						 InvalidateRect(hWnd, NULL, TRUE);
 	}

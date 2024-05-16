@@ -3363,11 +3363,54 @@ public class WinApi {
                 hInstance);
     }
 
+    public static PaintStructPtr mallocPaintStruct(){
+        long ret = NativesWindows.mallocPaintStruct();
+        return new PaintStructPtr(ret);
+    }
+
+    public static Hdc beginPaint(Hwnd hwnd,PaintStructPtr pPaintStruct){
+        long ret = NativesWindows.beginPaint(hwnd.value(), pPaintStruct.value());
+        return new Hdc(ret);
+    }
+
+    public static boolean endPaint(Hwnd hwnd,PaintStructPtr pPaintStruct){
+        return NativesWindows.endPaint(hwnd.value(),pPaintStruct.value());
+    }
+
+    public static void postQuitMessage(int exitCode){
+        NativesWindows.postQuitMessage(exitCode);
+    }
+
     public static void bindMessageCallbacker(Hwnd hwnd, WinMessageCallbacker callbacker) {
         NativesWindows.bindMessageCallbacker(hwnd.value(), callbacker);
     }
 
+    public static BitmapDcPtr mallocBitMapDc(){
+        long ret = NativesWindows.mallocBitMapDc();
+        return new BitmapDcPtr(ret);
+    }
 
+    public static BitmapDcInfo parseBitmapDcInfo(String str) {
+        if (str == null) {
+            return null;
+        }
+        Map<String, String> map = getJniStringMap(str);
+        BitmapDcInfo ret = new BitmapDcInfo();
+        ret.hdc = new Hdc(Converters.parseLong(map.get("hdc"), 0));
+        ret.hBitmap = new HBitmap(Converters.parseInt(map.get("hBitmap"), 0));
+        ret.width = Converters.parseInt(map.get("width"), 0);
+        ret.height = Converters.parseInt(map.get("height"), 0);
+        return ret;
+    }
+
+    public static BitmapDcInfo getBitmapDcInfo(BitmapDcPtr pBitmapDc){
+        String str = NativesWindows.getBitmapDcInfo(pBitmapDc.value());
+        return parseBitmapDcInfo(str);
+    }
+
+    public static void freopenStdio(){
+        NativesWindows.freopenStdio();
+    }
     public static HBitmap winAppCreateBitmap(int width, int height) {
         long ret = NativesWindows.winAppCreateBitmap(width, height);
         return new HBitmap(ret);
