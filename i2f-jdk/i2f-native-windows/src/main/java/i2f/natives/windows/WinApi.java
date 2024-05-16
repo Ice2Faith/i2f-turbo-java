@@ -27,10 +27,10 @@ import i2f.natives.windows.consts.shell.WinShFileOperationFunc;
 import i2f.natives.windows.consts.shell.WinShGetSpecialFolderLocationCsidl;
 import i2f.natives.windows.consts.system.WinExitWindowsFlag;
 import i2f.natives.windows.consts.system.WinOsVersionInfoPlatformId;
-import i2f.natives.windows.types.winapp.BitmapDcPtr;
 import i2f.natives.windows.consts.winapp.WinAppCallbacker;
 import i2f.natives.windows.consts.window.*;
-import i2f.natives.windows.types.*;
+import i2f.natives.windows.types.Handle;
+import i2f.natives.windows.types.WcharPtr;
 import i2f.natives.windows.types.com.CoIUnknownPtr;
 import i2f.natives.windows.types.com.CoTaskPtr;
 import i2f.natives.windows.types.com.LpItemIdList;
@@ -47,6 +47,7 @@ import i2f.natives.windows.types.service.ScHandle;
 import i2f.natives.windows.types.service.ServiceStatusInfo;
 import i2f.natives.windows.types.system.MemoryStatusEx;
 import i2f.natives.windows.types.system.OsVersionInfo;
+import i2f.natives.windows.types.winapp.BitmapDcPtr;
 import i2f.natives.windows.types.window.*;
 
 import java.io.File;
@@ -2151,119 +2152,119 @@ public class WinApi {
         return NativesWindows.deleteDC(hdc.value());
     }
 
-    public static int getStretchBltMode(Hdc hdc){
+    public static int getStretchBltMode(Hdc hdc) {
         return NativesWindows.getStretchBltMode(hdc.value());
     }
 
-    public static int setStretchBltMode(Hdc hdc,int mode){
-        return NativesWindows.setStretchBltMode(hdc.value(),mode);
+    public static int setStretchBltMode(Hdc hdc, int mode) {
+        return NativesWindows.setStretchBltMode(hdc.value(), mode);
     }
 
-    public static int getMapMode(Hdc hdc){
+    public static int getMapMode(Hdc hdc) {
         return NativesWindows.getMapMode(hdc.value());
     }
 
-    public static int setMapMode(Hdc hdc,int mode){
-        return NativesWindows.setMapMode(hdc.value(),mode);
+    public static int setMapMode(Hdc hdc, int mode) {
+        return NativesWindows.setMapMode(hdc.value(), mode);
     }
 
-    public static Point getViewportOrgEx(Hdc hdc){
+    public static Point getViewportOrgEx(Hdc hdc) {
         int[] ret = NativesWindows.getViewportOrgEx(hdc.value());
-        if(ret.length==0){
+        if (ret.length == 0) {
             return null;
         }
-        return new Point(ret[0],ret[1]);
+        return new Point(ret[0], ret[1]);
     }
 
-    public static Point setViewportOrgEx(Hdc hdc,int x,int y){
-        int[] ret = NativesWindows.setViewportOrgEx(hdc.value(),x,y);
-        if(ret.length==0){
+    public static Point setViewportOrgEx(Hdc hdc, int x, int y) {
+        int[] ret = NativesWindows.setViewportOrgEx(hdc.value(), x, y);
+        if (ret.length == 0) {
             return null;
         }
-        return new Point(ret[0],ret[1]);
+        return new Point(ret[0], ret[1]);
     }
 
-    public static Point setViewportOrgEx(Hdc hdc,Point p){
-        int[] ret = NativesWindows.setViewportOrgEx(hdc.value(),(int)p.x,(int)p.y);
-        if(ret.length==0){
+    public static Point setViewportOrgEx(Hdc hdc, Point p) {
+        int[] ret = NativesWindows.setViewportOrgEx(hdc.value(), (int) p.x, (int) p.y);
+        if (ret.length == 0) {
             return null;
         }
-        return new Point(ret[0],ret[1]);
+        return new Point(ret[0], ret[1]);
     }
 
-    public static Size getViewportExtEx(Hdc hdc){
+    public static Size getViewportExtEx(Hdc hdc) {
         int[] ret = NativesWindows.getViewportExtEx(hdc.value());
-        if(ret.length==0){
+        if (ret.length == 0) {
             return null;
         }
-        return new Size(ret[0],ret[1]);
+        return new Size(ret[0], ret[1]);
     }
 
-    public static Size setViewportExtEx(Hdc hdc,int cx,int cy){
-        int[] ret = NativesWindows.setViewportExtEx(hdc.value(),cx,cy);
-        if(ret.length==0){
+    public static Size setViewportExtEx(Hdc hdc, int cx, int cy) {
+        int[] ret = NativesWindows.setViewportExtEx(hdc.value(), cx, cy);
+        if (ret.length == 0) {
             return null;
         }
-        return new Size(ret[0],ret[1]);
+        return new Size(ret[0], ret[1]);
     }
 
-    public static Size setViewportExtEx(Hdc hdc,Size s){
-        int[] ret = NativesWindows.setViewportExtEx(hdc.value(),(int)s.dx,(int)s.dy);
-        if(ret.length==0){
+    public static Size setViewportExtEx(Hdc hdc, Size s) {
+        int[] ret = NativesWindows.setViewportExtEx(hdc.value(), (int) s.dx, (int) s.dy);
+        if (ret.length == 0) {
             return null;
         }
-        return new Size(ret[0],ret[1]);
+        return new Size(ret[0], ret[1]);
     }
 
-    public static Point getWindowOrgEx(Hdc hdc){
+    public static Point getWindowOrgEx(Hdc hdc) {
         int[] ret = NativesWindows.getWindowOrgEx(hdc.value());
-        if(ret.length==0){
+        if (ret.length == 0) {
             return null;
         }
-        return new Point(ret[0],ret[1]);
+        return new Point(ret[0], ret[1]);
     }
 
-    public static Point setWindowOrgEx(Hdc hdc,int x,int y){
-        int[] ret = NativesWindows.setWindowOrgEx(hdc.value(),x,y);
-        if(ret.length==0){
+    public static Point setWindowOrgEx(Hdc hdc, int x, int y) {
+        int[] ret = NativesWindows.setWindowOrgEx(hdc.value(), x, y);
+        if (ret.length == 0) {
             return null;
         }
-        return new Point(ret[0],ret[1]);
+        return new Point(ret[0], ret[1]);
     }
 
-    public static Point setWindowOrgEx(Hdc hdc,Point p){
-        int[] ret = NativesWindows.setWindowOrgEx(hdc.value(),(int)p.x,(int)p.y);
-        if(ret.length==0){
+    public static Point setWindowOrgEx(Hdc hdc, Point p) {
+        int[] ret = NativesWindows.setWindowOrgEx(hdc.value(), (int) p.x, (int) p.y);
+        if (ret.length == 0) {
             return null;
         }
-        return new Point(ret[0],ret[1]);
+        return new Point(ret[0], ret[1]);
     }
 
-    public static Size getWindowExtEx(Hdc hdc){
+    public static Size getWindowExtEx(Hdc hdc) {
         int[] ret = NativesWindows.getWindowExtEx(hdc.value());
-        if(ret.length==0){
+        if (ret.length == 0) {
             return null;
         }
-        return new Size(ret[0],ret[1]);
+        return new Size(ret[0], ret[1]);
     }
 
-    public static Size setWindowExtEx(Hdc hdc,int cx,int cy){
-        int[] ret = NativesWindows.setWindowExtEx(hdc.value(),cx,cy);
-        if(ret.length==0){
+    public static Size setWindowExtEx(Hdc hdc, int cx, int cy) {
+        int[] ret = NativesWindows.setWindowExtEx(hdc.value(), cx, cy);
+        if (ret.length == 0) {
             return null;
         }
-        return new Size(ret[0],ret[1]);
+        return new Size(ret[0], ret[1]);
     }
 
-    public static Size setWindowExtEx(Hdc hdc,Size s){
-        int[] ret = NativesWindows.setWindowExtEx(hdc.value(),(int)s.dx,(int)s.dy);
-        if(ret.length==0){
+    public static Size setWindowExtEx(Hdc hdc, Size s) {
+        int[] ret = NativesWindows.setWindowExtEx(hdc.value(), (int) s.dx, (int) s.dy);
+        if (ret.length == 0) {
             return null;
         }
-        return new Size(ret[0],ret[1]);
+        return new Size(ret[0], ret[1]);
     }
 
-    public static HGdiObj selectObject(Hdc hdc,HGdiObj hGdiObj){
+    public static HGdiObj selectObject(Hdc hdc, HGdiObj hGdiObj) {
         long ret = NativesWindows.selectObject(hdc.value(), hGdiObj.value());
         return new HGdiObj(ret);
     }
@@ -2278,8 +2279,8 @@ public class WinApi {
             int x1,
             int y1,
             long rop
-    ){
-        return NativesWindows.bitBlt(hdc.value(),x,y,cx,cy,hdcSrc.value(),x1,y1,rop);
+    ) {
+        return NativesWindows.bitBlt(hdc.value(), x, y, cx, cy, hdcSrc.value(), x1, y1, rop);
     }
 
     public static boolean bitBlt(
@@ -2288,39 +2289,41 @@ public class WinApi {
             Hdc hdcSrc,
             Point p1,
             long rop
-    ){
+    ) {
         return NativesWindows.bitBlt(hdc.value(),
-                (int)rect.point.x,(int)rect.point.y,
-                (int)rect.size.dx,(int)rect.size.dy,
+                (int) rect.point.x, (int) rect.point.y,
+                (int) rect.size.dx, (int) rect.size.dy,
                 hdcSrc.value(),
-                (int)p1.x,(int)p1.y,
+                (int) p1.x, (int) p1.y,
                 rop);
     }
 
-    public static HBrush createSolidBrush(int color){
+    public static HBrush createSolidBrush(int color) {
         long ret = NativesWindows.createSolidBrush(color);
         return new HBrush(ret);
     }
 
-    public static HPen createPen(int style,int width,int color){
+    public static HPen createPen(int style, int width, int color) {
         long ret = NativesWindows.createPen(style, width, color);
         return new HPen(ret);
     }
-    public static HPen createPen(int width,int color){
+
+    public static HPen createPen(int width, int color) {
         long ret = NativesWindows.createPen(WinGdiPenStyle.PS_SOLID, width, color);
         return new HPen(ret);
     }
-    public static HPen createPen(int color){
+
+    public static HPen createPen(int color) {
         long ret = NativesWindows.createPen(WinGdiPenStyle.PS_SOLID, 1, color);
         return new HPen(ret);
     }
 
-    public static Hdc createCompatibleDC(Hdc hdc){
+    public static Hdc createCompatibleDC(Hdc hdc) {
         long ret = NativesWindows.createCompatibleDC(hdc.value());
         return new Hdc(ret);
     }
 
-    public static HBitmap createCompatibleBitmap(Hdc hdc,int cx,int cy){
+    public static HBitmap createCompatibleBitmap(Hdc hdc, int cx, int cy) {
         long ret = NativesWindows.createCompatibleBitmap(hdc.value(), cx, cy);
         return new HBitmap(ret);
     }
@@ -2330,21 +2333,21 @@ public class WinApi {
             BitmapInfoPtr pBitmapInfo,
             int usage,
             Handle hSection,
-            int offset){
+            int offset) {
         long ret = NativesWindows.createDIBSection(hdc.value(), pBitmapInfo.value(),
                 usage, hSection.value(), offset);
         return new HBitmap(ret);
     }
 
-    public static void freeMallocPtr(MallocPtr ptr){
+    public static void freeMallocPtr(MallocPtr ptr) {
         NativesWindows.freeMallocPtr(ptr.value());
     }
 
-    public static void deleteNewPtr(NewPtr ptr){
+    public static void deleteNewPtr(NewPtr ptr) {
         NativesWindows.deleteNewPtr(ptr.value());
     }
 
-    public static void deleteNewArrayPtr(NewArrayPtr ptr){
+    public static void deleteNewArrayPtr(NewArrayPtr ptr) {
         NativesWindows.deleteNewArrayPtr(ptr.value());
     }
 
@@ -2356,7 +2359,7 @@ public class WinApi {
             int compression,
             int clrUsed,
             int sizeImage
-    ){
+    ) {
         long ret = NativesWindows.mallocBitmapInfoHeader(width, height, planes, bitCount, compression, clrUsed, sizeImage);
         return new BitmapInfoHeaderPtr(ret);
     }
@@ -2364,7 +2367,7 @@ public class WinApi {
     public static BitmapInfoHeaderPtr mallocBitmapInfoHeader(
             int width,
             int height
-    ){
+    ) {
         int nBytesPerLine = ((width * 32 + 31) & (~31)) >>> 3;
         int sizeImage = nBytesPerLine * height;
         long ret = NativesWindows.mallocBitmapInfoHeader(width, height,
@@ -2381,8 +2384,8 @@ public class WinApi {
             int height,
             int usage,
             Handle hSection,
-            int offset){
-        BitmapInfoHeaderPtr pBitmapInfo=mallocBitmapInfoHeader(width,height);
+            int offset) {
+        BitmapInfoHeaderPtr pBitmapInfo = mallocBitmapInfoHeader(width, height);
         HBitmap ret = createDIBSection(hdc, new BitmapInfoPtr(pBitmapInfo),
                 usage, hSection, offset);
         freeMallocPtr(pBitmapInfo);
@@ -2391,15 +2394,15 @@ public class WinApi {
 
     public static HBitmap createDIBSection(
             int width,
-            int height){
-        BitmapInfoHeaderPtr pBitmapInfo=mallocBitmapInfoHeader(width,height);
+            int height) {
+        BitmapInfoHeaderPtr pBitmapInfo = mallocBitmapInfoHeader(width, height);
         HBitmap ret = createDIBSection(new Hdc(0), new BitmapInfoPtr(pBitmapInfo),
                 WinCreateDIBSectionUsage.DIB_RGB_COLORS, new Handle(0), 0);
         freeMallocPtr(pBitmapInfo);
         return ret;
     }
 
-    public static HBrush createPatternBrush(HBitmap hBitmap){
+    public static HBrush createPatternBrush(HBitmap hBitmap) {
         long ret = NativesWindows.createPatternBrush(hBitmap.value());
         return new HBrush(ret);
     }
@@ -2407,19 +2410,19 @@ public class WinApi {
     public static LogBrushPtr mallocLogBrush(
             int color,
             int hatch,
-            int style){
+            int style) {
         long ret = NativesWindows.mallocLogBrush(color, hatch, style);
         return new LogBrushPtr(ret);
     }
 
-    public static HBrush createBrushIndirect(LogBrushPtr pLogBrush){
+    public static HBrush createBrushIndirect(LogBrushPtr pLogBrush) {
         long ret = NativesWindows.createBrushIndirect(pLogBrush.value());
         return new HBrush(ret);
     }
 
     public static HBrush createBrushIndirect(int color,
                                              int hatch,
-                                             int style){
+                                             int style) {
         LogBrushPtr logBrushPtr = mallocLogBrush(color, hatch, style);
         HBrush ret = createBrushIndirect(logBrushPtr);
         freeMallocPtr(logBrushPtr);
@@ -2430,12 +2433,12 @@ public class WinApi {
             int style,
             long widthX,
             long widthY,
-            int color){
+            int color) {
         long ret = NativesWindows.mallocLogPen(style, widthX, widthY, color);
         return new LogPenPtr(ret);
     }
 
-    public static HPen createPenIndirect(LogPenPtr pLogPen){
+    public static HPen createPenIndirect(LogPenPtr pLogPen) {
         long ret = NativesWindows.createPenIndirect(pLogPen.value());
         return new HPen(ret);
     }
@@ -2443,11 +2446,11 @@ public class WinApi {
     public static HPen createPenIndirect(int style,
                                          long widthX,
                                          long widthY,
-                                         int color){
-        LogPenPtr pLogPen=mallocLogPen(style, widthX, widthY, color);
+                                         int color) {
+        LogPenPtr pLogPen = mallocLogPen(style, widthX, widthY, color);
         HPen ret = createPenIndirect(pLogPen);
         freeMallocPtr(pLogPen);
-        return  ret;
+        return ret;
     }
 
     public static LogPenPtr mallocLogFont(
@@ -2464,12 +2467,12 @@ public class WinApi {
             int lfClipPrecision,
             int lfQuality,
             int lfPitchAndFamily,
-            String lfFaceName){
+            String lfFaceName) {
         long ret = NativesWindows.mallocLogFont(lfHeight, lfWidth, lfEscapement, lfOrientation, lfWeight, lfItalic, lfUnderline, lfStrikeOut, lfCharSet, lfOutPrecision, lfClipPrecision, lfQuality, lfPitchAndFamily, lfFaceName);
         return new LogPenPtr(ret);
     }
 
-    public static HFont createFontIndirect(LogPenPtr pLogFont){
+    public static HFont createFontIndirect(LogPenPtr pLogFont) {
         long ret = NativesWindows.createFontIndirect(pLogFont.value());
         return new HFont(ret);
     }
@@ -2487,108 +2490,108 @@ public class WinApi {
                                            int lfClipPrecision,
                                            int lfQuality,
                                            int lfPitchAndFamily,
-                                           String lfFaceName){
+                                           String lfFaceName) {
         LogPenPtr pLogFont = mallocLogFont(lfHeight, lfWidth, lfEscapement, lfOrientation, lfWeight, lfItalic, lfUnderline, lfStrikeOut, lfCharSet, lfOutPrecision, lfClipPrecision, lfQuality, lfPitchAndFamily, lfFaceName);
         HFont ret = createFontIndirect(pLogFont);
         freeMallocPtr(pLogFont);
         return ret;
     }
 
-    public static boolean ellipse(Hdc hdc,int left,int top,int right,int bottom){
-        return NativesWindows.ellipse(hdc.value(),left,top,right,bottom);
+    public static boolean ellipse(Hdc hdc, int left, int top, int right, int bottom) {
+        return NativesWindows.ellipse(hdc.value(), left, top, right, bottom);
     }
 
-    public static boolean ellipse(Hdc hdc,Rectangle rect){
-        return NativesWindows.ellipse(hdc.value(),(int)rect.left(),(int)rect.top(),(int)rect.right(),(int)rect.bottom());
+    public static boolean ellipse(Hdc hdc, Rectangle rect) {
+        return NativesWindows.ellipse(hdc.value(), (int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
     }
 
-    public static boolean circle(Hdc hdc,int x,int y,int radius){
-        return NativesWindows.ellipse(hdc.value(),x-radius,y-radius,x+radius,y+radius);
+    public static boolean circle(Hdc hdc, int x, int y, int radius) {
+        return NativesWindows.ellipse(hdc.value(), x - radius, y - radius, x + radius, y + radius);
     }
 
-    public static boolean circle(Hdc hdc,Point center,int radius){
-        return NativesWindows.ellipse(hdc.value(),(int)center.x-radius,(int)center.y-radius,(int)center.x+radius,(int)center.y+radius);
+    public static boolean circle(Hdc hdc, Point center, int radius) {
+        return NativesWindows.ellipse(hdc.value(), (int) center.x - radius, (int) center.y - radius, (int) center.x + radius, (int) center.y + radius);
     }
 
-    public static boolean rectangle(Hdc hdc,int left,int top,int right,int bottom){
-        return NativesWindows.rectangle(hdc.value(),left,top,right,bottom);
+    public static boolean rectangle(Hdc hdc, int left, int top, int right, int bottom) {
+        return NativesWindows.rectangle(hdc.value(), left, top, right, bottom);
     }
 
-    public static boolean rectangle(Hdc hdc,Rectangle rect){
-        return NativesWindows.rectangle(hdc.value(),(int)rect.left(),(int)rect.top(),(int)rect.right(),(int)rect.bottom());
+    public static boolean rectangle(Hdc hdc, Rectangle rect) {
+        return NativesWindows.rectangle(hdc.value(), (int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
     }
 
-    public static boolean square(Hdc hdc,int left,int top,int len){
-        return NativesWindows.rectangle(hdc.value(),left,top,left+len,top+len);
+    public static boolean square(Hdc hdc, int left, int top, int len) {
+        return NativesWindows.rectangle(hdc.value(), left, top, left + len, top + len);
     }
 
-    public static boolean square(Hdc hdc,Point p,int len){
-        return NativesWindows.rectangle(hdc.value(),(int)p.x,(int)p.y,(int)p.x+len,(int)p.y+len);
+    public static boolean square(Hdc hdc, Point p, int len) {
+        return NativesWindows.rectangle(hdc.value(), (int) p.x, (int) p.y, (int) p.x + len, (int) p.y + len);
     }
 
-    public static int setBkMode(Hdc hdc,int mode){
-        return NativesWindows.setBkMode(hdc.value(),mode);
+    public static int setBkMode(Hdc hdc, int mode) {
+        return NativesWindows.setBkMode(hdc.value(), mode);
     }
 
-    public static int getBkMode(Hdc hdc){
+    public static int getBkMode(Hdc hdc) {
         return NativesWindows.getBkMode(hdc.value());
     }
 
-    public static int setBkColor(Hdc hdc,int color){
-        return NativesWindows.setBkColor(hdc.value(),color);
+    public static int setBkColor(Hdc hdc, int color) {
+        return NativesWindows.setBkColor(hdc.value(), color);
     }
 
-    public static int getBkColor(Hdc hdc){
+    public static int getBkColor(Hdc hdc) {
         return NativesWindows.getBkColor(hdc.value());
     }
 
-    public static int setTextColor(Hdc hdc,int color){
-        return NativesWindows.setTextColor(hdc.value(),color);
+    public static int setTextColor(Hdc hdc, int color) {
+        return NativesWindows.setTextColor(hdc.value(), color);
     }
 
-    public static int getTextColor(Hdc hdc){
+    public static int getTextColor(Hdc hdc) {
         return NativesWindows.getTextColor(hdc.value());
     }
 
-    public static Rectangle getClientRect(Hwnd hwnd){
+    public static Rectangle getClientRect(Hwnd hwnd) {
         int[] ret = NativesWindows.getClientRect(hwnd.value());
-        if(ret.length==0){
+        if (ret.length == 0) {
             return null;
         }
-        return new Rectangle(ret[0],ret[1],ret[2]-ret[0],ret[3]-ret[1]);
+        return new Rectangle(ret[0], ret[1], ret[2] - ret[0], ret[3] - ret[1]);
     }
 
-    public static long defWindowProc(Hwnd hwnd,long message,long wParam,long lParam){
-        return NativesWindows.defWindowProc(hwnd.value(),message,wParam,lParam);
+    public static long defWindowProc(Hwnd hwnd, long message, long wParam, long lParam) {
+        return NativesWindows.defWindowProc(hwnd.value(), message, wParam, lParam);
     }
 
-    public static HModule getModuleHandle(String moduleName){
+    public static HModule getModuleHandle(String moduleName) {
         long ret = NativesWindows.getModuleHandle(moduleName);
         return new HModule(ret);
     }
 
-    public static HIcon extractIcon(HInstance hInstance,String exeFileName,int iconIndex){
+    public static HIcon extractIcon(HInstance hInstance, String exeFileName, int iconIndex) {
         long ret = NativesWindows.extractIcon(hInstance.value(), exeFileName, iconIndex);
         return new HIcon(ret);
     }
 
-    public static boolean destroyIcon(HIcon hIcon){
+    public static boolean destroyIcon(HIcon hIcon) {
         return NativesWindows.destroyIcon(hIcon.value());
     }
 
-    public static boolean freeConsole(){
+    public static boolean freeConsole() {
         return NativesWindows.freeConsole();
     }
 
-    public static boolean allocConsole(){
+    public static boolean allocConsole() {
         return NativesWindows.allocConsole();
     }
 
-    public static boolean attachConsole(long dwProcessId){
+    public static boolean attachConsole(long dwProcessId) {
         return NativesWindows.attachConsole(dwProcessId);
     }
 
-    public static boolean updateWindow(Hwnd hwnd){
+    public static boolean updateWindow(Hwnd hwnd) {
         return NativesWindows.updateWindow(hwnd.value());
     }
 
@@ -2599,10 +2602,10 @@ public class WinApi {
             int top,
             int right,
             int bottom,
-            boolean erase){
+            boolean erase) {
         return NativesWindows.invalidateRect(hwnd.value(),
                 nullRect,
-                left,top,right,bottom,
+                left, top, right, bottom,
                 erase);
     }
 
@@ -2612,32 +2615,32 @@ public class WinApi {
             int top,
             int right,
             int bottom,
-            boolean erase){
+            boolean erase) {
         return NativesWindows.invalidateRect(hwnd.value(),
                 false,
-                left,top,right,bottom,
+                left, top, right, bottom,
                 erase);
     }
 
     public static boolean invalidateRect(
             Hwnd hwnd,
             Rectangle rect,
-            boolean erase){
+            boolean erase) {
         return NativesWindows.invalidateRect(hwnd.value(),
                 false,
-                (int)rect.left(),
-                (int)rect.top(),
-                (int)rect.right(),
-                (int)rect.bottom(),
+                (int) rect.left(),
+                (int) rect.top(),
+                (int) rect.right(),
+                (int) rect.bottom(),
                 erase);
     }
 
     public static boolean invalidateRect(
             Hwnd hwnd,
-            boolean erase){
+            boolean erase) {
         return NativesWindows.invalidateRect(hwnd.value(),
                 true,
-                0,0,0,0,
+                0, 0, 0, 0,
                 erase);
     }
 
@@ -2645,8 +2648,8 @@ public class WinApi {
             Hwnd hwnd,
             HRgn hRgn,
             boolean erase
-    ){
-        return NativesWindows.invalidateRgn(hwnd.value(),hRgn.value(),erase);
+    ) {
+        return NativesWindows.invalidateRgn(hwnd.value(), hRgn.value(), erase);
     }
 
 
@@ -2655,74 +2658,611 @@ public class WinApi {
             Hwnd hwnd,
             long uMsgFilterMin,
             long uMsgFilterMax
-    ){
-        return NativesWindows.getMessage(pMsg.value(),hwnd.value(),uMsgFilterMin,uMsgFilterMax);
+    ) {
+        return NativesWindows.getMessage(pMsg.value(), hwnd.value(), uMsgFilterMin, uMsgFilterMax);
     }
 
-    public static long dispatchMessage(MsgPtr pMsg){
+    public static long dispatchMessage(MsgPtr pMsg) {
         return NativesWindows.dispatchMessage(pMsg.value());
     }
 
-    public static boolean translateMessage(MsgPtr pMsg){
+    public static boolean translateMessage(MsgPtr pMsg) {
         return NativesWindows.translateMessage(pMsg.value());
     }
 
-    public static MsgPtr mallocMsg(){
+    public static MsgPtr mallocMsg() {
         long ret = NativesWindows.mallocMsg();
         return new MsgPtr(ret);
     }
 
-    public static Hwnd getConsoleWindow(){
+    public static Hwnd getConsoleWindow() {
         long ret = NativesWindows.getConsoleWindow();
         return new Hwnd(ret);
     }
 
-    public static int getXLParam(long lParam){
+    public static int getXLParam(long lParam) {
         return NativesWindows.getXLParam(lParam);
     }
 
-    public static int getYLParam(long lParam){
+    public static int getYLParam(long lParam) {
         return NativesWindows.getYLParam(lParam);
     }
 
-    public static int makeWord(int a,int b){
-        return NativesWindows.makeWord(a,b);
+    public static int makeWord(int a, int b) {
+        return NativesWindows.makeWord(a, b);
     }
 
-    public static int hiWord(long a){
+    public static int hiWord(long a) {
         return NativesWindows.hiWord(a);
     }
 
-    public static int loWord(long a){
+    public static int loWord(long a) {
         return NativesWindows.loWord(a);
     }
 
-    public static int getRValue(int color){
+    public static int getRValue(int color) {
         return NativesWindows.getRValue(color);
     }
 
-    public static int getGValue(int color){
+    public static int getGValue(int color) {
         return NativesWindows.getGValue(color);
     }
 
-    public static int getBValue(int color){
+    public static int getBValue(int color) {
         return NativesWindows.getBValue(color);
     }
 
+    public static long getTickCount64() {
+        return NativesWindows.getTickCount64();
+    }
+
+    public static long queryUnbiasedInterruptTime() {
+        return NativesWindows.queryUnbiasedInterruptTime();
+    }
+
+    public static long queryProcessCycleTime(Handle hProcess) {
+        return NativesWindows.queryProcessCycleTime(hProcess.value());
+    }
+
+    public static long queryThreadCycleTime(Handle hThread) {
+        return NativesWindows.queryThreadCycleTime(hThread.value());
+    }
+
+    public static boolean beginPath(Hdc hdc) {
+        return NativesWindows.beginPath(hdc.value());
+    }
+
+    public static boolean endPath(Hdc hdc) {
+        return NativesWindows.endPath(hdc.value());
+    }
+
+    public static boolean abortPath(Hdc hdc) {
+        return NativesWindows.abortPath(hdc.value());
+    }
+
+    public static int addFontResource(String name) {
+        return NativesWindows.addFontResource(name);
+    }
+
+    public static boolean removeFontResource(String name) {
+        return NativesWindows.removeFontResource(name);
+    }
+
+    public static boolean angleArc(
+            Hdc hdc,
+            int x,
+            int y,
+            int r,
+            double startAngle,
+            double sweepAngle) {
+        return NativesWindows.angleArc(hdc.value(), x, y, r, startAngle, sweepAngle);
+    }
+
+    public static boolean angleArc(
+            Hdc hdc,
+            Point p,
+            int r,
+            double startAngle,
+            double sweepAngle) {
+        return NativesWindows.angleArc(hdc.value(), (int) p.x, (int) p.y, r, startAngle, sweepAngle);
+    }
+
+    public static boolean arc(
+            Hdc hdc,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            int arcBeginX,
+            int arcBeginY,
+            int arcEndX,
+            int arcEndY) {
+        return NativesWindows.arc(hdc.value(), left, top, right, bottom, arcBeginX, arcBeginY, arcEndX, arcEndY);
+    }
+
+    public static boolean arc(
+            Hdc hdc,
+            Rectangle rect,
+            Point begin,
+            Point end) {
+        return NativesWindows.arc(hdc.value(), (int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(),
+                (int) begin.x, (int) begin.y, (int) end.x, (int) end.y);
+    }
+
+    public static int getArcDirection(Hdc hdc) {
+        return NativesWindows.getArcDirection(hdc.value());
+    }
+
+    public static int setArcDirection(Hdc hdc, int direction) {
+        return NativesWindows.setArcDirection(hdc.value(), direction);
+    }
+
+    public static boolean arcTo(
+            Hdc hdc,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            int arcBeginX,
+            int arcBeginY,
+            int arcEndX,
+            int arcEndY) {
+        return NativesWindows.arcTo(hdc.value(), left, top, right, bottom, arcBeginX, arcBeginY, arcEndX, arcEndY);
+    }
+
+    public static boolean arcTo(
+            Hdc hdc,
+            Rectangle rect,
+            Point begin,
+            Point end) {
+        return NativesWindows.arcTo(hdc.value(), (int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(),
+                (int) begin.x, (int) begin.y, (int) end.x, (int) end.y);
+    }
+
+    public static boolean cancelDC(Hdc hdc) {
+        return NativesWindows.cancelDC(hdc.value());
+    }
+
+    public static boolean chord(
+            long hdc,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            int arcBeginX,
+            int arcBeginY,
+            int arcEndX,
+            int arcEndY) {
+        return NativesWindows.chord(hdc, left, top, right, bottom, arcBeginX, arcBeginY, arcEndX, arcEndY);
+    }
+
+    public static boolean chord(
+            Hdc hdc,
+            Rectangle rect,
+            Point begin,
+            Point end) {
+        return NativesWindows.chord(hdc.value(), (int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(),
+                (int) begin.x, (int) begin.y, (int) end.x, (int) end.y);
+    }
+
+    public static boolean closeFigure(Hdc hdc) {
+        return NativesWindows.closeFigure(hdc.value());
+    }
 
 
+    public static HPalette createHalftonePalette(Hdc hdc) {
+        long ret = NativesWindows.createHalftonePalette(hdc.value());
+        return new HPalette(ret);
+    }
+
+    public static int realizePalette(Hdc hdc) {
+        return NativesWindows.realizePalette(hdc.value());
+    }
+
+    public static boolean resizePalette(HPalette pPalette, int n) {
+        return NativesWindows.resizePalette(pPalette.value(), n);
+    }
+
+    public static HPalette selectPalette(Hdc hdc, HPalette pPalette, boolean forceBkgd) {
+        long ret = NativesWindows.selectPalette(hdc.value(), pPalette.value(), forceBkgd);
+        return new HPalette(ret);
+    }
+
+    public static HBrush createHatchBrush(int hatch, int color) {
+        long ret = NativesWindows.createHatchBrush(hatch, color);
+        return new HBrush(ret);
+    }
+
+    public static boolean fillPath(Hdc hdc) {
+        return NativesWindows.fillPath(hdc.value());
+    }
+
+    public static boolean fillRgn(Hdc hdc, HRgn hRgn, HBrush hBrush) {
+        return NativesWindows.fillRgn(hdc.value(), hRgn.value(), hBrush.value());
+    }
+
+    public static boolean flattenPath(Hdc hdc) {
+        return NativesWindows.flattenPath(hdc.value());
+    }
+
+    public static boolean floodFill(Hdc hdc, int x, int y, int color) {
+        return NativesWindows.floodFill(hdc.value(), x, y, color);
+    }
+
+    public static boolean floodFill(Hdc hdc, Point p, int color) {
+        return NativesWindows.floodFill(hdc.value(), (int) p.x, (int) p.y, color);
+    }
+
+    public static boolean extFloodFill(Hdc hdc, int x, int y, int color, int type) {
+        return NativesWindows.extFloodFill(hdc.value(), x, y, color, type);
+    }
+
+    public static boolean extFloodFill(Hdc hdc, Point p, int color, int type) {
+        return NativesWindows.extFloodFill(hdc.value(), (int) p.x, (int) p.y, color, type);
+    }
+
+    public static boolean frameRgn(Hdc hdc, HRgn hRgn, HBrush hBrush, int w, int h) {
+        return NativesWindows.frameRgn(hdc.value(), hRgn.value(), hBrush.value(), w, h);
+    }
+
+    public static boolean transparentBlt(
+            Hdc hdcDst,
+            int x,
+            int y,
+            int width,
+            int height,
+            Hdc hdcSrc,
+            int srcX,
+            int srcY,
+            int srcWidth,
+            int srcHeight,
+            int transparentColor) {
+        return NativesWindows.transparentBlt(hdcDst.value(), x, y, width, height, hdcSrc.value(), srcX, srcY, srcWidth, srcHeight, transparentColor);
+    }
+
+    public static boolean transparentBlt(
+            Hdc hdcDst,
+            Rectangle rectDst,
+            Hdc hdcSrc,
+            Rectangle rectSrc,
+            int transparentColor) {
+        return NativesWindows.transparentBlt(hdcDst.value(),
+                (int) rectDst.point.x, (int) rectDst.point.y, (int) rectDst.size.dx, (int) rectDst.size.dy,
+                hdcSrc.value(),
+                (int) rectSrc.point.x, (int) rectSrc.point.y, (int) rectSrc.size.dx, (int) rectSrc.size.dy,
+                transparentColor);
+    }
+
+    public static boolean stretchBlt(
+            Hdc hdcDst,
+            Rectangle rectDst,
+            Hdc hdcSrc,
+            Rectangle rectSrc,
+            long rop) {
+        return NativesWindows.stretchBlt(hdcDst.value(),
+                (int) rectDst.point.x, (int) rectDst.point.y, (int) rectDst.size.dx, (int) rectDst.size.dy,
+                hdcSrc.value(),
+                (int) rectSrc.point.x, (int) rectSrc.point.y, (int) rectSrc.size.dx, (int) rectSrc.size.dy,
+                rop);
+    }
+
+    public static Point getCurrentPositionEx(Hdc hdc) {
+        int[] ret = NativesWindows.getCurrentPositionEx(hdc.value());
+        if (ret.length == 0) {
+            return null;
+        }
+        return new Point(ret[0], ret[1]);
+    }
+
+    public static int getDCBrushColor(Hdc hdc) {
+        return NativesWindows.getDCBrushColor(hdc.value());
+    }
+
+    public static int setDCBrushColor(Hdc hdc, int color) {
+        return NativesWindows.setDCBrushColor(hdc.value(), color);
+    }
+
+    public static int getDCPenColor(Hdc hdc) {
+        return NativesWindows.getDCPenColor(hdc.value());
+    }
+
+    public static int setDCPenColor(Hdc hdc, int color) {
+        return NativesWindows.setDCPenColor(hdc.value(), color);
+    }
+
+    public static int getPixel(Hdc hdc, int x, int y) {
+        return NativesWindows.getPixel(hdc.value(), x, y);
+    }
+
+    public static int getPixel(Hdc hdc, Point p) {
+        return NativesWindows.getPixel(hdc.value(), (int) p.x, (int) p.y);
+    }
+
+    public static int setPixel(Hdc hdc, int x, int y, int color) {
+        return NativesWindows.setPixel(hdc.value(), x, y, color);
+    }
+
+    public static int setPixel(Hdc hdc, Point p, int color) {
+        return NativesWindows.setPixel(hdc.value(), (int) p.x, (int) p.y, color);
+    }
+
+    public static boolean setPixelV(Hdc hdc, int x, int y, int color) {
+        return NativesWindows.setPixelV(hdc.value(), x, y, color);
+    }
+
+    public static boolean setPixelV(Hdc hdc, Point p, int color) {
+        return NativesWindows.setPixelV(hdc.value(), (int) p.x, (int) p.y, color);
+    }
+
+    public static int getPolyFillMode(Hdc hdc) {
+        return NativesWindows.getPolyFillMode(hdc.value());
+    }
+
+    public static int setPolyFillMode(Hdc hdc, int mode) {
+        return NativesWindows.setPolyFillMode(hdc.value(), mode);
+    }
+
+    public static int getROP2(Hdc hdc) {
+        return NativesWindows.getROP2(hdc.value());
+    }
+
+    public static int setROP2(Hdc hdc, int rop2) {
+        return NativesWindows.setROP2(hdc.value(), rop2);
+    }
+
+    public static int getTextAlign(Hdc hdc) {
+        return NativesWindows.getTextAlign(hdc.value());
+    }
+
+    public static int setTextAlign(Hdc hdc, int align) {
+        return NativesWindows.setTextAlign(hdc.value(), align);
+    }
+
+    public static String getTextFace(Hdc hdc) {
+        return NativesWindows.getTextFace(hdc.value());
+    }
+
+    public static Point moveToEx(Hdc hdc, Point p) {
+        int[] ret = NativesWindows.moveToEx(hdc.value(), (int) p.x, (int) p.y);
+        if (ret.length == 0) {
+            return null;
+        }
+        return new Point(ret[0], ret[1]);
+    }
+
+    public static boolean lineTo(Hdc hdc, Point p) {
+        return NativesWindows.lineTo(hdc.value(), (int) p.x, (int) p.y);
+    }
+
+    public static Point lpToDp(Hdc hdc, Point p) {
+        int[] ret = NativesWindows.lpToDp(hdc.value(), (int) p.x, (int) p.y);
+        if (ret.length == 0) {
+            return null;
+        }
+        return new Point(ret[0], ret[1]);
+    }
+
+    public static Point dpToLp(Hdc hdc, Point p) {
+        int[] ret = NativesWindows.dpToLp(hdc.value(), (int) p.x, (int) p.y);
+        if (ret.length == 0) {
+            return null;
+        }
+        return new Point(ret[0], ret[1]);
+    }
+
+    public static boolean maskBlt(
+            Hdc hdcDst,
+            int x,
+            int y,
+            int width,
+            int height,
+            Hdc hdcSrc,
+            int srcX,
+            int srcY,
+            HBitmap hBmMask,
+            int xMask,
+            int yMask,
+            long rop) {
+        return NativesWindows.maskBlt(hdcDst.value(), x, y, width, height, hdcSrc.value(), srcX, srcY, hBmMask.value(), xMask, yMask, rop);
+    }
+
+    public static boolean maskBlt(
+            Hdc hdcDst,
+            Rectangle rectDst,
+            Hdc hdcSrc,
+            Point ptSrc,
+            HBitmap hBmMask,
+            int xMask,
+            int yMask,
+            long rop) {
+        return NativesWindows.maskBlt(hdcDst.value(),
+                (int) rectDst.point.x, (int) rectDst.point.y, (int) rectDst.size.dx, (int) rectDst.size.dy,
+                hdcSrc.value(),
+                (int) ptSrc.x, (int) ptSrc.y,
+                hBmMask.value(), xMask, yMask, rop);
+    }
+
+    public static int offsetClipRgn(Hdc hdc, int x, int y) {
+        return NativesWindows.offsetClipRgn(hdc.value(), x, y);
+    }
+
+    public static int offsetClipRgn(Hdc hdc, Point p) {
+        return NativesWindows.offsetClipRgn(hdc.value(), (int) p.x, (int) p.y);
+    }
+
+    public static int offsetRgn(HRgn hRgn, int x, int y) {
+        return NativesWindows.offsetRgn(hRgn.value(), x, y);
+    }
+
+    public static int offsetRgn(HRgn hRgn, Point p) {
+        return NativesWindows.offsetRgn(hRgn.value(), (int) p.x, (int) p.y);
+    }
+
+    public static Point offsetViewportOrgEx(Hdc hdc, Point p) {
+        int[] ret = NativesWindows.offsetViewportOrgEx(hdc.value(), (int) p.x, (int) p.y);
+        if (ret.length == 0) {
+            return null;
+        }
+        return new Point(ret[0], ret[1]);
+    }
+
+    public static Point offsetWindowOrgEx(Hdc hdc, Point p) {
+        int[] ret = NativesWindows.offsetWindowOrgEx(hdc.value(), (int) p.x, (int) p.y);
+        if (ret.length == 0) {
+            return null;
+        }
+        return new Point(ret[0], ret[1]);
+    }
+
+    public static boolean paintRgn(Hdc hdc, HRgn hRgn) {
+        return NativesWindows.paintRgn(hdc.value(), hRgn.value());
+    }
+
+    public static boolean patBlt(Hdc hdc, int x, int y, int width, int height, long rop) {
+        return NativesWindows.patBlt(hdc.value(), x, y, width, height, rop);
+    }
+
+    public static boolean patBlt(Hdc hdc, Rectangle rect, long rop) {
+        return NativesWindows.patBlt(hdc.value(), (int) rect.point.x, (int) rect.point.y, (int) rect.size.dx, (int) rect.size.dy, rop);
+    }
+
+    public static HRgn pathToRegion(Hdc hdc) {
+        long ret = NativesWindows.pathToRegion(hdc.value());
+        return new HRgn(ret);
+    }
+
+    public static int[] points2flat(Point[] points) {
+        int[] arr = new int[points.length * 2];
+        for (int i = 0; i < points.length; i++) {
+            arr[i * 2] = (int) points[i].x;
+            arr[i * 2 + 1] = (int) points[i].y;
+        }
+        return arr;
+    }
+
+    public static boolean polyBezier(Hdc hdc, Point[] points) {
+        int[] arr = points2flat(points);
+        return NativesWindows.polyBezier(hdc.value(), arr);
+    }
+
+    public static boolean polyBezierTo(Hdc hdc, Point[] points) {
+        int[] arr = points2flat(points);
+        return NativesWindows.polyBezierTo(hdc.value(), arr);
+    }
+
+    public static boolean polygon(Hdc hdc, Point[] points) {
+        int[] arr = points2flat(points);
+        return NativesWindows.polygon(hdc.value(), arr);
+    }
+
+    public static boolean polyline(Hdc hdc, Point[] points) {
+        int[] arr = points2flat(points);
+        return NativesWindows.polyline(hdc.value(), arr);
+    }
+
+    public static boolean polylineTo(Hdc hdc, Point[] points) {
+        int[] arr = points2flat(points);
+        return NativesWindows.polylineTo(hdc.value(), arr);
+    }
+
+    public static boolean ptInRegion(HRgn hRgn, Point p) {
+        return NativesWindows.ptInRegion(hRgn.value(), (int) p.x, (int) p.y);
+    }
+
+    public static boolean ptVisible(Hdc hdc, Point p) {
+        return NativesWindows.ptVisible(hdc.value(), (int) p.x, (int) p.y);
+    }
+
+    public static boolean rectInRegion(HRgn hRgn, int left, int top, int right, int bottom) {
+        return NativesWindows.rectInRegion(hRgn.value(), left, top, right, bottom);
+    }
+
+    public static boolean rectInRegion(HRgn hRgn, Rectangle rect) {
+        return NativesWindows.rectInRegion(hRgn.value(), (int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
+    }
+
+    public static boolean rectVisible(Hdc hdc, int left, int top, int right, int bottom) {
+        return NativesWindows.rectVisible(hdc.value(), left, top, right, bottom);
+    }
+
+    public static boolean rectVisible(Hdc hdc, Rectangle rect) {
+        return NativesWindows.rectVisible(hdc.value(), (int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
+    }
+
+    public static int saveDC(Hdc hdc) {
+        return NativesWindows.saveDC(hdc.value());
+    }
+
+    public static boolean restoreDC(Hdc hdc, int nSavedDC) {
+        return NativesWindows.restoreDC(hdc.value(), nSavedDC);
+    }
+
+    public static boolean roundRect(Hdc hdc, int left, int top, int right, int bottom, int width, int height) {
+        return NativesWindows.roundRect(hdc.value(), left, top, right, bottom, width, height);
+    }
+
+    public static boolean roundRect(Hdc hdc, Rectangle rect, int width, int height) {
+        return NativesWindows.roundRect(hdc.value(), (int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom(), width, height);
+    }
+
+    public static int selectClipRgn(Hdc hdc, HRgn hRgn) {
+        return NativesWindows.selectClipRgn(hdc.value(), hRgn.value());
+    }
+
+    public static boolean selectClipPath(Hdc hdc, int mode) {
+        return NativesWindows.selectClipPath(hdc.value(), mode);
+    }
+
+    public static Point getBrushOrgEx(Hdc hdc) {
+        int[] ret = NativesWindows.getBrushOrgEx(hdc.value());
+        if (ret.length == 0) {
+            return null;
+        }
+        return new Point(ret[0], ret[1]);
+    }
+
+    public static Point setBrushOrgEx(Hdc hdc, Point p) {
+        int[] ret = NativesWindows.setBrushOrgEx(hdc.value(), (int) p.x, (int) p.y);
+        if (ret.length == 0) {
+            return null;
+        }
+        return new Point(ret[0], ret[1]);
+    }
+
+    public static boolean setRectRgn(HRgn hRgn, int left, int top, int right, int bottom) {
+        return NativesWindows.setRectRgn(hRgn.value(), left, top, right, bottom);
+    }
+
+    public static boolean setRectRgn(HRgn hRgn, Rectangle rect) {
+        return NativesWindows.setRectRgn(hRgn.value(), (int) rect.left(), (int) rect.top(), (int) rect.right(), (int) rect.bottom());
+    }
+
+    public static boolean setTextJustification(Hdc hdc, int extra, int count) {
+        return NativesWindows.setTextJustification(hdc.value(), extra, count);
+    }
+
+    public static boolean strokeAndFillPath(Hdc hdc) {
+        return NativesWindows.strokeAndFillPath(hdc.value());
+    }
+
+    public static boolean strokePath(Hdc hdc) {
+        return NativesWindows.strokePath(hdc.value());
+    }
+
+    public static boolean textOut(Hdc hdc, Point p, String text) {
+        return NativesWindows.textOut(hdc.value(), (int) p.x, (int) p.y, text);
+    }
+
+    public static boolean unrealizeObject(HGdiObj hGdiObj) {
+        return NativesWindows.unrealizeObject(hGdiObj.value());
+    }
+
+    public static boolean updateColors(Hdc hdc) {
+        return NativesWindows.updateColors(hdc.value());
+    }
 
 
-
-
-
-
-
-
-
-
-
-    public static HBitmap winAppCreateBitmap(int width, int height){
+    public static HBitmap winAppCreateBitmap(int width, int height) {
         long ret = NativesWindows.winAppCreateBitmap(width, height);
         return new HBitmap(ret);
     }
@@ -2732,10 +3272,10 @@ public class WinApi {
             BitmapDcPtr pBDC,
             int newWidth,
             int newHeight,
-            int resizeMode){
+            int resizeMode) {
         NativesWindows.winAppResizeCompatibleDC(hdc.value(),
                 pBDC.value(),
-                newWidth,newHeight,
+                newWidth, newHeight,
                 resizeMode);
     }
 
@@ -2746,7 +3286,7 @@ public class WinApi {
             int nCmdShow,
             boolean showConsole,
             int mdcResizeMode,
-            WinAppCallbacker callbacker){
+            WinAppCallbacker callbacker) {
         return NativesWindows.winAppCreateWin32App(className, windowTitle, iconFileName, nCmdShow, showConsole, mdcResizeMode, callbacker);
     }
 }

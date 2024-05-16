@@ -1,6 +1,5 @@
 package i2f.natives.windows;
 
-import i2f.natives.core.MallocPtr;
 import i2f.natives.core.NativeUtil;
 import i2f.natives.windows.consts.winapp.WinAppCallbacker;
 
@@ -574,10 +573,10 @@ public class NativesWindows {
 
 
     public static native boolean getMessage(
-    long pMsg,
-    long hwnd,
-    long uMsgFilterMin,
-    long uMsgFilterMax
+            long pMsg,
+            long hwnd,
+            long uMsgFilterMin,
+            long uMsgFilterMax
     );
 
     public static native long dispatchMessage(long pMsg);
@@ -592,7 +591,7 @@ public class NativesWindows {
 
     public static native int getYLParam(long lParam);
 
-    public static native int makeWord(int a,int b);
+    public static native int makeWord(int a, int b);
 
     public static native int hiWord(long a);
 
@@ -604,9 +603,233 @@ public class NativesWindows {
 
     public static native int getBValue(int color);
 
+    public static native long getTickCount64();
+
+    public static native long queryUnbiasedInterruptTime();
+
+    public static native long queryProcessCycleTime(long hProcess);
+
+    public static native long queryThreadCycleTime(long hThread);
+
+    public static native boolean beginPath(long hdc);
+
+    public static native boolean endPath(long hdc);
+
+    public static native boolean abortPath(long hdc);
+
+    public static native int addFontResource(String name);
+
+    public static native boolean removeFontResource(String name);
+
+    public static native boolean angleArc(
+            long hdc,
+            int x,
+            int y,
+            int r,
+            double startAngle,
+            double sweepAngle);
+
+    public static native boolean arc(
+            long hdc,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            int arcBeginX,
+            int arcBeginY,
+            int arcEndX,
+            int arcEndY);
+
+    public static native int getArcDirection(long hdc);
+
+    public static native int setArcDirection(long hdc, int direction);
+
+    public static native boolean arcTo(
+            long hdc,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            int arcBeginX,
+            int arcBeginY,
+            int arcEndX,
+            int arcEndY);
+
+    public static native boolean cancelDC(long hdc);
+
+    public static native boolean chord(
+            long hdc,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            int arcBeginX,
+            int arcBeginY,
+            int arcEndX,
+            int arcEndY);
+
+    public static native boolean closeFigure(long hdc);
 
 
+    public static native long createHalftonePalette(long hdc);
 
+    public static native int realizePalette(long hdc);
+
+    public static native boolean resizePalette(long pPalette, int n);
+
+    public static native long selectPalette(long hdc, long pPalette, boolean forceBkgd);
+
+    public static native long createHatchBrush(int hatch, int color);
+
+    public static native boolean fillPath(long hdc);
+
+    public static native boolean fillRgn(long hdc, long hRgn, long hBrush);
+
+    public static native boolean flattenPath(long hdc);
+
+    public static native boolean floodFill(long hdc, int x, int y, int color);
+
+    public static native boolean extFloodFill(long hdc, int x, int y, int color, int type);
+
+    public static native boolean frameRgn(long hdc, long hRgn, long hBrush, int w, int h);
+
+    public static native boolean transparentBlt(
+            long hdcDst,
+            int x,
+            int y,
+            int width,
+            int height,
+            long hdcSrc,
+            int srcX,
+            int srcY,
+            int srcWidth,
+            int srcHeight,
+            int transparentColor);
+
+    public static native boolean stretchBlt(
+            long hdcDst,
+            int x,
+            int y,
+            int width,
+            int height,
+            long hdcSrc,
+            int srcX,
+            int srcY,
+            int srcWidth,
+            int srcHeight,
+            long rop);
+
+    public static native int[] getCurrentPositionEx(long hdc);
+
+    public static native int getDCBrushColor(long hdc);
+
+    public static native int setDCBrushColor(long hdc, int color);
+
+    public static native int getDCPenColor(long hdc);
+
+    public static native int setDCPenColor(long hdc, int color);
+
+    public static native int getPixel(long hdc, int x, int y);
+
+    public static native int setPixel(long hdc, int x, int y, int color);
+
+    public static native boolean setPixelV(long hdc, int x, int y, int color);
+
+    public static native int getPolyFillMode(long hdc);
+
+    public static native int setPolyFillMode(long hdc, int mode);
+
+    public static native int getROP2(long hdc);
+
+    public static native int setROP2(long hdc, int rop2);
+
+    public static native int getTextAlign(long hdc);
+
+    public static native int setTextAlign(long hdc, int align);
+
+    public static native String getTextFace(long hdc);
+
+    public static native int[] moveToEx(long hdc, int x, int y);
+
+    public static native boolean lineTo(long hdc, int x, int y);
+
+    public static native int[] lpToDp(long hdc, int x, int y);
+
+    public static native int[] dpToLp(long hdc, int x, int y);
+
+    public static native boolean maskBlt(
+            long hdcDst,
+            int x,
+            int y,
+            int width,
+            int height,
+            long hdcSrc,
+            int srcX,
+            int srcY,
+            long hBmMask,
+            int xMask,
+            int yMask,
+            long rop);
+
+    public static native int offsetClipRgn(long hdc, int x, int y);
+
+    public static native int offsetRgn(long hRgn, int x, int y);
+
+    public static native int[] offsetViewportOrgEx(long hdc, int x, int y);
+
+    public static native int[] offsetWindowOrgEx(long hdc, int x, int y);
+
+    public static native boolean paintRgn(long hdc, long hRgn);
+
+    public static native boolean patBlt(long hdc, int x, int y, int width, int height, long rop);
+
+    public static native long pathToRegion(long hdc);
+
+    public static native boolean polyBezier(long hdc, int[] points);
+
+    public static native boolean polyBezierTo(long hdc, int[] points);
+
+    public static native boolean polygon(long hdc, int[] points);
+
+    public static native boolean polyline(long hdc, int[] points);
+
+    public static native boolean polylineTo(long hdc, int[] points);
+
+    public static native boolean ptInRegion(long hRgn, int x, int y);
+
+    public static native boolean ptVisible(long hdc, int x, int y);
+
+    public static native boolean rectInRegion(long hRgn, int left, int top, int right, int bottom);
+
+    public static native boolean rectVisible(long hdc, int left, int top, int right, int bottom);
+
+    public static native int saveDC(long hdc);
+
+    public static native boolean restoreDC(long hdc, int nSavedDC);
+
+    public static native boolean roundRect(long hdc, int left, int top, int right, int bottom, int width, int height);
+
+    public static native int selectClipRgn(long hdc, long hRgn);
+
+    public static native boolean selectClipPath(long hdc, int mode);
+
+    public static native int[] getBrushOrgEx(long hdc);
+
+    public static native int[] setBrushOrgEx(long hdc, int x, int y);
+
+    public static native boolean setRectRgn(long hRgn, int left, int top, int right, int bottom);
+
+    public static native boolean setTextJustification(long hdc, int extra, int count);
+
+    public static native boolean strokeAndFillPath(long hdc);
+
+    public static native boolean strokePath(long hdc);
+
+    public static native boolean textOut(long hdc, int x, int y, String text);
+
+    public static native boolean unrealizeObject(long hGdiObj);
+
+    public static native boolean updateColors(long hdc);
 
 
     public static native long winAppCreateBitmap(int width, int height);

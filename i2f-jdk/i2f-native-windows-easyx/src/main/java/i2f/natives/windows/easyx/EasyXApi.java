@@ -9,8 +9,8 @@ import i2f.natives.windows.consts.gdi.*;
 import i2f.natives.windows.easyx.consts.EasyXInitGraphFlag;
 import i2f.natives.windows.easyx.types.*;
 import i2f.natives.windows.types.gdi.Hdc;
-import i2f.natives.windows.types.window.Hwnd;
 import i2f.natives.windows.types.gdi.LogFont;
+import i2f.natives.windows.types.window.Hwnd;
 
 import java.util.Map;
 
@@ -515,7 +515,7 @@ public class EasyXApi {
     }
 
     public static void drawPoly(Point[] points) {
-        int[] arr = points2flat(points);
+        int[] arr = WinApi.points2flat(points);
         NativesEasyX.drawPoly(arr);
     }
 
@@ -524,18 +524,11 @@ public class EasyXApi {
     }
 
     public static void fillPoly(Point[] points) {
-        int[] arr = points2flat(points);
+        int[] arr = WinApi.points2flat(points);
         NativesEasyX.fillPoly(arr);
     }
 
-    public static int[] points2flat(Point[] points) {
-        int[] arr = new int[points.length * 2];
-        for (int i = 0; i < points.length; i++) {
-            arr[i * 2] = (int) points[i].x;
-            arr[i * 2 + 1] = (int) points[i].y;
-        }
-        return arr;
-    }
+
 
     public static void setWriteMode(int mode) {
         NativesEasyX.setWriteMode(mode);
@@ -746,7 +739,7 @@ public class EasyXApi {
     }
 
     public static void polygon(Point[] points) {
-        int[] arr = points2flat(points);
+        int[] arr = WinApi.points2flat(points);
         NativesEasyX.polygon(arr);
     }
 
@@ -755,7 +748,7 @@ public class EasyXApi {
     }
 
     public static void fillPolygon(Point[] points) {
-        int[] arr = points2flat(points);
+        int[] arr = WinApi.points2flat(points);
         NativesEasyX.fillPolygon(arr);
     }
 
@@ -764,7 +757,7 @@ public class EasyXApi {
     }
 
     public static void clearPolygon(Point[] points) {
-        int[] arr = points2flat(points);
+        int[] arr = WinApi.points2flat(points);
         NativesEasyX.clearPolygon(arr);
     }
 
@@ -773,7 +766,7 @@ public class EasyXApi {
     }
 
     public static void solidPolygon(Point[] points) {
-        int[] arr = points2flat(points);
+        int[] arr = WinApi.points2flat(points);
         NativesEasyX.solidPolygon(arr);
     }
 
@@ -946,7 +939,7 @@ public class EasyXApi {
     }
 
     public static void polyBezier(Point[] points) {
-        int[] arr = points2flat(points);
+        int[] arr = WinApi.points2flat(points);
         NativesEasyX.polyBezier(arr);
     }
 
@@ -955,7 +948,7 @@ public class EasyXApi {
     }
 
     public static void polyLine(Point[] points) {
-        int[] arr = points2flat(points);
+        int[] arr = WinApi.points2flat(points);
         NativesEasyX.polyLine(arr);
     }
 }
