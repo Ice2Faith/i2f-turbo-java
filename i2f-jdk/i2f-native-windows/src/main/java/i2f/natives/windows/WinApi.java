@@ -7,6 +7,7 @@ import i2f.graphics.d2.shape.Rectangle;
 import i2f.natives.core.MallocPtr;
 import i2f.natives.core.NewArrayPtr;
 import i2f.natives.core.NewPtr;
+import i2f.natives.windows.consts.WinConsts;
 import i2f.natives.windows.consts.access.WinGenericRights;
 import i2f.natives.windows.consts.device.*;
 import i2f.natives.windows.consts.file.WinFileAttribute;
@@ -3259,6 +3260,111 @@ public class WinApi {
 
     public static boolean updateColors(Hdc hdc) {
         return NativesWindows.updateColors(hdc.value());
+    }
+
+    public static HCursor loadCursorByStandardId(HInstance hInstance, int standardCursorId) {
+        long ret = NativesWindows.loadCursorByStandardId(hInstance.value(), standardCursorId);
+        return new HCursor(ret);
+    }
+
+    public static HCursor loadCursorArrow(HInstance hInstance) {
+        long ret = NativesWindows.loadCursorByStandardId(hInstance.value(), WinStandardCursorId.IDC_ARROW);
+        return new HCursor(ret);
+    }
+
+    public static HCursor loadCursor(HInstance hInstance, String cursorName) {
+        long ret = NativesWindows.loadCursor(hInstance.value(), cursorName);
+        return new HCursor(ret);
+    }
+
+    public static HBrush convertBrushBySystemColorIndex(int index) {
+        long ret = NativesWindows.convertBrushBySystemColorIndex(index);
+        return new HBrush(ret);
+    }
+
+    public static HBrush convertBrushBySystemWindow() {
+        long ret = NativesWindows.convertBrushBySystemColorIndex(WinSystemColorIndex.COLOR_WINDOW);
+        return new HBrush(ret);
+    }
+
+    public static HBrush convertBrushBySystemWindowFrame() {
+        long ret = NativesWindows.convertBrushBySystemColorIndex(WinSystemColorIndex.COLOR_WINDOWFRAME);
+        return new HBrush(ret);
+    }
+
+    public static int registerClassEx(
+            int style,
+            int cbClsExtra,
+            int cbWndExtra,
+            HInstance hInstance,
+            HIcon hIcon,
+            HCursor hCursor,
+            HBrush hbrBackground,
+            String lpszMenuName,
+            String lpszClassName,
+            HIcon hIconSm) {
+        return NativesWindows.registerClassEx(style, cbClsExtra, cbWndExtra,
+                hInstance.value(), hIcon.value(), hCursor.value(), hbrBackground.value(),
+                lpszMenuName, lpszClassName,
+                hIconSm.value());
+    }
+
+    public static int registerClassEx(
+            HInstance hInstance,
+            HIcon hIcon,
+            String lpszClassName) {
+        return registerClassEx(WinClassStyle.CS_HREDRAW | WinClassStyle.CS_VREDRAW,
+                0, 0,
+                hInstance,
+                hIcon,
+                loadCursorArrow(hInstance),
+                convertBrushBySystemWindowFrame(),
+                null,
+                lpszClassName,
+                hIcon);
+    }
+
+
+    public static Hwnd createWindowEx(
+            int dwExStyle,
+            String lpClassName,
+            String lpWindowName,
+            int dwStyle,
+            int x,
+            int y,
+            int nWidth,
+            int nHeight,
+            Hwnd hwndParent,
+            HMenu hMenu,
+            HInstance hInstance) {
+        long ret = NativesWindows.createWindowEx(dwExStyle,
+                lpClassName, lpWindowName,
+                dwStyle,
+                x, y,
+                nWidth, nHeight,
+                hwndParent.value(),
+                hMenu.value(),
+                hInstance.value());
+        return new Hwnd(ret);
+    }
+
+    public static Hwnd createWindowEx(
+            String lpClassName,
+            String lpWindowName,
+            HInstance hInstance) {
+        return createWindowEx(0,
+                lpClassName,
+                lpWindowName,
+                WinWindowStyle.WS_OVERLAPPEDWINDOW,
+                WinConsts.CW_USEDEFAULT, 0,
+                WinConsts.CW_USEDEFAULT, 0,
+                new Hwnd(0),
+                new HMenu(0),
+                hInstance);
+    }
+
+    public static void bindMessageCallbacker(Hwnd hwnd, WinMessageCallbacker callbacker) {
+        NativesWindows.bindMessageCallbacker(hwnd.value(), callbacker);
     }
 
 

@@ -2,6 +2,7 @@ package i2f.natives.windows;
 
 import i2f.natives.core.NativeUtil;
 import i2f.natives.windows.consts.winapp.WinAppCallbacker;
+import i2f.natives.windows.consts.window.WinMessageCallbacker;
 
 /**
  * @author Ice2Faith
@@ -831,6 +832,38 @@ public class NativesWindows {
 
     public static native boolean updateColors(long hdc);
 
+    public static native long loadCursorByStandardId(long hInstance, int standardCursorId);
+
+    public static native long loadCursor(long hInstance, String cursorName);
+
+    public static native long convertBrushBySystemColorIndex(int index);
+
+    public static native int registerClassEx(
+            int style,
+            int cbClsExtra,
+            int cbWndExtra,
+            long hInstance,
+            long hIcon,
+            long hCursor,
+            long hbrBackground,
+            String lpszMenuName,
+            String lpszClassName,
+            long hIconSm);
+
+    public static native long createWindowEx(
+            int dwExStyle,
+            String lpClassName,
+            String lpWindowName,
+            int dwStyle,
+            int x,
+            int y,
+            int nWidth,
+            int nHeight,
+            long hwndParent,
+            long hMenu,
+            long hInstance);
+
+    public static native void bindMessageCallbacker(long hwnd, WinMessageCallbacker callbacker);
 
     public static native long winAppCreateBitmap(int width, int height);
 
@@ -849,5 +882,6 @@ public class NativesWindows {
             boolean showConsole,
             int mdcResizeMode,
             WinAppCallbacker callbacker);
+
 }
 

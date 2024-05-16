@@ -5134,6 +5134,224 @@ jlong hdc
 	return ret;
 }
 
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(loadCursor)(
+JNIEnv* env,
+jobject obj,
+jlong        hInstance,
+jstring      cursorName
+){
+	wchar_t* cursorName_ptr = jstring2wchar(env, cursorName);
+	HICON ret = LoadCursorW(ptrOf<HINSTANCE>(hInstance), cursorName_ptr);
+	freeWchar(cursorName_ptr);
+	return toPtr(ret);
+}
+
+
+static long long cursor_icon_map[][2] = {
+	{ 1, (long long)(void *)IDC_ARROW },
+	{ 2, (long long)(void *)IDC_IBEAM },
+	{ 3, (long long)(void *)IDC_WAIT },
+	{ 4, (long long)(void *)IDC_CROSS },
+	{ 5, (long long)(void *)IDC_UPARROW },
+	{ 6, (long long)(void *)IDC_SIZE },
+	{ 7, (long long)(void *)IDC_ICON },
+	{ 8, (long long)(void *)IDC_SIZENWSE },
+	{ 9, (long long)(void *)IDC_SIZENESW },
+	{ 10, (long long)(void *)IDC_SIZEWE },
+	{ 11, (long long)(void *)IDC_SIZENS },
+	{ 12, (long long)(void *)IDC_SIZEALL },
+	{ 13, (long long)(void *)IDC_HAND },
+	{ 14, (long long)(void *)IDC_APPSTARTING },
+	{ 15, (long long)(void *)IDC_HELP },
+	{ -1, -1 }
+};
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(loadCursorByStandardId)(
+JNIEnv* env,
+jobject obj,
+jlong        hInstance,
+jint      standardCursorId
+){
+	wchar_t* cursorName = NULL;
+	IID* piid = NULL;
+	int i = 0;
+	while (cursor_icon_map[i][0] > 0){
+		if (cursor_icon_map[i][0] == standardCursorId){
+			cursorName = (wchar_t*)cursor_icon_map[i][1];
+			break;
+		}
+		i++;
+	}
+	HICON ret = LoadCursorW(ptrOf<HINSTANCE>(hInstance), cursorName);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(convertBrushBySystemColorIndex)(
+JNIEnv* env,
+jobject obj,
+jint index
+){
+	HBRUSH ret = (HBRUSH)(index + 1);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(registerClassEx)(
+JNIEnv* env,
+jobject obj,
+jint        style,
+jint         cbClsExtra,
+jint         cbWndExtra,
+jlong   hInstance,
+jlong       hIcon,
+jlong     hCursor,
+jlong      hbrBackground,
+jstring     lpszMenuName,
+jstring     lpszClassName,
+jlong       hIconSm
+){
+	
+	wchar_t* lpszMenuName_ptr = jstring2wchar(env, lpszMenuName);
+	wchar_t* lpszClassName_ptr = jstring2wchar(env, lpszClassName);
+	// 注册类样式
+	WNDCLASSEXW wc = { 0 };
+	wc.cbSize = sizeof(WNDCLASSEXW);
+
+	wc.style = style; 
+	wc.lpfnWndProc = (WNDPROC)dispatcherWndProc;
+	wc.cbClsExtra = cbClsExtra;
+	wc.hInstance = ptrOf<HINSTANCE>(hInstance); 
+	wc.hIcon = ptrOf<HICON>(hIcon); 
+	wc.hCursor = ptrOf<HCURSOR>(hCursor);            
+	wc.hbrBackground = ptrOf<HBRUSH>(hbrBackground);  
+	wc.lpszMenuName = lpszMenuName_ptr;
+	wc.lpszClassName = lpszClassName_ptr;
+	wc.hIconSm = ptrOf<HICON>(hIconSm);
+
+	ATOM ret=RegisterClassExW(&wc);
+
+	freeWchar(lpszMenuName_ptr);
+	freeWchar(lpszClassName_ptr);
+
+	return ret;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(createWindowEx)(
+JNIEnv* env,
+jobject obj,
+jint dwExStyle,
+jstring lpClassName,
+jstring lpWindowName,
+jint dwStyle,
+jint x,
+jint y,
+jint nWidth,
+jint nHeight,
+jlong hwndParent,
+jlong hMenu,
+jlong hInstance
+){
+	wchar_t* lpClassName_ptr = jstring2wchar(env, lpClassName);
+	wchar_t* lpWindowName_ptr = jstring2wchar(env, lpWindowName);
+	HWND ret=CreateWindowExW(dwExStyle,
+		lpClassName_ptr,
+		lpWindowName_ptr,
+		dwStyle,
+		x, y,
+		nWidth, nHeight,
+		ptrOf<HWND>(hwndParent),
+		ptrOf<HMENU>(hMenu),
+		ptrOf<HINSTANCE>(hInstance),
+		NULL);
+	freeWchar(lpClassName_ptr);
+	freeWchar(lpWindowName_ptr);
+	return toPtr(ret);
+}
+
+typedef struct _JNI_WINAPP_ENV{
+	JNIEnv* env;
+	jobject callbacker;
+	jclass clazz;
+	jmethodID method;
+} JNI_WINAPP_ENV, *P_JNI_WINAPP_ENV;
+
+struct _WIN32_RAW_WINDOW;
+typedef _WIN32_RAW_WINDOW WIN32_RAW_WINDOW;
+typedef _WIN32_RAW_WINDOW* P_WIN32_RAW_WINDOW;
+
+struct _WIN32_RAW_WINDOW{
+	HWND hWnd;
+	void * callbackEnv;
+	LRESULT(*callbackFunc)(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+};
+
+static std::map<HWND, P_WIN32_RAW_WINDOW> g_raw_map;
+
+
+
+// 事件分发器
+LRESULT CALLBACK dispatcherWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
+
+	P_WIN32_RAW_WINDOW p_instance = g_raw_map[hWnd];
+	std::map<HWND, P_WIN32_RAW_WINDOW>* p_g_wnds = &g_raw_map;
+
+	if (p_instance == NULL){
+		return  DefWindowProcW(hWnd, message, wParam, lParam);
+	}
+
+	LRESULT ret=p_instance->callbackFunc(hWnd, message, wParam, lParam);
+
+	if (message == WM_DESTROY){
+		g_raw_map.erase(hWnd);
+		free(p_instance->callbackEnv);
+		free(p_instance);
+	}
+
+	return ret;
+}
+
+LRESULT jniRawCallbackFunc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
+	P_WIN32_RAW_WINDOW p_instance = g_raw_map[hWnd];
+
+	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)p_instance->callbackEnv;
+	jlong ret = appEnv->env->CallLongMethod(appEnv->callbacker, appEnv->method, toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam);
+
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(bindMessageCallbacker)(
+JNIEnv* env,
+jobject obj,
+jlong hwnd,
+jobject callbacker
+){
+	
+	P_WIN32_RAW_WINDOW config = (P_WIN32_RAW_WINDOW)malloc(sizeof(WIN32_RAW_WINDOW));
+	memset(config, 0, sizeof(WIN32_RAW_WINDOW));
+	config->hWnd = ptrOf<HWND>(hwnd);
+	
+
+	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)malloc(sizeof(JNI_WINAPP_ENV));
+	memset(appEnv, 0, sizeof(JNI_WINAPP_ENV));
+	appEnv->env = env;
+	appEnv->callbacker = callbacker;
+	config->callbackEnv = appEnv;
+	config->callbackFunc = jniRawCallbackFunc;
+	appEnv->clazz = env->GetObjectClass(callbacker);
+	appEnv->method = env->GetMethodID(appEnv->clazz, "callback", "(JJJJ)J");
+
+	g_raw_map[config->hWnd] = config;
+}
+
+
+
+
+
 
 
 
@@ -5199,6 +5417,7 @@ struct _WIN32_APP_INSTANCE{
 	void * callbackEnv;
 	LRESULT(*callbackFunc)(P_WIN32_APP_INSTANCE pInstance, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 };
+
 
 
 // 管理多个窗体的容器
@@ -5304,6 +5523,7 @@ LRESULT CALLBACK dispatcherWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
 	p_instance->callbackFunc(p_instance, hWnd, message, wParam, lParam);
 
+
 }
 
 int createWin32App(WIN32_APP_CONFIG* config){
@@ -5395,14 +5615,6 @@ int createWin32App(WIN32_APP_CONFIG* config){
 }
 
 
-typedef struct _JNI_WINAPP_ENV{
-	JNIEnv* env;
-	jobject callbacker;
-	jclass clazz;
-	jmethodID method;
-} JNI_WINAPP_ENV, *P_JNI_WINAPP_ENV;
-
-
 LRESULT jniCallbackFunc(P_WIN32_APP_INSTANCE p_instance, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
 
 	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)p_instance->callbackEnv;
@@ -5439,6 +5651,7 @@ LRESULT jniCallbackFunc(P_WIN32_APP_INSTANCE p_instance, HWND hWnd, UINT message
 		if (p_instance->icon != NULL){
 			DestroyIcon(p_instance->icon);
 		}
+		free(p_instance->callbackEnv);
 		free(p_instance);
 		free(appEnv);
 		break;
