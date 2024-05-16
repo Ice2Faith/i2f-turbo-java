@@ -29,6 +29,8 @@
 // msci
 #include<mmsystem.h>
 #pragma comment(lib,"winmm.lib")
+// gdi ∏Ωº”“¿¿µ
+#pragma comment(lib,"msimg32.lib")
 
 
 template<typename PTR>
@@ -4028,6 +4030,1107 @@ jobject obj,
 jint color
 ){
 	int ret = GetBValue(color);
+	return ret;
+}
+
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(getTickCount64)(
+JNIEnv* env,
+jobject obj
+){
+	ULONGLONG ret = GetTickCount64();
+	return ret;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(queryUnbiasedInterruptTime)(
+JNIEnv* env,
+jobject obj
+){
+	ULONGLONG ret = 0;
+	BOOL ok = QueryUnbiasedInterruptTime(&ret);
+	return ret;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(queryProcessCycleTime)(
+JNIEnv* env,
+jobject obj,
+jlong hProcess
+){
+	ULONG64 ret = 0;
+	BOOL ok = QueryProcessCycleTime(ptrOf<HANDLE>(hProcess), &ret);
+	return ret;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(queryThreadCycleTime)(
+JNIEnv* env,
+jobject obj,
+jlong hThread
+){
+	ULONG64 ret = 0;
+	BOOL ok = QueryThreadCycleTime(ptrOf<HANDLE>(hThread), &ret);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(beginPath)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = BeginPath(ptrOf<HDC>(hdc));
+	return ret==TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(endPath)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = EndPath(ptrOf<HDC>(hdc));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(abortPath)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = AbortPath(ptrOf<HDC>(hdc));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(addFontResource)(
+JNIEnv* env,
+jobject obj,
+jstring name
+){
+	wchar_t* name_ptr = jstring2wchar(env, name);
+	int ret = AddFontResourceW(name_ptr);
+	freeWchar(name_ptr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(removeFontResource)(
+JNIEnv* env,
+jobject obj,
+jstring name
+){
+	wchar_t* name_ptr = jstring2wchar(env, name);
+	BOOL ret = RemoveFontResourceW(name_ptr);
+	freeWchar(name_ptr);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(angleArc)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y,
+jint r,
+jdouble startAngle,
+jdouble sweepAngle
+){
+	BOOL ret=AngleArc(ptrOf<HDC>(hdc), x, y, r, startAngle, sweepAngle);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(arc)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint left,
+jint top,
+jint right,
+jint bottom,
+jint arcBeginX,
+jint arcBeginY,
+jint arcEndX,
+jint arcEndY
+){
+	BOOL ret = Arc(ptrOf<HDC>(hdc),left,top,right,bottom,arcBeginX,arcBeginY,arcEndX,arcEndY);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getArcDirection)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	int ret = GetArcDirection(ptrOf<HDC>(hdc));
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(setArcDirection)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint direction
+){
+	int ret = SetArcDirection(ptrOf<HDC>(hdc), direction);
+	return ret; 
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(arcTo)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint left,
+jint top,
+jint right,
+jint bottom,
+jint arcBeginX,
+jint arcBeginY,
+jint arcEndX,
+jint arcEndY
+){
+	BOOL ret = ArcTo(ptrOf<HDC>(hdc), left, top, right, bottom, arcBeginX, arcBeginY, arcEndX, arcEndY);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(cancelDC)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = CancelDC(ptrOf<HDC>(hdc));
+	return ret==TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(chord)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint left,
+jint top,
+jint right,
+jint bottom,
+jint arcBeginX,
+jint arcBeginY,
+jint arcEndX,
+jint arcEndY
+){
+	BOOL ret = Chord(ptrOf<HDC>(hdc), left, top, right, bottom, arcBeginX, arcBeginY, arcEndX, arcEndY);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(closeFigure)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = CloseFigure(ptrOf<HDC>(hdc));
+	return ret == TRUE;
+}
+
+
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(createHalftonePalette)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	HPALETTE ret = CreateHalftonePalette(ptrOf<HDC>(hdc));
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(realizePalette)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	UINT ret = RealizePalette(ptrOf<HDC>(hdc));
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(resizePalette)(
+JNIEnv* env,
+jobject obj,
+jlong hPalette,
+jint n
+){
+	BOOL ret = ResizePalette(ptrOf<HPALETTE>(hPalette),n);
+	return ret==TRUE;
+}
+
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(selectPalette)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jlong hPalette,
+jboolean forceBkgd
+){
+	HPALETTE ret = SelectPalette(ptrOf<HDC>(hdc), ptrOf<HPALETTE>(hPalette), forceBkgd?TRUE:FALSE);
+	return toPtr(ret);
+}
+
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(createHatchBrush)(
+JNIEnv* env,
+jobject obj,
+jint hatch,
+jint color
+){
+	HBRUSH ret = CreateHatchBrush(hatch,(COLORREF)color);
+	return toPtr(ret);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(fillPath)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = FillPath(ptrOf<HDC>(hdc));
+	return ret==TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(fillRgn)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jlong hRgn,
+jlong hBrush
+){
+	BOOL ret = FillRgn(ptrOf<HDC>(hdc),ptrOf<HRGN>(hRgn),ptrOf<HBRUSH>(hBrush));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(flattenPath)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = FlattenPath(ptrOf<HDC>(hdc));
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(floodFill)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y,
+jint color
+){
+	BOOL ret = FloodFill(ptrOf<HDC>(hdc),x,y,color);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(extFloodFill)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y,
+jint color,
+jint type
+){
+	BOOL ret = ExtFloodFill(ptrOf<HDC>(hdc), x, y, color,type);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(frameRgn)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jlong hRgn,
+jlong hBrush,
+jint w,
+jint h
+){
+	BOOL ret = FrameRgn(ptrOf<HDC>(hdc), ptrOf<HRGN>(hRgn), ptrOf<HBRUSH>(hBrush),w,h);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(transparentBlt)(
+JNIEnv* env,
+jobject obj,
+jlong hdcDst,
+jint x,
+jint y,
+jint width,
+jint height,
+jlong hdcSrc,
+jint srcX,
+jint srcY,
+jint srcWidth,
+jint srcHeight,
+jint transparentColor
+){
+	BOOL ret = TransparentBlt(ptrOf<HDC>(hdcDst),x,y,width,height,ptrOf<HDC>(hdcSrc),srcX,srcY,srcWidth,srcHeight,transparentColor);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(stretchBlt)(
+JNIEnv* env,
+jobject obj,
+jlong hdcDst,
+jint x,
+jint y,
+jint width,
+jint height,
+jlong hdcSrc,
+jint srcX,
+jint srcY,
+jint srcWidth,
+jint srcHeight,
+jlong rop
+){
+	BOOL ret = StretchBlt(ptrOf<HDC>(hdcDst), x, y, width, height, ptrOf<HDC>(hdcSrc), srcX, srcY, srcWidth, srcHeight, rop);
+	return ret == TRUE;
+}
+
+
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(getCurrentPositionEx)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	POINT p = { 0 };
+	BOOL ok = GetCurrentPositionEx(ptrOf<HDC>(hdc), &p);
+	if (ok == FALSE){
+		return env->NewIntArray(0);
+	}
+	jint buff[] = { p.x, p.y };
+	jintArray ret = env->NewIntArray(2);
+	env->SetIntArrayRegion(ret, 0, 2, buff);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getDCBrushColor)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	return GetDCBrushColor(ptrOf<HDC>(hdc));
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(setDCBrushColor)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint color
+){
+	return SetDCBrushColor(ptrOf<HDC>(hdc),color);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getDCPenColor)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	return GetDCPenColor(ptrOf<HDC>(hdc));
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(setDCPenColor)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint color
+){
+	return SetDCPenColor(ptrOf<HDC>(hdc), color);
+}
+
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getPixel)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	return GetPixel(ptrOf<HDC>(hdc), x,y);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(setPixel)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y,
+jint color
+){
+	return SetPixel(ptrOf<HDC>(hdc), x, y,(COLORREF)color);
+}
+
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(setPixelV)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y,
+jint color
+){
+	BOOL ret= SetPixelV(ptrOf<HDC>(hdc), x, y, (COLORREF)color);
+	return ret == TRUE;
+}
+
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getPolyFillMode)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	int ret = GetPolyFillMode(ptrOf<HDC>(hdc));
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(setPolyFillMode)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint mode
+){
+	int ret = SetPolyFillMode(ptrOf<HDC>(hdc),mode);
+	return ret;
+}
+
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getROP2)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	int ret = GetROP2(ptrOf<HDC>(hdc));
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(setROP2)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint rop2
+){
+	int ret = SetROP2(ptrOf<HDC>(hdc), rop2);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(getTextAlign)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	int ret = GetTextAlign(ptrOf<HDC>(hdc));
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(setTextAlign)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint align
+){
+	int ret = SetTextAlign(ptrOf<HDC>(hdc), align);
+	return ret;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+JNI_METHOD(getTextFace)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	wchar_t buff[1024] = { 0 };
+	int ret = GetTextFaceW(ptrOf<HDC>(hdc),1024,buff);
+	return wchar2jstring(env, buff);
+}
+
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(moveToEx)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	POINT p = { 0 };
+	BOOL ok=MoveToEx(ptrOf<HDC>(hdc), x, y, &p);
+	if (ok == FALSE){
+		return env->NewIntArray(0);
+	}
+	jint buff[] = { p.x, p.y };
+	jintArray ret=env->NewIntArray(2);
+	env->SetIntArrayRegion(ret, 0, 2, buff);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(lineTo)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	BOOL ok = LineTo(ptrOf<HDC>(hdc), x, y);
+	return ok == TRUE;
+}
+
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(lpToDp)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	POINT p = { 0 };
+	p.x = x;
+	p.y = y;
+	BOOL ok = LPtoDP(ptrOf<HDC>(hdc), &p,1);
+	if (ok == FALSE){
+		return env->NewIntArray(0);
+	}
+	jint buff[] = { p.x, p.y };
+	jintArray ret = env->NewIntArray(2);
+	env->SetIntArrayRegion(ret, 0, 2, buff);
+	return ret;
+}
+
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(dpToLp)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	POINT p = { 0 };
+	p.x = x;
+	p.y = y;
+	BOOL ok = DPtoLP(ptrOf<HDC>(hdc), &p, 1);
+	if (ok == FALSE){
+		return env->NewIntArray(0);
+	}
+	jint buff[] = { p.x, p.y };
+	jintArray ret = env->NewIntArray(2);
+	env->SetIntArrayRegion(ret, 0, 2, buff);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(maskBlt)(
+JNIEnv* env,
+jobject obj,
+jlong hdcDst,
+jint x,
+jint y,
+jint width,
+jint height,
+jlong hdcSrc,
+jint srcX,
+jint srcY,
+jlong hBmMask,
+jint xMask,
+jint yMask,
+jlong rop
+){
+	BOOL ret = MaskBlt(ptrOf<HDC>(hdcDst), x, y, width, height, ptrOf<HDC>(hdcSrc), srcX, srcY, ptrOf<HBITMAP>(hBmMask), xMask,yMask, rop);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(offsetClipRgn)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	int ret=OffsetClipRgn(ptrOf<HDC>(hdc), x, y);
+	return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(offsetRgn)(
+JNIEnv* env,
+jobject obj,
+jlong hRgn,
+jint x,
+jint y
+){
+	int ret = OffsetRgn(ptrOf<HRGN>(hRgn), x, y);
+	return ret;
+}
+
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(offsetViewportOrgEx)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	POINT p = { 0 };
+	BOOL ok = OffsetViewportOrgEx(ptrOf<HDC>(hdc), x, y,&p);
+	if (ok == FALSE){
+		return env->NewIntArray(0);
+	}
+	jint buff[] = { p.x, p.y };
+	jintArray ret = env->NewIntArray(2);
+	env->SetIntArrayRegion(ret, 0, 2, buff);
+	return ret;
+}
+
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(offsetWindowOrgEx)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	POINT p = { 0 };
+	BOOL ok = OffsetWindowOrgEx(ptrOf<HDC>(hdc), x, y, &p);
+	if (ok == FALSE){
+		return env->NewIntArray(0);
+	}
+	jint buff[] = { p.x, p.y };
+	jintArray ret = env->NewIntArray(2);
+	env->SetIntArrayRegion(ret, 0, 2, buff);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(paintRgn)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jlong hRgn
+){
+	BOOL ok = PaintRgn(ptrOf<HDC>(hdc), ptrOf<HRGN>(hRgn));
+	return ok;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(patBlt)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y,
+jint width,
+jint height,
+jlong rop
+){
+	BOOL ok = PatBlt(ptrOf<HDC>(hdc), x,y,width,height,rop);
+	return ok;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(pathToRegion)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	HRGN ret = PathToRegion(ptrOf<HDC>(hdc));
+	return toPtr(ret);
+}
+
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(pie)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint left,
+jint top,
+jint right,
+jint bottom,
+jint arcBeginX,
+jint arcBeginY,
+jint arcEndX,
+jint arcEndY
+){
+	BOOL ret = Pie(ptrOf<HDC>(hdc), left, top, right, bottom, arcBeginX, arcBeginY, arcEndX, arcEndY);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(polyBezier)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jintArray points
+){
+	int len = env->GetArrayLength(points);
+	jint* arr = env->GetIntArrayElements(points, NULL);
+	POINT* args = (POINT*)malloc(sizeof(POINT)*(len/2));
+	for (int i = 0; i < len / 2; i+=2){
+		args[i].x = arr[i * 2];
+		args[i].y = arr[i * 2 + 1];
+	}
+	
+	BOOL ret = PolyBezier(ptrOf<HDC>(hdc),args,(len/2));
+	env->ReleaseIntArrayElements(points, arr, 0);
+	return ret == TRUE;
+}
+
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(polyBezierTo)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jintArray points
+){
+	int len = env->GetArrayLength(points);
+	jint* arr = env->GetIntArrayElements(points, NULL);
+	POINT* args = (POINT*)malloc(sizeof(POINT)*(len / 2));
+	for (int i = 0; i < len / 2; i += 2){
+		args[i].x = arr[i * 2];
+		args[i].y = arr[i * 2 + 1];
+	}
+
+	BOOL ret = PolyBezierTo(ptrOf<HDC>(hdc), args, (len / 2));
+	env->ReleaseIntArrayElements(points, arr, 0);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(polygon)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jintArray points
+){
+	int len = env->GetArrayLength(points);
+	jint* arr = env->GetIntArrayElements(points, NULL);
+	POINT* args = (POINT*)malloc(sizeof(POINT)*(len / 2));
+	for (int i = 0; i < len / 2; i += 2){
+		args[i].x = arr[i * 2];
+		args[i].y = arr[i * 2 + 1];
+	}
+
+	BOOL ret = Polygon(ptrOf<HDC>(hdc), args, (len / 2));
+	env->ReleaseIntArrayElements(points, arr, 0);
+	return ret == TRUE;
+}
+
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(polyline)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jintArray points
+){
+	int len = env->GetArrayLength(points);
+	jint* arr = env->GetIntArrayElements(points, NULL);
+	POINT* args = (POINT*)malloc(sizeof(POINT)*(len / 2));
+	for (int i = 0; i < len / 2; i += 2){
+		args[i].x = arr[i * 2];
+		args[i].y = arr[i * 2 + 1];
+	}
+
+	BOOL ret = Polyline(ptrOf<HDC>(hdc), args, (len / 2));
+	env->ReleaseIntArrayElements(points, arr, 0);
+	return ret == TRUE;
+}
+
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(polylineTo)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jintArray points
+){
+	int len = env->GetArrayLength(points);
+	jint* arr = env->GetIntArrayElements(points, NULL);
+	POINT* args = (POINT*)malloc(sizeof(POINT)*(len / 2));
+	for (int i = 0; i < len / 2; i += 2){
+		args[i].x = arr[i * 2];
+		args[i].y = arr[i * 2 + 1];
+	}
+
+	BOOL ret = PolylineTo(ptrOf<HDC>(hdc), args, (len / 2));
+	env->ReleaseIntArrayElements(points, arr, 0);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(ptInRegion)(
+JNIEnv* env,
+jobject obj,
+jlong hRgn,
+jint x,
+jint y
+){
+	BOOL ret=PtInRegion(ptrOf<HRGN>(hRgn), x, y);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(ptVisible)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	BOOL ret = PtVisible(ptrOf<HDC>(hdc), x, y);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(rectInRegion)(
+JNIEnv* env,
+jobject obj,
+jlong hRgn,
+jint left,
+jint top,
+jint right,
+jint bottom
+){
+	RECT rect = { 0 };
+	rect.left = left;
+	rect.top = top;
+	rect.right = right;
+	rect.bottom = bottom;
+	BOOL ret = RectInRegion(ptrOf<HRGN>(hRgn), &rect);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(rectVisible)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint left,
+jint top,
+jint right,
+jint bottom
+){
+	RECT rect = { 0 };
+	rect.left = left;
+	rect.top = top;
+	rect.right = right;
+	rect.bottom = bottom;
+	BOOL ret = RectVisible(ptrOf<HDC>(hdc), &rect);
+	return ret==TRUE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(saveDC)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	int ret = SaveDC(ptrOf<HDC>(hdc));
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(restoreDC)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint nSavedDc
+){
+	BOOL ret = RestoreDC(ptrOf<HDC>(hdc), nSavedDc);
+	return ret==TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(roundRect)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint left,
+jint top,
+jint right,
+jint bottom,
+jint width,
+jint height
+){
+	BOOL ret = RoundRect(ptrOf<HDC>(hdc), left,top,right,bottom,width,height);
+	return ret == TRUE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+JNI_METHOD(selectClipRgn)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jlong hRgn
+){
+	int ret = SelectClipRgn(ptrOf<HDC>(hdc), ptrOf<HRGN>(hRgn));
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(selectClipPath)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint mode
+){
+	BOOL ret = SelectClipPath(ptrOf<HDC>(hdc), mode);
+	return ret == TRUE; 
+}
+
+
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(getBrushOrgEx)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	POINT p = { 0 };
+	BOOL ok = GetBrushOrgEx(ptrOf<HDC>(hdc), &p);
+	if (!ok){
+		return env->NewIntArray(0);
+	}
+	jint arr[] = { p.x, p.y };
+	jintArray ret = env->NewIntArray(2);
+	env->SetIntArrayRegion(ret, 0, 2, arr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jintArray JNICALL
+JNI_METHOD(setBrushOrgEx)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y
+){
+	POINT p = { 0 };
+	BOOL ok = SetBrushOrgEx(ptrOf<HDC>(hdc), x, y, &p);
+	if (!ok){
+		return env->NewIntArray(0);
+	}
+	jint arr[] = { p.x, p.y };
+	jintArray ret = env->NewIntArray(2);
+	env->SetIntArrayRegion(ret, 0, 2, arr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(setRectRgn)(
+JNIEnv* env,
+jobject obj,
+jlong hRgn,
+jint left,
+jint top,
+jint right,
+jint bottom
+){
+	BOOL ret=SetRectRgn(ptrOf<HRGN>(hRgn), left, top, right, bottom);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(setTextJustification)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint extra,
+jint count
+){
+	BOOL ret = SetTextJustification(ptrOf<HDC>(hdc),extra,count);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(strokeAndFillPath)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = StrokeAndFillPath(ptrOf<HDC>(hdc));
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(strokePath)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = StrokePath(ptrOf<HDC>(hdc));
+	return ret;
+}
+
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(textOut)(
+JNIEnv* env,
+jobject obj,
+jlong hdc,
+jint x,
+jint y,
+jstring text
+){
+	wchar_t* text_ptr = jstring2wchar(env, text);
+	BOOL ret = TextOutW(ptrOf<HDC>(hdc),x,y,text_ptr,lstrlenW(text_ptr));
+	freeWchar(text_ptr);
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(unrealizeObject)(
+JNIEnv* env,
+jobject obj,
+jlong hGdiObj
+){
+	BOOL ret=UnrealizeObject(ptrOf<HGDIOBJ>(hGdiObj));
+	return ret;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(updateColors)(
+JNIEnv* env,
+jobject obj,
+jlong hdc
+){
+	BOOL ret = UpdateColors(ptrOf<HDC>(hdc));
 	return ret;
 }
 
