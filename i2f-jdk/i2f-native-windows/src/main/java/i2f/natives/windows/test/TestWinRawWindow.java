@@ -22,7 +22,6 @@ import i2f.natives.windows.types.window.MsgPtr;
 import i2f.natives.windows.types.window.PaintStructPtr;
 
 import java.io.File;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author Ice2Faith
@@ -31,20 +30,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public class TestWinRawWindow {
     public static void main(String[] args) throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(1);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    app();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    latch.countDown();
-                }
-            }
-        }).start();
-        latch.await();
+        app();
     }
 
     public static void app() {
