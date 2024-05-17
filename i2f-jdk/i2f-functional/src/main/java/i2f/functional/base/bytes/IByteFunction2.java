@@ -10,4 +10,7 @@ import i2f.functional.base.IByteFunction;
 @FunctionalInterface
 public interface IByteFunction2<V1, V2> extends IByteFunction {
     byte apply(V1 v1, V2 v2);
+    static<V1, V2> IByteFunction2<V1, V2> of(IByteFunction2<V1, V2> ret){
+        return ret;
+    }
 }

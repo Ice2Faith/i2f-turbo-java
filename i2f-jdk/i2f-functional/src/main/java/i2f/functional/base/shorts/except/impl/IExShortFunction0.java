@@ -1,5 +1,6 @@
 package i2f.functional.base.shorts.except.impl;
 
+import i2f.functional.base.shorts.IShortFunction0;
 import i2f.functional.base.shorts.except.IExShortFunction;
 
 /**
@@ -10,4 +11,7 @@ import i2f.functional.base.shorts.except.IExShortFunction;
 @FunctionalInterface
 public interface IExShortFunction0 extends IExShortFunction {
     short apply() throws Throwable;
+    static IExShortFunction0 of(IExShortFunction0 ret){
+        return ret;
+    }
 }

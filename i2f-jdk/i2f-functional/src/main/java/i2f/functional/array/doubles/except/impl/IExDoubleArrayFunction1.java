@@ -10,4 +10,7 @@ import i2f.functional.array.doubles.except.IExDoubleArrayFunction;
 @FunctionalInterface
 public interface IExDoubleArrayFunction1<V1> extends IExDoubleArrayFunction {
     double[] apply(V1 v1) throws Throwable;
+    static<V1> IExDoubleArrayFunction1<V1> of(IExDoubleArrayFunction1<V1> ret){
+        return ret;
+    }
 }

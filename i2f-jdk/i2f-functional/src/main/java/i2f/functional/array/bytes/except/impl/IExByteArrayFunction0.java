@@ -1,5 +1,6 @@
 package i2f.functional.array.bytes.except.impl;
 
+import i2f.functional.array.bytes.IByteArrayFunction0;
 import i2f.functional.array.bytes.except.IExByteArrayFunction;
 
 /**
@@ -10,4 +11,7 @@ import i2f.functional.array.bytes.except.IExByteArrayFunction;
 @FunctionalInterface
 public interface IExByteArrayFunction0 extends IExByteArrayFunction {
     byte[] apply() throws Throwable;
+    static IExByteArrayFunction0 of(IExByteArrayFunction0 ret){
+        return ret;
+    }
 }

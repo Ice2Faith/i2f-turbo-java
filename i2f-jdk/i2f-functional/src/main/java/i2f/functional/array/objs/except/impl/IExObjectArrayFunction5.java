@@ -10,4 +10,7 @@ import i2f.functional.array.objs.except.IExObjectArrayFunction;
 @FunctionalInterface
 public interface IExObjectArrayFunction5<T, V1, V2, V3, V4, V5> extends IExObjectArrayFunction {
     T[] apply(V1 v1, V2 v2, V3 v3, V4 v4, V5 v5) throws Throwable;
+    static<T, V1, V2, V3, V4, V5> IExObjectArrayFunction5<T, V1, V2, V3, V4, V5> of(IExObjectArrayFunction5<T, V1, V2, V3, V4, V5> ret){
+        return ret;
+    }
 }

@@ -1,5 +1,6 @@
 package i2f.functional.base.chars.except.impl;
 
+import i2f.functional.base.chars.ICharFunction0;
 import i2f.functional.base.chars.except.IExCharFunction;
 
 /**
@@ -10,4 +11,7 @@ import i2f.functional.base.chars.except.IExCharFunction;
 @FunctionalInterface
 public interface IExCharFunction0 extends IExCharFunction {
     char apply() throws Throwable;
+    static IExCharFunction0 of(IExCharFunction0 ret){
+        return ret;
+    }
 }

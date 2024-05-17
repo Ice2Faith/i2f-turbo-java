@@ -10,4 +10,7 @@ import i2f.functional.array.IBoolArrayFunction;
 @FunctionalInterface
 public interface IBoolArrayFunction2<V1, V2> extends IBoolArrayFunction {
     boolean[] apply(V1 v1, V2 v2);
+    static<V1, V2> IBoolArrayFunction2<V1, V2> of(IBoolArrayFunction2<V1, V2> ret){
+        return ret;
+    }
 }

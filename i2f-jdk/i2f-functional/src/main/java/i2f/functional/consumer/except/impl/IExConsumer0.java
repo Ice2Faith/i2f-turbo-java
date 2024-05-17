@@ -1,6 +1,7 @@
 package i2f.functional.consumer.except.impl;
 
 import i2f.functional.consumer.except.IExConsumer;
+import i2f.functional.consumer.impl.IConsumer0;
 
 /**
  * @author Ice2Faith
@@ -10,4 +11,7 @@ import i2f.functional.consumer.except.IExConsumer;
 @FunctionalInterface
 public interface IExConsumer0 extends IExConsumer {
     void accept() throws Throwable;
+    static IExConsumer0 of(IExConsumer0 ret){
+        return ret;
+    }
 }

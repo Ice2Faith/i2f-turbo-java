@@ -10,4 +10,7 @@ import i2f.functional.array.chars.except.IExCharArrayFunction;
 @FunctionalInterface
 public interface IExCharArrayFunction1<V1> extends IExCharArrayFunction {
     char[] apply(V1 v1) throws Throwable;
+    static<V1> IExCharArrayFunction1<V1> of(IExCharArrayFunction1<V1> ret){
+        return ret;
+    }
 }
