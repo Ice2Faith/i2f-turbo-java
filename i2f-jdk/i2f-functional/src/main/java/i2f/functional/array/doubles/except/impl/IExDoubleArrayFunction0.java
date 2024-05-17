@@ -1,5 +1,6 @@
 package i2f.functional.array.doubles.except.impl;
 
+import i2f.functional.array.doubles.IDoubleArrayFunction0;
 import i2f.functional.array.doubles.except.IExDoubleArrayFunction;
 
 /**
@@ -10,4 +11,7 @@ import i2f.functional.array.doubles.except.IExDoubleArrayFunction;
 @FunctionalInterface
 public interface IExDoubleArrayFunction0 extends IExDoubleArrayFunction {
     double[] apply() throws Throwable;
+    static IExDoubleArrayFunction0 of(IExDoubleArrayFunction0 ret){
+        return ret;
+    }
 }

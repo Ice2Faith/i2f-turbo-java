@@ -1,5 +1,6 @@
 package i2f.functional.base.longs.except.impl;
 
+import i2f.functional.base.longs.ILongFunction0;
 import i2f.functional.base.longs.except.IExLongFunction;
 
 /**
@@ -10,4 +11,7 @@ import i2f.functional.base.longs.except.IExLongFunction;
 @FunctionalInterface
 public interface IExLongFunction0 extends IExLongFunction {
     long apply() throws Throwable;
+    static IExLongFunction0 of(IExLongFunction0 ret){
+        return ret;
+    }
 }

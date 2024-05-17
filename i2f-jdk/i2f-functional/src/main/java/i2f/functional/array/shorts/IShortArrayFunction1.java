@@ -10,4 +10,7 @@ import i2f.functional.array.IShortArrayFunction;
 @FunctionalInterface
 public interface IShortArrayFunction1<V1> extends IShortArrayFunction {
     short[] apply(V1 v1);
+    static<V1> IShortArrayFunction1<V1> of(IShortArrayFunction1<V1> ret){
+        return ret;
+    }
 }

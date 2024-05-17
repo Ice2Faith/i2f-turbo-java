@@ -10,4 +10,7 @@ import i2f.functional.base.floats.except.IExFloatFunction;
 @FunctionalInterface
 public interface IExFloatFunction3<V1, V2, V3> extends IExFloatFunction {
     float apply(V1 v1, V2 v2, V3 v3) throws Throwable;
+    static<V1, V2, V3> IExFloatFunction3<V1, V2, V3> of(IExFloatFunction3<V1, V2, V3> ret){
+        return ret;
+    }
 }

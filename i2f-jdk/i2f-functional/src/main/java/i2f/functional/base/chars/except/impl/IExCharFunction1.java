@@ -10,4 +10,7 @@ import i2f.functional.base.chars.except.IExCharFunction;
 @FunctionalInterface
 public interface IExCharFunction1<V1> extends IExCharFunction {
     char apply(V1 v1) throws Throwable;
+    static<V1> IExCharFunction1<V1> of(IExCharFunction1<V1> ret){
+        return ret;
+    }
 }

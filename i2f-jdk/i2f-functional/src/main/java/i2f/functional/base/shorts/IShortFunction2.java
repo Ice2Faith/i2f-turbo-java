@@ -10,4 +10,7 @@ import i2f.functional.base.IShortFunction;
 @FunctionalInterface
 public interface IShortFunction2<V1, V2> extends IShortFunction {
     short apply(V1 v1, V2 v2);
+    static<V1, V2> IShortFunction2<V1, V2> of(IShortFunction2<V1, V2> ret){
+        return ret;
+    }
 }

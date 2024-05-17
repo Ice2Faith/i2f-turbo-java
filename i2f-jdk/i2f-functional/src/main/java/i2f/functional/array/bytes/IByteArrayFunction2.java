@@ -10,4 +10,7 @@ import i2f.functional.array.IByteArrayFunction;
 @FunctionalInterface
 public interface IByteArrayFunction2<V1, V2> extends IByteArrayFunction {
     byte[] apply(V1 v1, V2 v2);
+    static<V1, V2> IByteArrayFunction2<V1, V2> of(IByteArrayFunction2<V1, V2> ret){
+        return ret;
+    }
 }

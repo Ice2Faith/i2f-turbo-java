@@ -10,4 +10,7 @@ import i2f.functional.array.bytes.except.IExByteArrayFunction;
 @FunctionalInterface
 public interface IExByteArrayFunction1<V1> extends IExByteArrayFunction {
     byte[] apply(V1 v1) throws Throwable;
+    static<V1> IExByteArrayFunction1<V1> of(IExByteArrayFunction1<V1> ret){
+        return ret;
+    }
 }

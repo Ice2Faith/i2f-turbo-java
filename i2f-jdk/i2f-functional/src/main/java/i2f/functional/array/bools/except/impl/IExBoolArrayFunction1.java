@@ -10,4 +10,7 @@ import i2f.functional.array.bools.except.IExBoolArrayFunction;
 @FunctionalInterface
 public interface IExBoolArrayFunction1<V1> extends IExBoolArrayFunction {
     boolean[] apply(V1 v1) throws Throwable;
+    static<V1> IExBoolArrayFunction1<V1> of(IExBoolArrayFunction1<V1> ret){
+        return ret;
+    }
 }

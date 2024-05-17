@@ -10,4 +10,7 @@ import i2f.functional.array.ints.except.IExIntArrayFunction;
 @FunctionalInterface
 public interface IExIntArrayFunction2<V1, V2> extends IExIntArrayFunction {
     int[] apply(V1 v1, V2 v2) throws Throwable;
+    static<V1, V2> IExIntArrayFunction2<V1, V2> of(IExIntArrayFunction2<V1, V2> ret){
+        return ret;
+    }
 }

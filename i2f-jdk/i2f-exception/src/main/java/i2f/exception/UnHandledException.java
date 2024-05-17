@@ -6,7 +6,7 @@ package i2f.exception;
  * @date 2024/4/22 16:45
  * @desc
  */
-public class UnHandledException extends ServiceException {
+public class UnHandledException extends RuntimeException {
     private Throwable reason;
 
     public UnHandledException(Throwable reason) {

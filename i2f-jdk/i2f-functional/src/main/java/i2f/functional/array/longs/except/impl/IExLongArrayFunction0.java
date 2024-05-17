@@ -1,5 +1,6 @@
 package i2f.functional.array.longs.except.impl;
 
+import i2f.functional.array.longs.ILongArrayFunction0;
 import i2f.functional.array.longs.except.IExLongArrayFunction;
 
 /**
@@ -10,4 +11,7 @@ import i2f.functional.array.longs.except.IExLongArrayFunction;
 @FunctionalInterface
 public interface IExLongArrayFunction0 extends IExLongArrayFunction {
     long[] apply() throws Throwable;
+    static IExLongArrayFunction0 of(IExLongArrayFunction0 ret){
+        return ret;
+    }
 }
