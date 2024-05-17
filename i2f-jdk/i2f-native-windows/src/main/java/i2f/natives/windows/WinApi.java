@@ -3318,7 +3318,7 @@ public class WinApi {
                 hInstance,
                 hIcon,
                 loadCursorArrow(hInstance),
-                convertBrushBySystemWindowFrame(),
+                convertBrushBySystemWindow(),
                 null,
                 lpszClassName,
                 hIcon);
