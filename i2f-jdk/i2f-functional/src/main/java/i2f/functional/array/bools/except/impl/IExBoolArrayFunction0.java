@@ -1,5 +1,6 @@
 package i2f.functional.array.bools.except.impl;
 
+import i2f.functional.array.bools.IBoolArrayFunction0;
 import i2f.functional.array.bools.except.IExBoolArrayFunction;
 
 /**
@@ -10,4 +11,7 @@ import i2f.functional.array.bools.except.IExBoolArrayFunction;
 @FunctionalInterface
 public interface IExBoolArrayFunction0 extends IExBoolArrayFunction {
     boolean[] apply() throws Throwable;
+    static IExBoolArrayFunction0 of(IExBoolArrayFunction0 ret){
+        return ret;
+    }
 }

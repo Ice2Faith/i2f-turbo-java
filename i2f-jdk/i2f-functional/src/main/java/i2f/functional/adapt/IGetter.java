@@ -1,5 +1,6 @@
 package i2f.functional.adapt;
 
+import i2f.functional.array.bools.except.impl.IExBoolArrayFunction0;
 import i2f.functional.func.impl.IFunction1;
 
 /**
@@ -9,4 +10,7 @@ import i2f.functional.func.impl.IFunction1;
  */
 @FunctionalInterface
 public interface IGetter<R, T> extends IFunction1<R, T> {
+    static<R, T> IGetter<R, T> of(IGetter<R, T> ret){
+        return ret;
+    }
 }

@@ -1,6 +1,7 @@
 package i2f.functional.array.objs;
 
 import i2f.functional.array.IObjectArrayFunction;
+import i2f.functional.array.shorts.except.impl.IExShortArrayFunction0;
 
 /**
  * @author Ice2Faith
@@ -10,4 +11,7 @@ import i2f.functional.array.IObjectArrayFunction;
 @FunctionalInterface
 public interface IObjectArrayFunction0<T> extends IObjectArrayFunction {
     T[] apply();
+    static<T> IObjectArrayFunction0<T> of(IObjectArrayFunction0<T> ret){
+        return ret;
+    }
 }

@@ -10,4 +10,7 @@ import i2f.functional.consumer.IConsumer;
 @FunctionalInterface
 public interface IConsumer2<V1, V2> extends IConsumer {
     void accept(V1 v1, V2 v2);
+    static<V1, V2> IConsumer2<V1, V2> of(IConsumer2<V1, V2> ret){
+        return ret;
+    }
 }

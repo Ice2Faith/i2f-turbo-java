@@ -10,4 +10,7 @@ import i2f.functional.base.IFloatFunction;
 @FunctionalInterface
 public interface IFloatFunction2<V1, V2> extends IFloatFunction {
     float apply(V1 v1, V2 v2);
+    static<V1, V2> IFloatFunction2<V1, V2> of(IFloatFunction2<V1, V2> ret){
+        return ret;
+    }
 }

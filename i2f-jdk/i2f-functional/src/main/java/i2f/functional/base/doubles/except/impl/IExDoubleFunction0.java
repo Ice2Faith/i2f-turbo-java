@@ -1,5 +1,6 @@
 package i2f.functional.base.doubles.except.impl;
 
+import i2f.functional.base.doubles.IDoubleFunction0;
 import i2f.functional.base.doubles.except.IExDoubleFunction;
 
 /**
@@ -10,4 +11,7 @@ import i2f.functional.base.doubles.except.IExDoubleFunction;
 @FunctionalInterface
 public interface IExDoubleFunction0 extends IExDoubleFunction {
     double apply() throws Throwable;
+    static IExDoubleFunction0 of(IExDoubleFunction0 ret){
+        return ret;
+    }
 }

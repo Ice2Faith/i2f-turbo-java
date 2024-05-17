@@ -10,4 +10,7 @@ import i2f.functional.array.IObjectArrayFunction;
 @FunctionalInterface
 public interface IObjectArrayFunction2<T, V1, V2> extends IObjectArrayFunction {
     T[] apply(V1 v1, V2 v2);
+    static<T, V1, V2> IObjectArrayFunction2<T, V1, V2> of(IObjectArrayFunction2<T, V1, V2> ret){
+        return ret;
+    }
 }

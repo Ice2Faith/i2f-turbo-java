@@ -10,4 +10,7 @@ import i2f.functional.array.IIntArrayFunction;
 @FunctionalInterface
 public interface IIntArrayFunction1<V1> extends IIntArrayFunction {
     int[] apply(V1 v1);
+    static<V1> IIntArrayFunction1<V1> of(IIntArrayFunction1<V1> ret){
+        return ret;
+    }
 }

@@ -1,6 +1,7 @@
 package i2f.functional.base.longs;
 
 import i2f.functional.base.ILongFunction;
+import i2f.functional.base.shorts.IShortFunction0;
 
 /**
  * @author Ice2Faith
@@ -10,4 +11,7 @@ import i2f.functional.base.ILongFunction;
 @FunctionalInterface
 public interface ILongFunction0 extends ILongFunction {
     long apply();
+    static ILongFunction0 of(ILongFunction0 ret){
+        return ret;
+    }
 }
