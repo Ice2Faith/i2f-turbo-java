@@ -865,9 +865,9 @@ public class NativesWindows {
 
     public static native long mallocPaintStruct();
 
-    public static native long beginPaint(long hwnd,long pPaintStruct);
+    public static native long beginPaint(long hwnd, long pPaintStruct);
 
-    public static native boolean endPaint(long hwnd,long pPaintStruct);
+    public static native boolean endPaint(long hwnd, long pPaintStruct);
 
     public static native void postQuitMessage(int exitCode);
 
@@ -878,6 +878,22 @@ public class NativesWindows {
     public static native String getBitmapDcInfo(long pBitmapDc);
 
     public static native void freopenStdio();
+
+    public static native long createThread(
+            int dwStackSize,
+            int dwCreationFlags,
+            Runnable runnable
+    );
+
+    public static native long waitForSingleObject(
+            long hHandle,
+            long dwMillSeconds
+    );
+
+    public static native long waitForMultipleObjects(
+            long[] hHandles,
+            boolean waitAll,
+            long dwMillSeconds);
 
     public static native long winAppCreateBitmap(int width, int height);
 
