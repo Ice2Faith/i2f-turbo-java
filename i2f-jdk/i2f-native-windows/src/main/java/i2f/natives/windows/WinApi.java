@@ -3363,21 +3363,21 @@ public class WinApi {
                 hInstance);
     }
 
-    public static PaintStructPtr mallocPaintStruct(){
+    public static PaintStructPtr mallocPaintStruct() {
         long ret = NativesWindows.mallocPaintStruct();
         return new PaintStructPtr(ret);
     }
 
-    public static Hdc beginPaint(Hwnd hwnd,PaintStructPtr pPaintStruct){
+    public static Hdc beginPaint(Hwnd hwnd, PaintStructPtr pPaintStruct) {
         long ret = NativesWindows.beginPaint(hwnd.value(), pPaintStruct.value());
         return new Hdc(ret);
     }
 
-    public static boolean endPaint(Hwnd hwnd,PaintStructPtr pPaintStruct){
-        return NativesWindows.endPaint(hwnd.value(),pPaintStruct.value());
+    public static boolean endPaint(Hwnd hwnd, PaintStructPtr pPaintStruct) {
+        return NativesWindows.endPaint(hwnd.value(), pPaintStruct.value());
     }
 
-    public static void postQuitMessage(int exitCode){
+    public static void postQuitMessage(int exitCode) {
         NativesWindows.postQuitMessage(exitCode);
     }
 
@@ -3385,7 +3385,7 @@ public class WinApi {
         NativesWindows.bindMessageCallbacker(hwnd.value(), callbacker);
     }
 
-    public static BitmapDcPtr mallocBitMapDc(){
+    public static BitmapDcPtr mallocBitMapDc() {
         long ret = NativesWindows.mallocBitMapDc();
         return new BitmapDcPtr(ret);
     }
@@ -3403,14 +3403,59 @@ public class WinApi {
         return ret;
     }
 
-    public static BitmapDcInfo getBitmapDcInfo(BitmapDcPtr pBitmapDc){
+    public static BitmapDcInfo getBitmapDcInfo(BitmapDcPtr pBitmapDc) {
         String str = NativesWindows.getBitmapDcInfo(pBitmapDc.value());
         return parseBitmapDcInfo(str);
     }
 
-    public static void freopenStdio(){
+    public static void freopenStdio() {
         NativesWindows.freopenStdio();
     }
+
+    public static Handle createThread(
+            int dwStackSize,
+            int dwCreationFlags,
+            Runnable runnable
+    ) {
+        long ret = NativesWindows.createThread(dwStackSize, dwCreationFlags, runnable);
+        return new Handle(ret);
+    }
+
+    public static Handle createThread(
+            Runnable runnable
+    ) {
+        return createThread(0, 0, runnable);
+    }
+
+    public static long waitForSingleObject(
+            Handle hHandle,
+            long dwMillSeconds
+    ) {
+        return NativesWindows.waitForSingleObject(hHandle.value(), dwMillSeconds);
+    }
+
+    public static long waitForSingleObject(
+            Handle hHandle
+    ) {
+        return waitForSingleObject(hHandle, -1);
+    }
+
+    public static long waitForMultipleObjects(
+            Handle[] hHandles,
+            boolean waitAll,
+            long dwMillSeconds) {
+        long[] args = new long[hHandles.length];
+        for (int i = 0; i < hHandles.length; i++) {
+            args[i] = hHandles[i].value();
+        }
+        return NativesWindows.waitForMultipleObjects(args, waitAll, dwMillSeconds);
+    }
+
+    public static long waitForMultipleObjects(
+            Handle[] hHandles) {
+        return waitForMultipleObjects(hHandles, true, -1);
+    }
+
     public static HBitmap winAppCreateBitmap(int width, int height) {
         long ret = NativesWindows.winAppCreateBitmap(width, height);
         return new HBitmap(ret);

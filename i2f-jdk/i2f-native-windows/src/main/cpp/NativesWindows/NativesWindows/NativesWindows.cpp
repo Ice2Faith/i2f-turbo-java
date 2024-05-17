@@ -5257,10 +5257,12 @@ LRESULT jniRawCallbackFunc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	P_WIN32_RAW_WINDOW p_instance = g_raw_map[hWnd];
 	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)p_instance->callbackEnv;
 	
+	bool isAttached = false;
 	int status=g_jvm->GetEnv((void**)&appEnv->env, JNI_VERSION_1_8);
 	if (status < 0){
 		JavaVMAttachArgs args = { JNI_VERSION_1_8, __FUNCTION__, NULL };
 		status=g_jvm->AttachCurrentThread((void**)&appEnv->env, &args);
+		isAttached = true;
 		if (status < 0){
 			MessageBoxA(NULL, "jvm get env error", "error", MB_OK);
 		}
@@ -5269,6 +5271,9 @@ LRESULT jniRawCallbackFunc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 	jlong ret = appEnv->env->CallLongMethod(appEnv->callbacker, appEnv->method, toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam);
 
+	if (isAttached){
+		g_jvm->DetachCurrentThread();
+	}
 	return ret;
 }
 
@@ -5464,7 +5469,86 @@ jobject obj
 	freopen("CONOUT$", "w", stderr); // 重定向标准错误输出
 }
 
+DWORD WINAPI jniRawThreadProc(LPVOID lpParameter){
+	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)lpParameter;
+	bool isAttached = false;
+	try{
+		int status = g_jvm->GetEnv((void**)&appEnv->env, JNI_VERSION_1_8);
+		if (status < 0){
+			JavaVMAttachArgs args = { JNI_VERSION_1_8, __FUNCTION__, NULL };
+			status = g_jvm->AttachCurrentThread((void**)&appEnv->env, &args);
+			isAttached = true;
+			if (status < 0){
 
+			}
+		}
+
+		appEnv->env->CallVoidMethod(appEnv->callbacker, appEnv->method);
+	}
+	catch (...){
+
+	}
+	appEnv->env->DeleteGlobalRef(appEnv->callbacker);
+	free(appEnv);
+	if (isAttached){
+		g_jvm->DetachCurrentThread();
+	}
+	return 0;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(createThread)(
+JNIEnv* env,
+jobject obj,
+jint dwStackSize,
+jint dwCreatetionFlags,
+jobject runnable
+){
+	env->GetJavaVM(&g_jvm);
+	runnable = env->NewGlobalRef(runnable);
+
+	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)malloc(sizeof(JNI_WINAPP_ENV));
+	memset(appEnv, 0, sizeof(JNI_WINAPP_ENV));
+	appEnv->env = env;
+	appEnv->callbacker = runnable;
+	appEnv->clazz = env->GetObjectClass(runnable);
+	appEnv->method = env->GetMethodID(appEnv->clazz, "run", "()V");
+
+	DWORD threadId=0;
+	HANDLE ret = CreateThread(NULL, dwStackSize, (PTHREAD_START_ROUTINE)jniRawThreadProc, (LPVOID)appEnv, dwCreatetionFlags, &threadId);
+
+	return toPtr(ret);
+}
+
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(waitForSingleObject)(
+JNIEnv* env,
+jobject obj,
+jlong hHandle,
+jlong dwMillSeconds
+){
+	DWORD ret = WaitForSingleObject(ptrOf<HANDLE>(hHandle), dwMillSeconds<0 ? INFINITE : dwMillSeconds);
+	return ret;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+JNI_METHOD(waitForMultipleObjects)(
+JNIEnv* env,
+jobject obj,
+jlongArray hHandles,
+jboolean waitAll,
+jlong dwMillSeconds
+){
+	int len=env->GetArrayLength(hHandles);
+	jlong * arr=env->GetLongArrayElements(hHandles, NULL);
+	HANDLE* args = (HANDLE*)malloc(sizeof(HANDLE)*len);
+	for (int i = 0; i < len; i++){
+		args[i] = ptrOf<HANDLE>(arr[i]);
+	}
+	DWORD ret = WaitForMultipleObjects(len, args, (waitAll ? TRUE : FALSE), dwMillSeconds<0 ? INFINITE:dwMillSeconds);
+	return ret;
+}
 
 
 
