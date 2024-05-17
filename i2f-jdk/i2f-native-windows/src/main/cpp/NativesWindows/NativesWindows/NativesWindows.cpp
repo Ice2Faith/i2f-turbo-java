@@ -1476,7 +1476,7 @@ jint index
 		// long
 		unsigned long long * ptr = (unsigned long long*)data;
 		if (type == REG_QWORD){
-			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%l64d", index, szValueName, type, ptr[0]);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%lld", index, szValueName, type, ptr[0]);
 		}
 		else if (type == REG_QWORD_LITTLE_ENDIAN){
 			unsigned long long wd = 0;
@@ -1484,7 +1484,7 @@ jint index
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%l64d", index, szValueName, type, wd);
+			swprintf(buff, L"index:%d;#;valueName:%s;#;type:%d;#;valueData:%lld", index, szValueName, type, wd);
 		}
 	}
 	else{
@@ -1549,7 +1549,7 @@ jint index
 	filetime2timet(&lastWriteTime, &tt);
 
 	wchar_t buff[MAXBYTE] = { 0 };
-	swprintf(buff, L"index:%d;#;keyName:%s;#;className:%s;#;lastWriteTime:%l64d", index, szKeyName, szClassName, tt);
+	swprintf(buff, L"index:%d;#;keyName:%s;#;className:%s;#;lastWriteTime:%lld", index, szKeyName, szClassName, tt);
 
 	return wchar2jstring(env, buff);
 }
@@ -1645,7 +1645,7 @@ jstring valueName
 		// long
 		unsigned long long * ptr = (unsigned long long*)data;
 		if (type == REG_QWORD){
-			swprintf(buff, L"type:%d;#;valueData:%l64d", type, ptr[0]);
+			swprintf(buff, L"type:%d;#;valueData:%lld", type, ptr[0]);
 		}
 		else if (type == REG_QWORD_LITTLE_ENDIAN){
 			unsigned long long wd = 0;
@@ -1653,7 +1653,7 @@ jstring valueName
 				wd <<= 8;
 				wd |= data[i];
 			}
-			swprintf(buff, L"type:%d;#;valueData:%l64d", type, wd);
+			swprintf(buff, L"type:%d;#;valueData:%lld", type, wd);
 		}
 	}
 	else{
@@ -2125,7 +2125,7 @@ jstring filePath
 	filetime2timet(&fileData.ftLastAccessTime, &ftLastAccessTime);
 	filetime2timet(&fileData.ftLastWriteTime, &ftLastWriteTime);
 	wchar_t buff[1024] = { 0 };
-	swprintf(buff, L"dwFileAttributes:%d;#;ftCreationTime:%l64d;#;ftLastAccessTime:%l64d;#;ftLastWriteTime:%l64d;#;nFileSize:%l64d",
+	swprintf(buff, L"dwFileAttributes:%d;#;ftCreationTime:%lld;#;ftLastAccessTime:%lld;#;ftLastWriteTime:%lld;#;nFileSize:%lld",
 		fileData.dwFileAttributes, ftCreationTime, ftLastAccessTime, ftLastWriteTime, nFileSize);
 	return wchar2jstring(env, buff);
 }
@@ -2153,7 +2153,7 @@ jlong hFile
 	ULONGLONG nFileIndex = (((ULONGLONG)info.nFileIndexHigh) << 32) | info.nFileIndexLow;
 
 	wchar_t buff[1024] = { 0 };
-	swprintf(buff, L"dwFileAttributes:%d;#;ftCreationTime:%l64d;#;ftLastAccessTime:%l64d;#;ftLastWriteTime:%l64d;#;nFileSize:%l64d;#;dwVolumeSerialNumber:%d;#;nNumberOfLinks:%d;#;nFileIndex:%l64d",
+	swprintf(buff, L"dwFileAttributes:%d;#;ftCreationTime:%lld;#;ftLastAccessTime:%lld;#;ftLastWriteTime:%lld;#;nFileSize:%lld;#;dwVolumeSerialNumber:%d;#;nNumberOfLinks:%d;#;nFileIndex:%lld",
 		info.dwFileAttributes, ftCreationTime, ftLastAccessTime, ftLastWriteTime, nFileSize, info.dwVolumeSerialNumber, info.nNumberOfLinks, nFileIndex);
 	return wchar2jstring(env, buff);
 }
@@ -2689,7 +2689,7 @@ jstring filePath
 		return nullptr;
 	}
 	wchar_t buff[1024] = { 0 };
-	swprintf(buff, L"freeBytesAvailableToCaller:%l64d;#;totalNumberOfBytes:%l64d;#;totalNumberOfFreeBytes:%l64d", lpFreeBytesAvailableToCaller, lpTotalNumberOfBytes, lpTotalNumberOfFreeBytes);
+	swprintf(buff, L"freeBytesAvailableToCaller:%lld;#;totalNumberOfBytes:%lld;#;totalNumberOfFreeBytes:%lld", lpFreeBytesAvailableToCaller, lpTotalNumberOfBytes, lpTotalNumberOfFreeBytes);
 	return wchar2jstring(env, buff);
 }
 
@@ -3115,7 +3115,7 @@ jobject obj
 		return nullptr;
 	}
 	wchar_t buff[2048] = { 0 };
-	swprintf(buff, L"dwLength:%d;#;dwMemoryLoad:%d;#;ullTotalPhys:%l64d;#;ullAvailPhys:%64d;#;ullTotalPageFile:%l64d;#;ullAvailPageFile:%l64d;#;ullTotalVirtual:%l64d;#;ullAvailVirtual:%l64d;#;ullAvailExtendedVirtual:%l64d",
+	swprintf(buff, L"dwLength:%d;#;dwMemoryLoad:%d;#;ullTotalPhys:%lld;#;ullAvailPhys:%lld;#;ullTotalPageFile:%lld;#;ullAvailPageFile:%lld;#;ullTotalVirtual:%lld;#;ullAvailVirtual:%lld;#;ullAvailExtendedVirtual:%lld",
 		ms.dwLength,
 		ms.dwMemoryLoad,
 		ms.ullTotalPhys,
@@ -5218,7 +5218,7 @@ struct _WIN32_RAW_WINDOW{
 
 static std::map<HWND, P_WIN32_RAW_WINDOW> g_raw_map;
 
-
+static JavaVM* g_jvm = NULL;
 
 // 事件分发器
 LRESULT CALLBACK dispatcherRawWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
@@ -5235,6 +5235,16 @@ LRESULT CALLBACK dispatcherRawWndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 
 	if (message == WM_DESTROY){
 		g_raw_map.erase(hWnd);
+		P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)p_instance->callbackEnv;
+		int status = g_jvm->GetEnv((void**)&appEnv->env, JNI_VERSION_1_8);
+		if (status < 0){
+			JavaVMAttachArgs args = { JNI_VERSION_1_8, __FUNCTION__, NULL };
+			status = g_jvm->AttachCurrentThread((void**)&appEnv->env, &args);
+			if (status < 0){
+				MessageBoxA(NULL, "jvm get env error", "error", MB_OK);
+			}
+		}
+		appEnv->env->DeleteGlobalRef(appEnv->callbacker);
 		free(p_instance->callbackEnv);
 		free(p_instance);
 	}
@@ -5242,43 +5252,24 @@ LRESULT CALLBACK dispatcherRawWndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 	return ret;
 }
 
+
 LRESULT jniRawCallbackFunc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
 	P_WIN32_RAW_WINDOW p_instance = g_raw_map[hWnd];
 	P_JNI_WINAPP_ENV appEnv = (P_JNI_WINAPP_ENV)p_instance->callbackEnv;
 	
-	
-	//jlong ret = appEnv->env->CallLongMethod(appEnv->callbacker, appEnv->method, toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam);
-
-	char log[1024] = { 0 };
-	sprintf(log, "instance:%d,appEnv:%d,env:%d,callbacker:%d,method:%d,hWnd:%d,message:%d,wParam:%d,lParam:%d",
-		p_instance, appEnv, appEnv->env,
-		appEnv->callbacker, appEnv->method, toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam
-		);
-	MessageBoxA(NULL, log, "debug", MB_OK);
-
-	PAINTSTRUCT ps;
-	HDC hdc;
-
-	switch (message){
-	case WM_CREATE:
-
-		break;
-	case WM_COMMAND:
-
-		break;
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		EndPaint(hWnd, &ps);
-		break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	
-	default:
-		return DefWindowProcW(hWnd, message, wParam, lParam);
+	int status=g_jvm->GetEnv((void**)&appEnv->env, JNI_VERSION_1_8);
+	if (status < 0){
+		JavaVMAttachArgs args = { JNI_VERSION_1_8, __FUNCTION__, NULL };
+		status=g_jvm->AttachCurrentThread((void**)&appEnv->env, &args);
+		if (status < 0){
+			MessageBoxA(NULL, "jvm get env error", "error", MB_OK);
+		}
 	}
+	
 
-	return 0;
+	jlong ret = appEnv->env->CallLongMethod(appEnv->callbacker, appEnv->method, toPtr(hWnd), (jlong)message, (jlong)wParam, (jlong)lParam);
+
+	return ret;
 }
 
 extern "C" JNIEXPORT jint JNICALL
@@ -5405,7 +5396,10 @@ jobject obj,
 jlong hwnd,
 jobject callbacker
 ){
-	
+	env->GetJavaVM(&g_jvm);
+
+	callbacker = env->NewGlobalRef(callbacker);
+
 	P_WIN32_RAW_WINDOW config = (P_WIN32_RAW_WINDOW)malloc(sizeof(WIN32_RAW_WINDOW));
 	memset(config, 0, sizeof(WIN32_RAW_WINDOW));
 	config->hWnd = ptrOf<HWND>(hwnd);
@@ -5452,11 +5446,11 @@ extern "C" JNIEXPORT jstring JNICALL
 JNI_METHOD(getBitmapDcInfo)(
 JNIEnv* env,
 jobject obj,
-long pBitmapDc
+jlong pBitmapDc
 ){
 	BITMAP_DC* ret = ptrOf<BITMAP_DC*>(pBitmapDc);
 	wchar_t buff[512] = { 0 };
-	swprintf(buff, L"hdc:%l64d;#;hBitmap:%l64d;#;width:%d;#;height:%d", toPtr(ret->hdc), toPtr(ret->hBitMap), ret->width, ret->height);
+	swprintf(buff, L"pBitmapDC:%lld;#;hdc:%lld;#;hBitmap:%lld;#;width:%d;#;height:%d",toPtr(ret), toPtr(ret->hdc), toPtr(ret->hBitMap), ret->width, ret->height);
 	return wchar2jstring(env, buff);
 }
 
@@ -5467,7 +5461,7 @@ jobject obj
 ){
 	freopen("CONIN$", "r", stdin); // 重定向标准输入
 	freopen("CONOUT$", "w", stdout); // 重定向标准输出
-	freopen("CONERR$", "w", stderr); // 重定向标准错误输出
+	freopen("CONOUT$", "w", stderr); // 重定向标准错误输出
 }
 
 
@@ -5772,7 +5766,7 @@ LRESULT jniCallbackFunc(P_WIN32_APP_INSTANCE p_instance, HWND hWnd, UINT message
 							 AllocConsole();
 							 freopen("CONIN$", "r", stdin); // 重定向标准输入
 							 freopen("CONOUT$", "w", stdout); // 重定向标准输出
-							 freopen("CONERR$", "w", stderr); // 重定向标准错误输出
+							 freopen("CONOUT$", "w", stderr); // 重定向标准错误输出
 							 HWND h = GetConsoleWindow();
 							 wchar_t buff[2048] = { 0 };
 							 GetWindowTextW(hWnd, buff, 2048);

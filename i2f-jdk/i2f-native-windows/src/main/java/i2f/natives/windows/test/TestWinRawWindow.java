@@ -1,6 +1,5 @@
 package i2f.natives.windows.test;
 
-import com.sun.javafx.font.directwrite.RECT;
 import i2f.graphics.d2.Point;
 import i2f.graphics.d2.shape.Rectangle;
 import i2f.natives.windows.WinApi;
@@ -23,8 +22,7 @@ import i2f.natives.windows.types.window.MsgPtr;
 import i2f.natives.windows.types.window.PaintStructPtr;
 
 import java.io.File;
-
-import static i2f.natives.windows.consts.window.WinSendMessageMsg.WM_KEYUP;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author Ice2Faith
@@ -32,7 +30,24 @@ import static i2f.natives.windows.consts.window.WinSendMessageMsg.WM_KEYUP;
  * @desc
  */
 public class TestWinRawWindow {
-    public static void main(String[] args){
+    public static void main(String[] args) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    app();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                }
+            }
+        }).start();
+        latch.await();
+    }
+
+    public static void app() {
         HModule hModule = WinApi.getModuleHandle(null);
         HInstance hInstance=new HInstance(hModule);
 
@@ -145,10 +160,12 @@ public class TestWinRawWindow {
                     case WinSendMessageMsg.WM_RBUTTONUP:
                     {
                         HBrush brush = WinApi.createSolidBrush(0xffffff);
-                        HGdiObj oldBrush = WinApi.selectObject(mdc.hdc, brush);
-                        WinApi.rectangle(mdc.hdc, -1, -1, mdc.width + 1, mdc.height + 1);
-                        WinApi.selectObject(mdc.hdc, oldBrush);
+                        Hdc pdc = mdc.hdc;
+                        HGdiObj oldBrush = WinApi.selectObject(pdc, brush);
+                        WinApi.rectangle(pdc, -1, -1, mdc.width + 1, mdc.height + 1);
+                        WinApi.selectObject(pdc, oldBrush);
                         WinApi.deleteObject(brush);
+//                        WinApi.releaseDC(hWnd,pdc);
                         WinApi.invalidateRect(hWnd, true);
                     }
                     WinApi.invalidateRect(hWnd, false);
@@ -159,8 +176,10 @@ public class TestWinRawWindow {
                         int y = WinApi.getYLParam(lParam);
 
                         if (isLeftDown){
-                            WinApi.moveToEx(mdc.hdc, new Point(lastPoint.x, lastPoint.y));
-                            WinApi.lineTo(mdc.hdc, new Point(x, y));
+                            Hdc pdc = mdc.hdc;
+                            WinApi.moveToEx(pdc, new Point(lastPoint.x, lastPoint.y));
+                            WinApi.lineTo(pdc, new Point(x, y));
+//                            WinApi.releaseDC(hWnd,pdc);
                         }
 
                         lastPoint.x = x;
