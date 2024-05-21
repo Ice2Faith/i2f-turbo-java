@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.dynamic.datasource.autoconfiguration.DynamicDataSourceProperty,\
+  i2f.springboot.dynamic.datasource.autoconfiguration.DynamicDataSourceConfig,\
+  i2f.springboot.dynamic.datasource.aop.DataSourceAspect,\
+  i2f.springboot.dynamic.datasource.initializer.DefaultDataSourceInitializerConfiguration

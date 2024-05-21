@@ -431,6 +431,12 @@
             <!-- ############################################################ -->
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-dynamic-datasource-spring-boot-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdbc-bql-spring-boot-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -543,7 +549,7 @@
                         <finalName>${project.artifactId}-${project.version}</finalName>
                         <archive>
                             <!-- 去除maven描述信息 -->
-                            <addMavenDescriptor>false</addMavenDescriptor>
+                            <!--                            <addMavenDescriptor>false</addMavenDescriptor>-->
                             <manifestEntries>
                                 <Maven-Group>${pom.groupId}</Maven-Group>
                                 <Maven-Artifact>${pom.artifactId}</Maven-Artifact>

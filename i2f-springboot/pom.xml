@@ -13,7 +13,7 @@
 
     <packaging>pom</packaging>
     <modules>
-
+        <module>i2f-dynamic-datasource-spring-boot-starter</module>
         <module>i2f-jdbc-bql-spring-boot-starter</module>
         <module>i2f-springboot-test</module>
     </modules>
