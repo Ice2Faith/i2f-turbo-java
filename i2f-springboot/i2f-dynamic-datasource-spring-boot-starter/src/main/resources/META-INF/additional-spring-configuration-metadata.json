@@ -1,0 +1,79 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.dynamic.datasource",
+      "type": "i2f.springboot.dynamic.datasource.autoconfiguration.DynamicDataSourceProperty",
+      "sourceType": "i2f.springboot.dynamic.datasource.autoconfiguration.DynamicDataSourceProperty"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.dynamic.datasource.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable auto-configuration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.aop.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable auto-configuration for aop",
+      "sourceType": "i2f.springboot.dynamic.datasource.aop.DataSourceAspect",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.initializer.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable auto-configuration for initializer",
+      "sourceType": "i2f.springboot.dynamic.datasource.initializer.DefaultDataSourceInitializerConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.multiply.master.driver",
+      "type": "java.sql.Driver",
+      "description": "jdbc driver class",
+      "defaultValue": "com.mysql.cj.jdbc.Driver"
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.multiply.master.url",
+      "type": "java.lang.String",
+      "description": "jdbc connect url",
+      "defaultValue": "jdbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8"
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.multiply.master.username",
+      "type": "java.lang.String",
+      "description": "jdbc username",
+      "defaultValue": "root"
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.multiply.master.password",
+      "type": "java.lang.String",
+      "description": "jdbc password",
+      "defaultValue": ""
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
