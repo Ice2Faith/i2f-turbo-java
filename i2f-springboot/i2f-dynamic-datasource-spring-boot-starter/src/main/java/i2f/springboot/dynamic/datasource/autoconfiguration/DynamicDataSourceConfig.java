@@ -13,7 +13,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -35,7 +36,10 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 @ConditionalOnExpression("${" + DynamicDataSourceConfig.CONFIG_PREFIX + ".enable:true}")
-@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
+@AutoConfigureBefore({
+        DataSourceAutoConfiguration.class
+})
+@AutoConfigureOrder(-1)
 @AutoConfigureAfter({
         DynamicDataSourceProperty.class,
         DefaultDataSourceInitializerConfiguration.class
@@ -59,7 +63,7 @@ public class DynamicDataSourceConfig implements BeanFactoryAware {
 
     @Bean
     @Primary
-    public DataSource dynamicDataSource() {
+    public DataSource dataSource() {
         log.info("datasource config....");
         DefaultListableBeanFactory listableBeanFactory = (DefaultListableBeanFactory) beanFactory;
         /*获取yml所有数据源配置*/
