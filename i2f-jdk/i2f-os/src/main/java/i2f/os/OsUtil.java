@@ -71,4 +71,28 @@ public class OsUtil {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
+
+    public static boolean is64bit() {
+        String osArch = System.getProperty("os.arch");
+        if ("amd64".equalsIgnoreCase(osArch)) {
+            return true;
+        } else if ("x86_64".equalsIgnoreCase(osArch)) {
+            return true;
+        } else if ("arm64".equalsIgnoreCase(osArch)) {
+            return true;
+        } else if ("ppc64".equalsIgnoreCase(osArch)) {
+            return true;
+        }
+        String vmName = System.getProperty("java.vm.name");
+        if (vmName != null) {
+            if (vmName.toLowerCase().contains("64-bit")) {
+                return true;
+            }
+        }
+        String sunArch = System.getProperty("sun.arch.data.model");
+        if ("64".equalsIgnoreCase(sunArch)) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -1,15 +1,10 @@
 package i2f.container.readonly.adapter;
 
-import com.sun.xml.internal.stream.util.ReadOnlyIterator;
 import i2f.container.readonly.exception.ReadonlyException;
-import i2f.container.sync.adapter.SyncIteratorAdapter;
-import i2f.container.sync.adapter.SyncSpliteratorAdapter;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Spliterator;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -51,7 +46,7 @@ public class ReadonlyCollectionAdapter<E> implements Collection<E> {
     @Override
     public Iterator<E> iterator() {
 
-        return new ReadOnlyIterator(collection.iterator());
+        return new ReadonlyIteratorAdapter<>(collection.iterator());
 
     }
 

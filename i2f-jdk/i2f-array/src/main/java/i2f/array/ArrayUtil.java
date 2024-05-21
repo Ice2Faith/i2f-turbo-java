@@ -6,8 +6,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.sun.tools.javac.jvm.ByteCodes.ret;
-
 /**
  * @author Ice2Faith
  * @date 2024/4/23 14:46
