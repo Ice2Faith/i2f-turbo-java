@@ -1,5 +1,7 @@
 package i2f.springboot.dynamic.datasource.aop;
 
+import i2f.springboot.dynamic.datasource.core.LookupBalanceType;
+
 import java.lang.annotation.*;
 
 /**
@@ -21,4 +23,18 @@ public @interface DataSource {
      * 中的datasourceId
      */
     String value() default DataSourceType.MASTER;
+
+    /**
+     * 是否是一个分组，如果是分组，则执行负载策略
+     *
+     * @return
+     */
+    boolean group() default false;
+
+    /**
+     * 指定为group时的选定策略
+     *
+     * @return
+     */
+    LookupBalanceType balance() default LookupBalanceType.UNKNOWN;
 }

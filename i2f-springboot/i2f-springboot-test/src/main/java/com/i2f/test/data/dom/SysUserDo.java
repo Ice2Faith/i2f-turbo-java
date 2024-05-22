@@ -39,32 +39,17 @@ public class SysUserDo {
     /**
      * 用户名
      */
-    protected String realname;
+    protected String nickname;
 
     /**
-     * 电话号码
+     * 年龄
      */
-    protected String phone;
+    protected Integer age;
 
     /**
-     * 电子邮箱
+     * 等级
      */
-    protected String email;
-
-    /**
-     * 注册时间
-     */
-    protected Date regDate;
-
-    /**
-     * 是否可删除：0 不可，1 可以
-     */
-    protected Integer delFlag;
-
-    /**
-     * 是否系统：0 否，1 是
-     */
-    protected Integer sysFlag;
+    protected Integer grade;
 
     /**
      * 状态：0 禁用，1 启用，99 删除
@@ -79,7 +64,7 @@ public class SysUserDo {
     /**
      * 创建人
      */
-    protected String createUser;
+    protected String createBy;
 
     /**
      * 更新时间
@@ -89,7 +74,7 @@ public class SysUserDo {
     /**
      * 更新时间
      */
-    protected String updateUser;
+    protected String updateBy;
 
 
     public <T extends SysUserDo> T convert(T dom) {
