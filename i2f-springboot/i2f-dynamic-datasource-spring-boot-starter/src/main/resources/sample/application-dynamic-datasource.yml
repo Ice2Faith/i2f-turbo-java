@@ -3,6 +3,12 @@ i2f:
     dynamic:
       datasource:
         enable: true
+        # which datasource is default primary, default value is master
+        primary: master
+        # whether enable strict mode,throw exception when target not found instead of use default primary, default value is false
+        strict: false
+        # group datasource balance strategy from defined in LookupBalanceType.type, default value is ring
+        balance: ring
         aop:
           enable: true
         initializer:
@@ -13,9 +19,15 @@ i2f:
             url: jdbc:oracle:thin:@localhost:1521:orcl
             username: scott
             password: 123456
+            # datasource type, datasource pool, such as hikari: com.zaxxer.hikari.HikariDataSource, default value is empty, use spring.datasource.type value
+            type: com.alibaba.druid.pool.DruidDataSource
+            # datasource belong which group, multi-value split by ',', used to balance on same group, default value is empty, not group
+            group: read,write
           slave:
             driver: com.mysql.cj.jdbc.Driver
             url: jdbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
             username: root
             password: 123456
+            type: com.zaxxer.hikari.HikariDataSource
+            group: read
 

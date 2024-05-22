@@ -1,11 +1,14 @@
 package i2f.springboot.dynamic.datasource.autoconfiguration;
 
 import i2f.springboot.dynamic.datasource.aop.DataSourceType;
+import i2f.springboot.dynamic.datasource.core.LookupBalanceType;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
@@ -19,15 +22,22 @@ import java.util.Map;
  * @date 2022/3/21 11:00
  * @desc
  */
+@Data
 @Slf4j
 @ConditionalOnExpression("${" + DynamicDataSourceConfig.CONFIG_PREFIX + ".enable:true}")
+@ConfigurationProperties(prefix = DynamicDataSourceConfig.CONFIG_PREFIX)
 public class DynamicDataSourceProperty implements InitializingBean {
 
     public static final String MULTIPLY_DATASOURCE_PREFIX = DynamicDataSourceConfig.CONFIG_PREFIX + ".multiply.";
+
+    private String primary = "master";
+    private boolean strict = false;
+    private String balance = LookupBalanceType.RING.type();
+
     @Autowired
     private Environment environment;
 
-    private Map<String, Map<String, Object>> properties = new HashMap<>();
+    private Map<String, DataSourceMeta> properties = new HashMap<>();
 
 
     public static Map<String, Map<String, Object>> getDatasourceConfigs(Environment env) {
@@ -36,18 +46,30 @@ public class DynamicDataSourceProperty implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        properties = getDatasourceConfigs(environment);
-        for (Map.Entry<String, Map<String, Object>> item : properties.entrySet()) {
+        Map<String, Map<String, Object>> configMap = getDatasourceConfigs(environment);
+        for (Map.Entry<String, Map<String, Object>> item : configMap.entrySet()) {
             log.info("multiply datasource find: " + item.getKey());
-            log.info("datasource is:" + item.getValue());
+            DataSourceMeta meta = DataSourceMeta.of(item.getValue());
+            if (meta.getUrl() != null) {
+                log.info("add datasource meta: " + item.getKey());
+                properties.put(item.getKey(), meta);
+            }
         }
 
-        if (!properties.containsKey(DataSourceType.MASTER)) {
-            resolveDefaultSpringDatasourceAsMaster(properties);
+        if (primary == null) {
+            primary = "";
+        }
+        primary = primary.trim();
+        if ("".equals(primary)) {
+            primary = DataSourceType.MASTER;
         }
 
-        if (!properties.containsKey(DataSourceType.MASTER)) {
-            throw new BeanInitializationException("datasource [" + DataSourceType.MASTER + "] not found config.please config properties like as:\n" +
+        if (!properties.containsKey(primary)) {
+            resolveDefaultSpringDatasourceAsMaster(primary, properties);
+        }
+
+        if (!properties.containsKey(primary)) {
+            throw new BeanInitializationException("datasource [" + primary + "] not found config.please config properties like as:\n" +
                     "\t" + MULTIPLY_DATASOURCE_PREFIX + "master.url=jdbc:xxx\n" +
                     "\t" + MULTIPLY_DATASOURCE_PREFIX + "master.username=xxx\n" +
                     "\t" + MULTIPLY_DATASOURCE_PREFIX + "master.password=xxx\n" +
@@ -57,21 +79,17 @@ public class DynamicDataSourceProperty implements InitializingBean {
         }
     }
 
-    public Map<String, Map<String, Object>> getDatasource() {
+    public Map<String, DataSourceMeta> getDatasource() {
         return properties;
     }
 
-    private void resolveDefaultSpringDatasourceAsMaster(Map<String, Map<String, Object>> properties) {
+    private void resolveDefaultSpringDatasourceAsMaster(String primary, Map<String, DataSourceMeta> properties) {
         Map<String, Object> map = getPropertiesWithPrefix(environment, false, "spring.datasource.");
-        Map<String, Object> res = new HashMap<>();
-        if (!map.containsKey("url")) {
+        DataSourceMeta meta = DataSourceMeta.of(map);
+        if (meta.getUrl() == null) {
             return;
         }
-        res.put("url", map.get("url"));
-        res.put("username", map.get("username"));
-        res.put("password", map.get("password"));
-        res.put("driver", map.get("driver-class-name"));
-        properties.put(DataSourceType.MASTER, res);
+        properties.put(primary, meta);
     }
 
 

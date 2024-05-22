@@ -1,12 +1,12 @@
 package i2f.springboot.dynamic.datasource.initializer;
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceWrapper;
+import i2f.springboot.dynamic.datasource.autoconfiguration.DataSourceMeta;
 import i2f.springboot.dynamic.datasource.core.DataSourceInitializer;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 
 import javax.sql.DataSource;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -23,12 +23,17 @@ public class DruidDataSourceInitializer implements DataSourceInitializer {
     }
 
     @Override
-    public DataSource initial(String dataSourceId, Map<String, Object> dataSourceConfig) {
+    public boolean accept(String dataSourceId, DataSourceMeta dataSourceMeta) {
+        return "com.alibaba.druid.pool.DruidDataSource".equals(dataSourceMeta.getType());
+    }
+
+    @Override
+    public DataSource initial(String dataSourceId, DataSourceMeta dataSourceMeta) {
         DruidDataSourceWrapper wrapper = new DruidDataSourceWrapper();
-        wrapper.setUrl(String.valueOf(dataSourceConfig.get("url")));
-        wrapper.setDriverClassName(String.valueOf(dataSourceConfig.get("driver")));
-        wrapper.setUsername(String.valueOf(dataSourceConfig.get("username")));
-        wrapper.setPassword(String.valueOf(dataSourceConfig.get("password")));
+        wrapper.setUrl(dataSourceMeta.getUrl());
+        wrapper.setDriverClassName(dataSourceMeta.getDriver());
+        wrapper.setUsername(dataSourceMeta.getUsername());
+        wrapper.setPassword(dataSourceMeta.getPassword());
         propertiesBindingPostProcessor.postProcessBeforeInitialization(wrapper, dataSourceId);
         try {
             wrapper.init();

@@ -1,7 +1,9 @@
 package i2f.springboot.dynamic.datasource.aop;
 
 import i2f.springboot.dynamic.datasource.autoconfiguration.DynamicDataSourceConfig;
+import i2f.springboot.dynamic.datasource.autoconfiguration.DynamicDataSourceProperty;
 import i2f.springboot.dynamic.datasource.core.DynamicDataSourceContextHolder;
+import i2f.springboot.dynamic.datasource.core.LookupDataSource;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -9,6 +11,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
@@ -26,9 +29,11 @@ import java.util.Objects;
 public class DataSourceAspect {
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Autowired
+    private DynamicDataSourceProperty dynamicDataSourceProperty;
 
-    @Pointcut("@annotation(i2f.springboot.dynamic.datasource.aop.DataSource)"
-            + "|| @within(i2f.springboot.dynamic.datasource.aop.DataSource)")
+    @Pointcut("@annotation(" + DynamicDataSourceConfig.PACKAGE_PREFIX + ".aop.DataSource)"
+            + "|| @within(" + DynamicDataSourceConfig.PACKAGE_PREFIX + ".aop.DataSource)")
     public void dsPointCut() {
 
     }
@@ -38,7 +43,12 @@ public class DataSourceAspect {
         DataSource dataSource = getDataSource(point);
 
         if (dataSource != null) {
-            DynamicDataSourceContextHolder.setDataSourceType(dataSource.value());
+            LookupDataSource lookup = new LookupDataSource();
+            lookup.setType(dataSource.value());
+            lookup.setGroup(dataSource.group());
+            lookup.setBalance(dataSource.balance());
+            lookup.setKey(null);
+            DynamicDataSourceContextHolder.setDataSourceType(lookup);
         }
 
         try {
