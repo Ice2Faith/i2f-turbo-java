@@ -15,7 +15,7 @@ public class DynamicDataSourceContextHolder {
      * 使用ThreadLocal维护变量，ThreadLocal为每个使用该变量的线程提供独立的变量副本，
      * 所以每一个线程都可以独立地改变自己的副本，而不会影响其它线程所对应的副本。
      */
-    private static final ThreadLocal<String> CONTEXT_HOLDER = new ThreadLocal<>();
+    private static final ThreadLocal<LookupDataSource> CONTEXT_HOLDER = new ThreadLocal<>();
 
     public static String realDataSourceTypeName(String dsType) {
         return dsType + "DataSource";
@@ -24,15 +24,15 @@ public class DynamicDataSourceContextHolder {
     /**
      * 设置数据源的变量
      */
-    public static void setDataSourceType(String dsType) {
-        log.info("switch datasource to {}", dsType);
-        CONTEXT_HOLDER.set(realDataSourceTypeName(dsType));
+    public static void setDataSourceType(LookupDataSource lookup) {
+        log.info("switch datasource to {}", lookup);
+        CONTEXT_HOLDER.set(lookup);
     }
 
     /**
      * 获得数据源的变量
      */
-    public static String getDataSourceType() {
+    public static LookupDataSource getDataSourceType() {
         return CONTEXT_HOLDER.get();
     }
 

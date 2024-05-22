@@ -1,7 +1,8 @@
 package i2f.springboot.dynamic.datasource.core;
 
+import i2f.springboot.dynamic.datasource.autoconfiguration.DataSourceMeta;
+
 import javax.sql.DataSource;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -9,5 +10,7 @@ import java.util.Map;
  * @desc
  */
 public interface DataSourceInitializer {
-    DataSource initial(String dataSourceId, Map<String, Object> dataSourceConfig);
+    boolean accept(String dataSourceId, DataSourceMeta dataSourceMeta);
+
+    DataSource initial(String dataSourceId, DataSourceMeta dataSourceMeta);
 }

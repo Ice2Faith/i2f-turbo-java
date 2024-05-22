@@ -16,14 +16,12 @@ import org.springframework.context.annotation.Bean;
 @ConditionalOnExpression("${" + DynamicDataSourceConfig.CONFIG_PREFIX + ".initializer.enable:true}")
 public class DefaultDataSourceInitializerConfiguration {
 
-    @ConditionalOnExpression("'com.alibaba.druid.pool.DruidDataSource'.equals('${spring.datasource.type}')")
     @ConditionalOnClass(DruidDataSourceWrapper.class)
     @Bean
     public DruidDataSourceInitializer druidDataSourceInitializer(ConfigurationPropertiesBindingPostProcessor postProcessor) {
         return new DruidDataSourceInitializer(postProcessor);
     }
 
-    @ConditionalOnExpression("'com.zaxxer.hikari.HikariDataSource'.equals('${spring.datasource.type}')")
     @ConditionalOnClass(HikariDataSource.class)
     @Bean
     public HikariDataSourceInitializer hikariDataSourceInitializer(ConfigurationPropertiesBindingPostProcessor postProcessor) {

@@ -14,6 +14,24 @@
       "defaultValue": true
     },
     {
+      "name": "i2f.springboot.dynamic.datasource.primary",
+      "type": "java.lang.String",
+      "description": "which datasource is default primary",
+      "defaultValue": "master"
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.strict",
+      "type": "java.lang.Boolean",
+      "description": "whether enable strict mode,throw exception when target not found instead of use default primary",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.balance",
+      "type": "java.lang.String",
+      "description": "group datasource balance strategy from defined in LookupBalanceType.type",
+      "defaultValue": "ring"
+    },
+    {
       "name": "i2f.springboot.dynamic.datasource.aop.enable",
       "type": "java.lang.Boolean",
       "description": "whether enable auto-configuration for aop",
@@ -49,6 +67,18 @@
       "name": "i2f.springboot.dynamic.datasource.multiply.master.password",
       "type": "java.lang.String",
       "description": "jdbc password",
+      "defaultValue": ""
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.multiply.master.type",
+      "type": "javax.sql.DataSource",
+      "description": "datasource type, datasource pool, such as hikari: com.zaxxer.hikari.HikariDataSource, default value is empty, use spring.datasource.type value",
+      "defaultValue": ""
+    },
+    {
+      "name": "i2f.springboot.dynamic.datasource.multiply.master.group",
+      "type": "java.lang.String",
+      "description": "datasource belong which group, multi-value split by ',', used to balance on same group, default value is empty, not group",
       "defaultValue": ""
     }
   ],
