@@ -1,5 +1,6 @@
 package i2f.jce.jdk.digest.hmac;
 
+import i2f.jce.jdk.supports.MacAlgorithm;
 import i2f.jce.std.digest.IMessageDigester;
 
 import javax.crypto.Mac;
@@ -20,13 +21,13 @@ import java.util.function.BiFunction;
 public class HmacMessageDigester implements IMessageDigester {
 
     public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_MD2 = (key, providerName) -> getInstance("MD2", key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_MD5 = (key, providerName) -> getInstance("MD5", key, providerName);
+    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_MD5 = (key, providerName) -> getInstance(MacAlgorithm.HmacMD5.text(), key, providerName);
 
-    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_1 = (key, providerName) -> getInstance("SHA-1", key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_224 = (key, providerName) -> getInstance("SHA-224", key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_256 = (key, providerName) -> getInstance("SHA-256", key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_384 = (key, providerName) -> getInstance("SHA-384", key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_512 = (key, providerName) -> getInstance("SHA-512", key, providerName);
+    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_1 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA1.text(), key, providerName);
+    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_224 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA224.text(), key, providerName);
+    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_256 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA256.text(), key, providerName);
+    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_384 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA384.text(), key, providerName);
+    public static final BiFunction<byte[], String, HmacMessageDigester> HMAC_SHA_512 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA512.text(), key, providerName);
 
 
     protected Mac provider;
@@ -47,9 +48,17 @@ public class HmacMessageDigester implements IMessageDigester {
         return new HmacMessageDigester(hmacInstance(mdType, key, providerName));
     }
 
+    public static String hmacName(String mdType){
+        String hmacName = mdType;
+        if(!hmacName.startsWith("Hmac")){
+            hmacName="Hmac" + mdType.replaceAll("-", "");
+        }
+        return hmacName;
+    }
+
     public static Mac hmacInstance(String mdType, byte[] key, String providerName) {
         try {
-            String hmacName = "Hmac" + mdType.replaceAll("-", "");
+            String hmacName=hmacName(mdType);
             SecretKey skey = new SecretKeySpec(key, hmacName);
             Mac mac = macOf(hmacName, providerName);
             mac.init(skey);
