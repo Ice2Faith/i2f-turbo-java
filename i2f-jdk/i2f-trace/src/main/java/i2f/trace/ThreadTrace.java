@@ -54,6 +54,11 @@ public class ThreadTrace {
         return current().getLineNumber();
     }
 
+    public static String currentLocation() {
+        StackTraceElement current = current();
+        return String.valueOf(current);
+    }
+
     public static Class<?> currentClass() {
         String className = currentClassName();
         return findClass(className);
