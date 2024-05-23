@@ -1,5 +1,7 @@
 package i2f.container.builder.obj;
 
+import i2f.typeof.token.TypeToken;
+
 import java.util.function.*;
 
 /**
@@ -15,6 +17,10 @@ public class ObjectBuilder<T> implements Supplier<T> {
     }
 
     public ObjectBuilder(T obj, Class<T> type) {
+        this.obj = obj;
+    }
+
+    public ObjectBuilder(T obj, TypeToken<T> type) {
         this.obj = obj;
     }
 

@@ -1,5 +1,7 @@
 package i2f.container.builder.collection;
 
+import i2f.typeof.token.TypeToken;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
@@ -18,6 +20,10 @@ public class CollectionBuilder<E, C extends Collection<E>> implements Supplier<C
     }
 
     public CollectionBuilder(C col, Class<E> elementType) {
+        this.col = col;
+    }
+
+    public CollectionBuilder(C col, TypeToken<E> elementType) {
         this.col = col;
     }
 

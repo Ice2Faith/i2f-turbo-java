@@ -11,6 +11,13 @@
 
     <artifactId>i2f-container-builder</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-typeof</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

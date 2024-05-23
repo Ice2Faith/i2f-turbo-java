@@ -1,5 +1,7 @@
 package i2f.container.builder.map;
 
+import i2f.typeof.token.TypeToken;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -18,6 +20,10 @@ public class MapBuilder<K, V, M extends Map<K, V>> implements Supplier<M> {
     }
 
     public MapBuilder(M map, Class<K> keyType, Class<V> valueType) {
+        this.map = map;
+    }
+
+    public MapBuilder(M map, TypeToken<K> keyType, TypeToken<V> valueType) {
         this.map = map;
     }
 
