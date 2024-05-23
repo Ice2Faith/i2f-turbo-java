@@ -1,6 +1,7 @@
 package i2f.reflect.vistor;
 
 import i2f.reflect.vistor.impl.VisitorParser;
+import i2f.typeof.token.TypeToken;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -12,6 +13,18 @@ import java.util.function.Function;
  */
 public interface Visitor {
     Object get();
+
+    default <T> T castAs() {
+        return (T) get();
+    }
+
+    default <T> T castAs(Class<T> clazz) {
+        return (T) get();
+    }
+
+    default <T> T castAs(TypeToken<T> token) {
+        return (T) get();
+    }
 
     default <T> T getAs(Function<Object, T> mapper) {
         return mapper.apply(get());

@@ -1,5 +1,7 @@
 package i2f.container.builder.collection;
 
+import i2f.typeof.token.TypeToken;
+
 import java.util.*;
 import java.util.function.*;
 
@@ -16,6 +18,10 @@ public class ListBuilder<E, C extends List<E>> implements Supplier<C> {
     }
 
     public ListBuilder(C list, Class<E> elementType) {
+        this.list = list;
+    }
+
+    public ListBuilder(C list, TypeToken<E> elementType) {
         this.list = list;
     }
 

@@ -167,7 +167,9 @@ public class ObjectConvertor {
             Map<Class<?>, Function<Instant, ?>> map = new LinkedHashMap<>();
 
             map.put(Date.class, Date::from);
-            map.put(java.sql.Date.class, java.sql.Date::from);
+            map.put(java.sql.Date.class, v -> {
+                return new java.sql.Date(v.toEpochMilli());
+            });
             map.put(Time.class, Time::from);
             map.put(Timestamp.class, Timestamp::from);
             map.put(LocalDateTime.class, v -> {
