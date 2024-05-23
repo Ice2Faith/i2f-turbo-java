@@ -2,6 +2,9 @@ package i2f.reflect.vistor;
 
 import i2f.reflect.vistor.impl.VisitorParser;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 /**
  * @author Ice2Faith
  * @date 2024/3/1 19:00
@@ -9,6 +12,14 @@ import i2f.reflect.vistor.impl.VisitorParser;
  */
 public interface Visitor {
     Object get();
+
+    default <T> T getAs(Function<Object, T> mapper) {
+        return mapper.apply(get());
+    }
+
+    default <T> T getAs(BiFunction<Object, T, T> mapper, T defVal) {
+        return mapper.apply(get(), defVal);
+    }
 
     void set(Object value);
 
