@@ -1,5 +1,7 @@
 package i2f.jce.bc;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import java.security.Provider;
 import java.security.Security;
 
@@ -15,7 +17,7 @@ public class BcProvider {
             "<dependency>\n" +
             "    <groupId>org.bouncycastle</groupId>\n" +
             "    <artifactId>bcprov-jdk15to18</artifactId>\n" +
-            "    <version>1.69</version>\n" +
+            "    <version>1.74</version>\n" +
             "</dependency>";
     private volatile static Provider BC_PROVIDER = null;
 
@@ -46,9 +48,10 @@ public class BcProvider {
                 Class<?> clazz = Class.forName(PROVIDER_CLASS_NAME);
                 Object provider = clazz.newInstance();
                 Security.addProvider((Provider) provider);
+
                 BC_PROVIDER = (Provider) provider;
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
     }
