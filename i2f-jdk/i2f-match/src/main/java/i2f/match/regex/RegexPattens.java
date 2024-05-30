@@ -49,4 +49,47 @@ public class RegexPattens {
      */
     public static final String SINGLE_QUOTE_STRING_REGEX = "\'([^\'\\\\]*(\\\\.[^\'\\\\]*)*)\'";
 
+    /**
+     * match for :
+     * standard single line comment block, such as
+     * // xxx
+     */
+    public static final String SINGLE_LINE_COMMENT_REGEX = "\\/\\/[^\\n]*";
+
+    /**
+     * match for :
+     * standard multi line comment block, such as
+     * \/* xxx *\/
+     */
+    public static final String MULTI_LINE_COMMENT_REGEX = "\\/\\*([^*]|(\\*+([^*/])))*\\*+\\/";
+
+
+    /**
+     * match for :
+     * standard single/multi line comment block, such as
+     * // xxx
+     * \/* xxx *\/
+     */
+    public static final String COMMON_COMMENT_REGEX = SINGLE_LINE_COMMENT_REGEX + "|" + MULTI_LINE_COMMENT_REGEX;
+
+    /**
+     * match for :
+     * sharp style single line comment block, such as
+     * # xxx
+     */
+    public static final String SINGLE_LINE_COMMENT_SHARP_REGEX = "#[^\\n]*";
+
+    /**
+     * match for :
+     * sql style single line comment block, such as
+     * -- xxx
+     */
+    public static final String SINGLE_LINE_COMMENT_SQL_REGEX = "--[ |\\t]+[^\\n]*";
+
+    /**
+     * match for :
+     * xml style multi line comment block, such as
+     * <!-- xxx -->
+     */
+    public static final String XML_COMMENT_REGEX = "\\<\\!\\-\\-[^\\-\\-\\>]*\\-\\-\\>";
 }

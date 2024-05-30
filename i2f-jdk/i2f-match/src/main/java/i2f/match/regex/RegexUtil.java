@@ -6,6 +6,7 @@ import i2f.match.regex.data.RegexMatchItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -106,4 +107,49 @@ public class RegexUtil {
         return builder.toString();
     }
 
+    public static String trimComment(String str) {
+        return replace(str, RegexPattens.COMMON_COMMENT_REGEX, s -> "");
+    }
+
+    public static String replace(String str, String regex, String replacement) {
+        return replace(str, regex, (s, i) -> replacement);
+    }
+
+    public static String replace(String str, String regex, Function<String, String> replacer) {
+        return replace(str, regex, (s, i) -> replacer == null ? s : replacer.apply(s));
+    }
+
+    public static String replace(String str, String regex, BiFunction<String, Integer, String> replacer) {
+        if (str == null) {
+            return null;
+        }
+        if (regex == null) {
+            return str;
+        }
+        StringBuilder builder = new StringBuilder();
+        Pattern patten = Pattern.compile(regex);
+        Matcher matcher = patten.matcher(str);
+        int cnt = 0;
+        int lidx = 0;
+        while (matcher.find()) {
+            MatchResult result = matcher.toMatchResult();
+
+            String oth = str.substring(lidx, result.start());
+            builder.append(oth);
+
+            lidx = result.end();
+            String group = matcher.group();
+            if (replacer != null) {
+                group = replacer.apply(group, cnt);
+            }
+            builder.append(group);
+
+            cnt++;
+        }
+
+        String oth = str.substring(lidx);
+        builder.append(oth);
+
+        return builder.toString();
+    }
 }
