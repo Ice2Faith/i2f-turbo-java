@@ -6,6 +6,28 @@ package i2f.match.regex;
  * @desc
  */
 public class RegexPattens {
+
+    /**
+     * match for :
+     * integer number, such as
+     * 12
+     * 1
+     * +80
+     * -60
+     * 0
+     */
+    public static final String INTEGER_NUMBER_REGEX = "[+|-]?(0|[1-9][0-9]*)";
+
+    /**
+     * match for :
+     * double number, such as
+     * 12
+     * 12.105
+     * -1.5
+     * 0.3
+     */
+    public static final String DOUBLE_NUMBER_REGEX = INTEGER_NUMBER_REGEX + "(\\.[0-9]+)?";
+
     /**
      * match for :
      * standard var defined name for c/c++/java
