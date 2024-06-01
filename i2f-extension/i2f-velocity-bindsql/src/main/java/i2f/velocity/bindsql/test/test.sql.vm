@@ -1,0 +1,92 @@
+select
+    #trim(",",","," "," ")
+        #foreach($column in $map.keySet())
+             a.$column,
+        #end
+    #end
+from $table a
+#sqlWhere()
+    #foreach($column in $map.keySet())
+        and a.$column = #sql($map.get($column))
+    #end
+#end
+
+;
+
+insert into $table
+(
+    #trim(",",","," "," ")
+        #foreach($column in $map.keySet())
+            $column,
+        #end
+    #end
+)
+values
+(
+    #trim(",",","," "," ")
+        #foreach($column in $map.keySet())
+            #sql($map.get($column)),
+        #end
+    #end
+)
+
+;
+
+update $table
+#sqlSet()
+    #foreach($column in $map.keySet())
+        $column = #sql($map.get($column)),
+    #end
+#end
+#sqlWhere()
+    #foreach($column in $map.keySet())
+        and $column = #sql($map.get($column))
+    #end
+#end
+
+;
+
+delete from $table
+#sqlWhere()
+    #foreach($column in $map.keySet())
+        and $column = #sql($map.get($column))
+    #end
+#end
+
+;
+
+#richFor($item,$map,",","{","}")
+    ${item}-$index:
+    #richFor($item,$map,",","{","}")
+        $item:$index:$map.get($item)
+    #end
+#end
+
+;
+#fori($item,10,0,-2,",","{","}")
+    ${item}-$index:
+#end
+
+;
+
+insert into $table
+(
+    #richFor($column,$map.keySet(),",")
+     $column
+    #end
+)
+#fori($item,0,3,1," union all ")
+    select
+    #richFor($column,$map.keySet(),",")
+        #sql($map.get($column))
+    #end
+    from dual
+#end
+
+;
+
+#richFor($item,[1,2,3,5,7,11])
+  $index:$item
+#end
+
+;
