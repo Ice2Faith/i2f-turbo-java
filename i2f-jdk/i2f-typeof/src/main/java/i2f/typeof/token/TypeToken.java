@@ -23,6 +23,9 @@ public abstract class TypeToken<T> {
         return getGenericsClassType(getClass());
     }
 
+    public Type type(){
+        return getGenericsClassTypes(getClass())[0];
+    }
     @Override
     public String toString() {
         return getType().getName();
