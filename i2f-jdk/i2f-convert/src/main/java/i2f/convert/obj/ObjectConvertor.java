@@ -2,6 +2,7 @@ package i2f.convert.obj;
 
 import i2f.typeof.TypeOf;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
@@ -209,6 +210,29 @@ public class ObjectConvertor {
         }
     }
 
+    public static String stringify(Object obj,String nullAs){
+        if(obj==null){
+            return nullAs;
+        }
+        Class<?> clazz=obj.getClass();
+        if(clazz.isArray()){
+            StringBuilder builder = new StringBuilder();
+            int len= Array.getLength(obj);
+            builder.append("[");
+            for (int i = 0; i < len; i++) {
+                if(i>0){
+                    builder.append(", ");
+                }
+                String str=stringify(Array.get(obj,i),nullAs);
+                builder.append(str);
+            }
+            builder.append("]");
+            return builder.toString();
+        }else {
+            return String.valueOf(obj);
+        }
+    }
+
     public static Object tryConvertAsType(Object val, Class<?> targetType) {
         if (val == null) {
             return val;
@@ -221,7 +245,7 @@ public class ObjectConvertor {
         }
         // 目标类型为 String ，都能转
         if (TypeOf.typeOf(targetType, String.class)) {
-            return String.valueOf(val);
+            return stringify(val,null);
         }
 
         // 原始和目标都是 Number
