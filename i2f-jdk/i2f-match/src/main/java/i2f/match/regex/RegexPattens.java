@@ -114,4 +114,57 @@ public class RegexPattens {
      * <!-- xxx -->
      */
     public static final String XML_COMMENT_REGEX = "\\<\\!\\-\\-[^\\-\\-\\>]*\\-\\-\\>";
+
+
+    /**
+     * match for:
+     * double " string, such as
+     * "user"
+     * "user say \"a's name is b\" "
+     */
+    public static final String SIMPLE_DOUBLE_QUOTE_STRING_REGEX = "\"((\\\\\")+|[^\"])*\"";
+
+    /**
+     * match for:
+     * single ' string,such as
+     * 'user'
+     * 'user say \'a "s" name is b\' '
+     */
+    public static final String SIMPLE_SINGLE_QUOTE_STRING_REGEX = "'((\\\\')+|[^'])*'";
+
+    /**
+     * match for :
+     * {} bracket, such as
+     * {a+b\}-c}
+     */
+    public static final String BIG_BRACKET_REGEX = "\\{((\\\\})+|[^}])*\\}";
+
+    /**
+     * match for :
+     * [] bracket, such as
+     * [a+b\]-c]
+     */
+    public static final String MID_BRACKET_REGEX = "\\[((\\\\])+|[^\\]])*\\]";
+
+    /**
+     * match for :
+     * [] bracket, such as
+     * [a+b\]-c]
+     */
+    public static final String LIT_BRACKET_REGEX = "\\(((\\\\\\))+|[^\\)])*\\)";
+
+    /**
+     * match for :
+     * indexed format placeholder, such as
+     * {}
+     * {:yyyy-MM}
+     * {0}
+     * {-1}
+     * {2:yyyy-MM-dd HH:mm:ss}
+     * {3: \{yyyyMMdd\}-HHmmss.SSS}
+     * { 4 :%02d}
+     * { 5 t:yyyy-MM-dd HH:mm:ss}
+     */
+    public static final String INDEXED_FORMAT_PLACEHOLDER_REGEX = "([^\\\\]|^)\\{(\\s*[+|-]?\\d+\\s*)?(\\s*[a-zA-Z]?:(((\\\\}|\\{)+|[^}])+)?)?\\}";
+
 }
