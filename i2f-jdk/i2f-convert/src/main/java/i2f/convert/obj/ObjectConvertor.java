@@ -235,6 +235,9 @@ public class ObjectConvertor {
 
     public static Object tryConvertAsType(Object val, Class<?> targetType) {
         if (val == null) {
+            if(TypeOf.typeOfAny(targetType,Boolean.class,boolean.class)){
+                return false;
+            }
             return val;
         }
 
@@ -252,7 +255,7 @@ public class ObjectConvertor {
         Class<?>[] numericTypes = bigDecimalTypeConverterMap.keySet().toArray(new Class<?>[0]);
         if (TypeOf.typeOfAny(clazz, numericTypes)
                 &&
-                TypeOf.typeOfAny(clazz, numericTypes)) {
+                TypeOf.typeOfAny(targetType, numericTypes)) {
             BigDecimal decimal = new BigDecimal(String.valueOf(val));
             for (Map.Entry<Class<?>, Function<BigDecimal, ?>> entry : bigDecimalTypeConverterMap.entrySet()) {
                 Class<?> itemClass = entry.getKey();
@@ -266,7 +269,7 @@ public class ObjectConvertor {
         Class<?>[] boolTypes = boolTypeConverterMap.keySet().toArray(new Class<?>[0]);
         if (TypeOf.typeOfAny(clazz, boolTypes)
                 &&
-                TypeOf.typeOfAny(clazz, boolTypes)) {
+                TypeOf.typeOfAny(targetType, boolTypes)) {
             boolean ok = (val == null) ? false : (Boolean) val;
             for (Map.Entry<Class<?>, Function<Boolean, ?>> entry : boolTypeConverterMap.entrySet()) {
                 Class<?> itemClass = entry.getKey();
@@ -280,7 +283,7 @@ public class ObjectConvertor {
         Class<?>[] charTypes = charTypeConverterMap.keySet().toArray(new Class<?>[0]);
         if (TypeOf.typeOfAny(clazz, charTypes)
                 &&
-                TypeOf.typeOfAny(clazz, charTypes)) {
+                TypeOf.typeOfAny(targetType, charTypes)) {
             char ch = (val == null) ? 0 : (Character) val;
             for (Map.Entry<Class<?>, Function<Character, ?>> entry : charTypeConverterMap.entrySet()) {
                 Class<?> itemClass = entry.getKey();
@@ -295,7 +298,7 @@ public class ObjectConvertor {
         Class<?>[] dateTypes = dateTypeConverterMap.keySet().toArray(new Class<?>[0]);
         if (TypeOf.typeOfAny(clazz, dateTypes)
                 &&
-                TypeOf.typeOfAny(clazz, dateTypes)) {
+                TypeOf.typeOfAny(targetType, dateTypes)) {
             Instant ins = null;
             for (Map.Entry<Class<?>, Function<Object, Instant>> entry : date2InstantConverterMap.entrySet()) {
                 Class<?> itemClass = entry.getKey();
@@ -345,6 +348,26 @@ public class ObjectConvertor {
             }
         }
 
+        // boolean 的宽泛转换
+        if (TypeOf.typeOfAny(targetType, boolTypes)){
+            if(val==null){
+                return false;
+            }
+            if(val instanceof Number){
+                return ((Number) val).intValue()!=0;
+            }
+            if(val instanceof String){
+                return !((String) val).isEmpty();
+            }
+            if(val instanceof Map){
+                return !((Map<?, ?>) val).isEmpty();
+            }
+            if(val instanceof Collection){
+                return !((Collection<?>) val).isEmpty();
+            }
+            return true;
+        }
+
         // 字符串字面值
         if (TypeOf.typeOfAny(targetType, boolTypes)) {
             String str = valStr.toLowerCase();
@@ -358,6 +381,18 @@ public class ObjectConvertor {
                 return true;
             }
             if ("0".equals(str)) {
+                return false;
+            }
+            if ("y".equals(str)) {
+                return true;
+            }
+            if ("n".equals(str)) {
+                return false;
+            }
+            if ("t".equals(str)) {
+                return true;
+            }
+            if ("f".equals(str)) {
                 return false;
             }
         }
