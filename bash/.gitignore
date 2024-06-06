@@ -1,3 +1,4 @@
 backup
 deploy
+release/test-*
 !release/*

@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>i2f-springboot-test</artifactId>
+    <artifactId>test-springboot</artifactId>
 
     <properties>
         <spring.version>5.2.12.RELEASE</spring.version>
