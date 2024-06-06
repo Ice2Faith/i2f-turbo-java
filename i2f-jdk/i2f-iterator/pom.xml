@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-refrence</artifactId>
+            <artifactId>i2f-reference</artifactId>
         </dependency>
     </dependencies>
 

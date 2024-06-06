@@ -1,9 +1,10 @@
 package i2f.bql.bean;
 
-import i2f.annotations.doc.db.Column;
-import i2f.annotations.doc.db.DbIgnore;
-import i2f.annotations.doc.db.DbIgnoreUnAnnotated;
-import i2f.annotations.doc.db.Primary;
+
+import i2f.annotations.db.Column;
+import i2f.annotations.db.DbIgnore;
+import i2f.annotations.db.DbIgnoreUnAnnotated;
+import i2f.annotations.db.Primary;
 import i2f.bql.lambda.impl.NameResolver;
 import i2f.lru.LruMap;
 

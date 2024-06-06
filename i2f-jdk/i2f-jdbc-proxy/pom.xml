@@ -33,7 +33,12 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-annotations</artifactId>
+            <artifactId>i2f-annotations-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-annotations-db</artifactId>
         </dependency>
 
         <dependency>

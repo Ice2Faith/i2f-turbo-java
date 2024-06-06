@@ -1,6 +1,6 @@
 package com.i2f.test.data.dom;
 
-import i2f.annotations.doc.db.Table;
+import i2f.annotations.db.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

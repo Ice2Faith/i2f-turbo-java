@@ -1,6 +1,7 @@
 package i2f.bql.lambda.impl;
 
-import i2f.annotations.doc.db.Column;
+
+import i2f.annotations.db.Column;
 
 import java.lang.reflect.Field;
 import java.util.function.Function;
