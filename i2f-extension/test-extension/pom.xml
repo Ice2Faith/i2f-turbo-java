@@ -9,7 +9,7 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-extension-test</artifactId>
+    <artifactId>test-extension</artifactId>
 
     <dependencies>
         <dependency>

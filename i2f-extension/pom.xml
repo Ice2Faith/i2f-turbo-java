@@ -17,9 +17,9 @@
         <module>i2f-extension-all</module>
         <module>i2f-jce-sm-antherd</module>
         <module>i2f-jce-bc</module>
-        <module>i2f-extension-test</module>
         <module>i2f-velocity</module>
         <module>i2f-velocity-bindsql</module>
+        <module>test-extension</module>
     </modules>
 
 
