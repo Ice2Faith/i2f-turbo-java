@@ -7,9 +7,11 @@ import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.data.NamingOutputParameter;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
+import i2f.jdbc.data.TypedArgument;
 import i2f.page.ApiPage;
 import i2f.page.Page;
 import i2f.reflect.ReflectResolver;
+import i2f.typeof.TypeOf;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -100,12 +102,57 @@ public class JdbcResolver {
         }
     }
 
+    public static BindSql.Type detectType(String sql) {
+        if (sql == null) {
+            return BindSql.Type.UNSET;
+        }
+        sql = sql.trim().toLowerCase();
+        if (sql.startsWith("select")) {
+            return BindSql.Type.QUERY;
+        }
+        if (sql.startsWith("insert")) {
+            return BindSql.Type.UPDATE;
+        }
+        if (sql.startsWith("update")) {
+            return BindSql.Type.UPDATE;
+        }
+        if (sql.startsWith("delete")) {
+            return BindSql.Type.UPDATE;
+        }
+        if (sql.startsWith("create")) {
+            return BindSql.Type.UPDATE;
+        }
+        if (sql.startsWith("drop")) {
+            return BindSql.Type.UPDATE;
+        }
+        if (sql.startsWith("alter")) {
+            return BindSql.Type.UPDATE;
+        }
+        if (sql.startsWith("comment")) {
+            return BindSql.Type.UPDATE;
+        }
+        if (sql.startsWith("{")) {
+            return BindSql.Type.CALL;
+        }
+        if (sql.startsWith("call")) {
+            return BindSql.Type.CALL;
+        }
+        return BindSql.Type.UNSET;
+    }
+
     public static List<Object> transaction(Connection conn, List<BindSql> sqls) throws SQLException {
         return transaction(conn, (connection, sqlList) -> {
             List<Object> ret = new ArrayList<>();
             for (BindSql sql : sqlList) {
-                if (sql.isUpdate()) {
+                BindSql.Type type = sql.getType();
+                if (type == null || type == BindSql.Type.UNSET) {
+                    type = detectType(sql.getSql());
+                }
+                if (type == BindSql.Type.UPDATE) {
                     int val = update(connection, sql.getSql(), sql.getArgs());
+                    ret.add(val);
+                } else if (type == BindSql.Type.CALL) {
+                    Map<String, Object> val = callNaming(connection, sql.getSql(), sql.getArgs());
                     ret.add(val);
                 } else {
                     QueryResult val = query(connection, sql.getSql(), sql.getArgs());
@@ -408,27 +455,29 @@ public class JdbcResolver {
     }
 
     public static boolean call(Connection conn, BindSql sql) throws SQLException {
-        return call(conn,sql.getSql(),sql.getArgs());
+        return call(conn, sql.getSql(), sql.getArgs());
     }
+
     public static boolean call(Connection conn, String sql, List<?> args) throws SQLException {
         Map<Integer, Object> map = call(conn, sql, args, null);
         return (Boolean) map.get(-1);
     }
 
     public static Map<Integer, Object> call(Connection conn, BindSql sql, Map<Integer, SQLType> outParams) throws SQLException {
-        return call(conn,sql.getSql(),sql.getArgs(),outParams);
+        return call(conn, sql.getSql(), sql.getArgs(), outParams);
     }
-        /**
-         * 返回值为outParams中指定的出参
-         * 特别的，key=-1表示执行的结果boolean值
-         *
-         * @param conn
-         * @param sql
-         * @param args
-         * @param outParams
-         * @return
-         * @throws SQLException
-         */
+
+    /**
+     * 返回值为outParams中指定的出参
+     * 特别的，key=-1表示执行的结果boolean值
+     *
+     * @param conn
+     * @param sql
+     * @param args
+     * @param outParams
+     * @return
+     * @throws SQLException
+     */
     public static Map<Integer, Object> call(Connection conn, String sql, List<?> args, Map<Integer, SQLType> outParams) throws SQLException {
         CallableStatement stat = callStatement(conn, sql, args, outParams);
         boolean ok = stat.execute();
@@ -469,36 +518,38 @@ public class JdbcResolver {
     }
 
     public static CallableStatement callStatement(Connection conn, BindSql sql) throws SQLException {
-        return callStatement(conn,sql.getSql(),sql.getArgs());
+        return callStatement(conn, sql.getSql(), sql.getArgs());
     }
-        public static CallableStatement callStatement(Connection conn, String sql, List<?> args) throws SQLException {
+
+    public static CallableStatement callStatement(Connection conn, String sql, List<?> args) throws SQLException {
         return callStatement(conn, sql, args, null);
     }
 
 
     public static CallableStatement callStatement(Connection conn, BindSql sql, Map<Integer, SQLType> outParams) throws SQLException {
-        return callStatement(conn,sql.getSql(),sql.getArgs(),outParams);
+        return callStatement(conn, sql.getSql(), sql.getArgs(), outParams);
     }
-        /**
-         * args 每个参数位置都是需要的，包括出参位置，出参可以设为任意值补位，因为会被忽略
-         * outParams 指定哪些是出参
-         * 举例：
-         * 调用存过：sp_test(in,in,out,in,out)
-         * 则对应的入参为：
-         * sql= {call sp_test(?,?,?,?,?)}
-         * args= [1,1,null,1,null]
-         * outParams= {
-         * 2: JDBCType.NUMBER,
-         * 4: JDBCType.VARCHAR
-         * }
-         *
-         * @param conn
-         * @param sql
-         * @param args
-         * @param outParams
-         * @return
-         * @throws SQLException
-         */
+
+    /**
+     * args 每个参数位置都是需要的，包括出参位置，出参可以设为任意值补位，因为会被忽略
+     * outParams 指定哪些是出参
+     * 举例：
+     * 调用存过：sp_test(in,in,out,in,out)
+     * 则对应的入参为：
+     * sql= {call sp_test(?,?,?,?,?)}
+     * args= [1,1,null,1,null]
+     * outParams= {
+     * 2: JDBCType.NUMBER,
+     * 4: JDBCType.VARCHAR
+     * }
+     *
+     * @param conn
+     * @param sql
+     * @param args
+     * @param outParams
+     * @return
+     * @throws SQLException
+     */
     public static CallableStatement callStatement(Connection conn, String sql, List<?> args, Map<Integer, SQLType> outParams) throws SQLException {
         Set<Integer> outs = new HashSet<>();
         if (outParams != null) {
@@ -520,19 +571,19 @@ public class JdbcResolver {
     }
 
     public static Map<String, Object> callNaming(Connection conn, BindSql sql) throws SQLException {
-        return callNaming(conn,sql.getSql(),sql.getArgs());
+        return callNaming(conn, sql.getSql(), sql.getArgs());
     }
 
-        /**
-         * 返回值为出参中指定的出参
-         * 特别的，key=-1表示执行的结果boolean值
-         *
-         * @param conn
-         * @param sql
-         * @param args
-         * @return
-         * @throws SQLException
-         */
+    /**
+     * 返回值为出参中指定的出参
+     * 特别的，key=-1表示执行的结果boolean值
+     *
+     * @param conn
+     * @param sql
+     * @param args
+     * @return
+     * @throws SQLException
+     */
     public static Map<String, Object> callNaming(Connection conn, String sql, List<?> args) throws SQLException {
         Map<Integer, NamingOutputParameter> namingMap = new LinkedHashMap<>();
 
@@ -550,9 +601,10 @@ public class JdbcResolver {
     }
 
     public static CallableStatement namingCallableStatement(Connection conn, BindSql sql, Map<Integer, NamingOutputParameter> context) throws SQLException {
-        return namingCallableStatement(conn,sql.getSql(),sql.getArgs(),context);
+        return namingCallableStatement(conn, sql.getSql(), sql.getArgs(), context);
     }
-        public static CallableStatement namingCallableStatement(Connection conn, String sql, List<?> args, Map<Integer, NamingOutputParameter> context) throws SQLException {
+
+    public static CallableStatement namingCallableStatement(Connection conn, String sql, List<?> args, Map<Integer, NamingOutputParameter> context) throws SQLException {
 
         CallableStatement stat = conn.prepareCall(sql);
         if (args != null) {
@@ -596,6 +648,19 @@ public class JdbcResolver {
     }
 
     public static void setStatementObject(PreparedStatement stat, int index, Object obj) throws SQLException {
+        if (obj == null) {
+            stat.setObject(index, obj);
+            return;
+        }
+        Class<?> clazz = obj.getClass();
+        if (obj instanceof TypedArgument) {
+            TypedArgument typedArgument = (TypedArgument) obj;
+            clazz = typedArgument.getType();
+            if (clazz == null) {
+                clazz = obj.getClass();
+            }
+            obj = typedArgument.getValue();
+        }
         if (obj instanceof Integer) {
             stat.setInt(index, (Integer) obj);
             return;
@@ -712,7 +777,44 @@ public class JdbcResolver {
             setStatementObject(stat, index, ((ThreadLocal<?>) obj).get());
             return;
         }
+
+        if (obj == null) {
+            setStatementNullWithType(stat, index, clazz);
+            return;
+        }
         stat.setObject(index, obj);
+    }
+
+    public static void setStatementNullWithType(PreparedStatement stat, int index, Class<?> clazz) throws SQLException {
+        if (clazz == null) {
+            stat.setObject(index, null);
+            return;
+        }
+        if (TypeOf.typeOfAny(clazz, int.class, Integer.class, AtomicInteger.class)) {
+            stat.setNull(index, Types.INTEGER);
+            return;
+        }
+        if (TypeOf.typeOfAny(clazz, long.class, Long.class, AtomicLong.class, BigInteger.class)) {
+            stat.setNull(index, Types.BIGINT);
+            return;
+        }
+        if (TypeOf.typeOfAny(clazz, String.class)) {
+            stat.setNull(index, Types.VARCHAR);
+            return;
+        }
+        if (ObjectConvertor.isNumericType(clazz)) {
+            stat.setNull(index, Types.NUMERIC);
+            return;
+        }
+        if (ObjectConvertor.isDateType(clazz)) {
+            stat.setNull(index, Types.DATE);
+            return;
+        }
+        if (ObjectConvertor.isBooleanType(clazz)) {
+            stat.setNull(index, Types.BOOLEAN);
+            return;
+        }
+        stat.setNull(index, Types.VARCHAR);
     }
 
     public static QueryResult parseResultSet(ResultSet rs) throws SQLException {

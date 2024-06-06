@@ -210,6 +210,42 @@ public class ObjectConvertor {
         }
     }
 
+    public static boolean isNumericType(Class<?> clazz) {
+        for (Class<?> item : bigDecimalTypeConverterMap.keySet()) {
+            if (TypeOf.typeOf(clazz, item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isBooleanType(Class<?> clazz) {
+        for (Class<?> item : boolTypeConverterMap.keySet()) {
+            if (TypeOf.typeOf(clazz, item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isCharType(Class<?> clazz) {
+        for (Class<?> item : charTypeConverterMap.keySet()) {
+            if (TypeOf.typeOf(clazz, item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isDateType(Class<?> clazz) {
+        for (Class<?> item : dateTypeConverterMap.keySet()) {
+            if (TypeOf.typeOf(clazz, item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static String stringify(Object obj,String nullAs){
         if(obj==null){
             return nullAs;

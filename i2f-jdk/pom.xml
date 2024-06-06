@@ -69,6 +69,7 @@
         <module>i2f-native-windows</module>
         <module>i2f-native-core</module>
         <module>i2f-native-windows-easyx</module>
+        <module>i2f-jdbc-proxy</module>
     </modules>
 
 
