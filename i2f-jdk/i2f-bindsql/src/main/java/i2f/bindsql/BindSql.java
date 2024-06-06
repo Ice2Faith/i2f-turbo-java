@@ -10,7 +10,24 @@ import java.util.Objects;
  * @desc
  */
 public class BindSql {
-    protected boolean update = false;
+    public static enum Type {
+        UNSET(0),
+        QUERY(1),
+        UPDATE(2),
+        CALL(3);
+
+        private int code;
+
+        private Type(int code) {
+            this.code = code;
+        }
+
+        public int code() {
+            return code;
+        }
+    }
+
+    protected Type type = Type.UNSET;
     protected String sql = "";
     protected List<Object> args = new ArrayList<>();
 
@@ -26,14 +43,14 @@ public class BindSql {
         this.args = args;
     }
 
-    public BindSql(boolean update, String sql, List<Object> args) {
-        this.update = update;
+    public BindSql(Type type, String sql, List<Object> args) {
+        this.type = type;
         this.sql = sql;
         this.args = args;
     }
 
-    public static BindSql of(boolean update, String sql, Object... args) {
-        return of(sql, args).setUpdate(update);
+    public static BindSql of(Type type, String sql, Object... args) {
+        return of(sql, args).setType(type);
     }
 
     public static BindSql of(String sql, Object... args) {
@@ -44,12 +61,12 @@ public class BindSql {
         return new BindSql(sql, list);
     }
 
-    public boolean isUpdate() {
-        return update;
+    public Type getType() {
+        return type;
     }
 
-    public BindSql setUpdate(boolean update) {
-        this.update = update;
+    public BindSql setType(Type type) {
+        this.type = type;
         return this;
     }
 
@@ -80,20 +97,20 @@ public class BindSql {
             return false;
         }
         BindSql bindSql = (BindSql) o;
-        return update == bindSql.update &&
+        return type == bindSql.type &&
                 Objects.equals(sql, bindSql.sql) &&
                 Objects.equals(args, bindSql.args);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(update, sql, args);
+        return Objects.hash(type, sql, args);
     }
 
     @Override
     public String toString() {
         return "BindSql{\n" +
-                "update  = " + update + "\n" +
+                "type  = " + type + "\n" +
                 ", sql   = " + sql + "\n" +
                 ", args  = " + args + "\n" +
                 "}";

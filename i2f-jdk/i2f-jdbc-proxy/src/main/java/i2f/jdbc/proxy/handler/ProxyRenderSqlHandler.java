@@ -1,0 +1,165 @@
+package i2f.jdbc.proxy.handler;
+
+import i2f.annotations.core.name.Name;
+import i2f.bindsql.BindSql;
+import i2f.convert.obj.ObjectConvertor;
+import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.data.QueryResult;
+import i2f.jdbc.proxy.annotations.IgnorePage;
+import i2f.jdbc.proxy.provider.JdbcInvokeContextProvider;
+import i2f.jdbc.proxy.provider.ProxyRenderSqlProvider;
+import i2f.page.ApiPage;
+import i2f.page.Page;
+import i2f.reflect.ReflectResolver;
+import i2f.reflect.RichConverter;
+import i2f.typeof.TypeOf;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
+import java.sql.Connection;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author Ice2Faith
+ * @date 2024/6/6 8:56
+ * @desc
+ */
+public class ProxyRenderSqlHandler<T> implements InvocationHandler {
+
+    private JdbcInvokeContextProvider<T> contextProvider;
+
+    private ProxyRenderSqlProvider sqlProvider;
+
+    public ProxyRenderSqlHandler(JdbcInvokeContextProvider<T> contextProvider, ProxyRenderSqlProvider sqlProvider) {
+        this.contextProvider = contextProvider;
+        this.sqlProvider = sqlProvider;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        Class<?> clazz = method.getDeclaringClass();
+        String methodId = clazz.getName().replaceAll("\\$", ".") + "." + method.getName();
+        Parameter[] parameters = method.getParameters();
+        String[] names = new String[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            String name = ReflectResolver.getAnnotationValue(parameter, Name.class, "value");
+            if (name != null && !"".equals(name)) {
+                names[i] = name;
+            } else {
+                names[i] = parameter.getName();
+            }
+        }
+
+        ApiPage page = null;
+        Map<String, Object> params = new LinkedHashMap<>();
+        for (int i = 0; i < names.length; i++) {
+            String name = names[i];
+            Object arg = args[i];
+            if (arg instanceof ApiPage) {
+                page = (ApiPage) arg;
+            }
+            params.put(name, arg);
+        }
+
+        BindSql sql = sqlProvider.render(methodId, params, method, args);
+
+        Type returnType = method.getGenericReturnType();
+        Class<?> returnClass = method.getReturnType();
+
+        BindSql.Type type = sql.getType();
+        if (type == null || type == BindSql.Type.UNSET) {
+            type = JdbcResolver.detectType(sql.getSql());
+        }
+
+        T context = contextProvider.beginContext();
+        Connection conn = contextProvider.getConnection(context);
+
+        try {
+
+
+            if (type == BindSql.Type.UPDATE) {
+                int val = JdbcResolver.update(conn, sql);
+                return ObjectConvertor.tryConvertAsType(val, returnClass);
+            } else if (type == BindSql.Type.CALL) {
+                Map<String, Object> val = JdbcResolver.callNaming(conn, sql);
+                return RichConverter.convert2Type(val, returnType);
+            } else {
+                // 原始包装类型
+                if (TypeOf.typeOf(returnClass, QueryResult.class)) {
+                    QueryResult val = JdbcResolver.query(conn, sql);
+                    return val;
+                }
+
+                // 单一返回值处理
+                if (TypeOf.isBaseType(returnClass)) {
+                    Object val = JdbcResolver.get(conn, sql, returnClass);
+                    return val;
+                }
+
+                if (ObjectConvertor.isNumericType(returnClass)
+                        || ObjectConvertor.isBooleanType(returnClass)
+                        || ObjectConvertor.isCharType(returnClass)
+                        || ObjectConvertor.isDateType(returnClass)) {
+                    Object val = JdbcResolver.get(conn, sql, returnClass);
+                    return val;
+                }
+
+                // 分页处理
+                boolean enablePage = false;
+                if (page != null) {
+                    enablePage = true;
+                    Boolean ignore = ReflectResolver.getAnnotationValue(method, IgnorePage.class, "value");
+                    if (ignore != null) {
+                        enablePage = !ignore;
+                    }
+                }
+
+                if (enablePage) {
+                    if (TypeOf.typeOf(returnClass, Page.class)) {
+                        Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
+                        return RichConverter.convert2Type(val, returnType);
+                    } else if (TypeOf.typeOf(returnClass, Collection.class)) {
+                        Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
+                        List<Map<String, Object>> list = val.getList();
+                        return RichConverter.convert2Type(list, returnType);
+                    } else if (TypeOf.isBaseType(returnClass)) {
+                        Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
+                        return ObjectConvertor.tryConvertAsType(val.getTotal(), returnClass);
+                    } else if (ObjectConvertor.isNumericType(returnClass)
+                            || ObjectConvertor.isBooleanType(returnClass)
+                            || ObjectConvertor.isCharType(returnClass)
+                            || ObjectConvertor.isDateType(returnClass)) {
+                        Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
+                        return ObjectConvertor.tryConvertAsType(val.getTotal(), returnClass);
+                    } else {
+                        Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
+                        List<Map<String, Object>> list = val.getList();
+                        if (list.isEmpty()) {
+                            return null;
+                        }
+                        return RichConverter.convert2Type(list.get(0), returnType);
+                    }
+                }
+
+                // 列表处理
+                if (TypeOf.typeOf(returnClass, Collection.class)) {
+                    List<Map<String, Object>> val = JdbcResolver.list(conn, sql);
+                    return RichConverter.convert2Type(val, returnType);
+                }
+
+                // 其他就是单一对象处理
+                Map<String, Object> val = JdbcResolver.find(conn, sql);
+                return RichConverter.convert2Type(val, returnType);
+            }
+        } finally {
+            contextProvider.endContext(context, conn);
+        }
+    }
+
+}

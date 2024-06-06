@@ -6,6 +6,7 @@ import i2f.functional.IFunctional;
 import i2f.lambda.inflater.LambdaInflater;
 import i2f.reflect.ReflectResolver;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Supplier;
@@ -222,7 +223,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
         return $beanQuery(bean, null, null);
     }
 
-    public <T> H $beanQuery(T bean, Collection<IFunctional> selectCols) {
+    public <T> H $beanQuery(T bean, Collection<? extends Serializable> selectCols) {
         return $beanQuery(bean, null, selectCols);
     }
 
@@ -230,16 +231,16 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
         return $beanQuery(bean, alias, null);
     }
 
-    public <T> H $beanQuery(T bean, String alias, Collection<IFunctional> selectCols) {
+    public <T> H $beanQuery(T bean, String alias, Collection<? extends Serializable> selectCols) {
         return $beanQuery(bean, alias, selectCols, null);
     }
 
-    public <T> H $beanQuery(T bean, String alias, Collection<IFunctional> selectCols, Collection<IFunctional> selectExcludeCols) {
+    public <T> H $beanQuery(T bean, String alias, Collection<? extends Serializable> selectCols, Collection<IFunctional> selectExcludeCols) {
         return $beanQuery(bean, alias, selectCols, selectExcludeCols, null, null, null);
     }
 
     public <T> H $beanQuery(T bean, String alias,
-                            Collection<IFunctional> selectCols,
+                            Collection<? extends Serializable> selectCols,
                             Collection<IFunctional> selectExcludeCols,
                             Collection<IFunctional> whereIsNullCols,
                             Collection<IFunctional> whereIsNotNullCols,
@@ -251,13 +252,17 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
         Set<Field> fields = BeanResolver.getDbFields(clazz);
         Map<String, String> colMap = new LinkedHashMap<>();
         if (selectCols != null && !selectCols.isEmpty()) {
-            for (IFunctional lambda : selectCols) {
-                Field field = LambdaInflater.fastSerializedLambdaFieldNullable(lambda);
-                String colName = fieldNameResolver.getName(field);
-                if (field.getName().equals(colName)) {
-                    colMap.put(colName, null);
+            for (Serializable lambda : selectCols) {
+                if (lambda instanceof IFunctional) {
+                    Field field = LambdaInflater.fastSerializedLambdaFieldNullable(lambda);
+                    String colName = fieldNameResolver.getName(field);
+                    if (field.getName().equals(colName)) {
+                        colMap.put(colName, null);
+                    } else {
+                        colMap.put(colName, field.getName());
+                    }
                 } else {
-                    colMap.put(colName, field.getName());
+                    colMap.put(String.valueOf(lambda), null);
                 }
             }
         }
