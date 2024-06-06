@@ -97,7 +97,7 @@ public class SqlProxy {
             idx++;
         }
         // 实际情况应该区分是否是查询类
-        if(bindSql.isUpdate()){
+        if(bindSql.getType()==BindSql.Type.UPDATE){
             int ret = stat.executeUpdate();
             stat.close();
             return ret;

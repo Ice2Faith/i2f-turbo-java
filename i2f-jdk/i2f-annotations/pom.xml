@@ -11,6 +11,29 @@
 
     <artifactId>i2f-annotations</artifactId>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-annotations-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-annotations-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-annotations-db</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-annotations-ext</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
