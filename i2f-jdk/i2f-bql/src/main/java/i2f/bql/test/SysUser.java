@@ -1,9 +1,11 @@
 package i2f.bql.test;
 
-import i2f.annotations.doc.db.Column;
-import i2f.annotations.doc.db.DbIgnore;
-import i2f.annotations.doc.db.Primary;
-import i2f.annotations.doc.db.Table;
+
+
+import i2f.annotations.db.Column;
+import i2f.annotations.db.DbIgnore;
+import i2f.annotations.db.Primary;
+import i2f.annotations.db.Table;
 
 import java.util.Date;
 

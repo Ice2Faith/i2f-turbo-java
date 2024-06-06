@@ -1,6 +1,6 @@
 package i2f.jdbc.proxy.handler;
 
-import i2f.annotations.core.name.Name;
+import i2f.annotations.core.naming.Name;
 import i2f.bindsql.BindSql;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.JdbcResolver;

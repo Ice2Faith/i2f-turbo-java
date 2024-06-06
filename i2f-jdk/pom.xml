@@ -15,10 +15,17 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>i2f-enums</module>
+
+        <module>i2f-annotations-core</module>
+        <module>i2f-annotations-db</module>
+        <module>i2f-annotations-api</module>
+        <module>i2f-annotations-ext</module>
+        <module>i2f-annotations</module>
+
         <module>i2f-jdk-all</module>
         <module>i2f-tuple</module>
         <module>i2f-streaming</module>
-        <module>i2f-annotations</module>
         <module>i2f-clock</module>
         <module>i2f-bql</module>
         <module>i2f-check</module>
@@ -61,7 +68,7 @@
         <module>i2f-io-stream</module>
         <module>i2f-match</module>
         <module>i2f-iterator</module>
-        <module>i2f-refrence</module>
+        <module>i2f-reference</module>
         <module>i2f-comparator</module>
         <module>i2f-serialize</module>
         <module>i2f-os</module>
@@ -70,6 +77,7 @@
         <module>i2f-native-core</module>
         <module>i2f-native-windows-easyx</module>
         <module>i2f-jdbc-proxy</module>
+
     </modules>
 
 
