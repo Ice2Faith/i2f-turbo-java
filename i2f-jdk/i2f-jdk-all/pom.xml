@@ -146,6 +146,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jdbc-bql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jdbc-proxy</artifactId>
         </dependency>
         <dependency>

@@ -49,6 +49,7 @@ public class BindSql {
         this.args = args;
     }
 
+
     public static BindSql of(Type type, String sql, Object... args) {
         return of(sql, args).setType(type);
     }
