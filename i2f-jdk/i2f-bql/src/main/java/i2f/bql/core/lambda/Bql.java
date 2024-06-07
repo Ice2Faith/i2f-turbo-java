@@ -16,6 +16,7 @@ import i2f.functional.adapt.IGetter;
 import i2f.functional.adapt.ISetter;
 import i2f.lambda.inflater.LambdaInflater;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Predicate;
@@ -120,54 +121,62 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
         return column;
     }
 
-    public List<String> lm2names(Collection<IFunctional> list) {
+    public List<String> lm2names(Collection<? extends Serializable> list) {
         if (list == null) {
             return null;
         }
         List<String> ret = new ArrayList<>();
-        for (IFunctional lambda : list) {
-            ret.add(lambdaFieldName(lambda));
+        for (Serializable lambda : list) {
+            if (lambda instanceof IFunctional) {
+                ret.add(lambdaFieldName((IFunctional) lambda));
+            } else {
+                ret.add(String.valueOf(lambda));
+            }
         }
         return ret;
     }
 
-    public <T> Map<String, T> lm2names(Map<IFunctional, T> map) {
+    public <T> Map<String, T> lm2names(Map<? extends Serializable, T> map) {
         if (map == null) {
             return null;
         }
         Map<String, T> ret = new LinkedHashMap<>();
-        for (Map.Entry<IFunctional, T> entry : map.entrySet()) {
-            IFunctional lambda = entry.getKey();
-            ret.put(lambdaFieldName(lambda), entry.getValue());
+        for (Map.Entry<? extends Serializable, T> entry : map.entrySet()) {
+            Serializable lambda = entry.getKey();
+            if (lambda instanceof IFunctional) {
+                ret.put(lambdaFieldName((IFunctional) lambda), entry.getValue());
+            } else {
+                ret.put(String.valueOf(lambda), entry.getValue());
+            }
         }
         return ret;
     }
 
-    public <T> List<Map<String, T>> lm2names(List<Map<IFunctional, T>> list) {
+    public <T> List<Map<String, T>> lm2names(List<Map<? extends Serializable, T>> list) {
         if (list == null) {
             return null;
         }
         List<Map<String, T>> ret = new LinkedList<>();
-        for (Map<IFunctional, T> item : list) {
+        for (Map<? extends Serializable, T> item : list) {
             ret.add(lm2names(item));
         }
         return ret;
     }
 
-    public List<String> lm2names(IFunctional... lambdas) {
+    public List<String> lm2names(Serializable... lambdas) {
         return lm2names(Arrays.asList(lambdas));
     }
 
-    public static MapBuilder<IFunctional, String, LinkedHashMap<IFunctional, String>> $colMapLambda() {
-        return Builders.newMap(LinkedHashMap::new, IFunctional.class, String.class);
+    public static MapBuilder<Serializable, String, LinkedHashMap<Serializable, String>> $colMapLambda() {
+        return Builders.newMap(LinkedHashMap::new, Serializable.class, String.class);
     }
 
-    public static MapBuilder<IFunctional, Object, LinkedHashMap<IFunctional, Object>> $valueMapLambda() {
-        return Builders.newMap(LinkedHashMap::new, IFunctional.class, Object.class);
+    public static MapBuilder<Serializable, Object, LinkedHashMap<Serializable, Object>> $valueMapLambda() {
+        return Builders.newMap(LinkedHashMap::new, Serializable.class, Object.class);
     }
 
-    public static ListBuilder<IFunctional, LinkedList<IFunctional>> $colListLambda() {
-        return Builders.newList(LinkedList::new, IFunctional.class);
+    public static ListBuilder<Serializable, LinkedList<Serializable>> $colListLambda() {
+        return Builders.newList(LinkedList::new, Serializable.class);
     }
 
     public H $tableName(Class<?> clazz) {
@@ -190,23 +199,23 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
         return $(decorateColumnName(lambdaFieldName(column)));
     }
 
-    public H $lambdaInsert(Class<?> table, Map<IFunctional, Object> valueMap) {
+    public H $lambdaInsert(Class<?> table, Map<? extends Serializable, Object> valueMap) {
         return $mapInsert(classTableName(table),
                 lm2names(valueMap));
     }
 
-    public H $lambdaInsertBatchValues(Class<?> table, List<Map<IFunctional, Object>> values) {
+    public H $lambdaInsertBatchValues(Class<?> table, List<Map<? extends Serializable, Object>> values) {
         return $mapInsertBatchValues(classTableName(table),
                 lm2names(values));
     }
 
-    public H $lambdaInsertBatchUnionAll(Class<?> table, List<Map<IFunctional, Object>> values) {
+    public H $lambdaInsertBatchUnionAll(Class<?> table, List<Map<? extends Serializable, Object>> values) {
         return $mapInsertBatchUnionAll(classTableName(table),
                 lm2names(values));
     }
 
     public H $lambdaDelete(Class<?> table,
-                           Map<IFunctional, Object> whereMap) {
+                           Map<? extends Serializable, Object> whereMap) {
         return $mapDelete(classTableName(table),
                 lm2names(whereMap),
                 null,
@@ -214,8 +223,8 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaDelete(Class<?> table,
-                           Map<IFunctional, Object> whereMap,
-                           Collection<IFunctional> whereIsNullCols) {
+                           Map<? extends Serializable, Object> whereMap,
+                           Collection<? extends Serializable> whereIsNullCols) {
         return $mapDelete(classTableName(table),
                 lm2names(whereMap),
                 lm2names(whereIsNullCols),
@@ -223,9 +232,9 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaDelete(Class<?> table,
-                           Map<IFunctional, Object> whereMap,
-                           Collection<IFunctional> whereIsNullCols,
-                           Collection<IFunctional> whereIsNotNullCols) {
+                           Map<? extends Serializable, Object> whereMap,
+                           Collection<? extends Serializable> whereIsNullCols,
+                           Collection<? extends Serializable> whereIsNotNullCols) {
         return $mapDelete(classTableName(table),
                 lm2names(whereMap),
                 lm2names(whereIsNullCols),
@@ -233,8 +242,8 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaUpdate(Class<?> table,
-                           Map<IFunctional, Object> updateMap,
-                           Map<IFunctional, Object> whereMap) {
+                           Map<? extends Serializable, Object> updateMap,
+                           Map<? extends Serializable, Object> whereMap) {
         return $mapUpdate(classTableName(table),
                 lm2names(updateMap),
                 null,
@@ -244,9 +253,9 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaUpdate(Class<?> table,
-                           Map<IFunctional, Object> updateMap,
-                           Collection<IFunctional> updateNullCols,
-                           Map<IFunctional, Object> whereMap) {
+                           Map<? extends Serializable, Object> updateMap,
+                           Collection<? extends Serializable> updateNullCols,
+                           Map<? extends Serializable, Object> whereMap) {
         return $mapUpdate(classTableName(table),
                 lm2names(updateMap),
                 lm2names(updateNullCols),
@@ -256,10 +265,10 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaUpdate(Class<?> table,
-                           Map<IFunctional, Object> updateMap,
-                           Collection<IFunctional> updateNullCols,
-                           Map<IFunctional, Object> whereMap,
-                           Collection<IFunctional> whereIsNullCols) {
+                           Map<? extends Serializable, Object> updateMap,
+                           Collection<? extends Serializable> updateNullCols,
+                           Map<? extends Serializable, Object> whereMap,
+                           Collection<? extends Serializable> whereIsNullCols) {
         return $mapUpdate(classTableName(table),
                 lm2names(updateMap),
                 lm2names(updateNullCols),
@@ -269,11 +278,11 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaUpdate(Class<?> table,
-                           Map<IFunctional, Object> updateMap,
-                           Collection<IFunctional> updateNullCols,
-                           Map<IFunctional, Object> whereMap,
-                           Collection<IFunctional> whereIsNullCols,
-                           Collection<IFunctional> whereIsNotNullCols) {
+                           Map<? extends Serializable, Object> updateMap,
+                           Collection<? extends Serializable> updateNullCols,
+                           Map<? extends Serializable, Object> whereMap,
+                           Collection<? extends Serializable> whereIsNullCols,
+                           Collection<? extends Serializable> whereIsNotNullCols) {
         return $mapUpdate(classTableName(table),
                 lm2names(updateMap),
                 lm2names(updateNullCols),
@@ -282,20 +291,20 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
                 lm2names(whereIsNotNullCols));
     }
 
-    public H $lambdaSet(Map<IFunctional, Object> updateMap) {
+    public H $lambdaSet(Map<? extends Serializable, Object> updateMap) {
         return $mapSet(lm2names(updateMap),
                 null);
     }
 
-    public H $lambdaSet(Map<IFunctional, Object> updateMap,
-                        Collection<IFunctional> updateNullCols) {
+    public H $lambdaSet(Map<? extends Serializable, Object> updateMap,
+                        Collection<? extends Serializable> updateNullCols) {
         return $mapSet(lm2names(updateMap),
                 lm2names(updateNullCols));
     }
 
     public H $lambdaQuery(Class<?> table,
-                          Collection<IFunctional> cols,
-                          Map<IFunctional, Object> whereMap) {
+                          Collection<? extends Serializable> cols,
+                          Map<? extends Serializable, Object> whereMap) {
         return $mapQuery(classTableName(table),
                 lm2names(cols),
                 lm2names(whereMap));
@@ -303,12 +312,12 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
 
     public H $lambdaQuery(Class<?> table,
                           String tableAlias,
-                          Map<IFunctional, String> colMap,
-                          Map<IFunctional, Object> whereMap,
-                          Collection<IFunctional> whereIsNullCols,
-                          Collection<IFunctional> whereIsNotNullCols,
-                          Collection<IFunctional> groupCols,
-                          Collection<IFunctional> orderCols) {
+                          Map<? extends Serializable, String> colMap,
+                          Map<? extends Serializable, Object> whereMap,
+                          Collection<? extends Serializable> whereIsNullCols,
+                          Collection<? extends Serializable> whereIsNotNullCols,
+                          Collection<? extends Serializable> groupCols,
+                          Collection<? extends Serializable> orderCols) {
         return $mapQuery(classTableName(table),
                 tableAlias,
                 lm2names(colMap),
@@ -319,69 +328,69 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
                 lm2names(orderCols));
     }
 
-    public H $lambdaSelect(Collection<IFunctional> cols) {
+    public H $lambdaSelect(Collection<? extends Serializable> cols) {
         return $mapSelect(lm2names(cols));
     }
 
     public H $lambdaSelect(String tableAlias,
-                           Collection<IFunctional> cols) {
+                           Collection<? extends Serializable> cols) {
         return $mapSelect(tableAlias,
                 lm2names(cols));
     }
 
     public H $lambdaSelect(String tableAlias,
-                           Map<IFunctional, String> colMap) {
+                           Map<? extends Serializable, String> colMap) {
         return $mapSelect(tableAlias,
                 lm2names(colMap));
     }
 
-    public H $lambdaWhere(Map<IFunctional, Object> whereMap) {
+    public H $lambdaWhere(Map<? extends Serializable, Object> whereMap) {
         return $mapWhere(lm2names(whereMap));
     }
 
     public H $lambdaWhere(String tableAlias,
-                          Map<IFunctional, Object> whereMap) {
+                          Map<? extends Serializable, Object> whereMap) {
         return $mapWhere(tableAlias,
                 lm2names(whereMap));
     }
 
-    public H $lambdaWhere(Map<IFunctional, Object> whereMap,
-                          Collection<IFunctional> whereIsNullCols) {
+    public H $lambdaWhere(Map<? extends Serializable, Object> whereMap,
+                          Collection<? extends Serializable> whereIsNullCols) {
         return $mapWhere(lm2names(whereMap),
                 lm2names(whereIsNullCols));
     }
 
     public H $lambdaWhere(String tableAlias,
-                          Map<IFunctional, Object> whereMap,
-                          Collection<IFunctional> whereIsNullCols) {
+                          Map<? extends Serializable, Object> whereMap,
+                          Collection<? extends Serializable> whereIsNullCols) {
         return $mapWhere(tableAlias,
                 lm2names(whereMap),
                 lm2names(whereIsNullCols));
     }
 
     public H $lambdaWhere(String tableAlias,
-                          Map<IFunctional, Object> whereMap,
-                          Collection<IFunctional> whereIsNullCols,
-                          Collection<IFunctional> whereIsNotNullCols) {
+                          Map<? extends Serializable, Object> whereMap,
+                          Collection<? extends Serializable> whereIsNullCols,
+                          Collection<? extends Serializable> whereIsNotNullCols) {
         return $mapWhere(tableAlias,
                 lm2names(whereMap),
                 lm2names(whereIsNullCols),
                 lm2names(whereIsNotNullCols));
     }
 
-    public H $lambdaGroupBy(String tableAlias, IFunctional... groupCols) {
+    public H $lambdaGroupBy(String tableAlias, Serializable... groupCols) {
         return $lambdaGroupBy(tableAlias, $arr2list(groupCols));
     }
 
-    public H $lambdaGroupBy(String tableAlias, Collection<IFunctional> groupCols) {
+    public H $lambdaGroupBy(String tableAlias, Collection<? extends Serializable> groupCols) {
         return $mapGroupBy(tableAlias, lm2names(groupCols));
     }
 
-    public H $lambdaOrderBy(String tableAlias, IFunctional... orderCols) {
+    public H $lambdaOrderBy(String tableAlias, Serializable... orderCols) {
         return $lambdaOrderBy(tableAlias, $arr2list(orderCols));
     }
 
-    public H $lambdaOrderBy(String tableAlias, Collection<IFunctional> orderCols) {
+    public H $lambdaOrderBy(String tableAlias, Collection<? extends Serializable> orderCols) {
         return $mapOrderBy(tableAlias, lm2names(orderCols));
     }
 
@@ -404,29 +413,33 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
         return $join(classTableName(table));
     }
 
-    public H $selectLambdas(IFunctional... list) {
+    public H $selectLambdas(Serializable... list) {
         return $selectLambdas(Bql.$arr2list(list));
     }
 
-    public H $selectLambdas(Collection<IFunctional> list) {
+    public H $selectLambdas(Collection<? extends Serializable> list) {
         return $select(() -> {
             Bql<?> ret = Bql.$lambda().$sepComma();
-            for (IFunctional lambda : list) {
+            for (Serializable lambda : list) {
                 if (lambda == null) {
                     continue;
                 }
-                ret.$col(lambdaFieldName(lambda));
+                if (lambda instanceof IFunctional) {
+                    ret.$col(lambdaFieldName((IFunctional) lambda));
+                } else {
+                    ret.$col(String.valueOf(lambda));
+                }
             }
             return ret;
         });
     }
 
 
-    public H $selectMixes(Object... list) {
+    public H $selectMixes(Serializable... list) {
         return $selectMixes(Bql.$arr2list(list));
     }
 
-    public H $selectMixes(Collection<Object> list) {
+    public H $selectMixes(Collection<? extends Serializable> list) {
         return $select(() -> {
             Bql<?> ret = Bql.$lambda().$sepComma();
             for (Object lambda : list) {
@@ -435,9 +448,8 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
                 }
                 if (lambda instanceof IFunctional) {
                     ret.$col(lambdaFieldName((IFunctional) lambda));
-                }
-                if (lambda instanceof String) {
-                    ret.$col((String) lambda);
+                } else {
+                    ret.$col(String.valueOf(lambda));
                 }
             }
             return ret;

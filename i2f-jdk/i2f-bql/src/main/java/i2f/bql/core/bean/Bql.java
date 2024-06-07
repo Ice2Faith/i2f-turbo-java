@@ -133,13 +133,13 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
     }
 
     public <T> H $beanDelete(T bean,
-                             Collection<IFunctional> whereIsNullCols) {
+                             Collection<? extends Serializable> whereIsNullCols) {
         return $beanDelete(bean, whereIsNullCols, null);
     }
 
     public <T> H $beanDelete(T bean,
-                             Collection<IFunctional> whereIsNullCols,
-                             Collection<IFunctional> whereIsNotNullCols) {
+                             Collection<? extends Serializable> whereIsNullCols,
+                             Collection<? extends Serializable> whereIsNotNullCols) {
         if (bean == null) {
             return (H) this;
         }
@@ -172,14 +172,14 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
         return $beanUpdate(update, cond, null, null, null);
     }
 
-    public <T> H $beanUpdate(T update, T cond, Collection<IFunctional> updateNullCols) {
+    public <T> H $beanUpdate(T update, T cond, Collection<? extends Serializable> updateNullCols) {
         return $beanUpdate(update, cond, updateNullCols, null, null);
     }
 
     public <T> H $beanUpdate(T update, T cond,
-                             Collection<IFunctional> updateNullCols,
-                             Collection<IFunctional> whereIsNullCols,
-                             Collection<IFunctional> whereIsNotNullCols) {
+                             Collection<? extends Serializable> updateNullCols,
+                             Collection<? extends Serializable> whereIsNullCols,
+                             Collection<? extends Serializable> whereIsNotNullCols) {
         if (update == null) {
             return (H) this;
         }
@@ -235,16 +235,16 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
         return $beanQuery(bean, alias, selectCols, null);
     }
 
-    public <T> H $beanQuery(T bean, String alias, Collection<? extends Serializable> selectCols, Collection<IFunctional> selectExcludeCols) {
+    public <T> H $beanQuery(T bean, String alias, Collection<? extends Serializable> selectCols, Collection<? extends Serializable> selectExcludeCols) {
         return $beanQuery(bean, alias, selectCols, selectExcludeCols, null, null, null);
     }
 
     public <T> H $beanQuery(T bean, String alias,
                             Collection<? extends Serializable> selectCols,
-                            Collection<IFunctional> selectExcludeCols,
-                            Collection<IFunctional> whereIsNullCols,
-                            Collection<IFunctional> whereIsNotNullCols,
-                            Collection<IFunctional> orderCols) {
+                            Collection<? extends Serializable> selectExcludeCols,
+                            Collection<? extends Serializable> whereIsNullCols,
+                            Collection<? extends Serializable> whereIsNotNullCols,
+                            Collection<? extends Serializable> orderCols) {
         if (bean == null) {
             return (H) this;
         }
@@ -268,9 +268,12 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
         }
         Set<String> excludeNames = new HashSet<>();
         if (selectExcludeCols != null) {
-            for (IFunctional lambda : selectExcludeCols) {
-                Field field = LambdaInflater.fastSerializedLambdaFieldNullable(lambda);
-                excludeNames.add(field.getName());
+            for (Serializable lambda : selectExcludeCols) {
+                if (lambda instanceof IFunctional) {
+                    excludeNames.add(lambdaFieldName((IFunctional) lambda));
+                } else {
+                    excludeNames.add(String.valueOf(lambda));
+                }
             }
         }
         Map<String, Object> whereMap = new LinkedHashMap<>();
