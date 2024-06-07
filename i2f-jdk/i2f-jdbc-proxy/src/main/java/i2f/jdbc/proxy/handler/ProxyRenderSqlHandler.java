@@ -4,9 +4,9 @@ import i2f.annotations.core.naming.Name;
 import i2f.bindsql.BindSql;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.context.JdbcInvokeContextProvider;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.proxy.annotations.IgnorePage;
-import i2f.jdbc.proxy.provider.JdbcInvokeContextProvider;
 import i2f.jdbc.proxy.provider.ProxyRenderSqlProvider;
 import i2f.lru.LruMap;
 import i2f.page.ApiPage;
@@ -31,17 +31,17 @@ import java.util.Map;
  * @date 2024/6/6 8:56
  * @desc
  */
-public class ProxyRenderSqlHandler<T> implements InvocationHandler {
+public class ProxyRenderSqlHandler implements InvocationHandler {
 
     private Class<?> proxyClass;
 
-    private JdbcInvokeContextProvider<T> contextProvider;
+    private JdbcInvokeContextProvider<?> contextProvider;
 
     private ProxyRenderSqlProvider sqlProvider;
 
     private static LruMap<String, Reference<Type[]>> CACHE_REL_TYPES = new LruMap<>(2048);
 
-    public ProxyRenderSqlHandler(Class<?> proxyClass, JdbcInvokeContextProvider<T> contextProvider, ProxyRenderSqlProvider sqlProvider) {
+    public ProxyRenderSqlHandler(Class<?> proxyClass, JdbcInvokeContextProvider<?> contextProvider, ProxyRenderSqlProvider sqlProvider) {
         this.proxyClass = proxyClass;
         this.contextProvider = contextProvider;
         this.sqlProvider = sqlProvider;
@@ -104,11 +104,10 @@ public class ProxyRenderSqlHandler<T> implements InvocationHandler {
         }
 
 
-        T context = contextProvider.beginContext();
-        Connection conn = contextProvider.getConnection(context);
+        Object context = contextProvider.beginContext();
+        Connection conn = contextProvider.getConnectionInner(context);
 
         try {
-
 
             if (type == BindSql.Type.UPDATE) {
                 int val = JdbcResolver.update(conn, sql);
@@ -191,7 +190,7 @@ public class ProxyRenderSqlHandler<T> implements InvocationHandler {
                 return RichConverter.convert2Type(val, returnType, relTypes);
             }
         } finally {
-            contextProvider.endContext(context, conn);
+            contextProvider.endContextInner(context, conn);
         }
     }
 

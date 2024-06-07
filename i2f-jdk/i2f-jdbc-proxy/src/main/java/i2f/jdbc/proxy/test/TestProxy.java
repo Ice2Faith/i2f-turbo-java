@@ -1,8 +1,8 @@
 package i2f.jdbc.proxy.test;
 
 import i2f.bql.test.SysUser;
+import i2f.jdbc.context.impl.DirectJdbcInvokeContextProvider;
 import i2f.jdbc.proxy.ProxySqlExecuteGenerator;
-import i2f.jdbc.proxy.provider.impl.SimpleJdbcInvokeContextProvider;
 import i2f.jdbc.proxy.provider.impl.SimpleProxyRenderSqlProvider;
 import i2f.page.ApiPage;
 import i2f.page.Page;
@@ -25,7 +25,7 @@ public class TestProxy {
                 "root", "ltb12315");
 
         TestSimpleMapper mapper = ProxySqlExecuteGenerator.proxy(TestSimpleMapper.class,
-                new SimpleJdbcInvokeContextProvider(conn),
+                new DirectJdbcInvokeContextProvider(conn),
                 new SimpleProxyRenderSqlProvider()
         );
 
