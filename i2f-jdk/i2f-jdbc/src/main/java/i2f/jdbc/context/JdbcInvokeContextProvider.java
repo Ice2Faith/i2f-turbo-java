@@ -1,4 +1,4 @@
-package i2f.jdbc.proxy.provider;
+package i2f.jdbc.context;
 
 import java.sql.Connection;
 
@@ -12,5 +12,13 @@ public interface JdbcInvokeContextProvider<T> {
 
     Connection getConnection(T context);
 
+    default Connection getConnectionInner(Object context) {
+        return getConnection((T) context);
+    }
+
     void endContext(T context, Connection conn);
+
+    default void endContextInner(Object context, Connection conn) {
+        endContext((T) context, conn);
+    }
 }

@@ -1,6 +1,6 @@
-package i2f.jdbc.proxy.provider.impl;
+package i2f.jdbc.context.impl;
 
-import i2f.jdbc.proxy.provider.JdbcInvokeContextProvider;
+import i2f.jdbc.context.JdbcInvokeContextProvider;
 
 import java.sql.Connection;
 
@@ -9,10 +9,10 @@ import java.sql.Connection;
  * @date 2024/6/6 10:52
  * @desc
  */
-public class SimpleJdbcInvokeContextProvider implements JdbcInvokeContextProvider<Connection> {
+public class DirectJdbcInvokeContextProvider implements JdbcInvokeContextProvider<Connection> {
     private Connection conn;
 
-    public SimpleJdbcInvokeContextProvider(Connection conn) {
+    public DirectJdbcInvokeContextProvider(Connection conn) {
         this.conn = conn;
     }
 
