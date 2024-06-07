@@ -48,11 +48,11 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-bql</artifactId>
+            <artifactId>i2f-jdbc-bql</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc</artifactId>
+            <artifactId>i2f-jdbc-proxy</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -61,6 +61,19 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-page</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-velocity-bindsql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-velocity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7</version>
         </dependency>
 
         <dependency>
@@ -77,6 +90,12 @@
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
             <version>1.2.16</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>2.3.2</version>
         </dependency>
     </dependencies>
 

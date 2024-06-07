@@ -56,6 +56,10 @@ public interface BaseMapper<T> {
 
     Page<T> page(T bean, ApiPage page);
 
+    boolean call(BindSql sql);
+
+    Map<String, Object> callNaming(BindSql sql);
+
     int executeUpdate(BindSql sql);
 
     <R> R executeGet(BindSql sql);

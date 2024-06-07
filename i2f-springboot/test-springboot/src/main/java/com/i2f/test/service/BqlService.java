@@ -1,13 +1,14 @@
 package com.i2f.test.service;
 
 import com.i2f.test.data.dom.SysUserDo;
+import com.i2f.test.mapper.TestMapper;
 import i2f.bql.core.bean.Bql;
 import i2f.container.builder.Builders;
+import i2f.jdbc.bql.BqlTemplate;
 import i2f.jdbc.data.QueryResult;
 import i2f.page.ApiPage;
 import i2f.page.Page;
 import i2f.springboot.dynamic.datasource.aop.DataSource;
-import i2f.springboot.jdbc.bql.components.BqlTemplate;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -16,6 +17,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -29,6 +31,9 @@ public class BqlService implements ApplicationRunner, ApplicationContextAware {
     @Autowired
     private BqlTemplate bqlTemplate;
 
+    @Resource
+    private TestMapper testMapper;
+
     private ApplicationContext context;
 
     @Override
@@ -38,6 +43,8 @@ public class BqlService implements ApplicationRunner, ApplicationContextAware {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+
+        List<SysUserDo> allList = testMapper.listAll();
 
         BqlService proxy=context.getBean(BqlService.class);
 

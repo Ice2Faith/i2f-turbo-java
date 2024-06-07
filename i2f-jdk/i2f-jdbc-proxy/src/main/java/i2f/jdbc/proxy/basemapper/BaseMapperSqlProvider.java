@@ -125,6 +125,14 @@ public class BaseMapperSqlProvider {
             if (parameterCount == 1) {
                 return (BindSql) args[0];
             }
+        } else if ("call".equals(name)) {
+            if (parameterCount == 1) {
+                return (BindSql) args[0];
+            }
+        } else if ("callNaming".equals(name)) {
+            if (parameterCount == 1) {
+                return (BindSql) args[0];
+            }
         } else if ("executeGet".equals(name)) {
             if (parameterCount == 1) {
                 return (BindSql) args[0];

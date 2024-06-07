@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 
 import javax.sql.DataSource;
 
@@ -19,9 +18,6 @@ import javax.sql.DataSource;
  * @desc
  */
 @ConditionalOnExpression("${i2f.jdbc.bql.enable:true}")
-@Import({
-
-})
 @EnableConfigurationProperties({
         JdbcBqlProperties.class
 })

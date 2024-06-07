@@ -30,7 +30,6 @@ public class VelocitySqlGenerator {
             return "?";
         });
 
-        sql=sql.replaceAll("\\s+"," ");
         return new BindSql(sql,list);
     }
 }
