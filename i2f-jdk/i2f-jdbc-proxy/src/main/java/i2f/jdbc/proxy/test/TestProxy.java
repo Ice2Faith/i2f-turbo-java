@@ -21,26 +21,27 @@ public class TestProxy {
     public static void main(String[] args) throws Exception {
         Class.forName("com.mysql.cj.jdbc.Driver");
 
-        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/i2f_proj?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false",
-                "root", "123456");
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/test_db?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false",
+                "root", "ltb12315");
 
         TestSimpleMapper mapper = ProxySqlExecuteGenerator.proxy(TestSimpleMapper.class,
                 new SimpleJdbcInvokeContextProvider(conn),
                 new SimpleProxyRenderSqlProvider()
         );
 
-        SysUser upd = new SysUser();
-        upd.setAge(23);
+//        SysUser upd = new SysUser();
+//        upd.setAge(23);
+//
+//        SysUser cond = new SysUser();
+//        cond.setId(1L);
+//        mapper.update(upd, cond);
+//
+//        SysUser ins = new SysUser();
+//        ins.setUserName("zhang");
+//        ins.setAge(12);
+//        mapper.insert(ins);
 
-        SysUser cond = new SysUser();
-        cond.setId(1L);
-        mapper.update(upd, cond);
-
-        SysUser ins = new SysUser();
-        ins.setUserName("zhang");
-        ins.setAge(12);
-        mapper.insert(ins);
-
+        SysUser[] users = mapper.list(new SysUser());
 
         int cnt = mapper.count();
 

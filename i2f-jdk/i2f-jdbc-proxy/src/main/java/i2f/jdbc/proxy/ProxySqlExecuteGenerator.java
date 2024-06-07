@@ -20,6 +20,6 @@ public class ProxySqlExecuteGenerator {
 
     public static <T, CTX> T proxy(Class<T> clazz, JdbcInvokeContextProvider<CTX> contextProvider,
                                    ProxyRenderSqlProvider sqlProvider) {
-        return proxy(clazz, new ProxyRenderSqlHandler<>(contextProvider, sqlProvider));
+        return proxy(clazz, new ProxyRenderSqlHandler<>(clazz, contextProvider, sqlProvider));
     }
 }
