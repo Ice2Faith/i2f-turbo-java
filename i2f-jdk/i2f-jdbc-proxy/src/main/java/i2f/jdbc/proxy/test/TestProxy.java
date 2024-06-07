@@ -41,7 +41,7 @@ public class TestProxy {
 //        ins.setAge(12);
 //        mapper.insert(ins);
 
-        SysUser[] users = mapper.list(new SysUser());
+        List<SysUser> users = mapper.list(new SysUser());
 
         int cnt = mapper.count();
 
