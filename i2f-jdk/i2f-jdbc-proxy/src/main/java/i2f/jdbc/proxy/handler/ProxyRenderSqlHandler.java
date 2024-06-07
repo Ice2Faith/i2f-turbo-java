@@ -8,8 +8,10 @@ import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.proxy.annotations.IgnorePage;
 import i2f.jdbc.proxy.provider.JdbcInvokeContextProvider;
 import i2f.jdbc.proxy.provider.ProxyRenderSqlProvider;
+import i2f.lru.LruMap;
 import i2f.page.ApiPage;
 import i2f.page.Page;
+import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.RichConverter;
 import i2f.typeof.TypeOf;
@@ -31,17 +33,28 @@ import java.util.Map;
  */
 public class ProxyRenderSqlHandler<T> implements InvocationHandler {
 
+    private Class<?> proxyClass;
+
     private JdbcInvokeContextProvider<T> contextProvider;
 
     private ProxyRenderSqlProvider sqlProvider;
 
-    public ProxyRenderSqlHandler(JdbcInvokeContextProvider<T> contextProvider, ProxyRenderSqlProvider sqlProvider) {
+    private static LruMap<String, Reference<Type[]>> CACHE_REL_TYPES = new LruMap<>(2048);
+
+    public ProxyRenderSqlHandler(Class<?> proxyClass, JdbcInvokeContextProvider<T> contextProvider, ProxyRenderSqlProvider sqlProvider) {
+        this.proxyClass = proxyClass;
         this.contextProvider = contextProvider;
         this.sqlProvider = sqlProvider;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (method.getName().equals("toString") && method.getParameterCount() == 0) {
+            return proxy.getClass().getName();
+        }
+        if (method.getName().equals("hashCode") && method.getParameterCount() == 0) {
+            return proxy.getClass().getName().hashCode();
+        }
         Class<?> clazz = method.getDeclaringClass();
         String methodId = clazz.getName().replaceAll("\\$", ".") + "." + method.getName();
         Parameter[] parameters = method.getParameters();
@@ -77,6 +90,20 @@ public class ProxyRenderSqlHandler<T> implements InvocationHandler {
             type = JdbcResolver.detectType(sql.getSql());
         }
 
+        Type[] relTypes = null;
+        if (!(returnType instanceof Class)) {
+            String cacheKey = proxyClass.getName() + "#" + method.getDeclaringClass().getName();
+            Reference<Type[]> ref = CACHE_REL_TYPES.get(cacheKey);
+
+            if (ref != null) {
+                relTypes = ref.get();
+            } else {
+                relTypes = RichConverter.fetchRelType(proxyClass, method.getDeclaringClass());
+                CACHE_REL_TYPES.put(cacheKey, Reference.of(relTypes));
+            }
+        }
+
+
         T context = contextProvider.beginContext();
         Connection conn = contextProvider.getConnection(context);
 
@@ -88,7 +115,7 @@ public class ProxyRenderSqlHandler<T> implements InvocationHandler {
                 return ObjectConvertor.tryConvertAsType(val, returnClass);
             } else if (type == BindSql.Type.CALL) {
                 Map<String, Object> val = JdbcResolver.callNaming(conn, sql);
-                return RichConverter.convert2Type(val, returnType);
+                return RichConverter.convert2Type(val, returnType, relTypes);
             } else {
                 // 原始包装类型
                 if (TypeOf.typeOf(returnClass, QueryResult.class)) {
@@ -123,11 +150,11 @@ public class ProxyRenderSqlHandler<T> implements InvocationHandler {
                 if (enablePage) {
                     if (TypeOf.typeOf(returnClass, Page.class)) {
                         Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
-                        return RichConverter.convert2Type(val, returnType);
+                        return RichConverter.convert2Type(val, returnType, relTypes);
                     } else if (TypeOf.typeOf(returnClass, Collection.class)) {
                         Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
                         List<Map<String, Object>> list = val.getList();
-                        return RichConverter.convert2Type(list, returnType);
+                        return RichConverter.convert2Type(list, returnType, relTypes);
                     } else if (TypeOf.isBaseType(returnClass)) {
                         Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
                         return ObjectConvertor.tryConvertAsType(val.getTotal(), returnClass);
@@ -143,19 +170,25 @@ public class ProxyRenderSqlHandler<T> implements InvocationHandler {
                         if (list.isEmpty()) {
                             return null;
                         }
-                        return RichConverter.convert2Type(list.get(0), returnType);
+                        return RichConverter.convert2Type(list.get(0), returnType, relTypes);
                     }
                 }
 
                 // 列表处理
                 if (TypeOf.typeOf(returnClass, Collection.class)) {
                     List<Map<String, Object>> val = JdbcResolver.list(conn, sql);
-                    return RichConverter.convert2Type(val, returnType);
+                    return RichConverter.convert2Type(val, returnType, relTypes);
+                }
+
+                // 数组处理
+                if (returnClass.isArray()) {
+                    List<Map<String, Object>> val = JdbcResolver.list(conn, sql);
+                    return RichConverter.convert2Type(val, returnType, relTypes);
                 }
 
                 // 其他就是单一对象处理
                 Map<String, Object> val = JdbcResolver.find(conn, sql);
-                return RichConverter.convert2Type(val, returnType);
+                return RichConverter.convert2Type(val, returnType, relTypes);
             }
         } finally {
             contextProvider.endContext(context, conn);

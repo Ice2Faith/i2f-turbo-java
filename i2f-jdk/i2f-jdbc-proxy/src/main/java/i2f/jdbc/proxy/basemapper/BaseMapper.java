@@ -34,7 +34,8 @@ public interface BaseMapper<T> {
 
     List<T> list(String table, Collection<String> cols, Map<String, Object> whereMap);
 
-    List<T> list(T bean);
+    //    List<T> list(T bean);
+    T[] list(T bean);
 
     Map<String, Object> findMap(String table, Collection<String> cols, Map<String, Object> whereMap);
 

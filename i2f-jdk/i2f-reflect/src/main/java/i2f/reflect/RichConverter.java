@@ -94,6 +94,9 @@ public class RichConverter {
         return convert2Type(obj, token.type());
     }
 
+    public static <T> T convert2Type(Object obj, Type type) {
+        return convert2Type(obj, type, null);
+    }
     /**
      * 根据type为目标类型，实现将obj转换为type类型的返回值
      * 支持不相关类型的转换，map的key和class的field等只需要满足名称相同即可
@@ -118,19 +121,26 @@ public class RichConverter {
      * @param <T>
      * @return
      */
-    public static <T> T convert2Type(Object obj, Type type) {
+    public static <T> T convert2Type(Object obj, Type type, Type[] relTypes) {
         if (obj == null) {
             return null;
         }
         if (type == null) {
             return (T) obj;
         }
+        if (type instanceof TypeVariable) {
+            if (relTypes != null) {
+                return convert2Type(obj, relTypes[0], null);
+            } else {
+                return convert2Type(obj, Object.class, null);
+            }
+        }
 
         Class<?> objClass = obj.getClass();
 
         Class<?> targetClass = null;
         Type[] targetArgumentTypes = null;
-        TypeVariable<? extends Class<?>>[] typeParameters = null;
+        TypeVariable[] typeParameters = null;
         if (type instanceof ParameterizedType) {
             // 处理类型具备泛型的情况，比如Map<String,Object>,List<SysUser>等具体的泛型类型
             ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -138,6 +148,33 @@ public class RichConverter {
             targetClass = (Class<?>) rawType;
             targetArgumentTypes = parameterizedType.getActualTypeArguments();
             typeParameters = targetClass.getTypeParameters();
+        } else if (type instanceof GenericArrayType) {
+            GenericArrayType genericArrayType = (GenericArrayType) type;
+            Class<?> componentType = Object.class;
+
+            Type genericComponentType = genericArrayType.getGenericComponentType();
+            targetArgumentTypes = new Type[]{genericComponentType};
+            if (genericComponentType instanceof TypeVariable) {
+                typeParameters = new TypeVariable[]{(TypeVariable) genericComponentType};
+            }
+
+            if (genericComponentType instanceof Class) {
+                componentType = (Class<?>) genericComponentType;
+            } else {
+
+                if (relTypes != null) {
+                    Type elemType = relTypes[0];
+                    if (elemType instanceof ParameterizedType) {
+                        componentType = (Class<?>) ((ParameterizedType) elemType).getRawType();
+                    } else if (elemType instanceof Class) {
+                        componentType = (Class<?>) elemType;
+                    }
+                }
+            }
+
+            Object arr = Array.newInstance(componentType, 0);
+            targetClass = arr.getClass();
+
         } else {
             targetClass = (Class<?>) type;
         }
@@ -190,19 +227,27 @@ public class RichConverter {
                 elementType = targetArgumentTypes == null ? Object.class : targetArgumentTypes[0];
             }
 
+            boolean useRelTypes = false;
+            if (elementType instanceof TypeVariable) {
+                if (relTypes != null) {
+                    elementType = relTypes[0];
+                    useRelTypes = true;
+                }
+            }
+
             if (objClass.isArray()) {
                 // 源类型为数组
                 int len = Array.getLength(obj);
                 for (int i = 0; i < len; i++) {
                     Object item = Array.get(obj, i);
-                    Object elem = convert2Type(item, elementType);
+                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes);
                     col.add(elem);
                 }
             } else if (Iterable.class.isAssignableFrom(objClass)) {
                 // 源类型为Iterable
                 Iterable iter = (Iterable) obj;
                 for (Object item : iter) {
-                    Object elem = convert2Type(item, elementType);
+                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes);
                     col.add(elem);
                 }
             } else if (Iterator.class.isAssignableFrom(objClass)) {
@@ -210,7 +255,7 @@ public class RichConverter {
                 Iterator iterator = (Iterator) obj;
                 while (iterator.hasNext()) {
                     Object item = iterator.hasNext();
-                    Object elem = convert2Type(item, elementType);
+                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes);
                     col.add(elem);
                 }
             } else if (Enumeration.class.isAssignableFrom(objClass)) {
@@ -218,7 +263,7 @@ public class RichConverter {
                 Enumeration enumeration = (Enumeration) obj;
                 while (enumeration.hasMoreElements()) {
                     Object item = enumeration.nextElement();
-                    Object elem = convert2Type(item, elementType);
+                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes);
                     col.add(elem);
                 }
             } else {
@@ -231,8 +276,25 @@ public class RichConverter {
                 // 源类型为Map
                 Map<?, ?> src = (Map<?, ?>) obj;
                 for (Map.Entry<?, ?> entry : src.entrySet()) {
-                    Object key = convert2Type(entry.getKey(), targetArgumentTypes == null ? Object.class : targetArgumentTypes[0]);
-                    Object value = convert2Type(entry.getValue(), targetArgumentTypes == null ? Object.class : targetArgumentTypes[1]);
+                    boolean useRelTypes = false;
+                    Type keyType = targetArgumentTypes == null ? Object.class : targetArgumentTypes[0];
+                    if (keyType instanceof TypeVariable) {
+                        if (relTypes != null) {
+                            keyType = relTypes[0];
+                            useRelTypes = true;
+                        }
+                    }
+
+                    Type valType = targetArgumentTypes == null ? Object.class : targetArgumentTypes[1];
+                    if (valType instanceof TypeVariable) {
+                        if (relTypes != null) {
+                            valType = relTypes[useRelTypes ? 1 : 0];
+                            useRelTypes = true;
+                        }
+                    }
+
+                    Object key = convert2Type(entry.getKey(), keyType, useRelTypes ? null : relTypes);
+                    Object value = convert2Type(entry.getValue(), valType, useRelTypes ? null : relTypes);
                     map.put(key, value);
                 }
             } else {
@@ -249,8 +311,25 @@ public class RichConverter {
                     Field field = entry.getValue();
                     try {
                         Object value = ReflectResolver.valueGet(obj, field);
-                        Object key = convert2Type(entry.getKey(), targetArgumentTypes == null ? Object.class : targetArgumentTypes[0]);
-                        value = convert2Type(value, targetArgumentTypes == null ? Object.class : targetArgumentTypes[1]);
+
+                        boolean useRelTypes = false;
+                        Type keyType = targetArgumentTypes == null ? Object.class : targetArgumentTypes[0];
+                        if (keyType instanceof TypeVariable) {
+                            if (relTypes != null) {
+                                keyType = relTypes[0];
+                                useRelTypes = true;
+                            }
+                        }
+
+                        Type valType = targetArgumentTypes == null ? Object.class : targetArgumentTypes[1];
+                        if (valType instanceof TypeVariable) {
+                            if (relTypes != null) {
+                                valType = relTypes[useRelTypes ? 1 : 0];
+                                useRelTypes = true;
+                            }
+                        }
+                        Object key = convert2Type(entry.getKey(), keyType, useRelTypes ? null : relTypes);
+                        value = convert2Type(value, valType, useRelTypes ? null : relTypes);
                         map.put(key, value);
                     } catch (Exception e) {
                         // 处理异常
@@ -270,15 +349,32 @@ public class RichConverter {
                 Map<?, ?> map = (Map<?, ?>) obj;
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
                     Object key = entry.getKey();
-                    String keyName = convert2Type(key, String.class);
+                    String keyName = convert2Type(key, String.class, null);
                     Field field = dstFieldsMap.get(keyName);
                     if (field == null) {
                         continue;
                     }
+                    boolean useRelTypes = false;
                     Type fieldType = field.getGenericType();
                     if (fieldType instanceof TypeVariable) {
                         if (typeParameters == null) {
-                            fieldType = Object.class;
+                            if (relTypes != null) {
+                                int i = 0;
+                                while (i < relTypes.length) {
+                                    if (fieldType.equals(relTypes[i])) {
+                                        break;
+                                    }
+                                    i++;
+                                }
+                                if (i < relTypes.length) {
+                                    fieldType = relTypes[i];
+                                } else {
+                                    fieldType = relTypes[0];
+                                }
+                                useRelTypes = true;
+                            } else {
+                                fieldType = Object.class;
+                            }
                         } else {
                             int i = 0;
                             while (i < typeParameters.length) {
@@ -291,7 +387,7 @@ public class RichConverter {
                         }
                     }
                     try {
-                        Object value = convert2Type(entry.getValue(), fieldType);
+                        Object value = convert2Type(entry.getValue(), fieldType, useRelTypes ? null : relTypes);
                         ReflectResolver.valueSet(ret, field, value);
                     } catch (Exception e) {
 
@@ -324,10 +420,27 @@ public class RichConverter {
                     try {
                         Object value = ReflectResolver.valueGet(obj, srcField);
 
+                        boolean useRelTypes = false;
                         Type fieldType = dstField.getGenericType();
                         if (fieldType instanceof TypeVariable) {
                             if (typeParameters == null) {
-                                fieldType = Object.class;
+                                if (relTypes != null) {
+                                    int i = 0;
+                                    while (i < relTypes.length) {
+                                        if (fieldType.equals(relTypes[i])) {
+                                            break;
+                                        }
+                                        i++;
+                                    }
+                                    if (i < relTypes.length) {
+                                        fieldType = relTypes[i];
+                                    } else {
+                                        fieldType = relTypes[0];
+                                    }
+                                    useRelTypes = true;
+                                } else {
+                                    fieldType = Object.class;
+                                }
                             } else {
                                 int i = 0;
                                 while (i < typeParameters.length) {
@@ -339,7 +452,7 @@ public class RichConverter {
                                 fieldType = targetArgumentTypes == null ? Object.class : targetArgumentTypes[i];
                             }
                         }
-                        value = convert2Type(value, fieldType);
+                        value = convert2Type(value, fieldType, useRelTypes ? null : relTypes);
                         ReflectResolver.valueSet(ret, dstField, value);
                     } catch (Exception e) {
                         // 处理异常
@@ -353,7 +466,8 @@ public class RichConverter {
         if (targetClass.isArray()) {
             Collection col = (Collection) ret;
             int size = col.size();
-            Object arr = Array.newInstance(targetClass.getComponentType(), size);
+            Class<?> componentType = targetClass.getComponentType();
+            Object arr = Array.newInstance(componentType, size);
             int i = 0;
             for (Object item : col) {
                 Array.set(arr, i, item);
@@ -363,6 +477,60 @@ public class RichConverter {
         }
 
         return (T) ret;
+    }
+
+    /**
+     * 查找指定类currentClass继承父类targetClass或者实现接口targetClass是使用的泛型参数
+     * 这样就可以得到实现类实现了父中的具体泛型类型
+     *
+     * @param currentClass
+     * @param targetClass
+     * @return
+     */
+    public static Type[] fetchRelType(Class<?> currentClass, Class<?> targetClass) {
+        return fetchRelTypeNext(currentClass, targetClass);
+    }
+
+    /**
+     * 具体的递归查找实现
+     *
+     * @param currentType
+     * @param targetClass
+     * @return
+     */
+    public static Type[] fetchRelTypeNext(Type currentType, Class<?> targetClass) {
+        if (currentType.equals(targetClass)) {
+            return null;
+        }
+        if (currentType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) currentType;
+            Type rawType = parameterizedType.getRawType();
+            if (rawType.equals(targetClass)) {
+                return parameterizedType.getActualTypeArguments();
+            }
+            currentType = rawType;
+        }
+        if (currentType instanceof TypeVariable) {
+            return null;
+        }
+        Class<?> currentClass = (Class<?>) currentType;
+        Type genericSuperclass = currentClass.getGenericSuperclass();
+        if (genericSuperclass != null) {
+            Type[] types = fetchRelTypeNext(genericSuperclass, targetClass);
+            if (types != null) {
+                return types;
+            }
+        }
+        Type[] genericInterfaces = currentClass.getGenericInterfaces();
+        if (genericInterfaces != null) {
+            for (Type genericInterface : genericInterfaces) {
+                Type[] types = fetchRelTypeNext(genericInterface, targetClass);
+                if (types != null) {
+                    return types;
+                }
+            }
+        }
+        return null;
     }
 
 }
