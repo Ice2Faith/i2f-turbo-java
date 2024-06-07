@@ -1,8 +1,6 @@
 package i2f.jdbc.proxy.test;
 
-import i2f.bql.test.SysUser;
 import i2f.jdbc.proxy.annotations.SqlScript;
-import i2f.jdbc.proxy.basemapper.BaseMapper;
 import i2f.page.ApiPage;
 import i2f.page.Page;
 
@@ -14,7 +12,7 @@ import java.util.Map;
  * @date 2024/6/6 10:54
  * @desc
  */
-public interface TestSimpleMapper extends BaseMapper<SysUser> {
+public interface TestSimpleMapper extends ExtendMapper {
 
     @SqlScript("select count(*) from sys_user")
     int count();
