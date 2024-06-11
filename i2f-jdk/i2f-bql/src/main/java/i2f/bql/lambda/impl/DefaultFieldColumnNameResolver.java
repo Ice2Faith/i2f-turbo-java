@@ -2,6 +2,8 @@ package i2f.bql.lambda.impl;
 
 
 import i2f.annotations.db.Column;
+import i2f.reflect.ReflectResolver;
+import i2f.text.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.function.Function;
@@ -15,20 +17,20 @@ public class DefaultFieldColumnNameResolver extends CachedFieldColumnNameResolve
 
     public static final Function<Field, String> DEFAULT_NAME_RESOLVER = (field) -> {
         String name = field.getName();
-        Column ann = NameResolver.getAnnotation(field, Column.class);
+        Column ann = ReflectResolver.getAnnotation(field, Column.class);
         if (ann == null) {
-            return NameResolver.toUnderScore(name);
+            return StringUtils.toUnderScore(name);
         }
         String value = ann.value();
         if (value != null && !"".equals(value)) {
             return value;
         }
-        return NameResolver.toUnderScore(name);
+        return StringUtils.toUnderScore(name);
     };
 
     public static final Function<Field, String> ANNOTATION_NAME_RESOLVER = (field) -> {
         String name = field.getName();
-        Column ann = NameResolver.getAnnotation(field, Column.class);
+        Column ann = ReflectResolver.getAnnotation(field, Column.class);
         if (ann == null) {
             return name;
         }
@@ -41,7 +43,7 @@ public class DefaultFieldColumnNameResolver extends CachedFieldColumnNameResolve
 
     public static final Function<Field, String> UNDERSCORE_NAME_RESOLVER = (field) -> {
         String name = field.getName();
-        return NameResolver.toUnderScore(name);
+        return StringUtils.toUnderScore(name);
     };
 
     public static final DefaultFieldColumnNameResolver DEFAULT = new DefaultFieldColumnNameResolver(DEFAULT_NAME_RESOLVER);

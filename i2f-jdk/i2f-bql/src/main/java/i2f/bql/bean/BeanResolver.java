@@ -5,8 +5,8 @@ import i2f.annotations.db.Column;
 import i2f.annotations.db.DbIgnore;
 import i2f.annotations.db.DbIgnoreUnAnnotated;
 import i2f.annotations.db.Primary;
-import i2f.bql.lambda.impl.NameResolver;
 import i2f.lru.LruMap;
+import i2f.reflect.ReflectResolver;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -30,7 +30,7 @@ public class BeanResolver {
             return new LinkedHashSet<>(fields);
         }
         Map<Field, Class<?>> classFields = getFields(clazz);
-        DbIgnoreUnAnnotated classAnn = NameResolver.getAnnotation(clazz, DbIgnoreUnAnnotated.class);
+        DbIgnoreUnAnnotated classAnn = ReflectResolver.getAnnotation(clazz, DbIgnoreUnAnnotated.class);
         boolean ignoreUnAnnotated = false;
         if (classAnn != null) {
             ignoreUnAnnotated = classAnn.value();
@@ -38,19 +38,19 @@ public class BeanResolver {
 
         Set<Field> ret = new LinkedHashSet<>();
         for (Field field : classFields.keySet()) {
-            DbIgnore fieldAnn = NameResolver.getAnnotation(field, DbIgnore.class);
+            DbIgnore fieldAnn = ReflectResolver.getAnnotation(field, DbIgnore.class);
             if (fieldAnn != null) {
                 if (fieldAnn.value()) {
                     continue;
                 }
             }
             if (ignoreUnAnnotated) {
-                Column nameAnn = NameResolver.getAnnotation(field, Column.class);
+                Column nameAnn = ReflectResolver.getAnnotation(field, Column.class);
                 if (nameAnn != null) {
                     ret.add(field);
                     continue;
                 }
-                Primary primaryAnn = NameResolver.getAnnotation(field, Primary.class);
+                Primary primaryAnn = ReflectResolver.getAnnotation(field, Primary.class);
                 if (primaryAnn != null) {
                     ret.add(field);
                     continue;
