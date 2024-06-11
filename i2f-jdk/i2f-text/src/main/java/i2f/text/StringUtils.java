@@ -1,6 +1,11 @@
 package i2f.text;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintStream;
+import java.lang.reflect.Array;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -280,5 +285,222 @@ public class StringUtils {
             result.add(item);
         }
         return result.toArray(new String[0]);
+    }
+
+    public static String getFileExtension(String str) {
+        return substringAfterLastIndexOf(str, ".", true);
+    }
+
+    public static String getFileName(String str) {
+        return substringBeforeLastIndexOf(new File(str).getName(), ".", false);
+    }
+
+    public static String substringBeforeLastIndexOf(String str, String idx) {
+        return substringBeforeLastIndexOf(str, idx, false);
+    }
+
+    public static String substringBeforeLastIndexOf(String str, String idx, boolean withIdx) {
+        if (str == null) {
+            return null;
+        }
+        int i = str.lastIndexOf(idx);
+        if (i >= 0) {
+            if (withIdx) {
+                return str.substring(0, i + idx.length());
+            } else {
+                return str.substring(0, i);
+            }
+        }
+        return null;
+    }
+
+    public static String substringAfterLastIndexOf(String str, String idx) {
+        return substringAfterLastIndexOf(str, idx, false);
+    }
+
+    public static String substringAfterLastIndexOf(String str, String idx, boolean withIdx) {
+        if (str == null) {
+            return null;
+        }
+        int i = str.lastIndexOf(idx);
+        if (i >= 0) {
+            if (withIdx) {
+                return str.substring(i);
+            } else {
+                return str.substring(i + idx.length());
+            }
+        }
+        return null;
+    }
+
+    public static String substringBeforeIndexOf(String str, String idx) {
+        return substringBeforeIndexOf(str, idx, false);
+    }
+
+    public static String substringBeforeIndexOf(String str, String idx, boolean withIdx) {
+        if (str == null) {
+            return null;
+        }
+        int i = str.indexOf(idx);
+        if (i >= 0) {
+            if (withIdx) {
+                return str.substring(0, i + idx.length());
+            } else {
+                return str.substring(0, i);
+            }
+        }
+        return null;
+    }
+
+    public static String substringAfterIndexOf(String str, String idx) {
+        return substringAfterIndexOf(str, idx, false);
+    }
+
+    public static String substringAfterIndexOf(String str, String idx, boolean withIdx) {
+        if (str == null) {
+            return null;
+        }
+        int i = str.indexOf(idx);
+        if (i >= 0) {
+            if (withIdx) {
+                return str.substring(i);
+            } else {
+                return str.substring(i + idx.length());
+            }
+        }
+        return null;
+    }
+
+    public static String of(Object obj) {
+        return of(obj, "null");
+    }
+
+    public static String of(Object obj, String nullAs) {
+        if (obj == null) {
+            return nullAs;
+        }
+        Class<?> clazz = obj.getClass();
+        if (clazz.isArray()) {
+            return ofArray(obj, nullAs);
+        } else if (obj instanceof Iterable) {
+            Iterable<?> iterable = (Iterable<?>) obj;
+            return ofIterable(iterable, nullAs);
+        } else if (obj instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) obj;
+            return ofMap(map, nullAs);
+        } else if (obj instanceof Throwable) {
+            Throwable ex = (Throwable) obj;
+            return ofThrowable(ex, nullAs);
+        }
+        return String.valueOf(obj);
+    }
+
+    public static String ofThrowable(Throwable ex, String nullAs) {
+        if (ex == null) {
+            return nullAs;
+        }
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(bos);
+        ps.println(ex.getClass().getName() + " : " + ex.getMessage());
+        ex.printStackTrace(ps);
+        ps.flush();
+        ps.close();
+        return new String(bos.toByteArray());
+    }
+
+    public static String ofMap(Map<?, ?> map, String nullAs) {
+        if (map == null) {
+            return nullAs;
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        boolean isFirst = true;
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            if (!isFirst) {
+                builder.append(", ");
+            }
+            builder.append(of(entry.getKey(), nullAs));
+            builder.append(" : ");
+            builder.append(of(entry.getValue(), nullAs));
+            isFirst = false;
+        }
+        builder.append("}");
+
+        return builder.toString();
+    }
+
+    public static String ofIterable(Iterable<?> iterable, String nullAs) {
+        if (iterable == null) {
+            return nullAs;
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        boolean isFirst = true;
+        for (Object elem : iterable) {
+            if (!isFirst) {
+                builder.append(", ");
+            }
+            builder.append(of(elem, nullAs));
+            isFirst = false;
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    public static String ofArray(Object arr, String nullAs) {
+        if (arr == null) {
+            return nullAs;
+        }
+        Class<?> clazz = arr.getClass();
+        if (!clazz.isArray()) {
+            return of(arr, nullAs);
+        }
+        StringBuilder builder = new StringBuilder();
+        int len = Array.getLength(arr);
+        builder.append("[");
+        for (int i = 0; i < len; i++) {
+            if (i > 0) {
+                builder.append(", ");
+            }
+            Object elem = Array.get(arr, i);
+            builder.append(of(elem, nullAs));
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    public static String ofBytes(byte[] bytes, String charset) {
+        try {
+            return new String(bytes, charset);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+    }
+
+    public static String ofUtf8(byte[] bytes) {
+        return ofBytes(bytes, "UTF-8");
+    }
+
+    public static String ofGbk(byte[] bytes) {
+        return ofBytes(bytes, "GBK");
+    }
+
+    public static byte[] toBytes(String str, String charset) {
+        if (str == null) {
+            return new byte[0];
+        }
+        try {
+            return str.getBytes(charset);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+    }
+
+    public static byte[] toUtf8(String str) {
+        return toBytes(str, "UTF-8");
+    }
+
+    public static byte[] toGbk(String str) {
+        return toBytes(str, "GBK");
     }
 }

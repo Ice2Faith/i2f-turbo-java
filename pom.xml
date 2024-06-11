@@ -354,6 +354,11 @@
                 <artifactId>i2f-unsafe</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-xml</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
 
             <!-- ############################################################ -->
 
