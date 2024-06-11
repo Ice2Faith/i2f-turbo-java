@@ -2,6 +2,8 @@ package i2f.bql.lambda.impl;
 
 
 import i2f.annotations.db.Table;
+import i2f.reflect.ReflectResolver;
+import i2f.text.StringUtils;
 
 import java.util.function.Function;
 
@@ -14,20 +16,20 @@ public class DefaultClassTableNameResolver extends CachedClassTableNameResolver 
 
     public static final Function<Class<?>, String> DEFAULT_NAME_RESOLVER = (clazz) -> {
         String name = clazz.getSimpleName();
-        Table ann = NameResolver.getAnnotation(clazz, Table.class);
+        Table ann = ReflectResolver.getAnnotation(clazz, Table.class);
         if (ann == null) {
-            return NameResolver.toUnderScore(name);
+            return StringUtils.toUnderScore(name);
         }
         String value = ann.value();
         if (value != null && !"".equals(value)) {
             return value;
         }
-        return NameResolver.toUnderScore(name);
+        return StringUtils.toUnderScore(name);
     };
 
     public static final Function<Class<?>, String> ANNOTATION_NAME_RESOLVER = (clazz) -> {
         String name = clazz.getSimpleName();
-        Table ann = NameResolver.getAnnotation(clazz, Table.class);
+        Table ann = ReflectResolver.getAnnotation(clazz, Table.class);
         if (ann == null) {
             return name;
         }
@@ -40,7 +42,7 @@ public class DefaultClassTableNameResolver extends CachedClassTableNameResolver 
 
     public static final Function<Class<?>, String> UNDERSCORE_NAME_RESOLVER = (clazz) -> {
         String name = clazz.getSimpleName();
-        return NameResolver.toUnderScore(name);
+        return StringUtils.toUnderScore(name);
     };
 
     public static final DefaultClassTableNameResolver DEFAULT = new DefaultClassTableNameResolver(DEFAULT_NAME_RESOLVER);
