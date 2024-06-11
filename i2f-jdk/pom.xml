@@ -79,6 +79,7 @@
         <module>i2f-jdbc-proxy</module>
         <module>i2f-jdbc-bql</module>
         <module>i2f-text</module>
+        <module>i2f-xml</module>
 
     </modules>
 

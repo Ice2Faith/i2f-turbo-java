@@ -2,20 +2,14 @@ package i2f.velocity.bindsql;
 
 import i2f.bindsql.BindSql;
 import i2f.io.stream.StreamUtil;
+import i2f.xml.XmlUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -50,42 +44,16 @@ public class VelocityResourceSqlTemplateResolver {
 
         byte[] bytes = StreamUtil.readBytes(url);
 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = XmlUtil.parseXml(bytes);
 
-        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        Document document = builder.parse(bis);
-        bis.close();
-
-        Node mapperNode = document.getFirstChild();
-        String className = mapperNode.getAttributes().getNamedItem("class").getTextContent();
+        Node mapperNode = XmlUtil.getRootNode(document);
+        String className = XmlUtil.getAttribute(mapperNode, "class");
         if (className == null) {
             className = "";
         }
         className = className.trim();
 
-        NodeList queryNodes = document.getElementsByTagName("query");
-        NodeList updateNodes = document.getElementsByTagName("update");
-        NodeList callNodes = document.getElementsByTagName("call");
-        NodeList sqlNodes = document.getElementsByTagName("sql");
-
-        List<Node> matchedNodes = new ArrayList<>();
-        for (int i = 0; i < queryNodes.getLength(); i++) {
-            Node item = queryNodes.item(i);
-            matchedNodes.add(item);
-        }
-        for (int i = 0; i < updateNodes.getLength(); i++) {
-            Node item = updateNodes.item(i);
-            matchedNodes.add(item);
-        }
-        for (int i = 0; i < callNodes.getLength(); i++) {
-            Node item = callNodes.item(i);
-            matchedNodes.add(item);
-        }
-        for (int i = 0; i < sqlNodes.getLength(); i++) {
-            Node item = sqlNodes.item(i);
-            matchedNodes.add(item);
-        }
+        List<Node> matchedNodes = XmlUtil.getNodesByTagName(document, Arrays.asList("query", "update", "call", "sql"));
 
         for (Node item : matchedNodes) {
             String nodeName = item.getNodeName();
@@ -93,12 +61,8 @@ public class VelocityResourceSqlTemplateResolver {
                 nodeName = "";
             }
             nodeName = nodeName.trim();
-            Node idNode = item.getAttributes().getNamedItem("method");
-            if (idNode == null) {
-                continue;
-            }
-            String method = idNode.getTextContent();
-            String body = item.getTextContent();
+            String method = XmlUtil.getAttribute(item, "method");
+            String body = XmlUtil.getNodeContent(item);
 
             if (method == null) {
                 continue;
