@@ -6,6 +6,7 @@ import i2f.springboot.jdbc.bql.components.SpringJdbcProxyMapperFactoryBean;
 import i2f.springboot.jdbc.bql.components.VelocityProxyRenderSqlProvider;
 import i2f.springboot.jdbc.bql.properties.JdbcProxyProperties;
 import i2f.velocity.VelocityGenerator;
+import i2f.velocity.bindsql.VelocityResourceSqlTemplateResolver;
 import i2f.velocity.bindsql.VelocitySqlGenerator;
 import lombok.Data;
 import org.apache.velocity.app.VelocityEngine;
@@ -51,10 +52,10 @@ public class JdbcProxyAutoConfiguration implements ApplicationContextAware, Bean
 
     private ApplicationContext context;
 
-    @ConditionalOnMissingBean(ProxyRenderSqlProvider.class)
+    @ConditionalOnMissingBean(VelocityResourceSqlTemplateResolver.class)
     @ConditionalOnClass({VelocitySqlGenerator.class, VelocityGenerator.class, VelocityEngine.class})
     @Bean
-    public VelocityProxyRenderSqlProvider velocityProxyRenderSqlProvider() {
+    public VelocityResourceSqlTemplateResolver velocityResourceSqlTemplateResolver() {
         JdbcProxyProperties proxyProperties = context.getBean(JdbcProxyProperties.class);
         List<String> scriptLocations = new ArrayList<>();
         List<String> locations = proxyProperties.getScriptLocations();
@@ -79,7 +80,16 @@ public class JdbcProxyAutoConfiguration implements ApplicationContextAware, Bean
 
             }
         }
-        return new VelocityProxyRenderSqlProvider(resources);
+        VelocityResourceSqlTemplateResolver ret = new VelocityResourceSqlTemplateResolver(resources);
+        ret.refreshResources();
+        return ret;
+    }
+
+    @ConditionalOnMissingBean(ProxyRenderSqlProvider.class)
+    @ConditionalOnClass({VelocitySqlGenerator.class, VelocityGenerator.class, VelocityEngine.class})
+    @Bean
+    public VelocityProxyRenderSqlProvider velocityProxyRenderSqlProvider(VelocityResourceSqlTemplateResolver templateResolver) {
+        return new VelocityProxyRenderSqlProvider(templateResolver);
     }
 
     @ConditionalOnMissingBean(ProxyRenderSqlProvider.class)

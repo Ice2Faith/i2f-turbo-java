@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class SimpleProxyRenderSqlProvider extends AbstractProxyRenderSqlProvider {
     @Override
-    public String getScript(String methodId, Map<String, Object> params, Method method, Object[] args) {
+    public BindSql getScript(String methodId, Map<String, Object> params, Method method, Object[] args) {
         throw new IllegalArgumentException("missing @" + (SqlScript.class.getSimpleName()) + " on method: " + methodId);
     }
 

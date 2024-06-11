@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper class="com.i2f.test.mapper.TestMapper">
+    <query method="listByMapper">
+        select * from sys_user
+    </query>
+</mapper>
