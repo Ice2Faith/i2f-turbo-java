@@ -22,7 +22,7 @@ public class TestProxy {
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/test_db?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false",
-                "root", "ltb12315");
+                "root", "123456");
 
         TestSimpleMapper mapper = ProxySqlExecuteGenerator.proxy(TestSimpleMapper.class,
                 new DirectJdbcInvokeContextProvider(conn),

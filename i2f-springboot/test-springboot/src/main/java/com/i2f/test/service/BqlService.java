@@ -46,6 +46,8 @@ public class BqlService implements ApplicationRunner, ApplicationContextAware {
 
         List<SysUserDo> allList = testMapper.listAll();
 
+        List<SysUserDo> sysUserDos = testMapper.listByMapper();
+
         BqlService proxy=context.getBean(BqlService.class);
 
         proxy.testRaw();

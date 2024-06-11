@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mapper class="com.test.mapper.TestMapper">
+
+    <query method="query">
+        select
+        #trim(",",","," "," ")
+        #foreach($column in $map.keySet())
+            a.$column,
+        #end
+    #end
+        from $table a
+        #sqlWhere()
+        #foreach($column in $map.keySet())
+            and a.$column = #sql($map.get($column))
+        #end
+    #end
+
+    </query>
+
+    <update method="update">
+        update $table
+        #sqlSet()
+        #foreach($column in $map.keySet())
+            $column = #sql($map.get($column)),
+        #end
+    #end
+        #sqlWhere()
+        #foreach($column in $map.keySet())
+            and $column = #sql($map.get($column))
+        #end
+    #end
+    </update>
+
+    <call method="call">
+        {
+        call sp_test(#sql($map.username),#sql($map.output))
+        }
+    </call>
+
+    <query method="com.hello.mapper.HelloMapper.list">
+        select
+        #trim(",",","," "," ")
+        #foreach($column in $map.keySet())
+            a.$column,
+        #end
+    #end
+        from $table a
+        #sqlWhere()
+        #foreach($column in $map.keySet())
+            and a.$column = #sql($map.get($column))
+        #end
+    #end
+
+    </query>
+
+</mapper>

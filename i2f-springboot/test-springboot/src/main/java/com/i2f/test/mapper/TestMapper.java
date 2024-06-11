@@ -15,4 +15,6 @@ public interface TestMapper extends BaseMapper<SysUserDo> {
 
     @SqlScript("select * from sys_user")
     List<SysUserDo> listAll();
+
+    List<SysUserDo> listByMapper();
 }

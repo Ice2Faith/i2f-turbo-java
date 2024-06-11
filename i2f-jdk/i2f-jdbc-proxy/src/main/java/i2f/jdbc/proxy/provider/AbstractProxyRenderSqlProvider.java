@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @desc
  */
 public abstract class AbstractProxyRenderSqlProvider implements ProxyRenderSqlProvider {
-    protected LruMap<String, String> scriptCache = new LruMap<>(2048);
+    protected LruMap<String, BindSql> scriptCache = new LruMap<>(2048);
     protected AtomicBoolean enableCache = new AtomicBoolean(true);
 
     @Override
@@ -26,23 +26,33 @@ public abstract class AbstractProxyRenderSqlProvider implements ProxyRenderSqlPr
         if (preSql != null) {
             return preSql;
         }
-        String script = null;
+        BindSql script = null;
         boolean cacheable = predicateCacheable(methodId, params, method, args);
         if (enableCache.get() && cacheable) {
             script = scriptCache.get(methodId);
         }
         if (script == null) {
-            script = ReflectResolver.getAnnotationValue(method, SqlScript.class, "value");
-            if (script == null || "".equals(script)) {
-                script = getScript(methodId, params, method, args);
+            SqlScript ann = ReflectResolver.getAnnotation(method, SqlScript.class);
+            if (ann != null) {
+                String sql = ann.value();
+                if (sql != null && !"".equals(sql)) {
+                    script = BindSql.of(ann.type(), sql);
+                }
             }
+        }
+        if (script == null) {
+            script = getScript(methodId, params, method, args);
         }
         if (enableCache.get() && cacheable) {
             if (script != null) {
                 scriptCache.put(methodId, script);
             }
         }
-        return renderSql(script, params, method, args);
+        BindSql ret = renderSql(script.getSql(), params, method, args);
+        if (ret.getType() == null || ret.getType() == BindSql.Type.UNSET) {
+            ret.setType(script.getType());
+        }
+        return ret;
     }
 
     private BindSql preHandleRender(String methodId, Map<String, Object> params, Method method, Object[] args) {
@@ -56,7 +66,7 @@ public abstract class AbstractProxyRenderSqlProvider implements ProxyRenderSqlPr
         return true;
     }
 
-    public abstract String getScript(String methodId, Map<String, Object> params, Method method, Object[] args);
+    public abstract BindSql getScript(String methodId, Map<String, Object> params, Method method, Object[] args);
 
     public abstract BindSql renderSql(String script, Map<String, Object> params, Method method, Object args);
 }

@@ -1,6 +1,8 @@
 package i2f.jdbc.proxy.annotations;
 
 
+import i2f.bindsql.BindSql;
+
 import java.lang.annotation.*;
 
 /**
@@ -15,4 +17,6 @@ import java.lang.annotation.*;
 @Documented
 public @interface SqlScript {
     String value();
+
+    BindSql.Type type() default BindSql.Type.UNSET;
 }

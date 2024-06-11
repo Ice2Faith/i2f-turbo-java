@@ -3,11 +3,10 @@ package i2f.springboot.jdbc.bql.components;
 import i2f.bindsql.BindSql;
 import i2f.jdbc.proxy.annotations.SqlScript;
 import i2f.jdbc.proxy.provider.AbstractProxyRenderSqlProvider;
+import i2f.velocity.bindsql.VelocityResourceSqlTemplateResolver;
 import i2f.velocity.bindsql.VelocitySqlGenerator;
 
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,14 +15,18 @@ import java.util.Map;
  * @desc
  */
 public class VelocityProxyRenderSqlProvider extends AbstractProxyRenderSqlProvider {
-    private List<URL> resourceList;
+    private VelocityResourceSqlTemplateResolver templateResolver;
 
-    public VelocityProxyRenderSqlProvider(List<URL> resourceList) {
-        this.resourceList = resourceList;
+    public VelocityProxyRenderSqlProvider(VelocityResourceSqlTemplateResolver templateResolver) {
+        this.templateResolver = templateResolver;
     }
 
     @Override
-    public String getScript(String methodId, Map<String, Object> params, Method method, Object[] args) {
+    public BindSql getScript(String methodId, Map<String, Object> params, Method method, Object[] args) {
+        BindSql script = templateResolver.getScript(methodId);
+        if (script != null) {
+            return script;
+        }
         throw new IllegalArgumentException("missing @" + (SqlScript.class.getSimpleName()) + " on method: " + methodId);
     }
 
