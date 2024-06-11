@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/i2f_proj?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false
     username: root
-    password: ltb12315
+    password: 123456
 
 i2f:
   jdbc:
@@ -33,7 +33,7 @@ i2f:
             driver: com.mysql.cj.jdbc.Driver
             url: jdbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
             username: root
-            password: ltb12315
+            password: 123456
             # datasource type, datasource pool, such as hikari: com.zaxxer.hikari.HikariDataSource, default value is empty, use spring.datasource.type value
             type: com.alibaba.druid.pool.DruidDataSource
             # datasource belong which group, multi-value split by ',', used to balance on same group, default value is empty, not group
@@ -42,7 +42,7 @@ i2f:
             driver: com.mysql.cj.jdbc.Driver
             url: jdbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
             username: root
-            password: ltb12315
+            password: 123456
             type: com.zaxxer.hikari.HikariDataSource
             group: read
 

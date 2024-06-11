@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    'mapper' is root node,
+    and with 'class' attribute,
+    mean's that children nodes all default in this class
+-->
+<mapper class="com.test.mapper.TestMapper">
+
+    <!--
+        children nodes:
+        support node type of 'query','update','call','sql',
+        query: for jdbc executeQuery,
+        update: for jdbc executeUpdate,
+        call: for jdbc call,
+        sql: auto detect type by keywords to 'query'/'update','call', but sometime maybe wrong detect.
+    -->
+
+    <!--
+        every child node,
+        with 'method' attribute,
+        mean's that this node refer to witch java method on root node's attribute 'mapper.class',
+        but also, method cloud be full method name assigned, which will use it instead of bind 'mapper.class',
+        such as below 'sql' node
+    -->
+    <query method="listAll">
+        select * from sys_user
+    </query>
+
+    <query method="list">
+        select a.*
+        from sys_user a
+        <!--
+        you can use #sqlWhere directive to trim and/or for inner text,
+        use like mybatis's 'where' tag,
+        but rule in velocity grammar is this form
+        -->
+        #sqlWhere()
+        #if($post.username != null && $post.username !="")
+            and a.username = #sql($post.username)
+        #end
+        #if($post.age != null)
+            and a.age &gt;= #sql($post.age)
+        #end
+    #end
+    </query>
+
+    <update method="update">
+        update sys_user
+        <!--
+            you also can use #sqlSet directive to trim , for inner text,
+            and also like mybatis's ‘set' tag,
+        -->
+        #sqlSet()
+        #if($post.username != null && $post.username !="")
+            username = #sql($post.username),
+        #end
+        #if($post.age != null)
+            age &gt;= #sql($post.age),
+        #end
+    #end
+        #sqlWhere()
+        and status=1
+        #if($post.id != null)
+            and id = #sql($post.id)
+        #end
+    #end
+    </update>
+
+    <call method="callTest">
+        {
+        call sp_test(#sql($post.username),#sql($post.id))
+        }
+    </call>
+
+    <sql method="com.hello.mapper.HelloMapper.hello">
+        select 1 from dual
+    </sql>
+
+</mapper>

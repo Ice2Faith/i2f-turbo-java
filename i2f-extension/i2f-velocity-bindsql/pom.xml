@@ -13,6 +13,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity</artifactId>
             <version>1.7</version>
@@ -32,6 +37,11 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-bindsql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-io-stream</artifactId>
         </dependency>
     </dependencies>
 

@@ -50,7 +50,7 @@ public class ProxyRenderSqlHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getName().equals("toString") && method.getParameterCount() == 0) {
-            return proxy.getClass().getName();
+            return proxyClass.getName() + proxy.getClass().getSimpleName();
         }
         if (method.getName().equals("hashCode") && method.getParameterCount() == 0) {
             return proxy.getClass().getName().hashCode();
