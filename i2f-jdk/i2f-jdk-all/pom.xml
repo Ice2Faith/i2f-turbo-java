@@ -230,6 +230,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-text</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-thread</artifactId>
         </dependency>
         <dependency>
