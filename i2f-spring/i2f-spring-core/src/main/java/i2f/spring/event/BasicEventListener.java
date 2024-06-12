@@ -3,7 +3,7 @@ package i2f.spring.event;
 import org.springframework.context.ApplicationListener;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/15 9:46
  * @desc
  */

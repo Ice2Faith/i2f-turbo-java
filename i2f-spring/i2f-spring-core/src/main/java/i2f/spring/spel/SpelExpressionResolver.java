@@ -11,12 +11,11 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CountDownLatch;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/18 16:48
  * @desc
  */
