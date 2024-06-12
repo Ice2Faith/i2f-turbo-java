@@ -6,7 +6,8 @@ import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.serialize.str.xml.IXmlSerializer;
 import i2f.serialize.str.xml.impl.Xml2Serializer;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.Collection;
 
 /**

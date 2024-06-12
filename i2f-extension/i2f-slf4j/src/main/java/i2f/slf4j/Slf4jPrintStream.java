@@ -11,7 +11,7 @@ import java.util.Formatter;
 import java.util.Locale;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/6/27 10:38
  * @desc 控制台输出，重定向到SLF4J，以便在logback中能够显示控制台输出
  */

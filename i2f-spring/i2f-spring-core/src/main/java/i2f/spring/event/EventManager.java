@@ -3,10 +3,9 @@ package i2f.spring.event;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.context.*;
-import org.springframework.stereotype.Component;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/15 9:22
  * @desc
  */
