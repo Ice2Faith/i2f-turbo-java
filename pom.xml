@@ -196,6 +196,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-io-file</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-io-stream</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -394,6 +399,12 @@
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-jackson</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jce-bc</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -401,6 +412,12 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jce-sm-antherd</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-slf4j</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
@@ -426,6 +443,29 @@
 
             <!-- ############################################################ -->
 
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-spring-core</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-spring-security</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-spring-web</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-spring-all</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
 
             <!-- ############################################################ -->
             <dependency>
@@ -437,6 +477,12 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdbc-bql-spring-boot-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-spring-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 

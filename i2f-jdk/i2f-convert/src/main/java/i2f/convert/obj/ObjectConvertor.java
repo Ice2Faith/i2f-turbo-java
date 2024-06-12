@@ -7,10 +7,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -71,6 +74,7 @@ public class ObjectConvertor {
             "HHmmss",
             "HHmm"
     };
+    public static final Map<String, SimpleDateFormat> simpleFormatMap;
     public static final Map<String, DateTimeFormatter> dateFormaterMap;
 
     static {
@@ -202,11 +206,14 @@ public class ObjectConvertor {
         }
 
         if (true) {
-            Map<String, DateTimeFormatter> map = new LinkedHashMap<>();
+            Map<String, SimpleDateFormat> formatMap = new ConcurrentHashMap<>();
+            Map<String, DateTimeFormatter> formatterMap = new ConcurrentHashMap<>();
             for (String dateFormat : dateFormats) {
-                map.put(dateFormat, DateTimeFormatter.ofPattern(dateFormat));
+                formatMap.put(dateFormat, new SimpleDateFormat(dateFormat));
+                formatterMap.put(dateFormat, DateTimeFormatter.ofPattern(dateFormat));
             }
-            dateFormaterMap = Collections.unmodifiableMap(map);
+            dateFormaterMap = formatterMap;
+            simpleFormatMap = formatMap;
         }
     }
 
@@ -516,5 +523,96 @@ public class ObjectConvertor {
             }
         }
         return date;
+    }
+
+
+    public static SimpleDateFormat getSimpleFormatter(String patten) {
+        if (simpleFormatMap.containsKey(patten)) {
+            return simpleFormatMap.get(patten);
+        }
+        SimpleDateFormat fmt = new SimpleDateFormat(patten);
+        simpleFormatMap.put(patten, fmt);
+        return simpleFormatMap.get(patten);
+    }
+
+    public static DateTimeFormatter getDateTimeFormatter(String patten) {
+        if (dateFormaterMap.containsKey(patten)) {
+            return dateFormaterMap.get(patten);
+        }
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(patten);
+        dateFormaterMap.put(patten, fmt);
+        return dateFormaterMap.get(patten);
+    }
+
+    public synchronized static String formatDate(String patten, Date date) {
+        return getSimpleFormatter(patten).format(date);
+    }
+
+    public synchronized static Date parseDate(String patten, String date) throws ParseException {
+        return getSimpleFormatter(patten).parse(date);
+    }
+
+    public static String formatDate(String patten, TemporalAccessor date) {
+        return getDateTimeFormatter(patten).format(date);
+    }
+
+    public static String formatDate(String patten, LocalDate date) {
+        return date.format(getDateTimeFormatter(patten));
+    }
+
+    public static String formatDate(String patten, LocalTime date) {
+        return date.format(getDateTimeFormatter(patten));
+    }
+
+    public static String formatDate(String patten, LocalDateTime date) {
+        return date.format(getDateTimeFormatter(patten));
+    }
+
+    public static LocalDate parseLocalDate(String patten, String date) {
+        return LocalDate.parse(date, getDateTimeFormatter(patten));
+    }
+
+    public static LocalTime parseLocalTime(String patten, String date) {
+        return LocalTime.parse(date, getDateTimeFormatter(patten));
+    }
+
+    public static LocalDateTime parseLocalDateTime(String patten, String date) {
+        return LocalDateTime.parse(date, getDateTimeFormatter(patten));
+    }
+
+    public static LocalDateTime parseLocalDateTime(String date) {
+        Exception ex = null;
+        for (String patten : dateFormats) {
+            try {
+                return date2LocalDateTime(parseDate(patten, date));
+            } catch (Exception e) {
+                ex = e;
+            }
+        }
+        if (ex instanceof RuntimeException) {
+            throw (RuntimeException) ex;
+        } else {
+            throw new IllegalArgumentException(ex);
+        }
+    }
+
+    public static LocalDate parseLocalDate(String date) {
+        return parseLocalDateTime(date).toLocalDate();
+    }
+
+    public static LocalTime parseLocalTime(String date) {
+        return parseLocalDateTime(date).toLocalTime();
+    }
+
+    public static LocalDateTime date2LocalDateTime(Date val) {
+        Instant instant = new Date(val.getTime()).toInstant();
+        ZoneId zone = ZoneId.systemDefault();
+        return LocalDateTime.ofInstant(instant, zone);
+    }
+
+    public static Date localDateTime2Date(LocalDateTime val) {
+        ZoneId zone = ZoneId.systemDefault();
+        Instant instant = ((LocalDateTime) val).atZone(zone).toInstant();
+        return Date.from(instant);
     }
 }

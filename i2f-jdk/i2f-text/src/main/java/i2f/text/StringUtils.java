@@ -288,11 +288,19 @@ public class StringUtils {
     }
 
     public static String getFileExtension(String str) {
-        return substringAfterLastIndexOf(str, ".", true);
+        String ret = substringAfterLastIndexOf(str, ".", true);
+        if (ret == null) {
+            return "";
+        }
+        return ret;
     }
 
-    public static String getFileName(String str) {
-        return substringBeforeLastIndexOf(new File(str).getName(), ".", false);
+    public static String getFileNameOnly(String str) {
+        String ret = substringBeforeLastIndexOf(new File(str).getName(), ".", false);
+        if (ret == null) {
+            return str;
+        }
+        return ret;
     }
 
     public static String substringBeforeLastIndexOf(String str, String idx) {
