@@ -20,6 +20,8 @@
         <module>i2f-velocity</module>
         <module>i2f-velocity-bindsql</module>
         <module>test-extension</module>
+        <module>i2f-jackson</module>
+        <module>i2f-slf4j</module>
     </modules>
 
 
