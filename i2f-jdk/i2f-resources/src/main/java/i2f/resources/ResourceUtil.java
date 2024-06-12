@@ -14,7 +14,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/1/18 13:54
  * @desc
  */

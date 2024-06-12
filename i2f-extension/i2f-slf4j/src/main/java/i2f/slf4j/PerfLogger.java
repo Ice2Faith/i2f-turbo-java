@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import java.util.function.Supplier;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/10/2 15:08
  * @desc 性能优化的Slf4j
  * Performance Logger

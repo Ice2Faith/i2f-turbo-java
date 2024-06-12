@@ -4,7 +4,7 @@ package i2f.spring.cglib;
 import i2f.proxy.IProxyHandler;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/3/26 19:50
  * @desc spring内嵌的cglib
  * 使用上与cglib无差别
