@@ -16,6 +16,16 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-reflect</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-io-stream</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-match</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

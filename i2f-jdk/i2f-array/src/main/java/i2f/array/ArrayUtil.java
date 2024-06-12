@@ -3403,4 +3403,275 @@ public class ArrayUtil {
         }
         return arr;
     }
+
+
+    public static <T> int compare(T[] arr1, T[] arr2, Comparator<T> comparator) {
+        if (arr1 == arr2) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            T v1 = arr1[i];
+            T v2 = arr2[i];
+            int rs = comparator.compare(v1, v2);
+            if (rs != 0) {
+                return rs;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return 1;
+        }
+        if (i < arr2.length) {
+            return -1;
+        }
+        return 0;
+    }
+
+    public static int compare(byte[] arr1, byte[] arr2) {
+        if (arr1 == arr2) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            byte v1 = arr1[i];
+            byte v2 = arr2[i];
+            int rs = Byte.compare(v1, v2);
+            if (rs != 0) {
+                return rs;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return 1;
+        }
+        if (i < arr2.length) {
+            return -1;
+        }
+        return 0;
+    }
+
+    public static int compare(short[] arr1, short[] arr2) {
+        if (arr1 == arr2) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            short v1 = arr1[i];
+            short v2 = arr2[i];
+            int rs = Short.compare(v1, v2);
+            if (rs != 0) {
+                return rs;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return 1;
+        }
+        if (i < arr2.length) {
+            return -1;
+        }
+        return 0;
+    }
+
+    public static int compare(char[] arr1, char[] arr2) {
+        if (arr1 == arr2) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            char v1 = arr1[i];
+            char v2 = arr2[i];
+            int rs = Character.compare(v1, v2);
+            if (rs != 0) {
+                return rs;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return 1;
+        }
+        if (i < arr2.length) {
+            return -1;
+        }
+        return 0;
+    }
+
+    public static int compare(int[] arr1, int[] arr2) {
+        if (arr1 == arr2) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            int v1 = arr1[i];
+            int v2 = arr2[i];
+            int rs = Integer.compare(v1, v2);
+            if (rs != 0) {
+                return rs;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return 1;
+        }
+        if (i < arr2.length) {
+            return -1;
+        }
+        return 0;
+    }
+
+    public static int compare(long[] arr1, long[] arr2) {
+        if (arr1 == arr2) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            long v1 = arr1[i];
+            long v2 = arr2[i];
+            int rs = Long.compare(v1, v2);
+            if (rs != 0) {
+                return rs;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return 1;
+        }
+        if (i < arr2.length) {
+            return -1;
+        }
+        return 0;
+    }
+
+    public static int compare(float[] arr1, float[] arr2) {
+        if (arr1 == arr2) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            float v1 = arr1[i];
+            float v2 = arr2[i];
+            int rs = Float.compare(v1, v2);
+            if (rs != 0) {
+                return rs;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return 1;
+        }
+        if (i < arr2.length) {
+            return -1;
+        }
+        return 0;
+    }
+
+    public static int compare(double[] arr1, double[] arr2) {
+        if (arr1 == arr2) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            double v1 = arr1[i];
+            double v2 = arr2[i];
+            int rs = Double.compare(v1, v2);
+            if (rs != 0) {
+                return rs;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return 1;
+        }
+        if (i < arr2.length) {
+            return -1;
+        }
+        return 0;
+    }
+
+    public static int compare(boolean[] arr1, boolean[] arr2) {
+        if (arr1 == arr2) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            boolean v1 = arr1[i];
+            boolean v2 = arr2[i];
+            int rs = Boolean.compare(v1, v2);
+            if (rs != 0) {
+                return rs;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return 1;
+        }
+        if (i < arr2.length) {
+            return -1;
+        }
+        return 0;
+    }
 }

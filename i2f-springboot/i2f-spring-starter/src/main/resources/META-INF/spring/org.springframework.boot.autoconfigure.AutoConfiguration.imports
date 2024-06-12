@@ -1,0 +1,3 @@
+i2f.springboot.spring.SpringCoreAutoConfiguration
+i2f.springboot.spring.SpringContextHolderAutoConfiguration
+i2f.springboot.spring.SpringWebAutoConfiguration

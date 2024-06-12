@@ -11,6 +11,13 @@
 
     <artifactId>i2f-text</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-iterator</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

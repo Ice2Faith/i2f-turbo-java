@@ -14,12 +14,22 @@
     <dependencies>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jackson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jce-bc</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jce-sm-antherd</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-slf4j</artifactId>
         </dependency>
 
         <dependency>
