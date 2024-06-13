@@ -81,6 +81,7 @@
         <module>i2f-text</module>
         <module>i2f-xml</module>
         <module>i2f-io-file</module>
+        <module>i2f-otpauth</module>
 
     </modules>
 
