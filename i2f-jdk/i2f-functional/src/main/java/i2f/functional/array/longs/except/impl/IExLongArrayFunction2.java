@@ -10,7 +10,8 @@ import i2f.functional.array.longs.except.IExLongArrayFunction;
 @FunctionalInterface
 public interface IExLongArrayFunction2<V1, V2> extends IExLongArrayFunction {
     long[] apply(V1 v1, V2 v2) throws Throwable;
-    static<V1, V2> IExLongArrayFunction2<V1, V2> of(IExLongArrayFunction2<V1, V2> ret){
+
+    static <V1, V2> IExLongArrayFunction2<V1, V2> of(IExLongArrayFunction2<V1, V2> ret) {
         return ret;
     }
 }

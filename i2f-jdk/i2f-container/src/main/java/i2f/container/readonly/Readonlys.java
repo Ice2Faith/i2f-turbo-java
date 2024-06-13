@@ -16,19 +16,19 @@ import java.util.Set;
  * @desc
  */
 public class Readonlys {
-    public static<E> Collection<E> collection(Collection<E> collection){
+    public static <E> Collection<E> collection(Collection<E> collection) {
         return new ReadonlyCollectionAdapter<>(collection);
     }
 
-    public static<E> List<E> list(List<E> list){
+    public static <E> List<E> list(List<E> list) {
         return new ReadonlyListAdapter<>(list);
     }
 
-    public static<E> Set<E> set(Set<E> list){
+    public static <E> Set<E> set(Set<E> list) {
         return new ReadonlySetAdapter<>(list);
     }
 
-    public static<K,V> Map<K,V> map(Map<K,V> list){
+    public static <K, V> Map<K, V> map(Map<K, V> list) {
         return new ReadonlyMapAdapter<>(list);
     }
 }

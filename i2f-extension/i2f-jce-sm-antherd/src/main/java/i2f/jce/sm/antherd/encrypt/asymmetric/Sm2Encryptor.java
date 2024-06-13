@@ -2,10 +2,10 @@ package i2f.jce.sm.antherd.encrypt.asymmetric;
 
 import com.antherd.smcrypto.sm2.Keypair;
 import com.antherd.smcrypto.sm2.Sm2;
+import i2f.codec.CodecUtil;
 import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
 import i2f.jce.std.encrypt.asymmetric.key.BytesPrivateKey;
 import i2f.jce.std.encrypt.asymmetric.key.BytesPublicKey;
-import i2f.jce.std.util.ByteUtil;
 
 import java.security.KeyPair;
 import java.util.Objects;
@@ -35,10 +35,10 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
 
     public Sm2Encryptor(KeyPair keyPair) {
         if (keyPair.getPublic() != null) {
-            this.publicKey = ByteUtil.toHex(keyPair.getPublic().getEncoded());
+            this.publicKey = CodecUtil.toHexString(keyPair.getPublic().getEncoded());
         }
         if (keyPair.getPrivate() != null) {
-            this.privateKey = ByteUtil.toHex(keyPair.getPrivate().getEncoded());
+            this.privateKey = CodecUtil.toHexString(keyPair.getPrivate().getEncoded());
         }
     }
 
@@ -49,8 +49,8 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
     public static KeyPair genKeyPair() {
         Keypair keypair = Sm2.generateKeyPairHex();
 
-        return new KeyPair(new BytesPublicKey("sm2", "hex", ByteUtil.ofHex(keypair.getPublicKey())),
-                new BytesPrivateKey("sm2", "hex", ByteUtil.ofHex(keypair.getPrivateKey())));
+        return new KeyPair(new BytesPublicKey("sm2", "hex", CodecUtil.ofHexString(keypair.getPublicKey())),
+                new BytesPrivateKey("sm2", "hex", CodecUtil.ofHexString(keypair.getPrivateKey())));
     }
 
     @Override

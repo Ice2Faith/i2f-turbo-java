@@ -10,7 +10,8 @@ import i2f.functional.array.floats.except.IExFloatArrayFunction;
 @FunctionalInterface
 public interface IExFloatArrayFunction4<V1, V2, V3, V4> extends IExFloatArrayFunction {
     float[] apply(V1 v1, V2 v2, V3 v3, V4 v4) throws Throwable;
-    static<V1, V2, V3, V4> IExFloatArrayFunction4<V1, V2, V3, V4> of(IExFloatArrayFunction4<V1, V2, V3, V4> ret){
+
+    static <V1, V2, V3, V4> IExFloatArrayFunction4<V1, V2, V3, V4> of(IExFloatArrayFunction4<V1, V2, V3, V4> ret) {
         return ret;
     }
 }

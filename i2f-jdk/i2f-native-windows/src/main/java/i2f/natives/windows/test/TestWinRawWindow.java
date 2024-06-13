@@ -35,64 +35,63 @@ public class TestWinRawWindow {
 
     public static void app() {
         HModule hModule = WinApi.getModuleHandle(null);
-        HInstance hInstance=new HInstance(hModule);
+        HInstance hInstance = new HInstance(hModule);
 
-        HIcon hIcon=new HIcon(0);
-        File iconFile=new File("win32.ico");
-        if(iconFile.exists()) {
-            hIcon=WinApi.extractIcon(hInstance, iconFile.getAbsolutePath(), 0);
+        HIcon hIcon = new HIcon(0);
+        File iconFile = new File("win32.ico");
+        if (iconFile.exists()) {
+            hIcon = WinApi.extractIcon(hInstance, iconFile.getAbsolutePath(), 0);
         }
 
 //        WinApi.freeConsole();
 
-        String className="JniJavaWin32Application";
-        WinApi.registerClassEx(hInstance,hIcon,className);
+        String className = "JniJavaWin32Application";
+        WinApi.registerClassEx(hInstance, hIcon, className);
 
-        String windowTitle="JNI-JAVA-Win32应用程序";
+        String windowTitle = "JNI-JAVA-Win32应用程序";
         Hwnd hWnd = WinApi.createWindowEx(className, windowTitle, hInstance);
 
-        BitmapDcPtr bitmapDcPtr=WinApi.mallocBitMapDc();
+        BitmapDcPtr bitmapDcPtr = WinApi.mallocBitMapDc();
 
-        int resizeMode=WinAppResizeMode.RESIZE_MODE_ADAPT;
-        if(!bitmapDcPtr.isZero()){
+        int resizeMode = WinAppResizeMode.RESIZE_MODE_ADAPT;
+        if (!bitmapDcPtr.isZero()) {
             Rectangle rect = WinApi.getClientRect(hWnd);
 
-            int newWidth = (int)rect.size.dx;
-            int newHeight = (int)rect.size.dy;
+            int newWidth = (int) rect.size.dx;
+            int newHeight = (int) rect.size.dy;
 
             Hdc hdc = WinApi.getDC(hWnd);
-            WinApi.winAppResizeCompatibleDC(hdc, bitmapDcPtr, newWidth, newHeight,resizeMode );
+            WinApi.winAppResizeCompatibleDC(hdc, bitmapDcPtr, newWidth, newHeight, resizeMode);
             WinApi.releaseDC(hWnd, hdc);
         }
 
         MsgPtr msgPtr = WinApi.mallocMsg();
 
         WinApi.bindMessageCallbacker(hWnd, new WinMessageCallbacker() {
-            private boolean showConsole=false;
-            private boolean isLeftDown=false;
-            private Point lastPoint=new Point(0,0);
+            private boolean showConsole = false;
+            private boolean isLeftDown = false;
+            private Point lastPoint = new Point(0, 0);
 
             @Override
             public long handle(Hwnd hWnd, long message, long wParam, long lParam) {
                 BitmapDcInfo mdc = WinApi.getBitmapDcInfo(bitmapDcPtr);
-                switch ((int)message){
+                switch ((int) message) {
                     case WinSendMessageMsg.WM_CREATE:
 
                         break;
                     case WinSendMessageMsg.WM_COMMAND:
 
                         break;
-                    case WinSendMessageMsg.WM_PAINT:
-                    {
-                        PaintStructPtr ps=WinApi.mallocPaintStruct();
+                    case WinSendMessageMsg.WM_PAINT: {
+                        PaintStructPtr ps = WinApi.mallocPaintStruct();
                         Rectangle rect = WinApi.getClientRect(hWnd);
                         Hdc hdc = WinApi.beginPaint(hWnd, ps);
-                        WinApi.bitBlt(hdc, 0, 0, (int)rect.size.dx, (int)rect.size.dy, mdc.hdc, 0, 0, WinBitBltRop.SRCCOPY);
+                        WinApi.bitBlt(hdc, 0, 0, (int) rect.size.dx, (int) rect.size.dy, mdc.hdc, 0, 0, WinBitBltRop.SRCCOPY);
                         WinApi.endPaint(hWnd, ps);
                         WinApi.freeMallocPtr(ps);
                     }
 
-                        break;
+                    break;
                     case WinSendMessageMsg.WM_DESTROY:
                         WinApi.postQuitMessage(0);
                         WinApi.deleteDC(mdc.hdc);
@@ -100,24 +99,22 @@ public class TestWinRawWindow {
                         WinApi.freeMallocPtr(bitmapDcPtr);
                         WinApi.freeMallocPtr(msgPtr);
                         break;
-                    case WinSendMessageMsg.WM_KEYUP:
-                    {
-                        if (wParam == WinKeyboardEventVk.VK_F12){
+                    case WinSendMessageMsg.WM_KEYUP: {
+                        if (wParam == WinKeyboardEventVk.VK_F12) {
                             showConsole = !showConsole;
-                            if (showConsole){
+                            if (showConsole) {
                                 WinApi.allocConsole();
 
                                 // 重定向标准输入输出
                                 WinApi.freopenStdio();
 
                                 Hwnd h = WinApi.getConsoleWindow();
-                                String title=WinApi.getWindowText(hWnd);
-                                title+=" - Console";
+                                String title = WinApi.getWindowText(hWnd);
+                                title += " - Console";
                                 WinApi.setWindowText(h, title);
                                 WinApi.setWindowTransparentAlpha(h, 0.25);
 //                                WinApi.postMessage(h, WinSendMessageMsg.WM_SETICON, ICON_BIG, (LPARAM)p_instance->icon);
-                            }
-                            else{
+                            } else {
                                 Hwnd h = WinApi.getConsoleWindow();
                                 WinApi.freeConsole();
                                 WinApi.postMessage(h, WinSendMessageMsg.WM_DESTROY, 0, 0);
@@ -126,8 +123,7 @@ public class TestWinRawWindow {
                         }
                     }
                     break;
-                    case WinSendMessageMsg.WM_LBUTTONDOWN:
-                    {
+                    case WinSendMessageMsg.WM_LBUTTONDOWN: {
                         isLeftDown = true;
                         lastPoint.x = WinApi.getXLParam(lParam);
                         lastPoint.y = WinApi.getYLParam(lParam);
@@ -135,16 +131,14 @@ public class TestWinRawWindow {
                     }
                     WinApi.invalidateRect(hWnd, false);
                     break;
-                    case WinSendMessageMsg.WM_LBUTTONUP:
-                    {
+                    case WinSendMessageMsg.WM_LBUTTONUP: {
                         isLeftDown = false;
                         lastPoint.x = WinApi.getXLParam(lParam);
                         lastPoint.y = WinApi.getYLParam(lParam);
                     }
                     WinApi.invalidateRect(hWnd, false);
                     break;
-                    case WinSendMessageMsg.WM_RBUTTONUP:
-                    {
+                    case WinSendMessageMsg.WM_RBUTTONUP: {
                         HBrush brush = WinApi.createSolidBrush(0xffffff);
                         Hdc pdc = mdc.hdc;
                         HGdiObj oldBrush = WinApi.selectObject(pdc, brush);
@@ -156,12 +150,11 @@ public class TestWinRawWindow {
                     }
                     WinApi.invalidateRect(hWnd, false);
                     break;
-                    case WinSendMessageMsg.WM_MOUSEMOVE:
-                    {
+                    case WinSendMessageMsg.WM_MOUSEMOVE: {
                         int x = WinApi.getXLParam(lParam);
                         int y = WinApi.getYLParam(lParam);
 
-                        if (isLeftDown){
+                        if (isLeftDown) {
                             Hdc pdc = mdc.hdc;
                             WinApi.moveToEx(pdc, new Point(lastPoint.x, lastPoint.y));
                             WinApi.lineTo(pdc, new Point(x, y));
@@ -170,15 +163,14 @@ public class TestWinRawWindow {
 
                         lastPoint.x = x;
                         lastPoint.y = y;
-                        System.out.println(x+","+y);
+                        System.out.println(x + "," + y);
                     }
                     WinApi.invalidateRect(hWnd, false);
                     break;
-                    case WinSendMessageMsg.WM_SIZE:
-                    {
+                    case WinSendMessageMsg.WM_SIZE: {
                         Rectangle rect = WinApi.getClientRect(hWnd);
-                        int newWidth = (int)rect.size.dx;
-                        int newHeight = (int)rect.size.dy;
+                        int newWidth = (int) rect.size.dx;
+                        int newHeight = (int) rect.size.dy;
                         Hdc dc = WinApi.getDC(hWnd);
                         WinApi.winAppResizeCompatibleDC(dc, bitmapDcPtr, newWidth, newHeight, resizeMode);
                         WinApi.releaseDC(hWnd, dc);
@@ -197,8 +189,7 @@ public class TestWinRawWindow {
         WinApi.updateWindow(hWnd);
 
 
-
-        while(WinApi.getMessage(msgPtr,new Hwnd(0),0,0)){
+        while (WinApi.getMessage(msgPtr, new Hwnd(0), 0, 0)) {
             WinApi.translateMessage(msgPtr);
             WinApi.dispatchMessage(msgPtr);
         }

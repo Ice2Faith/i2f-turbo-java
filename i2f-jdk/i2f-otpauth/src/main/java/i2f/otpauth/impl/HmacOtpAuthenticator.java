@@ -1,5 +1,7 @@
 package i2f.otpauth.impl;
 
+import i2f.bytes.ByteUtil;
+import i2f.codec.bytes.basex.Base32;
 import i2f.otpauth.OtpAuthenticator;
 import lombok.Data;
 
@@ -19,7 +21,7 @@ public abstract class HmacOtpAuthenticator implements OtpAuthenticator {
     protected byte[] secret;
     protected String algorithm = "SHA1";
     protected int digits = 6;
-    protected int period = 30;
+
 
     public HmacOtpAuthenticator(byte[] secret) {
         this.secret = secret;
@@ -60,27 +62,10 @@ public abstract class HmacOtpAuthenticator implements OtpAuthenticator {
         return ret;
     }
 
-    public static byte[] toBigEndian(long value, int byteCount) {
-        byte[] ret = new byte[byteCount];
-        // long to big-endian
-        for (int i = 0; i < byteCount; i++) {
-            ret[byteCount - 1 - i] = (byte) (value >>> (byteCount * i) & 0x0ff);
-        }
-        return ret;
-    }
-
-    public static byte[] toLittleEndian(long value, int byteCount) {
-        byte[] ret = new byte[byteCount];
-        // long to little-endian
-        for (int i = 0; i < byteCount; i++) {
-            ret[byteCount - 1 - i] = (byte) (value >>> (byteCount * i) & 0x0ff);
-        }
-        return ret;
-    }
 
     public static byte[] getCounterBytes(long counter, int period) {
         long window = counter / period;
-        byte[] ret = toBigEndian(window, 8);
+        byte[] ret = ByteUtil.toBigEndian(window, 8);
         return ret;
     }
 
@@ -104,22 +89,20 @@ public abstract class HmacOtpAuthenticator implements OtpAuthenticator {
     public String makeQrUrl(String account, String issuer) {
         try {
             String implType = getImplType();
-            String secretBase32 = Base32.encodeOriginal(secret);
+            String secretBase32 = Base32.encode(secret);
             if (issuer == null || issuer.isEmpty()) {
                 return PROTOCOL_PREFIX + implType + "/" +
                         urlEncode(account)
                         + "?secret=" + urlEncode(secretBase32)
                         + "&algorithm=" + urlEncode(algorithm)
-                        + "&digits=" + digits
-                        + "&period=" + period;
+                        + "&digits=" + digits;
             }
             return PROTOCOL_PREFIX + implType + "/" +
                     urlEncode(issuer + ":" + account)
                     + "?secret=" + urlEncode(secretBase32)
                     + "&issuer=" + urlEncode(issuer)
                     + "&algorithm=" + urlEncode(algorithm)
-                    + "&digits=" + digits
-                    + "&period=" + period;
+                    + "&digits=" + digits;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }

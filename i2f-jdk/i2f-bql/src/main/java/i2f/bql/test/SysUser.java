@@ -1,7 +1,6 @@
 package i2f.bql.test;
 
 
-
 import i2f.annotations.db.Column;
 import i2f.annotations.db.DbIgnore;
 import i2f.annotations.db.Primary;

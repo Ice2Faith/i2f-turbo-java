@@ -1,6 +1,7 @@
 package i2f.jce.std.signature;
 
-import i2f.jce.std.util.ByteUtil;
+
+import i2f.array.ArrayUtil;
 
 /**
  * @author Ice2Faith
@@ -12,6 +13,6 @@ public interface ISignatureSigner {
 
     default boolean verify(byte[] sign, byte[] data) throws Exception {
         byte[] cmp = sign(data);
-        return ByteUtil.compare(sign, cmp);
+        return ArrayUtil.equal(sign, cmp);
     }
 }

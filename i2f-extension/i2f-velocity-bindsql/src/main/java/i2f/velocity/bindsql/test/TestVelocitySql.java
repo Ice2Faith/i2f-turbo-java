@@ -14,14 +14,14 @@ import java.util.Map;
  */
 public class TestVelocitySql {
     public static void main(String[] args) throws Exception {
-        String content= GeneratorTool.readFile(".\\i2f-extension\\i2f-velocity-bindsql\\src\\main\\java\\i2f\\velocity\\bindsql\\test\\test.sql.vm","utf-8");
-        Map<String,Object> params = new HashMap<>();
+        String content = GeneratorTool.readFile(".\\i2f-extension\\i2f-velocity-bindsql\\src\\main\\java\\i2f\\velocity\\bindsql\\test\\test.sql.vm", "utf-8");
+        Map<String, Object> params = new HashMap<>();
         params.put("table", "sys_user");
-        Map<String,Object> map=new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("id", 1);
-        map.put("username","zhang");
-        map.put("age",12);
-        params.put("map",map);
+        map.put("username", "zhang");
+        map.put("age", 12);
+        params.put("map", map);
 
         String[] templates = content.split(";");
 

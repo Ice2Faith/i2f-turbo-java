@@ -529,7 +529,6 @@ public class EasyXApi {
     }
 
 
-
     public static void setWriteMode(int mode) {
         NativesEasyX.setWriteMode(mode);
     }

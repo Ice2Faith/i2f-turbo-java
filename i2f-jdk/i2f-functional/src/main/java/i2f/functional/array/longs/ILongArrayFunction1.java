@@ -10,7 +10,8 @@ import i2f.functional.array.ILongArrayFunction;
 @FunctionalInterface
 public interface ILongArrayFunction1<V1> extends ILongArrayFunction {
     long[] apply(V1 v1);
-    static<V1> ILongArrayFunction1<V1> of(ILongArrayFunction1<V1> ret){
+
+    static <V1> ILongArrayFunction1<V1> of(ILongArrayFunction1<V1> ret) {
         return ret;
     }
 }

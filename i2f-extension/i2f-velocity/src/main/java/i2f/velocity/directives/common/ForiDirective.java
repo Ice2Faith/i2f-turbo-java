@@ -12,10 +12,6 @@ import org.apache.velocity.runtime.parser.node.Node;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.Array;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -28,7 +24,7 @@ import java.util.Map;
  * 支持嵌套，对$index,$item表里进行了堆栈保护
  * 定义:
  * #richFor($item,begin:Integer,end:Integer,step:Integer,separator:String,open:String,close:String)
- *  body...
+ * body...
  * #end
  * 最多支持7个参数，至少需要前4个参数
  * $item 迭代的变量
@@ -38,10 +34,10 @@ import java.util.Map;
  * separator 分隔符
  * open 开始符号
  * close 结束符号
- *
  */
 public class ForiDirective extends Directive {
-    public static final String NAME="fori";
+    public static final String NAME = "fori";
+
     @Override
     public String getName() {
         return NAME;
@@ -55,51 +51,51 @@ public class ForiDirective extends Directive {
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
         Node itemNode = node.jjtGetChild(0);
-        String itemExpression= itemNode.literal();
-        String itemName=itemExpression.substring(1);
+        String itemExpression = itemNode.literal();
+        String itemName = itemExpression.substring(1);
         Object bakItemValue = itemNode.value(context);
 
         Node beginNode = node.jjtGetChild(1);
-        int begin=Integer.parseInt(String.valueOf(beginNode.value(context)));
+        int begin = Integer.parseInt(String.valueOf(beginNode.value(context)));
 
         Node endNode = node.jjtGetChild(2);
-        int end=Integer.parseInt(String.valueOf(endNode.value(context)));
+        int end = Integer.parseInt(String.valueOf(endNode.value(context)));
 
         Node stepNode = node.jjtGetChild(3);
-        int step=Integer.parseInt(String.valueOf(stepNode.value(context)));
+        int step = Integer.parseInt(String.valueOf(stepNode.value(context)));
 
-        boolean initState=begin<end;
+        boolean initState = begin < end;
 
-        String indexName="index";
+        String indexName = "index";
 
         Object bakIndexValue = context.get(indexName);
 
         String separator = null;
-        String open=null;
-        String close=null;
+        String open = null;
+        String close = null;
 
-        int i=4;
-        Node arg=null;
-        while(i<=7) {
+        int i = 4;
+        Node arg = null;
+        while (i <= 7) {
             arg = node.jjtGetChild(i);
             if (arg instanceof ASTBlock) {
                 // body
                 break;
-            }else{
-                if(i==4){
+            } else {
+                if (i == 4) {
                     Object value = arg.value(context);
-                    if(value!=null){
-                        separator=String.valueOf(value);
+                    if (value != null) {
+                        separator = String.valueOf(value);
                     }
-                }else if(i==5){
+                } else if (i == 5) {
                     Object value = arg.value(context);
-                    if(value!=null){
-                        open=String.valueOf(value);
+                    if (value != null) {
+                        open = String.valueOf(value);
                     }
-                }else if(i==6){
+                } else if (i == 6) {
                     Object value = arg.value(context);
-                    if(value!=null){
-                        close=String.valueOf(value);
+                    if (value != null) {
+                        close = String.valueOf(value);
                     }
                 }
             }
@@ -107,13 +103,13 @@ public class ForiDirective extends Directive {
             i++;
         }
 
-        StringWriter sw=new StringWriter();
-        int idx=0;
-        for (int item=begin;(item<end)==initState;item+=step) {
+        StringWriter sw = new StringWriter();
+        int idx = 0;
+        for (int item = begin; (item < end) == initState; item += step) {
             context.put(itemName, item);
-            context.put(indexName,idx);
-            if(idx>0){
-                if(separator!=null){
+            context.put(indexName, idx);
+            if (idx > 0) {
+                if (separator != null) {
                     sw.write(separator);
                 }
             }
@@ -123,18 +119,18 @@ public class ForiDirective extends Directive {
         }
 
 
-        context.put(itemName,bakItemValue);
-        context.put(indexName,bakIndexValue);
+        context.put(itemName, bakItemValue);
+        context.put(indexName, bakIndexValue);
 
         String str = sw.toString();
-        if(open!=null || close!=null){
-            str=str.trim();
-            if(!str.isEmpty()){
-                if(open!=null){
-                    str=open+str;
+        if (open != null || close != null) {
+            str = str.trim();
+            if (!str.isEmpty()) {
+                if (open != null) {
+                    str = open + str;
                 }
-                if(close!=null){
-                    str=str+close;
+                if (close != null) {
+                    str = str + close;
                 }
             }
         }

@@ -3,8 +3,6 @@ package i2f.container.readonly.adapter;
 import i2f.container.readonly.exception.ReadonlyException;
 
 import java.util.Iterator;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 /**
