@@ -10,7 +10,8 @@ import i2f.functional.array.IDoubleArrayFunction;
 @FunctionalInterface
 public interface IDoubleArrayFunction3<V1, V2, V3> extends IDoubleArrayFunction {
     double[] apply(V1 v1, V2 v2, V3 v3);
-    static<V1, V2, V3> IDoubleArrayFunction3<V1, V2, V3> of(IDoubleArrayFunction3<V1, V2, V3> ret){
+
+    static <V1, V2, V3> IDoubleArrayFunction3<V1, V2, V3> of(IDoubleArrayFunction3<V1, V2, V3> ret) {
         return ret;
     }
 }

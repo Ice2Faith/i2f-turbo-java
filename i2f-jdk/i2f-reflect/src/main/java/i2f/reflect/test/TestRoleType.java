@@ -1,14 +1,11 @@
 package i2f.reflect.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Ice2Faith
  * @date 2024/4/22 17:30
  * @desc
  */
-public class TestRoleType<U,T> {
+public class TestRoleType<U, T> {
     private String name;
     private U key;
     private T perms;

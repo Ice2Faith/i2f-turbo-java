@@ -26,7 +26,7 @@ import java.util.List;
  * 同时当body不为空串时，移除结束后，可以添加指定的前缀appendPrefix和后缀appendSuffix
  * 定义:
  * #trim(trimPrefixes:String|String[], trimSuffixes:String|String[],appendPrefix:String,appendSuffix:String)
- *  body...
+ * body...
  * #end
  * 最多支持4个参数
  * trimPrefixes: 要移除的前缀，可以是单个字符串，也可以是字符串数组，将会先对body进行trim之后判断前缀，任意前缀被去除之后退出
@@ -44,29 +44,29 @@ import java.util.List;
  * 使用案例：
  * 1. 在拼接SQL中，使用where语句时，移除内部多余的前置或者后置and,or引导符号
  * #trim(["and","or"],["and","or"]," where "," ")
- *     #foreach($column in $map.keySet())
- *         and a.$column = #sql($map.get($column))
- *     #end
+ * #foreach($column in $map.keySet())
+ * and a.$column = #sql($map.get($column))
+ * #end
  * #end
  * 可以看到，这个配置中，移除前缀["and","or"]，移除后缀["and","or"]，并且添加前缀"where "，添加后缀" "
  * 需要特别注意，我们在添加前缀和后缀是，多添加了空格，这是为了避免因为trim操作导致的丢失SQL的空格分隔符，导致最终的SQL不正确
  * 那么，这个例子的最终结果为：
- *  where a.id = 1  and a.age = 22  and a.username = zhang
+ * where a.id = 1  and a.age = 22  and a.username = zhang
  * 这样，就完成了我们的SQL的要求，接下来只要配合一些其他的处理，进行一些变换，处理字符串[zhang]的SQL转义
  * 或者使用占位符，最终使用预编译的SQL就行
  * 比如，经过下面的处理过程
- *  where a.id = ${0} and a.age = ${1} and a.username = ${2}
+ * where a.id = ${0} and a.age = ${1} and a.username = ${2}
  * 此时，可以使用一个map来记录映射关系：
  * {${2}=zhang, ${1}=12, ${3}=1, ${0}=1}
  * 那么，怎么实现这种替换呢？
  * 我们可以添加一个对象方法，比如：
  * public class ValueWrapper {
- *     public Map<String,Object> map=new HashMap<>();
- *     public Object wrap(Object value){
- *         String key= "${"+map.size()+"}";
- *         map.put(key,value);
- *         return key;
- *     }
+ * public Map<String,Object> map=new HashMap<>();
+ * public Object wrap(Object value){
+ * String key= "${"+map.size()+"}";
+ * map.put(key,value);
+ * return key;
+ * }
  * }
  * 这个方法，就将真实的值转换为了一个唯一的key
  * 然后，每次渲染的时候，添加这个新对象到context中
@@ -74,17 +74,17 @@ import java.util.List;
  * ValueWrapper wrapper=new ValueWrapper();
  * params.put("_wrap",wrapper);
  * 当我们渲染结束之后，wrapper.map中就有了真实值和映射关系
- *  where a.id = ${0} and a.age = ${1} and a.username = ${2}
- *  {${2}=zhang, ${1}=12, ${3}=1, ${0}=1}
+ * where a.id = ${0} and a.age = ${1} and a.username = ${2}
+ * {${2}=zhang, ${1}=12, ${3}=1, ${0}=1}
  * 然后，我们使用正则匹配替换，得到顺序的绑定变量和占位符串
- *  where a.id = ? and a.age = ? and a.username = ?
+ * where a.id = ? and a.age = ? and a.username = ?
  * 得到变量列表：
  * [1, 12, zhang]
  * 这样，我们就可以在PrepareStatement中依次的设置变量即可完成预编译
- *
  */
 public class TrimDirective extends Directive {
-    public static final String NAME="trim";
+    public static final String NAME = "trim";
+
     @Override
     public String getName() {
         return NAME;
@@ -97,44 +97,44 @@ public class TrimDirective extends Directive {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        List<String> trimPrefixList=new ArrayList<>();
-        List<String> trimSuffixList=new ArrayList<>();
-        String appendPrefix=null;
-        String appendSuffix=null;
-        int i=0;
-        Node arg=null;
-        while(i<=4) {
-             arg= node.jjtGetChild(i);
-            if(arg instanceof ASTBlock){
+        List<String> trimPrefixList = new ArrayList<>();
+        List<String> trimSuffixList = new ArrayList<>();
+        String appendPrefix = null;
+        String appendSuffix = null;
+        int i = 0;
+        Node arg = null;
+        while (i <= 4) {
+            arg = node.jjtGetChild(i);
+            if (arg instanceof ASTBlock) {
                 // body
                 break;
-            }else if(arg instanceof ASTObjectArray){
-                Collection value = (Collection)((ASTObjectArray) arg).value(context);
+            } else if (arg instanceof ASTObjectArray) {
+                Collection value = (Collection) ((ASTObjectArray) arg).value(context);
                 for (Object item : value) {
-                    if(item==null){
+                    if (item == null) {
                         continue;
                     }
-                    if(i==0){
+                    if (i == 0) {
                         trimPrefixList.add(String.valueOf(item));
-                    }else if(i==1){
+                    } else if (i == 1) {
                         trimSuffixList.add(String.valueOf(item));
-                    }else if(i==2){
-                        appendPrefix=String.valueOf(item);
-                    }else if(i==3){
-                        appendSuffix=String.valueOf(item);
+                    } else if (i == 2) {
+                        appendPrefix = String.valueOf(item);
+                    } else if (i == 3) {
+                        appendSuffix = String.valueOf(item);
                     }
                 }
-            }else{
+            } else {
                 Object value = arg.value(context);
-                if(value!=null){
-                    if(i==0){
+                if (value != null) {
+                    if (i == 0) {
                         trimPrefixList.add(String.valueOf(value));
-                    }else if(i==1){
+                    } else if (i == 1) {
                         trimSuffixList.add(String.valueOf(value));
-                    }else if(i==2){
-                        appendPrefix=String.valueOf(value);
-                    }else if(i==3){
-                        appendSuffix=String.valueOf(value);
+                    } else if (i == 2) {
+                        appendPrefix = String.valueOf(value);
+                    } else if (i == 3) {
+                        appendSuffix = String.valueOf(value);
                     }
                 }
             }
@@ -142,39 +142,39 @@ public class TrimDirective extends Directive {
             i++;
         }
 
-        StringWriter sw=new StringWriter();
+        StringWriter sw = new StringWriter();
         arg.render(context, sw);
         String str = sw.toString();
 
-        if(!trimPrefixList.isEmpty() || !trimSuffixList.isEmpty()){
-            str=str.trim();
+        if (!trimPrefixList.isEmpty() || !trimSuffixList.isEmpty()) {
+            str = str.trim();
 
             for (String item : trimPrefixList) {
-                if(str.startsWith(item)){
-                    str=str.substring(item.length());
+                if (str.startsWith(item)) {
+                    str = str.substring(item.length());
                     break;
                 }
             }
 
             for (String item : trimSuffixList) {
-                if(str.endsWith(item)){
-                    str=str.substring(0,str.length() - item.length());
+                if (str.endsWith(item)) {
+                    str = str.substring(0, str.length() - item.length());
                     break;
                 }
             }
         }
 
-        if(appendPrefix!=null || appendSuffix!=null){
-            str=str.trim();
+        if (appendPrefix != null || appendSuffix != null) {
+            str = str.trim();
 
-            boolean isEmptyBody=str.isEmpty();
+            boolean isEmptyBody = str.isEmpty();
 
-            if(appendPrefix!=null && !isEmptyBody){
-                str=appendPrefix+str;
+            if (appendPrefix != null && !isEmptyBody) {
+                str = appendPrefix + str;
             }
 
-            if(appendSuffix!=null && !isEmptyBody){
-                str=str+appendSuffix;
+            if (appendSuffix != null && !isEmptyBody) {
+                str = str + appendSuffix;
             }
 
         }

@@ -99,6 +99,6 @@ public interface WinShGetSpecialFolderLocationCsidl {
     int CSIDL_FLAG_MASK = 0xFF00;        // mask for all possible flag values
 
 
-    String IE_QUICK_LUNCH_SUB_PATH="\\Microsoft\\Internet Explorer\\Quick Launch";
-    int CSIDL_IE_QUICK_LUNCH=CSIDL_APPDATA;
+    String IE_QUICK_LUNCH_SUB_PATH = "\\Microsoft\\Internet Explorer\\Quick Launch";
+    int CSIDL_IE_QUICK_LUNCH = CSIDL_APPDATA;
 }

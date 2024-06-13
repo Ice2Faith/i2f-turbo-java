@@ -3,8 +3,6 @@ package i2f.container.readonly.adapter;
 import i2f.container.readonly.exception.ReadonlyException;
 
 import java.util.ListIterator;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 /**
@@ -22,42 +20,42 @@ public class ReadonlyListIteratorAdapter<E> implements ListIterator<E> {
     @Override
     public boolean hasNext() {
 
-            return iterator.hasNext();
+        return iterator.hasNext();
 
     }
 
     @Override
     public E next() {
 
-            return iterator.next();
+        return iterator.next();
 
     }
 
     @Override
     public boolean hasPrevious() {
 
-            return iterator.hasPrevious();
+        return iterator.hasPrevious();
 
     }
 
     @Override
     public E previous() {
 
-            return iterator.previous();
+        return iterator.previous();
 
     }
 
     @Override
     public int nextIndex() {
 
-            return iterator.nextIndex();
+        return iterator.nextIndex();
 
     }
 
     @Override
     public int previousIndex() {
 
-            return iterator.previousIndex();
+        return iterator.previousIndex();
 
     }
 
@@ -79,7 +77,7 @@ public class ReadonlyListIteratorAdapter<E> implements ListIterator<E> {
     @Override
     public void forEachRemaining(Consumer<? super E> action) {
 
-            iterator.forEachRemaining(action);
+        iterator.forEachRemaining(action);
 
     }
 }

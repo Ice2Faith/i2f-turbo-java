@@ -22,7 +22,6 @@ public class NamingOutputParameter {
     protected Object value;
 
 
-
     public NamingOutputParameter(String name, int sqlType) {
         this.name = name;
         this.sqlType = sqlType;
@@ -36,30 +35,30 @@ public class NamingOutputParameter {
     public NamingOutputParameter(String name, int sqlType, Object value) {
         this.name = name;
         this.sqlType = sqlType;
-        this.input=true;
+        this.input = true;
         this.value = value;
     }
 
     public NamingOutputParameter(String name, SQLType type, Object value) {
         this.name = name;
         this.type = type;
-        this.input=true;
+        this.input = true;
         this.value = value;
     }
 
     public static NamingOutputParameter of(String name, int sqlType) {
-        return new NamingOutputParameter(name,sqlType);
+        return new NamingOutputParameter(name, sqlType);
     }
 
     public static NamingOutputParameter of(String name, SQLType type) {
-        return new NamingOutputParameter(name,type);
+        return new NamingOutputParameter(name, type);
     }
 
     public static NamingOutputParameter of(String name, int sqlType, Object value) {
-        return new NamingOutputParameter(name,sqlType,value);
+        return new NamingOutputParameter(name, sqlType, value);
     }
 
     public static NamingOutputParameter of(String name, SQLType type, Object value) {
-        return new NamingOutputParameter(name, type,value);
+        return new NamingOutputParameter(name, type, value);
     }
 }

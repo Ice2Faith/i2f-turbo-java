@@ -10,7 +10,8 @@ import i2f.functional.comparator.except.IExComparator;
 @FunctionalInterface
 public interface IExComparator3<V1, V2, V3> extends IExComparator {
     int compare(V1 v1, V2 v2, V3 v3) throws Throwable;
-    static<V1, V2, V3> IExComparator3<V1, V2, V3> of(IExComparator3<V1, V2, V3> ret){
+
+    static <V1, V2, V3> IExComparator3<V1, V2, V3> of(IExComparator3<V1, V2, V3> ret) {
         return ret;
     }
 }

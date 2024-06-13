@@ -17,8 +17,8 @@ import java.util.concurrent.CountDownLatch;
  */
 public class TestWinApp {
     public static void main(String[] args) throws InterruptedException {
-        CountDownLatch latch=new CountDownLatch(1);
-        new Thread(()->{
+        CountDownLatch latch = new CountDownLatch(1);
+        new Thread(() -> {
             WinApi.winAppCreateWin32App("TestWin32App",
                     "Win32应用程序JAVA示例",
                     null,
@@ -28,10 +28,10 @@ public class TestWinApp {
                     new WinAppCallbacker() {
                         @Override
                         public long handle(Win32AppInstancePtr pInstance, Hwnd hwnd, long message, long wParam, long lParam) {
-                            if(message== WinSendMessageMsg.WM_MOUSEMOVE){
-                                int x=WinApi.getXLParam(lParam);
-                                int y=WinApi.getYLParam(lParam);
-                                System.out.println("java:"+message+","+wParam+","+lParam+","+x+","+y);
+                            if (message == WinSendMessageMsg.WM_MOUSEMOVE) {
+                                int x = WinApi.getXLParam(lParam);
+                                int y = WinApi.getYLParam(lParam);
+                                System.out.println("java:" + message + "," + wParam + "," + lParam + "," + x + "," + y);
                             }
                             return 0;
                         }
