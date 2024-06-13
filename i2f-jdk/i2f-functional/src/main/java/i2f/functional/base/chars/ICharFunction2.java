@@ -10,7 +10,8 @@ import i2f.functional.base.ICharFunction;
 @FunctionalInterface
 public interface ICharFunction2<V1, V2> extends ICharFunction {
     char apply(V1 v1, V2 v2);
-    static<V1, V2> ICharFunction2<V1, V2> of(ICharFunction2<V1, V2> ret){
+
+    static <V1, V2> ICharFunction2<V1, V2> of(ICharFunction2<V1, V2> ret) {
         return ret;
     }
 }

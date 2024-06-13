@@ -10,7 +10,7 @@ import i2f.natives.windows.consts.service.WinEnumServiceStatusServiceState;
 import i2f.natives.windows.consts.service.WinEnumServiceStatusServiceType;
 import i2f.natives.windows.consts.service.WinOpenScManagerDesiredAccess;
 import i2f.natives.windows.consts.window.WinSystemMetrics;
-import i2f.natives.windows.types.*;
+import i2f.natives.windows.types.Handle;
 import i2f.natives.windows.types.gdi.Hdc;
 import i2f.natives.windows.types.process.ModuleEntry32;
 import i2f.natives.windows.types.process.ProcessEntry32;

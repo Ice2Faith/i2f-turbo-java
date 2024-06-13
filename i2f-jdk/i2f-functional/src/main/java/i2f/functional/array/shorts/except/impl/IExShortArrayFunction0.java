@@ -1,6 +1,5 @@
 package i2f.functional.array.shorts.except.impl;
 
-import i2f.functional.array.shorts.IShortArrayFunction0;
 import i2f.functional.array.shorts.except.IExShortArrayFunction;
 
 /**
@@ -11,7 +10,8 @@ import i2f.functional.array.shorts.except.IExShortArrayFunction;
 @FunctionalInterface
 public interface IExShortArrayFunction0 extends IExShortArrayFunction {
     short[] apply() throws Throwable;
-    static IExShortArrayFunction0 of(IExShortArrayFunction0 ret){
+
+    static IExShortArrayFunction0 of(IExShortArrayFunction0 ret) {
         return ret;
     }
 }

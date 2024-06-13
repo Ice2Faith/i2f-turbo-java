@@ -1,13 +1,8 @@
 package i2f.container.readonly.adapter;
 
 import i2f.container.readonly.exception.ReadonlyException;
-import i2f.container.sync.adapter.SyncIteratorAdapter;
-import i2f.container.sync.adapter.SyncListIteratorAdapter;
-import i2f.container.sync.adapter.SyncSpliteratorAdapter;
 
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;

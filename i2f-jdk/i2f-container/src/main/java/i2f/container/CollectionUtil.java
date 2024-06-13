@@ -175,7 +175,7 @@ public class CollectionUtil {
     }
 
     public static <T, R, C extends Collection<R>> C argsAs(Supplier<C> supplier, Predicate<T> filter, Function<T, R> mapper, T... arr) {
-       return ofArgs(supplier.get(),filter,mapper,arr);
+        return ofArgs(supplier.get(), filter, mapper, arr);
     }
 
 
@@ -581,7 +581,7 @@ public class CollectionUtil {
     }
 
     public static <T, R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, Predicate<T> filter, Function<T, R> mapper, T[] arr) {
-        return ofArray(supplier.get(),filter,mapper,arr);
+        return ofArray(supplier.get(), filter, mapper, arr);
     }
 
     public static <C extends Collection<Integer>> C arrayAs(Supplier<C> supplier, int[] arr) {
@@ -597,7 +597,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, Predicate<Integer> filter, Function<Integer, R> mapper, int[] arr) {
-        return ofArray(supplier.get(),filter,mapper,arr);
+        return ofArray(supplier.get(), filter, mapper, arr);
     }
 
     public static <C extends Collection<Long>> C arrayAs(Supplier<C> supplier, long[] arr) {
@@ -613,7 +613,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, Predicate<Long> filter, Function<Long, R> mapper, long[] arr) {
-        return ofArray(supplier.get(),filter,mapper,arr);
+        return ofArray(supplier.get(), filter, mapper, arr);
     }
 
 
@@ -630,7 +630,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, Predicate<Short> filter, Function<Short, R> mapper, short[] arr) {
-        return ofArray(supplier.get(),filter,mapper,arr);
+        return ofArray(supplier.get(), filter, mapper, arr);
     }
 
     public static <C extends Collection<Character>> C arrayAs(Supplier<C> supplier, char[] arr) {
@@ -646,7 +646,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, Predicate<Character> filter, Function<Character, R> mapper, char[] arr) {
-        return ofArray(supplier.get(),filter,mapper,arr);
+        return ofArray(supplier.get(), filter, mapper, arr);
     }
 
 
@@ -663,7 +663,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, Predicate<Byte> filter, Function<Byte, R> mapper, byte[] arr) {
-        return ofArray(supplier.get(),filter,mapper,arr);
+        return ofArray(supplier.get(), filter, mapper, arr);
     }
 
 
@@ -680,7 +680,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, Predicate<Boolean> filter, Function<Boolean, R> mapper, boolean[] arr) {
-        return ofArray(supplier.get(),filter,mapper,arr);
+        return ofArray(supplier.get(), filter, mapper, arr);
     }
 
 
@@ -697,7 +697,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, Predicate<Float> filter, Function<Float, R> mapper, float[] arr) {
-        return ofArray(supplier.get(),filter,mapper,arr);
+        return ofArray(supplier.get(), filter, mapper, arr);
     }
 
     public static <C extends Collection<Double>> C arrayAs(Supplier<C> supplier, double[] arr) {
@@ -713,7 +713,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, Predicate<Double> filter, Function<Double, R> mapper, double[] arr) {
-        return ofArray(supplier.get(),filter,mapper,arr);
+        return ofArray(supplier.get(), filter, mapper, arr);
     }
 
     public static <T, C extends Collection<T>> C arrayAs(Supplier<C> supplier, int index, T[] arr) {
@@ -729,7 +729,7 @@ public class CollectionUtil {
     }
 
     public static <T, R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, int index, int length, Function<T, R> mapper, T[] arr) {
-        return ofArray(supplier.get(),index,length,mapper,arr);
+        return ofArray(supplier.get(), index, length, mapper, arr);
     }
 
 
@@ -746,7 +746,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, int index, int length, Function<Integer, R> mapper, int[] arr) {
-        return ofArray(supplier.get(),index,length,mapper,arr);
+        return ofArray(supplier.get(), index, length, mapper, arr);
     }
 
     public static <C extends Collection<Long>> C arrayAs(Supplier<C> supplier, int index, long[] arr) {
@@ -762,7 +762,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, int index, int length, Function<Long, R> mapper, long[] arr) {
-        return ofArray(supplier.get(),index,length,mapper,arr);
+        return ofArray(supplier.get(), index, length, mapper, arr);
     }
 
 
@@ -779,7 +779,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, int index, int length, Function<Short, R> mapper, short[] arr) {
-        return ofArray(supplier.get(),index,length,mapper,arr);
+        return ofArray(supplier.get(), index, length, mapper, arr);
     }
 
 
@@ -796,7 +796,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, int index, int length, Function<Character, R> mapper, char[] arr) {
-        return ofArray(supplier.get(),index,length,mapper,arr);
+        return ofArray(supplier.get(), index, length, mapper, arr);
     }
 
 
@@ -813,7 +813,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, int index, int length, Function<Byte, R> mapper, byte[] arr) {
-        return ofArray(supplier.get(),index,length,mapper,arr);
+        return ofArray(supplier.get(), index, length, mapper, arr);
     }
 
 
@@ -830,7 +830,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, int index, int length, Function<Boolean, R> mapper, boolean[] arr) {
-        return ofArray(supplier.get(),index,length,mapper,arr);
+        return ofArray(supplier.get(), index, length, mapper, arr);
     }
 
 
@@ -847,7 +847,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, int index, int length, Function<Float, R> mapper, float[] arr) {
-        return ofArray(supplier.get(),index,length,mapper,arr);
+        return ofArray(supplier.get(), index, length, mapper, arr);
     }
 
     public static <C extends Collection<Double>> C arrayAs(Supplier<C> supplier, int index, double[] arr) {
@@ -863,7 +863,7 @@ public class CollectionUtil {
     }
 
     public static <R, C extends Collection<R>> C arrayAs(Supplier<C> supplier, int index, int length, Function<Double, R> mapper, double[] arr) {
-        return ofArray(supplier.get(),index,length,mapper,arr);
+        return ofArray(supplier.get(), index, length, mapper, arr);
     }
 
 }

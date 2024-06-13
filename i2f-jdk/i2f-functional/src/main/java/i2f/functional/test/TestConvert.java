@@ -11,18 +11,18 @@ import java.util.function.Function;
  * @desc
  */
 public class TestConvert {
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
     }
 
-    public static<T,R> Function<T,R> convert(IExFunction1<R,T> ret){
+    public static <T, R> Function<T, R> convert(IExFunction1<R, T> ret) {
         return new Function<T, R>() {
             @Override
             public R apply(T t) {
-                try{
+                try {
                     return ret.apply(t);
-                }catch(Throwable e){
-                    throw new UnDeclaredFunctionalException(e.getMessage(),e);
+                } catch (Throwable e) {
+                    throw new UnDeclaredFunctionalException(e.getMessage(), e);
                 }
             }
         };

@@ -26,6 +26,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface AnnName {
     String value();
+
     boolean prefer() default false;
+
     String[] tags() default {};
 }

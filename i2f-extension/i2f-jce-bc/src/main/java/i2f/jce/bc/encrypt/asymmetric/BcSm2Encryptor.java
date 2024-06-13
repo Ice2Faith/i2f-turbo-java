@@ -1,11 +1,11 @@
 package i2f.jce.bc.encrypt.asymmetric;
 
+import i2f.codec.CodecUtil;
 import i2f.jce.bc.BcProvider;
 import i2f.jce.jdk.supports.SecureRandomAlgorithm;
 import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
 import i2f.jce.std.encrypt.asymmetric.key.BytesPrivateKey;
 import i2f.jce.std.encrypt.asymmetric.key.BytesPublicKey;
-import i2f.jce.std.util.ByteUtil;
 import org.bouncycastle.asn1.gm.GMNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -61,10 +61,10 @@ public class BcSm2Encryptor implements IAsymmetricEncryptor {
 
     public BcSm2Encryptor(KeyPair keyPair) {
         if (keyPair.getPublic() != null) {
-            this.publicKey = ByteUtil.toHex(keyPair.getPublic().getEncoded());
+            this.publicKey = CodecUtil.toHexString(keyPair.getPublic().getEncoded());
         }
         if (keyPair.getPrivate() != null) {
-            this.privateKey = ByteUtil.toHex(keyPair.getPrivate().getEncoded());
+            this.privateKey = CodecUtil.toHexString(keyPair.getPrivate().getEncoded());
         }
     }
 

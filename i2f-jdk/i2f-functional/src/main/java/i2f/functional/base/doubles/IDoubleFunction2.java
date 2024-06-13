@@ -10,7 +10,8 @@ import i2f.functional.base.IDoubleFunction;
 @FunctionalInterface
 public interface IDoubleFunction2<V1, V2> extends IDoubleFunction {
     double apply(V1 v1, V2 v2);
-    static<V1, V2> IDoubleFunction2<V1, V2> of(IDoubleFunction2<V1, V2> ret){
+
+    static <V1, V2> IDoubleFunction2<V1, V2> of(IDoubleFunction2<V1, V2> ret) {
         return ret;
     }
 }

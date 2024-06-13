@@ -48,17 +48,17 @@ public class HmacMessageDigester implements IMessageDigester {
         return new HmacMessageDigester(hmacInstance(mdType, key, providerName));
     }
 
-    public static String hmacName(String mdType){
+    public static String hmacName(String mdType) {
         String hmacName = mdType;
-        if(!hmacName.startsWith("Hmac")){
-            hmacName="Hmac" + mdType.replaceAll("-", "");
+        if (!hmacName.startsWith("Hmac")) {
+            hmacName = "Hmac" + mdType.replaceAll("-", "");
         }
         return hmacName;
     }
 
     public static Mac hmacInstance(String mdType, byte[] key, String providerName) {
         try {
-            String hmacName=hmacName(mdType);
+            String hmacName = hmacName(mdType);
             SecretKey skey = new SecretKeySpec(key, hmacName);
             Mac mac = macOf(hmacName, providerName);
             mac.init(skey);

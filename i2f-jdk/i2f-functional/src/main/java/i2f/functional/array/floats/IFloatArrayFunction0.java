@@ -1,7 +1,6 @@
 package i2f.functional.array.floats;
 
 import i2f.functional.array.IFloatArrayFunction;
-import i2f.functional.array.ints.except.impl.IExIntArrayFunction0;
 
 /**
  * @author Ice2Faith
@@ -11,7 +10,8 @@ import i2f.functional.array.ints.except.impl.IExIntArrayFunction0;
 @FunctionalInterface
 public interface IFloatArrayFunction0 extends IFloatArrayFunction {
     float[] apply();
-    static IFloatArrayFunction0 of(IFloatArrayFunction0 ret){
+
+    static IFloatArrayFunction0 of(IFloatArrayFunction0 ret) {
         return ret;
     }
 }

@@ -10,7 +10,8 @@ import i2f.functional.predicate.IPredicate;
 @FunctionalInterface
 public interface IPredicate0 extends IPredicate {
     boolean test();
-    static IPredicate of(IPredicate ret){
+
+    static IPredicate of(IPredicate ret) {
         return ret;
     }
 }

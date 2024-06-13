@@ -9,13 +9,15 @@ import java.util.Map;
  * @desc
  */
 public class ValueWrapper {
-    private Map<String,Object> map=new HashMap<>();
-    public Map<String,Object> getMap(){
+    private Map<String, Object> map = new HashMap<>();
+
+    public Map<String, Object> getMap() {
         return map;
     }
-    public Object wrap(Object value){
-        String key= "${"+map.size()+"}";
-        map.put(key,value);
+
+    public Object wrap(Object value) {
+        String key = "${" + map.size() + "}";
+        map.put(key, value);
         return key;
     }
 }

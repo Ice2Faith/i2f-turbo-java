@@ -16,100 +16,101 @@ import java.util.regex.Pattern;
  */
 public class JsonParser {
 
-    public static List<String> splitTokens(String str, Function<String,String> filter){
-        AtomicInteger idx=new AtomicInteger(0);
-        List<String> tokens=new ArrayList<>();
-        while(true){
-            String part= nextBlock(str,idx);
-            if(part==null){
+    public static List<String> splitTokens(String str, Function<String, String> filter) {
+        AtomicInteger idx = new AtomicInteger(0);
+        List<String> tokens = new ArrayList<>();
+        while (true) {
+            String part = nextBlock(str, idx);
+            if (part == null) {
                 break;
             }
-            if(filter!=null) {
+            if (filter != null) {
                 part = filter.apply(part);
             }
-            if(part!=null){
+            if (part != null) {
                 tokens.add(part);
             }
         }
         return tokens;
     }
-    public static Object parse(String json){
+
+    public static Object parse(String json) {
         List<String> tokens = splitTokens(json, part -> {
             String trim = part.trim();
             if (trim.isEmpty()) {
                 return null;
             }
-            if(trim.startsWith("//") || trim.startsWith("/*")){
+            if (trim.startsWith("//") || trim.startsWith("/*")) {
                 return null;
             }
             return trim;
         });
-        String bestJson=null;
+        String bestJson = null;
         for (String token : tokens) {
-            if(token.startsWith("{") || token.startsWith("[")){
-                bestJson=token;
+            if (token.startsWith("{") || token.startsWith("[")) {
+                bestJson = token;
                 break;
             }
         }
 
-        if(bestJson==null){
+        if (bestJson == null) {
             throw new IllegalArgumentException("non-json content found!");
         }
 
-        String prefix=bestJson.substring(0,1);
-        String innerText=bestJson.substring(1,bestJson.length()-1);
+        String prefix = bestJson.substring(0, 1);
+        String innerText = bestJson.substring(1, bestJson.length() - 1);
 
-        tokens=splitTokens(innerText,part -> {
+        tokens = splitTokens(innerText, part -> {
             String trim = part.trim();
             if (trim.isEmpty()) {
                 return null;
             }
-            if(trim.startsWith("//") || trim.startsWith("/*")){
+            if (trim.startsWith("//") || trim.startsWith("/*")) {
                 return null;
             }
             return trim;
         });
 
-        if("{".equals(prefix)){
-            Map<String,Object> ret=new LinkedHashMap<>();
+        if ("{".equals(prefix)) {
+            Map<String, Object> ret = new LinkedHashMap<>();
 
-            List<String> flags=new ArrayList<>();
+            List<String> flags = new ArrayList<>();
             for (String token : tokens) {
-                char ch=token.charAt(0);
-                if(ch=='[' || ch=='{' || ch=='('){
+                char ch = token.charAt(0);
+                if (ch == '[' || ch == '{' || ch == '(') {
                     flags.add(token);
-                }else if(ch=='"' || ch=='\''){
+                } else if (ch == '"' || ch == '\'') {
                     flags.add(token);
-                }else{
-                    String item=token;
-                    if(item.startsWith(":")){
+                } else {
+                    String item = token;
+                    if (item.startsWith(":")) {
                         flags.add(":");
-                        item=item.substring(1);
+                        item = item.substring(1);
                     }
-                    if(item.endsWith(",")){
-                        item=item.substring(0,item.length()-1);
-                        if(!item.isEmpty()) {
+                    if (item.endsWith(",")) {
+                        item = item.substring(0, item.length() - 1);
+                        if (!item.isEmpty()) {
                             flags.add(item);
                         }
                         flags.add(",");
-                    }else{
-                        if(!item.isEmpty()) {
+                    } else {
+                        if (!item.isEmpty()) {
                             flags.add(item);
                         }
                     }
                 }
             }
 
-            Map<String,String> kvs=new LinkedHashMap<>();
-            String key=null;
-            int i=0;
+            Map<String, String> kvs = new LinkedHashMap<>();
+            String key = null;
+            int i = 0;
             for (String token : flags) {
-                if(i%4==0){
-                    key=token;
+                if (i % 4 == 0) {
+                    key = token;
                 }
-                if(i%4==2){
-                    String val=token;
-                    kvs.put(key,val);
+                if (i % 4 == 2) {
+                    String val = token;
+                    kvs.put(key, val);
                 }
                 i++;
             }
@@ -117,63 +118,63 @@ public class JsonParser {
             for (Map.Entry<String, String> entry : kvs.entrySet()) {
                 String k = unescape(entry.getKey());
                 String v = entry.getValue();
-                if(v.startsWith("{") || v.startsWith("[")){
+                if (v.startsWith("{") || v.startsWith("[")) {
                     Object val = parse(v);
-                    ret.put(k,val);
-                }else if(v.startsWith("\"") || v.startsWith("'")){
-                    Object val=unescape(v);
-                    ret.put(k,val);
-                }else if(v.matches(RegexPattens.INTEGER_NUMBER_REGEX)){
-                    long val=Long.parseLong(v);
-                    ret.put(k,val);
-                }else if(v.matches(RegexPattens.DOUBLE_NUMBER_REGEX)){
-                    Object val=Double.parseDouble(v);
-                    ret.put(k,val);
-                }else if("true".equals(v)){
-                    ret.put(k,true);
-                }else if("false".equals(v)){
-                    ret.put(k,false);
-                }else if("null".equals(v)){
-                    ret.put(k,null);
-                }else{
-                    throw new IllegalArgumentException("un-support parse value: "+ v +" of key: "+k);
+                    ret.put(k, val);
+                } else if (v.startsWith("\"") || v.startsWith("'")) {
+                    Object val = unescape(v);
+                    ret.put(k, val);
+                } else if (v.matches(RegexPattens.INTEGER_NUMBER_REGEX)) {
+                    long val = Long.parseLong(v);
+                    ret.put(k, val);
+                } else if (v.matches(RegexPattens.DOUBLE_NUMBER_REGEX)) {
+                    Object val = Double.parseDouble(v);
+                    ret.put(k, val);
+                } else if ("true".equals(v)) {
+                    ret.put(k, true);
+                } else if ("false".equals(v)) {
+                    ret.put(k, false);
+                } else if ("null".equals(v)) {
+                    ret.put(k, null);
+                } else {
+                    throw new IllegalArgumentException("un-support parse value: " + v + " of key: " + k);
                 }
             }
 
             return ret;
-        }else if("[".equals(prefix)){
-            List<Object> ret=new ArrayList<>();
+        } else if ("[".equals(prefix)) {
+            List<Object> ret = new ArrayList<>();
 
-            List<String> flags=new ArrayList<>();
-            for (String token : tokens){
-                char ch=token.charAt(0);
-                if(ch=='[' || ch=='{' || ch=='('){
+            List<String> flags = new ArrayList<>();
+            for (String token : tokens) {
+                char ch = token.charAt(0);
+                if (ch == '[' || ch == '{' || ch == '(') {
                     flags.add(token);
-                }else if(ch=='"' || ch=='\''){
+                } else if (ch == '"' || ch == '\'') {
                     flags.add(token);
-                }else{
-                    String item=token;
-                    if(item.startsWith(",")){
+                } else {
+                    String item = token;
+                    if (item.startsWith(",")) {
                         flags.add(",");
-                        item=item.substring(1);
+                        item = item.substring(1);
                     }
-                    if(item.endsWith(",")){
-                        item=item.substring(0,item.length()-1);
-                        if(!item.isEmpty()) {
+                    if (item.endsWith(",")) {
+                        item = item.substring(0, item.length() - 1);
+                        if (!item.isEmpty()) {
                             String[] arr = item.split(",");
                             for (int i = 0; i < arr.length; i++) {
-                                if(i>0){
+                                if (i > 0) {
                                     flags.add(",");
                                 }
                                 flags.add(arr[i]);
                             }
                         }
                         flags.add(",");
-                    }else{
-                        if(!item.isEmpty()) {
+                    } else {
+                        if (!item.isEmpty()) {
                             String[] arr = item.split(",");
                             for (int i = 0; i < arr.length; i++) {
-                                if(i>0){
+                                if (i > 0) {
                                     flags.add(",");
                                 }
                                 flags.add(arr[i]);
@@ -183,37 +184,37 @@ public class JsonParser {
                 }
             }
 
-            List<String> elems=new ArrayList<>();
-            int i=0;
+            List<String> elems = new ArrayList<>();
+            int i = 0;
             for (String flag : flags) {
-                if(i%2==0){
+                if (i % 2 == 0) {
                     elems.add(flag);
                 }
                 i++;
             }
 
             for (String elem : elems) {
-                String v=elem;
-                if(v.startsWith("{") || v.startsWith("[")){
+                String v = elem;
+                if (v.startsWith("{") || v.startsWith("[")) {
                     Object val = parse(v);
                     ret.add(val);
-                }else if(v.startsWith("\"") || v.startsWith("'")){
-                    Object val=unescape(v);
+                } else if (v.startsWith("\"") || v.startsWith("'")) {
+                    Object val = unescape(v);
                     ret.add(val);
-                }else if(v.matches(RegexPattens.INTEGER_NUMBER_REGEX)){
-                    long val=Long.parseLong(v);
+                } else if (v.matches(RegexPattens.INTEGER_NUMBER_REGEX)) {
+                    long val = Long.parseLong(v);
                     ret.add(val);
-                }else if(v.matches(RegexPattens.DOUBLE_NUMBER_REGEX)){
-                    Object val=Double.parseDouble(v);
+                } else if (v.matches(RegexPattens.DOUBLE_NUMBER_REGEX)) {
+                    Object val = Double.parseDouble(v);
                     ret.add(val);
-                }else if("true".equals(v)){
+                } else if ("true".equals(v)) {
                     ret.add(true);
-                }else if("false".equals(v)){
+                } else if ("false".equals(v)) {
                     ret.add(false);
-                }else if("null".equals(v)){
+                } else if ("null".equals(v)) {
                     ret.add(null);
-                }else{
-                    throw new IllegalArgumentException("un-support parse value: "+ v);
+                } else {
+                    throw new IllegalArgumentException("un-support parse value: " + v);
                 }
             }
 
@@ -223,20 +224,20 @@ public class JsonParser {
         return null;
     }
 
-    public static String unescape(String str){
-        if(str==null){
+    public static String unescape(String str) {
+        if (str == null) {
             return null;
         }
-        String item=str;
-        if(str.startsWith("\"") || str.startsWith("'")){
-            item=str.substring(1,str.length()-1);
+        String item = str;
+        if (str.startsWith("\"") || str.startsWith("'")) {
+            item = str.substring(1, str.length() - 1);
         }
-        item=item.replaceAll("\\\\\\\\","\\\\");
-        item=item.replaceAll("\\\\n","\n");
-        item=item.replaceAll("\\\\r","\r");
-        item=item.replaceAll("\\\\t","\t");
-        item=item.replaceAll("\\\\\"","\"");
-        item=item.replaceAll("\\\\'","'");
+        item = item.replaceAll("\\\\\\\\", "\\\\");
+        item = item.replaceAll("\\\\n", "\n");
+        item = item.replaceAll("\\\\r", "\r");
+        item = item.replaceAll("\\\\t", "\t");
+        item = item.replaceAll("\\\\\"", "\"");
+        item = item.replaceAll("\\\\'", "'");
         return item;
     }
 

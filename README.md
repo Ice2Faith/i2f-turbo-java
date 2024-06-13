@@ -81,67 +81,67 @@
 ## 项目规划
 
 - i2f-jdk
-  - 包含仅依赖于jdk的功能
-  - 最小jdk为开发jdk8
-  - 后续jdk版本未进行测试
-  - 可能部分功能由于jdk版本升级的变更而不可用
+    - 包含仅依赖于jdk的功能
+    - 最小jdk为开发jdk8
+    - 后续jdk版本未进行测试
+    - 可能部分功能由于jdk版本升级的变更而不可用
 - i2f-jdk-all
-  - 是一个聚合包
-  - 包含了i2f-jdk下的所有模块的整合包
+    - 是一个聚合包
+    - 包含了i2f-jdk下的所有模块的整合包
 - i2f-extension
-  - 用于对于第三方jar包的功能进行二次封装
-  - 因此，这部分依赖第三方功能
-  - 打包时，仅打包本包内容
-  - 同时，依赖i2f-jdk模块的内容
-  - 因此，使用时，需要本包引入，第三方包引入，以及jdk的依赖引入
+    - 用于对于第三方jar包的功能进行二次封装
+    - 因此，这部分依赖第三方功能
+    - 打包时，仅打包本包内容
+    - 同时，依赖i2f-jdk模块的内容
+    - 因此，使用时，需要本包引入，第三方包引入，以及jdk的依赖引入
 - i2f-spring
-  - 用于针对spring的部分进行封装
-  - 这部分，仅针对spring的基础部分，也就是springframework部分
-  - 不包含springboot自动装配的部分
-  - 包含但不限于bean/tx/context/web/...
-  - 这部分，仅依赖spring以及jdk依赖
-  - 某种意义上来说，也算是extension的一部分
-  - 只不过单独拧出来
+    - 用于针对spring的部分进行封装
+    - 这部分，仅针对spring的基础部分，也就是springframework部分
+    - 不包含springboot自动装配的部分
+    - 包含但不限于bean/tx/context/web/...
+    - 这部分，仅依赖spring以及jdk依赖
+    - 某种意义上来说，也算是extension的一部分
+    - 只不过单独拧出来
 - i2f-springboot
-  - 用于针对springboot的自动装配
-  - 实现一些自动装配的功能，也就是starter功能
-  - 基于jdk,spring,extension
+    - 用于针对springboot的自动装配
+    - 实现一些自动装配的功能，也就是starter功能
+    - 基于jdk,spring,extension
 - 其他
-  - 可能会提供一些以all结尾的模块
-  - 这部分就是一些整合同一类特征的包
-  - 功能是打包其他模块
-  - 模块本身无实现逻辑
+    - 可能会提供一些以all结尾的模块
+    - 这部分就是一些整合同一类特征的包
+    - 功能是打包其他模块
+    - 模块本身无实现逻辑
 
 ## project plan
 
 - i2f-jdk
-  - only rely on jdk to develop
-  - minimal jdk version support jdk8
-  - the after version not tested
-  - some feature maybe un-useful because of higher jdk version
+    - only rely on jdk to develop
+    - minimal jdk version support jdk8
+    - the after version not tested
+    - some feature maybe un-useful because of higher jdk version
 - i2f-jdk-all
-  - it an merge package
-  - included all module of in i2f-jdk
+    - it an merge package
+    - included all module of in i2f-jdk
 - i2f-extension
-  - the features base on the thrid java package
-  - so, it rely on the thrid package
-  - only include itself code when package module
-  - and, maybe rely some module from i2f-jdk
-  - so that, add itself, thrid package and jdk module package when you use it
+    - the features base on the thrid java package
+    - so, it rely on the thrid package
+    - only include itself code when package module
+    - and, maybe rely some module from i2f-jdk
+    - so that, add itself, thrid package and jdk module package when you use it
 - i2f-spring
-  - make features for spring package only
-  - it only for spring basic features, also is springframework
-  - excludes springboot partial
-  - include bean/tx/context/web...
-  - and, only rely on jdk modules
-  - in some means, it is a patrial of extension
-  - but, use single module built.
+    - make features for spring package only
+    - it only for spring basic features, also is springframework
+    - excludes springboot partial
+    - include bean/tx/context/web...
+    - and, only rely on jdk modules
+    - in some means, it is a patrial of extension
+    - but, use single module built.
 - i2f-springboot
-  - make features fir springboot to auto-confuguration
-  - implements some features to auto-configuration, also is some springboot starter
-  - base on jdk, spring, extension
+    - make features fir springboot to auto-confuguration
+    - implements some features to auto-configuration, also is some springboot starter
+    - base on jdk, spring, extension
 - the others
-  - maybe provide some module of the name end with all
-  - those module only merge some has similiar feature modules to package
-  - it only package other modules
-  - itself not implements any features.
+    - maybe provide some module of the name end with all
+    - those module only merge some has similiar feature modules to package
+    - it only package other modules
+    - itself not implements any features.

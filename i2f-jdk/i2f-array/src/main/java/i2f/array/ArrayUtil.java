@@ -2,6 +2,7 @@ package i2f.array;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -3673,5 +3674,213 @@ public class ArrayUtil {
             return -1;
         }
         return 0;
+    }
+
+    public static <T> boolean equal(T[] arr1, T[] arr2) {
+        return equal(arr1, arr2, Objects::equals);
+    }
+
+    public static <T> boolean equal(T[] arr1, T[] arr2, BiPredicate<T, T> equalizer) {
+        if (arr1 == arr2) {
+            return true;
+        }
+        if (arr1 == null) {
+            return false;
+        }
+        if (arr2 == null) {
+            return false;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            T v1 = arr1[i];
+            T v2 = arr2[i];
+            boolean rs = equalizer.test(v1, v2);
+            if (!rs) {
+                return false;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return false;
+        }
+        if (i < arr2.length) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean equal(int[] arr1, int[] arr2) {
+        if (arr1 == arr2) {
+            return true;
+        }
+        if (arr1 == null) {
+            return false;
+        }
+        if (arr2 == null) {
+            return false;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            int v1 = arr1[i];
+            int v2 = arr2[i];
+            if (v1 != v2) {
+                return false;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return false;
+        }
+        if (i < arr2.length) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean equal(long[] arr1, long[] arr2) {
+        if (arr1 == arr2) {
+            return true;
+        }
+        if (arr1 == null) {
+            return false;
+        }
+        if (arr2 == null) {
+            return false;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            long v1 = arr1[i];
+            long v2 = arr2[i];
+            if (v1 != v2) {
+                return false;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return false;
+        }
+        if (i < arr2.length) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean equal(short[] arr1, short[] arr2) {
+        if (arr1 == arr2) {
+            return true;
+        }
+        if (arr1 == null) {
+            return false;
+        }
+        if (arr2 == null) {
+            return false;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            short v1 = arr1[i];
+            short v2 = arr2[i];
+            if (v1 != v2) {
+                return false;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return false;
+        }
+        if (i < arr2.length) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean equal(char[] arr1, char[] arr2) {
+        if (arr1 == arr2) {
+            return true;
+        }
+        if (arr1 == null) {
+            return false;
+        }
+        if (arr2 == null) {
+            return false;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            char v1 = arr1[i];
+            char v2 = arr2[i];
+            if (v1 != v2) {
+                return false;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return false;
+        }
+        if (i < arr2.length) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean equal(byte[] arr1, byte[] arr2) {
+        if (arr1 == arr2) {
+            return true;
+        }
+        if (arr1 == null) {
+            return false;
+        }
+        if (arr2 == null) {
+            return false;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            byte v1 = arr1[i];
+            byte v2 = arr2[i];
+            if (v1 != v2) {
+                return false;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return false;
+        }
+        if (i < arr2.length) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean equal(boolean[] arr1, boolean[] arr2) {
+        if (arr1 == arr2) {
+            return true;
+        }
+        if (arr1 == null) {
+            return false;
+        }
+        if (arr2 == null) {
+            return false;
+        }
+        int i = 0;
+        while (i < arr1.length && i < arr2.length) {
+            boolean v1 = arr1[i];
+            boolean v2 = arr2[i];
+            if (v1 != v2) {
+                return false;
+            }
+            i++;
+        }
+
+        if (i < arr1.length) {
+            return false;
+        }
+        if (i < arr2.length) {
+            return false;
+        }
+        return true;
     }
 }

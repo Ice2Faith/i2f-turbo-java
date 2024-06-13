@@ -2,6 +2,7 @@ package i2f.web.wrapper;
 
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -11,7 +12,8 @@ import java.io.IOException;
  * @desc
  */
 public class ByteArrayServletInputStream extends ServletInputStream {
-    protected ByteArrayInputStream bis ;
+    protected ByteArrayInputStream bis;
+
     public ByteArrayServletInputStream(ByteArrayInputStream bis) {
         this.bis = bis;
     }

@@ -1,7 +1,6 @@
 package i2f.functional.array.chars;
 
 import i2f.functional.array.ICharArrayFunction;
-import i2f.functional.array.doubles.except.impl.IExDoubleArrayFunction0;
 
 /**
  * @author Ice2Faith
@@ -11,7 +10,8 @@ import i2f.functional.array.doubles.except.impl.IExDoubleArrayFunction0;
 @FunctionalInterface
 public interface ICharArrayFunction0 extends ICharArrayFunction {
     char[] apply();
-    static ICharArrayFunction0 of(ICharArrayFunction0 ret){
+
+    static ICharArrayFunction0 of(ICharArrayFunction0 ret) {
         return ret;
     }
 }

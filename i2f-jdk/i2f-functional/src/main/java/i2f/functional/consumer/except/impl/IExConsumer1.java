@@ -12,7 +12,8 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface IExConsumer1<V1> extends IExConsumer, Serializable {
     void accept(V1 v1) throws Throwable;
-    static<V1> IExConsumer1<V1> of(IExConsumer1<V1> ret){
+
+    static <V1> IExConsumer1<V1> of(IExConsumer1<V1> ret) {
         return ret;
     }
 }

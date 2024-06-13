@@ -10,7 +10,8 @@ import i2f.functional.base.doubles.except.IExDoubleFunction;
 @FunctionalInterface
 public interface IExDoubleFunction2<V1, V2> extends IExDoubleFunction {
     double apply(V1 v1, V2 v2) throws Throwable;
-    static<V1, V2> IExDoubleFunction2<V1, V2> of(IExDoubleFunction2<V1, V2> ret){
+
+    static <V1, V2> IExDoubleFunction2<V1, V2> of(IExDoubleFunction2<V1, V2> ret) {
         return ret;
     }
 }

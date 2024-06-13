@@ -2,9 +2,9 @@ package i2f.velocity;
 
 import i2f.velocity.directives.common.ForiDirective;
 import i2f.velocity.directives.common.RichForDirective;
+import i2f.velocity.directives.common.TrimDirective;
 import i2f.velocity.directives.sql.SqlSetDirective;
 import i2f.velocity.directives.sql.SqlWhereDirective;
-import i2f.velocity.directives.common.TrimDirective;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;

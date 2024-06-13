@@ -1089,8 +1089,8 @@ public class ReflectResolver {
         ret.add("enable" + suffix);
         ret.add("build" + suffix);
         ret.add(fieldName);
-        if(fieldName.startsWith("is")){
-            ret.add("set"+firstUpper(fieldName.substring("is".length())));
+        if (fieldName.startsWith("is")) {
+            ret.add("set" + firstUpper(fieldName.substring("is".length())));
         }
         ret.add(suffix);
         return ret;
@@ -1157,30 +1157,31 @@ public class ReflectResolver {
         return ret;
     }
 
-    public static<T> T getAnnotationValue(AnnotatedElement elem,Class<? extends Annotation> clazz,String fieldName){
+    public static <T> T getAnnotationValue(AnnotatedElement elem, Class<? extends Annotation> clazz, String fieldName) {
         Annotation ann = getAnnotation(elem, clazz);
-        if(ann==null){
+        if (ann == null) {
             return null;
         }
-        try{
+        try {
             Object value = invokeMethod(ann, fieldName);
-            return (T)value;
-        }catch(Exception e){
+            return (T) value;
+        } catch (Exception e) {
 
         }
         return null;
     }
-    public static Map<String,Object> getAnnotationValues(AnnotatedElement elem,Class<? extends Annotation> clazz,List<String> fieldNames){
-        Map<String,Object> ret=new LinkedHashMap<>();
+
+    public static Map<String, Object> getAnnotationValues(AnnotatedElement elem, Class<? extends Annotation> clazz, List<String> fieldNames) {
+        Map<String, Object> ret = new LinkedHashMap<>();
         Annotation ann = getAnnotation(elem, clazz);
-        if(ann==null){
+        if (ann == null) {
             return ret;
         }
         for (String fieldName : fieldNames) {
-            try{
+            try {
                 Object value = invokeMethod(ann, fieldName);
-                ret.put(fieldName,value);
-            }catch(Exception e){
+                ret.put(fieldName, value);
+            } catch (Exception e) {
 
             }
         }
@@ -1188,32 +1189,32 @@ public class ReflectResolver {
         return ret;
     }
 
-    private static LruMap<String, Map<String,Object>> CACHE_GET_ANNOTATION_ALL_VALUES = new LruMap<>(2048);
+    private static LruMap<String, Map<String, Object>> CACHE_GET_ANNOTATION_ALL_VALUES = new LruMap<>(2048);
 
-    public static Map<String,Object> getAnnotationAllValues(AnnotatedElement elem,Class<? extends Annotation> clazz){
-        String key=elem+"#"+clazz;
+    public static Map<String, Object> getAnnotationAllValues(AnnotatedElement elem, Class<? extends Annotation> clazz) {
+        String key = elem + "#" + clazz;
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_ANNOTATION_ALL_VALUES : null), key, (k) -> {
-            Map<String,Object> ret=new LinkedHashMap<>();
+            Map<String, Object> ret = new LinkedHashMap<>();
             Annotation ann = getAnnotation(elem, clazz);
-            if(ann==null){
+            if (ann == null) {
                 return ret;
             }
             Class<? extends Annotation> annotationType = ann.annotationType();
             Map<Method, Class<?>> methods = getMethods(annotationType);
             for (Map.Entry<Method, Class<?>> entry : methods.entrySet()) {
                 Method method = entry.getKey();
-                if(method.getParameterCount()>0){
+                if (method.getParameterCount() > 0) {
                     continue;
                 }
 
                 String name = method.getName();
-                if(Arrays.asList("toString","equals","hashCode","annotationType").contains(name)){
+                if (Arrays.asList("toString", "equals", "hashCode", "annotationType").contains(name)) {
                     continue;
                 }
-                try{
+                try {
                     Object value = invokeMethod(ann, name);
-                    ret.put(name,value);
-                }catch(Exception e){
+                    ret.put(name, value);
+                } catch (Exception e) {
 
                 }
             }
@@ -1224,35 +1225,37 @@ public class ReflectResolver {
     private static LruMap<String, Annotation> CACHE_GET_ANNOTATION = new LruMap<>(8192);
 
     public static <T extends Annotation> T getAnnotation(AnnotatedElement elem, Class<T> clazz) {
-        String key=elem+"#"+clazz;
-        return (T)cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_ANNOTATION : null), key, (k) -> {
+        String key = elem + "#" + clazz;
+        return (T) cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_ANNOTATION : null), key, (k) -> {
             Set<T> anns = getAnnotations(elem, clazz, true);
             if (!anns.isEmpty()) {
                 return anns.iterator().next();
             }
             return null;
-        }, e->e);
+        }, e -> e);
     }
 
     private static LruMap<String, Map<Annotation, List<Annotation>>> CACHE_GET_ASSIGN_ANNOTATIONS = new LruMap<>(8192);
 
     public static <T extends Annotation> Map<T, List<Annotation>> getAssignAnnotations(AnnotatedElement elem, Class<T> clazz) {
-        String key=elem+"#"+clazz;
-        return (Map<T, List<Annotation>>)cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_ASSIGN_ANNOTATIONS : null), key, (k) -> {
-            Map ret= getAssignAnnotationsNext(elem, clazz, null, new LinkedList<>());
+        String key = elem + "#" + clazz;
+        return (Map<T, List<Annotation>>) cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_ASSIGN_ANNOTATIONS : null), key, (k) -> {
+            Map ret = getAssignAnnotationsNext(elem, clazz, null, new LinkedList<>());
             return ret;
-        }, e->{
-            Map<Annotation, List<Annotation>> ret=new LinkedHashMap<>();
+        }, e -> {
+            Map<Annotation, List<Annotation>> ret = new LinkedHashMap<>();
             for (Map.Entry<Annotation, List<Annotation>> entry : e.entrySet()) {
-                ret.put(entry.getKey(),new ArrayList<>(entry.getValue()));
+                ret.put(entry.getKey(), new ArrayList<>(entry.getValue()));
             }
             return ret;
         });
 
     }
+
     public static <T extends Annotation> Map<T, List<Annotation>> getAssignAnnotationsNext(AnnotatedElement elem, Class<T> clazz, Class<? extends Annotation> repeatableClass) {
-        return getAssignAnnotationsNext(elem,clazz,repeatableClass,new LinkedList<>());
+        return getAssignAnnotationsNext(elem, clazz, repeatableClass, new LinkedList<>());
     }
+
     public static <T extends Annotation> Map<T, List<Annotation>> getAssignAnnotationsNext(AnnotatedElement elem, Class<T> clazz, Class<? extends Annotation> repeatableClass, LinkedList<Annotation> stack) {
         Map<T, List<Annotation>> ret = new LinkedHashMap<>();
         if (repeatableClass == null) {
@@ -1316,11 +1319,11 @@ public class ReflectResolver {
     private static LruMap<String, Set<Annotation>> CACHE_GET_ANNOTATIONS = new LruMap<>(8192);
 
     public static <T extends Annotation> Set<T> getAnnotations(AnnotatedElement elem, Class<T> clazz) {
-        String key=elem+"#"+clazz;
-        return (Set<T>)cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_ANNOTATIONS : null), key, (k) -> {
-            Set set=getAnnotations(elem, clazz, false);
+        String key = elem + "#" + clazz;
+        return (Set<T>) cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_ANNOTATIONS : null), key, (k) -> {
+            Set set = getAnnotations(elem, clazz, false);
             return set;
-        }, e->{
+        }, e -> {
             return new HashSet<>(e);
         });
     }

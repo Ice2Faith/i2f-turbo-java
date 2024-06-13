@@ -2,6 +2,7 @@ package i2f.web.wrapper;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -39,7 +40,7 @@ public class ByteArrayServletOutputStream extends ServletOutputStream {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        bos.write(b,off,len);
+        bos.write(b, off, len);
     }
 
     @Override

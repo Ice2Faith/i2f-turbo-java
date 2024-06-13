@@ -1,6 +1,5 @@
 package i2f.functional.adapt;
 
-import i2f.functional.array.bools.except.impl.IExBoolArrayFunction0;
 import i2f.functional.func.impl.IFunction2;
 
 /**
@@ -10,7 +9,7 @@ import i2f.functional.func.impl.IFunction2;
  */
 @FunctionalInterface
 public interface IBuilder<R, T, V> extends IFunction2<R, T, V> {
-    static <R, T, V> IBuilder<R, T, V> of(IBuilder<R, T, V> ret){
+    static <R, T, V> IBuilder<R, T, V> of(IBuilder<R, T, V> ret) {
         return ret;
     }
 }

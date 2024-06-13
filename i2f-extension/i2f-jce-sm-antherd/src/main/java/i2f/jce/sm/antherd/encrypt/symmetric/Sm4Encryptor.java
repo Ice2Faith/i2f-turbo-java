@@ -1,10 +1,10 @@
 package i2f.jce.sm.antherd.encrypt.symmetric;
 
 import com.antherd.smcrypto.sm4.Sm4;
+import i2f.codec.CodecUtil;
 import i2f.jce.jdk.encrypt.Encryptor;
 import i2f.jce.jdk.supports.SecureRandomAlgorithm;
 import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
-import i2f.jce.std.util.ByteUtil;
 
 import java.util.Objects;
 
@@ -38,7 +38,7 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
         byte[] keyBytes = Encryptor.genKeyBytes(vectorBytes,
                 Sm4Encryptor.secretBytesLen()[0],
                 secureRandomAlgorithmName);
-        return ByteUtil.toHex(keyBytes);
+        return CodecUtil.toHexString(keyBytes);
     }
 
 

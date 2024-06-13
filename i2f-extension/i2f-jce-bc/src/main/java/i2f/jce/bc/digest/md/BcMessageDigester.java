@@ -1,8 +1,8 @@
 package i2f.jce.bc.digest.md;
 
 import i2f.jce.bc.BcProvider;
-import i2f.jce.jdk.digest.md.MessageDigester;
 import i2f.jce.bc.supports.MessageDigestAlgorithm;
+import i2f.jce.jdk.digest.md.MessageDigester;
 
 import java.security.MessageDigest;
 
