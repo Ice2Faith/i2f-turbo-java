@@ -493,16 +493,8 @@ public class ReflectResolver {
         return ret;
     }
 
-    public static Object invokeMethod(Object ivkObj, Class<?> clazz, String methodName, Object... args) throws IllegalArgumentException, IllegalAccessException {
-        int argsLen = args.length;
-        List<Class<?>> types = new ArrayList<>();
-        for (Object arg : args) {
-            if (arg == null) {
-                types.add(null);
-                continue;
-            }
-            types.add(arg.getClass());
-        }
+    public static Method matchMethodByParamTypes(Class<?> clazz, String methodName,Class<?>[] types){
+        int argsLen = types.length;
         Map<Method, Class<?>> methods = getMethods(clazz, (method) -> {
             if (!method.getName().equals(methodName)) {
                 return false;
@@ -513,7 +505,7 @@ public class ReflectResolver {
             Class<?>[] parameterTypes = method.getParameterTypes();
             for (int i = 0; i < argsLen; i++) {
                 Class<?> paramType = parameterTypes[i];
-                Class<?> argType = types.get(i);
+                Class<?> argType = types[i];
                 if (argType == null || paramType == null) {
                     continue;
                 }
@@ -524,14 +516,41 @@ public class ReflectResolver {
             return true;
         }, true);
         if (methods.isEmpty()) {
-            throw new IllegalAccessException("method [" + methodName + "] not found in class [" + clazz + "] with parameter count equals " + argsLen + " or parameter types matched.");
+            return null;
         }
         Method next = methods.keySet().iterator().next();
+        return next;
+    }
+
+    public static Method matchMethod(Class<?> clazz, String methodName, Object... args){
+        int argsLen = args.length;
+        Class<?>[] types=new Class[argsLen];
+        for (int i=0;i<args.length;i++) {
+            Object arg = args[i];
+            if (arg == null) {
+                types[i]=null;
+                continue;
+            }
+            types[i]=arg.getClass();
+        }
+        return matchMethodByParamTypes(clazz,methodName,types);
+    }
+
+    public static Object invokeMethod(Object ivkObj, Class<?> clazz, String methodName, Object... args) throws IllegalArgumentException, IllegalAccessException {
+        Method method = matchMethod(clazz, methodName, args);
+        if (method==null) {
+            throw new IllegalAccessException("method [" + methodName + "] not found in class [" + clazz + "] with parameter count equals " + args.length + " or parameter types matched.");
+        }
+        return invokeMethodeDirect(ivkObj,  method,args);
+    }
+
+    public static Object invokeMethodeDirect(Object ivkObj, Method method,Object ... args) throws IllegalAccessException {
         Object ret = null;
         boolean success = false;
         Throwable ex = null;
         try {
-            ret = next.invoke(ivkObj, args);
+            method.setAccessible(true);
+            ret = method.invoke(ivkObj, args);
             success = true;
         } catch (Throwable e) {
             ex = e;
