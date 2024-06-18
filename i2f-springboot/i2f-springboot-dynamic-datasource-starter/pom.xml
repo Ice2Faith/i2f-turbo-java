@@ -9,7 +9,7 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-dynamic-datasource-spring-boot-starter</artifactId>
+    <artifactId>i2f-springboot-dynamic-datasource-starter</artifactId>
 
 
     <properties>

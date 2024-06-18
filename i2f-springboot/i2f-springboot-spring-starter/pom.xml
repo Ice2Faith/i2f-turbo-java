@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>i2f-springboot</artifactId>
         <groupId>i2f.turbo</groupId>
+        <artifactId>i2f-springboot</artifactId>
         <version>1.0</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>i2f-jdbc-bql-spring-boot-starter</artifactId>
+    <artifactId>i2f-springboot-spring-starter</artifactId>
 
     <properties>
         <spring.version>5.2.12.RELEASE</spring.version>
@@ -45,35 +45,24 @@
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc-bql</artifactId>
+            <artifactId>i2f-spring-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc-proxy</artifactId>
+            <artifactId>i2f-spring-web</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-extension-velocity-bindsql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
-            <version>1.7</version>
-            <scope>provided</scope>
-            <optional>true</optional>
+            <artifactId>i2f-extension-jackson</artifactId>
         </dependency>
     </dependencies>
 
