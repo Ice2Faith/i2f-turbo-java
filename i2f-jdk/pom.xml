@@ -83,6 +83,8 @@
         <module>i2f-io-file</module>
         <module>i2f-otpauth</module>
         <module>i2f-bytes</module>
+        <module>test-features</module>
+        <module>i2f-compiler</module>
 
     </modules>
 

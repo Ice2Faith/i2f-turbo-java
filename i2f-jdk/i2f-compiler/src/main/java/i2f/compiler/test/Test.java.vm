@@ -1,0 +1,10 @@
+
+import java.util.Date;
+
+public class ###{
+
+    public Object call(Object arg){
+        System.out.println("test:"+arg);
+        return new Date();
+    }
+}
