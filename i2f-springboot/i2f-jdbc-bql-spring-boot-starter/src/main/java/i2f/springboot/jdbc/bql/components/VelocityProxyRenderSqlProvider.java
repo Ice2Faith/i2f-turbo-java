@@ -1,10 +1,10 @@
 package i2f.springboot.jdbc.bql.components;
 
 import i2f.bindsql.BindSql;
+import i2f.extension.velocity.bindsql.VelocityResourceSqlTemplateResolver;
+import i2f.extension.velocity.bindsql.VelocitySqlGenerator;
 import i2f.jdbc.proxy.annotations.SqlScript;
 import i2f.jdbc.proxy.provider.AbstractProxyRenderSqlProvider;
-import i2f.velocity.bindsql.VelocityResourceSqlTemplateResolver;
-import i2f.velocity.bindsql.VelocitySqlGenerator;
 
 import java.lang.reflect.Method;
 import java.util.Map;
