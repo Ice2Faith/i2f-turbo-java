@@ -10,7 +10,8 @@ import i2f.functional.comparator.IComparator;
 @FunctionalInterface
 public interface IComparator1<V1> extends IComparator {
     int compare(V1 v1);
-    static<V1> IComparator1<V1> of(IComparator1<V1> ret){
+
+    static <V1> IComparator1<V1> of(IComparator1<V1> ret) {
         return ret;
     }
 }

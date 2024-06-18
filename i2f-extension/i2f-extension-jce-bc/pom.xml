@@ -18,6 +18,11 @@
         </dependency>
 
         <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-codec</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15to18</artifactId>
             <version>1.74</version>

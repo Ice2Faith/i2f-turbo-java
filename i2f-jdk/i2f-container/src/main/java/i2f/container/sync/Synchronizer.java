@@ -14,7 +14,7 @@ import java.util.function.Function;
  */
 public class Synchronizer<T> {
     private volatile T target;
-    private ReadWriteLock lock=new ReentrantReadWriteLock();
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public Synchronizer(T target) {
         this.target = target;
@@ -25,83 +25,83 @@ public class Synchronizer<T> {
         this.lock = lock;
     }
 
-    public T get(){
+    public T get() {
         lock.readLock().lock();
-        try{
+        try {
             return target;
-        }finally {
+        } finally {
             lock.readLock().unlock();
         }
     }
 
-    public <R> R readFunction(Function<T,R> function){
+    public <R> R readFunction(Function<T, R> function) {
         lock.readLock().lock();
-        try{
+        try {
             return function.apply(target);
-        }finally {
+        } finally {
             lock.readLock().unlock();
         }
     }
 
-    public <R,U> R readFunction(BiFunction<T,U,R> function,U value){
+    public <R, U> R readFunction(BiFunction<T, U, R> function, U value) {
         lock.readLock().lock();
-        try{
-            return function.apply(target,value);
-        }finally {
+        try {
+            return function.apply(target, value);
+        } finally {
             lock.readLock().unlock();
         }
     }
 
-    public void readConsumer(Consumer<T> consumer){
+    public void readConsumer(Consumer<T> consumer) {
         lock.readLock().lock();
-        try{
+        try {
             consumer.accept(target);
-        }finally {
+        } finally {
             lock.readLock().unlock();
         }
     }
 
-    public<U> void readConsumer(BiConsumer<T,U> consumer,U value){
+    public <U> void readConsumer(BiConsumer<T, U> consumer, U value) {
         lock.readLock().lock();
-        try{
-            consumer.accept(target,value);
-        }finally {
+        try {
+            consumer.accept(target, value);
+        } finally {
             lock.readLock().unlock();
         }
     }
 
-    public <R> R writeFunction(Function<T,R> function){
+    public <R> R writeFunction(Function<T, R> function) {
         lock.writeLock().lock();
-        try{
+        try {
             return function.apply(target);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public <R,U> R writeFunction(BiFunction<T,U,R> function,U value){
+    public <R, U> R writeFunction(BiFunction<T, U, R> function, U value) {
         lock.writeLock().lock();
-        try{
-            return function.apply(target,value);
-        }finally {
+        try {
+            return function.apply(target, value);
+        } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public void writeConsumer(Consumer<T> consumer){
+    public void writeConsumer(Consumer<T> consumer) {
         lock.writeLock().lock();
-        try{
+        try {
             consumer.accept(target);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public<U> void writeConsumer(BiConsumer<T,U> consumer,U value){
+    public <U> void writeConsumer(BiConsumer<T, U> consumer, U value) {
         lock.writeLock().lock();
-        try{
-            consumer.accept(target,value);
-        }finally {
+        try {
+            consumer.accept(target, value);
+        } finally {
             lock.writeLock().unlock();
         }
     }

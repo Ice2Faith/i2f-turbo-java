@@ -1,6 +1,5 @@
 package i2f.functional.adapt.except;
 
-import i2f.functional.array.bools.except.impl.IExBoolArrayFunction0;
 import i2f.functional.func.except.impl.IExFunction2;
 
 /**
@@ -10,7 +9,7 @@ import i2f.functional.func.except.impl.IExFunction2;
  */
 @FunctionalInterface
 public interface IExBuilder<R, T, V> extends IExFunction2<R, T, V> {
-    static<R, T, V> IExBuilder<R, T, V> of(IExBuilder<R, T, V> ret){
+    static <R, T, V> IExBuilder<R, T, V> of(IExBuilder<R, T, V> ret) {
         return ret;
     }
 }

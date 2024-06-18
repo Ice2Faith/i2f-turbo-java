@@ -1,6 +1,5 @@
 package i2f.functional.adapt;
 
-import i2f.functional.array.bools.except.impl.IExBoolArrayFunction0;
 import i2f.functional.consumer.impl.IConsumer2;
 
 /**
@@ -10,7 +9,7 @@ import i2f.functional.consumer.impl.IConsumer2;
  */
 @FunctionalInterface
 public interface ISetter<T, V> extends IConsumer2<T, V> {
-    static<T, V> ISetter<T, V> of(ISetter<T, V> ret){
+    static <T, V> ISetter<T, V> of(ISetter<T, V> ret) {
         return ret;
     }
 }

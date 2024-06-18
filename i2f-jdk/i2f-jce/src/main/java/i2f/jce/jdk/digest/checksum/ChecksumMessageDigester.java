@@ -1,7 +1,7 @@
 package i2f.jce.jdk.digest.checksum;
 
+import i2f.bytes.ByteUtil;
 import i2f.jce.std.digest.IMessageDigester;
-import i2f.jce.std.util.ByteUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +46,7 @@ public class ChecksumMessageDigester implements IMessageDigester {
         }
         is.close();
         long num = md.getValue();
-        return ByteUtil.toBytes(num);
+        return ByteUtil.toBigEndian(num);
     }
 
     public Checksum getProvider() {

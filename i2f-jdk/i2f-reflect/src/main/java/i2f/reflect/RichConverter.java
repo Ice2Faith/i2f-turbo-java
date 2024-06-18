@@ -97,6 +97,7 @@ public class RichConverter {
     public static <T> T convert2Type(Object obj, Type type) {
         return convert2Type(obj, type, null);
     }
+
     /**
      * 根据type为目标类型，实现将obj转换为type类型的返回值
      * 支持不相关类型的转换，map的key和class的field等只需要满足名称相同即可

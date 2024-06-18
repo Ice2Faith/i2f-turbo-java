@@ -4,6 +4,8 @@ package i2f.codec;
 import i2f.codec.bytes.base64.Base64MimeStringByteCodec;
 import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.codec.bytes.base64.Base64UrlStringByteCodec;
+import i2f.codec.bytes.basex.Base16StringByteCodec;
+import i2f.codec.bytes.basex.Base32StringByteCodec;
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
 import i2f.codec.bytes.raw.BinStringByteCodec;
 import i2f.codec.bytes.raw.DecStringByteCodec;
@@ -124,6 +126,22 @@ public class CodecUtil {
 
     public static byte[] ofBase64Mime(String data) {
         return Base64MimeStringByteCodec.INSTANCE.decode(data);
+    }
+
+    public static String toBase32(byte[] data) {
+        return Base32StringByteCodec.INSTANCE.encode(data);
+    }
+
+    public static byte[] ofBase32(String data) {
+        return Base32StringByteCodec.INSTANCE.decode(data);
+    }
+
+    public static String toBase16(byte[] data) {
+        return Base16StringByteCodec.INSTANCE.encode(data);
+    }
+
+    public static byte[] ofBase16(String data) {
+        return Base16StringByteCodec.INSTANCE.decode(data);
     }
 
     public static String toUrl(String data) {

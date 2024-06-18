@@ -253,32 +253,32 @@ public class ObjectConvertor {
         return false;
     }
 
-    public static String stringify(Object obj,String nullAs){
-        if(obj==null){
+    public static String stringify(Object obj, String nullAs) {
+        if (obj == null) {
             return nullAs;
         }
-        Class<?> clazz=obj.getClass();
-        if(clazz.isArray()){
+        Class<?> clazz = obj.getClass();
+        if (clazz.isArray()) {
             StringBuilder builder = new StringBuilder();
-            int len= Array.getLength(obj);
+            int len = Array.getLength(obj);
             builder.append("[");
             for (int i = 0; i < len; i++) {
-                if(i>0){
+                if (i > 0) {
                     builder.append(", ");
                 }
-                String str=stringify(Array.get(obj,i),nullAs);
+                String str = stringify(Array.get(obj, i), nullAs);
                 builder.append(str);
             }
             builder.append("]");
             return builder.toString();
-        }else {
+        } else {
             return String.valueOf(obj);
         }
     }
 
     public static Object tryConvertAsType(Object val, Class<?> targetType) {
         if (val == null) {
-            if(TypeOf.typeOfAny(targetType,Boolean.class,boolean.class)){
+            if (TypeOf.typeOfAny(targetType, Boolean.class, boolean.class)) {
                 return false;
             }
             return val;
@@ -291,7 +291,7 @@ public class ObjectConvertor {
         }
         // 目标类型为 String ，都能转
         if (TypeOf.typeOf(targetType, String.class)) {
-            return stringify(val,null);
+            return stringify(val, null);
         }
 
         // 原始和目标都是 Number
@@ -392,20 +392,20 @@ public class ObjectConvertor {
         }
 
         // boolean 的宽泛转换
-        if (TypeOf.typeOfAny(targetType, boolTypes)){
-            if(val==null){
+        if (TypeOf.typeOfAny(targetType, boolTypes)) {
+            if (val == null) {
                 return false;
             }
-            if(val instanceof Number){
-                return ((Number) val).intValue()!=0;
+            if (val instanceof Number) {
+                return ((Number) val).intValue() != 0;
             }
-            if(val instanceof String){
+            if (val instanceof String) {
                 return !((String) val).isEmpty();
             }
-            if(val instanceof Map){
+            if (val instanceof Map) {
                 return !((Map<?, ?>) val).isEmpty();
             }
-            if(val instanceof Collection){
+            if (val instanceof Collection) {
                 return !((Collection<?>) val).isEmpty();
             }
             return true;
