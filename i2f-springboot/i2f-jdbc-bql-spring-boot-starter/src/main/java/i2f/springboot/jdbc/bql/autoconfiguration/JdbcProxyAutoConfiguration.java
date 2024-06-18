@@ -1,13 +1,13 @@
 package i2f.springboot.jdbc.bql.autoconfiguration;
 
+import i2f.extension.velocity.VelocityGenerator;
+import i2f.extension.velocity.bindsql.VelocityResourceSqlTemplateResolver;
+import i2f.extension.velocity.bindsql.VelocitySqlGenerator;
 import i2f.jdbc.proxy.provider.ProxyRenderSqlProvider;
 import i2f.jdbc.proxy.provider.impl.SimpleProxyRenderSqlProvider;
 import i2f.springboot.jdbc.bql.components.SpringJdbcProxyMapperFactoryBean;
 import i2f.springboot.jdbc.bql.components.VelocityProxyRenderSqlProvider;
 import i2f.springboot.jdbc.bql.properties.JdbcProxyProperties;
-import i2f.velocity.VelocityGenerator;
-import i2f.velocity.bindsql.VelocityResourceSqlTemplateResolver;
-import i2f.velocity.bindsql.VelocitySqlGenerator;
 import lombok.Data;
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;

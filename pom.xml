@@ -17,6 +17,7 @@
         <module>i2f-extension</module>
         <module>i2f-spring</module>
         <module>i2f-springboot</module>
+        <module>i2f-extension/i2f-extension-minio</module>
     </modules>
 
     <properties>
@@ -404,37 +405,121 @@
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-jackson</artifactId>
+                <artifactId>i2f-extension-aspectj</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-jce-bc</artifactId>
+                <artifactId>i2f-extension-cglib</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-jce-sm-antherd</artifactId>
+                <artifactId>i2f-extension-cron</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-slf4j</artifactId>
+                <artifactId>i2f-extension-email</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-velocity</artifactId>
+                <artifactId>i2f-extension-fastjson</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-velocity-bindsql</artifactId>
+                <artifactId>i2f-extension-fastjson2</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-ftp</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-gif</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-gson</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-hdfs</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-jackson</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-jce-bc</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-jce-sm-antherd</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-minio</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-qrcode</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-sftp</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-slf4j</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-velocity</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-velocity-bindsql</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-verifycode</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 

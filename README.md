@@ -88,6 +88,14 @@
 - i2f-jdk-all
   - 是一个聚合包
   - 包含了i2f-jdk下的所有模块的整合包
+- i2f-javax
+  - 主要用于处理不再默认的jre中的java拓展包
+  - 例如javax对于j2ee的部分
+- i2f-jakarta
+  - 由于javax部分已经想jakarta迁移
+  - 所以原来对javax的支持部分，也需要迁移到jakarta中来
+  - 遵循的原则是，原来javax中的部分，包、类、方法都会保持一致
+  - javax中没有的部分则额外添加
 - i2f-extension
   - 用于对于第三方jar包的功能进行二次封装
   - 因此，这部分依赖第三方功能
@@ -122,6 +130,14 @@
 - i2f-jdk-all
   - it an merge package
   - included all module of in i2f-jdk
+- i2f-javax
+  - mainly to process java extension package which not include in default jre
+  - such as, javax for j2ee partial
+- i2f-jakarta
+  - because of javax move to jakarta
+  - so that, old javax also need adapt jakarta, it is this module do
+  - the rule is that keep same as package, class, method
+  - it will be append to while javax not exists some features
 - i2f-extension
   - the features base on the thrid java package
   - so, it rely on the thrid package
