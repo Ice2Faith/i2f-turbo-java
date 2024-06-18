@@ -10,7 +10,8 @@ import i2f.functional.consumer.except.IExConsumer;
 @FunctionalInterface
 public interface IExConsumer2<V1, V2> extends IExConsumer {
     void accept(V1 v1, V2 v2) throws Throwable;
-    static<V1, V2> IExConsumer2<V1, V2> of(IExConsumer2<V1, V2> ret){
+
+    static <V1, V2> IExConsumer2<V1, V2> of(IExConsumer2<V1, V2> ret) {
         return ret;
     }
 }

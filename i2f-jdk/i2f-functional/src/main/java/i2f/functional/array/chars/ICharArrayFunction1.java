@@ -10,7 +10,8 @@ import i2f.functional.array.ICharArrayFunction;
 @FunctionalInterface
 public interface ICharArrayFunction1<V1> extends ICharArrayFunction {
     char[] apply(V1 v1);
-    static<V1> ICharArrayFunction1<V1> of(ICharArrayFunction1<V1> ret){
+
+    static <V1> ICharArrayFunction1<V1> of(ICharArrayFunction1<V1> ret) {
         return ret;
     }
 }

@@ -10,7 +10,8 @@ import i2f.functional.func.except.IExFunction;
 @FunctionalInterface
 public interface IExFunction3<R, V1, V2, V3> extends IExFunction {
     R apply(V1 v1, V2 v2, V3 v3) throws Throwable;
-    static<R, V1, V2, V3> IExFunction3<R, V1, V2, V3> of(IExFunction3<R, V1, V2, V3> ret){
+
+    static <R, V1, V2, V3> IExFunction3<R, V1, V2, V3> of(IExFunction3<R, V1, V2, V3> ret) {
         return ret;
     }
 }

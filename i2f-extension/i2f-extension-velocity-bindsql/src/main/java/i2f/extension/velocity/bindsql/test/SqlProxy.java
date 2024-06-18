@@ -22,47 +22,49 @@ import java.util.*;
  */
 public class SqlProxy {
 
-    public static interface MapperApi{
-        BindSql query(String table,Map<String,Object> map);
+    public static interface MapperApi {
+        BindSql query(String table, Map<String, Object> map);
     }
+
     public static void main(String[] args) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(".\\i2f-extension\\i2f-velocity-bindsql\\src\\main\\java\\i2f\\velocity\\bindsql\\test\\test.xml.vm");
 
         // 读取XML中的节点数据
-        Map<String,String> sqlMap=new LinkedHashMap<>();
+        Map<String, String> sqlMap = new LinkedHashMap<>();
         NodeList nodeList = document.getElementsByTagName("sql");
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node item = nodeList.item(i);
             Node idNode = item.getAttributes().getNamedItem("id");
-            if(idNode==null){
+            if (idNode == null) {
                 continue;
             }
             String id = idNode.getTextContent();
             String body = item.getTextContent();
-            sqlMap.put(id,body);
+            sqlMap.put(id, body);
         }
 
 
         MapperApi mapperApi = proxy(MapperApi.class, sqlMap);
 
-        Map<String,Object> map=new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("id", 1);
-        map.put("username","zhang");
-        map.put("age",12);
+        map.put("username", "zhang");
+        map.put("age", 12);
         BindSql bql = mapperApi.query("sys_user", map);
 
         System.out.println(bql);
 
         System.out.println("ok");
     }
-    public static<T> T proxy(Class<T> clazz,Map<String,String> templateMap){
+
+    public static <T> T proxy(Class<T> clazz, Map<String, String> templateMap) {
         Object ret = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{clazz}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 Class<?> clazz = method.getDeclaringClass();
-                String methodId = clazz.getName().replaceAll("\\$",".") + "." + method.getName();
+                String methodId = clazz.getName().replaceAll("\\$", ".") + "." + method.getName();
 
                 Parameter[] parameters = method.getParameters();
                 String[] names = new String[parameters.length];
@@ -84,20 +86,20 @@ public class SqlProxy {
                 return bindSql;
             }
         });
-        return (T)ret;
+        return (T) ret;
     }
 
-    public static Object executeSql(BindSql bindSql,Method method) throws Exception {
+    public static Object executeSql(BindSql bindSql, Method method) throws Exception {
         // 执行SQL语句
-        Connection conn=null;
+        Connection conn = null;
         PreparedStatement stat = conn.prepareStatement(bindSql.getSql());
-        int idx=1;
+        int idx = 1;
         for (Object value : bindSql.getArgs()) {
-            stat.setObject(idx,value);
+            stat.setObject(idx, value);
             idx++;
         }
         // 实际情况应该区分是否是查询类
-        if(bindSql.getType()==BindSql.Type.UPDATE){
+        if (bindSql.getType() == BindSql.Type.UPDATE) {
             int ret = stat.executeUpdate();
             stat.close();
             return ret;
@@ -111,44 +113,44 @@ public class SqlProxy {
         // 所以，返回值就是一个泛型集合
         Type returnType = method.getGenericReturnType();
         ParameterizedType parameterizedType = (ParameterizedType) returnType;
-        Class<?> collectionClass=(Class<?>)parameterizedType.getRawType();
+        Class<?> collectionClass = (Class<?>) parameterizedType.getRawType();
         // 而集合中元素的类型，就需要得到真实的元素类型，一般是一个bean类型
         Type typeArgument = parameterizedType.getActualTypeArguments()[0];
-        Class<?> beanClass=null;
-        if(typeArgument instanceof ParameterizedType){
-            beanClass=(Class<?>)((ParameterizedType) typeArgument).getRawType();
-        }else{
-            beanClass=(Class<?>)typeArgument;
+        Class<?> beanClass = null;
+        if (typeArgument instanceof ParameterizedType) {
+            beanClass = (Class<?>) ((ParameterizedType) typeArgument).getRawType();
+        } else {
+            beanClass = (Class<?>) typeArgument;
         }
 
         // 解析 ResultSet 为 returnType 类型返回
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
-        List<String> columnNames=new ArrayList<>();
+        List<String> columnNames = new ArrayList<>();
         for (int i = 0; i < columnCount; i++) {
-            columnNames.add(metaData.getColumnLabel(i+1));
+            columnNames.add(metaData.getColumnLabel(i + 1));
         }
-        Collection list=null;
+        Collection list = null;
         // 根据集合类型，实例化集合
         // 判断实际的集合类型可否直接实例化，不行的话默认按照List进行实例化集合
-        try{
-            list=(Collection) collectionClass.newInstance();
-        }catch(Exception e){
-            list=new LinkedList();
+        try {
+            list = (Collection) collectionClass.newInstance();
+        } catch (Exception e) {
+            list = new LinkedList();
         }
         // 判断是否是Map类型
-        boolean isMapBean=(Map.class.isAssignableFrom(beanClass));
-        while(rs.next()){
-            Object bean=isMapBean?new LinkedHashMap<>():beanClass.newInstance();
+        boolean isMapBean = (Map.class.isAssignableFrom(beanClass));
+        while (rs.next()) {
+            Object bean = isMapBean ? new LinkedHashMap<>() : beanClass.newInstance();
             for (int i = 0; i < columnCount; i++) {
                 String columnName = columnNames.get(i);
                 Object value = rs.getObject(i + 1);
-                if(isMapBean){
-                    ((Map)bean).put(columnName,value);
-                }else{
+                if (isMapBean) {
+                    ((Map) bean).put(columnName, value);
+                } else {
                     Field field = beanClass.getDeclaredField(columnName);
                     field.setAccessible(true);
-                    field.set(bean,value);
+                    field.set(bean, value);
                 }
             }
             list.add(bean);

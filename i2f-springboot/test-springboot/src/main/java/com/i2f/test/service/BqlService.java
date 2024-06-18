@@ -38,7 +38,7 @@ public class BqlService implements ApplicationRunner, ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.context=applicationContext;
+        this.context = applicationContext;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class BqlService implements ApplicationRunner, ApplicationContextAware {
 
         List<SysUserDo> sysUserDos = testMapper.listByMapper();
 
-        BqlService proxy=context.getBean(BqlService.class);
+        BqlService proxy = context.getBean(BqlService.class);
 
         proxy.testRaw();
 
@@ -68,7 +68,7 @@ public class BqlService implements ApplicationRunner, ApplicationContextAware {
 
     }
 
-    @DataSource(value="master")
+    @DataSource(value = "master")
     public void testRaw() throws Exception {
         QueryResult qr = bqlTemplate.queryRaw(Bql.$bean()
                 .$beanQuery(Builders.newObj(SysUserDo::new)
@@ -82,7 +82,7 @@ public class BqlService implements ApplicationRunner, ApplicationContextAware {
     }
 
     @DataSource(value = "slave")
-    public void testRawBql() throws Exception{
+    public void testRawBql() throws Exception {
 
         QueryResult qr = bqlTemplate.queryRaw(
                 Bql.$lambda()
@@ -102,14 +102,14 @@ public class BqlService implements ApplicationRunner, ApplicationContextAware {
         System.out.println(qr.getRows());
     }
 
-    @DataSource(value = "read",group = true)
-    public void testQuery() throws Exception{
+    @DataSource(value = "read", group = true)
+    public void testQuery() throws Exception {
         List<SysUserDo> users = bqlTemplate.list(new SysUserDo());
         System.out.println(users);
     }
 
-    @DataSource(value = "write",group = true)
-    public void testWrite() throws Exception{
+    @DataSource(value = "write", group = true)
+    public void testWrite() throws Exception {
         SysUserDo admin = bqlTemplate.find(Builders.newObj(SysUserDo::new)
                 .set(SysUserDo::setUsername, "admin")
                 .get());

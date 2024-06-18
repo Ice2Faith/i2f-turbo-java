@@ -11,6 +11,23 @@
 
     <artifactId>i2f-jce</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-array</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-bytes</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-codec</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

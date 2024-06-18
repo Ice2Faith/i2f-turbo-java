@@ -10,7 +10,8 @@ import i2f.functional.base.longs.except.IExLongFunction;
 @FunctionalInterface
 public interface IExLongFunction1<V1> extends IExLongFunction {
     long apply(V1 v1) throws Throwable;
-    static<V1> IExLongFunction1<V1> of(IExLongFunction1<V1> ret){
+
+    static <V1> IExLongFunction1<V1> of(IExLongFunction1<V1> ret) {
         return ret;
     }
 }

@@ -10,7 +10,8 @@ import i2f.functional.array.shorts.except.IExShortArrayFunction;
 @FunctionalInterface
 public interface IExShortArrayFunction4<V1, V2, V3, V4> extends IExShortArrayFunction {
     short[] apply(V1 v1, V2 v2, V3 v3, V4 v4) throws Throwable;
-    static<V1, V2, V3, V4> IExShortArrayFunction4<V1, V2, V3, V4> of(IExShortArrayFunction4<V1, V2, V3, V4> ret){
+
+    static <V1, V2, V3, V4> IExShortArrayFunction4<V1, V2, V3, V4> of(IExShortArrayFunction4<V1, V2, V3, V4> ret) {
         return ret;
     }
 }

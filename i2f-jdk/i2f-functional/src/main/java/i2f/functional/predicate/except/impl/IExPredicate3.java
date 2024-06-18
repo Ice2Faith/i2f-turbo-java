@@ -10,7 +10,8 @@ import i2f.functional.predicate.except.IExPredicate;
 @FunctionalInterface
 public interface IExPredicate3<V1, V2, V3> extends IExPredicate {
     boolean test(V1 v1, V2 v2, V3 v3) throws Throwable;
-    static<V1, V2, V3> IExPredicate3<V1, V2, V3> of(IExPredicate3<V1, V2, V3> ret){
+
+    static <V1, V2, V3> IExPredicate3<V1, V2, V3> of(IExPredicate3<V1, V2, V3> ret) {
         return ret;
     }
 }

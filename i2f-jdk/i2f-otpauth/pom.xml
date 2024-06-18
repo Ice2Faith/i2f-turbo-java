@@ -22,6 +22,16 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jce</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-codec</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-bytes</artifactId>
+        </dependency>
     </dependencies>
 
 

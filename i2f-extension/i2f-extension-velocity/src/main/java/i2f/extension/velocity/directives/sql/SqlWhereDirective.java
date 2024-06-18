@@ -27,11 +27,12 @@ import java.util.List;
  * appendSuffix=null
  * 定义:
  * #sqlWhere()
- *  body...
+ * body...
  * #end
  */
 public class SqlWhereDirective extends Directive {
-    public static final String NAME="sqlWhere";
+    public static final String NAME = "sqlWhere";
+
     @Override
     public String getName() {
         return NAME;
@@ -44,46 +45,46 @@ public class SqlWhereDirective extends Directive {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        List<String> trimPrefixList=new ArrayList<>(Arrays.asList("and","or","AND","OR"));
-        List<String> trimSuffixList=new ArrayList<>(Arrays.asList("and","or","AND","OR"));
-        String appendPrefix=" where ";
-        String appendSuffix=null;
-        Node arg=node.jjtGetChild(0);
+        List<String> trimPrefixList = new ArrayList<>(Arrays.asList("and", "or", "AND", "OR"));
+        List<String> trimSuffixList = new ArrayList<>(Arrays.asList("and", "or", "AND", "OR"));
+        String appendPrefix = " where ";
+        String appendSuffix = null;
+        Node arg = node.jjtGetChild(0);
 
-        StringWriter sw=new StringWriter();
+        StringWriter sw = new StringWriter();
         arg.render(context, sw);
         String str = sw.toString();
 
 
-        if(!trimPrefixList.isEmpty() || !trimSuffixList.isEmpty()){
-            str=str.trim();
+        if (!trimPrefixList.isEmpty() || !trimSuffixList.isEmpty()) {
+            str = str.trim();
 
             for (String item : trimPrefixList) {
-                if(str.startsWith(item)){
-                    str=str.substring(item.length());
+                if (str.startsWith(item)) {
+                    str = str.substring(item.length());
                     break;
                 }
             }
 
             for (String item : trimSuffixList) {
-                if(str.endsWith(item)){
-                    str=str.substring(0,str.length() - item.length());
+                if (str.endsWith(item)) {
+                    str = str.substring(0, str.length() - item.length());
                     break;
                 }
             }
         }
 
-        if(appendPrefix!=null || appendSuffix!=null){
-            str=str.trim();
+        if (appendPrefix != null || appendSuffix != null) {
+            str = str.trim();
 
-            boolean isEmptyBody=str.isEmpty();
+            boolean isEmptyBody = str.isEmpty();
 
-            if(appendPrefix!=null && !isEmptyBody){
-                str=appendPrefix+str;
+            if (appendPrefix != null && !isEmptyBody) {
+                str = appendPrefix + str;
             }
 
-            if(appendSuffix!=null && !isEmptyBody){
-                str=str+appendSuffix;
+            if (appendSuffix != null && !isEmptyBody) {
+                str = str + appendSuffix;
             }
 
         }

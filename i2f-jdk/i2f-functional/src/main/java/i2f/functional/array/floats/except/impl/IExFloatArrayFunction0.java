@@ -1,6 +1,5 @@
 package i2f.functional.array.floats.except.impl;
 
-import i2f.functional.array.floats.IFloatArrayFunction0;
 import i2f.functional.array.floats.except.IExFloatArrayFunction;
 
 /**
@@ -11,7 +10,8 @@ import i2f.functional.array.floats.except.IExFloatArrayFunction;
 @FunctionalInterface
 public interface IExFloatArrayFunction0 extends IExFloatArrayFunction {
     float[] apply() throws Throwable;
-    static IExFloatArrayFunction0 of(IExFloatArrayFunction0 ret){
+
+    static IExFloatArrayFunction0 of(IExFloatArrayFunction0 ret) {
         return ret;
     }
 }

@@ -12,7 +12,7 @@ import java.util.Map;
  * @desc
  */
 public class TestAnnotation {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         Class<?> clazz = TestAnnotation.class;
         Method method = ReflectResolver.getMethod(clazz, "test");
         AnnName ann = ReflectResolver.findAnnotation(method, AnnName.class);
@@ -24,8 +24,8 @@ public class TestAnnotation {
         System.out.println("ok");
     }
 
-    @AnnName(value = "test",prefer = true,tags = {"add","update"})
-    public static void test(){
+    @AnnName(value = "test", prefer = true, tags = {"add", "update"})
+    public static void test() {
 
     }
 }

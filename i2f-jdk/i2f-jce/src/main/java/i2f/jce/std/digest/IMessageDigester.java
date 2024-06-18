@@ -1,7 +1,7 @@
 package i2f.jce.std.digest;
 
+import i2f.array.ArrayUtil;
 import i2f.jce.std.signature.ISignatureSigner;
-import i2f.jce.std.util.ByteUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -25,7 +25,7 @@ public interface IMessageDigester extends ISignatureSigner {
 
     default boolean verify(byte[] sign, InputStream is) throws Exception {
         byte[] data = digest(is);
-        return ByteUtil.compare(data, sign);
+        return ArrayUtil.equal(data, sign);
     }
 
 }

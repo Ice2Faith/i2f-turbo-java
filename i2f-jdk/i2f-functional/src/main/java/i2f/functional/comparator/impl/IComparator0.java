@@ -1,7 +1,6 @@
 package i2f.functional.comparator.impl;
 
 import i2f.functional.comparator.IComparator;
-import i2f.functional.consumer.impl.IConsumer0;
 
 /**
  * @author Ice2Faith
@@ -11,7 +10,8 @@ import i2f.functional.consumer.impl.IConsumer0;
 @FunctionalInterface
 public interface IComparator0 extends IComparator {
     int compare();
-    static IComparator0 of(IComparator0 ret){
+
+    static IComparator0 of(IComparator0 ret) {
         return ret;
     }
 }

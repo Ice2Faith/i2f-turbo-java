@@ -4,7 +4,7 @@ import com.antherd.smcrypto.sm2.Keypair;
 import com.antherd.smcrypto.sm2.Sm2;
 import i2f.extension.jce.sm.antherd.encrypt.asymmetric.Sm2Encryptor;
 import i2f.jce.std.signature.ISignatureSigner;
-import i2f.jce.std.util.ByteUtil;
+import i2f.codec.CodecUtil;
 
 import java.security.KeyPair;
 import java.util.Objects;
@@ -33,10 +33,10 @@ public class Sm2SignatureSigner implements ISignatureSigner {
 
     public Sm2SignatureSigner(KeyPair keyPair) {
         if (keyPair.getPublic() != null) {
-            this.publicKey = ByteUtil.toHex(keyPair.getPublic().getEncoded());
+            this.publicKey = CodecUtil.toHexString(keyPair.getPublic().getEncoded());
         }
         if (keyPair.getPrivate() != null) {
-            this.privateKey = ByteUtil.toHex(keyPair.getPrivate().getEncoded());
+            this.privateKey = CodecUtil.toHexString(keyPair.getPrivate().getEncoded());
         }
     }
 

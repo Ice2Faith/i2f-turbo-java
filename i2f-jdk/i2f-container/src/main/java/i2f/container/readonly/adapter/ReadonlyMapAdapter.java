@@ -3,8 +3,6 @@ package i2f.container.readonly.adapter;
 import i2f.container.readonly.exception.ReadonlyException;
 
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -54,35 +52,35 @@ public class ReadonlyMapAdapter<K, V> implements Map<K, V> {
     @Override
     public int size() {
 
-            return map.size();
+        return map.size();
 
     }
 
     @Override
     public boolean isEmpty() {
 
-            return map.isEmpty();
+        return map.isEmpty();
 
     }
 
     @Override
     public boolean containsKey(Object key) {
 
-            return map.containsKey(key);
+        return map.containsKey(key);
 
     }
 
     @Override
     public boolean containsValue(Object value) {
 
-            return map.containsValue(value);
+        return map.containsValue(value);
 
     }
 
     @Override
     public V get(Object key) {
 
-            return map.get(key);
+        return map.get(key);
 
     }
 
@@ -109,35 +107,35 @@ public class ReadonlyMapAdapter<K, V> implements Map<K, V> {
     @Override
     public Set<K> keySet() {
 
-            return map.keySet();
+        return map.keySet();
 
     }
 
     @Override
     public Collection<V> values() {
 
-            return map.values();
+        return map.values();
 
     }
 
     @Override
     public Set<Entry<K, V>> entrySet() {
 
-            return map.entrySet();
+        return map.entrySet();
 
     }
 
     @Override
     public V getOrDefault(Object key, V defaultValue) {
 
-            return map.getOrDefault(key, defaultValue);
+        return map.getOrDefault(key, defaultValue);
 
     }
 
     @Override
     public void forEach(BiConsumer<? super K, ? super V> action) {
 
-            map.forEach(action);
+        map.forEach(action);
 
     }
 

@@ -1,6 +1,5 @@
 package i2f.functional.predicate.except.impl;
 
-import i2f.functional.predicate.IPredicate;
 import i2f.functional.predicate.except.IExPredicate;
 
 /**
@@ -11,7 +10,8 @@ import i2f.functional.predicate.except.IExPredicate;
 @FunctionalInterface
 public interface IExPredicate0 extends IExPredicate {
     boolean test() throws Throwable;
-    static IExPredicate0 of(IExPredicate0 ret){
+
+    static IExPredicate0 of(IExPredicate0 ret) {
         return ret;
     }
 }

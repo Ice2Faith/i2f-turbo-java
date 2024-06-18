@@ -3,9 +3,10 @@ package i2f.jdbc.test;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.NamingOutputParameter;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.JDBCType;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**

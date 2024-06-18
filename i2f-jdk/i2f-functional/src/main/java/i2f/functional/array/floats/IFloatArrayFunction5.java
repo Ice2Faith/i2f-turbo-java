@@ -10,7 +10,8 @@ import i2f.functional.array.IFloatArrayFunction;
 @FunctionalInterface
 public interface IFloatArrayFunction5<V1, V2, V3, V4, V5> extends IFloatArrayFunction {
     float[] apply(V1 v1, V2 v2, V3 v3, V4 v4, V5 v5);
-    static<V1, V2, V3, V4, V5>  IFloatArrayFunction5<V1, V2, V3, V4, V5>  of(IFloatArrayFunction5<V1, V2, V3, V4, V5>  ret){
+
+    static <V1, V2, V3, V4, V5> IFloatArrayFunction5<V1, V2, V3, V4, V5> of(IFloatArrayFunction5<V1, V2, V3, V4, V5> ret) {
         return ret;
     }
 }
