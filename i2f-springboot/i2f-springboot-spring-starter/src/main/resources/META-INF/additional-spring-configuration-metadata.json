@@ -1,0 +1,54 @@
+{
+  "groups": [
+    {
+      "name": "i2f.spring.core",
+      "type": "i2f.springboot.spring.SpringCoreAutoConfiguration",
+      "sourceType": "i2f.springboot.spring.SpringCoreAutoConfiguration"
+    },
+    {
+      "name": "i2f.spring.web",
+      "type": "i2f.springboot.spring.SpringWebAutoConfiguration",
+      "sourceType": "i2f.springboot.spring.SpringWebAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.spring.core.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable auto-configuration for spring core components.",
+      "sourceType": "i2f.springboot.spring.SpringCoreAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.web.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable auto-configuration for spring web components.",
+      "sourceType": "i2f.springboot.spring.SpringWebAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
