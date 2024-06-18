@@ -10,7 +10,8 @@ import i2f.functional.func.IFunction;
 @FunctionalInterface
 public interface IFunction2<R, V1, V2> extends IFunction {
     R apply(V1 v1, V2 v2);
-    static<R, V1, V2> IFunction2<R, V1, V2> of(IFunction2<R, V1, V2> ret){
+
+    static <R, V1, V2> IFunction2<R, V1, V2> of(IFunction2<R, V1, V2> ret) {
         return ret;
     }
 }

@@ -8,13 +8,13 @@ package i2f.enums.api;
 public interface IDict {
     int code();
 
-    default String key(){
+    default String key() {
         return null;
     }
 
     String text();
 
-    default String remark(){
+    default String remark() {
         return null;
     }
 }

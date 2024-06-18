@@ -9,9 +9,9 @@ import i2f.natives.windows.types.window.Hwnd;
  * @desc
  */
 public interface WinAppCallbacker {
-    default long callback(long p_instance, long hWnd, long message, long wParam, long lParam){
-        return handle(new Win32AppInstancePtr(p_instance),new Hwnd(hWnd),message,wParam,lParam);
+    default long callback(long p_instance, long hWnd, long message, long wParam, long lParam) {
+        return handle(new Win32AppInstancePtr(p_instance), new Hwnd(hWnd), message, wParam, lParam);
     }
 
-    long handle(Win32AppInstancePtr pInstance, Hwnd hwnd,long message,long wParam,long lParam);
+    long handle(Win32AppInstancePtr pInstance, Hwnd hwnd, long message, long wParam, long lParam);
 }

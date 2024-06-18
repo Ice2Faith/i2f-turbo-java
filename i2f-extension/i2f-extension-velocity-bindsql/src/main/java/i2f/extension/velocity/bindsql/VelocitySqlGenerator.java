@@ -16,20 +16,20 @@ import java.util.Map;
  */
 public class VelocitySqlGenerator {
 
-    public static BindSql renderSql(String template, Map<String,Object> params) throws IOException {
+    public static BindSql renderSql(String template, Map<String, Object> params) throws IOException {
         ValueWrapper wrapper = new ValueWrapper();
         params.put("__sql", wrapper);
-        template="#macro(sql $value)$__sql.wrap($value)#end\n"+template;
+        template = "#macro(sql $value)$__sql.wrap($value)#end\n" + template;
 
         String rs = VelocityGenerator.render(template, params);
 
-        List<Object> list=new ArrayList<>();
-        String sql= RegexUtil.replace(rs,"\\$\\{\\d+\\}",(s, i)->{
+        List<Object> list = new ArrayList<>();
+        String sql = RegexUtil.replace(rs, "\\$\\{\\d+\\}", (s, i) -> {
             Object val = wrapper.getMap().get(s);
             list.add(val);
             return "?";
         });
 
-        return new BindSql(sql,list);
+        return new BindSql(sql, list);
     }
 }

@@ -1,6 +1,5 @@
 package i2f.functional.adapt.except;
 
-import i2f.functional.array.bools.except.impl.IExBoolArrayFunction0;
 import i2f.functional.consumer.except.impl.IExConsumer1;
 
 /**
@@ -10,7 +9,7 @@ import i2f.functional.consumer.except.impl.IExConsumer1;
  */
 @FunctionalInterface
 public interface IExExecute<T> extends IExConsumer1<T> {
-    static<T> IExExecute<T> of(IExExecute<T> ret){
+    static <T> IExExecute<T> of(IExExecute<T> ret) {
         return ret;
     }
 }

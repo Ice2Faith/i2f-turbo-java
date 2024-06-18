@@ -10,7 +10,8 @@ import i2f.functional.base.shorts.except.IExShortFunction;
 @FunctionalInterface
 public interface IExShortFunction4<V1, V2, V3, V4> extends IExShortFunction {
     short apply(V1 v1, V2 v2, V3 v3, V4 v4) throws Throwable;
-    static<V1, V2, V3, V4> IExShortFunction4<V1, V2, V3, V4> of(IExShortFunction4<V1, V2, V3, V4> ret){
+
+    static <V1, V2, V3, V4> IExShortFunction4<V1, V2, V3, V4> of(IExShortFunction4<V1, V2, V3, V4> ret) {
         return ret;
     }
 }

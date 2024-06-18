@@ -1,5 +1,12 @@
 ----------------------------------------------------
-tl.test.Test.testSelect:566
+tl
+.
+test
+.
+Test
+.
+testSelect
+:566
 Bql{
 sql     =
 select su.*,
@@ -42,71 +49,74 @@ where (su.username = ?)
 tl.test.Test.testInsert:502
 Bql{
 sql     =
-insert into sys_user (username, nickname, age, status, create_time) values (?, ?, ?, ?, now())
-                                                                         , args  = [zhang, zhang, 24, 1]
-}
-Bql{
-sql     =
-                                                                    insert
-                                                                    into sys_user (username, nickname, age, status, create_time)
-                                                                    values ( ?, ?, ?, ?, now() )
-                                                                            , args  = [zhang, zhang, 24, 1]
-}
-Bql{
-sql     =
-                                                                    insert
-                                                                    into sys_user (username, nickname, age, status, create_time)
-                                                                    values ( ?, ?, ?, ?, now() )
-                                                                            , args  = [zhang, zhang, 24, 1]
-}
+insert
+into sys_user (username, nickname, age, status, create_time)
+values (?, ?, ?, ?, now())
+        , args = [zhang, zhang, 24, 1]
+    }
+    Bql{
+    sql =
+insert
+into sys_user (username, nickname, age, status, create_time)
+values ( ?, ?, ?, ?, now() )
+        , args = [zhang, zhang, 24, 1]
+    }
+    Bql{
+    sql =
+insert
+into sys_user (username, nickname, age, status, create_time)
+values ( ?, ?, ?, ?, now() )
+        , args = [zhang, zhang, 24, 1]
+    }
 ----------------------------------------------------
-tl.test.Test.testBatchInsert:416
-Bql{
-sql     =
-                                                                    insert
-                                                                    into sys_user (username, nickname, age, status, create_time)
-                                                                    values ( ?
-                                                                         , ?
-                                                                         , ?
-                                                                         , ?
-                                                                         , now() )
-                                                                         , (?, ?, ?, ?, now())
-                                                                         , (?, ?, ?, ?, now())
-                                                                         , args  = [zhang, zhang, 24, 1, li, li, 25, 1, wang, wang, 26, 1]
-}
-Bql{
-sql     =
-                                                                    insert
-                                                                    into sys_user (username, nickname, age, status, create_time)
-                                                                    values ( ?
-                                                                         , ?
-                                                                         , ?
-                                                                         , ?
-                                                                         , now() )
-                                                                         , (?, ?, ?, ?, now())
-                                                                         , (?, ?, ?, ?, now())
-                                                                         , args  = [zhang, zhang, 24, 1, li, li, 25, 1, wang, wang, 26, 1]
-}
-Bql{
-sql     =
-                                                                    insert
-                                                                    into sys_user (username, nickname, age, status, create_time)
-                                                                    values ( ?
-                                                                         , ?
-                                                                         , ?
-                                                                         , ?
-                                                                         , now() )
-                                                                         , (?, ?, ?, ?, now())
-                                                                         , (?, ?, ?, ?, now())
-                                                                         , args  = [zhang, zhang, 24, 1, li, li, 25, 1, wang, wang, 26, 1]
-}
+    tl.test.Test.testBatchInsert:416
+    Bql{
+    sql =
+insert
+into sys_user (username, nickname, age, status, create_time)
+values ( ?
+        , ?
+        , ?
+        , ?
+        , now() )
+        , (?, ?, ?, ?, now())
+        , (?, ?, ?, ?, now())
+        , args = [zhang, zhang, 24, 1, li, li, 25, 1, wang, wang, 26, 1]
+    }
+    Bql{
+    sql =
+insert
+into sys_user (username, nickname, age, status, create_time)
+values ( ?
+        , ?
+        , ?
+        , ?
+        , now() )
+        , (?, ?, ?, ?, now())
+        , (?, ?, ?, ?, now())
+        , args = [zhang, zhang, 24, 1, li, li, 25, 1, wang, wang, 26, 1]
+    }
+    Bql{
+    sql =
+insert
+into sys_user (username, nickname, age, status, create_time)
+values ( ?
+        , ?
+        , ?
+        , ?
+        , now() )
+        , (?, ?, ?, ?, now())
+        , (?, ?, ?, ?, now())
+        , args = [zhang, zhang, 24, 1, li, li, 25, 1, wang, wang, 26, 1]
+    }
 ----------------------------------------------------
-tl.test.Test.testBatchSelectInsert:311
-Bql{
-sql     =
-                                                                    insert
-                                                                    into sys_user (username, nickname, age, status, create_time)
-                                                                    select ? as username, ? as nickname,? as age,1 as status,now() as create_time from dual
+    tl.test.Test.testBatchSelectInsert:311
+    Bql{
+    sql =
+insert
+into sys_user (username, nickname, age, status, create_time)
+select ? as username, ? as nickname, ? as age, 1 as status, now() as create_time
+from dual
 union all
 select ? as username, ? as nickname, ? as age, 1 as status, now() as create_time
 from dual
@@ -117,7 +127,8 @@ from dual
     }
     Bql{
     sql =
-insert into sys_user (username, nickname, age, status, create_time)
+insert
+into sys_user (username, nickname, age, status, create_time)
 select ? as username, ? as nickname, ? as age, 1 as status, now() as create_time
 from dual
 union all
@@ -130,7 +141,8 @@ from dual
 }
 Bql{
 sql     =
-insert into sys_user (username, nickname, age, status, create_time)
+insert
+into sys_user (username, nickname, age, status, create_time)
 select ? as username, ? as nickname, ? as age, 1 as status, now() as create_time
 from dual
 union all
@@ -143,7 +155,8 @@ from dual
 }
 Bql{
 sql     =
-insert into sys_user (username, nickname, age, status, create_time)
+insert
+into sys_user (username, nickname, age, status, create_time)
 select ? as username, ? as nickname, ? as age, 1 as status, now() as create_time
 from dual
 union all
@@ -333,7 +346,7 @@ where su.age = ?
 order by su.username
        , args = [24, 1, 0]
     }
-    ----------------------------------------------------
+----------------------------------------------------
     tl.test.Test.testBeanUpdate:78
     Bql{
     sql =
