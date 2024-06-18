@@ -1,14 +1,10 @@
 package i2f.springboot.spring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import i2f.jackson.serializer.JacksonJsonSerializer;
-import i2f.spring.core.SpringUtil;
-import i2f.spring.enviroment.EnvironmentUtil;
-import i2f.spring.event.EventManager;
+import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.spring.web.mapping.MappingUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 

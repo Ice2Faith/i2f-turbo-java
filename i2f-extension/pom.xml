@@ -15,13 +15,26 @@
 
     <modules>
         <module>i2f-extension-all</module>
-        <module>i2f-jce-sm-antherd</module>
-        <module>i2f-jce-bc</module>
-        <module>i2f-velocity</module>
-        <module>i2f-velocity-bindsql</module>
+        <module>i2f-extension-jce-sm-antherd</module>
+        <module>i2f-extension-jce-bc</module>
+        <module>i2f-extension-velocity</module>
+        <module>i2f-extension-velocity-bindsql</module>
+        <module>i2f-extension-jackson</module>
+        <module>i2f-extension-slf4j</module>
+        <module>i2f-extension-cglib</module>
+        <module>i2f-extension-aspectj</module>
+        <module>i2f-extension-cron</module>
+        <module>i2f-extension-email</module>
+        <module>i2f-extension-qrcode</module>
         <module>test-extension</module>
-        <module>i2f-jackson</module>
-        <module>i2f-slf4j</module>
+        <module>i2f-extension-gson</module>
+        <module>i2f-extension-fastjson</module>
+        <module>i2f-extension-fastjson2</module>
+        <module>i2f-extension-verifycode</module>
+        <module>i2f-extension-ftp</module>
+        <module>i2f-extension-sftp</module>
+        <module>i2f-extension-hdfs</module>
+        <module>i2f-extension-gif</module>
     </modules>
 
 
