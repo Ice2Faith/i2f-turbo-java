@@ -21,5 +21,18 @@ public class TestCompiler {
                 "}";
         Object ret = MemoryCompiler.compileCallRandomClass(code, "call", "hello");
         System.out.println(ret);
+
+        String expression = "" +
+                "return root+\"/\"+new Date();";
+        String javaSourceCode = MemoryCompiler.wrapExpressionAsJavaSourceCode(expression, "TestExpression");
+        System.out.println(javaSourceCode);
+
+        long ts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            Object hello = MemoryCompiler.evaluateExpression(expression, "hello");
+            System.out.println(hello);
+        }
+        long uts = System.currentTimeMillis() - ts;
+        System.out.println(uts);
     }
 }
