@@ -10,8 +10,12 @@ import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
  * @author Ice2Faith
@@ -19,6 +23,21 @@ import java.util.concurrent.ConcurrentHashMap;
  * @desc
  */
 public class MemoryCompiler {
+
+    public static final String DEFAULT_IMPORTS = "\n" +
+            "import java.lang.*;\n" +
+            "import java.lang.reflect.*;\n" +
+            "import java.io.*;\n" +
+            "import java.time.*;\n" +
+            "import java.math.*;\n" +
+            "import java.util.*;\n" +
+            "import java.util.concurrent.*;\n" +
+            "import java.util.concurrent.atomic.*;\n" +
+            "import java.text.*;\n" +
+            "import java.net.*;\n" +
+            "import java.security.*;\n" +
+            "import java.util.stream.*;\n" +
+            "import java.util.function.*;\n";
 
     /**
      * 将java文件编译为class文件
@@ -182,8 +201,80 @@ public class MemoryCompiler {
      * @throws Exception
      */
     public static Object compileCallRandomClass(String javaSourceCode,String methodName,Object ... args) throws Exception {
-        String randomClassName="Rc"+(UUID.randomUUID().toString().replaceAll("-","").toLowerCase());
+        String randomClassName = "RC" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
         String sourceCode = javaSourceCode.replaceAll("###", randomClassName);
         return compileCall(sourceCode,randomClassName,randomClassName,methodName,args);
+    }
+
+    /**
+     * 执行表达式计算
+     * 实际上，是将表达式封装到一个随机类的函数中进行执行
+     * 定义如下：
+     * public class ### {
+     * public Object call(Object root) throws Throwable {
+     * ${expression}
+     * }
+     * }
+     * 因此，对expression有一些要求
+     * expression具有一个入参，名为root
+     * expression必须包含return语句，以满足函数的返回值要求
+     * expression中，如果import了其他类，需要用 ### 进行分隔
+     * ### 之前的视为imports
+     * ### 之后的视为函数体
+     * 举例说明：
+     * expression=
+     * import java.util.Date;
+     * ###
+     * return root+"/"+new Date();
+     *
+     * @param expression
+     * @param root
+     * @return
+     * @throws Exception
+     */
+    public static Object evaluateExpression(String expression, Object root) throws Exception {
+        String javaSourceCode = wrapExpressionAsJavaSourceCode(expression, "###");
+        return compileCallRandomClass(javaSourceCode, "call", root);
+    }
+
+    /**
+     * 将表达式包装为java源代码文件
+     * 定义如下：
+     * public class ### {
+     * public Object call(Object root) throws Throwable {
+     * ${expression}
+     * }
+     * }
+     * 因此，对expression有一些要求
+     * expression具有一个入参，名为root
+     * expression必须包含return语句，以满足函数的返回值要求
+     * expression中，如果import了其他类，需要用 ### 进行分隔
+     * ### 之前的视为imports
+     * ### 之后的视为函数体
+     * 举例说明：
+     * expression=
+     * import java.util.Date;
+     * ###
+     * return root+"/"+new Date();
+     *
+     * @param expression
+     * @param className
+     * @return
+     */
+    public static String wrapExpressionAsJavaSourceCode(String expression, String className) {
+        String[] arr = expression.split("###", 2);
+        String imports = arr.length > 1 ? arr[0] : "";
+        String body = arr.length > 1 ? arr[1] : arr[0];
+        if (imports.isEmpty()) {
+            imports = DEFAULT_IMPORTS;
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(imports).append("\n");
+        builder.append("public class ").append(className).append(" {").append("\n");
+        builder.append("\t").append("public Object call(Object root) throws Throwable {").append("\n");
+        builder.append("\t\t").append(body).append("\n");
+        builder.append("\t").append("}").append("\n");
+        builder.append("}").append("\n");
+        return builder.toString();
     }
 }
