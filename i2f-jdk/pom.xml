@@ -85,6 +85,7 @@
         <module>i2f-bytes</module>
         <module>test-features</module>
         <module>i2f-compiler</module>
+        <module>i2f-detegate</module>
 
     </modules>
 
