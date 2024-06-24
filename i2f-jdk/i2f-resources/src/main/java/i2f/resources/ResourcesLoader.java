@@ -124,6 +124,16 @@ public class ResourcesLoader {
             "xml-",
     };
 
+    public static final String[] DEFAULT_JDK_CLASS_NAME_PREFIXES = {
+            "java.",
+            "javax.",
+            "jakarta.",
+            "javafx.",
+            "sun.",
+            "jdk.",
+            "com.sun."
+    };
+
     public static URL getClasspathResource(String name) {
         name = ReflectResolver.getClasspathName(name);
         return ReflectResolver.getClassLoader().getResource(name);
@@ -228,7 +238,7 @@ public class ResourcesLoader {
 
     public static Map<String, Class<?>> getDefaultClasses(boolean jumpJre) {
         return getDefaultClasses(jumpJre, (path, clazz) -> {
-            return isJdkClass(clazz);
+            return !isJdkClass(clazz);
         });
     }
 
@@ -237,28 +247,12 @@ public class ResourcesLoader {
             return false;
         }
         String name = clazz.getName();
-        if (name.startsWith("java.")) {
-            return false;
+        for (String prefix : DEFAULT_JDK_CLASS_NAME_PREFIXES) {
+            if (name.startsWith(prefix)) {
+                return true;
+            }
         }
-        if (name.startsWith("javax.")) {
-            return false;
-        }
-        if (name.startsWith("jakarta.")) {
-            return false;
-        }
-        if (name.startsWith("javafx.")) {
-            return false;
-        }
-        if (name.startsWith("sun.")) {
-            return false;
-        }
-        if (name.startsWith("jdk.")) {
-            return false;
-        }
-        if (name.startsWith("com.sun.")) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     public static Map<String, Class<?>> getDefaultClasses(boolean jumpJre, BiPredicate<String, Class<?>> filter) {
@@ -278,7 +272,7 @@ public class ResourcesLoader {
 
     public static Map<String, Class<?>> getClasses(boolean jumpJre) {
         return getClasses(jumpJre, (path, clazz) -> {
-            return isJdkClass(clazz);
+            return !isJdkClass(clazz);
         });
     }
 
