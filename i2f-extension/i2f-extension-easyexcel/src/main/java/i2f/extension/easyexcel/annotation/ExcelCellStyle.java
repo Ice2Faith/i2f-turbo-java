@@ -26,6 +26,11 @@ public @interface ExcelCellStyle {
     // 因此，在spel表达式中，可以直接使用ExcelStyleCallbackMeta中的属性
     String spel() default "#{true}";
 
+    /**
+     * 指定为表头，此值为true则对应的样式应用到表头上
+     *
+     * @return
+     */
     boolean head() default false;
 
     String fontName() default "";

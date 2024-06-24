@@ -24,13 +24,13 @@ public class AnnotationExcelStyleCellWriteHandler extends IDataHoldStyleCellWrit
 
     @Override
     public boolean style(CellWriteHandlerContext context, WriteCellStyle writeCellStyle, Field field, Object rawData, Object rawObj, Cell cell, List<WriteCellData<?>> cellDataList, Integer rowIndex, Integer columnIndex, Head head, Boolean isHead) {
-        if (isHead) {
-
-            return false;
-        }
+//        if (isHead) {
+//            return false;
+//        }
         Map<String, Object> workbookContext = getWorkbookContext();
         Map<String, Object> sheetContext = getSheetContext();
-        boolean ok = AnnotationStyleUtil.parse(writeCellStyle,
+        boolean ok = AnnotationStyleUtil.parse(isHead == true,
+                writeCellStyle,
                 field, rawData, rawObj,
                 rowIndex, columnIndex,
                 cell, context,

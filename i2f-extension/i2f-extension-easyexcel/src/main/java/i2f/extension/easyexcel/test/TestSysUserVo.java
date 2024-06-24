@@ -6,19 +6,28 @@ import i2f.extension.easyexcel.annotation.ExcelCellStyle;
 import i2f.extension.easyexcel.annotation.ExcelTag;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 
 /**
  * @author Ice2Faith
  * @date 2024/6/24 11:28
  * @desc
  */
+@ExcelCellStyle(head = true,
+        backgroundColor = IndexedColors.LIGHT_YELLOW,
+        fontBold = ExcelCellStyle.Bool.TRUE,
+        alignHorizontal = HorizontalAlignment.CENTER,
+        alignVertical = VerticalAlignment.CENTER
+)
 @ExcelIgnoreUnannotated
 @Data
 @NoArgsConstructor
 public class TestSysUserVo {
     @ExcelProperty(value = "ID")
     private Long id;
+
 
     @ExcelCellStyle(hyperLink = true, fontUnderline = true, fontColor = IndexedColors.BLUE)
     @ExcelCellStyle(colWidth = 30, commentSpel = true, comment = "#{\"年龄为：\"+record.age}")
