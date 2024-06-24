@@ -35,6 +35,7 @@
         <module>i2f-extension-sftp</module>
         <module>i2f-extension-hdfs</module>
         <module>i2f-extension-gif</module>
+        <module>i2f-extension-easyexcel</module>
     </modules>
 
 
