@@ -6,6 +6,7 @@ import com.alibaba.excel.write.handler.CellWriteHandler;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import i2f.extension.easyexcel.annotation.ExcelTag;
 import i2f.extension.easyexcel.style.AnnotationExcelStyleCellWriteHandler;
+import i2f.reflect.ReflectResolver;
 import lombok.Data;
 
 import java.io.File;
@@ -152,12 +153,12 @@ public class ExcelExportTask implements Runnable {
         }
         Class<?> dataClass = provider.getDataClass();
         if (dataClass != null && !excludeColumnTags.isEmpty()) {
-            Map<Field, Class<?>> fields = ExcelTaskUtil.getFields(dataClass, true, (field) -> {
+            Map<Field, Class<?>> fields = ReflectResolver.getFields(dataClass, (field) -> {
                 int modifiers = field.getModifiers();
                 if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
                     return false;
                 }
-                ExcelTag ann = ExcelTaskUtil.getAnnotation(field, ExcelTag.class);
+                ExcelTag ann = ReflectResolver.getAnnotation(field, ExcelTag.class);
                 if (ann == null) {
                     return false;
                 }

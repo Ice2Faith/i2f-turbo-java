@@ -7,7 +7,7 @@ import com.alibaba.excel.write.metadata.holder.WriteWorkbookHolder;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import i2f.extension.easyexcel.annotation.ExcelCellStyle;
-import i2f.extension.easyexcel.core.ExcelTaskUtil;
+import i2f.reflect.ReflectResolver;
 import i2f.text.StringUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.poi.common.usermodel.HyperlinkType;
@@ -15,10 +15,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -28,14 +25,37 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AnnotationStyleUtil {
 
-    public static boolean parse(WriteCellStyle style,
+    public static boolean parse(boolean head, WriteCellStyle style,
                                 Field field, Object rawData, Object rawObj,
                                 int rowIndex, int colIndex,
                                 Cell cell, CellWriteHandlerContext context,
                                 Map<String, Object> sheetContext, Map<String, Object> workbookContext) {
         ExcelStyleCallbackMeta meta = parseStyleCallbackMeta(field, rawData, rawObj, rowIndex, colIndex);
 
+        ExcelCellStyle[] styles = meta.style;
+        List<ExcelCellStyle> list = new ArrayList<>();
+        if (styles != null) {
+            for (ExcelCellStyle item : styles) {
+                if (item == null) {
+                    continue;
+                }
+                if (item.head() == head) {
+                    list.add(item);
+                }
+            }
+        }
 
+        ExcelCellStyle[] arr = list.toArray(new ExcelCellStyle[0]);
+        meta.style = arr;
+
+        return applyFieldStyleMeta(style, meta, cell, context, sheetContext);
+    }
+
+
+    public static boolean applyFieldStyleMeta(WriteCellStyle style,
+                                              ExcelStyleCallbackMeta meta,
+                                              Cell cell, CellWriteHandlerContext context,
+                                              Map<String, Object> sheetContext) {
         Map<String, Boolean> spelMap = new HashedMap<>();
         boolean ret = false;
 
@@ -54,6 +74,9 @@ public class AnnotationStyleUtil {
 
         if (meta.style != null) {
             for (ExcelCellStyle item : meta.style) {
+                if (item == null) {
+                    continue;
+                }
                 String spel = item.spel();
                 if (StringUtils.isEmpty(spel)) {
                     continue;
@@ -104,10 +127,10 @@ public class AnnotationStyleUtil {
             CreationHelper creationHelper = workbook.getCreationHelper();
 
             if (colWidth > 0) {
-                String colWidthKey = "col-width:" + field;
+                String colWidthKey = "col-width:" + meta.field;
                 if (!sheetContext.containsKey(colWidthKey)) {
                     sheetContext.put(colWidthKey, true);
-                    sheet.setColumnWidth(colIndex, colWidth * 256);
+                    sheet.setColumnWidth(meta.col, colWidth * 256);
                 }
             }
 
@@ -140,8 +163,8 @@ public class AnnotationStyleUtil {
                     ClientAnchor anchor = creationHelper.createClientAnchor();
 
                     // fixed exception: Multiple cell comments in one cell are not allowed, cell: A1
-                    anchor.setRow1(rowIndex);
-                    anchor.setCol1(colIndex);
+                    anchor.setRow1(meta.row);
+                    anchor.setCol1(meta.col);
                     anchor.setRow2(anchor.getRow1() + 2);
                     anchor.setCol2(anchor.getCol1() + 2);
 
@@ -158,7 +181,7 @@ public class AnnotationStyleUtil {
                 cell.setCellFormula(formula);
             }
 
-            String fieldSelectionKey = "selection:" + field;
+            String fieldSelectionKey = "selection:" + meta.field;
             if (!sheetContext.containsKey(fieldSelectionKey)) {
                 sheetContext.put(fieldSelectionKey, true);
 
@@ -193,7 +216,7 @@ public class AnnotationStyleUtil {
                     String[] items = listSet.toArray(new String[0]);
                     DataValidationConstraint listConstraint = dataValidationHelper.createExplicitListConstraint(items);
 
-                    CellRangeAddressList cellAddresses = new CellRangeAddressList(0, 65535, colIndex, colIndex);
+                    CellRangeAddressList cellAddresses = new CellRangeAddressList(0, 65535, meta.col, meta.col);
                     DataValidation validation = dataValidationHelper.createValidation(listConstraint, cellAddresses);
                     sheet.addValidationData(validation);
                 }
@@ -217,8 +240,37 @@ public class AnnotationStyleUtil {
         ExcelCellStyle[] cellStyleAnn = null;
 
         if (field != null) {
-            propAnn = ExcelTaskUtil.getAnnotation(field, ExcelProperty.class);
-            cellStyleAnn = ExcelTaskUtil.getAnnotationRepeatable(field, ExcelCellStyle.class, new ExcelCellStyle[0]);
+            Set<ExcelCellStyle> styles = new LinkedHashSet<>();
+            propAnn = ReflectResolver.getAnnotation(field, ExcelProperty.class);
+            Set<ExcelCellStyle> anns = ReflectResolver.getAnnotations(field, ExcelCellStyle.class);
+            boolean hasData = false;
+            boolean hasHead = false;
+            if (anns != null) {
+                for (ExcelCellStyle item : anns) {
+                    if (item.head()) {
+                        hasHead = true;
+                    }
+                    hasData = true;
+                    styles.add(item);
+                }
+            }
+            if (!hasData || !hasHead) {
+                anns = ReflectResolver.getAnnotations(field, ExcelCellStyle.class);
+                if (anns != null) {
+                    for (ExcelCellStyle item : anns) {
+                        if (item.head()) {
+                            if (!hasHead) {
+                                styles.add(item);
+                            }
+                        } else {
+                            if (!hasData) {
+                                styles.add(item);
+                            }
+                        }
+                    }
+                }
+            }
+            cellStyleAnn = styles.toArray(new ExcelCellStyle[0]);
         }
 
         int order = Integer.MAX_VALUE;
