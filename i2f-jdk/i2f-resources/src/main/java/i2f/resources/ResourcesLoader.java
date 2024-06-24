@@ -19,6 +19,110 @@ import java.util.jar.*;
 public class ResourcesLoader {
     private static ConcurrentHashMap<URL, String> RES_CACHE = new ConcurrentHashMap<>();
 
+    public static final String[] DEFAULT_EXCLUDE_SCAN_JAR_NAME_PREFIXES = {
+            "lombok-",
+            "spring-",
+            "log4j-",
+            "jul-",
+            "logback-",
+            "slf4j-",
+            "snakeyaml-",
+            "HikariCP-",
+            "c3p0-",
+            "druid-",
+            "aspectj",
+            "cglib-",
+            "mybatis-",
+            "mysql-",
+            "hibernate-",
+            "jakarta-",
+            "jakarta.",
+            "jai_",
+            "javax-",
+            "javax.",
+            "jaxb-",
+            "jna-",
+            "jnr-",
+            "jsp-",
+            "jsr",
+            "tomcat-",
+            "jboss-",
+            "netty-",
+            "jetty-",
+            "servlet-",
+            "undertow-",
+            "websocket-",
+            "jedis-",
+            "jjwt-",
+            "lettuce-",
+            "lucene-",
+            "minio-",
+            "mongo-",
+            "mongodb-",
+            "kafka-",
+            "nacos-",
+            "feign-",
+            "netflix-",
+            "org.apache.",
+            "org.eclipse.",
+            "redisson-",
+            "seata-",
+            "sentinal-",
+            "shiro-",
+            "springfox-",
+            "ribbon-",
+            "swagger-",
+            "zipkin-",
+            "skywalking-",
+            "zookeeper-",
+            "zuul-",
+            "eureka-",
+            "hystrix-",
+            "kotlin-",
+            "groovy-",
+            "scala-",
+            "ojdbc",
+            "orai18n-",
+            "okhttp-",
+            "powerjob-",
+            "quartz-",
+            "xxl-job-",
+            "reactor-",
+            "sqlite-",
+            "thymeleaf-",
+            "velocity-",
+            "fastjson-",
+            "jackson-",
+            "fastjson2-",
+            "gson-",
+            "poi-",
+            "easypoi-",
+            "autopoi-",
+            "ooxml-",
+            "guava-",
+            "hutool-",
+
+            "commons-",
+            "idea_",
+            "debugger-",
+            "asm-",
+            "assertj-",
+            "hadoop-",
+            "httpclient-",
+            "httpcore-",
+            "istack-",
+            "itext-",
+            "joda-",
+            "json-",
+            "jsoup-",
+            "junit-",
+            "jxl-",
+            "kie-",
+            "maven-",
+            "plexus-",
+            "surefire-",
+            "xml-",
+    };
 
     public static URL getClasspathResource(String name) {
         name = ReflectResolver.getClasspathName(name);
@@ -117,45 +221,82 @@ public class ResourcesLoader {
         return ret;
     }
 
+
+    public static Map<String, Class<?>> getDefaultClasses() {
+        return getDefaultClasses(true);
+    }
+
+    public static Map<String, Class<?>> getDefaultClasses(boolean jumpJre) {
+        return getDefaultClasses(jumpJre, (path, clazz) -> {
+            return isJdkClass(clazz);
+        });
+    }
+
+    private static boolean isJdkClass(Class<?> clazz) {
+        if (clazz == null) {
+            return false;
+        }
+        String name = clazz.getName();
+        if (name.startsWith("java.")) {
+            return false;
+        }
+        if (name.startsWith("javax.")) {
+            return false;
+        }
+        if (name.startsWith("jakarta.")) {
+            return false;
+        }
+        if (name.startsWith("javafx.")) {
+            return false;
+        }
+        if (name.startsWith("sun.")) {
+            return false;
+        }
+        if (name.startsWith("jdk.")) {
+            return false;
+        }
+        if (name.startsWith("com.sun.")) {
+            return false;
+        }
+        return true;
+    }
+
+    public static Map<String, Class<?>> getDefaultClasses(boolean jumpJre, BiPredicate<String, Class<?>> filter) {
+
+        Map<URL, String> classes = scanResources(jumpJre, (jarName, embed) -> {
+            return isDefaultExcludeScanJarName(jarName);
+        }, (url, str) -> {
+            return isLegalClassFile(str);
+        });
+        return convertResourceAsClassMap(classes, filter);
+    }
+
+
     public static Map<String, Class<?>> getClasses() {
         return getClasses(true);
     }
 
     public static Map<String, Class<?>> getClasses(boolean jumpJre) {
         return getClasses(jumpJre, (path, clazz) -> {
-            if (clazz == null) {
-                return false;
-            }
-            String name = clazz.getName();
-            if (name.startsWith("java.")) {
-                return false;
-            }
-            if (name.startsWith("javax.")) {
-                return false;
-            }
-            if (name.startsWith("javafx.")) {
-                return false;
-            }
-            if (name.startsWith("sun.")) {
-                return false;
-            }
-            if (name.startsWith("jdk.")) {
-                return false;
-            }
-            if (name.startsWith("com.sun.")) {
-                return false;
-            }
-            return true;
+            return isJdkClass(clazz);
         });
     }
 
     public static Map<String, Class<?>> getClasses(boolean jumpJre, BiPredicate<String, Class<?>> filter) {
-        Map<String, Class<?>> ret = new LinkedHashMap<>();
+
         Map<URL, String> classes = scanResources(jumpJre, null, (url, str) -> {
             return isLegalClassFile(str);
         });
-        for (Map.Entry<URL, String> entry : classes.entrySet()) {
+        return convertResourceAsClassMap(classes, filter);
+    }
+
+    public static Map<String, Class<?>> convertResourceAsClassMap(Map<URL, String> resourcesMap, BiPredicate<String, Class<?>> filter) {
+        Map<String, Class<?>> ret = new LinkedHashMap<>();
+        for (Map.Entry<URL, String> entry : resourcesMap.entrySet()) {
             String value = entry.getValue();
+            if (!isLegalClassFile(value)) {
+                continue;
+            }
             Class<?> clazz = ReflectResolver.loadClass(ReflectResolver.path2ClassName(value));
             if (filter == null || filter.test(value, clazz)) {
                 ret.put(value, clazz);
@@ -165,7 +306,18 @@ public class ResourcesLoader {
     }
 
     public static Map<URL, String> scanResources() {
-        return scanResources(true, null, null);
+        return scanResources(true, (jarName, embed) -> {
+            return isDefaultExcludeScanJarName(jarName);
+        }, null);
+    }
+
+    public static boolean isDefaultExcludeScanJarName(String jarName) {
+        for (String prefix : DEFAULT_EXCLUDE_SCAN_JAR_NAME_PREFIXES) {
+            if (jarName.startsWith(prefix)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static Map<URL, String> scanResources(
