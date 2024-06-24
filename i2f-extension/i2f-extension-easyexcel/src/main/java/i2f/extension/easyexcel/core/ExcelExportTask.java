@@ -1,0 +1,320 @@
+package i2f.extension.easyexcel.core;
+
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.handler.CellWriteHandler;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import i2f.extension.easyexcel.annotation.ExcelTag;
+import i2f.extension.easyexcel.style.AnnotationExcelStyleCellWriteHandler;
+import lombok.Data;
+
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
+
+/**
+ * @author Ice2Faith
+ * @date 2024/1/29 10:38
+ * @desc
+ */
+@Data
+public class ExcelExportTask implements Runnable {
+    private int pageSize = 65530; // 旧版本的excel,单个sheet仅支持 65535 ，0x7fff
+    private IDataProvider provider;
+    private File file;
+    private File tmpFile;
+    private String sheetName;
+    private File templateFile;
+    private Set<String> excludeColumnTags;
+    private Set<String> excludeColumnNames;
+    private boolean enableCellStyleAnnotation;
+    private CellWriteHandler writeHandler;
+    private CountDownLatch latch;
+
+    public ExcelExportTask(IDataProvider provider, File file) {
+        this.provider = provider;
+        this.file = file;
+    }
+
+    public ExcelExportTask(IDataProvider provider, File file, String sheetName) {
+        this.provider = provider;
+        this.file = file;
+        this.sheetName = sheetName;
+    }
+
+    public ExcelExportTask(IDataProvider provider, File file, String sheetName, File templateFile) {
+        this.provider = provider;
+        this.file = file;
+        this.sheetName = sheetName;
+        this.templateFile = templateFile;
+    }
+
+    public ExcelExportTask(IDataProvider provider, File file, String sheetName, File templateFile, File tmpFile) {
+        this.provider = provider;
+        this.file = file;
+        this.sheetName = sheetName;
+        this.templateFile = templateFile;
+        this.tmpFile = tmpFile;
+    }
+
+    public ExcelExportTask setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+        return this;
+    }
+
+    public ExcelExportTask setTemplateFile(File templateFile) {
+        this.templateFile = templateFile;
+        return this;
+    }
+
+    public ExcelExportTask setExcludeColumnNames(Set<String> excludeColumnNames) {
+        this.excludeColumnNames = excludeColumnNames;
+        return this;
+    }
+
+    public static class EmptyCellWriteHandler implements CellWriteHandler {
+
+    }
+
+    public static final EmptyCellWriteHandler EMPTY_CELL_WRITE_HANDLER = new EmptyCellWriteHandler();
+
+    private void updateWriteHandler(List<?> list, Class<?> clazz,
+                                    Map<Integer, Map<String, Object>> sheetContext,
+                                    int sheetIndex,
+                                    Map<String, Object> workbookContext) {
+        if (writeHandler == null) {
+            return;
+        }
+        if (!(writeHandler instanceof IDataHoldCellWriteHandler)) {
+            return;
+        }
+        IDataHoldCellWriteHandler handler = (IDataHoldCellWriteHandler) writeHandler;
+        if (list != null) {
+            handler.setList(list);
+        }
+        if (clazz != null) {
+            handler.setClazz(clazz);
+        }
+        handler.setWorkbookContext(workbookContext);
+        if (!sheetContext.containsKey(sheetIndex)) {
+            sheetContext.put(sheetIndex, new HashMap<>());
+        }
+        handler.setSheetContext(sheetContext.get(sheetIndex));
+    }
+
+    @Override
+    public void run() {
+        if (tmpFile == null) {
+            String tmpSuffix = "";
+            String name = file.getName();
+            int idx = name.lastIndexOf(".");
+            if (idx >= 0) {
+                tmpSuffix = name.substring(idx);
+            }
+            tmpFile = new File(file.getParentFile(), UUID.randomUUID().toString().replaceAll("-", "") + tmpSuffix + ".data");
+        }
+
+        if (sheetName == null) {
+            sheetName = "sheet";
+        }
+
+        if (excludeColumnNames == null) {
+            excludeColumnNames = new HashSet<>();
+        }
+
+        if (tmpFile.exists()) {
+            tmpFile.delete();
+        }
+
+        if (writeHandler == null) {
+            if (enableCellStyleAnnotation) {
+                writeHandler = new AnnotationExcelStyleCellWriteHandler();
+            } else {
+                writeHandler = EMPTY_CELL_WRITE_HANDLER;
+            }
+        }
+
+        Map<String, Object> workbookContext = new HashMap<>();
+        Map<Integer, Map<String, Object>> sheetContext = new HashMap<>();
+
+        boolean useTemplate = (templateFile != null && templateFile.exists() && templateFile.isFile());
+
+        File tmpDir = tmpFile.getParentFile();
+        if (!tmpDir.exists()) {
+            tmpDir.mkdirs();
+        }
+
+        if (excludeColumnTags == null) {
+            excludeColumnTags = new HashSet<>();
+        }
+        Class<?> dataClass = provider.getDataClass();
+        if (dataClass != null && !excludeColumnTags.isEmpty()) {
+            Map<Field, Class<?>> fields = ExcelTaskUtil.getFields(dataClass, true, (field) -> {
+                int modifiers = field.getModifiers();
+                if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
+                    return false;
+                }
+                ExcelTag ann = ExcelTaskUtil.getAnnotation(field, ExcelTag.class);
+                if (ann == null) {
+                    return false;
+                }
+                String[] tags = ann.value();
+                if (tags == null) {
+                    return false;
+                }
+                for (String tag : tags) {
+                    if (excludeColumnTags.contains(tag)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            Set<String> names = fields.keySet().stream().map(Field::getName).collect(Collectors.toSet());
+            excludeColumnNames.addAll(names);
+        }
+
+
+        boolean isSupportPage = provider.supportPage();
+        if (!isSupportPage) {
+            Class<?> clazz = provider.getDataClass();
+            List<?> data = provider.getData(null);
+            int size = data.size();
+            if (size <= pageSize) {
+                if (useTemplate) {
+                    ExcelWriter excelWriter = EasyExcel.write(tmpFile)
+                            .withTemplate(templateFile)
+                            .registerWriteHandler(writeHandler)
+                            .excludeColumnFieldNames(excludeColumnNames)
+                            .build();
+                    WriteSheet writeSheet = EasyExcel.write()
+                            .sheet(0, sheetName)
+                            .build();
+                    updateWriteHandler(data, clazz, sheetContext, 0, workbookContext);
+                    excelWriter.fill(data, writeSheet);
+                    excelWriter.finish();
+                } else {
+                    updateWriteHandler(data, clazz, sheetContext, 0, workbookContext);
+                    EasyExcel.write(tmpFile, clazz)
+                            .sheet(0, sheetName)
+                            .registerWriteHandler(writeHandler)
+                            .excludeColumnFieldNames(excludeColumnNames)
+                            .doWrite(data);
+                }
+            } else {
+                ExcelWriter excelWriter = null;
+                // 处理使用模板的情况
+                if (useTemplate) {
+                    excelWriter = EasyExcel.write(tmpFile)
+                            .withTemplate(templateFile)
+                            .registerWriteHandler(writeHandler)
+                            .excludeColumnFieldNames(excludeColumnNames)
+                            .build();
+                } else {
+                    excelWriter = EasyExcel.write(tmpFile, clazz)
+                            .registerWriteHandler(writeHandler)
+                            .excludeColumnFieldNames(excludeColumnNames)
+                            .build();
+                }
+                int curPageIndex = 0;
+                int count = 0;
+                List<Object> curData = new ArrayList<>(pageSize);
+                for (Object item : data) {
+                    if (count == pageSize) {
+
+                        WriteSheet writeSheet = EasyExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
+                                .excludeColumnFieldNames(excludeColumnNames)
+                                .build();
+                        updateWriteHandler(curData, clazz, sheetContext, curPageIndex, workbookContext);
+                        if (useTemplate) {
+                            excelWriter.fill(curData, writeSheet);
+                        } else {
+                            excelWriter.write(curData, writeSheet);
+                        }
+
+                        count = 0;
+                        curPageIndex++;
+                        curData.clear();
+                    }
+                    curData.add(item);
+                    count++;
+                }
+                if (count > 0) {
+                    WriteSheet writeSheet = EasyExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
+                            .excludeColumnFieldNames(excludeColumnNames)
+                            .build();
+                    updateWriteHandler(curData, clazz, sheetContext, curPageIndex, workbookContext);
+                    if (useTemplate) {
+                        excelWriter.fill(curData, writeSheet);
+                    } else {
+                        excelWriter.write(curData, writeSheet);
+                    }
+                }
+
+                excelWriter.finish();
+            }
+        } else {
+            int curPageIndex = 0;
+
+            Class<?> clazz = provider.getDataClass();
+            ExcelWriter excelWriter = null;
+            if (useTemplate) {
+                excelWriter = EasyExcel.write(tmpFile)
+                        .withTemplate(templateFile)
+                        .registerWriteHandler(writeHandler)
+                        .excludeColumnFieldNames(excludeColumnNames)
+                        .build();
+            } else {
+                excelWriter = EasyExcel.write(tmpFile, clazz)
+                        .registerWriteHandler(writeHandler)
+                        .excludeColumnFieldNames(excludeColumnNames)
+                        .build();
+            }
+
+            while (true) {
+                ExcelExportPage page = new ExcelExportPage(curPageIndex, pageSize);
+                List<?> data = provider.getData(page);
+                if (data == null || data.isEmpty()) {
+                    break;
+                }
+
+                int dsize = data.size();
+
+                WriteSheet writeSheet = EasyExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
+                        .excludeColumnFieldNames(excludeColumnNames)
+                        .build();
+                updateWriteHandler(data, clazz, sheetContext, curPageIndex, workbookContext);
+                if (useTemplate) {
+                    excelWriter.fill(data, writeSheet);
+                } else {
+                    excelWriter.write(data, writeSheet);
+                }
+
+                curPageIndex++;
+
+                if (dsize < pageSize) {
+                    break;
+                }
+            }
+
+            excelWriter.finish();
+        }
+        if (file.exists()) {
+            file.delete();
+        }
+
+        File fileDir = file.getParentFile();
+        if (!fileDir.exists()) {
+            fileDir.mkdirs();
+        }
+        tmpFile.renameTo(file);
+
+        if (latch != null) {
+            latch.countDown();
+        }
+    }
+
+}
