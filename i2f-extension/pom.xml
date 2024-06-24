@@ -36,6 +36,7 @@
         <module>i2f-extension-hdfs</module>
         <module>i2f-extension-gif</module>
         <module>i2f-extension-easyexcel</module>
+        <module>i2f-extension-document</module>
     </modules>
 
 
