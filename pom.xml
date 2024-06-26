@@ -257,6 +257,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-lru-cache</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-lru-map</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
