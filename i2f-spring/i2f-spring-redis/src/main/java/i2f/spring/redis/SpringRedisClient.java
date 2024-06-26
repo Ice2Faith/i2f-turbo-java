@@ -49,55 +49,55 @@ public class SpringRedisClient implements IRedisClient {
 
     @Override
     public boolean set(String key, String val) {
-        template.opsForValue().set(key, val);
+        template.opsForValue().set(wrapKey(key), val);
         return true;
     }
 
     @Override
     public boolean set(String key, String val, long timeOutSecond) {
         if (timeOutSecond >= 0) {
-            template.opsForValue().set(key, val, timeOutSecond, TimeUnit.SECONDS);
+            template.opsForValue().set(wrapKey(key), val, timeOutSecond, TimeUnit.SECONDS);
         } else {
-            template.opsForValue().set(key, val);
+            template.opsForValue().set(wrapKey(key), val);
         }
         return true;
     }
 
     @Override
     public boolean expire(String key, long timeOutSecond) {
-        return Boolean.TRUE.equals(template.expire(key, timeOutSecond, TimeUnit.SECONDS));
+        return Boolean.TRUE.equals(template.expire(wrapKey(key), timeOutSecond, TimeUnit.SECONDS));
     }
 
     @Override
     public Long getExpire(String key) {
-        return template.getExpire(key, TimeUnit.SECONDS);
+        return template.getExpire(wrapKey(key), TimeUnit.SECONDS);
     }
 
     @Override
     public boolean setUnique(String key, String val, long timeOutSecond) {
         if (timeOutSecond >= 0) {
-            return Boolean.TRUE.equals(template.opsForValue().setIfAbsent(key, val, timeOutSecond, TimeUnit.SECONDS));
+            return Boolean.TRUE.equals(template.opsForValue().setIfAbsent(wrapKey(key), val, timeOutSecond, TimeUnit.SECONDS));
         } else {
-            return Boolean.TRUE.equals(template.opsForValue().setIfAbsent(key, val));
+            return Boolean.TRUE.equals(template.opsForValue().setIfAbsent(wrapKey(key), val));
         }
     }
 
     @Override
     public String del(String key) {
-        Object val = template.opsForValue().get(key);
-        template.delete(key);
+        Object val = template.opsForValue().get(wrapKey(key));
+        template.delete(wrapKey(key));
         return null == val ? null : String.valueOf(val);
     }
 
     @Override
     public String get(String key) {
-        Object val = template.opsForValue().get(key);
+        Object val = template.opsForValue().get(wrapKey(key));
         return null == val ? null : String.valueOf(val);
     }
 
     @Override
     public Collection<String> keys(String patten) {
-        return template.keys(patten);
+        return template.keys(wrapKey(patten));
     }
 
     /**
@@ -109,21 +109,21 @@ public class SpringRedisClient implements IRedisClient {
      */
     @Override
     public Long listPush(String key, String... values) {
-        return template.opsForList().rightPushAll(key, values);
+        return template.opsForList().rightPushAll(wrapKey(key), values);
     }
 
     @Override
     public Long listLength(String key) {
-        return template.opsForList().size(key);
+        return template.opsForList().size(wrapKey(key));
     }
 
     @Override
     public List<String> listAll(String key) {
-        Long size = template.opsForList().size(key);
+        Long size = template.opsForList().size(wrapKey(key));
         if (size == null) {
             size = (long) Integer.MAX_VALUE;
         }
-        List<Object> list = template.opsForList().range(key, 0, size);
+        List<Object> list = template.opsForList().range(wrapKey(key), 0, size);
         return list.stream()
                 .map(e -> e == null ? null : String.valueOf(e))
                 .collect(Collectors.toList());
@@ -131,14 +131,14 @@ public class SpringRedisClient implements IRedisClient {
 
     @Override
     public String listAt(String key, long index) {
-        Object val = template.opsForList().index(key, index);
+        Object val = template.opsForList().index(wrapKey(key), index);
         return val == null ? null : String.valueOf(val);
     }
 
     @Override
     public String listSet(String key, long index, String value) {
-        String ret = listAt(key, index);
-        template.opsForList().set(key, index, value);
+        String ret = listAt(wrapKey(key), index);
+        template.opsForList().set(wrapKey(key), index, value);
         return ret;
     }
 
@@ -153,25 +153,25 @@ public class SpringRedisClient implements IRedisClient {
      */
     @Override
     public Long hashSet(String key, String field, String value) {
-        template.opsForHash().put(key, field, value);
-        return template.opsForHash().size(key);
+        template.opsForHash().put(wrapKey(key), field, value);
+        return template.opsForHash().size(wrapKey(key));
     }
 
     @Override
     public String hashGet(String key, String field) {
-        Object val = template.opsForHash().get(key, field);
+        Object val = template.opsForHash().get(wrapKey(key), field);
         return val == null ? null : String.valueOf(val);
     }
 
     @Override
     public boolean hashSetMap(String key, Map<String, String> map) {
-        template.opsForHash().putAll(key, map);
+        template.opsForHash().putAll(wrapKey(key), map);
         return true;
     }
 
     @Override
     public Map<String, String> hashGetAll(String key) {
-        Map<Object, Object> map = template.opsForHash().entries(key);
+        Map<Object, Object> map = template.opsForHash().entries(wrapKey(key));
         Map<String, String> ret = new LinkedHashMap<>();
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
             Object value = entry.getValue();
@@ -182,11 +182,11 @@ public class SpringRedisClient implements IRedisClient {
 
     @Override
     public Long hashSize(String key) {
-        return template.opsForHash().size(key);
+        return template.opsForHash().size(wrapKey(key));
     }
 
     @Override
     public Long hashDelete(String key, String... fields) {
-        return template.opsForHash().delete(key, fields);
+        return template.opsForHash().delete(wrapKey(key), fields);
     }
 }
