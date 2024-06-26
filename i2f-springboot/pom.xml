@@ -19,6 +19,7 @@
         <module>i2f-springboot-spring-starter</module>
         <module>i2f-springboot-xxl-job-starter</module>
         <module>i2f-springboot-swagger2-starter</module>
+        <module>i2f-springboot-redisson-starter</module>
     </modules>
 
 </project>
