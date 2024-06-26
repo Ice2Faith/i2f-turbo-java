@@ -1,4 +1,4 @@
-package i2f.springboot.spring;
+package i2f.springboot.spring.core;
 
 import i2f.spring.core.SpringUtil;
 import i2f.spring.enviroment.EnvironmentUtil;

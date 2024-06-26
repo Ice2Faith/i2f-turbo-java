@@ -11,7 +11,7 @@ import org.apache.commons.net.ftp.FTPReply;
 import java.io.*;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2021/11/1
  */
 public class FtpUtil implements Closeable {

@@ -1,4 +1,4 @@
-package i2f.springboot.spring.holder;
+package i2f.springboot.spring.core.holder;
 
 import i2f.spring.core.SpringUtil;
 import i2f.spring.enviroment.EnvironmentUtil;

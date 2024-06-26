@@ -1,9 +1,9 @@
-package i2f.springboot.spring;
+package i2f.springboot.spring.core;
 
 import i2f.spring.core.SpringUtil;
 import i2f.spring.enviroment.EnvironmentUtil;
 import i2f.spring.event.EventManager;
-import i2f.springboot.spring.holder.SpringContextHolder;
+import i2f.springboot.spring.core.holder.SpringContextHolder;
 import lombok.Data;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
