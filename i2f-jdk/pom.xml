@@ -87,6 +87,7 @@
         <module>i2f-compiler</module>
         <module>i2f-detegate</module>
         <module>i2f-cache</module>
+        <module>i2f-lru-cache</module>
 
     </modules>
 
