@@ -16,7 +16,7 @@ import java.util.UUID;
 import static com.google.code.kaptcha.Constants.*;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2021/8/12
  */
 public class VerifyCodeUtil {

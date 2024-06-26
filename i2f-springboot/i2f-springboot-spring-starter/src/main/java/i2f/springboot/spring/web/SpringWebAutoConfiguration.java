@@ -1,4 +1,4 @@
-package i2f.springboot.spring;
+package i2f.springboot.spring.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;

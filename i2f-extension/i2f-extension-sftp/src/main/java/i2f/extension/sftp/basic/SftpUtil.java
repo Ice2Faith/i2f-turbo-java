@@ -10,7 +10,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2021/11/1
  */
 public class SftpUtil implements Closeable {

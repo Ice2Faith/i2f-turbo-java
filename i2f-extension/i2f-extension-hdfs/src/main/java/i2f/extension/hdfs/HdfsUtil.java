@@ -12,7 +12,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2021/11/1
  */
 public class HdfsUtil implements Closeable {

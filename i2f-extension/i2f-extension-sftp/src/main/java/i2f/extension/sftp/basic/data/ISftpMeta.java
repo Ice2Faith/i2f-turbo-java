@@ -6,7 +6,7 @@ import i2f.extension.ftp.data.IFtpMeta;
 import java.util.Properties;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2021/11/1
  */
 public interface ISftpMeta extends IFtpMeta {

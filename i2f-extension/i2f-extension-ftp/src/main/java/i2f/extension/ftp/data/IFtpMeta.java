@@ -2,7 +2,7 @@ package i2f.extension.ftp.data;
 
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2021/11/1
  */
 public interface IFtpMeta {
