@@ -1,0 +1,91 @@
+{
+  "groups": [
+    {
+      "name": "i2f.swagger2.apis",
+      "type": "i2f.springboot.swagger2.Swagger2AutoConfiguration",
+      "sourceType": "i2f.springboot.swagger2.Swagger2AutoConfiguration"
+    },
+    {
+      "name": "i2f.swagger2.apis.rest",
+      "type": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
+      "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.swagger2.apis.all.enable",
+      "type": "java.lang.Boolean",
+      "description": "all.",
+      "sourceType": "i2f.springboot.swagger2.Swagger2AutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swagger2.apis.rest.enable",
+      "type": "java.lang.Boolean",
+      "description": "rest.",
+      "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swagger2.apis.rest.all.enable",
+      "type": "java.lang.Boolean",
+      "description": "rest all.",
+      "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
+      "defaultValue": true
+    },{
+      "name": "i2f.swagger2.apis.rest.web.enable",
+      "type": "java.lang.Boolean",
+      "description": "rest web.",
+      "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
+      "defaultValue": true
+    },{
+      "name": "i2f.swagger2.apis.rest.get.enable",
+      "type": "java.lang.Boolean",
+      "description": "rest get.",
+      "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
+      "defaultValue": true
+    },{
+      "name": "i2f.swagger2.apis.rest.post.enable",
+      "type": "java.lang.Boolean",
+      "description": "rest post.",
+      "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
+      "defaultValue": true
+    },{
+      "name": "i2f.swagger2.apis.rest.put.enable",
+      "type": "java.lang.Boolean",
+      "description": "rest put.",
+      "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
+      "defaultValue": true
+    },{
+      "name": "i2f.swagger2.apis.rest.delete.enable",
+      "type": "java.lang.Boolean",
+      "description": "rest delete.",
+      "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
