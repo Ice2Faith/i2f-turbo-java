@@ -2,7 +2,7 @@ package i2f.extension.ftp.data;
 
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/3/26 18:40
  * @desc
  */

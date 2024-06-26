@@ -3,7 +3,7 @@ package i2f.extension.gif;
 import java.awt.image.BufferedImage;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/6/24 17:34
  * @desc
  */

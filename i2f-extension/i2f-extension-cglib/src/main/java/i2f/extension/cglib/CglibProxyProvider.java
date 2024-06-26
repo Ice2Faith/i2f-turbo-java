@@ -5,7 +5,7 @@ import i2f.proxy.IProxyHandler;
 import i2f.proxy.IProxyProvider;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/3/26 17:50
  * @desc
  */
