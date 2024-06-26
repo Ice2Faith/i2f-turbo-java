@@ -1,6 +1,6 @@
 package i2f.extension.redis.cache;
 
-import i2f.cache.impl.IStringObjectExpireContainerCache;
+import i2f.cache.impl.IExpireContainerCache;
 import i2f.cache.persist.IDistributedCache;
 import i2f.cache.persist.IPersistCache;
 import i2f.extension.redis.api.IRedisClient;
@@ -14,7 +14,7 @@ import java.util.function.Function;
  * @date 2024/6/26 15:56
  * @desc
  */
-public class RedisCache implements IStringObjectExpireContainerCache,
+public class RedisCache implements IExpireContainerCache<String, Object>,
         IPersistCache<String, Object>,
         IDistributedCache<String, Object> {
     protected String prefix;
