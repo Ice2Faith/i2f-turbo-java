@@ -15,7 +15,11 @@ public interface IContainerCache<K, V> extends ICache<K, V> {
 
     void clean();
 
-    int size();
+    default int size() {
+        return keys().size();
+    }
 
-    void forEach(Consumer<K> consumer);
+    default void forEach(Consumer<K> consumer) {
+        keys().forEach(consumer);
+    }
 }

@@ -35,8 +35,12 @@
         <module>i2f-extension-sftp</module>
         <module>i2f-extension-hdfs</module>
         <module>i2f-extension-gif</module>
+        <module>i2f-extension-minio</module>
         <module>i2f-extension-easyexcel</module>
         <module>i2f-extension-document</module>
+        <module>i2f-extension-jedis</module>
+        <module>i2f-extension-redis-api</module>
+        <module>i2f-extension-redis-cache</module>
     </modules>
 
 

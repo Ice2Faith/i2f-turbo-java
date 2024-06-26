@@ -18,6 +18,7 @@
         <module>i2f-spring-all</module>
         <module>i2f-spring-web</module>
         <module>i2f-spring-security</module>
+        <module>i2f-spring-redis</module>
     </modules>
 
     <properties>

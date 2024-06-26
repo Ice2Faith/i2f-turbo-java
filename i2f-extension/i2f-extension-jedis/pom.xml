@@ -5,30 +5,35 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>i2f.turbo</groupId>
-        <artifactId>i2f-spring</artifactId>
+        <artifactId>i2f-extension</artifactId>
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-spring-all</artifactId>
+    <artifactId>i2f-extension-jedis</artifactId>
+
 
     <dependencies>
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-spring-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-spring-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-spring-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-spring-web</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-cache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-redis-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>3.8.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -44,4 +49,6 @@
             </plugin>
         </plugins>
     </build>
+
+
 </project>

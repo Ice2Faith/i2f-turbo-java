@@ -14,5 +14,5 @@ public interface IExpireCache<K, V> extends ICache<K, V> {
 
     void expire(K key, long time, TimeUnit timeUnit);
 
-    long getExpire(K key, TimeUnit timeUnit);
+    Long getExpire(K key, TimeUnit timeUnit);
 }
