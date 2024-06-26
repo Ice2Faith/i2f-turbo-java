@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.encrypt.property.EncryptPropertyAutoConfiguration,\
+  i2f.springboot.encrypt.property.DefaultAesPropertyDecryptorConfiguration,\
+  i2f.springboot.encrypt.property.DefaultBase64PropertyDecryptorConfiguration
