@@ -21,6 +21,7 @@
         <module>i2f-springboot-swagger2-starter</module>
         <module>i2f-springboot-redisson-starter</module>
         <module>i2f-springboot-encrypt-property-starter</module>
+        <module>i2f-springboot-jackson-sensible-starter</module>
     </modules>
 
 </project>
