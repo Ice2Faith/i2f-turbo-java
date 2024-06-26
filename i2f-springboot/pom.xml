@@ -17,6 +17,7 @@
         <module>i2f-springboot-jdbc-bql-starter</module>
         <module>test-springboot</module>
         <module>i2f-springboot-spring-starter</module>
+        <module>i2f-springboot-xxl-job-starter</module>
     </modules>
 
 </project>
