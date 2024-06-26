@@ -1,0 +1,61 @@
+{
+  "groups": [
+    {
+      "name": "i2f.redission.lock",
+      "type": "i2f.springboot.redisson.aop.RedissonLockAop",
+      "sourceType": "i2f.springboot.redisson.aop.RedissonLockAop"
+    },
+    {
+      "name": "i2f.redission",
+      "type": "i2f.springboot.redisson.RedissonAutoConfiguration",
+      "sourceType": "i2f.springboot.redisson.RedissonAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.redission.lock.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable lock aop.",
+      "sourceType": "i2f.springboot.redisson.aop.RedissonLockAop",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.redission.lock-watchdog-timeout",
+      "type": "java.lang.Long",
+      "description": "redission lock watchdog timeout.",
+      "sourceType": "i2f.springboot.redisson.RedissonAutoConfiguration",
+      "defaultValue": 30000
+    },
+    {
+      "name": "i2f.redission.ping-connection-interval",
+      "type": "java.lang.Integer",
+      "description": "redission lock watchdog timeout.",
+      "sourceType": "i2f.springboot.redisson.RedissonAutoConfiguration",
+      "defaultValue": 30000
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
