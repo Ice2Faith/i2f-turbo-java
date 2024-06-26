@@ -90,12 +90,27 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-jedis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-minio</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-qrcode</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-redis-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-redis-cache</artifactId>
         </dependency>
 
         <dependency>

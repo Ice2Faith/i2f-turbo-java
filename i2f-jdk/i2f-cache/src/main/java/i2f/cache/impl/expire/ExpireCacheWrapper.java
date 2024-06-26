@@ -92,16 +92,16 @@ public class ExpireCacheWrapper<K, V, T> implements IExpireCache<K, V> {
     }
 
     @Override
-    public long getExpire(K key, TimeUnit timeUnit) {
+    public Long getExpire(K key, TimeUnit timeUnit) {
         lock.lock();
         try {
             ExpireData<V> data = getData(key);
             if (data == null) {
-                return 0;
+                return null;
             }
             long expireTs = data.getExpireTs();
             if (expireTs < 0) {
-                return -1;
+                return -1L;
             }
             return expireTs - System.currentTimeMillis();
         } finally {
