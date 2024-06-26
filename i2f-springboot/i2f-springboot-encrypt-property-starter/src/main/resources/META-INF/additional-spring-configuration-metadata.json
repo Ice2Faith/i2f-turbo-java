@@ -1,0 +1,73 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.encrypt.property",
+      "type": "i2f.springboot.encrypt.property.EncryptPropertyAutoConfiguration",
+      "sourceType": "i2f.springboot.encrypt.property.EncryptPropertyAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.encrypt.property.base64",
+      "type": "i2f.springboot.encrypt.property.DefaultBase64PropertyDecryptorConfiguration",
+      "sourceType": "i2f.springboot.encrypt.property.DefaultBase64PropertyDecryptorConfiguration"
+    },
+    {
+      "name": "i2f.springboot.encrypt.property.aes",
+      "type": "i2f.springboot.encrypt.property.DefaultAesPropertyDecryptorConfiguration",
+      "sourceType": "i2f.springboot.encrypt.property.DefaultAesPropertyDecryptorConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.encrypt.property.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable encrypt property aop.",
+      "sourceType": "i2f.springboot.encrypt.property.EncryptPropertyAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.encrypt.property.base64.enable",
+      "type": "java.lang.Boolean",
+      "description": "use base64 encode.",
+      "sourceType": "i2f.springboot.encrypt.property.DefaultBase64PropertyDecryptorConfiguration",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.encrypt.property.aes.enable",
+      "type": "java.lang.Boolean",
+      "description": "use aes encrypt.",
+      "sourceType": "i2f.springboot.encrypt.property.DefaultAesPropertyDecryptorConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.encrypt.property.aes.key",
+      "type": "java.lang.String",
+      "description": "aes key.",
+      "sourceType": "i2f.springboot.encrypt.property.DefaultAesPropertyDecryptorConfiguration",
+      "defaultValue": "123456"
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
