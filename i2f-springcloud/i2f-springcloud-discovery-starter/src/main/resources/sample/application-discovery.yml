@@ -1,0 +1,14 @@
+i2f:
+  springcloud:
+    discovery:
+      # 是否启用服务发现
+      enable: true
+      # 此服务发现的优先级
+      order: 0
+      # 允许配置多个服务发现，服务名-负载列表
+      instances:
+        sys-app:
+          - uri: http://192.168.1.100:8080/
+          - uri: http://192.168.1.101:8080/
+        file-svc:
+          - uri: http://192.168.1.110:8080/
