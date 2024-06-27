@@ -1,0 +1,54 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.discovery",
+      "type": "i2f.springcloud.discovery.properties.DiscoveryProperties",
+      "sourceType": "i2f.springcloud.discovery.properties.DiscoveryProperties"
+    },
+    {
+      "name": "i2f.springcloud.discovery.instances",
+      "type": "i2f.springcloud.discovery.properties.DiscoveryProperties",
+      "sourceType": "i2f.springcloud.discovery.properties.DiscoveryProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.discovery.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable discovery.",
+      "sourceType": "i2f.springcloud.discovery.properties.DiscoveryProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.discovery.order",
+      "type": "java.lang.Integer",
+      "description": "discovery client order.",
+      "sourceType": "i2f.springcloud.discovery.properties.DiscoveryProperties",
+      "defaultValue": 0
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

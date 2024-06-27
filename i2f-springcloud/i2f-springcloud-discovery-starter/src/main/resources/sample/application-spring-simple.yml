@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            sys-app:
+              - uri: http://192.168.1.100:8080/
+              - uri: http://192.168.1.101:8080/
+            file-svc:
+              - uri: http://192.168.1.110:8080/
