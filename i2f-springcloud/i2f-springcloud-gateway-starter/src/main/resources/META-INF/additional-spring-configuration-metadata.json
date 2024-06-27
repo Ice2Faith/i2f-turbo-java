@@ -22,8 +22,13 @@
     },
     {
       "name": "i2f.springcloud.gateway.global.filters.request-log",
-      "type": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
-      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter"
+      "type": "i2f.springcloud.gateway.filters.global.log.RequestLogGlobalFilter",
+      "sourceType": "i2f.springcloud.gateway.filters.global.log.RequestLogGlobalFilter"
+    },
+    {
+      "name": "i2f.springcloud.gateway.filters.query-repeat",
+      "type": "i2f.springcloud.gateway.filters.global.repeat.RequestQueryRepeatProperties",
+      "sourceType": "i2f.springcloud.gateway.filters.global.repeat.RequestQueryRepeatProperties"
     }
   ],
   "properties": [
@@ -108,29 +113,71 @@
       "name": "i2f.springcloud.gateway.global.filters.request-log.enable",
       "type": "java.lang.Boolean",
       "description": "enable request log filter.",
-      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
+      "sourceType": "i2f.springcloud.gateway.filters.global.log.RequestLogGlobalFilter",
       "defaultValue": true
     },
     {
       "name": "i2f.springcloud.gateway.global.filters.request-log.show-headers",
       "type": "java.lang.Boolean",
       "description": "enable show headers.",
-      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
+      "sourceType": "i2f.springcloud.gateway.filters.global.log.RequestLogGlobalFilter",
       "defaultValue": false
     },
     {
       "name": "i2f.springcloud.gateway.global.filters.request-log.show-querys",
       "type": "java.lang.Boolean",
       "description": "enable show query string params.",
-      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
+      "sourceType": "i2f.springcloud.gateway.filters.global.log.RequestLogGlobalFilter",
       "defaultValue": true
     },
     {
       "name": "i2f.springcloud.gateway.global.filters.request-log.show-statistic",
       "type": "java.lang.Boolean",
       "description": "enable show request statistic info.",
-      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
+      "sourceType": "i2f.springcloud.gateway.filters.global.log.RequestLogGlobalFilter",
       "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.gateway.filters.query-repeat.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable trim request query params filter.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.repeat.RequestQueryRepeatProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springcloud.gateway.filters.query-repeat.enable-repeat-json",
+      "type": "java.lang.Boolean",
+      "description": "enable trim json type.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.repeat.RequestQueryRepeatProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springcloud.gateway.filters.query-repeat.enable-repeat-form",
+      "type": "java.lang.Boolean",
+      "description": "enable trim form type.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.repeat.RequestQueryRepeatProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springcloud.gateway.filters.query-repeat.enable-repeat-xml",
+      "type": "java.lang.Boolean",
+      "description": "enable trim xml type.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.repeat.RequestQueryRepeatProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springcloud.gateway.filters.query-repeat.prefix-count",
+      "type": "java.lang.Integer",
+      "description": "trim path prefix count.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.repeat.RequestQueryRepeatProperties",
+      "defaultValue": 1
+    },
+    {
+      "name": "i2f.springcloud.gateway.filters.query-repeat.order",
+      "type": "java.lang.Integer",
+      "description": "filter order.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.repeat.RequestQueryRepeatProperties",
+      "defaultValue": 10
     }
   ],
   "hints": [

@@ -1,4 +1,4 @@
-package i2f.springcloud.gateway.filters.global;
+package i2f.springcloud.gateway.filters.global.log;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package i2f.springcloud.gateway.filters.global;
+package i2f.springcloud.gateway.filters.global.log;
 
 import java.util.concurrent.atomic.AtomicLong;
 
