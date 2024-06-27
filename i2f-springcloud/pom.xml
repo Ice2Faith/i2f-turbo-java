@@ -15,6 +15,7 @@
     <modules>
         <module>i2f-springcloud-refresh-starter</module>
         <module>i2f-springcloud-discovery-starter</module>
+        <module>i2f-springcloud-gateway-starter</module>
     </modules>
 
     <properties>

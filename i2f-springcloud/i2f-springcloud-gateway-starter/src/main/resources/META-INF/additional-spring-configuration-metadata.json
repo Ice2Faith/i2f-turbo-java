@@ -1,0 +1,160 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.gateway",
+      "type": "i2f.springcloud.gateway.GatewayAutoConfiguration",
+      "sourceType": "i2f.springcloud.gateway.GatewayAutoConfiguration"
+    },
+    {
+      "name": "i2f.springcloud.gateway.cors",
+      "type": "i2f.springcloud.gateway.GatewayCorsConfig",
+      "sourceType": "i2f.springcloud.gateway.GatewayCorsConfig"
+    },
+    {
+      "name": "i2f.springcloud.gateway.predicates.request-attr",
+      "type": "i2f.springcloud.gateway.predicates.RequestAttrRoutePredicateFactory",
+      "sourceType": "i2f.springcloud.gateway.predicates.RequestAttrRoutePredicateFactory"
+    },
+    {
+      "name": "i2f.springcloud.gateway.filters.request-attr",
+      "type": "i2f.springcloud.gateway.filters.RequestAttrGatewayFilterFactory",
+      "sourceType": "i2f.springcloud.gateway.filters.RequestAttrGatewayFilterFactory"
+    },
+    {
+      "name": "i2f.springcloud.gateway.global.filters.request-log",
+      "type": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
+      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.gateway.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable gateway.",
+      "sourceType": "i2f.springcloud.gateway.GatewayAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.gateway.enable-access-log",
+      "type": "java.lang.Boolean",
+      "description": "enable reactor access server log.",
+      "sourceType": "i2f.springcloud.gateway.GatewayAutoConfiguration",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springcloud.gateway.cors.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable cors.",
+      "sourceType": "i2f.springcloud.gateway.GatewayCorsConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.gateway.cors.url-patten",
+      "type": "java.lang.String",
+      "description": "url patten.",
+      "sourceType": "i2f.springcloud.gateway.GatewayCorsConfig",
+      "defaultValue": "/**"
+    },
+    {
+      "name": "i2f.springcloud.gateway.cors.allow-origins",
+      "type": "java.lang.String",
+      "description": "allow origins, multi value split by ','.",
+      "sourceType": "i2f.springcloud.gateway.GatewayCorsConfig",
+      "defaultValue": "*"
+    },
+    {
+      "name": "i2f.springcloud.gateway.cors.allow-methods",
+      "type": "java.lang.String",
+      "description": "allow methods, multi value split by ','.",
+      "sourceType": "i2f.springcloud.gateway.GatewayCorsConfig",
+      "defaultValue": "*"
+    },
+    {
+      "name": "i2f.springcloud.gateway.cors.allow-headers",
+      "type": "java.lang.String",
+      "description": "allow headers, multi value split by ','.",
+      "sourceType": "i2f.springcloud.gateway.GatewayCorsConfig",
+      "defaultValue": "*"
+    },
+    {
+      "name": "i2f.springcloud.gateway.cors.allow-credentials",
+      "type": "java.lang.Boolean",
+      "description": "allow credentials.",
+      "sourceType": "i2f.springcloud.gateway.GatewayCorsConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.gateway.cors.max-age",
+      "type": "java.lang.Long",
+      "description": "max age.",
+      "sourceType": "i2f.springcloud.gateway.GatewayCorsConfig",
+      "defaultValue": 6000
+    },
+    {
+      "name": "i2f.springcloud.gateway.predicates.request-attr.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable request attribute predicate.",
+      "sourceType": "i2f.springcloud.gateway.predicates.RequestAttrRoutePredicateFactory",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.gateway.filters.request-attr.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable request attribute filter.",
+      "sourceType": "i2f.springcloud.gateway.filters.RequestAttrGatewayFilterFactory",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.gateway.global.filters.request-log.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable request log filter.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.gateway.global.filters.request-log.show-headers",
+      "type": "java.lang.Boolean",
+      "description": "enable show headers.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springcloud.gateway.global.filters.request-log.show-querys",
+      "type": "java.lang.Boolean",
+      "description": "enable show query string params.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.gateway.global.filters.request-log.show-statistic",
+      "type": "java.lang.Boolean",
+      "description": "enable show request statistic info.",
+      "sourceType": "i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
