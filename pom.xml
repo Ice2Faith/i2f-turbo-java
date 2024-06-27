@@ -689,6 +689,9 @@
                         <compilerVersion>${java.version}</compilerVersion>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <compilerArgument>-parameters</compilerArgument>
+                        <!-- java9 之后，在处理lombok时，需要添加此编译参数 -->
+                        <compilerArgument>--add-exports</compilerArgument>
+                        <compilerArgument>jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</compilerArgument>
                     </configuration>
                 </plugin>
                 <plugin>

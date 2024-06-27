@@ -1,0 +1,11 @@
+# http-proxy 配置
+i2f:
+  http:
+    proxy:
+      enable: true
+      mappings:
+        - prefix: /baidu
+          target: https://www.baidu.com
+        - prefix: /github
+          target: https://www.github.com
+
