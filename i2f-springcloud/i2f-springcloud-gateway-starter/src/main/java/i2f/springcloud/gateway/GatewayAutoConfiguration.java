@@ -1,7 +1,8 @@
 package i2f.springcloud.gateway;
 
 import i2f.springcloud.gateway.filters.RequestAttrGatewayFilterFactory;
-import i2f.springcloud.gateway.filters.global.RequestLogGlobalFilter;
+import i2f.springcloud.gateway.filters.global.log.RequestLogGlobalFilter;
+import i2f.springcloud.gateway.filters.global.repeat.RequestQueryRepeatFilter;
 import i2f.springcloud.gateway.predicates.RequestAttrRoutePredicateFactory;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,8 @@ import org.springframework.context.annotation.Import;
         GatewayCorsConfig.class,
         RequestAttrRoutePredicateFactory.class,
         RequestAttrGatewayFilterFactory.class,
-        RequestLogGlobalFilter.class
+        RequestLogGlobalFilter.class,
+        RequestQueryRepeatFilter.class
 })
 @ConfigurationProperties(prefix = "i2f.springcloud.gateway")
 public class GatewayAutoConfiguration implements InitializingBean {

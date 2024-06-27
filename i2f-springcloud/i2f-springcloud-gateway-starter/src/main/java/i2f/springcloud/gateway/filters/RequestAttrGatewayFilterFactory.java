@@ -8,7 +8,6 @@ import org.springframework.cloud.gateway.filter.factory.AbstractNameValueGateway
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -18,7 +17,6 @@ import reactor.core.publisher.Mono;
  * @desc 检查header/query中存在指定的参数才放行，否则直接402 PAYMENT_REQUIRED
  */
 @ConditionalOnExpression("${i2f.springcloud.gateway.filters.request-attr.enable:true}")
-@Component
 @Slf4j
 public class RequestAttrGatewayFilterFactory extends AbstractNameValueGatewayFilterFactory {
 
