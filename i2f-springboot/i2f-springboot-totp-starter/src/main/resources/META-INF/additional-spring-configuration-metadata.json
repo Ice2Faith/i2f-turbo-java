@@ -1,65 +1,51 @@
 {
   "groups": [
     {
-      "name": "xxl.job",
-      "type": "i2f.springboot.xxljob.properties.XxlJobProperties",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties"
+      "name": "i2f.springboot.totp",
+      "type": "i2f.springboot.totp.HmacOtpAutoConfiguration",
+      "sourceType": "i2f.springboot.totp.HmacOtpAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.totp.factory",
+      "type": "i2f.springboot.totp.api.impl.DefaultTotpAuthenticatorFactory",
+      "sourceType": "i2f.springboot.totp.api.impl.DefaultTotpAuthenticatorFactory"
     }
   ],
   "properties": [
     {
-      "name": "xxl.job.admin.addresses",
-      "type": "java.lang.String",
-      "description": "admin address, multi value split by ','.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties",
-      "defaultValue": "http://127.0.0.1:8888/xxl-job-admin"
+      "name": "i2f.springboot.totp.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable totp authenticator.",
+      "sourceType": "i2f.springboot.totp.HmacOtpAutoConfiguration",
+      "defaultValue": true
     },
     {
-      "name": "xxl.job.access-token",
-      "type": "java.lang.String",
-      "description": "access token.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties",
-      "defaultValue": "default_token"
+      "name": "i2f.springboot.totp.factory",
+      "type": "java.lang.Boolean",
+      "description": "enable default factory.",
+      "sourceType": "i2f.springboot.totp.api.impl.DefaultTotpAuthenticatorFactory",
+      "defaultValue": true
     },
     {
-      "name": "xxl.job.executor.appname",
+      "name": "i2f.springboot.totp.factory.type",
       "type": "java.lang.String",
-      "description": "executor name.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties",
-      "defaultValue": "biz-executor"
+      "description": "totp type, totp|microsoft|steam.",
+      "sourceType": "i2f.springboot.totp.api.impl.DefaultTotpAuthenticatorFactory",
+      "defaultValue": "totp"
     },
     {
-      "name": "xxl.job.executor.address",
+      "name": "i2f.springboot.totp.factory.algorithm",
       "type": "java.lang.String",
-      "description": "executor bind address.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties"
+      "description": "hmac hash algorithm type, such SHA1,SHA256,MD5...",
+      "sourceType": "i2f.springboot.totp.api.impl.DefaultTotpAuthenticatorFactory",
+      "defaultValue": "SHA1"
     },
     {
-      "name": "xxl.job.executor.ip",
-      "type": "java.lang.String",
-      "description": "executor bind ip.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties"
-    },
-    {
-      "name": "xxl.job.executor.port",
+      "name": "i2f.springboot.totp.factory.digits",
       "type": "java.lang.Integer",
-      "description": "executor port.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties",
-      "defaultValue": 9999
-    },
-    {
-      "name": "xxl.job.executor.log-path",
-      "type": "java.lang.String",
-      "description": "executor log path.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties",
-      "defaultValue": "./xxj-job/logs"
-    },
-    {
-      "name": "xxl.job.executor.log-retention-days",
-      "type": "java.lang.Integer",
-      "description": "executor log retention days.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties",
-      "defaultValue": 30
+      "description": "totp code length.",
+      "sourceType": "i2f.springboot.totp.api.impl.DefaultTotpAuthenticatorFactory",
+      "defaultValue": 6
     }
   ],
   "hints": [
