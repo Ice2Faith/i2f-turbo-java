@@ -1,0 +1,86 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.refresh",
+      "type": "i2f.springcloud.refresh.RefreshAutoConfiguration",
+      "sourceType": "i2f.springcloud.refresh.RefreshAutoConfiguration"
+    },
+    {
+      "name": "i2f.springcloud.refresh.auto-refresh",
+      "type": "i2f.springcloud.refresh.AutoRefreshConfiguration",
+      "sourceType": "i2f.springcloud.refresh.AutoRefreshConfiguration"
+    },
+    {
+      "name": "i2f.springcloud.refresh.api-refresh",
+      "type": "i2f.springcloud.refresh.RefreshController",
+      "sourceType": "i2f.springcloud.refresh.RefreshController"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.refresh.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable refresh.",
+      "sourceType": "i2f.springcloud.refresh.RefreshAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.refresh.auto-refresh.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable auto refresh.",
+      "sourceType": "i2f.springcloud.refresh.AutoRefreshConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.refresh.auto-refresh.delay-time",
+      "type": "java.lang.Integer",
+      "description": "refresh delay time.",
+      "sourceType": "i2f.springcloud.refresh.AutoRefreshConfiguration",
+      "defaultValue": 5
+    },
+    {
+      "name": "i2f.springcloud.refresh.auto-refresh.delay-time-unit",
+      "type": "java.util.concurrent.TimeUnit",
+      "description": "refresh delay time unit.",
+      "sourceType": "i2f.springcloud.refresh.AutoRefreshConfiguration",
+      "defaultValue": "MINUTES"
+    },
+    {
+      "name": "i2f.springcloud.refresh.api-refresh.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable api refresh.",
+      "sourceType": "i2f.springcloud.refresh.RefreshController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.refresh.api-refresh.totp-key",
+      "type": "java.lang.String",
+      "description": "api refresh totp authentication key, if not null enable totp.",
+      "sourceType": "i2f.springcloud.refresh.RefreshController"
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
