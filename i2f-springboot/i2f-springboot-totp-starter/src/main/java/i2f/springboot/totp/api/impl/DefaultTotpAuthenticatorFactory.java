@@ -5,6 +5,7 @@ import i2f.otpauth.impl.MicrosoftAuthenticator;
 import i2f.otpauth.impl.SteamAuthenticator;
 import i2f.otpauth.impl.TotpAuthenticator;
 import i2f.springboot.totp.api.HmacOtpAuthenticatorFactory;
+import lombok.Data;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -14,6 +15,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @date 2024/6/27 11:07
  * @desc
  */
+@Data
 @ConditionalOnMissingBean(HmacOtpAuthenticatorFactory.class)
 @ConditionalOnExpression("${i2f.springboot.totp.factory.enable:true}")
 @ConfigurationProperties(prefix = "i2f.springboot.totp.factory")
