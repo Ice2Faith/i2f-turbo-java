@@ -22,6 +22,13 @@ public class RedisCache implements IExpireContainerCache<String, Object>,
     protected Function<Object, String> encoder;
     protected Function<String, Object> decoder;
 
+    public RedisCache(String prefix, IRedisClient client, Function<Object, String> encoder, Function<String, Object> decoder) {
+        this.prefix = prefix;
+        this.client = client;
+        this.encoder = encoder;
+        this.decoder = decoder;
+    }
+
     public RedisCache(IRedisClient client, Function<Object, String> encoder, Function<String, Object> decoder) {
         this.client = client;
         this.encoder = encoder;

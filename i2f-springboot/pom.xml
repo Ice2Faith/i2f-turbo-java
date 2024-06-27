@@ -22,6 +22,7 @@
         <module>i2f-springboot-redisson-starter</module>
         <module>i2f-springboot-encrypt-property-starter</module>
         <module>i2f-springboot-jackson-sensible-starter</module>
+        <module>i2f-springboot-redis-starter</module>
     </modules>
 
 </project>

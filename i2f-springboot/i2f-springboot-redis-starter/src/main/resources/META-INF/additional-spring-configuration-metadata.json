@@ -1,0 +1,111 @@
+{
+  "groups": [
+    {
+      "name": "i2f.spring.redis",
+      "type": "i2f.springboot.redis.RedisAutoConfiguration",
+      "sourceType": "i2f.springboot.redis.RedisAutoConfiguration"
+    },
+    {
+      "name": "i2f.spring.redis.redis-template",
+      "type": "i2f.springboot.redis.RedisTemplateAutoConfiguration",
+      "sourceType": "i2f.springboot.redis.RedisTemplateAutoConfiguration"
+    },
+    {
+      "name": "i2f.spring.redis.lettuce.heart-beat",
+      "type": "i2f.springboot.redis.LettuceRedisHeartbeatConfiguration",
+      "sourceType": "i2f.springboot.redis.LettuceRedisHeartbeatConfiguration"
+    },
+    {
+      "name": "i2f.spring.redis.redis-cache",
+      "type": "i2f.springboot.redis.RedisCacheConfiguration",
+      "sourceType": "i2f.springboot.redis.RedisCacheConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.spring.redis.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable redis.",
+      "sourceType": "i2f.springboot.redis.RedisAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.redis.date-format",
+      "type": "java.lang.String",
+      "description": "date format patten.",
+      "sourceType": "i2f.springboot.redis.RedisAutoConfiguration",
+      "defaultValue": "yyyy-MM-dd HH:mm:ss SSS"
+    },
+    {
+      "name": "i2f.spring.redis.redis-template.enable",
+      "type": "java.lang.Boolean",
+      "description": "config redis template.",
+      "sourceType": "i2f.springboot.redis.RedisTemplateAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.redis.lettuce.heart-beat.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable lettuce heart beat.",
+      "sourceType": "i2f.springboot.redis.LettuceRedisHeartbeatConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.redis.lettuce.heart-beat.init-delay-seconds",
+      "type": "java.lang.Long",
+      "description": "heart beat validate init delay seconds.",
+      "sourceType": "i2f.springboot.redis.LettuceRedisHeartbeatConfiguration",
+      "defaultValue": 30
+    },
+    {
+      "name": "i2f.spring.redis.lettuce.heart-beat.rate-seconds",
+      "type": "java.lang.Long",
+      "description": "heart beat validate rate seconds.",
+      "sourceType": "i2f.springboot.redis.LettuceRedisHeartbeatConfiguration",
+      "defaultValue": 30
+    },
+    {
+      "name": "i2f.spring.redis.redis-cache.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable redis cache.",
+      "sourceType": "i2f.springboot.redis.RedisCacheConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.redis.redis-cache.client-prefix",
+      "type": "java.lang.String",
+      "description": "redis client key prefix",
+      "sourceType": "i2f.springboot.redis.RedisCacheConfiguration"
+    },
+    {
+      "name": "i2f.spring.redis.redis-cache.cache-prefix",
+      "type": "java.lang.String",
+      "description": "redis cache key prefix.",
+      "sourceType": "i2f.springboot.redis.RedisCacheConfiguration"
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
