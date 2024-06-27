@@ -17,6 +17,7 @@
         <module>i2f-extension</module>
         <module>i2f-spring</module>
         <module>i2f-springboot</module>
+        <module>i2f-springcloud</module>
     </modules>
 
     <properties>
