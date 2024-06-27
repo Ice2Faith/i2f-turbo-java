@@ -28,7 +28,7 @@ public class HmacOtpAccountAuthenticator implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         if (accountKeyProvider == null) {
-            throw new IllegalStateException("you must implement on bean of " + HmacOtpAccountKeyProvider.class.getName() + " to get account bind key, such from database or others.");
+            throw new IllegalStateException("you must implement one bean of " + HmacOtpAccountKeyProvider.class.getName() + " to get account bind key, such from database or others.");
         }
     }
 
