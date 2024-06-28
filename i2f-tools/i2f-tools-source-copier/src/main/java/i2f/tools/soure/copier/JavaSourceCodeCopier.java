@@ -1,6 +1,9 @@
 package i2f.tools.soure.copier;
 
-import java.io.*;
+import i2f.io.file.FileUtil;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -102,21 +105,12 @@ public class JavaSourceCodeCopier {
             key = key.replaceAll("\\.", "/");
             key = key + ".java";
             File saveFile = new File(saveDir, key);
-            if (!saveFile.getParentFile().exists()) {
-                saveFile.getParentFile().mkdirs();
-            }
             File srcFile = entry.getValue();
-            copyFile(srcFile, saveFile);
+            FileUtil.copy(saveFile, srcFile);
         }
     }
 
-    public static void copyFile(File srcFile, File saveFile) throws IOException {
-        FileInputStream fis = new FileInputStream(srcFile);
-        FileOutputStream fos = new FileOutputStream(saveFile);
-        streamCopy(fis, fos);
-    }
-
-    public static void copy(Map<String, File> map, List<File> searchPath, List<File> beginFile) {
+    public static void copy(Map<String, File> map, List<File> searchPath, List<File> beginFile) throws IOException {
         Map<String, File> codeMap = new LinkedHashMap<>();
         search(codeMap, searchPath);
 
@@ -141,7 +135,7 @@ public class JavaSourceCodeCopier {
                 continue;
             }
             processSet.add(file);
-            String str = readFileText(file);
+            String str = FileUtil.loadTxtFile(file);
             String[] lines = str.split("\n");
             String packageName = "";
             Set<String> importList = new LinkedHashSet<>();
@@ -203,27 +197,6 @@ public class JavaSourceCodeCopier {
             }
 
         }
-    }
-
-    public static String readFileText(File file) {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            InputStream is = new FileInputStream(file);
-            streamCopy(is, bos);
-            return new String(bos.toByteArray(), "UTF-8");
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
-    public static void streamCopy(InputStream is, OutputStream bos) throws IOException {
-        int len = 0;
-        byte[] buff = new byte[8192];
-        while ((len = is.read(buff)) > 0) {
-            bos.write(buff, 0, len);
-        }
-        is.close();
-        bos.close();
     }
 
 

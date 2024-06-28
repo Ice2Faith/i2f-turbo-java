@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/6/12 16:25
  * @desc 判断Header/Query中需要包含指定名称的参数或者请求头
  * 如果正则不为空，则还需要满足正则
