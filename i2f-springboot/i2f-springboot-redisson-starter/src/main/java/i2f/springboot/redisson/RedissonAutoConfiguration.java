@@ -9,7 +9,6 @@ import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -36,12 +35,12 @@ public class RedissonAutoConfiguration {
     /**
      * 锁超时时间
      */
-    private long lockWatchdogTimeout=3000;
+    private long lockWatchdogTimeout = 3000;
 
     /**
      * 定时ping时间
      */
-    private int pingConnectionInterval=3000;
+    private int pingConnectionInterval = 3000;
 
     @Bean
     public RedissonClient redissonClient(RedisProperties redisProperties) {

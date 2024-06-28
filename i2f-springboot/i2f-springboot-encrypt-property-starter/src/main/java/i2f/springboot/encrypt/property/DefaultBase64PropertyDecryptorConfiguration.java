@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Bean;
 public class DefaultBase64PropertyDecryptorConfiguration {
 
     @Bean
-    public IPropertyDecryptor propertyDecryptor(){
+    public IPropertyDecryptor propertyDecryptor() {
         return new Base64PropertyDecryptor();
     }
 }

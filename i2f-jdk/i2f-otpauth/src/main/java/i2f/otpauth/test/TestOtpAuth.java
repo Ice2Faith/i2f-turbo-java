@@ -5,8 +5,6 @@ import i2f.otpauth.impl.HotpAuthenticator;
 import i2f.otpauth.impl.SteamAuthenticator;
 import i2f.otpauth.impl.TotpAuthenticator;
 
-import java.io.IOException;
-
 /**
  * @author Ice2Faith
  * @date 2024/6/13 9:14

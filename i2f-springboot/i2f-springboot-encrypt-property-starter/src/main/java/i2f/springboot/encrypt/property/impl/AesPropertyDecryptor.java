@@ -14,34 +14,35 @@ import i2f.springboot.encrypt.property.core.PrefixPropertyDecryptor;
  * @desc
  */
 public class AesPropertyDecryptor extends PrefixPropertyDecryptor implements ITextEncryptor {
-    public static final String AES_PREFIX="aes.";
+    public static final String AES_PREFIX = "aes.";
     protected SymmetricEncryptor encryptor;
+
     public AesPropertyDecryptor(String key) {
         super(AES_PREFIX);
         try {
             encryptor = SymmetricEncryptor.genKeyEncryptor(AesType.ECB_PKCS5Padding, key.getBytes(), null, SecureRandomAlgorithm.SHA1PRNG.text());
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
     @Override
     public String decryptText(String text) {
-        try{
+        try {
             byte[] data = encryptor.decrypt(CodecUtil.ofHexString(text));
             return CodecUtil.ofUtf8(data);
-        }catch(Exception e){
+        } catch (Exception e) {
             return text;
         }
     }
 
     @Override
     public String encrypt(String text) {
-        try{
+        try {
             byte[] enc = encryptor.encrypt(CodecUtil.toUtf8(text));
-            return AES_PREFIX+CodecUtil.toHexString(enc);
-        }catch(Exception e){
-            return AES_PREFIX+text;
+            return AES_PREFIX + CodecUtil.toHexString(enc);
+        } catch (Exception e) {
+            return AES_PREFIX + text;
         }
     }
 }

@@ -6,5 +6,5 @@ package i2f.springboot.encrypt.property.core;
  * @desc
  */
 public interface IPropertyDecryptor {
-    Object decrypt(Object obj,String name);
+    Object decrypt(Object obj, String name);
 }

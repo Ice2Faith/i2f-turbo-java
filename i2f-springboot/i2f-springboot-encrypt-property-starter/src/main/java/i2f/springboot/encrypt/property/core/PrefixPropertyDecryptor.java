@@ -7,18 +7,20 @@ package i2f.springboot.encrypt.property.core;
  */
 public abstract class PrefixPropertyDecryptor implements IPropertyDecryptor {
     protected String prefix;
-    public PrefixPropertyDecryptor(String prefix){
-        this.prefix=prefix;
+
+    public PrefixPropertyDecryptor(String prefix) {
+        this.prefix = prefix;
     }
+
     @Override
     public Object decrypt(Object obj, String name) {
-        if(obj==null){
+        if (obj == null) {
             return obj;
         }
-        String text=String.valueOf(obj);
-        if(text.startsWith(prefix)){
-            text=text.substring(prefix.length());
-            String value=decryptText(text);
+        String text = String.valueOf(obj);
+        if (text.startsWith(prefix)) {
+            text = text.substring(prefix.length());
+            String value = decryptText(text);
             return value;
         }
         return obj;

@@ -32,31 +32,36 @@
       "description": "rest all.",
       "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
       "defaultValue": true
-    },{
+    },
+    {
       "name": "i2f.swagger2.apis.rest.web.enable",
       "type": "java.lang.Boolean",
       "description": "rest web.",
       "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
       "defaultValue": true
-    },{
+    },
+    {
       "name": "i2f.swagger2.apis.rest.get.enable",
       "type": "java.lang.Boolean",
       "description": "rest get.",
       "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
       "defaultValue": true
-    },{
+    },
+    {
       "name": "i2f.swagger2.apis.rest.post.enable",
       "type": "java.lang.Boolean",
       "description": "rest post.",
       "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
       "defaultValue": true
-    },{
+    },
+    {
       "name": "i2f.swagger2.apis.rest.put.enable",
       "type": "java.lang.Boolean",
       "description": "rest put.",
       "sourceType": "i2f.springboot.swagger2.Swagger2RestfulConfiguration",
       "defaultValue": true
-    },{
+    },
+    {
       "name": "i2f.swagger2.apis.rest.delete.enable",
       "type": "java.lang.Boolean",
       "description": "rest delete.",

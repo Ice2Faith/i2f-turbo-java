@@ -1,6 +1,5 @@
 package i2f.springboot.swagger2;
 
-import com.google.common.base.Predicates;
 import i2f.springboot.swagger2.properties.Swagger2ApiInfoProperties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -10,8 +9,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
