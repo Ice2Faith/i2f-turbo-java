@@ -20,8 +20,15 @@ public class FileUtil {
     }
 
     public static File getTempFile() throws IOException {
+        return getTempFile(".data");
+    }
+
+    public static File getTempFile(String suffix) throws IOException {
+        if (suffix == null) {
+            suffix = ".data";
+        }
         String fileName = getTempFileName();
-        return File.createTempFile(fileName, ".data");
+        return File.createTempFile(fileName, suffix);
     }
 
     public static String getSpecies(String fileName) {
@@ -187,6 +194,10 @@ public class FileUtil {
         return StringUtils.getFileExtension(file.getName());
     }
 
+    public static void merge(File dstFile, boolean withMeta, File[] srcFiles) throws IOException {
+        merge(dstFile, withMeta, srcFiles, null);
+    }
+
     public static void merge(File dstFile, boolean withMeta, File[] srcFiles, Predicate<File> filter) throws IOException {
         if (srcFiles == null || srcFiles.length == 0) {
             return;
@@ -233,6 +244,10 @@ public class FileUtil {
             }
         }
         return os;
+    }
+
+    public static void splitMeta(File dstPath, File metaFile) throws IOException {
+        splitMeta(dstPath, metaFile, null);
     }
 
     public static void splitMeta(File dstPath, File metaFile, Predicate<File> filter) throws IOException {
@@ -302,6 +317,15 @@ public class FileUtil {
         StreamUtil.streamCopy(is, os, true);
     }
 
+    public static void move(File dstFile, File srcFile) throws IOException {
+        copy(dstFile, srcFile, null);
+        delete(srcFile, null);
+    }
+
+    public static void copy(File dstFile, File srcFile) throws IOException {
+        copy(dstFile, srcFile, null);
+    }
+
     public static void copy(File dstFile, File srcFile, Predicate<File> filter) throws IOException {
         if (srcFile == null || dstFile == null) {
             return;
@@ -323,6 +347,10 @@ public class FileUtil {
                 copy(newFile, item, filter);
             }
         }
+    }
+
+    public static void delete(File file) {
+        delete(file, null);
     }
 
     public static void delete(File file, Predicate<File> filter) {
@@ -352,6 +380,14 @@ public class FileUtil {
                 file.delete();
             }
         }
+    }
+
+    public static List<File> tree(File file) {
+        return tree(file, -1, null);
+    }
+
+    public static List<File> tree(File file, int level) {
+        return tree(file, level, null);
     }
 
     public static List<File> tree(File file, int level, Predicate<File> filter) {
