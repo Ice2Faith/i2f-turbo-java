@@ -12,7 +12,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/6/12 17:43
  * @desc 检查header/query中存在指定的参数才放行，否则直接402 PAYMENT_REQUIRED
  */

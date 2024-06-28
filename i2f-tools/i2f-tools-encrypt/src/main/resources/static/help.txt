@@ -1,0 +1,105 @@
+i2f-tools-encrypt
+提供命令行上进行部分的加解密或者编解码操作
+
+命令行参数：
+[选项] [参数]
+
+[选项]
+help 查看帮助
+- 以下部分为基础部分
+base16-en Base16StringByteCodec.INSTANCE
+base16-de Base16StringByteCodec.INSTANCE
+base32-en Base32StringByteCodec.INSTANCE
+base32-de Base32StringByteCodec.INSTANCE
+base64-en Base64.getEncoder()
+base64-de Base64.getDecoder()
+base64-url-en Base64.getUrlEncoder()
+base64-url-de Base64.getUrlDecoder()
+html-cer-en Base32StringByteCodec.INSTANCE
+html-cer-de Base32StringByteCodec.INSTANCE
+html-ncr-en Base32StringByteCodec.INSTANCE
+html-ncr-de Base32StringByteCodec.INSTANCE
+ucode-en Base32StringByteCodec.INSTANCE
+ucode-de Base32StringByteCodec.INSTANCE
+url-en URLEncoder
+url-de URLDecoder
+xcode-en Base32StringByteCodec.INSTANCE
+xcode-de Base32StringByteCodec.INSTANCE
+md2 MessageDigest.getInstance("MD2")
+md5 MessageDigest.getInstance("MD5")
+sha-1 MessageDigest.getInstance("SHA-1")
+sha-224 MessageDigest.getInstance("SHA-224")
+sha-256 MessageDigest.getInstance("SHA-256")
+sha-384 MessageDigest.getInstance("SHA-384")
+sha-512 MessageDigest.getInstance("SHA-512")
+hmac-md2 Mac.getInstance("HmacMD2")
+hmac-md5 Mac.getInstance("HmacMD5")
+hmac-sha-1 Mac.getInstance("HmacSHA1")
+hmac-sha-224 Mac.getInstance("HmacSHA224")
+hmac-sha-256 Mac.getInstance("HmacSHA256")
+hmac-sha-384 Mac.getInstance("HmacSHA384")
+hmac-sha-512 Mac.getInstance("HmacSHA512")
+
+- 以下部分为spring-security中PasswordEncoder的实例
+- 均带有pe前缀
+pe-argon2 Argon2PasswordEncoder()
+pe-bcrypt BCryptPasswordEncoder()
+pe-ldap-sha LdapShaPasswordEncoder()
+pe-md2 MessageDigestPasswordEncoder("MD2")
+pe-md4 Md4PasswordEncoder()
+pe-md5 MessageDigestPasswordEncoder("MD5")
+pe-no-op NoOpPasswordEncoder.getInstance()
+pe-pbkdf2 Pbkdf2PasswordEncoder()
+pe-pbkdf2-sec Pbkdf2PasswordEncoder(args[0])
+pe-scrypt SCryptPasswordEncoder()
+pe-sha-1 MessageDigestPasswordEncoder("SHA-1")
+pe-sha-224 MessageDigestPasswordEncoder("SHA-224")
+pe-sha-256 MessageDigestPasswordEncoder("SHA-256")
+pe-sha-384 MessageDigestPasswordEncoder("SHA-384")
+pe-sha-512 MessageDigestPasswordEncoder("SHA-512")
+
+- 以下部分为jasypt-spring-boot中的实例
+- 均带有jasypt前缀
+jasypt-txt-en BasicTextEncryptor.encrypt()
+jasypt-txt-de BasicTextEncryptor.decrypt()
+jasypt-strong-txt-en StrongTextEncryptor.encrypt()
+jasypt-strong-txt-de StrongTextEncryptor.decrypt()
+jasypt-std-pbe-en StandardPBEStringEncryptor.encrypt()
+jasypt-std-pbe-de StandardPBEStringEncryptor.decrypt()
+jasypt-algo-pbe-en StandardPBEStringEncryptor.encrypt() 指定算法
+jasypt-algo-pbe-de StandardPBEStringEncryptor.decrypt() 指定算法
+
+- 以下部分为jce中的实例
+aes-b64-en 使用jce的AES/ECB/PKCS5Padding算法encrypt加密输入为base64的字符串
+aes-b64-de 使用jce的AES/ECB/PKCS5Padding算法decrypt加密输入为base64的字符串
+aes-utf8-en 使用jce的AES/ECB/PKCS5Padding算法encrypt加密输入为utf8的字符串
+aes-utf8-de 使用jce的AES/ECB/PKCS5Padding算法decrypt加密输入为utf8的字符串
+aes-keygen-b64-en 使用jce的AES/ECB/PKCS5Padding基于Keygen生成key算法encrypt加密输入为base64的字符串
+aes-keygen-b64-de 使用jce的AES/ECB/PKCS5Padding基于Keygen生成key算法decrypt加密输入为base64的字符串
+aes-keygen-utf8-en 使用jce的AES/ECB/PKCS5Padding基于Keygen生成key算法encrypt加密输入为utf8的字符串
+aes-keygen-utf8-de 使用jce的AES/ECB/PKCS5Padding基于Keygen生成key算法decrypt加密输入为utf8的字符串
+
+- 以下为sm-antherd中的实例
+antherd-sm2-keygen Sm2Encryptor.genKey()
+antherd-sm2-encrypt Sm2Encryptor.encrypt()
+antherd-sm2-decrypt Sm2Encryptor.decrypt()
+antherd-sm2-sign Sm2Encryptor.sign()
+antherd-sm2-verify Sm2Encryptor.verify()
+antherd-sm3 Sm3Digester.INSTANCE
+antherd-sm4-keygen Sm4Encryptor.genKey()
+antherd-sm4-en Sm4Encryptor.encrypt()
+antherd-sm4-de Sm4Encryptor.decrypt()
+
+- 以下为bouncycastle中的实例
+bc-sm3 BcMessageDigester.SM3
+bc-tiger BcMessageDigester.Tiger
+bc-whirlpool BcMessageDigester.Whirlpool
+bc-shake-128 BcMessageDigester.SHAKE_128
+bc-shake-128 BcMessageDigester.SHAKE_256
+bc-sha512-224 BcMessageDigester.SHA512_224
+bc-sha512-256 BcMessageDigester.SHA512_256
+bc-sha3-224 BcMessageDigester.SHA3_224
+bc-sha3-256 BcMessageDigester.SHA3_256
+bc-sha3-384 BcMessageDigester.SHA3_384
+bc-sha3-512 BcMessageDigester.SHA3_512
+

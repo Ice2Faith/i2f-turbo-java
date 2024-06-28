@@ -15,6 +15,7 @@
     <modules>
 
         <module>i2f-tools-source-copier</module>
+        <module>i2f-tools-encrypt</module>
     </modules>
 
     <properties>
@@ -49,6 +50,36 @@
                             </manifestEntries>
                         </archive>
                     </configuration>
+                </plugin>
+
+                <!-- 打包插件 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <configuration>
+                        <finalName>${project.artifactId}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                        <archive>
+                            <manifestEntries>
+                                <Main-Class>${main.class}</Main-Class>
+                                <Class-Path>. ./resources/</Class-Path>
+                            </manifestEntries>
+                        </archive>
+                        <descriptorRefs>
+                            <!--打包时加入依赖-->
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
