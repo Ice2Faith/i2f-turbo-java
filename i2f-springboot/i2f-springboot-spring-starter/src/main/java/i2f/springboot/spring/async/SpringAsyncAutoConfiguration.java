@@ -27,12 +27,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 @EnableAsync
 @ConfigurationProperties(prefix = "i2f.spring.async")
 public class SpringAsyncAutoConfiguration implements AsyncConfigurer {
-    private int maxPoolSize=100;
-    private int corePoolSize=10;
-    private int queueCapital=20;
-    private String threadNamePrefix="async-thread-";
-    private int keepAliveSeconds=60;
-    private String rejectExecutionHandler="AbortPolicy";
+    private int maxPoolSize = 100;
+    private int corePoolSize = 10;
+    private int queueCapital = 20;
+    private String threadNamePrefix = "async-thread-";
+    private int keepAliveSeconds = 60;
+    private String rejectExecutionHandler = "AbortPolicy";
 
 
     @Bean
@@ -56,15 +56,15 @@ public class SpringAsyncAutoConfiguration implements AsyncConfigurer {
          * DiscardPolicy()：直接丢弃。
          * DiscardOldestPolicy()：丢弃队列中最老的任务。
          */
-        RejectedExecutionHandler handler=new ThreadPoolExecutor.AbortPolicy();
-        if("AbortPolicy".equals(rejectExecutionHandler)){
-            handler=new ThreadPoolExecutor.AbortPolicy();
-        }else if("CallerRunsPolicy".equals(rejectExecutionHandler)){
-            handler=new ThreadPoolExecutor.DiscardOldestPolicy();
-        }else if("DiscardPolicy".equals(rejectExecutionHandler)){
-            handler=new ThreadPoolExecutor.DiscardPolicy();
-        }else if("DiscardOldestPolicy".equals(rejectExecutionHandler)){
-            handler=new ThreadPoolExecutor.DiscardOldestPolicy();
+        RejectedExecutionHandler handler = new ThreadPoolExecutor.AbortPolicy();
+        if ("AbortPolicy".equals(rejectExecutionHandler)) {
+            handler = new ThreadPoolExecutor.AbortPolicy();
+        } else if ("CallerRunsPolicy".equals(rejectExecutionHandler)) {
+            handler = new ThreadPoolExecutor.DiscardOldestPolicy();
+        } else if ("DiscardPolicy".equals(rejectExecutionHandler)) {
+            handler = new ThreadPoolExecutor.DiscardPolicy();
+        } else if ("DiscardOldestPolicy".equals(rejectExecutionHandler)) {
+            handler = new ThreadPoolExecutor.DiscardOldestPolicy();
         }
         executor.setRejectedExecutionHandler(handler);
         //线程初始化

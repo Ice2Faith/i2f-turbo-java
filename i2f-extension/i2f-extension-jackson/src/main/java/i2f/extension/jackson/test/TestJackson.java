@@ -2,9 +2,9 @@ package i2f.extension.jackson.test;
 
 
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
+import i2f.extension.jackson.serializer.JacksonJsonWithTypeSerializer;
 import i2f.extension.jackson.serializer.JacksonXmlSerializer;
 import i2f.extension.jackson.serializer.JacksonYamlSerializer;
-import i2f.extension.jackson.serializer.JacksonJsonWithTypeSerializer;
 import i2f.serialize.str.IStringObjectSerializer;
 
 public class TestJackson {

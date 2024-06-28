@@ -55,9 +55,47 @@ public class BcAsymmetricEncryptor extends AsymmetricEncryptor {
         this.providerName = BcProvider.PROVIDER_NAME;
     }
 
+
+    public static KeyPair keyPairOf(AsymmetricType algorithm, byte[] publicKey, byte[] privateKey) throws Exception {
+        return Encryptor.keyPairOf(algorithm, publicKey, privateKey);
+    }
+
+    public static PublicKey publicKeyOf(AsymmetricType algorithm, byte[] codes) throws Exception {
+        return Encryptor.publicKeyOf(algorithm, codes);
+    }
+
+    public static PrivateKey privateKeyOf(AsymmetricType algorithm, byte[] codes) throws Exception {
+        return Encryptor.privateKeyOf(algorithm, codes);
+    }
+
+
+    public static KeyPair genKeyPair(AsymmetricType algorithm) throws Exception {
+        return Encryptor.genKeyPair(algorithm);
+    }
+
+    public static KeyPair genKeyPair(AsymmetricType algorithm, byte[] keyBytes) throws Exception {
+        return Encryptor.genKeyPair(algorithm, keyBytes);
+    }
+
+    public static KeyPair genKeyPair(AsymmetricType algorithm, byte[] keyBytes, String secureRandomAlgorithmName) throws Exception {
+        return Encryptor.genKeyPair(algorithm, keyBytes, secureRandomAlgorithmName);
+    }
+
+    public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm) throws Exception {
+        return genKeyEncryptor(algorithm, null, null, null);
+    }
+
+    public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm, IMessageDigester digester) throws Exception {
+        return genKeyEncryptor(algorithm, null, null, digester);
+    }
+
+    public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm, byte[] keyBytes, IMessageDigester digester) throws Exception {
+        return genKeyEncryptor(algorithm, keyBytes, null, digester);
+    }
+
     public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm, byte[] keyBytes, String secureRandomAlgorithmName, IMessageDigester digester) throws Exception {
         return new AsymmetricEncryptor(algorithm,
-                Encryptor.genKeyPair(algorithm,
+                genKeyPair(algorithm,
                         keyBytes,
                         secureRandomAlgorithmName),
                 digester

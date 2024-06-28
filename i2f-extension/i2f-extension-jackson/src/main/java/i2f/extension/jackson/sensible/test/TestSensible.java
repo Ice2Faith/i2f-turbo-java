@@ -9,10 +9,10 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class TestSensible extends AbsDictSensibleHandler  {
+public class TestSensible extends AbsDictSensibleHandler {
 
     public static void main(String[] args) throws Exception {
-        List<ISensibleHandler> handlers= Arrays.asList(new TestSensible());
+        List<ISensibleHandler> handlers = Arrays.asList(new TestSensible());
         SensibleHandlersHolder.GLOBAL_HANDLERS.addAll(handlers);
         test(new ObjectMapper());
     }

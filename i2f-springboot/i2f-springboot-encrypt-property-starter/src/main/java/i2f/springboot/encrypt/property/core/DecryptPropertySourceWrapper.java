@@ -11,10 +11,10 @@ public class DecryptPropertySourceWrapper<T> extends PropertySource<T> {
     private PropertySource<T> delegate;
     private IPropertyDecryptor decryptor;
 
-    public DecryptPropertySourceWrapper(PropertySource<T> delegate,IPropertyDecryptor decryptor) {
+    public DecryptPropertySourceWrapper(PropertySource<T> delegate, IPropertyDecryptor decryptor) {
         super(delegate.getName(), delegate.getSource());
         this.delegate = delegate;
-        this.decryptor=decryptor;
+        this.decryptor = decryptor;
     }
 
     @Override

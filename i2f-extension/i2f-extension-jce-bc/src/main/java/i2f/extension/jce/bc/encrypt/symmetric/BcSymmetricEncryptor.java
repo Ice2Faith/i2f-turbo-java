@@ -40,10 +40,22 @@ public class BcSymmetricEncryptor extends SymmetricEncryptor {
     }
 
 
+    public static SymmetricEncryptor genKeyEncryptor(SymmetricType algorithm) throws Exception {
+        return genKeyEncryptor(algorithm, null, null, null);
+    }
+
+    public static SymmetricEncryptor genKeyEncryptor(SymmetricType algorithm, byte[] keyBytes) throws Exception {
+        return genKeyEncryptor(algorithm, keyBytes, null, null);
+    }
+
+    public static SymmetricEncryptor genKeyEncryptor(SymmetricType algorithm, byte[] keyBytes, byte[] vectorBytes) throws Exception {
+        return genKeyEncryptor(algorithm, keyBytes, vectorBytes, null);
+    }
+
     public static SymmetricEncryptor genKeyEncryptor(SymmetricType algorithm, byte[] keyBytes, byte[] vectorBytes, String secureRandomAlgorithmName) throws Exception {
         if (algorithm.requireVector()) {
             return new SymmetricEncryptor(algorithm,
-                    Encryptor.genSecretKey(algorithm,
+                    genKey(algorithm,
                             keyBytes,
                             secureRandomAlgorithmName),
                     Encryptor.genParameterSpec(algorithm,
@@ -51,10 +63,22 @@ public class BcSymmetricEncryptor extends SymmetricEncryptor {
                             secureRandomAlgorithmName));
         } else {
             return new SymmetricEncryptor(algorithm,
-                    Encryptor.genSecretKey(algorithm,
+                    genKey(algorithm,
                             keyBytes,
                             secureRandomAlgorithmName));
         }
+    }
+
+    public static SymmetricEncryptor genPbeKeyEncryptor(PbeType algorithm, int iterationCount) throws Exception {
+        return genPbeKeyEncryptor(algorithm, null, null, iterationCount, null);
+    }
+
+    public static SymmetricEncryptor genPbeKeyEncryptor(PbeType algorithm, byte[] keyBytes, int iterationCount) throws Exception {
+        return genPbeKeyEncryptor(algorithm, keyBytes, null, iterationCount, null);
+    }
+
+    public static SymmetricEncryptor genPbeKeyEncryptor(PbeType algorithm, byte[] keyBytes, byte[] vectorBytes, int iterationCount) throws Exception {
+        return genPbeKeyEncryptor(algorithm, keyBytes, vectorBytes, iterationCount, null);
     }
 
     public static SymmetricEncryptor genPbeKeyEncryptor(PbeType algorithm, byte[] keyBytes, byte[] vectorBytes, int iterationCount, String secureRandomAlgorithmName) throws Exception {
@@ -62,9 +86,9 @@ public class BcSymmetricEncryptor extends SymmetricEncryptor {
             return new SymmetricEncryptor(algorithm,
                     Encryptor.genPbeSecretKey(algorithm.algorithmName(),
                             null,
-                            keyBytes,
-                            secureRandomAlgorithmName),
-                    Encryptor.genPbeParameterSpec(algorithm.algorithmName(),
+                            keyBytes
+                    ),
+                    Encryptor.genPbeParameterSpec(
                             vectorBytes,
                             algorithm.vectorBytesLen()[0],
                             secureRandomAlgorithmName,
@@ -73,11 +97,10 @@ public class BcSymmetricEncryptor extends SymmetricEncryptor {
             return new SymmetricEncryptor(algorithm,
                     Encryptor.genPbeSecretKey(algorithm.algorithmName(),
                             null,
-                            keyBytes,
-                            secureRandomAlgorithmName));
+                            keyBytes
+                    ));
         }
     }
-
 
     @Override
     public String toString() {

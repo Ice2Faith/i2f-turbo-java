@@ -12,12 +12,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class SensibleHandlersHolder {
 
-    public static CopyOnWriteArrayList<ISensibleHandler> GLOBAL_HANDLERS=new CopyOnWriteArrayList<>();
-    public static ThreadLocal<Collection<ISensibleHandler>> THREAD_HANDLERS=new ThreadLocal<>();
+    public static CopyOnWriteArrayList<ISensibleHandler> GLOBAL_HANDLERS = new CopyOnWriteArrayList<>();
+    public static ThreadLocal<Collection<ISensibleHandler>> THREAD_HANDLERS = new ThreadLocal<>();
 
     public static Collection<ISensibleHandler> getContextHandlers() {
         Collection<ISensibleHandler> handlers = THREAD_HANDLERS.get();
-        if(handlers!=null){
+        if (handlers != null) {
             return handlers;
         }
         return GLOBAL_HANDLERS;

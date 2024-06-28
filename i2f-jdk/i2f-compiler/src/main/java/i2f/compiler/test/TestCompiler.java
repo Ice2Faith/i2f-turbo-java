@@ -9,7 +9,7 @@ import i2f.compiler.MemoryCompiler;
  */
 public class TestCompiler {
     public static void main(String[] args) throws Exception {
-        String code="\n" +
+        String code = "\n" +
                 "import java.util.Date;\n" +
                 "\n" +
                 "public class ###{\n" +

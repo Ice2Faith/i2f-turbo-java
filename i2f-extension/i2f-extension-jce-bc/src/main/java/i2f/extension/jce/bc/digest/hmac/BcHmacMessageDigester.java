@@ -5,7 +5,7 @@ import i2f.extension.jce.bc.supports.MacAlgorithm;
 import i2f.jce.jdk.digest.hmac.HmacMessageDigester;
 
 import javax.crypto.Mac;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * @author Ice2Faith
@@ -17,21 +17,21 @@ public class BcHmacMessageDigester extends HmacMessageDigester {
         BcProvider.registryProvider();
     }
 
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacMD5 = (key, providerName) -> getInstance(MacAlgorithm.HmacMD5.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacSHA1 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA1.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacSHA224 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA224.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacSHA256 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA256.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacSHA384 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA384.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacSHA512 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA512.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacRIPEMD128 = (key, providerName) -> getInstance(MacAlgorithm.HmacRIPEMD128.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacRIPEMD160 = (key, providerName) -> getInstance(MacAlgorithm.HmacRIPEMD160.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacRIPEMD256 = (key, providerName) -> getInstance(MacAlgorithm.HmacRIPEMD256.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacRIPEMD320 = (key, providerName) -> getInstance(MacAlgorithm.HmacRIPEMD320.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacSHA512_224 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA512_224.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacSHA512_256 = (key, providerName) -> getInstance(MacAlgorithm.HmacSHA512_256.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacSM3 = (key, providerName) -> getInstance(MacAlgorithm.HmacSM3.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacTiger = (key, providerName) -> getInstance(MacAlgorithm.HmacTiger.text(), key, providerName);
-    public static final BiFunction<byte[], String, HmacMessageDigester> HmacWhirlpool = (key, providerName) -> getInstance(MacAlgorithm.HmacWhirlpool.text(), key, providerName);
+    public static final Function<byte[], HmacMessageDigester> HmacMD5 = (key) -> getInstance(MacAlgorithm.HmacMD5.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacSHA1 = (key) -> getInstance(MacAlgorithm.HmacSHA1.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacSHA224 = (key) -> getInstance(MacAlgorithm.HmacSHA224.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacSHA256 = (key) -> getInstance(MacAlgorithm.HmacSHA256.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacSHA384 = (key) -> getInstance(MacAlgorithm.HmacSHA384.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacSHA512 = (key) -> getInstance(MacAlgorithm.HmacSHA512.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacRIPEMD128 = (key) -> getInstance(MacAlgorithm.HmacRIPEMD128.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacRIPEMD160 = (key) -> getInstance(MacAlgorithm.HmacRIPEMD160.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacRIPEMD256 = (key) -> getInstance(MacAlgorithm.HmacRIPEMD256.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacRIPEMD320 = (key) -> getInstance(MacAlgorithm.HmacRIPEMD320.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacSHA512_224 = (key) -> getInstance(MacAlgorithm.HmacSHA512_224.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacSHA512_256 = (key) -> getInstance(MacAlgorithm.HmacSHA512_256.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacSM3 = (key) -> getInstance(MacAlgorithm.HmacSM3.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacTiger = (key) -> getInstance(MacAlgorithm.HmacTiger.text(), key, BcProvider.PROVIDER_NAME);
+    public static final Function<byte[], HmacMessageDigester> HmacWhirlpool = (key) -> getInstance(MacAlgorithm.HmacWhirlpool.text(), key, BcProvider.PROVIDER_NAME);
 
     public BcHmacMessageDigester() {
     }

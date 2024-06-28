@@ -2,9 +2,9 @@ package i2f.extension.jce.sm.antherd.signature;
 
 import com.antherd.smcrypto.sm2.Keypair;
 import com.antherd.smcrypto.sm2.Sm2;
+import i2f.codec.CodecUtil;
 import i2f.extension.jce.sm.antherd.encrypt.asymmetric.Sm2Encryptor;
 import i2f.jce.std.signature.ISignatureSigner;
-import i2f.codec.CodecUtil;
 
 import java.security.KeyPair;
 import java.util.Objects;

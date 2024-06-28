@@ -2,6 +2,7 @@ package i2f.extension.jce.sm.antherd.encrypt.symmetric;
 
 import com.antherd.smcrypto.sm4.Sm4;
 import i2f.codec.CodecUtil;
+import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.jce.jdk.encrypt.Encryptor;
 import i2f.jce.jdk.supports.SecureRandomAlgorithm;
 import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
@@ -28,6 +29,14 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
 
     public static int[] secretBytesLen() {
         return SECRET_BYTE_LEN;
+    }
+
+    public static String keyOf(byte[] codes) {
+        return HexStringByteCodec.INSTANCE.encode(codes);
+    }
+
+    public static byte[] keyTo(String key) {
+        return HexStringByteCodec.INSTANCE.decode(key);
     }
 
     public static String genKey() throws Exception {
@@ -71,6 +80,15 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
     public void setKey(String key) {
         this.key = key;
     }
+
+    public byte[] keyTo() {
+        return CodecUtil.ofHexString(key);
+    }
+
+    public void ofKey(byte[] codes) {
+        this.key = CodecUtil.toHexString(codes);
+    }
+
 
     @Override
     public boolean equals(Object o) {

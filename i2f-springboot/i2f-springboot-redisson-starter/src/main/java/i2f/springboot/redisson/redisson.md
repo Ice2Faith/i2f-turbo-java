@@ -2,14 +2,17 @@
 ---
 
 ## 简介
+
 - 是一个redis客户端
 - 但是引入了其他的高级功能
 - 比如grid,lock等功能
 - 其中的分布式锁是开发中比较常用的
 
 ## 使用
+
 - 这一个版本需要和springboot版本对应
 - 这里用的springboot版本如下
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -18,8 +21,10 @@
     <relativePath/>
 </parent>
 ```
+
 - 引入maven
 - 注意，需要和springboot版本对应
+
 ```xml
 <dependency>
     <groupId>org.redisson</groupId>
@@ -27,31 +32,38 @@
     <version>3.14.0</version>
 </dependency>
 ```
+
 - 移除原来的maven
 - 原因是已经包含了这个原来，没必要重复引入
 - 重复引入还可能版本冲突
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-data-redis</artifactId>
 </dependency>
 ```
+
 - 版本配置可以在maven搜索网站查看对应的 Compile Dependencies
 - 例如这个版本的依赖中，就明确了适用于 spring-boot-starter-data-redis 2.3.x 版本
-Compile Dependencies (5)
+  Compile Dependencies (5)
+
 -----------------------------------------------------------------------------------------
-| Group / Artifact   |	Version  |	Updates  |
-| --- | --- | --- |
-org.redisson / redisson |	3.14.0 |	3.18.1 |
-org.redisson / redisson-spring-data-23 |	3.14.0 |	3.18.1 |
-org.springframework.boot / spring-boot-starter-actuator |	2.3.4.RELEASE |	3.0.0 |
-org.springframework.boot / spring-boot-starter-web1 vulnerability |	2.3.4.RELEASE |	3.0.0 |
-org.springframework.boot / spring-boot-starter-data-redis |	2.3.4.RELEASE |	3.0.0 |
+
+| Group / Artifact                                                  | 	Version       | 	Updates |
+|-------------------------------------------------------------------|----------------|----------|
+ org.redisson / redisson                                           | 	3.14.0        | 	3.18.1  |
+ org.redisson / redisson-spring-data-23                            | 	3.14.0        | 	3.18.1  |
+ org.springframework.boot / spring-boot-starter-actuator           | 	2.3.4.RELEASE | 	3.0.0   |
+ org.springframework.boot / spring-boot-starter-web1 vulnerability | 	2.3.4.RELEASE | 	3.0.0   |
+ org.springframework.boot / spring-boot-starter-data-redis         | 	2.3.4.RELEASE | 	3.0.0   |
+
 -----------------------------------------------------------------------------------------
 
 - 添加配置
 - 配置和原来的一样，可以不变
- -但是min-idle建议不要设置为0，可能启动报错
+  -但是min-idle建议不要设置为0，可能启动报错
+
 ```yaml
 spring:
   redis:
@@ -67,10 +79,12 @@ spring:
         min-idle: 1     #最小等待连接中的数量,设 0 为没有限制
       shutdown-timeout: 100ms
 ```
+
 - 将本包及子包下面的内容放到自己的项目中
 
 ## 本包使用
-- RedissonConfig 配置了 RedissonClient 
+
+- RedissonConfig 配置了 RedissonClient
 - RedissonLockProvider 提供了几种获取分布式锁的方式
 - RedissonLockAop 提供了方法注解方式，进行方法的锁操作
 - RedisLock 提供了互斥锁的方法注解
@@ -78,6 +92,7 @@ spring:
 - RedisWriteLock 提供了写锁的方法注解
 - 使用示例
 - 直接获取锁方式
+
 ```java
 @Autowired
 private RedissonLockProvider lockProvider;
@@ -95,7 +110,9 @@ public void lockMethod(){
     }
 }
 ```
+
 - 使用方法注解方式
+
 ```java
 @RedisLock(clazz=TestServiceImpl.class,value="unique_no")
 public void lockMethod(){
@@ -104,6 +121,7 @@ public void lockMethod(){
 ```
 
 - 关于AOP中注解的使用说明和AOP定义如下
+
 ```java
 /**
  * 实现基于AOP的Redisson分布式锁机制
@@ -195,6 +213,7 @@ public class RedissonLockAop {
 ```
 
 ## 注意事项
+
 - 原来的RedisConfig等对redis的配置可以不变
 - 其他注意的点
 - 原来的配置中可能用到了LettuceConnectionFactory或者JedisConnectionFactory

@@ -18,7 +18,7 @@ public class DefaultAesPropertyDecryptorConfiguration {
     private String key;
 
     @Bean
-    public IPropertyDecryptor propertyDecryptor(){
+    public IPropertyDecryptor propertyDecryptor() {
         return new AesPropertyDecryptor(key);
     }
 }

@@ -4,7 +4,6 @@ import com.sun.mail.util.MailSSLSocketFactory;
 import i2f.extension.email.data.EmailConfigData;
 import i2f.extension.email.data.EmailSendData;
 
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;

@@ -2,7 +2,6 @@ package i2f.tools.encrypt.menus.bc.digest.hmac;
 
 
 import i2f.codec.CodecUtil;
-import i2f.extension.jce.bc.BcProvider;
 import i2f.extension.jce.bc.digest.hmac.BcHmacMessageDigester;
 import i2f.jce.jdk.digest.hmac.HmacMessageDigester;
 import i2f.tools.encrypt.IMenuHandler;
@@ -25,7 +24,7 @@ public class BcHmacSm3MenuHandler implements IMenuHandler {
         byte[] key = args[0].getBytes("UTF-8");
         for (int i = 1; i < args.length; i++) {
             String item = args[i];
-            HmacMessageDigester digester = BcHmacMessageDigester.HmacSM3.apply(key, BcProvider.PROVIDER_NAME);
+            HmacMessageDigester digester = BcHmacMessageDigester.HmacSM3.apply(key);
             String encode = CodecUtil.toHexString(digester.digest(item.getBytes("UTF-8")));
             System.out.println(item + "==> (key=" + args[0] + ") ==> " + encode);
         }

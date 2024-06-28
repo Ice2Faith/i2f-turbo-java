@@ -79,6 +79,10 @@ aes-keygen-b64-de 使用jce的AES/ECB/PKCS5Padding基于Keygen生成key算法dec
 aes-keygen-utf8-en 使用jce的AES/ECB/PKCS5Padding基于Keygen生成key算法encrypt加密输入为utf8的字符串
 aes-keygen-utf8-de 使用jce的AES/ECB/PKCS5Padding基于Keygen生成key算法decrypt加密输入为utf8的字符串
 
+rsa-keygen Encryptor.genKeyPair()
+rsa-encrypt AsymmetricEncryptor.encrypt()
+rsa-decrypt AsymmetricEncryptor.decrypt()
+
 - 以下为sm-antherd中的实例
 antherd-sm2-keygen Sm2Encryptor.genKey()
 antherd-sm2-encrypt Sm2Encryptor.encrypt()
@@ -106,3 +110,12 @@ bc-hmac-sm3 BcHmacMessageDigester.HmacSM3
 bc-hmac-tiger BcHmacMessageDigester.HmacTiger
 bc-hmac-whirlpool BcHmacMessageDigester.HmacWhirlpool
 
+bc-sm2-keygen BcSm2Encryptor.genKeyPair()
+bc-sm2-encrypt BcSymmetricEncryptor.encrypt()
+bc-sm2-decrypt BcSymmetricEncryptor.decrypt()
+bc-sm2-sign BcSymmetricEncryptor.sign()
+bc-sm2-verify BcSymmetricEncryptor.verify()
+bc-sm3 BcMessageDigester.SM3
+bc-sm4-keygen Encryptor.genSecretKey()
+bc-sm4-en BcSymmetricEncryptor.encrypt()
+bc-sm4-de BcSymmetricEncryptor.decrypt()

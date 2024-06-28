@@ -89,6 +89,7 @@
         <module>i2f-cache</module>
         <module>i2f-lru-cache</module>
         <module>i2f-features</module>
+        <module>i2f-compress</module>
 
     </modules>
 

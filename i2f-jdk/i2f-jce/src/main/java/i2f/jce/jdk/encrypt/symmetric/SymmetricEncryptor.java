@@ -4,9 +4,13 @@ import i2f.jce.jdk.encrypt.Encryptor;
 import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
 
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -14,6 +18,15 @@ import java.util.Objects;
  * @desc
  */
 public class SymmetricEncryptor implements ISymmetricEncryptor {
+
+    public static final Function<Key, SymmetricEncryptor> AES_DEFAULT = (key) -> new SymmetricEncryptor(AesType.DEFAULT, key);
+    public static final Supplier<SymmetricEncryptor> NEW_AES_DEFAULT = () -> {
+        try {
+            return SymmetricEncryptor.genKeyEncryptor(AesType.DEFAULT);
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    };
 
     protected String algorithmName;
     protected String providerName;
@@ -56,10 +69,66 @@ public class SymmetricEncryptor implements ISymmetricEncryptor {
         this.key = key;
     }
 
+    public static SecretKey keyOf(SymmetricType algorithm, byte[] codes) {
+        return Encryptor.keyOf(codes, algorithm);
+    }
+
+    public static AlgorithmParameterSpec specOf(byte[] codes) {
+        return Encryptor.specOf(codes);
+    }
+
+    public static byte[] keyTo(Key key) {
+        return Encryptor.keyTo(key);
+    }
+
+    public static byte[] specTo(IvParameterSpec spec) {
+        return Encryptor.specTo(spec);
+    }
+
+    public static SecretKey genKey(SymmetricType algorithm) throws Exception {
+        return genKey(algorithm, null, null);
+    }
+
+    public static SecretKey genKey(SymmetricType algorithm, byte[] keyBytes) throws Exception {
+        return genKey(algorithm, keyBytes, null);
+    }
+
+    public static SecretKey genKey(SymmetricType algorithm, byte[] keyBytes, String secureRandomAlgorithmName) throws Exception {
+        return Encryptor.genSecretKey(algorithm,
+                keyBytes,
+                secureRandomAlgorithmName);
+    }
+
+    public static AlgorithmParameterSpec genSpec(SymmetricType algorithm) throws Exception {
+        return genSpec(algorithm, null, null);
+    }
+
+    public static AlgorithmParameterSpec genSpec(SymmetricType algorithm, byte[] vectorBytes) throws Exception {
+        return genSpec(algorithm, vectorBytes, null);
+    }
+
+    public static AlgorithmParameterSpec genSpec(SymmetricType algorithm, byte[] vectorBytes, String secureRandomAlgorithmName) throws Exception {
+        return Encryptor.genParameterSpec(algorithm,
+                vectorBytes,
+                secureRandomAlgorithmName);
+    }
+
+    public static SymmetricEncryptor genKeyEncryptor(SymmetricType algorithm) throws Exception {
+        return genKeyEncryptor(algorithm, null, null, null);
+    }
+
+    public static SymmetricEncryptor genKeyEncryptor(SymmetricType algorithm, byte[] keyBytes) throws Exception {
+        return genKeyEncryptor(algorithm, keyBytes, null, null);
+    }
+
+    public static SymmetricEncryptor genKeyEncryptor(SymmetricType algorithm, byte[] keyBytes, byte[] vectorBytes) throws Exception {
+        return genKeyEncryptor(algorithm, keyBytes, vectorBytes, null);
+    }
+
     public static SymmetricEncryptor genKeyEncryptor(SymmetricType algorithm, byte[] keyBytes, byte[] vectorBytes, String secureRandomAlgorithmName) throws Exception {
         if (algorithm.requireVector()) {
             return new SymmetricEncryptor(algorithm,
-                    Encryptor.genSecretKey(algorithm,
+                    genKey(algorithm,
                             keyBytes,
                             secureRandomAlgorithmName),
                     Encryptor.genParameterSpec(algorithm,
@@ -67,10 +136,22 @@ public class SymmetricEncryptor implements ISymmetricEncryptor {
                             secureRandomAlgorithmName));
         } else {
             return new SymmetricEncryptor(algorithm,
-                    Encryptor.genSecretKey(algorithm,
+                    genKey(algorithm,
                             keyBytes,
                             secureRandomAlgorithmName));
         }
+    }
+
+    public static SymmetricEncryptor genPbeKeyEncryptor(PbeType algorithm, int iterationCount) throws Exception {
+        return genPbeKeyEncryptor(algorithm, null, null, iterationCount, null);
+    }
+
+    public static SymmetricEncryptor genPbeKeyEncryptor(PbeType algorithm, byte[] keyBytes, int iterationCount) throws Exception {
+        return genPbeKeyEncryptor(algorithm, keyBytes, null, iterationCount, null);
+    }
+
+    public static SymmetricEncryptor genPbeKeyEncryptor(PbeType algorithm, byte[] keyBytes, byte[] vectorBytes, int iterationCount) throws Exception {
+        return genPbeKeyEncryptor(algorithm, keyBytes, vectorBytes, iterationCount, null);
     }
 
     public static SymmetricEncryptor genPbeKeyEncryptor(PbeType algorithm, byte[] keyBytes, byte[] vectorBytes, int iterationCount, String secureRandomAlgorithmName) throws Exception {
@@ -78,9 +159,9 @@ public class SymmetricEncryptor implements ISymmetricEncryptor {
             return new SymmetricEncryptor(algorithm,
                     Encryptor.genPbeSecretKey(algorithm.algorithmName(),
                             null,
-                            keyBytes,
-                            secureRandomAlgorithmName),
-                    Encryptor.genPbeParameterSpec(algorithm.algorithmName(),
+                            keyBytes
+                    ),
+                    Encryptor.genPbeParameterSpec(
                             vectorBytes,
                             algorithm.vectorBytesLen()[0],
                             secureRandomAlgorithmName,
@@ -89,8 +170,8 @@ public class SymmetricEncryptor implements ISymmetricEncryptor {
             return new SymmetricEncryptor(algorithm,
                     Encryptor.genPbeSecretKey(algorithm.algorithmName(),
                             null,
-                            keyBytes,
-                            secureRandomAlgorithmName));
+                            keyBytes
+                    ));
         }
     }
 
@@ -163,6 +244,14 @@ public class SymmetricEncryptor implements ISymmetricEncryptor {
 
     public void setSpec(AlgorithmParameterSpec spec) {
         this.spec = spec;
+    }
+
+    public byte[] keyTo() {
+        return keyTo(key);
+    }
+
+    public void keyOf(byte[] codes) {
+        this.key = Encryptor.keyOf(codes, algorithmName);
     }
 
     @Override
