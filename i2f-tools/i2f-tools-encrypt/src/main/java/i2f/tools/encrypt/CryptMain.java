@@ -2,6 +2,10 @@ package i2f.tools.encrypt;
 
 
 import i2f.tools.encrypt.menus.HelpMenuHandler;
+import i2f.tools.encrypt.menus.bc.digest.*;
+import i2f.tools.encrypt.menus.bc.digest.hmac.BcHmacSm3MenuHandler;
+import i2f.tools.encrypt.menus.bc.digest.hmac.BcHmacTigerMenuHandler;
+import i2f.tools.encrypt.menus.bc.digest.hmac.BcHmacWhirlpoolMenuHandler;
 import i2f.tools.encrypt.menus.codec.*;
 import i2f.tools.encrypt.menus.digest.*;
 import i2f.tools.encrypt.menus.digest.hmac.*;
@@ -102,6 +106,22 @@ public class CryptMain {
         addMenuHandler(new AntherdSm4GenKeyMenuHandler());
         addMenuHandler(new AntherdSm4EncoderMenuHandler());
         addMenuHandler(new AntherdSm4DecoderMenuHandler());
+
+        addMenuHandler(new BcSha3A224MenuHandler());
+        addMenuHandler(new BcSha3A256MenuHandler());
+        addMenuHandler(new BcSha3A384MenuHandler());
+        addMenuHandler(new BcSha3A512MenuHandler());
+        addMenuHandler(new BcSha512A224MenuHandler());
+        addMenuHandler(new BcSha512A256MenuHandler());
+        addMenuHandler(new BcShake128MenuHandler());
+        addMenuHandler(new BcShake256MenuHandler());
+        addMenuHandler(new BcSm3MenuHandler());
+        addMenuHandler(new BcTigerMenuHandler());
+        addMenuHandler(new BcWhirlpoolMenuHandler());
+
+        addMenuHandler(new BcHmacSm3MenuHandler());
+        addMenuHandler(new BcHmacTigerMenuHandler());
+        addMenuHandler(new BcHmacWhirlpoolMenuHandler());
     }
 
     public static void main(String[] args) {

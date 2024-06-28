@@ -102,4 +102,7 @@ bc-sha3-224 BcMessageDigester.SHA3_224
 bc-sha3-256 BcMessageDigester.SHA3_256
 bc-sha3-384 BcMessageDigester.SHA3_384
 bc-sha3-512 BcMessageDigester.SHA3_512
+bc-hmac-sm3 BcHmacMessageDigester.HmacSM3
+bc-hmac-tiger BcHmacMessageDigester.HmacTiger
+bc-hmac-whirlpool BcHmacMessageDigester.HmacWhirlpool
 
