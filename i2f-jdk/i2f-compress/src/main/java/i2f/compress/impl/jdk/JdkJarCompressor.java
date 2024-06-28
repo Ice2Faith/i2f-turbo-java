@@ -1,26 +1,26 @@
-package i2f.compress.impl;
+package i2f.compress.impl.jdk;
 
 import i2f.compress.data.CompressBindData;
+import i2f.compress.impl.AbsCompressor;
 import i2f.io.stream.StreamUtil;
 
 import java.io.*;
 import java.util.Collection;
 import java.util.function.BiConsumer;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 /**
  * @author Ice2Faith
  * @date 2024/6/28 17:27
  * @desc
  */
-public class JdkZipCompressor extends AbsCompressor {
+public class JdkJarCompressor extends AbsCompressor {
     @Override
     public void compressBindData(File output, Collection<CompressBindData> inputs) throws IOException {
         FileOutputStream fos = new FileOutputStream(output);
-        ZipOutputStream zos = new JarOutputStream(fos);
+        JarOutputStream zos = new JarOutputStream(fos);
         for (CompressBindData input : inputs) {
             String path = input.getDirectory() + "/" + input.getFileName();
             if (path.startsWith("/")) {
@@ -30,7 +30,7 @@ public class JdkZipCompressor extends AbsCompressor {
             if (is == null) {
                 continue;
             }
-            ZipEntry entry = new ZipEntry(path);
+            JarEntry entry = new JarEntry(path);
             zos.putNextEntry(entry);
             StreamUtil.streamCopy(input.getInputStream(), zos, false, true);
             zos.flush();
@@ -43,9 +43,9 @@ public class JdkZipCompressor extends AbsCompressor {
     @Override
     public void release(File input, File output, BiConsumer<CompressBindData, File> consumer) throws IOException {
         InputStream fis = new FileInputStream(input);
-        ZipInputStream zis = new ZipInputStream(fis);
-        ZipEntry entry = null;
-        while ((entry = zis.getNextEntry()) != null) {
+        JarInputStream zis = new JarInputStream(fis);
+        JarEntry entry = null;
+        while ((entry = zis.getNextJarEntry()) != null) {
             if (entry.isDirectory()) {
                 zis.closeEntry();
                 continue;

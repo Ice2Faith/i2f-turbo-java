@@ -1,7 +1,7 @@
 package i2f.compress.test;
 
 import i2f.compress.ICompressor;
-import i2f.compress.impl.JdkZipCompressor;
+import i2f.compress.impl.jdk.JdkZipCompressor;
 
 import java.io.File;
 import java.io.IOException;
