@@ -4,11 +4,8 @@ import i2f.codec.bytes.base64.Base64UrlStringByteCodec;
 import i2f.io.stream.StreamUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * @author Ice2Faith

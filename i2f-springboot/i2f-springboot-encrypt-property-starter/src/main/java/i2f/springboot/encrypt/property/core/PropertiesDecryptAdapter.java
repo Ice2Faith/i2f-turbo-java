@@ -24,23 +24,25 @@ public class PropertiesDecryptAdapter implements BeanFactoryPostProcessor, Envir
     private Environment env;
     private ConfigurableListableBeanFactory beanFactory;
     private IPropertyDecryptor decryptor;
-    public PropertiesDecryptAdapter(IPropertyDecryptor decryptor){
-        this.decryptor=decryptor;
+
+    public PropertiesDecryptAdapter(IPropertyDecryptor decryptor) {
+        this.decryptor = decryptor;
     }
+
     @Override
     public void setEnvironment(Environment env) {
-        this.env=env;
+        this.env = env;
     }
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        this.beanFactory=beanFactory;
-        wrapEnv(env,beanFactory);
+        this.beanFactory = beanFactory;
+        wrapEnv(env, beanFactory);
     }
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
-        wrapEnv(env,beanFactory);
+        wrapEnv(env, beanFactory);
     }
 
     @Override
@@ -48,11 +50,11 @@ public class PropertiesDecryptAdapter implements BeanFactoryPostProcessor, Envir
         return -9999;
     }
 
-    public void wrapEnv(Environment env,ConfigurableListableBeanFactory beanFactory){
-        if(!(env instanceof ConfigurableEnvironment)){
+    public void wrapEnv(Environment env, ConfigurableListableBeanFactory beanFactory) {
+        if (!(env instanceof ConfigurableEnvironment)) {
             return;
         }
-        ConfigurableEnvironment cenv=(ConfigurableEnvironment)env;
+        ConfigurableEnvironment cenv = (ConfigurableEnvironment) env;
 
         MutablePropertySources sources = cenv.getPropertySources();
 
@@ -63,13 +65,13 @@ public class PropertiesDecryptAdapter implements BeanFactoryPostProcessor, Envir
                 .forEach(item -> sources.replace(item.getName(), item));
     }
 
-    public static final String IGNORE_SOURCE_SPRING="org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource";
+    public static final String IGNORE_SOURCE_SPRING = "org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource";
 
-    public<T> PropertySource<T> makeDecryptable(PropertySource<T> source,ConfigurableListableBeanFactory beanFactory){
-        if(source.getClass().getName().equals(IGNORE_SOURCE_SPRING)){
+    public <T> PropertySource<T> makeDecryptable(PropertySource<T> source, ConfigurableListableBeanFactory beanFactory) {
+        if (source.getClass().getName().equals(IGNORE_SOURCE_SPRING)) {
             return source;
         }
-        PropertySource<T> ret=new DecryptPropertySourceWrapper<>(source,decryptor);
+        PropertySource<T> ret = new DecryptPropertySourceWrapper<>(source, decryptor);
         return ret;
     }
 }

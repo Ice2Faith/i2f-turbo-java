@@ -35,7 +35,7 @@ public class JacksonSensibleAutoConfiguration implements ApplicationContextAware
         refresh();
     }
 
-    public static void refresh(){
+    public static void refresh() {
         try {
             Map<String, ISensibleHandler> beans = getBeans(ISensibleHandler.class);
             SensibleHandlersHolder.GLOBAL_HANDLERS.clear();
@@ -47,7 +47,7 @@ public class JacksonSensibleAutoConfiguration implements ApplicationContextAware
 
     public static <T> Map<String, T> getBeans(Class<T> clazz) {
         Map<String, T> ret = new HashMap<>();
-        if(context==null){
+        if (context == null) {
             return ret;
         }
         String[] names = context.getBeanNamesForType(clazz);

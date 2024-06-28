@@ -41,7 +41,7 @@ public class JacksonSensibleSerializer extends JsonSerializer<Object>
         }
         Class<?> rawClass = beanProperty.getType().getRawClass();
         Collection<ISensibleHandler> handlers = SensibleHandlersHolder.getContextHandlers();
-        if(handlers!=null){
+        if (handlers != null) {
             for (ISensibleHandler handler : handlers) {
                 Set<String> type = handler.accept();
                 if (type.contains(ann.type())) {

@@ -18,6 +18,8 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Objects;
 
@@ -66,6 +68,19 @@ public class BcSm2Encryptor implements IAsymmetricEncryptor {
         if (keyPair.getPrivate() != null) {
             this.privateKey = CodecUtil.toHexString(keyPair.getPrivate().getEncoded());
         }
+    }
+
+    public static KeyPair keyPairOf(byte[] publicKey, byte[] privateKey) throws Exception {
+        return new KeyPair(new BytesPublicKey("sm2", "hex", publicKey),
+                new BytesPrivateKey("sm2", "hex", privateKey));
+    }
+
+    public static PublicKey publicKeyOf(byte[] publicKey) {
+        return new BytesPublicKey("sm2", "hex", publicKey);
+    }
+
+    public static PrivateKey privateKeyOf(byte[] publicKey) {
+        return new BytesPrivateKey("sm2", "hex", publicKey);
     }
 
     public static KeyPair genKeyPair() throws Exception {
@@ -216,6 +231,22 @@ public class BcSm2Encryptor implements IAsymmetricEncryptor {
 
     public void setPrivateKey(String privateKey) {
         this.privateKey = privateKey;
+    }
+
+    public byte[] publicKeyTo() {
+        return CodecUtil.ofHexString(publicKey);
+    }
+
+    public byte[] privateKeyTo() {
+        return CodecUtil.ofHexString(privateKey);
+    }
+
+    public void ofPublicKey(byte[] codes) {
+        this.publicKey = CodecUtil.toHexString(codes);
+    }
+
+    public void ofPrivateKey(byte[] codes) {
+        this.privateKey = CodecUtil.toHexString(codes);
     }
 
     @Override

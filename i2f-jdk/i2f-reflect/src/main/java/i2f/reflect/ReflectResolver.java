@@ -493,7 +493,7 @@ public class ReflectResolver {
         return ret;
     }
 
-    public static Method matchMethodByParamTypes(Class<?> clazz, String methodName,Class<?>[] types){
+    public static Method matchMethodByParamTypes(Class<?> clazz, String methodName, Class<?>[] types) {
         int argsLen = types.length;
         Map<Method, Class<?>> methods = getMethods(clazz, (method) -> {
             if (!method.getName().equals(methodName)) {
@@ -522,29 +522,29 @@ public class ReflectResolver {
         return next;
     }
 
-    public static Method matchMethod(Class<?> clazz, String methodName, Object... args){
+    public static Method matchMethod(Class<?> clazz, String methodName, Object... args) {
         int argsLen = args.length;
-        Class<?>[] types=new Class[argsLen];
-        for (int i=0;i<args.length;i++) {
+        Class<?>[] types = new Class[argsLen];
+        for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
             if (arg == null) {
-                types[i]=null;
+                types[i] = null;
                 continue;
             }
-            types[i]=arg.getClass();
+            types[i] = arg.getClass();
         }
-        return matchMethodByParamTypes(clazz,methodName,types);
+        return matchMethodByParamTypes(clazz, methodName, types);
     }
 
     public static Object invokeMethod(Object ivkObj, Class<?> clazz, String methodName, Object... args) throws IllegalArgumentException, IllegalAccessException {
         Method method = matchMethod(clazz, methodName, args);
-        if (method==null) {
+        if (method == null) {
             throw new IllegalAccessException("method [" + methodName + "] not found in class [" + clazz + "] with parameter count equals " + args.length + " or parameter types matched.");
         }
-        return invokeMethodeDirect(ivkObj,  method,args);
+        return invokeMethodeDirect(ivkObj, method, args);
     }
 
-    public static Object invokeMethodeDirect(Object ivkObj, Method method,Object ... args) throws IllegalAccessException {
+    public static Object invokeMethodeDirect(Object ivkObj, Method method, Object... args) throws IllegalAccessException {
         Object ret = null;
         boolean success = false;
         Throwable ex = null;

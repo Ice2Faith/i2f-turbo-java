@@ -3,7 +3,6 @@ package i2f.springboot.redisson;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.stereotype.Component;
 
 public class RedissonLockProvider {
 

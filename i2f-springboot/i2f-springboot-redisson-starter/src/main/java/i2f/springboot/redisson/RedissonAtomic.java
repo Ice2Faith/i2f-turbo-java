@@ -2,7 +2,6 @@ package i2f.springboot.redisson;
 
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RedissonClient;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
