@@ -1,26 +1,26 @@
-package i2f.compress.impl.jdk;
+package i2f.extension.compress;
 
 import i2f.compress.data.CompressBindData;
 import i2f.compress.impl.AbsCompressor;
 import i2f.io.stream.StreamUtil;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
 import java.io.*;
 import java.util.Collection;
 import java.util.function.BiConsumer;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
-import java.util.jar.JarOutputStream;
 
 /**
  * @author Ice2Faith
- * @date 2024/6/28 17:27
+ * @date 2024/6/29 15:28
  * @desc
  */
-public class JdkJarCompressor extends AbsCompressor {
+public class ZipApacheCompressor extends AbsCompressor {
     @Override
     public void compressBindData(File output, Collection<CompressBindData> inputs) throws IOException {
         FileOutputStream fos = new FileOutputStream(output);
-        JarOutputStream zos = new JarOutputStream(fos);
+        ZipArchiveOutputStream zos = new ZipArchiveOutputStream(fos);
         for (CompressBindData input : inputs) {
             String path = input.getDirectory() + "/" + input.getFileName();
             if (path.startsWith("/")) {
@@ -30,11 +30,19 @@ public class JdkJarCompressor extends AbsCompressor {
             if (is == null) {
                 continue;
             }
-            JarEntry entry = new JarEntry(path);
-            zos.putNextEntry(entry);
-            StreamUtil.streamCopy(input.getInputStream(), zos, false, true);
+
+
+            ZipArchiveEntry entry = new ZipArchiveEntry(path);
+            if (input.getSize() >= 0) {
+                entry.setSize(input.getSize());
+            }
+            zos.putArchiveEntry(entry);
+            StreamUtil.streamCopy(is, zos, false);
             zos.flush();
-            zos.closeEntry();
+            zos.closeArchiveEntry();
+
+            is.close();
+
         }
 
         zos.close();
@@ -43,11 +51,10 @@ public class JdkJarCompressor extends AbsCompressor {
     @Override
     public void release(File input, File output, BiConsumer<CompressBindData, File> consumer) throws IOException {
         InputStream fis = new FileInputStream(input);
-        JarInputStream zis = new JarInputStream(fis);
-        JarEntry entry = null;
-        while ((entry = zis.getNextJarEntry()) != null) {
+        ZipArchiveInputStream zis = new ZipArchiveInputStream(fis);
+        ZipArchiveEntry entry = null;
+        while ((entry = zis.getNextZipEntry()) != null) {
             if (entry.isDirectory()) {
-                zis.closeEntry();
                 continue;
             }
             String path = entry.getName();
@@ -60,7 +67,6 @@ public class JdkJarCompressor extends AbsCompressor {
             }
             CompressBindData data = new CompressBindData(fileName, directory, zis);
             consumer.accept(data, output);
-            zis.closeEntry();
         }
         zis.close();
     }

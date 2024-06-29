@@ -19,11 +19,19 @@ public class CompressBindData {
     private String fileName;
     private String directory;
     private InputStream inputStream;
+    private long size=-1;
 
     public CompressBindData(String fileName, String directory, InputStream inputStream) {
         this.fileName = fileName;
         this.directory = directory;
         this.inputStream = inputStream;
+    }
+
+    public CompressBindData(String fileName, String directory, InputStream inputStream, long size) {
+        this.fileName = fileName;
+        this.directory = directory;
+        this.inputStream = inputStream;
+        this.size = size;
     }
 
     public static CompressBindData of(CompressBindFile bindFile) throws IOException {
@@ -32,7 +40,7 @@ public class CompressBindData {
         if (file.isFile()) {
             is = new FileInputStream(file);
         }
-        return new CompressBindData(file.getName(), bindFile.getDirectory(), is);
+        return new CompressBindData(file.getName(), bindFile.getDirectory(), is,file.length());
     }
 
     public static CompressBindData instance() {

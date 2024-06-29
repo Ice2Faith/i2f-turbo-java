@@ -16,7 +16,7 @@ import java.util.zip.ZipOutputStream;
  * @date 2024/6/28 17:27
  * @desc
  */
-public class JdkZipCompressor extends AbsCompressor {
+public class ZipJdkCompressor extends AbsCompressor {
     @Override
     public void compressBindData(File output, Collection<CompressBindData> inputs) throws IOException {
         FileOutputStream fos = new FileOutputStream(output);
@@ -31,6 +31,9 @@ public class JdkZipCompressor extends AbsCompressor {
                 continue;
             }
             ZipEntry entry = new ZipEntry(path);
+            if(input.getSize()>=0){
+                entry.setSize(input.getSize());
+            }
             zos.putNextEntry(entry);
             StreamUtil.streamCopy(input.getInputStream(), zos, false, true);
             zos.flush();

@@ -41,6 +41,7 @@
         <module>i2f-extension-jedis</module>
         <module>i2f-extension-redis-api</module>
         <module>i2f-extension-redis-cache</module>
+        <module>i2f-extension-compress</module>
     </modules>
 
 

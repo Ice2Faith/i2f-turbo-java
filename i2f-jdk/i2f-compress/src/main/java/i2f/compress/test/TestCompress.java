@@ -1,7 +1,7 @@
 package i2f.compress.test;
 
 import i2f.compress.ICompressor;
-import i2f.compress.impl.jdk.JdkZipCompressor;
+import i2f.compress.impl.jdk.ZipJdkCompressor;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class TestCompress {
     public static void main(String[] args) throws IOException {
-        ICompressor compressor = new JdkZipCompressor();
+        ICompressor compressor = new ZipJdkCompressor();
 
         File output = new File("./output/src.zip");
         compressor.compress(output,
