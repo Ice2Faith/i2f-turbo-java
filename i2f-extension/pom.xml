@@ -42,6 +42,8 @@
         <module>i2f-extension-redis-api</module>
         <module>i2f-extension-redis-cache</module>
         <module>i2f-extension-compress</module>
+        <module>i2f-extension-zip4j</module>
+        <module>i2f-extension-7zip</module>
     </modules>
 
 
