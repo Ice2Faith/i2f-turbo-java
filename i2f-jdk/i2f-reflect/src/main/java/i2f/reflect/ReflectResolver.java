@@ -459,6 +459,10 @@ public class ReflectResolver {
         return invokeSingletonMethod(ivkObj, ivkObj.getClass(), methodName, args);
     }
 
+    public static Object invokeStaticMethod(Method method, Object... args) throws IllegalArgumentException, IllegalAccessException {
+        return invokeSingletonMethod(null, method.getDeclaringClass(), method.getName(), args);
+    }
+
     public static Object invokeStaticMethod(Class<?> clazz, String methodName, Object... args) throws IllegalArgumentException, IllegalAccessException {
         return invokeMethod(null, clazz, methodName, args);
     }

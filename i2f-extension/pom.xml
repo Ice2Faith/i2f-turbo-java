@@ -44,6 +44,10 @@
         <module>i2f-extension-compress</module>
         <module>i2f-extension-zip4j</module>
         <module>i2f-extension-7zip</module>
+        <module>i2f-extension-httpclient</module>
+        <module>i2f-extension-netty</module>
+        <module>i2f-extension-quartz</module>
+        <module>i2f-extension-zookeeper</module>
     </modules>
 
 

@@ -150,6 +150,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-http-proxy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-image</artifactId>
         </dependency>
         <dependency>
@@ -183,6 +187,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-lambda</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-lock</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
