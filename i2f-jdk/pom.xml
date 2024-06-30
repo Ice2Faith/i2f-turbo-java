@@ -90,6 +90,8 @@
         <module>i2f-lru-cache</module>
         <module>i2f-features</module>
         <module>i2f-compress</module>
+        <module>i2f-http-proxy</module>
+        <module>i2f-lock</module>
 
     </modules>
 

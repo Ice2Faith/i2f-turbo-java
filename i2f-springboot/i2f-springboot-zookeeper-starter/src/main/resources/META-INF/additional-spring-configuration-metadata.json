@@ -1,0 +1,56 @@
+{
+  "groups": [
+    {
+      "name": "i2f.swagger2.apis",
+      "type": "i2f.springboot.zookeeper.properties.ZookeeperProperties",
+      "sourceType": "i2f.springboot.zookeeper.properties.ZookeeperProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.zookeeper.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable zookeeper.",
+      "sourceType": "i2f.springboot.zookeeper.ZookeeperAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.zookeeper.connect-string",
+      "type": "java.lang.String",
+      "description": "connect string.",
+      "sourceType": "i2f.springboot.zookeeper.properties.ZookeeperProperties",
+      "defaultValue": "localhost:2181"
+    },
+    {
+      "name": "i2f.zookeeper..session-timeout",
+      "type": "java.lang.Integer",
+      "description": "session timeout.",
+      "sourceType": "i2f.springboot.zookeeper.properties.ZookeeperProperties",
+      "defaultValue": -1
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
