@@ -223,6 +223,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-http-proxy</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-image</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -264,6 +269,11 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-lambda</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-lock</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -525,6 +535,12 @@
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-httpclient</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-jackson</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -555,7 +571,19 @@
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-netty</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-qrcode</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-quartz</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
@@ -604,6 +632,12 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-zip4j</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-zookeeper</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
