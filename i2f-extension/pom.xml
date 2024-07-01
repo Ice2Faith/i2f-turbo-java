@@ -48,6 +48,10 @@
         <module>i2f-extension-netty</module>
         <module>i2f-extension-quartz</module>
         <module>i2f-extension-zookeeper</module>
+        <module>i2f-extension-filesystem-hdfs</module>
+        <module>i2f-extension-filesystem-ftp</module>
+        <module>i2f-extension-filesystem-minio</module>
+        <module>i2f-extension-filesystem-sftp</module>
     </modules>
 
 

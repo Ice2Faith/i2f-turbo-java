@@ -238,6 +238,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-io-filesystem</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-io-stream</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -506,6 +511,30 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-fastjson2</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-filesystem-ftp</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-filesystem-hdfs</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-filesystem-minio</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-filesystem-sftp</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
