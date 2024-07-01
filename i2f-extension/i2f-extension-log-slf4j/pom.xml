@@ -5,21 +5,29 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>i2f.turbo</groupId>
-        <artifactId>i2f-jdk</artifactId>
+        <artifactId>i2f-extension</artifactId>
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-text</artifactId>
+    <artifactId>i2f-extension-log-slf4j</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-iterator</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-match</artifactId>
+            <artifactId>i2f-log</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.30</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -28,9 +36,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>true</addMavenDescriptor>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
     </build>
-
 
 </project>

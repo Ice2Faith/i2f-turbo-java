@@ -52,6 +52,7 @@
         <module>i2f-extension-filesystem-ftp</module>
         <module>i2f-extension-filesystem-minio</module>
         <module>i2f-extension-filesystem-sftp</module>
+        <module>i2f-extension-log-slf4j</module>
     </modules>
 
 
