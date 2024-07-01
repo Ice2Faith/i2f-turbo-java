@@ -63,6 +63,28 @@
             <artifactId>i2f-extension-fastjson2</artifactId>
         </dependency>
 
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-filesystem-ftp</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-filesystem-hdfs</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-filesystem-minio</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-filesystem-sftp</artifactId>
+        </dependency>
+
+
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-ftp</artifactId>
