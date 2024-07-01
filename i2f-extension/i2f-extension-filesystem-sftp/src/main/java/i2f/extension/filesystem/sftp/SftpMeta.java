@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Properties;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/3/26 18:47
  * @desc
  */
