@@ -16,18 +16,59 @@ public class ThreadTrace {
 
     public static StackTraceElement[] beforeTrace(String className) {
         StackTraceElement[] arr = Thread.currentThread().getStackTrace();
-        int idx = 0;
+        int idx = -1;
         for (int i = arr.length - 1; i >= 0; i--) {
             if (className.equals(arr[i].getClassName())) {
-                idx = i + 1;
+                idx = i;
                 break;
             }
         }
+        if (idx < 0) {
+            idx = arr.length - 1;
+        } else {
+            idx++;
+            idx = Math.min(idx, arr.length - 1);
+        }
         StackTraceElement[] ret = new StackTraceElement[arr.length - idx];
-        for (int i = idx; i < arr.length; i++) {
-            ret[i - idx] = arr[idx];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = arr[idx + i];
         }
         return ret;
+    }
+
+    public static StackTraceElement[] lastTrace(String className) {
+        StackTraceElement[] arr = Thread.currentThread().getStackTrace();
+        int idx = -1;
+        for (int i = 0; i < arr.length; i++) {
+            if (idx < 0) {
+                if (arr[i].getClassName().equals(className)) {
+                    idx = i;
+                }
+            } else {
+                if (arr[i].getClassName().equals(className)) {
+                    idx = i;
+                } else {
+                    break;
+                }
+            }
+
+        }
+        if (idx < 0) {
+            idx = arr.length - 1;
+        } else {
+            idx++;
+            idx = Math.min(idx, arr.length - 1);
+        }
+
+        StackTraceElement[] ret = new StackTraceElement[arr.length - idx];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = arr[idx + i];
+        }
+        return ret;
+    }
+
+    public static StackTraceElement last(String className) {
+        return lastTrace(className)[0];
     }
 
     public static StackTraceElement[] currentTrace() {

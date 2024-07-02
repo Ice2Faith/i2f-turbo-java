@@ -62,6 +62,7 @@ public class DefaultLogger implements ILogger {
         data.setThreadId(thread.getId());
         if (level.level() >= LogLevel.DEBUG.level()) {
             StackTraceElement elem = ThreadTrace.beforeTrace(ILogger.class.getName())[0];
+            data.setClassName(elem.getClassName());
             data.setMethodName(elem.getMethodName());
             data.setFileName(elem.getFileName());
             data.setLineNumber(elem.getLineNumber());
