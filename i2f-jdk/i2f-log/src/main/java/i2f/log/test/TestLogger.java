@@ -7,6 +7,7 @@ import i2f.log.decide.ILogDecider;
 import i2f.log.decide.impl.DefaultClassNamePattenLogDecider;
 import i2f.log.enums.LogLevel;
 import i2f.log.holder.LogHolder;
+import i2f.log.stdout.StdoutRedirectPrintStream;
 import i2f.log.writer.DefaultBroadcastLogWriter;
 import i2f.log.writer.ILogWriter;
 import i2f.log.writer.impl.LocalFilePlanTextLogWriter;
@@ -22,6 +23,7 @@ public class TestLogger {
     public static ILogger staticLogger = LoggerFactory.getLogger();
 
     public static void main(String[] args) {
+        StdoutRedirectPrintStream.redirectSysoutSyserr();
         ILogWriter writer = LogHolder.GLOBAL_WRITER;
         if (writer instanceof DefaultBroadcastLogWriter) {
             DefaultBroadcastLogWriter broadcastLogWriter = (DefaultBroadcastLogWriter) writer;
@@ -39,6 +41,8 @@ public class TestLogger {
         }
 
         staticLogger.info("this is main args: %s", Arrays.toString(args));
+
+        System.out.println("sysout");
 
         long bts = SystemClock.currentTimeMillis();
         for (int i = 0; i < 10 * 10000; i++) {

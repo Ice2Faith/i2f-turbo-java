@@ -24,6 +24,7 @@ public class LogData {
     private String threadName;
     private long threadId;
 
+    private String className;
     private String methodName;
     private String fileName;
     private int lineNumber;

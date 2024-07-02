@@ -17,18 +17,19 @@ import java.text.SimpleDateFormat;
 @Data
 @NoArgsConstructor
 public abstract class AbsPlainTextLogWriter implements ILogWriter {
-    protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
-
+    protected SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm:ss SSS");
+    protected int locationLen = 32;
+    protected int threadLen = 12;
     @Override
     public void write(LogData data) {
         StringBuilder builder = new StringBuilder();
         builder.append(dateFormat.format(data.getDate()));
         builder.append(String.format(" [%5s]", String.valueOf(data.getLevel())));
-        builder.append(String.format(" %32s", data.getLocation()));
-        builder.append(String.format(" [%8s-%3d]", data.getThreadName(), data.getThreadId()));
+        builder.append(String.format(" %" + locationLen + "s", truncateLocation(data.getLocation(), locationLen)));
+        builder.append(String.format(" [%" + threadLen + "s]", truncateString(String.format("%s-%d", data.getThreadName(), data.getThreadId()), threadLen)));
         builder.append(" : ").append(data.getMsg());
         if (data.getMethodName() != null) {
-            builder.append(String.format(" --@%s(%s:%d)", data.getMethodName(), data.getFileName(), data.getLineNumber()));
+            builder.append(String.format(" --@%s.%s(%s:%d)", data.getClassName(), data.getMethodName(), data.getFileName(), data.getLineNumber()));
         }
         if (data.getEx() != null) {
             Throwable ex = data.getEx();
@@ -41,6 +42,77 @@ public abstract class AbsPlainTextLogWriter implements ILogWriter {
                     .append(new String(bos.toByteArray()));
         }
         write(data.getLevel(), builder.toString());
+    }
+
+    public static String truncateString(String location, int len) {
+        if (location == null) {
+            return null;
+        }
+        if (location.isEmpty()) {
+            return location;
+        }
+        if (location.length() < len) {
+            return location;
+        }
+        String str = location.substring(location.length() - len);
+        if (str.length() > 1) {
+            str = "*" + str.substring(0, str.length() - 1);
+        }
+        return str;
+    }
+
+    public static String truncateLocation(String location, int len) {
+        if (location == null) {
+            return null;
+        }
+        if (location.isEmpty()) {
+            return location;
+        }
+        if (location.length() <= len) {
+            return location;
+        }
+        String[] arr = location.split("\\.");
+        int idx = arr.length - 1;
+        int diffLen = 0;
+        while (idx >= 0) {
+            int sumLen = idx * 2 + (arr.length - idx - 1);
+            for (int j = idx; j < arr.length; j++) {
+                sumLen += arr[j].length();
+            }
+            if (sumLen >= len) {
+                diffLen = sumLen - len;
+                break;
+            }
+            idx--;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < arr.length; i++) {
+            if (i < idx) {
+                builder.append(arr[i].substring(0, 1));
+                builder.append(".");
+            } else if (i == idx) {
+                if (diffLen > 0 && diffLen < arr[i].length()) {
+                    String str = arr[i].substring(0, arr[i].length() - diffLen);
+                    if (str.length() > 1) {
+                        str = str.substring(0, str.length() - 1) + "*";
+                    }
+                    builder.append(str);
+                } else {
+                    builder.append(arr[i]);
+                }
+                builder.append(".");
+            } else {
+                builder.append(arr[i]);
+                builder.append(".");
+            }
+        }
+        String str = builder.toString();
+        str = str.substring(0, str.length() - 1);
+        if (str.length() > len) {
+            str = str.substring(str.length() - len);
+        }
+        return str;
     }
 
     public abstract void write(LogLevel level, String text);
