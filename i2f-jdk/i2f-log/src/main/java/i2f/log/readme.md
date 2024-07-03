@@ -42,6 +42,9 @@
   - 实现对日志数据的格式化，将LogData格式化（序列化）为字符串
   - 默认实现为 DefaultLogDataFormatter
   - 在其他Log框架中，这也叫做Layout
+- LogConfiguration 提供基于LogProperties的配置入口
+- LogProperties 提供一些基础的配置
+- PropertiesFileLogPropertiesLoader 提供将properties文本转换为LogProperties的实用方法
 - IndexedPattenLogMsgFormatter
   - 按照参数索引的方式进行格式化
   - 下面是格式化参数讲解
