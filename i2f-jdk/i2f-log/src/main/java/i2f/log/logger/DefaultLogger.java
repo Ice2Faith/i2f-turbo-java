@@ -5,6 +5,7 @@ import i2f.log.ILogger;
 import i2f.log.data.LogData;
 import i2f.log.decide.ILogDecider;
 import i2f.log.enums.LogLevel;
+import i2f.log.holder.LogHolder;
 import i2f.log.writer.ILogWriter;
 import i2f.lru.ExpireConcurrentMap;
 import i2f.trace.ThreadTrace;
@@ -70,13 +71,17 @@ public class DefaultLogger implements ILogger {
         return data;
     }
 
+    public String formatMsg(String format, Object... args) {
+        return LogHolder.getMsgFormatter().format(format, args);
+    }
+
     @Override
     public void write(Object meta, LogLevel level, String format, Object... args) {
         if (!decider.enableLevel(level, location)) {
             return;
         }
         LogData data = newLogData(level);
-        data.setMsg(String.format(format, args));
+        data.setMsg(formatMsg(format, args));
         data.setMeta(meta);
         writer.write(data);
     }
@@ -87,7 +92,7 @@ public class DefaultLogger implements ILogger {
             return;
         }
         LogData data = newLogData(level);
-        data.setMsg(String.format(format, args));
+        data.setMsg(formatMsg(format, args));
         data.setMeta(meta);
         data.setEx(ex);
         writer.write(data);
