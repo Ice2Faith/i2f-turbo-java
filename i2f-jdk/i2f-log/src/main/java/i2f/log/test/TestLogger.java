@@ -3,6 +3,7 @@ package i2f.log.test;
 import i2f.clock.SystemClock;
 import i2f.log.ILogger;
 import i2f.log.LoggerFactory;
+import i2f.log.config.LogConfiguration;
 import i2f.log.decide.ILogDecider;
 import i2f.log.decide.impl.DefaultClassNamePattenLogDecider;
 import i2f.log.enums.LogLevel;
@@ -24,6 +25,7 @@ public class TestLogger {
     public static ILogger staticLogger = LoggerFactory.getLogger();
 
     public static void main(String[] args) {
+        LogConfiguration.config();
         StdoutRedirectPrintStream.redirectSysoutSyserr();
         ILogWriter writer = LogHolder.GLOBAL_WRITER;
         if (writer instanceof DefaultBroadcastLogWriter) {
@@ -31,6 +33,7 @@ public class TestLogger {
             broadcastLogWriter.getAsync().set(false);
             LocalFilePlanTextLogWriter fileWriter = new LocalFilePlanTextLogWriter();
             fileWriter.setFileLimitSize(3 * 1024 * 1024);
+            fileWriter.setFileLimitTotalSize(9 * 1024 * 1024);
             LogHolder.registryWriter("FILE", fileWriter);
         }
 

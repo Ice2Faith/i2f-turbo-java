@@ -1,0 +1,38 @@
+log:
+  stdoutRedirect:
+    enable: true
+    keepConsole: false
+    useTrace: true
+  stdoutWriter:
+    enable: true
+  fileWriter:
+    enable: true
+    filePath: ./logs
+    applicationName: noappname
+    limitLevel: INFO
+    fileLimitSizeMb: 200
+    fileLimitTotalSizeMb: 1000
+    fileSizeCheckCount: 100
+  broadcastWriter:
+    enable: true
+    async: true
+    parallelism: -1
+    items:
+      - name: CustomInfo
+        enable: false
+        className: i2f.log.writer.impl.LocalFilePlanTextLogWriter
+        params: applicationName=noappname-info&limitLevel=INFO
+      - name: CustomWarn
+        enable: false
+        className: i2f.log.writer.impl.LocalFilePlanTextLogWriter
+        params: applicationName=noappname-warn&limitLevel=WARN
+  loggingLevel:
+    enable: true
+    rootLevel: INFO
+    items:
+      - patten: com.**.mapper.**
+        enable: true
+        level: DEBUG
+      - patten: com.**.controller.**
+        enable: true
+        level: WARN

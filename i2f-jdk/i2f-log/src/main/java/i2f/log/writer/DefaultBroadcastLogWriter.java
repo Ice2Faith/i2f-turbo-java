@@ -25,11 +25,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DefaultBroadcastLogWriter implements ILogWriter {
     private Map<String, ILogWriter> writers = new ConcurrentHashMap<>();
     private AtomicBoolean async = new AtomicBoolean(true);
-    private ExecutorService pool = Executors.newWorkStealingPool(5);
+    private volatile ExecutorService pool = Executors.newWorkStealingPool(5);
 
     {
         loadStdoutWriter();
         loadSpiWriters();
+    }
+
+    public DefaultBroadcastLogWriter(boolean async, int parallelism) {
+        this.async.set(async);
+        this.pool = Executors.newWorkStealingPool(Math.max(1, parallelism));
+    }
+
+    public void adjustAsync(boolean async) {
+        this.async.set(async);
+    }
+
+    public void adjustPoolSize(int parallelism) {
+        if (parallelism <= 0) {
+            return;
+        }
+        this.pool = Executors.newWorkStealingPool(parallelism);
     }
 
     public void registry(String name, ILogWriter writer) {

@@ -37,6 +37,11 @@
             <artifactId>i2f-lru-map</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-reflect</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
