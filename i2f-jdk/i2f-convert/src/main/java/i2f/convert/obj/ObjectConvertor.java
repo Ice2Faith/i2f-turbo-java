@@ -6,6 +6,7 @@ import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.*;
@@ -372,7 +373,7 @@ public class ObjectConvertor {
         String valStr = String.valueOf(val);
         if (TypeOf.typeOfAny(targetType, numericTypes)) {
             BigDecimal decimal = null;
-            if (valStr.matches("[1-9]([0-9]+)?")) {
+            if (valStr.matches("(\\+|\\-)?[1-9]([0-9]+)?")) {
                 decimal = new BigDecimal(String.valueOf(val));
             } else if (valStr.matches("(0x|0X)[a-fA-F0-9]+")) {
                 Long num = Long.valueOf(valStr.substring(2), 16);
@@ -383,7 +384,7 @@ public class ObjectConvertor {
             } else if (valStr.matches("(0b|0B)[0-1]+")) {
                 Long num = Long.valueOf(valStr.substring(2), 2);
                 decimal = new BigDecimal(num);
-            } else if (valStr.matches("\\d+(\\.\\d+)?")) {
+            } else if (valStr.matches("(\\+|\\-)?\\d+(\\.\\d+)?")) {
                 decimal = new BigDecimal(valStr);
             }
 
@@ -535,7 +536,7 @@ public class ObjectConvertor {
                         }
                     }else{
                         if(name.equalsIgnoreCase(valStr)){
-                            return name;
+                            return enu;
                         }
                     }
                 }
