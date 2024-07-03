@@ -2,9 +2,15 @@ package i2f.convert.obj;
 
 import i2f.typeof.TypeOf;
 
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
+import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.*;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -284,9 +290,9 @@ public class ObjectConvertor {
             return val;
         }
 
-        Class<?> clazz = val.getClass();
+        Class<?> sourceType = val.getClass();
         // 类型匹配
-        if (TypeOf.typeOf(clazz, targetType)) {
+        if (TypeOf.typeOf(sourceType, targetType)) {
             return val;
         }
         // 目标类型为 String ，都能转
@@ -296,7 +302,7 @@ public class ObjectConvertor {
 
         // 原始和目标都是 Number
         Class<?>[] numericTypes = bigDecimalTypeConverterMap.keySet().toArray(new Class<?>[0]);
-        if (TypeOf.typeOfAny(clazz, numericTypes)
+        if (TypeOf.typeOfAny(sourceType, numericTypes)
                 &&
                 TypeOf.typeOfAny(targetType, numericTypes)) {
             BigDecimal decimal = new BigDecimal(String.valueOf(val));
@@ -310,7 +316,7 @@ public class ObjectConvertor {
 
         // 原始和目标都是 Boolean
         Class<?>[] boolTypes = boolTypeConverterMap.keySet().toArray(new Class<?>[0]);
-        if (TypeOf.typeOfAny(clazz, boolTypes)
+        if (TypeOf.typeOfAny(sourceType, boolTypes)
                 &&
                 TypeOf.typeOfAny(targetType, boolTypes)) {
             boolean ok = (val == null) ? false : (Boolean) val;
@@ -324,7 +330,7 @@ public class ObjectConvertor {
 
         // 原始和目标都是 Char
         Class<?>[] charTypes = charTypeConverterMap.keySet().toArray(new Class<?>[0]);
-        if (TypeOf.typeOfAny(clazz, charTypes)
+        if (TypeOf.typeOfAny(sourceType, charTypes)
                 &&
                 TypeOf.typeOfAny(targetType, charTypes)) {
             char ch = (val == null) ? 0 : (Character) val;
@@ -339,13 +345,13 @@ public class ObjectConvertor {
 
         // 日期时间类型的互转
         Class<?>[] dateTypes = dateTypeConverterMap.keySet().toArray(new Class<?>[0]);
-        if (TypeOf.typeOfAny(clazz, dateTypes)
+        if (TypeOf.typeOfAny(sourceType, dateTypes)
                 &&
                 TypeOf.typeOfAny(targetType, dateTypes)) {
             Instant ins = null;
             for (Map.Entry<Class<?>, Function<Object, Instant>> entry : date2InstantConverterMap.entrySet()) {
                 Class<?> itemClass = entry.getKey();
-                if (TypeOf.typeOf(itemClass, clazz)) {
+                if (TypeOf.typeOf(itemClass, sourceType)) {
                     ins = entry.getValue().apply(val);
                     break;
                 }
@@ -456,6 +462,180 @@ public class ObjectConvertor {
                 return dateTypeConverterMap.get(targetType).apply(ins);
             }
         }
+
+        // 其他特殊目标类型的处理
+        // 处理URL
+        if(TypeOf.typeOf(targetType, URL.class)){
+            if(TypeOf.typeOf(sourceType,File.class)){
+                try{
+                    File file = (File) val;
+                    return file.toURI().toURL();
+                }catch(Exception e){
+
+                }
+            }
+            try{
+                return new URL(valStr);
+            }catch(Exception e){
+
+            }
+        }
+        // 处理URI
+        if(TypeOf.typeOf(targetType, URI.class)){
+            if(TypeOf.typeOf(sourceType,File.class)){
+                try{
+                    File file = (File) val;
+                    return file.toURI();
+                }catch(Exception e){
+
+                }
+            }
+            try{
+                return new URI(valStr);
+            }catch(Exception e){
+
+            }
+        }
+        // 处理Charset
+        if(TypeOf.typeOf(targetType, Charset.class)){
+            try{
+                return Charset.forName(valStr);
+            }catch(Exception e){
+
+            }
+        }
+        // 处理File
+        if(TypeOf.typeOf(targetType, File.class)){
+            if(TypeOf.typeOf(sourceType,URL.class)){
+                URL url = (URL) val;
+                return new File(url.getFile());
+            }
+            if(TypeOf.typeOf(sourceType,URI.class)){
+                URI uri = (URI) val;
+                return new File(uri.getPath());
+            }
+            return new File(valStr);
+        }
+        // 处理目标Enum
+        if(targetType.isEnum()){
+            Object[] enums = targetType.getEnumConstants();
+            if(enums!=null){
+                boolean isIntVal = TypeOf.isBigIntegerCompatibleType(sourceType);
+                int intVal=-1;
+                if(isIntVal){
+                    intVal=new BigDecimal(valStr).intValue();
+                }
+                for (Object item : enums) {
+                    Enum<?> enu = (Enum<?>) item;
+                    String name = enu.name();
+                    int ordinal = enu.ordinal();
+                    if(isIntVal){
+                        if(ordinal==intVal){
+                            return enu;
+                        }
+                    }else{
+                        if(name.equalsIgnoreCase(valStr)){
+                            return name;
+                        }
+                    }
+                }
+            }
+        }
+        // 处理源Enum
+        if(sourceType.isEnum()){
+            Enum<?> enu = (Enum<?>) val;
+            String name = enu.name();
+            int ordinal = enu.ordinal();
+            if(TypeOf.isBigDecimalCompatibleType(targetType)){
+                return tryConvertAsType(ordinal,targetType);
+            }else if(TypeOf.typeOf(targetType, String.class)){
+                return name;
+            }
+        }
+
+        // 处理目标位Class
+        if(TypeOf.typeOf(targetType,Class.class)){
+            try{
+                Class<?> clazz = Class.forName(valStr);
+                if(clazz!=null){
+                    return clazz;
+                }
+            }catch(Throwable e){
+            }
+            try{
+                Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(valStr);
+                if(clazz!=null){
+                    return clazz;
+                }
+            }catch(Throwable e){
+            }
+        }
+
+        // 处理MessageDigest
+        if(TypeOf.typeOf(targetType,MessageDigest.class)){
+            try{
+                MessageDigest md = MessageDigest.getInstance(valStr);
+                if(md!=null){
+                    return md;
+                }
+            }catch(Exception e){
+
+            }
+        }
+
+        // 处理MessageDigest
+        if(TypeOf.typeOf(targetType, Mac.class)){
+            try{
+                Mac md = Mac.getInstance(valStr);
+                if(md!=null){
+                    return md;
+                }
+            }catch(Exception e){
+
+            }
+        }
+
+        // 处理Cipher
+        if(TypeOf.typeOf(targetType, Cipher.class)){
+            try{
+                Cipher md = Cipher.getInstance(valStr);
+                if(md!=null){
+                    return md;
+                }
+            }catch(Exception e){
+
+            }
+        }
+
+        // 处理InetAddress
+        if(TypeOf.typeOf(targetType, Inet4Address.class)){
+            try{
+                InetAddress inet = Inet4Address.getByName(valStr);
+                return inet;
+            }catch(Exception e){
+
+            }
+        }
+        if(TypeOf.typeOf(targetType, Inet6Address.class)){
+            try{
+                InetAddress inet = Inet6Address.getByName(valStr);
+                return inet;
+            }catch(Exception e){
+
+            }
+        }
+
+        // 处理Locale
+        if(TypeOf.typeOf(targetType, Locale.class)){
+            try{
+                Locale loc = new Locale(valStr);
+                return loc;
+            }catch(Exception e){
+
+            }
+        }
+
+
 
         return val;
     }
