@@ -114,7 +114,7 @@ public class StdoutRedirectPrintStream extends PrintStream {
     }
 
     protected void proxy(Object... vals) {
-        StackTraceElement trace = ThreadTrace.lastTrace(getClass().getName())[0];
+        StackTraceElement trace = ThreadTrace.last(getClass().getName());
         if (StdoutPlanTextLogWriter.class.getName().equals(trace.getClassName())) {
             Object obj = serializeVals(vals);
             target.println(obj);

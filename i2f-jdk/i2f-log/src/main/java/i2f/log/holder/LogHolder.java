@@ -3,6 +3,10 @@ package i2f.log.holder;
 import i2f.log.decide.ILogDecider;
 import i2f.log.decide.impl.DefaultClassNamePattenLogDecider;
 import i2f.log.enums.LogLevel;
+import i2f.log.format.ILogDataFormatter;
+import i2f.log.format.ILogMsgFormatter;
+import i2f.log.format.impl.DefaultLogDataFormatter;
+import i2f.log.format.impl.IndexedPattenLogMsgFormatter;
 import i2f.log.writer.DefaultBroadcastLogWriter;
 import i2f.log.writer.ILogWriter;
 
@@ -14,12 +18,20 @@ import i2f.log.writer.ILogWriter;
 public class LogHolder {
     public static final ILogDecider DEFAULT_DECIDER = new DefaultClassNamePattenLogDecider();
     public static final ILogWriter DEFAULT_WRITER = new DefaultBroadcastLogWriter();
+    public static final ILogMsgFormatter DEFAULT_MSG_FORMATTER = new IndexedPattenLogMsgFormatter();
+    public static final ILogDataFormatter DEFAULT_DATA_FORMATTER = new DefaultLogDataFormatter();
 
-    public static ILogDecider GLOBAL_DECIDER = DEFAULT_DECIDER;
+    public static volatile ILogDecider GLOBAL_DECIDER = DEFAULT_DECIDER;
     public static ThreadLocal<ILogDecider> THREAD_DECIDER = new ThreadLocal<>();
 
-    public static ILogWriter GLOBAL_WRITER = DEFAULT_WRITER;
+    public static volatile ILogWriter GLOBAL_WRITER = DEFAULT_WRITER;
     public static ThreadLocal<ILogWriter> THREAD_WRITER = new ThreadLocal<>();
+
+    public static volatile ILogMsgFormatter GLOBAL_MSG_FORMATTER = DEFAULT_MSG_FORMATTER;
+    public static ThreadLocal<ILogMsgFormatter> THREAD_MSG_FORMATTER = new ThreadLocal<>();
+
+    public static volatile ILogDataFormatter GLOBAL_DATA_FORMATTER = DEFAULT_DATA_FORMATTER;
+    public static ThreadLocal<ILogDataFormatter> THREAD_DATA_FORMATTER = new ThreadLocal<>();
 
     public static void replaceWriter(ILogWriter writer) {
         if (writer != null) {
@@ -81,6 +93,22 @@ public class LogHolder {
         ILogWriter writer = THREAD_WRITER.get();
         if (writer == null) {
             writer = GLOBAL_WRITER;
+        }
+        return writer;
+    }
+
+    public static ILogMsgFormatter getMsgFormatter() {
+        ILogMsgFormatter writer = THREAD_MSG_FORMATTER.get();
+        if (writer == null) {
+            writer = GLOBAL_MSG_FORMATTER;
+        }
+        return writer;
+    }
+
+    public static ILogDataFormatter getDataFormatter() {
+        ILogDataFormatter writer = THREAD_DATA_FORMATTER.get();
+        if (writer == null) {
+            writer = GLOBAL_DATA_FORMATTER;
         }
         return writer;
     }

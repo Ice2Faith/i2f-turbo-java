@@ -6,6 +6,7 @@ import i2f.log.LoggerFactory;
 import i2f.log.decide.ILogDecider;
 import i2f.log.decide.impl.DefaultClassNamePattenLogDecider;
 import i2f.log.enums.LogLevel;
+import i2f.log.format.impl.StringFormatLogMsgFormatter;
 import i2f.log.holder.LogHolder;
 import i2f.log.stdout.StdoutRedirectPrintStream;
 import i2f.log.writer.DefaultBroadcastLogWriter;
@@ -40,21 +41,25 @@ public class TestLogger {
 //            LogHolder.registryDecideLevel("i2f.log.**", LogLevel.WARN);
         }
 
+        // 设置为使用String.format
+        LogHolder.GLOBAL_MSG_FORMATTER = new StringFormatLogMsgFormatter();
         staticLogger.info("this is main args: %s", Arrays.toString(args));
 
         System.out.println("sysout");
 
+        // 设置为使用RegexUtil.format
+        LogHolder.GLOBAL_MSG_FORMATTER = LogHolder.DEFAULT_MSG_FORMATTER;
         long bts = SystemClock.currentTimeMillis();
         for (int i = 0; i < 10 * 10000; i++) {
             ILogger logger = LoggerFactory.getLogger();
-            logger.info("main scope logger: %d", SystemClock.currentTimeMillis());
+            logger.info("main scope logger: {}", SystemClock.currentTimeMillis());
 
-            logger.debug("debug level,%d", SystemClock.currentTimeMillis());
+            logger.debug("debug level,{}", SystemClock.currentTimeMillis());
 
             try {
                 int a = 1 / 0;
             } catch (Exception e) {
-                logger.error(e, "calculate error: %s", e.getMessage());
+                logger.error(e, "calculate error: { e:}", e.getMessage());
             }
         }
         long ets = SystemClock.currentTimeMillis();
