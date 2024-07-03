@@ -94,6 +94,7 @@
         <module>i2f-lock</module>
         <module>i2f-io-filesystem</module>
         <module>i2f-log</module>
+        <module>i2f-properties</module>
 
     </modules>
 
