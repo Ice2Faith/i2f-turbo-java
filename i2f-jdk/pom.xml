@@ -95,6 +95,7 @@
         <module>i2f-io-filesystem</module>
         <module>i2f-log</module>
         <module>i2f-properties</module>
+        <module>i2f-form-url-encoded</module>
 
     </modules>
 
