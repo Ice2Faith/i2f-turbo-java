@@ -1,5 +1,6 @@
 package i2f.properties;
 
+import i2f.reflect.ObjectRouteResolver;
 import i2f.reflect.RichConverter;
 import i2f.reflect.vistor.Visitor;
 import i2f.text.StringUtils;
@@ -11,7 +12,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 /**
@@ -84,7 +88,7 @@ public class PropertiesUtil {
 
     public static Map<String, Object> loadAsMapTree(Properties props, Function<String, String> keyMapper) {
         Map<String, String> map = toMap(props);
-        return groupMap(map,keyMapper);
+        return ObjectRouteResolver.ofMapTree(map, keyMapper);
     }
 
     public static Map<String, String> toMap(Properties props) {
@@ -97,68 +101,4 @@ public class PropertiesUtil {
         return ret;
     }
 
-    public static Map<String, Object> groupMap(Map<String, String> map) {
-        return groupMap(map, null);
-    }
-
-    public static Map<String, Object> groupMap(Map<String, String> map, Function<String, String> keyMapper) {
-        Map<String, Object> ret = new TreeMap<>();
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            String key = entry.getKey();
-            String[] arr = key.split("\\.", 2);
-            if (arr.length == 2) {
-                if (!ret.containsKey(arr[0])) {
-                    String putKey=arr[0];
-                    if(keyMapper!=null){
-                        putKey=keyMapper.apply(putKey);
-                    }
-                    ret.put(putKey, new TreeMap<>());
-                }
-                Map<String, String> obj = (Map<String, String>) ret.get(arr[0]);
-                String putKey=arr[1];
-                if(keyMapper!=null){
-                    putKey=keyMapper.apply(putKey);
-                }
-                obj.put(putKey, entry.getValue());
-            } else {
-                String putKey=arr[0];
-                if(keyMapper!=null){
-                    putKey=keyMapper.apply(putKey);
-                }
-                ret.put(putKey, entry.getValue());
-            }
-        }
-
-        Map<String, Object> root = new TreeMap<>();
-        Map<String, List<Object>> rootList = new TreeMap<>();
-
-        for (Map.Entry<String, Object> entry : ret.entrySet()) {
-            String key = entry.getKey();
-            Object obj = entry.getValue();
-            Object next = obj;
-            if (obj instanceof Map) {
-                Map<String, String> item = (Map<String, String>) obj;
-                next = groupMap(item, keyMapper);
-            }
-            if (key.endsWith("]")) {
-                int idx = key.lastIndexOf("[");
-                String name = key.substring(0, idx);
-                if (!rootList.containsKey(name)) {
-                    rootList.put(name, new ArrayList<>());
-                }
-                if (keyMapper != null) {
-                    name = keyMapper.apply(name);
-                }
-                rootList.get(name).add(next);
-            } else {
-                if (keyMapper != null) {
-                    key = keyMapper.apply(key);
-                }
-                root.put(key, next);
-            }
-        }
-
-        root.putAll(rootList);
-        return root;
-    }
 }
