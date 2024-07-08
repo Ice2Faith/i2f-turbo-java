@@ -28,5 +28,6 @@
     <modules>
         <module>i2f-javax-all</module>
         <module>i2f-javax-web</module>
+        <module>test-secure</module>
     </modules>
 </project>
