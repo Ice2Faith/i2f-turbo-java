@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>i2f.turbo</groupId>
-        <artifactId>i2f-jdk</artifactId>
+        <artifactId>i2f-javax</artifactId>
         <version>1.0</version>
     </parent>
 
-    <artifactId>test-features</artifactId>
+    <artifactId>test-secure</artifactId>
 
     <dependencies>
         <dependency>
@@ -18,8 +18,33 @@
         </dependency>
 
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-reflect</artifactId>
+            <artifactId>i2f-javax-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-codec</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-form-url-encoded</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-cache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-clock</artifactId>
         </dependency>
     </dependencies>
 
@@ -31,6 +56,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
