@@ -13,6 +13,7 @@ import i2f.streaming.window.SlideWindowInfo;
 import i2f.streaming.window.ViewWindowInfo;
 import i2f.streaming.window.WindowInfo;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.Writer;
 import java.security.SecureRandom;
@@ -111,6 +112,13 @@ public class StreamingImpl<E> implements Streaming<E> {
         richInject(inject);
         RichStreamProcessor processor = tryConvertAsRich(inject);
         if (processor == null) {
+            if (inject instanceof Closeable) {
+                try {
+                    ((Closeable) inject).close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             return;
         }
         processor.onAfter();
