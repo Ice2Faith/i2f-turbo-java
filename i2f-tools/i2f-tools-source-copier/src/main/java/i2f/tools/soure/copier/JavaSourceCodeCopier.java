@@ -165,6 +165,29 @@ public class JavaSourceCodeCopier {
                 }
             }
 
+            File dir = file.getParentFile();
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File item : files) {
+                    if (!item.isFile()) {
+                        continue;
+                    }
+                    String name = item.getName();
+                    if (!name.endsWith(".java")) {
+                        continue;
+                    }
+                    String simpleName = name.substring(0, name.length() - ".java".length());
+                    if (!str.contains(simpleName)) {
+                        continue;
+                    }
+                    String fullName = packageName + "." + simpleName;
+                    if (fullName.startsWith(".")) {
+                        fullName = fullName.substring(1);
+                    }
+                    importList.add(fullName);
+                }
+            }
+
             for (String item : importList) {
                 if (item.startsWith("java.")) {
                     continue;
