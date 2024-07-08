@@ -1,5 +1,7 @@
 package i2f.codec.bytes.basex;
 
+import java.io.*;
+
 /**
  * @author Ice2Faith
  * @date 2024/6/13 16:59
@@ -8,10 +10,22 @@ package i2f.codec.bytes.basex;
 public class Base32 {
     public static final String BASE32_BASE_MAPPING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             + "234567";
+    public static final int ENCODE_SRC_GROUP_LENGTH = 5;
+    public static final int ENCODE_DST_GROUP_LENGTH = 8;
+    public static final int DECODE_SRC_GROUP_LENGTH = ENCODE_DST_GROUP_LENGTH;
+    public static final int DECODE_DST_GROUP_LENGTH = ENCODE_SRC_GROUP_LENGTH;
+
+    public static void encodeRaw(InputStream is, OutputStream os) throws IOException {
+        BaseX.groupConvert(is, os, ENCODE_SRC_GROUP_LENGTH, Base32::encodeRaw);
+    }
+
+    public static void decodeRaw(InputStream is, OutputStream os) throws IOException {
+        BaseX.groupConvert(is, os, DECODE_SRC_GROUP_LENGTH, Base32::decodeRaw);
+    }
 
     public static byte[] encodeRaw(byte[] data) {
-        int srcGroupLen = 5;
-        int dstGroupLen = 8;
+        int srcGroupLen = ENCODE_SRC_GROUP_LENGTH;
+        int dstGroupLen = ENCODE_DST_GROUP_LENGTH;
         int moreLen = data.length % srcGroupLen;
         int srcPadLen = (moreLen == 0 ? 0 : srcGroupLen - moreLen);
         int dstPadLen = 0;
@@ -55,8 +69,8 @@ public class Base32 {
     }
 
     public static byte[] decodeRaw(byte[] data) {
-        int srcGroupLen = 8;
-        int dstGroupLen = 5;
+        int srcGroupLen = DECODE_SRC_GROUP_LENGTH;
+        int dstGroupLen = DECODE_DST_GROUP_LENGTH;
         int moreLen = data.length % srcGroupLen;
         int srcPadLen = (moreLen == 0 ? 0 : srcGroupLen - moreLen);
         int dstPadLen = 0;
@@ -107,6 +121,32 @@ public class Base32 {
         return ret;
     }
 
+
+    public static void encode(InputStream is, OutputStream os, String mapping) throws IOException {
+        BaseX.groupConvert(is, os, ENCODE_SRC_GROUP_LENGTH, (arr) -> {
+            byte[] bytes = encodeRaw(arr);
+            String str = BaseX.encodeMappingAsString(bytes, mapping);
+            return str.getBytes();
+        });
+    }
+
+    public static void decode(InputStream is, OutputStream os, String mapping) throws IOException {
+        BaseX.groupConvert(is, os, DECODE_SRC_GROUP_LENGTH, (arr) -> {
+            String str = new String(arr);
+            byte[] byets = BaseX.decodeMappingAsBytes(str, mapping);
+            return decodeRaw(byets);
+        });
+    }
+
+    public static void encode(InputStream is, OutputStream os) throws IOException {
+        encode(is, os, BASE32_BASE_MAPPING);
+    }
+
+    public static void decode(InputStream is, OutputStream os) throws IOException {
+        decode(is, os, BASE32_BASE_MAPPING);
+    }
+
+
     public static String encode(byte[] data, String mapping) {
         byte[] arr = encodeRaw(data);
         return BaseX.encodeMappingAsString(arr, mapping);
@@ -126,7 +166,7 @@ public class Base32 {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String raw = "";
         for (int i = 0; i < 10; i++) {
             raw += (char) ('0' + i);
@@ -137,6 +177,20 @@ public class Base32 {
             b64 = b64.replaceAll("=", "");
             String dec = new String(decode(b64));
             System.out.println(dec);
+            System.out.println(raw.equals(dec));
+
+            ByteArrayInputStream bis = new ByteArrayInputStream(raw.getBytes());
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            encode(bis, bos);
+            bis.close();
+            bos.close();
+            System.out.println(new String(bos.toByteArray()));
+            bis = new ByteArrayInputStream(bos.toByteArray());
+            bos = new ByteArrayOutputStream();
+            decode(bis, bos);
+            bis.close();
+            bos.close();
+            dec = new String(bos.toByteArray());
             System.out.println(raw.equals(dec));
         }
     }
