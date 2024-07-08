@@ -1,7 +1,11 @@
 package i2f.codec.bytes.basex;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * @author Ice2Faith
@@ -44,5 +48,31 @@ public class BaseX {
             }
         }
         return data;
+    }
+
+
+    public static void groupConvert(InputStream is, OutputStream os, int srcGroupLen, Function<byte[], byte[]> converter) throws IOException {
+        byte[] srcData = new byte[srcGroupLen];
+        int srcLen = 0;
+        int bt = 0;
+        while ((bt = is.read()) >= 0) {
+            srcData[srcLen] = (byte) bt;
+            srcLen++;
+            if (srcLen == srcData.length) {
+                byte[] dstData = converter.apply(srcData);
+                os.write(dstData);
+                os.flush();
+                srcLen = 0;
+            }
+        }
+        if (srcLen > 0) {
+            byte[] leftData = new byte[srcLen];
+            for (int i = 0; i < leftData.length; i++) {
+                leftData[i] = srcData[i];
+            }
+            byte[] dstData = converter.apply(leftData);
+            os.write(dstData);
+            os.flush();
+        }
     }
 }
