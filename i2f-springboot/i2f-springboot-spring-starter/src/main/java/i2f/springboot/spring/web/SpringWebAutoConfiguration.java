@@ -5,6 +5,7 @@ import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.spring.web.mapping.MappingUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -17,11 +18,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public class SpringWebAutoConfiguration {
 
     @ConditionalOnClass(ObjectMapper.class)
+    @Bean
     public JacksonJsonSerializer jacksonJsonSerializer(ObjectMapper objectMapper) {
         return new JacksonJsonSerializer(objectMapper);
     }
 
     @ConditionalOnClass(HandlerMethod.class)
+    @Bean
     public MappingUtil mappingUtil(RequestMappingHandlerMapping handlerMapping) {
         return new MappingUtil(handlerMapping);
     }
