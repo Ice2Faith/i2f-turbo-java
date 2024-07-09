@@ -2,6 +2,7 @@ package i2f.jce.std.signature;
 
 
 import i2f.array.ArrayUtil;
+import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.codec.bytes.raw.HexStringByteCodec;
 
 /**
@@ -15,6 +16,14 @@ public interface ISignatureSigner {
     default boolean verify(byte[] sign, byte[] data) throws Exception {
         byte[] cmp = sign(data);
         return ArrayUtil.equal(sign, cmp);
+    }
+
+    default String signAsBase64(byte[] data) throws Exception {
+        return Base64StringByteCodec.INSTANCE.encode(sign(data));
+    }
+
+    default boolean verifyByBase64(String sign, byte[] data) throws Exception {
+        return verify(Base64StringByteCodec.INSTANCE.decode(sign), data);
     }
 
     default String signAsHex(byte[] data) throws Exception {

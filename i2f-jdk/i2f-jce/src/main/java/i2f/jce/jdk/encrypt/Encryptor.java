@@ -497,6 +497,7 @@ public class Encryptor {
     }
 
     public static KeyFactory getKeyFactory(String algorithmName, String providerName) throws Exception {
+        algorithmName = cipherAlgorithm(algorithmName);
         providerName = checkProvider(providerName);
         KeyFactory instance = null;
         if (providerName != null) {

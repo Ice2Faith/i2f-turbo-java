@@ -12,7 +12,9 @@ import i2f.jce.jdk.encrypt.symmetric.AesType;
 import i2f.jce.jdk.encrypt.symmetric.SymmetricEncryptor;
 import i2f.jce.jdk.supports.MessageDigestAlgorithm;
 import i2f.jce.std.digest.IMessageDigester;
+import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
 
 import java.security.KeyPair;
 import java.util.function.Function;
@@ -24,9 +26,13 @@ import java.util.function.Supplier;
  * @desc
  */
 public class SecureProvider {
-    public static Supplier<AsymmetricEncryptor> asymmetricEncryptorSupplier = () -> new AsymmetricEncryptor(RsaType.NONE_PKCS1PADDING);
+    public static Supplier<IAsymmetricEncryptor> asymmetricEncryptorSupplier = () -> {
+        AsymmetricEncryptor ret = new AsymmetricEncryptor(RsaType.NONE_PKCS1PADDING);
+        ret.setDigester(null);
+        return ret;
+    };
 
-    public static Function<byte[], SymmetricEncryptor> symmetricEncryptorSupplier = (secretBytes) -> new SymmetricEncryptor(AesType.ECB_ISO10126Padding, SymmetricEncryptor.keyOf(AesType.ECB_ISO10126Padding, secretBytes));
+    public static Function<byte[], ISymmetricEncryptor> symmetricEncryptorSupplier = (secretBytes) -> new SymmetricEncryptor(AesType.ECB_ISO10126Padding, SymmetricEncryptor.keyOf(AesType.ECB_ISO10126Padding, secretBytes));
 
     public static Supplier<IMessageDigester> messageDigesterSupplier = () -> new MessageDigester(MessageDigester.messageDigestOf(MessageDigestAlgorithm.SHA_256));
 
@@ -37,7 +43,7 @@ public class SecureProvider {
             BcProvider.registryProvider();
             KeyPair keyPair = Encryptor.genKeyPair(RsaType.NONE_PKCS1PADDING, BcProvider.PROVIDER_NAME, null, len, null);
 
-            AsymmetricEncryptor encryptor = asymmetricEncryptorSupplier.get();
+            IAsymmetricEncryptor encryptor = asymmetricEncryptorSupplier.get();
             encryptor.setKeyPair(keyPair);
             return encryptor.getAsymKeyPair();
         } catch (Exception e) {

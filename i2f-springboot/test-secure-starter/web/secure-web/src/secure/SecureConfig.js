@@ -25,7 +25,7 @@ const SecureConfig = {
     enableSwapAsymKey: SecureConsts.DEFAULT_SECURE_SWAP_ASYM_KEY(),
     // 是否开启详细日志
     // 在正式环境中，请禁用
-    enableDebugLog: process.env.NODE_ENV != 'prod',
+    enableDebugLog: true || process.env.NODE_ENV != 'prod',
     // 支持两种模式：1 字符串模式，完全匹配；2 正则表达式模式，需要是正则表达式
     // 加密配置的白名单url
     whileList: ['/secure/key', '/secure/clientKey', '/secure/swapKey'],

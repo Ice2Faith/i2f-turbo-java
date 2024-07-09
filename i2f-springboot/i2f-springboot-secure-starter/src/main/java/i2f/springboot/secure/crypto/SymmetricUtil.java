@@ -2,7 +2,7 @@ package i2f.springboot.secure.crypto;
 
 
 import i2f.codec.CodecUtil;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricEncryptor;
+import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
 
 /**
  * @author Ice2Faith
@@ -18,7 +18,7 @@ public class SymmetricUtil {
 
     public static String encrypt(byte[] data, String key) {
         try {
-            SymmetricEncryptor encryptor = SecureProvider.symmetricEncryptorSupplier.apply(key.getBytes());
+            ISymmetricEncryptor encryptor = SecureProvider.symmetricEncryptorSupplier.apply(key.getBytes());
             byte[] sdata = encryptor.encrypt(data);
             return CodecUtil.toBase64(sdata);
         } catch (Exception e) {
@@ -30,7 +30,7 @@ public class SymmetricUtil {
     public static byte[] decrypt(String data, String key) {
         try {
             byte[] sdata = CodecUtil.ofBase64(data);
-            SymmetricEncryptor encryptor = SecureProvider.symmetricEncryptorSupplier.apply(key.getBytes());
+            ISymmetricEncryptor encryptor = SecureProvider.symmetricEncryptorSupplier.apply(key.getBytes());
             return encryptor.decrypt(sdata);
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,7 +41,7 @@ public class SymmetricUtil {
     public static byte[] decrypt(String data, byte[] key) {
         try {
             byte[] sdata = CodecUtil.ofBase64(data);
-            SymmetricEncryptor encryptor = SecureProvider.symmetricEncryptorSupplier.apply(key);
+            ISymmetricEncryptor encryptor = SecureProvider.symmetricEncryptorSupplier.apply(key);
             return encryptor.decrypt(sdata);
         } catch (Exception e) {
             e.printStackTrace();

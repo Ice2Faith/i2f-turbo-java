@@ -29,6 +29,6 @@ public class OriginPattenCorsConfiguration extends CorsConfiguration {
                 }
             }
         }
-        return null;
+        return ret;
     }
 }
