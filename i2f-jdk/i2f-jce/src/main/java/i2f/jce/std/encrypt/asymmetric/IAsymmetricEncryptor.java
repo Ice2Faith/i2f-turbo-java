@@ -38,11 +38,11 @@ public interface IAsymmetricEncryptor extends IEncryptor, ISignatureSigner {
     byte[] getPublicKeyBytes();
 
     default void setPublicKeyString(String str) {
-        setPublicKeyBytes(HexStringByteCodec.INSTANCE.decode(str));
+        setPublicKeyBytes(Base64StringByteCodec.INSTANCE.decode(str));
     }
 
     default String getPublicKeyString() {
-        return HexStringByteCodec.INSTANCE.encode(getPublicKeyBytes());
+        return Base64StringByteCodec.INSTANCE.encode(getPublicKeyBytes());
     }
 
     void setPrivateKeyBytes(byte[] privateKeyBytes);
@@ -50,11 +50,11 @@ public interface IAsymmetricEncryptor extends IEncryptor, ISignatureSigner {
     byte[] getPrivateKeyBytes();
 
     default void setPrivateKeyString(String str) {
-        setPrivateKeyBytes(HexStringByteCodec.INSTANCE.decode(str));
+        setPrivateKeyBytes(Base64StringByteCodec.INSTANCE.decode(str));
     }
 
     default String getPrivateKeyString() {
-        return HexStringByteCodec.INSTANCE.encode(getPrivateKeyBytes());
+        return Base64StringByteCodec.INSTANCE.encode(getPrivateKeyBytes());
     }
 
     void setKeyPair(KeyPair keyPair);

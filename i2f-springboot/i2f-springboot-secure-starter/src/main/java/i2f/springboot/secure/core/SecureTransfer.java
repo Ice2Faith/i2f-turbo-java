@@ -17,7 +17,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -38,10 +37,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2022/6/29 9:04
  * @desc Asym+Symm加密的工作支撑类
  */
-@ConditionalOnBean({
-        SecureConfig.class,
-        JacksonJsonSerializer.class
-})
+//@ConditionalOnBean({
+//        SecureConfig.class,
+//        JacksonJsonSerializer.class
+//})
 @Slf4j
 @Data
 @Component

@@ -2,9 +2,8 @@ package i2f.springboot.secure.crypto;
 
 
 import i2f.codec.CodecUtil;
-import i2f.jce.jdk.encrypt.asymmetric.AsymmetricEncryptor;
+import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
-import org.apache.logging.log4j.util.Base64Util;
 
 /**
  * @author Ice2Faith
@@ -41,7 +40,7 @@ public class AsymmetricUtil {
      */
     public static byte[] privateKeyDecrypt(AsymKeyPair key, byte[] data) {
         try {
-            AsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
+            IAsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
             encryptor.setAsymKeyPair(key);
             return encryptor.decrypt(data);
         } catch (Exception e) {
@@ -58,7 +57,7 @@ public class AsymmetricUtil {
      */
     public static byte[] privateKeyEncrypt(AsymKeyPair key, byte[] data) {
         try {
-            AsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
+            IAsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
             encryptor.setAsymKeyPair(key);
             return encryptor.privateEncrypt(data);
         } catch (Exception e) {
@@ -75,7 +74,7 @@ public class AsymmetricUtil {
      */
     public static byte[] publicKeyDecrypt(AsymKeyPair key, byte[] data) {
         try {
-            AsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
+            IAsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
             encryptor.setAsymKeyPair(key);
             return encryptor.publicDecrypt(data);
         } catch (Exception e) {
@@ -92,7 +91,7 @@ public class AsymmetricUtil {
      */
     public static byte[] publicKeyEncrypt(AsymKeyPair key, byte[] data) {
         try {
-            AsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
+            IAsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
             encryptor.setAsymKeyPair(key);
             return encryptor.encrypt(data);
         } catch (Exception e) {
@@ -102,7 +101,7 @@ public class AsymmetricUtil {
 
     public static byte[] makeSign(AsymKeyPair key, byte[] data) {
         try {
-            AsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
+            IAsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
             encryptor.setAsymKeyPair(key);
             return encryptor.sign(data);
         } catch (Exception e) {
@@ -112,9 +111,9 @@ public class AsymmetricUtil {
 
     public static String makeSignAsString(AsymKeyPair key, byte[] data) {
         try {
-            AsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
+            IAsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
             encryptor.setAsymKeyPair(key);
-            return encryptor.signAsHex(data);
+            return encryptor.signAsBase64(data);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -122,7 +121,7 @@ public class AsymmetricUtil {
 
     public static boolean verifySign(AsymKeyPair key, byte[] sign, byte[] data) {
         try {
-            AsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
+            IAsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
             encryptor.setAsymKeyPair(key);
             return encryptor.verify(sign, data);
         } catch (Exception e) {
@@ -132,9 +131,9 @@ public class AsymmetricUtil {
 
     public static boolean verifySignByString(AsymKeyPair key, String sign, byte[] data) {
         try {
-            AsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
+            IAsymmetricEncryptor encryptor = SecureProvider.asymmetricEncryptorSupplier.get();
             encryptor.setAsymKeyPair(key);
-            return encryptor.verifyByHex(sign, data);
+            return encryptor.verifyByBase64(sign, data);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
