@@ -1,4 +1,4 @@
-package i2f.springboot.secure.data;
+package i2f.springboot.swl.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

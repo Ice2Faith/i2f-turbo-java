@@ -1,4 +1,4 @@
-package i2f.springboot.secure.data;
+package i2f.springboot.swl.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,5 +32,8 @@ public class SecureHeader {
      */
     public String serverAsymSign;
 
+    /**
+     * 客户端非对称签名
+     */
     public String clientAsymSign;
 }
