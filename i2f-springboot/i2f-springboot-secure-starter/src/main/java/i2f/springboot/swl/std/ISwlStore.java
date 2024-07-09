@@ -15,9 +15,6 @@ public interface ISwlStore {
     String getOtherPublicKey(String otherAsymSign);
     void setOtherPublicKey(String otherAsymSign, String publicKey);
 
-    String getTargetPublicKey(String targetName);
-    void setTargetPublicKey(String targetName, String publicKey);
-
     boolean containsNonce(String nonce);
     void setNonce(String nonce,long timeoutSeconds);
 }
