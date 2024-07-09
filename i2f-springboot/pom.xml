@@ -27,6 +27,7 @@
         <module>i2f-springboot-http-proxy-starter</module>
         <module>i2f-springboot-zookeeper-starter</module>
         <module>i2f-springboot-secure-starter</module>
+        <module>test-secure-starter</module>
     </modules>
 
 
