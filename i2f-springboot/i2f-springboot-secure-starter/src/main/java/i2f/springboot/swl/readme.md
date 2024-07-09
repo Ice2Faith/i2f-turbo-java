@@ -1,0 +1,139 @@
+# SWL(secure web layer) 安全网络层
+- 为web应用提供安全保护层
+- 实现 Asymmetric Encrypt+Symmetric Encrypt+Message Digest 级别防护
+- 也就是，非对称加密+对称加密+摘要签名
+
+## 成分描述
+- Asymmetric Encrypt
+    - 提供非对称加解密，作用是保护对称加密秘钥，保证高性能、大数据传输的支持
+    - 提供数字签名加签验签，作用是防止伪造，保证防篡改性
+    - 在后文中，使用 asym 表示非对称加密
+- Symmetric Encrypt
+    - 提供数据加解密，作用是保证保密性
+    - 在后文中，使用 symm 表示对称加密
+- Message Digest
+    - 提供数据签名，作用是保证完整性
+    - 在后文中，使用 digest 表示消息摘要
+  
+## 数据载荷清单
+- clientAsymSign
+    - 客户端的公钥签名，用于确定与客户端配对的公钥
+    - 作用是用来查找请求对应的客户端公钥
+- serverAsymSign
+    - 服务端的公钥签名，用于确定请求发出时使用的服务端公钥
+    - 作用是用于确定使用了哪个服务端公钥
+- randomKey
+    - 对称加密的秘钥，用于进行对称加密算法进行加解密
+    - randomKey=asym.encrypt(key,asymPublicKey)
+    - 是原始的key秘钥经过使用接收方的公钥asymPublicKey进行非对称加密asym.encrypt之后的值
+    - 其中，原始秘钥key用于实际data数据的加解密，randomKey则用于网络中传输
+- data
+    - 传输的数据，用于进行网络传输的数据主体
+    - data=symm.encrypt(key,body)
+    - 是body使用原始key秘钥经过对称加密symm.encrypt之后的值
+- sign
+    - 传输数据的签名，用于保存数据的签名，防止数据篡改
+    - sign=digest.sign(data)
+    - 是加密后的data经过摘要算法digest.sign计算之后的值
+- digital
+    - 传输数据的数字签名，用于保存数字签名，防止数据伪造
+    - digital=asym.sign(sign,asymPrivateKey)
+    - 是数据签名sign经过发送方的私钥asymPrivateKey进行非对称签名asym.sign之后的值
+- nonce
+    - 一次性请求，用于确定数据请求的一次性，防止重复请求
+    - nonce=timestamp+seq
+    - 是由timestamp时间戳与seq请求唯一标识符组合而成
+    - 确定接受时间在[timestamp-window,timestamp+window]范围内，确定请求的实时性
+    - 同时，在规定的timeout时间范围内seq是唯一值，确定在timeout时间范围内不会重复请求
+    - 当timeout<=2*window时，则同时保证了实时性和防重复性
+
+## 运行原理
+- 双方生成各自非对称密钥对
+    - 服务端可在项目启动时初始化自身密钥对 serverPublicKey,serverPrivateKey
+    - 客户端可在页面初始化时初始化自身密钥对 clientPublicKey,clientPrivateKey
+- 交换双方公钥
+    - 客户端携带自身公钥 clientPublicKey 请求服务端
+    - 服务端计算客户端公钥签名 clientAsymSign=digest.sign(clientPublicKey)
+    - 服务端以键值对方式保存这个客户端公钥，key=clientAsymSign,value=clientPublicKey
+    - 服务端相应客户端自身公钥 serverPublicKey
+    - 客户端保存服务端公钥 serverPublicKey
+- 客户端发起请求
+    - 读取自身密钥对 clientPublicKey,clientPrivateKey
+    - 计算自身公钥签名 clientAsymSign=digest.sign(clientPublicKey)
+    - 读取服务端公钥 serverPublicKey
+    - 计算服务端公钥签名 serverAsymSign=digest.sign(serverPublicKey)
+    - 得到当前时间戳 timestamp
+    - 生成随机数作为 seq=rand()%1000
+    - 拼接得到一次性请求 nonce=timestamp + '-' + seq
+    - 生成随机对称加密秘钥 key=randKey()
+    - 使用服务端公钥加密随机秘钥 randomKey=asym.encrypt(key,serverPublicKey)
+    - 得到数据体 body
+    - 加密数据 data=symm.encrypt(key,body)
+    - 计算数据签名 sign=digest.sign(data+randomKey+nonce+clientAsymSign+serverAsymSign)
+    - 使用自身私钥计算数字签名 digital=asym.sign(sign,clientPrivateKey)
+    - 发送请求
+        - clientAsymSign
+        - serverAsymSign
+        - nonce
+        - randomKey
+        - data
+        - sign
+        - digital
+- 服务端接受请求
+    - 得到当前时间戳 current_timestamp
+    - 得到一次性请求 nonce
+    - 从一次性请求中分割出时间戳和随机数 [timestamp,seq]=nonce.split('-')
+    - 得到配置的时间窗口大小 window
+    - 如果当前时间戳不在前后window范围，则违反实时性要求，响应客户端失败
+        - 如果 abs(current_timestamp-timestamp)>window
+        - 响应失败，原因为：违反实时性约束
+    - 得到请求的客户端地址 clientIp
+    - 拼接随机数池的键值 nonceKey=clientIp+'-'+nonce
+        - 这一步是为了防止客户端之间互相影响
+        - 因此采用clientIp进行隔离
+        - 如果能够保存nonce本身就是短期内唯一的
+        - 不会与其他客户端冲突，则可以不用使用clientIp隔离
+    - 如果随机数还存在随机数池中，没有过期，则违反一次性要求，响应客户端失败
+        - 如果 noncePool.contains(nonceKey)
+        - 响应失败，原因为：违反一次性约束
+    - 得到数据签名 sign
+    - 得到数据体 data
+    - 得到随机对称秘钥 randomKey
+    - 读取客户端公钥签名 clientAsymSign
+    - 读取自身公钥签名 serverAsymSign
+    - 重新计算收到数据的签名 calc_sign=digest.sign(data+randomKey+nonce+clientAsymSign+serverAsymSign)
+    - 如果收到的数据签名与计算的数据签名不一致，则违反数据完整性要求，响应客户端失败
+        - 如果 calc_sign != sign
+        - 响应失败，原因为：违反数据完整性约束
+    - 得到数字签名 digital
+    - 根据客户端公钥签名获取对应的客户端公钥 clientPublicKey
+    - 使用客户端公钥验证数字签名有效性
+    - 如果数字签名无效，则违反防篡改要求，响应客户端失败
+        - 如果 asym.verify(digital,sign) != true
+        - 响应失败，原因为：违反数据防篡改约束
+    - 根据自身公钥签名获取对应的自身密钥对 serverPublicKey,serverPrivateKey
+    - 使用自身私钥解密随机秘钥得到原始对称秘钥 key=asym.decrypt(randomKey,serverPrivateKey)
+    - 如果解密对称秘钥失败，则违反数据完整性要求，响应客户端失败
+        - 如果 key == null
+        - 响应失败，原因为：违反数据防篡改约束
+    - 使用对称秘钥解密数据体得到原始数据体 body=symm.decrypt(key,data)
+- 服务端响应数据
+    - 和客户端发起请求基本一致
+    - 除了获取客户端公钥，需要根据请求来的 clientAsymSign 进行获取
+    - 其他流程一致
+    
+## 其他可考虑的点
+- 服务端
+    - 定时刷新自身的非对称密钥对，防止暴力破解
+    - 同时，维护几个历史密钥对，避免客户端还没来得及更新最新的服务端公钥
+    - 响应失败时，根据情况自动在请求头中附加最新的服务端公钥进行响应
+    - 实现客户端自动识别更新公钥
+    - 针对客户端的秘钥数据进行限制
+    - 比如，同一个IP的客户端始终只接受一个最新秘钥，不保留历史秘钥
+- 客户端
+    - 定时刷新自身的非对称密钥对，防止暴力破解
+    - 可以在每次进入系统时重新初始化一个新的秘钥对
+    - 也可以借助cookie定时自动过期的特性来做
+    - 或者使用localStorage等存储加上自身判定策略来实现
+    - 也需要考虑保留历史密钥对的情况
+    - 防止客户端刷新之后，部分响应数据解密失败
