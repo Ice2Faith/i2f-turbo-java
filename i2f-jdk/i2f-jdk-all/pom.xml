@@ -70,6 +70,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-code</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-codec</artifactId>
         </dependency>
         <dependency>
@@ -271,6 +275,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-resources</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-resp</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
