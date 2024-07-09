@@ -4,3 +4,6 @@ i2f.springboot.spring.web.SpringWebAutoConfiguration
 i2f.springboot.spring.async.SpringAsyncAutoConfiguration
 i2f.springboot.spring.cors.SpringCorsAutoConfiguration
 i2f.springboot.spring.schedule.SpringScheduleAutoConfiguration
+i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration
+i2f.springboot.spring.web.converter.SpringJacksonMvcConfigurer
+i2f.springboot.spring.web.converter.SpringJacksonMessageConverter

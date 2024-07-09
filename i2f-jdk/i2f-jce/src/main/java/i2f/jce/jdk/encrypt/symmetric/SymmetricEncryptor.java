@@ -175,6 +175,15 @@ public class SymmetricEncryptor implements ISymmetricEncryptor {
         }
     }
 
+    @Override
+    public void setKeyBytes(byte[] keyBytes) {
+        this.key = Encryptor.keyOf(keyBytes, algorithmName);
+    }
+
+    @Override
+    public byte[] getKeyBytes() {
+        return key.getEncoded();
+    }
 
     public Cipher getCipher(boolean encrypt) throws Exception {
         return Encryptor.getCipher(algorithmName, providerName, encrypt, key, requireVector ? spec : null);

@@ -1245,6 +1245,23 @@ public class ReflectResolver {
         }, LinkedHashMap::new);
     }
 
+    private static LruMap<String, Annotation> CACHE_GET_MEMBER_ANNOTATION = new LruMap<>(8192);
+
+    public static <T extends Annotation> T getMemberAnnotation(Member member, Class<T> clazz) {
+        if (!(member instanceof AnnotatedElement)) {
+            return null;
+        }
+        AnnotatedElement elem = (AnnotatedElement) member;
+        String key = member + "#" + clazz;
+        return (T) cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_MEMBER_ANNOTATION : null), key, (k) -> {
+            T ann = getAnnotation(elem, clazz);
+            if (ann == null) {
+                ann = getAnnotation(member.getDeclaringClass(), clazz);
+            }
+            return ann;
+        }, e -> e);
+    }
+
     private static LruMap<String, Annotation> CACHE_GET_ANNOTATION = new LruMap<>(8192);
 
     public static <T extends Annotation> T getAnnotation(AnnotatedElement elem, Class<T> clazz) {

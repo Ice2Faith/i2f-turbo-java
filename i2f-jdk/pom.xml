@@ -96,6 +96,8 @@
         <module>i2f-log</module>
         <module>i2f-properties</module>
         <module>i2f-form-url-encoded</module>
+        <module>i2f-code</module>
+        <module>i2f-resp</module>
 
     </modules>
 
