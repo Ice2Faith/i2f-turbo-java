@@ -3,9 +3,12 @@ package i2f.extension.jce.sm.antherd.encrypt.asymmetric;
 import com.antherd.smcrypto.sm2.Keypair;
 import com.antherd.smcrypto.sm2.Sm2;
 import i2f.codec.CodecUtil;
+import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
+import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.jce.std.encrypt.asymmetric.key.BytesPrivateKey;
 import i2f.jce.std.encrypt.asymmetric.key.BytesPublicKey;
+import lombok.Data;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -17,8 +20,12 @@ import java.util.Objects;
  * @date 2024/3/28 11:35
  * @desc
  */
+@Data
 public class Sm2Encryptor implements IAsymmetricEncryptor {
+    public static final int MODE_C1C3C2 = 0;
+    public static final int MODE_C1C2C3 = 1;
 
+    protected int cipherMode = MODE_C1C2C3;
     protected String publicKey;
     protected String privateKey;
 
@@ -66,6 +73,92 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
 
     public static PrivateKey privateKeyOf(byte[] publicKey) {
         return new BytesPrivateKey("sm2", "hex", publicKey);
+    }
+
+    @Override
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = HexStringByteCodec.INSTANCE.encode(publicKey.getEncoded());
+    }
+
+    @Override
+    public void setPrivateKey(PrivateKey privateKey) {
+        this.privateKey = HexStringByteCodec.INSTANCE.encode(privateKey.getEncoded());
+    }
+
+    @Override
+    public void setPublicKeyBytes(byte[] publicKeyBytes) {
+        this.publicKey = HexStringByteCodec.INSTANCE.encode(publicKeyBytes);
+    }
+
+    @Override
+    public byte[] getPublicKeyBytes() {
+        return HexStringByteCodec.INSTANCE.decode(publicKey);
+    }
+
+    @Override
+    public void setPrivateKeyBytes(byte[] privateKeyBytes) {
+        this.privateKey = HexStringByteCodec.INSTANCE.encode(privateKeyBytes);
+    }
+
+    @Override
+    public byte[] getPrivateKeyBytes() {
+        return HexStringByteCodec.INSTANCE.decode(this.privateKey);
+    }
+
+    @Override
+    public void setKeyPair(KeyPair keyPair) {
+        PublicKey pub = keyPair.getPublic();
+        if (pub != null) {
+            this.publicKey = HexStringByteCodec.INSTANCE.encode(pub.getEncoded());
+        }
+        PrivateKey pri = keyPair.getPrivate();
+        if (pri != null) {
+            this.privateKey = HexStringByteCodec.INSTANCE.encode(pri.getEncoded());
+        }
+    }
+
+    @Override
+    public KeyPair getKeyPair() {
+        PublicKey pub = null;
+        PrivateKey pri = null;
+        if (this.publicKey != null && !this.publicKey.isEmpty()) {
+            pub = new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.publicKey));
+        }
+        if (this.privateKey != null && !this.privateKey.isEmpty()) {
+            pri = new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.privateKey));
+        }
+        return new KeyPair(pub, pri);
+    }
+
+    @Override
+    public void setPublicKeyString(String str) {
+        this.publicKey = str;
+    }
+
+    @Override
+    public String getPublicKeyString() {
+        return this.publicKey;
+    }
+
+    @Override
+    public void setPrivateKeyString(String str) {
+        this.privateKey = str;
+    }
+
+    @Override
+    public String getPrivateKeyString() {
+        return this.privateKey;
+    }
+
+    @Override
+    public void setAsymKeyPair(AsymKeyPair keyPair) {
+        this.publicKey = keyPair.getPublicKey();
+        this.privateKey = keyPair.getPrivateKey();
+    }
+
+    @Override
+    public AsymKeyPair getAsymKeyPair() {
+        return new AsymKeyPair(this.publicKey, this.privateKey);
     }
 
     @Override

@@ -24,6 +24,11 @@
       "name": "i2f.spring.schedule",
       "type": "i2f.springboot.spring.schedule.SpringScheduleAutoConfiguration",
       "sourceType": "i2f.springboot.spring.schedule.SpringScheduleAutoConfiguration"
+    },
+    {
+      "name": "i2f.spring.jackson",
+      "type": "i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration",
+      "sourceType": "i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration"
     }
   ],
   "properties": [
@@ -180,6 +185,34 @@
       "description": "reject-execution-handler, reference of class ThreadPoolExecutor.AbortPolicy().",
       "sourceType": "i2f.springboot.spring.schedule.SpringScheduleAutoConfiguration",
       "defaultValue": "AbortPolicy"
+    },
+    {
+      "name": "i2f.spring.jackson.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable jackson.",
+      "sourceType": "i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.jackson.enable-long-to-string",
+      "type": "java.lang.Boolean",
+      "description": "enable jackson long to string.",
+      "sourceType": "i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.jackson.local-date-format",
+      "type": "java.lang.String",
+      "description": "jackson local date format.",
+      "sourceType": "i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration",
+      "defaultValue": "yyyy-MM-dd"
+    },
+    {
+      "name": "i2f.spring.jackson.local-time-format",
+      "type": "java.lang.String",
+      "description": "jackson local time format.",
+      "sourceType": "i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration",
+      "defaultValue": "HH:mm:ss"
     }
   ],
   "hints": [

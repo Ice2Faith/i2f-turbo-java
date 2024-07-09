@@ -1,9 +1,11 @@
 package i2f.extension.jce.bc.encrypt.asymmetric;
 
 import i2f.codec.CodecUtil;
+import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.extension.jce.bc.BcProvider;
 import i2f.jce.jdk.supports.SecureRandomAlgorithm;
 import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
+import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.jce.std.encrypt.asymmetric.key.BytesPrivateKey;
 import i2f.jce.std.encrypt.asymmetric.key.BytesPublicKey;
 import org.bouncycastle.asn1.gm.GMNamedCurves;
@@ -136,6 +138,105 @@ public class BcSm2Encryptor implements IAsymmetricEncryptor {
         return engine;
     }
 
+
+    @Override
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = HexStringByteCodec.INSTANCE.encode(publicKey.getEncoded());
+    }
+
+    @Override
+    public PublicKey getPublicKey() {
+        return new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.publicKey));
+
+    }
+
+    @Override
+    public void setPrivateKey(PrivateKey privateKey) {
+        this.privateKey = HexStringByteCodec.INSTANCE.encode(privateKey.getEncoded());
+    }
+
+    @Override
+    public PrivateKey getPrivateKey() {
+        return new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.privateKey));
+    }
+
+    @Override
+    public void setPublicKeyBytes(byte[] publicKeyBytes) {
+        this.publicKey = HexStringByteCodec.INSTANCE.encode(publicKeyBytes);
+    }
+
+    @Override
+    public byte[] getPublicKeyBytes() {
+        return HexStringByteCodec.INSTANCE.decode(publicKey);
+    }
+
+    @Override
+    public void setPrivateKeyBytes(byte[] privateKeyBytes) {
+        this.privateKey = HexStringByteCodec.INSTANCE.encode(privateKeyBytes);
+    }
+
+    @Override
+    public byte[] getPrivateKeyBytes() {
+        return HexStringByteCodec.INSTANCE.decode(this.privateKey);
+    }
+
+    @Override
+    public void setKeyPair(KeyPair keyPair) {
+        PublicKey pub = keyPair.getPublic();
+        if (pub != null) {
+            this.publicKey = HexStringByteCodec.INSTANCE.encode(pub.getEncoded());
+        }
+        PrivateKey pri = keyPair.getPrivate();
+        if (pri != null) {
+            this.privateKey = HexStringByteCodec.INSTANCE.encode(pri.getEncoded());
+        }
+    }
+
+    @Override
+    public KeyPair getKeyPair() {
+        PublicKey pub = null;
+        PrivateKey pri = null;
+        if (this.publicKey != null && !this.publicKey.isEmpty()) {
+            pub = new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.publicKey));
+        }
+        if (this.privateKey != null && !this.privateKey.isEmpty()) {
+            pri = new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.privateKey));
+        }
+        return new KeyPair(pub, pri);
+    }
+
+    @Override
+    public void setPublicKeyString(String str) {
+        this.publicKey = str;
+    }
+
+    @Override
+    public String getPublicKeyString() {
+        return this.publicKey;
+    }
+
+    @Override
+    public void setPrivateKeyString(String str) {
+        this.privateKey = str;
+    }
+
+    @Override
+    public String getPrivateKeyString() {
+        return this.privateKey;
+    }
+
+    @Override
+    public void setAsymKeyPair(AsymKeyPair keyPair) {
+        this.publicKey = keyPair.getPublicKey();
+        this.privateKey = keyPair.getPrivateKey();
+    }
+
+    @Override
+    public AsymKeyPair getAsymKeyPair() {
+        return new AsymKeyPair(this.publicKey, this.privateKey);
+    }
+
+
     @Override
     public byte[] encrypt(byte[] data) throws Exception {
         SM2Engine engine = getEncryptEngine();
@@ -215,38 +316,6 @@ public class BcSm2Encryptor implements IAsymmetricEncryptor {
 
     public void setSecureRandomAlgorithmName(String secureRandomAlgorithmName) {
         this.secureRandomAlgorithmName = secureRandomAlgorithmName;
-    }
-
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
-
-    public byte[] publicKeyTo() {
-        return CodecUtil.ofHexString(publicKey);
-    }
-
-    public byte[] privateKeyTo() {
-        return CodecUtil.ofHexString(privateKey);
-    }
-
-    public void ofPublicKey(byte[] codes) {
-        this.publicKey = CodecUtil.toHexString(codes);
-    }
-
-    public void ofPrivateKey(byte[] codes) {
-        this.privateKey = CodecUtil.toHexString(codes);
     }
 
     @Override

@@ -40,6 +40,18 @@ public class MessageDigester implements IMessageDigester {
         return getMds(is, provider);
     }
 
+    public static MessageDigest messageDigestOf(MessageDigestAlgorithm type) {
+        return messageDigestOf(type.text(), null);
+    }
+
+    public static MessageDigest messageDigestOf(MessageDigestAlgorithm type, String providerName) {
+        return messageDigestOf(type.text(), providerName);
+    }
+
+    public static MessageDigest messageDigestOf(String type) {
+        return messageDigestOf(type, null);
+    }
+
     public static MessageDigest messageDigestOf(String type, String providerName) {
         try {
             if ("".equals(providerName)) {

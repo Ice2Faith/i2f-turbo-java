@@ -7,6 +7,7 @@ import i2f.jce.jdk.encrypt.Encryptor;
 import i2f.jce.jdk.supports.SecureRandomAlgorithm;
 import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
 
+import java.security.Key;
 import java.util.Objects;
 
 /**
@@ -50,6 +51,30 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
         return CodecUtil.toHexString(keyBytes);
     }
 
+    @Override
+    public void setKey(Key key) {
+        this.key = HexStringByteCodec.INSTANCE.encode(key.getEncoded());
+    }
+
+    @Override
+    public void setKeyBytes(byte[] keyBytes) {
+        this.key = HexStringByteCodec.INSTANCE.encode(keyBytes);
+    }
+
+    @Override
+    public byte[] getKeyBytes() {
+        return HexStringByteCodec.INSTANCE.decode(this.key);
+    }
+
+    @Override
+    public void setKeyString(String str) {
+        this.key = str;
+    }
+
+    @Override
+    public String getKeyString() {
+        return this.key;
+    }
 
     @Override
     public byte[] encrypt(byte[] data) throws Exception {

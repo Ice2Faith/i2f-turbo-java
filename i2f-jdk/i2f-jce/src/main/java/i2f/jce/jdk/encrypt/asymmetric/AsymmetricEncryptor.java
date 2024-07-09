@@ -4,6 +4,7 @@ import i2f.jce.jdk.digest.md.MessageDigester;
 import i2f.jce.jdk.encrypt.Encryptor;
 import i2f.jce.std.digest.IMessageDigester;
 import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
+import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 
 import javax.crypto.Cipher;
 import java.security.Key;
@@ -80,6 +81,13 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
         this.privateKey = privateKey;
         this.publicKey = publicKey;
         this.digester = digester;
+    }
+
+    public AsymmetricEncryptor(AsymmetricType algorithm) {
+        this.algorithmName = algorithm.type();
+        this.providerName = algorithm.provider();
+        this.noPadding = algorithm.noPadding();
+        this.privateEncrypt = algorithm.privateEncrypt();
     }
 
     public AsymmetricEncryptor(AsymmetricType algorithm, PrivateKey privateKey, PublicKey publicKey) {
@@ -195,6 +203,46 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
             }
         }
         return cipher;
+    }
+
+    @Override
+    public void setPublicKeyBytes(byte[] publicKeyBytes) {
+        try {
+            this.publicKey = Encryptor.publicKeyOf(this.algorithmName, publicKeyBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public byte[] getPublicKeyBytes() {
+        return publicKey.getEncoded();
+    }
+
+
+    @Override
+    public void setPrivateKeyBytes(byte[] privateKeyBytes) {
+        try {
+            this.privateKey = Encryptor.privateKeyOf(algorithmName, privateKeyBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public byte[] getPrivateKeyBytes() {
+        return this.privateKey.getEncoded();
+    }
+
+    @Override
+    public void setKeyPair(KeyPair keyPair) {
+        this.publicKey = keyPair.getPublic();
+        this.privateKey = keyPair.getPrivate();
+    }
+
+    @Override
+    public KeyPair getKeyPair() {
+        return new KeyPair(this.publicKey, this.privateKey);
     }
 
     @Override
