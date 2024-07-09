@@ -26,28 +26,28 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
     public static final int MODE_C1C2C3 = 1;
 
     protected int cipherMode = MODE_C1C2C3;
-    protected String publicKey;
-    protected String privateKey;
+    protected String pubKey;
+    protected String priKey;
 
     public Sm2Encryptor() {
     }
 
     public Sm2Encryptor(String publicKey, String privateKey) {
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
+        this.pubKey = publicKey;
+        this.priKey = privateKey;
     }
 
     public Sm2Encryptor(Keypair keypair) {
-        this.publicKey = keypair.getPublicKey();
-        this.privateKey = keypair.getPrivateKey();
+        this.pubKey = keypair.getPublicKey();
+        this.priKey = keypair.getPrivateKey();
     }
 
     public Sm2Encryptor(KeyPair keyPair) {
         if (keyPair.getPublic() != null) {
-            this.publicKey = CodecUtil.toHexString(keyPair.getPublic().getEncoded());
+            this.pubKey = CodecUtil.toHexString(keyPair.getPublic().getEncoded());
         }
         if (keyPair.getPrivate() != null) {
-            this.privateKey = CodecUtil.toHexString(keyPair.getPrivate().getEncoded());
+            this.priKey = CodecUtil.toHexString(keyPair.getPrivate().getEncoded());
         }
     }
 
@@ -75,45 +75,56 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
         return new BytesPrivateKey("sm2", "hex", publicKey);
     }
 
+
     @Override
     public void setPublicKey(PublicKey publicKey) {
-        this.publicKey = HexStringByteCodec.INSTANCE.encode(publicKey.getEncoded());
+        this.pubKey = HexStringByteCodec.INSTANCE.encode(publicKey.getEncoded());
+    }
+
+    @Override
+    public PublicKey getPublicKey() {
+        return new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.pubKey));
     }
 
     @Override
     public void setPrivateKey(PrivateKey privateKey) {
-        this.privateKey = HexStringByteCodec.INSTANCE.encode(privateKey.getEncoded());
+        this.priKey = HexStringByteCodec.INSTANCE.encode(privateKey.getEncoded());
+    }
+
+    @Override
+    public PrivateKey getPrivateKey() {
+        return new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.priKey));
     }
 
     @Override
     public void setPublicKeyBytes(byte[] publicKeyBytes) {
-        this.publicKey = HexStringByteCodec.INSTANCE.encode(publicKeyBytes);
+        this.pubKey = HexStringByteCodec.INSTANCE.encode(publicKeyBytes);
     }
 
     @Override
     public byte[] getPublicKeyBytes() {
-        return HexStringByteCodec.INSTANCE.decode(publicKey);
+        return HexStringByteCodec.INSTANCE.decode(pubKey);
     }
 
     @Override
     public void setPrivateKeyBytes(byte[] privateKeyBytes) {
-        this.privateKey = HexStringByteCodec.INSTANCE.encode(privateKeyBytes);
+        this.priKey = HexStringByteCodec.INSTANCE.encode(privateKeyBytes);
     }
 
     @Override
     public byte[] getPrivateKeyBytes() {
-        return HexStringByteCodec.INSTANCE.decode(this.privateKey);
+        return HexStringByteCodec.INSTANCE.decode(this.priKey);
     }
 
     @Override
     public void setKeyPair(KeyPair keyPair) {
         PublicKey pub = keyPair.getPublic();
         if (pub != null) {
-            this.publicKey = HexStringByteCodec.INSTANCE.encode(pub.getEncoded());
+            this.pubKey = HexStringByteCodec.INSTANCE.encode(pub.getEncoded());
         }
         PrivateKey pri = keyPair.getPrivate();
         if (pri != null) {
-            this.privateKey = HexStringByteCodec.INSTANCE.encode(pri.getEncoded());
+            this.priKey = HexStringByteCodec.INSTANCE.encode(pri.getEncoded());
         }
     }
 
@@ -121,44 +132,44 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
     public KeyPair getKeyPair() {
         PublicKey pub = null;
         PrivateKey pri = null;
-        if (this.publicKey != null && !this.publicKey.isEmpty()) {
-            pub = new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.publicKey));
+        if (this.pubKey != null && !this.pubKey.isEmpty()) {
+            pub = new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.pubKey));
         }
-        if (this.privateKey != null && !this.privateKey.isEmpty()) {
-            pri = new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.privateKey));
+        if (this.priKey != null && !this.priKey.isEmpty()) {
+            pri = new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.priKey));
         }
         return new KeyPair(pub, pri);
     }
 
     @Override
     public void setPublicKeyString(String str) {
-        this.publicKey = str;
+        this.pubKey = str;
     }
 
     @Override
     public String getPublicKeyString() {
-        return this.publicKey;
+        return this.pubKey;
     }
 
     @Override
     public void setPrivateKeyString(String str) {
-        this.privateKey = str;
+        this.priKey = str;
     }
 
     @Override
     public String getPrivateKeyString() {
-        return this.privateKey;
+        return this.priKey;
     }
 
     @Override
     public void setAsymKeyPair(AsymKeyPair keyPair) {
-        this.publicKey = keyPair.getPublicKey();
-        this.privateKey = keyPair.getPrivateKey();
+        this.pubKey = keyPair.getPublicKey();
+        this.priKey = keyPair.getPrivateKey();
     }
 
     @Override
     public AsymKeyPair getAsymKeyPair() {
-        return new AsymKeyPair(this.publicKey, this.privateKey);
+        return new AsymKeyPair(this.pubKey, this.priKey);
     }
 
     @Override
@@ -187,51 +198,51 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
     }
 
     public String encrypt(String data) throws Exception {
-        return Sm2.doEncrypt(data, publicKey);
+        return Sm2.doEncrypt(data, pubKey);
     }
 
     public String decrypt(String data) throws Exception {
-        return Sm2.doDecrypt(data, privateKey);
+        return Sm2.doDecrypt(data, priKey);
     }
 
     public String sign(String data) throws Exception {
-        return Sm2.doSignature(data, privateKey);
+        return Sm2.doSignature(data, priKey);
     }
 
     public boolean verify(String sign, String data) throws Exception {
-        return Sm2.doVerifySignature(data, sign, publicKey);
+        return Sm2.doVerifySignature(data, sign, pubKey);
     }
 
-    public String getPublicKey() {
-        return publicKey;
+    public String getPubKey() {
+        return pubKey;
     }
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
+    public void setPubKey(String publicKey) {
+        this.pubKey = publicKey;
     }
 
-    public String getPrivateKey() {
-        return privateKey;
+    public String getPriKey() {
+        return priKey;
     }
 
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
+    public void setPriKey(String privateKey) {
+        this.priKey = privateKey;
     }
 
     public byte[] publicKeyTo() {
-        return CodecUtil.ofHexString(publicKey);
+        return CodecUtil.ofHexString(pubKey);
     }
 
     public byte[] privateKeyTo() {
-        return CodecUtil.ofHexString(privateKey);
+        return CodecUtil.ofHexString(priKey);
     }
 
     public void ofPublicKey(byte[] codes) {
-        this.publicKey = CodecUtil.toHexString(codes);
+        this.pubKey = CodecUtil.toHexString(codes);
     }
 
     public void ofPrivateKey(byte[] codes) {
-        this.privateKey = CodecUtil.toHexString(codes);
+        this.priKey = CodecUtil.toHexString(codes);
     }
 
     @Override
@@ -243,20 +254,20 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
             return false;
         }
         Sm2Encryptor that = (Sm2Encryptor) o;
-        return Objects.equals(publicKey, that.publicKey) &&
-                Objects.equals(privateKey, that.privateKey);
+        return Objects.equals(pubKey, that.pubKey) &&
+                Objects.equals(priKey, that.priKey);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(publicKey, privateKey);
+        return Objects.hash(pubKey, priKey);
     }
 
     @Override
     public String toString() {
         return "Sm2Encryptor{" +
-                "publicKey='" + publicKey + '\'' +
-                ", privateKey='" + privateKey + '\'' +
+                "publicKey='" + pubKey + '\'' +
+                ", privateKey='" + priKey + '\'' +
                 '}';
     }
 }

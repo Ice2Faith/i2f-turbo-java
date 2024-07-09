@@ -6,6 +6,7 @@ import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.jce.jdk.encrypt.Encryptor;
 import i2f.jce.jdk.supports.SecureRandomAlgorithm;
 import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
+import i2f.jce.std.encrypt.symmetric.key.BytesKey;
 
 import java.security.Key;
 import java.util.Objects;
@@ -17,13 +18,13 @@ import java.util.Objects;
  */
 public class Sm4Encryptor implements ISymmetricEncryptor {
 
-    private String key;
+    private String keyHex;
 
     public Sm4Encryptor() {
     }
 
     public Sm4Encryptor(String key) {
-        this.key = key;
+        this.keyHex = key;
     }
 
     public static final int[] SECRET_BYTE_LEN = {128};
@@ -53,27 +54,32 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
 
     @Override
     public void setKey(Key key) {
-        this.key = HexStringByteCodec.INSTANCE.encode(key.getEncoded());
+        this.keyHex = HexStringByteCodec.INSTANCE.encode(key.getEncoded());
+    }
+
+    @Override
+    public Key getKey() {
+        return new BytesKey("sm4", "hex", HexStringByteCodec.INSTANCE.decode(this.keyHex));
     }
 
     @Override
     public void setKeyBytes(byte[] keyBytes) {
-        this.key = HexStringByteCodec.INSTANCE.encode(keyBytes);
+        this.keyHex = HexStringByteCodec.INSTANCE.encode(keyBytes);
     }
 
     @Override
     public byte[] getKeyBytes() {
-        return HexStringByteCodec.INSTANCE.decode(this.key);
+        return HexStringByteCodec.INSTANCE.decode(this.keyHex);
     }
 
     @Override
     public void setKeyString(String str) {
-        this.key = str;
+        this.keyHex = str;
     }
 
     @Override
     public String getKeyString() {
-        return this.key;
+        return this.keyHex;
     }
 
     @Override
@@ -90,28 +96,20 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
 
 
     public String encrypt(String data) {
-        return Sm4.encrypt(data, key);
+        return Sm4.encrypt(data, keyHex);
     }
 
     public String decrypt(String data) {
-        return Sm4.decrypt(data, key);
+        return Sm4.decrypt(data, keyHex);
     }
 
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
 
     public byte[] keyTo() {
-        return CodecUtil.ofHexString(key);
+        return CodecUtil.ofHexString(keyHex);
     }
 
     public void ofKey(byte[] codes) {
-        this.key = CodecUtil.toHexString(codes);
+        this.keyHex = CodecUtil.toHexString(codes);
     }
 
 
@@ -124,18 +122,18 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
             return false;
         }
         Sm4Encryptor that = (Sm4Encryptor) o;
-        return Objects.equals(key, that.key);
+        return Objects.equals(keyHex, that.keyHex);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key);
+        return Objects.hash(keyHex);
     }
 
     @Override
     public String toString() {
         return "Sm4Encryptor{" +
-                "key='" + key + '\'' +
+                "key='" + keyHex + '\'' +
                 '}';
     }
 }
