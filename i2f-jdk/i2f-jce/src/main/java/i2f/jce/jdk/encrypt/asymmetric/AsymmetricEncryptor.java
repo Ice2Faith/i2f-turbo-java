@@ -1,5 +1,6 @@
 package i2f.jce.jdk.encrypt.asymmetric;
 
+import i2f.array.ArrayUtil;
 import i2f.jce.jdk.digest.md.MessageDigester;
 import i2f.jce.jdk.encrypt.Encryptor;
 import i2f.jce.std.digest.IMessageDigester;
@@ -54,7 +55,6 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
     protected boolean privateEncrypt;
     protected PrivateKey privateKey;
     protected PublicKey publicKey;
-    protected IMessageDigester digester = MessageDigester.SHA_256;
 
     public AsymmetricEncryptor() {
     }
@@ -73,15 +73,6 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
         this.publicKey = publicKey;
     }
 
-    public AsymmetricEncryptor(String algorithmName, String providerName, boolean noPadding, boolean privateEncrypt, PrivateKey privateKey, PublicKey publicKey, IMessageDigester digester) {
-        this.algorithmName = algorithmName;
-        this.providerName = providerName;
-        this.noPadding = noPadding;
-        this.privateEncrypt = privateEncrypt;
-        this.privateKey = privateKey;
-        this.publicKey = publicKey;
-        this.digester = digester;
-    }
 
     public AsymmetricEncryptor(AsymmetricType algorithm) {
         this.algorithmName = algorithm.type();
@@ -99,33 +90,16 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
         this.publicKey = publicKey;
     }
 
-    public AsymmetricEncryptor(AsymmetricType algorithm, PrivateKey privateKey, PublicKey publicKey, IMessageDigester digester) {
-        this.algorithmName = algorithm.type();
-        this.providerName = algorithm.provider();
-        this.noPadding = algorithm.noPadding();
-        this.privateEncrypt = algorithm.privateEncrypt();
-        this.privateKey = privateKey;
-        this.publicKey = publicKey;
-        this.digester = digester;
-    }
 
     public AsymmetricEncryptor(AsymmetricType algorithm, KeyPair keyPair) {
         this.algorithmName = algorithm.type();
         this.providerName = algorithm.provider();
         this.noPadding = algorithm.noPadding();
         this.privateEncrypt = algorithm.privateEncrypt();
-        this.privateKey = keyPair.getPrivate();
-        this.publicKey = keyPair.getPublic();
-    }
-
-    public AsymmetricEncryptor(AsymmetricType algorithm, KeyPair keyPair, IMessageDigester digester) {
-        this.algorithmName = algorithm.type();
-        this.providerName = algorithm.provider();
-        this.noPadding = algorithm.noPadding();
-        this.privateEncrypt = algorithm.privateEncrypt();
-        this.privateKey = keyPair.getPrivate();
-        this.publicKey = keyPair.getPublic();
-        this.digester = digester;
+        if(keyPair!=null) {
+            this.privateKey = keyPair.getPrivate();
+            this.publicKey = keyPair.getPublic();
+        }
     }
 
     public static KeyPair keyPairOf(AsymmetricType algorithm, byte[] publicKey, byte[] privateKey) throws Exception {
@@ -165,23 +139,18 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
     }
 
     public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm) throws Exception {
-        return genKeyEncryptor(algorithm, null, null, null);
+        return genKeyEncryptor(algorithm, null, null);
     }
 
-    public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm, IMessageDigester digester) throws Exception {
-        return genKeyEncryptor(algorithm, null, null, digester);
+    public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm, byte[] keyBytes) throws Exception {
+        return genKeyEncryptor(algorithm, keyBytes, null);
     }
 
-    public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm, byte[] keyBytes, IMessageDigester digester) throws Exception {
-        return genKeyEncryptor(algorithm, keyBytes, null, digester);
-    }
-
-    public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm, byte[] keyBytes, String secureRandomAlgorithmName, IMessageDigester digester) throws Exception {
+    public static AsymmetricEncryptor genKeyEncryptor(AsymmetricType algorithm, byte[] keyBytes, String secureRandomAlgorithmName) throws Exception {
         return new AsymmetricEncryptor(algorithm,
                 genKeyPair(algorithm,
                         keyBytes,
-                        secureRandomAlgorithmName),
-                digester
+                        secureRandomAlgorithmName)
         );
 
     }
@@ -265,7 +234,7 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
 
     @Override
     public byte[] privateEncrypt(byte[] data) throws Exception {
-        Cipher cipher = getCipher(true, false);
+        Cipher cipher = getCipher(true, true);
         if (noPadding) {
             data = Encryptor.handleNoPaddingEncryptFormat(cipher, data);
         }
@@ -274,7 +243,7 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
 
     @Override
     public byte[] publicDecrypt(byte[] data) throws Exception {
-        Cipher cipher = getCipher(false, true);
+        Cipher cipher = getCipher(false, false);
         if (noPadding) {
             data = Encryptor.handleNoPaddingEncryptFormat(cipher, data);
         }
@@ -283,10 +252,13 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
 
     @Override
     public byte[] sign(byte[] data) throws Exception {
-        if (digester != null) {
-            data = digester.digest(data);
-        }
         return privateEncrypt(data);
+    }
+
+    @Override
+    public boolean verify(byte[] sign, byte[] data) throws Exception {
+        byte[] bytes = publicDecrypt(sign);
+        return ArrayUtil.equal(bytes,data);
     }
 
     public String getAlgorithmName() {
@@ -337,14 +309,6 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
         this.publicKey = publicKey;
     }
 
-    public IMessageDigester getDigester() {
-        return digester;
-    }
-
-    public void setDigester(IMessageDigester digester) {
-        this.digester = digester;
-    }
-
     public byte[] publicKeyTo() {
         return keyTo(publicKey);
     }
@@ -375,13 +339,12 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
                 Objects.equals(algorithmName, that.algorithmName) &&
                 Objects.equals(providerName, that.providerName) &&
                 Objects.equals(privateKey, that.privateKey) &&
-                Objects.equals(publicKey, that.publicKey) &&
-                Objects.equals(digester, that.digester);
+                Objects.equals(publicKey, that.publicKey) ;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(algorithmName, providerName, noPadding, privateEncrypt, privateKey, publicKey, digester);
+        return Objects.hash(algorithmName, providerName, noPadding, privateEncrypt, privateKey, publicKey);
     }
 
     @Override
@@ -393,7 +356,6 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
                 ", privateEncrypt=" + privateEncrypt +
                 ", privateKey=" + privateKey +
                 ", publicKey=" + publicKey +
-                ", digester=" + digester +
                 '}';
     }
 }

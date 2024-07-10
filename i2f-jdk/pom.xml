@@ -98,6 +98,7 @@
         <module>i2f-form-url-encoded</module>
         <module>i2f-code</module>
         <module>i2f-resp</module>
+        <module>i2f-swl</module>
 
     </modules>
 
