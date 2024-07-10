@@ -1,7 +1,6 @@
 package i2f.springboot.swl.spring;
 
 
-import i2f.spring.web.mapping.MappingUtil;
 import i2f.springboot.secure.consts.SecureConsts;
 import i2f.springboot.swl.consts.SwlCode;
 import i2f.springboot.swl.exception.SwlException;
@@ -44,9 +43,6 @@ public class SwlSpringAop implements InitializingBean {
 
     @Autowired
     private SwlWebConfigProperties webProperties;
-
-    @Autowired
-    private MappingUtil mappingUtil;
 
     @Override
     public void afterPropertiesSet() throws Exception {
