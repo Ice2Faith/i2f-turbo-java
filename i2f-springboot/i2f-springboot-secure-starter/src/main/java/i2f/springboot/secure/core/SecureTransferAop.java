@@ -5,7 +5,7 @@ import i2f.spring.web.mapping.MappingUtil;
 import i2f.springboot.secure.SecureConfig;
 import i2f.springboot.secure.consts.SecureConsts;
 import i2f.springboot.secure.consts.SecureErrorCode;
-import i2f.springboot.swl.data.SecureCtrl;
+import i2f.springboot.secure.data.SecureCtrl;
 import i2f.springboot.secure.exception.SecureException;
 import i2f.springboot.secure.util.SecureUtils;
 import lombok.extern.slf4j.Slf4j;
