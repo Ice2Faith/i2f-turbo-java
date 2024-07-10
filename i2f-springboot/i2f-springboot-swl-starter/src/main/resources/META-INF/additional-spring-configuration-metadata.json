@@ -1,0 +1,247 @@
+{
+  "groups": [
+    {
+      "name": "i2f.swl",
+      "type": "i2f.springboot.swl.spring.SwlSpringAutoConfiguration",
+      "sourceType": "i2f.springboot.swl.spring.SwlSpringAutoConfiguration"
+    },
+    {
+      "name": "i2f.swl.transfer",
+      "type": "i2f.springboot.swl.spring.SwlTransferConfigProperties",
+      "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties"
+    },
+    {
+      "name": "i2f.swl.web",
+      "type": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties"
+    },
+    {
+      "name": "i2f.swl.aop",
+      "type": "i2f.springboot.swl.spring.SwlSpringAop",
+      "sourceType": "i2f.springboot.swl.spring.SwlSpringAop"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.swl.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable swl.",
+      "sourceType": "i2f.springboot.swl.spring.SwlSpringAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swl.aop.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable aop.",
+      "sourceType": "i2f.springboot.swl.spring.SwlSpringAop",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swl.transfer.cache-key-prefix",
+      "type": "java.lang.String",
+      "description": "cache key prefix.",
+      "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties"
+    },
+    {
+      "name": "i2f.swl.transfer.nonce-window-seconds",
+      "type": "java.lang.Long",
+      "description": "nonce window seconds, default 30 minutes.",
+      "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties",
+      "defaultValue": 1800
+    },
+    {
+      "name": "i2f.swl.transfer.nonce-timeout-seconds",
+      "type": "java.lang.Long",
+      "description": "nonce timeout seconds, default 30 minutes.",
+      "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties",
+      "defaultValue": 1800
+    },
+    {
+      "name": "i2f.swl.transfer.enable-refresh-self-key",
+      "type": "java.lang.Boolean",
+      "description": "enable refresh self key.",
+      "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swl.transfer.self-key-expire-seconds",
+      "type": "java.lang.Long",
+      "description": "self key expire seconds, default 24 hours.",
+      "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties",
+      "defaultValue": 86400
+    },
+    {
+      "name": "i2f.swl.transfer.self-key-max-count",
+      "type": "java.lang.Integer",
+      "description": "self key max count.",
+      "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties",
+      "defaultValue": 3
+    },
+    {
+      "name": "i2f.swl.transfer.other-key-expire-seconds",
+      "type": "java.lang.Long",
+      "description": "other key expire seconds, default 24 hours.",
+      "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties",
+      "defaultValue": 86400
+    },
+    {
+      "name": "i2f.swl.web.default-ctrl.in",
+      "type": "java.lang.Boolean",
+      "description": "default control input.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swl.web.default-ctrl.out",
+      "type": "java.lang.Boolean",
+      "description": "default control output.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swl.web.header-name",
+      "type": "java.lang.String",
+      "description": "header name.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "swlh"
+    },
+    {
+      "name": "i2f.swl.web.remote-asym-sign-header-name",
+      "type": "java.lang.String",
+      "description": "remote asym sign header name.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "swlras"
+    },
+    {
+      "name": "i2f.swl.web.current-asym-key-header-name",
+      "type": "java.lang.String",
+      "description": "current asym key header name.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "swlcak"
+    },
+    {
+      "name": "i2f.swl.web.real-content-type-header-name",
+      "type": "java.lang.String",
+      "description": "real content type header name.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "swlct"
+    },
+    {
+      "name": "i2f.swl.web.parameter-name",
+      "type": "java.lang.String",
+      "description": "parameter name.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "swlp"
+    },
+    {
+      "name": "i2f.swl.web.response-charset",
+      "type": "java.lang.String",
+      "description": "response charset.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "UTF-8"
+    },
+    {
+      "name": "i2f.swl.web.filter-response-exception",
+      "type": "java.lang.Boolean",
+      "description": "whether filter response exception.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.swl.web.asym-algo-class",
+      "type": "java.lang.Class",
+      "description": "asym algo class.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "i2f.extension.swl.impl.sm.antherd.SwlAntherdSm2AsymmetricEncryptor"
+    },
+    {
+      "name": "i2f.swl.web.symm-algo-class",
+      "type": "java.lang.Class",
+      "description": "symm algo class.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "i2f.extension.swl.impl.sm.antherd.SwlAntherdSm4SymmetricEncryptor"
+    },
+    {
+      "name": "i2f.swl.web.digest-algo-class",
+      "type": "java.lang.Class",
+      "description": "digest algo class.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "i2f.extension.swl.impl.sm.antherd.SwlAntherdSm3MessageDigester"
+    },
+    {
+      "name": "i2f.swl.web.obfuscate-algo-class",
+      "type": "java.lang.Class",
+      "description": "obfuscate algo class.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": "i2f.swl.impl.SwlBase64Obfuscator"
+    }
+  ],
+  "hints": [
+    {
+      "name": "i2f.swl.web.asym-algo-class",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "i2f.swl.std.ISwlAsymmetricEncryptor"
+          }
+        }
+      ]
+    },
+    {
+      "name": "i2f.swl.web.symm-algo-class",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "i2f.swl.std.ISwlSymmetricEncryptor"
+          }
+        }
+      ]
+    },
+    {
+      "name": "i2f.swl.web.digest-algo-class",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "i2f.swl.std.ISwlMessageDigester"
+          }
+        }
+      ]
+    },
+    {
+      "name": "i2f.swl.web.obfuscate-algo-class",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "i2f.swl.std.ISwlObfuscator"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

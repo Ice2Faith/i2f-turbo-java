@@ -13,12 +13,12 @@ public class TestAsymmetricEncryptor {
 
     public static void main(String[] args) throws Exception {
         AsymmetricEncryptor encryptor = AsymmetricEncryptor.genKeyEncryptor(RsaType.ECB_PKCS1PADDING,
-                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text(), null);
+                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text());
 
         test(encryptor);
 
         encryptor = AsymmetricEncryptor.genKeyEncryptor(RsaType.ECB_OAEPPadding,
-                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text(), null);
+                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text());
 
         test(encryptor);
 
