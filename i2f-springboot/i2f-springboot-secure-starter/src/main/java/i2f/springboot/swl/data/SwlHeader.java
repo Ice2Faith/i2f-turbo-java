@@ -30,12 +30,12 @@ public class SwlHeader {
     /**
      * 服务端非对称签名
      */
-    public String serverAsymSign;
+    public String remoteAsymSign;
 
     /**
      * 客户端非对称签名
      */
-    public String clientAsymSign;
+    public String localAsymSign;
 
     public static SwlHeader copy(SwlHeader header) {
         SwlHeader ret = new SwlHeader();
@@ -43,8 +43,8 @@ public class SwlHeader {
         ret.setNonce(header.getNonce());
         ret.setDigital(header.getDigital());
         ret.setRandomKey(header.getRandomKey());
-        ret.setClientAsymSign(header.getClientAsymSign());
-        ret.setServerAsymSign(header.getServerAsymSign());
+        ret.setLocalAsymSign(header.getLocalAsymSign());
+        ret.setRemoteAsymSign(header.getRemoteAsymSign());
 
         return ret;
     }

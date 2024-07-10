@@ -35,11 +35,16 @@ public class TestSwlTransfer {
         clientTransfer.acceptOtherPublicKey(serverKeyPair.getPublicKey());
         serverTransfer.acceptOtherPublicKey(clientKeyPair.getPublicKey());
 
-        SwlData clientSendData = clientTransfer.clientSend(serverKeyPair.getPublicKey(), Arrays.asList("body:123456", "query:user=admin"));
+        SwlData clientSendData = clientTransfer.send(serverKeyPair.getPublicKey(), Arrays.asList("body:123456", "query:user=admin"));
 
 
         String clientId = "127.0.0.1";
-        SwlData serverReceiveData = serverTransfer.serverReceive(clientId, clientSendData);
+        SwlData serverReceiveData = serverTransfer.receive(clientId, clientSendData);
+
+        SwlData serverResponseData = serverTransfer.response(serverReceiveData.getHeader().getRemoteAsymSign(), Arrays.asList("echo:ok", "data:ok"));
+
+        String serverId = "server";
+        SwlData clientReceiveData = clientTransfer.receive(serverId, serverResponseData);
 
         System.out.println("ok");
     }
