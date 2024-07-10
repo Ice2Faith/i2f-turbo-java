@@ -435,6 +435,7 @@ public class Encryptor {
     public static Cipher getCipher(String type, String providerName,
                                    boolean encrypt,
                                    Key key, AlgorithmParameterSpec spec) throws Exception {
+        type=cipherAlgorithm(type);
         int mode = encrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
         Cipher cipher = cipherOf(type, providerName);
         if (spec != null) {
@@ -447,6 +448,7 @@ public class Encryptor {
 
     public static Cipher cipherOf(String type, String providerName) throws Exception {
         providerName = checkProvider(providerName);
+        type=cipherAlgorithm(type);
         Cipher cipher = null;
         if (providerName == null) {
             cipher = Cipher.getInstance(type);

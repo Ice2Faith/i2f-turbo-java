@@ -69,6 +69,13 @@ public class SymmetricEncryptor implements ISymmetricEncryptor {
         this.key = key;
     }
 
+    public SymmetricEncryptor(SymmetricType algorithm) {
+        this.algorithmName = algorithm.type();
+        this.providerName = algorithm.provider();
+        this.noPadding = algorithm.noPadding();
+        this.requireVector = algorithm.requireVector();
+    }
+
     public static SecretKey keyOf(SymmetricType algorithm, byte[] codes) {
         return Encryptor.keyOf(codes, algorithm);
     }

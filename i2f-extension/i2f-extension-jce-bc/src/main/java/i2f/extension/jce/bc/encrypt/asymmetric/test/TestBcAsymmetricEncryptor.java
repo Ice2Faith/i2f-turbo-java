@@ -16,18 +16,18 @@ public class TestBcAsymmetricEncryptor {
 
     public static void main(String[] args) throws Exception {
         AsymmetricEncryptor encryptor = BcAsymmetricEncryptor.genKeyEncryptor(RsaType.ECB_PKCS1PADDING,
-                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text(), null);
+                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text());
 
         test(encryptor);
 
         encryptor = BcAsymmetricEncryptor.genKeyEncryptor(RsaType.ECB_OAEPPadding,
-                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text(), null);
+                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text());
 
         test(encryptor);
 
 
         encryptor = BcAsymmetricEncryptor.genKeyEncryptor(ElGamalType.ECB_OAEPPadding,
-                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text(), null);
+                "hello".getBytes(), SecureRandomAlgorithm.SHA1PRNG.text());
 
         test(encryptor);
 
