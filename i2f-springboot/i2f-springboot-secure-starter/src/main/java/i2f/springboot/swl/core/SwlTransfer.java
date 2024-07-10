@@ -37,11 +37,12 @@ public class SwlTransfer {
     public static final String OTHER_KEY_PUBLIC_KEY_PREFIX = "swl:key:other:keys:";
     public static final String OTHER_KEY_PUBLIC_DEFAULT = "swl:key:other:default";
     public static final String NONCE_PREFIX = "swl:nonce:";
+    public static final String KEYPAIR_SEPARATOR = "\n==========\n";
 
     private Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier;
     private Supplier<ISwlSymmetricEncryptor> symmetricEncryptorSupplier;
     private ISwlMessageDigester messageDigester;
-    private IExpireCache<String, Object> cache = new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));
+    private IExpireCache<String, String> cache = new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));
     private ISwlObfuscator obfuscator;
     private long nonceWindowSeconds = TimeUnit.MINUTES.toSeconds(30);
     private long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
@@ -51,7 +52,7 @@ public class SwlTransfer {
     private SecureRandom random=new SecureRandom();
 
     public AsymKeyPair getSelfKeyPair() {
-        Object obj = cache.get(SELF_KEY_PAIR_CURRENT_KEY);
+        String obj = cache.get(SELF_KEY_PAIR_CURRENT_KEY);
         if (obj == null) {
             return resetSelfKeyPair();
         }
@@ -61,10 +62,10 @@ public class SwlTransfer {
             return resetSelfKeyPair();
         }
 
-        AsymKeyPair pair = (AsymKeyPair) obj;
+        String[] arr = obj.split(KEYPAIR_SEPARATOR, 2);
         AsymKeyPair ret = new AsymKeyPair();
-        ret.setPublicKey(obfuscateDecode(pair.getPublicKey()));
-        ret.setPrivateKey(obfuscateDecode(pair.getPrivateKey()));
+        ret.setPublicKey(obfuscateDecode(arr[0]));
+        ret.setPrivateKey(obfuscateDecode(arr[1]));
         return ret;
     }
 
@@ -74,35 +75,36 @@ public class SwlTransfer {
                 obfuscateEncode(selfKeyPair.getPublicKey()),
                 obfuscateEncode(selfKeyPair.getPrivateKey())
         );
-        cache.set(key, keyPair, selfKeyMaxCount * selfKeyExpireSeconds, TimeUnit.SECONDS);
+        String text = keyPair.getPublicKey() + KEYPAIR_SEPARATOR + keyPair.getPrivateKey();
+        cache.set(key, text, selfKeyMaxCount * selfKeyExpireSeconds, TimeUnit.SECONDS);
         cache.set(SELF_KEY_PAIR_CURRENT_KEY, selfAsymSign);
     }
 
     public String getSelfPrivateKey(String selfAsymSign) {
         String key = SELF_KEY_PAIR_HISTORY_KEY_PREFIX + selfAsymSign;
-        Object obj = cache.get(key);
+        String obj = cache.get(key);
         if (obj == null) {
             return null;
         }
-        AsymKeyPair asymKeyPair = (AsymKeyPair) obj;
-        return obfuscateDecode(asymKeyPair.getPrivateKey());
+        String[] arr = obj.split(KEYPAIR_SEPARATOR, 2);
+        return obfuscateDecode(arr[1]);
     }
 
     public String getOtherPublicKey(String otherAsymSign) {
         String key = OTHER_KEY_PUBLIC_KEY_PREFIX + otherAsymSign;
-        Object obj = cache.get(key);
+        String obj = cache.get(key);
         if (obj == null) {
             return null;
         }
-        return obfuscateDecode((String) obj);
+        return obfuscateDecode(obj);
     }
 
     public String getOtherPublicKeyDefault() {
-        Object obj = cache.get(OTHER_KEY_PUBLIC_DEFAULT);
+        String obj = cache.get(OTHER_KEY_PUBLIC_DEFAULT);
         if (obj == null) {
             return null;
         }
-        String otherAsymSign = (String) obj;
+        String otherAsymSign = obj;
         return getOtherPublicKey(otherAsymSign);
     }
 
@@ -124,7 +126,7 @@ public class SwlTransfer {
 
     public void setNonce(String nonce, long timeoutSeconds) {
         String key = NONCE_PREFIX + nonce;
-        cache.set(key, SystemClock.currentTimeMillis(), timeoutSeconds, TimeUnit.SECONDS);
+        cache.set(key, String.valueOf(SystemClock.currentTimeMillis()), timeoutSeconds, TimeUnit.SECONDS);
     }
 
     public void acceptOtherPublicKey(String otherPublicKey) {
