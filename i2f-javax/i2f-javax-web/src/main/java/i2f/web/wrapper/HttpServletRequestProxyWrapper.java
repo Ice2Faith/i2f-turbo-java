@@ -17,6 +17,7 @@ public class HttpServletRequestProxyWrapper extends HttpServletRequestWrapper {
     protected Map<String, String> headers = new ConcurrentHashMap<>();
     protected String queryString;
     protected Map<String, List<String>> parameterMap;
+    protected String contentType;
 
     public HttpServletRequestProxyWrapper(HttpServletRequest request) throws IOException {
         super(request);
@@ -52,6 +53,18 @@ public class HttpServletRequestProxyWrapper extends HttpServletRequestWrapper {
 
     public void setAttachHeader(String name, String val) {
         headers.put(name, val);
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    @Override
+    public String getContentType() {
+        if (contentType != null && !contentType.isEmpty()) {
+            return contentType;
+        }
+        return super.getContentType();
     }
 
     public String getAttachHeader(String name) {
