@@ -42,22 +42,27 @@ public class SwlTransfer {
     private Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier;
     private Supplier<ISwlSymmetricEncryptor> symmetricEncryptorSupplier;
     private ISwlMessageDigester messageDigester;
-    private IExpireCache<String, String> cache = new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));
     private ISwlObfuscator obfuscator;
-    private long nonceWindowSeconds = TimeUnit.MINUTES.toSeconds(30);
-    private long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
-    private long selfKeyExpireSeconds = TimeUnit.HOURS.toSeconds(24);
-    private int selfKeyMaxCount = 3;
-    private long otherKeyExpireSeconds = TimeUnit.HOURS.toSeconds(24);
+
+    private IExpireCache<String, String> cache = new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));
+    private SwlTransferConfig config;
     private SecureRandom random=new SecureRandom();
 
+    public String cacheKey(String key) {
+        String cacheKeyPrefix = config.getCacheKeyPrefix();
+        if (cacheKeyPrefix == null || cacheKeyPrefix.isEmpty()) {
+            return key;
+        }
+        return cacheKeyPrefix + key;
+    }
+
     public AsymKeyPair getSelfKeyPair() {
-        String obj = cache.get(SELF_KEY_PAIR_CURRENT_KEY);
+        String obj = cache.get(cacheKey(SELF_KEY_PAIR_CURRENT_KEY));
         if (obj == null) {
             return resetSelfKeyPair();
         }
         String key = SELF_KEY_PAIR_HISTORY_KEY_PREFIX + obj;
-        obj = cache.get(key);
+        obj = cache.get(cacheKey(key));
         if (obj == null) {
             return resetSelfKeyPair();
         }
@@ -69,6 +74,15 @@ public class SwlTransfer {
         return ret;
     }
 
+    public String getSelfPublicKey() {
+        AsymKeyPair keyPair = getSelfKeyPair();
+        return keyPair.getPublicKey();
+    }
+
+    public String calcKeySign(String publicKey) {
+        return messageDigester.digest(publicKey);
+    }
+
     public void setSelfKeyPair(String selfAsymSign, AsymKeyPair selfKeyPair) {
         String key = SELF_KEY_PAIR_HISTORY_KEY_PREFIX + selfAsymSign;
         AsymKeyPair keyPair = new AsymKeyPair(
@@ -76,13 +90,13 @@ public class SwlTransfer {
                 obfuscateEncode(selfKeyPair.getPrivateKey())
         );
         String text = keyPair.getPublicKey() + KEYPAIR_SEPARATOR + keyPair.getPrivateKey();
-        cache.set(key, text, selfKeyMaxCount * selfKeyExpireSeconds, TimeUnit.SECONDS);
+        cache.set(cacheKey(key), text, selfKeyMaxCount * selfKeyExpireSeconds, TimeUnit.SECONDS);
         cache.set(SELF_KEY_PAIR_CURRENT_KEY, selfAsymSign);
     }
 
     public String getSelfPrivateKey(String selfAsymSign) {
         String key = SELF_KEY_PAIR_HISTORY_KEY_PREFIX + selfAsymSign;
-        String obj = cache.get(key);
+        String obj = cache.get(cacheKey(key));
         if (obj == null) {
             return null;
         }
@@ -92,7 +106,7 @@ public class SwlTransfer {
 
     public String getOtherPublicKey(String otherAsymSign) {
         String key = OTHER_KEY_PUBLIC_KEY_PREFIX + otherAsymSign;
-        String obj = cache.get(key);
+        String obj = cache.get(cacheKey(key));
         if (obj == null) {
             return null;
         }
@@ -100,7 +114,7 @@ public class SwlTransfer {
     }
 
     public String getOtherPublicKeyDefault() {
-        String obj = cache.get(OTHER_KEY_PUBLIC_DEFAULT);
+        String obj = cache.get(cacheKey(OTHER_KEY_PUBLIC_DEFAULT));
         if (obj == null) {
             return null;
         }
@@ -110,23 +124,23 @@ public class SwlTransfer {
 
     public void setOtherPublicKey(String otherAsymSign, String publicKey) {
         String key = OTHER_KEY_PUBLIC_KEY_PREFIX + otherAsymSign;
-        cache.set(key, obfuscateEncode(publicKey), otherKeyExpireSeconds, TimeUnit.SECONDS);
-        cache.set(OTHER_KEY_PUBLIC_DEFAULT, otherAsymSign);
+        cache.set(cacheKey(key), obfuscateEncode(publicKey), otherKeyExpireSeconds, TimeUnit.SECONDS);
+        cache.set(cacheKey(OTHER_KEY_PUBLIC_DEFAULT), otherAsymSign);
     }
 
     public void refreshOtherPublicKeyExpire(String otherAsymSign) {
         String key = OTHER_KEY_PUBLIC_KEY_PREFIX + otherAsymSign;
-        cache.expire(key, otherKeyExpireSeconds, TimeUnit.SECONDS);
+        cache.expire(cacheKey(key), otherKeyExpireSeconds, TimeUnit.SECONDS);
     }
 
     public boolean containsNonce(String nonce) {
         String key = NONCE_PREFIX + nonce;
-        return cache.exists(key);
+        return cache.exists(cacheKey(key));
     }
 
     public void setNonce(String nonce, long timeoutSeconds) {
         String key = NONCE_PREFIX + nonce;
-        cache.set(key, String.valueOf(SystemClock.currentTimeMillis()), timeoutSeconds, TimeUnit.SECONDS);
+        cache.set(cacheKey(key), String.valueOf(SystemClock.currentTimeMillis()), timeoutSeconds, TimeUnit.SECONDS);
     }
 
     public void acceptOtherPublicKey(String otherPublicKey) {
