@@ -6,6 +6,7 @@ package i2f.springboot.swl.consts;
  * @desc
  */
 public enum SwlCode {
+
     ASYMMETRIC_EXCEPTION(1000),
     ASYMMETRIC_ENCRYPT_EXCEPTION(1100),
     ASYMMETRIC_DECRYPT_EXCEPTION(1200),
