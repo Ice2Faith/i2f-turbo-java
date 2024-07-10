@@ -6,7 +6,7 @@ import i2f.cache.impl.container.MapCache;
 import i2f.cache.impl.expire.ObjectExpireCacheWrapper;
 import i2f.springboot.secure.consts.SecureConsts;
 import i2f.springboot.secure.core.SecureTransferFilter;
-import i2f.springboot.swl.data.SecureCtrl;
+import i2f.springboot.secure.data.SecureCtrl;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

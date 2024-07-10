@@ -1,6 +1,5 @@
-package i2f.springboot.swl.core;
+package i2f.springboot.swl.data;
 
-import i2f.springboot.swl.data.SecureHeader;
 import lombok.Data;
 
 import java.util.List;
@@ -12,6 +11,6 @@ import java.util.List;
  */
 @Data
 public class SwlData {
-    private SecureHeader header;
+    private SwlHeader header;
     private List<String> parts;
 }
