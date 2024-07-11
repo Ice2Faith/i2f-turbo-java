@@ -18,7 +18,7 @@ public class SwlTransferConfig {
     private long nonceWindowSeconds = TimeUnit.MINUTES.toSeconds(30);
     private long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
 
-    private boolean enableRefreshSelfKey=true;
+    private boolean enableRefreshSelfKey = true;
 
     private long selfKeyExpireSeconds = TimeUnit.HOURS.toSeconds(24);
     private int selfKeyMaxCount = 3;

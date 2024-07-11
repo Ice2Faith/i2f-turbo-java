@@ -14,7 +14,8 @@ import i2f.swl.std.ISwlMessageDigester;
  * @desc
  */
 public class SwlBcSha512MessageDigester implements ISwlMessageDigester {
-    private IMessageDigester digester= BcMessageDigester.SHA512;
+    private IMessageDigester digester = BcMessageDigester.SHA512;
+
     @Override
     public String digest(String data) {
         try {
@@ -22,7 +23,7 @@ public class SwlBcSha512MessageDigester implements ISwlMessageDigester {
             byte[] digest = digester.digest(bytes);
             return HexStringByteCodec.INSTANCE.encode(digest);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.DIGEST_SIGN_EXCEPTION.code(), e.getMessage(),e);
+            throw new SwlException(SwlCode.DIGEST_SIGN_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 
@@ -31,9 +32,9 @@ public class SwlBcSha512MessageDigester implements ISwlMessageDigester {
         try {
             byte[] digestBytes = HexStringByteCodec.INSTANCE.decode(digest);
             byte[] dataBytes = CharsetStringByteCodec.UTF8.decode(data);
-            return digester.verify(digestBytes,dataBytes);
+            return digester.verify(digestBytes, dataBytes);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.DIGEST_VERIFY_EXCEPTION.code(), e.getMessage(),e);
+            throw new SwlException(SwlCode.DIGEST_VERIFY_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 }
