@@ -66,9 +66,13 @@ public class SwlTransfer {
         if (refreshing.getAndSet(true)) {
             return;
         }
+        long timeout = config.getSelfKeyExpireSeconds() - 10;
+        if (timeout <= 0) {
+            timeout = config.getSelfKeyExpireSeconds();
+        }
         schedulePool.scheduleAtFixedRate(() -> {
             resetSelfKeyPair();
-        }, 0, Math.max(config.getSelfKeyExpireSeconds() - 10, config.getSelfKeyExpireSeconds()), TimeUnit.SECONDS);
+        }, 0, timeout, TimeUnit.SECONDS);
     }
 
     public String cacheKey(String key) {
@@ -76,7 +80,7 @@ public class SwlTransfer {
         if (cacheKeyPrefix == null || cacheKeyPrefix.isEmpty()) {
             return key;
         }
-        return cacheKeyPrefix + key;
+        return cacheKeyPrefix + ":" + key;
     }
 
     public AsymKeyPair getSelfKeyPair() {
@@ -114,7 +118,7 @@ public class SwlTransfer {
         );
         String text = keyPair.getPublicKey() + KEYPAIR_SEPARATOR + keyPair.getPrivateKey();
         cache.set(cacheKey(key), text, config.getSelfKeyMaxCount() * config.getSelfKeyExpireSeconds(), TimeUnit.SECONDS);
-        cache.set(SELF_KEY_PAIR_CURRENT_KEY, selfAsymSign);
+        cache.set(cacheKey(SELF_KEY_PAIR_CURRENT_KEY), selfAsymSign);
     }
 
     public String getSelfPrivateKey(String selfAsymSign) {
