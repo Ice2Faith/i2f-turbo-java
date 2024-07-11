@@ -1,9 +1,11 @@
 # SWL(secure web layer) 安全网络层
+
 - 为web应用提供安全保护层
 - 实现 Asymmetric Encrypt+Symmetric Encrypt+Message Digest 级别防护
 - 也就是，非对称加密+对称加密+摘要签名
 
 ## 成分描述
+
 - Asymmetric Encrypt
     - 提供非对称加解密，作用是保护对称加密秘钥，保证高性能、大数据传输的支持
     - 提供数字签名加签验签，作用是防止伪造，保证防篡改性
@@ -14,8 +16,9 @@
 - Message Digest
     - 提供数据签名，作用是保证完整性
     - 在后文中，使用 digest 表示消息摘要
-  
+
 ## 数据载荷清单
+
 - clientAsymSign
     - 客户端的公钥签名，用于确定与客户端配对的公钥
     - 作用是用来查找请求对应的客户端公钥
@@ -48,6 +51,7 @@
     - 当timeout<=2*window时，则同时保证了实时性和防重复性
 
 ## 运行原理
+
 - 双方生成各自非对称密钥对
     - 服务端可在项目启动时初始化自身密钥对 serverPublicKey,serverPrivateKey
     - 客户端可在页面初始化时初始化自身密钥对 clientPublicKey,clientPrivateKey
@@ -121,8 +125,9 @@
     - 和客户端发起请求基本一致
     - 除了获取客户端公钥，需要根据请求来的 clientAsymSign 进行获取
     - 其他流程一致
-    
+
 ## 其他可考虑的点
+
 - 服务端
     - 定时刷新自身的非对称密钥对，防止暴力破解
     - 同时，维护几个历史密钥对，避免客户端还没来得及更新最新的服务端公钥

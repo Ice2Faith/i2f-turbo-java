@@ -1,6 +1,5 @@
 package i2f.swl.core;
 
-import com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper;
 import i2f.cache.expire.IExpireCache;
 import i2f.cache.impl.container.MapCache;
 import i2f.cache.impl.expire.ObjectExpireCacheWrapper;
@@ -11,6 +10,10 @@ import i2f.swl.data.SwlContext;
 import i2f.swl.data.SwlData;
 import i2f.swl.data.SwlHeader;
 import i2f.swl.exception.SwlException;
+import i2f.swl.impl.SwlBase64Obfuscator;
+import i2f.swl.impl.SwlSha256MessageDigester;
+import i2f.swl.impl.supplier.SwlAesSymmetricEncryptorSupplier;
+import i2f.swl.impl.supplier.SwlRsaAsymmetricEncryptorSupplier;
 import i2f.swl.std.ISwlAsymmetricEncryptor;
 import i2f.swl.std.ISwlMessageDigester;
 import i2f.swl.std.ISwlObfuscator;
@@ -40,13 +43,13 @@ public class SwlTransfer {
     public static final String NONCE_PREFIX = "swl:nonce:";
     public static final String KEYPAIR_SEPARATOR = "\n==========\n";
 
-    private Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier;
-    private Supplier<ISwlSymmetricEncryptor> symmetricEncryptorSupplier;
-    private ISwlMessageDigester messageDigester;
-    private ISwlObfuscator obfuscator;
+    private Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier = new SwlRsaAsymmetricEncryptorSupplier();
+    private Supplier<ISwlSymmetricEncryptor> symmetricEncryptorSupplier = new SwlAesSymmetricEncryptorSupplier();
+    private ISwlMessageDigester messageDigester = new SwlSha256MessageDigester();
+    private ISwlObfuscator obfuscator = new SwlBase64Obfuscator();
 
     private IExpireCache<String, String> cache = new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));
-    private SwlTransferConfig config=new SwlTransferConfig();
+    private SwlTransferConfig config = new SwlTransferConfig();
     private SecureRandom random = new SecureRandom();
 
     private AtomicBoolean refreshing = new AtomicBoolean(false);

@@ -18,8 +18,9 @@ import javax.crypto.SecretKey;
  * @desc
  */
 public class SwlAesSymmetricEncryptor implements ISwlSymmetricEncryptor {
-    private SymmetricType symmetricType=AesType.ECB_ISO10126Padding;
-    private ISymmetricEncryptor encryptor=new SymmetricEncryptor(symmetricType);
+    private SymmetricType symmetricType = AesType.ECB_ISO10126Padding;
+    private ISymmetricEncryptor encryptor = new SymmetricEncryptor(symmetricType);
+
     @Override
     public String generateKey() {
         try {
@@ -27,7 +28,7 @@ public class SwlAesSymmetricEncryptor implements ISwlSymmetricEncryptor {
             byte[] encoded = key.getEncoded();
             return Base64StringByteCodec.INSTANCE.encode(encoded);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(),e.getMessage(),e);
+            throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 
@@ -37,7 +38,7 @@ public class SwlAesSymmetricEncryptor implements ISwlSymmetricEncryptor {
             byte[] encoded = encryptor.getKeyBytes();
             return Base64StringByteCodec.INSTANCE.encode(encoded);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(),e.getMessage(),e);
+            throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 
@@ -54,7 +55,7 @@ public class SwlAesSymmetricEncryptor implements ISwlSymmetricEncryptor {
             byte[] encrypt = encryptor.encrypt(bytes);
             return Base64StringByteCodec.INSTANCE.encode(encrypt);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.ASYMMETRIC_ENCRYPT_EXCEPTION.code(), e.getMessage(),e);
+            throw new SwlException(SwlCode.ASYMMETRIC_ENCRYPT_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 
@@ -65,7 +66,7 @@ public class SwlAesSymmetricEncryptor implements ISwlSymmetricEncryptor {
             byte[] encrypt = encryptor.decrypt(bytes);
             return CharsetStringByteCodec.UTF8.encode(encrypt);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.ASYMMETRIC_ENCRYPT_EXCEPTION.code(), e.getMessage(),e);
+            throw new SwlException(SwlCode.ASYMMETRIC_ENCRYPT_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 }

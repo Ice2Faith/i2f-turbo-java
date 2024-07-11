@@ -20,16 +20,17 @@ import javax.crypto.SecretKey;
  * @desc
  */
 public class SwlBcAes256SymmetricEncryptor implements ISwlSymmetricEncryptor {
-    private SymmetricType symmetricType= AesType.ECB_ISO10126Padding;
-    private ISymmetricEncryptor encryptor=new BcSymmetricEncryptor(symmetricType);
+    private SymmetricType symmetricType = AesType.ECB_ISO10126Padding;
+    private ISymmetricEncryptor encryptor = new BcSymmetricEncryptor(symmetricType);
+
     @Override
     public String generateKey() {
         try {
-            SecretKey key = Encryptor.genSecretKey(symmetricType, BcProvider.PROVIDER_NAME,null,256);
+            SecretKey key = Encryptor.genSecretKey(symmetricType, BcProvider.PROVIDER_NAME, null, 256);
             byte[] encoded = key.getEncoded();
             return Base64StringByteCodec.INSTANCE.encode(encoded);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(),e.getMessage(),e);
+            throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 
@@ -39,7 +40,7 @@ public class SwlBcAes256SymmetricEncryptor implements ISwlSymmetricEncryptor {
             byte[] encoded = encryptor.getKeyBytes();
             return Base64StringByteCodec.INSTANCE.encode(encoded);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(),e.getMessage(),e);
+            throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 
@@ -56,7 +57,7 @@ public class SwlBcAes256SymmetricEncryptor implements ISwlSymmetricEncryptor {
             byte[] encrypt = encryptor.encrypt(bytes);
             return Base64StringByteCodec.INSTANCE.encode(encrypt);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.ASYMMETRIC_ENCRYPT_EXCEPTION.code(), e.getMessage(),e);
+            throw new SwlException(SwlCode.ASYMMETRIC_ENCRYPT_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 
@@ -67,7 +68,7 @@ public class SwlBcAes256SymmetricEncryptor implements ISwlSymmetricEncryptor {
             byte[] encrypt = encryptor.decrypt(bytes);
             return CharsetStringByteCodec.UTF8.encode(encrypt);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.ASYMMETRIC_ENCRYPT_EXCEPTION.code(), e.getMessage(),e);
+            throw new SwlException(SwlCode.ASYMMETRIC_ENCRYPT_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 }

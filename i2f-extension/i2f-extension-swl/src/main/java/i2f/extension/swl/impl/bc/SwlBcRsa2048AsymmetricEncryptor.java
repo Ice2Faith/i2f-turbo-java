@@ -23,53 +23,54 @@ import java.security.PublicKey;
  * @desc
  */
 public class SwlBcRsa2048AsymmetricEncryptor implements ISwlAsymmetricEncryptor {
-    private AsymmetricType asymmetricType=RsaType.NONE_PKCS1PADDING;
-    private IAsymmetricEncryptor encryptor=new AsymmetricEncryptor(asymmetricType);
+    private AsymmetricType asymmetricType = RsaType.NONE_PKCS1PADDING;
+    private IAsymmetricEncryptor encryptor = new AsymmetricEncryptor(asymmetricType);
+
     @Override
     public AsymKeyPair generateKeyPair() {
         try {
-            KeyPair keyPair = Encryptor.genKeyPair(asymmetricType, BcProvider.PROVIDER_NAME,null,2048);
-            String publicKey= null;
+            KeyPair keyPair = Encryptor.genKeyPair(asymmetricType, BcProvider.PROVIDER_NAME, null, 2048);
+            String publicKey = null;
             PublicKey pubKey = keyPair.getPublic();
-            if(pubKey!=null){
-                publicKey=Base64StringByteCodec.INSTANCE.encode(pubKey.getEncoded());
+            if (pubKey != null) {
+                publicKey = Base64StringByteCodec.INSTANCE.encode(pubKey.getEncoded());
             }
-            String privateKey= null;
+            String privateKey = null;
             PrivateKey priKey = keyPair.getPrivate();
-            if(priKey!=null){
-                privateKey=Base64StringByteCodec.INSTANCE.encode(priKey.getEncoded());
+            if (priKey != null) {
+                privateKey = Base64StringByteCodec.INSTANCE.encode(priKey.getEncoded());
             }
-            return new AsymKeyPair(publicKey,privateKey);
+            return new AsymKeyPair(publicKey, privateKey);
         } catch (Exception e) {
-            throw new SwlException(SwlCode.ASYMMETRIC_INVALID_KEY_EXCEPTION.code(),e.getMessage(),e);
+            throw new SwlException(SwlCode.ASYMMETRIC_INVALID_KEY_EXCEPTION.code(), e.getMessage(), e);
         }
     }
 
     @Override
     public AsymKeyPair getKeyPair() {
         KeyPair keyPair = encryptor.getKeyPair();
-        String publicKey= null;
+        String publicKey = null;
         PublicKey pubKey = keyPair.getPublic();
-        if(pubKey!=null){
-            publicKey=Base64StringByteCodec.INSTANCE.encode(pubKey.getEncoded());
+        if (pubKey != null) {
+            publicKey = Base64StringByteCodec.INSTANCE.encode(pubKey.getEncoded());
         }
-        String privateKey= null;
+        String privateKey = null;
         PrivateKey priKey = keyPair.getPrivate();
-        if(priKey!=null){
-            privateKey=Base64StringByteCodec.INSTANCE.encode(priKey.getEncoded());
+        if (priKey != null) {
+            privateKey = Base64StringByteCodec.INSTANCE.encode(priKey.getEncoded());
         }
-        return new AsymKeyPair(publicKey,privateKey);
+        return new AsymKeyPair(publicKey, privateKey);
     }
 
     @Override
     public void setKeyPair(AsymKeyPair key) {
         String publicKey = key.getPublicKey();
-        if(publicKey!=null){
+        if (publicKey != null) {
             byte[] encoded = Base64StringByteCodec.INSTANCE.decode(publicKey);
             encryptor.setPublicKeyBytes(encoded);
         }
         String privateKey = key.getPrivateKey();
-        if(privateKey!=null){
+        if (privateKey != null) {
             byte[] encoded = Base64StringByteCodec.INSTANCE.decode(privateKey);
             encryptor.setPrivateKeyBytes(encoded);
         }

@@ -1,6 +1,8 @@
 package i2f.extension.swl.impl.bc.test;
 
-import i2f.extension.swl.impl.bc.*;
+import i2f.extension.swl.impl.bc.SwlBcSm2AsymmetricEncryptor;
+import i2f.extension.swl.impl.bc.SwlBcSm3MessageDigester;
+import i2f.extension.swl.impl.bc.SwlBcSm4SymmetricEncryptor;
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.core.SwlTransfer;
 import i2f.swl.data.SwlData;
