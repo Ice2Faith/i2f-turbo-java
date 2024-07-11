@@ -82,7 +82,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         }
 
         // 没有输入输出控制，直接跳过
-        if (ctrl.isIn() && !ctrl.isOut()) {
+        if (!ctrl.isIn() && !ctrl.isOut()) {
             chain.doFilter(request, response);
             return;
         }
@@ -135,16 +135,17 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
                 data.setHeader(deserializeHeader(swlh));
                 data.setParts(Arrays.asList(srcText, swlp));
 
-                // 保存请求时的非对称公钥签名
-                // 此时还没有进行receive，因此local还是客户端的值，remote是服务端的值
-                clientAsymSign = data.getHeader().getLocalAsymSign();
-                serverAsymSign = data.getHeader().getRemoteAsymSign();
-
                 // 保存原始请求头
                 nextRequest.setAttribute(SwlWebConsts.SWL_REQUEST_RAW_HEADER_ATTR_KEY, data.getHeader());
 
                 // 接受数据
                 SwlData receiveData = transfer.receive(clientIp, data);
+
+                // 保存请求时的非对称公钥签名
+                // 此时还没有进行receive，因此local还是客户端的值，remote是服务端的值
+                clientAsymSign = receiveData.getHeader().getRemoteAsymSign();
+                serverAsymSign = receiveData.getHeader().getLocalAsymSign();
+
 
                 // 保存解密后的头
                 nextRequest.setAttribute(SwlWebConsts.SWL_REQUEST_HEADER_ATTR_KEY, receiveData.getHeader());
@@ -226,10 +227,14 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
         byte[] responseBody = responseWrapper.getBodyBytes();
 
-        String responseCharset = responseWrapper.getCharacterEncoding();
+        String responseCharset = config.getResponseCharset();
         if (responseCharset == null || responseCharset.isEmpty()) {
-            responseCharset = config.getResponseCharset();
+            responseCharset = responseWrapper.getCharacterEncoding();
         }
+        if (responseCharset == null || responseCharset.isEmpty()) {
+            responseCharset = "UTF-8";
+        }
+        responseWrapper.setCharacterEncoding(responseCharset);
 
         // 处理直接下载型接口，推荐还是使用白名单
         // 小文件可以在这里进行自动处理

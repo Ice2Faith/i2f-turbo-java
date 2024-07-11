@@ -44,11 +44,16 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-swl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-spring-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-springboot-secure-starter</artifactId>
+            <artifactId>i2f-springboot-swl-starter</artifactId>
             <version>1.0</version>
         </dependency>
     </dependencies>
