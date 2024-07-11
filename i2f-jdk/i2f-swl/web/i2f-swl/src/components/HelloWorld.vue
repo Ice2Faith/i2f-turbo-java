@@ -22,6 +22,7 @@
 
 import TestSwlTransfer from "@/i2f-turbo-web/i2f-swl/test/TestSwlTransfer";
 import AntMatcher from "@/i2f-turbo-web/i2f-core/match/impl/AntMatcher";
+import Random from "@/i2f-turbo-web/i2f-core/util/Random";
 
 export default {
   name: 'HelloWorld',
@@ -111,7 +112,7 @@ export default {
       this.$axios({
         url: 'test/echo',
         method: 'post',
-        // data: Random.nextInt(),
+        data: Random.nextInt(),
         // headers: SecureTransfer.getSecureHeader(false)
       }).then(({data}) => {
         console.log('echo', data)

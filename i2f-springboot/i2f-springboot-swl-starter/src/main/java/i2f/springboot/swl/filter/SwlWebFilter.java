@@ -269,6 +269,11 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
         String responseText = new String(responseBody, responseCharset);
 
+        Object responseString = request.getAttribute(SwlWebConsts.SWL_STRING_RESPONSE);
+        if(Boolean.TRUE.equals(responseString)){
+            responseText=jsonSerializer.serialize(responseText);
+        }
+
         SwlData responseData = transfer.response(clientAsymSign, Collections.singletonList(responseText));
         String responseSwlh = serializeHeader(responseData.getHeader());
         response.setHeader(config.getHeaderName(), responseSwlh);

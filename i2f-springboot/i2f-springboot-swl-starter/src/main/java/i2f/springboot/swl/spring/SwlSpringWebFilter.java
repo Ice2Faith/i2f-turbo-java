@@ -4,6 +4,7 @@ import i2f.reflect.ReflectResolver;
 import i2f.serialize.str.json.IJsonSerializer;
 import i2f.spring.matcher.MatcherUtil;
 import i2f.spring.web.mapping.MappingUtil;
+import i2f.springboot.swl.filter.SwlWebConsts;
 import i2f.springboot.swl.filter.SwlWebCtrl;
 import i2f.springboot.swl.filter.SwlWebFilter;
 import i2f.springboot.swl.filter.SwlWebConfig;
@@ -11,6 +12,7 @@ import i2f.swl.annotation.SecureParams;
 import i2f.swl.core.SwlTransfer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -24,6 +26,7 @@ import java.util.List;
  * @date 2024/7/10 17:11
  * @desc
  */
+@Slf4j
 @Data
 @NoArgsConstructor
 public class SwlSpringWebFilter extends SwlWebFilter {
@@ -43,6 +46,12 @@ public class SwlSpringWebFilter extends SwlWebFilter {
     @Override
     public SwlWebCtrl parseCtrl(HttpServletRequest request, HttpServletResponse response) {
         Method method = mappingUtil.getRequestMappingMethod(request);
+        // 特殊标记返回值为String的方法
+        Class<?> returnType = method.getReturnType();
+        if (String.class.isAssignableFrom(returnType)) {
+            request.setAttribute(SwlWebConsts.SWL_STRING_RESPONSE,true);
+            log.debug("mapping return string type.");
+        }
         return parseCtrl(request, method, config);
     }
 
