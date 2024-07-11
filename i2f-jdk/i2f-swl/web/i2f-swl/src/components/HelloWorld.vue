@@ -1,5 +1,6 @@
 <template>
   <div>
+    <button @click="testTransfer">transfer</button>
 
     <button @click="invokeInt">int</button>
     <button @click="invokeStr">str</button>
@@ -16,6 +17,8 @@
 <script>
 
 
+import TestSwlTransfer from "@/i2f-turbo-web/i2f-swl/test/TestSwlTransfer";
+
 export default {
   name: 'HelloWorld',
   props: {},
@@ -27,6 +30,9 @@ export default {
   created() {
   },
   methods: {
+    testTransfer() {
+      TestSwlTransfer.main();
+    },
     invokeParam() {
       let obj = {
         name: "张三",
