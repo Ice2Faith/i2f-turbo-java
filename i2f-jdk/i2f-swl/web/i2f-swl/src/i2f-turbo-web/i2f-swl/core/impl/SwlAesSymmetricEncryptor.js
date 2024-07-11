@@ -1,4 +1,5 @@
 import AesUtil from "../../../i2f-core/crypto/symmetric/AesUtil";
+import Base64Util from "@/i2f-turbo-web/i2f-core/codec/Base64Util";
 
 /**
  * @param key {String}
@@ -18,14 +19,16 @@ function SwlAesSymmetricEncryptor(key = null) {
  * return {String}
  */
 SwlAesSymmetricEncryptor.prototype.generateKey = function () {
-    return AesUtil.genKey()
+    let ret= AesUtil.genKey()
+    return Base64Util.encrypt(ret)
 }
 /**
  * @override
  * @return {String}
  */
 SwlAesSymmetricEncryptor.prototype.getKey = function () {
-    return this._key
+    let ret= this._key
+    return Base64Util.encrypt(ret)
 }
 /**
  *
@@ -33,6 +36,7 @@ SwlAesSymmetricEncryptor.prototype.getKey = function () {
  * @return {void}
  */
 SwlAesSymmetricEncryptor.prototype.setKey = function (key) {
+    key=Base64Util.decrypt(key)
     this._key = key
 }
 /**
