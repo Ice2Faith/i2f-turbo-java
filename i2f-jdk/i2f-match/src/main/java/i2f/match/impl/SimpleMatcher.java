@@ -23,8 +23,8 @@ public class SimpleMatcher implements IMatcher {
      * 此时可以用于表示哪一个patten更能够更加精准来匹配字符串
      * 这个返回值在某些情况下很有用，比如多个匹配规则同时适用一个目标时，优选某个规则的情况
      *
-     * @param patten
      * @param str
+     * @param patten
      * @return
      */
     @Override
