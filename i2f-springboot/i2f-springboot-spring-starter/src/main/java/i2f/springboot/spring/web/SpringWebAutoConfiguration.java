@@ -3,9 +3,12 @@ package i2f.springboot.spring.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.spring.web.mapping.MappingUtil;
+import i2f.springboot.spring.web.converter.SpringJacksonMessageConverter;
+import i2f.springboot.spring.web.converter.SpringJacksonMvcConfigurer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -14,6 +17,10 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * @date 2024/6/12 9:44
  * @desc
  */
+@Import({
+        SpringJacksonMessageConverter.class,
+        SpringJacksonMvcConfigurer.class
+})
 @ConditionalOnExpression("${i2f.spring.web.enable:true}")
 public class SpringWebAutoConfiguration {
 

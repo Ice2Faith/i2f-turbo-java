@@ -29,7 +29,7 @@ import java.lang.reflect.Parameter;
  * @desc
  */
 @ConditionalOnClass(Aspect.class)
-@ConditionalOnBean(SwlSpringWebFilter.class)
+//@ConditionalOnBean(SwlSpringWebFilter.class)
 @ConditionalOnExpression("${i2f.swl.aop.enable:true}")
 @Slf4j
 @Component
