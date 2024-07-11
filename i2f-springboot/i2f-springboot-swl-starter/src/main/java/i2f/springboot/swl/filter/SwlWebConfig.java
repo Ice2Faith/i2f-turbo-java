@@ -1,13 +1,13 @@
 package i2f.springboot.swl.filter;
 
-import i2f.extension.swl.impl.sm.antherd.SwlAntherdSm2AsymmetricEncryptor;
-import i2f.extension.swl.impl.sm.antherd.SwlAntherdSm3MessageDigester;
-import i2f.extension.swl.impl.sm.antherd.SwlAntherdSm4SymmetricEncryptor;
 import i2f.swl.impl.SwlBase64Obfuscator;
-import i2f.swl.std.ISwlAsymmetricEncryptor;
+import i2f.swl.impl.SwlSha256MessageDigester;
+import i2f.swl.impl.supplier.SwlAesSymmetricEncryptorSupplier;
+import i2f.swl.impl.supplier.SwlRsaAsymmetricEncryptorSupplier;
 import i2f.swl.std.ISwlMessageDigester;
 import i2f.swl.std.ISwlObfuscator;
-import i2f.swl.std.ISwlSymmetricEncryptor;
+import i2f.swl.std.supplier.ISwlAsymmetricEncryptorSupplier;
+import i2f.swl.std.supplier.ISwlSymmetricEncryptorSupplier;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -31,8 +31,8 @@ public class SwlWebConfig {
     protected boolean filterResponseException=false;
     protected List<String> whiteListIn;
     protected List<String> whiteListOut;
-    protected Class<? extends ISwlAsymmetricEncryptor> asymAlgoClass= SwlAntherdSm2AsymmetricEncryptor.class;
-    protected Class<? extends ISwlSymmetricEncryptor> symmAlgoClass= SwlAntherdSm4SymmetricEncryptor.class;
-    protected Class<? extends ISwlMessageDigester> digestAlgoClass= SwlAntherdSm3MessageDigester.class;
+    protected Class<? extends ISwlAsymmetricEncryptorSupplier> asymAlgoClass = SwlRsaAsymmetricEncryptorSupplier.class;
+    protected Class<? extends ISwlSymmetricEncryptorSupplier> symmAlgoClass = SwlAesSymmetricEncryptorSupplier.class;
+    protected Class<? extends ISwlMessageDigester> digestAlgoClass = SwlSha256MessageDigester.class;
     protected Class<? extends ISwlObfuscator> obfuscateAlgoClass= SwlBase64Obfuscator.class;
 }

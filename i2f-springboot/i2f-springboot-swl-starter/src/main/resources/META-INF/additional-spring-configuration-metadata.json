@@ -152,21 +152,21 @@
       "type": "java.lang.Class",
       "description": "asym algo class.",
       "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
-      "defaultValue": "i2f.extension.swl.impl.sm.antherd.SwlAntherdSm2AsymmetricEncryptor"
+      "defaultValue": "i2f.swl.impl.supplier.SwlRsaAsymmetricEncryptorSupplier"
     },
     {
       "name": "i2f.swl.web.symm-algo-class",
       "type": "java.lang.Class",
       "description": "symm algo class.",
       "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
-      "defaultValue": "i2f.extension.swl.impl.sm.antherd.SwlAntherdSm4SymmetricEncryptor"
+      "defaultValue": "i2f.swl.impl.supplier.SwlAesSymmetricEncryptorSupplier"
     },
     {
       "name": "i2f.swl.web.digest-algo-class",
       "type": "java.lang.Class",
       "description": "digest algo class.",
       "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
-      "defaultValue": "i2f.extension.swl.impl.sm.antherd.SwlAntherdSm3MessageDigester"
+      "defaultValue": "i2f.swl.impl.SwlSha256MessageDigester"
     },
     {
       "name": "i2f.swl.web.obfuscate-algo-class",
@@ -183,7 +183,7 @@
         {
           "name": "class-reference",
           "parameters": {
-            "target": "i2f.swl.std.ISwlAsymmetricEncryptor"
+            "target": "i2f.swl.std.supplier.ISwlAsymmetricEncryptorSupplier"
           }
         }
       ]
@@ -194,7 +194,7 @@
         {
           "name": "class-reference",
           "parameters": {
-            "target": "i2f.swl.std.ISwlSymmetricEncryptor"
+            "target": "i2f.swl.std.supplier.ISwlSymmetricEncryptorSupplier"
           }
         }
       ]
