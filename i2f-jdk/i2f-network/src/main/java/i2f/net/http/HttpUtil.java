@@ -27,7 +27,7 @@ public class HttpUtil {
 
     public static void setHttpHeaders(HttpURLConnection conn, HttpRequest request) {
         Map<String, Object> header = request.getHeader();
-        if (header == null || header.size() == 0) {
+        if (header == null || header.isEmpty()) {
             return;
         }
         for (Map.Entry<String, Object> item : header.entrySet()) {
@@ -47,7 +47,7 @@ public class HttpUtil {
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
             url = "http://" + url;
         }
-        if (params == null || params.size() == 0) {
+        if (params == null || params.isEmpty()) {
             return url;
         }
         StringBuilder builder = new StringBuilder();

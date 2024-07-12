@@ -58,7 +58,7 @@ public class SeedReplaceColorImageFilter implements IImageFilter {
         };
         points.add(p);
 
-        while (points.size() > 0) {
+        while (!points.isEmpty()) {
             Point cur = points.get(0);
             map[(int) cur.x][(int) cur.y] = 1;
 

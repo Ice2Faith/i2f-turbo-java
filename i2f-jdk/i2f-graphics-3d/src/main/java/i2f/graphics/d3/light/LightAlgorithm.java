@@ -64,8 +64,7 @@ public class LightAlgorithm {
 
     public static D3Color light(D3Point viewPoint, List<D3Light> lights, D3Point point, D3Vector normalLine, Material material, D3Color ambi) {
         D3Color ret = new D3Color();
-        for (int i = 0; i < lights.size(); i++) {
-            D3Light light = lights.get(i);
+        for (D3Light light : lights) {
             if (!light.enable) {
                 ret.r += material.diff.r;
                 ret.g += material.diff.g;

@@ -36,8 +36,8 @@ public class RelativeAnyPointTransform implements ITransform {
         Point np = trans.transform(p);
 
         // 按照原点进行任意变换
-        for (int i = 0; i < transforms.size(); i++) {
-            np = transforms.get(i).transform(np);
+        for (ITransform transform : transforms) {
+            np = transform.transform(np);
         }
 
         // 重新还原到任意参考点

@@ -35,7 +35,7 @@ public abstract class AbstractProxyRenderSqlProvider implements ProxyRenderSqlPr
             SqlScript ann = ReflectResolver.getAnnotation(method, SqlScript.class);
             if (ann != null) {
                 String sql = ann.value();
-                if (sql != null && !"".equals(sql)) {
+                if (sql != null && !sql.isEmpty()) {
                     script = BindSql.of(ann.type(), sql);
                 }
             }

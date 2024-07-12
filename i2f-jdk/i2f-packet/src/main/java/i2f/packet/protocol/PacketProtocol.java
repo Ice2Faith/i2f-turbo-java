@@ -104,7 +104,7 @@ public class PacketProtocol {
     }
 
     public PacketProtocol addHead(String name, String value) {
-        if (name == null || "".equals(name)) {
+        if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("head name cannot be empty");
         }
         this.head.put(name, value);

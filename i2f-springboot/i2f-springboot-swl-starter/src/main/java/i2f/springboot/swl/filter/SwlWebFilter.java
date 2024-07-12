@@ -55,6 +55,9 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
             return;
         }
 
+        // 获取控制信息，可子类重写实现白名单等功能
+        SwlWebCtrl ctrl = parseCtrl(request, response);
+
         // 跳过multipart请求
         String contentType = request.getContentType();
         if (contentType == null) {
@@ -63,12 +66,8 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         contentType = contentType.toLowerCase();
 
         if (contentType.contains("multipart/form-data")) {
-            chain.doFilter(request, response);
-            return;
+            ctrl.setIn(false);
         }
-
-        // 获取控制信息，可子类重写实现白名单等功能
-        SwlWebCtrl ctrl = parseCtrl(request, response);
 
         // 获取安全头，优先从请求头获取，获取不到则从请求参数获取
         String swlh = request.getHeader(config.getHeaderName());

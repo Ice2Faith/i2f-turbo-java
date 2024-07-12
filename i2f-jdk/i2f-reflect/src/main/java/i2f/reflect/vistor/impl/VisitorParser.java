@@ -158,7 +158,7 @@ public class VisitorParser {
                     staticClass = ReflectResolver.loadClassWithJdk(className);
                 }
 
-                if (!"".equals(paramExpression)) {
+                if (!paramExpression.isEmpty()) {
                     paramExpression = paramExpression.substring(1, paramExpression.length() - 1);
                     List<String> parameters = splitParameters(paramExpression);
                     Object[] args = new Object[parameters.size()];
@@ -289,7 +289,7 @@ public class VisitorParser {
             index.incrementAndGet();
         }
 
-        if (!"".equals(curr)) {
+        if (!curr.isEmpty()) {
             tokens.add(curr);
         }
 
@@ -312,8 +312,8 @@ public class VisitorParser {
             } else if (ch == '[') {
                 AtomicInteger nextIndex = new AtomicInteger(index.get());
                 String str = nextEnclose(expression, nextIndex, '[', ']');
-                if (str != null && !"".equals(str)) {
-                    if (!"".equals(curr)) {
+                if (str != null && !str.isEmpty()) {
+                    if (!curr.isEmpty()) {
                         tokens.add(curr);
                         curr = "";
                     }
@@ -326,7 +326,7 @@ public class VisitorParser {
             } else if (ch == '@') {
                 AtomicInteger nextIndex = new AtomicInteger(index.get() + 1);
                 String str = nextFullNaming(expression, nextIndex);
-                if (str != null && !"".equals(str)) {
+                if (str != null && !str.isEmpty()) {
                     curr += '@';
                     curr += str;
                     index.set(nextIndex.get());
@@ -337,7 +337,7 @@ public class VisitorParser {
                     if (ch == '(') {
                         nextIndex = new AtomicInteger(index.get());
                         str = nextEnclose(expression, nextIndex, '(', ')');
-                        if (str != null && !"".equals(str)) {
+                        if (str != null && !str.isEmpty()) {
                             curr += str;
                             tokens.add(curr);
                             curr = "";
@@ -361,7 +361,7 @@ public class VisitorParser {
                     curr += '#';
                     AtomicInteger nextIndex = new AtomicInteger(index.get());
                     String str = nextEnclose(expression, nextIndex, '{', '}');
-                    if (str != null && !"".equals(str)) {
+                    if (str != null && !str.isEmpty()) {
                         curr += str;
                         tokens.add(curr);
                         curr = "";
@@ -377,7 +377,7 @@ public class VisitorParser {
                 if (tmp.matches("\\d\\.\\d") && !curr.contains(".")) {
                     curr += ".";
                 } else {
-                    if (!"".equals(curr)) {
+                    if (!curr.isEmpty()) {
                         tokens.add(curr);
                         curr = "";
                     }
@@ -387,7 +387,7 @@ public class VisitorParser {
                 throw new IllegalStateException("char [" + ch + "] not recognized at index is " + index.get());
             }
         }
-        if (!"".equals(curr)) {
+        if (!curr.isEmpty()) {
             tokens.add(curr);
         }
         return tokens;
@@ -397,12 +397,12 @@ public class VisitorParser {
         AtomicInteger tmp = new AtomicInteger(index.get());
         String ret = "";
         String str = nextNaming(expression, tmp);
-        if (str != null && !"".equals(str)) {
+        if (str != null && !str.isEmpty()) {
             ret += str;
             while (tmp.get() < expression.length() && expression.charAt(tmp.get()) == '.') {
                 tmp.incrementAndGet();
                 str = nextNaming(expression, tmp);
-                if (str != null && !"".equals(str)) {
+                if (str != null && !str.isEmpty()) {
                     ret += ".";
                     ret += str;
                 } else {
@@ -421,7 +421,7 @@ public class VisitorParser {
         while (index.get() < expression.length()) {
             char ch = expression.charAt(index.get());
             if (ch >= '0' && ch <= '9') {
-                if ("".equals(ret)) {
+                if (ret.isEmpty()) {
                     return ret;
                 }
             } else if ((ch >= 'a' && ch <= 'z')

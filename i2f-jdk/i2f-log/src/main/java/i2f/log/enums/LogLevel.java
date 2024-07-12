@@ -25,7 +25,7 @@ public enum LogLevel {
     }
 
     public static LogLevel parse(String lvl) {
-        if (lvl == null || "".equals(lvl)) {
+        if (lvl == null || lvl.isEmpty()) {
             return OFF;
         }
         lvl = lvl.trim().toUpperCase();

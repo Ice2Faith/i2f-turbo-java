@@ -639,9 +639,9 @@ public class TestLambda {
                         , "d1").$on(() -> Bql.$_()
                         .$cond("su.status=d1.dict_value")
                 )
-                .$where(query, post -> post != null && post.size() > 0,
+                .$where(query, post -> post != null && !post.isEmpty(),
                         post -> Bql.$_()
-                                .$and((String) post.get("username"), v -> v != null && !"".equals(v), v -> Bql.$_("su.username=?", v))
+                                .$and((String) post.get("username"), v -> v != null && !v.isEmpty(), v -> Bql.$_("su.username=?", v))
                                 .$and((Integer) post.get("age"), v -> v != null && v > 0, v -> Bql.$_("su.age>=?", v))
                                 .$alias("su").$and()
                                 .$eq("age", (Integer) post.get("age"))
@@ -710,9 +710,9 @@ public class TestLambda {
                         , "d1").$on(() -> Bql.$_()
                         .$cond("su.status=d1.dict_value")
                 )
-                .$where(query, post -> post != null && post.size() > 0,
+                .$where(query, post -> post != null && !post.isEmpty(),
                         post -> Bql.$lambda()
-                                .$and((String) post.get("username"), v -> v != null && !"".equals(v), v -> Bql.$_("su.username=?", v))
+                                .$and((String) post.get("username"), v -> v != null && !v.isEmpty(), v -> Bql.$_("su.username=?", v))
                                 .$and((Integer) post.get("age"), v -> v != null && v > 0, v -> Bql.$_("su.age>=?", v))
                                 .$alias("su").$and()
                                 .$eq(SysUser::getAge, (Integer) post.get("age"))

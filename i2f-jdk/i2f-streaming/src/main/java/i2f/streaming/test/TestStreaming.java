@@ -26,7 +26,7 @@ public class TestStreaming {
                 .<String>process((item, collector) -> {
                     String[] arr = item.split("\\s+");
                     for (String it : arr) {
-                        if ("".equals(it)) {
+                        if (it.isEmpty()) {
                             continue;
                         }
                         collector.accept(it);

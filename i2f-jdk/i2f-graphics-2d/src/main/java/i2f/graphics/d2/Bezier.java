@@ -26,11 +26,13 @@ public class Bezier {
 
     public static Point bezierPoint(double rate, List<Point> points) {
         double sumX = 0, sumY = 0;
-        for (int i = 0; i < points.size(); i++) {
-            double brate = bernstein(i, points.size() - 1, rate);
-            sumX += points.get(i).x * brate;
-            sumY += points.get(i).y * brate;
-
+        int listSize = points.size();
+        int i = 0;
+        for (Point point : points) {
+            double brate = bernstein(i, listSize - 1, rate);
+            sumX += point.x * brate;
+            sumY += point.y * brate;
+            i++;
         }
         return new Point(sumX, sumY);
     }
@@ -46,10 +48,16 @@ public class Bezier {
 
     public static List<Point> samples(List<Point> points) {
         double len = 0;
-        for (int i = 1; i < points.size(); i++) {
-            Point pre = points.get(i - 1);
-            Point cur = points.get(i);
-            len += Calc.abs(cur.x - pre.x) + Calc.abs(cur.y - pre.y);
+        Point pre = null;
+        int i = 0;
+        for (Point point : points) {
+            if (i == 0) {
+                pre = point;
+            } else {
+                Point cur = point;
+                len += Calc.abs(cur.x - pre.x) + Calc.abs(cur.y - pre.y);
+            }
+            i++;
         }
         len *= 1.2;
         int count = (int) len;

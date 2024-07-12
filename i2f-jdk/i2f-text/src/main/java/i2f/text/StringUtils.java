@@ -278,7 +278,7 @@ public class StringUtils {
         Vector<String> result = new Vector<>();
         for (String item : ret) {
             if (removeEmpty) {
-                if ("".equals(item)) {
+                if (item.isEmpty()) {
                     continue;
                 }
             }

@@ -64,7 +64,7 @@ public class RegexUtil {
             RegexFindPartMeta oth = new RegexFindPartMeta();
             oth.part = str.substring(lidx, result.start());
             oth.isMatch = false;
-            if (!"".equals(oth.part)) {
+            if (!oth.part.isEmpty()) {
                 ret.add(oth);
             }
 
@@ -81,7 +81,7 @@ public class RegexUtil {
         RegexFindPartMeta oth = new RegexFindPartMeta();
         oth.part = str.substring(lidx);
         oth.isMatch = false;
-        if (!"".equals(oth.part)) {
+        if (!oth.part.isEmpty()) {
             ret.add(oth);
         }
 

@@ -93,7 +93,7 @@ public class Bql<H extends Bql<H>> {
             return false;
         }
         if (val instanceof String) {
-            return !"".equals(val);
+            return !((String) val).isEmpty();
         }
         if (val instanceof Collection) {
             return !((Collection) val).isEmpty();
@@ -484,13 +484,13 @@ public class Bql<H extends Bql<H>> {
         }
         if (appendPrefix != null) {
             sql = sql.trim();
-            if (!"".equals(sql)) {
+            if (!sql.isEmpty()) {
                 sql = appendPrefix + " " + sql;
             }
         }
         if (appendSuffix != null) {
             sql = sql.trim();
-            if (!"".equals(sql)) {
+            if (!sql.isEmpty()) {
                 sql = sql + " " + appendSuffix;
             }
         }
@@ -994,7 +994,7 @@ public class Bql<H extends Bql<H>> {
     }
 
     public H $from(String table, String tableAlias) {
-        if (tableAlias == null || "".equals(tableAlias)) {
+        if (tableAlias == null || tableAlias.isEmpty()) {
             return $($keywords("from ") + decorateTableName(table));
         }
         return $($keywords("from ") + decorateTableName(table) + " " + tableAlias);
@@ -1054,7 +1054,7 @@ public class Bql<H extends Bql<H>> {
     }
 
     public H $join(String table, String tableAlias) {
-        if (tableAlias == null || "".equals(tableAlias)) {
+        if (tableAlias == null || tableAlias.isEmpty()) {
             return join().$(decorateTableName(table));
         }
         return join().$(decorateTableName(table)).$(tableAlias);
@@ -1366,7 +1366,7 @@ public class Bql<H extends Bql<H>> {
     }
 
     public String columnName(String tableAlias, String column) {
-        if (tableAlias != null && !"".equals(tableAlias)) {
+        if (tableAlias != null && !tableAlias.isEmpty()) {
             return tableAlias + "." + decorateColumnName(column);
         }
         return decorateColumnName(column);
@@ -1374,7 +1374,7 @@ public class Bql<H extends Bql<H>> {
 
     public String condColumnName(String link, String tableAlias, String column) {
         String name = columnName(tableAlias, column);
-        if (link != null && !"".equals(link)) {
+        if (link != null && !link.isEmpty()) {
             return $keywords(link) + " " + name;
         }
         return name;
@@ -1382,7 +1382,7 @@ public class Bql<H extends Bql<H>> {
 
     public String selectColumnName(String tableAlias, String column, String asAlias) {
         String name = columnName(tableAlias, decorateColumnName(column));
-        if (asAlias != null && !"".equals(asAlias)) {
+        if (asAlias != null && !asAlias.isEmpty()) {
             return name + $keywords(" as ") + decorateColumnAs(asAlias);
         }
         return name;
@@ -1390,14 +1390,14 @@ public class Bql<H extends Bql<H>> {
 
     public String valueCondColumnName(String link, String tableAlias, String column) {
         String name = valueColumnName(tableAlias, column);
-        if (link != null && !"".equals(link)) {
+        if (link != null && !link.isEmpty()) {
             return $keywords(link) + " " + name;
         }
         return name;
     }
 
     public String valueColumnName(String tableAlias, String column) {
-        if (tableAlias != null && !"".equals(tableAlias)) {
+        if (tableAlias != null && !tableAlias.isEmpty()) {
             return tableAlias + "." + column;
         }
         return column;
@@ -1405,7 +1405,7 @@ public class Bql<H extends Bql<H>> {
 
     public String valueSelectColumnName(String tableAlias, String column, String asAlias) {
         String name = valueColumnName(tableAlias, column);
-        if (asAlias != null && !"".equals(asAlias)) {
+        if (asAlias != null && !asAlias.isEmpty()) {
             return name + $keywords(" as ") + decorateColumnAs(asAlias);
         }
         return name;

@@ -61,7 +61,7 @@ public class IdPackCodec<T, C extends Collection<T>> implements IStringCollectio
         C ret = supplier.get();
         String[] arr = enc.split(separator);
         for (String item : arr) {
-            if ("".equals(item)) {
+            if (item.isEmpty()) {
                 continue;
             }
             try {

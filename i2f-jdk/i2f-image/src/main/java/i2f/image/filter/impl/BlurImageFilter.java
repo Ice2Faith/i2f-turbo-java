@@ -59,7 +59,8 @@ public class BlurImageFilter implements IImageFilter {
                 double dr = 0;
                 double dg = 0;
                 double db = 0;
-                for (int i = 0; i < colors.size(); i++) {
+                int colorsSize = colors.size();
+                for (int i = 0; i < colorsSize; i++) {
                     int dis = dises.get(i);
                     Rgba c = colors.get(i);
                     int ndis = rr - dis;

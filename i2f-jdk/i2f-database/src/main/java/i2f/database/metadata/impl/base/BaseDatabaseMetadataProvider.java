@@ -517,7 +517,7 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
 
     @Override
     public TableMeta getTableInfoByQuery(Connection conn, String table) throws SQLException {
-        if (table == null || "".equals(table)) {
+        if (table == null || table.isEmpty()) {
             throw new SQLException("bad table name found is : " + table);
         }
         if (!table.matches("[a-zA-Z0-9\\_\\-`\"\\.\\$]+")) {

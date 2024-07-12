@@ -23,8 +23,9 @@ public class PolygonOffsetTool {
     public static List<Point> offset(List<Point> points, double offset) {
         // 计算边的单位化向量
         List<Point> unitizationEdgeVectors = new ArrayList<>();
-        for (int i = 0; i < points.size(); i++) {
-            int ni = (i == points.size() - 1) ? 0 : i + 1;
+        int listSize = points.size();
+        for (int i = 0; i < listSize; i++) {
+            int ni = (i == listSize - 1) ? 0 : i + 1;
             // 计算边向量
             Point vec = Point.sub(points.get(ni), points.get(i));
             // 单位化边向量
@@ -37,8 +38,8 @@ public class PolygonOffsetTool {
         }
 
         List<Point> resultPoints = new ArrayList<>();
-        for (int i = 0; i < points.size(); i++) {
-            int si = (i == 0) ? (points.size() - 1) : (i - 1);
+        for (int i = 0; i < listSize; i++) {
+            int si = (i == 0) ? (listSize - 1) : (i - 1);
             int ei = i;
             // 计算向量夹角
             double sina = Point.crossMul(unitizationEdgeVectors.get(si), unitizationEdgeVectors.get(ei));

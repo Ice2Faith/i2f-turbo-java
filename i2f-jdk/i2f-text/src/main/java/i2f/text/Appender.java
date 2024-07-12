@@ -366,7 +366,7 @@ public class Appender<T extends Appendable> {
     }
 
     public Appender<T> addEmptyTo(String str, Object replace) {
-        return addWhenTo(str, str == null || "".equals(str), replace);
+        return addWhenTo(str, str == null || str.isEmpty(), replace);
     }
 
     public <E> Appender<T> addIteratorElem(Iterator<E> iterator, Object separator, Object open, Object close, BiConsumer<Appender<T>, E> mapper) {

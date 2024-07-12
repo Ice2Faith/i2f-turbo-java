@@ -152,7 +152,7 @@ public enum DatabaseType {
      * @return ignore
      */
     public static DatabaseType typeOfJdbcUrl(String jdbcUrl) {
-        if (jdbcUrl == null || "".equals(jdbcUrl.trim())) {
+        if (jdbcUrl == null || jdbcUrl.trim().isEmpty()) {
             //"Error: The jdbcUrl is Null, Cannot read database type"
             return DatabaseType.ERROR;
         }
