@@ -1,0 +1,19 @@
+package i2f.web.swl.filter;
+
+/**
+ * @author Ice2Faith
+ * @date 2024/7/10 20:34
+ * @desc
+ */
+public interface SwlWebConsts {
+    String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+
+    String SWL_REQUEST_RAW_HEADER_ATTR_KEY = "SWL_RAW_HEADER";
+    String SWL_REQUEST_HEADER_ATTR_KEY = "SWL_HEADER";
+    String SWL_REQUEST_DECRYPT_ATTR_KEY = "SWL_DECRYPTED";
+    String SWL_REQUEST_DECRYPT_EXCEPTION_ATTR_KEY = "SWL_EXCEPTION";
+    String SWL_RESPONSE_ENCRYPT_ATTR_KEY = "SWL_ENCRYPTED";
+
+    String SWL_REQUIRE_ENCRYPT_RESPONSE = "SWL_REQUIRE_ENCRYPT_RESPONSE";
+    String SWL_STRING_RESPONSE = "SWL_STRING_RESPONSE";
+}
