@@ -175,6 +175,16 @@ public class SwlTransfer {
         setOtherPublicKey(otherAsymSign, otherPublicKey);
     }
 
+    public String getSelfSwapKey() {
+        String selfPublicKey = getSelfPublicKey();
+        return obfuscateEncode(selfPublicKey);
+    }
+
+    public void acceptOtherSwapKey(String otherSwapKey) {
+        String otherPublicKey = obfuscateDecode(otherSwapKey);
+        acceptOtherPublicKey(otherPublicKey);
+    }
+
     public AsymKeyPair resetSelfKeyPair() {
         ISwlAsymmetricEncryptor asymmetricEncryptor = asymmetricEncryptorSupplier.get();
         AsymKeyPair asymKeyPair = asymmetricEncryptor.generateKeyPair();
@@ -204,8 +214,13 @@ public class SwlTransfer {
     }
 
     public SwlData send(String remotePublicKey, List<String> parts) {
+        return send(remotePublicKey, parts, null);
+    }
+
+    public SwlData send(String remotePublicKey, List<String> parts, List<String> attaches) {
         SwlData ret = new SwlData();
         ret.setParts(new ArrayList<>());
+        ret.setAttaches(new ArrayList<>());
         ret.setHeader(new SwlHeader());
         ret.setContext(new SwlContext());
 
@@ -253,6 +268,14 @@ public class SwlTransfer {
             }
             ret.getParts().add(data);
         }
+        if (attaches != null) {
+            for (String attach : attaches) {
+                if (attach != null) {
+                    builder.append(attach);
+                }
+                ret.getAttaches().add(attach);
+            }
+        }
 
         String data = builder.toString();
         ret.getContext().setData(data);
@@ -278,6 +301,7 @@ public class SwlTransfer {
     public SwlData receive(String clientId, SwlData request) {
         SwlData ret = new SwlData();
         ret.setParts(new ArrayList<>());
+        ret.setAttaches(new ArrayList<>());
         ret.setHeader(SwlHeader.copy(request.getHeader()));
         ret.setContext(new SwlContext());
 
@@ -343,6 +367,15 @@ public class SwlTransfer {
             for (String part : parts) {
                 if (part != null) {
                     builder.append(part);
+                }
+            }
+        }
+
+        List<String> attaches = request.getAttaches();
+        if (attaches != null) {
+            for (String attach : attaches) {
+                if (attach != null) {
+                    builder.append(attach);
                 }
             }
         }
@@ -426,15 +459,23 @@ public class SwlTransfer {
         return ret;
     }
 
-    public SwlData send(List<String> parts) {
+    public SwlData sendDefault(List<String> parts, List<String> attaches) {
         String otherPublicKey = getOtherPublicKeyDefault();
-        return send(otherPublicKey, parts);
+        return send(otherPublicKey, parts, attaches);
+    }
+
+    public SwlData sendDefault(List<String> parts) {
+        String otherPublicKey = getOtherPublicKeyDefault();
+        return send(otherPublicKey, parts, null);
+    }
+
+    public SwlData response(String remoteAsymSign, List<String> parts, List<String> attaches) {
+        String otherPublicKey = getOtherPublicKey(remoteAsymSign);
+        return send(otherPublicKey, parts, attaches);
     }
 
     public SwlData response(String remoteAsymSign, List<String> parts) {
         String otherPublicKey = getOtherPublicKey(remoteAsymSign);
-        return send(otherPublicKey, parts);
+        return send(otherPublicKey, parts, null);
     }
-
-
 }
