@@ -493,7 +493,7 @@ public class ResourcesLoader {
         for (File item : files) {
             String name = item.getName();
             String nextPrefix = prefix + "/" + name;
-            if ("".equals(name)) {
+            if (name.isEmpty()) {
                 nextPrefix = prefix;
             }
             if (isJarFile(name)) {
@@ -581,12 +581,12 @@ public class ResourcesLoader {
                     if (!urlStr.startsWith("jar:")) {
                         urlStr = "jar:" + urlStr;
                     }
-                    if (!"".equals(name)) {
+                    if (!name.isEmpty()) {
                         urlStr = urlStr + "!/" + name;
                     }
                     URL key = new URL(urlStr);
                     String value = prefix + "!" + name;
-                    if ("".equals(name)) {
+                    if (name.isEmpty()) {
                         value = prefix;
                     }
                     boolean keep = true;

@@ -56,7 +56,7 @@ public class FtpUtil implements Closeable {
         String[] dirs = serverPath.split("\\/");
         StringBuilder builder = new StringBuilder();
         for (String item : dirs) {
-            if ("".equals(item)) {
+            if (item.isEmpty()) {
                 continue;
             }
             builder.append("/");

@@ -789,7 +789,7 @@ public class WindowsUtil {
                     continue;
                 }
                 String out = OsUtil.runCmd("wmic " + type + " get " + column).trim();
-                if ("".equals(out)) {
+                if (out.isEmpty()) {
                     continue;
                 }
                 String[] arr = out.split("\n");

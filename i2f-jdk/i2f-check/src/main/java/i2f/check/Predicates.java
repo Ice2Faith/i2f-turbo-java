@@ -35,7 +35,7 @@ public class Predicates {
     }
 
     public static boolean isEmptyString(String str) {
-        return str == null || "".equals(str);
+        return str == null || str.isEmpty();
     }
 
     public static boolean nonEmptyString(String str) {
@@ -43,7 +43,7 @@ public class Predicates {
     }
 
     public static boolean isBlankString(String str) {
-        return str == null || "".equals(str.trim());
+        return str == null || str.trim().isEmpty();
     }
 
     public static boolean nonBlankString(String str) {

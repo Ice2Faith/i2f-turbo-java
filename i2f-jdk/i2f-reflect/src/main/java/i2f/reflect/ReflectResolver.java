@@ -443,7 +443,7 @@ public class ReflectResolver {
             ret[i] = parameters[i].getName();
             if (nameProvider != null) {
                 String name = nameProvider.apply(parameters[i], method);
-                if (name != null && !"".equals(name)) {
+                if (name != null && !name.isEmpty()) {
                     ret[i] = name;
                 }
             }
@@ -1126,7 +1126,7 @@ public class ReflectResolver {
                 methodName = methodName.substring(prefix.length());
             }
         }
-        if ("".equals(methodName)) {
+        if (methodName.isEmpty()) {
             return methodName;
         }
         return methodName.substring(0, 1).toLowerCase() + methodName.substring(1);
@@ -1136,7 +1136,7 @@ public class ReflectResolver {
         if (name == null) {
             return null;
         }
-        if ("".equals(name)) {
+        if (name.isEmpty()) {
             return name;
         }
         return name.substring(0, 1).toUpperCase() + name.substring(1);
@@ -1146,7 +1146,7 @@ public class ReflectResolver {
         if (name == null) {
             return null;
         }
-        if ("".equals(name)) {
+        if (name.isEmpty()) {
             return name;
         }
         return name.substring(0, 1).toLowerCase() + name.substring(1);

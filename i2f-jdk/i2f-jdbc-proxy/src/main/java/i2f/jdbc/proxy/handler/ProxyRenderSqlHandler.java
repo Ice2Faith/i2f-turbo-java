@@ -62,7 +62,7 @@ public class ProxyRenderSqlHandler implements InvocationHandler {
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
             String name = ReflectResolver.getAnnotationValue(parameter, Name.class, "value");
-            if (name != null && !"".equals(name)) {
+            if (name != null && !name.isEmpty()) {
                 names[i] = name;
             } else {
                 names[i] = parameter.getName();

@@ -97,7 +97,7 @@ public class DynamicDataSourceConfig implements BeanFactoryAware, ApplicationCon
             boolean isUsed = false;
             for (String item : arr) {
                 String k = item.trim();
-                if ("".equals(k)) {
+                if (k.isEmpty()) {
                     continue;
                 }
                 if (!groupMap.containsKey(k)) {
@@ -137,13 +137,13 @@ public class DynamicDataSourceConfig implements BeanFactoryAware, ApplicationCon
             if (className == null) {
                 className = "";
             }
-            if ("".equals(className)) {
+            if (className.isEmpty()) {
                 className = environment.getProperty("spring.datasource.type");
                 if (className == null) {
                     className = "";
                 }
             }
-            if ("".equals(className)) {
+            if (className.isEmpty()) {
                 dataSourceMeta.setType(className);
             }
         }
@@ -159,7 +159,7 @@ public class DynamicDataSourceConfig implements BeanFactoryAware, ApplicationCon
         DataSourceBuilder<?> builder = DataSourceBuilder.create();
         try {
             String className = dataSourceMeta.getType();
-            if (className != null && !"".equals(className)) {
+            if (className != null && !className.isEmpty()) {
                 Class<? extends DataSource> clazz = (Class<? extends DataSource>) Class.forName(className);
                 if (clazz != null) {
                     builder.type(clazz);

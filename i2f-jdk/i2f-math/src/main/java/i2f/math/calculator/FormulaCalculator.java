@@ -262,7 +262,8 @@ public class FormulaCalculator {
 
     public static String buildPrepareFormula(String preFormula, List<String> flags, List<String> values) {
         String ret = preFormula;
-        for (int i = 0; i < flags.size(); i++) {
+        int flagsSize = flags.size();
+        for (int i = 0; i < flagsSize; i++) {
             ret = ret.replaceAll(flags.get(i), values.get(i));
         }
         return ret;
@@ -422,7 +423,7 @@ public class FormulaCalculator {
         m_flagStack.clear();
         m_numberStack.clear();
 
-        if (formula.trim().length() == 0) {
+        if (formula.trim().isEmpty()) {
             throw new RuntimeException("输入串长度被截断或是无意义空串，请重试");
         }
 
@@ -437,7 +438,7 @@ public class FormulaCalculator {
             } else {
                 String flg = getFlag(formula.substring(i), base);
                 flg = flg.trim();
-                if (flg.length() > 0) {
+                if (!flg.isEmpty()) {
                     if ("dehex".equalsIgnoreCase(flg)) {
                         int baseCur = Integer.parseInt(String.valueOf(m_numberStack.pop().intValue()));
                         int bakAddCount = p_addCount;
@@ -606,8 +607,8 @@ public class FormulaCalculator {
     }
 
     private boolean isLegalOperator(String ope) {
-        for (int i = 0; i < m_flags.size(); i++) {
-            if (ope.equalsIgnoreCase(m_flags.get(i))) {
+        for (String flag : m_flags) {
+            if (ope.equalsIgnoreCase(flag)) {
                 return true;
             }
         }
@@ -618,7 +619,7 @@ public class FormulaCalculator {
         String top = m_flagStack.peek();
         if (isSingleNumberOperator(top))//单目运算符号，只取出一个操作数计算即可
         {
-            if (m_numberStack.size() < 1) {
+            if (m_numberStack.isEmpty()) {
                 return false;
             }
             BigDecimal num2 = BigDecimal.ZERO;
@@ -644,7 +645,8 @@ public class FormulaCalculator {
     }
 
     private boolean isSingleNumberOperator(String ope) {
-        for (int i = m_indexOfSingleNumberOperatorBegin; i < m_flags.size(); i++) {
+        int flagsSize = m_flags.size();
+        for (int i = m_indexOfSingleNumberOperatorBegin; i < flagsSize; i++) {
             if (ope.equalsIgnoreCase(m_flags.get(i))) {
                 return true;
             }
@@ -879,11 +881,13 @@ public class FormulaCalculator {
 
     private int getFlagIndex(String flg) {
         int ret = -1;
-        for (int i = 0; i < m_flags.size(); i++) {
-            if (flg.equalsIgnoreCase(m_flags.get(i))) {
+        int i = 0;
+        for (String flag : m_flags) {
+            if (flg.equalsIgnoreCase(flag)) {
                 ret = i;
                 break;
             }
+            i++;
         }
         return ret;
     }

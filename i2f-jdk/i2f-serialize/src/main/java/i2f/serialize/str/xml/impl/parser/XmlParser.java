@@ -90,12 +90,12 @@ public class XmlParser {
         int offset = 0;
         while (offset < str.length()) {
             XmlCtx ctx = readOneTag(str, offset);
-            if (ctx.getName() == null && (ctx.getXml() == null || "".equals(ctx.getXml().trim()))) {
+            if (ctx.getName() == null && (ctx.getXml() == null || ctx.getXml().trim().isEmpty())) {
 
             } else {
                 Map<String, String> attrs = null;
                 String attrLine = ctx.getAttr();
-                if (attrLine != null && !"".equals(attrLine)) {
+                if (attrLine != null && !attrLine.isEmpty()) {
                     attrs = new HashMap<>();
                     List<RegexMatchItem> items = RegexUtil.regexFinds(attrLine, REG_KEY_EQUAL_VALUE);
                     for (RegexMatchItem item : items) {
@@ -113,7 +113,7 @@ public class XmlParser {
                 node.setAttrs(attrs);
                 root.add(node);
                 System.out.println(ctx);
-                if (ctx.getContent() != null && !"".equals(ctx.getContent())) {
+                if (ctx.getContent() != null && !ctx.getContent().isEmpty()) {
                     parseNext(ctx.getContent(), node);
                 }
             }

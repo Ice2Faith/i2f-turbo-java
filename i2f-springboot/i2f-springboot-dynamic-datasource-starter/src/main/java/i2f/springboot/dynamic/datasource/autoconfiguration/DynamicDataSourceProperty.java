@@ -60,7 +60,7 @@ public class DynamicDataSourceProperty implements InitializingBean {
             primary = "";
         }
         primary = primary.trim();
-        if ("".equals(primary)) {
+        if (primary.isEmpty()) {
             primary = DataSourceType.MASTER;
         }
 

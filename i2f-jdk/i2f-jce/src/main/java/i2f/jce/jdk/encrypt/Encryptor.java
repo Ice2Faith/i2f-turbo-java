@@ -91,10 +91,10 @@ public class Encryptor {
 
     public static String algorithmNameOf(String algorithm, String mode, String padding) {
         String ret = algorithm;
-        if (mode != null && !"".equals(mode)) {
+        if (mode != null && !mode.isEmpty()) {
             ret += "/" + mode;
         }
-        if (padding != null && !"".equals(padding)) {
+        if (padding != null && !padding.isEmpty()) {
             ret += "/" + padding;
         }
         return ret;
@@ -239,7 +239,7 @@ public class Encryptor {
     private static SecretKeyFactory getSecretKeyFactory(String algorithmName, String providerName) throws Exception {
         providerName = checkProvider(providerName);
         SecretKeyFactory factory = null;
-        if (providerName == null || "".equals(providerName)) {
+        if (providerName == null || providerName.isEmpty()) {
             factory = SecretKeyFactory.getInstance(algorithmName);
         } else {
             factory = SecretKeyFactory.getInstance(algorithmName, providerName);
@@ -382,7 +382,7 @@ public class Encryptor {
     }
 
     public static SecureRandom getSecureRandom(String secureRandomAlgorithmName) throws NoSuchAlgorithmException {
-        if (secureRandomAlgorithmName == null || "".equals(secureRandomAlgorithmName)) {
+        if (secureRandomAlgorithmName == null || secureRandomAlgorithmName.isEmpty()) {
             secureRandomAlgorithmName = "SHA1PRNG";
         }
         SecureRandom random = SecureRandom.getInstance(secureRandomAlgorithmName);
