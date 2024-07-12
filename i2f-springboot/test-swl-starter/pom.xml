@@ -9,7 +9,7 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>test-secure-starter</artifactId>
+    <artifactId>test-swl-starter</artifactId>
 
     <dependencies>
         <dependency>

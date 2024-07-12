@@ -26,10 +26,9 @@
         <module>i2f-springboot-totp-starter</module>
         <module>i2f-springboot-http-proxy-starter</module>
         <module>i2f-springboot-zookeeper-starter</module>
-        <module>i2f-springboot-secure-starter</module>
-        <module>test-secure-starter</module>
-        <module>test-xxl-job</module>
         <module>i2f-springboot-swl-starter</module>
+        <module>test-swl-starter</module>
+        <module>test-xxl-job</module>
     </modules>
 
 
