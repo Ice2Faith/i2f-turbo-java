@@ -6,6 +6,7 @@ package i2f.swl.consts;
  * @desc
  */
 public enum SwlCode {
+    INTERNAL_EXCEPTION(0),
 
     ASYMMETRIC_EXCEPTION(1000),
     ASYMMETRIC_ENCRYPT_EXCEPTION(1100),
