@@ -28,5 +28,6 @@
     <modules>
         <module>i2f-jakarta-web</module>
         <module>i2f-jakarta-all</module>
+        <module>i2f-jakarta-swl</module>
     </modules>
 </project>

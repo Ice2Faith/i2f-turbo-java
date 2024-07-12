@@ -2,6 +2,7 @@ package i2f.springboot.swl.spring;
 
 import i2f.swl.consts.SwlCode;
 import i2f.swl.exception.SwlException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,9 +20,16 @@ import java.util.Map;
 @ConditionalOnExpression("${i2f.swl.exception-handler.enable:true}")
 @RestControllerAdvice
 public class SwlExceptionHandler {
+
+    @Autowired(required = false)
+    private ISwlExceptionAdvideConverter advideConverter;
+
     @ExceptionHandler(SwlException.class)
     public Object handleSwlException(SwlException e) {
         e.printStackTrace();
+        if (advideConverter != null) {
+            return advideConverter.convert(e);
+        }
         SwlCode swlCode = SwlCode.INTERNAL_EXCEPTION;
         int code = e.code();
         for (SwlCode value : SwlCode.values()) {

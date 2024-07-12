@@ -18,6 +18,7 @@ public class HttpServletRequestProxyWrapper extends HttpServletRequestWrapper {
     protected Map<String, String> headers = new ConcurrentHashMap<>();
     protected String queryString;
     protected Map<String, List<String>> parameterMap;
+    protected String contentType;
 
     public HttpServletRequestProxyWrapper(HttpServletRequest request) throws IOException {
         super(request);
@@ -53,6 +54,18 @@ public class HttpServletRequestProxyWrapper extends HttpServletRequestWrapper {
 
     public void setAttachHeader(String name, String val) {
         headers.put(name, val);
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    @Override
+    public String getContentType() {
+        if (contentType != null && !contentType.isEmpty()) {
+            return contentType;
+        }
+        return super.getContentType();
     }
 
     public String getAttachHeader(String name) {
@@ -153,12 +166,12 @@ public class HttpServletRequestProxyWrapper extends HttpServletRequestWrapper {
     @Override
     public Enumeration<String> getHeaders(String name) {
         List<String> ret = new ArrayList<>();
+        if (headers.containsKey(name)) {
+            ret.add(headers.get(name));
+        }
         Enumeration<String> enums = super.getHeaders(name);
         while (enums.hasMoreElements()) {
             ret.add(enums.nextElement());
-        }
-        if (headers.containsKey(name)) {
-            ret.add(headers.get(name));
         }
         return Collections.enumeration(ret);
     }
@@ -166,12 +179,12 @@ public class HttpServletRequestProxyWrapper extends HttpServletRequestWrapper {
     @Override
     public Enumeration<String> getHeaderNames() {
         List<String> ret = new ArrayList<>();
+        for (String item : headers.keySet()) {
+            ret.add(item);
+        }
         Enumeration<String> enums = super.getHeaderNames();
         while (enums.hasMoreElements()) {
             ret.add(enums.nextElement());
-        }
-        for (String item : headers.keySet()) {
-            ret.add(item);
         }
         return Collections.enumeration(ret);
     }

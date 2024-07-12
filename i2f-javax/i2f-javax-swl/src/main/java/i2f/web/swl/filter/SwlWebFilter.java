@@ -1,4 +1,4 @@
-package i2f.springboot.swl.filter;
+package i2f.web.swl.filter;
 
 import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
