@@ -31,6 +31,7 @@ public class SwlWebConfig {
     protected boolean filterResponseException=false;
     protected List<String> whiteListIn;
     protected List<String> whiteListOut;
+    protected List<String> attachedHeaderNames;
     protected Class<? extends ISwlAsymmetricEncryptorSupplier> asymAlgoClass = SwlRsaAsymmetricEncryptorSupplier.class;
     protected Class<? extends ISwlSymmetricEncryptorSupplier> symmAlgoClass = SwlAesSymmetricEncryptorSupplier.class;
     protected Class<? extends ISwlMessageDigester> digestAlgoClass = SwlSha256MessageDigester.class;

@@ -13,5 +13,6 @@ import java.util.List;
 public class SwlData {
     private SwlHeader header;
     private List<String> parts;
+    private List<String> attaches;
     private SwlContext context;
 }

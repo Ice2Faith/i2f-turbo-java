@@ -1,9 +1,9 @@
 import SwlWebCtrl from "./SwlWebCtrl";
 import SwlRsaAsymmetricEncryptorSupplier from "../core/impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
-import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
 import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
 import SwlBase64Obfuscator from "../core/impl/SwlBase64Obfuscator";
-import SwlAntherdSm4SymmetricEncryptorSupplier from "../extension/impl/sm/antherd/supplier/SwlAntherdSm4SymmetricEncryptorSupplier";
+import SwlAntherdSm4SymmetricEncryptorSupplier
+    from "../extension/impl/sm/antherd/supplier/SwlAntherdSm4SymmetricEncryptorSupplier";
 
 /**
  * @return SwlWebConfig
@@ -52,6 +52,12 @@ function SwlWebConfig() {
      * @type {string[]}
      */
     this.whiteListOut = ['/**/swl/**'];
+
+    /**
+     *
+     * @type {string[]}
+     */
+    this.attachedHeaderNames = null;
     /**
      * @type {ISwlAsymmetricEncryptorSupplier}
      */

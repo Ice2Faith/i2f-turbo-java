@@ -276,6 +276,25 @@ SwlTransfer.prototype.acceptOtherPublicKey = function (otherPublicKey) {
 
 /**
  *
+ * @return {String}
+ */
+SwlTransfer.prototype.getSelfSwapKey = function () {
+    let selfPublicKey = this.getSelfPublicKey();
+    return this.obfuscateEncode(selfPublicKey);
+}
+
+/**
+ *
+ * @param otherSwapKey {String}
+ * @return {void}
+ */
+SwlTransfer.prototype.acceptOtherSwapKey = function (otherSwapKey) {
+    let otherPublicKey = this.obfuscateDecode(otherSwapKey);
+    this.acceptOtherPublicKey(otherPublicKey);
+}
+
+/**
+ *
  * @return {AsymKeyPair}
  */
 SwlTransfer.prototype.resetSelfKeyPair = function () {
@@ -320,11 +339,13 @@ SwlTransfer.prototype.obfuscateDecode = function (data) {
  *
  * @param remotePublicKey {String}
  * @param parts {string[]}
+ * @param attaches {string[]|null}
  * @return {SwlData}
  */
-SwlTransfer.prototype.send = function (remotePublicKey, parts) {
+SwlTransfer.prototype.send = function (remotePublicKey, parts, attaches = null) {
     let ret = new SwlData();
     ret.parts = [];
+    ret.attaches = []
     ret.header = new SwlHeader();
     ret.context = new SwlContext();
 
@@ -373,6 +394,15 @@ SwlTransfer.prototype.send = function (remotePublicKey, parts) {
         }
         ret.parts.push(data);
     }
+    if (attaches) {
+        for (let i = 0; i < attaches.length; i++) {
+            let attach = attaches[i]
+            if (attach) {
+                builder += attach;
+            }
+            ret.attaches.push(attach);
+        }
+    }
 
     let data = builder;
     ret.context.data = (data);
@@ -404,6 +434,7 @@ SwlTransfer.prototype.send = function (remotePublicKey, parts) {
 SwlTransfer.prototype.receive = function (clientId, request) {
     let ret = new SwlData();
     ret.parts = ([]);
+    ret.attaches = ([]);
     ret.header = (SwlHeader.copy(request.header));
     ret.context = (new SwlContext());
 
@@ -471,6 +502,16 @@ SwlTransfer.prototype.receive = function (clientId, request) {
             if (part != null) {
                 builder += part;
             }
+        }
+    }
+    let attaches = request.attaches;
+    if (attaches != null) {
+        for (let i = 0; i < attaches.length; i++) {
+            let attach = attaches[i]
+            if (attach != null) {
+                builder += attach;
+            }
+            ret.attaches.push(attach)
         }
     }
 
@@ -557,22 +598,24 @@ SwlTransfer.prototype.receive = function (clientId, request) {
 /**
  *
  * @param parts {string[]}
+ * @param attaches {string[]|null}
  * @return {SwlData}
  */
-SwlTransfer.prototype.sendDefault = function (parts) {
+SwlTransfer.prototype.sendDefault = function (parts, attaches = null) {
     let otherPublicKey = this.getOtherPublicKeyDefault();
-    return this.send(otherPublicKey, parts);
+    return this.send(otherPublicKey, parts, attaches);
 }
 
 /**
  *
  * @param remoteAsymSign {String}
  * @param parts {string[]}
+ * @param attaches {string[]|null}
  * @return {SwlData}
  */
-SwlTransfer.prototype.response = function (remoteAsymSign, parts) {
+SwlTransfer.prototype.response = function (remoteAsymSign, parts, attaches = null) {
     let otherPublicKey = this.getOtherPublicKey(remoteAsymSign);
-    return this.send(otherPublicKey, parts);
+    return this.send(otherPublicKey, parts, attaches);
 }
 
 export default SwlTransfer

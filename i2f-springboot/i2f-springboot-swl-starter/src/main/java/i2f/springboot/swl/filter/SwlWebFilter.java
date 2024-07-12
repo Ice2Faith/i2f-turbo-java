@@ -130,10 +130,19 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
                     }
                 }
 
+                List<String> attachedHeaders = new ArrayList<>();
+                if (this.config.getAttachedHeaderNames() != null) {
+                    for (String headerName : this.config.getAttachedHeaderNames()) {
+                        String header = request.getHeader(headerName);
+                        attachedHeaders.add(header);
+                    }
+                }
+
                 // 构造请求数据
                 SwlData data = new SwlData();
                 data.setHeader(deserializeHeader(swlh));
                 data.setParts(Arrays.asList(srcText, swlp));
+                data.setAttaches(attachedHeaders);
 
                 // 保存原始请求头
                 nextRequest.setAttribute(SwlWebConsts.SWL_REQUEST_RAW_HEADER_ATTR_KEY, data.getHeader());
@@ -274,7 +283,19 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
             responseText=jsonSerializer.serialize(responseText);
         }
 
-        SwlData responseData = transfer.response(clientAsymSign, Collections.singletonList(responseText));
+
+        List<String> attachedHeaders = new ArrayList<>();
+        if (this.config.getAttachedHeaderNames() != null) {
+            for (String headerName : this.config.getAttachedHeaderNames()) {
+                String header = response.getHeader(headerName);
+                attachedHeaders.add(header);
+            }
+        }
+
+        List<String> parts = new ArrayList<>();
+        parts.add(responseText);
+
+        SwlData responseData = transfer.response(clientAsymSign, parts);
         String responseSwlh = serializeHeader(responseData.getHeader());
         response.setHeader(config.getHeaderName(), responseSwlh);
         response.setHeader(config.getRemoteAsymSignHeaderName(), responseData.getContext().getLocalAsymSign());

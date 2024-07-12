@@ -4,7 +4,7 @@ import SwlHeader from "./SwlHeader";
 /**
  * @return {SwlData}
  */
-function SwlData(header = new SwlHeader(), parts = []) {
+function SwlData(header = new SwlHeader(), parts = [], attaches = []) {
     /**
      * @type SwlHeader
      */
@@ -13,6 +13,10 @@ function SwlData(header = new SwlHeader(), parts = []) {
      * @type String[]
      */
     this.parts = parts
+    /**
+     * @type {string[]|null}
+     */
+    this.attaches = attaches
     /**
      * SwlContext
      */
