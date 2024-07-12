@@ -16,6 +16,7 @@ import java.util.Arrays;
  * @date 2024/6/12 9:44
  * @desc
  */
+@ConditionalOnClass(CorsFilter.class)
 @ConditionalOnExpression("${i2f.spring.cors.enable:true}")
 @Slf4j
 @ConfigurationProperties(prefix = "i2f.spring.cors")

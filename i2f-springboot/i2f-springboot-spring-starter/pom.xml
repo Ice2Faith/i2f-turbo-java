@@ -47,6 +47,10 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-jackson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-slf4j</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

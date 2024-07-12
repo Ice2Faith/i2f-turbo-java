@@ -9,6 +9,113 @@
 
 ---
 
+## 配置示例
+```yml
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            # 使用内置的简易客户端配置几个客户端实例
+            # 这里就定义了两个应用
+            # 和使用其他服务发现中的应用名作用一样
+            # 比如 eureka 或者 nacos 等服务发现
+            manage-app:
+              # 这个应用有一个实例
+              - uri: http://localhost:8081/
+            report-app:
+              # 这个应用则有两个实例
+              - uri: http://localhost:8082/
+              - uri: http://localhost:8083/
+    gateway:
+      # 路由配置列表
+      routes:
+        # 转发系统路由，路径前缀示例
+        # 原始URL：http://gateway.com/system/user/info
+        # 转发URL:http://system.com/user/info
+        # id 在配置中唯一即可，无特殊要求
+        - id: system
+          # 转发到的 baseURL
+          uri: http://system.com
+          predicates:
+            # 满足以 /system/ 开头的所有请求都转发
+            - Path=/system/**
+          filters:
+            # 这里去除一层路径，也就是把 /system 这一层去掉
+            - StripPrefix=1
+        # 下面是拓展示例
+        # 原始URL: http://localhost/upload/icon/2024/demo.png
+        # 转发URL：http://192.168.1.100:8861/file/2024/demo.png
+        - id: file
+          # 转发到的 baseURL
+          uri: http://192.168.1.100:8861/file
+          predicates:
+            - Path=/upload/icon/**
+          filters:
+            - StripPrefix=2
+        # 结合使用服务发现能力进行负载均衡
+        - id: report-app
+          # 这里就是使用服务发现的服务名，上面那样定义也是可以的
+          uri: http://report-app/
+          predicates:
+            - Path=/api/report/**
+          filters:
+            - StripPrefix=2
+        # 添加请求头/响应头
+        - id: route1
+          uri: http://example.org
+          predicates:
+            - Path=/api/service1/**  # 路径匹配规则
+          filters:
+            - AddRequestHeader=X-Request-Foo, Bar  # 添加请求头
+            - AddResponseHeader=X-Response-Red, Blue # 添加响应头
+
+        # 路径重写
+        - id: route2
+          uri: http://example.org
+          predicates:
+            - Path=/api/service2/**
+            - Method=GET,POST  # 只允许 GET 和 POST 方法
+          filters:
+            - RewritePath=/api/service2/(?<segment>.*), /$\{segment}  # URL 重写
+        
+        # 第三条路由规则
+        - id: route3
+          uri: https://example.org
+          predicates:
+            - Path=/red/{segment},/blue/{segment}
+
+      # 全局过滤器配置
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin  # 去重HTTP响应头
+
+      # 用于控制 HTTP 请求的负载均衡器配置
+      loadbalancer:
+        use404: true  # 当无可用服务时返回404
+
+      # HTTP请求重试配置
+      retry:
+        enabled: true
+        retries: 3  # 重试次数
+        statuses: BAD_GATEWAY,GATEWAY_TIMEOUT  # 触发重试的HTTP状态码
+        methods: GET,POST  # 允许重试的HTTP方法
+        backoff:
+          firstBackoff: 50ms  # 首次重试的延迟
+          maxBackoff: 500ms  # 最大重试延迟
+          factor: 2  # 延迟因子
+          basedOnPreviousValue: false  # 延迟是否基于上一次的延迟时间
+
+      # 跨域配置
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"  # 允许所有域
+            allowedMethods: "*"  # 允许所有方法
+            allowedHeaders: "*"  # 允许所有头
+            allowCredentials: true  # 允许证书
+```
+
 ## 断言 predicates
 
 - 用来匹配路由的，断言为真时，表示匹配上路由

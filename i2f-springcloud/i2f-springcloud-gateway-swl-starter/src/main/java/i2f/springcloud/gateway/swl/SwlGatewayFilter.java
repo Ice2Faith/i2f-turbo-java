@@ -505,7 +505,8 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
     public static SwlWebCtrl parseCtrl(ServerHttpRequest request, SwlWebConfig config) {
         SwlWebCtrl defaultCtrl = config.getDefaultCtrl();
 
-        if (request instanceof MultipartHttpServletRequest) {
+        MediaType contentType = request.getHeaders().getContentType();
+        if(MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)){
             return new SwlWebCtrl(false, defaultCtrl.isOut());
         }
 
