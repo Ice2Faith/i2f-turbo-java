@@ -282,10 +282,6 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
         return chain.filter(mutatedExchange);
     }
 
-    public ServerHttpRequest wrapperServerHttpRequest(ServerHttpRequest request, String swlh) {
-
-
-    }
 
     public ServerHttpResponse wrapperServerHttpResponse(ServerHttpResponse response,
                                                         String finalClientAsymSign,
