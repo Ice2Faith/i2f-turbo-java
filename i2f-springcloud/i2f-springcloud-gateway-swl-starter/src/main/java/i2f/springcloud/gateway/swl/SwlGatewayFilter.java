@@ -72,7 +72,6 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
 
         String method = String.valueOf(request.getMethod());
-
         if ("OPTIONS".equalsIgnoreCase(method)) {
             return chain.filter(exchange);
         }
@@ -116,19 +115,30 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
+        ServerHttpRequest nextRequest = request;
+        ServerHttpResponse nextResponse = response;
+
+        // 获取客户端IP，用以客户端隔离
+        String clientIp = getIp(request);
+        if (clientIp != null) {
+            clientIp = clientIp.replaceAll(":", "-");
+        }
 
         // 获取原始请求的非对称秘钥签名
         // 用于响应时使用，以配对请求
         String clientAsymSign = request.getHeaders().getFirst(config.getRemoteAsymSignHeaderName());
         String serverAsymSign = null;
 
-        ServerHttpRequest nextRequest = request;
-        ServerHttpResponse nextResponse = response;
-
-        // 设置暴露响应头，以支持前端获取这些值
-        applyExposeHeader(response);
 
         if (ctrl.isIn()) {
+            // 请求参数
+            MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(request.getQueryParams());
+
+            // 获取加密后的请求参数
+            String swlp = queryParams.getFirst(config.getParameterName());
+            queryParams.remove(config.getParameterName());
+
+            // 获取请求体
             byte[] body = request.getBody()
                     .defaultIfEmpty(new DefaultDataBufferFactory().allocateBuffer(0))
                     .collectList()
@@ -146,23 +156,6 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         return Mono.just(data);
                     })
                     .block();
-
-
-            // 请求参数
-            MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(request.getQueryParams());
-
-
-            // 获取客户端IP，用以客户端隔离
-            String clientIp = getIp(request);
-            if (clientIp != null) {
-                clientIp = clientIp.replaceAll(":", "-");
-            }
-
-
-            // 获取加密后的请求参数
-            String swlp = queryParams.getFirst(config.getParameterName());
-            queryParams.remove(config.getParameterName());
-
 
             Charset charset = mediaType.getCharset();
             if (charset == null) {
@@ -228,6 +221,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             // 覆盖请求参数
             request.getQueryParams().putAll(replaceParameterMap);
 
+
             // 覆盖真实请求内容类型
             String realContentType = request.getHeaders().getFirst(config.getRealContentTypeHeaderName());
             if (realContentType != null && !realContentType.isEmpty()) {
@@ -235,8 +229,9 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                 request.getHeaders().setContentType(MediaType.parseMediaType(realContentType));
             }
 
-            URI uri = request.getURI();
+            // 替换请求为包装请求
 
+            URI uri = request.getURI();
             String uriStr = uri.toString();
             int idx = uriStr.indexOf("?");
             if (idx >= 0) {
@@ -274,6 +269,10 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             nextResponse = wrapperServerHttpResponse(response, clientAsymSign, serverAsymSign);
         }
 
+        // 设置暴露响应头，以支持前端获取这些值
+        applyExposeHeader(response);
+
+        // 进行下游处理
         ServerWebExchange mutatedExchange = exchange.mutate()
                 .request(nextRequest)
                 .response(nextResponse)
@@ -293,10 +292,34 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                     return super.writeWith(body);
                 }
 
+                ServerHttpResponse delegateResponse = getDelegate();
+
+                // 处理直接下载型接口，推荐还是使用白名单
+                // 小文件可以在这里进行自动处理
+                // 如果是大文件下载，这里可是内存包装
+                // 使用白名单，避免OOM
+                boolean specificResponseBody = false;
+                Collection<String> headerNames = delegateResponse.getHeaders().keySet();
+                for (String item : headerNames) {
+                    if (item == null || item.isEmpty()) {
+                        continue;
+                    }
+                    String str = item.toLowerCase().trim();
+                    if ("content-disposition".equals(str)) {
+                        String header = delegateResponse.getHeaders().getFirst(item);
+                        if (header != null && !header.isEmpty()) {
+                            specificResponseBody = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (specificResponseBody) {
+                    return super.writeWith(body);
+                }
+
                 Flux<DataBuffer> fluxBody = (Flux<DataBuffer>) body;
                 return super.writeWith(fluxBody.buffer().map(dataBuffers -> {
-                    ServerHttpResponse delegateResponse = getDelegate();
-
 
                     DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
                     DataBuffer join = dataBufferFactory.join(dataBuffers);
@@ -318,32 +341,6 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                     if (responseCharset == null || responseCharset.isEmpty()) {
                         responseCharset = "UTF-8";
                     }
-                    MediaType responseMediaType = MediaType.parseMediaType("text/plain;charset=" + responseCharset);
-
-
-                    // 处理直接下载型接口，推荐还是使用白名单
-                    // 小文件可以在这里进行自动处理
-                    // 如果是大文件下载，这里可是内存包装
-                    // 使用白名单，避免OOM
-                    boolean specificResponseBody = false;
-                    Collection<String> headerNames = delegateResponse.getHeaders().keySet();
-                    for (String item : headerNames) {
-                        if (item == null || item.isEmpty()) {
-                            continue;
-                        }
-                        String str = item.toLowerCase().trim();
-                        if ("content-disposition".equals(str)) {
-                            String header = delegateResponse.getHeaders().getFirst(item);
-                            if (header != null && !header.isEmpty()) {
-                                specificResponseBody = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (specificResponseBody) {
-                        return bufferFactory().wrap(responseBody);
-                    }
 
 
                     String responseText = null;
@@ -353,10 +350,10 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         throw new SwlException(SwlCode.INTERNAL_EXCEPTION.code(), e.getMessage(), e);
                     }
 
-//                                    Object responseString = request.getAttribute(SwlWebConsts.SWL_STRING_RESPONSE);
-//                                    if(Boolean.TRUE.equals(responseString)){
-//                                        responseText=jsonSerializer.serialize(responseText);
-//                                    }
+//                    Object responseString = request.getAttribute(SwlWebConsts.SWL_STRING_RESPONSE);
+//                    if (Boolean.TRUE.equals(responseString)) {
+//                        responseText = jsonSerializer.serialize(responseText);
+//                    }
 
 
                     List<String> attachedHeaders = new ArrayList<>();
@@ -396,6 +393,8 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                             delegateResponse.getHeaders().set(config.getCurrentAsymKeyHeaderName(), transfer.obfuscateEncode(selfPublicKey));
                         }
                     }
+
+                    MediaType responseMediaType = MediaType.parseMediaType("text/plain;charset=" + responseCharset);
                     delegateResponse.getHeaders().setContentType(responseMediaType);
 
                     // 响应数据
