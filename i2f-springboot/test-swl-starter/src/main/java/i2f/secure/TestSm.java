@@ -5,7 +5,6 @@ import com.antherd.smcrypto.sm2.Sm2;
 import com.antherd.smcrypto.sm3.Sm3;
 import com.antherd.smcrypto.sm4.Sm4;
 import i2f.extension.jce.sm.antherd.encrypt.asymmetric.Sm2Encryptor;
-import i2f.jce.jdk.encrypt.asymmetric.AsymmetricEncryptor;
 import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
 
 /**
