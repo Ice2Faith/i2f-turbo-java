@@ -13,6 +13,7 @@ import i2f.swl.std.supplier.ISwlAsymmetricEncryptorSupplier;
 import i2f.swl.std.supplier.ISwlSymmetricEncryptorSupplier;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -52,21 +53,45 @@ public class SwlSpringAutoConfiguration {
     @Autowired
     private IExpireCache<String, Object> expireCache;
 
+    @Autowired
+    private BeanFactory beanFactory;
+
+
+    public <T> T getBeanByTypeOrNewInstance(Class<T> clazz) {
+        try {
+            T ret = beanFactory.getBean(clazz);
+            if (ret != null) {
+                return ret;
+            }
+        } catch (Exception e) {
+        }
+        try {
+            T ret = ReflectResolver.getInstance(clazz);
+            return ret;
+        } catch (Exception e) {
+
+        }
+        throw new IllegalStateException("get bean or new instance exception for class: " + clazz);
+    }
 
     @ConditionalOnMissingBean(SwlTransfer.class)
     @Bean
     public SwlTransfer swlTransfer() {
         SwlTransfer ret = new SwlTransfer();
         try {
+
+        } catch (Exception e) {
+        }
+        try {
             Class<? extends ISwlAsymmetricEncryptorSupplier> clazz = webProperties.getAsymAlgoClass();
-            ISwlAsymmetricEncryptorSupplier supplier = ReflectResolver.getInstance(clazz);
+            ISwlAsymmetricEncryptorSupplier supplier = getBeanByTypeOrNewInstance(clazz);
             ret.setAsymmetricEncryptorSupplier(supplier);
         } catch (Exception e) {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
         try {
             Class<? extends ISwlSymmetricEncryptorSupplier> clazz = webProperties.getSymmAlgoClass();
-            ISwlSymmetricEncryptorSupplier supplier = ReflectResolver.getInstance(clazz);
+            ISwlSymmetricEncryptorSupplier supplier = getBeanByTypeOrNewInstance(clazz);
             ret.setSymmetricEncryptorSupplier(supplier);
         } catch (Exception e) {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
@@ -74,7 +99,7 @@ public class SwlSpringAutoConfiguration {
 
         try{
             Class<? extends ISwlMessageDigester> clazz = webProperties.getDigestAlgoClass();
-            ISwlMessageDigester digester = ReflectResolver.getInstance(clazz);
+            ISwlMessageDigester digester = getBeanByTypeOrNewInstance(clazz);
             ret.setMessageDigester(digester);
         }catch(Exception e){
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(),e.getMessage(),e);
@@ -82,7 +107,7 @@ public class SwlSpringAutoConfiguration {
 
         try{
             Class<? extends ISwlObfuscator> clazz = webProperties.getObfuscateAlgoClass();
-            ISwlObfuscator obfuscator = ReflectResolver.getInstance(clazz);
+            ISwlObfuscator obfuscator = getBeanByTypeOrNewInstance(clazz);
             ret.setObfuscator(obfuscator);
         }catch(Exception e){
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(),e.getMessage(),e);

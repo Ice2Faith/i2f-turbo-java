@@ -1,4 +1,4 @@
-package i2f.springboot.swl.filter;
+package i2f.web.swl.filter;
 
 /**
  * @author Ice2Faith
