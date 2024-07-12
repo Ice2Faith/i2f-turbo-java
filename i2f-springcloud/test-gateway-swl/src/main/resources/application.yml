@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            backend-app:
+              - uri: http://localhost:8082/
+
+    gateway:
+      routes:
+        - id: backend-app
+          uri: https://backend-app/app
+          predicates:
+            - Path=/app/**
+          filters:
+            - StripPrefix=1
+
+i2f:
+  spring:
+    web:
+      mapping:
+        enable: false

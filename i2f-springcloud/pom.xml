@@ -17,6 +17,7 @@
         <module>i2f-springcloud-discovery-starter</module>
         <module>i2f-springcloud-gateway-starter</module>
         <module>i2f-springcloud-gateway-swl-starter</module>
+        <module>test-gateway-swl</module>
     </modules>
 
     <properties>

@@ -3,8 +3,7 @@
     {
       "name": "i2f.gateway.swl",
       "type": "i2f.springcloud.gateway.swl.SwlGatewayAutoConfiguration",
-      "sourceType": i2f.springcloud.gateway.swl.SwlGatewayAutoConfiguration
-      "
+      "sourceType": "i2f.springcloud.gateway.swl.SwlGatewayAutoConfiguration"
     },
     {
       "name": "i2f.swl.transfer",
