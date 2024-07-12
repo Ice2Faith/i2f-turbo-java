@@ -21,7 +21,7 @@ import java.security.PublicKey;
  * @desc
  */
 public class SwlRsaAsymmetricEncryptor implements ISwlAsymmetricEncryptor {
-    private AsymmetricType asymmetricType = RsaType.NONE_PKCS1PADDING;
+    private AsymmetricType asymmetricType = RsaType.ECB_PKCS1PADDING;
     private IAsymmetricEncryptor encryptor = new AsymmetricEncryptor(asymmetricType);
 
     @Override

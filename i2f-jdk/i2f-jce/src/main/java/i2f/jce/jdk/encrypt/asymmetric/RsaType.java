@@ -11,25 +11,13 @@ public enum RsaType implements AsymmetricType {
      */
     DEFAULT("RSA", false, true),
     /**
-     * 默认工作模式, PKCS1Padding模式填充
-     */
-    NONE_PKCS1PADDING("RSA/None/PKCS1Padding", false, true),
-    /**
      * 无向量加密模式, PKCS1Padding模式填充
      */
     ECB_PKCS1PADDING("RSA/ECB/PKCS1Padding", false, true),
     /**
-     * 默认工作模式, PKCS1Padding模式填充
-     */
-    NONE_PKCS5PADDING("RSA/None/PKCS5Padding", false, true),
-    /**
      * 无向量加密模式, PKCS5Padding模式填充
      */
     ECB_PKCS5PADDING("RSA/ECB/PKCS5Padding", false, true),
-    /**
-     * 默认工作模式, OAEPPadding模式填充
-     */
-    NONE_OAEPPadding("RSA/None/OAEPPadding", false, true),
     /**
      * 无向量加密模式, OAEPPadding模式填充
      */

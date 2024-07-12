@@ -2,8 +2,8 @@ import SwlWebCtrl from "./SwlWebCtrl";
 import SwlRsaAsymmetricEncryptorSupplier from "../core/impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
 import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
 import SwlBase64Obfuscator from "../core/impl/SwlBase64Obfuscator";
-import SwlAntherdSm4SymmetricEncryptorSupplier
-    from "../extension/impl/sm/antherd/supplier/SwlAntherdSm4SymmetricEncryptorSupplier";
+import SwlAesSymmetricEncryptorSupplier
+    from "@/i2f-turbo-web/i2f-swl/core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
 
 /**
  * @return SwlWebConfig
@@ -66,7 +66,7 @@ function SwlWebConfig() {
      *
      * @type {ISwlSymmetricEncryptorSupplier}
      */
-    this.symmAlgoSupplier = new SwlAntherdSm4SymmetricEncryptorSupplier();
+    this.symmAlgoSupplier = new SwlAesSymmetricEncryptorSupplier();
     /**
      *
      * @type {ISwlMessageDigester}

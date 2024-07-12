@@ -3,8 +3,8 @@ package i2f.extension.swl.impl.bc;
 import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
 import i2f.extension.jce.bc.BcProvider;
+import i2f.extension.jce.bc.encrypt.asymmetric.BcAsymmetricEncryptor;
 import i2f.jce.jdk.encrypt.Encryptor;
-import i2f.jce.jdk.encrypt.asymmetric.AsymmetricEncryptor;
 import i2f.jce.jdk.encrypt.asymmetric.AsymmetricType;
 import i2f.jce.jdk.encrypt.asymmetric.RsaType;
 import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
@@ -23,8 +23,8 @@ import java.security.PublicKey;
  * @desc
  */
 public class SwlBcRsa2048AsymmetricEncryptor implements ISwlAsymmetricEncryptor {
-    private AsymmetricType asymmetricType = RsaType.NONE_PKCS1PADDING;
-    private IAsymmetricEncryptor encryptor = new AsymmetricEncryptor(asymmetricType);
+    private AsymmetricType asymmetricType = RsaType.ECB_PKCS1PADDING;
+    private IAsymmetricEncryptor encryptor = new BcAsymmetricEncryptor(asymmetricType);
 
     @Override
     public AsymKeyPair generateKeyPair() {
