@@ -5,6 +5,7 @@ import MatcherUtil from "../../i2f-core/match/MatcherUtil";
 import qs from 'qs'
 import Base64Util from "@/i2f-turbo-web/i2f-core/codec/Base64Util";
 import SwlData from "@/i2f-turbo-web/i2f-swl/core/data/SwlData";
+
 /**
  *
  * @param transfer {SwlTransfer}
@@ -53,8 +54,16 @@ SwlWebFilter.prototype.requestFilter = function (res) {
         swlSendContext.params=params
     }
 
+    let attachedHeaders = []
+    if (this.config.attachedHeaderNames) {
+        for (let i = 0; i < this.config.attachedHeaderNames.length; i++) {
+            let headerName = this.config.attachedHeaderNames[i]
+            attachedHeaders.push(res.headers[headerName])
+        }
+    }
+
     debugger
-    let swlSendData=this.transfer.sendDefault([body,params])
+    let swlSendData = this.transfer.sendDefault([body, params], attachedHeaders)
     swlSendContext.swlSendData=swlSendData
     let swlh=Base64Util.encrypt(qs.stringify(swlSendData.header))
     swlh=this.transfer.obfuscateEncode(swlh)
@@ -104,9 +113,18 @@ SwlWebFilter.prototype.responseFilter = function (res) {
     swlReceiveContext.body=body
     swlReceiveContext.swlh=swlh
 
+    let attachedHeaders = []
+    if (this.config.attachedHeaderNames) {
+        for (let i = 0; i < this.config.attachedHeaderNames.length; i++) {
+            let headerName = this.config.attachedHeaderNames[i]
+            attachedHeaders.push(res.headers[headerName])
+        }
+    }
+
     let recvData=new SwlData()
     recvData.header=qs.parse(swlh)
-    recvData.parts.push(body)
+    recvData.parts = [body]
+    recvData.attaches = attachedHeaders
     let swlReceiveData=this.transfer.receive('server',recvData)
     swlReceiveContext.swlReceiveData=swlReceiveData
     res.headers['Content-Type']=realContentType

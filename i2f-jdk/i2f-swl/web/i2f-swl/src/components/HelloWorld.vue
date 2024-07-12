@@ -57,17 +57,14 @@ export default {
     testSwapKey(){
       debugger
       let transfer=this.$axios.$filter.transfer
-      let publicKey = transfer.getSelfPublicKey();
-      publicKey=transfer.obfuscateEncode(publicKey)
+      let selfSwapKey = transfer.getSelfSwapKey()
       this.$axios({
         url: 'swl/swapKey',
         method: 'post',
-        data: {
-          key: publicKey
-        },
+        data: selfSwapKey,
       }).then(({data}) => {
         debugger
-        transfer.acceptOtherPublicKey(transfer.obfuscateDecode(data))
+        transfer.acceptOtherSwapKey(data)
         console.log('echo', data)
       })
     },

@@ -20,6 +20,9 @@ public abstract class BaseJacksonContextSerializer<T> extends JsonSerializer<T> 
 
     @Override
     public JsonSerializer<?> createContextual(SerializerProvider serializerProvider, BeanProperty beanProperty) throws JsonMappingException {
+        if (beanProperty == null) {
+            return this;
+        }
         this.beanProperty = beanProperty;
         this.fieldClass = beanProperty.getType().getRawClass();
         this.fieldFormat = this.fieldClass.getAnnotation(JsonFormat.class);
