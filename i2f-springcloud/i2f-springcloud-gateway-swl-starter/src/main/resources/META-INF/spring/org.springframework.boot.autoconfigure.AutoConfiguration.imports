@@ -1,0 +1,3 @@
+i2f.springcloud.gateway.swl.SwlGatewayAutoConfiguration
+i2f.springcloud.gateway.swl.SwlMissingBeanConfiguration
+i2f.springcloud.gateway.swl.SwlGatewayFilter
