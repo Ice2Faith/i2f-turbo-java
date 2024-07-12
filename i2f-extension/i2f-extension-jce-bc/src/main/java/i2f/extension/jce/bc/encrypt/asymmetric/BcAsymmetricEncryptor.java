@@ -4,7 +4,6 @@ import i2f.extension.jce.bc.BcProvider;
 import i2f.jce.jdk.encrypt.Encryptor;
 import i2f.jce.jdk.encrypt.asymmetric.AsymmetricEncryptor;
 import i2f.jce.jdk.encrypt.asymmetric.AsymmetricType;
-import i2f.jce.std.digest.IMessageDigester;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -39,6 +38,11 @@ public class BcAsymmetricEncryptor extends AsymmetricEncryptor {
 
     public BcAsymmetricEncryptor(AsymmetricType algorithm, KeyPair keyPair) {
         super(algorithm, keyPair);
+        this.providerName = BcProvider.PROVIDER_NAME;
+    }
+
+    public BcAsymmetricEncryptor(AsymmetricType algorithm) {
+        super(algorithm);
         this.providerName = BcProvider.PROVIDER_NAME;
     }
 

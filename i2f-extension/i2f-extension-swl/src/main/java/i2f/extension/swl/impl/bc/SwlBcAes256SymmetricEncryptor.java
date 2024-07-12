@@ -1,18 +1,15 @@
 package i2f.extension.swl.impl.bc;
 
+import i2f.code.CodeUtil;
 import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
-import i2f.extension.jce.bc.BcProvider;
 import i2f.extension.jce.bc.encrypt.symmetric.AesType;
 import i2f.extension.jce.bc.encrypt.symmetric.BcSymmetricEncryptor;
-import i2f.jce.jdk.encrypt.Encryptor;
 import i2f.jce.jdk.encrypt.symmetric.SymmetricType;
 import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.exception.SwlException;
 import i2f.swl.std.ISwlSymmetricEncryptor;
-
-import javax.crypto.SecretKey;
 
 /**
  * @author Ice2Faith
@@ -26,9 +23,8 @@ public class SwlBcAes256SymmetricEncryptor implements ISwlSymmetricEncryptor {
     @Override
     public String generateKey() {
         try {
-            SecretKey key = Encryptor.genSecretKey(symmetricType, BcProvider.PROVIDER_NAME, null, 256);
-            byte[] encoded = key.getEncoded();
-            return Base64StringByteCodec.INSTANCE.encode(encoded);
+            String key = CodeUtil.makeCheckCode(256 / 8);
+            return key;
         } catch (Exception e) {
             throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(), e.getMessage(), e);
         }
@@ -38,7 +34,7 @@ public class SwlBcAes256SymmetricEncryptor implements ISwlSymmetricEncryptor {
     public String getKey() {
         try {
             byte[] encoded = encryptor.getKeyBytes();
-            return Base64StringByteCodec.INSTANCE.encode(encoded);
+            return CharsetStringByteCodec.UTF8.encode(encoded);
         } catch (Exception e) {
             throw new SwlException(SwlCode.SYMMETRIC_INVALID_KEY_EXCEPTION.code(), e.getMessage(), e);
         }
@@ -46,7 +42,7 @@ public class SwlBcAes256SymmetricEncryptor implements ISwlSymmetricEncryptor {
 
     @Override
     public void setKey(String key) {
-        byte[] bytes = Base64StringByteCodec.INSTANCE.decode(key);
+        byte[] bytes = CharsetStringByteCodec.UTF8.decode(key);
         encryptor.setKeyBytes(bytes);
     }
 

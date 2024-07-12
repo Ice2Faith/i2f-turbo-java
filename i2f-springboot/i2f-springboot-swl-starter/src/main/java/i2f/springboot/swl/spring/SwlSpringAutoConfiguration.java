@@ -1,7 +1,6 @@
 package i2f.springboot.swl.spring;
 
 import i2f.cache.expire.IExpireCache;
-import i2f.extension.swl.impl.sm.antherd.supplier.SwlAntherdSm4SymmetricEncryptorSupplier;
 import i2f.reflect.ReflectResolver;
 import i2f.serialize.str.json.IJsonSerializer;
 import i2f.spring.web.mapping.MappingUtil;
@@ -20,7 +19,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 
 import javax.servlet.DispatcherType;
 import java.util.concurrent.TimeUnit;
@@ -34,11 +32,6 @@ import java.util.concurrent.TimeUnit;
 @EnableConfigurationProperties({
         SwlWebConfigProperties.class,
         SwlTransferConfigProperties.class
-})
-@Import({
-        SwlMissingBeanConfiguration.class,
-        SwlSpringAop.class,
-        SwlSpringController.class
 })
 @Data
 @NoArgsConstructor
@@ -78,8 +71,6 @@ public class SwlSpringAutoConfiguration {
         } catch (Exception e) {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
-
-        ret.setSymmetricEncryptorSupplier(new SwlAntherdSm4SymmetricEncryptorSupplier());
 
         try{
             Class<? extends ISwlMessageDigester> clazz = webProperties.getDigestAlgoClass();

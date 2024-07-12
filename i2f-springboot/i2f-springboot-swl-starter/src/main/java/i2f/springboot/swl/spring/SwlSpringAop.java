@@ -13,13 +13,10 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
@@ -29,10 +26,9 @@ import java.lang.reflect.Parameter;
  * @desc
  */
 @ConditionalOnClass(Aspect.class)
-//@ConditionalOnBean(SwlSpringWebFilter.class)
+//@ConditionalOnBean(SwlTransfer.class)
 @ConditionalOnExpression("${i2f.swl.aop.enable:true}")
 @Slf4j
-@Component
 @Aspect
 public class SwlSpringAop implements InitializingBean {
 
