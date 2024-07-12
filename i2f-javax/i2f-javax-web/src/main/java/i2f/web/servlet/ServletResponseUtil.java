@@ -61,7 +61,7 @@ public class ServletResponseUtil {
 
     public static void supportCors(HttpServletResponse resp) {
         Collection<String> headers = resp.getHeaders("Access-Control-Allow-Origin");
-        if (headers.size() <= 0) {
+        if (headers.isEmpty()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         resp.setHeader("Access-Control-Allow-Methods", "*");

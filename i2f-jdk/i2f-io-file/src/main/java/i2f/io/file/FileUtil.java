@@ -136,7 +136,7 @@ public class FileUtil {
                 continue;
             }
             if ("..".equals(item)) {
-                if (vector.size() > 0) {
+                if (!vector.isEmpty()) {
                     vector.remove(vector.size() - 1);
                 }
             } else {
@@ -519,7 +519,7 @@ public class FileUtil {
             if (trimLine) {
                 line = line.trim();
             }
-            if (ignoreBlankLine && "".equals(line)) {
+            if (ignoreBlankLine && line.isEmpty()) {
                 continue;
             }
 

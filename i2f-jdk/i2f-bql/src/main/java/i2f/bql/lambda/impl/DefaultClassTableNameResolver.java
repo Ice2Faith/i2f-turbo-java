@@ -21,7 +21,7 @@ public class DefaultClassTableNameResolver extends CachedClassTableNameResolver 
             return StringUtils.toUnderScore(name);
         }
         String value = ann.value();
-        if (value != null && !"".equals(value)) {
+        if (value != null && !value.isEmpty()) {
             return value;
         }
         return StringUtils.toUnderScore(name);
@@ -34,7 +34,7 @@ public class DefaultClassTableNameResolver extends CachedClassTableNameResolver 
             return name;
         }
         String value = ann.value();
-        if (value != null && !"".equals(value)) {
+        if (value != null && !value.isEmpty()) {
             return value;
         }
         return name;

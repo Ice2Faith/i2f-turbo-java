@@ -98,7 +98,7 @@ public class Uid {
                                 builder.append(String.format("%02X", (int) (bt & 0x0ff)));
                             }
                             String mac = builder.toString();
-                            if (!"".equals(mac)) {
+                            if (!mac.isEmpty()) {
                                 mac = mac.substring(1);
                             }
                             String niName = element.getName() + "/" + mac;

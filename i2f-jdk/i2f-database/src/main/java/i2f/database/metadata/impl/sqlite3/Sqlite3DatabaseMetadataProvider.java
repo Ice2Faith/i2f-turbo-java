@@ -372,7 +372,7 @@ public class Sqlite3DatabaseMetadataProvider extends BaseDatabaseMetadataProvide
                 if (str.endsWith(",")) {
                     str = str.substring(0, str.length() - 1);
                 }
-                if ("".equals(str)) {
+                if (str.isEmpty()) {
                     continue;
                 }
                 ls.add(str);

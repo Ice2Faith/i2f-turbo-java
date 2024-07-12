@@ -42,8 +42,8 @@ public class RelativeAnyLineTransform implements ITransform {
         np = trans.transform(np);
 
         // 按照原点进行任意变换
-        for (int i = 0; i < transforms.size(); i++) {
-            np = transforms.get(i).transform(np);
+        for (ITransform transform : transforms) {
+            np = transform.transform(np);
         }
 
         // 旋转回去

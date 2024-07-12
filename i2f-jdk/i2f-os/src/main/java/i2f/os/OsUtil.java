@@ -21,10 +21,10 @@ public class OsUtil {
 
     public static String getCmdCharset() {
         String charset = System.getProperty("sun.jnu.encoding");
-        if (charset == null || "".equals(charset)) {
+        if (charset == null || charset.isEmpty()) {
             charset = System.getProperty("file.encoding");
         }
-        if (charset == null || "".equals(charset)) {
+        if (charset == null || charset.isEmpty()) {
             charset = Charset.defaultCharset().name();
         }
         return charset;

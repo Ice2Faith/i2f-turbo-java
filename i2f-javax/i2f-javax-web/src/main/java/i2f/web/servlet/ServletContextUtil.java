@@ -28,13 +28,13 @@ public class ServletContextUtil {
     public static String getToken(HttpServletRequest request, String tokenName) {
         String token = "";
         token = request.getHeader(tokenName);
-        if (token == null || "".equals(token)) {
+        if (token == null || token.isEmpty()) {
             token = request.getParameter(tokenName);
         }
-        if (token == null || "".equals(token)) {
+        if (token == null || token.isEmpty()) {
             token = (String) request.getSession().getAttribute(tokenName);
         }
-        if (token == null || "".equals(token)) {
+        if (token == null || token.isEmpty()) {
             token = (String) request.getAttribute(tokenName);
         }
         return token;

@@ -16,7 +16,7 @@ public class ResourceResolver {
 
     public static Resource[] resourceResolve(String location) throws Exception {
         Set<Resource> resourceSet = new HashSet<>();
-        if (location == null || "".equals(location)) {
+        if (location == null || location.isEmpty()) {
             return new Resource[0];
         }
         if (location.indexOf(",") >= 0) {

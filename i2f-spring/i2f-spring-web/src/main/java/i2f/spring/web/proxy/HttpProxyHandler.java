@@ -68,7 +68,7 @@ public class HttpProxyHandler {
         }
         String query = request.getQueryString();
         String target = targetUrl + path.replace(proxyPrefix, "");
-        if (query != null && !"".equals(query) && !"null".equals(query)) {
+        if (query != null && !query.isEmpty() && !"null".equals(query)) {
             target = target + "?" + query;
         }
         URI newUri = new URI(target);

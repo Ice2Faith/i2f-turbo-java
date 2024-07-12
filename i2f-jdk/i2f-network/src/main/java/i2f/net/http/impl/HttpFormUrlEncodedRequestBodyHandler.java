@@ -20,7 +20,7 @@ public class HttpFormUrlEncodedRequestBodyHandler implements IHttpRequestBodyHan
     @Override
     public void writeBody(Map<String, Object> data, HttpRequest request, Object output, Object... args) throws IOException {
         List<MultipartFile> files = request.getFiles();
-        if (files != null && files.size() > 0) {
+        if (files != null && !files.isEmpty()) {
             new HttpMultipartFormDataRequestBodyHandler().writeBody(data, request, output, args);
             return;
         }

@@ -150,7 +150,7 @@ public class UCodeStringCodec implements IStringStringCodec {
                         while (j < len) {
                             RegexFindPartMeta next = parts.get(j);
                             if (!next.isMatch) {
-                                if (!"".equals(next.part.trim())) {
+                                if (!next.part.trim().isEmpty()) {
                                     findNext = false;
                                     break;
                                 }
