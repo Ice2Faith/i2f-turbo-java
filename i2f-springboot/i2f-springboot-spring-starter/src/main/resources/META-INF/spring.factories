@@ -7,4 +7,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   i2f.springboot.spring.schedule.SpringScheduleAutoConfiguration,\
   i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration,\
   i2f.springboot.spring.web.converter.SpringJacksonMvcConfigurer,\
-  i2f.springboot.spring.web.converter.SpringJacksonMessageConverter
+  i2f.springboot.spring.web.converter.SpringJacksonMessageConverter,\
+  i2f.springboot.spring.application.SpringBootPrintBannerAutoConfiguration
