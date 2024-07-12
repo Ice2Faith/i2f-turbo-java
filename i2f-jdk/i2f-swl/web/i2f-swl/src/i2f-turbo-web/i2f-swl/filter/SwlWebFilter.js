@@ -31,9 +31,11 @@ function SwlWebFilter(transfer = new SwlTransfer(), config = new SwlWebConfig())
 }
 
 
-
-
-
+/**
+ *
+ * @param res {SwlWebRes}
+ * @return {SwlWebRes}
+ */
 SwlWebFilter.prototype.requestFilter = function (res) {
     let selfPublicKey = this.transfer.getSelfPublicKey();
     let localAsymSign=this.transfer.calcKeySign(selfPublicKey)
@@ -80,6 +82,11 @@ SwlWebFilter.prototype.requestFilter = function (res) {
     res.swlSendContext=swlSendContext
     return res
 }
+/**
+ *
+ * @param res {SwlWebRes}
+ * @return {SwlWebRes}
+ */
 SwlWebFilter.prototype.responseFilter = function (res) {
     if(!res){
         return res
@@ -136,6 +143,11 @@ SwlWebFilter.prototype.responseFilter = function (res) {
 
     return res
 }
+/**
+ *
+ * @param res {SwlWebRes}
+ * @return {String|null}
+ */
 SwlWebFilter.getRequestContentType = function (res) {
     let contentType = null
     const method = res.method
@@ -161,7 +173,7 @@ SwlWebFilter.getRequestContentType = function (res) {
 
 /**
  *
- * @param res
+ * @param res {SwlWebRes}
  * @return {string}
  */
 SwlWebFilter.getTrimContextPathRequestUri = function (res) {
@@ -207,7 +219,7 @@ SwlWebFilter.combinePath=function(prefix, suffix, separator='/') {
 
 /**
  *
- * @param res
+ * @param res {SwlWebRes}
  * @return {URL}
  */
 SwlWebFilter.getFullURL=function(res){
@@ -231,7 +243,7 @@ SwlWebFilter.getFullURL=function(res){
 
 /**
  *
- * @param res
+ * @param res {SwlWebRes}
  * @param config {SwlWebConfig}
  * @return {SwlWebCtrl}
  */
