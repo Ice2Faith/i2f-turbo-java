@@ -8,19 +8,37 @@ spring:
         simple:
           instances:
             backend-app:
-              - uri: http://localhost:8082/
+              - uri: http://localhost:8082/app
 
     gateway:
+      discovery:
+        locator:
+          enable: false
       routes:
+        - id: swl
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/swl/**
         - id: backend-app
-          uri: https://backend-app/app
+          uri: http://localhost:8082/
           predicates:
             - Path=/app/**
-          filters:
-            - StripPrefix=1
+
 
 i2f:
   spring:
     web:
       mapping:
         enable: false
+  swl:
+    web:
+      whiteListIn:
+        - /swl/key
+        - /swl/swapKey
+      whiteListOut:
+        - /swl/key
+        - /swl/swapKey
+
+logging:
+  level:
+    org.springframework.cloud.gateway: debug

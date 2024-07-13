@@ -53,6 +53,13 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-spring-starter</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-springcloud-gateway-starter</artifactId>
+            <version>1.0</version>
+        </dependency>
+
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springcloud-gateway-swl-starter</artifactId>
