@@ -3,8 +3,8 @@ import SwlWebConfig from "./SwlWebConfig";
 import SwlWebCtrl from "./SwlWebCtrl";
 import MatcherUtil from "../../i2f-core/match/MatcherUtil";
 import qs from 'qs'
-import Base64Util from "@/i2f-turbo-web/i2f-core/codec/Base64Util";
-import SwlData from "@/i2f-turbo-web/i2f-swl/core/data/SwlData";
+import Base64Util from "../../i2f-core/codec/Base64Util";
+import SwlData from "../core/data/SwlData";
 
 /**
  *

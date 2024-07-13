@@ -2,8 +2,7 @@ import SwlWebCtrl from "./SwlWebCtrl";
 import SwlRsaAsymmetricEncryptorSupplier from "../core/impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
 import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
 import SwlBase64Obfuscator from "../core/impl/SwlBase64Obfuscator";
-import SwlAesSymmetricEncryptorSupplier
-    from "@/i2f-turbo-web/i2f-swl/core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
+import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
 
 /**
  * @return SwlWebConfig
