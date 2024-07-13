@@ -64,7 +64,6 @@ SwlWebFilter.prototype.requestFilter = function (res) {
         }
     }
 
-    debugger
     let swlSendData = this.transfer.sendDefault([body, params], attachedHeaders)
     swlSendContext.swlSendData=swlSendData
     let swlh=Base64Util.encrypt(qs.stringify(swlSendData.header))
