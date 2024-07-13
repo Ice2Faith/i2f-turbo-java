@@ -137,7 +137,11 @@ SwlWebFilter.prototype.responseFilter = function (res) {
     res.headers['Content-Type']=realContentType
     let data=swlReceiveData.parts[0]
     if(data!=null){
-        data=JSON.parse(data)
+        try{
+            data=JSON.parse(data)
+        }catch (e){
+
+        }
     }
     res.data=data
 

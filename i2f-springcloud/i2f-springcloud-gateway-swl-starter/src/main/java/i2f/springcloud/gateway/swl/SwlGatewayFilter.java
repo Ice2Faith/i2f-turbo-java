@@ -22,6 +22,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -32,6 +33,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,6 +47,9 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -80,6 +86,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
+
         SwlWebCtrl ctrl = parseCtrl(request, this.config);
 
         MediaType mediaType = request.getHeaders().getContentType();
@@ -100,13 +107,14 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
 
         // 获取安全头，优先从请求头获取，获取不到则从请求参数获取
-        String swlh = request.getHeaders().getFirst(config.getHeaderName());
-        if (swlh == null || swlh.isEmpty()) {
-            swlh = request.getQueryParams().getFirst(config.getHeaderName());
+        AtomicReference<String> swlh=new AtomicReference<>(null);
+        swlh.set(request.getHeaders().getFirst(config.getHeaderName()));
+        if (swlh.get() == null || swlh.get().isEmpty()) {
+            swlh.set(request.getQueryParams().getFirst(config.getHeaderName()));
         }
 
         // 如果带有安全头，则强制为输入需要解密
-        if (swlh != null && !swlh.isEmpty()) {
+        if (swlh.get() != null && !swlh.get().isEmpty()) {
             ctrl.setIn(true);
         }
 
@@ -115,31 +123,24 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        ServerHttpRequest nextRequest = request;
-        ServerHttpResponse nextResponse = response;
 
         // 获取客户端IP，用以客户端隔离
-        String clientIp = getIp(request);
-        if (clientIp != null) {
-            clientIp = clientIp.replaceAll(":", "-");
+        AtomicReference<String> clientIp = new AtomicReference<>(getIp(request));
+        if (clientIp.get() != null) {
+            clientIp.set(clientIp.get().replaceAll(":", "-"));
         }
 
         // 获取原始请求的非对称秘钥签名
         // 用于响应时使用，以配对请求
-        String clientAsymSign = request.getHeaders().getFirst(config.getRemoteAsymSignHeaderName());
-        String serverAsymSign = null;
+        AtomicReference<String> clientAsymSign = new AtomicReference<>(request.getHeaders().getFirst(config.getRemoteAsymSignHeaderName()));
+        AtomicReference<String> serverAsymSign = new AtomicReference<>(null);
 
+        ServerHttpResponse nextResponse = getNextResponse(response, ctrl, clientAsymSign, serverAsymSign);
 
         if (ctrl.isIn()) {
-            // 请求参数
-            MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(request.getQueryParams());
-
-            // 获取加密后的请求参数
-            String swlp = queryParams.getFirst(config.getParameterName());
-            queryParams.remove(config.getParameterName());
 
             // 获取请求体
-            byte[] body = request.getBody()
+            return request.getBody()
                     .defaultIfEmpty(new DefaultDataBufferFactory().allocateBuffer(0))
                     .collectList()
                     .map(list -> list.get(0)
@@ -149,150 +150,186 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                     .doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release)
                     .flatMap(dataBuffer -> {
                         // 获取请求体
-                        byte[] data = new byte[dataBuffer.readableByteCount()];
-                        dataBuffer.read(data);
+                        byte[] dataBytes = new byte[dataBuffer.readableByteCount()];
+                        dataBuffer.read(dataBytes);
                         DataBufferUtils.release(dataBuffer);
 
-                        return Mono.just(data);
-                    })
-                    .block();
-
-            Charset charset = mediaType.getCharset();
-            if (charset == null) {
-                charset = StandardCharsets.UTF_8;
-            }
-
-            // 转换请求体为字符串
-            String srcText = null;
-            if (body.length > 0) {
-                srcText = new String(body, charset);
-            }
-
-            // 如果文本是引号开头，则是被转义为了JSON
-            // 需要进行反序列化字符串
-            if (srcText != null) {
-                srcText = srcText.trim();
-                if (srcText.startsWith("\"")) {
-                    srcText = (String) jsonSerializer.deserialize(srcText, String.class);
-                }
-            }
-
-            List<String> attachedHeaders = new ArrayList<>();
-            if (this.config.getAttachedHeaderNames() != null) {
-                for (String headerName : this.config.getAttachedHeaderNames()) {
-                    String header = request.getHeaders().getFirst(headerName);
-                    attachedHeaders.add(header);
-                }
-            }
-
-            // 构造请求数据
-            SwlData data = new SwlData();
-            data.setHeader(deserializeHeader(swlh));
-            data.setParts(Arrays.asList(srcText, swlp));
-            data.setAttaches(attachedHeaders);
+                        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(request.getHeaders());
 
 
-            // 接受数据
-            SwlData receiveData = transfer.receive(clientIp, data);
+                        // 请求参数
+                        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(request.getQueryParams());
 
-            // 保存请求时的非对称公钥签名
-            // 此时还没有进行receive，因此local还是客户端的值，remote是服务端的值
-            clientAsymSign = receiveData.getHeader().getRemoteAsymSign();
-            serverAsymSign = receiveData.getHeader().getLocalAsymSign();
-
-
-            // 获取解密后的数据
-            srcText = receiveData.getParts().get(0);
-            swlp = receiveData.getParts().get(1);
-
-            // 重新设置请求参数
-            String replaceQueryString = null;
-            Map<String, List<String>> replaceParameterMap = null;
-            if (swlp != null) {
-                replaceQueryString = swlp;
-                replaceParameterMap = FormUrlEncodedEncoder.toMap(swlp);
-            }
-
-            // 重新构造请求
-            if (srcText != null) {
-                body = srcText.getBytes(charset);
-            }
-
-            // 覆盖请求参数
-            request.getQueryParams().putAll(replaceParameterMap);
+                        // 获取加密后的请求参数
+                        String swlp = queryParams.getFirst(config.getParameterName());
+                        queryParams.remove(config.getParameterName());
 
 
-            // 覆盖真实请求内容类型
-            String realContentType = request.getHeaders().getFirst(config.getRealContentTypeHeaderName());
-            if (realContentType != null && !realContentType.isEmpty()) {
-                request.getHeaders().set("Content-Type", realContentType);
-                request.getHeaders().setContentType(MediaType.parseMediaType(realContentType));
-            }
+                        byte[] body = dataBytes;
 
-            // 替换请求为包装请求
+                        Charset charset = mediaType.getCharset();
+                        if (charset == null) {
+                            charset = StandardCharsets.UTF_8;
+                        }
 
-            URI uri = request.getURI();
-            String uriStr = uri.toString();
-            int idx = uriStr.indexOf("?");
-            if (idx >= 0) {
-                uriStr = uriStr.substring(0, idx);
-            }
+                        // 转换请求体为字符串
+                        String srcText = null;
+                        if (body.length > 0) {
+                            srcText = new String(body, charset);
+                        }
 
-            URI mutatedUri = UriComponentsBuilder.fromUriString(uriStr).queryParams(queryParams).build().toUri();
+                        // 如果文本是引号开头，则是被转义为了JSON
+                        // 需要进行反序列化字符串
+                        if (srcText != null) {
+                            srcText = srcText.trim();
+                            if (srcText.startsWith("\"")) {
+                                srcText = (String) jsonSerializer.deserialize(srcText, String.class);
+                            }
+                        }
 
-            byte[] mutatedBody = body;
-            nextRequest = new ServerHttpRequestDecorator(request) {
+                        List<String> attachedHeaders = new ArrayList<>();
+                        if (this.config.getAttachedHeaderNames() != null) {
+                            for (String headerName : this.config.getAttachedHeaderNames()) {
+                                String header = request.getHeaders().getFirst(headerName);
+                                attachedHeaders.add(header);
+                            }
+                        }
 
-                @Override
-                public MultiValueMap<String, String> getQueryParams() {
-                    return queryParams;
-                }
+                        // 构造请求数据
+                        SwlData data = new SwlData();
+                        data.setHeader(deserializeHeader(swlh.get()));
+                        data.setParts(Arrays.asList(srcText, swlp));
+                        data.setAttaches(attachedHeaders);
 
-                @Override
-                public URI getURI() { // 覆盖getQueryParams方法不生效，需要覆盖URI
-                    return mutatedUri;
-                }
 
-                @Override
-                public Flux<DataBuffer> getBody() {
-                    return Flux.defer(() -> {
-                        DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(mutatedBody);
-                        DataBufferUtils.retain(buffer);
-                        return Mono.just(buffer);
+                        // 接受数据
+                        SwlData receiveData = transfer.receive(clientIp.get(), data);
+
+                        // 保存请求时的非对称公钥签名
+                        // 此时还没有进行receive，因此local还是客户端的值，remote是服务端的值
+                        clientAsymSign.set(receiveData.getHeader().getRemoteAsymSign());
+                        serverAsymSign.set(receiveData.getHeader().getLocalAsymSign());
+
+
+                        // 获取解密后的数据
+                        srcText = receiveData.getParts().get(0);
+                        swlp = receiveData.getParts().get(1);
+
+                        // 重新设置请求参数
+                        String replaceQueryString = null;
+                        Map<String, List<String>> replaceParameterMap = null;
+                        if (swlp != null) {
+                            replaceQueryString = swlp;
+                            replaceParameterMap = FormUrlEncodedEncoder.toMap(swlp);
+                        }
+
+                        // 重新构造请求
+                        if (srcText != null) {
+                            body = srcText.getBytes(charset);
+                        }
+
+                        // 覆盖请求参数
+                        if(replaceParameterMap!=null) {
+                            queryParams.putAll(replaceParameterMap);
+                        }
+
+                        // 覆盖真实请求内容类型
+                        String realContentType = request.getHeaders().getFirst(config.getRealContentTypeHeaderName());
+                        if (realContentType != null && !realContentType.isEmpty()) {
+                            headers.set("Content-Type", realContentType);
+                        }
+
+                        // 替换请求为包装请求
+                        URI uri = request.getURI();
+                        String uriStr = uri.toString();
+                        int idx = uriStr.indexOf("?");
+                        if (idx >= 0) {
+                            uriStr = uriStr.substring(0, idx);
+                        }
+
+                        URI mutatedUri = UriComponentsBuilder.fromUriString(uriStr).queryParams(queryParams).build().toUri();
+
+
+                        byte[] mutatedBody = body;
+                        ServerHttpRequest nextRequest = new ServerHttpRequestDecorator(request) {
+
+                            @Override
+                            public MultiValueMap<String, String> getQueryParams() {
+                                return queryParams;
+                            }
+
+                            @Override
+                            public URI getURI() { // 覆盖getQueryParams方法不生效，需要覆盖URI
+                                return mutatedUri;
+                            }
+
+                            @Override
+                            public HttpHeaders getHeaders() {
+                                return new HttpHeaders(headers);
+                            }
+
+                            @Override
+                            public Flux<DataBuffer> getBody() {
+                                return Flux.defer(() -> {
+                                    DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(mutatedBody);
+                                    DataBufferUtils.retain(buffer);
+                                    return Mono.just(buffer);
+                                });
+                            }
+                        };
+
+                        // 进行下游处理
+                        ServerWebExchange mutatedExchange = exchange.mutate()
+                                .request(nextRequest)
+                                .response(nextResponse)
+                                .build();
+
+                        return chain.filter(mutatedExchange);
                     });
-                }
-            };
+
         }
 
 
-        if (ctrl.isOut()) {
-            nextResponse = wrapperServerHttpResponse(response, clientAsymSign, serverAsymSign);
-        }
 
-        // 设置暴露响应头，以支持前端获取这些值
-        applyExposeHeader(response);
+
 
         // 进行下游处理
         ServerWebExchange mutatedExchange = exchange.mutate()
-                .request(nextRequest)
+                .request(request)
                 .response(nextResponse)
                 .build();
 
         return chain.filter(mutatedExchange);
     }
 
+    public ServerHttpResponse getNextResponse(ServerHttpResponse response,
+                                              SwlWebCtrl ctrl,
+                                              AtomicReference<String> clientAsymSign,
+                                              AtomicReference<String> serverAsymSign
+                                              ){
+        if (ctrl.isOut()) {
+            return wrapperServerHttpResponse(response, clientAsymSign, serverAsymSign);
+        }
+
+        return response;
+    }
+
 
     public ServerHttpResponse wrapperServerHttpResponse(ServerHttpResponse response,
-                                                        String finalClientAsymSign,
-                                                        String finalServerAsymSign) {
+                                                        AtomicReference<String> clientAsymSign,
+                                                        AtomicReference<String> serverAsymSign) {
         return new ServerHttpResponseDecorator(response) {
             @Override
             public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+
+                ServerHttpResponse delegateResponse = getDelegate();
+
+                // 设置暴露响应头，以支持前端获取这些值
+                applyExposeHeader(delegateResponse);
+
                 if (!(body instanceof Flux)) {
                     return super.writeWith(body);
                 }
-
-                ServerHttpResponse delegateResponse = getDelegate();
 
                 // 处理直接下载型接口，推荐还是使用白名单
                 // 小文件可以在这里进行自动处理
@@ -368,7 +405,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                     List<String> parts = new ArrayList<>();
                     parts.add(responseText);
 
-                    SwlData responseData = transfer.response(finalClientAsymSign, parts);
+                    SwlData responseData = transfer.response(clientAsymSign.get(), parts);
                     String responseSwlh = serializeHeader(responseData.getHeader());
                     delegateResponse.getHeaders().set(config.getHeaderName(), responseSwlh);
                     delegateResponse.getHeaders().set(config.getRemoteAsymSignHeaderName(), responseData.getContext().getLocalAsymSign());
@@ -388,8 +425,8 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
                     String selfPublicKey = transfer.getSelfPublicKey();
                     String selfAsymSign = transfer.calcKeySign(selfPublicKey);
-                    if (finalServerAsymSign != null) {
-                        if (!selfAsymSign.equalsIgnoreCase(finalServerAsymSign)) {
+                    if (serverAsymSign.get() != null) {
+                        if (!selfAsymSign.equalsIgnoreCase(serverAsymSign.get())) {
                             delegateResponse.getHeaders().set(config.getCurrentAsymKeyHeaderName(), transfer.obfuscateEncode(selfPublicKey));
                         }
                     }
@@ -407,7 +444,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -1;
+        return -100;
     }
 
 
@@ -429,12 +466,14 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
         // 将随机Asym加密模糊之后的Symm秘钥放入响应头，并设置可访问权限
         Collection<String> oldHeaders = response.getHeaders().get(SwlWebConsts.ACCESS_CONTROL_EXPOSE_HEADERS);
         Set<String> headers = new LinkedHashSet<>();
-        for (String header : oldHeaders) {
-            String[] arr = header.split(",");
-            for (String item : arr) {
-                String str = item.trim();
-                if (!str.isEmpty()) {
-                    headers.add(str);
+        if(oldHeaders!=null) {
+            for (String header : oldHeaders) {
+                String[] arr = header.split(",");
+                for (String item : arr) {
+                    String str = item.trim();
+                    if (!str.isEmpty()) {
+                        headers.add(str);
+                    }
                 }
             }
         }
@@ -478,7 +517,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             if (remoteAddress != null) {
                 InetAddress addr = remoteAddress.getAddress();
                 if (addr != null) {
-                    ip = String.valueOf(addr);
+                    ip = addr.getHostAddress();
                 }
             }
             if (ip.equals("127.0.0.1")) {
@@ -506,7 +545,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
         SwlWebCtrl defaultCtrl = config.getDefaultCtrl();
 
         MediaType contentType = request.getHeaders().getContentType();
-        if(MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)){
+        if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
             return new SwlWebCtrl(false, defaultCtrl.isOut());
         }
 

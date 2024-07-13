@@ -2,6 +2,7 @@ package i2f.springboot.swl.spring;
 
 
 import i2f.swl.consts.SwlCode;
+import i2f.swl.core.SwlTransfer;
 import i2f.swl.exception.SwlException;
 import i2f.web.swl.filter.SwlWebConsts;
 import i2f.web.swl.filter.SwlWebCtrl;
@@ -13,6 +14,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 
@@ -25,8 +28,9 @@ import java.lang.reflect.Parameter;
  * @date 2022/6/29 13:59
  * @desc
  */
+@AutoConfigureAfter(SwlSpringAutoConfiguration.class)
 @ConditionalOnClass(Aspect.class)
-//@ConditionalOnBean(SwlTransfer.class)
+@ConditionalOnBean(SwlTransfer.class)
 @ConditionalOnExpression("${i2f.swl.aop.enable:true}")
 @Slf4j
 @Aspect

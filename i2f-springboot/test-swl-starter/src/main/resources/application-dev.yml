@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
   servlet:
     context-path: /app
 
@@ -15,4 +15,9 @@ spring:
     locale: zh_CN
     time-zone: Asia/Shanghai
 
-
+i2f:
+  swl:
+    enable: false
+  spring:
+    cors:
+      enable: false

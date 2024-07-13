@@ -4,6 +4,7 @@ package i2f.springboot.swl.spring;
 import i2f.swl.annotation.SecureParams;
 import i2f.swl.core.SwlTransfer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2022/6/30 11:34
  * @desc
  */
+@AutoConfigureAfter(SwlSpringAutoConfiguration.class)
 @ConditionalOnBean(SwlTransfer.class)
 @ConditionalOnExpression("${i2f.swl.api.enable:true}")
 @RestController
