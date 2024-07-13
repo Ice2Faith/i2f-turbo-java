@@ -1,7 +1,7 @@
 import axios from 'axios'
 import SwlWebFilter from "../filter/SwlWebFilter";
-import SwlTransfer from "@/i2f-turbo-web/i2f-swl/core/core/SwlTransfer";
-import LocalStorageExpireCache from "@/i2f-turbo-web/i2f-core/cache/impl/LocalStorageExpireCache";
+import SwlTransfer from "../core/core/SwlTransfer";
+import LocalStorageExpireCache from "../../i2f-core/cache/impl/LocalStorageExpireCache";
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 
