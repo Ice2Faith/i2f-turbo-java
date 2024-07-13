@@ -17,7 +17,7 @@ spring:
 
 i2f:
   swl:
-    enable: false
+    enable: true
   spring:
     cors:
-      enable: false
+      enable: true
