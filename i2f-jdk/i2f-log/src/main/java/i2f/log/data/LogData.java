@@ -28,4 +28,6 @@ public class LogData {
     private String methodName;
     private String fileName;
     private int lineNumber;
+
+    private String traceId;
 }

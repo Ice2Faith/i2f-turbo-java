@@ -68,11 +68,37 @@ public class DefaultLogger implements ILogger {
             data.setFileName(elem.getFileName());
             data.setLineNumber(elem.getLineNumber());
         }
+        data.setTraceId(getTraceId());
         return data;
     }
 
     public String formatMsg(String format, Object... args) {
         return LogHolder.getMsgFormatter().format(format, args);
+    }
+
+    @Override
+    public void setTraceId(String traceId) {
+        LogHolder.setTraceId(traceId);
+    }
+
+    @Override
+    public String getTraceId() {
+        return LogHolder.getTraceId();
+    }
+
+    @Override
+    public void removeTraceId() {
+        LogHolder.removeTraceId();
+    }
+
+    @Override
+    public String newTraceId() {
+        return LogHolder.newTraceId();
+    }
+
+    @Override
+    public String getOrNewTraceId() {
+        return LogHolder.getOrNewTraceId();
     }
 
     @Override
