@@ -2,6 +2,7 @@ package i2f.log.format.impl;
 
 import i2f.log.data.LogData;
 import i2f.log.format.ILogDataFormatter;
+import i2f.lru.LruMap;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ import java.text.SimpleDateFormat;
 @Data
 @NoArgsConstructor
 public class DefaultLogDataFormatter implements ILogDataFormatter {
+    public static LruMap<String,String> CACHE_LOCATION=new LruMap<>(1024);
     protected ThreadLocal<SimpleDateFormat> dateFormat = ThreadLocal.withInitial(() -> new SimpleDateFormat("MM-dd HH:mm:ss SSS"));
     protected int locationLen = 32;
     protected int threadLen = 12;
@@ -31,6 +33,9 @@ public class DefaultLogDataFormatter implements ILogDataFormatter {
         builder.append(" : ").append(data.getMsg());
         if (data.getMethodName() != null) {
             builder.append(String.format(" --@%s.%s(%s:%d)", data.getClassName(), data.getMethodName(), data.getFileName(), data.getLineNumber()));
+        }
+        if(data.getTraceId()!=null){
+            builder.append(String.format(" --#%s", data.getTraceId()));
         }
         if (data.getEx() != null) {
             Throwable ex = data.getEx();
@@ -73,6 +78,11 @@ public class DefaultLogDataFormatter implements ILogDataFormatter {
         if (location.length() <= len) {
             return location;
         }
+        String cacheKey=len+"#"+location;
+        String cacheValue = CACHE_LOCATION.get(cacheKey);
+        if(cacheValue!=null){
+            return cacheValue;
+        }
         String[] arr = location.split("\\.");
         int idx = arr.length - 1;
         int diffLen = 0;
@@ -114,6 +124,7 @@ public class DefaultLogDataFormatter implements ILogDataFormatter {
         if (str.length() > len) {
             str = str.substring(str.length() - len);
         }
+        CACHE_LOCATION.put(cacheKey,str);
         return str;
     }
 }
