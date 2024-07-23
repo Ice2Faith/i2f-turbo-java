@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.7.RELEASE</version>
+    </parent>
+
+<!--    <groupId>i2f.turbo</groupId>-->
+    <artifactId>i2f-springboot-maven-project</artifactId>
+<!--    <version>1.0</version>-->
+
+    <packaging>jar</packaging>
+
+    <description>maven project</description>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+
+        <lombok.version>1.18.16</lombok.version>
+
+        <!-- 指定主类，也就是启动类 -->
+        <main.class>com.springboot.maven.SpringBootMavenApplication</main.class>
+        <!--
+        允许添加classpath，每个classpath使用逗号分隔，不支持换行
+        如果有scope为system的jar包参与打包
+        则按照如下格式添加
+        lib/jar文件的实际名称
+        这些jar可以在如下位置中，
+        /src/main/resources/lib/
+        /lib/
+        /../lib/
+        pom.xml
+        也就是在resources的lib文件夹中，
+        本pom模块的lib文件夹中，
+        父级pom模块的lib文件夹中
+         -->
+        <additional.classpath>lib/res-lib-1.0.jar pom/res-lib-1.0.jar</additional.classpath>
+
+        <spring.version>5.2.12.RELEASE</spring.version>
+        <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
+        <spring-cloud.version>Hoxton.SR12</spring-cloud.version>
+        <alibaba-cloud.version>0.2.2.RELEASE</alibaba-cloud.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${alibaba-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+                <optional>true</optional>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- spring-boot-devtools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional> <!-- 表示依赖不会传递 -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework.boot</groupId>-->
+<!--                    <artifactId>spring-boot-starter-tomcat</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-undertow</artifactId>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mavem</groupId>
+            <artifactId>res-lib</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/src/main/resources/lib/res-lib-1.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mavem</groupId>
+            <artifactId>pom-lib</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/pom-lib-1.0.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+
+    <!-- 指定仓库 -->
+    <repositories>
+        <repository>
+            <id>public</id>
+            <name>aliyun nexus</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <!-- 指定插件仓库 -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>public</id>
+            <name>aliyun nexus</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <build>
+        <!-- 指定资源路径，部分项目的xml写在java路径中，需要包含进来 -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.json</include>
+                    <include>**/*.ftl</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.yaml</include>
+                    <include>**/*.yml</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.html</include>
+                    <include>**/*.js</include>
+                    <include>**/*.css</include>
+                    <include>**/*.vue</include>
+                    <include>**/*.json</include>
+                    <include>**/*.md</include>
+                    <include>**/*.txt</include>
+                    <include>**/*.vm</include>
+                    <include>**/*.db</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <skip>true</skip>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <compilerVersion>${java.version}</compilerVersion>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <compilerArgument>-parameters</compilerArgument>
+                    <!-- java9 之后，在处理lombok时，需要添加此编译参数 -->
+                    <!--                        <compilerArgument>&#45;&#45;add-exports</compilerArgument>-->
+                    <!--                        <compilerArgument>jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</compilerArgument>-->
+                    <compilerArgs>
+                        <arg>-Xlint:unchecked</arg>
+                        <arg>-Xlint:deprecation</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>doc</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>xls</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>ppt</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>docx</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>xlsx</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>pptx</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>lib</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>so</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>dll</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
+                <executions>
+                </executions>
+            </plugin>
+
+            <!-- 打包插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <!-- 指定生成的jar包名 -->
+                    <finalName>${project.artifactId}</finalName>
+                    <archive>
+                        <!-- 去除maven描述信息 -->
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <manifest>
+                            <!-- 添加classpath,指定classpath前缀，指定启动类 -->
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <!-- 指定启动类 -->
+                            <mainClass>${main.class}</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <!-- 添加自己的classpath，多个classpath之间直接空格隔开，写成多个Class-Path标签将被后面的覆盖 -->
+                            <Class-Path>. ./resources/ ${additional.classpath}</Class-Path>
+                            <Timestamp>${maven.build.timestamp}</Timestamp>
+                        </manifestEntries>
+                    </archive>
+                    <excludes>
+                        <!-- 打包时排除以下文件，这是实现分离配置文件的第一步 -->
+                        <!-- 这样就得到了一个单纯的jar包，不包含配置信息 -->
+                        <exclude>bin/**</exclude>
+                        <exclude>assembly/**</exclude>
+                        <exclude>*assembly*.xml</exclude>
+                        <exclude>lib/*.jar</exclude>
+
+                        <exclude>templates/**</exclude>
+                        <exclude>static/**</exclude>
+                        <exclude>public/**</exclude>
+
+                        <exclude>i18n/**</exclude>
+                        <exclude>META-INF/**</exclude>
+
+                        <exclude>mapper/**</exclude>
+                        <exclude>*mapper*/**</exclude>
+
+                        <exclude>*mybatis*/**</exclude>
+
+                        <exclude>*spring*.xml</exclude>
+
+                        <exclude>logback/**</exclude>
+                        <exclude>*logback*.xml</exclude>
+
+                        <exclude>*.properties</exclude>
+                        <exclude>*.yml</exclude>
+                        <exclude>*.yaml</exclude>
+                        <exclude>*.conf</exclude>
+                        <exclude>*.j2</exclude>
+                        <exclude>*.config</exclude>
+                        <exclude>*.txt</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <!-- 打包插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4.1</version>
+                <!-- 使用多个 execution 分别进行执行打包，以重新指定打包文件名 -->
+                <executions>
+                    <execution>
+                        <id>make-all</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${project.artifactId}</finalName>
+                            <descriptors>
+                                <descriptor>src/main/resources/assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+
+
+                    <execution>
+                        <id>make-upgrade</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${project.artifactId}</finalName>
+                            <descriptors>
+                                <descriptor>src/main/resources/assembly-upgrade.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -864,7 +864,7 @@
                                 <goal>copy-resources</goal>
                             </goals>
                             <configuration>
-                                <encoding>UTF-8</encoding>
+                                <encoding>${project.build.sourceEncoding}</encoding>
                                 <!-- 资源文件的输出目录 -->
                                 <outputDirectory>${project.build.directory}/classes</outputDirectory>
                                 <resources>
