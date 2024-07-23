@@ -41,6 +41,16 @@ public interface ILogger {
         return enableLevel(LogLevel.TRACE);
     }
 
+    void setTraceId(String traceId);
+
+    String getTraceId();
+
+    void removeTraceId();
+
+    String newTraceId();
+
+    String getOrNewTraceId();
+
     void write(Object meta, LogLevel level, String format, Object... args);
 
     void write(Object meta, LogLevel level, Throwable ex, String format, Object... args);
