@@ -175,6 +175,12 @@
             <artifactId>i2f-extension-slf4j</artifactId>
         </dependency>
 
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-slf4j-log</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-swl</artifactId>
