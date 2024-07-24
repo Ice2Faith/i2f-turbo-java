@@ -56,6 +56,7 @@
         <module>i2f-extension-swl</module>
         <module>i2f-extension-slf4j-log</module>
         <module>i2f-extension-tts-espeak</module>
+        <module>i2f-extension-tts-jacob</module>
     </modules>
 
 
