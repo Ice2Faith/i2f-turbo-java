@@ -41,6 +41,11 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-log</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-console-color</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
