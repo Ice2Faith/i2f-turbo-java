@@ -58,6 +58,7 @@
         <module>i2f-extension-tts-espeak</module>
         <module>i2f-extension-tts-jacob</module>
         <module>i2f-extension-asr-vosk</module>
+        <module>i2f-extension-ocr-tesseract</module>
     </modules>
 
 
