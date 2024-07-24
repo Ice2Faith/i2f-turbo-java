@@ -53,7 +53,7 @@ public class TestLogger {
         // 设置为使用RegexUtil.format
         LogHolder.GLOBAL_MSG_FORMATTER = LogHolder.DEFAULT_MSG_FORMATTER;
         long bts = SystemClock.currentTimeMillis();
-        for (int i = 0; i < 10 * 10000; i++) {
+        for (int i = 0; i < 1 * 10000; i++) {
             ILogger logger = LoggerFactory.getLogger();
             logger.info("main scope logger: {}", SystemClock.currentTimeMillis());
 

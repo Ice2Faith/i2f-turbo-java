@@ -8,5 +8,9 @@ import i2f.log.data.LogData;
  * @desc
  */
 public interface ILogDataFormatter {
-    String format(LogData data);
+    default String format(LogData data) {
+        return format(data, false);
+    }
+
+    String format(LogData data, boolean stdout);
 }

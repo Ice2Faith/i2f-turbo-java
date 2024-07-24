@@ -99,6 +99,7 @@
         <module>i2f-code</module>
         <module>i2f-resp</module>
         <module>i2f-swl</module>
+        <module>i2f-console-color</module>
 
     </modules>
 
