@@ -41,6 +41,9 @@ public class FileUtil {
 
     public static File useParentDir(File file) {
         File parent = file.getParentFile();
+        if (parent == null) {
+            parent = new File(file.getAbsolutePath()).getParentFile();
+        }
         return useDir(parent);
     }
 
