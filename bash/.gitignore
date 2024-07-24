@@ -2,3 +2,4 @@ backup
 deploy
 release/test-*
 !release/*
+release/i2f-springboot-maven-project*
