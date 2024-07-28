@@ -31,9 +31,9 @@
         <dependency>
             <groupId>org.opencv</groupId>
             <artifactId>opencv</artifactId>
-            <version>3.4.5</version>
+            <version>4.3.0</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/src/main/resources/lib/opencv-345.jar</systemPath>
+            <systemPath>${pom.basedir}/src/main/resources/lib/opencv-430.jar</systemPath>
         </dependency>
     </dependencies>
 

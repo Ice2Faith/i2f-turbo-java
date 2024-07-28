@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class TestOpenCvDetect {
     public static void main(String[] args){
-        File file=new File("./tmp.jpeg");
-        File saveFile=new File("./tmp-save.jpg");
+        File file = new File("./tmp.png");
+        File saveFile = new File("./tmp-save.png");
         List<Rectangle> rectangles = OpenCvProvider.detectFrontFace(file,true,saveFile);
         for (Rectangle rectangle : rectangles) {
             System.out.println(rectangle);
