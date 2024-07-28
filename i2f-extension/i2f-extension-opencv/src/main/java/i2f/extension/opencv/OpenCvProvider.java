@@ -2,8 +2,8 @@ package i2f.extension.opencv;
 
 import i2f.io.file.FileUtil;
 import i2f.os.OsUtil;
-import org.opencv.core.*;
 import org.opencv.core.Point;
+import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -13,9 +13,9 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Ice2Faith
@@ -26,8 +26,8 @@ public class OpenCvProvider {
     public static final String OFFICIAL_URL = "https://opencv.org/";
 
     public static final String[] CLASS_PATHS = {
-            "lib/opencv_java345_x64.dll",
-            "lib/opencv_java345_x86.dll"
+            "lib/opencv_java430_x64.dll",
+            "lib/opencv_java430_x86.dll"
     };
     public static final String DLL_PATH = "./opencv";
     public static final String DATA_PATH = DLL_PATH + "/data";
@@ -61,7 +61,7 @@ public class OpenCvProvider {
 
     }
     public static void loadNative(){
-        String dllName = "opencv_java345";
+        String dllName = "opencv_java430";
         if (OsUtil.is64bit()) {
             dllName = dllName + "_x64";
         } else {
