@@ -20,9 +20,9 @@ import java.util.List;
  */
 public class FunctionPainter {
     public static void main(String[] args) throws IOException {
-        testCross();
+//        testCross();
 //        testCenter();
-//        testArguments();
+        testArguments();
     }
 
     public static void testArguments() throws IOException {
@@ -33,7 +33,9 @@ public class FunctionPainter {
                 FunctionType.ARGUMENTS,
                 (t) -> new double[]{
                         16*Math.pow(Math.sin(t),3.0),
-                        13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)
+                        13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t),
+                        5*t,
+                        t*Math.sin(3*t)
                 });
         ImageIO.write(img, "png", new File("./tmp.png"));
     }
@@ -45,7 +47,10 @@ public class FunctionPainter {
                 15, 15,
                 FunctionType.CENTER,
                 (x) -> new double[]{
-                        x
+                        x,
+                        Math.sin(x)+x*Math.cos(x),
+                        Math.abs(Math.sin(x))+Math.abs(Math.cos(x))
+
                 });
         ImageIO.write(img, "png", new File("./tmp.png"));
     }
@@ -109,23 +114,40 @@ public class FunctionPainter {
         Double minX=beginX;
         Double maxX=endX;
 
-        List<double[]> yList = new ArrayList<>(100);
-        int yLen = -1;
+        List<List<double[]>> lines=new ArrayList<>();
         for (double x = beginX; x <= endX; x += accX) {
             double[] yArr = yValueMapper.apply(x);
-            if (yLen <= 0) {
-                yLen = yArr.length;
-                if(type==FunctionType.ARGUMENTS){
-                    yLen= yArr.length/2;
+            if (type==FunctionType.CROSS){
+                // yArr: y1,y2,y3 ...
+                for (int i = 0; i < yArr.length; i++) {
+                    double cx = x;
+                    double cy = yArr[i];
+                    double[] arr = new double[]{cx, cy};
+
+                    if (minY == null || arr[1] < minY) {
+                        minY = arr[1];
+                    }
+                    if (maxY == null || arr[1] > maxY) {
+                        maxY = arr[1];
+                    }
+
+                    if(minX==null || arr[0] <minX){
+                        minX=arr[0];
+                    }
+                    if(maxX==null || arr[0]>maxX){
+                        maxX=arr[0];
+                    }
+
+                    if(lines.size()<=i){
+                        lines.add(new ArrayList<>(100));
+                    }
+                    lines.get(i).add(arr);
                 }
-                if (yLen < 1) {
-                    yLen = 1;
-                }
-            }
-            if (type == FunctionType.CENTER) {
+            } else if (type == FunctionType.CENTER) {
                 double angle = x;
-                // angle, radius ...
-                for (double radius : yArr) {
+                // yArr: radius1,radius2 ...
+                for (int i = 0; i < yArr.length; i++) {
+                    double radius=yArr[i];
                     double cx = radius * Math.cos(angle);
                     double cy = radius * Math.sin(angle);
                     double[] arr = new double[]{cx, cy};
@@ -144,30 +166,14 @@ public class FunctionPainter {
                         maxX=arr[0];
                     }
 
-                    yList.add(arr);
+
+                    if(lines.size()<=i){
+                        lines.add(new ArrayList<>(100));
+                    }
+                    lines.get(i).add(arr);
                 }
 
-            } else if (type==FunctionType.CROSS){
-
-                double[] arr = new double[1 + yLen];
-                arr[0] = x;
-                for (int i = 1; i < arr.length; i++) {
-                    arr[i] = 0;
-                    if ((i - 1) < yArr.length) {
-                        arr[i] = yArr[i - 1];
-                    }
-                    if (minY == null || arr[i] < minY) {
-                        minY = arr[i];
-                    }
-                    if (maxY == null || arr[i] > maxY) {
-                        maxY = arr[i];
-                    }
-
-                }
-
-
-                yList.add(arr);
-            }else if(type == FunctionType.ARGUMENTS){
+            } else if(type == FunctionType.ARGUMENTS){
 
                 for (int i = 0; (i+1) < yArr.length; i+=2) {
                     double cx = yArr[i];
@@ -189,20 +195,14 @@ public class FunctionPainter {
                         maxX=arr[0];
                     }
 
-                    yList.add(arr);
+                    int j=i/2;
+                    if(lines.size()<=j){
+                        lines.add(new ArrayList<>(100));
+                    }
+                    lines.get(j).add(arr);
                 }
             }
         }
-
-        if (type == FunctionType.CENTER) {
-            yLen = 1;
-        }
-        if (type == FunctionType.ARGUMENTS) {
-            yLen = 1;
-        }
-
-
-
 
         final double finalWidth = width;
 
@@ -293,27 +293,32 @@ public class FunctionPainter {
 
         Random random = new SecureRandom();
 
-        Color[] colors = new Color[yLen];
-        for (int i = 0; i < yLen; i++) {
+        int linesCount = lines.size();
+        Color[] colors = new Color[linesCount];
+        for (int i = 0; i < linesCount; i++) {
             colors[i] = new Color(random.nextInt(230), random.nextInt(230), random.nextInt(230));
         }
 
-        g.setColor(Color.BLACK);
-        double lastX = 0;
-        double[] lastY = new double[yLen];
-        boolean isFirst = true;
-        for (double[] xy : yList) {
-            double x = xy[0];
-            if (Double.isInfinite(x)) {
-                x = width;
-            }
-            if (Double.isNaN(x)) {
-                x = 0;
-            }
-            double vx = xTransform.apply(x);
 
-            for (int i = 0; i < yLen; i++) {
-                double y = xy[1 + i];
+        for (int i = 0; i < lines.size(); i++) {
+            g.setColor(colors[i]);
+
+            List<double[]> line=lines.get(i);
+
+            double lastX=0;
+            double lastY=0;
+            boolean isFirst = true;
+            for (double[] xy : line) {
+                double x = xy[0];
+                if (Double.isInfinite(x)) {
+                    x = width;
+                }
+                if (Double.isNaN(x)) {
+                    x = 0;
+                }
+                double vx = xTransform.apply(x);
+
+                double y = xy[1];
                 if (Double.isInfinite(y)) {
                     y = height;
                 }
@@ -324,16 +329,16 @@ public class FunctionPainter {
 
                 if (!isFirst) {
                     g.setColor(colors[i]);
-                    g.drawLine((int) (lastX), (int) (lastY[i]),
+                    g.drawLine((int) (lastX), (int) (lastY),
                             (int) (vx), (int) (vy));
                 }
 
-                lastY[i] = vy;
+                lastY = vy;
+
+                lastX = vx;
+                isFirst = false;
             }
 
-
-            lastX = vx;
-            isFirst = false;
         }
 
         return img;
