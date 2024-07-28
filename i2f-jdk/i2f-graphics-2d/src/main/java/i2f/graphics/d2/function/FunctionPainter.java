@@ -70,9 +70,43 @@ public class FunctionPainter {
     }
 
     public enum FunctionType {
-        CROSS, // 直角坐标
-        CENTER, // 极坐标
-        ARGUMENTS // 参数方程
+        CROSS, // 直角坐标，返回值 yArr: y1,y2,y3 ...
+        CENTER, // 极坐标，返回值 yArr: radius1,radius2 ...
+        ARGUMENTS // 参数方程，返回值 yArr: x1,y1,x2,y2,...
+    }
+    public static BufferedImage drawFunction(double beginX, double endX, double accX,
+                                             Function<Double, double[]> yValueMapper) {
+        return drawFunction(beginX,endX,accX,
+                1080,720,null,
+                20,20,FunctionType.CROSS,
+                yValueMapper);
+    }
+    public static BufferedImage drawFunction(double beginX, double endX, double accX,
+                                             int width, int height,
+                                             Function<Double, double[]> yValueMapper) {
+        return drawFunction(beginX,endX,accX,
+                width,height,null,
+                20,20,FunctionType.CROSS,
+                yValueMapper);
+    }
+
+    public static BufferedImage drawFunction(double beginX, double endX, double accX,
+                                             int width, int height, BufferedImage img,
+                                             Function<Double, double[]> yValueMapper) {
+        return drawFunction(beginX,endX,accX,
+                width,height,img,
+                20,20,FunctionType.CROSS,
+                yValueMapper);
+    }
+
+    public static BufferedImage drawFunction(double beginX, double endX, double accX,
+                                             int width, int height, BufferedImage img,
+                                             double xAxisCount, double yAxisCount,
+                                             Function<Double, double[]> yValueMapper) {
+        return drawFunction(beginX,endX,accX,
+                width,height,img,
+                xAxisCount,yAxisCount,FunctionType.CROSS,
+                yValueMapper);
     }
 
     public static BufferedImage drawFunction(double beginX, double endX, double accX,
@@ -174,7 +208,7 @@ public class FunctionPainter {
                 }
 
             } else if(type == FunctionType.ARGUMENTS){
-
+                // yArr: x1,y1,x2,y2,...
                 for (int i = 0; (i+1) < yArr.length; i+=2) {
                     double cx = yArr[i];
                     double cy = yArr[i+1];
