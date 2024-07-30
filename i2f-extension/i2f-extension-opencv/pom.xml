@@ -35,6 +35,21 @@
             <scope>system</scope>
             <systemPath>${pom.basedir}/src/main/resources/lib/opencv-430.jar</systemPath>
         </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv</artifactId>
+            <version>1.5.9</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv-platform</artifactId>
+            <version>1.5.9</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
