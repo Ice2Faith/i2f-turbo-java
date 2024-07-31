@@ -15,7 +15,8 @@
     <modules>
 
         <module>i2f-tools-source-copier</module>
-<!--        <module>i2f-tools-encrypt</module>-->
+        <module>i2f-tools-face-recognizer</module>
+        <!--        <module>i2f-tools-encrypt</module>-->
     </modules>
 
     <properties>
@@ -70,6 +71,7 @@
                             <!--打包时加入依赖-->
                             <descriptorRef>jar-with-dependencies</descriptorRef>
                         </descriptorRefs>
+
                     </configuration>
                     <executions>
                         <execution>
