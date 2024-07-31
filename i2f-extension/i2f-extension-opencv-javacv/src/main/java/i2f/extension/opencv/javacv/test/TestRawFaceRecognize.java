@@ -1,6 +1,6 @@
-package i2f.extension.opencv.test;
+package i2f.extension.opencv.javacv.test;
 
-import i2f.extension.opencv.OpenCvProvider;
+import i2f.extension.opencv.data.OpenCvDataFileProvider;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
@@ -25,7 +25,7 @@ public class TestRawFaceRecognize {
             modelFile.getParentFile().mkdirs();
         }
 
-        File xmlFile = OpenCvProvider.getClasspathOpenCvDataFile("haarcascades/haarcascade_frontalface_default.xml");
+        File xmlFile = OpenCvDataFileProvider.getClasspathOpenCvDataFile("haarcascades/haarcascade_frontalface_default.xml");
 
         CascadeClassifier classifier = new CascadeClassifier(xmlFile.getAbsolutePath());
 

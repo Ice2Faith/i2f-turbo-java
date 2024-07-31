@@ -15,6 +15,7 @@ public class TestOpenCvDetect {
     public static void main(String[] args){
         File file = new File("./tmp.png");
         File saveFile = new File("./tmp-save.png");
+//        OpenCvVersion.VERSION="480";
         List<Rectangle> rectangles = OpenCvProvider.detectFrontFace(file,true,saveFile);
         for (Rectangle rectangle : rectangles) {
             System.out.println(rectangle);
