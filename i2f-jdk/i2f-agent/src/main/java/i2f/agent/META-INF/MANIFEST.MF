@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Premain-Class: i2f.agent.AgentMain
+Agent-Class: i2f.agent.AgentMain
+Can-Redefine-Classes: true
+Can-Retransform-Classes: true
+Main-Class: i2f.agent.AppMain
+Class-Path: . ./i2f-jdk-all-1.0.jar ./tools.jar
+Created-By: Apache Maven 3.6.3
+Build-Jdk: 1.8.0_201
+Built-By: Ice2Faith
