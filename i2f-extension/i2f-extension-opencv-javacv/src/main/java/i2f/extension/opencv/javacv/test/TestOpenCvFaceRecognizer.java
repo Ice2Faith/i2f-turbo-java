@@ -1,7 +1,8 @@
-package i2f.extension.opencv.test;
+package i2f.extension.opencv.javacv.test;
 
-import i2f.extension.opencv.OpenCvFaceRecognizer;
-import i2f.extension.opencv.OpenCvProvider;
+
+import i2f.extension.opencv.data.OpenCvDataFileProvider;
+import i2f.extension.opencv.javacv.OpenCvFaceRecognizer;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
 import java.io.File;
@@ -15,7 +16,7 @@ import java.util.List;
  */
 public class TestOpenCvFaceRecognizer {
     public static void main(String[] args) throws IOException {
-        File xmlFile = OpenCvProvider.getClasspathOpenCvDataFile("haarcascades/haarcascade_frontalface_default.xml");
+        File xmlFile = OpenCvDataFileProvider.getClasspathOpenCvDataFile("haarcascades/haarcascade_frontalface_default.xml");
 
         CascadeClassifier classifier = new CascadeClassifier(xmlFile.getAbsolutePath());
 

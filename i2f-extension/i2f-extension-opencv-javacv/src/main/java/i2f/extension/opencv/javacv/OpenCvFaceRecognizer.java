@@ -1,5 +1,6 @@
-package i2f.extension.opencv;
+package i2f.extension.opencv.javacv;
 
+import i2f.extension.opencv.data.OpenCvDataFileProvider;
 import i2f.io.file.FileUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,7 +48,8 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 public class OpenCvFaceRecognizer implements Closeable {
-    private CascadeClassifier classifier;
+    public static final String DEFAULT_FRONTFACE_CASCASE_XML = "haarcascades/haarcascade_frontalface_default.xml";
+    private CascadeClassifier classifier = new CascadeClassifier(OpenCvDataFileProvider.getClasspathOpenCvDataFile(DEFAULT_FRONTFACE_CASCASE_XML).getAbsolutePath());
     private FaceRecognizer recognizer = LBPHFaceRecognizer.create();
     private List<String> labelNameList = new ArrayList<>();
     private int width = 256;

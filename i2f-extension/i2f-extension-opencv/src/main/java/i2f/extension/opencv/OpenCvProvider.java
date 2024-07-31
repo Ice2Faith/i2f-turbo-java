@@ -1,5 +1,6 @@
 package i2f.extension.opencv;
 
+import i2f.extension.opencv.data.OpenCvDataFileProvider;
 import i2f.io.file.FileUtil;
 import i2f.os.OsUtil;
 import org.opencv.core.Point;
@@ -24,14 +25,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class OpenCvProvider {
     public static final String OFFICIAL_URL = "https://opencv.org/";
-    public static final String DLL_BASE_NAME = "opencv_java430";
+    public static final String DLL_BASE_PREFIX = "opencv_java";
+    public static final String DLL_BASE_NAME = DLL_BASE_PREFIX + "430";
 
     public static final String[] CLASS_PATHS = {
             "lib/" + DLL_BASE_NAME + "_x64.dll",
             "lib/" + DLL_BASE_NAME + "_x86.dll"
     };
-    public static final String DLL_PATH = "./opencv";
-    public static final String DATA_PATH = DLL_PATH + "/data";
+
     private static final AtomicBoolean initialed = new AtomicBoolean(false);
 
     public static final String HAARCASCADE_FRONTALFACE_ALT_XML = "haarcascades/haarcascade_frontalface_alt.xml";
@@ -53,7 +54,7 @@ public class OpenCvProvider {
         if (initialed.getAndSet(true)) {
             return;
         }
-        File releaseDir = new File(DLL_PATH);
+        File releaseDir = new File(OpenCvDataFileProvider.ROOT_PATH);
         if (releaseDir.exists()) {
             return;
         }
@@ -64,19 +65,21 @@ public class OpenCvProvider {
             FileUtil.save(is, saveFile);
             is.close();
         }
-        System.out.println("please copy *.dll files to your system %PATH% variable directory from " + DLL_PATH + ".");
+        System.out.println("please copy *.dll files to your system %PATH% variable directory from " + OpenCvDataFileProvider.ROOT_PATH + ".");
 
     }
 
     public static void loadNative() {
-        String dllName = DLL_BASE_NAME;
+        String dllName = DLL_BASE_PREFIX + OpenCvVersion.VERSION;
         if (OsUtil.is64bit()) {
             dllName = dllName + "_x64";
         } else {
             dllName = dllName + "_x86";
         }
         dllName = System.mapLibraryName(dllName);
-        System.load(new File(DLL_PATH, dllName).getAbsolutePath());
+        String dllPath = new File(OpenCvDataFileProvider.ROOT_PATH, dllName).getAbsolutePath();
+        System.out.println("load opencv lib : " + dllPath);
+        System.load(dllPath);
     }
 
     public static List<Rectangle> detectFrontFace(File imgFile) {
@@ -128,7 +131,7 @@ public class OpenCvProvider {
 
         Mat imgMat = Imgcodecs.imread(imgFile.getAbsolutePath());
 
-        File fontFaceXmlFile = getClasspathOpenCvDataFile(cascadeXmlFileName);
+        File fontFaceXmlFile = OpenCvDataFileProvider.getClasspathOpenCvDataFile(cascadeXmlFileName);
 
         CascadeClassifier classifier = new CascadeClassifier(fontFaceXmlFile.getAbsolutePath());
 
@@ -257,17 +260,5 @@ public class OpenCvProvider {
         return ret;
     }
 
-    public static File getClasspathOpenCvDataFile(String fontFaceXmlName) {
-        File fontFaceXmlFile = new File(DATA_PATH, fontFaceXmlName);
-        if (!fontFaceXmlFile.exists()) {
-            try {
-                InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("lib/data/" + fontFaceXmlName);
-                FileUtil.save(is, fontFaceXmlFile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return fontFaceXmlFile;
-    }
 
 }
