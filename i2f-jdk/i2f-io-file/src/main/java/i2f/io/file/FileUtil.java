@@ -632,4 +632,21 @@ public class FileUtil {
     public static String realpath(String path, String subpath) {
         return pathGen(path, subpath);
     }
+
+    public static File getClasspathExtraFile(File extraRootDir, String extraResource) throws IOException {
+        return getClasspathExtraFile(extraRootDir, extraResource, false);
+    }
+
+    public static File getClasspathExtraFile(File extraRootDir, String extraResource, boolean forceCover) throws IOException {
+        useDir(extraRootDir);
+        if (extraResource.startsWith("/")) {
+            extraResource = extraResource.substring(1);
+        }
+        File extraFile = new File(extraRootDir, extraResource);
+        if (forceCover || !extraFile.exists()) {
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(extraResource);
+            FileUtil.save(is, extraFile);
+        }
+        return extraFile;
+    }
 }
