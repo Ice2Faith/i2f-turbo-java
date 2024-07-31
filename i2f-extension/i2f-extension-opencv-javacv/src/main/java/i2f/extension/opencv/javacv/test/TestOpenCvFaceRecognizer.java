@@ -5,9 +5,11 @@ import i2f.extension.opencv.data.OpenCvDataFileProvider;
 import i2f.extension.opencv.javacv.OpenCvFaceRecognizer;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -46,15 +48,31 @@ public class TestOpenCvFaceRecognizer {
         System.out.println();
 
 
-        File testDir = new File("./testing");
-        if (!testDir.exists()) {
-            testDir.mkdirs();
+        if (args.length == 0) {
+            File testDir = new File("./testing");
+            if (!testDir.exists()) {
+                testDir.mkdirs();
+            }
+
+            recognizer.test(testDir);
+
+            Map.Entry<String, Rectangle> result = recognizer.predictAsLabelAndMarkRect(new File("./testing/s7/4.pgm.verify.png"), new File("./testing/s7/4.pgm.mark.png"));
+            System.out.println(result);
+        } else {
+            for (String arg : args) {
+                System.out.println("--------------------------------");
+                File file = new File(arg);
+                if (!file.exists() || !file.isFile()) {
+                    System.out.println("file not found! " + arg);
+                    continue;
+                }
+
+                File saveFile = new File(file.getParentFile(), file.getName() + ".mark.png");
+                Map.Entry<String, Rectangle> result = recognizer.predictAsLabelAndMarkRect(file, saveFile);
+                System.out.println("result: " + result);
+                System.out.println("mark file: " + saveFile);
+            }
         }
-
-        recognizer.test(testDir);
-
-        recognizer.predictAsLabelAndMarkRect(new File("./testing/s7/4.pgm.verify.png"), new File("./testing/s7/4.pgm.mark.png"));
-
         recognizer.close();
     }
 }
