@@ -20,6 +20,29 @@ import java.util.*;
  * @author Ice2Faith
  * @date 2024/7/31 10:26
  * @desc
+ * 使用 opencv 进行人脸检测与识别
+ * 默认使用LBPH进行人脸识别
+ * 训练train和测试test均使用图片目录结构
+ * 目录结构一致
+ * 训练数据目录下的每个子目录
+ * 子目录名称就是label的名称
+ * 子目录中的文件就是人脸图片
+ * 所以，目录结构大致这样
+ * trained
+ *      tom
+ *          tom-01.png
+ *          tom-02.jpg
+ *      jack
+ *          jack-01.png
+ *          jack-02.jpeg
+ * 另外，支持模型的保存save和载入load
+ * 以模型文件 test.xml 为例
+ * 则会产生如下文件
+ * test.xml 模型文件
+ * test.labels.txt 标签文件
+ * test.properties 配置文件
+ * 可以根据实际需求，调整LBPH为Fisher或者其他人脸识别引擎
+ * 同时根据需要变更CascadeClassifier为其他的人脸检测引擎
  */
 @Data
 @NoArgsConstructor
