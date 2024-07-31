@@ -14,6 +14,10 @@
     <dependencies>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-annotations</artifactId>
         </dependency>
         <dependency>
@@ -199,6 +203,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jdbc-proxy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jvm</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>

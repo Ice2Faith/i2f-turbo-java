@@ -1,13 +1,13 @@
 package i2f.springboot.spring.application;
 
 import i2f.extension.slf4j.Slf4jPrintStream;
+import i2f.jvm.JvmUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.SpringVersion;
@@ -22,7 +22,6 @@ import java.net.NetworkInterface;
 import java.security.Provider;
 import java.sql.Driver;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -38,12 +37,12 @@ public class BaseBootApplication {
     public static WebApplicationType webType;
     public static Class<?> mainClass;
     public static String[] mainArgs;
-    public static AtomicBoolean RUN_BANNER=new AtomicBoolean(false);
+    public static AtomicBoolean RUN_BANNER = new AtomicBoolean(false);
 
-    public static void registerStartup(WebApplicationType webType,Class<?> mainClass,String[] args){
-        BaseBootApplication.webType=webType;
-        BaseBootApplication.mainClass=mainClass;
-        BaseBootApplication.mainArgs=args;
+    public static void registerStartup(WebApplicationType webType, Class<?> mainClass, String[] args) {
+        BaseBootApplication.webType = webType;
+        BaseBootApplication.mainClass = mainClass;
+        BaseBootApplication.mainArgs = args;
     }
 
     public static void startup(Class<?> mainClass, String[] args) {
@@ -53,7 +52,7 @@ public class BaseBootApplication {
     public static void startup(WebApplicationType webType, Class<?> mainClass, String[] args) {
         Slf4jPrintStream.redirectSysoutSyserr();
 
-        registerStartup(webType,mainClass,args);
+        registerStartup(webType, mainClass, args);
 
         SpringApplicationBuilder builder = new SpringApplicationBuilder();
 
@@ -61,16 +60,16 @@ public class BaseBootApplication {
             builder.web(WebApplicationType.NONE);
         }
         builder.sources(mainClass)
-                .listeners(getStartedListener(webType,mainClass))
+                .listeners(getStartedListener(webType, mainClass))
                 .run(args);
     }
 
 
-    public static ApplicationListener<ApplicationStartedEvent> getStartedListener(WebApplicationType webType, Class<?> mainClass){
+    public static ApplicationListener<ApplicationStartedEvent> getStartedListener(WebApplicationType webType, Class<?> mainClass) {
         return new ApplicationListener<ApplicationStartedEvent>() {
             @Override
             public void onApplicationEvent(ApplicationStartedEvent event) {
-                if(BaseBootApplication.RUN_BANNER.getAndSet(true)){
+                if (BaseBootApplication.RUN_BANNER.getAndSet(true)) {
                     return;
                 }
                 BaseBootApplication.webType = event.getSpringApplication().getWebApplicationType();
@@ -91,9 +90,9 @@ public class BaseBootApplication {
         builder.append("\n----------------------------------------------------------\n")
                 .append("\twelcome to this system:\n")
                 .append("\tapp    :\t").append(env.getProperty("spring.application.name")).append(" | ").append(env.getProperty("spring.profiles.active")).append("\n")
-                .append("\tprocess:\t").append("PID:").append(getPid()).append(" | ").append("User:").append(getStartUser()).append("\n")
+                .append("\tprocess:\t").append("PID:").append(JvmUtil.getPid()).append(" | ").append("User:").append(JvmUtil.getStartUser()).append("\n")
                 .append("\tversion:\t").append("SpringBoot:").append(SpringBootVersion.getVersion()).append(" | ").append("Spring:").append(SpringVersion.getVersion()).append("\n");
-        RuntimeMXBean runtimeMXBean = getRuntimeMXBean();
+        RuntimeMXBean runtimeMXBean = JvmUtil.getRuntimeMXBean();
         if (runtimeMXBean != null) {
             long startTime = runtimeMXBean.getStartTime();
             long uptime = runtimeMXBean.getUptime();
@@ -102,17 +101,17 @@ public class BaseBootApplication {
             builder.append("\ttime   :\t").append("start:").append(diffStart)
                     .append(" | ").append("up:").append(uptime).append("\n");
         }
-        if (isDebug()) {
+        if (JvmUtil.isDebug()) {
             builder.append("\tdebug  :\t").append(true).append("\n");
         }
-        if (isAgent()) {
+        if (JvmUtil.isAgent()) {
             builder.append("\tagent  :\t").append(true).append("\n");
         }
-        if (isNoVerify()) {
+        if (JvmUtil.isNoVerify()) {
             builder.append("\tverify :\t").append(false).append("\n");
         }
-        if(webType==null){
-            webType=BaseBootApplication.webType;
+        if (webType == null) {
+            webType = BaseBootApplication.webType;
         }
         if (webType != null) {
             builder.append("\tweb    :\t").append(webType).append("\n");
@@ -126,11 +125,11 @@ public class BaseBootApplication {
                 if (contextPath == null) {
                     contextPath = "";
                 }
-                if(contextPath.endsWith("/")){
-                    contextPath=contextPath.substring(0,contextPath.length()-1);
+                if (contextPath.endsWith("/")) {
+                    contextPath = contextPath.substring(0, contextPath.length() - 1);
                 }
-                if(!"".equals(contextPath) && !contextPath.startsWith("/")){
-                    contextPath="/"+contextPath;
+                if (!"".equals(contextPath) && !contextPath.startsWith("/")) {
+                    contextPath = "/" + contextPath;
                 }
 
 
@@ -217,33 +216,33 @@ public class BaseBootApplication {
 
         ServiceLoader<Provider> providers = ServiceLoader.load(Provider.class);
         if (providers != null) {
-            boolean isFirst=true;
+            boolean isFirst = true;
             for (Provider provider : providers) {
-                if(isFirst){
+                if (isFirst) {
                     builder.append("\tjce:\n");
                 }
-                isFirst=false;
+                isFirst = false;
                 builder.append("\t\t").append(String.format("%-6s", provider.getName())).append(":").append(provider.getClass().getName()).append("\n");
             }
         }
 
         ServiceLoader<IIOServiceProvider> ios = ServiceLoader.load(IIOServiceProvider.class);
         if (ios != null) {
-            boolean isFirst=true;
+            boolean isFirst = true;
             for (IIOServiceProvider io : ios) {
-                if(isFirst){
+                if (isFirst) {
                     builder.append("\tio:\n");
                 }
-                isFirst=false;
+                isFirst = false;
                 builder.append("\t\t").append(io.getClass().getName()).append("\n");
             }
         }
 
-        String mainClassName="UNKNOWN";
-        if(mainClass!=null){
-            mainClassName=mainClass.getName();
-        }else if(BaseBootApplication.mainClass!=null){
-            mainClassName=BaseBootApplication.mainClass.getName();
+        String mainClassName = "UNKNOWN";
+        if (mainClass != null) {
+            mainClassName = mainClass.getName();
+        } else if (BaseBootApplication.mainClass != null) {
+            mainClassName = BaseBootApplication.mainClass.getName();
         }
 
         Runtime runtime = Runtime.getRuntime();
@@ -260,55 +259,4 @@ public class BaseBootApplication {
     }
 
 
-    public static RuntimeMXBean getRuntimeMXBean() {
-        return ManagementFactory.getRuntimeMXBean();
-    }
-
-    public static String getPid() {
-        String name = getRuntimeMXBean().getName();
-        String[] arr = name.split("@", 2);
-        if (arr.length == 2) {
-            return arr[0];
-        }
-        return "-1";
-    }
-
-    public static String getStartUser() {
-        String name = getRuntimeMXBean().getName();
-        String[] arr = name.split("@", 2);
-        if (arr.length == 2) {
-            return arr[1];
-        }
-        return "";
-    }
-
-    public static boolean isDebug() {
-        List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        for (String arg : args) {
-            if (arg.startsWith("-Xrunjdwp") || arg.startsWith("-agentlib:jdwp")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean isAgent() {
-        List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        for (String arg : args) {
-            if (arg.startsWith("-javaagent:")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean isNoVerify() {
-        List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        for (String arg : args) {
-            if ("-noverify".equals(arg) || "-Xverify:none".equals(arg)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
