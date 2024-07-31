@@ -52,7 +52,7 @@ public class TestOpenCvFaceRecognizer {
 
         recognizer.test(testDir);
 
-        recognizer.predictAsLabelAndMarkRect(new File("./testing/s7/4.pgm.png"), new File("./testing/s7/4.pgm.mark.png"));
+        recognizer.predictAsLabelAndMarkRect(new File("./testing/s7/4.pgm.verify.png"), new File("./testing/s7/4.pgm.mark.png"));
 
         recognizer.close();
     }
