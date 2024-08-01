@@ -519,6 +519,12 @@
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-agent-javassist</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-aspectj</artifactId>
                 <version>${i2f.version}</version>
             </dependency>

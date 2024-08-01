@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
-Premain-Class: i2f.agent.AgentMain
-Agent-Class: i2f.agent.AgentMain
+Premain-Class: i2f.extension.agent.javassist.AgentMain
+Agent-Class: i2f.extension.agent.javassist.AgentMain
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 Main-Class: i2f.agent.AppMain
-Class-Path: . ./resources
+Class-Path: .  ./resources
 Created-By: Apache Maven 3.6.3
 Build-Jdk: 1.8.0_201
 Built-By: Ice2Faith
