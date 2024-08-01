@@ -8,8 +8,13 @@ import javassist.expr.MethodCall;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -28,6 +33,83 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
         boolean ret = StringMatcher.antClass().match(className, "org.springframework.**");
         System.out.println(ret);
     }
+    public static boolean isSpringApplicationContext(CtClass clazz){
+        return isAssignableFrom(clazz,SPRING_CONTEXT_CLASS_NAME);
+    }
+    public static boolean isAssignableFrom(CtClass clazz,String fullClassName){
+        if(clazz==null){
+            return false;
+        }
+        String name = clazz.getName();
+        if(name==null){
+            return false;
+        }
+        if(Object.class.getName().equals(name)){
+            return false;
+        }
+        if(fullClassName.equals(name)){
+            return true;
+        }
+        try {
+            CtClass superclass = clazz.getSuperclass();
+            if(isAssignableFrom(superclass,fullClassName)){
+                return true;
+            }
+        } catch (Exception e) {
+
+        }
+        try {
+            CtClass[] interfaces = clazz.getInterfaces();
+            if(interfaces!=null){
+                for (CtClass anInterface : interfaces) {
+                    if(isAssignableFrom(anInterface,fullClassName)){
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        }
+        return false;
+    }
+
+    public static Map<CtMethod,CtClass> getAllMethods(CtClass clazz){
+        Map<CtMethod,CtClass> ret=new LinkedHashMap<>();
+        if(clazz==null){
+            return ret;
+        }
+        CtMethod[] methods = clazz.getMethods();
+        if(methods!=null){
+            for (CtMethod method : methods) {
+                ret.put(method,clazz);
+            }
+        }
+        CtMethod[] declaredMethods = clazz.getDeclaredMethods();
+        if(declaredMethods!=null){
+            for (CtMethod method : declaredMethods) {
+                ret.put(method,clazz);
+            }
+        }
+        try {
+            CtClass superclass = clazz.getSuperclass();
+            Map<CtMethod, CtClass> next = getAllMethods(superclass);
+            ret.putAll(next);
+        } catch (Exception e) {
+
+        }
+        try {
+            CtClass[] interfaces = clazz.getInterfaces();
+            if(interfaces!=null){
+                for (CtClass anInterface : interfaces) {
+                    Map<CtMethod, CtClass> next = getAllMethods(anInterface);
+                    ret.putAll(next);
+                }
+            }
+        } catch (Exception e) {
+
+        }
+        return ret;
+    }
 
     @Override
     public byte[] transform(ClassLoader loader,
@@ -37,70 +119,81 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
                             byte[] classfileBuffer) throws IllegalClassFormatException {
         className = className.replaceAll("/", ".");
 
+        if (className.startsWith("java.lang.")
+                || className.startsWith("java.util.")
+                || className.startsWith("java.time.")
+                || className.startsWith("java.reflect.")
+                || className.startsWith("java.math.")
+                || className.startsWith("java.text.")) {
+//            System.out.println("jump class:"+className);
+            return classfileBuffer;
+        }
 
-        if (StringMatcher.antClass().match(className, "org.springframework.**")) {
+        if(!className.contains("WebApplicationContextServletContextAwareProcessor")){
+            return classfileBuffer;
+        }
+
+        if (className.startsWith("org.springframework.")) {
             ClassPool cp = ClassPool.getDefault();
 
             CtClass cc = null;
             try {
                 cc = cp.get(className);
-                System.out.println("spring-context find class:" + className);
-                CtConstructor[] constructors = cc.getConstructors();
-                for (CtConstructor constructor : constructors) {
-                    try {
-                        String trigger = className + "." + constructor;
-                        constructor.insertBeforeBody("{" +
-                                "    Class<?> $clazz=this.getClass();\n" +
-                                "    Class<?> $contextClass=org.springframework.context.ApplicationContext.class;\n" +
-                                "        System.out.println(\"spring-context constructor-test. --" + trigger + "\");" +
-                                "    if($contextClass.isAssignableFrom($clazz)){\n" +
-                                "        i2f.extension.agent.javassist.transformer.XxeGuardClassTransformer.context=this;\n" +
-                                "        System.out.println(\"spring-context constructor-inject. --" + trigger + "\");" +
-                                "    }" +
-                                "}\n");
-                        System.out.println("spring-context inject constructor:" + constructor.getName());
-                    } catch (Exception e) {
 
-                    }
-                }
+//                if(!isSpringApplicationContext(cc)){
+//                    return classfileBuffer;
+//                }
 
+                System.out.println("spring-context-class:"+className);
 
-                CtMethod[] methods = cc.getMethods();
+                Map<CtMethod, CtClass> allMethods = getAllMethods(cc);
+
+                Set<CtMethod> methods = allMethods.keySet();
+
                 for (CtMethod method : methods) {
+                    if (method.isEmpty()) {
+//                    System.out.println("jump method empty:" + item.getName());
+                        continue;
+                    }
+                    if (Arrays.asList("equals", "hashCode", "clone",
+                            "wait", "notify", "finalize", "notifyAll",
+                            "getClass", "toString").contains(method.getName())) {
+//                    System.out.println("jump method in:" + item.getName());
+                        continue;
+                    }
+//                    System.out.println("spring-context-class-method:"+method);
+
+//                    if(!Modifier.isPublic(method.getModifiers())) {
+//                        method.setModifiers(method.getModifiers()|Modifier.PUBLIC);
+//
+//                    }
+
+                    boolean isTar="org.springframework.boot.web.servlet.context.WebApplicationContextServletContextAwareProcessor".equals(className);
+                    String tarCode="Object $zObj=this;\n" +
+                            "  System.out.println(\"tar-obj:\"+$zObj);\n"+
+                            "                    Class $zObjClass=$zObj.getClass();\n" +
+                            "  System.out.println(\"tar-clazz:\"+$zObjClass);\n"+
+                            "                    java.lang.reflect.Field $zContextField = $zObjClass.getDeclaredField(\"webApplicationContext\");\n" +
+                            "  System.out.println(\"tar-field:\"+$zContextField);\n"+
+                            "                    $zContextField.setAccessible(true);\n" +
+                            "                    "+XxeGuardClassTransformer.class.getName()+".context=$zContextField.get($zObj);";
                     try {
                         String trigger = className + "." + method.getName();
                         method.insertBefore("{" +
-                                "    Class<?> $clazz=this.getClass();\n" +
-                                "    Class<?> $contextClass=org.springframework.context.ApplicationContext.class;\n" +
-                                "        System.out.println(\"spring-context constructor-test. --" + trigger + "\");" +
-                                "    if($contextClass.isAssignableFrom($clazz)){\n" +
-                                "        i2f.extension.agent.javassist.transformer.XxeGuardClassTransformer.context=this;\n" +
-                                "        System.out.println(\"spring-context constructor-inject. --" + trigger + "\");" +
-                                "    }" +
+//                                "    Class<?> $clazz=this.getClass();\n" +
+//                                "    Class<?> $contextClass=org.springframework.context.ApplicationContext.class;\n" +
+                                        (isTar?tarCode:"")+
+                                "        System.out.println(\"spring-context method-test. --" + trigger + "\");" +
+//                                "    if($contextClass.isAssignableFrom($clazz)){\n" +
+//                                "        i2f.extension.agent.javassist.transformer.XxeGuardClassTransformer.context=this;\n" +
+//                                "        System.out.println(\"spring-context constructor-inject. --" + trigger + "\");" +
+//                                "    }" +
                                 "}\n");
-                        System.out.println("spring-context inject method:" + method.getName());
+                        System.out.println("spring-context inject method:" + method);
                     } catch (Exception e) {
-
+                        System.err.println(e.getMessage());
                     }
                 }
-                CtMethod[] declaredMethods = cc.getDeclaredMethods();
-                for (CtMethod method : declaredMethods) {
-                    try {
-                        String trigger = className + "." + method.getName();
-                        method.insertBefore("{" +
-                                "    Class<?> $clazz=this.getClass();\n" +
-                                "    Class<?> $contextClass=org.springframework.context.ApplicationContext.class;\n" +
-                                "        System.out.println(\"spring-context constructor-test. --" + trigger + "\");" +
-                                "    if($contextClass.isAssignableFrom($clazz)){\n" +
-                                "        i2f.extension.agent.javassist.transformer.XxeGuardClassTransformer.context=this;\n" +
-                                "        System.out.println(\"spring-context constructor-inject. --" + trigger + "\");" +
-                                "    }" +
-                                "}\n");
-                    } catch (Exception e) {
-
-                    }
-                }
-
 
                 if (!hasInterval.getAndSet(true)) {
                     Thread thread = new Thread(new Runnable() {
@@ -144,8 +237,7 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
                 }
                 return cc.toBytecode();
             } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println(e.getMessage());
+                System.err.println(e.getMessage());
             } finally {
                 if (cc != null) {
                     cc.detach();
