@@ -62,7 +62,7 @@
         <module>i2f-extension-opencv</module>
         <module>i2f-extension-opencv-javacv</module>
         <module>i2f-extension-opencv-data</module>
-        <module>i2f-agent-javassist</module>
+        <module>i2f-extension-agent-javassist</module>
     </modules>
 
 
