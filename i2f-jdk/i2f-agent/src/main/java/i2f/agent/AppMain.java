@@ -3,6 +3,7 @@ package i2f.agent;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.Scanner;
@@ -35,25 +36,41 @@ public class AppMain {
             System.out.println("not valid index select,exit!");
             return;
         }
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        String name = AppMain.class.getName().replaceAll("\\.", "/") + ".class";
-        URL url = loader.getResource(name);
-        if (url == null) {
-            System.out.println("not found resource,exit!");
-            return;
+
+        scanner.nextLine();
+        System.out.println("------------------------------------------------");
+        System.out.println("please input one agent jar path(default is this) :");
+        System.out.print(">/ ");
+        String agentJar = scanner.nextLine();
+        agentJar = agentJar.trim();
+        if (!agentJar.isEmpty()) {
+            File agentJarFile = new File(agentJar);
+            if (agentJarFile.exists() && agentJarFile.isFile()) {
+                agentJar = agentJarFile.getAbsolutePath();
+                System.out.println("found input jar file : " + agentJarFile);
+            }
         }
-        String file = url.getPath();
-        idx = file.indexOf("!");
-        if (idx < 0) {
-            System.out.println("not jar env,exit!");
-            return;
+        if (agentJar.isEmpty()) {
+            System.out.println("finding default jar file ...");
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            String name = AppMain.class.getName().replaceAll("\\.", "/") + ".class";
+            URL url = loader.getResource(name);
+            if (url == null) {
+                System.out.println("not found resource,exit!");
+                return;
+            }
+            String file = url.getPath();
+            idx = file.indexOf("!");
+            if (idx < 0) {
+                System.out.println("not jar env,exit!");
+                return;
+            }
+            agentJar = file.substring(0, idx);
+            agentJar = agentJar.substring("file:/".length());
         }
-        String agentJar = file.substring(0, idx);
-        agentJar = agentJar.substring("file:/".length());
         System.out.println("agentJar:" + agentJar);
 
         System.out.println("------------------------------------------------");
-        scanner.nextLine();
         String agentArg = "args,ret,stat@com.i2f.**&stat@java.util.**";
         System.out.println("please input agent argument:");
         System.out.println("actions@method-ant-pattens&actions@method-ant-pattens");

@@ -63,6 +63,9 @@ public class AgentUtil {
      */
     public static Map<String, Set<String>> parseClassPattenMap(String arg) {
         Map<String, Set<String>> actionPattens = new HashMap<>();
+        if (arg == null || arg.isEmpty()) {
+            return actionPattens;
+        }
         String[] rules = arg.split("&");
         for (String rule : rules) {
             String[] pair = rule.split("@", 2);

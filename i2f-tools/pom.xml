@@ -15,7 +15,8 @@
     <modules>
 
         <module>i2f-tools-source-copier</module>
-        <module>i2f-tools-face-recognizer</module>
+        <!--        <module>i2f-tools-face-recognizer</module>-->
+        <module>i2f-tools-agent</module>
         <!--        <module>i2f-tools-encrypt</module>-->
     </modules>
 

@@ -96,10 +96,14 @@ public class AntMatcher implements IMatcher {
                             k++;
                         }
 
-
                         int m = 0;
                         while ((m + si) < slen) {
                             String nextStr = str.substring(m + si);
+                            if (m == 0) {
+                                if (!nextStr.contains(nextPatten)) {
+                                    return MATCH_FAILURE_VALUE;
+                                }
+                            }
                             if (nextStr.startsWith(nextPatten)) {
                                 m += nextPatten.length();
                                 mlen += nextPatten.length();
@@ -109,6 +113,11 @@ public class AntMatcher implements IMatcher {
                         }
                         pi += j + 2 + k;
                         si += m;
+
+                        // 以多分段结尾，完全匹配剩余部分
+                        if (nextPatten.isEmpty()) {
+                            si = slen;
+                        }
                     } else {
                         // 单分段匹配
                         String nextPatten = "";
@@ -120,6 +129,11 @@ public class AntMatcher implements IMatcher {
                         int m = 0;
                         while ((m + si) < slen) {
                             String nextStr = str.substring(m + si);
+                            if (m == 0) {
+                                if (!nextStr.contains(nextPatten)) {
+                                    return MATCH_FAILURE_VALUE;
+                                }
+                            }
                             if (nextStr.startsWith(nextPatten)) {
                                 m += nextPatten.length();
                                 mlen += nextPatten.length();
@@ -153,6 +167,10 @@ public class AntMatcher implements IMatcher {
                     return MATCH_FAILURE_VALUE;
                 }
             }
+        }
+
+        if (si < slen) {
+            return MATCH_FAILURE_VALUE;
         }
 
         return calcMatchRate(si, pi, slen, plen, mlen);

@@ -9,7 +9,7 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-agent-javassist</artifactId>
+    <artifactId>i2f-extension-agent-javassist</artifactId>
 
     <dependencies>
         <dependency>
