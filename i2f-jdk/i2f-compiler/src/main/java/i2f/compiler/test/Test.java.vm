@@ -1,6 +1,6 @@
 import java.util.Date;
 
-public class ###{
+public class ###class {
 
 public Object call(Object arg) {
     System.out.println("test:" + arg);

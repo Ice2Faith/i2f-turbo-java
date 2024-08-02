@@ -25,8 +25,6 @@ public class InvokeWatchClassesTransformer implements ClassFileTransformer {
         this.actionPattens = actionPattens;
     }
 
-    private Object springContext;
-
     @Override
     public byte[] transform(ClassLoader loader,
                             String className,

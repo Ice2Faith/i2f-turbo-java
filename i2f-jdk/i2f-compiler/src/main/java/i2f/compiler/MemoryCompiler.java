@@ -16,13 +16,17 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 /**
  * @author Ice2Faith
  * @date 2024/6/18 19:14
  * @desc
  */
 public class MemoryCompiler {
+
+    public static final String SCRIPT_TAG_PREFIX = "###";
+    public static final String IMPORT_SPLIT_TAG = SCRIPT_TAG_PREFIX + "import";
+    public static final String CLASS_NAME_TAG = SCRIPT_TAG_PREFIX + "class";
+    public static final String METHOD_SPLIT_TAG = SCRIPT_TAG_PREFIX + "method";
 
     public static final String DEFAULT_IMPORTS = "\n" +
             "import java.lang.*;\n" +
@@ -196,7 +200,7 @@ public class MemoryCompiler {
 
     /**
      * 作用和上面的类似
-     * 不过，javaSourceCode 需要使用 ### 代替类名的位置
+     * 不过，javaSourceCode 需要使用 ###class 代替类名的位置
      * 并且不能写包名，其他一切正常
      *
      * @param javaSourceCode
@@ -207,76 +211,172 @@ public class MemoryCompiler {
      */
     public static Object compileCallRandomClass(String javaSourceCode, String methodName, Object... args) throws Exception {
         String randomClassName = "RC" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
-        String sourceCode = javaSourceCode.replaceAll("###", randomClassName);
+        String sourceCode = javaSourceCode.replaceAll(CLASS_NAME_TAG, randomClassName);
         return compileCall(sourceCode, randomClassName, randomClassName, methodName, args);
     }
 
     /**
      * 执行表达式计算
-     * 实际上，是将表达式封装到一个随机类的函数中进行执行
-     * 定义如下：
-     * public class ### {
-     * public Object call(Object root) throws Throwable {
-     * ${expression}
-     * }
-     * }
-     * 因此，对expression有一些要求
-     * expression具有一个入参，名为root
-     * expression必须包含return语句，以满足函数的返回值要求
-     * expression中，如果import了其他类，需要用 ### 进行分隔
-     * ### 之前的视为imports
-     * ### 之后的视为函数体
-     * 举例说明：
-     * expression=
-     * import java.util.Date;
-     * ###
-     * return root+"/"+new Date();
-     *
+     * 关于表达式 expression 的包装规则，请查看 {@link  #wrapExpressionAsJavaSourceCode(String expression, String className)} 的注释
      * @param expression
      * @param root
      * @return
      * @throws Exception
      */
     public static Object evaluateExpression(String expression, Object root) throws Exception {
-        String javaSourceCode = wrapExpressionAsJavaSourceCode(expression, "###");
-        return compileCallRandomClass(javaSourceCode, "call", root);
+        String javaSourceCode = wrapExpressionAsJavaSourceCode(expression, CLASS_NAME_TAG);
+        return compileCallRandomClass(javaSourceCode, "_call", root);
     }
 
     /**
      * 将表达式包装为java源代码文件
      * 定义如下：
-     * public class ### {
-     * public Object call(Object root) throws Throwable {
-     * ${expression}
-     * }
-     * }
-     * 因此，对expression有一些要求
-     * expression具有一个入参，名为root
-     * expression必须包含return语句，以满足函数的返回值要求
-     * expression中，如果import了其他类，需要用 ### 进行分隔
-     * ### 之前的视为imports
-     * ### 之后的视为函数体
-     * 举例说明：
-     * expression=
-     * import java.util.Date;
-     * ###
-     * return root+"/"+new Date();
      *
+     * <hr/>
+     * <pre>
+     * <b><i>
+     * ${expression.import}
+     *
+     * public class ###class {
+     *     public Object _call(Object root) throws Throwable {
+     *         ${expression.expr}
+     *     }
+     *
+     *     ${expression.method}
+     * }
+     * </i></b>
+     * </pre>
+     *
+     * <hr/>
+     * 因此，对expression有一些要求
+     * expression具有一个入参，名为 $root
+     * expression必须包含return语句，以满足函数的返回值要求
+     *
+     * <hr/>
+     * <h6>expression 组成部分</h6>
+     * <pre>
+     * [import ###import] [method ###method] expr
+     * 分层3部分
+     *     分别是，由 ###import 分隔的 import 导入语句部分
+     *     由 ###method 分隔的定义方法部分
+     *     以及最后的 expr 表达式部分
+     * 优先截取 ###import 之前的部分作为 import 语句部分
+     * 再对剩下的部分，截取 ###method 之前的部分作为 method 语句部分
+     * 最后剩下的部分，就是 expr 语句部分
+     * </pre>
+     *
+     * <hr/>
+     * <h6>举例说明：</h6>
+     * <pre>
+     * expression=```java
+     * <b><i>
+     * import java.util.Date;
+     *
+     * ###import
+     *
+     * public Date currentDate(){
+     *     return new Date();
+     * }
+     *
+     * ###method
+     *
+     * return $root+"/"+currentDate();
+     * </i></b>
+     * ```
+     * </pre>
+     *
+     * <hr/>
+     * 在这个例子中
+     * 演示了完整的三部分内容
+     *
+     * <hr/>
+     * <h6>import 部分为 ：</h6>
+     * <pre>
+     * ```java
+     * <b><i>
+     * import java.util.Date;
+     * </i></b>
+     * ```
+     * </pre>
+     *
+     * <hr/>
+     * <h6>method 部分为 ：</h6>
+     * <pre>
+     * ```java
+     * <b><i>
+     * public Date currentDate(){
+     *     return new Date();
+     * }
+     * </i></b>
+     * ```
+     * </pre>
+     *
+     * <hr/>
+     * <h6>expr 部分为 ：</h6>
+     * <pre>
+     * ```java
+     * <b><i>
+     * return $root+"/"+currentDate();
+     * </i></b>
+     * ```
+     * </pre>
+     *
+     * <hr/>
+     * 同时，因为import和method部分可以缺省
+     * 所以，下面的语句也是可以的
+     *
+     * <hr/>
+     * <h6>有import语句，无method语句</h6>
+     * <pre>
+     * expression=```java
+     * <b><i>
+     * import java.util.Date;
+     *
+     * ###import
+     *
+     * return $root+"/"+new Date();
+     * </i></b>
+     * ```
+     * </pre>
+     *
+     * <hr/>
+     * <h6>有import语句，无method语句</h6>
+     * <pre>
+     * expression=```java
+     * <b><i>
+     * public long currentTimeMillis(){
+     *     return System.currentTimeMillis();
+     * }
+     *
+     * ###method
+     *
+     * return $root+"/"+currentTimeMillis();
+     * </i></b>
+     * ```
+     * </pre>
+     *
+     * <hr/>
+     * <h6>无import语句，无method语句</h6>
+     * <pre>
+     * expression=```java
+     * <b><i>
+     * return $root+"/"+System.currentTimeMillis();
+     * </i></b>
+     * ```
+     * </pre>
      * @param expression
      * @param className
      * @return
      */
     public static String wrapExpressionAsJavaSourceCode(String expression, String className) {
-        String[] arr = expression.split("###", 2);
+        String[] arr = expression.split(IMPORT_SPLIT_TAG, 2);
         String imports = arr.length > 1 ? arr[0] : "";
         String body = arr.length > 1 ? arr[1] : arr[0];
-        if (imports.isEmpty()) {
-            imports = DEFAULT_IMPORTS;
-        }
         StringBuilder builder = new StringBuilder();
+        builder.append(DEFAULT_IMPORTS).append("\n");
         builder.append(imports).append("\n");
         builder.append("public class ").append(className).append(" {").append("\n");
-        builder.append("\t").append("public Object call(Object root) throws Throwable {").append("\n");
+        builder.append("\t").append("public Object _call(Object $root) throws Throwable {").append("\n");
         builder.append("\t\t").append(body).append("\n");
         builder.append("\t").append("}").append("\n");
         builder.append("}").append("\n");
