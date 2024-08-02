@@ -4,6 +4,7 @@ import i2f.extension.javassist.JavassistUtil;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
+import javassist.Modifier;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -143,6 +144,10 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
                     if (Arrays.asList("equals", "hashCode", "clone",
                             "wait", "notify", "finalize", "notifyAll",
                             "getClass", "toString", "registerNatives").contains(method.getName())) {
+                        continue;
+                    }
+
+                    if (Modifier.isStatic(method.getModifiers())) {
                         continue;
                     }
 
