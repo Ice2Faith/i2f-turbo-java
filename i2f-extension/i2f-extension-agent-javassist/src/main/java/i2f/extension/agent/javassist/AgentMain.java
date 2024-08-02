@@ -3,6 +3,7 @@ package i2f.extension.agent.javassist;
 
 import i2f.agent.AgentUtil;
 import i2f.extension.agent.javassist.context.AgentContextHolder;
+import i2f.extension.agent.javassist.evaluate.LocalFileExpressionEvaluator;
 import i2f.extension.agent.javassist.transformer.ShutdownLogClassTransformer;
 import i2f.extension.agent.javassist.transformer.SpringApplicationContextHoldClassesTransformer;
 import i2f.extension.agent.javassist.transformer.XxeGuardClassTransformer;
@@ -48,9 +49,12 @@ public class AgentMain {
         AgentContextHolder.instrumentation = inst;
         AgentContextHolder.agentArg = arg;
 
+        LocalFileExpressionEvaluator.initFileWatchThread();
+
         AgentContextHolder.transformers.add(new SpringApplicationContextHoldClassesTransformer());
         AgentContextHolder.transformers.add(new ShutdownLogClassTransformer());
         AgentContextHolder.transformers.add(new XxeGuardClassTransformer());
+
 
 //        AgentContextHolder.transformers.add(new InvokeWatchClassesTransformer(actionPattens));
 
