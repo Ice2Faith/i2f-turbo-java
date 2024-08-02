@@ -12,7 +12,7 @@ public class TestCompiler {
         String code = "\n" +
                 "import java.util.Date;\n" +
                 "\n" +
-                "public class ###{\n" +
+                "public class ###class{\n" +
                 "\n" +
                 "    public Object call(Object arg){\n" +
                 "        System.out.println(\"test:\"+arg);\n" +

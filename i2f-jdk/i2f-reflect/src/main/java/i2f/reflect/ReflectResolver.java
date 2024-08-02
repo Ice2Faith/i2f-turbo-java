@@ -413,7 +413,7 @@ public class ReflectResolver {
             } else if (ex instanceof IllegalAccessException) {
                 throw (IllegalAccessException) ex;
             } else {
-                throw new IllegalAccessException(ex.getMessage() + "\ncause by: " + ex.getClass().getName());
+                throw new IllegalArgumentException(ex.getMessage() + "\ncause by: " + ex.getClass().getName(), ex);
             }
         }
         return ret;
@@ -491,7 +491,7 @@ public class ReflectResolver {
             } else if (ex instanceof IllegalAccessException) {
                 throw (IllegalAccessException) ex;
             } else {
-                throw new IllegalAccessException(ex.getMessage() + "\ncause by: " + ex.getClass().getName());
+                throw new IllegalArgumentException(ex.getMessage() + "\ncause by: " + ex.getClass().getName(), ex);
             }
         }
         return ret;
@@ -565,7 +565,7 @@ public class ReflectResolver {
             } else if (ex instanceof IllegalAccessException) {
                 throw (IllegalAccessException) ex;
             } else {
-                throw new IllegalAccessException(ex.getMessage() + "\ncause by: " + ex.getClass().getName());
+                throw new IllegalArgumentException(ex.getMessage() + "\ncause by: " + ex.getClass().getName(), ex);
             }
         }
         return ret;
@@ -631,7 +631,7 @@ public class ReflectResolver {
             } else if (ex instanceof IllegalAccessException) {
                 throw (IllegalAccessException) ex;
             } else {
-                throw new IllegalAccessException(ex.getMessage() + "\ncause by: " + ex.getClass().getName());
+                throw new IllegalArgumentException(ex.getMessage() + "\ncause by: " + ex.getClass().getName(), ex);
             }
         }
         return ret;
@@ -700,7 +700,7 @@ public class ReflectResolver {
             } else if (ex instanceof IllegalAccessException) {
                 throw (IllegalAccessException) ex;
             } else {
-                throw new IllegalAccessException(ex.getMessage() + "\ncause by: " + ex.getClass().getName());
+                throw new IllegalArgumentException(ex.getMessage() + "\ncause by: " + ex.getClass().getName(), ex);
             }
         }
         return ret;
