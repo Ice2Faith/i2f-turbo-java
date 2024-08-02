@@ -1,7 +1,6 @@
 package i2f.extension.agent.javassist.transformer;
 
 import i2f.extension.agent.javassist.context.AgentContextHolder;
-import i2f.extension.agent.javassist.evaluate.LocalFileExpressionEvaluator;
 import i2f.extension.javassist.JavassistUtil;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -21,7 +20,14 @@ import java.util.Set;
  */
 public class SpringApplicationContextHoldClassesTransformer implements ClassFileTransformer {
     public static final String SPRING_CONTEXT_CLASS_NAME = "org.springframework.context.ApplicationContext";
-    public static final String INJECT_CLASS_NAME = "org.springframework.boot.web.servlet.context.WebApplicationContextServletContextAwareProcessor";
+    public static final String[][] INJECT_APPLICATION_CONTEXT_CLASS_FIELD_ARRAY =
+            {
+                    {"org.springframework.boot.web.servlet.context.WebApplicationContextServletContextAwareProcessor", "webApplicationContext"},
+                    {"org.springframework.context.support.ApplicationContextAwareProcessor", "applicationContext"},
+                    {"org.springframework.context.support.ApplicationListenerDetector", "applicationContext"},
+                    {"org.springframework.boot.builder.ParentContextCloserApplicationListener", "context"},
+                    {"org.springframework.boot.context.event.ApplicationReadyEvent", "context"}
+            };
 
     public static boolean isSpringApplicationContext(CtClass clazz) {
         return JavassistUtil.isAssignableFrom(clazz, SPRING_CONTEXT_CLASS_NAME);
@@ -36,9 +42,20 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
 
         className = className.replaceAll("/", ".");
 
-        if (!INJECT_CLASS_NAME.equals(className)) {
+        String injectClassName = null;
+        String injectFieldName = null;
+        for (String[] pair : INJECT_APPLICATION_CONTEXT_CLASS_FIELD_ARRAY) {
+            if (pair[0].equals(className)) {
+                injectClassName = pair[0];
+                injectFieldName = pair[1];
+                break;
+            }
+        }
+
+        if (injectClassName == null) {
             return null;
         }
+
 
         ClassPool cp = ClassPool.getDefault();
 
@@ -61,13 +78,15 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
                     continue;
                 }
 
+                String trigger = className + "." + method;
+                String injectLocation = "trigger[" + trigger + "] field [" + injectFieldName + "]";
                 String tarCode = "if(" + AgentContextHolder.class.getName() + ".springApplicationContext==null) { \n" +
                         "    Object $zObj=this;\n" +
                         "    Class $zObjClass=$zObj.getClass();\n" +
-                        "    java.lang.reflect.Field $zContextField = $zObjClass.getDeclaredField(\"webApplicationContext\");\n" +
+                        "    java.lang.reflect.Field $zContextField = $zObjClass.getDeclaredField(\"" + injectFieldName + "\");\n" +
                         "    $zContextField.setAccessible(true);\n" +
                         "    " + AgentContextHolder.class.getName() + ".springApplicationContext=$zContextField.get($zObj);\n" +
-                        "    System.out.println(\"spring-application-context inject : \"+" + AgentContextHolder.class.getName() + ".springApplicationContext);\n" +
+                        "    System.out.println(\"spring-application-context inject : \"+" + AgentContextHolder.class.getName() + ".springApplicationContext + \" by " + injectLocation + "\");\n" +
                         "}\n";
                 try {
                     method.insertBefore("{" + tarCode + "}\n");
@@ -76,8 +95,6 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
                     e.printStackTrace();
                 }
             }
-
-            LocalFileExpressionEvaluator.initFileWatchThread();
 
             return cc.toBytecode();
         } catch (Exception e) {

@@ -1,5 +1,6 @@
 package i2f.extension.agent.javassist.transformer;
 
+import i2f.extension.javassist.JavassistUtil;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -7,6 +8,9 @@ import javassist.CtMethod;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -22,10 +26,6 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
                             ProtectionDomain protectionDomain,
                             byte[] classfileBuffer) throws IllegalClassFormatException {
         className = className.replaceAll("/", ".");
-
-        if (!className.startsWith("javax.xml.")) {
-            return null;
-        }
 
         if ("javax.xml.parsers.DocumentBuilderFactory".equals(className)) {
             ClassPool cp = ClassPool.getDefault();
@@ -125,6 +125,48 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
 //            factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 //            factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 //            System.out.println("disabled xxe features : XMLInputFactory.newInstance()");
+        }
+
+        if ("org.springframework.http.converter.xml.SourceHttpMessageConverter".equals(className)) {
+
+            ClassPool cp = ClassPool.getDefault();
+            System.out.println("xxe:" + className);
+            CtClass cc = null;
+            try {
+                cc = cp.get(className);
+                Map<CtMethod, CtClass> allMethods = JavassistUtil.getAllMethods(cc);
+                Set<CtMethod> methods = allMethods.keySet();
+                for (CtMethod method : methods) {
+                    if (method.isEmpty()) {
+                        continue;
+                    }
+                    if (Arrays.asList("equals", "hashCode", "clone",
+                            "wait", "notify", "finalize", "notifyAll",
+                            "getClass", "toString", "registerNatives").contains(method.getName())) {
+                        continue;
+                    }
+
+                    method.insertAfter("{\n" +
+                            "    org.springframework.http.converter.xml.SourceHttpMessageConverter $zConverter=this;\n" +
+                            "    if($zConverter.isProcessExternalEntities()){\n" +
+                            "        $zConverter.setProcessExternalEntities(false);\n" +
+                            "        System.out.println(\"disabled xxe: SourceHttpMessageConverter\");\n" +
+                            "    }\n" +
+                            "}\n");
+                }
+
+
+                return cc.toBytecode();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (cc != null) {
+                    cc.detach();
+                }
+            }
+
+            // SourceHttpMessageConverter.setProcessExternalEntities(false);
+
         }
 
 
