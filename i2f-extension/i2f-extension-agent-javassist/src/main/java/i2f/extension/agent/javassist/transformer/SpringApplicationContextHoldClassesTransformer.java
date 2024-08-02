@@ -63,7 +63,6 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
         try {
             cc = cp.get(className);
 
-
             Map<CtMethod, CtClass> allMethods = JavassistUtil.getAllMethods(cc);
 
             Set<CtMethod> methods = allMethods.keySet();
@@ -78,7 +77,7 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
                     continue;
                 }
 
-                String trigger = className + "." + method;
+                String trigger = className + "." + method.getName();
                 String injectLocation = "trigger[" + trigger + "] field [" + injectFieldName + "]";
                 String tarCode = "if(" + AgentContextHolder.class.getName() + ".springApplicationContext==null) { \n" +
                         "    Object $zObj=this;\n" +
@@ -86,7 +85,9 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
                         "    java.lang.reflect.Field $zContextField = $zObjClass.getDeclaredField(\"" + injectFieldName + "\");\n" +
                         "    $zContextField.setAccessible(true);\n" +
                         "    " + AgentContextHolder.class.getName() + ".springApplicationContext=$zContextField.get($zObj);\n" +
-                        "    System.out.println(\"spring-application-context inject : \"+" + AgentContextHolder.class.getName() + ".springApplicationContext + \" by " + injectLocation + "\");\n" +
+                        "    if(" + AgentContextHolder.class.getName() + ".springApplicationContext!=null){\n" +
+                        "        System.out.println(\"spring-application-context inject : \"+" + AgentContextHolder.class.getName() + ".springApplicationContext + \" by " + injectLocation + "\");\n" +
+                        "    }\n" +
                         "}\n";
                 try {
                     method.insertBefore("{" + tarCode + "}\n");
