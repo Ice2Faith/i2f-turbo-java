@@ -2,11 +2,12 @@ package i2f.extension.agent.javassist;
 
 
 import i2f.agent.AgentUtil;
-import i2f.agent.transformer.SystemLoadedClassesPrintTransformer;
-import i2f.extension.agent.javassist.transformer.InvokeWatchClassesTransformer;
+import i2f.extension.agent.javassist.context.AgentContextHolder;
+import i2f.extension.agent.javassist.transformer.ShutdownLogClassTransformer;
 import i2f.extension.agent.javassist.transformer.SpringApplicationContextHoldClassesTransformer;
 import i2f.extension.agent.javassist.transformer.XxeGuardClassTransformer;
 
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.Map;
 import java.util.Set;
@@ -44,12 +45,21 @@ public class AgentMain {
     public static void agentProxy(String arg, Instrumentation inst) {
         System.out.println("AgentMain start run ! , arg is " + arg);
         Map<String, Set<String>> actionPattens = AgentUtil.parseClassPattenMap(arg);
+        AgentContextHolder.instrumentation = inst;
+        AgentContextHolder.agentArg = arg;
 
-        inst.addTransformer(new SystemLoadedClassesPrintTransformer(), true);
-        inst.addTransformer(new XxeGuardClassTransformer(), true);
-        inst.addTransformer(new InvokeWatchClassesTransformer(actionPattens), true);
-        inst.addTransformer(new SpringApplicationContextHoldClassesTransformer(), true);
+        AgentContextHolder.transformers.add(new SpringApplicationContextHoldClassesTransformer());
+        AgentContextHolder.transformers.add(new ShutdownLogClassTransformer());
+        AgentContextHolder.transformers.add(new XxeGuardClassTransformer());
 
+//        AgentContextHolder.transformers.add(new InvokeWatchClassesTransformer(actionPattens));
+
+//        AgentContextHolder.transformers.add(new SystemLoadedClassesPrintTransformer());
+
+
+        for (ClassFileTransformer transformer : AgentContextHolder.transformers) {
+            inst.addTransformer(transformer, true);
+        }
 //        AgentUtil.retransformLoadedClasses(inst, actionPattens);
     }
 

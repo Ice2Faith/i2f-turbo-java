@@ -1,21 +1,18 @@
 package i2f.extension.agent.javassist.transformer;
 
-import i2f.compiler.MemoryCompiler;
 import i2f.extension.agent.javassist.context.AgentContextHolder;
+import i2f.extension.agent.javassist.evaluate.LocalFileExpressionEvaluator;
 import i2f.extension.javassist.JavassistUtil;
-import i2f.io.file.FileUtil;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 
-import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Ice2Faith
@@ -25,9 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SpringApplicationContextHoldClassesTransformer implements ClassFileTransformer {
     public static final String SPRING_CONTEXT_CLASS_NAME = "org.springframework.context.ApplicationContext";
     public static final String INJECT_CLASS_NAME = "org.springframework.boot.web.servlet.context.WebApplicationContextServletContextAwareProcessor";
-
-
-    public static AtomicBoolean hasInterval = new AtomicBoolean(false);
 
     public static boolean isSpringApplicationContext(CtClass clazz) {
         return JavassistUtil.isAssignableFrom(clazz, SPRING_CONTEXT_CLASS_NAME);
@@ -63,7 +57,7 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
                 }
                 if (Arrays.asList("equals", "hashCode", "clone",
                         "wait", "notify", "finalize", "notifyAll",
-                        "getClass", "toString").contains(method.getName())) {
+                        "getClass", "toString", "registerNatives").contains(method.getName())) {
                     continue;
                 }
 
@@ -78,41 +72,16 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
                 try {
                     method.insertBefore("{" + tarCode + "}\n");
                 } catch (Exception e) {
-                    System.err.println(e.getMessage());
+                    System.out.println(method);
+                    e.printStackTrace();
                 }
             }
 
-            if (!hasInterval.getAndSet(true)) {
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                Thread.sleep(3000);
-                            } catch (InterruptedException e) {
+            LocalFileExpressionEvaluator.initFileWatchThread();
 
-                            }
-                            if (AgentContextHolder.springApplicationContext != null) {
-                                try {
-                                    File file = new File("./expression/expression.java");
-                                    if (file.exists() && file.isFile()) {
-                                        String expression = FileUtil.loadTxtFile(file);
-                                        Object ret = MemoryCompiler.evaluateExpression(expression, AgentContextHolder.springApplicationContext);
-                                        System.out.println("expression:" + ret);
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-                }, "test-context");
-                System.out.println("start-test-context....");
-                thread.start();
-            }
             return cc.toBytecode();
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
         } finally {
             if (cc != null) {
                 cc.detach();
@@ -121,4 +90,6 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
 
         return null;
     }
+
+
 }
