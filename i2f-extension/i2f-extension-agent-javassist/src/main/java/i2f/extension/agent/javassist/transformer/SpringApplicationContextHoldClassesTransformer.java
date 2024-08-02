@@ -67,7 +67,7 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
                     continue;
                 }
 
-                String tarCode = "if(" + SpringApplicationContextHoldClassesTransformer.class.getName() + ".context==null) { \n" +
+                String tarCode = "if(" + AgentContextHolder.class.getName() + ".springApplicationContext==null) { \n" +
                         "    Object $zObj=this;\n" +
                         "    Class $zObjClass=$zObj.getClass();\n" +
                         "    java.lang.reflect.Field $zContextField = $zObjClass.getDeclaredField(\"webApplicationContext\");\n" +
