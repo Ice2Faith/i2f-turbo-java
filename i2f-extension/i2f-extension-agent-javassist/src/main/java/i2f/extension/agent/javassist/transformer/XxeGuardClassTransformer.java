@@ -1,6 +1,5 @@
 package i2f.extension.agent.javassist.transformer;
 
-import i2f.match.StringMatcher;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -15,13 +14,6 @@ import java.security.ProtectionDomain;
  * @desc
  */
 public class XxeGuardClassTransformer implements ClassFileTransformer {
-    public static void main(String[] args) {
-        String className = "org.springframework.boot.web.servlet.context.WebApplicationContextServletContextAwareProcessor";
-        boolean ret = StringMatcher.antClass().match(className, "org.springframework.**");
-        System.out.println(ret);
-    }
-
-
 
     @Override
     public byte[] transform(ClassLoader loader,
@@ -53,7 +45,6 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
                 return cc.toBytecode();
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println(e.getMessage());
             } finally {
                 if (cc != null) {
                     cc.detach();
@@ -88,7 +79,6 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
                 return cc.toBytecode();
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println(e.getMessage());
             } finally {
                 if (cc != null) {
                     cc.detach();
@@ -115,8 +105,9 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
 
                 method.insertAfter("{\n" +
                         "    if ($_ != null) { \n" +
-                        "        $_.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false); \n" +
-                        "        $_.setProperty(XMLInputFactory.SUPPORT_DTD, false); \n" +
+                        "        Object $zValue=Boolean.FALSE;\n" +
+                        "        $_.setProperty(javax.xml.stream.XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, $zValue); \n" +
+                        "        $_.setProperty(javax.xml.stream.XMLInputFactory.SUPPORT_DTD, $zValue); \n" +
                         "        System.out.println(\"disabled xxe features : XMLInputFactory.newInstance()\"); \n" +
                         "    } \n" +
                         "}\n");
@@ -124,7 +115,6 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
                 return cc.toBytecode();
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println(e.getMessage());
             } finally {
                 if (cc != null) {
                     cc.detach();

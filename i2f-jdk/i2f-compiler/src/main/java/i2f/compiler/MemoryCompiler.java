@@ -215,17 +215,37 @@ public class MemoryCompiler {
         return compileCall(sourceCode, randomClassName, randomClassName, methodName, args);
     }
 
+    public static Object evaluateExpression(String expression, Object root) throws Exception {
+        return evaluateExpression(expression, root, null, null);
+    }
+
+    public static Object evaluateExpression(String expression, Object root,
+                                            String additionalImports) throws Exception {
+        return evaluateExpression(expression, root, additionalImports, null);
+    }
+
     /**
      * 执行表达式计算
-     * 关于表达式 expression 的包装规则，请查看 {@link  #wrapExpressionAsJavaSourceCode(String expression, String className)} 的注释
+     * 关于表达式 expression 的包装规则，请查看 {@link  #wrapExpressionAsJavaSourceCode(String expression, String classNameString additionalImports, String additionalMethods)} 的注释
      * @param expression
      * @param root
      * @return
      * @throws Exception
      */
-    public static Object evaluateExpression(String expression, Object root) throws Exception {
-        String javaSourceCode = wrapExpressionAsJavaSourceCode(expression, CLASS_NAME_TAG);
+    public static Object evaluateExpression(String expression, Object root,
+                                            String additionalImports,
+                                            String additionalMethods) throws Exception {
+        String javaSourceCode = wrapExpressionAsJavaSourceCode(expression, CLASS_NAME_TAG, additionalImports, additionalMethods);
         return compileCallRandomClass(javaSourceCode, "_call", root);
+    }
+
+    public static String wrapExpressionAsJavaSourceCode(String expression, String className) {
+        return wrapExpressionAsJavaSourceCode(expression, className, null, null);
+    }
+
+    public static String wrapExpressionAsJavaSourceCode(String expression, String className,
+                                                        String additionalImports) {
+        return wrapExpressionAsJavaSourceCode(expression, className, additionalImports, null);
     }
 
     /**
@@ -236,6 +256,7 @@ public class MemoryCompiler {
      * <pre>
      * <b><i>
      * ${expression.import}
+     * ${additionalImports}
      *
      * public class ###class {
      *     public Object _call(Object root) throws Throwable {
@@ -243,6 +264,8 @@ public class MemoryCompiler {
      *     }
      *
      *     ${expression.method}
+     *
+     *     ${additionalMethods}
      * }
      * </i></b>
      * </pre>
@@ -366,19 +389,43 @@ public class MemoryCompiler {
      * </pre>
      * @param expression
      * @param className
+     * @param additionalImports
+     * @param additionalMethods
      * @return
      */
-    public static String wrapExpressionAsJavaSourceCode(String expression, String className) {
+    public static String wrapExpressionAsJavaSourceCode(String expression, String className,
+                                                        String additionalImports,
+                                                        String additionalMethods) {
         String[] arr = expression.split(IMPORT_SPLIT_TAG, 2);
         String imports = arr.length > 1 ? arr[0] : "";
         String body = arr.length > 1 ? arr[1] : arr[0];
+
+        String methods = "";
+        arr = body.split(METHOD_SPLIT_TAG, 2);
+        if (arr.length > 1) {
+            methods = arr[0];
+            body = arr[1];
+        }
+
         StringBuilder builder = new StringBuilder();
+
         builder.append(DEFAULT_IMPORTS).append("\n");
         builder.append(imports).append("\n");
+        if (additionalImports != null) {
+            builder.append(additionalImports).append("\n");
+        }
+
         builder.append("public class ").append(className).append(" {").append("\n");
+
+        builder.append("\t").append(methods).append("\n");
+        if (additionalMethods != null) {
+            builder.append("\t").append(additionalMethods).append("\n");
+        }
+
         builder.append("\t").append("public Object _call(Object $root) throws Throwable {").append("\n");
         builder.append("\t\t").append(body).append("\n");
         builder.append("\t").append("}").append("\n");
+
         builder.append("}").append("\n");
         return builder.toString();
     }
