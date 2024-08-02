@@ -4,6 +4,7 @@ package i2f.extension.agent.javassist;
 import i2f.agent.AgentUtil;
 import i2f.agent.transformer.SystemLoadedClassesPrintTransformer;
 import i2f.extension.agent.javassist.transformer.InvokeWatchClassesTransformer;
+import i2f.extension.agent.javassist.transformer.SpringApplicationContextHoldClassesTransformer;
 import i2f.extension.agent.javassist.transformer.XxeGuardClassTransformer;
 
 import java.lang.instrument.Instrumentation;
@@ -47,6 +48,7 @@ public class AgentMain {
         inst.addTransformer(new SystemLoadedClassesPrintTransformer(), true);
         inst.addTransformer(new XxeGuardClassTransformer(), true);
         inst.addTransformer(new InvokeWatchClassesTransformer(actionPattens), true);
+        inst.addTransformer(new SpringApplicationContextHoldClassesTransformer(), true);
 
 //        AgentUtil.retransformLoadedClasses(inst, actionPattens);
     }
