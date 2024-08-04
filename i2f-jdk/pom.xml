@@ -102,6 +102,7 @@
         <module>i2f-console-color</module>
         <module>i2f-agent</module>
         <module>i2f-jvm</module>
+        <module>i2f-script</module>
 
     </modules>
 
