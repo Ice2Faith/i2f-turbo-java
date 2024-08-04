@@ -1,0 +1,6 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.swl.spring.SwlSpringAutoConfiguration,\
+  i2f.springboot.swl.spring.SwlMissingBeanConfiguration,\
+  i2f.springboot.swl.spring.SwlSpringAop,\
+  i2f.springboot.swl.spring.SwlSpringController,\
+  i2f.springboot.swl.spring.SwlExceptionHandler

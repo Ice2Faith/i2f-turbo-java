@@ -1,9 +1,9 @@
 package i2f.unsafe;
 
-import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * @author Ice2Faith
@@ -11,8 +11,33 @@ import java.lang.reflect.Field;
  * @desc
  */
 public class UnsafeHacker {
+    public static final String NASHORN_OBJECT_SIZE_CALCULATOR_CLASS_NAME = "jdk.nashorn.internal.ir.debug.ObjectSizeCalculator";
+    public static final String NASHORN_MAVEN_DEPENDENCY = "" +
+            "<dependency>\n" +
+            "    <groupId>org.openjdk.nashorn</groupId>\n" +
+            "    <artifactId>nashorn-core</artifactId>\n" +
+            "    <version>15.4</version>\n" +
+            "</dependency>";
+    public static Class<?> NASHORN_OBJECT_SIZE_CACULATOR_CLASS = null;
     private static volatile Unsafe unsafe;
 
+    static {
+        if (NASHORN_OBJECT_SIZE_CACULATOR_CLASS == null) {
+            try {
+                NASHORN_OBJECT_SIZE_CACULATOR_CLASS = Class.forName(NASHORN_OBJECT_SIZE_CALCULATOR_CLASS_NAME);
+            } catch (Throwable e) {
+            }
+        }
+        if (NASHORN_OBJECT_SIZE_CACULATOR_CLASS == null) {
+            try {
+                NASHORN_OBJECT_SIZE_CACULATOR_CLASS = Thread.currentThread().getContextClassLoader().loadClass(NASHORN_OBJECT_SIZE_CALCULATOR_CLASS_NAME);
+            } catch (Throwable e) {
+            }
+        }
+        if (NASHORN_OBJECT_SIZE_CACULATOR_CLASS == null) {
+            System.out.println("nashorn missing, maybe add dependency : \n" + NASHORN_MAVEN_DEPENDENCY);
+        }
+    }
     public static Unsafe getUnsafe() {
         if (unsafe == null) {
             synchronized (UnsafeHacker.class) {
@@ -59,7 +84,19 @@ public class UnsafeHacker {
     }
 
     public static long sizeOf(Object obj) {
-        return ObjectSizeCalculator.getObjectSize(obj);
+        if (NASHORN_OBJECT_SIZE_CACULATOR_CLASS == null) {
+            return -1;
+        }
+        try {
+            Method method = NASHORN_OBJECT_SIZE_CACULATOR_CLASS.getDeclaredMethod("getObjectSize", Object.class);
+            if (method == null) {
+                return -1;
+            }
+            return (Long) method.invoke(null, obj);
+        } catch (Throwable e) {
+
+        }
+        return -1;
     }
 
 }
