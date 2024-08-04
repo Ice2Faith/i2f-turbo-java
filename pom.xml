@@ -19,6 +19,7 @@
         <module>i2f-springboot</module>
         <module>i2f-springcloud</module>
         <module>i2f-tools</module>
+        <module>i2f-jdk17</module>
     </modules>
 
     <properties>
@@ -33,12 +34,16 @@
         <root.link.gitee>https://gitee.com/Ice2Faith/i2f-turbo-java</root.link.gitee>
         <root.link.email>ugex_savelar@163.com</root.link.email>
 
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
+        <java.source.version>1.8</java.source.version>
+        <java.target.version>1.8</java.target.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
 
-        <lombok.version>1.18.16</lombok.version>
+        <lombok.version>1.18.30</lombok.version>
     </properties>
 
     <dependencyManagement>
@@ -901,14 +906,37 @@
                     <version>3.8.1</version>
                     <configuration>
                         <skip>true</skip>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <source>${java.source.version}</source>
+                        <target>${java.target.version}</target>
                         <compilerVersion>${java.version}</compilerVersion>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <compilerArgument>-parameters</compilerArgument>
-                        <!-- java9 之后，在处理lombok时，需要添加此编译参数 -->
+                        <!-- java9 之后，在处理lombok时，需要添加此编译参数 begin -->
                         <!--                        <compilerArgument>&#45;&#45;add-exports</compilerArgument>-->
                         <!--                        <compilerArgument>jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</compilerArgument>-->
+                        <!-- java9 之后，在处理lombok时，需要添加此编译参数 begin -->
+
+                        <!-- 上面无效时，使用此部分 begin -->
+                        <compilerArgs>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED</arg>
+                        </compilerArgs>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                        <!-- 上面无效时，使用此部分 end -->
                     </configuration>
                 </plugin>
                 <plugin>
@@ -990,6 +1018,9 @@
                                 <Root-Link-Email>${root.link.email}</Root-Link-Email>
                                 <Root-Link-Github>${root.link.github}</Root-Link-Github>
                                 <Root-Link-Gitee>${root.link.gitee}</Root-Link-Gitee>
+
+                                <Java-Source-Version>${java.source.version}</Java-Source-Version>
+                                <Java-Target-Version>${java.target.version}</Java-Target-Version>
                             </manifestEntries>
                         </archive>
                         <includes>
@@ -1045,6 +1076,9 @@
                                 <Root-Link-Email>${root.link.email}</Root-Link-Email>
                                 <Root-Link-Github>${root.link.github}</Root-Link-Github>
                                 <Root-Link-Gitee>${root.link.gitee}</Root-Link-Gitee>
+
+                                <Java-Source-Version>${java.source.version}</Java-Source-Version>
+                                <Java-Target-Version>${java.target.version}</Java-Target-Version>
                             </manifestEntries>
                         </archive>
                         <descriptorRefs>
