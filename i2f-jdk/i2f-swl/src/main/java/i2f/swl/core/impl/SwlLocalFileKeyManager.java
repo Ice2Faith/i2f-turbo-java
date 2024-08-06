@@ -22,6 +22,7 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     public static final String SELF_KEY_FILE_SUFFIX = ".self.key";
     public static final String OTHER_KEY_FILE_SUFFIX = ".other.key";
     public static final String KEY_PAIR_SEPARATOR = "\n====\n";
+    public static final String DEFAULT_SELF_KEY_FILE="default.key.txt";
 
     protected LruMap<String, AsymKeyPair> selfCache = new LruMap<>(1024);
     protected LruMap<String, AsymKeyPair> otherCache = new LruMap<>(1024);
@@ -67,6 +68,9 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
         return new File(getOtherKeyDir(), otherAsymSign+ OTHER_KEY_FILE_SUFFIX);
     }
 
+    public File getDefaultSelfKeyFile(){
+        return new File(getSelfKeyDir(),DEFAULT_SELF_KEY_FILE);
+    }
     public String serializeKeyPair(AsymKeyPair keyPair){
         StringBuilder builder=new StringBuilder();
         builder.append(keyPair.getPublicKey()==null?"":obfuscateEncode(keyPair.getPublicKey()));
@@ -109,6 +113,18 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     }
 
     @Override
+    public AsymKeyPair getSelfKeyPair() {
+        try {
+            File file = getDefaultSelfKeyFile();
+            String selfAsymSign = FileUtil.loadTxtFile(file);
+            return getSelfKeyPair(selfAsymSign);
+        } catch (IOException e) {
+
+        }
+        return null;
+    }
+
+    @Override
     public AsymKeyPair getSelfKeyPair(String selfAsymSign) {
         if(selfAsymSign==null){
             return null;
@@ -133,6 +149,9 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     public void setSelfKeyPair(String selfAsymSign, AsymKeyPair keyPair) {
         try {
             saveKeyPair(getSelfKeyFile(selfAsymSign),keyPair);
+            File file = getDefaultSelfKeyFile();
+            FileUtil.useParentDir(file);
+            FileUtil.save(selfAsymSign,file);
         } catch (IOException e) {
 
         }
