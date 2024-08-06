@@ -297,7 +297,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         SwlData responseData = transfer.response(clientAsymSign, parts);
         String responseSwlh = serializeHeader(responseData.getHeader());
         response.setHeader(config.getHeaderName(), responseSwlh);
-        response.setHeader(config.getRemoteAsymSignHeaderName(), responseData.getContext().getLocalAsymSign());
+        response.setHeader(config.getRemoteAsymSignHeaderName(), responseData.getContext().getSelfAsymSign());
 
         responseText = responseData.getParts().get(0);
         responseBody = responseText.getBytes("UTF-8");
