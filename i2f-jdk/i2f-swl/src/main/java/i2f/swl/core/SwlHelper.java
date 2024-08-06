@@ -40,7 +40,6 @@ public class SwlHelper extends SwlExchanger {
     public static final String SELF_KEY_PAIR_HISTORY_KEY_PREFIX = "swl:key:self:history:";
     public static final String OTHER_KEY_PUBLIC_KEY_PREFIX = "swl:key:other:keys:";
     public static final String OTHER_KEY_PUBLIC_DEFAULT = "swl:key:other:default";
-    public static final String NONCE_PREFIX = "swl:nonce:";
     public static final String KEYPAIR_SEPARATOR = "\n==========\n";
 
 
@@ -155,16 +154,6 @@ public class SwlHelper extends SwlExchanger {
         cache.expire(cacheKey(key), config.getOtherKeyExpireSeconds(), TimeUnit.SECONDS);
     }
 
-    public boolean containsNonce(String nonce) {
-        String key = NONCE_PREFIX + nonce;
-        return cache.exists(cacheKey(key));
-    }
-
-    public void setNonce(String nonce, long timeoutSeconds) {
-        String key = NONCE_PREFIX + nonce;
-        cache.set(cacheKey(key), String.valueOf(SystemClock.currentTimeMillis()), timeoutSeconds, TimeUnit.SECONDS);
-    }
-
     public void acceptOtherPublicKey(String otherPublicKey) {
         String otherAsymSign = messageDigester.digest(otherPublicKey);
         setOtherPublicKey(otherAsymSign, otherPublicKey);
@@ -188,25 +177,6 @@ public class SwlHelper extends SwlExchanger {
         return asymKeyPair;
     }
 
-    public String obfuscateEncode(String data) {
-        if (data == null) {
-            return null;
-        }
-        if (obfuscator == null) {
-            return data;
-        }
-        return obfuscator.encode(data);
-    }
-
-    public String obfuscateDecode(String data) {
-        if (data == null) {
-            return null;
-        }
-        if (obfuscator == null) {
-            return data;
-        }
-        return obfuscator.decode(data);
-    }
 
     public SwlData send(String remotePublicKey, List<String> parts) {
         return send(remotePublicKey, parts, null);

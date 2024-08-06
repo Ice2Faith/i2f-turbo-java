@@ -12,21 +12,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SwlHeader {
     /**
-     * 签名
+     * 时间戳
      */
-    public String sign;
+    public String timestamp;
     /**
      * 一次性消息
      */
     public String nonce;
     /**
-     * 数字签名
-     */
-    public String digital;
-    /**
      * 随机秘钥
      */
     public String randomKey;
+    /**
+     * 签名
+     */
+    public String sign;
+    /**
+     * 数字签名
+     */
+    public String digital;
     /**
      * 服务端非对称签名
      */
@@ -37,15 +41,14 @@ public class SwlHeader {
      */
     public String localAsymSign;
 
-    public static SwlHeader copy(SwlHeader header) {
-        SwlHeader ret = new SwlHeader();
-        ret.setSign(header.getSign());
-        ret.setNonce(header.getNonce());
-        ret.setDigital(header.getDigital());
-        ret.setRandomKey(header.getRandomKey());
-        ret.setLocalAsymSign(header.getLocalAsymSign());
-        ret.setRemoteAsymSign(header.getRemoteAsymSign());
-
-        return ret;
+    public static SwlHeader copy(SwlHeader src,SwlHeader dst) {
+        dst.setTimestamp(src.getTimestamp());
+        dst.setNonce(src.getNonce());
+        dst.setRandomKey(src.getRandomKey());
+        dst.setSign(src.getSign());
+        dst.setDigital(src.getDigital());
+        dst.setLocalAsymSign(src.getLocalAsymSign());
+        dst.setRemoteAsymSign(src.getRemoteAsymSign());
+        return dst;
     }
 }

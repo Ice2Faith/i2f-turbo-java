@@ -230,22 +230,23 @@ public class SwlTransfer {
         ISwlSymmetricEncryptor symmetricEncryptor = symmetricEncryptorSupplier.get();
 
         AsymKeyPair selfKeyPair = getSelfKeyPair();
-        ret.getContext().setSelfKeyPair(selfKeyPair);
+        ret.getContext().setSelfPrivateKey(selfKeyPair.getPrivateKey());
 
         String localAsymSign = messageDigester.digest(selfKeyPair.getPublicKey());
         ret.getHeader().setLocalAsymSign(localAsymSign);
-        ret.getContext().setLocalAsymSign(localAsymSign);
+        ret.getContext().setSelfAsymSign(localAsymSign);
 
         String remoteAsymSign = messageDigester.digest(remotePublicKey);
         ret.getHeader().setRemoteAsymSign(remoteAsymSign);
         ret.getContext().setRemoteAsymSign(remoteAsymSign);
 
         long timestamp = SystemClock.currentTimeMillis() / 1000;
+        ret.getHeader().setTimestamp(String.valueOf(timestamp));
+        ret.getContext().setTimestamp(String.valueOf(timestamp));
+
         long seq = random.nextInt(0x7fff);
         String nonce = Long.toString(timestamp, 16) + "-" + Long.toString(seq, 16);
         ret.getHeader().setNonce(nonce);
-        ret.getContext().setTimestamp(String.valueOf(timestamp));
-        ret.getContext().setSeq(String.valueOf(seq));
         ret.getContext().setNonce(nonce);
 
         String key = symmetricEncryptor.generateKey();
@@ -280,7 +281,7 @@ public class SwlTransfer {
         String data = builder.toString();
         ret.getContext().setData(data);
 
-        String sign = messageDigester.digest(data + randomKey + nonce + localAsymSign + remoteAsymSign);
+        String sign = messageDigester.digest(data + randomKey+timestamp + nonce + localAsymSign + remoteAsymSign);
         ret.getHeader().setSign(sign);
         ret.getContext().setSign(sign);
 
@@ -302,7 +303,7 @@ public class SwlTransfer {
         SwlData ret = new SwlData();
         ret.setParts(new ArrayList<>());
         ret.setAttaches(new ArrayList<>());
-        ret.setHeader(SwlHeader.copy(request.getHeader()));
+        ret.setHeader(SwlHeader.copy(request.getHeader(),new SwlHeader()));
         ret.setContext(new SwlContext());
 
         ret.getHeader().setLocalAsymSign(obfuscateDecode(ret.getHeader().getLocalAsymSign()));
@@ -321,26 +322,21 @@ public class SwlTransfer {
         long currentTimestamp = SystemClock.currentTimeMillis() / 1000;
         ret.getContext().setCurrentTimestamp(String.valueOf(currentTimestamp));
 
+        String timestamp=ret.getHeader().getTimestamp();
+        long ts=Long.parseLong(timestamp);
+        ret.getContext().setTimestamp(timestamp);
+
         String nonce = ret.getHeader().getNonce();
         ret.getContext().setNonce(nonce);
         if (nonce == null || nonce.isEmpty()) {
             throw new SwlException(SwlCode.NONCE_MISSING_EXCEPTION.code(), "nonce cannot is empty!");
         }
 
-        String[] nonceArr = nonce.split("-", 2);
-        if (nonceArr.length != 2) {
-            throw new SwlException(SwlCode.NONCE_INVALID_EXCEPTION.code(), "nonce is invalid!");
-        }
-
-        long timestamp = Long.parseLong(nonceArr[0], 16);
-        String seq = nonceArr[1];
-        ret.getContext().setTimestamp(String.valueOf(timestamp));
-        ret.getContext().setSeq(seq);
 
         long window = config.getNonceWindowSeconds();
         ret.getContext().setWindow(String.valueOf(window));
 
-        if (Math.abs(currentTimestamp - timestamp) > window) {
+        if (Math.abs(currentTimestamp - ts) > window) {
             throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION.code(), "timestamp is exceed allow window seconds!");
         }
 
@@ -396,12 +392,12 @@ public class SwlTransfer {
         }
 
         String localAsymSign = ret.getHeader().getLocalAsymSign();
-        ret.getContext().setLocalAsymSign(localAsymSign);
+        ret.getContext().setSelfAsymSign(localAsymSign);
         if (localAsymSign == null || localAsymSign.isEmpty()) {
             throw new SwlException(SwlCode.SERVER_ASYM_KEY_SIGN_MISSING_EXCEPTION.code(), "local asym sign cannot be empty!");
         }
 
-        boolean signOk = messageDigester.verify(sign, data + randomKey + nonce + remoteAsymSign + localAsymSign);
+        boolean signOk = messageDigester.verify(sign, data + randomKey +timestamp+ nonce + remoteAsymSign + localAsymSign);
         ret.getContext().setSignOk(signOk);
         if (!signOk) {
             throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "verify sign failure!");
@@ -431,7 +427,7 @@ public class SwlTransfer {
         }
 
         String localPrivateKey = getSelfPrivateKey(localAsymSign);
-        ret.getContext().setSelfKeyPair(new AsymKeyPair(null, localPrivateKey));
+        ret.getContext().setSelfPrivateKey( localPrivateKey);
         if (localPrivateKey == null || localPrivateKey.isEmpty()) {
             throw new SwlException(SwlCode.SERVER_ASYM_KEY_NOT_FOUND_EXCEPTION.code(), "server key not found!");
         }

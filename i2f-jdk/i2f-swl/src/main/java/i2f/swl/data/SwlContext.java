@@ -13,11 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SwlContext {
     private String remotePublicKey;
-    private AsymKeyPair selfKeyPair;
-    private String localAsymSign;
     private String remoteAsymSign;
+
+    private String selfPrivateKey;
+    private String selfAsymSign;
+
     private String timestamp;
-    private String seq;
     private String nonce;
     private String key;
     private String randomKey;
