@@ -32,6 +32,7 @@ public class TokenBucketLimiter implements Limiter {
     protected ConcurrentHashMap<String, Map.Entry<AtomicInteger, AtomicLong>> bucket = new ConcurrentHashMap<>();
     protected AtomicInteger limitCount = new AtomicInteger(300);
     protected AtomicLong maxKeepaliveMillSeconds = new AtomicLong(30 * 60 * 1000);
+    protected AtomicInteger incrementCount = new AtomicInteger(1);
 
     protected AtomicBoolean initialed = new AtomicBoolean(false);
     protected long timePeriod = 1;
@@ -71,7 +72,7 @@ public class TokenBucketLimiter implements Limiter {
                         removeSet.add(k);
                     }
                     v.getKey().updateAndGet((val) -> {
-                        val = Math.min(limitCount.get(), val + 1);
+                        val = Math.min(limitCount.get(), val + incrementCount.get());
                         return val;
                     });
                     return v;
@@ -80,14 +81,31 @@ public class TokenBucketLimiter implements Limiter {
                     bucket.remove(k);
                 }
                 nullCnt.updateAndGet((val) -> {
-                    val = Math.min(limitCount.get(), val + 1);
+                    val = Math.min(limitCount.get(), val + incrementCount.get());
                     return val;
                 });
             }
         }, 0, Math.max(1, timePeriod), timeUnit == null ? TimeUnit.SECONDS : timeUnit);
     }
 
-    @Override
+    public int getQps() {
+        TimeUnit unit = timeUnit == null ? TimeUnit.SECONDS : timeUnit;
+        long period = Math.max(1, timePeriod);
+        long qps = incrementCount.get() / unit.toSeconds(period);
+        return (int) qps;
+    }
+
+    public int calcIncrementCountByQps(int qps) {
+        TimeUnit unit = timeUnit == null ? TimeUnit.SECONDS : timeUnit;
+        long increment = unit.convert(qps, TimeUnit.SECONDS);
+        return (int) increment;
+    }
+
+    public void setQps(int qps) {
+        int increment = calcIncrementCountByQps(qps);
+        incrementCount.set(Math.max(1, increment));
+    }
+
     public boolean require(String name) {
         if (!initialed.get()) {
             init();
