@@ -10,6 +10,10 @@ import i2f.extension.jce.sm.antherd.encrypt.symmetric.Sm4Encryptor;
  * @desc
  */
 public class SmUtil {
+    static {
+        NashornProvider.printNonNashorn();
+        SmAntherdProvider.printNonDependency();
+    }
     public static String sm3(String str) throws Exception {
         return Sm3Digester.INSTANCE.digest(str);
     }
