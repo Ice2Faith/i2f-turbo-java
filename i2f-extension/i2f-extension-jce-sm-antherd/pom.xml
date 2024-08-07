@@ -38,13 +38,13 @@
         如果Java环境高于java15,则需要添加此依赖，否则不要添加
         原因是 nashorn 的 JavaScript 引擎在 java15 被正式移除
          -->
-<!--        <dependency>-->
-<!--            <groupId>org.openjdk.nashorn</groupId>-->
-<!--            <artifactId>nashorn-core</artifactId>-->
-<!--            <version>15.4</version>-->
-<!--            <scope>provided</scope>-->
-<!--            <optional>true</optional>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.openjdk.nashorn</groupId>
+            <artifactId>nashorn-core</artifactId>
+            <version>15.4</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
