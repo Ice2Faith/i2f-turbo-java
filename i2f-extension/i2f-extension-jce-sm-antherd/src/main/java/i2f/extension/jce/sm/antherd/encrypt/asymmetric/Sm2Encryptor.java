@@ -4,6 +4,8 @@ import com.antherd.smcrypto.sm2.Keypair;
 import com.antherd.smcrypto.sm2.Sm2;
 import i2f.codec.CodecUtil;
 import i2f.codec.bytes.raw.HexStringByteCodec;
+import i2f.extension.jce.sm.antherd.NashornProvider;
+import i2f.extension.jce.sm.antherd.SmAntherdProvider;
 import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.jce.std.encrypt.asymmetric.key.BytesPrivateKey;
@@ -22,6 +24,10 @@ import java.util.Objects;
  */
 @Data
 public class Sm2Encryptor implements IAsymmetricEncryptor {
+    static {
+        NashornProvider.printNonNashorn();
+        SmAntherdProvider.printNonDependency();
+    }
     public static final int MODE_C1C3C2 = 0;
     public static final int MODE_C1C2C3 = 1;
 
