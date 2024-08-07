@@ -1,6 +1,8 @@
 package i2f.extension.jce.sm.antherd.digest;
 
 import com.antherd.smcrypto.sm3.Sm3;
+import i2f.extension.jce.sm.antherd.NashornProvider;
+import i2f.extension.jce.sm.antherd.SmAntherdProvider;
 import i2f.jce.std.digest.IMessageDigester;
 
 import java.io.ByteArrayOutputStream;
@@ -12,6 +14,10 @@ import java.io.InputStream;
  * @desc
  */
 public class Sm3Digester implements IMessageDigester {
+    static {
+        NashornProvider.printNonNashorn();
+        SmAntherdProvider.printNonDependency();
+    }
     public static final Sm3Digester INSTANCE = new Sm3Digester();
 
     public Sm3Digester() {

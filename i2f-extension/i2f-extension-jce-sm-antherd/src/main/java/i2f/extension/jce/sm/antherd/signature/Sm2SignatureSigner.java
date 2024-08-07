@@ -1,9 +1,11 @@
 package i2f.extension.jce.sm.antherd.signature;
 
 import com.antherd.smcrypto.sm2.Keypair;
-import com.antherd.smcrypto.sm2.Sm2;
 import i2f.codec.CodecUtil;
+import i2f.extension.jce.sm.antherd.NashornProvider;
+import i2f.extension.jce.sm.antherd.SmAntherdProvider;
 import i2f.extension.jce.sm.antherd.encrypt.asymmetric.Sm2Encryptor;
+import i2f.extension.jce.sm.antherd.jdk15.Sm2;
 import i2f.jce.std.signature.ISignatureSigner;
 
 import java.security.KeyPair;
@@ -15,6 +17,10 @@ import java.util.Objects;
  * @desc
  */
 public class Sm2SignatureSigner implements ISignatureSigner {
+    static {
+        NashornProvider.printNonNashorn();
+        SmAntherdProvider.printNonDependency();
+    }
     protected String publicKey;
     protected String privateKey;
 
