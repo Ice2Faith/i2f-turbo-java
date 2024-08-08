@@ -24,6 +24,14 @@ public class AsymKeyPair {
         this.privateKey = privateKey;
     }
 
+    public static AsymKeyPair copy(AsymKeyPair pair){
+        return new AsymKeyPair(pair.getPublicKey(),pair.getPrivateKey());
+    }
+
+    public AsymKeyPair copy(){
+        return copy(this);
+    }
+
 
     public static void saveAsymKey(AsymKeyPair asymKey, OutputStream os) throws IOException {
         String pubKey = asymKey.getPublicKey();

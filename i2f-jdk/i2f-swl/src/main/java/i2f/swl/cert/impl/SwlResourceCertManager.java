@@ -3,13 +3,12 @@ package i2f.swl.cert.impl;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import i2f.lru.LruMap;
-import i2f.swl.cert.SwlCert;
 import i2f.swl.cert.SwlCertManager;
 import i2f.swl.cert.SwlCertUtil;
+import i2f.swl.cert.data.SwlCert;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.exception.SwlException;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,7 +29,10 @@ public class SwlResourceCertManager implements SwlCertManager {
     public static final String DEFAULT_PATH = "swl/cert";
     private String classpathBasePath = DEFAULT_PATH;
     private File localFilePath = new File("./" + DEFAULT_PATH);
-    private transient LruMap<String, SwlCert> cacheCert = new LruMap<>();
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private transient LruMap<String, SwlCert> cacheCert = new LruMap<>(1024);
 
     public SwlResourceCertManager(String classpathBasePath, File localFilePath) {
         this.classpathBasePath = classpathBasePath;

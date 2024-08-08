@@ -1,4 +1,4 @@
-package i2f.swl.core;
+package i2f.swl.core.key;
 
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 
@@ -16,15 +16,15 @@ public interface SwlKeyManager {
 
     AsymKeyPair getSelfKeyPair(String selfAsymSign);
 
-    void setSelfKeyPair(String selfAsymSign,AsymKeyPair keyPair);
+    void setSelfKeyPair(String selfAsymSign, AsymKeyPair keyPair);
 
-    AsymKeyPair getOtherKeyPair();
+    String getOtherPublicKey();
 
     String getDefaultOtherAsymSign();
 
     void setDefaultOtherAsymSign(String otherAsymSign);
 
-    AsymKeyPair getOtherKeyPair(String otherAsymSign);
+    String getOtherPublicKey(String otherAsymSign);
 
-    void setOtherKeyPair(String otherAsymSign,AsymKeyPair keyPair);
+    void setOtherPublicKey(String otherAsymSign, String publicKey);
 }

@@ -4,6 +4,8 @@ import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
 import i2f.codec.str.code.UrlCodeStringCodec;
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.swl.cert.data.SwlCert;
+import i2f.swl.cert.data.SwlCertPair;
 
 /**
  * @author Ice2Faith
