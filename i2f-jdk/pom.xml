@@ -104,6 +104,7 @@
         <module>i2f-jvm</module>
         <module>i2f-script</module>
         <module>i2f-limit</module>
+        <module>i2f-pool</module>
 
     </modules>
 

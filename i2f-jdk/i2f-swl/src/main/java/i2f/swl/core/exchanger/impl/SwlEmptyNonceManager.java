@@ -1,6 +1,6 @@
-package i2f.swl.core.impl;
+package i2f.swl.core.exchanger.impl;
 
-import i2f.swl.core.SwlNonceManager;
+import i2f.swl.core.exchanger.SwlNonceManager;
 
 /**
  * @author Ice2Faith

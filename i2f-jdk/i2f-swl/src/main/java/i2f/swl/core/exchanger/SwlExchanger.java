@@ -1,14 +1,13 @@
-package i2f.swl.core.worker;
+package i2f.swl.core.exchanger;
 
 import i2f.clock.SystemClock;
-import i2f.codec.bytes.base64.Base64StringByteCodec;
-import i2f.codec.bytes.charset.CharsetStringByteCodec;
-import i2f.codec.str.code.UrlCodeStringCodec;
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
-import i2f.lru.ObjectPool;
+import i2f.pool.impl.ObjectPool;
+import i2f.swl.cert.SwlCert;
+import i2f.swl.cert.SwlCertPair;
+import i2f.swl.cert.SwlCertUtil;
 import i2f.swl.consts.SwlCode;
-import i2f.swl.core.SwlNonceManager;
-import i2f.swl.core.impl.SwlEmptyNonceManager;
+import i2f.swl.core.exchanger.impl.SwlEmptyNonceManager;
 import i2f.swl.data.SwlContext;
 import i2f.swl.data.SwlData;
 import i2f.swl.data.SwlHeader;
@@ -21,12 +20,10 @@ import i2f.swl.std.ISwlAsymmetricEncryptor;
 import i2f.swl.std.ISwlMessageDigester;
 import i2f.swl.std.ISwlObfuscator;
 import i2f.swl.std.ISwlSymmetricEncryptor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -38,9 +35,11 @@ import java.util.function.Supplier;
  */
 @Data
 @NoArgsConstructor
-public class SwlWorker {
+public class SwlExchanger {
 
+    @Setter(AccessLevel.NONE)
     protected Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier = new SwlRsaAsymmetricEncryptorSupplier();
+    @Setter(AccessLevel.NONE)
     protected Supplier<ISwlSymmetricEncryptor> symmetricEncryptorSupplier = new SwlAesSymmetricEncryptorSupplier();
     protected ISwlMessageDigester messageDigester = new SwlSha256MessageDigester();
     protected ISwlObfuscator obfuscator = new SwlBase64Obfuscator();
@@ -48,12 +47,42 @@ public class SwlWorker {
     protected long timestampExpireWindowSeconds = 30;
 
     protected SwlNonceManager nonceManager = new SwlEmptyNonceManager();
-    private long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
+    protected long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
 
     protected SecureRandom random = new SecureRandom();
 
-    protected ObjectPool<ISwlAsymmetricEncryptor> asymmetricEncryptorObjectPool = new ObjectPool<>(asymmetricEncryptorSupplier);
-    protected ObjectPool<ISwlSymmetricEncryptor> symmetricEncryptorObjectPool = new ObjectPool<>(symmetricEncryptorSupplier);
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
+    protected transient ObjectPool<ISwlAsymmetricEncryptor> asymmetricEncryptorObjectPool = new ObjectPool<>(asymmetricEncryptorSupplier);
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
+    protected transient ObjectPool<ISwlSymmetricEncryptor> symmetricEncryptorObjectPool = new ObjectPool<>(symmetricEncryptorSupplier);
+
+    public void setAsymmetricEncryptorSupplier(Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier) {
+        this.asymmetricEncryptorSupplier = asymmetricEncryptorSupplier;
+        asymmetricEncryptorObjectPool.setSupplier(this.asymmetricEncryptorSupplier);
+    }
+
+    public void setSymmetricEncryptorSupplier(Supplier<ISwlSymmetricEncryptor> symmetricEncryptorSupplier) {
+        this.symmetricEncryptorSupplier = symmetricEncryptorSupplier;
+        symmetricEncryptorObjectPool.setSupplier(this.symmetricEncryptorSupplier);
+    }
+
+    public ISwlAsymmetricEncryptor requireAsymmetricEncryptor() {
+        return asymmetricEncryptorObjectPool.require();
+    }
+
+    public void releaseAsymmetricEncryptor(ISwlAsymmetricEncryptor encryptor) {
+        asymmetricEncryptorObjectPool.release(encryptor);
+    }
+
+    public ISwlSymmetricEncryptor requireSymmetricEncryptor() {
+        return symmetricEncryptorObjectPool.require();
+    }
+
+    public void releaseSymmetricEncryptor(ISwlSymmetricEncryptor encryptor) {
+        symmetricEncryptorObjectPool.release(encryptor);
+    }
 
     public AsymKeyPair generateKeyPair() {
         ISwlAsymmetricEncryptor encryptor = asymmetricEncryptorObjectPool.require();
@@ -78,60 +107,10 @@ public class SwlWorker {
         try {
             AsymKeyPair serverKeyPair = encryptor.generateKeyPair();
             AsymKeyPair clientKeyPair = encryptor.generateKeyPair();
-            return makeCertPair(certId, serverKeyPair, clientKeyPair);
+            return SwlCertUtil.make(certId, serverKeyPair, clientKeyPair);
         } finally {
             asymmetricEncryptorObjectPool.release(encryptor);
         }
-    }
-
-    public static String serializeCert(SwlCert cert) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("certId=").append(UrlCodeStringCodec.INSTANCE.encode(cert.getCertId())).append("\n");
-        builder.append("publicKey=").append(UrlCodeStringCodec.INSTANCE.encode(cert.getPublicKey())).append("\n");
-        builder.append("privateKey=").append(UrlCodeStringCodec.INSTANCE.encode(cert.getPrivateKey())).append("\n");
-        builder.append("remotePublicKey=").append(UrlCodeStringCodec.INSTANCE.encode(cert.getRemotePublicKey())).append("\n");
-        String prop = builder.toString();
-        return Base64StringByteCodec.INSTANCE.encode(CharsetStringByteCodec.UTF8.decode(prop));
-    }
-
-    public static SwlCert deserializeCert(String str) {
-        if (str == null || str.isEmpty()) {
-            return null;
-        }
-        SwlCert ret = new SwlCert();
-        String prop = CharsetStringByteCodec.UTF8.encode(Base64StringByteCodec.INSTANCE.decode(str));
-        String[] lines = prop.split("\n");
-        for (String line : lines) {
-            String[] pair = line.split("=", 2);
-            if (pair.length < 2) {
-                continue;
-            }
-            String name = pair[0];
-            String value = UrlCodeStringCodec.INSTANCE.decode(pair[1]);
-            if ("certId".equals(name)) {
-                ret.setCertId(value);
-            } else if ("publicKey".equals(name)) {
-                ret.setPublicKey(value);
-            } else if ("privateKey".equals(name)) {
-                ret.setPrivateKey(value);
-            } else if ("remotePublicKey".equals(name)) {
-                ret.setRemotePublicKey(value);
-            }
-        }
-
-        return ret;
-    }
-
-    public static SwlCertPair makeCertPair(String certId, AsymKeyPair serverKeyPair, AsymKeyPair clientKeyPair) {
-        SwlCert server = new SwlCert(certId,
-                serverKeyPair.getPublicKey(),
-                serverKeyPair.getPrivateKey(),
-                clientKeyPair.getPublicKey());
-        SwlCert client = new SwlCert(certId,
-                clientKeyPair.getPublicKey(),
-                clientKeyPair.getPrivateKey(),
-                serverKeyPair.getPublicKey());
-        return new SwlCertPair(server, client);
     }
 
     public String obfuscateEncode(String data) {

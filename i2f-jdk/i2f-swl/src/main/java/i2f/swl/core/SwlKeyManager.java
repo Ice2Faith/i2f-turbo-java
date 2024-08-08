@@ -10,9 +10,19 @@ import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 public interface SwlKeyManager {
     AsymKeyPair getSelfKeyPair();
 
+    String getDefaultSelfAsymSign();
+
+    void setDefaultSelfAsymSign(String selfAsymSign);
+
     AsymKeyPair getSelfKeyPair(String selfAsymSign);
 
     void setSelfKeyPair(String selfAsymSign,AsymKeyPair keyPair);
+
+    AsymKeyPair getOtherKeyPair();
+
+    String getDefaultOtherAsymSign();
+
+    void setDefaultOtherAsymSign(String otherAsymSign);
 
     AsymKeyPair getOtherKeyPair(String otherAsymSign);
 

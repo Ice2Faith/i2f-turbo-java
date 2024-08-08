@@ -1,4 +1,4 @@
-package i2f.swl.core.worker;
+package i2f.swl.cert;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,5 +21,18 @@ public class SwlCert {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
         this.remotePublicKey = remotePublicKey;
+    }
+
+    public static SwlCert copy(SwlCert cert) {
+        SwlCert ret = new SwlCert();
+        ret.setCertId(cert.getCertId());
+        ret.setPublicKey(cert.getPublicKey());
+        ret.setPrivateKey(cert.getPrivateKey());
+        ret.setRemotePublicKey(cert.getRemotePublicKey());
+        return ret;
+    }
+
+    public SwlCert copy() {
+        return copy(this);
     }
 }
