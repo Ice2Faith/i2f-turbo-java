@@ -1,8 +1,8 @@
 package i2f.swl.test;
 
-import i2f.swl.cert.SwlCert;
+import i2f.swl.cert.SwlCertExchanger;
+import i2f.swl.cert.data.SwlCert;
 import i2f.swl.cert.impl.SwlResourceCertManager;
-import i2f.swl.core.exchanger.cert.SwlCertExchanger;
 import i2f.swl.data.SwlData;
 import i2f.swl.impl.SwlAesSymmetricEncryptor;
 import i2f.swl.impl.SwlBase64Obfuscator;

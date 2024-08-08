@@ -1,11 +1,14 @@
-package i2f.swl.core.impl;
+package i2f.swl.core.key.impl;
 
 import i2f.io.file.FileUtil;
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.lru.LruMap;
-import i2f.swl.core.SwlKeyManager;
+import i2f.swl.core.key.SwlKeyManager;
 import i2f.swl.impl.SwlBase64Obfuscator;
 import i2f.swl.std.ISwlObfuscator;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +29,17 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     public static final String DEFAULT_SELF_KEY_FILE = "default.self.key.txt";
     public static final String DEFAULT_OTHER_KEY_FILE = "default.other.key.txt";
 
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     protected LruMap<String, AsymKeyPair> selfCache = new LruMap<>(1024);
-    protected LruMap<String, AsymKeyPair> otherCache = new LruMap<>(1024);
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    protected LruMap<String, String> otherCache = new LruMap<>(1024);
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     protected AtomicReference<String> selfDefaultCache = new AtomicReference<>();
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     protected AtomicReference<String> otherDefaultCache = new AtomicReference<>();
 
     protected File rootDir = new File(DEFAULT_KEY_ROOT_DIR_NAME);
@@ -64,42 +75,42 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
         return new File(rootDir, OTHER_KEY_DIR_NAME);
     }
 
-    public File getSelfKeyFile(String selfAsymSign){
-        return new File(getSelfKeyDir(), selfAsymSign+ SELF_KEY_FILE_SUFFIX);
+    public File getSelfKeyFile(String selfAsymSign) {
+        return new File(getSelfKeyDir(), selfAsymSign + SELF_KEY_FILE_SUFFIX);
     }
 
-    public File getOtherKeyFile(String otherAsymSign){
-        return new File(getOtherKeyDir(), otherAsymSign+ OTHER_KEY_FILE_SUFFIX);
+    public File getOtherKeyFile(String otherAsymSign) {
+        return new File(getOtherKeyDir(), otherAsymSign + OTHER_KEY_FILE_SUFFIX);
     }
 
-    public File getDefaultSelfKeyFile(){
-        return new File(getSelfKeyDir(),DEFAULT_SELF_KEY_FILE);
+    public File getDefaultSelfKeyFile() {
+        return new File(getSelfKeyDir(), DEFAULT_SELF_KEY_FILE);
     }
 
     public File getDefaultOtherKeyFile() {
         return new File(getOtherKeyDir(), DEFAULT_OTHER_KEY_FILE);
     }
 
-    public String serializeKeyPair(AsymKeyPair keyPair){
-        StringBuilder builder=new StringBuilder();
-        builder.append(keyPair.getPublicKey()==null?"":obfuscateEncode(keyPair.getPublicKey()));
+    public String serializeKeyPair(AsymKeyPair keyPair) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(keyPair.getPublicKey() == null ? "" : obfuscateEncode(keyPair.getPublicKey()));
         builder.append(KEY_PAIR_SEPARATOR);
-        builder.append(keyPair.getPrivateKey()==null?"":obfuscateEncode(keyPair.getPrivateKey()));
+        builder.append(keyPair.getPrivateKey() == null ? "" : obfuscateEncode(keyPair.getPrivateKey()));
         return builder.toString();
     }
 
-    public AsymKeyPair deserializeKeyPair(String str){
+    public AsymKeyPair deserializeKeyPair(String str) {
         String[] arr = str.split(KEY_PAIR_SEPARATOR, 2);
         String publicKey = arr[0];
-        if(publicKey.isEmpty()){
-            publicKey=null;
+        if (publicKey.isEmpty()) {
+            publicKey = null;
         }
         String privateKey = null;
-        if(arr.length>1){
-            privateKey=arr[1];
+        if (arr.length > 1) {
+            privateKey = arr[1];
         }
-        if(privateKey!=null && privateKey.isEmpty()){
-            privateKey=null;
+        if (privateKey != null && privateKey.isEmpty()) {
+            privateKey = null;
         }
         return new AsymKeyPair(
                 obfuscateDecode(publicKey),
@@ -108,17 +119,17 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     }
 
     public AsymKeyPair loadKeyPair(File file) throws IOException {
-        if(!file.exists() || !file.isFile()){
+        if (!file.exists() || !file.isFile()) {
             return null;
         }
         String str = FileUtil.loadTxtFile(file);
         return deserializeKeyPair(str);
     }
 
-    public void saveKeyPair(File file,AsymKeyPair keyPair) throws IOException {
+    public void saveKeyPair(File file, AsymKeyPair keyPair) throws IOException {
         String str = serializeKeyPair(keyPair);
         FileUtil.useParentDir(file);
-        FileUtil.save(str,file);
+        FileUtil.save(str, file);
     }
 
     @Override
@@ -134,9 +145,16 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
 
     @Override
     public String getDefaultSelfAsymSign() {
+        String str = selfDefaultCache.get();
+        if (str != null) {
+            return str;
+        }
         try {
             File file = getDefaultSelfKeyFile();
             String selfAsymSign = FileUtil.loadTxtFile(file);
+            if (selfAsymSign != null) {
+                selfDefaultCache.set(selfAsymSign);
+            }
             return selfAsymSign;
         } catch (IOException e) {
 
@@ -162,7 +180,7 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
 
     @Override
     public AsymKeyPair getSelfKeyPair(String selfAsymSign) {
-        if(selfAsymSign==null){
+        if (selfAsymSign == null) {
             return null;
         }
         AsymKeyPair keyPair = selfCache.get(selfAsymSign);
@@ -175,26 +193,30 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
         } catch (IOException e) {
 
         }
-        if(ret!=null){
-            selfCache.put(selfAsymSign,ret);
+        if (ret != null) {
+            selfCache.put(selfAsymSign, ret.copy());
         }
         return ret;
     }
 
     @Override
     public void setSelfKeyPair(String selfAsymSign, AsymKeyPair keyPair) {
+        if (selfAsymSign == null || keyPair == null) {
+            return;
+        }
+        selfCache.put(selfAsymSign, keyPair.copy());
         try {
-            saveKeyPair(getSelfKeyFile(selfAsymSign),keyPair);
+            saveKeyPair(getSelfKeyFile(selfAsymSign), keyPair);
         } catch (IOException e) {
 
         }
     }
 
     @Override
-    public AsymKeyPair getOtherKeyPair() {
+    public String getOtherPublicKey() {
         try {
             String otherAsymSign = getDefaultOtherAsymSign();
-            return getOtherKeyPair(otherAsymSign);
+            return getOtherPublicKey(otherAsymSign);
         } catch (Exception e) {
 
         }
@@ -203,9 +225,16 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
 
     @Override
     public String getDefaultOtherAsymSign() {
+        String str = otherDefaultCache.get();
+        if (str != null) {
+            return str;
+        }
         try {
             File file = getDefaultOtherKeyFile();
             String otherAsymSign = FileUtil.loadTxtFile(file);
+            if (otherAsymSign != null) {
+                otherDefaultCache.set(otherAsymSign);
+            }
             return otherAsymSign;
         } catch (IOException e) {
 
@@ -230,30 +259,37 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     }
 
     @Override
-    public AsymKeyPair getOtherKeyPair(String otherAsymSign) {
-        if(otherAsymSign==null){
+    public String getOtherPublicKey(String otherAsymSign) {
+        if (otherAsymSign == null) {
             return null;
         }
-        AsymKeyPair keyPair = otherCache.get(otherAsymSign);
-        if (keyPair != null) {
-            return keyPair;
+        String publicKey = otherCache.get(otherAsymSign);
+        if (publicKey != null) {
+            return publicKey;
         }
-        AsymKeyPair ret = null;
+        String ret = null;
         try {
-            ret = loadKeyPair(getOtherKeyFile(otherAsymSign));
+            AsymKeyPair keyPair = loadKeyPair(getOtherKeyFile(otherAsymSign));
+            if (keyPair != null) {
+                ret = keyPair.getPublicKey();
+            }
         } catch (IOException e) {
 
         }
-        if(ret!=null){
-            selfCache.put(otherAsymSign,ret);
+        if (ret != null) {
+            otherCache.put(otherAsymSign, ret);
         }
         return ret;
     }
 
     @Override
-    public void setOtherKeyPair(String otherAsymSign, AsymKeyPair keyPair) {
+    public void setOtherPublicKey(String otherAsymSign, String publicKey) {
+        if (otherAsymSign == null || publicKey == null) {
+            return;
+        }
+        otherCache.put(otherAsymSign, publicKey);
         try {
-            saveKeyPair(getOtherKeyFile(otherAsymSign),keyPair);
+            saveKeyPair(getOtherKeyFile(otherAsymSign), new AsymKeyPair(publicKey, null));
         } catch (IOException e) {
 
         }
