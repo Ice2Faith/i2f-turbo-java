@@ -9,6 +9,7 @@ import i2f.swl.std.ISwlObfuscator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -22,10 +23,13 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     public static final String SELF_KEY_FILE_SUFFIX = ".self.key";
     public static final String OTHER_KEY_FILE_SUFFIX = ".other.key";
     public static final String KEY_PAIR_SEPARATOR = "\n====\n";
-    public static final String DEFAULT_SELF_KEY_FILE="default.key.txt";
+    public static final String DEFAULT_SELF_KEY_FILE = "default.self.key.txt";
+    public static final String DEFAULT_OTHER_KEY_FILE = "default.other.key.txt";
 
     protected LruMap<String, AsymKeyPair> selfCache = new LruMap<>(1024);
     protected LruMap<String, AsymKeyPair> otherCache = new LruMap<>(1024);
+    protected AtomicReference<String> selfDefaultCache = new AtomicReference<>();
+    protected AtomicReference<String> otherDefaultCache = new AtomicReference<>();
 
     protected File rootDir = new File(DEFAULT_KEY_ROOT_DIR_NAME);
 
@@ -71,6 +75,11 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     public File getDefaultSelfKeyFile(){
         return new File(getSelfKeyDir(),DEFAULT_SELF_KEY_FILE);
     }
+
+    public File getDefaultOtherKeyFile() {
+        return new File(getOtherKeyDir(), DEFAULT_OTHER_KEY_FILE);
+    }
+
     public String serializeKeyPair(AsymKeyPair keyPair){
         StringBuilder builder=new StringBuilder();
         builder.append(keyPair.getPublicKey()==null?"":obfuscateEncode(keyPair.getPublicKey()));
@@ -115,13 +124,40 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     @Override
     public AsymKeyPair getSelfKeyPair() {
         try {
+            String selfAsymSign = getDefaultSelfAsymSign();
+            return getSelfKeyPair(selfAsymSign);
+        } catch (Exception e) {
+
+        }
+        return null;
+    }
+
+    @Override
+    public String getDefaultSelfAsymSign() {
+        try {
             File file = getDefaultSelfKeyFile();
             String selfAsymSign = FileUtil.loadTxtFile(file);
-            return getSelfKeyPair(selfAsymSign);
+            return selfAsymSign;
         } catch (IOException e) {
 
         }
         return null;
+    }
+
+    @Override
+    public void setDefaultSelfAsymSign(String selfAsymSign) {
+        selfDefaultCache.set(selfAsymSign);
+        try {
+            File file = getDefaultSelfKeyFile();
+            if (selfAsymSign == null) {
+                file.delete();
+                return;
+            }
+            FileUtil.useParentDir(file);
+            FileUtil.save(selfAsymSign, file);
+        } catch (IOException e) {
+
+        }
     }
 
     @Override
@@ -149,9 +185,45 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     public void setSelfKeyPair(String selfAsymSign, AsymKeyPair keyPair) {
         try {
             saveKeyPair(getSelfKeyFile(selfAsymSign),keyPair);
-            File file = getDefaultSelfKeyFile();
+        } catch (IOException e) {
+
+        }
+    }
+
+    @Override
+    public AsymKeyPair getOtherKeyPair() {
+        try {
+            String otherAsymSign = getDefaultOtherAsymSign();
+            return getOtherKeyPair(otherAsymSign);
+        } catch (Exception e) {
+
+        }
+        return null;
+    }
+
+    @Override
+    public String getDefaultOtherAsymSign() {
+        try {
+            File file = getDefaultOtherKeyFile();
+            String otherAsymSign = FileUtil.loadTxtFile(file);
+            return otherAsymSign;
+        } catch (IOException e) {
+
+        }
+        return null;
+    }
+
+    @Override
+    public void setDefaultOtherAsymSign(String otherAsymSign) {
+        otherDefaultCache.set(otherAsymSign);
+        try {
+            File file = getDefaultOtherKeyFile();
+            if (otherAsymSign == null) {
+                file.delete();
+                return;
+            }
             FileUtil.useParentDir(file);
-            FileUtil.save(selfAsymSign,file);
+            FileUtil.save(otherAsymSign, file);
         } catch (IOException e) {
 
         }

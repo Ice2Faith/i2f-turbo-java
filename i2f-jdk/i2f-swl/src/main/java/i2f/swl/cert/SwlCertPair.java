@@ -1,4 +1,4 @@
-package i2f.swl.core.worker;
+package i2f.swl.cert;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,8 +14,8 @@ public class SwlCertPair {
     protected SwlCert server;
     protected SwlCert client;
 
-    public SwlCertPair(SwlCert client, SwlCert server) {
-        this.client = client;
+    public SwlCertPair(SwlCert server, SwlCert client) {
         this.server = server;
+        this.client = client;
     }
 }
