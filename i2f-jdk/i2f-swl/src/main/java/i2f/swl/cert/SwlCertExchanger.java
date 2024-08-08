@@ -1,8 +1,7 @@
-package i2f.swl.core.exchanger.cert;
+package i2f.swl.cert;
 
-import i2f.swl.cert.SwlCert;
-import i2f.swl.cert.SwlCertManager;
-import i2f.swl.cert.SwlCertPair;
+import i2f.swl.cert.data.SwlCert;
+import i2f.swl.cert.data.SwlCertPair;
 import i2f.swl.cert.impl.SwlResourceCertManager;
 import i2f.swl.core.exchanger.SwlExchanger;
 import i2f.swl.data.SwlData;

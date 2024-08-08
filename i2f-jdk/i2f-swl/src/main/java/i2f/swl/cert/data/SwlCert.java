@@ -1,4 +1,4 @@
-package i2f.swl.cert;
+package i2f.swl.cert.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

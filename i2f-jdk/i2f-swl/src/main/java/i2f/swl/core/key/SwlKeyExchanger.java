@@ -1,19 +1,14 @@
-package i2f.swl.core;
+package i2f.swl.core.key;
 
-import i2f.cache.expire.IExpireCache;
-import i2f.cache.impl.container.MapCache;
-import i2f.cache.impl.expire.ObjectExpireCacheWrapper;
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.core.exchanger.SwlExchanger;
-import i2f.swl.core.impl.SwlLocalFileKeyManager;
+import i2f.swl.core.key.impl.SwlLocalFileKeyManager;
 import i2f.swl.data.SwlData;
 import i2f.swl.std.ISwlAsymmetricEncryptor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Ice2Faith
@@ -23,48 +18,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Data
 @NoArgsConstructor
 public class SwlKeyExchanger extends SwlExchanger {
-    public static final String SELF_KEY_PAIR_CURRENT_KEY = "swl:key:self:current";
-    public static final String SELF_KEY_PAIR_HISTORY_KEY_PREFIX = "swl:key:self:history:";
-    public static final String OTHER_KEY_PUBLIC_KEY_PREFIX = "swl:key:other:keys:";
-    public static final String OTHER_KEY_PUBLIC_DEFAULT = "swl:key:other:default";
-    public static final String NONCE_PREFIX = "swl:nonce:";
-    public static final String KEYPAIR_SEPARATOR = "\n==========\n";
 
-    private SwlKeyManager keyManager = new SwlLocalFileKeyManager();
-
-    private IExpireCache<String, String> cache = new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));
-    private SwlTransferConfig config = new SwlTransferConfig();
-
-    private AtomicBoolean refreshing = new AtomicBoolean(false);
-    private ScheduledExecutorService schedulePool = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread thread = new Thread(r, "swl-refreshing");
-            thread.setDaemon(true);
-            return thread;
-        }
-    });
-
-    public void initialRefreshingThread() {
-        if (refreshing.getAndSet(true)) {
-            return;
-        }
-        long timeout = config.getSelfKeyExpireSeconds() - 10;
-        if (timeout <= 0) {
-            timeout = config.getSelfKeyExpireSeconds();
-        }
-        schedulePool.scheduleAtFixedRate(() -> {
-            resetSelfKeyPair();
-        }, 0, timeout, TimeUnit.SECONDS);
-    }
-
-    public String cacheKey(String key) {
-        String cacheKeyPrefix = config.getCacheKeyPrefix();
-        if (cacheKeyPrefix == null || cacheKeyPrefix.isEmpty()) {
-            return key;
-        }
-        return cacheKeyPrefix + ":" + key;
-    }
+    protected SwlKeyManager keyManager = new SwlLocalFileKeyManager();
 
     public AsymKeyPair getSelfKeyPair() {
         return keyManager.getSelfKeyPair();
@@ -81,9 +36,7 @@ public class SwlKeyExchanger extends SwlExchanger {
 
     public void setSelfKeyPair(String selfAsymSign, AsymKeyPair selfKeyPair) {
         keyManager.setSelfKeyPair(selfAsymSign, selfKeyPair);
-
-        // TODO key expire
-//        cache.set(cacheKey(key), text, config.getSelfKeyMaxCount() * config.getSelfKeyExpireSeconds(), TimeUnit.SECONDS);
+        keyManager.setDefaultSelfAsymSign(selfAsymSign);
     }
 
     public String getSelfPrivateKey(String selfAsymSign) {
@@ -95,33 +48,16 @@ public class SwlKeyExchanger extends SwlExchanger {
     }
 
     public String getOtherPublicKey(String otherAsymSign) {
-        AsymKeyPair keyPair = keyManager.getOtherKeyPair(otherAsymSign);
-        if (keyPair == null) {
-            return null;
-        }
-        return keyPair.getPublicKey();
+        return keyManager.getOtherPublicKey(otherAsymSign);
     }
 
     public String getOtherPublicKeyDefault() {
-        AsymKeyPair keyPair = keyManager.getOtherKeyPair();
-        if (keyPair == null) {
-            return null;
-        }
-        return keyPair.getPublicKey();
+        return keyManager.getOtherPublicKey();
     }
 
     public void setOtherPublicKey(String otherAsymSign, String publicKey) {
-        keyManager.setOtherKeyPair(otherAsymSign, new AsymKeyPair(publicKey, null));
+        keyManager.setOtherPublicKey(otherAsymSign, publicKey);
         keyManager.setDefaultOtherAsymSign(otherAsymSign);
-
-        // TODO key expire
-//        cache.set(cacheKey(key), obfuscateEncode(publicKey), config.getOtherKeyExpireSeconds(), TimeUnit.SECONDS);
-
-    }
-
-    public void refreshOtherPublicKeyExpire(String otherAsymSign) {
-        String key = OTHER_KEY_PUBLIC_KEY_PREFIX + otherAsymSign;
-        cache.expire(cacheKey(key), config.getOtherKeyExpireSeconds(), TimeUnit.SECONDS);
     }
 
     public void acceptOtherPublicKey(String otherPublicKey) {
@@ -140,8 +76,9 @@ public class SwlKeyExchanger extends SwlExchanger {
     }
 
     public AsymKeyPair resetSelfKeyPair() {
-        ISwlAsymmetricEncryptor asymmetricEncryptor = asymmetricEncryptorSupplier.get();
+        ISwlAsymmetricEncryptor asymmetricEncryptor = requireAsymmetricEncryptor();
         AsymKeyPair asymKeyPair = asymmetricEncryptor.generateKeyPair();
+        releaseAsymmetricEncryptor(asymmetricEncryptor);
         String selfAsymSign = messageDigester.digest(asymKeyPair.getPublicKey());
         setSelfKeyPair(selfAsymSign, asymKeyPair);
         return asymKeyPair;

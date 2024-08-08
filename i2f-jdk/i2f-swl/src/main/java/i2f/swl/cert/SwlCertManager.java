@@ -1,5 +1,8 @@
 package i2f.swl.cert;
 
+import i2f.swl.cert.data.SwlCert;
+import i2f.swl.cert.data.SwlCertPair;
+
 /**
  * @author Ice2Faith
  * @date 2024/8/8 15:37

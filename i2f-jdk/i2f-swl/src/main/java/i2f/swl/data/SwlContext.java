@@ -1,6 +1,5 @@
 package i2f.swl.data;
 
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

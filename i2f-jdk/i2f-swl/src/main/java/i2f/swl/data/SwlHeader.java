@@ -41,7 +41,7 @@ public class SwlHeader {
      */
     public String localAsymSign;
 
-    public static SwlHeader copy(SwlHeader src,SwlHeader dst) {
+    public static SwlHeader copy(SwlHeader src, SwlHeader dst) {
         dst.setTimestamp(src.getTimestamp());
         dst.setNonce(src.getNonce());
         dst.setRandomKey(src.getRandomKey());

@@ -281,7 +281,7 @@ public class SwlTransfer {
         String data = builder.toString();
         ret.getContext().setData(data);
 
-        String sign = messageDigester.digest(data + randomKey+timestamp + nonce + localAsymSign + remoteAsymSign);
+        String sign = messageDigester.digest(data + randomKey + timestamp + nonce + localAsymSign + remoteAsymSign);
         ret.getHeader().setSign(sign);
         ret.getContext().setSign(sign);
 
@@ -303,7 +303,7 @@ public class SwlTransfer {
         SwlData ret = new SwlData();
         ret.setParts(new ArrayList<>());
         ret.setAttaches(new ArrayList<>());
-        ret.setHeader(SwlHeader.copy(request.getHeader(),new SwlHeader()));
+        ret.setHeader(SwlHeader.copy(request.getHeader(), new SwlHeader()));
         ret.setContext(new SwlContext());
 
         ret.getHeader().setLocalAsymSign(obfuscateDecode(ret.getHeader().getLocalAsymSign()));
@@ -322,8 +322,8 @@ public class SwlTransfer {
         long currentTimestamp = SystemClock.currentTimeMillis() / 1000;
         ret.getContext().setCurrentTimestamp(String.valueOf(currentTimestamp));
 
-        String timestamp=ret.getHeader().getTimestamp();
-        long ts=Long.parseLong(timestamp);
+        String timestamp = ret.getHeader().getTimestamp();
+        long ts = Long.parseLong(timestamp);
         ret.getContext().setTimestamp(timestamp);
 
         String nonce = ret.getHeader().getNonce();
@@ -397,7 +397,7 @@ public class SwlTransfer {
             throw new SwlException(SwlCode.SERVER_ASYM_KEY_SIGN_MISSING_EXCEPTION.code(), "local asym sign cannot be empty!");
         }
 
-        boolean signOk = messageDigester.verify(sign, data + randomKey +timestamp+ nonce + remoteAsymSign + localAsymSign);
+        boolean signOk = messageDigester.verify(sign, data + randomKey + timestamp + nonce + remoteAsymSign + localAsymSign);
         ret.getContext().setSignOk(signOk);
         if (!signOk) {
             throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "verify sign failure!");
@@ -427,7 +427,7 @@ public class SwlTransfer {
         }
 
         String localPrivateKey = getSelfPrivateKey(localAsymSign);
-        ret.getContext().setSelfPrivateKey( localPrivateKey);
+        ret.getContext().setSelfPrivateKey(localPrivateKey);
         if (localPrivateKey == null || localPrivateKey.isEmpty()) {
             throw new SwlException(SwlCode.SERVER_ASYM_KEY_NOT_FOUND_EXCEPTION.code(), "server key not found!");
         }
