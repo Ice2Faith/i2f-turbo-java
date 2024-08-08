@@ -1,16 +1,14 @@
 package i2f.swl.test;
 
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
-import i2f.swl.core.SwlTransfer;
-import i2f.swl.core.worker.SwlCert;
-import i2f.swl.core.worker.SwlCertPair;
-import i2f.swl.core.worker.SwlWorker;
+import i2f.swl.cert.SwlCert;
+import i2f.swl.cert.SwlCertPair;
+import i2f.swl.core.exchanger.SwlExchanger;
 import i2f.swl.data.SwlData;
 import i2f.swl.impl.SwlAesSymmetricEncryptor;
 import i2f.swl.impl.SwlBase64Obfuscator;
 import i2f.swl.impl.SwlRsaAsymmetricEncryptor;
 import i2f.swl.impl.SwlSha256MessageDigester;
-import i2f.swl.std.ISwlAsymmetricEncryptor;
 
 import java.util.Arrays;
 
@@ -19,7 +17,7 @@ import java.util.Arrays;
  * @date 2024/7/10 10:12
  * @desc
  */
-public class TestSwlWorker {
+public class TestSwlExchanger {
     public static void main(String[] args) throws Exception {
 //        testRaw();
 
@@ -27,13 +25,13 @@ public class TestSwlWorker {
     }
 
     public static void testCert() throws Exception {
-        SwlWorker clientTransfer = new SwlWorker();
+        SwlExchanger clientTransfer = new SwlExchanger();
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
         clientTransfer.setMessageDigester(new SwlSha256MessageDigester());
         clientTransfer.setObfuscator(new SwlBase64Obfuscator());
 
-        SwlWorker serverTransfer = new SwlWorker();
+        SwlExchanger serverTransfer = new SwlExchanger();
         serverTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         serverTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
         serverTransfer.setMessageDigester(new SwlSha256MessageDigester());
@@ -68,13 +66,14 @@ public class TestSwlWorker {
 
     public static void testRaw() throws Exception {
 
-        SwlWorker clientTransfer = new SwlWorker();
+        SwlExchanger clientTransfer = new SwlExchanger();
+
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
         clientTransfer.setMessageDigester(new SwlSha256MessageDigester());
         clientTransfer.setObfuscator(new SwlBase64Obfuscator());
 
-        SwlWorker serverTransfer = new SwlWorker();
+        SwlExchanger serverTransfer = new SwlExchanger();
         serverTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         serverTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
         serverTransfer.setMessageDigester(new SwlSha256MessageDigester());
