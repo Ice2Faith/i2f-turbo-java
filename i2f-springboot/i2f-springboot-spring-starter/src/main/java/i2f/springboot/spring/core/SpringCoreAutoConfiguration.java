@@ -1,7 +1,9 @@
 package i2f.springboot.spring.core;
 
+import i2f.spring.core.SpringContext;
 import i2f.spring.core.SpringUtil;
 import i2f.spring.enviroment.EnvironmentUtil;
+import i2f.spring.enviroment.SpringEnvironment;
 import i2f.spring.event.EventManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Import;
@@ -15,7 +17,9 @@ import org.springframework.context.annotation.Import;
 @Import({
         SpringUtil.class,
         EnvironmentUtil.class,
-        EventManager.class
+        EventManager.class,
+        SpringEnvironment.class,
+        SpringContext.class,
 })
 public class SpringCoreAutoConfiguration {
 

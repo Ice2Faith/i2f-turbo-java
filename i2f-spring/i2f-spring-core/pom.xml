@@ -35,6 +35,16 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-proxy</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-environment</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-context</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
