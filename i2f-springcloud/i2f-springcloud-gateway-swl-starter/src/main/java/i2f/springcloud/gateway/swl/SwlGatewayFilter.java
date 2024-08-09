@@ -31,10 +31,7 @@ import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,8 +44,6 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -408,7 +403,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                     SwlData responseData = transfer.response(clientAsymSign.get(), parts);
                     String responseSwlh = serializeHeader(responseData.getHeader());
                     delegateResponse.getHeaders().set(config.getHeaderName(), responseSwlh);
-                    delegateResponse.getHeaders().set(config.getRemoteAsymSignHeaderName(), responseData.getContext().getLocalAsymSign());
+                    delegateResponse.getHeaders().set(config.getRemoteAsymSignHeaderName(), responseData.getContext().getSelfAsymSign());
 
                     responseText = responseData.getParts().get(0);
                     try {
