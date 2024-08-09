@@ -110,6 +110,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-convert</artifactId>
         </dependency>
         <dependency>
@@ -127,6 +131,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-enums</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-environment</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>

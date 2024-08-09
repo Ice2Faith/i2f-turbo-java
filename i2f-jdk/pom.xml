@@ -105,6 +105,8 @@
         <module>i2f-script</module>
         <module>i2f-limit</module>
         <module>i2f-pool</module>
+        <module>i2f-context</module>
+        <module>i2f-environment</module>
 
     </modules>
 
