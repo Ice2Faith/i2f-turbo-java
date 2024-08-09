@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @desc
  */
 public class SwlLocalFileKeyManager implements SwlKeyManager {
-    public static final String DEFAULT_KEY_ROOT_DIR_NAME = "./key-data";
+    public static final String DEFAULT_KEY_ROOT_DIR_NAME = "./swl/key-data";
     public static final String SELF_KEY_DIR_NAME = "self-key";
     public static final String OTHER_KEY_DIR_NAME = "other-key";
     public static final String SELF_KEY_FILE_SUFFIX = ".self.key";
