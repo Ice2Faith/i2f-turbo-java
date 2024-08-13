@@ -8,6 +8,9 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +20,7 @@ import java.util.List;
  * @desc
  */
 public class XmlUtil {
+
     public static DocumentBuilderFactory getFactory() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setExpandEntityReferences(false); // 防止 XXE 攻击
@@ -24,12 +28,21 @@ public class XmlUtil {
     }
 
     public static Document parseXml(byte[] bytes) throws Exception {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        return parseXml(bis);
+    }
+
+    public static Document parseXml(File file) throws Exception {
+        FileInputStream fis = new FileInputStream(file);
+        return parseXml(fis);
+    }
+
+    public static Document parseXml(InputStream is) throws Exception {
         DocumentBuilderFactory factory = getFactory();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        Document document = builder.parse(bis);
-        bis.close();
+        Document document = builder.parse(is);
+        is.close();
 
         return document;
     }
@@ -59,6 +72,20 @@ public class XmlUtil {
             for (int i = 0; i < len; i++) {
                 Node node = list.item(i);
                 ret.add(node);
+            }
+        }
+        return ret;
+    }
+
+    public static List<Node> getChildNodes(Node node, List<String> tagNames) {
+        List<Node> ret = new ArrayList<>();
+        NodeList list = node.getChildNodes();
+        int len = list.getLength();
+        for (int i = 0; i < len; i++) {
+            Node item = list.item(i);
+            String name = getTagName(item);
+            if (tagNames.contains(name)) {
+                ret.add(item);
             }
         }
         return ret;
