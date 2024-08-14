@@ -43,20 +43,20 @@ public class TestSwlExchanger {
         SwlCert clientCert = certPair.getClient();
 
 
-        SwlData clientSendData = clientTransfer.send(clientCert,
+        SwlData clientSendData = clientTransfer.sendByCert(clientCert,
                 Arrays.asList("body:123456", "query:user=admin"));
 
 
         String clientId = "127.0.0.1";
-        SwlData serverReceiveData = serverTransfer.receive(clientId,
+        SwlData serverReceiveData = serverTransfer.receiveByCert(clientId,
                 clientSendData,
                 serverCert);
 
-        SwlData serverResponseData = serverTransfer.send(serverCert,
+        SwlData serverResponseData = serverTransfer.sendByCert(serverCert,
                 Arrays.asList("echo:ok", "data:ok"));
 
         String serverId = "server";
-        SwlData clientReceiveData = clientTransfer.receive(
+        SwlData clientReceiveData = clientTransfer.receiveByCert(
                 serverResponseData,
                 clientCert
         );
@@ -87,23 +87,23 @@ public class TestSwlExchanger {
         String clientAsymSign = "client";
 
 
-        SwlData clientSendData = clientTransfer.send(serverKeyPair.getPublicKey(), serverAsymSign,
+        SwlData clientSendData = clientTransfer.sendByRaw(serverKeyPair.getPublicKey(), serverAsymSign,
                 clientKeyPair.getPrivateKey(), clientAsymSign,
                 Arrays.asList("body:123456", "query:user=admin"));
 
 
         String clientId = "127.0.0.1";
-        SwlData serverReceiveData = serverTransfer.receive(clientId,
+        SwlData serverReceiveData = serverTransfer.receiveByRaw(clientId,
                 clientSendData,
                 clientKeyPair.getPublicKey(),
                 serverKeyPair.getPrivateKey());
 
-        SwlData serverResponseData = serverTransfer.send(clientKeyPair.getPublicKey(), clientAsymSign,
+        SwlData serverResponseData = serverTransfer.sendByRaw(clientKeyPair.getPublicKey(), clientAsymSign,
                 serverKeyPair.getPrivateKey(), serverAsymSign
                 , Arrays.asList("echo:ok", "data:ok"));
 
         String serverId = "server";
-        SwlData clientReceiveData = clientTransfer.receive(serverId,
+        SwlData clientReceiveData = clientTransfer.receiveByRaw(serverId,
                 serverResponseData,
                 serverKeyPair.getPublicKey(),
                 clientKeyPair.getPrivateKey());

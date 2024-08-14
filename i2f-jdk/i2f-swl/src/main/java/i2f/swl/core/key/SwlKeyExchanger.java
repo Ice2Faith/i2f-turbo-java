@@ -90,7 +90,7 @@ public class SwlKeyExchanger extends SwlExchanger {
 
     public SwlData send(String remotePublicKey, List<String> parts, List<String> attaches) {
         AsymKeyPair keyPair = getSelfKeyPair();
-        return send(remotePublicKey, calcKeySign(remotePublicKey),
+        return sendByRaw(remotePublicKey, calcKeySign(remotePublicKey),
                 keyPair.getPrivateKey(), calcKeySign(keyPair.getPublicKey()),
                 parts, attaches);
     }
@@ -100,7 +100,7 @@ public class SwlKeyExchanger extends SwlExchanger {
         String otherAsymSign = request.getHeader().getLocalAsymSign();
         String otherPublicKey = getOtherPublicKey(otherAsymSign);
         String selfPrivateKey = getSelfPrivateKey(selfAsymSign);
-        return receive(clientId, request, otherPublicKey, selfPrivateKey);
+        return receiveByRaw(clientId, request, otherPublicKey, selfPrivateKey);
     }
 
     public SwlData sendDefault(List<String> parts, List<String> attaches) {
