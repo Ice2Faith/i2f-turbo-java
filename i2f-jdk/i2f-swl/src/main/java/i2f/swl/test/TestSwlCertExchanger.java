@@ -44,20 +44,20 @@ public class TestSwlCertExchanger {
         clientTransfer.getCertManager().storeClient(clientCert);
 
 
-        SwlData clientSendData = clientTransfer.send(certId,
+        SwlData clientSendData = clientTransfer.sendByCertId(certId,
                 Arrays.asList("body:123456", "query:user=admin"));
 
 
         String clientId = "127.0.0.1";
-        SwlData serverReceiveData = serverTransfer.accept(clientId,
+        SwlData serverReceiveData = serverTransfer.acceptByCertId(clientId,
                 clientSendData,
                 certId);
 
-        SwlData serverResponseData = serverTransfer.response(certId,
+        SwlData serverResponseData = serverTransfer.responseByCertId(certId,
                 Arrays.asList("echo:ok", "data:ok"));
 
         String serverId = "server";
-        SwlData clientReceiveData = clientTransfer.receive(
+        SwlData clientReceiveData = clientTransfer.receiveByCert(
                 serverResponseData,
                 clientCert
         );

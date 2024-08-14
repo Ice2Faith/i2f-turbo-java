@@ -133,31 +133,31 @@ public class SwlExchanger {
         return obfuscator.decode(data);
     }
 
-    public SwlData send(SwlCert cert,
-                        List<String> parts) {
-        return send(cert, parts, null);
+    public SwlData sendByCert(SwlCert cert,
+                              List<String> parts) {
+        return sendByCert(cert, parts, null);
     }
 
-    public SwlData send(SwlCert cert,
-                        List<String> parts,
-                        List<String> attaches) {
-        return send(cert.getRemotePublicKey(), cert.getCertId(),
+    public SwlData sendByCert(SwlCert cert,
+                              List<String> parts,
+                              List<String> attaches) {
+        return sendByRaw(cert.getRemotePublicKey(), cert.getCertId(),
                 cert.getPrivateKey(), cert.getCertId(),
                 parts, attaches);
     }
 
-    public SwlData send(String remotePublicKey, String remoteAsymSign,
-                        String selfPrivateKey, String selfAsymSign,
-                        List<String> parts) {
-        return send(remotePublicKey, remoteAsymSign,
+    public SwlData sendByRaw(String remotePublicKey, String remoteAsymSign,
+                             String selfPrivateKey, String selfAsymSign,
+                             List<String> parts) {
+        return sendByRaw(remotePublicKey, remoteAsymSign,
                 selfPrivateKey, selfAsymSign,
                 parts, null);
     }
 
-    public SwlData send(String remotePublicKey, String remoteAsymSign,
-                        String selfPrivateKey, String selfAsymSign,
-                        List<String> parts,
-                        List<String> attaches) {
+    public SwlData sendByRaw(String remotePublicKey, String remoteAsymSign,
+                             String selfPrivateKey, String selfAsymSign,
+                             List<String> parts,
+                             List<String> attaches) {
         SwlData ret = new SwlData();
         ret.setParts(new ArrayList<>());
         ret.setAttaches(new ArrayList<>());
@@ -257,23 +257,23 @@ public class SwlExchanger {
         return header;
     }
 
-    public SwlData receive(SwlData request,
-                           SwlCert cert) {
-        return receive(cert.getCertId(), request,
+    public SwlData receiveByCert(SwlData request,
+                                 SwlCert cert) {
+        return receiveByRaw(cert.getCertId(), request,
                 cert.getRemotePublicKey(), cert.getPrivateKey());
     }
 
-    public SwlData receive(String clientId,
-                           SwlData request,
-                           SwlCert cert) {
-        return receive(clientId, request,
+    public SwlData receiveByCert(SwlData request,
+                                 SwlCert cert,
+                                 String clientId) {
+        return receiveByRaw(clientId, request,
                 cert.getRemotePublicKey(), cert.getPrivateKey());
     }
 
-    public SwlData receive(String clientId,
-                           SwlData request,
-                           String remotePublicKey,
-                           String selfPrivateKey) {
+    public SwlData receiveByRaw(String clientId,
+                                SwlData request,
+                                String remotePublicKey,
+                                String selfPrivateKey) {
         SwlData ret = new SwlData();
         ret.setParts(new ArrayList<>());
         ret.setAttaches(new ArrayList<>());

@@ -12,23 +12,19 @@ function SwlContext() {
     /**
      * @type {AsymKeyPair}
      */
-    this.selfKeyPair = new AsymKeyPair()
-    /**
-     * @type {String}
-     */
-    this.localAsymSign = null
-    /**
-     * @type {String}
-     */
     this.remoteAsymSign = null
     /**
      * @type {String}
      */
-    this.timestamp = null
+    this.selfPrivateKey = null
     /**
      * @type {String}
      */
-    this.seq = null
+    this.selfAsymSign = null
+    /**
+     * @type {String}
+     */
+    this.timestamp = null
     /**
      * @type {String}
      */

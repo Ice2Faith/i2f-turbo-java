@@ -25,57 +25,57 @@ public class SwlCertExchanger extends SwlExchanger {
         certManager.storePair(pair);
     }
 
-    public SwlData send(String certId,
-                        List<String> parts) {
+    public SwlData sendByCertId(String certId,
+                                List<String> parts) {
         SwlCert cert = certManager.loadClient(certId);
-        return send(cert, parts);
+        return sendByCert(cert, parts);
     }
 
-    public SwlData send(String certId,
-                        List<String> parts,
-                        List<String> attaches) {
+    public SwlData sendByCertId(String certId,
+                                List<String> parts,
+                                List<String> attaches) {
         SwlCert cert = certManager.loadClient(certId);
-        return send(cert, parts, attaches);
+        return sendByCert(cert, parts, attaches);
     }
 
-    public SwlData receive(SwlData request,
-                           String certId) {
+    public SwlData receiveByCertId(SwlData request,
+                                   String certId) {
         SwlCert cert = certManager.loadClient(certId);
-        return receive(request, cert);
+        return receiveByCert(request, cert);
     }
 
-    public SwlData receive(String clientId,
-                           SwlData request,
-                           String certId) {
+    public SwlData receiveByCertId(SwlData request,
+                                   String certId,
+                                   String clientId) {
         SwlCert cert = certManager.loadClient(certId);
-        return receive(clientId, request, cert);
+        return receiveByCert( request, cert,clientId);
     }
 
 
-    public SwlData response(String certId,
-                            List<String> parts) {
+    public SwlData responseByCertId(String certId,
+                                    List<String> parts) {
         SwlCert cert = certManager.loadServer(certId);
-        return send(cert, parts);
+        return sendByCert(cert, parts);
     }
 
-    public SwlData response(String certId,
-                            List<String> parts,
-                            List<String> attaches) {
+    public SwlData responseByCertId(String certId,
+                                    List<String> parts,
+                                    List<String> attaches) {
         SwlCert cert = certManager.loadServer(certId);
-        return send(cert, parts, attaches);
+        return sendByCert(cert, parts, attaches);
     }
 
-    public SwlData accept(SwlData request,
-                          String certId) {
+    public SwlData acceptByCertId(SwlData request,
+                                  String certId) {
         SwlCert cert = certManager.loadServer(certId);
-        return receive(request, cert);
+        return receiveByCert(request, cert);
     }
 
-    public SwlData accept(String clientId,
-                          SwlData request,
-                          String certId) {
+    public SwlData acceptByCertId(SwlData request,
+                                  String certId,
+                                  String clientId) {
         SwlCert cert = certManager.loadServer(certId);
-        return receive(clientId, request, cert);
+        return receiveByCert( request, cert,clientId);
     }
 
 
