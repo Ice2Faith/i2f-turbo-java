@@ -2,6 +2,8 @@ package i2f.swl.test;
 
 import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.core.SwlTransfer;
+import i2f.swl.core.SwlTransferRefactor;
+import i2f.swl.core.key.SwlKeyExchanger;
 import i2f.swl.data.SwlData;
 import i2f.swl.impl.SwlAesSymmetricEncryptor;
 import i2f.swl.impl.SwlBase64Obfuscator;
@@ -18,13 +20,13 @@ import java.util.Arrays;
 public class TestSwlTransfer {
     public static void main(String[] args) {
 
-        SwlTransfer clientTransfer = new SwlTransfer();
+        SwlTransferRefactor clientTransfer = new SwlTransferRefactor();
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
         clientTransfer.setMessageDigester(new SwlSha256MessageDigester());
         clientTransfer.setObfuscator(new SwlBase64Obfuscator());
 
-        SwlTransfer serverTransfer = new SwlTransfer();
+        SwlKeyExchanger serverTransfer = new SwlKeyExchanger();
         serverTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         serverTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
         serverTransfer.setMessageDigester(new SwlSha256MessageDigester());
