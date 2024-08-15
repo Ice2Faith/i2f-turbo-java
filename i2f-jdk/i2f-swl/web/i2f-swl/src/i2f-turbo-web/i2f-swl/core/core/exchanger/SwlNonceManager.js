@@ -1,6 +1,6 @@
 
 /**
- * @return {SwlCertManager}
+ * @return {SwlNonceManager}
  * @interface {SwlNonceManager}
  */
 function SwlNonceManager() {

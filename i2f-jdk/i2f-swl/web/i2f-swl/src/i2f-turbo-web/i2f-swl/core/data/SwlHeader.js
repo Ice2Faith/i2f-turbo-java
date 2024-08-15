@@ -44,19 +44,19 @@ function SwlHeader() {
 
 /**
  *
- * @param header {SwlHeader}
+ * @param src {SwlHeader}
+ * @param dst {SwlHeader}
  * @return {SwlHeader}
  */
-SwlHeader.copy = function (header) {
-    let ret = new SwlHeader();
-    ret.timestamp=header.timestamp;
-    ret.nonce = header.nonce;
-    ret.randomKey = header.randomKey;
-    ret.sign = header.sign;
-    ret.digital = header.digital;
-    ret.localAsymSign = header.localAsymSign;
-    ret.remoteAsymSign = header.remoteAsymSign;
-    return ret;
+SwlHeader.copy = function (src, dst) {
+    dst.timestamp=src.timestamp;
+    dst.nonce = src.nonce;
+    dst.randomKey = src.randomKey;
+    dst.sign = src.sign;
+    dst.digital = src.digital;
+    dst.localAsymSign = src.localAsymSign;
+    dst.remoteAsymSign = src.remoteAsymSign;
+    return dst;
 }
 
 export default SwlHeader
