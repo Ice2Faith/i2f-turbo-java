@@ -52,7 +52,7 @@ function SwlTransfer() {
      *
      * @type Random
      */
-    this.random = Random
+    this.random = new Random()
     /**
      *
      * @type {boolean}

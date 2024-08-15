@@ -4,9 +4,13 @@ import SwlSha256MessageDigester from "../../impl/SwlSha256MessageDigester";
 import SwlBase64Obfuscator from "../../impl/SwlBase64Obfuscator";
 import SwlEmptyNonceManager from "./impl/SwlEmptyNonceManager";
 import SwlCertUtil from "../../cert/SwlCertUtil";
-import SwlData from "@/i2f-turbo-web/i2f-swl/core/data/SwlData";
-import SwlHeader from "@/i2f-turbo-web/i2f-swl/core/data/SwlHeader";
-import SwlContext from "@/i2f-turbo-web/i2f-swl/core/data/SwlContext";
+import SwlData from "../../data/SwlData";
+import SwlHeader from "../../data/SwlHeader";
+import SwlContext from "../../data/SwlContext";
+import SystemClock from "../../../../i2f-core/clock/SystemClock";
+import Random from "../../../../i2f-core/util/Random";
+import SwlException from "../../exception/SwlException";
+import SwlCode from "../../consts/SwlCode";
 
 /**
  * @return {SwlExchanger}
@@ -43,7 +47,7 @@ function SwlExchanger() {
      *
      * @type Random
      */
-    this.random = Random
+    this.random = new Random()
 
 }
 
@@ -127,79 +131,78 @@ SwlExchanger.prototype.sendByCert=function(cert, parts, attaches=[]) {
  */
 SwlExchanger.prototype.sendByRaw=function(remotePublicKey,remoteAsymSign,
                                           selfPrivateKey,selfAsymSign,
-                                          , parts, attaches=[]) {
+                                           parts, attaches=[]) {
     let ret = new SwlData();
     ret.parts=[]
     ret.attaches=[]
     ret.header=new SwlHeader();
     ret.context=new SwlContext();
 
-    ret.context.setRemotePublicKey(remotePublicKey);
-    ret.header.setRemoteAsymSign(remoteAsymSign);
-    ret.context.setRemoteAsymSign(remoteAsymSign);
+    ret.context.remotePublicKey=remotePublicKey;
+    ret.header.remoteAsymSign=remoteAsymSign;
+    ret.context.remoteAsymSign=remoteAsymSign;
 
 
-    ret.context.setSelfPrivateKey(selfPrivateKey);
-    ret.header.setLocalAsymSign(selfAsymSign);
-    ret.context.setSelfAsymSign(selfAsymSign);
+    ret.context.selfPrivateKey=selfPrivateKey;
+    ret.header.localAsymSign=selfAsymSign;
+    ret.context.selfAsymSign=selfAsymSign;
 
 
-    String timestamp = String.valueOf(SystemClock.currentTimeMillis() / 1000);
-    ret.header.setTimestamp(timestamp);
-    ret.context.setTimestamp(timestamp);
+    let timestamp = ''+(SystemClock.currentTimeMillis() / 1000);
+    ret.header.timestamp=timestamp;
+    ret.context.timestamp=timestamp;
 
-    String nonce = String.valueOf(random.nextInt(0x7fff)) + String.valueOf(random.nextInt(0x7fff));
-    ret.header.setNonce(nonce);
-    ret.context.setNonce(nonce);
+    let nonce = ''+(this.random.nextLowerInt(0x7fff)) + ''+(this.random.nextLowerInt(0x7fff));
+    ret.header.nonce=nonce;
+    ret.context.nonce=nonce;
 
-    ISwlSymmetricEncryptor symmetricEncryptor = symmetricEncryptorObjectPool.require();
-    String key = symmetricEncryptor.generateKey();
-    ret.context.setKey(key);
+    let symmetricEncryptor = this.symmetricEncryptorSupplier.get();
+    let key = symmetricEncryptor.generateKey();
+    ret.context.key=key;
 
-    ISwlAsymmetricEncryptor asymmetricEncryptor = asymmetricEncryptorObjectPool.require();
+    let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
     asymmetricEncryptor.setPublicKey(remotePublicKey);
-    String randomKey = asymmetricEncryptor.encrypt(key);
-    ret.header.setRandomKey(randomKey);
-    ret.context.setRandomKey(randomKey);
+    let randomKey = asymmetricEncryptor.encrypt(key);
+    ret.header.randomKey=randomKey;
+    ret.context.randomKey=randomKey;
 
     symmetricEncryptor.setKey(key);
-    StringBuilder builder = new StringBuilder();
-    for (String part : parts) {
-        String data = null;
-        if (part != null) {
+    let builder = '';
+    for (let i=0;i<parts.length;i++) {
+        let part=parts[i]
+        let data = null;
+        if (part) {
             data = symmetricEncryptor.encrypt(part);
         }
-        if (data != null) {
-            builder.append(data);
+        if (data) {
+            builder+=data;
         }
-        ret.getParts().add(data);
+        ret.parts.push(data);
     }
     if (attaches != null) {
-        for (String attach : attaches) {
+        for (let i=0;i< attaches.length;i++) {
+            let attach=attaches[i]
             if (attach != null) {
-                builder.append(attach);
+                builder+=attach;
             }
-            ret.getAttaches().add(attach);
+            ret.attaches.push(attach);
         }
     }
 
-    symmetricEncryptorObjectPool.release(symmetricEncryptor);
+    let data = builder;
+    ret.context.data=data;
 
-    String data = builder.toString();
-    ret.context.setData(data);
-
-    String sign = messageDigester.digest(data + randomKey + timestamp + nonce + selfAsymSign + remoteAsymSign);
-    ret.header.setSign(sign);
-    ret.context.setSign(sign);
+    let sign = this.messageDigester.digest(data + randomKey + timestamp + nonce + selfAsymSign + remoteAsymSign);
+    ret.header.sign=sign;
+    ret.context.sign=sign;
 
     asymmetricEncryptor.setPrivateKey(selfPrivateKey);
-    String digital = asymmetricEncryptor.sign(sign);
-    ret.header.setDigital(digital);
-    ret.context.setDigital(digital);
+    let digital = asymmetricEncryptor.sign(sign);
+    ret.header.digital=digital;
+    ret.context.digital=digital;
 
-    asymmetricEncryptorObjectPool.release(asymmetricEncryptor);
 
-    encode(ret.getHeader());
+    this.encode(ret.header);
 
     return ret;
 }
@@ -240,6 +243,184 @@ SwlExchanger.prototype.swap=function(header) {
     header.localAsymSign=header.remoteAsymSign
     header.remoteAsymSign=str
     return header;
+}
+
+/**
+ *
+ * @param request {SwlData}
+ * @param cert {SwlCert}
+ * @param clientId {String|null}
+ * @return {SwlData}
+ */
+SwlExchanger.prototype.receiveByCert=function(request,
+    cert,
+    clientId=null) {
+    if(!clientId){
+        clientId=cert.certId
+    }
+    return receiveByRaw(clientId, request,
+        cert.remotePublicKey, cert.privateKey);
+}
+
+/**
+ *
+ * @param clientId {String}
+ * @param request {SwlData}
+ * @param remotePublicKey {String}
+ * @param selfPrivateKey {String}
+ * @return {SwlData}
+ */
+SwlExchanger.prototype.receiveByRaw=function(clientId,
+    request,
+    remotePublicKey,
+    selfPrivateKey) {
+    let ret = new SwlData();
+    ret.parts=[];
+    ret.attaches=[];
+    ret.header=SwlHeader.copy(request.header, new SwlHeader());
+    ret.context=new SwlContext();
+
+    this.decode(ret.header);
+
+    this.swap(ret.header);
+
+    ret.context.clientId=clientId;
+
+    let currentTimestamp = SystemClock.currentTimeMillis() / 1000;
+    ret.context.currentTimestamp=''+(currentTimestamp);
+
+    let timestamp = ret.header.timestamp;
+    let ts = parseInt(timestamp);
+    ret.context.timestamp=timestamp;
+
+    let window = this.timestampExpireWindowSeconds;
+    ret.context.window=(''+(window));
+
+    if (Math.abs(currentTimestamp - ts) > window) {
+        throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION.code(), "timestamp is exceed allow window seconds!");
+    }
+
+    let nonce = ret.header.nonce;
+    ret.context.nonce=nonce;
+    if (!nonce || nonce=='') {
+        throw new SwlException(SwlCode.NONCE_MISSING_EXCEPTION.code(), "nonce cannot is empty!");
+    }
+
+    if (this.nonceManager != null) {
+        let nonceKey = timestamp + "-" + nonce;
+        if (clientId != null && !clientId.isEmpty()) {
+            nonceKey = clientId + "-" + nonce;
+        }
+        ret.context.nonceKey=nonceKey;
+        if (this.nonceManager.contains(nonceKey)) {
+            throw new SwlException(SwlCode.NONCE_ALREADY_EXISTS_EXCEPTION.code(), "nonce key already exists!");
+        }
+
+        this.nonceManager.set(nonceKey, this.nonceTimeoutSeconds);
+    }
+
+    let sign = ret.header.sign;
+    ret.context.sign=sign;
+    if (!sign || sign=='') {
+        throw new SwlException(SwlCode.SIGN_MISSING_EXCEPTION.code(), "sign cannot be empty!");
+    }
+
+    let builder = '';
+    let parts = request.parts;
+    if (parts != null) {
+        for (let i=0;i<parts.length;i++) {
+            let part=parts[i]
+            if (part) {
+                builder+=part;
+            }
+        }
+    }
+
+    let attaches = request.attaches;
+    if (attaches != null) {
+        for (let i=0;i<attaches.length;i++) {
+            let attach=attaches[i]
+            if (attach) {
+                builder+=attach;
+            }
+        }
+    }
+
+    let data = builder;
+    ret.context.data=data;
+
+    let randomKey = ret.header.randomKey;
+    ret.context.randomKey=randomKey;
+    if (!randomKey || randomKey=='') {
+        throw new SwlException(SwlCode.RANDOM_KEY_MISSING_EXCEPTION.code(), "random key cannot be empty!");
+    }
+
+    let remoteAsymSign = ret.header.remoteAsymSign;
+    ret.context.remoteAsymSign=remoteAsymSign;
+    if (!remoteAsymSign || remoteAsymSign=='') {
+        throw new SwlException(SwlCode.CLIENT_ASYM_KEY_SIGN_MISSING_EXCEPTION.code(), "remote asym sign cannot be empty!");
+    }
+
+    let localAsymSign = ret.header.localAsymSign;
+    ret.context.selfAsymSign=localAsymSign;
+    if (!localAsymSign || localAsymSign=='') {
+        throw new SwlException(SwlCode.SERVER_ASYM_KEY_SIGN_MISSING_EXCEPTION.code(), "local asym sign cannot be empty!");
+    }
+
+    let signOk = this.messageDigester.verify(sign, data + randomKey + timestamp + nonce + remoteAsymSign + localAsymSign);
+    ret.context.signOk=signOk;
+    if (!signOk) {
+        throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "verify sign failure!");
+    }
+
+    let digital = ret.header.digital;
+    ret.context.digital=digital;
+    if (!digital || digital=='') {
+        throw new SwlException(SwlCode.DIGITAL_MISSING_EXCEPTION.code(), "digital cannot be empty!");
+    }
+
+    ret.context.remotePublicKey=remotePublicKey;
+    if (!remotePublicKey || remotePublicKey=='') {
+        throw new SwlException(SwlCode.CLIENT_ASYM_KEY_NOT_FOUND_EXCEPTION.code(), "remote key not found!");
+    }
+
+    let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
+    asymmetricEncryptor.setPublicKey(remotePublicKey);
+
+    let digitalOk = asymmetricEncryptor.verify(digital, sign);
+    ret.context.digitalOk=digitalOk;
+    if (!digitalOk) {
+        throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION.code(), "verify digital failure!");
+    }
+
+    ret.context.selfPrivateKey=selfPrivateKey;
+    if (!selfPrivateKey || selfPrivateKey=='') {
+        throw new SwlException(SwlCode.SERVER_ASYM_KEY_NOT_FOUND_EXCEPTION.code(), "server key not found!");
+    }
+
+    asymmetricEncryptor.setPrivateKey(selfPrivateKey);
+    let key = asymmetricEncryptor.decrypt(randomKey);
+    ret.context.key=key;
+    if (!key  || key=='') {
+        throw new SwlException(SwlCode.RANDOM_KEY_INVALID_EXCEPTION.code(), "random key is invalid!");
+    }
+
+
+    let symmetricEncryptor = this.symmetricEncryptorSupplier.get();
+    symmetricEncryptor.setKey(key);
+
+    if (parts != null) {
+        for (let i=0;i<parts.length;i++) {
+            let part=parts[i]
+            let item = null;
+            if (part) {
+                item = symmetricEncryptor.decrypt(part);
+            }
+            ret.parts.push(item);
+        }
+    }
+
+    return ret;
 }
 
 export default SwlExchanger
