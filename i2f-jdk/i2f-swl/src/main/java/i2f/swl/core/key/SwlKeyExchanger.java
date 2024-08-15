@@ -84,18 +84,18 @@ public class SwlKeyExchanger extends SwlExchanger {
         return asymKeyPair;
     }
 
-    public SwlData send(String remotePublicKey, List<String> parts) {
-        return send(remotePublicKey, parts, null);
+    public SwlData sendByKey(String remotePublicKey, List<String> parts) {
+        return sendByKey(remotePublicKey, parts, null);
     }
 
-    public SwlData send(String remotePublicKey, List<String> parts, List<String> attaches) {
+    public SwlData sendByKey(String remotePublicKey, List<String> parts, List<String> attaches) {
         AsymKeyPair keyPair = getSelfKeyPair();
         return sendByRaw(remotePublicKey, calcKeySign(remotePublicKey),
                 keyPair.getPrivateKey(), calcKeySign(keyPair.getPublicKey()),
                 parts, attaches);
     }
 
-    public SwlData receive(String clientId, SwlData request) {
+    public SwlData receiveByKey(String clientId, SwlData request) {
         String selfAsymSign = request.getHeader().getRemoteAsymSign();
         String otherAsymSign = request.getHeader().getLocalAsymSign();
         String otherPublicKey = getOtherPublicKey(otherAsymSign);
@@ -103,23 +103,23 @@ public class SwlKeyExchanger extends SwlExchanger {
         return receiveByRaw(clientId, request, otherPublicKey, selfPrivateKey);
     }
 
-    public SwlData sendDefault(List<String> parts, List<String> attaches) {
+    public SwlData sendDefaultByKey(List<String> parts, List<String> attaches) {
         String otherPublicKey = getOtherPublicKeyDefault();
-        return send(otherPublicKey, parts, attaches);
+        return sendByKey(otherPublicKey, parts, attaches);
     }
 
-    public SwlData sendDefault(List<String> parts) {
+    public SwlData sendDefaultByKey(List<String> parts) {
         String otherPublicKey = getOtherPublicKeyDefault();
-        return send(otherPublicKey, parts, null);
+        return sendByKey(otherPublicKey, parts, null);
     }
 
-    public SwlData response(String remoteAsymSign, List<String> parts, List<String> attaches) {
+    public SwlData responseByKey(String remoteAsymSign, List<String> parts, List<String> attaches) {
         String otherPublicKey = getOtherPublicKey(remoteAsymSign);
-        return send(otherPublicKey, parts, attaches);
+        return sendByKey(otherPublicKey, parts, attaches);
     }
 
-    public SwlData response(String remoteAsymSign, List<String> parts) {
+    public SwlData responseByKey(String remoteAsymSign, List<String> parts) {
         String otherPublicKey = getOtherPublicKey(remoteAsymSign);
-        return send(otherPublicKey, parts, null);
+        return sendByKey(otherPublicKey, parts, null);
     }
 }

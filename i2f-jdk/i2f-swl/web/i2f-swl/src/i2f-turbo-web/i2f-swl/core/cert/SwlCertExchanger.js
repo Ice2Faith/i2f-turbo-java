@@ -1,10 +1,11 @@
 import SwlExchanger from "../core/exchanger/SwlExchanger";
-import SwlStorageCertManager from "@./impl/SwlStorageCertManager";
+import SwlStorageCertManager from "./impl/SwlStorageCertManager";
 
 /**
  * @param certManager {SwlCertManager}
  * @return {SwlCertExchanger}
- * @constructor
+ * @extends {SwlExchanger}
+ * @constructor {SwlCertExchanger}
  */
 function SwlCertExchanger(certManager=new SwlStorageCertManager()) {
     /**
