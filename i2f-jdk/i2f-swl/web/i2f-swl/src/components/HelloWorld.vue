@@ -23,6 +23,9 @@
 import TestSwlTransfer from "@/i2f-turbo-web/i2f-swl/test/TestSwlTransfer";
 import AntMatcher from "@/i2f-turbo-web/i2f-core/match/impl/AntMatcher";
 import Random from "@/i2f-turbo-web/i2f-core/util/Random";
+import TestSwlExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlExchanger";
+import TestSwlCertTransfer from "@/i2f-turbo-web/i2f-swl/test/TestSwlCertExchanger";
+import TestSwlKeyExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlKeyExchanger";
 
 export default {
   name: 'HelloWorld',
@@ -36,7 +39,10 @@ export default {
   },
   methods: {
     testTransfer() {
-      TestSwlTransfer.main();
+      // TestSwlTransfer.main();
+      // TestSwlExchanger.main();
+      // TestSwlCertTransfer.main();
+      TestSwlKeyExchanger.main();
     },
     testMatcher(){
       let matcher=new AntMatcher()

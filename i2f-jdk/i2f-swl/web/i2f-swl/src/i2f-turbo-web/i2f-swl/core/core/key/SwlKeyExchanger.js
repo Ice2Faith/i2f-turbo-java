@@ -1,5 +1,5 @@
 import SwlExchanger from "../exchanger/SwlExchanger";
-import SwlStorageKeyManager from "@/i2f-turbo-web/i2f-swl/core/core/key/impl/SwlStorageKeyManager";
+import SwlStorageKeyManager from "./impl/SwlStorageKeyManager";
 
 /**
  * @param keyManager {SwlKeyManager}
@@ -8,6 +8,10 @@ import SwlStorageKeyManager from "@/i2f-turbo-web/i2f-swl/core/core/key/impl/Swl
  * @constructor {SwlKeyExchanger}
  */
 function SwlKeyExchanger(keyManager=new SwlStorageKeyManager()) {
+    /**
+     * 继承父类属性
+     */
+    SwlExchanger.call(this)
     /**
      *
      * @type {SwlKeyManager}
@@ -25,7 +29,7 @@ SwlKeyExchanger.prototype.constructor = SwlKeyExchanger
  * @return {AsymKeyPair}
  */
 SwlKeyExchanger.prototype.getSelfKeyPair = function () {
-    this.keyManager.getSelfKeyPair()
+    return this.keyManager.getDefaultSelfKeyPair()
 }
 
 

@@ -7,6 +7,14 @@ import SwlCertManager from "../SwlCertManager";
  */
 function SwlStorageCertManager(cachePrefix=SwlStorageCertManager.DEFAULT_KEY_PREFIX(),
                                storage=localStorage) {
+    /**
+     * 继承父类属性
+     */
+    SwlCertManager.call(this)
+    /**
+     *
+     * @type {string}
+     */
     this.cachePrefix = cachePrefix;
     /**
      *

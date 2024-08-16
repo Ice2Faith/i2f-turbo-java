@@ -22,7 +22,7 @@ public class SwlKeyExchanger extends SwlExchanger {
     protected SwlKeyManager keyManager = new SwlLocalFileKeyManager();
 
     public AsymKeyPair getSelfKeyPair() {
-        return keyManager.getSelfKeyPair();
+        return keyManager.getDefaultSelfKeyPair();
     }
 
     public String getSelfPublicKey() {
@@ -52,7 +52,7 @@ public class SwlKeyExchanger extends SwlExchanger {
     }
 
     public String getOtherPublicKeyDefault() {
-        return keyManager.getOtherPublicKey();
+        return keyManager.getDefaultOtherPublicKey();
     }
 
     public void setOtherPublicKey(String otherAsymSign, String publicKey) {
