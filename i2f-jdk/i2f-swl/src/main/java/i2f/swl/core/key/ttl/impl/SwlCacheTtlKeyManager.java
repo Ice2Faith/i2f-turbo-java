@@ -208,7 +208,7 @@ public class SwlCacheTtlKeyManager extends AbsSwlCacheKeyManager implements SwlT
     }
 
     @Override
-    public void setSelfKeyPair(String selfAsymSign, AsymKeyPair keyPair, long ttlSeconds) {
+    public void setSelfKeyPairWithTtl(String selfAsymSign, AsymKeyPair keyPair, long ttlSeconds) {
         if (selfAsymSign == null || keyPair == null) {
             return;
         }
@@ -219,7 +219,7 @@ public class SwlCacheTtlKeyManager extends AbsSwlCacheKeyManager implements SwlT
     }
 
     @Override
-    public void setOtherPublicKey(String otherAsymSign, String publicKey, long ttlSeconds) {
+    public void setOtherPublicKeyWithTtl(String otherAsymSign, String publicKey, long ttlSeconds) {
         if (otherAsymSign == null || publicKey == null) {
             return;
         }
