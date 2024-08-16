@@ -10,7 +10,7 @@ function SwlKeyManager() {
 /**
  * @return {AsymKeyPair}
  */
-SwlKeyManager.prototype.getSelfKeyPair = function () {
+SwlKeyManager.prototype.getDefaultSelfKeyPair = function () {
 
 }
 
@@ -52,7 +52,7 @@ SwlKeyManager.prototype.setSelfKeyPair = function (selfAsymSign, keyPair) {
 /**
  * @return {String}
  */
-SwlKeyManager.prototype.getOtherPublicKey = function () {
+SwlKeyManager.prototype.getDefaultOtherPublicKey = function () {
 
 }
 

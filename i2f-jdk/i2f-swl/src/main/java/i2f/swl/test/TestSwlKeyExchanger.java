@@ -15,7 +15,7 @@ import java.util.Arrays;
  * @date 2024/7/10 10:12
  * @desc
  */
-public class TestSwlKeyTransfer {
+public class TestSwlKeyExchanger {
     public static void main(String[] args) {
 
         SwlKeyExchanger clientTransfer = new SwlKeyExchanger();

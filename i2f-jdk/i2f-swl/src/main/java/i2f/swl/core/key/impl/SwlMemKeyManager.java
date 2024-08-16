@@ -19,7 +19,7 @@ public class SwlMemKeyManager implements SwlKeyManager {
 
 
     @Override
-    public AsymKeyPair getSelfKeyPair() {
+    public AsymKeyPair getDefaultSelfKeyPair() {
         String selfAsymSign = getDefaultSelfAsymSign();
         return getSelfKeyPair(selfAsymSign);
     }
@@ -52,7 +52,7 @@ public class SwlMemKeyManager implements SwlKeyManager {
     }
 
     @Override
-    public String getOtherPublicKey() {
+    public String getDefaultOtherPublicKey() {
         String otherAsymSign = getDefaultOtherAsymSign();
         return getOtherPublicKey(otherAsymSign);
     }

@@ -62,7 +62,7 @@ SwlExchanger.prototype.generateKeyPair = function () {
 /**
  * @return {String}
  */
-SwlExchanger.prototype.generateKeyPair = function () {
+SwlExchanger.prototype.generateKey = function () {
     let encryptor = this.symmetricEncryptorSupplier.get();
     return encryptor.generateKey()
 }
@@ -258,7 +258,7 @@ SwlExchanger.prototype.receiveByCert=function(request,
     if(!clientId){
         clientId=cert.certId
     }
-    return receiveByRaw(clientId, request,
+    return this.receiveByRaw(clientId, request,
         cert.remotePublicKey, cert.privateKey);
 }
 
@@ -308,7 +308,7 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
 
     if (this.nonceManager != null) {
         let nonceKey = timestamp + "-" + nonce;
-        if (clientId != null && !clientId.isEmpty()) {
+        if (clientId&& clientId!='') {
             nonceKey = clientId + "-" + nonce;
         }
         ret.context.nonceKey=nonceKey;

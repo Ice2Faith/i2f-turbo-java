@@ -6,6 +6,10 @@ import SwlCertManager from "../SwlCertManager";
  */
 function SwlMemCertManager() {
     /**
+     * 继承父类属性
+     */
+    SwlCertManager.call(this)
+    /**
      *
      * @type {Map|Object}
      */

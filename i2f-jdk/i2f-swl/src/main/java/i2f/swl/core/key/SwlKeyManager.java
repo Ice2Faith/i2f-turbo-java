@@ -8,7 +8,7 @@ import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
  * @desc
  */
 public interface SwlKeyManager {
-    AsymKeyPair getSelfKeyPair();
+    AsymKeyPair getDefaultSelfKeyPair();
 
     String getDefaultSelfAsymSign();
 
@@ -18,7 +18,7 @@ public interface SwlKeyManager {
 
     void setSelfKeyPair(String selfAsymSign, AsymKeyPair keyPair);
 
-    String getOtherPublicKey();
+    String getDefaultOtherPublicKey();
 
     String getDefaultOtherAsymSign();
 
