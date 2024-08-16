@@ -9,6 +9,10 @@ import SwlStorageCertManager from "./impl/SwlStorageCertManager";
  */
 function SwlCertExchanger(certManager=new SwlStorageCertManager()) {
     /**
+     * 继承父类属性
+     */
+    SwlExchanger.call(this)
+    /**
      *
      * @type {SwlCertManager}
      */

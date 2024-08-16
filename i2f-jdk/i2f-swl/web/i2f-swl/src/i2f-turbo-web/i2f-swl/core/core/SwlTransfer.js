@@ -366,12 +366,13 @@ SwlTransfer.prototype.send = function (remotePublicKey, parts, attaches = null) 
     ret.context.remoteAsymSign = remoteAsymSign;
 
     let timestamp = Math.floor(SystemClock.currentTimeMillis() / 1000);
+    ret.header.timestamp=''+timestamp
+    ret.context.timestamp=''+timestamp
+
     let seq = this.random.nextLowerInt(0x7fff);
     let nonce = timestamp.toString(16) + "-" + seq.toString(16);
     ret.header.nonce = nonce;
-    ret.context.timestamp = ('' + timestamp);
-    ret.context.seq = ('' + seq);
-    ret.context.nonce = (nonce);
+    ret.context.nonce=nonce
 
     let key = symmetricEncryptor.generateKey();
     ret.context.key = (key);
@@ -435,7 +436,7 @@ SwlTransfer.prototype.receive = function (clientId, request) {
     let ret = new SwlData();
     ret.parts = ([]);
     ret.attaches = ([]);
-    ret.header = (SwlHeader.copy(request.header));
+    ret.header = (SwlHeader.copy(request.header,new SwlHeader()));
     ret.context = (new SwlContext());
 
     ret.header.localAsymSign = (this.obfuscateDecode(ret.header.localAsymSign));
@@ -454,21 +455,15 @@ SwlTransfer.prototype.receive = function (clientId, request) {
     let currentTimestamp = Math.floor(SystemClock.currentTimeMillis() / 1000);
     ret.context.currentTimestamp = ('' + currentTimestamp);
 
+    let timestamp=ret.header.timestamp
+    let ts=parseInt(timestamp)
+    ret.context.timestamp=timestamp
+
     let nonce = ret.header.nonce;
     ret.context.nonce = (nonce);
     if (nonce == null || nonce === "") {
         throw new SwlException(SwlCode.NONCE_MISSING_EXCEPTION(), "nonce cannot is empty!");
     }
-
-    let nonceArr = nonce.split("-", 2);
-    if (nonceArr.length != 2) {
-        throw new SwlException(SwlCode.NONCE_INVALID_EXCEPTION(), "nonce is invalid!");
-    }
-
-    let timestamp = parseInt(nonceArr[0], 16);
-    let seq = nonceArr[1];
-    ret.context.timestamp = ('' + timestamp);
-    ret.context.seq = (seq);
 
     let window = this.config.nonceWindowSeconds;
     ret.context.window = ('' + window);
@@ -476,6 +471,7 @@ SwlTransfer.prototype.receive = function (clientId, request) {
     if (Math.abs(currentTimestamp - timestamp) > window) {
         throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION(), "timestamp is exceed allow window seconds!");
     }
+
 
     let nonceKey = nonce;
     if (clientId != null && clientId !== "") {
@@ -566,7 +562,7 @@ SwlTransfer.prototype.receive = function (clientId, request) {
     }
 
     let localPrivateKey = this.getSelfPrivateKey(localAsymSign);
-    ret.context.selfKeyPair = (new AsymKeyPair(null, localPrivateKey));
+    ret.context.selfPrivateKey = (localPrivateKey);
     if (localPrivateKey == null || localPrivateKey === "") {
         throw new SwlException(SwlCode.SERVER_ASYM_KEY_NOT_FOUND_EXCEPTION(), "server key not found!");
     }

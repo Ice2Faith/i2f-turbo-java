@@ -43,7 +43,7 @@ public class SwlCacheTtlKeyManager extends AbsSwlCacheKeyManager implements SwlT
     protected AtomicReference<String> otherDefaultCache = new AtomicReference<>();
 
     @Override
-    public AsymKeyPair getSelfKeyPair() {
+    public AsymKeyPair getDefaultSelfKeyPair() {
         try {
             String selfAsymSign = getDefaultSelfAsymSign();
             return getSelfKeyPair(selfAsymSign);
@@ -122,7 +122,7 @@ public class SwlCacheTtlKeyManager extends AbsSwlCacheKeyManager implements SwlT
     }
 
     @Override
-    public String getOtherPublicKey() {
+    public String getDefaultOtherPublicKey() {
         try {
             String otherAsymSign = getDefaultOtherAsymSign();
             return getOtherPublicKey(otherAsymSign);

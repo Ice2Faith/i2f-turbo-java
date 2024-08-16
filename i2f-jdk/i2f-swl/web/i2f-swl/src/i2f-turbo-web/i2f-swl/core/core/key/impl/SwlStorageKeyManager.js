@@ -4,9 +4,9 @@ import AsymKeyPair from "../../../../../i2f-core/crypto/asymmetric/AsymKeyPair";
 
 /**
  * @param {localStorage|sessionStorage}
- * @return {SwlEmptyNonceManager}
+ * @return {SwlStorageKeyManager}
  * @implements {SwlKeyManager}
- * @constructor {SwlEmptyNonceManager}
+ * @constructor {SwlStorageKeyManager}
  */
 function SwlStorageKeyManager(cachePrefix = SwlStorageKeyManager.DEFAULT_KEY_PREFIX(),
                               storage=localStorage) {
@@ -172,7 +172,7 @@ SwlStorageKeyManager.prototype.deserializeKeyPair=function(str) {
 /**
  * @return {AsymKeyPair}
  */
-SwlStorageKeyManager.prototype.getSelfKeyPair = function () {
+SwlStorageKeyManager.prototype.getDefaultSelfKeyPair = function () {
     let selfAsymSign = this.getDefaultSelfAsymSign();
     return this.getSelfKeyPair(selfAsymSign);
 }
@@ -251,7 +251,7 @@ SwlStorageKeyManager.prototype.setSelfKeyPair = function (selfAsymSign, keyPair)
 /**
  * @return {String}
  */
-SwlStorageKeyManager.prototype.getOtherPublicKey = function () {
+SwlStorageKeyManager.prototype.getDefaultOtherPublicKey = function () {
     let otherAsymSign = this.getDefaultOtherAsymSign();
     return this.getOtherPublicKey(otherAsymSign);
 }

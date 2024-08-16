@@ -48,9 +48,10 @@ public class TestSwlExchanger {
 
 
         String clientId = "127.0.0.1";
-        SwlData serverReceiveData = serverTransfer.receiveByCert(clientId,
+        SwlData serverReceiveData = serverTransfer.receiveByCert(
                 clientSendData,
-                serverCert);
+                serverCert,
+                clientId);
 
         SwlData serverResponseData = serverTransfer.sendByCert(serverCert,
                 Arrays.asList("echo:ok", "data:ok"));

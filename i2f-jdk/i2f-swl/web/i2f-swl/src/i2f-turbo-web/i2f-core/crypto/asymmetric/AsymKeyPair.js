@@ -44,4 +44,21 @@ AsymKeyPair.prototype.setPrivateKey = function (privateKey) {
     this._privateKey = privateKey
 }
 
+/**
+ *
+ * @param pair {AsymKeyPair}
+ * @return {AsymKeyPair}
+ */
+AsymKeyPair.copy=function(pair){
+    return new AsymKeyPair(pair.getPublicKey(),pair.getPrivateKey())
+}
+
+/**
+ *
+ * @return {AsymKeyPair}
+ */
+AsymKeyPair.prototype.copy=function(){
+    return AsymKeyPair.copy(this)
+}
+
 export default AsymKeyPair

@@ -133,7 +133,7 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     }
 
     @Override
-    public AsymKeyPair getSelfKeyPair() {
+    public AsymKeyPair getDefaultSelfKeyPair() {
         try {
             String selfAsymSign = getDefaultSelfAsymSign();
             return getSelfKeyPair(selfAsymSign);
@@ -213,7 +213,7 @@ public class SwlLocalFileKeyManager implements SwlKeyManager {
     }
 
     @Override
-    public String getOtherPublicKey() {
+    public String getDefaultOtherPublicKey() {
         try {
             String otherAsymSign = getDefaultOtherAsymSign();
             return getOtherPublicKey(otherAsymSign);
