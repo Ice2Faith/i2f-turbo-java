@@ -11,9 +11,9 @@ import i2f.swl.core.key.SwlKeyManager;
 public interface SwlTtlKeyManager extends SwlKeyManager {
     boolean preferSetAndTtl();
 
-    void setSelfKeyPair(String selfAsymSign, AsymKeyPair keyPair, long ttlSeconds);
+    void setSelfKeyPairWithTtl(String selfAsymSign, AsymKeyPair keyPair, long ttlSeconds);
 
-    void setOtherPublicKey(String otherAsymSign, String publicKey, long ttlSeconds);
+    void setOtherPublicKeyWithTtl(String otherAsymSign, String publicKey, long ttlSeconds);
 
     void setSelfTtl(String selfAsymSign, long ttlSeconds);
 

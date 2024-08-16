@@ -70,7 +70,7 @@ public class SwlTtlKeyExchanger extends SwlKeyExchanger {
     public void setSelfKeyPair(String selfAsymSign, AsymKeyPair selfKeyPair) {
         SwlTtlKeyManager manager = getTtlKeyManager();
         if (manager.preferSetAndTtl()) {
-            manager.setSelfKeyPair(selfAsymSign, selfKeyPair, selfKeyMaxCount * selfKeyExpireSeconds);
+            manager.setSelfKeyPairWithTtl(selfAsymSign, selfKeyPair, selfKeyMaxCount * selfKeyExpireSeconds);
         } else {
             manager.setSelfKeyPair(selfAsymSign, selfKeyPair);
             manager.setSelfTtl(selfAsymSign, selfKeyMaxCount * selfKeyExpireSeconds);
@@ -82,7 +82,7 @@ public class SwlTtlKeyExchanger extends SwlKeyExchanger {
     public void setOtherPublicKey(String otherAsymSign, String publicKey) {
         SwlTtlKeyManager manager = getTtlKeyManager();
         if (manager.preferSetAndTtl()) {
-            manager.setOtherPublicKey(otherAsymSign, publicKey, otherKeyExpireSeconds);
+            manager.setOtherPublicKeyWithTtl(otherAsymSign, publicKey, otherKeyExpireSeconds);
         } else {
             manager.setOtherPublicKey(otherAsymSign, publicKey);
             manager.setOtherTtl(otherAsymSign, otherKeyExpireSeconds);
