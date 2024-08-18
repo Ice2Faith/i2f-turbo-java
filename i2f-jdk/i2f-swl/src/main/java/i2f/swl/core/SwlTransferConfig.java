@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class SwlTransferConfig {
     private String cacheKeyPrefix;
 
-    private long nonceWindowSeconds = TimeUnit.MINUTES.toSeconds(30);
+    private long timestampExpireWindowSeconds = TimeUnit.MINUTES.toSeconds(30);
     private long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
 
     private boolean enableRefreshSelfKey = true;

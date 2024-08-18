@@ -8,10 +8,10 @@ function SwlTransferConfig() {
      */
     this.cacheKeyPrefix = null;
     /**
-     * default 30 minutes
+     * default 30 seconds
      * @type {int}
      */
-    this.nonceWindowSeconds = 1800;
+    this.timestampExpireWindowSeconds = 30;
     /**
      * default 30 minutes
      * @type {int}
