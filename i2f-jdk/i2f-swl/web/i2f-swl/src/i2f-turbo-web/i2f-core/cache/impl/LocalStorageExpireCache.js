@@ -58,7 +58,7 @@ LocalStorageExpireCache.prototype.getData = function (key) {
         return null
     }
     let data = this.deserialize(json)
-    if (data == null) {
+    if (!data) {
         localStorage.removeItem(key)
         return null
     }

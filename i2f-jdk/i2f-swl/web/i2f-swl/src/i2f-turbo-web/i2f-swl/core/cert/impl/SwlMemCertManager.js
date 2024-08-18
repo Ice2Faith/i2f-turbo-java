@@ -55,7 +55,7 @@ SwlMemCertManager.prototype.getCertName = function (certId,server) {
 SwlMemCertManager.prototype.load = function (certId,server) {
     let certName = this.getCertName(certId, server);
     let ret = this.certMap[certName];
-    if (ret != null) {
+    if (ret) {
         return ret.copy();
     }
     return null;

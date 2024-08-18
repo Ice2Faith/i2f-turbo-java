@@ -84,7 +84,7 @@ SwlStorageCertManager.prototype.cacheKey = function (key) {
 SwlStorageCertManager.prototype.load = function (certId,server) {
     let certName = this.getCertName(certId, server);
     let cert = this.cacheCert[certName];
-    if (cert != null) {
+    if (cert) {
         return cert.copy();
     }
     let str = this.storage.getItem(this.cacheKey(certName));
