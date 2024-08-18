@@ -20,13 +20,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @desc
  */
 @Data
+
 @NoArgsConstructor
 public class SwlTransferRefactor extends SwlExchanger {
     public static final String SELF_KEY_PAIR_CURRENT_KEY = "swl:key:self:current";
     public static final String SELF_KEY_PAIR_HISTORY_KEY_PREFIX = "swl:key:self:history:";
     public static final String OTHER_KEY_PUBLIC_KEY_PREFIX = "swl:key:other:keys:";
     public static final String OTHER_KEY_PUBLIC_DEFAULT = "swl:key:other:default";
-    public static final String NONCE_PREFIX = "swl:nonce:";
     public static final String KEYPAIR_SEPARATOR = "\n==========\n";
 
     private IExpireCache<String, String> cache = new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));

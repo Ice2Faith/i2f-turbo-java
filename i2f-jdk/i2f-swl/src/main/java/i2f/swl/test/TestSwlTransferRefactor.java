@@ -17,16 +17,16 @@ import java.util.Arrays;
  * @date 2024/7/10 10:12
  * @desc
  */
-public class TestSwlTransfer {
+public class TestSwlTransferRefactor {
     public static void main(String[] args) {
 
-        SwlTransfer clientTransfer = new SwlTransfer();
+        SwlTransferRefactor clientTransfer = new SwlTransferRefactor();
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
         clientTransfer.setMessageDigester(new SwlSha256MessageDigester());
         clientTransfer.setObfuscator(new SwlBase64Obfuscator());
 
-        SwlTransfer serverTransfer = new SwlTransfer();
+        SwlKeyExchanger serverTransfer = new SwlKeyExchanger();
         serverTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         serverTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
         serverTransfer.setMessageDigester(new SwlSha256MessageDigester());
@@ -42,9 +42,9 @@ public class TestSwlTransfer {
 
 
         String clientId = "127.0.0.1";
-        SwlData serverReceiveData = serverTransfer.receive(clientId, clientSendData);
+        SwlData serverReceiveData = serverTransfer.receiveByKey(clientId, clientSendData);
 
-        SwlData serverResponseData = serverTransfer.response(serverReceiveData.getHeader().getRemoteAsymSign(), Arrays.asList("echo:ok", "data:ok"));
+        SwlData serverResponseData = serverTransfer.responseByKey(serverReceiveData.getHeader().getRemoteAsymSign(), Arrays.asList("echo:ok", "data:ok"));
 
         String serverId = "server";
         SwlData clientReceiveData = clientTransfer.receive(serverId, serverResponseData);
