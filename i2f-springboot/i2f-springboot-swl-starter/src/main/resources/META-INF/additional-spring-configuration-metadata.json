@@ -69,11 +69,11 @@
       "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties"
     },
     {
-      "name": "i2f.swl.transfer.nonce-window-seconds",
+      "name": "i2f.swl.transfer.timestamp-expire-window-seconds",
       "type": "java.lang.Long",
-      "description": "nonce window seconds, default 30 minutes.",
+      "description": "timestamp expire window seconds, default 30 seconds.",
       "sourceType": "i2f.springboot.swl.spring.SwlTransferConfigProperties",
-      "defaultValue": 1800
+      "defaultValue": 30
     },
     {
       "name": "i2f.swl.transfer.nonce-timeout-seconds",
