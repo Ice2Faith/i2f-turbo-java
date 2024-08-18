@@ -148,7 +148,7 @@ SwlExchanger.prototype.sendByRaw=function(remotePublicKey,remoteAsymSign,
     ret.context.selfAsymSign=selfAsymSign;
 
 
-    let timestamp = ''+(SystemClock.currentTimeMillis() / 1000);
+    let timestamp = ''+Math.floor(SystemClock.currentTimeMillis() / 1000);
     ret.header.timestamp=timestamp;
     ret.context.timestamp=timestamp;
 
@@ -286,7 +286,7 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
 
     ret.context.clientId=clientId;
 
-    let currentTimestamp = SystemClock.currentTimeMillis() / 1000;
+    let currentTimestamp = Math.floor(SystemClock.currentTimeMillis() / 1000);
     ret.context.currentTimestamp=''+(currentTimestamp);
 
     let timestamp = ret.header.timestamp;
