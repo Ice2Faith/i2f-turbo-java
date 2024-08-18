@@ -153,10 +153,16 @@ public class XxeGuardClassTransformer implements ClassFileTransformer {
 
                     method.insertAfter("{\n" +
                             "    org.springframework.http.converter.xml.SourceHttpMessageConverter $zConverter=this;\n" +
-                            "    if($zConverter.isProcessExternalEntities()){\n" +
-                            "        $zConverter.setProcessExternalEntities(false);\n" +
-                            "        System.out.println(\"disabled xxe: SourceHttpMessageConverter\");\n" +
-                            "    }\n" +
+                            "    Object $zFalse=Boolean.FALSE;\n" +
+                            "    Object $zObj=$zConverter;\n" +
+                            "    Class $zClazz = $zConverter.getClass();\n" +
+                            "    java.lang.reflect.Field supportDtdField = $zClazz.getDeclaredField(\"supportDtd\");\n" +
+                            "    supportDtdField.setAccessible(true);\n" +
+                            "    supportDtdField.set($zObj,$zFalse);\n" +
+                            "    java.lang.reflect.Field processExternalEntitiesField = $zClazz.getDeclaredField(\"processExternalEntities\");\n" +
+                            "    processExternalEntitiesField.setAccessible(true);\n" +
+                            "    processExternalEntitiesField.set($zObj,$zFalse);\n"+
+                            "    System.out.println(\"disabled xxe features : SourceHttpMessageConverter()\"); \n" +
                             "}\n");
                 }
 

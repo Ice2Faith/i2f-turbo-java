@@ -19,19 +19,16 @@ import java.util.Set;
  * @date 2024/8/2 8:31
  * @desc
  */
-public class SpringApplicationContextHoldClassesTransformer implements ClassFileTransformer {
-    public static final String SPRING_CONTEXT_CLASS_NAME = "org.springframework.context.ApplicationContext";
-    public static final String[][] INJECT_APPLICATION_CONTEXT_CLASS_FIELD_ARRAY =
+public class SpringApplicationHoldClassesTransformer implements ClassFileTransformer {
+    public static final String SPRING_APPLICATION_CLASS_NAME = "org.springframework.boot.SpringApplication";
+    public static final String[][] INJECT_APPLICATION_CLASS_FIELD_ARRAY =
             {
-                    {"org.springframework.boot.web.servlet.context.WebApplicationContextServletContextAwareProcessor", "webApplicationContext"},
-                    {"org.springframework.context.support.ApplicationContextAwareProcessor", "applicationContext"},
-                    {"org.springframework.context.support.ApplicationListenerDetector", "applicationContext"},
-                    {"org.springframework.boot.builder.ParentContextCloserApplicationListener", "context"},
-                    {"org.springframework.boot.context.event.ApplicationReadyEvent", "context"}
+                    {SPRING_APPLICATION_CLASS_NAME,null},
+                    {"org.springframework.boot.context.event.EventPublishingRunListener","application"}
             };
 
-    public static boolean isSpringApplicationContext(CtClass clazz) {
-        return JavassistUtil.isAssignableFrom(clazz, SPRING_CONTEXT_CLASS_NAME);
+    public static boolean isSpringApplication(CtClass clazz) {
+        return JavassistUtil.isAssignableFrom(clazz, SPRING_APPLICATION_CLASS_NAME);
     }
 
     @Override
@@ -45,7 +42,7 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
 
         String injectClassName = null;
         String injectFieldName = null;
-        for (String[] pair : INJECT_APPLICATION_CONTEXT_CLASS_FIELD_ARRAY) {
+        for (String[] pair : INJECT_APPLICATION_CLASS_FIELD_ARRAY) {
             if (pair[0].equals(className)) {
                 injectClassName = pair[0];
                 injectFieldName = pair[1];
@@ -83,14 +80,18 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
 
                 String trigger = className + "." + method.getName();
                 String injectLocation = "trigger[" + trigger + "] field [" + injectFieldName + "]";
-                String tarCode = "if(" + AgentContextHolder.class.getName() + ".springApplicationContext==null) { \n" +
-                        "    Object $zObj=this;\n" +
-                        "    Class $zObjClass=$zObj.getClass();\n" +
-                        "    java.lang.reflect.Field $zContextField = $zObjClass.getDeclaredField(\"" + injectFieldName + "\");\n" +
-                        "    $zContextField.setAccessible(true);\n" +
-                        "    " + AgentContextHolder.class.getName() + ".springApplicationContext=$zContextField.get($zObj);\n" +
-                        "    if(" + AgentContextHolder.class.getName() + ".springApplicationContext!=null){\n" +
-                        "        System.out.println(\"spring-application-context inject : \"+" + AgentContextHolder.class.getName() + ".springApplicationContext + \" by " + injectLocation + "\");\n" +
+                String tarCode = "if(" + AgentContextHolder.class.getName() + ".springApplication==null) { \n" +
+                        "    Object $zObj=this;\n" ;
+                        if(injectFieldName==null){
+                            tarCode+= "    "+AgentContextHolder.class.getName()+".springApplication=$zObj;\n" ;
+                        }else{
+                            tarCode+= "    Class $zObjClass=$zObj.getClass();\n" +
+                                    "    java.lang.reflect.Field $zContextField = $zObjClass.getDeclaredField(\"" + injectFieldName + "\");\n" +
+                                    "    $zContextField.setAccessible(true);\n" +
+                                    "    " + AgentContextHolder.class.getName() + ".springApplication=$zContextField.get($zObj);\n" ;
+                        }
+                        tarCode+="    if(" + AgentContextHolder.class.getName() + ".springApplication!=null){\n" +
+                        "        System.out.println(\"spring-application inject : \"+" + AgentContextHolder.class.getName() + ".springApplication + \" by " + injectLocation + "\");\n" +
                         "    }\n" +
                         "}\n";
                 try {

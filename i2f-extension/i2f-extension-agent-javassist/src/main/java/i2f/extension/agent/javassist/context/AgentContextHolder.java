@@ -18,6 +18,8 @@ public class AgentContextHolder {
 
     public static volatile CopyOnWriteArrayList<ClassFileTransformer> transformers = new CopyOnWriteArrayList<>();
 
+    public static volatile Object springApplication;
+
     public static volatile Object springApplicationContext;
 
     public static volatile CopyOnWriteArrayList<Object> globalList = new CopyOnWriteArrayList<>();
