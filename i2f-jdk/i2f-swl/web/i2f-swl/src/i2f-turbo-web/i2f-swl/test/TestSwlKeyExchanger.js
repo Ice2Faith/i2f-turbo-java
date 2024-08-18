@@ -1,10 +1,9 @@
-import SwlTransfer from "../core/core/SwlTransfer";
 import SwlRsaAsymmetricEncryptorSupplier from "../core/impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
 import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
 import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
 import SwlBase64Obfuscator from "../core/impl/SwlBase64Obfuscator";
-import SwlKeyExchanger from "@/i2f-turbo-web/i2f-swl/core/core/key/SwlKeyExchanger";
-import SwlMemKeyManager from "@/i2f-turbo-web/i2f-swl/core/core/key/impl/SwlMemKeyManager";
+import SwlKeyExchanger from "../core/core/key/SwlKeyExchanger";
+import SwlMemKeyManager from "../core/core/key/impl/SwlMemKeyManager";
 
 /**
  * @return TestSwlTransfer

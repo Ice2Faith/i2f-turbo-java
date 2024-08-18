@@ -1,5 +1,5 @@
-import SwlKeyExchanger from "@/i2f-turbo-web/i2f-swl/core/core/key/SwlKeyExchanger";
-import SwlMemTtlKeyManager from "@/i2f-turbo-web/i2f-swl/core/core/key/ttl/impl/SwlMemTtlKeyManager";
+import SwlKeyExchanger from "../SwlKeyExchanger";
+import SwlMemTtlKeyManager from "./impl/SwlMemTtlKeyManager";
 
 /**
  * @param keyManager {SwlTtlKeyManager}
