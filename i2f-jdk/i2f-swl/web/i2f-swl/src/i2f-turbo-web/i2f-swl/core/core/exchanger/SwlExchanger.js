@@ -19,6 +19,31 @@ import SwlCode from "../../consts/SwlCode";
 function SwlExchanger() {
     /**
      *
+     * @type {boolean}
+     */
+    this.enableTimestamp=true
+    /**
+     *
+     * @type {long} seconds
+     */
+    this.timestampExpireWindowSeconds = 30
+    /**
+     *
+     * @type {boolean}
+     */
+    this.enableNonce=true
+    /**
+     *
+     * @type {long} seconds
+     */
+    this.nonceTimeoutSeconds=30*60
+    /**
+     *
+     * @type {boolean}
+     */
+    this.enableDigital=true
+    /**
+     *
      * @type {ISwlAsymmetricEncryptorSupplier}
      */
     this.asymmetricEncryptorSupplier = new SwlRsaAsymmetricEncryptorSupplier()
@@ -38,11 +63,12 @@ function SwlExchanger() {
      */
     this.obfuscator = new SwlBase64Obfuscator()
 
-    this.timestampExpireWindowSeconds = 30
-
+    /**
+     *
+     * @type {SwlNonceManager}
+     */
     this.nonceManager = new SwlEmptyNonceManager();
 
-    this.nonceTimeoutSeconds=30*60
     /**
      *
      * @type Random
@@ -196,8 +222,12 @@ SwlExchanger.prototype.sendByRaw=function(remotePublicKey,remoteAsymSign,
     ret.header.sign=sign;
     ret.context.sign=sign;
 
-    asymmetricEncryptor.setPrivateKey(selfPrivateKey);
-    let digital = asymmetricEncryptor.sign(sign);
+
+    let digital="none";
+    if(this.enableDigital) {
+        asymmetricEncryptor.setPrivateKey(selfPrivateKey);
+        digital = asymmetricEncryptor.sign(sign);
+    }
     ret.header.digital=digital;
     ret.context.digital=digital;
 
@@ -296,8 +326,10 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
     let window = this.timestampExpireWindowSeconds;
     ret.context.window=(''+(window));
 
-    if (Math.abs(currentTimestamp - ts) > window) {
-        throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION.code(), "timestamp is exceed allow window seconds!");
+    if(this.enableTimestamp) {
+        if (Math.abs(currentTimestamp - ts) > window) {
+            throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION.code(), "timestamp is exceed allow window seconds!");
+        }
     }
 
     let nonce = ret.header.nonce;
@@ -306,17 +338,19 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
         throw new SwlException(SwlCode.NONCE_MISSING_EXCEPTION.code(), "nonce cannot is empty!");
     }
 
-    if (this.nonceManager != null) {
-        let nonceKey = timestamp + "-" + nonce;
-        if (clientId&& clientId!='') {
-            nonceKey = clientId + "-" + nonce;
-        }
-        ret.context.nonceKey=nonceKey;
-        if (this.nonceManager.contains(nonceKey)) {
-            throw new SwlException(SwlCode.NONCE_ALREADY_EXISTS_EXCEPTION.code(), "nonce key already exists!");
-        }
+    if(this.enableNonce) {
+        if (this.nonceManager != null) {
+            let nonceKey = timestamp + "-" + nonce;
+            if (clientId && clientId != '') {
+                nonceKey = clientId + "-" + nonce;
+            }
+            ret.context.nonceKey = nonceKey;
+            if (this.nonceManager.contains(nonceKey)) {
+                throw new SwlException(SwlCode.NONCE_ALREADY_EXISTS_EXCEPTION.code(), "nonce key already exists!");
+            }
 
-        this.nonceManager.set(nonceKey, this.nonceTimeoutSeconds);
+            this.nonceManager.set(nonceKey, this.nonceTimeoutSeconds);
+        }
     }
 
     let sign = ret.header.sign;
@@ -387,10 +421,12 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
     let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
     asymmetricEncryptor.setPublicKey(remotePublicKey);
 
-    let digitalOk = asymmetricEncryptor.verify(digital, sign);
-    ret.context.digitalOk=digitalOk;
-    if (!digitalOk) {
-        throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION.code(), "verify digital failure!");
+    if(this.enableDigital) {
+        let digitalOk = asymmetricEncryptor.verify(digital, sign);
+        ret.context.digitalOk = digitalOk;
+        if (!digitalOk) {
+            throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION.code(), "verify digital failure!");
+        }
     }
 
     ret.context.selfPrivateKey=selfPrivateKey;

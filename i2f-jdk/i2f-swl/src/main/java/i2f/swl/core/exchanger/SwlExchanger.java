@@ -37,6 +37,14 @@ import java.util.function.Supplier;
 @NoArgsConstructor
 public class SwlExchanger {
 
+    protected boolean enableTimestamp=true;
+    protected long timestampExpireWindowSeconds = 30;
+
+    protected boolean enableNonce=false;
+    protected long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
+
+    protected boolean enableDigital=true;
+
     @Setter(AccessLevel.NONE)
     protected Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier = new SwlRsaAsymmetricEncryptorSupplier();
     @Setter(AccessLevel.NONE)
@@ -44,10 +52,7 @@ public class SwlExchanger {
     protected ISwlMessageDigester messageDigester = new SwlSha256MessageDigester();
     protected ISwlObfuscator obfuscator = new SwlBase64Obfuscator();
 
-    protected long timestampExpireWindowSeconds = 30;
-
     protected SwlNonceManager nonceManager = new SwlEmptyNonceManager();
-    protected long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
 
     protected SecureRandom random = new SecureRandom();
 
@@ -222,8 +227,11 @@ public class SwlExchanger {
         ret.getHeader().setSign(sign);
         ret.getContext().setSign(sign);
 
-        asymmetricEncryptor.setPrivateKey(selfPrivateKey);
-        String digital = asymmetricEncryptor.sign(sign);
+        String digital="none";
+        if(enableDigital) {
+            asymmetricEncryptor.setPrivateKey(selfPrivateKey);
+            digital = asymmetricEncryptor.sign(sign);
+        }
         ret.getHeader().setDigital(digital);
         ret.getContext().setDigital(digital);
 
@@ -296,8 +304,10 @@ public class SwlExchanger {
         long window = timestampExpireWindowSeconds;
         ret.getContext().setWindow(String.valueOf(window));
 
-        if (Math.abs(currentTimestamp - ts) > window) {
-            throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION.code(), "timestamp is exceed allow window seconds!");
+        if(enableTimestamp) {
+            if (Math.abs(currentTimestamp - ts) > window) {
+                throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION.code(), "timestamp is exceed allow window seconds!");
+            }
         }
 
         String nonce = ret.getHeader().getNonce();
@@ -306,17 +316,19 @@ public class SwlExchanger {
             throw new SwlException(SwlCode.NONCE_MISSING_EXCEPTION.code(), "nonce cannot is empty!");
         }
 
-        if (nonceManager != null) {
-            String nonceKey = timestamp + "-" + nonce;
-            if (clientId != null && !clientId.isEmpty()) {
-                nonceKey = clientId + "-" + nonce;
-            }
-            ret.getContext().setNonceKey(nonceKey);
-            if (nonceManager.contains(nonceKey)) {
-                throw new SwlException(SwlCode.NONCE_ALREADY_EXISTS_EXCEPTION.code(), "nonce key already exists!");
-            }
+        if(enableNonce) {
+            if (nonceManager != null) {
+                String nonceKey = timestamp + "-" + nonce;
+                if (clientId != null && !clientId.isEmpty()) {
+                    nonceKey = clientId + "-" + nonce;
+                }
+                ret.getContext().setNonceKey(nonceKey);
+                if (nonceManager.contains(nonceKey)) {
+                    throw new SwlException(SwlCode.NONCE_ALREADY_EXISTS_EXCEPTION.code(), "nonce key already exists!");
+                }
 
-            nonceManager.set(nonceKey, nonceTimeoutSeconds);
+                nonceManager.set(nonceKey, nonceTimeoutSeconds);
+            }
         }
 
         String sign = ret.getHeader().getSign();
@@ -385,10 +397,12 @@ public class SwlExchanger {
         ISwlAsymmetricEncryptor asymmetricEncryptor = asymmetricEncryptorObjectPool.require();
         asymmetricEncryptor.setPublicKey(remotePublicKey);
 
-        boolean digitalOk = asymmetricEncryptor.verify(digital, sign);
-        ret.getContext().setDigitalOk(digitalOk);
-        if (!digitalOk) {
-            throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION.code(), "verify digital failure!");
+        if(enableDigital){
+            boolean digitalOk = asymmetricEncryptor.verify(digital, sign);
+            ret.getContext().setDigitalOk(digitalOk);
+            if (!digitalOk) {
+                throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION.code(), "verify digital failure!");
+            }
         }
 
         ret.getContext().setSelfPrivateKey(selfPrivateKey);
