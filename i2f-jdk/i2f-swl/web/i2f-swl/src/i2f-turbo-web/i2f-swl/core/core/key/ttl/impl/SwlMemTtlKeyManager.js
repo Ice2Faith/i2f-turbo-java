@@ -1,5 +1,5 @@
-import SwlTtlKeyManager from "@/i2f-turbo-web/i2f-swl/core/core/key/ttl/SwlTtlKeyManager";
-import SystemClock from "@/i2f-turbo-web/i2f-core/clock/SystemClock";
+import SwlTtlKeyManager from "../SwlTtlKeyManager";
+import SystemClock from "../../../../../../i2f-core/clock/SystemClock";
 
 /**
  *
