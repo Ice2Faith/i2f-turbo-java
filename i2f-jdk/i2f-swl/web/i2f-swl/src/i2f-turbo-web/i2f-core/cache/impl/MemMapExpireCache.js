@@ -22,7 +22,7 @@ MemMapExpireCache.prototype.constructor = MemMapExpireCache
  */
 MemMapExpireCache.prototype.getData = function (key) {
     let data = this._map.get(key)
-    if (data == null) {
+    if (!data) {
         return null
     }
     if (data.expireTs >= 0) {
