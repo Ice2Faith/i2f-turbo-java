@@ -116,7 +116,7 @@ SwlTransfer.prototype.initialRefreshingThread = function () {
  */
 SwlTransfer.prototype.cacheKey = function (key) {
     let cacheKeyPrefix = this.config.cacheKeyPrefix;
-    if (cacheKeyPrefix == null || cacheKeyPrefix === "") {
+    if (!cacheKeyPrefix || cacheKeyPrefix === "") {
         return key;
     }
     return cacheKeyPrefix + ":" + key;
@@ -128,12 +128,12 @@ SwlTransfer.prototype.cacheKey = function (key) {
  */
 SwlTransfer.prototype.getSelfKeyPair = function () {
     let obj = this.cache.get(this.cacheKey(SwlTransfer.SELF_KEY_PAIR_CURRENT_KEY()));
-    if (obj == null) {
+    if (!obj) {
         return this.resetSelfKeyPair();
     }
     let key = SwlTransfer.SELF_KEY_PAIR_HISTORY_KEY_PREFIX() + obj;
     obj = this.cache.get(this.cacheKey(key));
-    if (obj == null) {
+    if (!obj) {
         return this.resetSelfKeyPair();
     }
 
@@ -186,7 +186,7 @@ SwlTransfer.prototype.setSelfKeyPair = function (selfAsymSign, selfKeyPair) {
 SwlTransfer.prototype.getSelfPrivateKey = function (selfAsymSign) {
     let key = SwlTransfer.SELF_KEY_PAIR_HISTORY_KEY_PREFIX() + selfAsymSign;
     let obj = this.cache.get(this.cacheKey(key));
-    if (obj == null) {
+    if (!obj) {
         return null;
     }
     let arr = obj.split(SwlTransfer.KEYPAIR_SEPARATOR(), 2);
@@ -201,7 +201,7 @@ SwlTransfer.prototype.getSelfPrivateKey = function (selfAsymSign) {
 SwlTransfer.prototype.getOtherPublicKey = function (otherAsymSign) {
     let key = SwlTransfer.OTHER_KEY_PUBLIC_KEY_PREFIX() + otherAsymSign;
     let obj = this.cache.get(this.cacheKey(key));
-    if (obj == null) {
+    if (!obj) {
         return null;
     }
     return this.obfuscateDecode(obj);
@@ -213,7 +213,7 @@ SwlTransfer.prototype.getOtherPublicKey = function (otherAsymSign) {
  */
 SwlTransfer.prototype.getOtherPublicKeyDefault = function () {
     let obj = this.cache.get(this.cacheKey(SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT()));
-    if (obj == null) {
+    if (!obj) {
         return null;
     }
     let otherAsymSign = obj;

@@ -105,7 +105,7 @@ SwlWebFilter.prototype.responseFilter = function (res) {
         currentPublicKey=this.transfer.obfuscateDecode(currentPublicKey)
         this.transfer.acceptOtherPublicKey(currentPublicKey)
     }
-    if(swlh!=null && swlh!=""){
+    if(swlh && swlh!=""){
         ctrl.enableIn=true
     }else{
         ctrl.enableIn=false
@@ -135,7 +135,7 @@ SwlWebFilter.prototype.responseFilter = function (res) {
     swlReceiveContext.swlReceiveData=swlReceiveData
     res.headers['Content-Type']=realContentType
     let data=swlReceiveData.parts[0]
-    if(data!=null){
+    if(data){
         try{
             data=JSON.parse(data)
         }catch (e){
@@ -154,7 +154,7 @@ SwlWebFilter.prototype.responseFilter = function (res) {
 SwlWebFilter.getRequestContentType = function (res) {
     let contentType = null
     const method = res.method
-    if (contentType == null) {
+    if (!contentType) {
         Object.keys(res.headers).forEach((key) => {
             const lkey = key.toLowerCase()
             if (lkey == 'content-type') {
@@ -162,7 +162,7 @@ SwlWebFilter.getRequestContentType = function (res) {
             }
         })
     }
-    if (contentType == null) {
+    if (!contentType) {
         const methodHeader = res.headers[method]
         Object.keys(methodHeader).forEach((key) => {
             const lkey = key.toLowerCase()
