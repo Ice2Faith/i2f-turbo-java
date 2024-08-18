@@ -6,7 +6,7 @@ import MemMapExpireCache from "../../../i2f-core/cache/impl/MemMapExpireCache";
 import SwlTransferConfig from "./SwlTransferConfig";
 import Random from "../../../i2f-core/util/Random";
 import AsymKeyPair from "../../../i2f-core/crypto/asymmetric/AsymKeyPair";
-import SwlExchanger from "@/i2f-turbo-web/i2f-swl/core/core/exchanger/SwlExchanger";
+import SwlExchanger from "./exchanger/SwlExchanger";
 
 /**
  * @return SwlTransferRefactor

@@ -3,7 +3,7 @@ import SwlRsaAsymmetricEncryptorSupplier from "../core/impl/supplier/SwlRsaAsymm
 import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
 import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
 import SwlBase64Obfuscator from "../core/impl/SwlBase64Obfuscator";
-import SwlExchanger from "@/i2f-turbo-web/i2f-swl/core/core/exchanger/SwlExchanger";
+import SwlExchanger from "../core/core/exchanger/SwlExchanger";
 
 /**
  * @return TestSwlExchanger
