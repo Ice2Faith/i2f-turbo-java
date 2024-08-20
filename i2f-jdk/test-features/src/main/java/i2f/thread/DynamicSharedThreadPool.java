@@ -131,18 +131,18 @@ public class DynamicSharedThreadPool {
     protected void workTaskLoop(ThreadWorkInfo info) {
         long lastWorkTs = System.currentTimeMillis();
 
-        info.setTaskUseMillSeconds(0);
-        info.setTaskUseCount(0);
-        info.setTaskUseMillSecondsList(new LinkedList<>());
-        info.setTaskWatermarkMillSecondsList(new LinkedList<>());
-        info.setTaskCpuMillSecondsList(new LinkedList<>());
+        info.setRecentSumTaskUseMillSeconds(0);
+        info.setRecentTaskCount(0);
+        info.setRecentTaskUseMillSecondsList(new LinkedList<>());
+        info.setRecentRunTimestampMillSecondsList(new LinkedList<>());
+        info.setRecentCpuTimestampMillSecondsList(new LinkedList<>());
 
-        info.getTaskWatermarkMillSecondsList().add(System.currentTimeMillis());
+        info.getRecentRunTimestampMillSecondsList().add(System.currentTimeMillis());
 
         long id = Thread.currentThread().getId();
 
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-        info.getTaskCpuMillSecondsList().add(threadMXBean.getThreadCpuTime(id)/1000);
+        info.getRecentCpuTimestampMillSecondsList().add(threadMXBean.getThreadCpuTime(id)/1000);
 
         while (true) {
             ThreadTaskInfo<?> task = null;
@@ -197,29 +197,29 @@ public class DynamicSharedThreadPool {
 
                 task.setFinishTs(endTs);
 
-                info.getTaskUseMillSecondsList().add(diffTs);
-                info.setTaskUseMillSeconds(info.getTaskUseMillSeconds()+diffTs);
-                info.setTaskUseCount(info.getTaskUseCount()+1);
+                info.getRecentTaskUseMillSecondsList().add(diffTs);
+                info.setRecentSumTaskUseMillSeconds(info.getRecentSumTaskUseMillSeconds()+diffTs);
+                info.setRecentTaskCount(info.getRecentTaskCount()+1);
 
-                info.getTaskWatermarkMillSecondsList().add(endTs);
+                info.getRecentRunTimestampMillSecondsList().add(endTs);
 
                 long cpuTime = threadMXBean.getThreadCpuTime(id) / 1000;
-                info.getTaskCpuMillSecondsList().add(cpuTime);
+                info.getRecentCpuTimestampMillSecondsList().add(cpuTime);
 
-                if(info.getTaskUseCount()>30){
-                    long diff = info.getTaskUseMillSecondsList().removeFirst();
-                    info.setTaskUseMillSeconds(info.getTaskUseMillSeconds()-diff);
-                    info.setTaskUseCount(info.getTaskUseCount()-1);
+                if(info.getRecentTaskCount()>30){
+                    long diff = info.getRecentTaskUseMillSecondsList().removeFirst();
+                    info.setRecentSumTaskUseMillSeconds(info.getRecentSumTaskUseMillSeconds()-diff);
+                    info.setRecentTaskCount(info.getRecentTaskCount()-1);
 
-                    info.getTaskWatermarkMillSecondsList().removeFirst();
-                    info.getTaskCpuMillSecondsList().removeFirst();
+                    info.getRecentRunTimestampMillSecondsList().removeFirst();
+                    info.getRecentCpuTimestampMillSecondsList().removeFirst();
                 }
 
-                long avgUse=info.getTaskUseMillSeconds()/info.getTaskUseCount();
+                long avgUse=info.getRecentSumTaskUseMillSeconds()/info.getRecentTaskCount();
 
-                long firstTs = info.getTaskWatermarkMillSecondsList().getFirst();
+                long firstTs = info.getRecentRunTimestampMillSecondsList().getFirst();
                 long sumTs=endTs-firstTs;
-                long avgSum=sumTs/info.getTaskUseCount();
+                long avgSum=sumTs/info.getRecentTaskCount();
 
                 double useRate=avgUse*1.0/avgSum;
                 System.out.println("useRate:"+String.format("%.04f",useRate));
@@ -227,8 +227,8 @@ public class DynamicSharedThreadPool {
                     triggerThread();
                 }
 
-                long avgCpu=cpuTime-info.getTaskCpuMillSecondsList().getFirst();
-                avgCpu=avgCpu/info.getTaskUseCount();
+                long avgCpu=cpuTime-info.getRecentCpuTimestampMillSecondsList().getFirst();
+                avgCpu=avgCpu/info.getRecentTaskCount();
 
                 double cpuRate=avgCpu*1.0/avgSum;
                 System.out.println("cpuRate:"+String.format("%.04f",cpuRate));

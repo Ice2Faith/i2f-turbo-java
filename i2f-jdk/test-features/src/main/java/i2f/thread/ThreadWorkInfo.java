@@ -20,9 +20,9 @@ public class ThreadWorkInfo {
     protected long endTs;
     protected AtomicLong taskCount=new AtomicLong(0);
     protected Throwable throwable;
-    protected LinkedList<Long> taskUseMillSecondsList=new LinkedList<>();
-    protected LinkedList<Long> taskWatermarkMillSecondsList=new LinkedList<>();
-    protected LinkedList<Long> taskCpuMillSecondsList=new LinkedList<>();
-    protected long taskUseMillSeconds;
-    protected int taskUseCount;
+    protected LinkedList<Long> recentTaskUseMillSecondsList =new LinkedList<>();
+    protected LinkedList<Long> recentRunTimestampMillSecondsList =new LinkedList<>();
+    protected LinkedList<Long> recentCpuTimestampMillSecondsList =new LinkedList<>();
+    protected long recentSumTaskUseMillSeconds;
+    protected int recentTaskCount;
 }
