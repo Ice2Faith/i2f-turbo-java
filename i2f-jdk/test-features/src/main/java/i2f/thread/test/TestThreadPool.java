@@ -29,7 +29,10 @@ public class TestThreadPool {
             System.out.println("sleep:" + currSleepTs);
             new Thread(() -> {
                 try {
-                    Thread.sleep(isFirst ? 8000 : 300);
+                    long sleepTs = isFirst ? 8000 : 0;
+                    if (sleepTs > 0) {
+                        Thread.sleep(sleepTs);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println(e.getMessage());
@@ -43,7 +46,7 @@ public class TestThreadPool {
                                 if (currSleepTs > 0) {
                                     Thread.sleep(random.nextInt(currSleepTs));
                                 }
-                                int cnt = random.nextInt(10000);
+                                int cnt = random.nextInt(currSleepTs + 1);
                                 double sum = 0;
                                 for (int j = 0; j < cnt; j++) {
                                     double p = Math.sin(j);
