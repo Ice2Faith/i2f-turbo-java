@@ -1,11 +1,13 @@
 package i2f.thread;
 
+import i2f.clock.SystemClock;
 import i2f.thread.local.ThreadLocalUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -48,6 +50,8 @@ public class DynamicSharedThreadPool implements ExecutorService {
     protected AtomicBoolean shutdown = new AtomicBoolean(false);
 
     protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    protected SecureRandom random = new SecureRandom();
+
 
     public DynamicSharedThreadPool(String threadName) {
         if (threadName != null) {
@@ -65,7 +69,7 @@ public class DynamicSharedThreadPool implements ExecutorService {
         CompletableFuture<T> ret = new CompletableFuture<>();
         ThreadTaskInfo<T> info = (ThreadTaskInfo<T>) new ThreadTaskInfo<>(task, ret);
         taskQueue.add(info);
-        System.out.println("taskQueue:size:" + taskQueue.size());
+//        System.out.println("taskQueue:size:" + taskQueue.size());
         triggerThread();
         return ret;
     }
@@ -114,11 +118,24 @@ public class DynamicSharedThreadPool implements ExecutorService {
 
     @Override
     public boolean isTerminated() {
-        return this.shutdown.get() && this.taskQueue.isEmpty();
+        return this.shutdown.get() && this.threadMap.isEmpty();
     }
 
     @Override
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+        long millis = unit.toMillis(timeout);
+        long beginTs = SystemClock.currentTimeMillis();
+        while (true) {
+            if (this.shutdown.get() && this.threadMap.isEmpty()) {
+                return true;
+            }
+            long endTs = SystemClock.currentTimeMillis();
+            long diffTs = endTs - beginTs;
+            if (diffTs > millis) {
+                break;
+            }
+            Thread.sleep(1);
+        }
         return false;
     }
 
@@ -229,7 +246,7 @@ public class DynamicSharedThreadPool implements ExecutorService {
             if (currThreadCount.get() >= maxThreadCount.get()) {
                 return;
             }
-            if (currThreadCount.get() > taskQueue.size() / processorCount) {
+            if (currThreadCount.get() > taskQueue.size()) {
                 return;
             }
         } finally {
@@ -237,11 +254,14 @@ public class DynamicSharedThreadPool implements ExecutorService {
         }
         lock.writeLock().lock();
         try {
-            int addCount = taskQueue.size() / (currThreadCount.get() + 1);
-            if (addCount < 1) {
-                addCount = 1;
+            double addCount = taskQueue.size() * 1.0 / (currThreadCount.get() + 1);
+            if (random.nextDouble() > addCount) {
+                return;
             }
-            System.out.println("addCount:" + addCount);
+            if (addCount < 1) {
+                addCount += 1;
+            }
+//            System.out.println("addCount:" + String.format("%.2f",addCount));
             for (int i = 0; i < addCount; i++) {
                 addWorkThread();
             }
@@ -252,7 +272,25 @@ public class DynamicSharedThreadPool implements ExecutorService {
 
     protected void addWorkThread() {
         ThreadWorkInfo info = new ThreadWorkInfo();
-        info.setThreadName(threadName + "-" + threadId.incrementAndGet());
+        lock.readLock().lock();
+        try {
+            while (true) {
+                String threadName = this.threadName + "-" + threadId.updateAndGet(v -> {
+                    v = v + 1;
+                    if (v < 0) {
+                        v = 1;
+                    }
+                    return v;
+                });
+                info.setThreadName(threadName);
+                if (!threadMap.containsKey(threadName)) {
+                    break;
+                }
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -261,7 +299,7 @@ public class DynamicSharedThreadPool implements ExecutorService {
                 } catch (Exception e) {
                     info.setThrowable(e);
                 } finally {
-                    info.setEndTs(System.currentTimeMillis());
+                    info.setEndTs(SystemClock.currentTimeMillis());
                     lock.writeLock().lock();
                     try{
                         currThreadCount.decrementAndGet();
@@ -271,13 +309,13 @@ public class DynamicSharedThreadPool implements ExecutorService {
                     }
 
                     System.out.println("currThreadCount:destroy:" + currThreadCount.get());
-                    System.out.println("threadMap:size:" + threadMap.size());
+//                    System.out.println("threadMap:size:" + threadMap.size());
                 }
             }
         }, info.getThreadName());
         thread.start();
         info.setThread(thread);
-        info.setStartTs(System.currentTimeMillis());
+        info.setStartTs(SystemClock.currentTimeMillis());
         info.getTaskCount().set(0);
         lock.writeLock().lock();
         try{
@@ -287,11 +325,11 @@ public class DynamicSharedThreadPool implements ExecutorService {
             lock.writeLock().unlock();
         }
         System.out.println("currThreadCount:create:" + currThreadCount.get());
-        System.out.println("threadMap:size:" + threadMap.size());
+//        System.out.println("threadMap:size:" + threadMap.size());
     }
 
     protected void workTaskLoop(ThreadWorkInfo info) {
-        long lastWorkTs = System.currentTimeMillis();
+        long lastWorkTs = SystemClock.currentTimeMillis();
 
         info.setRecentSumTaskUseMillSeconds(0);
         info.setRecentTaskCount(0);
@@ -299,7 +337,7 @@ public class DynamicSharedThreadPool implements ExecutorService {
         info.setRecentRunTimestampMillSecondsList(new LinkedList<>());
         info.setRecentCpuTimestampMillSecondsList(new LinkedList<>());
 
-        info.getRecentRunTimestampMillSecondsList().add(System.currentTimeMillis());
+        info.getRecentRunTimestampMillSecondsList().add(SystemClock.currentTimeMillis());
 
         Thread thread = Thread.currentThread();
         long id = thread.getId();
@@ -307,34 +345,42 @@ public class DynamicSharedThreadPool implements ExecutorService {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         info.getRecentCpuTimestampMillSecondsList().add(threadMXBean.getThreadCpuTime(id)/1000);
 
-        int yieldCount = 0;
+        double yieldCount = 0.1;
         while (true) {
             ThreadTaskInfo<?> task = null;
             for (int i = 0; i < 5; i++) {
                 task = taskQueue.poll();
                 if (task != null) {
-                    yieldCount = 0;
+                    yieldCount = 0.1;
                     break;
                 }
-                yieldCount++;
+                yieldCount *= 1.03;
             }
             if (task == null) {
-                long idleMillSeconds = System.currentTimeMillis() - lastWorkTs;
-                if (idleMillSeconds > workThreadAliveWaitMillSeconds.get()) {
+                long idleMillSeconds = SystemClock.currentTimeMillis() - lastWorkTs;
+                if (idleMillSeconds > workThreadAliveWaitMillSeconds.get() + random.nextInt(1 + workThreadAliveWaitMillSeconds.get()) / 2) {
                     break;
                 }
+                if (shutdown.get() && taskQueue.isEmpty()) {
+                    break;
+                }
+                double maxAliveYield = workThreadAliveWaitMillSeconds.get() / 2.0 / processorCount;
+                double maxIdleYield = workThreadIdleMillSeconds.get() * 2 * processorCount;
+                double maxYield = Math.max(maxAliveYield, maxIdleYield);
+                yieldCount = Math.min(yieldCount, maxYield);
                 try {
-                    Thread.sleep(workThreadIdleMillSeconds.get() + yieldCount);
+//                    System.out.println("yield:"+String.format("%.2f",yieldCount));
+                    Thread.sleep(workThreadIdleMillSeconds.get() + (int) yieldCount);
                 } catch (Exception e) {
 
                 }
                 continue;
             }
-            System.out.println("taskQueue:size:" + taskQueue.size());
+//            System.out.println("taskQueue:size:" + taskQueue.size());
             Callable<?> callable = task.getTask();
             CompletableFuture future = task.getFuture();
 
-            long beginTs = System.currentTimeMillis();
+            long beginTs = SystemClock.currentTimeMillis();
             task.setTriggerTs(beginTs);
 
             long waitMillSeconds = beginTs - task.submitTs;
@@ -364,7 +410,7 @@ public class DynamicSharedThreadPool implements ExecutorService {
                     future.completeExceptionally(e);
                 }
             } finally {
-                long endTs = System.currentTimeMillis();
+                long endTs = SystemClock.currentTimeMillis();
                 long diffTs = endTs - beginTs;
 
                 task.setFinishTs(endTs);
@@ -394,18 +440,24 @@ public class DynamicSharedThreadPool implements ExecutorService {
                 long avgSum=sumTs/info.getRecentTaskCount();
 
                 double useRate=avgUse*1.0/avgSum;
-                System.out.println("useRate:"+String.format("%.04f",useRate));
-                if(useRate<0.6){
-                    triggerThread();
+//                System.out.println("useRate:"+String.format("%.04f",useRate));
+                double triggerUseRate = 1.0 - useRate;
+                if (triggerUseRate > 0) {
+                    if (random.nextDouble() < triggerUseRate) {
+                        triggerThread();
+                    }
                 }
 
                 long avgCpu=cpuTime-info.getRecentCpuTimestampMillSecondsList().getFirst();
                 avgCpu=avgCpu/info.getRecentTaskCount();
 
                 double cpuRate=avgCpu*1.0/avgSum;
-                System.out.println("cpuRate:"+String.format("%.04f",cpuRate));
-                if(cpuRate<0.3){
-                    triggerThread();
+//                System.out.println("cpuRate:"+String.format("%.04f",cpuRate));
+                double triggerCpuRate = 1.0 - cpuRate;
+                if (triggerCpuRate > 0) {
+                    if (random.nextDouble() < triggerCpuRate) {
+                        triggerThread();
+                    }
                 }
             }
 
