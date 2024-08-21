@@ -6,11 +6,15 @@ import lombok.NoArgsConstructor;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -20,7 +24,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @Data
 @NoArgsConstructor
-public class DynamicSharedThreadPool {
+public class DynamicSharedThreadPool implements ExecutorService {
     protected static final AtomicInteger POOL_COUNT = new AtomicInteger(0);
 
     protected LinkedBlockingQueue<ThreadTaskInfo<?>> taskQueue = new LinkedBlockingQueue<>();
@@ -41,6 +45,8 @@ public class DynamicSharedThreadPool {
     protected AtomicBoolean enableClearThreadLocals = new AtomicBoolean(false);
     protected AtomicBoolean enableClearInheritableThreadLocals = new AtomicBoolean(false);
 
+    protected AtomicBoolean shutdown = new AtomicBoolean(false);
+
     protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     public DynamicSharedThreadPool(String threadName) {
@@ -51,7 +57,11 @@ public class DynamicSharedThreadPool {
         triggerThread();
     }
 
+    @Override
     public <T> Future<T> submit(Callable<T> task) {
+        if (this.shutdown.get()) {
+            throw new IllegalStateException("pool has shutdown!");
+        }
         CompletableFuture<T> ret = new CompletableFuture<>();
         ThreadTaskInfo<T> info = (ThreadTaskInfo<T>) new ThreadTaskInfo<>(task, ret);
         taskQueue.add(info);
@@ -60,14 +70,157 @@ public class DynamicSharedThreadPool {
         return ret;
     }
 
-    public void submit(Runnable task) {
-        submit(new Callable<Object>() {
+    @Override
+    public Future<?> submit(Runnable task) {
+        return submit(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 task.run();
                 return null;
             }
         });
+    }
+
+    @Override
+    public void shutdown() {
+        this.shutdown.set(true);
+    }
+
+    @Override
+    public List<Runnable> shutdownNow() {
+        List<Runnable> ret = new LinkedList<>();
+        while (!taskQueue.isEmpty()) {
+            ThreadTaskInfo<?> task = taskQueue.poll();
+            if (task != null) {
+                ret.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            task.getTask().call();
+                        } catch (Exception e) {
+                            throw new IllegalStateException(e);
+                        }
+                    }
+                });
+            }
+        }
+        return ret;
+    }
+
+    @Override
+    public boolean isShutdown() {
+        return this.shutdown.get();
+    }
+
+    @Override
+    public boolean isTerminated() {
+        return this.shutdown.get() && this.taskQueue.isEmpty();
+    }
+
+    @Override
+    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+        return false;
+    }
+
+    @Override
+    public <T> Future<T> submit(Runnable task, T result) {
+        return this.submit(() -> {
+            task.run();
+            return result;
+        });
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+        int count = 0;
+        List<Future<T>> ret = new ArrayList<>();
+        for (Callable<T> task : tasks) {
+            count++;
+        }
+        CountDownLatch latch = new CountDownLatch(count);
+        for (Callable<T> task : tasks) {
+            Future<T> future = this.submit(() -> {
+                try {
+                    return task.call();
+                } finally {
+                    latch.countDown();
+                }
+            });
+            ret.add(future);
+        }
+        latch.await();
+        return ret;
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+        int count = 0;
+        List<Future<T>> ret = new ArrayList<>();
+        for (Callable<T> task : tasks) {
+            count++;
+        }
+        CountDownLatch latch = new CountDownLatch(count);
+        for (Callable<T> task : tasks) {
+            Future<T> future = this.submit(() -> {
+                try {
+                    return task.call();
+                } finally {
+                    latch.countDown();
+                }
+            });
+            ret.add(future);
+        }
+        latch.await(timeout, unit);
+        return ret;
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+        AtomicReference<T> ret = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        for (Callable<T> task : tasks) {
+            Future<T> future = this.submit(() -> {
+                try {
+                    T obj = task.call();
+                    ret.set(obj);
+                    return obj;
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
+        return ret.get();
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        AtomicReference<T> ret = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        for (Callable<T> task : tasks) {
+            Future<T> future = this.submit(() -> {
+                try {
+                    T obj = task.call();
+                    ret.set(obj);
+                    return obj;
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await(timeout, unit);
+        return ret.get();
+    }
+
+    @Override
+    public void execute(Runnable command) {
+        try {
+            this.submit(command).get();
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        } catch (ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     protected void triggerThread() {
