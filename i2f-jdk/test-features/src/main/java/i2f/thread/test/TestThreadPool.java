@@ -18,8 +18,7 @@ public class TestThreadPool {
         SecureRandom random = new SecureRandom();
 
         int count = 5000;
-//        int[] sleepArr={0,0,0,30,300,1000,2000,3000,5000,10000};
-        int[] sleepArr = {0, 0, 0, 30, 3000, 300, 1000, 10000, 2000, 5000};
+        int[] sleepArr = {0, 0, 0, 30, 3000, 10, 300, 8000, 1000, 90, 10000, 2000, 200, 5000, 3, 2, 1, 1, 2, 3, 100, 200, 300, 400, 500, 400, 300, 200, 100, 50, 30, 10, 5, 2, 1, 1};
         long[] execArr = new long[sleepArr.length];
         for (int t = 0; t < sleepArr.length; t++) {
 
@@ -75,7 +74,13 @@ public class TestThreadPool {
         }
 
         for (int i = 0; i < sleepArr.length; i++) {
-            System.out.println(sleepArr[i] + ":" + execArr[i]);
+            System.out.println("result:" + sleepArr[i] + ":" + execArr[i]);
         }
+
+        Thread.sleep(60 * 1000);
+
+        pool.submit(() -> {
+            System.out.println("ok");
+        });
     }
 }

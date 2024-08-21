@@ -27,8 +27,9 @@ public class DynamicSharedThreadPool {
     protected String threadName = "dynamic-shared";
     protected AtomicInteger threadId = new AtomicInteger(0);
 
+    protected volatile int processorCount = Runtime.getRuntime().availableProcessors();
     protected AtomicInteger currThreadCount = new AtomicInteger(0);
-    protected AtomicInteger maxThreadCount = new AtomicInteger(300);
+    protected AtomicInteger maxThreadCount = new AtomicInteger(1024 * processorCount);
 
     protected AtomicInteger workThreadIdleMillSeconds = new AtomicInteger(1);
     protected AtomicInteger workThreadAliveWaitMillSeconds = new AtomicInteger(30 * 1000);
@@ -37,12 +38,7 @@ public class DynamicSharedThreadPool {
 
     protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public DynamicSharedThreadPool(int maxThreadCount) {
-        this(maxThreadCount, null);
-    }
-
-    public DynamicSharedThreadPool(int maxThreadCount, String threadName) {
-        this.maxThreadCount.set(Math.max(1, maxThreadCount));
+    public DynamicSharedThreadPool(String threadName) {
         if (threadName != null) {
             this.threadName = threadName;
         }
@@ -54,6 +50,7 @@ public class DynamicSharedThreadPool {
         CompletableFuture<T> ret = new CompletableFuture<>();
         ThreadTaskInfo<T> info = (ThreadTaskInfo<T>) new ThreadTaskInfo<>(task, ret);
         taskQueue.add(info);
+        System.out.println("taskQueue:size:" + taskQueue.size());
         triggerThread();
         return ret;
     }
@@ -69,13 +66,12 @@ public class DynamicSharedThreadPool {
     }
 
     protected void triggerThread() {
-        if (currThreadCount.getAndIncrement() == 0) {
-            addWorkThread();
-            return;
-        }
         lock.readLock().lock();
         try {
-            if (currThreadCount.get() > maxThreadCount.get()) {
+            if (currThreadCount.get() >= maxThreadCount.get()) {
+                return;
+            }
+            if (currThreadCount.get() > taskQueue.size() / processorCount) {
                 return;
             }
         } finally {
@@ -83,8 +79,14 @@ public class DynamicSharedThreadPool {
         }
         lock.writeLock().lock();
         try {
-            addWorkThread();
-            currThreadCount.incrementAndGet();
+            int addCount = taskQueue.size() / (currThreadCount.get() + 1);
+            if (addCount < 1) {
+                addCount = 1;
+            }
+            System.out.println("addCount:" + addCount);
+            for (int i = 0; i < addCount; i++) {
+                addWorkThread();
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -110,7 +112,8 @@ public class DynamicSharedThreadPool {
                         lock.writeLock().unlock();
                     }
 
-                    System.out.println("currThreadCount:"+currThreadCount.get());
+                    System.out.println("currThreadCount:destroy:" + currThreadCount.get());
+                    System.out.println("threadMap:size:" + threadMap.size());
                 }
             }
         }, info.getThreadName());
@@ -125,7 +128,8 @@ public class DynamicSharedThreadPool {
         }finally {
             lock.writeLock().unlock();
         }
-        System.out.println("currThreadCount:"+currThreadCount.get());
+        System.out.println("currThreadCount:create:" + currThreadCount.get());
+        System.out.println("threadMap:size:" + threadMap.size());
     }
 
     protected void workTaskLoop(ThreadWorkInfo info) {
@@ -144,13 +148,16 @@ public class DynamicSharedThreadPool {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         info.getRecentCpuTimestampMillSecondsList().add(threadMXBean.getThreadCpuTime(id)/1000);
 
+        int yieldCount = 0;
         while (true) {
             ThreadTaskInfo<?> task = null;
             for (int i = 0; i < 5; i++) {
                 task = taskQueue.poll();
                 if (task != null) {
+                    yieldCount = 0;
                     break;
                 }
+                yieldCount++;
             }
             if (task == null) {
                 long idleMillSeconds = System.currentTimeMillis() - lastWorkTs;
@@ -158,13 +165,13 @@ public class DynamicSharedThreadPool {
                     break;
                 }
                 try {
-                    Thread.sleep(workThreadIdleMillSeconds.get());
+                    Thread.sleep(workThreadIdleMillSeconds.get() + yieldCount);
                 } catch (Exception e) {
 
                 }
                 continue;
             }
-
+            System.out.println("taskQueue:size:" + taskQueue.size());
             Callable<?> callable = task.getTask();
             CompletableFuture future = task.getFuture();
 
