@@ -1,5 +1,6 @@
 package i2f.thread;
 
+import i2f.thread.local.ThreadLocalUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -7,6 +8,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.LinkedList;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -35,6 +37,9 @@ public class DynamicSharedThreadPool {
     protected AtomicInteger workThreadAliveWaitMillSeconds = new AtomicInteger(30 * 1000);
 
     protected AtomicLong taskMaxWaitMillSeconds = new AtomicLong(300);
+
+    protected AtomicBoolean enableClearThreadLocals = new AtomicBoolean(false);
+    protected AtomicBoolean enableClearInheritableThreadLocals = new AtomicBoolean(false);
 
     protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -143,7 +148,8 @@ public class DynamicSharedThreadPool {
 
         info.getRecentRunTimestampMillSecondsList().add(System.currentTimeMillis());
 
-        long id = Thread.currentThread().getId();
+        Thread thread = Thread.currentThread();
+        long id = thread.getId();
 
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         info.getRecentCpuTimestampMillSecondsList().add(threadMXBean.getThreadCpuTime(id)/1000);
@@ -188,6 +194,12 @@ public class DynamicSharedThreadPool {
                 info.getTaskCount().incrementAndGet();
                 lastWorkTs = beginTs;
 
+                if (enableClearThreadLocals.get()) {
+                    ThreadLocalUtil.clearAllThreadLocals(thread);
+                }
+                if (enableClearInheritableThreadLocals.get()) {
+                    ThreadLocalUtil.clearAllInheritableThreadLocals(thread);
+                }
                 Object ret = callable.call();
 
                 if (future != null) {
