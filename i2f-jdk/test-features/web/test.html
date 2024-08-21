@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="./vue@2_dist_vue.js"></script>
+    <title>vue2</title>
+
+    <script src="./vue2-loader.js"></script>
+
+</head>
+<body>
+
+</body>
+<script>
+    // Promise.all([
+    //     Vue2Loader.createComponent('./comp.vue?x=1')
+    // ]).then(()=>{
+    //     Vue2Loader.createApp('./test.vue')
+    // })
+    //
+    Vue2Loader.setupVueApp({
+        url:'./test.vue',
+        components:[
+            './comp.vue'
+        ]
+    })
+
+
+</script>
+<style>
+
+</style>
+</html>
