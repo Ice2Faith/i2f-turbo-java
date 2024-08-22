@@ -1,6 +1,7 @@
 package i2f.image.filter.impl;
 
 import i2f.color.Rgba;
+import i2f.image.FontUtil;
 import i2f.image.filter.IImageFilter;
 
 import java.awt.*;
@@ -12,7 +13,9 @@ import java.awt.image.BufferedImage;
  * @desc 图像字符化
  */
 public class TextStyleImageFilter implements IImageFilter {
-
+    static {
+        FontUtil.registryDefaultFonts();
+    }
     protected String str;
     protected int fontSize;
     protected String fontFamily = "黑体";
