@@ -1,4 +1,11 @@
 /**
+ * 帮助在多页面html中使用VUE2进行开发
+ * 这能够改善一些使用上的方式
+ * 带来一些简化的便利
+ * 但是，同样的也有一些约束
+ * 比如，不能使用import和export语句进行导入导出其他模块
+ * 仅支持使用export default 导出默认的VUE组件
+ * 所以，你如果需要进行import其他模块，则需要在html中全局引入方式实现
  * @return {Vue2Loader}
  * @constructor {Vue2Loader}
  */
@@ -57,16 +64,34 @@ Vue2Loader.parseVueTemplate=function(html){
 
 /**
  *
+ * @param url
+ * @return {Promise<string>}
+ */
+Vue2Loader.fetchUrl=function(url){
+    if((typeof fetch)!=='undefined'){
+        return fetch(url).then(res=>res.text())
+    }
+    if((typeof  axios)!=='undefined'){
+        return axios({
+            url: url,
+            method: 'get',
+            responseType: 'text'
+        }).then(res=>res.data)
+    }
+    throw Error('not found any support fetch tool!')
+}
+
+/**
+ *
  * @param url {string}
- * @param appId {string}
+ * @param appId {string|null}
  * @return {Promise<string>}
  */
 Vue2Loader.createApp=function(url,appId='app'){
     if(!appId){
         appId='app'
     }
-    return fetch(url)
-        .then(res=>res.text())
+    return Vue2Loader.fetchUrl(url)
         .then(vueHtml=>{
             const vueTemplate = Vue2Loader.parseVueTemplate(vueHtml);
 
@@ -94,7 +119,7 @@ Vue2Loader.createApp=function(url,appId='app'){
             let script=vueTemplate.script
             script+='\n'
             script+='   '+vueTemplate.varName+'.el="#'+appId+'"\n' +
-                    '   window.vueApp=new Vue('+vueTemplate.varName+')\n'
+                    '   window.vueApp_'+vueTemplate.varName+'=new Vue('+vueTemplate.varName+')\n'
 
             let scriptDom = document.querySelector(`#${appId}Script`);
             if(scriptDom){
@@ -106,8 +131,70 @@ Vue2Loader.createApp=function(url,appId='app'){
             }
             scriptDom.innerHTML=script
 
-            return appId
+            return new Promise((resolve, reject)=>{
+                let spyAppSetupCall=()=>{
+                    if(window['vueApp_'+vueTemplate.varName]){
+                        resolve(window['vueApp_'+vueTemplate.varName])
+                    }else{
+                        setTimeout(spyAppSetupCall,30)
+                    }
+                }
+                setTimeout(spyAppSetupCall,30)
+            })
         })
+}
+
+/**
+ *
+ * @return {{pagePath: string, pageName: string}}
+ */
+Vue2Loader.parseCurrentPageInfo=function(){
+    let path=window.location.pathname
+    let app='index'
+    let idx=path.lastIndexOf('/')
+    if(idx>=0){
+        app=path.substring(idx+1)
+        path=path.substring(0,idx)
+    }
+    idx=app.lastIndexOf(".")
+    if(idx>=0){
+        app=app.substring(0,idx)
+    }
+    if(!app || app==''){
+        app='index'
+    }
+    return {
+        pagePath: path,
+        pageName: app
+    }
+}
+
+/**
+ * @return {void}
+ */
+Vue2Loader.loadDefaultResources=function(){
+    let info = Vue2Loader.parseCurrentPageInfo();
+    document.write(
+        '<script type="text/javascript" src="'+info.pagePath+'/'+info.pageName+'.js" charset="utf-8"></script>'
+    );
+    document.write('<link rel="stylesheet" href="'+info.pagePath+'/'+info.pageName+'.css">');
+
+    document.write(
+        '<script type="text/javascript" src="'+info.pagePath+'/'+'index.js" charset="utf-8"></script>'
+    );
+    document.write('<link rel="stylesheet" href="'+info.pagePath+'/'+'index.css">');
+
+}
+
+/**
+ *
+ * @param appId {string|null}
+ * @return {Promise<string>}
+ */
+Vue2Loader.createDefaultApp=function(appId='app'){
+    let info = Vue2Loader.parseCurrentPageInfo();
+    let fullAppUrl=info.pagePath+'/'+info.pageName+'.vue'
+    return Vue2Loader.createApp(fullAppUrl,appId)
 }
 
 /**
@@ -129,8 +216,7 @@ Vue2Loader.createComponent=function(url,componentName=null){
         }
     }
     let appId=`component_`+componentName+'_'+Vue2Loader.randomUUID()
-    return fetch(url)
-        .then(res=>res.text())
+    return Vue2Loader.fetchUrl(url)
         .then(vueHtml=>{
             const vueTemplate = Vue2Loader.parseVueTemplate(vueHtml);
 
@@ -202,7 +288,7 @@ Vue2Loader.createComponent=function(url,componentName=null){
  * @param config {object}
  * @return {Promise<string>}
  */
-Vue2Loader.setupVueApp=function(config){
+Vue2Loader.setupVueApp=function(config={}){
     let components=[]
     if(config.components){
         for (let i = 0; i < config.components.length; i++) {
@@ -219,6 +305,10 @@ Vue2Loader.setupVueApp=function(config){
     }
     return Promise.all(components)
         .then(()=>{
-            return Vue2Loader.createApp(config.url,config.appId)
+            if(!config.url || config.url==''){
+                return Vue2Loader.createDefaultApp(config.appId)
+            }else{
+                return Vue2Loader.createApp(config.url,config.appId)
+            }
         })
 }
