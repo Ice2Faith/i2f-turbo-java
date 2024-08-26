@@ -1,6 +1,7 @@
 package i2f.image.filter.impl;
 
 
+import i2f.image.FontUtil;
 import i2f.image.filter.IImageFilter;
 import lombok.Data;
 
@@ -14,6 +15,9 @@ import java.awt.image.BufferedImage;
  */
 @Data
 public class WatermarkImageFilter implements IImageFilter {
+    static {
+        FontUtil.registryDefaultFonts();
+    }
     private String text;
     private boolean gridMode = true;
     private String fontFamily;
