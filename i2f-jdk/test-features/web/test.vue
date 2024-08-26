@@ -13,6 +13,9 @@ export default {
     return {
       message: 'hello'
     }
+  },
+  created(){
+    this.alertHello()
   }
 }
 </script>
