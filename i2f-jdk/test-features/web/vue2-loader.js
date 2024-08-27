@@ -29,7 +29,8 @@ Vue2Loader.parseHtmlDom=function(html){
 }
 
 /**
- *
+ * 使用随机数作为唯一ID
+ * 这也是UUID-3的实现方式
  * @return {string}
  */
 Vue2Loader.randomUUID=function(){
@@ -82,7 +83,12 @@ Vue2Loader.fetchUrl=function(url){
 }
 
 /**
- *
+ * mixins=[
+ *         {
+ *             url: './test.js'
+ *         },
+ *         './hello.js'
+ *     ]
  * @param url {string}
  * @param appId {string|null}
  * @param mixins {string[]|null}
@@ -215,18 +221,29 @@ Vue2Loader.loadDefaultResources=function(){
 }
 
 /**
- *
+ * mixins=[
+ *         {
+ *             url: './test.js'
+ *         },
+ *         './hello.js'
+ *     ]
  * @param appId {string|null}
+ * @param mixins {string[]|null}
  * @return {Promise<string>}
  */
-Vue2Loader.createDefaultApp=function(appId='app'){
+Vue2Loader.createDefaultApp = function (appId = 'app', mixins = []) {
     let info = Vue2Loader.parseCurrentPageInfo();
     let fullAppUrl=info.pagePath+'/'+info.pageName+'.vue'
-    return Vue2Loader.createApp(fullAppUrl,appId)
+    return Vue2Loader.createApp(fullAppUrl, appId, mixins)
 }
 
 /**
- *
+ * mixins=[
+ *         {
+ *             url: './test.js'
+ *         },
+ *         './hello.js'
+ *     ]
  * @param url {string}
  * @param componentName {string}
  * @param mixins {string[]|null}
@@ -373,6 +390,12 @@ Vue2Loader.loadObject=function(url){
  *             url: './test.vue'
  *         },
  *         './hello.vue'
+ *     ],
+ *     mixins:[
+ *         {
+ *             url: './test.js'
+ *         },
+ *         './hello.js'
  *     ]
  * }
  * @param config {object}
@@ -396,7 +419,7 @@ Vue2Loader.setupVueApp=function(config={}){
     return Promise.all(components)
         .then(()=>{
             if(!config.url || config.url==''){
-                return Vue2Loader.createDefaultApp(config.appId)
+                return Vue2Loader.createDefaultApp(config.appId, config.mixins)
             }else{
                 return Vue2Loader.createApp(config.url,config.appId,config.mixins)
             }
