@@ -65,12 +65,90 @@ Vue2Loader.parseVueTemplate=function(html){
 
 /**
  *
- * @param url
+ * @param url {string}
+ * @param options {object|null}
+ * @return {Promise<Object>}
+ */
+Vue2Loader.fetchJsonp=function(url,options={}){
+    if(!options){
+        options={}
+    }
+    return new Promise((resolve, reject)=>{
+        let callbackFunctionName=options.callbackFunctionName || 'jsonp_callback'
+        if(options.randomCallbackFunctionName){
+            callbackFunctionName=callbackFunctionName+'_'+Vue2Loader.randomUUID()
+        }
+        window[callbackFunctionName]=(response)=>{
+            resolve({
+                ok:true,
+                json:()=>Promise.resolve(response),
+                text:()=>Promise.resolve(response),
+            })
+        }
+
+        let src=url+''
+        if(src.indexOf('?')>=0){
+            src+='&'
+        }else{
+            src+='?'
+        }
+        src+='jsonp_callback='+callbackFunctionName
+
+        let jsonpScriptId='jsonp_script_'+Vue2Loader.randomUUID()
+        let scriptDom=document.createElement('script')
+        scriptDom.id=jsonpScriptId
+        scriptDom.src=src
+        scriptDom.charset='UTF-8'
+        scriptDom.nonce=jsonpScriptId
+        if(options.referrerPolicy){
+            scriptDom.referrerPolicy=options.referrerPolicy // 'same-origin'
+        }
+        if(options.crossOrigin){
+            scriptDom.crossOrigin=options.crossOrigin // 'true'
+        }
+
+        scriptDom.onerror=(event, source, lineno, colno, error)=>{
+            reject({
+                event,
+                source,
+                lineno,
+                colno,
+                error
+            })
+        }
+        document.body.append(scriptDom)
+
+        let timeout=options.timeout || -1
+
+        setTimeout(()=>{
+            if(timeout>0){
+                reject(new Error('fetch jsonp timeout of '+timeout+'!'))
+            }
+            scriptDom.remove()
+        },timeout>0?timeout:1500)
+    })
+}
+
+/**
+ *
+ * @param url {string}
  * @return {Promise<string>}
  */
 Vue2Loader.fetchUrl=function(url){
+    if(window.location.protocol==='file:'){
+        let idx=url.lastIndexOf('?')
+        if(idx>=0){
+            url=url.substring(0,idx)+'.jsonp.js'+url.substring(idx)
+        }else{
+            url=url+'.jsonp.js'
+        }
+        return Vue2Loader.fetchJsonp(url)
+            .then(res=>res.text())
+    }
     if((typeof fetch)!=='undefined'){
-        return fetch(url).then(res=>res.text())
+        return fetch(url,{
+            mode: 'no-cors'
+        }).then(res=>res.text())
     }
     if((typeof  axios)!=='undefined'){
         return axios({
