@@ -1,11 +1,78 @@
 /**
- * 帮助在多页面html中使用VUE2进行开发
- * 这能够改善一些使用上的方式
- * 带来一些简化的便利
- * 但是，同样的也有一些约束
- * 比如，不能使用import和export语句进行导入导出其他模块
- * 仅支持使用export default 导出默认的VUE组件
- * 所以，你如果需要进行import其他模块，则需要在html中全局引入方式实现
+ * help use vue2 in multi-page-application website<br/>
+ * this could improve coding style & structure<br/>
+ * bring out simplify , purify vue code like vue-cli<br/>
+ * but also, it has some restrict with it<br/>
+ * such as, could not use 'import' and 'export' segments for process other modules<br/>
+ * only support use 'export default' to  export default vue component(or instance)<br/>
+ * so that, import other modules must by global '<script>' in html<br/>
+ * <hr>
+ * this is a <b>comp.vue</b> file
+ * <pre>
+ * <template>
+ *   <div class="comp">
+ *     {{message}}
+ *   </div>
+ * </template>
+ *
+ *
+ * <script>
+ * export default {
+ *   name: "comp",
+ *   data(){
+ *     return {
+ *       message: 'xxx',
+ *       timer:null
+ *     }
+ *   },
+ *   mounted(){
+ *     this.timer=setInterval(()=>{
+ *       this.message=new Date()+''
+ *     },1000)
+ *   },
+ *   destroyed(){
+ *     clearInterval(this.timer)
+ *   }
+ * }
+ * </script>
+ *
+ * <style>
+ * .comp{
+ *   color: red;
+ * }
+ * </style>
+ * </pre>
+ *
+ * <hr/>
+ * this is a <b>comp.html</b> file
+ * <pre>
+ * <!DOCTYPE html>
+ * <html>
+ * <head>
+ *     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+ *     <!-- <script src="./vue@2_dist_vue.js"></script> -->
+ *     <title>vue2</title>
+ *     <script src="./vue2-loader.js"></script>
+ *
+ * </head>
+ * <body>
+ *
+ * </body>
+ * <script>
+ *     Vue2Loader.setupVueApp({
+ *         url:'./comp.vue'
+ *     })
+ *
+ * </script>
+ * <style>
+ *
+ * </style>
+ * </html>
+ * </pre>
+ *
+ * <hr/>
+ * now, you got an vue page <b>comp.html</b>,and could be view it in browser
+ *
  * @return {Vue2Loader}
  * @constructor {Vue2Loader}
  */
@@ -29,8 +96,8 @@ Vue2Loader.parseHtmlDom=function(html){
 }
 
 /**
- * 使用随机数作为唯一ID
- * 这也是UUID-3的实现方式
+ * use random number as uuid
+ * this is uuid-3 implements
  * @return {string}
  */
 Vue2Loader.randomUUID=function(){
@@ -50,9 +117,24 @@ Vue2Loader.randomUUID=function(){
  */
 Vue2Loader.parseVueTemplate=function(html){
     const doc=Vue2Loader.parseHtmlDom(html)
-    let template=doc.querySelector('template')?.innerHTML||''
-    let script=doc.querySelector('script')?.innerHTML||''
-    let style=doc.querySelector('style')?.innerHTML||''
+    let template = doc.querySelector('template')
+    if (template) {
+        template = template.innerHTML
+    } else {
+        template = ''
+    }
+    let script = doc.querySelector('script')
+    if (script) {
+        script = script.innerHTML
+    } else {
+        script = ''
+    }
+    let style = doc.querySelector('style')
+    if (style) {
+        style = style.innerHTML
+    } else {
+        style = ''
+    }
     let varName='vueComponent_'+Vue2Loader.randomUUID()
     script=script.replace(/export\s+default\s+\{/,'let '+varName+' = {')
     return {
@@ -124,7 +206,12 @@ Vue2Loader.fetchJsonp=function(url,options={}){
             if(timeout>0){
                 reject(new Error('fetch jsonp timeout of '+timeout+'!'))
             }
-            scriptDom.remove()
+            try {
+                scriptDom.remove()
+            } catch (e) {
+                scriptDom.parentNode.removeChild(scriptDom)
+            }
+
         },timeout>0?timeout:1500)
     })
 }
@@ -409,8 +496,16 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
             scriptDom.innerHTML=script
 
             setTimeout(()=>{
-                scriptDom.remove()
-                appDom.remove()
+                try {
+                    scriptDom.remove()
+                } catch (e) {
+                    scriptDom.parentNode.removeChild(scriptDom)
+                }
+                try {
+                    appDom.remove()
+                } catch (e) {
+                    appDom.parentNode.removeChild(appDom)
+                }
             })
 
             return appId
