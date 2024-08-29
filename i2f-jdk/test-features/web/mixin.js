@@ -1,7 +1,7 @@
 export default {
     methods:{
         alertHello(){
-            alert('hello')
+            console.log('hello')
         }
     }
 }
