@@ -40,6 +40,9 @@
  * .comp{
  *   color: red;
  * }
+ * .--this span{
+ *  color: #444;
+ * }
  * </style>
  * </pre>
  *
@@ -123,7 +126,7 @@ Vue2Loader.parseVueTemplate=function(html){
     } else {
         template = ''
     }
-    let className='scoped-'+Vue2Loader.randomUUID().toLowerCase()
+    let className='vue-scoped-style-'+Vue2Loader.randomUUID().toLowerCase()
     let dom=Vue2Loader.parseHtmlDom(`<html><head></head><body>${template}</body></html>`)
     let body=dom.body
     let root=body.firstElementChild
@@ -145,13 +148,71 @@ Vue2Loader.parseVueTemplate=function(html){
         style = ''
     }
     style=style.replaceAll('.--this','.'+className)
-    let varName='vueComponent_'+Vue2Loader.randomUUID()
+    let varName='vue_conf_'+Vue2Loader.randomUUID()
     script=script.replace(/export\s+default\s+\{/,'let '+varName+' = {')
     return {
         template: template,
         script: script,
         style: style,
         varName: varName
+    }
+}
+
+/**
+ *
+ * @param parent {HTMLElement}
+ * @param child {HTMLElement}
+ */
+Vue2Loader.domAppend=function(parent,child){
+    try {
+        parent.append(child)
+    }catch (e){
+        parent.appendChild(child)
+    }
+}
+
+/**
+ *
+ * @param dom {HTMLElement}
+ */
+Vue2Loader.domRemove=function (dom){
+    try{
+        dom.remove()
+    }catch (e){
+        dom.parentNode.removeChild(dom)
+    }
+}
+
+/**
+ *
+ * @param elemId {string}
+ * @param tagName {string}
+ * @param parent {HTMLElement}
+ * @return {HTMLElement}
+ */
+Vue2Loader.domGetOrCreate=function( elemId, tagName='div',parent=null){
+    if(!parent){
+        parent=document.body
+    }
+    let dom = document.querySelector(`#${elemId}`);
+    if(!dom){
+        dom = document.createElement(tagName);
+        dom.id=elemId
+        Vue2Loader.domAppend(parent,dom)
+    }
+    return dom
+}
+
+/**
+ *
+ * @param dom {HTMLElement}
+ * @param html {string}
+ */
+Vue2Loader.domSetInnerHtml=function (dom,html){
+    try {
+        dom.innerHTML=html
+    }catch (e){
+        dom.innerText=html
     }
 }
 
@@ -208,11 +269,8 @@ Vue2Loader.fetchJsonp=function(url,options={}){
                 error
             })
         }
-        try {
-            document.body.append(scriptDom)
-        } catch (e) {
-            document.body.appendChild(scriptDom)
-        }
+
+        Vue2Loader.domAppend(document.body,scriptDom)
 
         let timeout=options.timeout || -1
 
@@ -220,12 +278,7 @@ Vue2Loader.fetchJsonp=function(url,options={}){
             if(timeout>0){
                 reject(new Error('fetch jsonp timeout of '+timeout+'!'))
             }
-            try {
-                scriptDom.remove()
-            } catch (e) {
-                scriptDom.parentNode.removeChild(scriptDom)
-            }
-
+            Vue2Loader.domRemove(scriptDom)
         },timeout>0?timeout:1500)
     })
 }
@@ -262,22 +315,15 @@ Vue2Loader.fetchUrl=function(url){
 }
 
 /**
- * mixins=[
- *         {
- *             url: './test.js'
- *         },
- *         './hello.js'
- *     ]
- * @param url {string}
- * @param appId {string|null}
- * @param mixins {string[]|null}
- * @return {Promise<string>}
+ *
+ * @param mixins {string[]}
+ * @param mixinVarName {string|null}
+ * @return {Promise<mixinVarName>}
  */
-Vue2Loader.createApp=function(url,appId='app',mixins=[]){
-    if(!appId){
-        appId='app'
+Vue2Loader.loadMixins=function (mixins=[],mixinVarName=null){
+    if(!mixinVarName){
+        mixinVarName='vue_mixins_'+Vue2Loader.randomUUID()
     }
-    let mixinVarName='mixins_'+Vue2Loader.randomUUID()
     window[mixinVarName]=[]
     let mixinList=[]
     if(mixins){
@@ -301,76 +347,101 @@ Vue2Loader.createApp=function(url,appId='app',mixins=[]){
                     window[mixinVarName].push(item)
                 }
             }
-        }).then(()=>{
-            return Vue2Loader.fetchUrl(url)
+            return mixinVarName
         })
-        .then(vueHtml=>{
+}
+
+/**
+ *
+ * @param vueOptions {Object} vue options
+ * @param elemId {string} element id
+ * @param mixinVarName {string} mixins variable name
+ * @param vueAppVarName {string} vue app variable name
+ */
+Vue2Loader.initVueApp=function(vueOptions,
+                              elemId,
+                              mixinVarName,
+                              vueAppVarName){
+    if(!elemId){
+        elemId='app'
+    }
+    vueOptions.el=`#${elemId}`
+    if(window[mixinVarName]){
+        vueOptions.mixins=window[mixinVarName]
+    }
+    if(vueOptions.title && vueOptions.title!=''){
+        document.title=vueOptions.title
+    }
+    window[vueAppVarName]=new Vue(vueOptions)
+}
+
+Vue2Loader.initVueComponent=function (vueOptions,
+                                      componentName,
+                                      templateElemId,
+                                      mixinVarName,
+                                      vueCompVarName){
+    let templateDom=document.querySelector(`#vue_component_${templateElemId}`)
+    vueOptions.name=componentName
+    if(window[mixinVarName]){
+        vueOptions.mixins=window[mixinVarName]
+    }
+    vueOptions.template=templateDom.innerHTML
+    Vue.component(componentName,vueOptions)
+    window[vueCompVarName]=vueOptions
+}
+
+/**
+ * mixins=[
+ *         {
+ *             url: './test.js'
+ *         },
+ *         './hello.js'
+ *     ]
+ * @param url {string}
+ * @param appId {string|null}
+ * @param mixins {string[]|null}
+ * @return {Promise<string>}
+ */
+Vue2Loader.createApp=function(url,appId='app',mixins=[]){
+    if(!appId){
+        appId='app'
+    }
+    return Vue2Loader.loadMixins(mixins)
+        .then((mixinVarName)=>{
+            return Vue2Loader.fetchUrl(url).then(vueHtml=>{
+                return {
+                    mixinVarName:mixinVarName,
+                    vueHtml:vueHtml
+                }
+            })
+        })
+        .then(({mixinVarName,vueHtml})=>{
             const vueTemplate = Vue2Loader.parseVueTemplate(vueHtml);
 
-            let appDom = document.querySelector(`#${appId}`);
-            if(appDom){
-                appDom.innerHTML=''
-            }else{
-                appDom = document.createElement('div');
-                appDom.id=appId
-                try {
-                    document.body.append(appDom)
-                } catch (e) {
-                    document.body.appendChild(appDom)
-                }
-            }
-            appDom.innerHTML=vueTemplate.template
+            let appDom = Vue2Loader.domGetOrCreate(appId,'div',document.body)
+            Vue2Loader.domSetInnerHtml(appDom,vueTemplate.template)
 
 
-            let styleDom = document.querySelector(`#${appId}Style`);
-            if(styleDom){
-                styleDom.innerHTML=''
-            }else{
-                styleDom = document.createElement('style');
-                styleDom.id=`${appId}Style`
-                try {
-                    document.head.append(styleDom)
-                } catch (e) {
-                    document.head.appendChild(styleDom)
-                }
-            }
-            styleDom.innerHTML=vueTemplate.style
+            let styleDom = Vue2Loader.domGetOrCreate(`vue_style_${appId}`,'style',document.head)
+            Vue2Loader.domSetInnerHtml(styleDom,vueTemplate.style)
 
+            let vueAppVarName='vue_app_'+vueTemplate.varName
             let script=vueTemplate.script
             script+='\n'
-            script+='   '+vueTemplate.varName+'.el="#'+appId+'"\n' +
-                    '   '+vueTemplate.varName+'.mixins=window.'+mixinVarName+'||[] \n'+
-                    '   window.vueApp_'+vueTemplate.varName+'=new Vue('+vueTemplate.varName+')\n'
+            script+=`Vue2Loader.initVueApp(${vueTemplate.varName},'${appId}','${mixinVarName}','${vueAppVarName}')\n`
 
-            let scriptDom = document.querySelector(`#${appId}Script`);
-            if(scriptDom){
-                scriptDom.type = 'text/javascript'
-                try {
-                    scriptDom.innerHTML = ''
-                } catch (e) {
-                    scriptDom.innerText = ''
-                }
-            }else{
-                scriptDom = document.createElement('script');
-                scriptDom.id=`${appId}Script`
-                try {
-                    document.body.append(scriptDom)
-                } catch (e) {
-                    document.body.appendChild(scriptDom)
-                }
-            }
+            let scriptDom = Vue2Loader.domGetOrCreate(`vue_script_${appId}`,'script',document.body);
             scriptDom.type = 'text/javascript'
-            try {
-                scriptDom.innerHTML = script
-            } catch (e) {
-                scriptDom.innerText = script
-            }
-
+            Vue2Loader.domSetInnerHtml(scriptDom,script)
 
             return new Promise((resolve, reject)=>{
                 let spyAppSetupCall=()=>{
-                    if(window['vueApp_'+vueTemplate.varName]){
-                        resolve(window['vueApp_'+vueTemplate.varName])
+                    if(window[vueAppVarName]){
+                        resolve(window[vueAppVarName])
+                        setTimeout(()=>{
+                            delete window[mixinVarName]
+                            // Vue2Loader.domRemove(scriptDom)
+                        },300)
                     }else{
                         setTimeout(spyAppSetupCall,30)
                     }
@@ -463,111 +534,52 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
             componentName=componentName.substring(0,idx)
         }
     }
-    let appId=`component_`+componentName+'_'+Vue2Loader.randomUUID()
-    let mixinVarName='mixins_'+Vue2Loader.randomUUID()
-    window[mixinVarName]=[]
-    let mixinList=[]
-    if(mixins){
-        for (let i = 0; i < mixins.length; i++) {
-            let item=mixins[i]
-            if(!item){
-                continue
-            }
-            if(item.url){
-                mixinList.push(Vue2Loader.loadObject(item.url))
-            }else{
-                mixinList.push(Vue2Loader.loadObject(item))
-            }
-        }
-    }
-    return Promise.all(mixinList)
-        .then(vueMixins=>{
-            for (let i = 0; i < vueMixins.length; i++) {
-                let item = vueMixins[i];
-                if(item){
-                    window[mixinVarName].push(item)
-                }
-            }
-        }).then(()=>{
-            return Vue2Loader.fetchUrl(url)
-        })
-        .then(vueHtml=>{
-            const vueTemplate = Vue2Loader.parseVueTemplate(vueHtml);
-
-            let appDom = document.querySelector(`#${appId}`);
-            if(appDom){
-                appDom.innerHTML=''
-            }else{
-                appDom = document.createElement('div');
-                appDom.id=appId
-                try {
-                    document.body.append(appDom)
-                } catch (e) {
-                    document.body.appendChild(appDom)
-                }
-            }
-            appDom.innerHTML=vueTemplate.template
-
-
-            let styleDom = document.querySelector(`#${appId}Style`);
-            if(styleDom){
-                styleDom.innerHTML=''
-            }else{
-                styleDom = document.createElement('style');
-                styleDom.id=`${appId}Style`
-                try {
-                    document.body.append(styleDom)
-                } catch (e) {
-                    document.body.appendChild(styleDom)
-                }
-            }
-            styleDom.innerHTML=vueTemplate.style
-
-
-            let script=vueTemplate.script
-            script+='\n'
-            script+='let compDom'+vueTemplate.varName+'=document.querySelector("#'+appId+'")\n' +
-                '            '+vueTemplate.varName+'.name="'+componentName+'"\n' +
-                '            '+vueTemplate.varName+'.mixins=window.'+mixinVarName+'||[] \n'+
-                '            '+vueTemplate.varName+'.template=compDom'+vueTemplate.varName+'.innerHTML\n' +
-                '            Vue.component("'+componentName+'",'+vueTemplate.varName+')\n'
-
-            let scriptDom = document.querySelector(`#${appId}Script`);
-            if(scriptDom){
-                scriptDom.type = 'text/javascript'
-                try {
-                    scriptDom.innerHTML = ''
-                } catch (e) {
-                    scriptDom.innerText = ''
-                }
-            }else{
-                scriptDom = document.createElement('script');
-                scriptDom.id=`${appId}Script`
-                try {
-                    document.body.append(scriptDom)
-                } catch (e) {
-                    document.body.appendChild(scriptDom)
-                }
-            }
-            scriptDom.type = 'text/javascript'
-            try {
-                scriptDom.innerHTML = script
-            } catch (e) {
-                scriptDom.innerText = script
-            }
-
-            setTimeout(()=>{
-                try {
-                    scriptDom.remove()
-                } catch (e) {
-                    scriptDom.parentNode.removeChild(scriptDom)
-                }
-                try {
-                    appDom.remove()
-                } catch (e) {
-                    appDom.parentNode.removeChild(appDom)
+    let appId=componentName+'_'+Vue2Loader.randomUUID()
+    return Vue2Loader.loadMixins(mixins)
+        .then((mixinVarName)=>{
+            return Vue2Loader.fetchUrl(url).then(vueHtml=>{
+                return {
+                    mixinVarName:mixinVarName,
+                    vueHtml:vueHtml
                 }
             })
+        })
+        .then(({mixinVarName,vueHtml})=>{
+            const vueTemplate = Vue2Loader.parseVueTemplate(vueHtml);
+
+            let appDom = Vue2Loader.domGetOrCreate(`vue_component_${appId}`,'div',document.body);
+            appDom.style.display='none'
+            appDom.style.height='0px'
+            appDom.style.width='0px'
+            Vue2Loader.domSetInnerHtml(appDom,vueTemplate.template)
+
+
+            let styleDom = Vue2Loader.domGetOrCreate(`vue_component_style_${appId}`,'style',document.body);
+            Vue2Loader.domSetInnerHtml(styleDom,vueTemplate.style)
+
+
+            let vueCompVarName='vue_comp_'+vueTemplate.varName
+            let script=vueTemplate.script
+            script+='\n'
+            script+=`Vue2Loader.initVueComponent(${vueTemplate.varName},'${componentName}','${appId}','${mixinVarName}','${vueCompVarName}')\n`
+
+            let scriptDom = Vue2Loader.domGetOrCreate(`vue_component_script_${appId}`,'script',document.body);
+            scriptDom.type = 'text/javascript'
+            Vue2Loader.domSetInnerHtml(scriptDom,script)
+
+            let spyCompSetupCall=()=>{
+                if(window[vueCompVarName]){
+                    Vue2Loader.domRemove(scriptDom)
+                    Vue2Loader.domRemove(appDom)
+                    setTimeout(()=>{
+                        delete window[mixinVarName]
+                        delete window[vueCompVarName]
+                    },300)
+                }else{
+                    setTimeout(spyCompSetupCall,30)
+                }
+            }
+            setTimeout(spyCompSetupCall,30)
 
             return appId
         })
@@ -585,42 +597,18 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
 Vue2Loader.loadObject=function(url){
     return Vue2Loader.fetchUrl(url)
         .then(script=>{
-            let varName='obj_'+Vue2Loader.randomUUID()
+            let varName='js_obj_'+Vue2Loader.randomUUID()
             script=script.replace(/export\s+default\s+\{/,'window.'+varName+' = {')
-            let scriptDom = document.querySelector(`#${varName}Script`);
-            if(scriptDom){
-                scriptDom.type = 'text/javascript'
-                try {
-                    scriptDom.innerHTML = ''
-                } catch (e) {
-                    scriptDom.innerText = ''
-                }
-            }else{
-                scriptDom = document.createElement('script');
-                scriptDom.id=`${varName}Script`
-                try {
-                    document.body.append(scriptDom)
-                } catch (e) {
-                    document.body.appendChild(scriptDom)
-                }
-            }
+            let scriptDom = Vue2Loader.domGetOrCreate(`js_obj_script_${varName}`,'script',document.body);
             scriptDom.type = 'text/javascript'
-            try {
-                scriptDom.innerHTML = script
-            } catch (e) {
-                scriptDom.innerText = script
-            }
+            Vue2Loader.domSetInnerHtml(scriptDom,script)
             return new Promise((resolve, reject)=>{
                 let spyAppSetupCall=()=>{
                     if(window[varName]){
                         resolve(window[varName])
                         setTimeout(()=>{
                             delete window[varName]
-                            try{
-                                scriptDom.remove()
-                            }catch (e){
-                                scriptDom.parentNode.removeChild(scriptDom)
-                            }
+                            Vue2Loader.domRemove(scriptDom)
                         },500)
                     }else{
                         setTimeout(spyAppSetupCall,30)
