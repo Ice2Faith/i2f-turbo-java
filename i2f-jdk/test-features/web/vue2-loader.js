@@ -198,7 +198,11 @@ Vue2Loader.fetchJsonp=function(url,options={}){
                 error
             })
         }
-        document.body.append(scriptDom)
+        try {
+            document.body.append(scriptDom)
+        } catch (e) {
+            document.body.appendChild(scriptDom)
+        }
 
         let timeout=options.timeout || -1
 
@@ -299,7 +303,11 @@ Vue2Loader.createApp=function(url,appId='app',mixins=[]){
             }else{
                 appDom = document.createElement('div');
                 appDom.id=appId
-                document.body.append(appDom)
+                try {
+                    document.body.append(appDom)
+                } catch (e) {
+                    document.body.appendChild(appDom)
+                }
             }
             appDom.innerHTML=vueTemplate.template
 
@@ -310,7 +318,11 @@ Vue2Loader.createApp=function(url,appId='app',mixins=[]){
             }else{
                 styleDom = document.createElement('style');
                 styleDom.id=`${appId}Style`
-                document.body.append(styleDom)
+                try {
+                    document.body.append(styleDom)
+                } catch (e) {
+                    document.body.appendChild(styleDom)
+                }
             }
             styleDom.innerHTML=vueTemplate.style
 
@@ -322,13 +334,28 @@ Vue2Loader.createApp=function(url,appId='app',mixins=[]){
 
             let scriptDom = document.querySelector(`#${appId}Script`);
             if(scriptDom){
-                scriptDom.innerHTML=''
+                scriptDom.type = 'text/javascript'
+                try {
+                    scriptDom.innerHTML = ''
+                } catch (e) {
+                    scriptDom.innerText = ''
+                }
             }else{
                 scriptDom = document.createElement('script');
                 scriptDom.id=`${appId}Script`
-                document.body.append(scriptDom)
+                try {
+                    document.body.append(scriptDom)
+                } catch (e) {
+                    document.body.appendChild(scriptDom)
+                }
             }
-            scriptDom.innerHTML=script
+            scriptDom.type = 'text/javascript'
+            try {
+                scriptDom.innerHTML = script
+            } catch (e) {
+                scriptDom.innerText = script
+            }
+
 
             return new Promise((resolve, reject)=>{
                 let spyAppSetupCall=()=>{
@@ -463,7 +490,11 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
             }else{
                 appDom = document.createElement('div');
                 appDom.id=appId
-                document.body.append(appDom)
+                try {
+                    document.body.append(appDom)
+                } catch (e) {
+                    document.body.appendChild(appDom)
+                }
             }
             appDom.innerHTML=vueTemplate.template
 
@@ -473,7 +504,11 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
             }else{
                 styleDom = document.createElement('style');
                 styleDom.id=`${appId}Style`
-                document.body.append(styleDom)
+                try {
+                    document.body.append(styleDom)
+                } catch (e) {
+                    document.body.appendChild(styleDom)
+                }
             }
             styleDom.innerHTML=vueTemplate.style
 
@@ -487,13 +522,27 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
 
             let scriptDom = document.querySelector(`#${appId}Script`);
             if(scriptDom){
-                scriptDom.innerHTML=''
+                scriptDom.type = 'text/javascript'
+                try {
+                    scriptDom.innerHTML = ''
+                } catch (e) {
+                    scriptDom.innerText = ''
+                }
             }else{
                 scriptDom = document.createElement('script');
                 scriptDom.id=`${appId}Script`
-                document.body.append(scriptDom)
+                try {
+                    document.body.append(scriptDom)
+                } catch (e) {
+                    document.body.appendChild(scriptDom)
+                }
             }
-            scriptDom.innerHTML=script
+            scriptDom.type = 'text/javascript'
+            try {
+                scriptDom.innerHTML = script
+            } catch (e) {
+                scriptDom.innerText = script
+            }
 
             setTimeout(()=>{
                 try {
@@ -528,13 +577,27 @@ Vue2Loader.loadObject=function(url){
             script=script.replace(/export\s+default\s+\{/,'window.'+varName+' = {')
             let scriptDom = document.querySelector(`#${varName}Script`);
             if(scriptDom){
-                scriptDom.innerHTML=''
+                scriptDom.type = 'text/javascript'
+                try {
+                    scriptDom.innerHTML = ''
+                } catch (e) {
+                    scriptDom.innerText = ''
+                }
             }else{
                 scriptDom = document.createElement('script');
                 scriptDom.id=`${varName}Script`
-                document.body.append(scriptDom)
+                try {
+                    document.body.append(scriptDom)
+                } catch (e) {
+                    document.body.appendChild(scriptDom)
+                }
             }
-            scriptDom.innerHTML=script
+            scriptDom.type = 'text/javascript'
+            try {
+                scriptDom.innerHTML = script
+            } catch (e) {
+                scriptDom.innerText = script
+            }
             return new Promise((resolve, reject)=>{
                 let spyAppSetupCall=()=>{
                     if(window[varName]){
