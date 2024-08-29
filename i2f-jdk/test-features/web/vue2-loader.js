@@ -389,6 +389,14 @@ Vue2Loader.initVueApp=function(vueOptions,
     window[vueAppVarName]=new Vue(vueOptions)
 }
 
+/**
+ *
+ * @param vueOptions {Object} vue options
+ * @param componentName {string} component name
+ * @param templateElemId {string} component template dom id
+ * @param mixinVarName {string} mixins variable name
+ * @param vueCompVarName {string} vue component variable name
+ */
 Vue2Loader.initVueComponent=function (vueOptions,
                                       componentName,
                                       templateElemId,
