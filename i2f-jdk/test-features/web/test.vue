@@ -10,6 +10,7 @@
 <script>
 export default {
   name: "test",
+  title: '测试页面',
   data(){
     return {
       message: 'hello'
