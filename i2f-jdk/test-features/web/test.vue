@@ -6,6 +6,9 @@
   </div>
 </template>
 
+<header>
+  <title>加油</title>
+</header>
 
 <script>
 export default {
