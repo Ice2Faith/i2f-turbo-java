@@ -2,7 +2,7 @@ jsonp_callback('\n'+
 'export default {\n'+
 '    methods:{\n'+
 '        alertHello(){\n'+
-'            alert("hello")\n'+
+'            console.log("hello")\n'+
 '        }\n'+
 '    }\n'+
 '}\n'+
