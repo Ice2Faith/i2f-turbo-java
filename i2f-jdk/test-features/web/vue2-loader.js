@@ -15,6 +15,9 @@
  *   </div>
  * </template>
  *
+ * <header>
+ *   <title>vue2-loader</title>
+ * </header>
  *
  * <script>
  * export default {
@@ -116,7 +119,7 @@ Vue2Loader.randomUUID=function(){
 /**
  *
  * @param html {string}
- * @return {{template: (*|string), varName: string, style: (*|string), script: string}}
+ * @return {{template: string, varName: string, header: string, style: string, script: string}}
  */
 Vue2Loader.parseVueTemplate=function(html){
     const doc=Vue2Loader.parseHtmlDom(html)
@@ -141,6 +144,10 @@ Vue2Loader.parseVueTemplate=function(html){
     } else {
         script = ''
     }
+    let varName='vue_conf_'+Vue2Loader.randomUUID()
+    script=script.replace(/export\s+default\s+\{/,'let '+varName+' = {')
+
+
     let style = doc.querySelector('style')
     if (style) {
         style = style.innerHTML
@@ -148,12 +155,19 @@ Vue2Loader.parseVueTemplate=function(html){
         style = ''
     }
     style=style.replaceAll('.--this','.'+className)
-    let varName='vue_conf_'+Vue2Loader.randomUUID()
-    script=script.replace(/export\s+default\s+\{/,'let '+varName+' = {')
+
+    let header = doc.querySelector('header')
+    if (header) {
+        header = header.innerHTML
+    } else {
+        header = ''
+    }
+
     return {
         template: template,
         script: script,
         style: style,
+        header: header,
         varName: varName
     }
 }
@@ -391,6 +405,22 @@ Vue2Loader.initVueComponent=function (vueOptions,
 }
 
 /**
+ *
+ * @param header {string} html of head segment
+ */
+Vue2Loader.appendHeader=function (header){
+    if(header && header!=''){
+        document.head.innerHTML=document.head.innerHTML+header
+        let arr=document.head.querySelectorAll('title')
+        for (let i = 0; i < arr.length; i++) {
+            if(i!=arr.length-1){
+                Vue2Loader.domRemove(arr[i])
+            }
+        }
+    }
+}
+
+/**
  * mixins=[
  *         {
  *             url: './test.js'
@@ -417,6 +447,8 @@ Vue2Loader.createApp=function(url,appId='app',mixins=[]){
         })
         .then(({mixinVarName,vueHtml})=>{
             const vueTemplate = Vue2Loader.parseVueTemplate(vueHtml);
+
+            Vue2Loader.appendHeader(vueTemplate.header)
 
             let appDom = Vue2Loader.domGetOrCreate(appId,'div',document.body)
             Vue2Loader.domSetInnerHtml(appDom,vueTemplate.template)
@@ -546,6 +578,8 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
         })
         .then(({mixinVarName,vueHtml})=>{
             const vueTemplate = Vue2Loader.parseVueTemplate(vueHtml);
+
+            Vue2Loader.appendHeader(vueTemplate.header)
 
             let appDom = Vue2Loader.domGetOrCreate(`vue_component_${appId}`,'div',document.body);
             appDom.style.display='none'
