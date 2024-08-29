@@ -1,6 +1,7 @@
 <template>
   <div class="comp">
     {{message}}
+    <span>is now!</span>
   </div>
 </template>
 
@@ -28,6 +29,10 @@ export default {
 <style>
 .comp{
   color: red;
+}
+
+.--this span{
+  color: lawngreen;
 }
 </style>
 

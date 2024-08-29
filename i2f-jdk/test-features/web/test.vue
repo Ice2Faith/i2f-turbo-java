@@ -1,6 +1,7 @@
 <template>
   <div class="app">
     {{message}}
+    <span>world</span>
     <comp></comp>
   </div>
 </template>
@@ -20,9 +21,18 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .app{
   color: blue;
+}
+.--this{
+  background: lightseagreen;
+}
+.--this span{
+  color: coral;
+}
+span{
+  color: cyan;
 }
 </style>
 

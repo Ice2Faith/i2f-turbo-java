@@ -123,6 +123,15 @@ Vue2Loader.parseVueTemplate=function(html){
     } else {
         template = ''
     }
+    let className='scoped-'+Vue2Loader.randomUUID().toLowerCase()
+    let dom=Vue2Loader.parseHtmlDom(`<html><head></head><body>${template}</body></html>`)
+    let body=dom.body
+    let root=body.firstElementChild
+    if(root){
+        root.className=root.className+' '+className
+        template=body.innerHTML
+    }
+
     let script = doc.querySelector('script')
     if (script) {
         script = script.innerHTML
@@ -135,6 +144,7 @@ Vue2Loader.parseVueTemplate=function(html){
     } else {
         style = ''
     }
+    style=style.replaceAll('.--this','.'+className)
     let varName='vueComponent_'+Vue2Loader.randomUUID()
     script=script.replace(/export\s+default\s+\{/,'let '+varName+' = {')
     return {
@@ -319,9 +329,9 @@ Vue2Loader.createApp=function(url,appId='app',mixins=[]){
                 styleDom = document.createElement('style');
                 styleDom.id=`${appId}Style`
                 try {
-                    document.body.append(styleDom)
+                    document.head.append(styleDom)
                 } catch (e) {
-                    document.body.appendChild(styleDom)
+                    document.head.appendChild(styleDom)
                 }
             }
             styleDom.innerHTML=vueTemplate.style
@@ -498,6 +508,7 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
             }
             appDom.innerHTML=vueTemplate.template
 
+
             let styleDom = document.querySelector(`#${appId}Style`);
             if(styleDom){
                 styleDom.innerHTML=''
@@ -511,6 +522,7 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
                 }
             }
             styleDom.innerHTML=vueTemplate.style
+
 
             let script=vueTemplate.script
             script+='\n'
@@ -602,6 +614,14 @@ Vue2Loader.loadObject=function(url){
                 let spyAppSetupCall=()=>{
                     if(window[varName]){
                         resolve(window[varName])
+                        setTimeout(()=>{
+                            delete window[varName]
+                            try{
+                                scriptDom.remove()
+                            }catch (e){
+                                scriptDom.parentNode.removeChild(scriptDom)
+                            }
+                        },500)
                     }else{
                         setTimeout(spyAppSetupCall,30)
                     }
