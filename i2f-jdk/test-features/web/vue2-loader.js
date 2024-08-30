@@ -130,7 +130,7 @@ Vue2Loader.parseVueTemplate=function(html){
         template = ''
     }
     let className='vue-scoped-style-'+Vue2Loader.randomUUID().toLowerCase()
-    let dom=Vue2Loader.parseHtmlDom(`<html><head></head><body>${template}</body></html>`)
+    let dom = Vue2Loader.parseHtmlDom('<html><head></head><body>' + template + '</body></html>')
     let body=dom.body
     let root=body.firstElementChild
     if(root){
@@ -154,7 +154,7 @@ Vue2Loader.parseVueTemplate=function(html){
     } else {
         style = ''
     }
-    style=style.replaceAll('.--this','.'+className)
+    style = style.split('.--this').join(('.' + className))
 
     let header = doc.querySelector('header')
     if (header) {
@@ -204,11 +204,14 @@ Vue2Loader.domRemove=function (dom){
  * @param parent {HTMLElement}
  * @return {HTMLElement}
  */
-Vue2Loader.domGetOrCreate=function( elemId, tagName='div',parent=null){
+Vue2Loader.domGetOrCreate = function (elemId, tagName, parent) {
+    if (!tagName) {
+        tagName = 'div'
+    }
     if(!parent){
         parent=document.body
     }
-    let dom = document.querySelector(`#${elemId}`);
+    let dom = document.querySelector('#' + elemId);
     if(!dom){
         dom = document.createElement(tagName);
         dom.id=elemId
@@ -236,20 +239,24 @@ Vue2Loader.domSetInnerHtml=function (dom,html){
  * @param options {object|null}
  * @return {Promise<Object>}
  */
-Vue2Loader.fetchJsonp=function(url,options={}){
+Vue2Loader.fetchJsonp = function (url, options) {
     if(!options){
         options={}
     }
-    return new Promise((resolve, reject)=>{
+    return new Promise(function (resolve, reject) {
         let callbackFunctionName=options.callbackFunctionName || 'jsonp_callback'
         if(options.randomCallbackFunctionName){
             callbackFunctionName=callbackFunctionName+'_'+Vue2Loader.randomUUID()
         }
-        window[callbackFunctionName]=(response)=>{
+        window[callbackFunctionName] = function (response) {
             resolve({
                 ok:true,
-                json:()=>Promise.resolve(response),
-                text:()=>Promise.resolve(response),
+                json: function () {
+                    return Promise.resolve(response)
+                },
+                text: function () {
+                    return Promise.resolve(response)
+                },
             })
         }
 
@@ -274,13 +281,13 @@ Vue2Loader.fetchJsonp=function(url,options={}){
             scriptDom.crossOrigin=options.crossOrigin // 'true'
         }
 
-        scriptDom.onerror=(event, source, lineno, colno, error)=>{
+        scriptDom.onerror = function (event, source, lineno, colno, error) {
             reject({
-                event,
-                source,
-                lineno,
-                colno,
-                error
+                event: event,
+                source: source,
+                lineno: lineno,
+                colno: colno,
+                error: error
             })
         }
 
@@ -288,7 +295,7 @@ Vue2Loader.fetchJsonp=function(url,options={}){
 
         let timeout=options.timeout || -1
 
-        setTimeout(()=>{
+        setTimeout(function () {
             if(timeout>0){
                 reject(new Error('fetch jsonp timeout of '+timeout+'!'))
             }
@@ -311,19 +318,25 @@ Vue2Loader.fetchUrl=function(url){
             url=url+'.jsonp.js'
         }
         return Vue2Loader.fetchJsonp(url)
-            .then(res=>res.text())
+            .then(function (res) {
+                return res.text()
+            })
     }
     if((typeof fetch)!=='undefined'){
         return fetch(url,{
             mode: 'no-cors'
-        }).then(res=>res.text())
+        }).then(function (res) {
+            return res.text()
+        })
     }
     if((typeof  axios)!=='undefined'){
         return axios({
             url: url,
             method: 'get',
             responseType: 'text'
-        }).then(res=>res.data)
+        }).then(function (res) {
+            return res.data
+        })
     }
     throw Error('not found any support fetch tool!')
 }
@@ -334,7 +347,10 @@ Vue2Loader.fetchUrl=function(url){
  * @param mixinVarName {string|null}
  * @return {Promise<mixinVarName>}
  */
-Vue2Loader.loadMixins=function (mixins=[],mixinVarName=null){
+Vue2Loader.loadMixins = function (mixins, mixinVarName) {
+    if (!mixins) {
+        mixins = []
+    }
     if(!mixinVarName){
         mixinVarName='vue_mixins_'+Vue2Loader.randomUUID()
     }
@@ -354,7 +370,7 @@ Vue2Loader.loadMixins=function (mixins=[],mixinVarName=null){
         }
     }
     return Promise.all(mixinList)
-        .then(vueMixins=>{
+        .then(function (vueMixins) {
             for (let i = 0; i < vueMixins.length; i++) {
                 let item = vueMixins[i];
                 if(item){
@@ -379,7 +395,7 @@ Vue2Loader.initVueApp=function(vueOptions,
     if(!elemId){
         elemId='app'
     }
-    vueOptions.el=`#${elemId}`
+    vueOptions.el = '#' + elemId
     if(window[mixinVarName]){
         vueOptions.mixins=window[mixinVarName]
     }
@@ -402,7 +418,7 @@ Vue2Loader.initVueComponent=function (vueOptions,
                                       templateElemId,
                                       mixinVarName,
                                       vueCompVarName){
-    let templateDom=document.querySelector(`#vue_component_${templateElemId}`)
+    let templateDom = document.querySelector('#vue_component_' + templateElemId)
     vueOptions.name=componentName
     if(window[mixinVarName]){
         vueOptions.mixins=window[mixinVarName]
@@ -440,20 +456,26 @@ Vue2Loader.appendHeader=function (header){
  * @param mixins {string[]|null}
  * @return {Promise<string>}
  */
-Vue2Loader.createApp=function(url,appId='app',mixins=[]){
+Vue2Loader.createApp = function (url, appId, mixins) {
     if(!appId){
         appId='app'
     }
+    if (!mixins) {
+        mixins = []
+    }
     return Vue2Loader.loadMixins(mixins)
-        .then((mixinVarName)=>{
-            return Vue2Loader.fetchUrl(url).then(vueHtml=>{
+        .then(function (mixinVarName) {
+            return Vue2Loader.fetchUrl(url).then(function (vueHtml) {
                 return {
                     mixinVarName:mixinVarName,
                     vueHtml:vueHtml
                 }
             })
         })
-        .then(({mixinVarName,vueHtml})=>{
+        .then(function (args) {
+            const mixinVarName = args.mixinVarName;
+            const vueHtml = args.vueHtml;
+
             const vueTemplate = Vue2Loader.parseVueTemplate(vueHtml);
 
             Vue2Loader.appendHeader(vueTemplate.header)
@@ -462,25 +484,25 @@ Vue2Loader.createApp=function(url,appId='app',mixins=[]){
             Vue2Loader.domSetInnerHtml(appDom,vueTemplate.template)
 
 
-            let styleDom = Vue2Loader.domGetOrCreate(`vue_style_${appId}`,'style',document.head)
+            let styleDom = Vue2Loader.domGetOrCreate('vue_style_' + appId, 'style', document.head)
             Vue2Loader.domSetInnerHtml(styleDom,vueTemplate.style)
 
             let vueAppVarName='vue_app_'+vueTemplate.varName
             let script=vueTemplate.script
             script+='\n'
-            script+=`Vue2Loader.initVueApp(${vueTemplate.varName},'${appId}','${mixinVarName}','${vueAppVarName}')\n`
+            script += 'Vue2Loader.initVueApp(' + vueTemplate.varName + ',"' + appId + '","' + mixinVarName + '","' + vueAppVarName + '")\n'
 
-            let scriptDom = Vue2Loader.domGetOrCreate(`vue_script_${appId}`,'script',document.body);
+            let scriptDom = Vue2Loader.domGetOrCreate('vue_script_' + appId, 'script', document.body);
             scriptDom.type = 'text/javascript'
             Vue2Loader.domSetInnerHtml(scriptDom,script)
 
-            return new Promise((resolve, reject)=>{
-                let spyAppSetupCall=()=>{
+            return new Promise(function (resolve, reject) {
+                let spyAppSetupCall = function () {
                     if(window[vueAppVarName]){
                         resolve(window[vueAppVarName])
-                        setTimeout(()=>{
+                        setTimeout(function () {
                             delete window[mixinVarName]
-                            // Vue2Loader.domRemove(scriptDom)
+                            Vue2Loader.domRemove(scriptDom)
                         },300)
                     }else{
                         setTimeout(spyAppSetupCall,30)
@@ -544,7 +566,13 @@ Vue2Loader.loadDefaultResources=function(){
  * @param mixins {string[]|null}
  * @return {Promise<string>}
  */
-Vue2Loader.createDefaultApp = function (appId = 'app', mixins = []) {
+Vue2Loader.createDefaultApp = function (appId, mixins) {
+    if (!appId) {
+        appId = 'app'
+    }
+    if (!mixins) {
+        mixins = []
+    }
     let info = Vue2Loader.parseCurrentPageInfo();
     let fullAppUrl=info.pagePath+'/'+info.pageName+'.vue'
     return Vue2Loader.createApp(fullAppUrl, appId, mixins)
@@ -562,7 +590,7 @@ Vue2Loader.createDefaultApp = function (appId = 'app', mixins = []) {
  * @param mixins {string[]|null}
  * @return {Promise<string>}
  */
-Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
+Vue2Loader.createComponent = function (url, componentName, mixins) {
     if(!componentName){
         componentName=url
         let idx=componentName.lastIndexOf('/')
@@ -574,46 +602,51 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
             componentName=componentName.substring(0,idx)
         }
     }
+    if (!mixins) {
+        mixins = []
+    }
     let appId=componentName+'_'+Vue2Loader.randomUUID()
     return Vue2Loader.loadMixins(mixins)
-        .then((mixinVarName)=>{
-            return Vue2Loader.fetchUrl(url).then(vueHtml=>{
+        .then(function (mixinVarName) {
+            return Vue2Loader.fetchUrl(url).then(function (vueHtml) {
                 return {
                     mixinVarName:mixinVarName,
                     vueHtml:vueHtml
                 }
             })
         })
-        .then(({mixinVarName,vueHtml})=>{
+        .then(function (args) {
+            const mixinVarName = args.mixinVarName;
+            const vueHtml = args.vueHtml;
             const vueTemplate = Vue2Loader.parseVueTemplate(vueHtml);
 
             Vue2Loader.appendHeader(vueTemplate.header)
 
-            let appDom = Vue2Loader.domGetOrCreate(`vue_component_${appId}`,'div',document.body);
+            let appDom = Vue2Loader.domGetOrCreate('vue_component_' + appId, 'div', document.body);
             appDom.style.display='none'
             appDom.style.height='0px'
             appDom.style.width='0px'
             Vue2Loader.domSetInnerHtml(appDom,vueTemplate.template)
 
 
-            let styleDom = Vue2Loader.domGetOrCreate(`vue_component_style_${appId}`,'style',document.body);
+            let styleDom = Vue2Loader.domGetOrCreate('vue_component_style_' + appId, 'style', document.body);
             Vue2Loader.domSetInnerHtml(styleDom,vueTemplate.style)
 
 
             let vueCompVarName='vue_comp_'+vueTemplate.varName
             let script=vueTemplate.script
             script+='\n'
-            script+=`Vue2Loader.initVueComponent(${vueTemplate.varName},'${componentName}','${appId}','${mixinVarName}','${vueCompVarName}')\n`
+            script += 'Vue2Loader.initVueComponent(' + vueTemplate.varName + ',"' + componentName + '","' + appId + '","' + mixinVarName + '","' + vueCompVarName + '")\n'
 
-            let scriptDom = Vue2Loader.domGetOrCreate(`vue_component_script_${appId}`,'script',document.body);
+            let scriptDom = Vue2Loader.domGetOrCreate('vue_component_script_' + appId, 'script', document.body);
             scriptDom.type = 'text/javascript'
             Vue2Loader.domSetInnerHtml(scriptDom,script)
 
-            let spyCompSetupCall=()=>{
+            let spyCompSetupCall = function () {
                 if(window[vueCompVarName]){
                     Vue2Loader.domRemove(scriptDom)
                     Vue2Loader.domRemove(appDom)
-                    setTimeout(()=>{
+                    setTimeout(function () {
                         delete window[mixinVarName]
                         delete window[vueCompVarName]
                     },300)
@@ -625,7 +658,7 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
 
             return appId
         })
-        .catch(error=>{
+        .catch(function (error) {
             return Promise.resolve(appId)
         })
 
@@ -638,17 +671,17 @@ Vue2Loader.createComponent=function(url,componentName=null,mixins=[]){
  */
 Vue2Loader.loadObject=function(url){
     return Vue2Loader.fetchUrl(url)
-        .then(script=>{
+        .then(function (script) {
             let varName='js_obj_'+Vue2Loader.randomUUID()
             script=script.replace(/export\s+default\s+\{/,'window.'+varName+' = {')
-            let scriptDom = Vue2Loader.domGetOrCreate(`js_obj_script_${varName}`,'script',document.body);
+            let scriptDom = Vue2Loader.domGetOrCreate('js_obj_script_' + varName, 'script', document.body);
             scriptDom.type = 'text/javascript'
             Vue2Loader.domSetInnerHtml(scriptDom,script)
-            return new Promise((resolve, reject)=>{
-                let spyAppSetupCall=()=>{
+            return new Promise(function (resolve, reject) {
+                let spyAppSetupCall = function () {
                     if(window[varName]){
                         resolve(window[varName])
-                        setTimeout(()=>{
+                        setTimeout(function () {
                             delete window[varName]
                             Vue2Loader.domRemove(scriptDom)
                         },500)
@@ -658,7 +691,7 @@ Vue2Loader.loadObject=function(url){
                 }
                 setTimeout(spyAppSetupCall,30)
             })
-        }).catch(err=>{
+        }).catch(function (err) {
             return Promise.resolve(null)
         })
 }
@@ -687,7 +720,10 @@ Vue2Loader.loadObject=function(url){
  * @param config {object}
  * @return {Promise<string>}
  */
-Vue2Loader.setupVueApp=function(config={}){
+Vue2Loader.setupVueApp = function (config) {
+    if (!config) {
+        config = {}
+    }
     let components=[]
     if(config.components){
         for (let i = 0; i < config.components.length; i++) {
@@ -703,7 +739,7 @@ Vue2Loader.setupVueApp=function(config={}){
         }
     }
     return Promise.all(components)
-        .then(()=>{
+        .then(function () {
             if(!config.url || config.url==''){
                 return Vue2Loader.createDefaultApp(config.appId, config.mixins)
             }else{
