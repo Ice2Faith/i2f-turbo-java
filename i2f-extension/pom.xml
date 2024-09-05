@@ -64,6 +64,7 @@
         <module>i2f-extension-opencv-data</module>
         <module>i2f-extension-agent-javassist</module>
         <module>i2f-extension-javassist</module>
+        <module>i2f-extension-mybatis</module>
     </modules>
 
 
