@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.mybatis",
+      "type": "i2f.springboot.mybatis.MybatisDynamicAutoConfiguration",
+      "sourceType": "i2f.springboot.mybatis.MybatisDynamicAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.mybatis.dynamic.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable dynamic script executor.",
+      "sourceType": "i2f.springboot.mybatis.dynamic.SpringMybatisDynamicScriptExecutor",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
