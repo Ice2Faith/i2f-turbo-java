@@ -136,14 +136,35 @@ public class ReflectResolver {
     public static Field getField(Class<?> clazz, String fieldName) {
         String key = clazz + "##" + fieldName;
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_FIELD : null), key, (k) -> {
-            Map<Field, Class<?>> fields = getFields(clazz, (field) -> {
-                return field.getName().equals(fieldName);
-            }, true);
-            if (fields.isEmpty()) {
-                return null;
-            }
-            return fields.keySet().iterator().next();
+            return getField0(clazz, fieldName);
         }, v -> v);
+    }
+
+    public static Field getField0(Class<?> clazz, String fieldName) {
+        try {
+            Field field = clazz.getField(fieldName);
+            if (field != null) {
+                return field;
+            }
+        } catch (Exception e) {
+
+        }
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            if (field != null) {
+                return field;
+            }
+        } catch (Exception e) {
+
+        }
+
+        Map<Field, Class<?>> fields = getFields(clazz, (field) -> {
+            return field.getName().equals(fieldName);
+        }, true);
+        if (fields.isEmpty()) {
+            return null;
+        }
+        return fields.keySet().iterator().next();
     }
 
     public static <T extends Annotation> Map<Field, Set<T>> getFieldsWithAnnotation(Class<?> clazz, Class<T> annotationClass) {
@@ -706,44 +727,218 @@ public class ReflectResolver {
         return ret;
     }
 
+    public static <T> T copyWeak(Object src, T dst) {
+        return copy(src, dst, null, null, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName, ReflectResolver::weakName);
+    }
+
+    public static <T> T copyWeak(Object src, T dst, Predicate<Field> fieldFilter, Predicate<String> mapFieldFilter) {
+        return copy(src, dst, fieldFilter, mapFieldFilter, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName, ReflectResolver::weakName);
+    }
+
     public static <T> T copy(Object src, T dst) {
-        return copy(src, dst, null, null);
+        return copy(src, dst, null, null, null, null, null);
     }
 
     public static <T> T copy(Object src, T dst, Predicate<Field> fieldFilter, Predicate<String> mapFieldFilter) {
+        return copy(src, dst, fieldFilter, mapFieldFilter, null, null, null);
+    }
+
+    public static <T> T copy(Object src, T dst, Predicate<Field> fieldFilter, Predicate<String> mapFieldFilter,
+                             Function<Field, String> srcFieldNameMapper,
+                             Function<Field, String> dstFieldNameMapper,
+                             Function<String, String> srcMapNameMapper) {
         if (src == null || dst == null) {
             return dst;
         }
-        if (src instanceof Map && dst instanceof Map) {
-
+        if (src.getClass().isArray() && dst instanceof Collection) {
+            return (T) arrObj2col(src, (Collection) dst);
+        } else if (src instanceof Iterator && dst instanceof Collection) {
+            return (T) col2col((Iterator) src, (Collection) dst);
+        } else if (src instanceof Iterable && dst instanceof Collection) {
+            return (T) col2col((Iterable) src, (Collection) dst);
+        } else if (src instanceof Enumeration && dst instanceof Collection) {
+            return (T) col2col((Enumeration) src, (Collection) dst);
+        } else if (src instanceof Map && dst instanceof Map) {
+            map2map((Map) src, (Map) dst, mapFieldFilter == null ? null : (key) -> {
+                String mKey = null;
+                if (mKey != null) {
+                    if (key instanceof String) {
+                        mKey = (String) key;
+                    } else {
+                        mKey = String.valueOf(key);
+                    }
+                }
+                return mapFieldFilter.test(mKey);
+            }, srcMapNameMapper);
         } else if (src instanceof Map) {
-            map2bean((Map<String, Object>) src, dst, mapFieldFilter);
+            map2bean((Map<String, Object>) src, dst, mapFieldFilter, srcMapNameMapper, dstFieldNameMapper);
         } else if (dst instanceof Map) {
-            bean2map(src, (Map<String, Object>) dst, fieldFilter);
+            bean2map(src, (Map<String, Object>) dst, fieldFilter, srcFieldNameMapper);
         } else {
-            beanCopy(src, dst, fieldFilter);
+            beanCopy(src, dst, fieldFilter, srcFieldNameMapper, dstFieldNameMapper);
         }
         return dst;
     }
 
+    public static <E, C extends Collection<E>> C arrObj2col(Object arr, C col) {
+        return arrObj2col(arr, col, null);
+    }
+
+    public static <E, C extends Collection<E>> C arrObj2col(Object arr, C col, Predicate<E> filter) {
+        if (arr == null || col == null) {
+            return col;
+        }
+        if (!arr.getClass().isArray()) {
+            return col;
+        }
+        int len = Array.getLength(arr);
+        for (int i = 0; i < len; i++) {
+            E elem = (E) Array.get(arr, i);
+            if (filter == null || filter.test(elem)) {
+                col.add(elem);
+            }
+        }
+        return col;
+    }
+
+    public static <E, C extends Collection<E>> C arr2col(E[] arr, C col) {
+        return arr2col(arr, col, null);
+    }
+
+    public static <E, C extends Collection<E>> C arr2col(E[] arr, C col, Predicate<E> filter) {
+        if (arr == null || col == null) {
+            return col;
+        }
+        for (int i = 0; i < arr.length; i++) {
+            E elem = arr[i];
+            if (filter == null || filter.test(elem)) {
+                col.add(elem);
+            }
+        }
+        return col;
+    }
+
+    public static <E, C extends Collection<E>> C col2col(Iterable<E> iterable, C col) {
+        return col2col(iterable, col, null);
+    }
+
+    public static <E, C extends Collection<E>> C col2col(Iterable<E> iterable, C col, Predicate<E> filter) {
+        if (iterable == null || col == null) {
+            return col;
+        }
+        return col2col(iterable.iterator(), col, filter);
+    }
+
+    public static <E, C extends Collection<E>> C col2col(Iterator<E> iterator, C col) {
+        return col2col(iterator, col, null);
+    }
+
+    public static <E, C extends Collection<E>> C col2col(Iterator<E> iterator, C col, Predicate<E> filter) {
+        if (iterator == null || col == null) {
+            return col;
+        }
+        while (iterator.hasNext()) {
+            E elem = iterator.next();
+            if (filter == null || filter.test(elem)) {
+                col.add(elem);
+            }
+        }
+        return col;
+    }
+
+    public static <E, C extends Collection<E>> C col2col(Enumeration<E> enumeration, C col) {
+        return col2col(enumeration, col, null);
+    }
+
+    public static <E, C extends Collection<E>> C col2col(Enumeration<E> enumeration, C col, Predicate<E> filter) {
+        if (enumeration == null || col == null) {
+            return col;
+        }
+        while (enumeration.hasMoreElements()) {
+            E elem = enumeration.nextElement();
+            if (filter == null || filter.test(elem)) {
+                col.add(elem);
+            }
+        }
+        return col;
+    }
+
+    public static <K, T extends Map> T map2map(Map<K, ?> src, T dst) {
+        return map2map(src, dst, null, null);
+    }
+
+    public static <K, T extends Map> T map2map(Map<K, ?> src, T dst, Predicate<K> mapFieldFilter) {
+        return map2map(src, dst, mapFieldFilter, null);
+    }
+
+    public static <K, T extends Map> T map2map(Map<K, ?> src, T dst, Predicate<K> mapFieldFilter,
+                                               Function<String, String> srcMapNameMapper) {
+        if (src == null || dst == null) {
+            return dst;
+        }
+        for (Map.Entry<K, ?> entry : src.entrySet()) {
+            K name = entry.getKey();
+            boolean isTarget = false;
+            if (mapFieldFilter == null || mapFieldFilter.test(name)) {
+                isTarget = true;
+            }
+            if (name instanceof String) {
+                name = (K) srcMapNameMapper.apply((String) name);
+            }
+            try {
+                dst.put(name, entry.getValue());
+            } catch (Throwable e) {
+
+            }
+        }
+        return dst;
+    }
+
+    public static <T> T map2beanWeak(Map<String, Object> src, T dst) {
+        return map2bean(src, dst, null, ReflectResolver::weakName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T map2beanWeak(Map<String, Object> src, T dst, Predicate<String> fieldFilter) {
+        return map2bean(src, dst, fieldFilter, ReflectResolver::weakName, ReflectResolver::weakFieldName);
+    }
+
     public static <T> T map2bean(Map<String, Object> src, T dst) {
-        return map2bean(src, dst, null);
+        return map2bean(src, dst, null, null, null);
     }
 
     public static <T> T map2bean(Map<String, Object> src, T dst, Predicate<String> fieldFilter) {
+        return map2bean(src, dst, fieldFilter, null, null);
+    }
+
+    public static <T> T map2bean(Map<String, Object> src, T dst, Predicate<String> fieldFilter,
+                                 Function<String, String> srcMapNameMapper,
+                                 Function<Field, String> dstFieldNameMapper) {
         if (src == null || dst == null) {
             return dst;
         }
         Map<Field, Class<?>> dstFields = getFields(dst.getClass());
         Map<String, Field> dstNameMap = new HashMap<>();
         for (Field item : dstFields.keySet()) {
-            dstNameMap.put(item.getName(), item);
+            String name = item.getName();
+            if (dstFieldNameMapper != null) {
+                String str = dstFieldNameMapper.apply(item);
+                if (str != null) {
+                    name = str;
+                }
+            }
+            dstNameMap.put(name, item);
         }
         for (Map.Entry<String, Object> entry : src.entrySet()) {
             String name = entry.getKey();
             boolean isTarget = false;
             if (fieldFilter == null || fieldFilter.test(name)) {
                 isTarget = true;
+            }
+            if (srcMapNameMapper != null) {
+                String str = srcMapNameMapper.apply(name);
+                if (str != null) {
+                    name = str;
+                }
             }
             Field dstField = dstNameMap.get(name);
             if (dstField == null) {
@@ -764,10 +959,15 @@ public class ReflectResolver {
     }
 
     public static <M extends Map<String, Object>> M bean2map(Object src, M dst) {
-        return bean2map(src, dst, null);
+        return bean2map(src, dst, null, null);
     }
 
     public static <M extends Map<String, Object>> M bean2map(Object src, M dst, Predicate<Field> fieldFilter) {
+        return bean2map(src, dst, fieldFilter, null);
+    }
+
+    public static <M extends Map<String, Object>> M bean2map(Object src, M dst, Predicate<Field> fieldFilter,
+                                                             Function<Field, String> srcFieldNameMapper) {
         if (src == null || dst == null) {
             return dst;
         }
@@ -780,6 +980,12 @@ public class ReflectResolver {
                 isTarget = true;
             }
             String name = srcField.getName();
+            if (srcFieldNameMapper != null) {
+                String str = srcFieldNameMapper.apply(srcField);
+                if (str != null) {
+                    name = str;
+                }
+            }
             if (!isTarget) {
                 continue;
             }
@@ -795,11 +1001,40 @@ public class ReflectResolver {
         return dst;
     }
 
+    public static String weakName(String name) {
+        if (name == null) {
+            return null;
+        }
+        return name.replaceAll("-|_", "").toLowerCase();
+    }
+
+    public static String weakFieldName(Field field) {
+        if (field == null) {
+            return null;
+        }
+        return field.getName().replaceAll("-|_", "").toLowerCase();
+    }
+
+
+    public static <T> T beanCopyWeak(Object src, T dst) {
+        return beanCopy(src, dst, null, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T beanCopyWeak(Object src, T dst, Predicate<Field> fieldFilter) {
+        return beanCopy(src, dst, fieldFilter, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
     public static <T> T beanCopy(Object src, T dst) {
-        return beanCopy(src, dst, null);
+        return beanCopy(src, dst, null, null, null);
     }
 
     public static <T> T beanCopy(Object src, T dst, Predicate<Field> fieldFilter) {
+        return beanCopy(src, dst, fieldFilter, null, null);
+    }
+
+    public static <T> T beanCopy(Object src, T dst, Predicate<Field> fieldFilter,
+                                 Function<Field, String> srcFieldNameMapper,
+                                 Function<Field, String> dstFieldNameMapper) {
         if (src == null || dst == null) {
             return dst;
         }
@@ -808,7 +1043,14 @@ public class ReflectResolver {
         Map<Field, Class<?>> dstFields = getFields(dst.getClass());
         Map<String, Field> dstNameMap = new HashMap<>();
         for (Field item : dstFields.keySet()) {
-            dstNameMap.put(item.getName(), item);
+            String name = item.getName();
+            if (dstFieldNameMapper != null) {
+                String str = dstFieldNameMapper.apply(item);
+                if (str != null) {
+                    name = str;
+                }
+            }
+            dstNameMap.put(name, item);
         }
 
         for (Field srcField : srcFields.keySet()) {
@@ -817,6 +1059,12 @@ public class ReflectResolver {
                 isTarget = true;
             }
             String name = srcField.getName();
+            if (srcFieldNameMapper != null) {
+                String str = srcFieldNameMapper.apply(srcField);
+                if (str != null) {
+                    name = str;
+                }
+            }
             Field dstField = dstNameMap.get(name);
             if (dstField == null) {
                 isTarget = false;
