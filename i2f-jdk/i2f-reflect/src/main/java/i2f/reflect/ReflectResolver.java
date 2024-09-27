@@ -10,6 +10,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -237,14 +238,34 @@ public class ReflectResolver {
     public static Method getMethod(Class<?> clazz, String methodName) {
         String key = clazz + "#" + methodName;
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_METHOD : null), key, (k) -> {
-            Map<Method, Class<?>> methods = getMethods(clazz, (method) -> {
-                return method.getName().equals(methodName);
-            }, true);
-            if (methods.isEmpty()) {
-                return null;
-            }
-            return methods.keySet().iterator().next();
+            return getMethod0(clazz, methodName);
         }, v -> v);
+    }
+
+    public static Method getMethod0(Class<?> clazz, String methodName) {
+        try {
+            Method method = clazz.getMethod(methodName);
+            if (method != null) {
+                return method;
+            }
+        } catch (Exception e) {
+
+        }
+        try {
+            Method method = clazz.getDeclaredMethod(methodName);
+            if (method != null) {
+                return method;
+            }
+        } catch (Exception e) {
+
+        }
+        Map<Method, Class<?>> methods = getMethods(clazz, (method) -> {
+            return method.getName().equals(methodName);
+        }, true);
+        if (methods.isEmpty()) {
+            return null;
+        }
+        return methods.keySet().iterator().next();
     }
 
     private static LruMap<Class<?>, Map<Method, Class<?>>> CACHE_GET_METHODS = new LruMap<>(8192);
@@ -761,7 +782,7 @@ public class ReflectResolver {
         } else if (src instanceof Map && dst instanceof Map) {
             map2map((Map) src, (Map) dst, mapFieldFilter == null ? null : (key) -> {
                 String mKey = null;
-                if (mKey != null) {
+                if (key != null) {
                     if (key instanceof String) {
                         mKey = (String) key;
                     } else {
@@ -1005,14 +1026,14 @@ public class ReflectResolver {
         if (name == null) {
             return null;
         }
-        return name.replaceAll("-|_", "").toLowerCase();
+        return name.replaceAll("[-_'\"`.]", "").toLowerCase();
     }
 
     public static String weakFieldName(Field field) {
         if (field == null) {
             return null;
         }
-        return field.getName().replaceAll("-|_", "").toLowerCase();
+        return field.getName().replaceAll("[-_]", "").toLowerCase();
     }
 
 
@@ -1025,60 +1046,270 @@ public class ReflectResolver {
     }
 
     public static <T> T beanCopy(Object src, T dst) {
-        return beanCopy(src, dst, null, null, null);
+        return beanCopy(src, dst, null, null, null, null, null, null);
     }
 
     public static <T> T beanCopy(Object src, T dst, Predicate<Field> fieldFilter) {
-        return beanCopy(src, dst, fieldFilter, null, null);
+        return beanCopy(src, dst, fieldFilter, null, null, null, null, null);
+    }
+
+    /**
+     * bean属性的复制
+     * 无论值src中的值是什么全部复制覆盖dst中的字段
+     *
+     * @param src
+     * @param dst
+     * @param fieldFilter
+     * @param srcFieldNameMapper
+     * @param dstFieldNameMapper
+     * @param <T>
+     * @return
+     */
+    public static <T> T beanCopy(Object src, T dst, Predicate<Field> fieldFilter,
+                                 Function<Field, String> srcFieldNameMapper,
+                                 Function<Field, String> dstFieldNameMapper) {
+        return beanCopy(src, dst, fieldFilter, srcFieldNameMapper, dstFieldNameMapper, null, null, null);
+    }
+
+    public static <T> T beanAssignWeak(Object src, T dst) {
+        return beanAssign(src, dst, null, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T beanAssignWeak(Object src, T dst, Predicate<Field> fieldFilter) {
+        return beanAssign(src, dst, fieldFilter, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T beanAssign(Object src, T dst) {
+        return beanAssign(src, dst, null, null, null);
+    }
+
+    public static <T> T beanAssign(Object src, T dst, Predicate<Field> fieldFilter) {
+        return beanAssign(src, dst, fieldFilter, null, null);
+    }
+
+    /**
+     * bean的覆盖
+     * 使用src中的所有非空属性覆盖dst中的属性
+     * 当dst中的属性也非空时，也会被src覆盖
+     *
+     * @param src
+     * @param dst
+     * @param fieldFilter
+     * @param srcFieldNameMapper
+     * @param dstFieldNameMapper
+     * @param <T>
+     * @return
+     */
+    public static <T> T beanAssign(Object src, T dst, Predicate<Field> fieldFilter,
+                                   Function<Field, String> srcFieldNameMapper,
+                                   Function<Field, String> dstFieldNameMapper) {
+        return beanCopy(src, dst, fieldFilter, srcFieldNameMapper, dstFieldNameMapper, null, v -> {
+            if (v == null) {
+                return false;
+            }
+            if (v instanceof String) {
+                if (((String) v).isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
+        }, null);
+    }
+
+    public static <T> T beanMergeWeak(Object src, T dst) {
+        return beanMerge(src, dst, null, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T beanMergeWeak(Object src, T dst, Predicate<Field> fieldFilter) {
+        return beanMerge(src, dst, fieldFilter, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T beanMerge(Object src, T dst) {
+        return beanMerge(src, dst, null, null, null);
+    }
+
+    public static <T> T beanMerge(Object src, T dst, Predicate<Field> fieldFilter) {
+        return beanMerge(src, dst, fieldFilter, null, null);
+    }
+
+    /**
+     * bean属性的合并
+     * 保留dst中的非空属性，并且使用src中的非空属性补充到dst中
+     * 到dst中和src中同时存在相同字段的非空时，则保留dst中的值
+     *
+     * @param src
+     * @param dst
+     * @param fieldFilter
+     * @param srcFieldNameMapper
+     * @param dstFieldNameMapper
+     * @param <T>
+     * @return
+     */
+    public static <T> T beanMerge(Object src, T dst, Predicate<Field> fieldFilter,
+                                  Function<Field, String> srcFieldNameMapper,
+                                  Function<Field, String> dstFieldNameMapper) {
+        return beanCopy(src, dst, fieldFilter, srcFieldNameMapper, dstFieldNameMapper, null, v -> {
+            if (v == null) {
+                return false;
+            }
+            if (v instanceof String) {
+                if (((String) v).isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
+        }, v -> {
+            if (v == null) {
+                return true;
+            }
+            if (v instanceof String) {
+                if (((String) v).isEmpty()) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     public static <T> T beanCopy(Object src, T dst, Predicate<Field> fieldFilter,
                                  Function<Field, String> srcFieldNameMapper,
-                                 Function<Field, String> dstFieldNameMapper) {
+                                 Function<Field, String> dstFieldNameMapper,
+                                 Function<Object, Object> valueMapper,
+                                 Predicate<Object> newValueCopyFilter,
+                                 Predicate<Object> oldValueCoverFilter) {
+        return beanCopy0(src, dst, fieldFilter,
+                srcFieldNameMapper == null ? null : (field) -> {
+                    String name = srcFieldNameMapper.apply(field);
+                    if (name == null) {
+                        return Collections.emptyList();
+                    }
+                    return Collections.singletonList(name);
+                }, dstFieldNameMapper == null ? null : (field) -> {
+                    String name = dstFieldNameMapper.apply(field);
+                    if (name == null) {
+                        return Collections.emptyList();
+                    }
+                    return Collections.singletonList(name);
+                }, valueMapper,
+                newValueCopyFilter,
+                oldValueCoverFilter);
+    }
+
+    public static <T> T beanCopy0(Object src, T dst) {
+        return beanCopy0(src, dst, null,
+                null, null,
+                null, null, null);
+    }
+
+    public static <T> T beanCopy0(Object src, T dst, Predicate<Field> fieldFilter) {
+        return beanCopy0(src, dst, fieldFilter,
+                null, null,
+                null, null, null);
+    }
+
+    public static <T> T beanCopy0(Object src, T dst, Predicate<Field> fieldFilter,
+                                  Function<Field, List<String>> srcFieldNameMapper,
+                                  Function<Field, List<String>> dstFieldNameMapper) {
+        return beanCopy0(src, dst, fieldFilter,
+                srcFieldNameMapper, dstFieldNameMapper,
+                null, null, null);
+    }
+
+    /**
+     * bean的字段复制
+     *
+     * @param src
+     * @param dst
+     * @param fieldFilter         指定src中的哪些字段将会被用于copy，允许null则全字段
+     * @param srcFieldNameMapper  指定src中的每个字段可以映射为哪些字段名以和dst的字段进行匹配，也就是说允许一个字段有多个别名，允许null则默认字段名
+     * @param dstFieldNameMapper  指定dst中的每个字段可以映射为哪些字段名以和src的字段进行匹配，也就是说允许一个字段有多个别名，允许null则默认字段名
+     * @param valueMapper         指定从src中取出的字段值进行怎样的转换操作到dst中，允许null则改规则不生效
+     * @param newValueCopyFilter  指定哪些情况下的src的值需要调用dst进行值的设定，这就允许过滤某些src的值不设置到dst中，比如null值不进行设置，允许null则改规则不生效
+     * @param oldValueCoverFilter 指定当dst中要被设置时先检测是否需要进行覆盖，这就可以排除当dst中的值已经满足需求时不要进行覆盖，比如dst中的值已经非null时保留dst原始值而不进行修改，允许null则改规则不生效
+     * @param <T>
+     * @return dst
+     */
+    public static <T> T beanCopy0(Object src, T dst, Predicate<Field> fieldFilter,
+                                  Function<Field, List<String>> srcFieldNameMapper,
+                                  Function<Field, List<String>> dstFieldNameMapper,
+                                  Function<Object, Object> valueMapper,
+                                  Predicate<Object> newValueCopyFilter,
+                                  Predicate<Object> oldValueCoverFilter) {
         if (src == null || dst == null) {
             return dst;
         }
 
         Map<Field, Class<?>> srcFields = getFields(src.getClass());
-        Map<Field, Class<?>> dstFields = getFields(dst.getClass());
-        Map<String, Field> dstNameMap = new HashMap<>();
-        for (Field item : dstFields.keySet()) {
-            String name = item.getName();
-            if (dstFieldNameMapper != null) {
-                String str = dstFieldNameMapper.apply(item);
-                if (str != null) {
-                    name = str;
-                }
-            }
-            dstNameMap.put(name, item);
+        if (srcFields.isEmpty()) {
+            return dst;
         }
 
+        Map<Field, Class<?>> dstFields = getFields(dst.getClass());
+        if (dstFields.isEmpty()) {
+            return dst;
+        }
+
+        Map<String, Field> dstNameMap = new HashMap<>();
+        for (Field item : dstFields.keySet()) {
+            if (dstFieldNameMapper != null) {
+                List<String> list = dstFieldNameMapper.apply(item);
+                for (String name : list) {
+                    if (name != null) {
+                        dstNameMap.put(name, item);
+                    }
+                }
+
+            }
+            dstNameMap.put(item.getName(), item);
+        }
+
+        HashSet<String> list = new HashSet<>();
         for (Field srcField : srcFields.keySet()) {
             boolean isTarget = false;
             if (fieldFilter == null || fieldFilter.test(srcField)) {
                 isTarget = true;
             }
-            String name = srcField.getName();
-            if (srcFieldNameMapper != null) {
-                String str = srcFieldNameMapper.apply(srcField);
-                if (str != null) {
-                    name = str;
-                }
-            }
-            Field dstField = dstNameMap.get(name);
-            if (dstField == null) {
-                isTarget = false;
-            }
             if (!isTarget) {
                 continue;
             }
+            list.clear();
+            if (srcFieldNameMapper != null) {
+                List<String> names = srcFieldNameMapper.apply(srcField);
+                for (String name : names) {
+                    if (name != null) {
+                        list.add(name);
+                    }
+                }
+            }
+            list.add(srcField.getName());
 
-            try {
-                Object val = valueGet(src, srcField);
-                val = ObjectConvertor.tryConvertAsType(val, dstField.getType());
-                valueSet(dst, dstField, val);
-            } catch (Throwable e) {
+            for (String name : list) {
+                Field dstField = dstNameMap.get(name);
+                if (dstField == null) {
+                    continue;
+                }
 
+                try {
+                    if (oldValueCoverFilter != null) {
+                        Object old = valueGet(dst, dstField);
+                        if (oldValueCoverFilter != null) {
+                            if (!oldValueCoverFilter.test(old)) {
+                                continue;
+                            }
+                        }
+                    }
+                    Object val = valueGet(src, srcField);
+                    if (valueMapper != null) {
+                        val = valueMapper.apply(val);
+                    }
+                    if (newValueCopyFilter != null && !newValueCopyFilter.test(val)) {
+                        continue;
+                    }
+                    val = ObjectConvertor.tryConvertAsType(val, dstField.getType());
+                    valueSet(dst, dstField, val);
+                } catch (Throwable e) {
+
+                }
             }
         }
 
@@ -1160,12 +1391,41 @@ public class ReflectResolver {
     public static Method getGetter(Class<?> clazz, String fieldName) {
         String key = clazz + "##" + fieldName;
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_GETTER_BY_NAME : null), key, (k) -> {
-            List<Method> getters = getGetters(clazz, fieldName);
-            if (getters.isEmpty()) {
-                return null;
-            }
-            return getters.get(0);
+            return getGetter0(clazz, fieldName);
         }, v -> v);
+    }
+
+    public static Method getGetter0(Class<?> clazz, String fieldName) {
+        AtomicReference<Method> ret = new AtomicReference<>();
+        iterGetterNames(fieldName, (name) -> {
+            try {
+                Method method = clazz.getMethod(name);
+                if (method != null && isGetter(method)) {
+                    ret.set(method);
+                    return true;
+                }
+            } catch (Exception e) {
+
+            }
+            try {
+                Method method = clazz.getDeclaredMethod(name);
+                if (method != null && isGetter(method)) {
+                    ret.set(method);
+                    return true;
+                }
+            } catch (Exception e) {
+
+            }
+            return false;
+        });
+        if (ret.get() != null) {
+            return ret.get();
+        }
+        List<Method> getters = getGetters0(clazz, fieldName, true);
+        if (getters.isEmpty()) {
+            return null;
+        }
+        return getters.get(0);
     }
 
     private static LruMap<Field, List<Method>> CACHE_GET_GETTERS = new LruMap<>(8192);
@@ -1183,15 +1443,19 @@ public class ReflectResolver {
     public static List<Method> getGetters(Class<?> clazz, String fieldName) {
         String key = clazz + "##" + fieldName;
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_GETTERS_BY_NAME : null), key, (k) -> {
-            Set<String> methodNames = getGetterNames(fieldName);
-            Map<Method, Class<?>> methods = getMethods(clazz, (method) -> {
-                if (!methodNames.contains(method.getName())) {
-                    return false;
-                }
-                return isGetter(method);
-            }, false);
-            return new ArrayList<>(methods.keySet());
+            return getGetters0(clazz, fieldName, false);
         }, ArrayList::new);
+    }
+
+    public static List<Method> getGetters0(Class<?> clazz, String fieldName, boolean matchedOne) {
+        Set<String> methodNames = getGetterNames(fieldName);
+        Map<Method, Class<?>> methods = getMethods(clazz, (method) -> {
+            if (!methodNames.contains(method.getName())) {
+                return false;
+            }
+            return isGetter(method);
+        }, matchedOne);
+        return new ArrayList<>(methods.keySet());
     }
 
     public static boolean isGetter(Method method) {
@@ -1230,7 +1494,7 @@ public class ReflectResolver {
     public static Method getSetter(Class<?> clazz, String fieldName) {
         String key = clazz + "##" + fieldName;
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_SETTER_BY_NAME : null), key, (k) -> {
-            List<Method> setters = getSetters(clazz, fieldName);
+            List<Method> setters = getSetters0(clazz, fieldName, true);
             if (setters.isEmpty()) {
                 return null;
             }
@@ -1253,15 +1517,19 @@ public class ReflectResolver {
     public static List<Method> getSetters(Class<?> clazz, String fieldName) {
         String key = clazz + "##" + fieldName;
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_SETTERS_BY_NAME : null), key, (k) -> {
-            Set<String> methodNames = getSetterNames(fieldName);
-            Map<Method, Class<?>> methods = getMethods(clazz, (method) -> {
-                if (!methodNames.contains(method.getName())) {
-                    return false;
-                }
-                return isSetter(method);
-            }, false);
-            return new ArrayList<>(methods.keySet());
+            return getSetters0(clazz, fieldName, false);
         }, ArrayList::new);
+    }
+
+    public static List<Method> getSetters0(Class<?> clazz, String fieldName, boolean matchedOne) {
+        Set<String> methodNames = getSetterNames(fieldName);
+        Map<Method, Class<?>> methods = getMethods(clazz, (method) -> {
+            if (!methodNames.contains(method.getName())) {
+                return false;
+            }
+            return isSetter(method);
+        }, matchedOne);
+        return new ArrayList<>(methods.keySet());
     }
 
     public static boolean isSetter(Method method) {
@@ -1339,31 +1607,72 @@ public class ReflectResolver {
         Array.set(arr, index, value);
     }
 
+    public static boolean iterGetterNames(String fieldName, Predicate<String> stopper) {
+        String suffix = firstUpper(fieldName);
+        if (stopper.test("get" + suffix)) {
+            return true;
+        }
+        if (stopper.test("is" + suffix)) {
+            return true;
+        }
+        if (stopper.test("has" + suffix)) {
+            return true;
+        }
+        if (stopper.test("enable" + suffix)) {
+            return true;
+        }
+        if (stopper.test(fieldName)) {
+            return true;
+        }
+        if (stopper.test(suffix)) {
+            return true;
+        }
+        return false;
+    }
 
     public static Set<String> getGetterNames(String fieldName) {
         Set<String> ret = new LinkedHashSet<>();
-        String suffix = firstUpper(fieldName);
-        ret.add("get" + suffix);
-        ret.add("is" + suffix);
-        ret.add("has" + suffix);
-        ret.add("enable" + suffix);
-        ret.add(fieldName);
-        ret.add(suffix);
+        iterGetterNames(fieldName, (name) -> {
+            ret.add(name);
+            return false;
+        });
         return ret;
+    }
+
+    public static boolean iterSetterNames(String fieldName, Predicate<String> stopper) {
+        String suffix = firstUpper(fieldName);
+        if (stopper.test("set" + suffix)) {
+            return true;
+        }
+        if (stopper.test("with" + suffix)) {
+            return true;
+        }
+        if (stopper.test("enable" + suffix)) {
+            return true;
+        }
+        if (stopper.test("build" + suffix)) {
+            return true;
+        }
+        if (stopper.test(fieldName)) {
+            return true;
+        }
+        if (fieldName.startsWith("is")) {
+            if (stopper.test("set" + firstUpper(fieldName.substring("is".length())))) {
+                return true;
+            }
+        }
+        if (stopper.test(suffix)) {
+            return true;
+        }
+        return false;
     }
 
     public static Set<String> getSetterNames(String fieldName) {
         Set<String> ret = new LinkedHashSet<>();
-        String suffix = firstUpper(fieldName);
-        ret.add("set" + suffix);
-        ret.add("with" + suffix);
-        ret.add("enable" + suffix);
-        ret.add("build" + suffix);
-        ret.add(fieldName);
-        if (fieldName.startsWith("is")) {
-            ret.add("set" + firstUpper(fieldName.substring("is".length())));
-        }
-        ret.add(suffix);
+        iterSetterNames(fieldName, (name) -> {
+            ret.add(name);
+            return false;
+        });
         return ret;
     }
 
