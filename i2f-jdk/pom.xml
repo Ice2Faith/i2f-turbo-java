@@ -108,6 +108,7 @@
         <module>i2f-context</module>
         <module>i2f-environment</module>
         <module>i2f-event</module>
+        <module>i2f-i18n</module>
 
     </modules>
 

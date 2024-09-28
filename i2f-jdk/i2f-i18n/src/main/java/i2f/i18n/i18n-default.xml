@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<i18n lang="default">
+    <item name="app.version">
+        1.0.0
+    </item>
+    <item name="app.banner" lang="en" keep="true" only="true">
+        |-----------------
+        |name: svc
+        |active: prod
+        |fallback
+        |-----------------
+    </item>
+</i18n>

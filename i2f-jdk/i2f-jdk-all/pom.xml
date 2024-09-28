@@ -182,6 +182,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-i18n</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-image</artifactId>
         </dependency>
         <dependency>

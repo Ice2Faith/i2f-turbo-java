@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<i18n lang="zh-CN">
+    <item name="app.version" lang="zh-CN">
+        1.0.0
+    </item>
+    <item name="app.banner" lang="zh-CN" keep="true">
+        |-----------------
+        |name: svc
+        |active: prod
+        |-----------------
+    </item>
+</i18n>
