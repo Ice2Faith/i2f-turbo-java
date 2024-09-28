@@ -3,6 +3,13 @@ package i2f.reflect;
 
 import i2f.convert.obj.ObjectConvertor;
 import i2f.lru.LruMap;
+import i2f.reflect.virtual.VirtualField;
+import i2f.reflect.virtual.VirtualGetterField;
+import i2f.reflect.virtual.VirtualSetterField;
+import i2f.reflect.virtual.impl.FieldGetterSetterField;
+import i2f.reflect.virtual.impl.MethodGetterField;
+import i2f.reflect.virtual.impl.MethodGetterSetterField;
+import i2f.reflect.virtual.impl.MethodSetterField;
 import i2f.typeof.TypeOf;
 
 import java.io.File;
@@ -296,34 +303,7 @@ public class ReflectResolver {
         return getMethods(clazz, superFilter, methodFilter, false);
     }
 
-    public static Map<Method, Class<?>> getMethods(Class<?> clazz,
-                                                   Predicate<Class<?>> superFilter,
-                                                   Predicate<Method> methodFilter,
-                                                   boolean matchedOne
-    ) {
-        Map<Method, Class<?>> ret = new LinkedHashMap<>();
-        if (clazz == null) {
-            return ret;
-        }
-        Set<Method> arr = findMethod(clazz, methodFilter, matchedOne);
-        for (Method item : arr) {
-            ret.put(item, clazz);
-            if (matchedOne) {
-                return ret;
-            }
-        }
-        if (Object.class.equals(clazz)) {
-            return ret;
-        }
-
-        Class<?> superclass = clazz.getSuperclass();
-        if (superFilter == null || superFilter.test(superclass)) {
-            Map<Method, Class<?>> next = getMethods(superclass, superFilter, methodFilter, matchedOne);
-            ret.putAll(next);
-        }
-
-        return ret;
-    }
+    private static LruMap<String, Map<String, VirtualField>> CACHE_GET_VIRTUAL_FIELDS = new LruMap<>(8192);
 
     public static Set<Method> findMethod(Class<?> clazz, Predicate<Method> filter) {
         return findMethod(clazz, filter, false);
@@ -1957,6 +1937,601 @@ public class ReflectResolver {
         }
         mergeArray(ret, filter, matchedOne, elem.getDeclaredAnnotations(), elem.getAnnotations());
         return ret;
+    }
+    private static LruMap<String, Map<VirtualField, Class<?>>> CACHE_GET_VIRTUAL_FIELDS0 = new LruMap<>(8192);
+    private static LruMap<String, Map<String, VirtualGetterField>> CACHE_GET_VIRTUAL_GETTER_FIELDS = new LruMap<>(8192);
+    private static LruMap<String, Map<String, VirtualSetterField>> CACHE_GET_VIRTUAL_SETTER_FIELDS = new LruMap<>(8192);
+
+    public static Map<Method, Class<?>> getMethods(Class<?> clazz,
+                                                   Predicate<Class<?>> superFilter,
+                                                   Predicate<Method> methodFilter,
+                                                   boolean matchedOne
+    ) {
+        Map<Method, Class<?>> ret = new LinkedHashMap<>();
+        if (clazz == null) {
+            return ret;
+        }
+        Set<Method> arr = findMethod(clazz, methodFilter, matchedOne);
+        for (Method item : arr) {
+            ret.put(item, clazz);
+            if (matchedOne) {
+                return ret;
+            }
+        }
+        if (Object.class.equals(clazz)) {
+            return ret;
+        }
+
+        Class<?> superclass = clazz.getSuperclass();
+        if (superFilter == null || superFilter.test(superclass)) {
+            Map<Method, Class<?>> next = getMethods(superclass, superFilter, methodFilter, matchedOne);
+            ret.putAll(next);
+        }
+
+        Class<?>[] interfaces = clazz.getInterfaces();
+        if (interfaces != null) {
+            for (Class<?> superInterface : interfaces) {
+                if (superFilter == null || superFilter.test(superInterface)) {
+                    Map<Method, Class<?>> next = getMethods(superclass, superFilter, methodFilter, matchedOne);
+                    ret.putAll(next);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public static Map<String, VirtualField> getVirtualFields(Class<?> clazz) {
+        String key = clazz + "##";
+        return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_VIRTUAL_FIELDS : null), key, (k) -> {
+            return getVirtualFields(clazz, null, null, null, false);
+        }, v -> {
+            return new LinkedHashMap<>(v);
+        });
+    }
+
+    public static Map<String, VirtualField> getVirtualFields(Class<?> clazz,
+                                                             Predicate<Class<?>> superFilter
+    ) {
+        return getVirtualFields(clazz, superFilter, null, null, false);
+    }
+
+    public static Map<String, VirtualField> getVirtualFields(Class<?> clazz,
+                                                             Predicate<Class<?>> superFilter,
+                                                             Predicate<Field> fieldFilter,
+                                                             Predicate<Method> methodFilter
+    ) {
+        return getVirtualFields(clazz, superFilter, fieldFilter, methodFilter, false);
+    }
+
+    public static Map<VirtualField, Class<?>> getVirtualFields0(Class<?> clazz) {
+        String key = clazz + "##";
+        return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_VIRTUAL_FIELDS0 : null), key, (k) -> {
+            return getVirtualFields0(clazz, null, null, null, false);
+        }, v -> {
+            return new LinkedHashMap<>(v);
+        });
+    }
+
+    public static Map<VirtualField, Class<?>> getVirtualFields0(Class<?> clazz,
+                                                                Predicate<Class<?>> superFilter
+    ) {
+        return getVirtualFields0(clazz, superFilter, null, null, false);
+    }
+
+    public static Map<VirtualField, Class<?>> getVirtualFields0(Class<?> clazz,
+                                                                Predicate<Class<?>> superFilter,
+                                                                Predicate<Field> fieldFilter,
+                                                                Predicate<Method> methodFilter
+    ) {
+        return getVirtualFields0(clazz, superFilter, fieldFilter, methodFilter, false);
+    }
+
+    /**
+     * 获取虚拟字段
+     * 优先返回具备完整读写权限的类型
+     *
+     * @param clazz
+     * @param superFilter
+     * @param fieldFilter
+     * @param methodFilter
+     * @param matchedOne
+     * @return
+     */
+    public static Map<String, VirtualField> getVirtualFields(Class<?> clazz,
+                                                             Predicate<Class<?>> superFilter,
+                                                             Predicate<Field> fieldFilter,
+                                                             Predicate<Method> methodFilter,
+                                                             boolean matchedOne
+    ) {
+        Map<VirtualField, Class<?>> map = getVirtualFields0(clazz, superFilter, fieldFilter, methodFilter, matchedOne);
+        Map<String, List<VirtualField>> aggMap = new LinkedHashMap<>();
+        for (Map.Entry<VirtualField, Class<?>> entry : map.entrySet()) {
+            VirtualField key = entry.getKey();
+            String name = key.name();
+            if (!aggMap.containsKey(name)) {
+                aggMap.put(name, new ArrayList<>());
+            }
+            aggMap.get(name).add(key);
+        }
+
+        Map<String, VirtualField> ret = new LinkedHashMap<>();
+        for (Map.Entry<String, List<VirtualField>> entry : aggMap.entrySet()) {
+            List<VirtualField> list = entry.getValue();
+            VirtualField rwField = null;
+            for (VirtualField item : list) {
+                if (item.readable() && item.writeable()) {
+                    rwField = item;
+                    break;
+                }
+            }
+            if (rwField != null) {
+                ret.put(entry.getKey(), rwField);
+            } else {
+                ret.put(entry.getKey(), list.get(0));
+            }
+        }
+        return ret;
+    }
+
+    public static Map<String, VirtualGetterField> getVirtualGetterFields(Class<?> clazz) {
+        String key = clazz + "##";
+        return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_VIRTUAL_GETTER_FIELDS : null), key, (k) -> {
+            return getVirtualGetterFields0(clazz);
+        }, v -> {
+            return new LinkedHashMap<>(v);
+        });
+    }
+
+    public static Map<String, VirtualSetterField> getVirtualSetterFields(Class<?> clazz) {
+        String key = clazz + "##";
+        return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_VIRTUAL_SETTER_FIELDS : null), key, (k) -> {
+            return getVirtualSetterFields0(clazz);
+        }, v -> {
+            return new LinkedHashMap<>(v);
+        });
+    }
+
+    public static Map<String, VirtualGetterField> getVirtualGetterFields0(Class<?> clazz) {
+        Map<VirtualField, Class<?>> map = getVirtualFields0(clazz);
+        Map<String, VirtualGetterField> ret = new LinkedHashMap<>();
+        for (Map.Entry<VirtualField, Class<?>> entry : map.entrySet()) {
+            VirtualField key = entry.getKey();
+            if (key instanceof VirtualGetterField) {
+                String name = key.name();
+                if (!ret.containsKey(name)) {
+                    ret.put(name, (VirtualGetterField) key);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public static Map<String, VirtualSetterField> getVirtualSetterFields0(Class<?> clazz) {
+        Map<VirtualField, Class<?>> map = getVirtualFields0(clazz);
+        Map<String, VirtualSetterField> ret = new LinkedHashMap<>();
+        for (Map.Entry<VirtualField, Class<?>> entry : map.entrySet()) {
+            VirtualField key = entry.getKey();
+            if (key instanceof VirtualSetterField) {
+                String name = key.name();
+                if (!ret.containsKey(name)) {
+                    ret.put(name, (VirtualSetterField) key);
+                }
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * 虚拟字段
+     * 使用getter/setter方法的名称，映射为一个字段名，这是虚拟字段，也就是类中可能没有对应的属性
+     * 同时包含类中定义的field字段，这是实际字段，也就是类中定义的属性
+     *
+     * @param clazz
+     * @param superFilter
+     * @param fieldFilter
+     * @param methodFilter
+     * @param matchedOne
+     * @return
+     */
+    public static Map<VirtualField, Class<?>> getVirtualFields0(Class<?> clazz,
+                                                                Predicate<Class<?>> superFilter,
+                                                                Predicate<Field> fieldFilter,
+                                                                Predicate<Method> methodFilter,
+                                                                boolean matchedOne
+    ) {
+        Map<VirtualField, Class<?>> ret = new LinkedHashMap<>();
+        if (clazz == null) {
+            return ret;
+        }
+        Set<Method> methods = findMethod(clazz, (m) -> {
+            if (!isGetter(m) && !isSetter(m)) {
+                return false;
+            }
+            return methodFilter == null || methodFilter.test(m);
+        }, false);
+        Map<String, List<Method>> methodFieldsMap = new LinkedHashMap<>();
+        for (Method item : methods) {
+            if (isGetter(item)) {
+                MethodGetterField vir = new MethodGetterField(item);
+                String name = vir.name();
+                if (!methodFieldsMap.containsKey(name)) {
+                    methodFieldsMap.put(name, new ArrayList<>());
+                }
+                methodFieldsMap.get(name).add(item);
+            }
+            if (isSetter(item)) {
+                MethodSetterField vir = new MethodSetterField(item);
+                String name = vir.name();
+                if (!methodFieldsMap.containsKey(name)) {
+                    methodFieldsMap.put(name, new ArrayList<>());
+                }
+                methodFieldsMap.get(name).add(item);
+            }
+        }
+        for (Map.Entry<String, List<Method>> entry : methodFieldsMap.entrySet()) {
+            List<Method> list = entry.getValue();
+            Method getter = null;
+            Method setter = null;
+            for (Method method : list) {
+                if (isGetter(method)) {
+                    getter = method;
+                }
+                if (isSetter(method)) {
+                    setter = method;
+                }
+                if (getter != null && setter != null) {
+                    break;
+                }
+            }
+            if (getter != null && setter != null) {
+                ret.put(new MethodGetterSetterField(getter, setter), clazz);
+            } else {
+                if (getter != null) {
+                    ret.put(new MethodGetterField(getter), clazz);
+                }
+                if (setter != null) {
+                    ret.put(new MethodSetterField(setter), clazz);
+                }
+            }
+            if (matchedOne) {
+                return ret;
+            }
+        }
+        Set<Field> fields = findField(clazz, fieldFilter, matchedOne);
+        for (Field item : fields) {
+            ret.put(new FieldGetterSetterField(item), clazz);
+            if (matchedOne) {
+                return ret;
+            }
+        }
+        if (Object.class.equals(clazz)) {
+            return ret;
+        }
+
+        Class<?> superclass = clazz.getSuperclass();
+        if (superFilter == null || superFilter.test(superclass)) {
+            Map<VirtualField, Class<?>> next = getVirtualFields0(superclass, superFilter, fieldFilter, methodFilter, matchedOne);
+            ret.putAll(next);
+        }
+
+        Class<?>[] interfaces = clazz.getInterfaces();
+        if (interfaces != null) {
+            for (Class<?> superInterface : interfaces) {
+                if (superFilter == null || superFilter.test(superInterface)) {
+                    Map<VirtualField, Class<?>> next = getVirtualFields0(superclass, superFilter, fieldFilter, methodFilter, matchedOne);
+                    ret.putAll(next);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public static String weakVirtualFieldName(VirtualField field) {
+        if (field == null) {
+            return null;
+        }
+        return field.name().replaceAll("[-_]", "").toLowerCase();
+    }
+
+
+    public static <T> T beanCopyVirtualWeak(Object src, T dst) {
+        return beanCopyVirtual(src, dst, null, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakVirtualFieldName);
+    }
+
+    public static <T> T beanCopyVirtualWeak(Object src, T dst, Predicate<VirtualField> fieldFilter) {
+        return beanCopyVirtual(src, dst, fieldFilter, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakVirtualFieldName);
+    }
+
+    public static <T> T beanCopyVirtual(Object src, T dst) {
+        return beanCopyVirtual(src, dst, null, null, null, null, null, null);
+    }
+
+    public static <T> T beanCopyVirtual(Object src, T dst, Predicate<VirtualField> fieldFilter) {
+        return beanCopyVirtual(src, dst, fieldFilter, null, null, null, null, null);
+    }
+
+    /**
+     * bean虚拟属性的复制
+     * 无论值src中的值是什么全部复制覆盖dst中的字段
+     *
+     * @param src
+     * @param dst
+     * @param fieldFilter
+     * @param srcFieldNameMapper
+     * @param dstFieldNameMapper
+     * @param <T>
+     * @return
+     */
+    public static <T> T beanCopyVirtual(Object src, T dst, Predicate<VirtualField> fieldFilter,
+                                        Function<VirtualField, String> srcFieldNameMapper,
+                                        Function<VirtualField, String> dstFieldNameMapper) {
+        return beanCopyVirtual(src, dst, fieldFilter, srcFieldNameMapper, dstFieldNameMapper, null, null, null);
+    }
+
+    public static <T> T beanAssignVirtualWeak(Object src, T dst) {
+        return beanAssignVirtual(src, dst, null, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakVirtualFieldName);
+    }
+
+    public static <T> T beanAssignVirtualWeak(Object src, T dst, Predicate<VirtualField> fieldFilter) {
+        return beanAssignVirtual(src, dst, fieldFilter, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakVirtualFieldName);
+    }
+
+    public static <T> T beanAssignVirtual(Object src, T dst) {
+        return beanAssignVirtual(src, dst, null, null, null);
+    }
+
+    public static <T> T beanAssignVirtual(Object src, T dst, Predicate<VirtualField> fieldFilter) {
+        return beanAssignVirtual(src, dst, fieldFilter, null, null);
+    }
+
+    /**
+     * bean虚拟字段的覆盖
+     * 使用src中的所有非空属性覆盖dst中的属性
+     * 当dst中的属性也非空时，也会被src覆盖
+     *
+     * @param src
+     * @param dst
+     * @param fieldFilter
+     * @param srcFieldNameMapper
+     * @param dstFieldNameMapper
+     * @param <T>
+     * @return
+     */
+    public static <T> T beanAssignVirtual(Object src, T dst, Predicate<VirtualField> fieldFilter,
+                                          Function<VirtualField, String> srcFieldNameMapper,
+                                          Function<VirtualField, String> dstFieldNameMapper) {
+        return beanCopyVirtual(src, dst, fieldFilter, srcFieldNameMapper, dstFieldNameMapper, null, v -> {
+            if (v == null) {
+                return false;
+            }
+            if (v instanceof String) {
+                if (((String) v).isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
+        }, null);
+    }
+
+    public static <T> T beanMergeVirtualWeak(Object src, T dst) {
+        return beanMergeVirtual(src, dst, null, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakVirtualFieldName);
+    }
+
+    public static <T> T beanMergeVirtualWeak(Object src, T dst, Predicate<VirtualField> fieldFilter) {
+        return beanMergeVirtual(src, dst, fieldFilter, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakVirtualFieldName);
+    }
+
+    public static <T> T beanMergeVirtual(Object src, T dst) {
+        return beanMergeVirtual(src, dst, null, null, null);
+    }
+
+    public static <T> T beanMergeVirtual(Object src, T dst, Predicate<VirtualField> fieldFilter) {
+        return beanMergeVirtual(src, dst, fieldFilter, null, null);
+    }
+
+    /**
+     * bean虚拟属性的合并
+     * 保留dst中的非空属性，并且使用src中的非空属性补充到dst中
+     * 到dst中和src中同时存在相同字段的非空时，则保留dst中的值
+     *
+     * @param src
+     * @param dst
+     * @param fieldFilter
+     * @param srcFieldNameMapper
+     * @param dstFieldNameMapper
+     * @param <T>
+     * @return
+     */
+    public static <T> T beanMergeVirtual(Object src, T dst, Predicate<VirtualField> fieldFilter,
+                                         Function<VirtualField, String> srcFieldNameMapper,
+                                         Function<VirtualField, String> dstFieldNameMapper) {
+        return beanCopyVirtual(src, dst, fieldFilter, srcFieldNameMapper, dstFieldNameMapper, null, v -> {
+            if (v == null) {
+                return false;
+            }
+            if (v instanceof String) {
+                if (((String) v).isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
+        }, v -> {
+            if (v == null) {
+                return true;
+            }
+            if (v instanceof String) {
+                if (((String) v).isEmpty()) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    public static <T> T beanCopyVirtual(Object src, T dst, Predicate<VirtualField> fieldFilter,
+                                        Function<VirtualField, String> srcFieldNameMapper,
+                                        Function<VirtualField, String> dstFieldNameMapper,
+                                        Function<Object, Object> valueMapper,
+                                        Predicate<Object> newValueCopyFilter,
+                                        Predicate<Object> oldValueCoverFilter) {
+        return beanCopyVirtual0(src, dst, fieldFilter,
+                srcFieldNameMapper == null ? null : (field) -> {
+                    String name = srcFieldNameMapper.apply(field);
+                    if (name == null) {
+                        return Collections.emptyList();
+                    }
+                    return Collections.singletonList(name);
+                }, dstFieldNameMapper == null ? null : (field) -> {
+                    String name = dstFieldNameMapper.apply(field);
+                    if (name == null) {
+                        return Collections.emptyList();
+                    }
+                    return Collections.singletonList(name);
+                }, valueMapper,
+                newValueCopyFilter,
+                oldValueCoverFilter);
+    }
+
+    public static <T> T beanCopyVirtual0(Object src, T dst) {
+        return beanCopyVirtual0(src, dst, null,
+                null, null,
+                null, null, null);
+    }
+
+    public static <T> T beanCopyVirtual0(Object src, T dst, Predicate<VirtualField> fieldFilter) {
+        return beanCopyVirtual0(src, dst, fieldFilter,
+                null, null,
+                null, null, null);
+    }
+
+    public static <T> T beanCopyVirtual0(Object src, T dst, Predicate<VirtualField> fieldFilter,
+                                         Function<VirtualField, List<String>> srcFieldNameMapper,
+                                         Function<VirtualField, List<String>> dstFieldNameMapper) {
+        return beanCopyVirtual0(src, dst, fieldFilter,
+                srcFieldNameMapper, dstFieldNameMapper,
+                null, null, null);
+    }
+
+    /**
+     * bean的虚拟字段复制
+     *
+     * @param src
+     * @param dst
+     * @param fieldFilter         指定src中的哪些字段将会被用于copy，允许null则全字段
+     * @param srcFieldNameMapper  指定src中的每个字段可以映射为哪些字段名以和dst的字段进行匹配，也就是说允许一个字段有多个别名，允许null则默认字段名
+     * @param dstFieldNameMapper  指定dst中的每个字段可以映射为哪些字段名以和src的字段进行匹配，也就是说允许一个字段有多个别名，允许null则默认字段名
+     * @param valueMapper         指定从src中取出的字段值进行怎样的转换操作到dst中，允许null则改规则不生效
+     * @param newValueCopyFilter  指定哪些情况下的src的值需要调用dst进行值的设定，这就允许过滤某些src的值不设置到dst中，比如null值不进行设置，允许null则改规则不生效
+     * @param oldValueCoverFilter 指定当dst中要被设置时先检测是否需要进行覆盖，这就可以排除当dst中的值已经满足需求时不要进行覆盖，比如dst中的值已经非null时保留dst原始值而不进行修改，允许null则改规则不生效
+     * @param <T>
+     * @return dst
+     */
+    public static <T> T beanCopyVirtual0(Object src, T dst, Predicate<VirtualField> fieldFilter,
+                                         Function<VirtualField, List<String>> srcFieldNameMapper,
+                                         Function<VirtualField, List<String>> dstFieldNameMapper,
+                                         Function<Object, Object> valueMapper,
+                                         Predicate<Object> newValueCopyFilter,
+                                         Predicate<Object> oldValueCoverFilter) {
+        if (src == null || dst == null) {
+            return dst;
+        }
+
+        Map<String, VirtualGetterField> srcFields = getVirtualGetterFields(src.getClass());
+        if (srcFields.isEmpty()) {
+            return dst;
+        }
+
+        Map<String, VirtualSetterField> dstFields = getVirtualSetterFields(dst.getClass());
+        if (dstFields.isEmpty()) {
+            return dst;
+        }
+
+        Map<String, VirtualSetterField> dstNameMap = new HashMap<>();
+        for (VirtualSetterField item : dstFields.values()) {
+            if (dstFieldNameMapper != null) {
+                List<String> list = dstFieldNameMapper.apply(item);
+                for (String name : list) {
+                    if (name != null) {
+                        dstNameMap.put(name, item);
+                    }
+                }
+
+            }
+            dstNameMap.put(item.name(), item);
+        }
+
+        Map<String, VirtualGetterField> dstGetterFields = new LinkedHashMap<>();
+        Map<String, VirtualGetterField> dstGetterNameMap = new HashMap<>();
+        if (oldValueCoverFilter != null) {
+            dstGetterFields = getVirtualGetterFields(dst.getClass());
+            for (VirtualGetterField item : dstGetterFields.values()) {
+                if (dstFieldNameMapper != null) {
+                    List<String> list = dstFieldNameMapper.apply(item);
+                    for (String name : list) {
+                        if (name != null) {
+                            dstGetterNameMap.put(name, item);
+                        }
+                    }
+
+                }
+                dstGetterNameMap.put(item.name(), item);
+            }
+        }
+
+        HashSet<String> list = new HashSet<>();
+        for (VirtualGetterField srcField : srcFields.values()) {
+            boolean isTarget = false;
+            if (fieldFilter == null || fieldFilter.test(srcField)) {
+                isTarget = true;
+            }
+            if (!isTarget) {
+                continue;
+            }
+            list.clear();
+            if (srcFieldNameMapper != null) {
+                List<String> names = srcFieldNameMapper.apply(srcField);
+                for (String name : names) {
+                    if (name != null) {
+                        list.add(name);
+                    }
+                }
+            }
+            list.add(srcField.name());
+
+            for (String name : list) {
+                VirtualSetterField dstField = dstNameMap.get(name);
+                if (dstField == null) {
+                    continue;
+                }
+
+                try {
+                    if (oldValueCoverFilter != null) {
+                        VirtualGetterField dstGetterField = dstGetterNameMap.get(name);
+                        if (dstGetterField != null) {
+                            Object old = dstGetterField.get(dst);
+                            if (oldValueCoverFilter != null) {
+                                if (!oldValueCoverFilter.test(old)) {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    Object val = srcField.get(src);
+                    if (valueMapper != null) {
+                        val = valueMapper.apply(val);
+                    }
+                    if (newValueCopyFilter != null && !newValueCopyFilter.test(val)) {
+                        continue;
+                    }
+                    val = ObjectConvertor.tryConvertAsType(val, dstField.type());
+                    dstField.set(dst, val);
+                } catch (Throwable e) {
+
+                }
+            }
+        }
+
+        return dst;
     }
 }
 
