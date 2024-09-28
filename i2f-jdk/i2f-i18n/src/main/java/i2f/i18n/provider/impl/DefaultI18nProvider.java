@@ -40,31 +40,60 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Data
 @NoArgsConstructor
 public class DefaultI18nProvider implements I18nProvider {
-    public static final String[] DEFAULT_FILE_NAMES = {
-            "classpath:i18n/message-%s.properties",
-            "classpath:i18n/message-%s.xml",
-            "classpath:i18n/i18n-%s.properties",
-            "classpath:i18n/i18n-%s.xml",
-            "classpath:i18n-%s.properties",
-            "classpath:i18n-%s.xml",
-            "classpath:resources/i18n-%s.properties",
-            "classpath:resources/i18n-%s.xml",
-            "classpath:config/i18n-%s.properties",
-            "classpath:config/i18n-%s.xml",
-            "file:i18n/message-%s.properties",
-            "file:i18n/message-%s.xml",
-            "file:i18n/i18n-%s.properties",
-            "file:i18n/i18n-%s.xml",
-            "file:i18n-%s.properties",
-            "file:i18n-%s.xml",
-            "file:resources/i18n-%s.properties",
-            "file:resources/i18n-%s.xml",
-            "file:config/i18n-%s.properties",
-            "file:config/i18n-%s.xml",
+    public static final String[] DEFAULT_TYPES = {
+            "classpath:",
+            "file:"
     };
+    public static final String[] DEFAULT_DIRECTORIES = {
+            "i18n/",
+            "resources/",
+            "config/",
+            "lang/"
+    };
+    public static final String[] DEFAULT_FILENAMES = {
+            "i18n",
+            "message",
+            "string"
+    };
+    public static final String[] DEFAULT_SUFFIXES = {
+            ".properties",
+            ".xml"
+    };
+    public static final String[] DEFAULT_FILE_NAMES = cartesianProduct(
+            Arrays.asList(
+                    Arrays.asList(DEFAULT_TYPES),
+                    Arrays.asList(DEFAULT_DIRECTORIES),
+                    Arrays.asList(DEFAULT_FILENAMES),
+                    Collections.singletonList("-%s"),
+                    Arrays.asList(DEFAULT_SUFFIXES)
+            )
+    ).toArray(new String[0]);
     protected CopyOnWriteArrayList<String> fileNames = new CopyOnWriteArrayList<>(Arrays.asList(DEFAULT_FILE_NAMES));
     protected ConcurrentHashMap<String, ConcurrentHashMap<String, String>> cacheMap = new ConcurrentHashMap<>();
 
+    public static List<String> cartesianProduct(List<List<String>> tables) {
+        List<String> left = Collections.singletonList("");
+        for (List<String> right : tables) {
+            left = cartesianProductNext(left, right);
+        }
+        return left;
+    }
+
+    public static List<String> cartesianProductNext(List<String> left, List<String> right) {
+        List<String> ret = new ArrayList<>();
+        for (String ls : left) {
+            if (ls == null) {
+                ls = "";
+            }
+            for (String rs : right) {
+                if (rs == null) {
+                    rs = "";
+                }
+                ret.add(ls.concat(rs));
+            }
+        }
+        return ret;
+    }
 
     public Map<String, String> getLangMap(String lang) {
         if (lang == null) {
@@ -90,101 +119,112 @@ public class DefaultI18nProvider implements I18nProvider {
         if (lang == null) {
             return;
         }
-        List<I18nItem> items = new ArrayList<>();
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        for (String fileName : fileNames) {
-            boolean isClasspath = true;
-            int idx = fileName.indexOf(":");
-            if (idx >= 0) {
-                String prefix = fileName.substring(0, idx);
-                fileName = fileName.substring(idx + 1);
-                if ("classpath".equalsIgnoreCase(prefix)
-                        || "classpath*".equalsIgnoreCase(prefix)) {
-                    isClasspath = true;
-                } else if ("file".equalsIgnoreCase(prefix)) {
-                    isClasspath = false;
-                } else {
-                    continue;
+        synchronized (String.valueOf(Math.abs(lang.hashCode())%32).intern()) {
+            List<I18nItem> items = new ArrayList<>();
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            for (String fileName : fileNames) {
+                boolean isClasspath = true;
+                int idx = fileName.indexOf(":");
+                if (idx >= 0) {
+                    String prefix = fileName.substring(0, idx);
+                    fileName = fileName.substring(idx + 1);
+                    if ("classpath".equalsIgnoreCase(prefix)
+                            || "classpath*".equalsIgnoreCase(prefix)) {
+                        isClasspath = true;
+                    } else if ("file".equalsIgnoreCase(prefix)) {
+                        isClasspath = false;
+                    } else {
+                        continue;
+                    }
                 }
-            }
-            fileName = String.format(fileName, lang);
-            boolean isProperties = true;
-            idx = fileName.lastIndexOf(".");
-            if (idx >= 0) {
-                String suffix = fileName.substring(idx + 1);
-                if ("properties".equalsIgnoreCase(suffix)) {
-                    isProperties = true;
-                } else if ("xml".equalsIgnoreCase(suffix)) {
-                    isProperties = false;
-                } else {
-                    continue;
+                fileName = String.format(fileName, lang);
+                boolean isProperties = true;
+                idx = fileName.lastIndexOf(".");
+                if (idx >= 0) {
+                    String suffix = fileName.substring(idx + 1);
+                    if ("properties".equalsIgnoreCase(suffix)) {
+                        isProperties = true;
+                    } else if ("xml".equalsIgnoreCase(suffix)) {
+                        isProperties = false;
+                    } else {
+                        continue;
+                    }
                 }
-            }
-            List<InputStream> inputs = new ArrayList<>();
-            if (isClasspath) {
-                try {
-                    Enumeration<URL> resources = classLoader.getResources(fileName);
-                    while (resources.hasMoreElements()) {
-                        URL url = resources.nextElement();
-                        if (url != null) {
-                            try {
-                                InputStream is = url.openStream();
-                                if (is != null) {
-                                    inputs.add(is);
-                                }
-                            } catch (IOException e) {
+                List<InputStream> inputs = new ArrayList<>();
+                List<String> searchNames = Collections.singletonList(fileName);
+                if (I18n.DEFAULT_LANG.equals(lang)) {
+                    searchNames = Arrays.asList(fileName, fileName.replace("-" + I18n.DEFAULT_LANG, ""));
+                }
+                for (String searchName : searchNames) {
+                    if (isClasspath) {
+                        try {
+                            Enumeration<URL> resources = classLoader.getResources(searchName);
+                            while (resources.hasMoreElements()) {
+                                URL url = resources.nextElement();
+                                if (url != null) {
+                                    try {
+                                        InputStream is = url.openStream();
+                                        if (is != null) {
+                                            inputs.add(is);
+                                        }
+                                    } catch (IOException e) {
 
+                                    }
+                                }
                             }
+                        } catch (IOException e) {
+
+                        }
+                    } else {
+                        try {
+                            File file = new File(searchName);
+                            if (file.exists()) {
+                                InputStream is = new FileInputStream(file);
+                                inputs.add(is);
+                            }
+                        } catch (Exception e) {
+
                         }
                     }
-                } catch (IOException e) {
-
                 }
-            } else {
-                try {
-                    File file = new File(fileName);
-                    if (file.exists()) {
-                        InputStream is = new FileInputStream(file);
-                        inputs.add(is);
+                for (InputStream input : inputs) {
+                    try {
+                        if (isProperties) {
+                            I18nParser parser = new PropertiesI18nParser(lang, input);
+                            Collection<I18nItem> list = parser.parse();
+                            items.addAll(list);
+                        } else {
+                            I18nParser parser = new XmlI18nParser(lang, input);
+                            Collection<I18nItem> list = parser.parse();
+                            items.addAll(list);
+                        }
+                    } catch (Exception e) {
+
                     }
-                } catch (Exception e) {
-
                 }
             }
-            for (InputStream input : inputs) {
-                try {
-                    if (isProperties) {
-                        I18nParser parser = new PropertiesI18nParser(lang, input);
-                        Collection<I18nItem> list = parser.parse();
-                        items.addAll(list);
-                    } else {
-                        I18nParser parser = new XmlI18nParser(lang, input);
-                        Collection<I18nItem> list = parser.parse();
-                        items.addAll(list);
-                    }
-                } catch (Exception e) {
 
+            for (I18nItem item : items) {
+                String itemLang = item.getLang();
+                String itemName = item.getName();
+                String itemValue = item.getValue();
+                if (itemName == null) {
+                    continue;
                 }
+                if (itemValue == null) {
+                    continue;
+                }
+                if (itemLang == null) {
+                    itemLang = lang;
+                }
+                ConcurrentHashMap<String, String> langMap = cacheMap.computeIfAbsent(itemLang, (langKey) -> {
+                    return new ConcurrentHashMap<>();
+                });
+                langMap.computeIfAbsent(itemName, (nameKey) -> itemValue);
             }
-        }
-
-        for (I18nItem item : items) {
-            String itemLang = item.getLang();
-            String itemName = item.getName();
-            String itemValue = item.getValue();
-            if (itemName == null) {
-                continue;
-            }
-            if (itemValue == null) {
-                continue;
-            }
-            if (itemLang == null) {
-                itemLang = lang;
-            }
-            ConcurrentHashMap<String, String> langMap = cacheMap.computeIfAbsent(itemLang, (langKey) -> {
+            cacheMap.computeIfAbsent(lang, (langKey) -> {
                 return new ConcurrentHashMap<>();
             });
-            langMap.computeIfAbsent(itemName, (nameKey) -> itemValue);
         }
     }
 
