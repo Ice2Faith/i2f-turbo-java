@@ -1938,6 +1938,7 @@ public class ReflectResolver {
         mergeArray(ret, filter, matchedOne, elem.getDeclaredAnnotations(), elem.getAnnotations());
         return ret;
     }
+
     private static LruMap<String, Map<VirtualField, Class<?>>> CACHE_GET_VIRTUAL_FIELDS0 = new LruMap<>(8192);
     private static LruMap<String, Map<String, VirtualGetterField>> CACHE_GET_VIRTUAL_GETTER_FIELDS = new LruMap<>(8192);
     private static LruMap<String, Map<String, VirtualSetterField>> CACHE_GET_VIRTUAL_SETTER_FIELDS = new LruMap<>(8192);
@@ -2233,6 +2234,166 @@ public class ReflectResolver {
         return field.name().replaceAll("[-_]", "").toLowerCase();
     }
 
+
+    public static <T> T copyVirtualWeak(Object src, T dst) {
+        return copyVirtual(src, dst, null, null, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakName);
+    }
+
+    public static <T> T copyVirtualWeak(Object src, T dst, Predicate<VirtualField> fieldFilter, Predicate<String> mapFieldFilter) {
+        return copyVirtual(src, dst, fieldFilter, mapFieldFilter, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakName);
+    }
+
+    public static <T> T copyVirtual(Object src, T dst) {
+        return copyVirtual(src, dst, null, null, null, null, null);
+    }
+
+    public static <T> T copyVirtual(Object src, T dst, Predicate<VirtualField> fieldFilter, Predicate<String> mapFieldFilter) {
+        return copyVirtual(src, dst, fieldFilter, mapFieldFilter, null, null, null);
+    }
+
+    public static <T> T copyVirtual(Object src, T dst, Predicate<VirtualField> fieldFilter, Predicate<String> mapFieldFilter,
+                                    Function<VirtualField, String> srcFieldNameMapper,
+                                    Function<VirtualField, String> dstFieldNameMapper,
+                                    Function<String, String> srcMapNameMapper) {
+        if (src == null || dst == null) {
+            return dst;
+        }
+        if (src.getClass().isArray() && dst instanceof Collection) {
+            return (T) arrObj2col(src, (Collection) dst);
+        } else if (src instanceof Iterator && dst instanceof Collection) {
+            return (T) col2col((Iterator) src, (Collection) dst);
+        } else if (src instanceof Iterable && dst instanceof Collection) {
+            return (T) col2col((Iterable) src, (Collection) dst);
+        } else if (src instanceof Enumeration && dst instanceof Collection) {
+            return (T) col2col((Enumeration) src, (Collection) dst);
+        } else if (src instanceof Map && dst instanceof Map) {
+            map2map((Map) src, (Map) dst, mapFieldFilter == null ? null : (key) -> {
+                String mKey = null;
+                if (key != null) {
+                    if (key instanceof String) {
+                        mKey = (String) key;
+                    } else {
+                        mKey = String.valueOf(key);
+                    }
+                }
+                return mapFieldFilter.test(mKey);
+            }, srcMapNameMapper);
+        } else if (src instanceof Map) {
+            map2beanVirtual((Map<String, Object>) src, dst, mapFieldFilter, srcMapNameMapper, dstFieldNameMapper);
+        } else if (dst instanceof Map) {
+            beanVirtual2map(src, (Map<String, Object>) dst, fieldFilter, srcFieldNameMapper);
+        } else {
+            beanCopyVirtual(src, dst, fieldFilter, srcFieldNameMapper, dstFieldNameMapper);
+        }
+        return dst;
+    }
+
+    public static <T> T map2beanVirtualWeak(Map<String, Object> src, T dst) {
+        return map2beanVirtual(src, dst, null, ReflectResolver::weakName, ReflectResolver::weakVirtualFieldName);
+    }
+
+    public static <T> T map2beanVirtualWeak(Map<String, Object> src, T dst, Predicate<String> fieldFilter) {
+        return map2beanVirtual(src, dst, fieldFilter, ReflectResolver::weakName, ReflectResolver::weakVirtualFieldName);
+    }
+
+    public static <T> T map2beanVirtual(Map<String, Object> src, T dst) {
+        return map2beanVirtual(src, dst, null, null, null);
+    }
+
+    public static <T> T map2beanVirtual(Map<String, Object> src, T dst, Predicate<String> fieldFilter) {
+        return map2beanVirtual(src, dst, fieldFilter, null, null);
+    }
+
+    public static <T> T map2beanVirtual(Map<String, Object> src, T dst, Predicate<String> fieldFilter,
+                                        Function<String, String> srcMapNameMapper,
+                                        Function<VirtualField, String> dstFieldNameMapper) {
+        if (src == null || dst == null) {
+            return dst;
+        }
+        Map<String, VirtualSetterField> dstFields = getVirtualSetterFields(dst.getClass());
+        Map<String, VirtualSetterField> dstNameMap = new HashMap<>();
+        for (VirtualSetterField item : dstFields.values()) {
+            String name = item.name();
+            if (dstFieldNameMapper != null) {
+                String str = dstFieldNameMapper.apply(item);
+                if (str != null) {
+                    name = str;
+                }
+            }
+            dstNameMap.put(name, item);
+        }
+        for (Map.Entry<String, Object> entry : src.entrySet()) {
+            String name = entry.getKey();
+            boolean isTarget = false;
+            if (fieldFilter == null || fieldFilter.test(name)) {
+                isTarget = true;
+            }
+            if (srcMapNameMapper != null) {
+                String str = srcMapNameMapper.apply(name);
+                if (str != null) {
+                    name = str;
+                }
+            }
+            VirtualSetterField dstField = dstNameMap.get(name);
+            if (dstField == null) {
+                isTarget = false;
+            }
+            if (!isTarget) {
+                continue;
+            }
+            try {
+                Object val = entry.getValue();
+                val = ObjectConvertor.tryConvertAsType(val, dstField.type());
+                dstField.set(dst, val);
+            } catch (Throwable e) {
+
+            }
+        }
+        return dst;
+    }
+
+    public static <M extends Map<String, Object>> M beanVirtual2map(Object src, M dst) {
+        return beanVirtual2map(src, dst, null, null);
+    }
+
+    public static <M extends Map<String, Object>> M beanVirtual2map(Object src, M dst, Predicate<VirtualField> fieldFilter) {
+        return beanVirtual2map(src, dst, fieldFilter, null);
+    }
+
+    public static <M extends Map<String, Object>> M beanVirtual2map(Object src, M dst, Predicate<VirtualField> fieldFilter,
+                                                                    Function<VirtualField, String> srcFieldNameMapper) {
+        if (src == null || dst == null) {
+            return dst;
+        }
+
+        Map<String, VirtualGetterField> srcFields = getVirtualGetterFields(src.getClass());
+
+        for (VirtualGetterField srcField : srcFields.values()) {
+            boolean isTarget = false;
+            if (fieldFilter == null || fieldFilter.test(srcField)) {
+                isTarget = true;
+            }
+            String name = srcField.name();
+            if (srcFieldNameMapper != null) {
+                String str = srcFieldNameMapper.apply(srcField);
+                if (str != null) {
+                    name = str;
+                }
+            }
+            if (!isTarget) {
+                continue;
+            }
+
+            try {
+                Object val = srcField.get(src);
+                dst.put(name, val);
+            } catch (Throwable e) {
+
+            }
+        }
+
+        return dst;
+    }
 
     public static <T> T beanCopyVirtualWeak(Object src, T dst) {
         return beanCopyVirtual(src, dst, null, ReflectResolver::weakVirtualFieldName, ReflectResolver::weakVirtualFieldName);
