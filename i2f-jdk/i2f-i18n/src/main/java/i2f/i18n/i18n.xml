@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<i18n lang="zh">
+    <item name="app.version">
+        正式版
+    </item>
+    <item name="app.banner" keep="true" only="true">
+        |-----------------
+        |名称: svc
+        |激活: prod
+        |默认
+        |-----------------
+    </item>
+</i18n>

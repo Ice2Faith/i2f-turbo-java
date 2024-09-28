@@ -6,6 +6,7 @@ import i2f.i18n.provider.impl.MergedI18nProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 
@@ -61,18 +62,24 @@ public class I18n {
                 list.add(provider);
             }
             if (!list.isEmpty()) {
-                DefaultI18nProvider provider = new DefaultI18nProvider();
-                provider.loadLangMap(DEFAULT_LANG);
+                DefaultI18nProvider provider = getDefaultI18nProvider();
                 list.add(provider);
                 smartProvider = new MergedI18nProvider(list);
             }
         }
         if (smartProvider == null) {
-            DefaultI18nProvider provider = new DefaultI18nProvider();
-            provider.loadLangMap(DEFAULT_LANG);
+            DefaultI18nProvider provider = getDefaultI18nProvider();
             smartProvider = provider;
         }
         return smartProvider;
+    }
+
+    public static DefaultI18nProvider getDefaultI18nProvider() {
+        DefaultI18nProvider provider = new DefaultI18nProvider();
+        provider.loadLangMap(DEFAULT_LANG);
+        provider.loadLangMap(Locale.ENGLISH.getLanguage());
+        provider.loadLangMap(Locale.getDefault().getLanguage());
+        return provider;
     }
 
     public static I18nProvider getProvider() {
