@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <i18n lang="zh">
+    <ref name="app.demo"/>
     <item name="app.version">
         正式版
     </item>

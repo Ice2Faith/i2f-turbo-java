@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <i18n lang="default">
+    <ref name="app.help"/>
     <item name="app.version">
         1.0.0
     </item>

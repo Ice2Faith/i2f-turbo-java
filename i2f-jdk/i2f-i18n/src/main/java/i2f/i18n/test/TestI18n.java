@@ -30,5 +30,9 @@ public class TestI18n {
         I18n.setThreadLang("zh");
         String banner = I18n.get("app.banner");
         System.out.println("###" + banner + "###");
+        String help = I18n.get("app.help");
+        System.out.println("###" + help + "###");
+        String demo = I18n.get("app.demo");
+        System.out.println("###" + demo + "###");
     }
 }
