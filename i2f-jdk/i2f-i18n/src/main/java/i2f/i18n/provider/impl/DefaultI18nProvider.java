@@ -6,14 +6,11 @@ import i2f.i18n.parser.I18nParser;
 import i2f.i18n.parser.impl.PropertiesI18nParser;
 import i2f.i18n.parser.impl.XmlI18nParser;
 import i2f.i18n.provider.I18nProvider;
+import i2f.i18n.util.I18nUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -40,30 +37,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Data
 @NoArgsConstructor
 public class DefaultI18nProvider implements I18nProvider {
-    public static final String[] DEFAULT_TYPES = {
-            "classpath:",
-            "file:"
-    };
-    public static final String[] DEFAULT_DIRECTORIES = {
-            "i18n/",
-            "resources/",
-            "config/",
-            "lang/"
-    };
-    public static final String[] DEFAULT_FILENAMES = {
-            "i18n",
-            "message",
-            "string"
-    };
+
     public static final String[] DEFAULT_SUFFIXES = {
             ".properties",
             ".xml"
     };
-    public static final String[] DEFAULT_FILE_NAMES = cartesianProduct(
+    public static final String[] DEFAULT_FILE_NAMES = I18nUtil.cartesianProduct(
             Arrays.asList(
-                    Arrays.asList(DEFAULT_TYPES),
-                    Arrays.asList(DEFAULT_DIRECTORIES),
-                    Arrays.asList(DEFAULT_FILENAMES),
+                    Arrays.asList(I18nUtil.DEFAULT_TYPES),
+                    Arrays.asList(I18nUtil.DEFAULT_DIRECTORIES),
+                    Arrays.asList(I18nUtil.DEFAULT_FILENAMES),
                     Collections.singletonList("-%s"),
                     Arrays.asList(DEFAULT_SUFFIXES)
             )
@@ -71,29 +54,6 @@ public class DefaultI18nProvider implements I18nProvider {
     protected CopyOnWriteArrayList<String> fileNames = new CopyOnWriteArrayList<>(Arrays.asList(DEFAULT_FILE_NAMES));
     protected ConcurrentHashMap<String, ConcurrentHashMap<String, String>> cacheMap = new ConcurrentHashMap<>();
 
-    public static List<String> cartesianProduct(List<List<String>> tables) {
-        List<String> left = Collections.singletonList("");
-        for (List<String> right : tables) {
-            left = cartesianProductNext(left, right);
-        }
-        return left;
-    }
-
-    public static List<String> cartesianProductNext(List<String> left, List<String> right) {
-        List<String> ret = new ArrayList<>();
-        for (String ls : left) {
-            if (ls == null) {
-                ls = "";
-            }
-            for (String rs : right) {
-                if (rs == null) {
-                    rs = "";
-                }
-                ret.add(ls.concat(rs));
-            }
-        }
-        return ret;
-    }
 
     public Map<String, String> getLangMap(String lang) {
         if (lang == null) {
@@ -157,34 +117,9 @@ public class DefaultI18nProvider implements I18nProvider {
                 }
                 for (String searchName : searchNames) {
                     if (isClasspath) {
-                        try {
-                            Enumeration<URL> resources = classLoader.getResources(searchName);
-                            while (resources.hasMoreElements()) {
-                                URL url = resources.nextElement();
-                                if (url != null) {
-                                    try {
-                                        InputStream is = url.openStream();
-                                        if (is != null) {
-                                            inputs.add(is);
-                                        }
-                                    } catch (IOException e) {
-
-                                    }
-                                }
-                            }
-                        } catch (IOException e) {
-
-                        }
+                        I18nUtil.getClasspathInputStreams(inputs, searchName, classLoader, false);
                     } else {
-                        try {
-                            File file = new File(searchName);
-                            if (file.exists()) {
-                                InputStream is = new FileInputStream(file);
-                                inputs.add(is);
-                            }
-                        } catch (Exception e) {
-
-                        }
+                        I18nUtil.getFileInputStream(inputs, searchName);
                     }
                 }
                 for (InputStream input : inputs) {
