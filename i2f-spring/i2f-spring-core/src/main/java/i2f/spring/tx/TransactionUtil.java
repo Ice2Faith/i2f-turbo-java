@@ -131,27 +131,64 @@ public class TransactionUtil {
         return tx(beginTimeout(), arg, function);
     }
 
-    public <R, T> R tx(TransactionStatus status, T arg, TxFunction<R, T> function) {
+    public <R, T> R tx(TransactionStatus status, T arg, TxFunction<R, T> function, Class<? extends Throwable>... rollbackFor) {
         try {
             R ret = function.run(arg);
             commit(status);
             return ret;
         } catch (Throwable e) {
-            rollback(status);
+            boolean isType = isRollbackTypeOf(e, rollbackFor);
+            if (isType) {
+                rollback(status);
+            } else {
+                commit(status);
+            }
             throw new TxUnhandledException(e.getMessage(), e);
         }
+    }
+
+    public boolean isRollbackTypeOf(Throwable e, Class<? extends Throwable>... rollbackFor) {
+        if (e == null) {
+            return false;
+        }
+        if (rollbackFor == null) {
+            return true;
+        }
+        boolean anyTest = false;
+        Class<? extends Throwable> currClazz = e.getClass();
+        for (Class<? extends Throwable> clazz : rollbackFor) {
+            if (clazz == null) {
+                continue;
+            }
+            anyTest = true;
+            if (clazz.equals(currClazz)) {
+                return true;
+            }
+            if (clazz.isAssignableFrom(currClazz)) {
+                return true;
+            }
+        }
+        if (!anyTest) {
+            return true;
+        }
+        return false;
     }
 
     public void tx(TxExecute task) {
         tx(beginTimeout(), task);
     }
 
-    public void tx(TransactionStatus status, TxExecute task) {
+    public void tx(TransactionStatus status, TxExecute task, Class<? extends Throwable>... rollbackFor) {
         try {
             task.run();
             commit(status);
         } catch (Throwable e) {
-            rollback(status);
+            boolean isType = isRollbackTypeOf(e, rollbackFor);
+            if (isType) {
+                rollback(status);
+            } else {
+                commit(status);
+            }
             throw new TxUnhandledException(e.getMessage(), e);
         }
     }
@@ -160,12 +197,17 @@ public class TransactionUtil {
         tx(beginTimeout(), arg, task);
     }
 
-    public <T> void tx(TransactionStatus status, T arg, TxConsumer<T> task) {
+    public <T> void tx(TransactionStatus status, T arg, TxConsumer<T> task, Class<? extends Throwable>... rollbackFor) {
         try {
             task.run(arg);
             commit(status);
         } catch (Throwable e) {
-            rollback(status);
+            boolean isType = isRollbackTypeOf(e, rollbackFor);
+            if (isType) {
+                rollback(status);
+            } else {
+                commit(status);
+            }
             throw new TxUnhandledException(e.getMessage(), e);
         }
     }
@@ -174,16 +216,22 @@ public class TransactionUtil {
         return tx(beginTimeout(), task);
     }
 
-    public <R> R tx(TransactionStatus status, TxSupplier<R> task) {
+    public <R> R tx(TransactionStatus status, TxSupplier<R> task, Class<? extends Throwable>... rollbackFor) {
         try {
             R ret = task.run();
             commit(status);
             return ret;
         } catch (Throwable e) {
-            rollback(status);
+            boolean isType = isRollbackTypeOf(e, rollbackFor);
+            if (isType) {
+                rollback(status);
+            } else {
+                commit(status);
+            }
             throw new TxUnhandledException(e.getMessage(), e);
         }
     }
+
 
     @FunctionalInterface
     public interface TxFunction<R, T> {
