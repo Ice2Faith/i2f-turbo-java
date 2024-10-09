@@ -1,14 +1,21 @@
 package i2f.springboot.jdbc.bql.autoconfiguration;
 
+import i2f.extension.ognl.OgnlUtil;
 import i2f.extension.velocity.VelocityGenerator;
 import i2f.extension.velocity.bindsql.VelocityResourceSqlTemplateResolver;
 import i2f.extension.velocity.bindsql.VelocitySqlGenerator;
 import i2f.jdbc.proxy.provider.ProxyRenderSqlProvider;
 import i2f.jdbc.proxy.provider.impl.SimpleProxyRenderSqlProvider;
+import i2f.jdbc.proxy.xml.mybatis.MybatisMapperContext;
+import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
+import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
+import i2f.jdbc.proxy.xml.mybatis.provider.MybatisMapperProxyRenderSqlProvider;
 import i2f.springboot.jdbc.bql.components.SpringJdbcProxyMapperFactoryBean;
 import i2f.springboot.jdbc.bql.components.VelocityProxyRenderSqlProvider;
+import i2f.springboot.jdbc.bql.mybatis.OgnlMybatisMapperInflater;
 import i2f.springboot.jdbc.bql.properties.JdbcProxyProperties;
 import lombok.Data;
+import ognl.Ognl;
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +59,53 @@ public class JdbcProxyAutoConfiguration implements ApplicationContextAware, Bean
 
     private ApplicationContext context;
 
+    @ConditionalOnMissingBean(MybatisMapperInflater.class)
+    @ConditionalOnClass({OgnlMybatisMapperInflater.class, OgnlUtil.class, Ognl.class})
+    @Bean
+    public MybatisMapperInflater ognlMybatisMapperInflater() {
+        return new OgnlMybatisMapperInflater();
+    }
+
+    @ConditionalOnMissingBean(MybatisMapperInflater.class)
+    @ConditionalOnClass({MybatisMapperInflater.class})
+    @Bean
+    public MybatisMapperInflater mybatisMapperInflater() {
+        return new MybatisMapperInflater();
+    }
+
+    @ConditionalOnMissingBean(MybatisMapperContext.class)
+    @ConditionalOnClass({MybatisMapperContext.class})
+    @Bean
+    public MybatisMapperContext mybatisMapperContext(MybatisMapperInflater inflater) {
+        JdbcProxyProperties proxyProperties = context.getBean(JdbcProxyProperties.class);
+        List<String> scriptLocations = new ArrayList<>();
+        List<String> locations = proxyProperties.getScriptLocations();
+        if (locations != null) {
+            scriptLocations.addAll(locations);
+        } else {
+            scriptLocations.add("classpath*:/**/mapper/**/*.xml");
+        }
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        List<URL> resources = new ArrayList<>();
+        for (String scriptLocation : scriptLocations) {
+            String path = scriptLocation.trim();
+            if (path.isEmpty()) {
+                continue;
+            }
+            try {
+                Resource[] arr = resolver.getResources(path);
+                for (Resource resource : arr) {
+                    resources.add(resource.getURL());
+                }
+            } catch (Exception e) {
+
+            }
+        }
+        MybatisMapperContext context = new MybatisMapperContext(resources);
+        context.setInflater(inflater);
+        return context;
+    }
+
     @ConditionalOnMissingBean(VelocityResourceSqlTemplateResolver.class)
     @ConditionalOnClass({VelocitySqlGenerator.class, VelocityGenerator.class, VelocityEngine.class})
     @Bean
@@ -83,6 +137,13 @@ public class JdbcProxyAutoConfiguration implements ApplicationContextAware, Bean
         VelocityResourceSqlTemplateResolver ret = new VelocityResourceSqlTemplateResolver(resources);
         ret.refreshResources();
         return ret;
+    }
+
+    @ConditionalOnMissingBean(ProxyRenderSqlProvider.class)
+    @ConditionalOnClass({MybatisMapperContext.class, MybatisMapperInflater.class, MybatisMapperParser.class})
+    @Bean
+    public MybatisMapperProxyRenderSqlProvider mybatisMapperProxyRenderSqlProvider(MybatisMapperContext context) {
+        return new MybatisMapperProxyRenderSqlProvider(context);
     }
 
     @ConditionalOnMissingBean(ProxyRenderSqlProvider.class)

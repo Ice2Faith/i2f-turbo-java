@@ -48,6 +48,11 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jdbc-proxy-xml</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-velocity-bindsql</artifactId>
         </dependency>
 
@@ -55,6 +60,19 @@
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity</artifactId>
             <version>1.7</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-ognl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ognl</groupId>
+            <artifactId>ognl</artifactId>
+            <version>3.4.2</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>

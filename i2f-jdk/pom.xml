@@ -109,6 +109,7 @@
         <module>i2f-environment</module>
         <module>i2f-event</module>
         <module>i2f-i18n</module>
+        <module>i2f-jdbc-proxy-xml</module>
 
     </modules>
 
