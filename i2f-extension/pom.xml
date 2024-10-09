@@ -66,6 +66,7 @@
         <module>i2f-extension-javassist</module>
         <module>i2f-extension-mybatis</module>
         <module>i2f-extension-ognl</module>
+        <module>i2f-extension-jdbc-proxy-mybatis</module>
     </modules>
 
 
