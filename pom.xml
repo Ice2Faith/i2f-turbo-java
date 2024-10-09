@@ -737,6 +737,12 @@
                 <version>${i2f.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-ognl</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>i2f.turbo</groupId>

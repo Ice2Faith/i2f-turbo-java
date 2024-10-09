@@ -1,6 +1,7 @@
 package i2f.compiler;
 
 import i2f.io.file.FileUtil;
+import i2f.lru.LruMap;
 import i2f.reflect.ReflectResolver;
 
 import javax.tools.*;
@@ -10,11 +11,9 @@ import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * @author Ice2Faith
@@ -122,6 +121,12 @@ public class MemoryCompiler {
         return classLoader;
     }
 
+    public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s+");
+    private static final LruMap<String, Set<Class<?>>> CACHE_COMPILE_CLASS = new LruMap<>(2048);
+    private static final LruMap<String, Class<?>> CACHE_FIND_COMPILE_CLASS = new LruMap<>(2048);
+    private static final LruMap<String, String> CACHE_RANDOM_CLASS_NAME = new LruMap<>(2048);
+    private static final LruMap<String, String> CACHE_WRAP_EXPRESSION_AS_JAVA_SOURCE_CODE = new LruMap<>(2048);
+
     /**
      * 直接得到源文件编译之后的class
      * 参数和作用同上
@@ -132,14 +137,14 @@ public class MemoryCompiler {
      * @return
      * @throws Exception
      */
-    public static Map<Class, File> compileAsClass(String javaSourceCode,
-                                                  String javaFileName,
-                                                  File outputDir
+    public static Map<Class<?>, File> compileAsClass(String javaSourceCode,
+                                                     String javaFileName,
+                                                     File outputDir
     ) throws Exception {
 
         Map<String, File> files = compileAsFile(javaSourceCode, javaFileName, outputDir);
 
-        Map<Class, File> ret = new HashMap<>();
+        Map<Class<?>, File> ret = new HashMap<>();
 
         ClassLoader classLoader = getClassLoader(outputDir);
         for (Map.Entry<String, File> entry : files.entrySet()) {
@@ -149,6 +154,62 @@ public class MemoryCompiler {
         }
 
         return ret;
+    }
+
+    public static Set<Class<?>> compileClass(String javaSourceCode, String javaFileName) throws Exception {
+        String key = javaFileName + "##" + javaSourceCode;
+        Set<Class<?>> set = CACHE_COMPILE_CLASS.get(key);
+        if (set != null) {
+            return new LinkedHashSet<>(set);
+        }
+        synchronized (CACHE_COMPILE_CLASS) {
+            Set<Class<?>> ret = compileClass0(javaSourceCode, javaFileName);
+            if (ret != null) {
+                CACHE_COMPILE_CLASS.put(key, new LinkedHashSet<>(ret));
+            }
+            return ret;
+        }
+    }
+
+    public static Set<Class<?>> compileClass0(String javaSourceCode, String javaFileName) throws Exception {
+        File outputDir = new File("./memory-compiler/classes/" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase()));
+        outputDir.mkdirs();
+        try {
+            Map<Class<?>, File> map = compileAsClass(javaSourceCode, javaFileName, outputDir);
+            return new LinkedHashSet<>(map.keySet());
+        } finally {
+            FileUtil.delete(outputDir, null);
+        }
+    }
+
+    public static Class<?> findCompileClass(String javaSourceCode, String javaFileName, String fullClassName) throws Exception {
+        String key = fullClassName + "##" + javaFileName + "##" + javaSourceCode;
+        Class<?> set = CACHE_FIND_COMPILE_CLASS.get(key);
+        if (set != null) {
+            return set;
+        }
+        synchronized (CACHE_FIND_COMPILE_CLASS) {
+            Class<?> ret = findCompileClass0(javaSourceCode, javaFileName, fullClassName);
+            if (ret != null) {
+                CACHE_FIND_COMPILE_CLASS.put(key, ret);
+            }
+            return ret;
+        }
+    }
+
+    public static Class<?> findCompileClass0(String javaSourceCode, String javaFileName, String fullClassName) throws Exception {
+        Set<Class<?>> set = compileClass(javaSourceCode, javaFileName);
+        Class<?> clazz = null;
+        for (Class<?> key : set) {
+            if (key.getName().equals(fullClassName)) {
+                clazz = key;
+                break;
+            }
+        }
+        if (clazz == null) {
+            throw new NoClassDefFoundError(fullClassName);
+        }
+        return clazz;
     }
 
     /**
@@ -166,36 +227,53 @@ public class MemoryCompiler {
      * @throws Exception
      */
     public static Object compileCall(String javaSourceCode, String javaFileName, String fullClassName, String methodName, Object... args) throws Exception {
-        File outputDir = new File("./memory-compiler/classes/" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase()));
-        outputDir.mkdirs();
-        try {
-            Map<Class, File> map = compileAsClass(javaSourceCode, javaFileName, outputDir);
-            Class<?> clazz = null;
-            for (Map.Entry<Class, File> entry : map.entrySet()) {
-                Class<?> key = entry.getKey();
-                if (key.getName().equals(fullClassName)) {
-                    clazz = key;
-                    break;
-                }
-            }
-            if (clazz == null) {
-                throw new NoClassDefFoundError(fullClassName);
-            }
-            Method method = ReflectResolver.matchMethod(clazz, methodName, args);
-            if (method == null) {
-                throw new NoSuchMethodException(fullClassName + "." + methodName + " with args count " + args.length);
-            }
-            if (Modifier.isStatic(method.getModifiers())) {
-                Object ret = ReflectResolver.invokeMethodeDirect(null, method, args);
-                return ret;
-            }
-            Object obj = ReflectResolver.getInstance(clazz);
-            Object ret = ReflectResolver.invokeMethodeDirect(obj, method, args);
-            return ret;
-        } finally {
-            FileUtil.delete(outputDir, null);
+        Class<?> clazz = findCompileClass(javaSourceCode, javaFileName, fullClassName);
+        Method method = ReflectResolver.matchMethod(clazz, methodName, args);
+        if (method == null) {
+            throw new NoSuchMethodException(fullClassName + "." + methodName + " with args count " + args.length);
         }
+        if (Modifier.isStatic(method.getModifiers())) {
+            Object ret = ReflectResolver.invokeMethodeDirect(null, method, args);
+            return ret;
+        }
+        Object obj = ReflectResolver.getInstance(clazz);
+        Object ret = ReflectResolver.invokeMethodeDirect(obj, method, args);
+        return ret;
 
+
+    }
+
+    public static Object evaluateExpression(String expression, Object root) throws Exception {
+        return evaluateExpression(expression, root, null, null);
+    }
+
+    public static Object evaluateExpression(String expression, Object root,
+                                            String additionalImports) throws Exception {
+        return evaluateExpression(expression, root, additionalImports, null);
+    }
+
+    public static String getCachedRandomClassName(String javaSourceCode) throws Exception {
+        String key = javaSourceCode;
+        String set = CACHE_RANDOM_CLASS_NAME.get(key);
+        if (set != null) {
+            return set;
+        }
+        synchronized (CACHE_RANDOM_CLASS_NAME) {
+            String ret = "RC" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
+            if (ret != null) {
+                CACHE_RANDOM_CLASS_NAME.put(key, ret);
+            }
+            return ret;
+        }
+    }
+
+    public static String wrapExpressionAsJavaSourceCode(String expression, String className) {
+        return wrapExpressionAsJavaSourceCode(expression, className, null, null);
+    }
+
+    public static String wrapExpressionAsJavaSourceCode(String expression, String className,
+                                                        String additionalImports) {
+        return wrapExpressionAsJavaSourceCode(expression, className, additionalImports, null);
     }
 
     /**
@@ -210,23 +288,16 @@ public class MemoryCompiler {
      * @throws Exception
      */
     public static Object compileCallRandomClass(String javaSourceCode, String methodName, Object... args) throws Exception {
-        String randomClassName = "RC" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
+        String randomClassName = getCachedRandomClassName(javaSourceCode);
         String sourceCode = javaSourceCode.replaceAll(CLASS_NAME_TAG, randomClassName);
         return compileCall(sourceCode, randomClassName, randomClassName, methodName, args);
     }
-
-    public static Object evaluateExpression(String expression, Object root) throws Exception {
-        return evaluateExpression(expression, root, null, null);
-    }
-
-    public static Object evaluateExpression(String expression, Object root,
-                                            String additionalImports) throws Exception {
-        return evaluateExpression(expression, root, additionalImports, null);
-    }
+    ;
 
     /**
      * 执行表达式计算
      * 关于表达式 expression 的包装规则，请查看 {@link  #wrapExpressionAsJavaSourceCode(String expression, String classNameString additionalImports, String additionalMethods)} 的注释
+     *
      * @param expression
      * @param root
      * @return
@@ -239,19 +310,27 @@ public class MemoryCompiler {
         return compileCallRandomClass(javaSourceCode, "_call", root);
     }
 
-    public static String wrapExpressionAsJavaSourceCode(String expression, String className) {
-        return wrapExpressionAsJavaSourceCode(expression, className, null, null);
-    }
-
     public static String wrapExpressionAsJavaSourceCode(String expression, String className,
-                                                        String additionalImports) {
-        return wrapExpressionAsJavaSourceCode(expression, className, additionalImports, null);
+                                                        String additionalImports,
+                                                        String additionalMethods) {
+        String key = className + "##" + expression + "##" + additionalImports + "##" + additionalMethods;
+        String set = CACHE_WRAP_EXPRESSION_AS_JAVA_SOURCE_CODE.get(key);
+        if (set != null) {
+            return set;
+        }
+        synchronized (CACHE_WRAP_EXPRESSION_AS_JAVA_SOURCE_CODE) {
+            String ret = wrapExpressionAsJavaSourceCode0(expression, className, additionalImports, additionalMethods);
+            if (ret != null) {
+                CACHE_WRAP_EXPRESSION_AS_JAVA_SOURCE_CODE.put(key, ret);
+            }
+            return ret;
+        }
     }
 
     /**
      * 将表达式包装为java源代码文件
      * 定义如下：
-     *
+     * <p>
      * <hr/>
      * <pre>
      * <b><i>
@@ -269,12 +348,12 @@ public class MemoryCompiler {
      * }
      * </i></b>
      * </pre>
-     *
+     * <p>
      * <hr/>
      * 因此，对expression有一些要求
      * expression具有一个入参，名为 $root
      * expression必须包含return语句，以满足函数的返回值要求
-     *
+     * <p>
      * <hr/>
      * <h6>expression 组成部分</h6>
      * <pre>
@@ -287,7 +366,7 @@ public class MemoryCompiler {
      * 再对剩下的部分，截取 ###method 之前的部分作为 method 语句部分
      * 最后剩下的部分，就是 expr 语句部分
      * </pre>
-     *
+     * <p>
      * <hr/>
      * <h6>举例说明：</h6>
      * <pre>
@@ -307,11 +386,11 @@ public class MemoryCompiler {
      * </i></b>
      * ```
      * </pre>
-     *
+     * <p>
      * <hr/>
      * 在这个例子中
      * 演示了完整的三部分内容
-     *
+     * <p>
      * <hr/>
      * <h6>import 部分为 ：</h6>
      * <pre>
@@ -321,7 +400,7 @@ public class MemoryCompiler {
      * </i></b>
      * ```
      * </pre>
-     *
+     * <p>
      * <hr/>
      * <h6>method 部分为 ：</h6>
      * <pre>
@@ -333,7 +412,7 @@ public class MemoryCompiler {
      * </i></b>
      * ```
      * </pre>
-     *
+     * <p>
      * <hr/>
      * <h6>expr 部分为 ：</h6>
      * <pre>
@@ -343,11 +422,11 @@ public class MemoryCompiler {
      * </i></b>
      * ```
      * </pre>
-     *
+     * <p>
      * <hr/>
      * 同时，因为import和method部分可以缺省
      * 所以，下面的语句也是可以的
-     *
+     * <p>
      * <hr/>
      * <h6>有import语句，无method语句</h6>
      * <pre>
@@ -361,7 +440,7 @@ public class MemoryCompiler {
      * </i></b>
      * ```
      * </pre>
-     *
+     * <p>
      * <hr/>
      * <h6>有import语句，无method语句</h6>
      * <pre>
@@ -377,7 +456,7 @@ public class MemoryCompiler {
      * </i></b>
      * ```
      * </pre>
-     *
+     * <p>
      * <hr/>
      * <h6>无import语句，无method语句</h6>
      * <pre>
@@ -387,13 +466,14 @@ public class MemoryCompiler {
      * </i></b>
      * ```
      * </pre>
+     *
      * @param expression
      * @param className
      * @param additionalImports
      * @param additionalMethods
      * @return
      */
-    public static String wrapExpressionAsJavaSourceCode(String expression, String className,
+    public static String wrapExpressionAsJavaSourceCode0(String expression, String className,
                                                         String additionalImports,
                                                         String additionalMethods) {
         String[] arr = expression.split(IMPORT_SPLIT_TAG, 2);
@@ -405,6 +485,47 @@ public class MemoryCompiler {
         if (arr.length > 1) {
             methods = arr[0];
             body = arr[1];
+        }
+        if (!body.contains("return")) {
+            // return segment not exists
+            if (!RETURN_PATTERN.matcher(body).find()) {
+                String[] lines = body.split("\n");
+                int lastCodeLineIdx = lines.length - 1;
+                for (int i = lastCodeLineIdx; i >= 0; i--) {
+                    String str = lines[i];
+                    if (str.isEmpty()) {
+                        continue;
+                    }
+                    str = str.trim();
+                    if (str.isEmpty()) {
+                        continue;
+                    }
+                    if ("{".equals(str)) {
+                        continue;
+                    }
+                    if ("}".equals(str)) {
+                        continue;
+                    }
+                    lastCodeLineIdx = i;
+                    break;
+                }
+                String line = lines[lastCodeLineIdx];
+                int idx = line.lastIndexOf(";");
+                if (idx >= 0) {
+                    line = line.substring(0, idx + 1) + " return " + line.substring(idx + 1);
+                } else {
+                    line = " return " + line;
+                }
+                if (!line.endsWith(";")) {
+                    line = line + ";";
+                }
+                lines[lastCodeLineIdx] = line;
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < lines.length; i++) {
+                    builder.append(lines[i]).append("\n");
+                }
+                body = builder.toString();
+            }
         }
 
         StringBuilder builder = new StringBuilder();
