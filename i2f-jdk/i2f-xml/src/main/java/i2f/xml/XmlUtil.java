@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -48,7 +50,15 @@ public class XmlUtil {
     }
 
     public static Node getRootNode(Document document) {
-        return document.getFirstChild();
+        NodeList list = document.getChildNodes();
+        int len = list.getLength();
+        for (int i = 0; i < len; i++) {
+            Node item = list.item(i);
+            if (Node.ELEMENT_NODE == item.getNodeType()) {
+                return item;
+            }
+        }
+        return document.getLastChild();
     }
 
     public static String getNodeContent(Node node) {
@@ -62,6 +72,21 @@ public class XmlUtil {
             return null;
         }
         return item.getTextContent();
+    }
+
+    public static Map<String, String> getAttributes(Node node) {
+        Map<String, String> ret = new LinkedHashMap<>();
+        NamedNodeMap attributes = node.getAttributes();
+        if (attributes != null) {
+            int length = attributes.getLength();
+            for (int i = 0; i < length; i++) {
+                Node item = attributes.item(i);
+                String nodeName = item.getNodeName();
+                String nodeValue = item.getNodeValue();
+                ret.put(nodeName, nodeValue);
+            }
+        }
+        return ret;
     }
 
     public static List<Node> getNodesByTagName(Document document, List<String> tagNameList) {
