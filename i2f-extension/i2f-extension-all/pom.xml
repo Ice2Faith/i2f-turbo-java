@@ -157,6 +157,16 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-ocr-tesseract</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-ognl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-qrcode</artifactId>
         </dependency>
 
