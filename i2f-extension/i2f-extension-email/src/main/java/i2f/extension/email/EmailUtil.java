@@ -105,7 +105,7 @@ public class EmailUtil {
     public static MimeMessage fillMimeMessage(MimeMessage message, EmailSendData data) throws MessagingException {
         message.setSubject(data.title, data.charSet);
 
-        if (data.attachFiles != null && data.attachFiles.size() > 0) {
+        if (data.attachFiles != null && !data.attachFiles.isEmpty()) {
             Multipart multipart = new MimeMultipart();
             if (data.type == EmailSendData.Type.PLAIN_TEXT) {
                 BodyPart part = genPlainTextBodyPart(data.content, data.charSet);
