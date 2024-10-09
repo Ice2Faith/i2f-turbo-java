@@ -3,3 +3,4 @@ deploy
 release/test-*
 !release/*
 release/i2f-springboot-maven-project*
+release/i2f-tools-face-recognizer*
