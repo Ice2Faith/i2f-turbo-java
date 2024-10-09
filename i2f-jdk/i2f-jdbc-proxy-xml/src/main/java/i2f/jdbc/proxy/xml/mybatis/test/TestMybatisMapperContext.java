@@ -1,10 +1,9 @@
-package i2f.extension.jdbc.proxy.mybatis.test;
+package i2f.jdbc.proxy.xml.mybatis.test;
 
 import i2f.bindsql.BindSql;
-import i2f.extension.jdbc.proxy.mybatis.MybatisMapperContext;
-import i2f.extension.jdbc.proxy.mybatis.data.MybatisMapperNode;
-import i2f.extension.jdbc.proxy.mybatis.inflater.MybatisMapperInflater;
-import i2f.extension.jdbc.proxy.mybatis.inflater.OgnlMybatisMapperInflater;
+import i2f.jdbc.proxy.xml.mybatis.MybatisMapperContext;
+import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
+import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.xml.XmlUtil;
 import org.w3c.dom.Document;
 
@@ -38,27 +37,16 @@ public class TestMybatisMapperContext {
         params.put("offset", 0);
         params.put("size", 100);
 
-        if (true) {
             System.out.println("=====================================================");
             MybatisMapperContext context = new MybatisMapperContext();
             context.setInflater(MybatisMapperInflater.INSTANCE);
 
-            String file = "i2f-extension/i2f-extension-jdbc-proxy-mybatis/src/main/resources/sample/TestMapper.base.xml";
+        String file = "i2f-jdk/i2f-jdbc-proxy-xml/src/main/resources/sample/TestMapper.xml";
             Document document = XmlUtil.parseXml(new File(file));
             context.loadDocuments(Arrays.asList(document));
             testContext(context, params);
-        }
 
-        if (true) {
-            System.out.println("=====================================================");
-            MybatisMapperContext context = new MybatisMapperContext();
-            context.setInflater(OgnlMybatisMapperInflater.INSTANCE);
 
-            String file = "i2f-extension/i2f-extension-jdbc-proxy-mybatis/src/main/resources/sample/TestMapper.ognl.xml";
-            Document document = XmlUtil.parseXml(new File(file));
-            context.loadDocuments(Arrays.asList(document));
-            testContext(context, params);
-        }
 
     }
 

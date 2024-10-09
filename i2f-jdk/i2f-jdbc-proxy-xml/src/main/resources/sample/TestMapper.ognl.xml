@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="i2f.extension.jdbc.proxy.mybatis.test.mapper.TestMapper">
+<mapper namespace="i2f.jdbc.proxy.xml.mybatis.test.mapper.TestMapper">
 
-    <resultMap id="mapRewriteVo" type="i2f.extension.jdbc.proxy.mybatis.test.TestVo">
+    <resultMap id="mapRewriteVo" type="i2f.jdbc.proxy.xml.mybatis.test.TestVo">
         <result property="id" column="ID"/>
         <result property="code" column="CODE"/>
         <result property="name" column="NAME"/>
     </resultMap>
 
     <sql id="sqlTest">
-        <if test='eval("$root.req",$root)==null'>
+        <if test='req==null'>
             test sql
         </if>
     </sql>
 
     <sql id="com.test.sqlTestFull">
-        <if test='eval("$root.req",$root)!=null'>
+        <if test='req!=null'>
             test sql full
         </if>
     </sql>
@@ -36,22 +36,22 @@
 
         (
         select
-        <if test='eval("req.codeColumn",$root)!=null'>
+        <if test="req.codeColumn!=null">
             ${req.codeColumn} as CODE,
         </if>
-        <if test='eval("req.nameColumn",$root)!=null'>
+        <if test="req.nameColumn!=null">
             ${req.nameColumn} as NAME,
         </if>
         ${req.idColumn} as ID
         from ${req.tableName}
         <where>
-            <if test='eval("$root.req",$root)!=null'>
+            <if test="$root!=null">
                 <![CDATA[
                 and 1>2
                 ]]>
             </if>
             <choose>
-                <when test='eval("$root.req",$root)!=null'>
+                <when test="$root!=null">
                     and 1=1
                 </when>
                 <otherwise>
@@ -63,7 +63,7 @@
         order by ${req.idColumn}
         ) a
         <where>
-            <if test='eval("$root.post",$root)!=null'>
+            <if test="post!=null">
                 and a.ID in
                 <foreach collection="post.vals" item="item" open="(" separator="," close=")">
                     #{item}
@@ -80,10 +80,10 @@
     <update id="updateRewrite">
         update ${req.tableName}
         <set>
-            <if test='eval("$root.req",$root)!=null'>
+            <if test="req!=null">
                 ${req.codeColumn} =#{post.code,jdbcType=VARCHAR},
             </if>
-            <if test='eval("$root.req",$root)!=null'>
+            <if test="req!=null">
                 ${req.nameColumn} =#{post.name,jdbcType=VARCHAR},
             </if>
             ${req.idColumn}=#{post.id},

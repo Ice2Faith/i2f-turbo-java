@@ -1,6 +1,7 @@
-package i2f.extension.jdbc.proxy.mybatis.inflater;
+package i2f.springboot.jdbc.bql.mybatis;
 
 import i2f.extension.ognl.OgnlUtil;
+import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 
 import java.util.Map;
 

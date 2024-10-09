@@ -1,8 +1,8 @@
-package i2f.extension.jdbc.proxy.mybatis.inflater;
+package i2f.jdbc.proxy.xml.mybatis.inflater;
 
 import i2f.bindsql.BindSql;
 import i2f.compiler.MemoryCompiler;
-import i2f.extension.jdbc.proxy.mybatis.data.MybatisMapperNode;
+import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.match.regex.RegexUtil;
 import i2f.reflect.vistor.Visitor;
 import org.w3c.dom.Node;
