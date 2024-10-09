@@ -222,6 +222,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jdbc-proxy-xml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jvm</artifactId>
         </dependency>
         <dependency>

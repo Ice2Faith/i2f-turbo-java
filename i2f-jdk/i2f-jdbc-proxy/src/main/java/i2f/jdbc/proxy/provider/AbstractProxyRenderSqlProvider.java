@@ -48,14 +48,20 @@ public abstract class AbstractProxyRenderSqlProvider implements ProxyRenderSqlPr
                 scriptCache.put(methodId, script);
             }
         }
-        BindSql ret = renderSql(script.getSql(), params, method, args);
+        BindSql ret = null;
+        if (script == null) {
+            ret = inflateScript(methodId, params, method, args);
+        }
+        if (ret == null) {
+            ret = renderSql(script.getSql(), params, method, args);
+        }
         if (ret.getType() == null || ret.getType() == BindSql.Type.UNSET) {
             ret.setType(script.getType());
         }
         return ret;
     }
 
-    private BindSql preHandleRender(String methodId, Map<String, Object> params, Method method, Object[] args) {
+    protected BindSql preHandleRender(String methodId, Map<String, Object> params, Method method, Object[] args) {
         if (!method.getDeclaringClass().equals(BaseMapper.class)) {
             return null;
         }
@@ -64,6 +70,10 @@ public abstract class AbstractProxyRenderSqlProvider implements ProxyRenderSqlPr
 
     public boolean predicateCacheable(String methodId, Map<String, Object> params, Method method, Object[] args) {
         return true;
+    }
+
+    public BindSql inflateScript(String methodId, Map<String, Object> params, Method method, Object[] args) {
+        return null;
     }
 
     public abstract BindSql getScript(String methodId, Map<String, Object> params, Method method, Object[] args);

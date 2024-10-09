@@ -1,9 +1,9 @@
-package i2f.extension.jdbc.proxy.mybatis;
+package i2f.jdbc.proxy.xml.mybatis;
 
 import i2f.bindsql.BindSql;
-import i2f.extension.jdbc.proxy.mybatis.data.MybatisMapperNode;
-import i2f.extension.jdbc.proxy.mybatis.inflater.MybatisMapperInflater;
-import i2f.extension.jdbc.proxy.mybatis.parser.MybatisMapperParser;
+import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
+import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
+import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
 import i2f.xml.XmlUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;

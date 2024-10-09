@@ -1,6 +1,6 @@
-package i2f.extension.jdbc.proxy.mybatis.parser;
+package i2f.jdbc.proxy.xml.mybatis.parser;
 
-import i2f.extension.jdbc.proxy.mybatis.data.MybatisMapperNode;
+import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

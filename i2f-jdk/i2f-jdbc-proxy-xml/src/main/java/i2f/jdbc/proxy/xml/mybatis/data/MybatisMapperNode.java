@@ -1,4 +1,4 @@
-package i2f.extension.jdbc.proxy.mybatis.data;
+package i2f.jdbc.proxy.xml.mybatis.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
