@@ -45,6 +45,7 @@ public class AgentContextHolder {
     }
 
     public static void setTraceId(Object request) {
+        System.out.println("filter-holder-set-trace-id: " + request);
         String id = threadTraceId.get();
         if (id != null) {
             return;
@@ -52,7 +53,21 @@ public class AgentContextHolder {
         if (request != null) {
             try {
                 Class<?> clazz = request.getClass();
-                Method method = clazz.getDeclaredMethod("getHeader", String.class);
+                Method method = null;
+                if (method == null) {
+                    try {
+                        method = clazz.getDeclaredMethod("getHeader", String.class);
+                    } catch (Exception e) {
+
+                    }
+                }
+                if (method == null) {
+                    try {
+                        method = clazz.getMethod("getHeader", String.class);
+                    } catch (Exception e) {
+
+                    }
+                }
                 if (method != null) {
                     id = (String) method.invoke(request, REQUEST_HEADER_TRACE_ID_NAME);
                 }
