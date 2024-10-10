@@ -1,11 +1,14 @@
 package i2f.extension.agent.javassist.transformer;
 
+import i2f.agent.AgentUtil;
+import i2f.agent.transformer.InstrumentTransformerFeature;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 
 /**
@@ -13,7 +16,24 @@ import java.security.ProtectionDomain;
  * @date 2024/8/2 14:20
  * @desc
  */
-public class ShutdownLogClassTransformer implements ClassFileTransformer {
+public class ShutdownLogClassTransformer implements ClassFileTransformer, InstrumentTransformerFeature {
+
+    @Override
+    public boolean canRetransform() {
+        return true;
+    }
+
+    @Override
+    public void onAdded(Instrumentation inst) {
+        AgentUtil.retransformLoadedClasses(inst, (clazz) -> {
+            String name = clazz.getName();
+            if (name.equals("java.lang.Shutdown")) {
+                return true;
+            }
+            return false;
+        });
+    }
+
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
         className = className.replaceAll("/", ".");

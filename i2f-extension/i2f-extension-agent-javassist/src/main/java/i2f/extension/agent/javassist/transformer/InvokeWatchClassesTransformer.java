@@ -1,5 +1,7 @@
 package i2f.extension.agent.javassist.transformer;
 
+import i2f.agent.AgentUtil;
+import i2f.agent.transformer.InstrumentTransformerFeature;
 import i2f.match.StringMatcher;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -7,6 +9,7 @@ import javassist.CtMethod;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,12 +21,41 @@ import java.util.Set;
  * @date 2022/4/3 12:24
  * @desc
  */
-public class InvokeWatchClassesTransformer implements ClassFileTransformer {
+public class InvokeWatchClassesTransformer implements ClassFileTransformer, InstrumentTransformerFeature {
     private Map<String, Set<String>> actionPattens;
 
     public InvokeWatchClassesTransformer(Map<String, Set<String>> actionPattens) {
         this.actionPattens = actionPattens;
     }
+
+    @Override
+    public boolean canRetransform() {
+        return true;
+    }
+
+    @Override
+    public void onAdded(Instrumentation inst) {
+        AgentUtil.retransformLoadedClasses(inst, (clazz) -> {
+            String name = clazz.getName();
+            if (isJavaClass(name)
+                    || name.contains("$")) {
+                return false;
+            }
+            return true;
+        });
+    }
+
+    public boolean isJavaClass(String name) {
+        if (name.startsWith("java.")
+                || name.startsWith("javax.")
+                || name.startsWith("jakarta.")
+                || name.startsWith("sun.")
+                || name.startsWith("nashorn.")) {
+            return true;
+        }
+        return false;
+    }
+
 
     @Override
     public byte[] transform(ClassLoader loader,
@@ -34,12 +66,8 @@ public class InvokeWatchClassesTransformer implements ClassFileTransformer {
 //        System.out.println("watch class:" + className);
         // 转换为类名
         className = className.replaceAll("/", ".");
-        if (className.startsWith("java.lang.")
-                || className.startsWith("java.util.")
-                || className.startsWith("java.time.")
-                || className.startsWith("java.reflect.")
-                || className.startsWith("java.math.")
-                || className.startsWith("java.text.")) {
+        if (isJavaClass(className)
+                || className.contains("$")) {
 //            System.out.println("jump class:"+className);
             return classfileBuffer;
         }

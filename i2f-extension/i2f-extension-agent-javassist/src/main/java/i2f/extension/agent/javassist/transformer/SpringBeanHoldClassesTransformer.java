@@ -1,10 +1,13 @@
 package i2f.extension.agent.javassist.transformer;
 
+import i2f.agent.AgentUtil;
+import i2f.agent.transformer.InstrumentTransformerFeature;
 import i2f.extension.javassist.JavassistUtil;
 import javassist.*;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Map;
@@ -15,7 +18,33 @@ import java.util.Set;
  * @date 2024/8/2 16:21
  * @desc
  */
-public class SpringBeanHoldClassesTransformer implements ClassFileTransformer {
+public class SpringBeanHoldClassesTransformer implements ClassFileTransformer, InstrumentTransformerFeature {
+    @Override
+    public boolean canRetransform() {
+        return true;
+    }
+
+    @Override
+    public void onAdded(Instrumentation inst) {
+        AgentUtil.retransformLoadedClasses(inst, (clazz) -> {
+            String name = clazz.getName();
+            if (!name.startsWith("org.springframework.")) {
+                return false;
+            }
+            String lowerName = name.toLowerCase();
+            if (!lowerName.contains("context")
+                    && !lowerName.contains("application")
+                    && !lowerName.contains(".context.")
+                    && !lowerName.contains(".beans.")
+                    && !lowerName.contains(".core.env.")
+                    && !lowerName.contains(".web.")
+            ) {
+                return false;
+            }
+            return true;
+        });
+    }
+
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
         className = className.replaceAll("/", ".");
