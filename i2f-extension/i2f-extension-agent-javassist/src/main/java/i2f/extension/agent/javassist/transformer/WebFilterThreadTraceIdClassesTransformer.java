@@ -80,16 +80,16 @@ public class WebFilterThreadTraceIdClassesTransformer implements ClassFileTransf
                     continue;
                 }
                 method.insertBefore("{\n" +
-                        "    System.out.println(\"filter-set-trace-id:\"+this);\n" +
+//                        "    System.out.println(\"filter-set-trace-id:\"+this);\n" +
                         "    " + AgentContextHolder.class.getName() + ".setTraceId($1);\n" +
-                        "    System.out.println(\"filter-set-trace-id:\" + this);\n" +
+//                        "    System.out.println(\"filter-set-trace-id:\" + this);\n" +
                         "}\n");
                 method.insertAfter("{\n" +
 //                        "    System.out.println(\"filter-remove-trace-id:\"+this);\n" +
                         "    " + AgentContextHolder.class.getName() + ".removeTraceId();\n" +
 //                        "    System.out.println(\"filter-remove-trace-id:\" + this);\n" +
                         "}\n", true);
-                System.out.println("throwable-notify-transformer:" + method);
+                System.out.println("filter-trace-transformer:" + method);
             }
 
 
