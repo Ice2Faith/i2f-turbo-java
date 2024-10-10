@@ -7,10 +7,13 @@ import i2f.jvm.JvmUtil;
 import i2f.match.StringMatcher;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.jar.JarFile;
 
 /**
  * @author ltb
@@ -18,6 +21,96 @@ import java.util.function.Predicate;
  * @desc
  */
 public class AgentUtil {
+
+    public static void appendAgentJarToBootstrapClassLoaderSearch(Instrumentation inst) {
+        if (inst == null) {
+            return;
+        }
+        try {
+            File agentJarFile = getAgentJarFile();
+            if (agentJarFile == null) {
+                return;
+            }
+            if (!agentJarFile.isFile()) {
+                return;
+            }
+            appendJarFileToBootstrapClassLoaderSearch(inst, agentJarFile);
+            File parentFile = agentJarFile.getParentFile();
+            if (parentFile == null) {
+                return;
+            }
+            File libDir = new File(parentFile, "lib");
+            appendJarLibDirToBootstrapClassLoaderSearch(inst, libDir);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void appendJarFileToBootstrapClassLoaderSearch(Instrumentation inst, File jarFile) {
+        if (inst == null) {
+            return;
+        }
+        if (jarFile == null) {
+            return;
+        }
+        if (!jarFile.isFile()) {
+            return;
+        }
+        try {
+            inst.appendToBootstrapClassLoaderSearch(new JarFile(jarFile));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void appendJarLibDirToBootstrapClassLoaderSearch(Instrumentation inst, File libDir) {
+        if (inst == null) {
+            return;
+        }
+        if (libDir == null) {
+            return;
+        }
+        if (!libDir.isDirectory()) {
+            return;
+        }
+        File[] files = libDir.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            String name = file.getName();
+            if (name.endsWith(".jar")) {
+                if (file.isFile()) {
+                    try {
+                        inst.appendToBootstrapClassLoaderSearch(new JarFile(file));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    public static File getAgentJarFile() {
+        List<String> inputArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
+        for (String inputArgument : inputArguments) {
+            if (inputArgument == null) {
+                continue;
+            }
+            inputArgument = inputArgument.trim();
+            if (inputArgument.startsWith("-javaagent:")) {
+                String javaAgent = inputArgument.substring("-javaagent:".length());
+                int idx = javaAgent.indexOf("=");
+                if (idx >= 0) {
+                    javaAgent = javaAgent.substring(0, idx);
+                }
+                return new File(javaAgent.trim());
+            }
+        }
+        return null;
+    }
 
     public static void addTransformers(Instrumentation inst, List<ClassFileTransformer> transformers) {
         if (transformers == null || transformers.isEmpty()) {

@@ -44,16 +44,25 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-springboot-xxl-job-starter</artifactId>
-            <version>1.0</version>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>i2f.turbo</groupId>-->
+        <!--            <artifactId>i2f-springboot-xxl-job-starter</artifactId>-->
+        <!--            <version>1.0</version>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>com.xuxueli</groupId>
             <artifactId>xxl-job-core</artifactId>
             <version>2.4.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-tools-agent-package</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:\home\dev\java\dev-center\i2f-turbo-java\i2f-tools\i2f-tools-agent\i2f-tools-agent.jar
+            </systemPath>
         </dependency>
     </dependencies>
 

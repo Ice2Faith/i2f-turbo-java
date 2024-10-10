@@ -2,6 +2,7 @@ package i2f.extension.agent.javassist.transformer;
 
 import i2f.agent.AgentUtil;
 import i2f.agent.transformer.InstrumentTransformerFeature;
+import i2f.extension.agent.javassist.context.AgentContextHolder;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
@@ -18,70 +19,26 @@ import java.security.ProtectionDomain;
  * @desc
  */
 public class ThrowableRecordClassTransformer implements ClassFileTransformer, InstrumentTransformerFeature {
-    public static void getProxyMethod() {
-//        System.out.println("new-throwable:"+this);
-//        boolean isExcept=true;
-//        String name = this.getClass().getName();
-//        if(name.startsWith("java.lang.")){
-//            isExcept=false;
-//        }
-//        if(isExcept) {
-//            String className = "i2f.extension.agent.javassist.context.AgentContextHolder";
-//            Class clazz = null;
-//            if (clazz == null) {
-//                try {
-//                    clazz = Class.forName(className);
-//                } catch (Throwable ex) {
-//
-//                }
-//            }
-//            if (clazz == null) {
-//                try {
-//                    clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-//                } catch (Throwable ex) {
-//
-//                }
-//            }
-//            if (clazz != null) {
-//                try {
-//                    java.lang.reflect.Method method = clazz.getDeclaredMethod("notifyThrowable", new Class[]{Throwable.class});
-//                    Object ivkObj = null;
-//                    Object[] ivkArgs = new Object[]{this};
-//                    method.invoke(ivkObj, ivkArgs);
-//                    System.out.println("trigger-throwable:" + this);
-//                } catch (Exception e) {
-//
-//                }
-//            }
-//        }
-
-    }
 
     @Override
     public boolean canRetransform() {
-        return false;
+        return true;
     }
 
     @Override
     public void onAdded(Instrumentation inst) {
-        new Thread(() -> {
-            try {
-                Thread.sleep(10 * 1000);
-            } catch (InterruptedException e) {
-
-            }
-            AgentUtil.retransformLoadedClasses(inst, (clazz) -> {
-                return Throwable.class.equals(clazz) || Throwable.class.isAssignableFrom(clazz);
-            });
-        }).start();
+        AgentUtil.retransformLoadedClasses(inst, (clazz) -> {
+            return Throwable.class.equals(clazz) || Throwable.class.isAssignableFrom(clazz);
+        });
     }
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
         className = className.replaceAll("/", ".");
-        if (!"java.lang.Throwable".equals(className)) {
+        if (!className.matches("^([a-zA-Z0-9_]+)?(\\.[a-zA-Z0-9_]+)*([a-zA-Z0-9_$]*)(Throwable|Exception|Error)$")) {
             return null;
         }
+        System.out.println("match-throwable:" + className);
 
 
         ClassPool cp = ClassPool.getDefault();
@@ -96,41 +53,10 @@ public class ThrowableRecordClassTransformer implements ClassFileTransformer, In
                     continue;
                 }
                 constructor.insertAfter("{\n" +
-                        "System.out.println(\"new-throwable:\"+this);\n" +
-                        "        boolean isExcept=true;\n" +
-                        "        String name = this.getClass().getName();\n" +
-                        "        if(name.startsWith(\"java.lang.\")){\n" +
-                        "            isExcept=false;\n" +
-                        "        }\n" +
-                        "        if(isExcept) {\n" +
-                        "            String className = \"i2f.extension.agent.javassist.context.AgentContextHolder\";\n" +
-                        "            Class clazz = null;\n" +
-                        "            if (clazz == null) {\n" +
-                        "                try {\n" +
-                        "                    clazz = Class.forName(className);\n" +
-                        "                } catch (Throwable ex) {\n" +
-                        "\n" +
-                        "                }\n" +
-                        "            }\n" +
-                        "            if (clazz == null) {\n" +
-                        "                try {\n" +
-                        "                    clazz = Thread.currentThread().getContextClassLoader().loadClass(className);\n" +
-                        "                } catch (Throwable ex) {\n" +
-                        "\n" +
-                        "                }\n" +
-                        "            }\n" +
-                        "            if (clazz != null) {\n" +
-                        "                try {\n" +
-                        "                    java.lang.reflect.Method method = clazz.getDeclaredMethod(\"notifyThrowable\", new Class[]{Throwable.class});\n" +
-                        "                    Object ivkObj = null;\n" +
-                        "                    Object[] ivkArgs = new Object[]{this};\n" +
-                        "                    method.invoke(ivkObj, ivkArgs);\n" +
-                        "                    System.out.println(\"trigger-throwable:\" + this);\n" +
-                        "                } catch (Exception e) {\n" +
-                        "\n" +
-                        "                }\n" +
-                        "            }\n" +
-                        "        }\n" +
+//                        "    System.out.println(\"new-throwable:\"+this);\n" +
+                        "    Throwable $zEx = this;\n" +
+                        "    " + AgentContextHolder.class.getName() + ".notifyThrowable($zEx);\n" +
+//                        "    System.out.println(\"trigger-throwable:\" + this);\n" +
                         "}\n");
                 System.out.println("throwable-notify-transformer:" + constructor);
             }
