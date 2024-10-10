@@ -35,11 +35,13 @@ public class AgentContextHolder {
 
     public static volatile ConcurrentHashMap<String, Object> globalMap = new ConcurrentHashMap<>();
 
+    public static Instrumentation instrumentation() {
+        return instrumentation;
+    }
+
+
     public static void notifyThrowable(Throwable e) {
-        System.out.println("notify-throwable-invoke:" + e.getClass());
-        while (THROWABLE_QUEUE.size() > THROWABLE_MAX_QUEUE_SIZE.get()) {
-            THROWABLE_QUEUE.poll();
-        }
+//        System.out.println("notify-throwable-invoke:" + e.getClass());
         THROWABLE_QUEUE.add(e);
         triggerThrowableDispatchThread();
     }
@@ -48,7 +50,9 @@ public class AgentContextHolder {
         if (THROWABLE_THREAD_RUNNING.getAndSet(true)) {
             return;
         }
+        System.out.println("dispatch-throwable-trigger...");
         Thread thread = new Thread(() -> {
+            System.out.println("dispatch-throwable-thread-running...");
             try {
                 runLoopThreadDispatch();
             } catch (Exception e) {
@@ -61,11 +65,12 @@ public class AgentContextHolder {
 
     public static void runLoopThreadDispatch() throws InterruptedException {
         while (true) {
+//            System.out.println("dispatch-throwable-wait...");
             while (THROWABLE_QUEUE.size() > THROWABLE_MAX_QUEUE_SIZE.get()) {
                 THROWABLE_QUEUE.poll();
             }
             Throwable e = THROWABLE_QUEUE.take();
-            System.out.println("dispatch-throwable-invoke:" + e.getClass());
+//            System.out.println("dispatch-throwable-invoke:" + e.getClass());
             for (Predicate<Throwable> listener : THROWABLE_LISTENER) {
                 if (listener == null) {
                     continue;

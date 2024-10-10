@@ -42,10 +42,12 @@ public class AgentMain {
 
     public static void agentProxy(String arg, Instrumentation inst) {
         System.out.println("AgentMain start run ! , arg is " + arg);
+
+        AgentUtil.appendAgentJarToBootstrapClassLoaderSearch(inst);
+
         Map<String, Set<String>> actionPattens = AgentUtil.parseClassPattenMap(arg);
         AgentContextHolder.instrumentation = inst;
         AgentContextHolder.agentArg = arg;
-
 
         LocalFileExpressionEvaluator.initFileWatchThread(inst);
 
@@ -53,7 +55,7 @@ public class AgentMain {
         AgentContextHolder.transformers.add(new SpringApplicationContextHoldClassesTransformer());
         AgentContextHolder.transformers.add(new SpringApplicationHoldClassesTransformer());
         AgentContextHolder.transformers.add(new ShutdownLogClassTransformer());
-//        AgentContextHolder.transformers.add(new ThrowableRecordClassTransformer());
+        AgentContextHolder.transformers.add(new ThrowableRecordClassTransformer());
         AgentContextHolder.transformers.add(new XxeGuardClassTransformer());
 
 //        AgentContextHolder.transformers.add(new InvokeWatchClassesTransformer(actionPattens));
@@ -65,5 +67,6 @@ public class AgentMain {
 //        AgentUtil.retransformLoadedClasses(inst, actionPattens);
 
     }
+
 
 }
