@@ -24,8 +24,6 @@ public class WebFilterThreadTraceIdClassesTransformer implements ClassFileTransf
             "org.springframework.web.filter.FormContentFilter",
             "org.springframework.web.filter.CharacterEncodingFilter",
             "org.springframework.web.filter.OncePerRequestFilter",
-            "javax.servlet.Filter",
-            "jakarta.servlet.Filter"
     };
 
     @Override
@@ -42,17 +40,24 @@ public class WebFilterThreadTraceIdClassesTransformer implements ClassFileTransf
                     return true;
                 }
             }
-            return false;
+            return name.matches("^(javax\\.servlet\\.|jakarta\\.servlet\\.|org\\.springframework\\.web\\.)([a-zA-Z0-9_]+\\.)*([a-zA-Z0-9_$]*)(Filter)$");
         });
     }
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
         className = className.replaceAll("/", ".");
+        boolean isTarget = false;
         for (String item : FILTER_CLASSES) {
             if (item.equals(className)) {
-                return null;
+                isTarget = true;
             }
+        }
+        if (!isTarget) {
+            isTarget = className.matches("^(javax\\.servlet\\.|jakarta\\.servlet\\.|org\\.springframework\\.web\\.)([a-zA-Z0-9_]+\\.)*([a-zA-Z0-9_$]*)(Filter)$");
+        }
+        if (!isTarget) {
+            return null;
         }
         System.out.println("match-filter:" + className);
 
