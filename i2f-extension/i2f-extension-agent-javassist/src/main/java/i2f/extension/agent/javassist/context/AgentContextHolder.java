@@ -2,6 +2,8 @@ package i2f.extension.agent.javassist.context;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -35,10 +37,42 @@ public class AgentContextHolder {
 
     public static volatile ConcurrentHashMap<String, Object> globalMap = new ConcurrentHashMap<>();
 
+    public static final String REQUEST_HEADER_TRACE_ID_NAME = "trace-id";
+    public static final ThreadLocal<String> threadTraceId = new ThreadLocal<>();
+
     public static Instrumentation instrumentation() {
         return instrumentation;
     }
 
+    public static void setTraceId(Object request) {
+        String id = threadTraceId.get();
+        if (id != null) {
+            return;
+        }
+        if (request != null) {
+            try {
+                Class<?> clazz = request.getClass();
+                Method method = clazz.getDeclaredMethod("getHeader", String.class);
+                if (method != null) {
+                    id = (String) method.invoke(request, REQUEST_HEADER_TRACE_ID_NAME);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (id != null) {
+            id = UUID.randomUUID() + "-" + Thread.currentThread().getId();
+        }
+        threadTraceId.set(id);
+    }
+
+    public static void removeTraceId() {
+        threadTraceId.remove();
+    }
+
+    public static String getTraceId() {
+        return threadTraceId.get();
+    }
 
     public static void notifyThrowable(Throwable e) {
 //        System.out.println("notify-throwable-invoke:" + e.getClass());

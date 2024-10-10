@@ -56,6 +56,7 @@ public class AgentMain {
         AgentContextHolder.transformers.add(new SpringApplicationHoldClassesTransformer());
         AgentContextHolder.transformers.add(new ShutdownLogClassTransformer());
         AgentContextHolder.transformers.add(new ThrowableRecordClassTransformer());
+        AgentContextHolder.transformers.add(new WebFilterThreadTraceIdClassesTransformer());
         AgentContextHolder.transformers.add(new XxeGuardClassTransformer());
 
 //        AgentContextHolder.transformers.add(new InvokeWatchClassesTransformer(actionPattens));
