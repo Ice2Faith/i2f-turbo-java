@@ -75,7 +75,7 @@ public class AgentContextHolder {
                 e.printStackTrace();
             }
         }
-        if (id != null) {
+        if (id == null) {
             id = UUID.randomUUID() + "-" + Thread.currentThread().getId();
         }
         threadTraceId.set(id);
