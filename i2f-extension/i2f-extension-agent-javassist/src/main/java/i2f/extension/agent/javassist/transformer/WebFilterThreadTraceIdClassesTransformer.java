@@ -12,6 +12,8 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -67,7 +69,9 @@ public class WebFilterThreadTraceIdClassesTransformer implements ClassFileTransf
         try {
             cc = cp.get(className);
 
-            CtMethod[] methods = cc.getDeclaredMethods();
+            Set<CtMethod> methods = new LinkedHashSet<>();
+            methods.addAll(Arrays.asList(cc.getDeclaredMethods()));
+            methods.addAll(Arrays.asList(cc.getMethods()));
             for (CtMethod method : methods) {
                 if (!Arrays.asList(
                         "doFilter",
@@ -76,9 +80,9 @@ public class WebFilterThreadTraceIdClassesTransformer implements ClassFileTransf
                     continue;
                 }
                 method.insertBefore("{\n" +
-//                        "    System.out.println(\"filter-set-trace-id:\"+this);\n" +
+                        "    System.out.println(\"filter-set-trace-id:\"+this);\n" +
                         "    " + AgentContextHolder.class.getName() + ".setTraceId($1);\n" +
-//                        "    System.out.println(\"filter-set-trace-id:\" + this);\n" +
+                        "    System.out.println(\"filter-set-trace-id:\" + this);\n" +
                         "}\n");
                 method.insertAfter("{\n" +
 //                        "    System.out.println(\"filter-remove-trace-id:\"+this);\n" +
