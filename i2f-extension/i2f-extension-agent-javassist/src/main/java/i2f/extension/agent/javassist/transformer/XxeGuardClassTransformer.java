@@ -1,5 +1,7 @@
 package i2f.extension.agent.javassist.transformer;
 
+import i2f.agent.AgentUtil;
+import i2f.agent.transformer.InstrumentTransformerFeature;
 import i2f.extension.javassist.JavassistUtil;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -8,6 +10,7 @@ import javassist.Modifier;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Map;
@@ -18,7 +21,33 @@ import java.util.Set;
  * @date 2024/7/31 18:08
  * @desc
  */
-public class XxeGuardClassTransformer implements ClassFileTransformer {
+public class XxeGuardClassTransformer implements ClassFileTransformer, InstrumentTransformerFeature {
+
+    public static final String[] TARGET_CLASSES = {
+            "javax.xml.parsers.DocumentBuilderFactory",
+            "javax.xml.parsers.SAXParserFactory",
+            "javax.xml.stream.XMLInputFactory",
+            "org.springframework.http.converter.xml.SourceHttpMessageConverter"
+    };
+
+    @Override
+    public boolean canRetransform() {
+        return true;
+    }
+
+    @Override
+    public void onAdded(Instrumentation inst) {
+
+        AgentUtil.retransformLoadedClasses(inst, (clazz) -> {
+            String name = clazz.getName();
+            for (String item : TARGET_CLASSES) {
+                if (name.equals(item)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
 
     @Override
     public byte[] transform(ClassLoader loader,

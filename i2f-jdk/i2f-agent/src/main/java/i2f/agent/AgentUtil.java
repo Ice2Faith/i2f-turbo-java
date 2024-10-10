@@ -2,12 +2,15 @@ package i2f.agent;
 
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
+import i2f.agent.transformer.InstrumentTransformerFeature;
 import i2f.jvm.JvmUtil;
 import i2f.match.StringMatcher;
 
 import java.io.File;
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author ltb
@@ -15,6 +18,27 @@ import java.util.*;
  * @desc
  */
 public class AgentUtil {
+
+    public static void addTransformers(Instrumentation inst, List<ClassFileTransformer> transformers) {
+        if (transformers == null || transformers.isEmpty()) {
+            return;
+        }
+        for (ClassFileTransformer transformer : transformers) {
+            if (transformer instanceof InstrumentTransformerFeature) {
+                InstrumentTransformerFeature feature = (InstrumentTransformerFeature) transformer;
+                inst.addTransformer(transformer, feature.canRetransform());
+            } else {
+                inst.addTransformer(transformer);
+            }
+        }
+        for (ClassFileTransformer transformer : transformers) {
+            if (transformer instanceof InstrumentTransformerFeature) {
+                InstrumentTransformerFeature feature = (InstrumentTransformerFeature) transformer;
+                feature.onAdded(inst);
+            }
+        }
+    }
+
     public static List<Class<?>> getLoadedClasses(Instrumentation inst) {
         Class<?>[] classes = inst.getAllLoadedClasses();
         List<Class<?>> ret = new ArrayList<>(Arrays.asList(classes));
@@ -99,6 +123,19 @@ public class AgentUtil {
         return actionPattens;
     }
 
+    public static void retransformLoadedClasses(Instrumentation inst, Predicate<Class<?>> filter) {
+        List<Class<?>> list = AgentUtil.getLoadedClasses(inst);
+        for (Class<?> item : list) {
+            if (filter == null || filter.test(item)) {
+                try {
+                    System.out.println("retransform:" + item.getName());
+                    inst.retransformClasses(item);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     public static void retransformLoadedClasses(Instrumentation inst, Map<String, Set<String>> actionPattens) {
         List<Class<?>> list = AgentUtil.getLoadedClasses(inst);

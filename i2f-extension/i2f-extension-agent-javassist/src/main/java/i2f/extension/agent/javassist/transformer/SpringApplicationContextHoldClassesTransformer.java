@@ -1,5 +1,7 @@
 package i2f.extension.agent.javassist.transformer;
 
+import i2f.agent.AgentUtil;
+import i2f.agent.transformer.InstrumentTransformerFeature;
 import i2f.extension.agent.javassist.context.AgentContextHolder;
 import i2f.extension.javassist.JavassistUtil;
 import javassist.ClassPool;
@@ -9,6 +11,7 @@ import javassist.Modifier;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Map;
@@ -19,7 +22,7 @@ import java.util.Set;
  * @date 2024/8/2 8:31
  * @desc
  */
-public class SpringApplicationContextHoldClassesTransformer implements ClassFileTransformer {
+public class SpringApplicationContextHoldClassesTransformer implements ClassFileTransformer, InstrumentTransformerFeature {
     public static final String SPRING_CONTEXT_CLASS_NAME = "org.springframework.context.ApplicationContext";
     public static final String[][] INJECT_APPLICATION_CONTEXT_CLASS_FIELD_ARRAY =
             {
@@ -32,6 +35,24 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
 
     public static boolean isSpringApplicationContext(CtClass clazz) {
         return JavassistUtil.isAssignableFrom(clazz, SPRING_CONTEXT_CLASS_NAME);
+    }
+
+    @Override
+    public boolean canRetransform() {
+        return true;
+    }
+
+    @Override
+    public void onAdded(Instrumentation inst) {
+        AgentUtil.retransformLoadedClasses(inst, (clazz) -> {
+            String name = clazz.getName();
+            for (String[] arr : INJECT_APPLICATION_CONTEXT_CLASS_FIELD_ARRAY) {
+                if (name.equals(arr[0])) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     @Override

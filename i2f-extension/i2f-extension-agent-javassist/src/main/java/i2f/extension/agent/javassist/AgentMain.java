@@ -6,8 +6,6 @@ import i2f.extension.agent.javassist.context.AgentContextHolder;
 import i2f.extension.agent.javassist.evaluate.LocalFileExpressionEvaluator;
 import i2f.extension.agent.javassist.transformer.*;
 
-import java.io.File;
-import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.Map;
 import java.util.Set;
@@ -55,16 +53,15 @@ public class AgentMain {
         AgentContextHolder.transformers.add(new SpringApplicationContextHoldClassesTransformer());
         AgentContextHolder.transformers.add(new SpringApplicationHoldClassesTransformer());
         AgentContextHolder.transformers.add(new ShutdownLogClassTransformer());
+//        AgentContextHolder.transformers.add(new ThrowableRecordClassTransformer());
         AgentContextHolder.transformers.add(new XxeGuardClassTransformer());
-
 
 //        AgentContextHolder.transformers.add(new InvokeWatchClassesTransformer(actionPattens));
 
 //        AgentContextHolder.transformers.add(new SystemLoadedClassesPrintTransformer());
 
-        for (ClassFileTransformer transformer : AgentContextHolder.transformers) {
-            inst.addTransformer(transformer, true);
-        }
+        AgentUtil.addTransformers(inst, AgentContextHolder.transformers);
+
 //        AgentUtil.retransformLoadedClasses(inst, actionPattens);
 
     }

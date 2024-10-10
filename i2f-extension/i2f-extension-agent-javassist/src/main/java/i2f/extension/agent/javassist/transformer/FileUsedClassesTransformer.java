@@ -1,24 +1,46 @@
 package i2f.extension.agent.javassist.transformer;
 
-import i2f.extension.agent.javassist.context.AgentContextHolder;
-import i2f.extension.javassist.JavassistUtil;
-import javassist.*;
+import i2f.agent.transformer.InstrumentTransformerFeature;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtConstructor;
 
 import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 import java.security.ProtectionDomain;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Ice2Faith
  * @date 2024/8/2 8:31
  * @desc
  */
-public class FileUsedClassesTransformer implements ClassFileTransformer {
+public class FileUsedClassesTransformer implements ClassFileTransformer, InstrumentTransformerFeature {
     public static final String FILE_CLASS_NAME= File.class.getName();
+
+    @Override
+    public boolean canRetransform() {
+        return true;
+    }
+
+    @Override
+    public void onAdded(Instrumentation inst) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(8 * 1000);
+            } catch (Exception e) {
+
+            }
+            try {
+                inst.retransformClasses(File.class);
+            } catch (UnmodifiableClassException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
     @Override
     public byte[] transform(ClassLoader loader,
                             String className,
@@ -37,7 +59,7 @@ public class FileUsedClassesTransformer implements ClassFileTransformer {
         try {
             cc = cp.get(className);
 
-            CtConstructor[] constructors = cc.getConstructors();
+            CtConstructor[] constructors = cc.getDeclaredConstructors();
 
             for (CtConstructor method : constructors) {
                 if (method.isEmpty()) {
@@ -47,7 +69,7 @@ public class FileUsedClassesTransformer implements ClassFileTransformer {
 
                 String trigger = className + "." + method.getName();
                 String injectLocation = "trigger[" + trigger + "]";
-                String tarCode = "System.out.println(this.getAbsolutePath());\n";
+                String tarCode = "System.out.println(\"file-use:\"+this.getAbsolutePath());\n";
                 try {
                     method.insertAfter("{" + tarCode + "}\n");
                 } catch (Exception e) {

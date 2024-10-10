@@ -3,7 +3,10 @@ package i2f.agent;
 
 import i2f.agent.transformer.SystemLoadedClassesPrintTransformer;
 
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,9 +44,10 @@ public class AgentMain {
         System.out.println("AgentMain start run ! , arg is " + arg);
         Map<String, Set<String>> actionPattens = AgentUtil.parseClassPattenMap(arg);
 
-        inst.addTransformer(new SystemLoadedClassesPrintTransformer(), true);
+        List<ClassFileTransformer> transformers = new ArrayList<>();
+        transformers.add(new SystemLoadedClassesPrintTransformer());
+        AgentUtil.addTransformers(inst, transformers);
 
-        AgentUtil.retransformLoadedClasses(inst, actionPattens);
     }
 
 }
