@@ -1,8 +1,12 @@
 package i2f.extension.agent.javassist.context;
 
+import i2f.clock.SystemClock;
+import i2f.extension.agent.javassist.transformer.SystemErrorThrowablePrintListener;
+import i2f.jvm.JvmUtil;
+import i2f.reflect.ReflectResolver;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Method;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -38,7 +42,28 @@ public class AgentContextHolder {
     public static volatile ConcurrentHashMap<String, Object> globalMap = new ConcurrentHashMap<>();
 
     public static final String REQUEST_HEADER_TRACE_ID_NAME = "trace-id";
+    public static final String TRACE_ID_FIELD_NAME = "traceId";
     public static final ThreadLocal<String> threadTraceId = new ThreadLocal<>();
+    public static final ThreadLocal<String> threadTraceSource = new ThreadLocal<>();
+    public static final long PID;
+    private static final AtomicBoolean initialSlf4jMDC = new AtomicBoolean(false);
+    private static final AtomicBoolean initialI2fLogHolder = new AtomicBoolean(false);
+    private static volatile Class<?> slf4jMDCClass;
+    private static volatile Class<?> i2fLogHolderClass;
+
+    static {
+        long pid = 0;
+        try {
+            String str = JvmUtil.getPid();
+            try {
+                pid = Long.parseLong(str);
+            } catch (Exception e) {
+            }
+        } catch (Exception e) {
+        }
+        PID = pid;
+        THROWABLE_LISTENER.add(SystemErrorThrowablePrintListener.INSTANCE);
+    }
 
     public static Instrumentation instrumentation() {
         return instrumentation;
@@ -52,42 +77,99 @@ public class AgentContextHolder {
         }
         if (request != null) {
             try {
-                Class<?> clazz = request.getClass();
-                Method method = null;
-                if (method == null) {
-                    try {
-                        method = clazz.getDeclaredMethod("getHeader", String.class);
-                    } catch (Exception e) {
-
-                    }
-                }
-                if (method == null) {
-                    try {
-                        method = clazz.getMethod("getHeader", String.class);
-                    } catch (Exception e) {
-
-                    }
-                }
-                if (method != null) {
-                    id = (String) method.invoke(request, REQUEST_HEADER_TRACE_ID_NAME);
-                }
+                id = (String) ReflectResolver.invokeMethod(request, "getHeader", REQUEST_HEADER_TRACE_ID_NAME);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            if (id == null) {
+                try {
+                    id = (String) ReflectResolver.invokeMethod(request, "getHeader", TRACE_ID_FIELD_NAME);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (id == null) {
+                try {
+                    id = (String) ReflectResolver.invokeMethod(request, "getParameter", TRACE_ID_FIELD_NAME);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (id == null) {
+                try {
+                    id = (String) ReflectResolver.invokeMethod(request, "getParameter", TRACE_ID_FIELD_NAME);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (threadTraceSource.get() == null) {
+                try {
+                    Object origin = ReflectResolver.invokeMethod(request, "getHeader", "origin");
+                    Object method = ReflectResolver.invokeMethod(request, "getMethod");
+                    Object contentType = ReflectResolver.invokeMethod(request, "getContentType");
+                    Object url = ReflectResolver.invokeMethod(request, "getRequestURL");
+
+                    threadTraceSource.set(String.format("http [%s] [%s] [%s] [%s]", String.valueOf(origin), String.valueOf(method), String.valueOf(contentType), String.valueOf(url)));
+                } catch (IllegalAccessException e) {
+
+                }
+            }
         }
         if (id == null) {
-            id = UUID.randomUUID() + "-" + Thread.currentThread().getId();
+            id = "tid-" + Long.toString(SystemClock.currentTimeMillis(), 16) + "-" + Long.toString(PID, 16) + "-" + Long.toString(Thread.currentThread().getId(), 16) + "-" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
         }
         threadTraceId.set(id);
+        if (!initialSlf4jMDC.getAndSet(true)) {
+            slf4jMDCClass = ReflectResolver.loadClass("org.slf4j.MDC");
+        }
+        if (slf4jMDCClass != null) {
+            try {
+                ReflectResolver.invokeStaticMethod(slf4jMDCClass, "put", TRACE_ID_FIELD_NAME, threadTraceId.get());
+            } catch (IllegalAccessException e) {
+
+            }
+        }
+        if (!initialI2fLogHolder.getAndSet(true)) {
+            i2fLogHolderClass = ReflectResolver.loadClass("i2f.log.holder.LogHolder");
+        }
+        if (i2fLogHolderClass != null) {
+            try {
+                ReflectResolver.invokeStaticMethod(i2fLogHolderClass, "setTraceId", threadTraceId.get());
+            } catch (IllegalAccessException e) {
+
+            }
+        }
     }
 
     public static void removeTraceId() {
         threadTraceId.remove();
+        threadTraceSource.remove();
+        if (!initialSlf4jMDC.getAndSet(true)) {
+            slf4jMDCClass = ReflectResolver.loadClass("org.slf4j.MDC");
+        }
+        if (slf4jMDCClass != null) {
+            try {
+                ReflectResolver.invokeStaticMethod(slf4jMDCClass, "remove", TRACE_ID_FIELD_NAME);
+            } catch (IllegalAccessException e) {
+
+            }
+        }
+        if (!initialI2fLogHolder.getAndSet(true)) {
+            i2fLogHolderClass = ReflectResolver.loadClass("i2f.log.holder.LogHolder");
+        }
+        if (i2fLogHolderClass != null) {
+            try {
+                ReflectResolver.invokeStaticMethod(i2fLogHolderClass, "removeTraceId");
+            } catch (IllegalAccessException e) {
+
+            }
+        }
     }
 
     public static String getTraceId() {
         return threadTraceId.get();
     }
+
 
     public static void notifyThrowable(Throwable e) {
 //        System.out.println("notify-throwable-invoke:" + e.getClass());
