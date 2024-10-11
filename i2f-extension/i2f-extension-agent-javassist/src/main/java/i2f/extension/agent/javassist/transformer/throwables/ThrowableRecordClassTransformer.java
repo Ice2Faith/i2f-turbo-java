@@ -1,4 +1,4 @@
-package i2f.extension.agent.javassist.transformer;
+package i2f.extension.agent.javassist.transformer.throwables;
 
 import i2f.agent.AgentUtil;
 import i2f.agent.transformer.InstrumentTransformerFeature;

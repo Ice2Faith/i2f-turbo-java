@@ -1,7 +1,8 @@
-package i2f.extension.agent.javassist.transformer;
+package i2f.extension.agent.javassist.transformer.shutdown;
 
 import i2f.agent.AgentUtil;
 import i2f.agent.transformer.InstrumentTransformerFeature;
+import i2f.extension.agent.javassist.context.AgentContextHolder;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -50,14 +51,11 @@ public class ShutdownLogClassTransformer implements ClassFileTransformer, Instru
             CtMethod method = cc.getDeclaredMethod("exit", new CtClass[]{CtClass.intType});
 
             method.insertBefore("{\n" +
+//                  "    System.out.println(\"shutdown-notify:\"+this);\n" +
                     "    int $zExitCode=$1;\n" +
-                    "    System.out.println(\"#######################\");\n" +
-                    "    System.out.println(\"exit code:\"+$zExitCode+\" with Thread: \"+Thread.currentThread().getName());\n" +
                     "    StackTraceElement[] $zTraces = Thread.currentThread().getStackTrace();\n" +
-                    "    for (int $zIdx = 0; $zIdx < $zTraces.length; $zIdx++) {\n" +
-                    "        System.out.println(\"   at \"+$zTraces[$zIdx]);\n" +
-                    "    }" +
-                    "    System.out.println(\"#######################\");\n" +
+                    "    " + AgentContextHolder.class.getName() + ".notifyShutdown($zExitCode,$zTraces);\n" +
+//                  "    System.out.println(\"shutdown-notify:\" + this);\n" +
                     "}\n");
             return cc.toBytecode();
         } catch (Exception e) {

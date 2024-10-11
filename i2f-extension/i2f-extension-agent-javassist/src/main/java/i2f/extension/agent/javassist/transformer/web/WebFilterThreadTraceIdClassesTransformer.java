@@ -1,4 +1,4 @@
-package i2f.extension.agent.javassist.transformer;
+package i2f.extension.agent.javassist.transformer.web;
 
 import i2f.agent.AgentUtil;
 import i2f.agent.transformer.InstrumentTransformerFeature;

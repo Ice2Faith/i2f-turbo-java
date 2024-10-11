@@ -22,6 +22,36 @@ import java.util.jar.JarFile;
  */
 public class AgentUtil {
 
+    public static boolean isAssignableFrom(Class<?> clazz, String type) {
+        if (clazz == null) {
+            return false;
+        }
+        String name = clazz.getName();
+        if (name == null) {
+            return false;
+        }
+        if (name.equals(type)) {
+            return true;
+        }
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass != null) {
+            boolean ok = isAssignableFrom(superclass, type);
+            if (ok) {
+                return true;
+            }
+        }
+
+        Class<?>[] interfaces = clazz.getInterfaces();
+        for (Class<?> anInterface : interfaces) {
+            boolean ok = isAssignableFrom(anInterface, type);
+            if (ok) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static void appendAgentJarToBootstrapClassLoaderSearch(Instrumentation inst) {
         if (inst == null) {
             return;

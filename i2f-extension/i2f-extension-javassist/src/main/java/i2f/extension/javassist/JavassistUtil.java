@@ -20,9 +20,6 @@ public class JavassistUtil {
         if (name == null) {
             return false;
         }
-        if (Object.class.getName().equals(name)) {
-            return false;
-        }
         if (fullClassName.equals(name)) {
             return true;
         }

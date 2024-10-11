@@ -1,4 +1,4 @@
-package i2f.extension.agent.javassist.transformer;
+package i2f.extension.agent.javassist.transformer.throwables;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -16,7 +16,7 @@ public class SystemErrorThrowablePrintListener implements Predicate<Throwable> {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(bos);
         thr.printStackTrace(ps);
-        System.err.println("=============================\n====" + thr.hashCode() + "@" + new String(bos.toByteArray()));
+        System.err.println("=============================\nthrowable====" + thr.hashCode() + "@" + new String(bos.toByteArray()));
         return true;
     }
 }
