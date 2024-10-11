@@ -1,18 +1,24 @@
 package i2f.extension.agent.javassist.context;
 
 import i2f.clock.SystemClock;
-import i2f.extension.agent.javassist.transformer.SystemErrorThrowablePrintListener;
+import i2f.extension.agent.javassist.transformer.file.SystemOutFilePrintListener;
+import i2f.extension.agent.javassist.transformer.jdbc.SystemOutSqlPrintListener;
+import i2f.extension.agent.javassist.transformer.shutdown.SystemErrorShutdownPrintListener;
+import i2f.extension.agent.javassist.transformer.throwables.SystemErrorThrowablePrintListener;
 import i2f.jvm.JvmUtil;
 import i2f.reflect.ReflectResolver;
 
+import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.sql.Statement;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -27,6 +33,10 @@ public class AgentContextHolder {
     public static final LinkedBlockingQueue<Throwable> THROWABLE_QUEUE = new LinkedBlockingQueue<>();
     public static final AtomicBoolean THROWABLE_THREAD_RUNNING = new AtomicBoolean(false);
     public static final AtomicInteger THROWABLE_MAX_QUEUE_SIZE = new AtomicInteger(8192);
+
+    public static final CopyOnWriteArrayList<BiPredicate<String, Object>> SQL_LISTENER = new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<Predicate<File>> FILE_LISTENER = new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<BiPredicate<Integer, StackTraceElement[]>> SHUTDOWN_LISTENER = new CopyOnWriteArrayList<>();
 
     public static volatile Instrumentation instrumentation;
     public static volatile String agentArg;
@@ -63,6 +73,9 @@ public class AgentContextHolder {
         }
         PID = pid;
         THROWABLE_LISTENER.add(SystemErrorThrowablePrintListener.INSTANCE);
+        SQL_LISTENER.add(SystemOutSqlPrintListener.INSTANCE);
+        FILE_LISTENER.add(SystemOutFilePrintListener.INSTANCE);
+        SHUTDOWN_LISTENER.add(SystemErrorShutdownPrintListener.INSTANCE);
     }
 
     public static Instrumentation instrumentation() {
@@ -170,6 +183,29 @@ public class AgentContextHolder {
         return threadTraceId.get();
     }
 
+    public static void notifyShutdown(int exitCode, StackTraceElement[] stack) {
+        for (BiPredicate<Integer, StackTraceElement[]> item : SHUTDOWN_LISTENER) {
+            if (item != null) {
+                item.test(exitCode, stack);
+            }
+        }
+    }
+
+    public static void notifyFile(File file) {
+        for (Predicate<File> item : FILE_LISTENER) {
+            if (item != null) {
+                item.test(file);
+            }
+        }
+    }
+
+    public static void notifyStatementExecute(String sql, Statement statement) {
+        for (BiPredicate<String, Object> item : SQL_LISTENER) {
+            if (item != null) {
+                item.test(sql, statement);
+            }
+        }
+    }
 
     public static void notifyThrowable(Throwable e) {
 //        System.out.println("notify-throwable-invoke:" + e.getClass());

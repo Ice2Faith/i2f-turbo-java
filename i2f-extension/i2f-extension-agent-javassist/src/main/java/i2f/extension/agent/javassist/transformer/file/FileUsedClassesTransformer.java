@@ -1,6 +1,7 @@
-package i2f.extension.agent.javassist.transformer;
+package i2f.extension.agent.javassist.transformer.file;
 
 import i2f.agent.transformer.InstrumentTransformerFeature;
+import i2f.extension.agent.javassist.context.AgentContextHolder;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
@@ -67,11 +68,12 @@ public class FileUsedClassesTransformer implements ClassFileTransformer, Instrum
                 }
 
 
-                String trigger = className + "." + method.getName();
-                String injectLocation = "trigger[" + trigger + "]";
-                String tarCode = "System.out.println(\"file-use:\"+this.getAbsolutePath());\n";
                 try {
-                    method.insertAfter("{" + tarCode + "}\n");
+                    method.insertAfter("{\n" +
+//                            "    System.out.println(\"file-new-notify:\"+this);\n" +
+                            "    " + AgentContextHolder.class.getName() + ".notifyFile(this);\n" +
+//                            "    System.out.println(\"file-new-notify:\" + this);\n" +
+                            "}\n");
                 } catch (Exception e) {
                     System.out.println(method);
                     e.printStackTrace();
