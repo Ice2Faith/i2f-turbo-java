@@ -8,9 +8,11 @@ import i2f.jdbc.data.NamingOutputParameter;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.data.TypedArgument;
+import i2f.match.regex.RegexUtil;
 import i2f.page.ApiPage;
 import i2f.page.Page;
 import i2f.reflect.ReflectResolver;
+import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 
 import java.math.BigDecimal;
@@ -23,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
@@ -447,6 +450,236 @@ public class JdbcResolver {
         int ret = stat.executeUpdate();
         stat.close();
         return ret;
+    }
+
+
+    public static <T> void batch(Connection conn, BindSql bql, Iterable<T> iterator) throws SQLException {
+        batch(conn, bql, iterator.iterator(), null, -1);
+    }
+
+    public static <T> void batch(Connection conn, BindSql bql, Iterable<T> iterator, int batchSize) throws SQLException {
+        batch(conn, bql, iterator.iterator(), null, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, BindSql bql, Iterable<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(conn, bql, iterator.iterator(), filter, -1);
+    }
+
+    public static <T> void batch(Connection conn, BindSql bql, Iterable<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch(conn, bql, iterator.iterator(), filter, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, BindSql bql, Iterator<T> iterator) throws SQLException {
+        batch(conn, bql, iterator, null, -1);
+    }
+
+    public static <T> void batch(Connection conn, BindSql bql, Iterator<T> iterator, int batchSize) throws SQLException {
+        batch(conn, bql, iterator, null, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, BindSql bql, Iterator<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(conn, bql, iterator, filter, -1);
+    }
+
+    /**
+     * bql的绑定args为Function类型则认定为Function，否则按照expression处理
+     *
+     * @param conn
+     * @param bql
+     * @param iterator
+     * @param filter
+     * @param batchSize
+     * @param <T>
+     * @throws SQLException
+     */
+    public static <T> void batch(Connection conn, BindSql bql, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        List<Function<T, ?>> getters = new ArrayList<>();
+        for (Object item : bql.getArgs()) {
+            if (item instanceof Function) {
+                Function getter = (Function) item;
+                getters.add(getter);
+            } else {
+                String expression = String.valueOf(item);
+                getters.add((elem) -> Visitor.visit(expression, elem).get());
+            }
+        }
+        batch0(conn, bql.getSql(), getters, iterator, filter, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, String sql, Iterable<T> iterator) throws SQLException {
+        batch(conn, sql, iterator.iterator(), null, -1);
+    }
+
+    public static <T> void batch(Connection conn, String sql, Iterable<T> iterator, int batchSize) throws SQLException {
+        batch(conn, sql, iterator.iterator(), null, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, String sql, Iterable<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(conn, sql, iterator.iterator(), filter, -1);
+    }
+
+    public static <T> void batch(Connection conn, String sql, Iterable<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch(conn, sql, iterator.iterator(), filter, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, String sql, Iterator<T> iterator) throws SQLException {
+        batch(conn, sql, iterator, null, -1);
+    }
+
+    public static <T> void batch(Connection conn, String sql, Iterator<T> iterator, int batchSize) throws SQLException {
+        batch(conn, sql, iterator, null, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, String sql, Iterator<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(conn, sql, iterator, filter, -1);
+    }
+
+    /**
+     * sql 使用 ${} 占位符来取iterator中的元素的值
+     *
+     * @param conn
+     * @param sql
+     * @param iterator
+     * @param filter
+     * @param batchSize
+     * @param <T>
+     * @throws SQLException
+     */
+    public static <T> void batch(Connection conn, String sql, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        List<String> expression = new ArrayList<>();
+        RegexUtil.regexFindAndReplace(sql, "\\$\\{[^}]+\\}", (result) -> {
+            expression.add(result);
+            return "?";
+        });
+        batch(conn, sql, expression, iterator, filter, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, String sql, List<String> expressions, Iterable<T> iterator) throws SQLException {
+        batch(conn, sql, expressions, iterator.iterator(), null, -1);
+    }
+
+    public static <T> void batch(Connection conn, String sql, List<String> expressions, Iterable<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(conn, sql, expressions, iterator.iterator(), filter, -1);
+    }
+
+    public static <T> void batch(Connection conn, String sql, List<String> expressions, Iterable<T> iterator, int batchSize) throws SQLException {
+        batch(conn, sql, expressions, iterator.iterator(), null, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, String sql, List<String> expressions, Iterable<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch(conn, sql, expressions, iterator.iterator(), filter, batchSize);
+    }
+
+    public static <T> void batch(Connection conn, String sql, List<String> expressions, Iterator<T> iterator) throws SQLException {
+        batch(conn, sql, expressions, iterator, null, -1);
+    }
+
+    public static <T> void batch(Connection conn, String sql, List<String> expressions, Iterator<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(conn, sql, expressions, iterator, filter, -1);
+    }
+
+    public static <T> void batch(Connection conn, String sql, List<String> expressions, Iterator<T> iterator, int batchSize) throws SQLException {
+        batch(conn, sql, expressions, iterator, null, batchSize);
+    }
+
+
+    public static <T> void batch(Connection conn, String sql, List<String> expressions, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        List<Function<T, ?>> getters = new ArrayList<>();
+        for (String expression : expressions) {
+            getters.add((elem) -> Visitor.visit(expression, elem).get());
+        }
+        batch0(conn, sql, getters, iterator, filter, batchSize);
+    }
+
+    public static <T> void batch0(Connection conn, String sql, List<Function<T, ?>> expressions, Iterable<T> iterator) throws SQLException {
+        batch0(conn, sql, expressions, iterator.iterator(), null, -1);
+    }
+
+    public static <T> void batch0(Connection conn, String sql, List<Function<T, ?>> expressions, Iterable<T> iterator, Predicate<T> filter) throws SQLException {
+        batch0(conn, sql, expressions, iterator.iterator(), filter, -1);
+    }
+
+    public static <T> void batch0(Connection conn, String sql, List<Function<T, ?>> expressions, Iterable<T> iterator, int batchSize) throws SQLException {
+        batch0(conn, sql, expressions, iterator.iterator(), null, batchSize);
+    }
+
+    public static <T> void batch0(Connection conn, String sql, List<Function<T, ?>> expressions, Iterable<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch0(conn, sql, expressions, iterator.iterator(), filter, batchSize);
+    }
+
+    public static <T> void batch0(Connection conn, String sql, List<Function<T, ?>> expressions, Iterator<T> iterator) throws SQLException {
+        batch0(conn, sql, expressions, iterator, null, -1);
+    }
+
+    public static <T> void batch0(Connection conn, String sql, List<Function<T, ?>> expressions, Iterator<T> iterator, Predicate<T> filter) throws SQLException {
+        batch0(conn, sql, expressions, iterator, filter, -1);
+    }
+
+    public static <T> void batch0(Connection conn, String sql, List<Function<T, ?>> expressions, Iterator<T> iterator, int batchSize) throws SQLException {
+        batch0(conn, sql, expressions, iterator, null, batchSize);
+    }
+
+    public static <T> void batch0(Connection conn, String sql, List<Function<T, ?>> expressions, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        if (iterator == null) {
+            return;
+        }
+        PreparedStatement stat = null;
+        if (batchSize < 0) {
+            while (iterator.hasNext()) {
+                T elem = iterator.next();
+                if (filter != null && !filter.test(elem)) {
+                    continue;
+                }
+                if (stat == null) {
+                    stat = conn.prepareStatement(sql);
+                }
+                int i = 1;
+                for (Function<T, ?> expression : expressions) {
+                    Object val = expression.apply(elem);
+                    setStatementObject(stat, i++, val);
+                }
+                stat.addBatch();
+            }
+            stat.executeBatch();
+        } else {
+            List<T> once = new ArrayList<>(batchSize);
+            int count = 0;
+            while (iterator.hasNext()) {
+                T elem = iterator.next();
+                if (filter != null && !filter.test(elem)) {
+                    continue;
+                }
+
+                once.add(elem);
+                count++;
+
+                if (stat == null) {
+                    stat = conn.prepareStatement(sql);
+                }
+                int i = 1;
+                for (Function<T, ?> expression : expressions) {
+                    Object val = expression.apply(elem);
+                    setStatementObject(stat, i++, val);
+                }
+                stat.addBatch();
+                if (count == batchSize) {
+                    stat.executeBatch();
+                    count = 0;
+                    once.clear();
+                    stat = null;
+                }
+            }
+            if (count > 0) {
+                stat.executeBatch();
+                count = 0;
+                once.clear();
+                stat = null;
+            }
+        }
+
+        if (stat != null) {
+            stat.close();
+        }
     }
 
     public static boolean call(Connection conn, String sql) throws SQLException {
