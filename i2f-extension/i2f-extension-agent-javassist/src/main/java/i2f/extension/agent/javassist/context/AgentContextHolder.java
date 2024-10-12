@@ -2,7 +2,10 @@ package i2f.extension.agent.javassist.context;
 
 import i2f.clock.SystemClock;
 import i2f.extension.agent.javassist.transformer.file.SystemOutFilePrintListener;
+import i2f.extension.agent.javassist.transformer.http.SystemOutUrlOpenConnectionPrintListener;
 import i2f.extension.agent.javassist.transformer.jdbc.SystemOutSqlPrintListener;
+import i2f.extension.agent.javassist.transformer.process.SystemOutProcessStartPrintListener;
+import i2f.extension.agent.javassist.transformer.rmi.SystemOutRmiNamingLookupPrintListener;
 import i2f.extension.agent.javassist.transformer.shutdown.SystemErrorShutdownPrintListener;
 import i2f.extension.agent.javassist.transformer.throwables.SystemErrorThrowablePrintListener;
 import i2f.jvm.JvmUtil;
@@ -11,6 +14,7 @@ import i2f.reflect.ReflectResolver;
 import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.net.URL;
 import java.sql.Statement;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +41,9 @@ public class AgentContextHolder {
     public static final CopyOnWriteArrayList<BiPredicate<String, Object>> SQL_LISTENER = new CopyOnWriteArrayList<>();
     public static final CopyOnWriteArrayList<Predicate<File>> FILE_LISTENER = new CopyOnWriteArrayList<>();
     public static final CopyOnWriteArrayList<BiPredicate<Integer, StackTraceElement[]>> SHUTDOWN_LISTENER = new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<Predicate<ProcessBuilder>> PROCESS_START_LISTENER = new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<Predicate<URL>> URL_OPEN_CONNECTION_LISTENER = new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<Predicate<String>> RMI_NAMING_LOOKUP_LISTENER = new CopyOnWriteArrayList<>();
 
     public static volatile Instrumentation instrumentation;
     public static volatile String agentArg;
@@ -76,6 +83,9 @@ public class AgentContextHolder {
         SQL_LISTENER.add(SystemOutSqlPrintListener.INSTANCE);
         FILE_LISTENER.add(SystemOutFilePrintListener.INSTANCE);
         SHUTDOWN_LISTENER.add(SystemErrorShutdownPrintListener.INSTANCE);
+        PROCESS_START_LISTENER.add(SystemOutProcessStartPrintListener.INSTANCE);
+        URL_OPEN_CONNECTION_LISTENER.add(SystemOutUrlOpenConnectionPrintListener.INSTANCE);
+        RMI_NAMING_LOOKUP_LISTENER.add(SystemOutRmiNamingLookupPrintListener.INSTANCE);
     }
 
     public static Instrumentation instrumentation() {
@@ -183,10 +193,42 @@ public class AgentContextHolder {
         return threadTraceId.get();
     }
 
+    public static void notifyRmiNamingLookup(String name) {
+        for (Predicate<String> item : RMI_NAMING_LOOKUP_LISTENER) {
+            if (item != null) {
+                if (item.test(name)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    public static void notifyUrlOpenConnection(URL url) {
+        for (Predicate<URL> item : URL_OPEN_CONNECTION_LISTENER) {
+            if (item != null) {
+                if (item.test(url)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    public static void notifyProcessStart(ProcessBuilder builder) {
+        for (Predicate<ProcessBuilder> item : PROCESS_START_LISTENER) {
+            if (item != null) {
+                if (item.test(builder)) {
+                    break;
+                }
+            }
+        }
+    }
+
     public static void notifyShutdown(int exitCode, StackTraceElement[] stack) {
         for (BiPredicate<Integer, StackTraceElement[]> item : SHUTDOWN_LISTENER) {
             if (item != null) {
-                item.test(exitCode, stack);
+                if (item.test(exitCode, stack)) {
+                    break;
+                }
             }
         }
     }
@@ -194,7 +236,9 @@ public class AgentContextHolder {
     public static void notifyFile(File file) {
         for (Predicate<File> item : FILE_LISTENER) {
             if (item != null) {
-                item.test(file);
+                if (item.test(file)) {
+                    break;
+                }
             }
         }
     }
@@ -202,7 +246,9 @@ public class AgentContextHolder {
     public static void notifyStatementExecute(String sql, Statement statement) {
         for (BiPredicate<String, Object> item : SQL_LISTENER) {
             if (item != null) {
-                item.test(sql, statement);
+                if (item.test(sql, statement)) {
+                    break;
+                }
             }
         }
     }
