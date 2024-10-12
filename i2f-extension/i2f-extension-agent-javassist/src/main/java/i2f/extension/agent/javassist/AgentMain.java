@@ -7,6 +7,8 @@ import i2f.extension.agent.javassist.evaluate.LocalFileExpressionEvaluator;
 import i2f.extension.agent.javassist.transformer.file.FileUsedClassesTransformer;
 import i2f.extension.agent.javassist.transformer.jdbc.ConnectionSqlClassesTransformer;
 import i2f.extension.agent.javassist.transformer.jdbc.StatementSqlClassesTransformer;
+import i2f.extension.agent.javassist.transformer.process.ProcessStartClassFileTransformer;
+import i2f.extension.agent.javassist.transformer.rmi.RmiNamingLookupClassFileTransformer;
 import i2f.extension.agent.javassist.transformer.shutdown.ShutdownLogClassTransformer;
 import i2f.extension.agent.javassist.transformer.spring.SpringApplicationContextHoldClassesTransformer;
 import i2f.extension.agent.javassist.transformer.spring.SpringApplicationHoldClassesTransformer;
@@ -67,6 +69,8 @@ public class AgentMain {
         AgentContextHolder.transformers.add(new WebFilterThreadTraceIdClassesTransformer());
         AgentContextHolder.transformers.add(new StatementSqlClassesTransformer());
         AgentContextHolder.transformers.add(new ConnectionSqlClassesTransformer());
+        AgentContextHolder.transformers.add(new ProcessStartClassFileTransformer());
+        AgentContextHolder.transformers.add(new RmiNamingLookupClassFileTransformer());
         AgentContextHolder.transformers.add(new XxeGuardClassTransformer());
 
 //        AgentContextHolder.transformers.add(new InvokeWatchClassesTransformer(actionPattens));
