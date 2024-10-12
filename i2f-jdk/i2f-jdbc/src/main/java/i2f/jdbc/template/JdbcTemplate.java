@@ -15,9 +15,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLType;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
@@ -31,6 +33,147 @@ public class JdbcTemplate {
 
     public JdbcTemplate(JdbcInvokeContextProvider<?> contextProvider) {
         this.contextProvider = contextProvider;
+    }
+
+
+    public <T> void batch(BindSql bql, Iterable<T> iterator) throws SQLException {
+        batch(bql, iterator.iterator(), null, -1);
+    }
+
+    public <T> void batch(BindSql bql, Iterable<T> iterator, int batchSize) throws SQLException {
+        batch(bql, iterator.iterator(), null, batchSize);
+    }
+
+    public <T> void batch(BindSql bql, Iterable<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(bql, iterator.iterator(), filter, -1);
+    }
+
+    public <T> void batch(BindSql bql, Iterable<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch(bql, iterator.iterator(), filter, batchSize);
+    }
+
+    public <T> void batch(BindSql bql, Iterator<T> iterator) throws SQLException {
+        batch(bql, iterator, null, -1);
+    }
+
+    public <T> void batch(BindSql bql, Iterator<T> iterator, int batchSize) throws SQLException {
+        batch(bql, iterator, null, batchSize);
+    }
+
+    public <T> void batch(BindSql bql, Iterator<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(bql, iterator, filter, -1);
+    }
+
+    public <T> void batch(BindSql bql, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        contextActionDelegate(bql, (conn, _bql) -> {
+            JdbcResolver.batch(conn, bql, iterator, filter, batchSize);
+            return null;
+        });
+    }
+
+    public <T> void batch(String sql, Iterable<T> iterator) throws SQLException {
+        batch(sql, iterator.iterator(), null, -1);
+    }
+
+    public <T> void batch(String sql, Iterable<T> iterator, int batchSize) throws SQLException {
+        batch(sql, iterator.iterator(), null, batchSize);
+    }
+
+    public <T> void batch(String sql, Iterable<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(sql, iterator.iterator(), filter, -1);
+    }
+
+    public <T> void batch(String sql, Iterable<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch(sql, iterator.iterator(), filter, batchSize);
+    }
+
+    public <T> void batch(String sql, Iterator<T> iterator) throws SQLException {
+        batch(sql, iterator, null, -1);
+    }
+
+    public <T> void batch(String sql, Iterator<T> iterator, int batchSize) throws SQLException {
+        batch(sql, iterator, null, batchSize);
+    }
+
+    public <T> void batch(String sql, Iterator<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(sql, iterator, filter, -1);
+    }
+
+    public <T> void batch(String sql, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        contextActionDelegate(sql, (conn, _sql) -> {
+            JdbcResolver.batch(conn, sql, iterator, filter, batchSize);
+            return null;
+        });
+    }
+
+    public <T> void batch(String sql, List<String> expressions, Iterable<T> iterator) throws SQLException {
+        batch(sql, expressions, iterator.iterator(), null, -1);
+    }
+
+    public <T> void batch(String sql, List<String> expressions, Iterable<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(sql, expressions, iterator.iterator(), filter, -1);
+    }
+
+    public <T> void batch(String sql, List<String> expressions, Iterable<T> iterator, int batchSize) throws SQLException {
+        batch(sql, expressions, iterator.iterator(), null, batchSize);
+    }
+
+    public <T> void batch(String sql, List<String> expressions, Iterable<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch(sql, expressions, iterator.iterator(), filter, batchSize);
+    }
+
+    public <T> void batch(String sql, List<String> expressions, Iterator<T> iterator) throws SQLException {
+        batch(sql, expressions, iterator, null, -1);
+    }
+
+    public <T> void batch(String sql, List<String> expressions, Iterator<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(sql, expressions, iterator, filter, -1);
+    }
+
+    public <T> void batch(String sql, List<String> expressions, Iterator<T> iterator, int batchSize) throws SQLException {
+        batch(sql, expressions, iterator, null, batchSize);
+    }
+
+    public <T> void batch(String sql, List<String> expressions, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        contextActionDelegate(sql, (conn, _sql) -> {
+            JdbcResolver.batch(conn, sql, expressions, iterator, filter, batchSize);
+            return null;
+        });
+    }
+
+    public <T> void batch0(String sql, List<Function<T, ?>> expressions, Iterable<T> iterator) throws SQLException {
+        batch0(sql, expressions, iterator.iterator(), null, -1);
+    }
+
+    public <T> void batch0(String sql, List<Function<T, ?>> expressions, Iterable<T> iterator, Predicate<T> filter) throws SQLException {
+        batch0(sql, expressions, iterator.iterator(), filter, -1);
+    }
+
+    public <T> void batch0(String sql, List<Function<T, ?>> expressions, Iterable<T> iterator, int batchSize) throws SQLException {
+        batch0(sql, expressions, iterator.iterator(), null, batchSize);
+    }
+
+    public <T> void batch0(String sql, List<Function<T, ?>> expressions, Iterable<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch0(sql, expressions, iterator.iterator(), filter, batchSize);
+    }
+
+    public <T> void batch0(String sql, List<Function<T, ?>> expressions, Iterator<T> iterator) throws SQLException {
+        batch0(sql, expressions, iterator, null, -1);
+    }
+
+    public <T> void batch0(String sql, List<Function<T, ?>> expressions, Iterator<T> iterator, Predicate<T> filter) throws SQLException {
+        batch0(sql, expressions, iterator, filter, -1);
+    }
+
+    public <T> void batch0(String sql, List<Function<T, ?>> expressions, Iterator<T> iterator, int batchSize) throws SQLException {
+        batch0(sql, expressions, iterator, null, batchSize);
+    }
+
+    public <T> void batch0(String sql, List<Function<T, ?>> expressions, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        contextActionDelegate(sql, (conn, _sql) -> {
+            JdbcResolver.batch0(conn, sql, expressions, iterator, filter, batchSize);
+            return null;
+        });
     }
 
     public int update(String sql, List<?> args) throws SQLException {

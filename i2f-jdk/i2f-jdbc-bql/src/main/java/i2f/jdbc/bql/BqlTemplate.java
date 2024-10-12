@@ -11,9 +11,11 @@ import i2f.page.Page;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
@@ -24,6 +26,38 @@ public class BqlTemplate extends JdbcTemplate {
 
     public BqlTemplate(JdbcInvokeContextProvider<?> contextProvider) {
         super(contextProvider);
+    }
+
+    public <T> void batch(Bql<?> bql, Iterable<T> iterator) throws SQLException {
+        batch(bql, iterator.iterator(), null, -1);
+    }
+
+    public <T> void batch(Bql<?> bql, Iterable<T> iterator, int batchSize) throws SQLException {
+        batch(bql, iterator.iterator(), null, batchSize);
+    }
+
+    public <T> void batch(Bql<?> bql, Iterable<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(bql, iterator.iterator(), filter, -1);
+    }
+
+    public <T> void batch(Bql<?> bql, Iterable<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch(bql, iterator.iterator(), filter, batchSize);
+    }
+
+    public <T> void batch(Bql<?> bql, Iterator<T> iterator) throws SQLException {
+        batch(bql, iterator, null, -1);
+    }
+
+    public <T> void batch(Bql<?> bql, Iterator<T> iterator, int batchSize) throws SQLException {
+        batch(bql, iterator, null, batchSize);
+    }
+
+    public <T> void batch(Bql<?> bql, Iterator<T> iterator, Predicate<T> filter) throws SQLException {
+        batch(bql, iterator, filter, -1);
+    }
+
+    public <T> void batch(Bql<?> bql, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
+        batch(bql.$$(), iterator, filter, batchSize);
     }
 
     public <T> int insert(T bean) throws SQLException {

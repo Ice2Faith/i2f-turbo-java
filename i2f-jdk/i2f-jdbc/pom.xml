@@ -44,6 +44,11 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-bindsql-page</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-match</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
