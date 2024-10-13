@@ -43,6 +43,9 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     protected IFieldColumnNameResolver fieldNameResolver = DefaultFieldColumnNameResolver.DEFAULT;
     protected IClassTableNameResolver tableNameResolver = DefaultClassTableNameResolver.DEFAULT;
 
+    public static final InheritableThreadLocal<IFieldColumnNameResolver> localFieldNameResolver = new InheritableThreadLocal<>();
+    public static final InheritableThreadLocal<IClassTableNameResolver> localTableNameResolver = new InheritableThreadLocal<>();
+
     public Bql() {
         // 初始化，
         // 查找顺序，静态变量->ThreadLocal
@@ -61,6 +64,30 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
         if (tableNameResolverHolder.get() != null) {
             this.tableNameResolver = tableNameResolverHolder.get();
         }
+    }
+
+    @Override
+    public H inherit() {
+        super.inherit();
+        Optional.ofNullable(localFieldNameResolver.get()).ifPresent((v) -> fieldNameResolver = v);
+        Optional.ofNullable(localTableNameResolver.get()).ifPresent((v) -> tableNameResolver = v);
+        return (H) this;
+    }
+
+    @Override
+    public H store() {
+        super.store();
+        localFieldNameResolver.set(fieldNameResolver);
+        localTableNameResolver.set(tableNameResolver);
+        return (H) this;
+    }
+
+    @Override
+    public H unset() {
+        super.unset();
+        localFieldNameResolver.set(null);
+        localTableNameResolver.set(null);
+        return (H) this;
     }
 
     public static <H extends Bql<H>> Bql<H> $lambda() {

@@ -189,6 +189,14 @@ public class Bql<H extends Bql<H>> {
     protected Function<String, String> tableNameDecorator = NONE_TABLE_NAME_DECORATOR;
     protected Function<String, String> columnAsDecorator = NONE_COLUMN_AS_DECORATOR;
 
+    public static final InheritableThreadLocal<String> localLink = new InheritableThreadLocal<>();
+    public static final InheritableThreadLocal<String> localSeparator = new InheritableThreadLocal<>();
+    public static final InheritableThreadLocal<String> localAlias = new InheritableThreadLocal<>();
+    public static final InheritableThreadLocal<String> localPlaceHolder = new InheritableThreadLocal<>();
+    public static final InheritableThreadLocal<Boolean> localUpperKeyWords = new InheritableThreadLocal<>();
+    public static final InheritableThreadLocal<Function<String, String>> localColumnNameDecorator = new InheritableThreadLocal<>();
+    public static final InheritableThreadLocal<Function<String, String>> localTableNameDecorator = new InheritableThreadLocal<>();
+    public static final InheritableThreadLocal<Function<String, String>> localColumnAsDecorator = new InheritableThreadLocal<>();
 
     public Bql() {
         if (GLOBAL_UPPER_KEYWORDS != null) {
@@ -220,6 +228,70 @@ public class Bql<H extends Bql<H>> {
         }
     }
 
+    public H inherit() {
+        Optional.ofNullable(localLink.get()).ifPresent((v) -> link = v);
+        Optional.ofNullable(localSeparator.get()).ifPresent((v) -> separator = v);
+        Optional.ofNullable(localPlaceHolder.get()).ifPresent((v) -> placeholder = v);
+        Optional.ofNullable(localUpperKeyWords.get()).ifPresent((v) -> upperKeywords = v);
+        Optional.ofNullable(localColumnNameDecorator.get()).ifPresent((v) -> columnNameDecorator = v);
+        Optional.ofNullable(localTableNameDecorator.get()).ifPresent((v) -> tableNameDecorator = v);
+        Optional.ofNullable(localColumnAsDecorator.get()).ifPresent((v) -> columnAsDecorator = v);
+        return (H) this;
+    }
+
+    public H store() {
+        localLink.set(link);
+        localSeparator.set(separator);
+        localAlias.set(alias);
+        localPlaceHolder.set(placeholder);
+        localUpperKeyWords.set(upperKeywords);
+        localColumnNameDecorator.set(columnNameDecorator);
+        localTableNameDecorator.set(tableNameDecorator);
+        localColumnAsDecorator.set(columnAsDecorator);
+        return (H) this;
+    }
+
+    public H unset() {
+        localLink.set(null);
+        localSeparator.set(null);
+        localAlias.set(null);
+        localPlaceHolder.set(null);
+        localUpperKeyWords.set(null);
+        localColumnNameDecorator.set(null);
+        localTableNameDecorator.set(null);
+        localColumnAsDecorator.set(null);
+        return (H) this;
+    }
+
+    public Function<String, String> columnNameDecorator() {
+        return columnNameDecorator;
+    }
+
+    public H columnNameDecorator(Function<String, String> columnNameDecorator) {
+        this.columnNameDecorator = columnNameDecorator;
+        store();
+        return (H) this;
+    }
+
+    public Function<String, String> tableNameDecorator() {
+        return tableNameDecorator;
+    }
+
+    public H tableNameDecorator(Function<String, String> tableNameDecorator) {
+        this.tableNameDecorator = tableNameDecorator;
+        store();
+        return (H) this;
+    }
+
+    public Function<String, String> columnAsDecorator() {
+        return columnAsDecorator;
+    }
+
+    public H columnAsDecorator(Function<String, String> columnAsDecorator) {
+        this.columnAsDecorator = columnAsDecorator;
+        store();
+        return (H) this;
+    }
 
     public static <H extends Bql<H>> Bql<H> $_() {
         return (Bql<H>) new Bql();
@@ -1267,61 +1339,73 @@ public class Bql<H extends Bql<H>> {
 
     public H $and() {
         this.link = "and";
+        store();
         return (H) this;
     }
 
     public H $or() {
         this.link = "or";
+        store();
         return (H) this;
     }
 
     public H $link() {
         this.link = null;
+        store();
         return (H) this;
     }
 
     public H $alias() {
         this.alias = null;
+        store();
         return (H) this;
     }
 
     public H $alias(String alias) {
         this.alias = alias;
+        store();
         return (H) this;
     }
 
     public H $sep() {
         this.separator = " ";
+        store();
         return (H) this;
     }
 
     public H $sepComma() {
         this.separator = ",";
+        store();
         return (H) this;
     }
 
     public H $sep(String separator) {
         this.separator = separator;
+        store();
         return (H) this;
     }
 
     public H $sepNone() {
         this.separator = null;
+        store();
         return (H) this;
     }
 
     public H placeholder() {
         this.placeholder = "?";
+        store();
         return (H) this;
     }
 
     public H placeholder(String holder) {
         this.placeholder = holder;
+        store();
         return (H) this;
     }
 
     public H upperKeywords(boolean enable) {
         this.upperKeywords = enable;
+        store();
         return (H) this;
     }
 
