@@ -18,6 +18,7 @@ TAIL_LOG_LINES=1000
 TAIL_EXCEPT_LINES=3000
 
 # 查询异常之后的多少行
+TAIL_EXCEPT_BEFORE_LINES=5
 TAIL_EXCEPT_AFTER_LINES=30
 
 # ##################################################################################################################
@@ -649,7 +650,7 @@ function except() {
 
     if [[ -n "$_p_log_file" ]]; then
         echo -e "\033[0;34m found log file ${LOG_DIR}/$_p_log_file \033[0m"
-        tail -f -n $TAIL_EXCEPT_LINES ${LOG_DIR}/$_p_log_file | grep -inA $TAIL_EXCEPT_AFTER_LINES exception
+        tail -f -n $TAIL_EXCEPT_LINES ${LOG_DIR}/$_p_log_file | grep -in -B $TAIL_EXCEPT_BEFORE_LINES -A $TAIL_EXCEPT_AFTER_LINES exception
     else
       echo -e "\033[0;31m not found log file like ${AppName}*.log. \033[0m"
     fi
