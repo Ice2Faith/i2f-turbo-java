@@ -2,7 +2,6 @@ package i2f.springboot.spring.web.converter;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -17,7 +16,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class SpringMvcJacksonConverterConfigurer  implements WebMvcConfigurer {
+public class SpringMvcJacksonConverterConfigurer implements WebMvcConfigurer {
 
     private MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter;
 

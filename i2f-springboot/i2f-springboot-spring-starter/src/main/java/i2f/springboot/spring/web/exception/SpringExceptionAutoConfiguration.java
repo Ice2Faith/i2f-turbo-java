@@ -6,16 +6,19 @@ import i2f.springboot.spring.web.api.impl.ApiRespExceptionConverter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
  * @author Ice2Faith
  * @date 2024/6/12 9:44
  * @desc
  */
+@ConditionalOnClass(HandlerExceptionResolver.class)
 @ConditionalOnExpression("${i2f.spring.exception.enable:true}")
 @Slf4j
 @Data
