@@ -149,6 +149,14 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         if (str == null || str.isEmpty()) {
             return false;
         }
+        for (int i = 0; i < 32; i++) {
+            if (i == '\t') {
+                continue;
+            }
+            if (str.indexOf(i) >= 0) {
+                return true;
+            }
+        }
         for (String item : BAD_INVISIBLE_URL_ENCODED_ASCII_CHARS) {
             if (str.contains(item)) {
                 return true;
@@ -265,6 +273,9 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         }
         for (Part part : parts) {
             String fileName = part.getSubmittedFileName();
+            if (fileName == null || fileName.isEmpty()) {
+                continue;
+            }
             if (containsInvisibleUrlEncodedAsciiChar(fileName)) {
                 return true;
             }
