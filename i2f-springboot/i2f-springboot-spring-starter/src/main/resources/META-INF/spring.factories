@@ -10,4 +10,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   i2f.springboot.spring.web.converter.SpringJacksonMessageConverter,\
   i2f.springboot.spring.application.SpringBootPrintBannerAutoConfiguration,\
   i2f.springboot.spring.web.exception.SpringExceptionAutoConfiguration,\
-  i2f.springboot.spring.web.response.SpringResponseAutoConfiguration
+  i2f.springboot.spring.web.response.SpringResponseAutoConfiguration,\
+  i2f.springboot.spring.web.trace.SpringTraceAutoConfiguration
