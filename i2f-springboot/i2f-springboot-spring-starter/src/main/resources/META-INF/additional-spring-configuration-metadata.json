@@ -29,6 +29,16 @@
       "name": "i2f.spring.jackson",
       "type": "i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration",
       "sourceType": "i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration"
+    },
+    {
+      "name": "i2f.spring.exception",
+      "type": "i2f.springboot.spring.web.exception.SpringExceptionAutoConfiguration",
+      "sourceType": "i2f.springboot.spring.web.exception.SpringExceptionAutoConfiguration"
+    },
+    {
+      "name": "i2f.spring.response",
+      "type": "i2f.springboot.spring.web.response.SpringResponseAutoConfiguration",
+      "sourceType": "i2f.springboot.spring.web.response.SpringResponseAutoConfiguration"
     }
   ],
   "properties": [
@@ -213,6 +223,41 @@
       "description": "jackson local time format.",
       "sourceType": "i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration",
       "defaultValue": "HH:mm:ss"
+    },
+    {
+      "name": "i2f.spring.exception.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable exception auto configuration.",
+      "sourceType": "i2f.springboot.spring.web.exception.SpringExceptionAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.exception.http-status",
+      "type": "java.lang.Integer",
+      "description": "exception response http status code.",
+      "sourceType": "i2f.springboot.spring.web.exception.SpringExceptionAutoConfiguration",
+      "defaultValue": 200
+    },
+    {
+      "name": "i2f.spring.exception.print-exception.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable print un-resolved exception stack.",
+      "sourceType": "i2f.springboot.spring.web.exception.SpringExceptionAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.exception.response-exception.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable exception occurred response body.",
+      "sourceType": "i2f.springboot.spring.web.exception.SpringExceptionAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.response.enable.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable response body advice.",
+      "sourceType": "i2f.springboot.spring.web.response.SpringResponseAutoConfiguration",
+      "defaultValue": true
     }
   ],
   "hints": [
