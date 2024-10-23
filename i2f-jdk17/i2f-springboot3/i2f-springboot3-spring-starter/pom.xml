@@ -43,6 +43,10 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-resp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jvm</artifactId>
         </dependency>
         <dependency>
