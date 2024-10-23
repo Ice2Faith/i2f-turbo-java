@@ -39,6 +39,11 @@
       "name": "i2f.spring.response",
       "type": "i2f.springboot.spring.web.response.SpringResponseAutoConfiguration",
       "sourceType": "i2f.springboot.spring.web.response.SpringResponseAutoConfiguration"
+    },
+    {
+      "name": "i2f.spring.trace",
+      "type": "i2f.springboot.spring.web.trace.SpringTraceAutoConfiguration",
+      "sourceType": "i2f.springboot.spring.web.trace.SpringTraceAutoConfiguration"
     }
   ],
   "properties": [
@@ -257,6 +262,13 @@
       "type": "java.lang.Boolean",
       "description": "enable response body advice.",
       "sourceType": "i2f.springboot.spring.web.response.SpringResponseAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.spring.trace.enable.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable trace mdc context.",
+      "sourceType": "i2f.springboot.spring.web.trace.SpringTraceAutoConfiguration",
       "defaultValue": true
     }
   ],
