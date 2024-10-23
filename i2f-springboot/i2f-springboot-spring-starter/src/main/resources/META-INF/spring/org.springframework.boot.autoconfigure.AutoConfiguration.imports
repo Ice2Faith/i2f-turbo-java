@@ -8,3 +8,5 @@ i2f.springboot.spring.web.SpringObjectMapperCustomizerConfiguration
 i2f.springboot.spring.web.converter.SpringJacksonMvcConfigurer
 i2f.springboot.spring.web.converter.SpringJacksonMessageConverter
 i2f.springboot.spring.application.SpringBootPrintBannerAutoConfiguration
+i2f.springboot.spring.web.exception.SpringExceptionAutoConfiguration
+i2f.springboot.spring.web.response.SpringResponseAutoConfiguration
