@@ -203,35 +203,37 @@ public class SecurityFilter extends OncePerHttpServletFilter {
 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (!isSafeRequest(request)) {
-            onUnSafeRejectRequest(request, response);
+        String reason = isSafeRequest(request);
+        if (reason != null) {
+            onUnSafeRejectRequest(reason, request, response);
             return;
         }
         chain.doFilter(request, response);
     }
 
-    public void onUnSafeRejectRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void onUnSafeRejectRequest(String reason, HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setStatus(403);
         response.setContentType("text/plain");
         PrintWriter writer = response.getWriter();
-        writer.write("bad request!");
+        writer.write("bad request! cause reason is : " + reason);
         writer.flush();
     }
 
-    public boolean isSafeRequest(HttpServletRequest request) throws ServletException, IOException {
+    public String isSafeRequest(HttpServletRequest request) throws ServletException, IOException {
         String method = request.getMethod();
-        if (isBadMethod(method)) {
-            return false;
+        String reason = null;
+        if ((reason = isBadMethod(method)) != null) {
+            return reason;
         }
         String requestUrl = request.getRequestURL().toString().toLowerCase();
-        if (containsInvisibleUrlEncodedAsciiChar(requestUrl)) {
-            return false;
+        if ((reason = containsInvisibleUrlEncodedAsciiChar(requestUrl)) != null) {
+            return String.format("bad request url, reason of %s", reason);
         }
-        if (isBadUrl(requestUrl)) {
-            return false;
+        if ((reason = isBadUrl(requestUrl)) != null) {
+            return String.format("bad request url, reason of %s", reason);
         }
-        if (isBadSuffix(requestUrl)) {
-            return false;
+        if ((reason = isBadSuffix(requestUrl)) != null) {
+            return String.format("bad request url, reason of %s", reason);
         }
         if (strictPath.get()) {
             String path = requestUrl;
@@ -243,64 +245,64 @@ public class SecurityFilter extends OncePerHttpServletFilter {
             if (idx >= 0) {
                 path = path.substring(idx);
             }
-            if (isBadStrictPath(path)) {
-                return false;
+            if ((reason = isBadStrictPath(path)) != null) {
+                return String.format("bad request url path, reason of %s", reason);
             }
         }
         String requestURI = request.getRequestURI().toLowerCase();
-        if (containsInvisibleUrlEncodedAsciiChar(requestURI)) {
-            return false;
+        if ((reason = containsInvisibleUrlEncodedAsciiChar(requestURI)) != null) {
+            return String.format("bad request uri, reason of %s", reason);
         }
-        if (isBadUrl(requestURI)) {
-            return false;
+        if ((reason = isBadUrl(requestURI)) != null) {
+            return String.format("bad request uri, reason of %s", reason);
         }
-        if (isBadSuffix(requestURI)) {
-            return false;
+        if ((reason = isBadSuffix(requestURI)) != null) {
+            return String.format("bad request uri, reason of %s", reason);
         }
         if (strictPath.get()) {
-            if (isBadStrictPath(requestURI)) {
-                return false;
+            if ((reason = isBadStrictPath(requestURI)) != null) {
+                return String.format("bad request uri, reason of %s", reason);
             }
         }
-        if (matchIllegalFileAccessFilePath(requestURI)) {
-            return false;
+        if ((reason = matchIllegalFileAccessFilePath(requestURI)) != null) {
+            return String.format("bad request uri, reason of %s", reason);
         }
-        if (matchIllegalFileAccessFileName(requestURI)) {
-            return false;
+        if ((reason = matchIllegalFileAccessFileName(requestURI)) != null) {
+            return String.format("bad request uri, reason of %s", reason);
         }
         String servletPath = request.getServletPath().toLowerCase();
-        if (containsInvisibleUrlEncodedAsciiChar(servletPath)) {
-            return false;
+        if ((reason = containsInvisibleUrlEncodedAsciiChar(servletPath)) != null) {
+            return String.format("bad servlet path, reason of %s", reason);
         }
-        if (isBadUrl(servletPath)) {
-            return false;
+        if ((reason = isBadUrl(servletPath)) != null) {
+            return String.format("bad servlet path, reason of %s", reason);
         }
-        if (isBadSuffix(servletPath)) {
-            return false;
+        if ((reason = isBadSuffix(servletPath)) != null) {
+            return String.format("bad servlet path, reason of %s", reason);
         }
-        if (isExceedRootPath(servletPath)) {
-            return false;
+        if ((reason = isExceedRootPath(servletPath)) != null) {
+            return String.format("bad servlet path, reason of %s", reason);
         }
         if (strictPath.get()) {
-            if (isBadStrictPath(servletPath)) {
-                return false;
+            if ((reason = isBadStrictPath(servletPath)) != null) {
+                return String.format("bad servlet path, reason of %s", reason);
             }
         }
-        if (matchIllegalFileAccessFilePath(servletPath)) {
-            return false;
+        if ((reason = matchIllegalFileAccessFilePath(servletPath)) != null) {
+            return String.format("bad servlet path, reason of %s", reason);
         }
-        if (matchIllegalFileAccessFileName(servletPath)) {
-            return false;
+        if ((reason = matchIllegalFileAccessFileName(servletPath)) != null) {
+            return String.format("bad servlet path, reason of %s", reason);
         }
         String origin = request.getHeader("Origin");
-        if (containsInvisibleUrlEncodedAsciiChar(origin)) {
-            return false;
+        if ((reason = containsInvisibleUrlEncodedAsciiChar(origin)) != null) {
+            return String.format("bad http header origin, reason of %s", reason);
         }
-        if (isBadUrl(origin)) {
-            return false;
+        if ((reason = isBadUrl(origin)) != null) {
+            return String.format("bad http header origin, reason of %s", reason);
         }
-        if (isBadOrigin(origin)) {
-            return false;
+        if ((reason = isBadOrigin(origin)) != null) {
+            return String.format("bad http header origin, reason of %s", reason);
         }
         String referer = request.getHeader("Referer");
         if (referer != null) {
@@ -318,40 +320,40 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                 referer = referer.substring(0, idx);
             }
         }
-        if (containsInvisibleUrlEncodedAsciiChar(referer)) {
-            return false;
+        if ((reason = containsInvisibleUrlEncodedAsciiChar(referer)) != null) {
+            return String.format("bad http header referer, reason of %s", reason);
         }
-        if (isBadReferer(referer)) {
-            return false;
+        if ((reason = isBadReferer(referer)) != null) {
+            return String.format("bad http header referer, reason of %s", reason);
         }
-        if (isBadParts(request)) {
-            return false;
+        if ((reason = isBadParts(request)) != null) {
+            return String.format("bad http header referer, reason of %s", reason);
         }
         if (invisibleHeaderCheck.get() || sqlInjectHeaderCheck.get()) {
             Enumeration<String> headerNames = request.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String name = headerNames.nextElement();
                 if (invisibleHeaderCheck.get()) {
-                    if (containsInvisibleUrlEncodedAsciiChar(name)) {
-                        return false;
+                    if ((reason = containsInvisibleUrlEncodedAsciiChar(name)) != null) {
+                        return String.format("bad http header name [%s], reason of %s", name, reason);
                     }
                 }
                 if (sqlInjectHeaderCheck.get()) {
-                    if (matchSqlInject(name)) {
-                        return false;
+                    if ((reason = matchSqlInject(name)) != null) {
+                        return String.format("bad http header name [%s], reason of %s", name, reason);
                     }
                 }
                 Enumeration<String> headers = request.getHeaders(name);
                 while (headers.hasMoreElements()) {
                     String value = headers.nextElement();
                     if (invisibleHeaderCheck.get()) {
-                        if (containsInvisibleUrlEncodedAsciiChar(value)) {
-                            return false;
+                        if ((reason = containsInvisibleUrlEncodedAsciiChar(value)) != null) {
+                            return String.format("bad http header name [%s] value, reason of %s", name, reason);
                         }
                     }
                     if (sqlInjectHeaderCheck.get()) {
-                        if (matchSqlInject(value)) {
-                            return false;
+                        if ((reason = matchSqlInject(value)) != null) {
+                            return String.format("bad http header name [%s] value, reason of %s", name, reason);
                         }
                     }
                 }
@@ -363,13 +365,13 @@ public class SecurityFilter extends OncePerHttpServletFilter {
             for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
                 String name = entry.getKey();
                 if (invisibleParameterCheck.get()) {
-                    if (containsInvisibleUrlEncodedAsciiChar(name)) {
-                        return false;
+                    if ((reason = containsInvisibleUrlEncodedAsciiChar(name)) != null) {
+                        return String.format("bad http query parameter name [%s], reason of %s", name, reason);
                     }
                 }
                 if (sqlInjectParameterCheck.get()) {
-                    if (matchSqlInject(URLDecoder.decode(name, "UTF-8"))) {
-                        return false;
+                    if ((reason = matchSqlInject(URLDecoder.decode(name, "UTF-8"))) != null) {
+                        return String.format("bad http query parameter name [%s], reason of %s", name, reason);
                     }
                 }
                 String[] value = entry.getValue();
@@ -381,8 +383,8 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                         continue;
                     }
                     if (invisibleParameterCheck.get()) {
-                        if (containsInvisibleUrlEncodedAsciiChar(item)) {
-                            return false;
+                        if ((reason = containsInvisibleUrlEncodedAsciiChar(item)) != null) {
+                            return String.format("bad http query parameter name [%s] value, reason of %s", name, reason);
                         }
                     }
                     String decode = null;
@@ -390,27 +392,27 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                         if (decode == null) {
                             decode = URLDecoder.decode(item, "UTF-8");
                         }
-                        if (matchSqlInject(decode)) {
-                            return false;
+                        if ((reason = matchSqlInject(decode)) != null) {
+                            return String.format("bad http query parameter name [%s] value, reason of %s", name, reason);
                         }
                     }
                     if (illegalFileAccessParameterCheck.get()) {
                         if (decode == null) {
                             decode = URLDecoder.decode(item, "UTF-8");
                         }
-                        if (matchIllegalFileAccessFilePath(decode)) {
-                            return false;
+                        if ((reason = matchIllegalFileAccessFilePath(decode)) != null) {
+                            return String.format("bad http query parameter name [%s] value, reason of %s", name, reason);
                         }
-                        if (matchIllegalFileAccessFileName(decode)) {
-                            return false;
+                        if ((reason = matchIllegalFileAccessFileName(decode)) != null) {
+                            return String.format("bad http query parameter name [%s] value, reason of %s", name, reason);
                         }
                     }
                     if (illegalCommandExecuteParameterCheck.get()) {
                         if (decode == null) {
                             decode = URLDecoder.decode(item, "UTF-8");
                         }
-                        if (matchIllegalCommandExecuteCommands(decode)) {
-                            return false;
+                        if ((reason = matchIllegalCommandExecuteCommands(decode)) != null) {
+                            return String.format("bad http query parameter name [%s] value, reason of %s", name, reason);
                         }
                     }
                 }
@@ -425,96 +427,96 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                     }
                     String name = item.getName();
                     if (invisibleCookieCheck.get()) {
-                        if (containsInvisibleUrlEncodedAsciiChar(name)) {
-                            return false;
+                        if ((reason = containsInvisibleUrlEncodedAsciiChar(name)) != null) {
+                            return String.format("bad http cookie name [%s], reason of %s", name, reason);
                         }
                     }
                     if (sqlInjectCookieCheck.get()) {
-                        if (matchSqlInject(name)) {
-                            return false;
+                        if ((reason = matchSqlInject(name)) != null) {
+                            return String.format("bad http cookie name [%s], reason of %s", name, reason);
                         }
                     }
                     String value = item.getValue();
                     if (invisibleCookieCheck.get()) {
-                        if (containsInvisibleUrlEncodedAsciiChar(value)) {
-                            return false;
+                        if ((reason = containsInvisibleUrlEncodedAsciiChar(value)) != null) {
+                            return String.format("bad http cookie name [%s] value, reason of %s", name, reason);
                         }
                     }
                     if (sqlInjectCookieCheck.get()) {
-                        if (matchSqlInject(value)) {
-                            return false;
+                        if ((reason = matchSqlInject(value)) != null) {
+                            return String.format("bad http cookie name [%s] value, reason of %s", name, reason);
                         }
                     }
                 }
             }
         }
-        return true;
+        return null;
     }
 
-    public boolean isBadMethod(String method) {
+    public String isBadMethod(String method) {
         if (method == null || method.isEmpty()) {
-            return false;
+            return null;
         }
         if (denyMethods.isEmpty()) {
-            return false;
+            return null;
         }
         for (String item : denyMethods) {
             if (item == null || item.isEmpty()) {
                 continue;
             }
             if (item.equalsIgnoreCase(method)) {
-                return true;
+                return String.format("un-support http method [%s]", item);
             }
         }
-        return false;
+        return null;
     }
 
 
-    public boolean containsInvisibleUrlEncodedAsciiChar(String str) {
+    public String containsInvisibleUrlEncodedAsciiChar(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         for (int i = 0; i < 32; i++) {
             if (i == '\t') {
                 continue;
             }
             if (str.indexOf(i) >= 0) {
-                return true;
+                return String.format("contains invisible char [%d]", i);
             }
         }
         if (!str.contains("%")) {
-            return false;
+            return null;
         }
         for (String item : BAD_INVISIBLE_URL_ENCODED_ASCII_CHARS) {
             if (str.contains(item)) {
-                return true;
+                return String.format("contains invisible url encoded char [%s]", item);
             }
         }
-        return false;
+        return null;
     }
 
-    public boolean isBadUrl(String str) {
+    public String isBadUrl(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         for (String item : denyUrlStrings) {
             if (item == null || item.isEmpty()) {
                 continue;
             }
             if (str.contains(item)) {
-                return true;
+                return String.format("contains bad url string [%s]", item);
             }
         }
-        return false;
+        return null;
     }
 
-    public boolean isBadSuffix(String str) {
+    public String isBadSuffix(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         int idx = str.lastIndexOf(".");
         if (idx < 0) {
-            return false;
+            return null;
         }
         String suffix = str.substring(idx);
         for (String item : allowSuffixes) {
@@ -522,7 +524,7 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                 continue;
             }
             if (Objects.equals(suffix, item)) {
-                return false;
+                return null;
             }
         }
         for (String item : denySuffixes) {
@@ -530,22 +532,22 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                 continue;
             }
             if (Objects.equals(suffix, item)) {
-                return true;
+                return String.format("with bad suffix [%s]", item);
             }
         }
-        return defaultAllowSuffix.get();
+        return defaultAllowSuffix.get() ? String.format("default reject not allowed suffix [%s]", suffix) : null;
     }
 
-    public boolean isExceedRootPath(String path) {
+    public String isExceedRootPath(String path) {
         if (path == null || path.isEmpty()) {
-            return false;
+            return null;
         }
         if (!path.contains("..")
                 && !path.contains(".")
                 && !path.contains("~")
                 && !path.contains("-")
         ) {
-            return false;
+            return null;
         }
         String[] arr = path.split("[/\\\\]");
         Stack<String> stack = new Stack<>();
@@ -557,172 +559,179 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                 continue;
             }
             if ("~".equals(item)) {
-                return true;
+                return "path exceed root path by [~]";
             }
             if ("-".equals(item)) {
-                return true;
+                return "path exceed root path by [-]";
             }
             if ("..".equals(item)) {
                 if (stack.isEmpty()) {
-                    return true;
+                    return "path exceed root path by [..]";
                 } else {
                     stack.pop();
                 }
             }
             stack.push(item);
         }
-        return false;
+        return null;
     }
 
-    public boolean isBadOrigin(String str) {
+    public String isBadOrigin(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         if (allowOriginRegexList.isEmpty()) {
-            return false;
+            return null;
         }
         for (String regex : allowOriginRegexList) {
             if (str.matches(regex)) {
-                return false;
+                return null;
             }
         }
-        return true;
+        return "origin not match any allowed";
     }
 
-    public boolean isBadReferer(String str) {
+    public String isBadReferer(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         if (allowRefererRegexList.isEmpty()) {
-            return false;
+            return null;
         }
         for (String regex : allowRefererRegexList) {
             if (str.matches(regex)) {
-                return false;
+                return null;
             }
         }
-        return true;
+        return "referer not match any allowed";
     }
 
-    public boolean isBadParts(HttpServletRequest request) throws ServletException, IOException {
+    public String isBadParts(HttpServletRequest request) throws ServletException, IOException {
+        String reason = null;
         if (request == null) {
-            return false;
+            return null;
         }
         String contentType = request.getContentType();
         if (contentType == null) {
-            return false;
+            return null;
         }
         contentType = contentType.toLowerCase();
         if (!contentType.contains("multipart/form-data")) {
-            return false;
+            return null;
         }
         Collection<Part> parts = request.getParts();
         if (parts == null || parts.isEmpty()) {
-            return false;
+            return null;
         }
         for (Part part : parts) {
+            String name = part.getName();
             String fileName = part.getSubmittedFileName();
             if (fileName == null || fileName.isEmpty()) {
                 continue;
             }
             fileName = fileName.replaceAll("\\\\", "/");
-            if (containsInvisibleUrlEncodedAsciiChar(fileName)) {
-                return true;
+            if ((reason = containsInvisibleUrlEncodedAsciiChar(fileName)) != null) {
+                return String.format("part name [%s] not safe, reason of %s", name, reason);
             }
-            if (isBadUrl(fileName)) {
-                return true;
+            if ((reason = isBadUrl(fileName)) != null) {
+                return String.format("part name [%s] not safe, reason of %s", name, reason);
             }
-            if (isBadSuffix(fileName)) {
-                return true;
+            if ((reason = isBadSuffix(fileName)) != null) {
+                return String.format("part name [%s] not safe, reason of %s", name, reason);
             }
-            if (isExceedRootPath(fileName)) {
-                return true;
+            if ((reason = isExceedRootPath(fileName)) != null) {
+                return String.format("part name [%s] not safe, reason of %s", name, reason);
             }
             if (strictPath.get()) {
-                if (isBadStrictPath(fileName)) {
-                    return true;
+                if ((reason = isBadStrictPath(fileName)) != null) {
+                    return String.format("part name [%s] not safe, reason of %s", name, reason);
                 }
             }
             if (sqlInjectParameterCheck.get()) {
-                if (matchSqlInject(fileName)) {
-                    return true;
+                if ((reason = matchSqlInject(fileName)) != null) {
+                    return String.format("part name [%s] not safe, reason of %s", name, reason);
                 }
             }
         }
-        return false;
+        return null;
     }
 
-    public boolean isBadStrictPath(String str) {
+    public String isBadStrictPath(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         if (str.contains("\\")) {
-            return true;
+            return "path contains [\\]";
         }
         if (!str.startsWith("/")) {
             str = "/" + str;
         }
         if (str.contains("//")) {
-            return true;
+            return "path contains [//]";
         }
         if (str.contains("/../") || str.endsWith("/..")) {
-            return true;
+            return "path contains [/../]";
         }
         if (str.contains("/./") || str.endsWith("/.")) {
-            return true;
+            return "path contains [/./]";
         }
         if (str.contains("/~/") || str.endsWith("/~")) {
-            return true;
+            return "path contains [/~/]";
         }
         if (str.contains("/-/") || str.endsWith("/-")) {
-            return true;
+            return "path contains [/-/]";
         }
-        return false;
+        return null;
     }
 
-    public boolean matchSqlInject(String str) {
+    public String matchSqlInject(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         for (String item : sqlInjectRegexList) {
             if (str.matches(item)) {
-                return true;
+                return String.format("string matched sql inject pattern [%s]", item);
             }
         }
         for (Pattern pattern : sqlInjectPatternList) {
             Matcher matcher = pattern.matcher(str);
             if (matcher.find()) {
-                return true;
+                return String.format("string contains sql inject pattern [%s]", pattern.pattern());
             }
         }
-        return false;
+        return null;
     }
 
 
-    public boolean matchIllegalFileAccessFilePath(String str) {
+    public String matchIllegalFileAccessFilePath(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         boolean isFirst = true;
         for (String item : illegalFileAccessPaths) {
             if (isFirst) {
                 str = str.replaceAll("\\\\", "/");
             }
-            if (str.contains("/" + item + "/")
-                    || str.endsWith("/" + item)
-                    || str.startsWith(item + "/")
-                    || str.equals(item)
-            ) {
-                return true;
+            if (str.equals(item)) {
+                return String.format("illegal file path [%s]", item);
+            }
+            if (str.contains("/" + item + "/")) {
+                return String.format("illegal file path [/%s/]", item);
+            }
+            if (str.endsWith("/" + item)) {
+                return String.format("illegal file path [/%s]", item);
+            }
+            if (str.startsWith(item + "/")) {
+                return String.format("illegal file path [%s/]", item);
             }
             isFirst = false;
         }
-        return false;
+        return null;
     }
 
-    public boolean matchIllegalFileAccessFileName(String str) {
+    public String matchIllegalFileAccessFileName(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         String name = str;
         boolean isFirst = true;
@@ -739,20 +748,20 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                     name = name.substring(0, idx);
                 }
                 if (name.isEmpty()) {
-                    return false;
+                    return null;
                 }
             }
             if (name.equals(item)) {
-                return true;
+                return String.format("illegal file name [%s]", item);
             }
             isFirst = false;
         }
-        return false;
+        return null;
     }
 
-    public boolean matchIllegalCommandExecuteCommands(String str) {
+    public String matchIllegalCommandExecuteCommands(String str) {
         if (str == null || str.isEmpty()) {
-            return false;
+            return null;
         }
         String cmd = str;
         boolean isFirst = true;
@@ -760,19 +769,19 @@ public class SecurityFilter extends OncePerHttpServletFilter {
             if (isFirst) {
                 str = str.trim();
                 if (str.isEmpty()) {
-                    return false;
+                    return null;
                 }
                 String[] arr = str.split("\\s+", 2);
                 cmd = arr[0].toLowerCase();
                 if (cmd.isEmpty()) {
-                    return false;
+                    return null;
                 }
             }
             if (cmd.equals(item)) {
-                return true;
+                return String.format("illegal command [%s]", item);
             }
             isFirst = false;
         }
-        return false;
+        return null;
     }
 }
