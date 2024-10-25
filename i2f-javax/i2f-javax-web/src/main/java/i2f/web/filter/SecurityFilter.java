@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 public class SecurityFilter extends OncePerHttpServletFilter {
 
     public static final String[] BAD_METHODS = {"TRACE", "BATCH"};
+
+    public static final String[] ALLOWED_CONTENT_TYPE = {"application/json", "multipart/form-data", "application/x-www-from-urlencoded", "binary"};
     public static final String[] BAD_INVISIBLE_URL_ENCODED_ASCII_CHARS;
     public static final String BAD_URL_CHARS = ";'\"<>\\|{}`~!$^";
     public static final String[] BAD_URL_ENCODED_URL_CHARS;
@@ -152,6 +154,11 @@ public class SecurityFilter extends OncePerHttpServletFilter {
     protected final CopyOnWriteArrayList<String> denyMethods = new CopyOnWriteArrayList<>();
 
     /**
+     * 只允许哪些 http content-type
+     */
+    protected final CopyOnWriteArrayList<String> allowedContentTypes = new CopyOnWriteArrayList<>();
+
+    /**
      * 默认情况下，是否跳过后缀判断
      */
     protected final AtomicBoolean defaultAllowSuffix = new AtomicBoolean(true);
@@ -249,6 +256,19 @@ public class SecurityFilter extends OncePerHttpServletFilter {
     protected final ConcurrentHashMap<String, CopyOnWriteArrayList<String>> servletPathRegexAllowOriginRegexMap = new ConcurrentHashMap<>();
     protected final ConcurrentHashMap<String, CopyOnWriteArrayList<String>> servletPathRegexAllowRefererRegexMap = new ConcurrentHashMap<>();
 
+
+    /**
+     * 全局需要哪些名称的请求头或请求URL参数
+     * 可用于例如authorization,token,origin,referer等请求头的要求检查
+     */
+    protected final CopyOnWriteArrayList<String> globalRequireHeadersParametersNameList = new CopyOnWriteArrayList<>();
+    /**
+     * 全局哪些路径可以允许不携带上面指定的参数列表
+     * 可以作为上面定义的白名单使用
+     * 可用于，例如authorization,token等登录参数的场景中，排除某些白名单路径
+     */
+    protected final CopyOnWriteArrayList<String> globalAllowMissingHeadersParametersNameServletPathRegexList = new CopyOnWriteArrayList<>();
+
     public SecurityFilter() {
         init();
     }
@@ -256,6 +276,9 @@ public class SecurityFilter extends OncePerHttpServletFilter {
     public void init() {
         denyMethods.clear();
         denyMethods.addAll(Arrays.asList(BAD_METHODS));
+
+        allowedContentTypes.clear();
+        allowedContentTypes.addAll(Arrays.asList(ALLOWED_CONTENT_TYPE));
 
         allowSuffixes.clear();
         allowSuffixes.addAll(Arrays.asList(PASS_SUFFIXES));
@@ -314,6 +337,10 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         String method = request.getMethod();
         String reason = null;
         if ((reason = isBadMethod(method)) != null) {
+            return reason;
+        }
+        String contentType = request.getContentType();
+        if ((reason = isBadContentType(contentType)) != null) {
             return reason;
         }
         String requestUrl = request.getRequestURL().toString().toLowerCase();
@@ -391,6 +418,9 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         }
         if ((reason = matchNotAllowedPathForIp(servletPath, ip)) != null) {
             return String.format("bad servlet path, reason of %s", reason);
+        }
+        if ((reason = isMissingHeadersParameters(servletPath, request)) != null) {
+            return reason;
         }
         String origin = request.getHeader("Origin");
         if (origin == null || origin.isEmpty()) {
@@ -768,6 +798,22 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         return null;
     }
 
+    public String isBadContentType(String contentType) {
+        if (contentType == null || contentType.isEmpty()) {
+            return null;
+        }
+        if (allowedContentTypes.isEmpty()) {
+            return null;
+        }
+        contentType = contentType.toLowerCase();
+        for (String item : allowedContentTypes) {
+            if (contentType.contains(item)) {
+                return null;
+            }
+        }
+        return String.format("not allowed http content-type %s", contentType);
+    }
+
 
     public String containsInvisibleUrlEncodedAsciiChar(String str) {
         if (str == null || str.isEmpty()) {
@@ -1102,6 +1148,31 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                 return String.format("string contains remote invoke pattern [%s]", pattern.pattern());
             }
         }
+        return null;
+    }
+
+    public String isMissingHeadersParameters(String servletPath, HttpServletRequest request) {
+        if (servletPath == null || servletPath.isEmpty()) {
+            return null;
+        }
+        if (globalRequireHeadersParametersNameList.isEmpty()) {
+            return null;
+        }
+        if (globalAllowMissingHeadersParametersNameServletPathRegexList.isEmpty()) {
+            return null;
+        }
+        for (String key : globalAllowMissingHeadersParametersNameServletPathRegexList) {
+            if (servletPath.equals(key) || servletPath.matches(key)) {
+                return null;
+            }
+        }
+
+        for (String name : globalRequireHeadersParametersNameList) {
+            if (request.getHeader(name) == null && request.getParameter(name) == null) {
+                return String.format("require header/parameter [%s]", name);
+            }
+        }
+
         return null;
     }
 
