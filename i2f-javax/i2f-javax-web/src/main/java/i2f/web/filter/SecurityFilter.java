@@ -10,8 +10,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.URLDecoder;
+import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -107,6 +110,12 @@ public class SecurityFilter extends OncePerHttpServletFilter {
     };
     public static final Pattern[] SQL_INJECT_PATTERNS;
 
+    public static final String[] REMOTE_INVOKE_REGEXES = {
+            "rmi://",
+            "jndi:[a-zA-Z0-9-_$]://"
+    };
+    public static final Pattern[] REMOTE_INVOKE_PATTERNS;
+
     static {
         List<String> badInvisibleUrlEncodedAsciiChars = new ArrayList<>();
         for (int i = 0; i < 32; i++) {
@@ -129,40 +138,116 @@ public class SecurityFilter extends OncePerHttpServletFilter {
             sqlInjectPatterns.add(Pattern.compile(item));
         }
         SQL_INJECT_PATTERNS = sqlInjectPatterns.toArray(new Pattern[0]);
+
+        List<Pattern> remoteInvokePatterns = new ArrayList<>();
+        for (String item : SQL_INJECT_REGEXES) {
+            remoteInvokePatterns.add(Pattern.compile(item));
+        }
+        REMOTE_INVOKE_PATTERNS = remoteInvokePatterns.toArray(new Pattern[0]);
     }
 
-
+    /**
+     * 拒绝哪些 http method
+     */
     protected final CopyOnWriteArrayList<String> denyMethods = new CopyOnWriteArrayList<>();
 
+    /**
+     * 默认情况下，是否跳过后缀判断
+     */
     protected final AtomicBoolean defaultAllowSuffix = new AtomicBoolean(true);
+    /**
+     * 允许访问的后缀和禁止访问的后缀
+     */
     protected final CopyOnWriteArrayList<String> allowSuffixes = new CopyOnWriteArrayList<>();
     protected final CopyOnWriteArrayList<String> denySuffixes = new CopyOnWriteArrayList<>();
 
+    /**
+     * 禁止URL中包含哪些字符串
+     */
     protected final CopyOnWriteArrayList<String> denyUrlStrings = new CopyOnWriteArrayList<>();
 
+    /**
+     * 是否启用严格路径限制，将会禁止相对路径访问
+     */
     protected final AtomicBoolean strictPath = new AtomicBoolean(true);
 
+    /**
+     * 是否允许空的Origin和referer请求头
+     */
+    protected final AtomicBoolean allowEmptyOrigin = new AtomicBoolean(true);
+    protected final AtomicBoolean allowEmptyReferer = new AtomicBoolean(true);
+    /**
+     * 允许哪些Origin和referer请求头的请求
+     * 全等于或者正则匹配
+     */
     protected final CopyOnWriteArrayList<String> allowOriginRegexList = new CopyOnWriteArrayList<>();
     protected final CopyOnWriteArrayList<String> allowRefererRegexList = new CopyOnWriteArrayList<>();
 
+    /**
+     * 不可见字符的URL编码检查哪些部分，header,parameter,cookie
+     */
     protected final AtomicBoolean invisibleHeaderCheck = new AtomicBoolean(true);
     protected final AtomicBoolean invisibleParameterCheck = new AtomicBoolean(true);
     protected final AtomicBoolean invisibleCookieCheck = new AtomicBoolean(true);
 
+    /**
+     * 简单SQL注入的检查哪些部分，header,parameter,cookie
+     */
     protected final AtomicBoolean sqlInjectHeaderCheck = new AtomicBoolean(true);
     protected final AtomicBoolean sqlInjectParameterCheck = new AtomicBoolean(true);
     protected final AtomicBoolean sqlInjectCookieCheck = new AtomicBoolean(true);
 
+    /**
+     * 简单远程调用的检查哪些部分，header,parameter,cookie
+     */
+    protected final AtomicBoolean remoteInvokeHeaderCheck = new AtomicBoolean(true);
+    protected final AtomicBoolean remoteInvokeParameterCheck = new AtomicBoolean(true);
+    protected final AtomicBoolean remoteInvokeCookieCheck = new AtomicBoolean(true);
 
+    /**
+     * SQL注入检查的判定正则表达式
+     */
     protected final CopyOnWriteArrayList<String> sqlInjectRegexList = new CopyOnWriteArrayList<>();
     protected final CopyOnWriteArrayList<Pattern> sqlInjectPatternList = new CopyOnWriteArrayList<>();
 
+    /**
+     * 远程调用检查的判定正则表达式
+     */
+    protected final CopyOnWriteArrayList<String> remoteInvokeRegexList = new CopyOnWriteArrayList<>();
+    protected final CopyOnWriteArrayList<Pattern> remoteInvokePatternList = new CopyOnWriteArrayList<>();
+
+    /**
+     * 简单文件访问的检查哪些部分，parameter
+     */
     protected final AtomicBoolean illegalFileAccessParameterCheck = new AtomicBoolean(true);
+    /**
+     * 哪些文件访问路径包含或者文件名不合规列表
+     */
     protected final CopyOnWriteArrayList<String> illegalFileAccessPaths = new CopyOnWriteArrayList<>();
     protected final CopyOnWriteArrayList<String> illegalFileAccessFileNames = new CopyOnWriteArrayList<>();
 
+    /**
+     * 简单的命令执行的检查哪些部分，parameter
+     */
     protected final AtomicBoolean illegalCommandExecuteParameterCheck = new AtomicBoolean(true);
+    /**
+     * 哪些命令的不合规命令名列表
+     */
     protected final CopyOnWriteArrayList<String> illegalCommandExecuteCommands = new CopyOnWriteArrayList<>();
+
+    /**
+     * 哪些IP将会拒绝访问
+     * 全等于或者正则匹配
+     */
+    protected final CopyOnWriteArrayList<String> denyIpRegexList = new CopyOnWriteArrayList<>();
+
+    /**
+     * 哪些路径只允许在匹配的ip/origin/referer的情况下进行访问
+     * 全等于或者正则匹配
+     */
+    protected final ConcurrentHashMap<String, CopyOnWriteArrayList<String>> servletPathRegexAllowIpRegexMap = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String, CopyOnWriteArrayList<String>> servletPathRegexAllowOriginRegexMap = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String, CopyOnWriteArrayList<String>> servletPathRegexAllowRefererRegexMap = new ConcurrentHashMap<>();
 
     public SecurityFilter() {
         init();
@@ -199,6 +284,12 @@ public class SecurityFilter extends OncePerHttpServletFilter {
 
         illegalCommandExecuteCommands.clear();
         illegalCommandExecuteCommands.addAll(Arrays.asList(BAD_COMMANDS));
+
+        remoteInvokeRegexList.clear();
+        remoteInvokeRegexList.addAll(Arrays.asList(REMOTE_INVOKE_REGEXES));
+
+        remoteInvokePatternList.clear();
+        remoteInvokePatternList.addAll(Arrays.asList(REMOTE_INVOKE_PATTERNS));
     }
 
     @Override
@@ -294,7 +385,20 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         if ((reason = matchIllegalFileAccessFileName(servletPath)) != null) {
             return String.format("bad servlet path, reason of %s", reason);
         }
+        String ip = getIp(request);
+        if ((reason = matchDenyForIp(ip)) != null) {
+            return String.format("ban ip, reason of %s", reason);
+        }
+        if ((reason = matchNotAllowedPathForIp(servletPath, ip)) != null) {
+            return String.format("bad servlet path, reason of %s", reason);
+        }
         String origin = request.getHeader("Origin");
+        if (origin == null || origin.isEmpty()) {
+            if (!allowEmptyOrigin.get()) {
+                reason = "not allow empty origin";
+                return String.format("bad http header origin, reason of %s", reason);
+            }
+        }
         if ((reason = containsInvisibleUrlEncodedAsciiChar(origin)) != null) {
             return String.format("bad http header origin, reason of %s", reason);
         }
@@ -303,6 +407,9 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         }
         if ((reason = isBadOrigin(origin)) != null) {
             return String.format("bad http header origin, reason of %s", reason);
+        }
+        if ((reason = matchNotAllowedPathForOrigin(servletPath, origin)) != null) {
+            return String.format("bad servlet path, reason of %s", reason);
         }
         String referer = request.getHeader("Referer");
         if (referer != null) {
@@ -320,16 +427,25 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                 referer = referer.substring(0, idx);
             }
         }
+        if (referer == null || referer.isEmpty()) {
+            if (!allowEmptyReferer.get()) {
+                reason = "not allow empty referer";
+                return String.format("bad http header referer, reason of %s", reason);
+            }
+        }
         if ((reason = containsInvisibleUrlEncodedAsciiChar(referer)) != null) {
             return String.format("bad http header referer, reason of %s", reason);
         }
         if ((reason = isBadReferer(referer)) != null) {
             return String.format("bad http header referer, reason of %s", reason);
         }
+        if ((reason = matchNotAllowedPathForReferer(servletPath, referer)) != null) {
+            return String.format("bad servlet path, reason of %s", reason);
+        }
         if ((reason = isBadParts(request)) != null) {
             return String.format("bad http header referer, reason of %s", reason);
         }
-        if (invisibleHeaderCheck.get() || sqlInjectHeaderCheck.get()) {
+        if (invisibleHeaderCheck.get() || sqlInjectHeaderCheck.get() || remoteInvokeHeaderCheck.get()) {
             Enumeration<String> headerNames = request.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String name = headerNames.nextElement();
@@ -340,6 +456,11 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                 }
                 if (sqlInjectHeaderCheck.get()) {
                     if ((reason = matchSqlInject(name)) != null) {
+                        return String.format("bad http header name [%s], reason of %s", name, reason);
+                    }
+                }
+                if (remoteInvokeHeaderCheck.get()) {
+                    if ((reason = matchRemoteInvoke(name)) != null) {
                         return String.format("bad http header name [%s], reason of %s", name, reason);
                     }
                 }
@@ -356,10 +477,15 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                             return String.format("bad http header name [%s] value, reason of %s", name, reason);
                         }
                     }
+                    if (remoteInvokeHeaderCheck.get()) {
+                        if ((reason = matchRemoteInvoke(value)) != null) {
+                            return String.format("bad http header name [%s] value, reason of %s", name, reason);
+                        }
+                    }
                 }
             }
         }
-        if (invisibleParameterCheck.get() || sqlInjectParameterCheck.get()
+        if (invisibleParameterCheck.get() || sqlInjectParameterCheck.get() || remoteInvokeParameterCheck.get()
                 || illegalFileAccessParameterCheck.get() || illegalCommandExecuteParameterCheck.get()) {
             Map<String, String[]> parameterMap = request.getParameterMap();
             for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
@@ -371,6 +497,11 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                 }
                 if (sqlInjectParameterCheck.get()) {
                     if ((reason = matchSqlInject(URLDecoder.decode(name, "UTF-8"))) != null) {
+                        return String.format("bad http query parameter name [%s], reason of %s", name, reason);
+                    }
+                }
+                if (remoteInvokeParameterCheck.get()) {
+                    if ((reason = matchRemoteInvoke(URLDecoder.decode(name, "UTF-8"))) != null) {
                         return String.format("bad http query parameter name [%s], reason of %s", name, reason);
                     }
                 }
@@ -396,6 +527,14 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                             return String.format("bad http query parameter name [%s] value, reason of %s", name, reason);
                         }
                     }
+                    if (remoteInvokeParameterCheck.get()) {
+                        if (decode == null) {
+                            decode = URLDecoder.decode(item, "UTF-8");
+                        }
+                        if ((reason = matchRemoteInvoke(decode)) != null) {
+                            return String.format("bad http query parameter name [%s] value, reason of %s", name, reason);
+                        }
+                    }
                     if (illegalFileAccessParameterCheck.get()) {
                         if (decode == null) {
                             decode = URLDecoder.decode(item, "UTF-8");
@@ -418,7 +557,7 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                 }
             }
         }
-        if (invisibleCookieCheck.get() || sqlInjectCookieCheck.get()) {
+        if (invisibleCookieCheck.get() || sqlInjectCookieCheck.get() || remoteInvokeCookieCheck.get()) {
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie item : cookies) {
@@ -436,6 +575,11 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                             return String.format("bad http cookie name [%s], reason of %s", name, reason);
                         }
                     }
+                    if (remoteInvokeCookieCheck.get()) {
+                        if ((reason = matchRemoteInvoke(name)) != null) {
+                            return String.format("bad http cookie name [%s], reason of %s", name, reason);
+                        }
+                    }
                     String value = item.getValue();
                     if (invisibleCookieCheck.get()) {
                         if ((reason = containsInvisibleUrlEncodedAsciiChar(value)) != null) {
@@ -447,10 +591,163 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                             return String.format("bad http cookie name [%s] value, reason of %s", name, reason);
                         }
                     }
+                    if (remoteInvokeCookieCheck.get()) {
+                        if ((reason = matchRemoteInvoke(value)) != null) {
+                            return String.format("bad http cookie name [%s] value, reason of %s", name, reason);
+                        }
+                    }
                 }
             }
         }
         return null;
+    }
+
+    public String matchDenyForIp(String ip) {
+        if (ip == null || ip.isEmpty()) {
+            return null;
+        }
+
+        if (denyIpRegexList.isEmpty()) {
+            return null;
+        }
+
+        for (String regex : denyIpRegexList) {
+            if (regex == null || regex.isEmpty()) {
+                continue;
+            }
+            if (ip.equals(regex) || ip.matches(regex)) {
+                return String.format("ip has been denied access [%s]", regex);
+            }
+
+        }
+
+        return null;
+    }
+
+    public String matchNotAllowedPathForIp(String servletPath, String ip) {
+        if (servletPath == null || servletPath.isEmpty()) {
+            return null;
+        }
+        if (ip == null || ip.isEmpty()) {
+            return null;
+        }
+        if (servletPathRegexAllowIpRegexMap.isEmpty()) {
+            return null;
+        }
+        boolean matched = false;
+        boolean allowed = false;
+        for (Map.Entry<String, CopyOnWriteArrayList<String>> entry : servletPathRegexAllowIpRegexMap.entrySet()) {
+            String key = entry.getKey();
+            if (servletPath.equals(key) || servletPath.matches(key)) {
+                CopyOnWriteArrayList<String> value = entry.getValue();
+                if (value == null || value.isEmpty()) {
+                    continue;
+                }
+                for (String regex : value) {
+                    if (regex == null || regex.isEmpty()) {
+                        continue;
+                    }
+                    matched = true;
+                    if (ip.equals(regex) || ip.matches(regex)) {
+                        allowed = true;
+                    }
+                    if (allowed) {
+                        break;
+                    }
+                }
+            }
+            if (allowed) {
+                break;
+            }
+        }
+        if (!matched) {
+            return null;
+        }
+        return allowed ? null : String.format("ip not allowed [%s]", ip);
+    }
+
+    public String matchNotAllowedPathForOrigin(String servletPath, String origin) {
+        if (servletPath == null || servletPath.isEmpty()) {
+            return null;
+        }
+        if (origin == null || origin.isEmpty()) {
+            return null;
+        }
+        if (servletPathRegexAllowOriginRegexMap.isEmpty()) {
+            return null;
+        }
+        boolean matched = false;
+        boolean allowed = false;
+        for (Map.Entry<String, CopyOnWriteArrayList<String>> entry : servletPathRegexAllowOriginRegexMap.entrySet()) {
+            String key = entry.getKey();
+            if (servletPath.equals(key) || servletPath.matches(key)) {
+                CopyOnWriteArrayList<String> value = entry.getValue();
+                if (value == null || value.isEmpty()) {
+                    continue;
+                }
+                for (String regex : value) {
+                    if (regex == null || regex.isEmpty()) {
+                        continue;
+                    }
+                    matched = true;
+                    if (origin.equals(regex) || origin.matches(regex)) {
+                        allowed = true;
+                    }
+                    if (allowed) {
+                        break;
+                    }
+                }
+            }
+            if (allowed) {
+                break;
+            }
+        }
+        if (!matched) {
+            return null;
+        }
+        return allowed ? null : String.format("origin not allowed [%s]", origin);
+    }
+
+    public String matchNotAllowedPathForReferer(String servletPath, String referer) {
+        if (servletPath == null || servletPath.isEmpty()) {
+            return null;
+        }
+        if (referer == null || referer.isEmpty()) {
+            return null;
+        }
+        if (servletPathRegexAllowRefererRegexMap.isEmpty()) {
+            return null;
+        }
+        boolean matched = false;
+        boolean allowed = false;
+        for (Map.Entry<String, CopyOnWriteArrayList<String>> entry : servletPathRegexAllowRefererRegexMap.entrySet()) {
+            String key = entry.getKey();
+            if (servletPath.equals(key) || servletPath.matches(key)) {
+                CopyOnWriteArrayList<String> value = entry.getValue();
+                if (value == null || value.isEmpty()) {
+                    continue;
+                }
+                for (String regex : value) {
+                    if (regex == null || regex.isEmpty()) {
+                        continue;
+                    }
+                    matched = true;
+                    if (referer.equals(regex) || referer.matches(regex)) {
+                        allowed = true;
+                    }
+                    if (allowed) {
+                        break;
+                    }
+                }
+            }
+            if (allowed) {
+                break;
+            }
+        }
+        if (!matched) {
+            return null;
+        }
+        return allowed ? null : String.format("referer not allowed [%s]", referer);
     }
 
     public String isBadMethod(String method) {
@@ -652,6 +949,11 @@ public class SecurityFilter extends OncePerHttpServletFilter {
                     return String.format("part name [%s] not safe, reason of %s", name, reason);
                 }
             }
+            if (remoteInvokeParameterCheck.get()) {
+                if ((reason = matchRemoteInvoke(fileName)) != null) {
+                    return String.format("part name [%s] not safe, reason of %s", name, reason);
+                }
+            }
         }
         return null;
     }
@@ -783,5 +1085,57 @@ public class SecurityFilter extends OncePerHttpServletFilter {
             isFirst = false;
         }
         return null;
+    }
+
+    public String matchRemoteInvoke(String str) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+        for (String item : remoteInvokeRegexList) {
+            if (str.matches(item)) {
+                return String.format("string matched remote invoke pattern [%s]", item);
+            }
+        }
+        for (Pattern pattern : remoteInvokePatternList) {
+            Matcher matcher = pattern.matcher(str);
+            if (matcher.find()) {
+                return String.format("string contains remote invoke pattern [%s]", pattern.pattern());
+            }
+        }
+        return null;
+    }
+
+
+    public static String getIp(HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+            if (ip.equals("127.0.0.1")) {
+                //根据网卡取本机配置的IP
+                InetAddress inet = null;
+                try {
+                    inet = InetAddress.getLocalHost();
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+                if (inet != null) {
+                    ip = inet.getHostAddress();
+                }
+            }
+        }
+        //对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
+        if (ip != null && ip.contains(",")) {
+            ip = ip.substring(0, ip.indexOf(","));
+        }
+        return ip;
     }
 }
