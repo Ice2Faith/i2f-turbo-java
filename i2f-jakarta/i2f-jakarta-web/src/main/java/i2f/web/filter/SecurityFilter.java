@@ -1,5 +1,6 @@
 package i2f.web.filter;
 
+import i2f.web.wrapper.HttpServletRequestProxyWrapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -30,7 +31,13 @@ public class SecurityFilter extends OncePerHttpServletFilter {
 
     public static final String[] BAD_METHODS = {"TRACE", "BATCH"};
 
-    public static final String[] ALLOWED_CONTENT_TYPE = {"application/json", "multipart/form-data", "application/x-www-from-urlencoded", "binary"};
+    public static final String[] ALLOWED_CONTENT_TYPE = {
+            "application/json",
+            "application/x-www-from-urlencoded",
+            "multipart/form-data",
+            "text/xml",
+            "binary"
+    };
     public static final String[] BAD_INVISIBLE_URL_ENCODED_ASCII_CHARS;
     public static final String BAD_URL_CHARS = ";'\"<>\\|{}`~!$^";
     public static final String[] BAD_URL_ENCODED_URL_CHARS;
@@ -114,9 +121,56 @@ public class SecurityFilter extends OncePerHttpServletFilter {
 
     public static final String[] REMOTE_INVOKE_REGEXES = {
             "rmi://",
-            "jndi:[a-zA-Z0-9-_$]://"
+            "jndi:[a-zA-Z0-9-_$]://",
+            "ldap://",
+            "jdbc://",
+
     };
     public static final Pattern[] REMOTE_INVOKE_PATTERNS;
+
+    public static final Pattern[] XML_XXE_PATTERN = {
+            Pattern.compile("\\<\\!ENTITY(\\s+|\\>)".toLowerCase()),
+            Pattern.compile("\\<\\!ELEMENT(\\s+|\\>)".toLowerCase())
+    };
+
+    public static final Pattern[] HTML_XSS_PATTERN = {
+            Pattern.compile("\\<\\script(\\s+|\\>)".toLowerCase()),
+            Pattern.compile("\\<\\iframe(\\s+|\\>)".toLowerCase()),
+    };
+
+    public static final Pattern[] JAVA_DESERIALIZE_PATTERN = {
+            Pattern.compile("java\\.lang\\.Runtime"),
+            Pattern.compile("java\\.lang\\.Process"),
+            Pattern.compile("java\\.lang\\.ProcessImpl"),
+            Pattern.compile("java\\.lang\\.ProcessBuilder"),
+            Pattern.compile("java\\.rmi\\.Naming"),
+            Pattern.compile("java\\.rmi\\.registry\\.Registry"),
+            Pattern.compile("sun\\.rmi\\.registry\\.RegistryImpl"),
+            Pattern.compile("java\\.lang\\.System"),
+            Pattern.compile("java\\.lang\\.Shutdown"),
+            Pattern.compile("java\\.lang\\.Thread"),
+            Pattern.compile("java\\.net\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("sun\\.net\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("java\\.rmi\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("sun\\.rmi\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("java\\.sql\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("javax\\.sql\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("jakarta\\.sql\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("javax\\.rmi\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("jakarta\\.rmi\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("javax\\.naming\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("jakarta\\.naming\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("javax\\.net\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("jakarta\\.net\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("javax\\.transaction\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("jakarta\\.transaction\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("com\\.sun.\\.jndi\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("com\\.sun.\\.rmi\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("com\\.sun.\\.rowset\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("com\\.sun.\\.net\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("com\\.sun.\\.jmx\\.[a-zA-Z0-9_$]+"),
+            Pattern.compile("com\\.oracle.\\.net\\.[a-zA-Z0-9_$]+"),
+    };
 
     static {
         List<String> badInvisibleUrlEncodedAsciiChars = new ArrayList<>();
@@ -269,6 +323,26 @@ public class SecurityFilter extends OncePerHttpServletFilter {
      */
     protected final CopyOnWriteArrayList<String> globalAllowMissingHeadersParametersNameServletPathRegexList = new CopyOnWriteArrayList<>();
 
+    /**
+     * 是否检测请求体
+     */
+    protected final AtomicBoolean requestBodyCheck = new AtomicBoolean(false);
+
+    /**
+     * xxe 外部实体注入攻击
+     */
+    protected final CopyOnWriteArrayList<Pattern> xmlXxePatternList = new CopyOnWriteArrayList<>();
+
+    /**
+     * html 跨站脚本攻击
+     */
+    protected final CopyOnWriteArrayList<Pattern> htmlXssPatternList = new CopyOnWriteArrayList<>();
+
+    /**
+     * Java反序列化攻击
+     */
+    protected final CopyOnWriteArrayList<Pattern> javaDeserializePatternList = new CopyOnWriteArrayList<>();
+
     public SecurityFilter() {
         init();
     }
@@ -313,6 +387,15 @@ public class SecurityFilter extends OncePerHttpServletFilter {
 
         remoteInvokePatternList.clear();
         remoteInvokePatternList.addAll(Arrays.asList(REMOTE_INVOKE_PATTERNS));
+
+        xmlXxePatternList.clear();
+        xmlXxePatternList.addAll(Arrays.asList(XML_XXE_PATTERN));
+
+        htmlXssPatternList.clear();
+        htmlXssPatternList.addAll(Arrays.asList(HTML_XSS_PATTERN));
+
+        javaDeserializePatternList.clear();
+        javaDeserializePatternList.addAll(Arrays.asList(JAVA_DESERIALIZE_PATTERN));
     }
 
     @Override
@@ -321,6 +404,15 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         if (reason != null) {
             onUnSafeRejectRequest(reason, request, response);
             return;
+        }
+        if (requestBodyCheck.get()) {
+            try {
+                request = wrapSafeRequest(request);
+            } catch (IllegalArgumentException e) {
+                reason = e.getMessage();
+                onUnSafeRejectRequest(reason, request, response);
+                return;
+            }
         }
         chain.doFilter(request, response);
     }
@@ -331,6 +423,128 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         PrintWriter writer = response.getWriter();
         writer.write("bad request! cause reason is : " + reason);
         writer.flush();
+    }
+
+    public HttpServletRequest wrapSafeRequest(HttpServletRequest request) throws IOException {
+        String method = request.getMethod();
+        if (method == null) {
+            method = "GET";
+        }
+        if ("GET".equalsIgnoreCase(method)) {
+            return request;
+        }
+        String contentType = request.getContentType();
+        if (contentType == null) {
+            return request;
+        }
+        contentType = contentType.toLowerCase();
+        boolean isJson = false;
+        boolean isForm = false;
+        boolean isXml = false;
+        if (contentType.contains("application/json")) {
+            isJson = true;
+        } else if (contentType.contains("application/x-www-from-urlencoded")) {
+            isForm = true;
+        } else if (contentType.contains("text/xml")) {
+            isXml = true;
+        }
+        if (!isJson && !isForm && !isXml) {
+            return request;
+        }
+        String characterEncoding = request.getCharacterEncoding();
+        if (characterEncoding == null) {
+            characterEncoding = "UTF-8";
+        }
+        HttpServletRequestProxyWrapper wrapper = new HttpServletRequestProxyWrapper(request);
+        byte[] bodyBytes = wrapper.getBodyBytes();
+        if (bodyBytes == null || bodyBytes.length == 0) {
+            return wrapper;
+        }
+
+        String reason = null;
+        String body = new String(bodyBytes, characterEncoding);
+        if (isXml) {
+            if ((reason = isSafeXml(body)) != null) {
+                throw new IllegalArgumentException(reason);
+            }
+        }
+
+        if (isForm) {
+            String[] pairs = body.split("&");
+            for (String pair : pairs) {
+                String[] arr = pair.split("=", 2);
+                if (arr.length != 2) {
+                    continue;
+                }
+                String value = arr[1];
+                if (illegalCommandExecuteParameterCheck.get()) {
+                    if ((reason = matchIllegalCommandExecuteCommands(value)) != null) {
+                        throw new IllegalArgumentException(reason);
+                    }
+                }
+            }
+        }
+
+        if (sqlInjectParameterCheck.get()) {
+            if ((reason = matchSqlInject(body)) != null) {
+                throw new IllegalArgumentException(reason);
+            }
+        }
+
+        if (remoteInvokeParameterCheck.get()) {
+            if ((reason = matchRemoteInvoke(body)) != null) {
+                throw new IllegalArgumentException(reason);
+            }
+        }
+
+        if ((reason = matchJavaDeserialize(body)) != null) {
+            throw new IllegalArgumentException(reason);
+        }
+
+        return wrapper;
+    }
+
+    public String matchJavaDeserialize(String str) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+        if (javaDeserializePatternList.isEmpty()) {
+            return null;
+        }
+        str = str.toLowerCase();
+        str = str.replaceAll("\\&lt;", "<");
+        str = str.replaceAll("\\&gt;", ">");
+        // 反序列化 判定
+        for (Pattern pattern : javaDeserializePatternList) {
+            Matcher matcher = pattern.matcher(str);
+            if (matcher.find()) {
+                return "bad body, maybe exists deserialize execute!";
+            }
+        }
+
+        return null;
+    }
+
+
+    public String isSafeXml(String str) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+        if (xmlXxePatternList.isEmpty()) {
+            return null;
+        }
+        str = str.toLowerCase();
+        str = str.replaceAll("\\&lt;", "<");
+        str = str.replaceAll("\\&gt;", ">");
+        // xxe 判定
+        for (Pattern pattern : xmlXxePatternList) {
+            Matcher matcher = pattern.matcher(str);
+            if (matcher.find()) {
+                return "bad body, maybe exists xxe!";
+            }
+        }
+
+        return null;
     }
 
     public String isSafeRequest(HttpServletRequest request) throws ServletException, IOException {
