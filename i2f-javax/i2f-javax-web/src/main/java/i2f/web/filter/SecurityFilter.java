@@ -33,7 +33,7 @@ public class SecurityFilter extends OncePerHttpServletFilter {
 
     public static final String[] ALLOWED_CONTENT_TYPE = {
             "application/json",
-            "application/x-www-from-urlencoded",
+            "application/x-www-form-urlencoded",
             "multipart/form-data",
             "text/xml",
             "binary"
@@ -112,7 +112,7 @@ public class SecurityFilter extends OncePerHttpServletFilter {
     public static final String[] SQL_INJECT_REGEXES = {
             "\\s+or\\s+.+=.+",
             "\\s+union\\s+.*select.+",
-            "\\s*;\\s*(select|update|insert|delete|create|drop|grant|revoke|alter|comment|show|load|show)\\s+",
+            "\\s*;\\s*(select|update|insert|delete|create|drop|truncate|grant|revoke|alter|comment|show|load|show)\\s+",
             "\\s*;\\s*(begin|rollback|commit)\\s*(;)?",
             "\\s*;\\s*(updatexml|load)\\s*(\\()?",
             "\\s+--\\s*"
@@ -134,8 +134,8 @@ public class SecurityFilter extends OncePerHttpServletFilter {
     };
 
     public static final Pattern[] HTML_XSS_PATTERN = {
-            Pattern.compile("\\<\\script(\\s+|\\>)".toLowerCase()),
-            Pattern.compile("\\<\\iframe(\\s+|\\>)".toLowerCase()),
+            Pattern.compile("\\<script(\\s+|\\>)".toLowerCase()),
+            Pattern.compile("\\<iframe(\\s+|\\>)".toLowerCase()),
     };
 
     public static final Pattern[] JAVA_DESERIALIZE_PATTERN = {
@@ -418,6 +418,7 @@ public class SecurityFilter extends OncePerHttpServletFilter {
     }
 
     public void onUnSafeRejectRequest(String reason, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        System.err.println(String.format(">>>>>>>>>>> reject request 403 on [%5s] [%20s] %s, reason of %s", request.getMethod(), request.getContentType(), String.valueOf(request.getRequestURL()), reason));
         response.setStatus(403);
         response.setContentType("text/plain");
         PrintWriter writer = response.getWriter();
@@ -443,7 +444,7 @@ public class SecurityFilter extends OncePerHttpServletFilter {
         boolean isXml = false;
         if (contentType.contains("application/json")) {
             isJson = true;
-        } else if (contentType.contains("application/x-www-from-urlencoded")) {
+        } else if (contentType.contains("application/x-www-form-urlencoded")) {
             isForm = true;
         } else if (contentType.contains("text/xml")) {
             isXml = true;
