@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.trace.mdc.spring.springmvc.WebTraceSlf4jMdcConfiguration,\
+  i2f.springboot.trace.mdc.spring.scheduling.SpringSchedulingTraceSlf4jMdcAspect,\
+  i2f.springboot.trace.mdc.spring.gateway.GatewayTraceSlf4jMdcGlobalFilter,\
+  i2f.springboot.trace.mdc.xxljob.XxlJobTraceSlf4jMdcAspect

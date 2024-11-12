@@ -30,6 +30,7 @@
         <module>test-swl-starter</module>
         <module>test-xxl-job</module>
         <module>i2f-springboot-mybatis-starter</module>
+        <module>i2f-springboot-trace-mdc-starter</module>
         <!--        <module>i2f-springboot-maven-project</module>-->
     </modules>
 
