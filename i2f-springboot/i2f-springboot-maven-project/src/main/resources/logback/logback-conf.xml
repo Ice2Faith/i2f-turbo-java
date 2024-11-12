@@ -7,11 +7,11 @@
 
     <!-- 日志格式 -->
     <property name="CONSOLE_LOG_PATTERN"
-              value="${CONSOLE_LOG_PATTERN:-%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr([%-5level]) %clr([%-40.40logger{40}:%-4.5line]){cyan} %clr([%-24.24thread]){magenta} - %msg%n}"/>
+              value="${CONSOLE_LOG_PATTERN:-%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr([%-5level]) %clr([%-40.40logger{40}:%-4.5line]){cyan} %clr([%-24.24thread]){magenta} %clr([%.48X{traceId}]){green} %clr([%.64X{traceSource}]){blue} - %msg%n}"/>
 
     <!-- 日志格式 -->
     <property name="LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%-40.40logger{40}:%-4.5line] [%-4.24thread] [%X{JOB_ID}] [%X{TASK_ID}] - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%-40.40logger{40}:%-4.5line] [%-24.24thread] [%.48X{traceId}] [%.64X{traceSource}] - %msg%n"/>
 
 
 </included>
