@@ -2,7 +2,7 @@ package i2f.graphics.d2;
 
 import i2f.color.Rgba;
 import i2f.graphics.d2.visual.D2Frame;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 import lombok.SneakyThrows;
 
@@ -31,7 +31,7 @@ public class CherryTree {
         });
 
         Point startPoint = new Point(img.getWidth() / 2, img.getHeight());
-        Point endPoint = new Point(img.getWidth() / 2 + Calc.rand(100) - 50, img.getHeight() * 0.7);
+        Point endPoint = new Point(img.getWidth() / 2 + MathUtil.rand(100) - 50, img.getHeight() * 0.7);
         Line line = new Line(startPoint, endPoint);
         tree.drawTree(12, startPoint, line.direction(), line.length());
     }
@@ -72,8 +72,8 @@ public class CherryTree {
     }
 
     public void drawTree(int level, Point startPoint, double direction, double startLen) {
-        startColor = Rgba.rgba(Calc.rand(100), Calc.rand(100), Calc.rand(100), 255);
-        endColor = Rgba.rgba(Calc.rand(100, 255), Calc.rand(100, 255), Calc.rand(100, 255), 100);
+        startColor = Rgba.rgba(MathUtil.rand(100), MathUtil.rand(100), MathUtil.rand(100), 255);
+        endColor = Rgba.rgba(MathUtil.rand(100, 255), MathUtil.rand(100, 255), MathUtil.rand(100, 255), 100);
         drawBole(level, level, startPoint, direction, startLen);
         stepListener();
         Point endPoint = D2Calc.directionMove(startPoint, startLen, direction);
@@ -124,7 +124,7 @@ public class CherryTree {
 
         for (int i = 1; i < 3; i++) {
 
-            double qlen = (Calc.rand() % (50 - 10 * i) + (30 + 10 * i)) * 1.0 / 100 * len;
+            double qlen = (MathUtil.rand() % (50 - 10 * i) + (30 + 10 * i)) * 1.0 / 100 * len;
             double qdirect = nextDirection(direction);
             Point qend = D2Calc.directionMove(startPoint, qlen, qdirect);
             //Ellipse(hdc, qend.x - 3, qend.y - 3, qend.x + 3, qend.y + 3);
@@ -149,12 +149,12 @@ public class CherryTree {
     }
 
     protected double nextLen(double len) {
-        return len * ((Calc.rand() % 25 + 70) * 1.0 / 100);
+        return len * ((MathUtil.rand() % 25 + 70) * 1.0 / 100);
     }
 
     protected double nextDirection(double startDirection) {
-        double fac = Calc.angle2radian(Calc.rand() % 60 - 60);
-        if (Calc.rand() % 100 < 50) {
+        double fac = MathUtil.angle2radian(MathUtil.rand() % 60 - 60);
+        if (MathUtil.rand() % 100 < 50) {
             fac = 0.0 - fac;
         }
         return startDirection + fac;
@@ -164,7 +164,7 @@ public class CherryTree {
         if (level <= 0) {
             return;
         }
-        int boleCount = Calc.rand() % 2 + 2;
+        int boleCount = MathUtil.rand() % 2 + 2;
         for (int i = 0; i < boleCount; i++) {
             double ndirect = nextDirection(startDirection);
             drawBole(level, sumLevel, startEnd, ndirect, startLen);

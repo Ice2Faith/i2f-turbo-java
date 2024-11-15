@@ -2,7 +2,7 @@ package i2f.graphics.d3.shape;
 
 import i2f.graphics.d3.D3Point;
 import i2f.graphics.d3.data.D3Model;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -31,9 +31,9 @@ public class Torus {
 
         for (int i = 0; i < aAngleCount; i++) {
             for (int j = 0; j < bAngleCount; j++) {
-                double x = (r1 + r2 * Math.sin(2 * Calc.PI / bAngleCount * j)) * Math.sin(2 * Calc.PI / aAngleCount * i);
-                double y = (r1 + r2 * Math.sin(2 * Calc.PI / bAngleCount * j)) * Math.cos(2 * Calc.PI / aAngleCount * i);
-                double z = r2 * Math.cos(2 * Calc.PI / bAngleCount * j);
+                double x = (r1 + r2 * Math.sin(2 * MathUtil.PI / bAngleCount * j)) * Math.sin(2 * MathUtil.PI / aAngleCount * i);
+                double y = (r1 + r2 * Math.sin(2 * MathUtil.PI / bAngleCount * j)) * Math.cos(2 * MathUtil.PI / aAngleCount * i);
+                double z = r2 * Math.cos(2 * MathUtil.PI / bAngleCount * j);
                 ret.points.add(new D3Point(x, y, z));
             }
         }

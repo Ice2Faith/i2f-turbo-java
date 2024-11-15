@@ -4,7 +4,7 @@ import i2f.graphics.d3.D3Point;
 import i2f.graphics.d3.D3Vector;
 import i2f.graphics.d3.data.D3Model;
 import i2f.graphics.d3.data.D3ModelFlat;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -31,9 +31,9 @@ public class Ball {
         ret.flats = new ArrayList<>();
         for (int i = 0; i <= bAngleCount; i++) {
             for (int j = 0; j <= aAngleCount; j++) {
-                double x = radius * Math.sin(2 * Calc.PI / aAngleCount * j) * Math.sin(Calc.PI / bAngleCount * i);
-                double z = radius * Math.cos(2 * Calc.PI / aAngleCount * j);
-                double y = radius * Math.sin(2 * Calc.PI / aAngleCount * j) * Math.cos(Calc.PI / bAngleCount * i);
+                double x = radius * Math.sin(2 * MathUtil.PI / aAngleCount * j) * Math.sin(MathUtil.PI / bAngleCount * i);
+                double z = radius * Math.cos(2 * MathUtil.PI / aAngleCount * j);
+                double y = radius * Math.sin(2 * MathUtil.PI / aAngleCount * j) * Math.cos(MathUtil.PI / bAngleCount * i);
                 ret.points.add(new D3Point(x, y, z));
             }
         }

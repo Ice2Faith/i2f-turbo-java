@@ -5,6 +5,8 @@ import i2f.comparator.impl.ArrayComparator;
 import i2f.comparator.impl.DefaultComparator;
 import i2f.comparator.impl.NullableComparator;
 
+import java.util.Comparator;
+
 /**
  * @author Ice2Faith
  * @date 2024/4/19 11:50
@@ -12,6 +14,23 @@ import i2f.comparator.impl.NullableComparator;
  * Comparators::compareInteger
  */
 public class Comparators {
+
+    public static <T> Comparator<T> of(Comparator<T> comparator) {
+        return comparator;
+    }
+
+    public static <T> int compare(T v1, T v2, Comparator<T> comparator) {
+        if (v1 == v2) {
+            return 0;
+        }
+        if (v1 == null) {
+            return -1;
+        }
+        if (v2 == null) {
+            return 1;
+        }
+        return comparator.compare(v1, v2);
+    }
 
     public static <T> int compare(T o1, T o2) {
         return DefaultComparator.compareDefault(o1, o2);

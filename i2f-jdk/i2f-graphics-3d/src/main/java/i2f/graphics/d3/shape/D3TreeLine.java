@@ -4,7 +4,7 @@ import i2f.color.Rgba;
 import i2f.graphics.d3.*;
 import i2f.graphics.d3.data.D3Model;
 import i2f.graphics.d3.data.D3ModelFlat;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,14 +81,14 @@ public class D3TreeLine {
         D3Point end = begin.end;
         D3Vector v = new D3Vector(begin);
         D3SphericalPoint sp = v.spherical();
-        int count = Calc.rand(2, 5);
+        int count = MathUtil.rand(2, 5);
         for (int i = 0; i < count; i++) {
-            if (Calc.randPercent() < 0.3 * (1.0 - (bole.level * 1.0 / bole.maxLevel))) { // 随机裁剪
+            if (MathUtil.randPercent() < 0.3 * (1.0 - (bole.level * 1.0 / bole.maxLevel))) { // 随机裁剪
                 continue;
             }
-            double nlen = begin.length() / 2 * Calc.randPercent() + begin.length() / 2; // >0.5*len
-            double nag = sp.aAngle + Calc.angle2radian(Calc.rand(-60, 60));
-            double nbg = sp.bAngle + Calc.angle2radian(Calc.rand(-60, 60));
+            double nlen = begin.length() / 2 * MathUtil.randPercent() + begin.length() / 2; // >0.5*len
+            double nag = sp.aAngle + MathUtil.angle2radian(MathUtil.rand(-60, 60));
+            double nbg = sp.bAngle + MathUtil.angle2radian(MathUtil.rand(-60, 60));
             D3SphericalPoint off = new D3SphericalPoint(nlen, nag, nbg);
             D3Point npoff = off.point();
             D3Point nend = new D3Point(end.x + npoff.x, end.y + npoff.y, end.z + npoff.z);

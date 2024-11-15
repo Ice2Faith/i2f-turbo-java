@@ -1,19 +1,21 @@
 package i2f.math;
 
-import java.util.Random;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.security.SecureRandom;
 
 /**
  * @author Ice2Faith
  * @date 2022/6/17 22:56
  * @desc
  */
-public class Calc {
+public class MathUtil {
     public static final double PI = 3.141592653549626;
     public static final double PI_RADIAN = PI;
     public static final double PI2 = PI * 2;
     public static final double PI_ANGLE = 180.0;
     public static final double PI_ANGLE2 = PI_ANGLE * 2;
-    public static Random rand = new Random();
+    public static final SecureRandom RANDOM = new SecureRandom();
 
     /**
      * 求三角形三边边长分别为lenA,lenB,lenC的三角形中
@@ -47,7 +49,7 @@ public class Calc {
      */
     public static double angleTriangle(double lenA, double lenB, double lenC) {
         double ra = radianTriangle(lenA, lenB, lenC);
-        return Calc.regularAngle(Calc.radian2angle(ra));
+        return MathUtil.regularAngle(MathUtil.radian2angle(ra));
     }
 
     /**
@@ -927,18 +929,108 @@ public class Calc {
     }
 
     public static int rand() {
-        return rand.nextInt();
+        return RANDOM.nextInt();
     }
 
     public static int rand(int max) {
-        return rand.nextInt(max);
+        return RANDOM.nextInt(max);
     }
 
     public static int rand(int min, int max) {
-        return min + (rand.nextInt(max - min));
+        return min + (RANDOM.nextInt(max - min));
     }
 
     public static double randPercent() {
-        return rand.nextDouble();
+        return RANDOM.nextDouble();
+    }
+
+
+    public static double radian(double dx, double dy) {
+        return Math.atan2(dy, dx);
+    }
+
+    public static double radian(double bx, double by, double ex, double ey) {
+        return radian(ex - bx, ey - by);
+    }
+
+    public static int randInt() {
+        return RANDOM.nextInt();
+    }
+
+    public static int randInt(int bound) {
+        return RANDOM.nextInt(bound);
+    }
+
+    public static int randInt(int min, int max) {
+        return RANDOM.nextInt(max - min) + min;
+    }
+
+    public static double randDouble() {
+        return RANDOM.nextDouble();
+    }
+
+    public static boolean randBoolean() {
+        return RANDOM.nextBoolean();
+    }
+
+    public static double trunc(double num, int prec) {
+        int aprec = Math.abs(prec);
+        long pm = 1;
+        for (int i = 0; i < aprec; i++) {
+            pm *= 10;
+        }
+        if (prec >= 0) {
+            BigDecimal bv = BigDecimal.valueOf(num);
+            return bv.divide(BigDecimal.ONE, prec, RoundingMode.HALF_UP).doubleValue();
+        } else {
+            return ((long) (num / pm)) * pm;
+        }
+    }
+
+    /**
+     * 差值，在[begin-end]区间用比例rate[0.0-1.0]进行差值，得到结果并返回
+     *
+     * @param begin
+     * @param end
+     * @param rate
+     * @return
+     */
+    public static double smoothValue(double begin, double end, double rate) {
+        return begin + (end - begin) * rate;
+    }
+
+    public static long smoothValue(long begin, long end, double rate) {
+        return (long) smoothValue((double) begin, (double) end, rate);
+    }
+
+    public static int smoothValue(int begin, int end, double rate) {
+        return (int) smoothValue((double) begin, (double) end, rate);
+    }
+
+    /**
+     * 计算中间点ref在区间[begin-end]上的差值比例
+     *
+     * @param begin
+     * @param end
+     * @param ref
+     * @return
+     */
+    public static double smoothRate(double begin, double end, double ref) {
+        double rate = (ref - begin) / (end - begin);
+        if (Double.isNaN(rate)) {
+            return 0;
+        }
+        if (Double.isInfinite(rate)) {
+            return 1;
+        }
+        return rate;
+    }
+
+    public static double smoothRate(long begin, long end, long ref) {
+        return smoothRate((double) begin, (double) end, (double) ref);
+    }
+
+    public static double smoothRate(int begin, int end, int ref) {
+        return smoothRate((double) begin, (double) end, (double) ref);
     }
 }

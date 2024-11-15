@@ -3,7 +3,7 @@ package i2f.graphics.d3.visual;
 import i2f.graphics.d3.D3Painter;
 import i2f.graphics.d3.projection.ID3Projection;
 import i2f.graphics.d3.transform.impl.*;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 
 import javax.swing.*;
@@ -113,31 +113,31 @@ public class D3Frame extends JFrame
         if (isDownAlt) { // Alt+X/Y/Z进行旋转
             if (isDownX) {
                 if (e.getWheelRotation() == 1) { // 上滚
-                    spin.sx += Calc.angle2radian(5);
-                    spin.sx = Calc.regularRadian(spin.sx);
+                    spin.sx += MathUtil.angle2radian(5);
+                    spin.sx = MathUtil.regularRadian(spin.sx);
                 } else if (e.getWheelRotation() == -1) {//下滚
-                    spin.sx -= Calc.angle2radian(5);
-                    spin.sx = Calc.regularRadian(spin.sx);
+                    spin.sx -= MathUtil.angle2radian(5);
+                    spin.sx = MathUtil.regularRadian(spin.sx);
                 }
                 isAction = true;
             }
             if (isDownY) {
                 if (e.getWheelRotation() == 1) { // 上滚
-                    spin.sy += Calc.angle2radian(5);
-                    spin.sy = Calc.regularRadian(spin.sy);
+                    spin.sy += MathUtil.angle2radian(5);
+                    spin.sy = MathUtil.regularRadian(spin.sy);
                 } else if (e.getWheelRotation() == -1) {//下滚
-                    spin.sy -= Calc.angle2radian(5);
-                    spin.sy = Calc.regularRadian(spin.sy);
+                    spin.sy -= MathUtil.angle2radian(5);
+                    spin.sy = MathUtil.regularRadian(spin.sy);
                 }
                 isAction = true;
             }
             if (isDownZ) {
                 if (e.getWheelRotation() == 1) { // 上滚
-                    spin.sz += Calc.angle2radian(5);
-                    spin.sz = Calc.regularRadian(spin.sz);
+                    spin.sz += MathUtil.angle2radian(5);
+                    spin.sz = MathUtil.regularRadian(spin.sz);
                 } else if (e.getWheelRotation() == -1) {//下滚
-                    spin.sz -= Calc.angle2radian(5);
-                    spin.sz = Calc.regularRadian(spin.sz);
+                    spin.sz -= MathUtil.angle2radian(5);
+                    spin.sz = MathUtil.regularRadian(spin.sz);
                 }
                 isAction = true;
             }

@@ -1,7 +1,7 @@
 package i2f.graphics.d2;
 
 import i2f.graphics.d2.std.ILenght;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +23,7 @@ public class Line implements ILenght {
 
     @Override
     public double length() {
-        return Calc.distance(this.begin.x, this.begin.y, this.end.x, this.end.y);
+        return MathUtil.distance(this.begin.x, this.begin.y, this.end.x, this.end.y);
     }
 
     public double dx() {

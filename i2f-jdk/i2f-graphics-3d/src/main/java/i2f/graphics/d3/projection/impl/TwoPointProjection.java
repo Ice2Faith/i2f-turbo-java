@@ -5,7 +5,7 @@ import i2f.graphics.d3.D3Point;
 import i2f.graphics.d3.D3SphericalPoint;
 import i2f.graphics.d3.D3VaryUtil;
 import i2f.graphics.d3.projection.IViewPointProjection;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,8 +20,8 @@ public class TwoPointProjection extends AbstractMatrixProjection implements IVie
     protected double r;
     protected double d;
 
-    public static final double A_ANGLE = Calc.angle2radian(45);
-    public static final double B_ANGLE = Calc.angle2radian(90);
+    public static final double A_ANGLE = MathUtil.angle2radian(45);
+    public static final double B_ANGLE = MathUtil.angle2radian(90);
 
     public TwoPointProjection(boolean enableMatrix, double r, double d) {
         super(enableMatrix);

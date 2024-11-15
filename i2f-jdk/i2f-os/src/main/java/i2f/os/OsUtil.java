@@ -44,6 +44,10 @@ public class OsUtil {
     }
 
     public static String runCmd(String cmd) {
+        return runCmd(cmd, getCmdCharset());
+    }
+
+    public static String runCmd(String cmd, String charset) {
         try {
             Runtime runtime = Runtime.getRuntime();
 
@@ -64,8 +68,10 @@ public class OsUtil {
             bos.flush();
 
             process.waitFor();
-
-            String str = new String(bos.toByteArray(), getCmdCharset());
+            if (charset == null || charset.isEmpty()) {
+                charset = "UTF-8";
+            }
+            String str = new String(bos.toByteArray(), charset);
             return str;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);

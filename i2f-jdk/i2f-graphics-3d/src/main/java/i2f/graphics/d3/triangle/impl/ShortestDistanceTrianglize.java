@@ -5,7 +5,7 @@ import i2f.graphics.d3.D3Vector;
 import i2f.graphics.d3.data.D3Model;
 import i2f.graphics.d3.data.D3ModelFlat;
 import i2f.graphics.d3.triangle.ITrianglize;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 
 import java.util.*;
 
@@ -114,9 +114,9 @@ public class ShortestDistanceTrianglize implements ITrianglize {
         double lb = v2.length();
         double lc = v3.length();
 
-        double aa = Calc.angleTriangle(la, lb, lc);
-        double ab = Calc.angleTriangle(lb, la, lc);
-        double ac = Calc.angleTriangle(lc, la, lb);
+        double aa = MathUtil.angleTriangle(la, lb, lc);
+        double ab = MathUtil.angleTriangle(lb, la, lc);
+        double ac = MathUtil.angleTriangle(lc, la, lb);
 
         if (aa > maxTriangleAngleLimit || ab > maxTriangleAngleLimit || ac > maxTriangleAngleLimit) {
             return true;

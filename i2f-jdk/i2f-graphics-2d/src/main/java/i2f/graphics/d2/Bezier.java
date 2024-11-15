@@ -1,7 +1,7 @@
 package i2f.graphics.d2;
 
 
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class Bezier {
                 pre = point;
             } else {
                 Point cur = point;
-                len += Calc.abs(cur.x - pre.x) + Calc.abs(cur.y - pre.y);
+                len += MathUtil.abs(cur.x - pre.x) + MathUtil.abs(cur.y - pre.y);
             }
             i++;
         }

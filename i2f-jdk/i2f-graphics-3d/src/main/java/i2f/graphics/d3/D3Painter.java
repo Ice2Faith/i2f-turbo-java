@@ -13,7 +13,7 @@ import i2f.graphics.d3.light.Material;
 import i2f.graphics.d3.projection.ID3Projection;
 import i2f.graphics.d3.transform.ID3Transform;
 import i2f.graphics.d3.visible.BlankingAlgorithm;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -43,7 +43,7 @@ public class D3Painter {
     // 使用背面剔除
     public boolean enableBlanking = false;
     // 视点
-    public D3SphericalPoint viewPoint = new D3SphericalPoint(500, Calc.angle2radian(60), Calc.angle2radian(45));
+    public D3SphericalPoint viewPoint = new D3SphericalPoint(500, MathUtil.angle2radian(60), MathUtil.angle2radian(45));
 
     // 光照系统
     public boolean enableLighting = true;

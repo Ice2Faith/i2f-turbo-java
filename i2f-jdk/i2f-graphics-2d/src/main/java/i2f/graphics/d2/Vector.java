@@ -2,7 +2,7 @@ package i2f.graphics.d2;
 
 
 import i2f.graphics.d2.std.ILenght;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 
 /**
@@ -54,7 +54,7 @@ public class Vector extends Point implements ILenght {
 
     // 获取向量模长
     public static double length(Vector d) {
-        return Math.sqrt(Calc.squareSum(d.x, d.y));
+        return Math.sqrt(MathUtil.squareSum(d.x, d.y));
     }
 
     // 单位化

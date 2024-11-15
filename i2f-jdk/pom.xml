@@ -110,6 +110,17 @@
         <module>i2f-event</module>
         <module>i2f-i18n</module>
         <module>i2f-jdbc-proxy-xml</module>
+        <module>i2f-algo</module>
+        <module>i2f-dict</module>
+        <module>i2f-check-filter</module>
+        <module>i2f-hash</module>
+        <module>i2f-data-processor</module>
+        <module>i2f-lifecycle</module>
+        <module>i2f-template-render</module>
+        <module>i2f-number-idcard</module>
+        <module>i2f-datetime</module>
+        <module>i2f-search</module>
+        <module>i2f-verifycode</module>
 
 
     </modules>

@@ -12,6 +12,7 @@ public class DefaultComparator<T> implements Comparator<T> {
     private boolean reverseNull = false;
     private boolean reverseResult = false;
 
+    @Override
     public int compare(T o1, T o2) {
         return compareDefault(o1, o2, reverseNull, reverseResult);
     }

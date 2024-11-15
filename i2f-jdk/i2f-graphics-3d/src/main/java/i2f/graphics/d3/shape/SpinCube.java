@@ -3,7 +3,7 @@ package i2f.graphics.d3.shape;
 import i2f.graphics.d2.Point;
 import i2f.graphics.d3.D3Point;
 import i2f.graphics.d3.data.D3Model;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -33,8 +33,8 @@ public class SpinCube {
         for (int i = 0; i < points.size(); i++) {
             for (int j = 0; j < angleCount; j++) {
                 double x = points.get(i).x;
-                double y = points.get(i).y * Math.cos(2 * Calc.PI / angleCount * j);
-                double z = points.get(i).y * Math.sin(2 * Calc.PI / angleCount * j);
+                double y = points.get(i).y * Math.cos(2 * MathUtil.PI / angleCount * j);
+                double z = points.get(i).y * Math.sin(2 * MathUtil.PI / angleCount * j);
                 ret.points.add(new D3Point(x, y, z));
             }
         }
@@ -51,9 +51,9 @@ public class SpinCube {
         //环形曲面
         for (int i = 0; i < points.size(); i++) {
             for (int j = 0; j < angleCount; j++) {
-                double x = points.get(i).x * Math.cos(2 * Calc.PI / angleCount * j);
+                double x = points.get(i).x * Math.cos(2 * MathUtil.PI / angleCount * j);
                 double y = points.get(i).y;
-                double z = points.get(i).x * Math.sin(2 * Calc.PI / angleCount * j);
+                double z = points.get(i).x * Math.sin(2 * MathUtil.PI / angleCount * j);
                 ret.points.add(new D3Point(x, y, z));
             }
         }
