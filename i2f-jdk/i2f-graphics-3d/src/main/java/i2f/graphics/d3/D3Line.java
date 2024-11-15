@@ -3,7 +3,7 @@ package i2f.graphics.d3;
 import i2f.graphics.d2.Line;
 import i2f.graphics.d2.std.ILenght;
 import i2f.graphics.d3.projection.ID3Projection;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,7 +25,7 @@ public class D3Line implements ILenght {
 
     @Override
     public double length() {
-        return Calc.distance(this.begin.x, this.begin.y, this.begin.z, this.end.x, this.end.y, this.end.z);
+        return MathUtil.distance(this.begin.x, this.begin.y, this.begin.z, this.end.x, this.end.y, this.end.z);
     }
 
     public Line projection(ID3Projection proj) {

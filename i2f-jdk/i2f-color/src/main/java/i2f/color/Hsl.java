@@ -1,7 +1,7 @@
 package i2f.color;
 
 
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 
 /**
  * @author Ice2Faith
@@ -42,7 +42,7 @@ public class Hsl {
     }
 
     public static double stdHsl(double val) {
-        return Calc.between(val, 0, 1);
+        return MathUtil.between(val, 0, 1);
     }
 
     public static Hsl rgb2hsl(Rgba rgb) {
@@ -115,9 +115,9 @@ public class Hsl {
             g = 255.0 * hue2rgb(var1, var2, h);
             b = 255.0 * hue2rgb(var1, var2, h - (1.0 / 3.0));
         }
-        r = Calc.between(r, 0, 255);
-        g = Calc.between(g, 0, 255);
-        r = Calc.between(r, 0, 255);
+        r = MathUtil.between(r, 0, 255);
+        g = MathUtil.between(g, 0, 255);
+        r = MathUtil.between(r, 0, 255);
         return Rgba.rgba((int) r, (int) g, (int) b, hsl.a);
     }
 

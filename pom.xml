@@ -63,6 +63,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-algo</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-annotations</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -128,6 +133,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-check-filter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-clock</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -188,6 +198,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-data-processor</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-database</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -198,7 +213,17 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-datetime</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-detegate</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-dict</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -259,6 +284,11 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-graphics-3d</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-hash</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -333,6 +363,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-lifecycle</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-limit</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -384,6 +419,11 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-network</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-number-idcard</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>

@@ -2,7 +2,7 @@ package i2f.graphics.d3;
 
 
 import i2f.graphics.d2.std.ILenght;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 
 /**
@@ -97,7 +97,7 @@ public class D3Vector extends D3Point implements ILenght {
 
     // 获取向量模长
     public static double length(D3Vector d) {
-        return Math.sqrt(Calc.squareSum(d.x, d.y, d.z));
+        return Math.sqrt(MathUtil.squareSum(d.x, d.y, d.z));
     }
 
     // 单位化

@@ -1,7 +1,7 @@
 package i2f.graphics.d2;
 
 
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 
 /**
  * @author Ice2Faith
@@ -69,11 +69,11 @@ public class D2Calc {
      * @return 反射弧度
      */
     public static double reflectRadian(double inRadian, double flatRadian) {
-        double i = Calc.regularRadian(inRadian);
-        double mi = Calc.regularRadian(flatRadian);
+        double i = MathUtil.regularRadian(inRadian);
+        double mi = MathUtil.regularRadian(flatRadian);
         //double a=i-mi+2*PI;
         //return getRegularRadian((i+PI)+2*(PI/2-a));
-        return Calc.regularRadian(-i + 2 * mi);
+        return MathUtil.regularRadian(-i + 2 * mi);
     }
 
 }
