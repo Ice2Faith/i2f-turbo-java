@@ -1,0 +1,60 @@
+{
+  "groups": [
+    {
+      "name": "i2f.minio",
+      "type": "i2f.springboot.minio.properties.MinioProperties",
+      "sourceType": "i2f.springboot.minio.properties.MinioProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.minio.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable minio.",
+      "sourceType": "i2f.springboot.minio.properties.MinioProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.minio.url",
+      "type": "java.lang.String",
+      "description": "minio endpoint url.",
+      "sourceType": "i2f.springboot.minio.properties.MinioProperties"
+    },
+    {
+      "name": "i2f.minio.access-key",
+      "type": "java.lang.String",
+      "description": "minio access key.",
+      "sourceType": "i2f.springboot.minio.properties.MinioProperties"
+    },
+    {
+      "name": "i2f.minio.secret-key",
+      "type": "java.lang.String",
+      "description": "minio secret key.",
+      "sourceType": "i2f.springboot.minio.properties.MinioProperties"
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
