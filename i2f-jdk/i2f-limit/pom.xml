@@ -22,6 +22,11 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-clock</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-cache</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

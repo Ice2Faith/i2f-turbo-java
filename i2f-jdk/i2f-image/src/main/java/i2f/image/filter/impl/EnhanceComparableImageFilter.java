@@ -1,7 +1,7 @@
 package i2f.image.filter.impl;
 
 import i2f.color.Rgba;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 
 /**
  * @author Ice2Faith
@@ -26,10 +26,10 @@ public class EnhanceComparableImageFilter extends AbstractImageFilter {
         int b = color.b;
         int a = color.a;
 
-        r = (int) Calc.between((r > half) ? (r * upRate) : (r * downRate), 0, 255);
-        g = (int) Calc.between((g > half) ? (g * upRate) : (g * downRate), 0, 255);
-        b = (int) Calc.between((b > half) ? (b * upRate) : (b * downRate), 0, 255);
-        a = (int) Calc.between((a > half) ? (a * upRate) : (a * downRate), 0, 255);
+        r = (int) MathUtil.between((r > half) ? (r * upRate) : (r * downRate), 0, 255);
+        g = (int) MathUtil.between((g > half) ? (g * upRate) : (g * downRate), 0, 255);
+        b = (int) MathUtil.between((b > half) ? (b * upRate) : (b * downRate), 0, 255);
+        a = (int) MathUtil.between((a > half) ? (a * upRate) : (a * downRate), 0, 255);
 
         return Rgba.rgba(r, g, b, a);
     }

@@ -2,7 +2,7 @@ package i2f.image.filter.impl;
 
 import i2f.color.Rgba;
 import i2f.image.filter.IImageFilter;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class BlurImageFilter implements IImageFilter {
         BufferedImage dimg = new BufferedImage(simg.getWidth(), simg.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 
         int rr = (int) (radius + 1);
-        int rsum = (int) Calc.sumi(rr);
+        int rsum = (int) MathUtil.sumi(rr);
         for (int x = 0; x < dimg.getWidth(); x++) {
             for (int y = 0; y < dimg.getHeight(); y++) {
                 List<Integer> dises = new ArrayList<>();
@@ -44,7 +44,7 @@ public class BlurImageFilter implements IImageFilter {
                         if (y + j < 0 || y + j >= dimg.getHeight()) {
                             continue;
                         }
-                        double dis = Calc.distance(x, y, x + i, y + j);
+                        double dis = MathUtil.distance(x, y, x + i, y + j);
                         if (dis > radius) {
                             continue;
                         }
@@ -73,7 +73,7 @@ public class BlurImageFilter implements IImageFilter {
                 }
 
 
-                Rgba dc = Rgba.rgba((int) (Calc.between(dr, 0, 255)), (int) (Calc.between(dg, 0, 255)), (int) (Calc.between(db, 0, 255)), (int) (Calc.between(da, 0, 255)));
+                Rgba dc = Rgba.rgba((int) (MathUtil.between(dr, 0, 255)), (int) (MathUtil.between(dg, 0, 255)), (int) (MathUtil.between(db, 0, 255)), (int) (MathUtil.between(da, 0, 255)));
                 dimg.setRGB(x, y, dc.argb());
             }
         }

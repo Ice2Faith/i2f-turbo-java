@@ -1,6 +1,6 @@
 package i2f.color;
 
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -31,7 +31,7 @@ public class Rgba {
     }
 
     public static int stdRgba(int val) {
-        return (int) Calc.between(val, 0, 255);
+        return (int) MathUtil.between(val, 0, 255);
     }
 
     public static Rgba rgb(int r, int g, int b) {
@@ -74,7 +74,7 @@ public class Rgba {
 
     public int gray() {
         double gray = Math.pow((Math.pow(r, 2.2) * 0.2973 + Math.pow(g, 2.2) * 0.6274 + Math.pow(b, 2.2) * 0.0753), (1 / 2.2));
-        gray = Calc.between(gray, 0, 255);
+        gray = MathUtil.between(gray, 0, 255);
         return (int) gray;
     }
 
@@ -92,10 +92,10 @@ public class Rgba {
      * @return
      */
     public static Rgba smooth(double rate, Rgba c1, Rgba c2) {
-        int r = Calc.smooth(rate, c1.r, c2.r);
-        int g = Calc.smooth(rate, c1.g, c2.g);
-        int b = Calc.smooth(rate, c1.b, c2.b);
-        int a = Calc.smooth(rate, c1.a, c2.a);
+        int r = MathUtil.smooth(rate, c1.r, c2.r);
+        int g = MathUtil.smooth(rate, c1.g, c2.g);
+        int b = MathUtil.smooth(rate, c1.b, c2.b);
+        int a = MathUtil.smooth(rate, c1.a, c2.a);
         return Rgba.rgba(r, g, b, a);
     }
 

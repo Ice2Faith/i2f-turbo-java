@@ -3,7 +3,7 @@ package i2f.image.filter.impl;
 import i2f.color.Rgba;
 import i2f.graphics.d2.Point;
 import i2f.image.filter.IImageFilter;
-import i2f.math.Calc;
+import i2f.math.MathUtil;
 
 import java.awt.image.BufferedImage;
 
@@ -27,12 +27,12 @@ public class RectangleNormalizeImageFilter implements IImageFilter {
 
     public RectangleNormalizeImageFilter(Point[] points) {
         this.points = points;
-        double minx = Calc.min(points[0].x, points[1].x, points[2].x, points[3].x);
-        double miny = Calc.min(points[0].y, points[1].y, points[2].y, points[3].y);
-        double maxx = Calc.max(points[0].x, points[1].x, points[2].x, points[3].x);
-        double maxy = Calc.max(points[0].y, points[1].y, points[2].y, points[3].y);
-        nwid = (int) Calc.abs(maxx - minx);
-        nhei = (int) Calc.abs(maxy - miny);
+        double minx = MathUtil.min(points[0].x, points[1].x, points[2].x, points[3].x);
+        double miny = MathUtil.min(points[0].y, points[1].y, points[2].y, points[3].y);
+        double maxx = MathUtil.max(points[0].x, points[1].x, points[2].x, points[3].x);
+        double maxy = MathUtil.max(points[0].y, points[1].y, points[2].y, points[3].y);
+        nwid = (int) MathUtil.abs(maxx - minx);
+        nhei = (int) MathUtil.abs(maxy - miny);
     }
 
     @Override
