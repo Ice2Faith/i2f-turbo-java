@@ -5,26 +5,29 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>i2f.turbo</groupId>
-        <artifactId>i2f-extension</artifactId>
+        <artifactId>i2f-springboot</artifactId>
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-extension-filesystem-minio</artifactId>
+    <artifactId>i2f-springboot-oss-minio-starter</artifactId>
+
 
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-io-filesystem</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
-
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-extension-minio</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -32,6 +35,12 @@
             <artifactId>minio</artifactId>
             <version>7.1.0</version>
             <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-filesystem-minio</artifactId>
         </dependency>
     </dependencies>
 

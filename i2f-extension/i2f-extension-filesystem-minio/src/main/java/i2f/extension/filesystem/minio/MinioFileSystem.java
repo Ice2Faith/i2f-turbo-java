@@ -1,6 +1,8 @@
 package i2f.extension.filesystem.minio;
 
 
+import i2f.extension.minio.MinioMeta;
+import i2f.extension.minio.MinioUtil;
 import i2f.io.filesystem.IFile;
 import i2f.io.filesystem.abs.AbsFileSystem;
 import i2f.io.stream.StreamUtil;
@@ -16,15 +18,16 @@ public class MinioFileSystem extends AbsFileSystem {
 
     public MinioFileSystem(MinioMeta meta) {
         this.meta = meta;
-        getClient();
+        this.client = getClient();
+    }
+
+    public MinioFileSystem(MinioClient client) {
+        this.client = client;
     }
 
     public MinioClient getClient() {
         if (this.client == null) {
-            this.client = MinioClient.builder()
-                    .endpoint(meta.getUrl())
-                    .credentials(meta.getAccessKey(), meta.getSecretKey())
-                    .build();
+            this.client = MinioUtil.getClient(this.meta);
         }
         return client;
     }
