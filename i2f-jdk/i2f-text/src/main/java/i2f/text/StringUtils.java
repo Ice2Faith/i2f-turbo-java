@@ -4,9 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Array;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -14,6 +13,49 @@ import java.util.Vector;
  * @desc
  */
 public class StringUtils {
+    public static final String SPECIAL_WHITE_SPACE_STR = "\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\u0085\u200B\u200C\u200D\u2060\u2063";
+    public static final Set<Character> SPECIAL_WHITE_SPACE_CHARS = Collections.unmodifiableSet(((Supplier<Set<Character>>) () -> {
+        // unicode 中的特殊格式控制符号，体现为不可见字符，但是在某些编码下，显示为乱码，比如在GBK编码下，就是乱码
+        // 这种字符一般发生在从网页中复制，或者从WORD等排版工具中复制时，会带入这种字符
+        // 一般的空格为0x20,也就是ascii值32，\\u0020，空格
+        char[] arr = SPECIAL_WHITE_SPACE_STR.toCharArray();
+        Set<Character> ret = new HashSet<>();
+        for (char ch : arr) {
+            ret.add(ch);
+        }
+        return ret;
+    }).get());
+
+    public static boolean isSpecialWhiteSpaceChar(char ch) {
+        return SPECIAL_WHITE_SPACE_CHARS.contains(ch);
+    }
+
+    public static boolean hasSpecialWhiteSpaceChars(String str) {
+        if (str == null) {
+            return false;
+        }
+        int len = str.length();
+        for (int i = 0; i < len; i++) {
+            if (SPECIAL_WHITE_SPACE_CHARS.contains(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String trimSpecialWhiteSpaceChars(String str) {
+        if (str == null) {
+            return str;
+        }
+        StringBuilder builder = new StringBuilder();
+        char[] arr = str.toCharArray();
+        for (int i = 0; i < arr.length; i++) {
+            if (!SPECIAL_WHITE_SPACE_CHARS.contains(arr[i])) {
+                builder.append(arr[i]);
+            }
+        }
+        return builder.toString();
+    }
     public static boolean isEmpty(String str) {
         return str == null || str.isEmpty();
     }
