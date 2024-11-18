@@ -3,14 +3,14 @@ package i2f.text;
 import i2f.iterator.iterator.Iterators;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.function.*;
 
 /**
  * @author Ice2Faith
@@ -19,6 +19,26 @@ import java.util.function.Function;
  */
 public class Appender<T extends Appendable> {
     protected volatile T appender;
+
+    public static final Predicate<?> DEFAULT_FILTER = (val) -> {
+        if (val == null) {
+            return false;
+        }
+        if (val instanceof String) {
+            return !((String) val).isEmpty();
+        }
+        if (val instanceof Collection) {
+            return !((Collection) val).isEmpty();
+        }
+        if (val instanceof Map) {
+            return !((Map) val).isEmpty();
+        }
+        Class<?> clazz = val.getClass();
+        if (clazz.isArray()) {
+            return Array.getLength(val) > 0;
+        }
+        return val != null;
+    };
 
     public Appender(T appender) {
         this.appender = appender;
@@ -40,14 +60,50 @@ public class Appender<T extends Appendable> {
         return builder().addsSep(separator, objs).get();
     }
 
+    public static Appender<StringBuffer> buffer(Appender<?> val) {
+        return buffer().add(val.get());
+    }
+
+    public static Appender<StringBuilder> builder(Appender<?> val) {
+        return builder().add(val.get());
+    }
+
+    public static Appender<StringBuffer> buffer(Supplier<Appender<?>> caller) {
+        return buffer().add(caller.get());
+    }
+
+    public static Appender<StringBuilder> builder(Supplier<Appender<?>> caller) {
+        return builder().add(caller.get());
+    }
+
+    public Appender<T> add(Supplier<Appender<?>> val) {
+        if (val == null) {
+            return this;
+        }
+        Appender<?> appender = val.get();
+        return add(appender);
+    }
+
+    public Appender<T> add(Appender<?> val) {
+        if (val == null) {
+            return this;
+        }
+        String str = val.get();
+        return add(str);
+    }
+
     ////////////////////////////////////////////////////
     public Appender<T> set(Object obj) {
         clear();
         return add(obj);
     }
 
-    public String get() {
+    public String build() {
         return appender.toString();
+    }
+
+    public String get() {
+        return build();
     }
 
     @Override
@@ -58,6 +114,210 @@ public class Appender<T extends Appendable> {
     public Appender<T> clear() {
         return trunc(0);
     }
+
+    public static <T> Predicate<T> defaultFilter() {
+        return (Predicate<T>) DEFAULT_FILTER;
+    }
+
+    public static <T> List<T> $arr2list(T[] arr) {
+        List<T> ret = new ArrayList<>();
+        if (arr == null) {
+            return ret;
+        }
+        for (T item : arr) {
+            ret.add(item);
+        }
+        return ret;
+    }
+
+    public static <T> List<T> $one2list(T obj) {
+        List<T> ret = new ArrayList<>();
+        if (obj == null) {
+            return ret;
+        }
+        ret.add(obj);
+        return ret;
+    }
+
+
+    public <E> Appender<T> $if(E val, Predicate<E> filter, Function<E, Appender<?>> caller) {
+        if (filter != null && !filter.test(val)) {
+            return this;
+        }
+        return add(caller.apply(val));
+    }
+
+    public <E> Appender<T> $if(E val, Function<E, Appender<?>> caller) {
+        return $if(val, defaultFilter(), caller);
+    }
+
+
+    public <E> Appender<T> $trim(T val, Predicate<T> filter,
+                                 String trimPrefixes, String trimSuffixes,
+                                 String appendPrefix, String appendSuffix,
+                                 Function<T, Appender<?>> caller) {
+        return $trim(val, filter,
+                $one2list(trimPrefixes), $one2list(trimSuffixes),
+                appendPrefix, appendSuffix,
+                caller);
+    }
+
+    public <E> Appender<T> $trim(T val, Predicate<T> filter,
+                                 String[] trimPrefixes, String[] trimSuffixes,
+                                 String appendPrefix, String appendSuffix,
+                                 Function<T, Appender<?>> caller) {
+        return $trim(val, filter,
+                $arr2list(trimPrefixes), $arr2list(trimSuffixes),
+                appendPrefix, appendSuffix,
+                caller);
+    }
+
+
+    public <E> Appender<T> $trim(E val, Predicate<E> filter,
+                                 Collection<String> trimPrefixes, Collection<String> trimSuffixes,
+                                 String appendPrefix, String appendSuffix,
+                                 Function<E, Appender<?>> caller) {
+        if (filter != null && !filter.test(val)) {
+            return this;
+        }
+        String str = caller.apply(val).get();
+        if (trimPrefixes != null) {
+            for (String item : trimPrefixes) {
+                if (item == null) {
+                    continue;
+                }
+                str = str.trim();
+                if (str.startsWith(item)) {
+                    str = str.substring(item.length());
+                }
+            }
+        }
+        if (trimSuffixes != null) {
+            for (String item : trimSuffixes) {
+                if (item == null) {
+                    continue;
+                }
+                str = str.trim();
+                if (str.startsWith(item)) {
+                    str = str.substring(0, str.length() - item.length());
+                }
+            }
+        }
+        if (appendPrefix != null) {
+            str = str.trim();
+            if (!str.isEmpty()) {
+                str = appendPrefix + " " + str;
+            }
+        }
+        if (appendSuffix != null) {
+            str = str.trim();
+            if (!str.isEmpty()) {
+                str = str + " " + appendSuffix;
+            }
+        }
+        return add(str);
+    }
+
+    public <E> Appender<T> $trim(E val,
+                                 String trimPrefixes, String trimSuffixes,
+                                 String appendPrefix, String appendSuffix,
+                                 Function<E, Appender<?>> caller) {
+        return $trim(val,
+                $one2list(trimPrefixes), $one2list(trimSuffixes),
+                appendPrefix, appendSuffix,
+                caller);
+    }
+
+    public <E> Appender<T> $trim(E val,
+                                 String[] trimPrefixes, String[] trimSuffixes,
+                                 String appendPrefix, String appendSuffix,
+                                 Function<E, Appender<?>> caller) {
+        return $trim(val,
+                $arr2list(trimPrefixes), $arr2list(trimSuffixes),
+                appendPrefix, appendSuffix,
+                caller);
+    }
+
+    public <E> Appender<T> $trim(E val,
+                                 Collection<String> trimPrefixes, Collection<String> trimSuffixes,
+                                 String appendPrefix, String appendSuffix,
+                                 Function<E, Appender<?>> caller) {
+        return $trim(val, defaultFilter(),
+                trimPrefixes, trimSuffixes,
+                appendPrefix, appendSuffix,
+                caller);
+    }
+
+    public Appender<T> $trim(String trimPrefixes, String trimSuffixes,
+                             String appendPrefix, String appendSuffix,
+                             Supplier<Appender<?>> caller) {
+        return $trim($one2list(trimPrefixes), $one2list(trimSuffixes),
+                appendPrefix, appendSuffix,
+                caller);
+    }
+
+    public Appender<T> $trim(String[] trimPrefixes, String[] trimSuffixes,
+                             String appendPrefix, String appendSuffix,
+                             Supplier<Appender<?>> caller) {
+        return $trim($arr2list(trimPrefixes), $arr2list(trimSuffixes),
+                appendPrefix, appendSuffix,
+                caller);
+    }
+
+    public Appender<T> $trim(Collection<String> trimPrefixes, Collection<String> trimSuffixes,
+                             String appendPrefix, String appendSuffix,
+                             Supplier<Appender<?>> caller) {
+        return $trim(null, null,
+                trimPrefixes, trimSuffixes,
+                appendPrefix, appendSuffix,
+                v -> caller.get());
+    }
+
+    public <E, C extends Collection<E>> Appender<T> $for(C val, Predicate<C> filter,
+                                                         String separator,
+                                                         Predicate<E> itemFilter,
+                                                         BiFunction<Integer, E, Appender<?>> itemCaller) {
+        if (filter != null && !filter.test(val)) {
+            return this;
+        }
+        Appender<?> next = Appender.buffer();
+        int idx = 0;
+        boolean isFirst = true;
+        for (E item : val) {
+            if (itemFilter != null && !itemFilter.test(item)) {
+                idx++;
+                continue;
+            }
+            if (!isFirst) {
+                next.add(separator);
+            }
+            Appender<?> one = itemCaller.apply(idx, item);
+            next.add(one);
+            isFirst = false;
+            idx++;
+        }
+        return add(next);
+    }
+
+    public <E, C extends Collection<E>> Appender<T> $for(C val,
+                                                         String separator,
+                                                         Predicate<E> itemFilter,
+                                                         BiFunction<Integer, E, Appender<?>> itemCaller) {
+        return $for(val, defaultFilter(), separator, itemFilter, itemCaller);
+    }
+
+    public Appender<T> $each(Supplier<Appender>... suppliers) {
+        return $each($arr2list(suppliers));
+    }
+
+    public Appender<T> $each(Collection<Supplier<Appender>> suppliers) {
+        for (Supplier<Appender> supplier : suppliers) {
+            Appender<?> next = supplier.get();
+            add(next);
+        }
+        return this;
+    }
+
 
     public Appender<T> trunc(int len) {
         if (appender instanceof StringBuilder) {
@@ -284,6 +544,54 @@ public class Appender<T extends Appendable> {
             String end = substr(clen - slen);
             if (end.equals(str)) {
                 del(clen - slen, clen);
+            }
+        }
+        return this;
+    }
+
+    public Appender<T> trim() {
+        String str = appender.toString().trim();
+        if (appender instanceof StringBuilder) {
+            StringBuilder builder = (StringBuilder) appender;
+            builder.setLength(0);
+            builder.append(str);
+        } else if (appender instanceof StringBuffer) {
+            StringBuffer buffer = (StringBuffer) appender;
+            buffer.setLength(0);
+            buffer.append(str);
+        }
+        return this;
+    }
+
+    public Appender<T> toLowerCase() {
+        if (appender instanceof StringBuilder) {
+            StringBuilder builder = (StringBuilder) appender;
+            int len = builder.length();
+            for (int i = 0; i < len; i++) {
+                builder.setCharAt(i, Character.toLowerCase(builder.charAt(i)));
+            }
+        } else if (appender instanceof StringBuffer) {
+            StringBuffer buffer = (StringBuffer) appender;
+            int len = buffer.length();
+            for (int i = 0; i < len; i++) {
+                buffer.setCharAt(i, Character.toLowerCase(buffer.charAt(i)));
+            }
+        }
+        return this;
+    }
+
+    public Appender<T> toUpperCase() {
+        if (appender instanceof StringBuilder) {
+            StringBuilder builder = (StringBuilder) appender;
+            int len = builder.length();
+            for (int i = 0; i < len; i++) {
+                builder.setCharAt(i, Character.toUpperCase(builder.charAt(i)));
+            }
+        } else if (appender instanceof StringBuffer) {
+            StringBuffer buffer = (StringBuffer) appender;
+            int len = buffer.length();
+            for (int i = 0; i < len; i++) {
+                buffer.setCharAt(i, Character.toUpperCase(buffer.charAt(i)));
             }
         }
         return this;
