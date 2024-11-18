@@ -49,6 +49,11 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-elasticsearch</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-email</artifactId>
         </dependency>
 
