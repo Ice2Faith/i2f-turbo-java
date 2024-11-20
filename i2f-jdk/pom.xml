@@ -121,6 +121,7 @@
         <module>i2f-datetime</module>
         <module>i2f-search</module>
         <module>i2f-verifycode</module>
+        <module>i2f-authentication</module>
 
 
     </modules>

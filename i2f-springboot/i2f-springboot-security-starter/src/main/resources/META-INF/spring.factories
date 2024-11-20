@@ -1,0 +1,15 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.security.SecurityExceptionHandler,\
+  i2f.springboot.security.SecurityAutoConfiguration,\
+  i2f.springboot.security.PasswordEncoderConfiguration,\
+  i2f.springboot.security.DisableSecurityConfiguration,\
+  i2f.springboot.security.impl.SecurityForwardController,\
+  i2f.springboot.security.def.guarder.LoginGuarderAutoConfiguration,\
+  i2f.springboot.security.def.guarder.LoginLockBeforeLoginChecker,\
+  i2f.springboot.security.def.DefaultAuthorizeExceptionHandler,\
+  i2f.springboot.security.def.token.DefaultAuthenticationTokenFilter,\
+  i2f.springboot.security.def.token.DefaultTokenHolder,\
+  i2f.springboot.security.def.DefaultUserDetailsService,\
+  i2f.springboot.security.def.token.DefaultAuthenticationSuccessHandler,\
+  i2f.springboot.security.def.token.DefaultAuthenticationFailureHandler,\
+  i2f.springboot.security.def.token.DefaultLogoutSuccessHandler

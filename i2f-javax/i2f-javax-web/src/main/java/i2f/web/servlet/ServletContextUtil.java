@@ -22,8 +22,27 @@ import java.util.List;
  * @desc
  */
 public class ServletContextUtil {
+
     public static final String UserAgent = "User-Agent";
     public static final String FORWARD_DATA_ATTR_KEY = "forward-data";
+    public static final String FORWARD_EXCEPTION_ATTR_KEY = "forward-exception";
+    public static final String FORWARD_PATH = "/forward/response";
+
+    public static void setForwardData(HttpServletRequest request, Object data) {
+        request.setAttribute(FORWARD_DATA_ATTR_KEY, data);
+    }
+
+    public static void setForwardException(HttpServletRequest request, Throwable ex) {
+        request.setAttribute(FORWARD_EXCEPTION_ATTR_KEY, ex);
+    }
+
+    public static Object getForwardData(HttpServletRequest request) {
+        return request.getAttribute(FORWARD_DATA_ATTR_KEY);
+    }
+
+    public static Throwable getForwardException(HttpServletRequest request) {
+        return (Throwable) request.getAttribute(FORWARD_EXCEPTION_ATTR_KEY);
+    }
 
     public static String getToken(HttpServletRequest request, String tokenName) {
         String token = "";

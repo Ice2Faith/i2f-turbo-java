@@ -103,6 +103,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-authentication</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-bindsql</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -912,6 +917,12 @@
 
 
             <!-- ############################################################ -->
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-spring-authentication</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>i2f.turbo</groupId>
