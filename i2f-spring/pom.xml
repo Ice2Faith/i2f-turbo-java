@@ -19,6 +19,7 @@
         <module>i2f-spring-web</module>
         <module>i2f-spring-security</module>
         <module>i2f-spring-redis</module>
+        <module>i2f-spring-authentication</module>
     </modules>
 
     <properties>
