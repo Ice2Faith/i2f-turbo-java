@@ -67,6 +67,7 @@
         <module>i2f-extension-mybatis</module>
         <module>i2f-extension-ognl</module>
         <module>i2f-extension-elasticsearch</module>
+        <module>i2f-extension-canal</module>
     </modules>
 
 
