@@ -1,0 +1,10 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.shiro.ShiroAutoConfiguration,\
+  i2f.springboot.shiro.ShiroExceptionHandler,\
+  i2f.springboot.shiro.def.DefaultUsernamePasswordRealm,\
+  i2f.springboot.shiro.def.DefaultCustomerTokenRealm,\
+  i2f.springboot.shiro.def.DefaultShiroTokenHolder,\
+  i2f.springboot.shiro.def.DefaultLoginFailureHandler,\
+  i2f.springboot.shiro.def.DefaultLoginSuccessHandler,\
+  i2f.springboot.shiro.def.DefaultLogoutHandler,\
+  i2f.spring.authentication.forward.SecurityForwardController
