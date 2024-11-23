@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.config.security",
+      "type": "i2f.springboot.security.SecurityAutoConfiguration",
+      "sourceType": "i2f.springboot.security.SecurityAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.config.security.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable security aop.",
+      "sourceType": "i2f.springboot.security.SecurityAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
