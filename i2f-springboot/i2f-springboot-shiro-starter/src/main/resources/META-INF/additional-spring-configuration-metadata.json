@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.config.shiro",
+      "type": "i2f.springboot.shiro.ShiroAutoConfiguration",
+      "sourceType": "i2f.springboot.shiro.ShiroAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.config.shiro.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable shiro aop.",
+      "sourceType": "i2f.springboot.shiro.ShiroAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
