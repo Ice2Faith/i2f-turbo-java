@@ -1,11 +1,13 @@
 package i2f.database.metadata;
 
 import i2f.database.metadata.data.TableMeta;
+import i2f.database.metadata.impl.dm.DmDatabaseMetadataProvider;
 import i2f.database.metadata.impl.gbase.GbaseDatabaseMetadataProvider;
 import i2f.database.metadata.impl.mysql.MysqlDatabaseMetadataProvider;
 import i2f.database.metadata.impl.oracle.OracleDatabaseMetadataProvider;
 import i2f.database.metadata.impl.postgresql.PostgreSqlDatabaseMetadataProvider;
 import i2f.database.metadata.impl.sqlite3.Sqlite3DatabaseMetadataProvider;
+import i2f.database.type.DatabaseType;
 import i2f.jdbc.data.QueryResult;
 
 import java.sql.Connection;
@@ -56,18 +58,24 @@ public interface DatabaseMetadataProvider {
     }
 
     static DatabaseMetadataProvider findProvider(Connection conn) throws SQLException {
-        String productName = conn.getMetaData().getDatabaseProductName().toLowerCase();
-        if (productName.contains("mysql")) {
+        DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+        String productName = conn.getMetaData().getDatabaseProductName();
+        if (DatabaseType.MYSQL == databaseType
+                || DatabaseType.MARIADB == databaseType) {
             return new MysqlDatabaseMetadataProvider();
-        } else if (productName.contains("oracle")) {
+        } else if (DatabaseType.ORACLE == databaseType
+                || DatabaseType.ORACLE_12C == databaseType) {
             return new OracleDatabaseMetadataProvider();
-        } else if (productName.contains("gbase")) {
+        } else if (DatabaseType.GBASE == databaseType) {
             return new GbaseDatabaseMetadataProvider();
-        } else if (productName.contains("sqlite")) {
+        } else if (DatabaseType.SQLITE == databaseType) {
             return new Sqlite3DatabaseMetadataProvider();
-        } else if (productName.contains("postgresql")) {
+        } else if (DatabaseType.POSTGRE_SQL == databaseType) {
             return new PostgreSqlDatabaseMetadataProvider();
+        } else if (DatabaseType.DM == databaseType) {
+            return new DmDatabaseMetadataProvider();
         }
+
         throw new IllegalStateException("un-support metadata provider for product: " + productName);
     }
 
