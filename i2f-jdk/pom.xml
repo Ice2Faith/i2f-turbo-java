@@ -122,6 +122,7 @@
         <module>i2f-search</module>
         <module>i2f-verifycode</module>
         <module>i2f-authentication</module>
+        <module>i2f-launcher</module>
 
 
     </modules>
