@@ -22,6 +22,11 @@
             <artifactId>i2f-jdbc</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-database-type</artifactId>
+        </dependency>
+
 
         <!-- mysql -->
         <dependency>
