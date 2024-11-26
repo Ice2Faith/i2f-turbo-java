@@ -1,0 +1,6 @@
+--classpath
+./config
+./conf
+--entry-class
+com.test.TestMain
+--exclude-default
