@@ -171,8 +171,39 @@ public class ExtLibClassLoader extends URLClassLoader {
         return null;
     }
 
-    public Set<URL> findResourcesInJarInputStream(String name, String parent, JarInputStream jis, boolean matchOne) {
-
+    public Set<URL> findResourcesInJarInputStream(String name, String parent, JarInputStream jis, boolean matchOne) throws IOException {
+        Set<URL> ret = new LinkedHashSet<>();
+        if (jis == null) {
+            return ret;
+        }
+        JarEntry nextJarEntry = null;
+        while ((nextJarEntry = jis.getNextJarEntry()) != null) {
+            if (nextJarEntry.isDirectory()) {
+                continue;
+            }
+            String entryName = nextJarEntry.getName();
+            if (entryName == null) {
+                continue;
+            }
+            try {
+                if (entryName.equals(name)) {
+                    ret.add(new URL(parent + "!" + entryName));
+                    if (matchOne) {
+                        return ret;
+                    }
+                }
+                if (name.endsWith(".jar")) {
+                    Set<URL> next = findResourcesInJarInputStream(name, parent + "!" + entryName, jis, matchOne);
+                    ret.addAll(next);
+                    if (matchOne && !ret.isEmpty()) {
+                        return ret;
+                    }
+                }
+            } finally {
+                jis.closeEntry();
+            }
+        }
+        return null;
     }
 
     public Set<URL> findResourcesInJarFile(String name, String parent, File file, boolean matchOne) {
