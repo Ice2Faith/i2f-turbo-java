@@ -123,6 +123,7 @@
         <module>i2f-verifycode</module>
         <module>i2f-authentication</module>
         <module>i2f-launcher</module>
+        <module>i2f-database-metadata</module>
 
 
     </modules>
