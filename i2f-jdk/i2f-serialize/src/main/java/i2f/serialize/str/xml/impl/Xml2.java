@@ -73,6 +73,10 @@ public class Xml2 {
         return String.valueOf(num);
     }
 
+    protected static String toXmlEnum(Enum val) {
+        return val.name();
+    }
+
     protected static String toXmlNull() {
         return "";
     }
@@ -145,8 +149,12 @@ public class Xml2 {
             appendXmlTag(builder, "string", tagName, toXmlString((String) val));
         } else if (val instanceof Number) {
             appendXmlTag(builder, "number", tagName, toXmlNumber((Number) val));
+        } else if (val.getClass().isEnum()) {
+            appendXmlTag(builder, "enum", tagName, toXmlEnum((Enum) val));
         } else {
             appendXmlTag(builder, "object", tagName, toXml(val));
         }
     }
+
+
 }

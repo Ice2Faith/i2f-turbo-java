@@ -44,7 +44,14 @@ public class Json2 {
             return whenCollection((Collection) obj);
         }
 
+        if (obj.getClass().isEnum()) {
+            return whenEnum((Enum) obj);
+        }
         return whenBean(obj);
+    }
+
+    private static String whenEnum(Enum obj) {
+        return quote + obj.name() + quote;
     }
 
     private static String whenNull(Object obj) {

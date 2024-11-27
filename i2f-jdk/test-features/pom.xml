@@ -32,6 +32,11 @@
             <artifactId>i2f-extension-cglib</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-serialize</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
