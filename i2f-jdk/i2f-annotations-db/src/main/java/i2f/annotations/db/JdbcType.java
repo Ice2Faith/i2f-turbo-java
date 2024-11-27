@@ -3,6 +3,7 @@ package i2f.annotations.db;
 import i2f.annotations.core.doc.Comment;
 
 import java.lang.annotation.*;
+import java.sql.JDBCType;
 
 /**
  * @author Ice2Faith
@@ -29,5 +30,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface JdbcType {
-    String value();
+    JDBCType value();
 }

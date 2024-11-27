@@ -1,29 +1,25 @@
 package i2f.reverse.engineer.generator;
 
-import i2f.core.database.db.core.DbBeanResolver;
-import i2f.core.database.db.core.DbResolver;
-import i2f.core.database.db.data.TableMeta;
-import i2f.core.reflection.reflect.Reflects;
-import i2f.core.reflection.reflect.core.ReflectResolver;
-import i2f.core.resource.ResourceUtil;
-import i2f.core.serialize.str.xml.impl.Xml2;
-import i2f.extension.template.velocity.VelocityGenerator;
-import i2f.generator.api.ApiLine;
-import i2f.generator.api.ApiMethod;
-import i2f.generator.api.ApiMethodResolver;
-import i2f.generator.data.JavaCodeContext;
-import i2f.generator.data.TableContext;
-import i2f.generator.drawio.er.DrawioAdapter;
-import i2f.generator.drawio.er.DrawioErElem;
-import i2f.generator.er.ErContext;
-import i2f.generator.module.ModuleController;
-import i2f.generator.module.ModuleResolver;
+
+import i2f.database.metadata.DatabaseMetadataProvider;
+import i2f.database.metadata.data.TableMeta;
+import i2f.extension.velocity.VelocityGenerator;
+import i2f.resources.ResourceUtil;
+import i2f.reverse.engineer.generator.database.JavaCodeContext;
+import i2f.reverse.engineer.generator.database.TableContext;
+import i2f.reverse.engineer.generator.er.ErContext;
+import i2f.reverse.engineer.generator.er.drawio.DrawioAdapter;
+import i2f.reverse.engineer.generator.er.drawio.DrawioErElem;
+import i2f.serialize.str.xml.impl.Xml2;
+import i2f.spring.mvc.metadata.api.ApiLine;
+import i2f.spring.mvc.metadata.api.ApiMethod;
+import i2f.spring.mvc.metadata.api.ApiMethodResolver;
+import i2f.spring.mvc.metadata.module.ModuleController;
+import i2f.spring.mvc.metadata.module.ModuleResolver;
+import i2f.text.StringUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.*;
@@ -37,7 +33,6 @@ import java.util.function.Predicate;
  */
 public class GeneratorDriver {
     public static String generate(TableMeta table, String template, JavaCodeContext codeCtx) throws Exception {
-        table.sortColumns();
         TableContext tableCtx = TableContext.parse(table);
         Map<String, Object> map = new HashMap<>();
         map.put("code", codeCtx);
@@ -47,7 +42,6 @@ public class GeneratorDriver {
     }
 
     public static void batch(TableMeta table, String templatePath, String outputPath, JavaCodeContext codeCtx) throws Exception {
-        table.sortColumns();
         TableContext tableCtx = TableContext.parse(table);
         Map<String, Object> map = new HashMap<>();
         map.put("code", codeCtx);
@@ -56,21 +50,21 @@ public class GeneratorDriver {
     }
 
     public static String generate(Connection conn, String tableName, String template, JavaCodeContext codeCtx) throws Exception {
-        TableMeta table = DbResolver.getTableMeta(conn, tableName);
+        TableMeta table = DatabaseMetadataProvider.findProvider(conn).getTableInfo(conn, null, tableName);
         return generate(table, template, codeCtx);
     }
 
     public static void batch(Connection conn, String tableName, String templatePath, String outputPath, JavaCodeContext codeCtx) throws Exception {
-        TableMeta table = DbResolver.getTableMeta(conn, tableName);
+        TableMeta table = DatabaseMetadataProvider.findProvider(conn).getTableInfo(conn, null, tableName);
         batch(table, templatePath, outputPath, codeCtx);
     }
 
-    public static String generate(Class beanClass, String template, JavaCodeContext codeCtx) throws Exception {
+    public static String generate(Class<?> beanClass, String template, JavaCodeContext codeCtx) throws Exception {
         TableMeta table = DbBeanResolver.getTableMeta(beanClass);
         return generate(table, template, codeCtx);
     }
 
-    public static void batch(Class beanClass, String templatePath, String outputPath, JavaCodeContext codeCtx) throws Exception {
+    public static void batch(Class<?> beanClass, String templatePath, String outputPath, JavaCodeContext codeCtx) throws Exception {
         TableMeta table = DbBeanResolver.getTableMeta(beanClass);
         batch(table, templatePath, outputPath, codeCtx);
     }
@@ -78,17 +72,14 @@ public class GeneratorDriver {
 
     public static String er(List<TableMeta> tables, String template) throws Exception {
         Map<String, Object> map = new HashMap<>();
-        for (TableMeta item : tables) {
-            item.sortColumns();
-        }
         ErContext ctx = ErContext.parse(tables);
         map.put("er", ctx);
         return VelocityGenerator.render(template, map);
     }
 
-    public static String er(String template, Class... beanClasses) throws Exception {
+    public static String er(String template, Class<?>... beanClasses) throws Exception {
         List<TableMeta> list = new ArrayList<>();
-        for (Class item : beanClasses) {
+        for (Class<?> item : beanClasses) {
             TableMeta table = DbBeanResolver.getTableMeta(item);
             list.add(table);
         }
@@ -97,8 +88,9 @@ public class GeneratorDriver {
 
     public static String er(Connection conn, String template, String... tableNames) throws Exception {
         List<TableMeta> list = new ArrayList<>();
+        DatabaseMetadataProvider provider = DatabaseMetadataProvider.findProvider(conn);
         for (String item : tableNames) {
-            TableMeta table = DbResolver.getTableMeta(conn, item);
+            TableMeta table = provider.getTableInfo(conn, null, item);
             list.add(table);
         }
         return er(list, template);
@@ -106,9 +98,6 @@ public class GeneratorDriver {
 
     public static String drawioEr(List<TableMeta> tables, String template) throws IOException {
         Map<String, Object> map = new HashMap<>();
-        for (TableMeta item : tables) {
-            item.sortColumns();
-        }
         List<DrawioErElem> elems = DrawioAdapter.parseEr(tables);
         map.put("elems", elems);
         return VelocityGenerator.render(template, map);
@@ -121,16 +110,13 @@ public class GeneratorDriver {
 
     public static String doc(List<TableMeta> tables, String template) throws Exception {
         Map<String, Object> map = new HashMap<>();
-        for (TableMeta item : tables) {
-            item.sortColumns();
-        }
         map.put("tables", tables);
         return VelocityGenerator.render(template, map);
     }
 
-    public static String doc(String template, Class... beanClasses) throws Exception {
+    public static String doc(String template, Class<?>... beanClasses) throws Exception {
         List<TableMeta> list = new ArrayList<>();
-        for (Class item : beanClasses) {
+        for (Class<?> item : beanClasses) {
             TableMeta table = DbBeanResolver.getTableMeta(item);
             list.add(table);
         }
@@ -139,8 +125,9 @@ public class GeneratorDriver {
 
     public static String doc(Connection conn, String template, String... tableNames) throws Exception {
         List<TableMeta> list = new ArrayList<>();
+        DatabaseMetadataProvider provider = DatabaseMetadataProvider.findProvider(conn);
         for (String item : tableNames) {
-            TableMeta table = DbResolver.getTableMeta(conn, item);
+            TableMeta table = provider.getTableInfo(conn, null, item);
             list.add(table);
         }
         return doc(list, template);
@@ -169,11 +156,11 @@ public class GeneratorDriver {
         return VelocityGenerator.render(template, map);
     }
 
-    public static String apiVo(Class voClass, String template) throws IOException {
+    public static String apiVo(Class<?> voClass, String template) throws IOException {
         return apiVo(voClass, null, template);
     }
 
-    public static String apiVo(Class voClass, ApiMethodResolver.TraceLevel level, String template) throws IOException {
+    public static String apiVo(Class<?> voClass, ApiMethodResolver.TraceLevel level, String template) throws IOException {
         List<ApiMethod> apis = new ArrayList<>();
         Method[] methods = voClass.getMethods();
         Method[] declaredMethods = voClass.getDeclaredMethods();
@@ -200,77 +187,26 @@ public class GeneratorDriver {
         return apis(apis, template);
     }
 
-    public static Set<Method> getMvcMethos(Class clazz) {
-        String clazzName = clazz.getName();
-        int idx = clazzName.indexOf("$$EnhancerBySpring");
-        if (idx >= 0) {
-            clazzName = clazzName.substring(0, idx);
-            clazz = Reflects.findClass(clazzName);
-        }
-        Set<Method> set = ReflectResolver.getMethodsWithAnnotations(clazz, false,
-                RequestMapping.class,
-                GetMapping.class, PostMapping.class, PutMapping.class, DeleteMapping.class,
-                PatchMapping.class);
-        return set;
-    }
-
-    public static String apiMvc(Class clazz, String template) throws IOException {
+    public static String apiMvc(Class<?> clazz, String template) throws IOException {
         return apiMvc(clazz, null, template);
     }
 
-    public static String apiMvc(Class clazz, ApiMethodResolver.TraceLevel level, String template) throws IOException {
-        List<ApiMethod> apis = getMvcApiMethods(clazz, level);
+    public static String apiMvc(Class<?> clazz, ApiMethodResolver.TraceLevel level, String template) throws IOException {
+        List<ApiMethod> apis = ApiMethodResolver.getMvcApiMethods(clazz, level);
         return apis(apis, template);
     }
 
-    public static List<ApiMethod> getMvcApiMethods(Class clazz) {
-        return getMvcApiMethods(clazz, null);
-    }
-
-    public static List<ApiMethod> getMvcApiMethods(Class clazz, ApiMethodResolver.TraceLevel level) {
-        List<ApiMethod> apis = new ArrayList<>();
-        Set<Method> set = getMvcMethos(clazz);
-        for (Method item : set) {
-            apis.add(ApiMethodResolver.parseMethod(item, level));
-        }
-        return apis;
-    }
-
-    public static String apiMvcs(String template, Class clazz, Class... classes) throws IOException {
+    public static String apiMvcs(String template, Class<?> clazz, Class<?>... classes) throws IOException {
         return apiMvcs(null, template, clazz, classes);
     }
 
-    public static String apiMvcs(ApiMethodResolver.TraceLevel level, String template, Class clazz, Class... classes) throws IOException {
+    public static String apiMvcs(ApiMethodResolver.TraceLevel level, String template, Class<?> clazz, Class<?>... classes) throws IOException {
         List<ApiMethod> apis = new ArrayList<>();
-        apis.addAll(getMvcApiMethods(clazz, level));
-        for (Class item : classes) {
-            apis.addAll(getMvcApiMethods(item, level));
+        apis.addAll(ApiMethodResolver.getMvcApiMethods(clazz, level));
+        for (Class<?> item : classes) {
+            apis.addAll(ApiMethodResolver.getMvcApiMethods(item, level));
         }
         return apis(apis, template);
-    }
-
-    public static <T extends Annotation> Set<Class<?>> getSpringClassesWithAnnotations(ApplicationContext context, Class<T> annClazz) {
-        Set<Class<?>> ret = new LinkedHashSet<>();
-        Map<String, Object> beans = context.getBeansWithAnnotation(annClazz);
-        for (Map.Entry<String, Object> entry : beans.entrySet()) {
-            Object bean = entry.getValue();
-            Class<?> clazz = bean.getClass();
-            String clazzName = clazz.getName();
-            int idx = clazzName.indexOf("$$Enhancer");
-            if (idx >= 0) {
-                clazzName = clazzName.substring(0, idx);
-                clazz = Reflects.findClass(clazzName);
-            }
-            ret.add(clazz);
-        }
-        return ret;
-    }
-
-    public static Set<Class<?>> getSpringMvcControllers(ApplicationContext context) {
-        Set<Class<?>> ret = new LinkedHashSet<>();
-        ret.addAll(getSpringClassesWithAnnotations(context, RestController.class));
-        ret.addAll(getSpringClassesWithAnnotations(context, Controller.class));
-        return ret;
     }
 
     public static String apiMvcsSameComments(ApplicationContext context, Predicate<Class<?>> filter, String template) throws IOException {
@@ -329,12 +265,12 @@ public class GeneratorDriver {
     }
 
     public static String apiMvcsControllers(ApplicationContext context, Predicate<Class<?>> filter, Consumer<List<ApiMethod>> preProcessor, ApiMethodResolver.TraceLevel level, String template) throws IOException {
-        Set<Class<?>> controllers = getSpringMvcControllers(context);
+        Set<Class<?>> controllers = ApiMethodResolver.getSpringMvcControllers(context);
         List<ApiMethod> apis = new LinkedList<>();
         if (filter != null) {
             for (Class<?> controller : controllers) {
                 if (filter.test(controller)) {
-                    apis.addAll(getMvcApiMethods(controller, level));
+                    apis.addAll(ApiMethodResolver.getMvcApiMethods(controller, level));
                 }
             }
         }
@@ -385,7 +321,7 @@ public class GeneratorDriver {
     }
 
     public static String modulesMvcControllers(ApplicationContext context, Predicate<Class<?>> filter, Consumer<List<ModuleController>> preProcessor, String template) throws IOException {
-        Set<Class<?>> controllers = getSpringMvcControllers(context);
+        Set<Class<?>> controllers = ApiMethodResolver.getSpringMvcControllers(context);
         List<ModuleController> modules = new LinkedList<>();
         if (filter != null) {
             for (Class<?> controller : controllers) {
@@ -408,10 +344,6 @@ public class GeneratorDriver {
     }
 
     public static String tablesDoc(List<TableMeta> tables, String template) throws IOException {
-        for (TableMeta table : tables) {
-            table.inflateIndexes();
-        }
-
         Map<String, Object> params = new HashMap<>();
         params.put("tables", tables);
         return VelocityGenerator.render(template, params);

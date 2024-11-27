@@ -30,4 +30,7 @@ public class ColumnMeta {
     protected String looseJavaType;
     protected String looseJdbcType;
 
+    public static int compare(ColumnMeta o1, ColumnMeta o2) {
+        return Integer.compare(o1.getIndex(), o2.getIndex());
+    }
 }

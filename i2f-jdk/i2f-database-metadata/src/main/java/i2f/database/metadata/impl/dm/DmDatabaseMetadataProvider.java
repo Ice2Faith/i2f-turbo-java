@@ -5,9 +5,9 @@ import i2f.database.metadata.data.IndexColumnMeta;
 import i2f.database.metadata.data.IndexMeta;
 import i2f.database.metadata.data.TableMeta;
 import i2f.database.metadata.impl.base.BaseDatabaseMetadataProvider;
+import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
-import i2f.jdbc.data.StdType;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

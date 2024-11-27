@@ -29,5 +29,9 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Primary {
+    String value() default "";
 
+    int order() default -1;
+
+    String type() default "";
 }
