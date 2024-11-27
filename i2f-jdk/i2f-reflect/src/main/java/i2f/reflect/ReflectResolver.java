@@ -12,7 +12,7 @@ import i2f.reflect.virtual.impl.MethodGetterSetterField;
 import i2f.reflect.virtual.impl.MethodSetterField;
 import i2f.typeof.TypeOf;
 
-import java.io.File;
+import java.io.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -29,6 +29,182 @@ import java.util.function.Predicate;
  */
 public class ReflectResolver {
     public static AtomicBoolean ENABLE_CACHE = new AtomicBoolean(true);
+
+    public static boolean isIgnoreSerializeFields(Field field) {
+        int modifiers = field.getModifiers();
+        if (Modifier.isTransient(modifiers)) {
+            return true;
+        }
+        if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
+            return true;
+        }
+        Class<?> declaringClass = field.getDeclaringClass();
+        if (TypeOf.typeOf(declaringClass, Type.class)) {
+            return true;
+        }
+        if (TypeOf.typeOf(declaringClass, Number.class)) {
+            return true;
+        }
+        if (TypeOf.typeOf(declaringClass, InputStream.class)) {
+            return true;
+        }
+        if (TypeOf.typeOf(declaringClass, OutputStream.class)) {
+            return true;
+        }
+        if (TypeOf.typeOf(declaringClass, Reader.class)) {
+            return true;
+        }
+        if (TypeOf.typeOf(declaringClass, Writer.class)) {
+            return true;
+        }
+        if (TypeOf.typeOf(declaringClass, Scanner.class)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    public static final String[] JDK_CLASS_PREFIXES = new String[]{
+            "java.",
+            "jdk.",
+            "javax.",
+            "jakarta.",
+            "javafx.",
+            "com.sun.java.accessibility.",
+            "sun.awt.",
+            "sun.nio.cs.ext.",
+            "sun.text.resources.cldr.",
+            "sun.util.cldr.",
+            "sun.util.resources.cldr.",
+            "com.oracle.deploy.update.",
+            "com.sun.applet2.",
+            "com.sun.deploy.",
+            "sun.net.spi.nameservice.dns.",
+            "com.sun.javaws.",
+            "com.sun.jnlp.",
+            "sun.security.internal.",
+            "com.oracle.jrockit.jfr.",
+            "oracle.jrockit.jfr.",
+            "com.sun.glass.",
+            "com.sun.javafx.",
+            "com.sun.media.",
+            "com.sun.openpisces.",
+            "com.sun.pisces.",
+            "com.sun.prism.",
+            "com.sun.scenario.",
+            "com.sun.webkit.",
+            "netscape.javascript.",
+            "com.sun.net.ssl.",
+            "sun.security.provider.",
+            "sun.security.rsa.",
+            "sun.security.ssl.",
+            "sun.text.resources.",
+            "sun.util.resources.",
+            "com.sun.java.browser.",
+            "netscape.security.",
+            "sun.plugin.",
+            "sun.plugin2.",
+            "com.sun.corba.se.",
+            "com.sun.imageio.",
+            "com.sun.java.",
+            "com.sun.jndi.",
+            "com.sun.org.apache.",
+            "com.sun.rowset.",
+            "com.sun.xml.",
+            "sun.net.idn.",
+            "sun.print.resources.",
+            "sun.rmi.",
+            "sun.text.resources.",
+            "com.oracle.net.",
+            "com.oracle.nio.",
+            "com.oracle.util.",
+            "com.oracle.webservices.",
+            "com.oracle.xmlns.internal.",
+            "com.sun.accessibility.",
+            "com.sun.activation.",
+            "com.sun.awt.",
+            "com.sun.beans.",
+            "com.sun.corba.",
+            "com.sun.demo.",
+            "com.sun.image.",
+            "com.sun.imageio.",
+            "com.sun.istack.",
+            "com.sun.java.",
+            "com.sun.java_cup.",
+            "com.sun.jmx.",
+            "com.sun.jndi.",
+            "com.sun.management.",
+            "com.sun.media.",
+            "com.sun.naming.",
+            "com.sun.net.",
+            "com.sun.nio.",
+            "com.sun.org.",
+            "com.sun.rmi.",
+            "com.sun.rowset.",
+            "com.sun.security.",
+            "com.sun.swing.",
+            "com.sun.tracing.",
+            "com.sun.xml.",
+            "org.ietf.jgss.",
+            "org.jcp.xml.",
+            "org.omg.",
+            "org.w3c.",
+            "org.xml.sax.",
+            "sun.applet.",
+            "sun.audio.",
+            "sun.awt.",
+            "sun.corba.",
+            "sun.dc.",
+            "sun.font.",
+            "sun.instrument.",
+            "sun.invoke.",
+            "sun.io.",
+            "sun.java2d.",
+            "sun.launcher.",
+            "sun.management.",
+            "sun.misc.",
+            "sun.net.",
+            "sun.nio.",
+            "sun.print.",
+            "sun.reflect.",
+            "sun.rmi.",
+            "sun.security.",
+            "sun.swing.",
+            "sun.text.",
+            "sun.jar.",
+            "sun.tracing.",
+            "sun.usagetracker.",
+            "sun.util.",
+            "sun.security.",
+            "com.sun.crypto.provider.",
+            "com.sun.codemodel.",
+            "com.sun.istack.",
+            "com.sun.jarsigner.",
+            "com.sun.javadoc.",
+            "com.sun.jdi.",
+            "com.sun.source.",
+            "com.sun.tools.",
+            "com.sun.xml.",
+            "org.relaxng.datatype.",
+            "sun.jvmstack.",
+            "sun.rmi.",
+            "sun.tools.",
+            "com.sun.nio.zipfs."
+    };
+
+    public static boolean isJdkClas(Class<?> clazz) {
+        return isJdkClassName(clazz.getName());
+    }
+
+    public static boolean isJdkClassName(String className) {
+        for (String prefix : JDK_CLASS_PREFIXES) {
+            if (className.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public static ClassLoader getClassLoader() {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -200,8 +376,15 @@ public class ReflectResolver {
     private static LruMap<Class<?>, Map<Field, Class<?>>> CACHE_GET_FIELDS = new LruMap<>(8192);
 
     public static Map<Field, Class<?>> getFields(Class<?> clazz) {
-        return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_FIELDS : null), clazz, (k) -> getFields(k, null, null, false), LinkedHashMap::new);
+        return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_FIELDS : null), clazz, (k) -> getFields(k, null, field -> !isIgnoreSerializeFields(field), false), LinkedHashMap::new);
     }
+
+    private static LruMap<Class<?>, Map<Field, Class<?>>> CACHE_GET_FORCE_FIELDS = new LruMap<>(8192);
+
+    public static Map<Field, Class<?>> getForceFields(Class<?> clazz) {
+        return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_FORCE_FIELDS : null), clazz, (k) -> getFields(k, null, null, false), LinkedHashMap::new);
+    }
+
 
     public static Map<Field, Class<?>> getFields(Class<?> clazz,
                                                  Predicate<Field> fieldFilter

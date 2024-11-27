@@ -63,13 +63,13 @@
             <optional>true</optional>
         </dependency>
 
-        <dependency>
-            <groupId>com.gbase</groupId>
-            <artifactId>gbase-connector-java</artifactId>
-            <version>8.3.81.53</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/gbase-connector-java-8.3.81.53-build55.2.1-bin.jar</systemPath>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.gbase</groupId>-->
+        <!--            <artifactId>gbase-connector-java</artifactId>-->
+        <!--            <version>8.3.81.53</version>-->
+        <!--            <scope>system</scope>-->
+        <!--            <systemPath>${pom.basedir}/lib/gbase-connector-java-8.3.81.53-build55.2.1-bin.jar</systemPath>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>org.postgresql</groupId>
