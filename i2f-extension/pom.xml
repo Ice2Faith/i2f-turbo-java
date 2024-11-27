@@ -68,6 +68,7 @@
         <module>i2f-extension-ognl</module>
         <module>i2f-extension-elasticsearch</module>
         <module>i2f-extension-canal</module>
+        <module>i2f-extension-reverse-engineer-generator</module>
     </modules>
 
 

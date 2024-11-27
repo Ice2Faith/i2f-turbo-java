@@ -185,6 +185,18 @@ public class ReflectResolver {
         return ret;
     }
 
+    public static Map<Field, Class<?>> getFieldsWithAnyAnnotations(Class<?> clazz, Class<? extends Annotation>... anns) {
+        return ReflectResolver.getFields(clazz, (field) -> {
+            for (Class<? extends Annotation> annType : anns) {
+                Annotation ann = ReflectResolver.getAnnotation(field, annType);
+                if (ann != null) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
     private static LruMap<Class<?>, Map<Field, Class<?>>> CACHE_GET_FIELDS = new LruMap<>(8192);
 
     public static Map<Field, Class<?>> getFields(Class<?> clazz) {
@@ -281,6 +293,18 @@ public class ReflectResolver {
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_METHODS : null), clazz, (k) -> {
             return getMethods(k, null, null, false);
         }, LinkedHashMap::new);
+    }
+
+    public static Map<Method, Class<?>> getMethodsWithAnyAnnotations(Class<?> clazz, Class<? extends Annotation>... anns) {
+        return ReflectResolver.getMethods(clazz, (method) -> {
+            for (Class<? extends Annotation> annType : anns) {
+                Annotation ann = ReflectResolver.getAnnotation(method, annType);
+                if (ann != null) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     public static Map<Method, Class<?>> getMethods(Class<?> clazz,
