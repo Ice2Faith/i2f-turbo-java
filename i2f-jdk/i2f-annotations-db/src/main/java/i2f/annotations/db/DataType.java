@@ -30,4 +30,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface DataType {
     String value();
+
+    int precision() default 0;
+
+    int scale() default 0;
 }

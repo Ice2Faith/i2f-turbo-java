@@ -9,10 +9,10 @@ import i2f.database.metadata.data.TableMeta;
 import i2f.database.metadata.impl.mysql.MySqlType;
 import i2f.database.metadata.impl.oracle.OracleType;
 import i2f.database.metadata.impl.postgresql.PostgreSqlType;
+import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
-import i2f.jdbc.data.StdType;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -266,19 +266,19 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
 
         parseMoreTableInfo(conn, ret);
 
-        ret.getColumns().sort((v1, v2) -> Integer.compare(v1.getIndex(), v2.getIndex()));
+        ret.getColumns().sort(ColumnMeta::compare);
 
         if (ret.getPrimary() != null) {
-            ret.getPrimary().getColumns().sort((v1, v2) -> Integer.compare(v1.getIndex(), v2.getIndex()));
+            ret.getPrimary().getColumns().sort(IndexColumnMeta::compare);
         }
         if (ret.getUniqueIndexes() != null) {
             for (IndexMeta idx : ret.getUniqueIndexes()) {
-                idx.getColumns().sort((v1, v2) -> Integer.compare(v1.getIndex(), v2.getIndex()));
+                idx.getColumns().sort(IndexColumnMeta::compare);
             }
         }
         if (ret.getIndexes() != null) {
             for (IndexMeta idx : ret.getIndexes()) {
-                idx.getColumns().sort((v1, v2) -> Integer.compare(v1.getIndex(), v2.getIndex()));
+                idx.getColumns().sort(IndexColumnMeta::compare);
             }
         }
 

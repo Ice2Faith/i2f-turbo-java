@@ -32,4 +32,6 @@ public @interface Unique {
     String value() default "";
 
     int order() default -1;
+
+    String type() default "";
 }

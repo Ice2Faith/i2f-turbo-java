@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>api doc</title>
+</head>
+<body>
+<h1>api doc</h1>
+    #foreach(${api} in ${apis})
+    <hr/>
+    <hr/>
+    <h2>comment:   ${_vm.ifnull(${api.comment},"")}</h2>
+    <h3>java: ${_vm.ifnull(${api.javaMethod},"")}</h3>
+    <h3>url:  ${_vm.ifnull(${api.urls},"")}</h3>
+    <h3>method:  ${_vm.ifnull(${api.methods},"")}</h3>
+    <h3>consumers: ${_vm.ifnull(${api.consumers},"")}</h3>
+    <h3>products: ${_vm.ifnull(${api.products},"")}</h3>
+    <h3>remark: ${_vm.ifnull(${api.remark},"")}</h3>
+    <h3>request:</h3>
+    <table border="1" cellspacing="0" style="width:100%;">
+        <tr style="background-color: #ddd;">
+            <th style="width: 5%;">
+                number
+            </th>
+            <th style="width: 20%;">
+                parent
+            </th>
+            <th style="width: 20%;">
+                name
+            </th>
+            <th style="width: 10%;">
+                restrict
+            </th>
+            <th style="width: 10%;">
+                type
+            </th>
+            <th style="width: 5%;">
+                width
+            </th>
+            <th style="width: 20%;">
+                comment
+            </th>
+            <th style="width: 10%;">
+                remark
+            </th>
+        </tr>
+        #foreach(${line} in ${api.args})
+            <tr>
+                <td style="background-color: #eee;">
+                    $velocityCount
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.parent},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.name},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.restrict},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.typeName},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.width},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.comment},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.remark},"")}
+                </td>
+            </tr>
+        #end
+    </table>
+    <h3>response:</h3>
+    <table border="1" cellspacing="0" style="width:100%;">
+        <tr style="background-color: #ddd;">
+            <th style="width: 5%;">
+                number
+            </th>
+            <th style="width: 20%;">
+                parent
+            </th>
+            <th style="width: 20%;">
+                name
+            </th>
+            <th style="width: 10%;">
+                restrict
+            </th>
+            <th style="width: 10%;">
+                type
+            </th>
+            <th style="width: 5%;">
+                width
+            </th>
+            <th style="width: 20%;">
+                comment
+            </th>
+            <th style="width: 10%;">
+                remark
+            </th>
+        </tr>
+        #foreach(${line} in ${api.returns})
+            <tr>
+                <td style="background-color: #eee;">
+                    $velocityCount
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.parent},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.name},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.restrict},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.typeName},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.width},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.comment},"")}
+                </td>
+                <td>
+                    ${_vm.ifnull(${line.remark},"")}
+                </td>
+            </tr>
+        #end
+    </table>
+    #end
+
+
+</body>
+</html>

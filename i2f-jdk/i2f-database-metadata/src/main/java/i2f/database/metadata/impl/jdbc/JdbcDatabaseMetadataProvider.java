@@ -8,10 +8,10 @@ import i2f.database.metadata.impl.base.BaseDatabaseMetadataProvider;
 import i2f.database.metadata.impl.mysql.MySqlType;
 import i2f.database.metadata.impl.oracle.OracleType;
 import i2f.database.metadata.impl.postgresql.PostgreSqlType;
+import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
-import i2f.jdbc.data.StdType;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

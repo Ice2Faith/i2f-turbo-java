@@ -9,8 +9,10 @@ import i2f.jdbc.template.JdbcTemplate;
 import i2f.page.ApiPage;
 import i2f.page.Page;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -79,9 +81,27 @@ public class BqlTemplate extends JdbcTemplate {
         );
     }
 
+    public <T> int updateByPk(T update) throws SQLException {
+        return update(Bql.$bean()
+                .$beanUpdateByPk(update)
+        );
+    }
+
     public <T> int delete(T condition) throws SQLException {
         return update(Bql.$bean()
                 .$beanDelete(condition)
+        );
+    }
+
+    public <T, V extends Serializable> int deleteByPk(Class<T> beanClass, V... pkValues) throws SQLException {
+        return update(Bql.$bean()
+                .$beanDeleteByPk(beanClass, pkValues)
+        );
+    }
+
+    public <T, V extends Serializable> int deleteByPk(Class<T> beanClass, Collection<V> pkValues) throws SQLException {
+        return update(Bql.$bean()
+                .$beanDeleteByPk(beanClass, pkValues)
         );
     }
 
@@ -93,6 +113,9 @@ public class BqlTemplate extends JdbcTemplate {
         });
     }
 
+    public <T> T findByPk(Class<T> beanClass, Serializable pkValue) throws SQLException {
+        return find(Bql.$bean().$beanQueryByPk(beanClass, pkValue), beanClass);
+    }
 
     public <T> T find(T condition) throws SQLException {
         return find(Bql.$bean().$beanQuery(condition), (Class<T>) condition.getClass());
@@ -109,6 +132,13 @@ public class BqlTemplate extends JdbcTemplate {
         });
     }
 
+    public <T, V extends Serializable> List<T> listByPk(Class<T> beanClass, V... pkValues) throws SQLException {
+        return list(Bql.$bean().$beanQueryByPk(beanClass, pkValues), beanClass);
+    }
+
+    public <T, V extends Serializable> List<T> listByPk(Class<T> beanClass, Collection<V> pkValues) throws SQLException {
+        return list(Bql.$bean().$beanQueryByPk(beanClass, pkValues), beanClass);
+    }
 
     public <T> List<T> list(T condition) throws SQLException {
         return list(Bql.$bean().$beanQuery(condition), (Class<T>) condition.getClass());
@@ -149,11 +179,23 @@ public class BqlTemplate extends JdbcTemplate {
         return find(bql, (Function<String, String>) null);
     }
 
+    public Map<String, Object> findByPkMap(Class<?> beanClass, Serializable pkValue) throws SQLException {
+        return find(Bql.$bean().$beanQueryByPk(beanClass, pkValue), (Function<String, String>) null);
+    }
+
     public Map<String, Object> find(Bql<?> bql, Function<String, String> columnNameMapper) throws SQLException {
         return contextActionDelegate(bql.$$(), (conn, sql) -> {
             Map<String, Object> ret = JdbcResolver.find(conn, sql, columnNameMapper);
             return ret;
         });
+    }
+
+    public <V extends Serializable> List<Map<String, Object>> listByPkMap(Class<?> beanClass, V... pkValue) throws SQLException {
+        return list(Bql.$bean().$beanQueryByPk(beanClass, pkValue), -1, null);
+    }
+
+    public <V extends Serializable> List<Map<String, Object>> listByPkMap(Class<?> beanClass, Collection<V> pkValue) throws SQLException {
+        return list(Bql.$bean().$beanQueryByPk(beanClass, pkValue), -1, null);
     }
 
     public List<Map<String, Object>> list(Bql<?> bql) throws SQLException {

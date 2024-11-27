@@ -27,6 +27,7 @@
             <artifactId>i2f-annotations-db</artifactId>
         </dependency>
 
+
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-lambda</artifactId>
@@ -55,6 +56,11 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-text</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-database-metadata-bean</artifactId>
         </dependency>
     </dependencies>
 

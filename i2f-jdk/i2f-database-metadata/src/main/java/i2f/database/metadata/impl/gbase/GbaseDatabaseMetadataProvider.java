@@ -2,7 +2,7 @@ package i2f.database.metadata.impl.gbase;
 
 import i2f.database.metadata.data.ColumnMeta;
 import i2f.database.metadata.impl.mysql.MysqlDatabaseMetadataProvider;
-import i2f.jdbc.data.StdType;
+import i2f.database.metadata.std.StdType;
 
 import java.util.Map;
 
