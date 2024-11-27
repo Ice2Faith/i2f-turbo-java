@@ -20,6 +20,7 @@
         <module>i2f-spring-security</module>
         <module>i2f-spring-redis</module>
         <module>i2f-spring-authentication</module>
+        <module>i2f-spring-mvc-metadata</module>
     </modules>
 
     <properties>
