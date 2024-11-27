@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author ltb
@@ -19,7 +20,7 @@ public class ErLine {
 
     public static ErLine parse(ErEntity entity, ErAttribute attr) {
         ErLine ret = new ErLine();
-        ret.id = CodeUtil.makeUUID();
+        ret.id = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
         ret.formId = entity.getId();
         ret.toId = attr.getId();
         ret.text = "";

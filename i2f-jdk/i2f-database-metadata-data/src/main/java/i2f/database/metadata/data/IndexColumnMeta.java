@@ -14,4 +14,8 @@ public class IndexColumnMeta {
     protected boolean isDesc;
     protected String type;
 
+    public static int compare(IndexColumnMeta o1, IndexColumnMeta o2) {
+        return Integer.compare(o1.getIndex(), o2.getIndex());
+    }
+
 }

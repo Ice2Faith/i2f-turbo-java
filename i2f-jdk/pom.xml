@@ -124,6 +124,8 @@
         <module>i2f-authentication</module>
         <module>i2f-launcher</module>
         <module>i2f-database-metadata</module>
+        <module>i2f-database-metadata-bean</module>
+        <module>i2f-database-metadata-data</module>
 
 
     </modules>

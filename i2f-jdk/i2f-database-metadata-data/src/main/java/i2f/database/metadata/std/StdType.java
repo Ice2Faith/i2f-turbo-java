@@ -1,4 +1,4 @@
-package i2f.jdbc.data;
+package i2f.database.metadata.std;
 
 import java.math.BigDecimal;
 import java.sql.JDBCType;
@@ -89,5 +89,64 @@ public enum StdType {
 
     public JDBCType looseJdbcType() {
         return looseJdbcType;
+    }
+
+    public static StdType detectType(String type, String javaType) {
+        if (type != null) {
+            type = type.toLowerCase();
+            for (StdType value : StdType.values()) {
+                if (type.equals(value.text)) {
+                    return value;
+                }
+            }
+            for (StdType value : StdType.values()) {
+                if (type.startsWith(value.text)) {
+                    return value;
+                }
+            }
+            for (StdType value : StdType.values()) {
+                if (type.equalsIgnoreCase(value.jdbcType.getName())) {
+                    return value;
+                }
+            }
+            for (StdType value : StdType.values()) {
+                if (type.startsWith(value.jdbcType.getName().toLowerCase())) {
+                    return value;
+                }
+            }
+            for (StdType value : StdType.values()) {
+                if (type.equalsIgnoreCase(value.looseJdbcType.getName())) {
+                    return value;
+                }
+            }
+            for (StdType value : StdType.values()) {
+                if (type.startsWith(value.looseJdbcType.getName().toLowerCase())) {
+                    return value;
+                }
+            }
+        }
+        if (javaType != null) {
+            for (StdType value : StdType.values()) {
+                if (javaType.equals(value.javaType.getSimpleName())) {
+                    return value;
+                }
+            }
+            for (StdType value : StdType.values()) {
+                if (value.javaType.getSimpleName().endsWith(javaType)) {
+                    return value;
+                }
+            }
+            for (StdType value : StdType.values()) {
+                if (javaType.equals(value.looseJavaType.getSimpleName())) {
+                    return value;
+                }
+            }
+            for (StdType value : StdType.values()) {
+                if (value.looseJavaType.getSimpleName().endsWith(javaType)) {
+                    return value;
+                }
+            }
+        }
+        return null;
     }
 }

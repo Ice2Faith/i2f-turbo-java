@@ -1,6 +1,9 @@
 package i2f.reverse.engineer.generator.er.drawio;
 
 
+import i2f.database.metadata.data.ColumnMeta;
+import i2f.database.metadata.data.TableMeta;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -22,10 +25,10 @@ public class DrawioAdapter {
         List<DrawioErElem> elems = new LinkedList<>();
         for (TableMeta table : tables) {
             int x = 0;
-            List<TableColumnMeta> columns = table.getColumns();
+            List<ColumnMeta> columns = table.getColumns();
             DrawioErElem entity = new DrawioErElem();
             entity.setId(getId());
-            entity.setText(table.getRemark());
+            entity.setText(table.getComment());
             entity.setType("entity");
             entity.setX(x);
             entity.setY(y);
@@ -34,10 +37,10 @@ public class DrawioAdapter {
             elems.add(entity);
 
             y += 200;
-            for (TableColumnMeta column : columns) {
+            for (ColumnMeta column : columns) {
                 DrawioErElem attribute = new DrawioErElem();
                 attribute.setId(getId());
-                attribute.setText(column.getRemark());
+                attribute.setText(column.getComment());
                 attribute.setType("attribute");
                 attribute.setX(x);
                 attribute.setY(y);

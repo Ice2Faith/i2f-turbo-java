@@ -1,6 +1,6 @@
 package i2f.database.metadata.impl.gbase;
 
-import i2f.jdbc.data.StdType;
+import i2f.database.metadata.std.StdType;
 
 /**
  * @author Ice2Faith

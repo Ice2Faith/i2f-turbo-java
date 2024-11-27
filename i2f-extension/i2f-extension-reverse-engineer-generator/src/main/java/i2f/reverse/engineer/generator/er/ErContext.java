@@ -1,5 +1,6 @@
 package i2f.reverse.engineer.generator.er;
 
+import i2f.database.metadata.data.TableMeta;
 import lombok.Data;
 
 import java.util.ArrayList;

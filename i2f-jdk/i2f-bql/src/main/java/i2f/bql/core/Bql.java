@@ -1006,7 +1006,33 @@ public class Bql<H extends Bql<H>> {
                 for (Map.Entry<String, Object> entry : whereMap.entrySet()) {
                     String col = entry.getKey();
                     Object val = entry.getValue();
-                    ret.$eq(col, val);
+                    if (val instanceof Collection) {
+                        Collection<?> c = (Collection<?>) val;
+                        ret.$in(col, c);
+                    }
+                    if (val instanceof Iterable) {
+                        List<Object> list = new ArrayList<>();
+                        Iterable<?> iter = (Iterable<?>) val;
+                        for (Object o : iter) {
+                            list.add(o);
+                        }
+                        ret.$in(col, list);
+                    }
+                    if (val != null && val.getClass().isArray()) {
+                        int len = Array.getLength(val);
+                        if (len == 1) {
+                            ret.$eq(col, Array.get(val, 0));
+                        } else {
+                            List<Object> list = new ArrayList<>();
+                            for (int i = 0; i < len; i++) {
+                                list.add(Array.get(val, i));
+                            }
+                            ret.$in(col, list);
+                        }
+                    } else {
+                        ret.$eq(col, val);
+                    }
+
                 }
             }
             if (whereIsNullCols != null) {

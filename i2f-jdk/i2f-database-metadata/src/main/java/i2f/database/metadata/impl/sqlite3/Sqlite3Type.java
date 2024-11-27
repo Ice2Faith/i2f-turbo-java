@@ -1,6 +1,6 @@
 package i2f.database.metadata.impl.sqlite3;
 
-import i2f.jdbc.data.StdType;
+import i2f.database.metadata.std.StdType;
 
 /**
  * @author Ice2Faith

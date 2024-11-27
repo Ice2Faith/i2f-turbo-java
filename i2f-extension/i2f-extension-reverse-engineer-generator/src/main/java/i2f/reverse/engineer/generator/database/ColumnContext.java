@@ -1,5 +1,7 @@
 package i2f.reverse.engineer.generator.database;
 
+import i2f.database.metadata.data.ColumnMeta;
+import i2f.extension.velocity.GeneratorTool;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -27,15 +29,15 @@ public class ColumnContext {
 
     private String isPrimaryKey = "NO";
 
-    public static ColumnContext parse(TableColumnMeta meta) {
+    public static ColumnContext parse(ColumnMeta meta) {
         ColumnContext ret = new ColumnContext();
         ret.name = meta.getName();
-        ret.comment = meta.getRemark();
+        ret.comment = meta.getComment();
 
         ret.camelName = GeneratorTool.toCamel(GeneratorTool.lower(ret.name));
         ret.pascalName = GeneratorTool.toPascal(GeneratorTool.lower(ret.name));
 
-        ret.javaType = meta.getJavaTypeString();
+        ret.javaType = meta.getJavaType();
 
         if (ret.javaType != null) {
             if (ret.javaType.startsWith("java.lang.")) {
@@ -45,16 +47,16 @@ public class ColumnContext {
                 ret.javaType = Date.class.getSimpleName();
             }
         }
-        ret.jdbcType = meta.getTypeName();
+        ret.jdbcType = meta.getType();
 
-        ret.isAutoincrement = meta.getIsAutoincrement();
-        ret.isPrimaryKey = meta.getIsPrimaryKey();
+        ret.isAutoincrement = meta.isAutoIncrement();
+        ret.isPrimaryKey = meta.isAutoIncrement();
         return ret;
     }
 
-    public static List<ColumnContext> parse(List<TableColumnMeta> metas) {
+    public static List<ColumnContext> parse(List<ColumnMeta> metas) {
         List<ColumnContext> ret = new ArrayList<>();
-        for (TableColumnMeta item : metas) {
+        for (ColumnMeta item : metas) {
             ColumnContext ctx = parse(item);
             ret.add(ctx);
         }

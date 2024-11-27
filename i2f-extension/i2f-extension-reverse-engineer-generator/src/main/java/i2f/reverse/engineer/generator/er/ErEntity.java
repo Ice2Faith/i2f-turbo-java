@@ -1,9 +1,11 @@
 package i2f.reverse.engineer.generator.er;
 
+import i2f.database.metadata.data.TableMeta;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author ltb
@@ -23,10 +25,10 @@ public class ErEntity {
 
     public static ErEntity parse(TableMeta meta) {
         ErEntity ret = new ErEntity();
-        ret.id = CodeUtil.makeUUID();
+        ret.id = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
         ret.width = 160;
         ret.height = 80;
-        ret.text = meta.getRemark();
+        ret.text = meta.getComment();
         ret.attrs = ErAttribute.parse(meta.getColumns());
         ErLine.parse(ret);
 
