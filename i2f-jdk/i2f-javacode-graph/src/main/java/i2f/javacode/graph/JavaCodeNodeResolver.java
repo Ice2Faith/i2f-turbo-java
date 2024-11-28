@@ -152,12 +152,18 @@ public class JavaCodeNodeResolver {
             return node;
         }
 
-        if (jdkClass) {
+
+        Type genericSuperclass = clazz.getGenericSuperclass();
+        Type[] genericInterfaces = clazz.getGenericInterfaces();
+
+        boolean hasGenericSuperClass = TypeOf.isGenericType(genericSuperclass);
+        boolean hasGenericInterfaces = TypeOf.hasGenericType(genericInterfaces);
+
+        if (jdkClass && !(hasGenericSuperClass || hasGenericInterfaces)) {
             return node;
         }
 
-        Type genericSuperclass = clazz.getGenericSuperclass();
-        if (genericSuperclass != null) {
+        if (hasGenericSuperClass) {
             JavaCodeNode nextNode = parse(genericSuperclass, JavaNodeType.SUPER);
             if (nextNode != null) {
                 node.setSuperClass(nextNode);
@@ -172,8 +178,8 @@ public class JavaCodeNodeResolver {
             }
         }
 
-        Type[] genericInterfaces = clazz.getGenericInterfaces();
-        if (genericInterfaces != null && genericInterfaces.length > 0) {
+
+        if (hasGenericInterfaces) {
             for (Type anInterface : genericInterfaces) {
                 JavaCodeNode nextNode = parse(anInterface, JavaNodeType.INTERFACE);
                 if (nextNode != null) {
@@ -213,7 +219,7 @@ public class JavaCodeNodeResolver {
         nodeMap.put(node.getSignature(), node);
 
         Type genericType = field.getGenericType();
-        if (genericType != null) {
+        if (TypeOf.isGenericType(genericType)) {
             JavaCodeNode nextNode = parse(genericType, JavaNodeType.TYPE);
             if (nextNode != null) {
                 node.setRealType(nextNode);
@@ -271,7 +277,7 @@ public class JavaCodeNodeResolver {
         }
 
         Type[] genericParameterTypes = method.getGenericParameterTypes();
-        if (genericParameterTypes != null && genericParameterTypes.length > 0) {
+        if (TypeOf.hasGenericType(genericParameterTypes)) {
             for (Type parameter : genericParameterTypes) {
                 JavaCodeNode nextNode = parse(parameter, JavaNodeType.PARAMETER);
                 if (nextNode != null) {
@@ -301,7 +307,7 @@ public class JavaCodeNodeResolver {
         }
 
         Type genericReturnType = method.getGenericReturnType();
-        if (genericReturnType != null) {
+        if (TypeOf.isGenericType(genericReturnType)) {
             JavaCodeNode nextNode = parse(genericReturnType, JavaNodeType.RETURN);
             if (nextNode != null) {
                 node.setReturnType(nextNode);
@@ -347,7 +353,7 @@ public class JavaCodeNodeResolver {
         }
 
         Type[] genericParameterTypes = constructor.getGenericParameterTypes();
-        if (genericParameterTypes != null && genericParameterTypes.length > 0) {
+        if (TypeOf.hasGenericType(genericParameterTypes)) {
             for (Type parameter : genericParameterTypes) {
                 JavaCodeNode nextNode = parse(parameter, JavaNodeType.PARAMETER);
                 if (nextNode != null) {

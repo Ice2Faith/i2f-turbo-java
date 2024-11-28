@@ -1,5 +1,6 @@
 package i2f.typeof;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
@@ -96,6 +97,28 @@ public class TypeOf {
         }
 
         return type.equals(clazz) || type.isAssignableFrom(clazz);
+    }
+
+    public static boolean isGenericType(Type type) {
+        if (type == null) {
+            return false;
+        }
+        if (Class.class.equals(type)) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean hasGenericType(Type[] arr) {
+        if (arr == null) {
+            return false;
+        }
+        for (Type type : arr) {
+            if (isGenericType(type)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean typeOf(Class<?> clazz, Class<?> type) {
