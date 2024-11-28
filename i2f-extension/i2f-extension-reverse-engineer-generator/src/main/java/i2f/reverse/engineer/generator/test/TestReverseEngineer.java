@@ -27,7 +27,7 @@ public class TestReverseEngineer {
         Connection conn = JdbcResolver.getConnection("com.mysql.cj.jdbc.Driver",
                 "jdbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai",
                 "root",
-                "ltb12315");
+                "xxx123456");
 
         DatabaseMetadataProvider provider = DatabaseMetadataProvider.findProvider(conn);
 
