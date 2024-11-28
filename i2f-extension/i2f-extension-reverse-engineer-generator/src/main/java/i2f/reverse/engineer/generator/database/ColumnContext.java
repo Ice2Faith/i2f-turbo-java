@@ -25,9 +25,9 @@ public class ColumnContext {
     private String javaType;
     private String jdbcType;
 
-    private String isAutoincrement = "NO";
+    private boolean isAutoincrement = false;
 
-    private String isPrimaryKey = "NO";
+    private boolean isPrimaryKey = false;
 
     public static ColumnContext parse(ColumnMeta meta) {
         ColumnContext ret = new ColumnContext();
