@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class TestJavaCode {
     public static void main(String[] args) {
-        List<JavaCodeNode> nodes = JavaCodeNodeResolver.parse(Arrays.asList(JavaCodeNodeResolver.class, JavaCodeRelationEchartsGraphConverter.class, JavaCodeRelationGraphConverter.class));
+        List<JavaCodeNode> nodes = new JavaCodeNodeResolver().withDefault().parse(Arrays.asList(JavaCodeNodeResolver.class, JavaCodeRelationEchartsGraphConverter.class, JavaCodeRelationGraphConverter.class));
 
         System.out.println("====================");
         JavaCodeRelationGraph map = JavaCodeRelationGraphConverter.convert(nodes);
