@@ -1,6 +1,7 @@
 package i2f.extension.velocity;
 
 import i2f.extension.velocity.directives.common.ForiDirective;
+import i2f.extension.velocity.directives.common.ReplaceAllDirective;
 import i2f.extension.velocity.directives.common.RichForDirective;
 import i2f.extension.velocity.directives.common.TrimDirective;
 import i2f.extension.velocity.directives.sql.SqlSetDirective;
@@ -141,6 +142,7 @@ public class VelocityGenerator {
             fileName = file.getName();
         }
         engine.loadDirective(TrimDirective.class.getName());
+        engine.loadDirective(ReplaceAllDirective.class.getName());
         engine.loadDirective(SqlWhereDirective.class.getName());
         engine.loadDirective(SqlSetDirective.class.getName());
         engine.loadDirective(RichForDirective.class.getName());

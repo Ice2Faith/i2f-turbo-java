@@ -23,12 +23,24 @@ public class GeneratorTool {
         return dolar;
     }
 
+    public String newline() {
+        return "\n";
+    }
+
     public static boolean isnull(Object obj) {
         return obj == null;
     }
 
+    public static boolean notNull(Object obj) {
+        return !isnull(obj);
+    }
+
     public static boolean isEmpty(String str) {
         return str == null || "".equals(str);
+    }
+
+    public static boolean notEmpty(String str) {
+        return !isEmpty(str);
     }
 
     public static boolean isArray(Object obj) {
