@@ -5,6 +5,7 @@ import i2f.typeof.token.data.TypeNode;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 
 /**
@@ -131,6 +132,13 @@ public abstract class TypeToken<T> {
             node.setArgs(new ArrayList<>());
             return node;
         }
+        if (genType instanceof WildcardType) {
+            WildcardType type = (WildcardType) genType;
+            TypeNode node = new TypeNode();
+            node.setType((Class<?>) Object.class);
+            node.setArgs(new ArrayList<>());
+            return node;
+        }
         if (genType instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType) genType;
 
@@ -142,6 +150,11 @@ public abstract class TypeToken<T> {
             Type[] actualTypeArguments = ptype.getActualTypeArguments();
             for (Type item : actualTypeArguments) {
                 TypeNode next = getFullGenericType(item);
+                if (next == null) {
+                    next = new TypeNode();
+                    next.setType((Class<?>) Object.class);
+                    next.setArgs(new ArrayList<>());
+                }
                 root.getArgs().add(next);
             }
 

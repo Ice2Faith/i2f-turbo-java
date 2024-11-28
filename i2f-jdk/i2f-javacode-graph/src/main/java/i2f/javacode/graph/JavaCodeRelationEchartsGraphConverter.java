@@ -1,13 +1,13 @@
-package i2f.relation.javacode;
+package i2f.javacode.graph;
 
-import i2f.relation.javacode.data.JavaCodeMeta;
-import i2f.relation.javacode.data.JavaCodeRelation;
-import i2f.relation.javacode.data.JavaCodeRelationMap;
-import i2f.relation.javacode.data.JavaNodeType;
-import i2f.relation.javacode.data.echcarts.EchartsMapCategories;
-import i2f.relation.javacode.data.echcarts.EchartsMapLinks;
-import i2f.relation.javacode.data.echcarts.EchartsMapNodes;
-import i2f.relation.javacode.data.echcarts.JavaCodeEchartsMap;
+import i2f.javacode.graph.data.JavaCodeMeta;
+import i2f.javacode.graph.data.JavaCodeRelation;
+import i2f.javacode.graph.data.JavaCodeRelationGraph;
+import i2f.javacode.graph.data.JavaNodeType;
+import i2f.javacode.graph.data.echcarts.EchartsGraphCategories;
+import i2f.javacode.graph.data.echcarts.EchartsGraphLinks;
+import i2f.javacode.graph.data.echcarts.EchartsGraphNodes;
+import i2f.javacode.graph.data.echcarts.JavaCodeEchartsGraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,15 +19,15 @@ import java.util.Map;
  * @date 2024/11/27 21:30
  * @desc
  */
-public class JavaCodeRelationEchartsMapConverter {
-    public static JavaCodeEchartsMap convert(JavaCodeRelationMap relationMap) {
-        JavaCodeEchartsMap ret = new JavaCodeEchartsMap();
+public class JavaCodeRelationEchartsGraphConverter {
+    public static JavaCodeEchartsGraph convert(JavaCodeRelationGraph relationMap) {
+        JavaCodeEchartsGraph ret = new JavaCodeEchartsGraph();
         int index = 0;
-        List<EchartsMapCategories> categories = new ArrayList<>();
+        List<EchartsGraphCategories> categories = new ArrayList<>();
         Map<JavaNodeType, Integer> categoriesIndexMap = new HashMap<>();
         index = 0;
         for (JavaNodeType item : JavaNodeType.values()) {
-            EchartsMapCategories vo = new EchartsMapCategories();
+            EchartsGraphCategories vo = new EchartsGraphCategories();
             vo.setName(item.name());
             categories.add(vo);
             categoriesIndexMap.put(item, index);
@@ -35,11 +35,11 @@ public class JavaCodeRelationEchartsMapConverter {
         }
 
         Map<String, Integer> nodeIndexMap = new HashMap<>();
-        List<EchartsMapNodes> nodes = new ArrayList<>();
+        List<EchartsGraphNodes> nodes = new ArrayList<>();
         index = 0;
         for (Map.Entry<String, JavaCodeMeta> entry : relationMap.getNodeMap().entrySet()) {
             JavaCodeMeta meta = entry.getValue();
-            EchartsMapNodes vo = new EchartsMapNodes();
+            EchartsGraphNodes vo = new EchartsGraphNodes();
             vo.setCategory(categoriesIndexMap.get(meta.getNodeType()));
             vo.setId(entry.getKey());
             vo.setName(meta.getName());
@@ -52,9 +52,9 @@ public class JavaCodeRelationEchartsMapConverter {
             index++;
         }
 
-        List<EchartsMapLinks> links = new ArrayList<>();
+        List<EchartsGraphLinks> links = new ArrayList<>();
         for (JavaCodeRelation relation : relationMap.getRelations()) {
-            EchartsMapLinks vo = new EchartsMapLinks();
+            EchartsGraphLinks vo = new EchartsGraphLinks();
             vo.setSource(nodeIndexMap.get(relation.getStartSignature()));
             vo.setTarget(nodeIndexMap.get(relation.getEndSignature()));
             vo.setValue(relation.getRelationType().name());

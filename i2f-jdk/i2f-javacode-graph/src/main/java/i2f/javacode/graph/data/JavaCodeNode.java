@@ -1,4 +1,4 @@
-package i2f.relation.javacode.data;
+package i2f.javacode.graph.data;
 
 import lombok.Data;
 
@@ -22,4 +22,5 @@ public class JavaCodeNode extends JavaCodeMeta {
     protected List<JavaCodeNode> parameters = new ArrayList<>();
     protected JavaCodeNode returnType;
     protected List<JavaCodeNode> exceptions = new ArrayList<>();
+    protected List<JavaCodeNode> genericParameters = new ArrayList<>();
 }

@@ -1,14 +1,17 @@
-package i2f.relation.javacode;
+package i2f.javacode.graph;
 
+import i2f.javacode.graph.data.JavaCodeNode;
+import i2f.javacode.graph.data.JavaNodeType;
 import i2f.reflect.ReflectResolver;
-import i2f.relation.javacode.data.JavaCodeNode;
-import i2f.relation.javacode.data.JavaNodeType;
 import i2f.typeof.TypeOf;
+import i2f.typeof.token.TypeToken;
+import i2f.typeof.token.data.TypeNode;
 
 import java.lang.annotation.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -32,13 +35,64 @@ public class JavaCodeNodeResolver {
         return ret;
     }
 
+    public JavaCodeNode parse(Type genType, JavaNodeType type) {
+        if (genType == null) {
+            return null;
+        }
+        TypeNode fullType = TypeToken.getFullGenericType(genType);
+        return parse(fullType, null);
+    }
+
+    public JavaCodeNode parse(TypeNode typeNode, JavaNodeType type) {
+        if (typeNode == null) {
+            return null;
+        }
+        String signature = typeNode.fullName();
+        if (nodeMap.containsKey(signature)) {
+            return nodeMap.get(signature);
+        }
+        if (type == null) {
+            if (typeNode.getArgs() == null || typeNode.getArgs().isEmpty()) {
+                type = JavaNodeType.CLASS;
+            } else {
+                type = JavaNodeType.GENERIC;
+            }
+        }
+
+        JavaCodeNode node = new JavaCodeNode();
+        node.setNodeType(type);
+        node.setSignature(signature);
+        node.setName(typeNode.simpleName());
+        node.setType(typeNode.getType());
+        Class<?> realType = typeNode.getType();
+        if (realType != null) {
+            JavaCodeNode nextNode = parse(realType, JavaNodeType.CLASS);
+            if (nextNode != null) {
+                node.setRealType(nextNode);
+            }
+        }
+        nodeMap.put(node.getSignature(), node);
+
+        List<TypeNode> args = typeNode.getArgs();
+        if (args != null) {
+            for (TypeNode arg : args) {
+                JavaCodeNode nextNode = parse(arg, null);
+                if (nextNode != null) {
+                    node.getGenericParameters().add(nextNode);
+                }
+            }
+        }
+
+        return node;
+    }
+
     public JavaCodeNode parse(Class<?> clazz, JavaNodeType type) {
         if (clazz == null) {
             return null;
         }
         String signature = clazz.getName();
         if (nodeMap.containsKey(signature)) {
-            return null;
+            return nodeMap.get(signature);
         }
         if (type == null) {
             type = JavaNodeType.CLASS;
@@ -102,19 +156,38 @@ public class JavaCodeNodeResolver {
             return node;
         }
 
-        Class<?> superclass = clazz.getSuperclass();
-        if (superclass != null) {
-            JavaCodeNode nextNode = parse(superclass, JavaNodeType.SUPER);
+        Type genericSuperclass = clazz.getGenericSuperclass();
+        if (genericSuperclass != null) {
+            JavaCodeNode nextNode = parse(genericSuperclass, JavaNodeType.SUPER);
             if (nextNode != null) {
                 node.setSuperClass(nextNode);
             }
+        } else {
+            Class<?> superclass = clazz.getSuperclass();
+            if (superclass != null) {
+                JavaCodeNode nextNode = parse(superclass, JavaNodeType.SUPER);
+                if (nextNode != null) {
+                    node.setSuperClass(nextNode);
+                }
+            }
         }
-        Class<?>[] interfaces = clazz.getInterfaces();
-        if (interfaces != null) {
-            for (Class<?> anInterface : interfaces) {
+
+        Type[] genericInterfaces = clazz.getGenericInterfaces();
+        if (genericInterfaces != null && genericInterfaces.length > 0) {
+            for (Type anInterface : genericInterfaces) {
                 JavaCodeNode nextNode = parse(anInterface, JavaNodeType.INTERFACE);
                 if (nextNode != null) {
                     node.getInterfaces().add(nextNode);
+                }
+            }
+        } else {
+            Class<?>[] interfaces = clazz.getInterfaces();
+            if (interfaces != null) {
+                for (Class<?> anInterface : interfaces) {
+                    JavaCodeNode nextNode = parse(anInterface, JavaNodeType.INTERFACE);
+                    if (nextNode != null) {
+                        node.getInterfaces().add(nextNode);
+                    }
                 }
             }
         }
@@ -127,7 +200,7 @@ public class JavaCodeNodeResolver {
         }
         String signature = field.getDeclaringClass().getName() + "." + field.getName();
         if (nodeMap.containsKey(signature)) {
-            return null;
+            return nodeMap.get(signature);
         }
         if (type == null) {
             type = JavaNodeType.FIELD;
@@ -139,11 +212,19 @@ public class JavaCodeNodeResolver {
         node.setType(field.getType());
         nodeMap.put(node.getSignature(), node);
 
-        Class<?> nextType = field.getType();
-        if (nextType != null) {
-            JavaCodeNode nextNode = parse(nextType, JavaNodeType.CLASS);
+        Type genericType = field.getGenericType();
+        if (genericType != null) {
+            JavaCodeNode nextNode = parse(genericType, JavaNodeType.TYPE);
             if (nextNode != null) {
                 node.setRealType(nextNode);
+            }
+        } else {
+            Class<?> nextType = field.getType();
+            if (nextType != null) {
+                JavaCodeNode nextNode = parse(nextType, JavaNodeType.CLASS);
+                if (nextNode != null) {
+                    node.setRealType(nextNode);
+                }
             }
         }
 
@@ -167,7 +248,7 @@ public class JavaCodeNodeResolver {
         }
         String signature = method.getDeclaringClass().getName() + "." + method.getName() + "() -> " + method.toGenericString();
         if (nodeMap.containsKey(signature)) {
-            return null;
+            return nodeMap.get(signature);
         }
         if (type == null) {
             type = JavaNodeType.METHOD;
@@ -189,12 +270,22 @@ public class JavaCodeNodeResolver {
             }
         }
 
-        Class<?>[] parameters = method.getParameterTypes();
-        if (parameters != null) {
-            for (Class<?> parameter : parameters) {
+        Type[] genericParameterTypes = method.getGenericParameterTypes();
+        if (genericParameterTypes != null && genericParameterTypes.length > 0) {
+            for (Type parameter : genericParameterTypes) {
                 JavaCodeNode nextNode = parse(parameter, JavaNodeType.PARAMETER);
                 if (nextNode != null) {
                     node.getParameters().add(nextNode);
+                }
+            }
+        } else {
+            Class<?>[] parameters = method.getParameterTypes();
+            if (parameters != null) {
+                for (Class<?> parameter : parameters) {
+                    JavaCodeNode nextNode = parse(parameter, JavaNodeType.PARAMETER);
+                    if (nextNode != null) {
+                        node.getParameters().add(nextNode);
+                    }
                 }
             }
         }
@@ -209,12 +300,19 @@ public class JavaCodeNodeResolver {
             }
         }
 
-        Class<?> returnType = method.getReturnType();
-        JavaCodeNode nextNode = parse(returnType, JavaNodeType.RETURN);
-        if (nextNode != null) {
-            node.setReturnType(nextNode);
+        Type genericReturnType = method.getGenericReturnType();
+        if (genericReturnType != null) {
+            JavaCodeNode nextNode = parse(genericReturnType, JavaNodeType.RETURN);
+            if (nextNode != null) {
+                node.setReturnType(nextNode);
+            }
+        } else {
+            Class<?> returnType = method.getReturnType();
+            JavaCodeNode nextNode = parse(returnType, JavaNodeType.RETURN);
+            if (nextNode != null) {
+                node.setReturnType(nextNode);
+            }
         }
-
 
         return node;
     }
@@ -226,7 +324,7 @@ public class JavaCodeNodeResolver {
         }
         String signature = constructor.getDeclaringClass().getName() + "." + "<init>" + "() -> " + constructor.toGenericString();
         if (nodeMap.containsKey(signature)) {
-            return null;
+            return nodeMap.get(signature);
         }
         if (type == null) {
             type = JavaNodeType.CONSTRUCTOR;
@@ -248,12 +346,22 @@ public class JavaCodeNodeResolver {
             }
         }
 
-        Class<?>[] parameters = constructor.getParameterTypes();
-        if (parameters != null) {
-            for (Class<?> parameter : parameters) {
+        Type[] genericParameterTypes = constructor.getGenericParameterTypes();
+        if (genericParameterTypes != null && genericParameterTypes.length > 0) {
+            for (Type parameter : genericParameterTypes) {
                 JavaCodeNode nextNode = parse(parameter, JavaNodeType.PARAMETER);
                 if (nextNode != null) {
                     node.getParameters().add(nextNode);
+                }
+            }
+        } else {
+            Class<?>[] parameters = constructor.getParameterTypes();
+            if (parameters != null) {
+                for (Class<?> parameter : parameters) {
+                    JavaCodeNode nextNode = parse(parameter, JavaNodeType.PARAMETER);
+                    if (nextNode != null) {
+                        node.getParameters().add(nextNode);
+                    }
                 }
             }
         }
@@ -279,7 +387,7 @@ public class JavaCodeNodeResolver {
         }
         String signature = annotation.annotationType().getName();
         if (nodeMap.containsKey(signature)) {
-            return null;
+            return nodeMap.get(signature);
         }
         if (type == null) {
             type = JavaNodeType.ANNOTATION;
