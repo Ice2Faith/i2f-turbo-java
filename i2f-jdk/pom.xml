@@ -126,6 +126,7 @@
         <module>i2f-database-metadata</module>
         <module>i2f-database-metadata-bean</module>
         <module>i2f-database-metadata-data</module>
+        <module>i2f-javacode-graph</module>
 
 
     </modules>
