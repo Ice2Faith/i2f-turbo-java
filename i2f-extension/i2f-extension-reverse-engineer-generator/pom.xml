@@ -29,6 +29,11 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-database-metadata-bean</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-mvc-metadata</artifactId>
         </dependency>
 

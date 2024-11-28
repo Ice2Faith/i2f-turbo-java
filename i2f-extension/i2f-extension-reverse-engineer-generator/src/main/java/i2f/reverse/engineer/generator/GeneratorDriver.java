@@ -2,6 +2,7 @@ package i2f.reverse.engineer.generator;
 
 
 import i2f.database.metadata.DatabaseMetadataProvider;
+import i2f.database.metadata.bean.BeanDatabaseMetadataResolver;
 import i2f.database.metadata.data.TableMeta;
 import i2f.extension.velocity.VelocityGenerator;
 import i2f.resources.ResourceUtil;
@@ -60,12 +61,12 @@ public class GeneratorDriver {
     }
 
     public static String generate(Class<?> beanClass, String template, JavaCodeContext codeCtx) throws Exception {
-        TableMeta table = DbBeanResolver.getTableMeta(beanClass);
+        TableMeta table = BeanDatabaseMetadataResolver.getTableMeta(beanClass);
         return generate(table, template, codeCtx);
     }
 
     public static void batch(Class<?> beanClass, String templatePath, String outputPath, JavaCodeContext codeCtx) throws Exception {
-        TableMeta table = DbBeanResolver.getTableMeta(beanClass);
+        TableMeta table = BeanDatabaseMetadataResolver.getTableMeta(beanClass);
         batch(table, templatePath, outputPath, codeCtx);
     }
 
@@ -80,7 +81,7 @@ public class GeneratorDriver {
     public static String er(String template, Class<?>... beanClasses) throws Exception {
         List<TableMeta> list = new ArrayList<>();
         for (Class<?> item : beanClasses) {
-            TableMeta table = DbBeanResolver.getTableMeta(item);
+            TableMeta table = BeanDatabaseMetadataResolver.getTableMeta(item);
             list.add(table);
         }
         return er(list, template);
@@ -117,7 +118,7 @@ public class GeneratorDriver {
     public static String doc(String template, Class<?>... beanClasses) throws Exception {
         List<TableMeta> list = new ArrayList<>();
         for (Class<?> item : beanClasses) {
-            TableMeta table = DbBeanResolver.getTableMeta(item);
+            TableMeta table = BeanDatabaseMetadataResolver.getTableMeta(item);
             list.add(table);
         }
         return doc(list, template);
