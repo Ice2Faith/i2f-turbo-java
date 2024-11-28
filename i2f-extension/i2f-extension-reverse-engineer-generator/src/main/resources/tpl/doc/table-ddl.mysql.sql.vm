@@ -1,0 +1,101 @@
+-- table ddl
+
+#foreach(${table} in ${tables})
+-- -------------------------------------------------
+-- 1.${velocityCount} :   ${table.name}
+
+-- drop table if exists ${table.name};
+
+create table ${table.name}
+(
+    #foreach(${column} in ${table.columns})
+        #replaceAll("[\r\n\t ]+"," ")
+        ${column.name}
+        ${column.type}
+        #if(${column.precision}>0)
+            (
+            ${column.precision}
+            #if(${column.scale}>0)
+                ,${column.scale}
+            #end
+)
+        #end
+        #if(!$_vm.isEmpty($column.defaultValue))
+                default ${column.defaultValue}
+        #end
+        #if(!$column.nullable)
+                not null
+            #end
+        #if(!$_vm.isEmpty($column.comment))
+                comment '${_vm.ifnull(${column.comment},"")}'
+            #end
+        #if($velocityCount<${table.columns.size()})
+                               ,
+           #end
+    #end
+
+#end
+
+#if(!$_vm.isnull(${table.primary}))
+    #replaceAll("[\r\n\t ]+"," ")
+            , primary key (
+            #foreach(${column} in ${table.primary.columns})
+    ${column.name}
+    #if(${column.desc})
+                            desc
+                        #end
+    #if($velocityCount<${table.primary.columns.size()})
+                                           ,
+                       #end
+#end
+            )
+        #end
+#end#replaceAll("[\r\n\t ]+"," ")
+#if(!$_vm.isEmpty($table.comment))
+        comment '${_vm.ifnull(${table.comment},"")}'
+#end
+#end ;
+
+
+#if(!$_vm.isnull(${table.uniqueIndexes}))
+    #foreach(${index} in ${table.uniqueIndexes})
+    create unique index ${index.name}
+        #replaceAll("[\r\n\t ]+"," ")
+        on ${table.name} (
+        #foreach(${column} in ${index.columns})
+            ${column.name}
+            #if(${column.desc})
+                desc
+            #end
+            #if($velocityCount<${index.columns.size()})
+                ,
+            #end
+        #end
+        )
+    #end ;
+
+#end
+#end
+
+
+#if(!$_vm.isnull(${table.indexes}))
+    #foreach(${index} in ${table.indexes})
+    create index ${index.name}
+        #replaceAll("[\r\n\t ]+"," ")
+        on ${table.name} (
+        #foreach(${column} in ${index.columns})
+            ${column.name}
+            #if(${column.desc})
+                desc
+            #end
+            #if($velocityCount<${index.columns.size()})
+                ,
+            #end
+        #end
+        )
+    #end ;
+#end
+#end
+
+
+#end

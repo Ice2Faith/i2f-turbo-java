@@ -32,7 +32,7 @@ import java.util.function.Predicate;
  * @date 2022/6/15 16:04
  * @desc
  */
-public class GeneratorDriver {
+public class ReverseEngineerGenerator {
     public static String generate(TableMeta table, String template, JavaCodeContext codeCtx) throws Exception {
         TableContext tableCtx = TableContext.parse(table);
         Map<String, Object> map = new HashMap<>();
@@ -339,8 +339,23 @@ public class GeneratorDriver {
         return modulesMvc(modules, template);
     }
 
-    public static String tablesDoc(List<TableMeta> tables) throws IOException {
-        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/table-doc.html.vm", "UTF-8");
+    public static String tablesDesignDoc(List<TableMeta> tables) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/table-design.html.vm", "UTF-8");
+        return tablesDoc(tables, tpl);
+    }
+
+    public static String tablesStructDoc(List<TableMeta> tables) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-struct.html.vm", "UTF-8");
+        return tablesDoc(tables, tpl);
+    }
+
+    public static String tablesDdlMysql(List<TableMeta> tables) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-ddl.mysql.sql.vm", "UTF-8");
+        return tablesDoc(tables, tpl);
+    }
+
+    public static String tablesDdlOracle(List<TableMeta> tables) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-ddl.oracle.sql.vm", "UTF-8");
         return tablesDoc(tables, tpl);
     }
 

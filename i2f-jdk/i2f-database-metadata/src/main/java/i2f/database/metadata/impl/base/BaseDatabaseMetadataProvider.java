@@ -169,6 +169,7 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
                 }
             }
         }
+        ret.sort((e1, e2) -> String.CASE_INSENSITIVE_ORDER.compare(e1.getName(), e2.getName()));
         return ret;
     }
 
