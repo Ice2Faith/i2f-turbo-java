@@ -67,6 +67,14 @@ public class TestReverseEngineer {
         output = new File(dir, "tables-ddl.oracle.sql");
         StreamUtil.writeString(result, output);
 
+        result = ReverseEngineerGenerator.drawioEr(tableMetas);
+        output = new File(dir, "er.xml.drawio");
+        StreamUtil.writeString(result, output);
+
+        result = ReverseEngineerGenerator.er(tableMetas);
+        output = new File(dir, "er.xml");
+        StreamUtil.writeString(result, output);
+
 //        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-ddl.oracle.sql.vm", "UTF-8");
 //        result = ReverseEngineerGenerator.tablesDoc(tableMetas,tpl);
 //        output=new File(dir,"tables-ddl.oracle.sql");

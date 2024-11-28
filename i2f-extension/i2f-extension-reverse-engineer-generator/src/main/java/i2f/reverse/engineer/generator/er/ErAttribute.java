@@ -27,6 +27,9 @@ public class ErAttribute {
         ret.width = 100;
         ret.height = 60;
         ret.text = meta.getComment();
+        if (ret.text == null || ret.text.isEmpty()) {
+            ret.text = meta.getName();
+        }
         return ret;
     }
 

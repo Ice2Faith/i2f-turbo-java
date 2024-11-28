@@ -258,7 +258,7 @@ public class StreamUtil {
     }
 
     public static void writeString(String str, File file) throws IOException {
-        writeString(str, StandardCharsets.UTF_16.name(), file);
+        writeString(str, StandardCharsets.UTF_8.name(), file);
     }
 
     public static void writeString(String str, String charset, File file) throws IOException {

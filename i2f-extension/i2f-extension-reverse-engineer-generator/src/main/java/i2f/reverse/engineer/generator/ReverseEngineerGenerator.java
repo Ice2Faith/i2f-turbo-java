@@ -70,6 +70,10 @@ public class ReverseEngineerGenerator {
         batch(table, templatePath, outputPath, codeCtx);
     }
 
+    public static String er(List<TableMeta> tables) throws Exception {
+        String tpl = ResourceUtil.getClasspathResourceAsString("tpl/er/er.xml.vm", "UTF-8");
+        return er(tables, tpl);
+    }
 
     public static String er(List<TableMeta> tables, String template) throws Exception {
         Map<String, Object> map = new HashMap<>();

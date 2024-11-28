@@ -1,0 +1,1341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio-plugin" modified="2023-05-11T08:42:47.550Z"
+        agent="5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36"
+        etag="b4rvB9Hyk6hXLVEPJBp4" version="13.7.9" type="embed">
+    <diagram id="lNPZZ_e-28soofFFy49H" name="Page-1">
+        <mxGraphModel dx="385" dy="528" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1"
+                      page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                                                            <!-- 实体 -->
+                        <mxCell id="5eed7606de734e2a95aab0f9139deb87" value="sys_dict" style="rounded=0;whiteSpace=wrap;html=1;"
+                                parent="1" vertex="1">
+                            <mxGeometry x="0" y="0" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                    
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="ecb11d594a73423bb4826df5d8c08d92" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="0" y="200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="8ac3bdda83054f1f923c7aa70e667203" value="" style="endArrow=none;html=1;" parent="1"
+                                source="5eed7606de734e2a95aab0f9139deb87" target="ecb11d594a73423bb4826df5d8c08d92" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="245aafce3d51481fa683988c413bbaa3" value="name" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="100" y="200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="378a0b9e317c4ff18d10b88564d859f6" value="" style="endArrow=none;html=1;" parent="1"
+                                source="5eed7606de734e2a95aab0f9139deb87" target="245aafce3d51481fa683988c413bbaa3" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="e96abaedcdf244e2ab7a57d71659d8d4" value="no" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="200" y="200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="0536fc8ecba64b189e0c817f818c29a9" value="" style="endArrow=none;html=1;" parent="1"
+                                source="5eed7606de734e2a95aab0f9139deb87" target="e96abaedcdf244e2ab7a57d71659d8d4" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="efc0d12b63e8460f88536d6944dfe496" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="300" y="200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="285f4ed4b2a24a61abf1f1bccc43d6d4" value="" style="endArrow=none;html=1;" parent="1"
+                                source="5eed7606de734e2a95aab0f9139deb87" target="efc0d12b63e8460f88536d6944dfe496" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="f918c06c54eb402aaa60f0100726a0b4" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="400" y="200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="4a3e247d086d4af0b677d0108fba0c92" value="" style="endArrow=none;html=1;" parent="1"
+                                source="5eed7606de734e2a95aab0f9139deb87" target="f918c06c54eb402aaa60f0100726a0b4" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="6cc62ca0c6c344a08fb9b92fd9f7a44e" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="500" y="200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="4de9370b98524984a1755423b564ad49" value="" style="endArrow=none;html=1;" parent="1"
+                                source="5eed7606de734e2a95aab0f9139deb87" target="6cc62ca0c6c344a08fb9b92fd9f7a44e" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="8265ce50691d4bcb96dcbf9452773b6b" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="600" y="200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="252ef89f052e456ea743e7a676382dd4" value="" style="endArrow=none;html=1;" parent="1"
+                                source="5eed7606de734e2a95aab0f9139deb87" target="8265ce50691d4bcb96dcbf9452773b6b" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="9b117baa3e5642dba993076fa2e00a74" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="700" y="200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="903fa6f106bc416e91c896a4e54137d8" value="" style="endArrow=none;html=1;" parent="1"
+                                source="5eed7606de734e2a95aab0f9139deb87" target="9b117baa3e5642dba993076fa2e00a74" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                                                <!-- 实体 -->
+                        <mxCell id="747abcd3b67f4b229c862d19b21f2548" value="sys_dict_item" style="rounded=0;whiteSpace=wrap;html=1;"
+                                parent="1" vertex="1">
+                            <mxGeometry x="0" y="400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                    
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="ff40e546255c4c90aa84823209060d6d" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="0" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="7c283f1623fd4cd7886b96e5400f8a70" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="ff40e546255c4c90aa84823209060d6d" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="82c2727eadbd458786cc9c315977e3e0" value="dict_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="100" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="3e47e7bfbc444694b652bfb83b368b79" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="82c2727eadbd458786cc9c315977e3e0" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="ab0660aebb9942e9b6b766357a78b8a4" value="name" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="200" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="48118756cf024bd88fc121f338659bf9" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="ab0660aebb9942e9b6b766357a78b8a4" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="ac60f1e6a56d4e9481c9dce6b0dc1c1d" value="no" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="300" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="9580c64884644b688b37cfc63a7b2d55" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="ac60f1e6a56d4e9481c9dce6b0dc1c1d" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="83593a8ccab449ffbb5ff558378f248b" value="value" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="400" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="b3d6365bc3344f92a370bf55a096f9da" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="83593a8ccab449ffbb5ff558378f248b" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="5c0279087ddd4c5e96620224fb5a16ef" value="remark" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="500" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="6841925032de441ebd3b3c98975bc65c" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="5c0279087ddd4c5e96620224fb5a16ef" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="004eeaa75acb4d4a95b7c1af223adc55" value="parent_item_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="600" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="5acb5dbd94b6474ba7be8f62ac788948" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="004eeaa75acb4d4a95b7c1af223adc55" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="ec9bb0f8d90b46228ceaea01fa477a5a" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="700" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="d891f87801cf4f4b8f2f6a25e4a1e3d1" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="ec9bb0f8d90b46228ceaea01fa477a5a" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="d9eb585fbaad4897b836724cd78ab98c" value="tags" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="800" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="1a25b75e914f4d9594ab68e712f18db5" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="d9eb585fbaad4897b836724cd78ab98c" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="5c2d84f8e01c4e20a523b51d9938a530" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="900" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="7682f161e18d49e0ae632a0b96494b74" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="5c2d84f8e01c4e20a523b51d9938a530" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="dca0b43100574d19b7c6fc40b555761a" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1000" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="1f021861eaad497697294499c53c148e" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="dca0b43100574d19b7c6fc40b555761a" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="607f36965781490a999c9a1c7dc8109d" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1100" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="e27bc76c56944d34a683aa01e122c6c4" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="607f36965781490a999c9a1c7dc8109d" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="6444978cfafc4f238aca3aefd0d4a2c7" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1200" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="60977a93081b440a97afd0eff3fea3d4" value="" style="endArrow=none;html=1;" parent="1"
+                                source="747abcd3b67f4b229c862d19b21f2548" target="6444978cfafc4f238aca3aefd0d4a2c7" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                                                <!-- 实体 -->
+                        <mxCell id="63f1916f005741a2aaa2725e8ad2eca8" value="sys_log" style="rounded=0;whiteSpace=wrap;html=1;"
+                                parent="1" vertex="1">
+                            <mxGeometry x="0" y="800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                    
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="80839370867044a4967408111b55dfb9" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="0" y="1000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="c428bd827c4e4cdaa4ca0706e887e2c1" value="" style="endArrow=none;html=1;" parent="1"
+                                source="63f1916f005741a2aaa2725e8ad2eca8" target="80839370867044a4967408111b55dfb9" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="5c89769dd34d4a10baef3c6edbee2618" value="type" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="100" y="1000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="48b308d4c93743b3994844da404e1c2d" value="" style="endArrow=none;html=1;" parent="1"
+                                source="63f1916f005741a2aaa2725e8ad2eca8" target="5c89769dd34d4a10baef3c6edbee2618" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="d853ec65fca249728a12c7df8a4de0de" value="title" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="200" y="1000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="7e03cb4b1f2f4ea99d26437b0ef87c1f" value="" style="endArrow=none;html=1;" parent="1"
+                                source="63f1916f005741a2aaa2725e8ad2eca8" target="d853ec65fca249728a12c7df8a4de0de" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="4c2dd0da5e5a4167a5fb2f8edd47024a" value="target" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="300" y="1000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="ecdd9d3bb9474e5fbfe47247b218aeb8" value="" style="endArrow=none;html=1;" parent="1"
+                                source="63f1916f005741a2aaa2725e8ad2eca8" target="4c2dd0da5e5a4167a5fb2f8edd47024a" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="506f726f3b6b44369453d557ed5eb727" value="action" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="400" y="1000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="a9204741036a4dbe851c45f8273f8187" value="" style="endArrow=none;html=1;" parent="1"
+                                source="63f1916f005741a2aaa2725e8ad2eca8" target="506f726f3b6b44369453d557ed5eb727" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="725a30ffffa745d4a38c59976849b378" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="500" y="1000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="b0233a4801724fe883e5eac7abcf4203" value="" style="endArrow=none;html=1;" parent="1"
+                                source="63f1916f005741a2aaa2725e8ad2eca8" target="725a30ffffa745d4a38c59976849b378" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="f7bd87a18d0443e49c8278a313af5a66" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="600" y="1000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="b8645119f8b8481592956ece9fe1b7fd" value="" style="endArrow=none;html=1;" parent="1"
+                                source="63f1916f005741a2aaa2725e8ad2eca8" target="f7bd87a18d0443e49c8278a313af5a66" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                                                <!-- 实体 -->
+                        <mxCell id="7baefc1d1ef340fe9d3875bdd9bd41b7" value="sys_permission" style="rounded=0;whiteSpace=wrap;html=1;"
+                                parent="1" vertex="1">
+                            <mxGeometry x="0" y="1200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                    
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="674d0c3e84294dafa0609eb3d8632843" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="0" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="d4a1cae95f8b4eec91618fccfde79ff4" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="674d0c3e84294dafa0609eb3d8632843" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="938bc6631b5b466c96deb07576d0280f" value="name" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="100" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="04b0ed38ec3f4c4cb977463d73846533" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="938bc6631b5b466c96deb07576d0280f" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="e5bb948196fe4e1a8bc12d91ec876a64" value="no" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="200" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="4ac5bd4e4e1f4b54a41a6c97a3bf8edb" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="e5bb948196fe4e1a8bc12d91ec876a64" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="953b17dc97734da196ec304427a07a6d" value="type" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="300" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="abbd9a5adc0442fcac6e27bd40ecd6d6" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="953b17dc97734da196ec304427a07a6d" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="e29c3723d2f74a48ba4099b36bf75aa8" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="400" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="7882b85e8aa74deb92b319a60de59425" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="e29c3723d2f74a48ba4099b36bf75aa8" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="15eb48744d324142a06dbd41c20763ed" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="500" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="8195722d14ef4d9bbc473d74ef3c4a69" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="15eb48744d324142a06dbd41c20763ed" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="fea73b8d0aad4a50b739db56a64f8a77" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="600" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="07ba475b57414427a3280e7918cb900b" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="fea73b8d0aad4a50b739db56a64f8a77" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="fb8a47618e8e4d9489dc2aead5ad82e8" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="700" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="98d00e5e575646049100242c6bb1e2e6" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="fb8a47618e8e4d9489dc2aead5ad82e8" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="a9b5343c752946c98275c17db4fcf211" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="800" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="e9083ec0775b4243843f079c16517799" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="a9b5343c752946c98275c17db4fcf211" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                                                <!-- 实体 -->
+                        <mxCell id="1969702055004cb18e5743efd46c63c8" value="sys_role" style="rounded=0;whiteSpace=wrap;html=1;"
+                                parent="1" vertex="1">
+                            <mxGeometry x="0" y="1600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                    
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="234d21d721754c249931ff6dff4ba1a4" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="0" y="1800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="313d440c0a0c4d5d96141b992c25c429" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1969702055004cb18e5743efd46c63c8" target="234d21d721754c249931ff6dff4ba1a4" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="af502b55602243cfa7152137b1a8f69c" value="name" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="100" y="1800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="64607308894644d2a82cd733a60c6b8c" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1969702055004cb18e5743efd46c63c8" target="af502b55602243cfa7152137b1a8f69c" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="90a4d33a361f429894cadd2b0b8d3b93" value="no" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="200" y="1800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="66b91d72bf7d4029a0aeee8ddfc4c77c" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1969702055004cb18e5743efd46c63c8" target="90a4d33a361f429894cadd2b0b8d3b93" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="8ca1d9cd90bb457a82d640bc4dca7640" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="300" y="1800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="0d08835b781f4e9aa81a1ae83e4a15c6" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1969702055004cb18e5743efd46c63c8" target="8ca1d9cd90bb457a82d640bc4dca7640" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="142fff04a5b44dd680883b4335bd0d92" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="400" y="1800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="4c37a166291449fd88ed953f11449349" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1969702055004cb18e5743efd46c63c8" target="142fff04a5b44dd680883b4335bd0d92" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="97a238031a2e44ae8dd2b9e66b640460" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="500" y="1800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="c7c5058cc8194f91a733703fd1938cfe" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1969702055004cb18e5743efd46c63c8" target="97a238031a2e44ae8dd2b9e66b640460" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="526421bfd7c440939f302ece3c269eee" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="600" y="1800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="bb6192ebf73b40169599cd4ff942ec79" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1969702055004cb18e5743efd46c63c8" target="526421bfd7c440939f302ece3c269eee" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="eef26999db53452196d6cfe54ffc81e9" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="700" y="1800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="069b3479b0a44a7b9f5ad1c7fa961a5a" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1969702055004cb18e5743efd46c63c8" target="eef26999db53452196d6cfe54ffc81e9" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                                                <!-- 实体 -->
+                        <mxCell id="7fe87b6d17dc4f2fa094fa28dc9c3467" value="sys_role_permission" style="rounded=0;whiteSpace=wrap;html=1;"
+                                parent="1" vertex="1">
+                            <mxGeometry x="0" y="2000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                    
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="15e0c0b85e2049bba2c0ded981930a6a" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="0" y="2200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="b87f7241804d439db4c891390bd69a8e" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="15e0c0b85e2049bba2c0ded981930a6a" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="c429de530b0043a4881a9f0ef5571e58" value="role_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="100" y="2200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="1ce98608d5294d12ad70d549b25f83a6" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="c429de530b0043a4881a9f0ef5571e58" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="fd9754650178420cbd172be9b238a9e0" value="permission_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="200" y="2200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="8420a43afbb948b387803761ec9df8d0" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="fd9754650178420cbd172be9b238a9e0" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="cecf9fafe00248f4bc11d96591d77575" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="300" y="2200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="6dcba159b8994abfb600f65c1a1960d0" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="cecf9fafe00248f4bc11d96591d77575" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="5c273cbb8b784eda8ceaa30f9e45adff" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="400" y="2200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="2fafece081df48b4abde660770bceb04" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="5c273cbb8b784eda8ceaa30f9e45adff" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="72904b43cd944e8d9aa0854331fa916d" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="500" y="2200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="6183f3c2692845629180cb0c3b5b2e8a" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="72904b43cd944e8d9aa0854331fa916d" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="7349489790ce48ff8f0baade5d4dcd8f" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="600" y="2200" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="6a054fc753b249239b83bc14a56c340b" value="" style="endArrow=none;html=1;" parent="1"
+                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="7349489790ce48ff8f0baade5d4dcd8f" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                                                <!-- 实体 -->
+                        <mxCell id="cbf6dfbabea8493084fd13095635872b" value="用户表" style="rounded=0;whiteSpace=wrap;html=1;"
+                                parent="1" vertex="1">
+                            <mxGeometry x="0" y="2400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                    
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="1a7cbd52fc0349e48405adcfe923c24e" value="ID" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="0" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="4deaf01b013a4904a322c95f642b8d8c" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="1a7cbd52fc0349e48405adcfe923c24e" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="d54c32fce5f14455a96429590be1ee71" value="用户名" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="100" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="a81757253c39426a979c56023036b76e" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="d54c32fce5f14455a96429590be1ee71" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="7811aae203e3424ea7702d1cb088c2c9" value="密码" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="200" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="e38385d0ee1846a2bdebd78a987cbfb8" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="7811aae203e3424ea7702d1cb088c2c9" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="1721a7abc9eb439b94edbecaac263e03" value="昵称" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="300" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="3122d5340ac14fdcb774a49f1357875d" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="1721a7abc9eb439b94edbecaac263e03" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="a4b97f6a91c848a681c94540305450ec" value="age" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="400" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="9c091871431d415c91ab0e482d060ccf" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="a4b97f6a91c848a681c94540305450ec" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="7d90385da98a4e6bbec946fc8addd824" value="grade" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="500" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="0779055b89d14a2eb967c741557bc453" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="7d90385da98a4e6bbec946fc8addd824" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="18df5dbe03444f31abd97852808c2c69" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="600" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="6643533ffec7494f8c00273fa1152c5b" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="18df5dbe03444f31abd97852808c2c69" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="c73a7e82d4f94c1ca731325115ae695f" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="700" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="99ecc23c3a614d8b8c5c65ff0aa66211" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="c73a7e82d4f94c1ca731325115ae695f" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="f5b5f223b7ba4dfabb466f246860ae46" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="800" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="122ad4132e234273a6be092ddee1dce3" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="f5b5f223b7ba4dfabb466f246860ae46" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="9c06dc0d903f41248baca14db141d663" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="900" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="4815e1e6ade745e1b7f7da4f51ab6053" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="9c06dc0d903f41248baca14db141d663" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="714e5b708f34442bbc5c96fc00e81646" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1000" y="2600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="b4763a889d384c5f88adfabfbff314f8" value="" style="endArrow=none;html=1;" parent="1"
+                                source="cbf6dfbabea8493084fd13095635872b" target="714e5b708f34442bbc5c96fc00e81646" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                                                <!-- 实体 -->
+                        <mxCell id="35f8c249d51f4968a7bba9b5fe4b22e3" value="sys_user_role" style="rounded=0;whiteSpace=wrap;html=1;"
+                                parent="1" vertex="1">
+                            <mxGeometry x="0" y="2800" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                    
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="ee73c2ff4ed547a8ab8f8056f6c21c6f" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="0" y="3000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="6dd3e65effaf4d73895cbabeee22769f" value="" style="endArrow=none;html=1;" parent="1"
+                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="ee73c2ff4ed547a8ab8f8056f6c21c6f" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="1375107bde614c39ae623b19cd1af4c3" value="user_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="100" y="3000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="2fd7c01c084a45f9bac1be594581a5ea" value="" style="endArrow=none;html=1;" parent="1"
+                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="1375107bde614c39ae623b19cd1af4c3" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="721f8a91b39247ee9b5adec5be9ba599" value="role_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="200" y="3000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="bff7c65f321d4542aafe9511718a1e53" value="" style="endArrow=none;html=1;" parent="1"
+                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="721f8a91b39247ee9b5adec5be9ba599" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="990ccefdc84a4b80b10c37a78380631d" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="300" y="3000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="fe30ebce37db411c9b04b42720a33e6d" value="" style="endArrow=none;html=1;" parent="1"
+                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="990ccefdc84a4b80b10c37a78380631d" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="84f04bfe28f24eccac286ebddf4db23f" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="400" y="3000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="2aeec64d483945c6acd4eead2f1f979d" value="" style="endArrow=none;html=1;" parent="1"
+                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="84f04bfe28f24eccac286ebddf4db23f" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="3bf0aac361734415853ed837f055c4ef" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="500" y="3000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="f60fae3c4de24d51ba9f7f193ec46a32" value="" style="endArrow=none;html=1;" parent="1"
+                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="3bf0aac361734415853ed837f055c4ef" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="5d8006b440de4cab998639d8209ac3cc" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="600" y="3000" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="4c7b4b1da3ed4a2791a0bd4c5e6dc993" value="" style="endArrow=none;html=1;" parent="1"
+                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="5d8006b440de4cab998639d8209ac3cc" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                    
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
+

@@ -29,6 +29,9 @@ public class DrawioAdapter {
             DrawioErElem entity = new DrawioErElem();
             entity.setId(getId());
             entity.setText(table.getComment());
+            if (entity.getText() == null || entity.getText().isEmpty()) {
+                entity.setText(table.getName());
+            }
             entity.setType("entity");
             entity.setX(x);
             entity.setY(y);
@@ -41,6 +44,9 @@ public class DrawioAdapter {
                 DrawioErElem attribute = new DrawioErElem();
                 attribute.setId(getId());
                 attribute.setText(column.getComment());
+                if (attribute.getText() == null || attribute.getText().isEmpty()) {
+                    attribute.setText(column.getName());
+                }
                 attribute.setType("attribute");
                 attribute.setX(x);
                 attribute.setY(y);

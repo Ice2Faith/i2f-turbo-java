@@ -29,6 +29,9 @@ public class ErEntity {
         ret.width = 160;
         ret.height = 80;
         ret.text = meta.getComment();
+        if (ret.text == null || ret.text.isEmpty()) {
+            ret.text = meta.getName();
+        }
         ret.attrs = ErAttribute.parse(meta.getColumns());
         ErLine.parse(ret);
 
