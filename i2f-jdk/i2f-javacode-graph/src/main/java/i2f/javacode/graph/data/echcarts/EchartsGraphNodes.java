@@ -1,4 +1,4 @@
-package i2f.relation.javacode.data.echcarts;
+package i2f.javacode.graph.data.echcarts;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @desc
  */
 @Data
-public class EchartsMapNodes {
+public class EchartsGraphNodes {
     protected int category;
     protected String id;
     protected String name;

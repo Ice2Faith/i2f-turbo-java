@@ -1,4 +1,4 @@
-package i2f.relation.javacode.data;
+package i2f.javacode.graph.data;
 
 import lombok.Data;
 
@@ -13,7 +13,7 @@ import java.util.Map;
  * @desc
  */
 @Data
-public class JavaCodeRelationMap {
+public class JavaCodeRelationGraph {
     protected Map<String, JavaCodeMeta> nodeMap = new HashMap<>();
     protected List<JavaCodeRelation> relations = new ArrayList<>();
 }

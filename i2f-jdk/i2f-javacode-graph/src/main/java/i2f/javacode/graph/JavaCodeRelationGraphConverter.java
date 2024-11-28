@@ -1,9 +1,9 @@
-package i2f.relation.javacode;
+package i2f.javacode.graph;
 
-import i2f.relation.javacode.data.JavaCodeNode;
-import i2f.relation.javacode.data.JavaCodeRelation;
-import i2f.relation.javacode.data.JavaCodeRelationMap;
-import i2f.relation.javacode.data.JavaRelationType;
+import i2f.javacode.graph.data.JavaCodeNode;
+import i2f.javacode.graph.data.JavaCodeRelation;
+import i2f.javacode.graph.data.JavaCodeRelationGraph;
+import i2f.javacode.graph.data.JavaRelationType;
 
 import java.util.List;
 
@@ -12,11 +12,11 @@ import java.util.List;
  * @date 2024/11/27 21:30
  * @desc
  */
-public class JavaCodeRelationConverter {
-    protected JavaCodeRelationMap relationMap = new JavaCodeRelationMap();
+public class JavaCodeRelationGraphConverter {
+    protected JavaCodeRelationGraph relationMap = new JavaCodeRelationGraph();
 
-    public static JavaCodeRelationMap convert(List<JavaCodeNode> nodes) {
-        JavaCodeRelationConverter converter = new JavaCodeRelationConverter();
+    public static JavaCodeRelationGraph convert(List<JavaCodeNode> nodes) {
+        JavaCodeRelationGraphConverter converter = new JavaCodeRelationGraphConverter();
         converter.resolve(nodes);
         return converter.relationMap;
     }
@@ -28,6 +28,9 @@ public class JavaCodeRelationConverter {
     }
 
     public void resolve(JavaCodeNode node) {
+        if (relationMap.getNodeMap().containsKey(node.getSignature())) {
+            return;
+        }
         relationMap.getNodeMap().put(node.getSignature(), node.copyMeta());
         JavaCodeNode realType = node.getRealType();
         if (realType != null) {
@@ -131,6 +134,17 @@ public class JavaCodeRelationConverter {
                 relation.setRelationType(JavaRelationType.EXCEPTION);
                 relationMap.getRelations().add(relation);
                 resolve(except);
+            }
+        }
+        List<JavaCodeNode> genericParameters = node.getGenericParameters();
+        if (genericParameters != null) {
+            for (JavaCodeNode generic : genericParameters) {
+                JavaCodeRelation relation = new JavaCodeRelation();
+                relation.setStartSignature(node.getSignature());
+                relation.setEndSignature(generic.getSignature());
+                relation.setRelationType(JavaRelationType.GENERIC);
+                relationMap.getRelations().add(relation);
+                resolve(generic);
             }
         }
     }

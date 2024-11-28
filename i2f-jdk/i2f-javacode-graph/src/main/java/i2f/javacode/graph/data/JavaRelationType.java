@@ -1,27 +1,28 @@
-package i2f.relation.javacode.data;
+package i2f.javacode.graph.data;
 
 /**
  * @author Ice2Faith
  * @date 2024/11/27 19:16
  * @desc
  */
-public enum JavaNodeType {
-    CLASS(0, "class"),
+public enum JavaRelationType {
+    REAL(0, "real"),
     FIELD(1, "field"),
     METHOD(2, "method"),
     CONSTRUCTOR(3, "constructor"),
-    INTERFACE(4, "interface"),
-    SUPER(5, "super"),
+    SUPER(4, "super"),
+    INTERFACE(5, "interface"),
     ANNOTATION(6, "annotation"),
     PARAMETER(7, "parameter"),
     RETURN(8, "return"),
     EXCEPTION(9, "exception"),
+    GENERIC(10, "generic"),
     ;
 
     private int code;
     private String text;
 
-    private JavaNodeType(int code, String text) {
+    private JavaRelationType(int code, String text) {
         this.code = code;
         this.text = text;
     }

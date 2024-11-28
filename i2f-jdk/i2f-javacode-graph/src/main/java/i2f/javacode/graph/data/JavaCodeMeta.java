@@ -1,4 +1,4 @@
-package i2f.relation.javacode.data;
+package i2f.javacode.graph.data;
 
 import lombok.Data;
 
