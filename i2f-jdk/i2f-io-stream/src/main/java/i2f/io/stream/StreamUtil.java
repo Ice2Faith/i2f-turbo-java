@@ -4,6 +4,7 @@ import i2f.io.stream.impl.TempFileInputStream;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -170,6 +171,10 @@ public class StreamUtil {
         return builder.toString();
     }
 
+    public static String readString(InputStream is, boolean closeIs) throws IOException {
+        return readString(is, StandardCharsets.UTF_8.name(), closeIs);
+    }
+
     public static String readString(InputStream is, String charset, boolean closeIs) throws IOException {
         InputStreamReader reader = new InputStreamReader(is, charset);
         return readString(reader, closeIs);
@@ -178,6 +183,10 @@ public class StreamUtil {
     public static void writeBytes(byte[] data, OutputStream os, boolean closeOs) throws IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(data);
         streamCopy(bis, os, closeOs, true);
+    }
+
+    public static void writeString(String str, OutputStream os, boolean closeOs) throws IOException {
+        writeString(str, os, StandardCharsets.UTF_8.name(), closeOs);
     }
 
     public static void writeString(String str, OutputStream os, String charset, boolean closeOs) throws IOException {
@@ -222,9 +231,17 @@ public class StreamUtil {
         return readBytes(is, offset, size, true);
     }
 
+    public static String readString(File file) throws IOException {
+        return readString(file, StandardCharsets.UTF_8.name());
+    }
+
     public static String readString(File file, String charset) throws IOException {
         InputStream is = new FileInputStream(file);
         return readString(is, charset, true);
+    }
+
+    public static String readString(URL url) throws IOException {
+        return readString(url, StandardCharsets.UTF_8.name());
     }
 
     public static String readString(URL url, String charset) throws IOException {
@@ -238,6 +255,10 @@ public class StreamUtil {
         }
         OutputStream os = new FileOutputStream(file);
         writeBytes(data, os, true);
+    }
+
+    public static void writeString(String str, File file) throws IOException {
+        writeString(str, StandardCharsets.UTF_16.name(), file);
     }
 
     public static void writeString(String str, String charset, File file) throws IOException {

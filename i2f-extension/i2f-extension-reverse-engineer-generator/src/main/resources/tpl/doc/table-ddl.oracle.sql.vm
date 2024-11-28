@@ -1,0 +1,103 @@
+-- table ddl
+
+#foreach(${table} in ${tables})
+-- -------------------------------------------------
+-- 1.${velocityCount} :   ${_vm.upper(${table.name})}
+
+-- DROP TABLE ${_vm.upper(${table.name})};
+
+CREATE TABLE ${_vm.upper(${table.name})}
+(
+    #foreach(${column} in ${table.columns})
+        #replaceAll("[\r\n\t ]+"," ")
+        ${_vm.upper(${column.name})}
+        ${_vm.upper(${column.type})}
+        #if(${column.precision}>0)
+            (
+            ${column.precision}
+            #if(${column.scale}>0)
+                ,${column.scale}
+            #end
+)
+        #end
+        #if(!$_vm.isEmpty($column.defaultValue))
+                DEFAULT ${column.defaultValue}
+        #end
+        #if(!$column.nullable)
+                NOT NULL
+            #end
+        #if($velocityCount<${table.columns.size()})
+                               ,
+           #end
+    #end
+
+#end
+
+#if(!$_vm.isnull(${table.primary}))
+    #replaceAll("[\r\n\t ]+"," ")
+            , PRIMARY KEY (
+            #foreach(${column} in ${table.primary.columns})
+    ${_vm.upper(${column.name})}
+    #if(${column.desc})
+                            DESC
+                        #end
+    #if($velocityCount<${table.primary.columns.size()})
+                                           ,
+                       #end
+#end
+            )
+        #end
+#end;
+
+
+#if(!$_vm.isnull(${table.uniqueIndexes}))
+    #foreach(${index} in ${table.uniqueIndexes})
+    CREATE UNIQUE INDEX ${_vm.upper(${index.name})}
+        #replaceAll("[\r\n\t ]+"," ")
+        ON ${_vm.upper(${table.name})} (
+        #foreach(${column} in ${index.columns})
+            ${_vm.upper(${column.name})}
+            #if(${column.desc})
+                DESC
+            #end
+            #if($velocityCount<${index.columns.size()})
+                ,
+            #end
+        #end
+        )
+    #end ;
+
+#end
+#end
+
+
+#if(!$_vm.isnull(${table.indexes}))
+    #foreach(${index} in ${table.indexes})
+    CREATE INDEX ${_vm.upper(${index.name})}
+        #replaceAll("[\r\n\t ]+"," ")
+        ON ${_vm.upper(${table.name})} (
+        #foreach(${column} in ${index.columns})
+            ${_vm.upper(${column.name})}
+            #if(${column.desc})
+                DESC
+            #end
+            #if($velocityCount<${index.columns.size()})
+                ,
+            #end
+        #end
+        )
+    #end ;
+#end
+#end
+
+#if(!$_vm.isEmpty($table.comment))
+COMMENT${_vm.upper(${table.name})}${_vm.ifnull(${table.comment},"")}#end
+
+#foreach(${column} in ${table.columns})
+    #if(!$_vm.isEmpty($column.comment))
+    COMMENT ON COLUMN ${_vm.upper(${table.name})}.${_vm.upper(${column.name})} IS '${_vm.ifnull(${column.comment},"")}' ;
+    #end
+#end
+
+
+#end

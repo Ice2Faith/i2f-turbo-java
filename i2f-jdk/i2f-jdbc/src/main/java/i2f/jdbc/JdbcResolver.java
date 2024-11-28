@@ -47,10 +47,19 @@ public class JdbcResolver {
                                            String url,
                                            String username,
                                            String password) throws SQLException {
+        Exception ex = null;
         try {
             Class.forName(driver);
         } catch (Exception e) {
-            throw new SQLException(e.getMessage(), e);
+            ex = e;
+        }
+        try {
+            Thread.currentThread().getContextClassLoader().loadClass(driver);
+        } catch (Exception e) {
+            ex = e;
+        }
+        if (ex != null) {
+            throw new SQLException(ex.getMessage(), ex);
         }
         return DriverManager.getConnection(url, username, password);
     }

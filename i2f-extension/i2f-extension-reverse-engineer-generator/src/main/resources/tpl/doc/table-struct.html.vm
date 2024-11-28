@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>table struct doc</title>
+    <style>
+        * {
+            font-family: 'Arial';
+            font-size: 12pt;
+            margin: 0;
+            padding: 0;
+        }
+
+        hr {
+            margin: 8px 2px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin: 5px 2px;
+        }
+
+        table tr td {
+            padding: 5px 8px;
+            border: solid 1px black;
+        }
+
+        .table-column-list {
+            width: 100%;
+        }
+
+        .table-column-head {
+            text-align: center;
+            font-weight: normal;
+            background-color: #aaaaaa;
+        }
+    </style>
+</head>
+<body>
+<h1>table design doc</h1>
+    #foreach(${table} in ${tables})
+    <hr/>
+    <h2>1.${velocityCount} table:   ${table.name}</h2>
+    <h3>comment:  ${_vm.ifnull(${table.comment},"")}</h3>
+    <h3>database: ${_vm.ifnull(${table.database},"")}</h3>
+    <h3>schema:  ${_vm.ifnull(${table.schema},"")}</h3>
+    <h3>catalog: ${_vm.ifnull(${table.catalog},"")}</h3>
+    <table border="1" cellspacing="0" style="width:100%;">
+        <tr>
+            <th class="table-column-head" style="width: 5%;">
+                number
+            </th>
+            <th class="table-column-head" style="width: 20%;">
+                name
+            </th>
+            <th class="table-column-head" style="width: 20%;">
+                type
+            </th>
+            <th class="table-column-head" style="width: 5%;">
+                precision
+            </th>
+            <th class="table-column-head" style="width: 5%;">
+                scale
+            </th>
+            <th class="table-column-head" style="width: 5%;">
+                not_null
+            </th>
+            <th class="table-column-head" style="width: 5%;">
+                primary
+            </th>
+            <th class="table-column-head" style="width: 5%;">
+                auto_increment
+            </th>
+            <th class="table-column-head" style="width: 5%;">
+                unique
+            </th>
+            <th class="table-column-head" style="width: 5%;">
+                index
+            </th>
+            <th class="table-column-head" style="width: 5%;">
+                default
+            </th>
+            <th class="table-column-head" style="width: 5%;">
+                generated
+            </th>
+            <th class="table-column-head" style="width: 20%;">
+                comment
+            </th>
+        </tr>
+        #foreach(${column} in ${table.columns})
+            <tr>
+                <td>
+                    $velocityCount
+                </td>
+                <td>
+                    ${column.name}
+                </td>
+                <td>
+                    ${column.type}
+                    #if(${column.precision}>0)
+                        (
+                        ${column.precision}
+                        #if(${column.scale}>0)
+                            ,${column.scale}
+                        #end
+                        )
+                    #end
+                </td>
+                <td>
+                    ${column.precision}
+                </td>
+                <td>
+                    ${column.scale}
+                </td>
+                <td>
+                    #if(!${column.nullable})
+                        true
+                    #end
+                </td>
+                <td>
+                    #if(${column.primaryKey})
+                        true
+                    #end
+                </td>
+                <td>
+                    #if(${column.autoIncrement})
+                        true
+                    #end
+                </td>
+                <td>
+                    #if(${column.uniqueKey})
+                        true
+                    #end
+                </td>
+                <td>
+                    #if(${column.indexKey})
+                        true
+                    #end
+                </td>
+                <td>
+                    ${_vm.ifnull(${column.defaultValue},"")}
+                </td>
+                <td>
+                    #if(${column.generated})
+                        true
+                    #end
+                </td>
+                <td>
+                    ${_vm.ifnull(${column.comment},"")}
+                </td>
+            </tr>
+        #end
+    </table>
+
+    <br/>
+
+    <h3>primary key</h3>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                number
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                name
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                columns
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                remark
+            </th>
+        </tr>
+        #if(!${_vm.isnull(${table.primary})})
+
+            <tr>
+                <td class="table-column-body">
+                    1
+                </td>
+                <td class="table-column-body">
+                    ${_vm.ifnull(${table.primary.name},"")}
+                </td>
+                <td class="table-column-body">
+                    #foreach(${item} in ${table.primary.columns})
+                        ${item.name}
+                        #if($velocityCount < $table.primary.columns.size())
+                            ,
+                        #end
+                    #end
+                </td>
+                <td class="table-column-body">
+                    ${_vm.ifnull(${table.primary.type},"")}
+                </td>
+            </tr>
+        #end
+    </table>
+
+    <br/>
+
+    <h3>unique index</h3>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                number
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                name
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                columns
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                remark
+            </th>
+        </tr>
+        #foreach(${line} in ${table.uniqueIndexes})
+            <tr>
+                <td class="table-column-body">
+                    $velocityCount
+                </td>
+                <td class="table-column-body">
+                    ${_vm.ifnull(${line.name},"")}
+                </td>
+                <td class="table-column-body">
+                    #foreach(${item} in ${line.columns})
+                        ${item.name}
+                        #if($velocityCount < $line.columns.size())
+                            ,
+                        #end
+                    #end
+                </td>
+                <td class="table-column-body">
+                    ${_vm.ifnull(${line.type},"")}
+                </td>
+            </tr>
+        #end
+    </table>
+
+    <br/>
+
+    <h3>index</h3>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                number
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                name
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                columns
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                remark
+            </th>
+        </tr>
+        #foreach(${line} in ${table.indexes})
+            <tr>
+                <td class="table-column-body">
+                    $velocityCount
+                </td>
+                <td class="table-column-body">
+                    ${_vm.ifnull(${line.name},"")}
+                </td>
+                <td class="table-column-body">
+                    #foreach(${item} in ${line.columns})
+                        ${item.name}
+                        #if($velocityCount < $line.columns.size())
+                            ,
+                        #end
+                    #end
+                </td>
+                <td class="table-column-body">
+                    ${_vm.ifnull(${line.type},"")}
+                </td>
+            </tr>
+        #end
+    </table>
+    #end
+
+</body>
+</html>
