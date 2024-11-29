@@ -1,7 +1,15 @@
 package i2f.extension.velocity;
 
-import java.io.*;
+import i2f.io.stream.StreamUtil;
+import i2f.os.OsUtil;
+import i2f.text.StringUtils;
+import i2f.typeof.TypeOf;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -36,7 +44,7 @@ public class GeneratorTool {
     }
 
     public static boolean isEmpty(String str) {
-        return str == null || "".equals(str);
+        return StringUtils.isEmpty(str);
     }
 
     public static boolean notEmpty(String str) {
@@ -181,14 +189,14 @@ public class GeneratorTool {
         if (isEmpty(str)) {
             return str;
         }
-        return str.substring(0, 1).toLowerCase() + str.substring(1);
+        return StringUtils.firstLower(str);
     }
 
     public static String firstUpper(String str) {
         if (isEmpty(str)) {
             return str;
         }
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
+        return StringUtils.firstUpper(str);
     }
 
     public static String format(String fmt, Object... args) {
@@ -253,27 +261,12 @@ public class GeneratorTool {
     }
 
     public static String readFile(String filePath, String charset) throws IOException {
-        StringBuilder builder = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), charset))) {
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-                builder.append("\n");
-            }
-        }
-        return builder.toString();
+        return StreamUtil.readString(new File(filePath), charset);
     }
 
     public static void writeFile(String filePath, Object content, String charset) throws IOException {
-        File file = new File(filePath);
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), charset))) {
-            String os = str(content);
-            writer.write(os);
-            writer.flush();
-        }
+        String os = str(content);
+        StreamUtil.writeString(os, charset, new File(filePath));
     }
 
     public static File[] listFiles(String filePath) {
@@ -321,27 +314,7 @@ public class GeneratorTool {
     }
 
     public static String cmdResult(String cmdLine, String charset) throws IOException, InterruptedException {
-        Process process = Runtime.getRuntime().exec(cmdLine);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-        int bt = -1;
-        InputStream ois = process.getInputStream();
-        while ((bt = ois.read()) != -1) {
-            bos.write(bt);
-        }
-        ois.close();
-
-        InputStream eis = process.getErrorStream();
-        while ((bt = eis.read()) != -1) {
-            bos.write(bt);
-        }
-        eis.close();
-
-        process.waitFor();
-
-        byte[] data = bos.toByteArray();
-        String ret = new String(data, charset);
-        return ret;
+        return OsUtil.runCmd(cmdLine, charset);
     }
 
     public static List<Map<String, Object>> list(Object itr) {
@@ -415,51 +388,73 @@ public class GeneratorTool {
         if (isEmpty(str)) {
             return str;
         }
-        if (!str.contains("_") && !str.contains("-")) {
-            return firstUpper(str);
-        }
-        String[] arr = split(str, true, "_|-", -1, true);
-        StringBuffer buffer = new StringBuffer();
-        for (String item : arr) {
-            buffer.append(firstUpper(item));
-        }
-        return buffer.toString();
+        return StringUtils.toPascal(str);
     }
 
     public static String toCamel(String str) {
         if (isEmpty(str)) {
             return str;
         }
-        if (!str.contains("_") && !str.contains("-")) {
-            return firstLower(str);
-        }
-        String[] arr = split(str, true, "_|-", -1, true);
-        StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < arr.length; i++) {
-            if (i == 0) {
-                buffer.append(firstLower(arr[i]));
-            } else {
-                buffer.append(firstUpper(arr[i]));
-            }
-        }
-        return buffer.toString();
+        return StringUtils.toCamel(str);
     }
 
     public static String toUnderScore(String str) {
         if (str.contains("_")) {
             return str.trim();
         }
-        StringBuffer buffer = new StringBuffer();
-        char[] arr = str.toCharArray();
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] >= 'A' && arr[i] <= 'Z') {
-                buffer.append("_");
-                buffer.append((char) (arr[i] | 32));
-            } else {
-                buffer.append(arr[i]);
-            }
+        return StringUtils.toUnderScore(str);
+    }
+
+    public static String toSnake(String str) {
+        if (str.contains("-")) {
+            return str.trim();
         }
-        return buffer.toString();
+        return StringUtils.toSnake(str);
+    }
+
+    public static String toPropertyCase(String str) {
+        if (str.contains(".")) {
+            return str.trim();
+        }
+        return StringUtils.toPropertyCase(str);
+    }
+
+    public static String toPathCase(String str) {
+        if (str.contains("/")) {
+            return str.trim();
+        }
+        return StringUtils.toPathCase(str);
+    }
+
+    public static String toColonCase(String str) {
+        if (str.contains(":")) {
+            return str.trim();
+        }
+        return StringUtils.toColonCase(str);
+    }
+
+    public static String toUrlEncoded(String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        try {
+            return URLEncoder.encode(str, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+
+        }
+        return str;
+    }
+
+    public static String toBase64(String str) {
+        if (str == null) {
+            return null;
+        }
+        try {
+            return Base64.getEncoder().encodeToString(str.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+
+        }
+        return str;
     }
 
     public static String[] split(String str, boolean trimBefore, String regex, int limit, boolean removeEmpty) {
@@ -491,15 +486,6 @@ public class GeneratorTool {
         if (target == null) {
             return false;
         }
-        for (Class item : types) {
-            if (item.equals(target)) {
-                return true;
-            }
-            //该方法用于判定，父类target是否派生出了子类item
-            if (target.isAssignableFrom(item)) {
-                return true;
-            }
-        }
-        return false;
+        return TypeOf.typeOfAny(target, types);
     }
 }
