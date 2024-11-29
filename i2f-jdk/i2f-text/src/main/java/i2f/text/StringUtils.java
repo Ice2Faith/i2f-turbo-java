@@ -56,6 +56,7 @@ public class StringUtils {
         }
         return builder.toString();
     }
+
     public static boolean isEmpty(String str) {
         return str == null || str.isEmpty();
     }
@@ -186,7 +187,27 @@ public class StringUtils {
     }
 
     public static String toUnderScore(String str) {
-        if (str.contains("_")) {
+        return toLinkCase0(str, "_");
+    }
+
+    public static String toSnake(String str) {
+        return toLinkCase0(str, "-");
+    }
+
+    public static String toPropertyCase(String str) {
+        return toLinkCase0(str, ".");
+    }
+
+    public static String toPathCase(String str) {
+        return toLinkCase0(str, "/");
+    }
+
+    public static String toColonCase(String str) {
+        return toLinkCase0(str, ":");
+    }
+
+    public static String toLinkCase0(String str, String separator) {
+        if (str.contains(separator)) {
             return str.trim();
         }
         StringBuffer buffer = new StringBuffer();
@@ -194,7 +215,7 @@ public class StringUtils {
         for (int i = 0; i < arr.length; i++) {
             if (arr[i] >= 'A' && arr[i] <= 'Z') {
                 if (i > 0) {
-                    buffer.append("_");
+                    buffer.append(separator);
                 }
                 buffer.append((char) (arr[i] | 32));
             } else {
@@ -204,24 +225,207 @@ public class StringUtils {
         return buffer.toString();
     }
 
+    public static String concatPath(String prefix, String suffix) {
+        return concatWith(prefix, suffix, "/");
+    }
+
+    public static String concatWith(String prefix, String suffix, String separator) {
+        if (prefix == null) {
+            prefix = "";
+        }
+        if (suffix == null) {
+            suffix = "";
+        }
+        if (separator == null) {
+            separator = "";
+        }
+        if (separator.isEmpty()) {
+            return prefix + suffix;
+        }
+        if (prefix.endsWith(separator)) {
+            if (suffix.startsWith(separator)) {
+                return prefix + suffix.substring(separator.length());
+            } else {
+                return prefix + suffix;
+            }
+        } else {
+            if (suffix.startsWith(separator)) {
+                return prefix + suffix;
+            } else {
+                return prefix + separator + suffix;
+            }
+        }
+    }
+
+    public static boolean endsWithIgnoreCase(String str, String suffix) {
+        return endsWith(str, suffix, false, true);
+    }
+
+    public static boolean endsWith(String str, String suffix, boolean ignoreCase) {
+        return endsWith(str, suffix, false, ignoreCase);
+    }
+
+    public static boolean endsWith(String str, String suffix, boolean trimWhiteSpace, boolean ignoreCase) {
+        if (str == null) {
+            return false;
+        }
+        if (suffix == null) {
+            return true;
+        }
+        if (suffix.isEmpty()) {
+            return true;
+        }
+        String cmpStr = str;
+        String cmpSuffix = suffix;
+        if (trimWhiteSpace) {
+            cmpStr = cmpStr.trim();
+        }
+        if (ignoreCase) {
+            cmpStr = cmpStr.toLowerCase();
+            cmpSuffix = cmpSuffix.toLowerCase();
+        }
+        return cmpStr.endsWith(cmpSuffix);
+    }
+
+    public static boolean startsWithIgnoreCase(String str, String prefix) {
+        return startsWith(str, prefix, false, true);
+    }
+
+    public static boolean startsWith(String str, String prefix, boolean ignoreCase) {
+        return startsWith(str, prefix, false, ignoreCase);
+    }
+
+    public static boolean startsWith(String str, String prefix, boolean trimWhiteSpace, boolean ignoreCase) {
+        if (str == null) {
+            return false;
+        }
+        if (prefix == null) {
+            return true;
+        }
+        if (prefix.isEmpty()) {
+            return true;
+        }
+        String cmpStr = str;
+        String cmpPrefix = prefix;
+        if (trimWhiteSpace) {
+            cmpStr = cmpStr.trim();
+        }
+        if (ignoreCase) {
+            cmpStr = cmpStr.toLowerCase();
+            cmpPrefix = cmpPrefix.toLowerCase();
+        }
+        return cmpStr.startsWith(cmpPrefix);
+    }
+
+    public static String ensureStartsWith(String str, String prefix) {
+        return ensureStartsWith(str, prefix, false);
+    }
+
+    public static String ensureStartsWithIgnoreCase(String str, String prefix) {
+        return ensureStartsWith(str, prefix, true);
+    }
+
+    public static String ensureStartsWith(String str, String prefix, boolean ignoreCase) {
+        if (str == null || prefix == null) {
+            return str;
+        }
+        if (prefix.isEmpty()) {
+            return str;
+        }
+        String cmpStr = str;
+        String cmpPrefix = prefix;
+        if (ignoreCase) {
+            cmpStr = str.toLowerCase();
+            cmpPrefix = str.toLowerCase();
+        }
+        if (cmpStr.startsWith(cmpPrefix)) {
+            return str;
+        }
+        return prefix + str;
+    }
+
+    public static String ensureEndsWith(String str, String suffix) {
+        return ensureEndsWith(str, suffix, false);
+    }
+
+    public static String ensureEndsWithIgnoreCase(String str, String suffix) {
+        return ensureEndsWith(str, suffix, true);
+    }
+
+    public static String ensureEndsWith(String str, String suffix, boolean ignoreCase) {
+        if (str == null || suffix == null) {
+            return str;
+        }
+        if (suffix.isEmpty()) {
+            return str;
+        }
+        String cmpStr = str;
+        String cmpSuffix = suffix;
+        if (ignoreCase) {
+            cmpStr = str.toLowerCase();
+            cmpSuffix = str.toLowerCase();
+        }
+        if (cmpStr.startsWith(cmpSuffix)) {
+            return str;
+        }
+        return str + suffix;
+    }
+
+    public static String trimPrefixIgnoreCase(String str, String... prefixes) {
+        return trim(str, false, true, Arrays.asList(prefixes), null, null, null);
+    }
+
+    public static String trimSuffixIgnoreCase(String str, String... suffixes) {
+        return trim(str, false, true, null, Arrays.asList(suffixes), null, null);
+    }
+
+    public static String trimIgnoreCase(String str, List<String> trimPrefixes, List<String> trimSuffixes) {
+        return trim(str, true, true, trimPrefixes, trimSuffixes, null, null);
+    }
+
+    public static String trimIgnoreCase(String str, List<String> trimPrefixes, List<String> trimSuffixes, String appendPrefix, String appendSuffix) {
+        return trim(str, true, true, trimPrefixes, trimSuffixes, appendPrefix, appendSuffix);
+    }
+
+    public static String trimIgnoreCase(String str, boolean trimWhiteSpace, List<String> trimPrefixes, List<String> trimSuffixes, String appendPrefix, String appendSuffix) {
+        return trim(str, trimWhiteSpace, true, trimPrefixes, trimSuffixes, appendPrefix, appendSuffix);
+    }
+
+    public static String trimPrefix(String str, String... prefixes) {
+        return trim(str, false, false, Arrays.asList(prefixes), null, null, null);
+    }
+
+    public static String trimSuffix(String str, String... suffixes) {
+        return trim(str, false, false, null, Arrays.asList(suffixes), null, null);
+    }
+
     public static String trim(String str, List<String> trimPrefixes, List<String> trimSuffixes) {
-        return trim(str, true, trimPrefixes, trimSuffixes, null, null);
+        return trim(str, true, false, trimPrefixes, trimSuffixes, null, null);
     }
 
     public static String trim(String str, List<String> trimPrefixes, List<String> trimSuffixes, String appendPrefix, String appendSuffix) {
-        return trim(str, true, trimPrefixes, trimSuffixes, appendPrefix, appendSuffix);
+        return trim(str, true, false, trimPrefixes, trimSuffixes, appendPrefix, appendSuffix);
     }
 
-    public static String trim(String str, boolean trimWhiteSpace, List<String> trimPrefixes, List<String> trimSuffixes, String appendPrefix, String appendSuffix) {
+    public static String trim(String str, boolean trimWhiteSpace, boolean ignoreCase, List<String> trimPrefixes, List<String> trimSuffixes, String appendPrefix, String appendSuffix) {
         if (str == null) {
             return null;
+        }
+        String cmpStr = str;
+        if (ignoreCase) {
+            cmpStr = str.toLowerCase();
         }
         if (trimPrefixes != null && !trimPrefixes.isEmpty()) {
             if (trimWhiteSpace) {
                 str = str.trim();
+                cmpStr = cmpStr.trim();
             }
             for (String item : trimPrefixes) {
-                if (str.startsWith(item)) {
+                String cmpItem = item;
+                if (ignoreCase) {
+                    cmpItem = cmpItem.toLowerCase();
+                }
+                if (cmpStr.startsWith(cmpItem)) {
                     str = str.substring(item.length());
                     break;
                 }
@@ -230,9 +434,14 @@ public class StringUtils {
         if (trimSuffixes != null && !trimSuffixes.isEmpty()) {
             if (trimWhiteSpace) {
                 str = str.trim();
+                cmpStr = cmpStr.trim();
             }
             for (String item : trimSuffixes) {
-                if (str.endsWith(item)) {
+                String cmpItem = item;
+                if (ignoreCase) {
+                    cmpItem = cmpItem.toLowerCase();
+                }
+                if (cmpStr.endsWith(cmpItem)) {
                     str = str.substring(0, str.length() - item.length());
                     break;
                 }
@@ -552,5 +761,26 @@ public class StringUtils {
 
     public static byte[] toGbk(String str) {
         return toBytes(str, "GBK");
+    }
+
+    public static String convertCharset(String source, String targetCharset, String unrecognizeCharReplacer) {
+        if (source == null) {
+            return source;
+        }
+        char[] arr = source.toCharArray();
+        StringBuilder builder = new StringBuilder();
+        for (char ch : arr) {
+            String str = "" + ch;
+            try {
+                byte[] bytes = str.getBytes(targetCharset);
+                String rev = new String(bytes, targetCharset);
+                if (str.equals(rev)) {
+                    builder.append(ch);
+                }
+            } catch (Exception e) {
+                builder.append(unrecognizeCharReplacer);
+            }
+        }
+        return builder.toString();
     }
 }
