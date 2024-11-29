@@ -36,12 +36,19 @@
             font-weight: normal;
             background-color: #aaaaaa;
         }
+
+        .document {
+            max-width: calc(210mm * 1);
+            overflow-wrap: break-word;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
+<div class="document">
     #foreach(${api} in ${apis})
-    <h3>1.1.${velocityCount} ${_vm.ifnull(${api.comment},"")}</h3>
-
+        <h3>1.1.${velocityCount} ${api.javaMethod} ${_vm.ifnull(${api.comment},"")}</h3>
+        <h6>${api.javaGenericMethod}</h6>
     接口说明：<br/>
 
     <table class="api-desc-table" border="1" cellspacing="0">
@@ -55,7 +62,11 @@
         </tr>
         <tr>
             <td class="api-desc-key">服务名</td>
-            <td class="api-desc-value">${_vm.ifnull(${api.urls[0]},"")}</td>
+            <td class="api-desc-value">
+                #if(!${api.urls.isEmpty()})
+                ${_vm.ifnull(${api.urls[0]},"")}
+                #end
+            </td>
         </tr>
         <tr>
             <td class="api-desc-key">请求地址</td>
@@ -63,7 +74,11 @@
         </tr>
         <tr>
             <td class="api-desc-key">接口协议</td>
-            <td class="api-desc-value">HTTP ${_vm.ifnull(${api.methods[0]},"")}</td>
+            <td class="api-desc-value">HTTP
+                #if(!${api.methods.isEmpty()})
+                    ${_vm.ifnull(${api.methods[0]},"")}
+                #end
+            </td>
         </tr>
         <tr>
             <td class="api-desc-key">字节编码</td>
@@ -211,6 +226,7 @@
 <br/>
 <br/>
 
+</div>
 </body>
 
 </html>
