@@ -47,9 +47,9 @@
 <body>
 <div class="document">
     #foreach(${api} in ${apis})
-        <h3>1.1.${velocityCount} ${api.javaMethod} ${_vm.ifnull(${api.comment},"")}</h3>
-        <h6>${api.javaGenericMethod}</h6>
-    接口说明：<br/>
+        <h3>1.1.${velocityCount} ${_vm.ifnull(${api.comment},"")}</h3>
+
+        接口说明：<br/>
 
     <table class="api-desc-table" border="1" cellspacing="0">
         <tr>
