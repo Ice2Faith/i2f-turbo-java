@@ -25,6 +25,8 @@ public class ColumnContext {
     private String javaType;
     private String jdbcType;
 
+    private ColumnMeta meta;
+
     private boolean isAutoincrement = false;
 
     private boolean isPrimaryKey = false;
@@ -51,6 +53,8 @@ public class ColumnContext {
 
         ret.isAutoincrement = meta.isAutoIncrement();
         ret.isPrimaryKey = meta.isAutoIncrement();
+
+        ret.meta = meta;
         return ret;
     }
 

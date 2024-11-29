@@ -21,6 +21,8 @@ public class TableContext {
 
     private List<ColumnContext> columns;
 
+    private TableMeta meta;
+
     public static TableContext parse(TableMeta meta) {
         TableContext ret = new TableContext();
         ret.name = meta.getName();
@@ -30,6 +32,8 @@ public class TableContext {
         ret.pascalName = GeneratorTool.toPascal(GeneratorTool.lower(ret.name));
 
         ret.columns = ColumnContext.parse(meta.getColumns());
+
+        ret.meta = meta;
         return ret;
     }
 }
