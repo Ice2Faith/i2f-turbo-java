@@ -684,7 +684,13 @@ public class ApiMethodResolver {
     public static String getTypeName(Type type, boolean keepJavaLang, boolean keepAll) {
         if (type instanceof Class) {
             Class<?> clazz = (Class<?>) type;
-            return getTypeName(clazz.getName(), keepJavaLang, keepAll);
+            if (clazz.isArray()) {
+                Class<?> componentType = clazz.getComponentType();
+                String name = componentType.getName() + "[]";
+                return getTypeName(name, keepJavaLang, keepAll);
+            } else {
+                return getTypeName(clazz.getName(), keepJavaLang, keepAll);
+            }
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType) type;
             Type rawType = ptype.getRawType();
@@ -701,8 +707,6 @@ public class ApiMethodResolver {
                 name += ">";
             }
             return name;
-        } else if (type instanceof TypeVariable) {
-
         }
         return getTypeName(type.getTypeName(), keepJavaLang, keepAll);
     }
@@ -720,7 +724,7 @@ public class ApiMethodResolver {
     public static String getShortTypeName(String name) {
         int idx = name.lastIndexOf(".");
         if (idx >= 0) {
-            return name.substring(idx + 1);
+            return name.substring(idx + 1).replaceAll("\\$", ".");
         }
         return name;
     }

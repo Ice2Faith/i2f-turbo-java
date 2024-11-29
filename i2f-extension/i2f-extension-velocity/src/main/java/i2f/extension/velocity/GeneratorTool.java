@@ -2,6 +2,8 @@ package i2f.extension.velocity;
 
 import i2f.io.stream.StreamUtil;
 import i2f.os.OsUtil;
+import i2f.serialize.str.json.impl.Json2;
+import i2f.serialize.str.xml.impl.Xml2;
 import i2f.text.StringUtils;
 import i2f.typeof.TypeOf;
 
@@ -455,6 +457,14 @@ public class GeneratorTool {
 
         }
         return str;
+    }
+
+    public static String toXmlString(Object obj) {
+        return Xml2.toXmlString(str(obj));
+    }
+
+    public static String toJsonString(Object obj) {
+        return Json2.toJson(obj);
     }
 
     public static String[] split(String str, boolean trimBefore, String regex, int limit, boolean removeEmpty) {
