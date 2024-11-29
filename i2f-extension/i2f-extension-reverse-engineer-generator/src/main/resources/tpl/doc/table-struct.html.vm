@@ -33,10 +33,17 @@
             font-weight: normal;
             background-color: #aaaaaa;
         }
+
+        .document {
+            max-width: calc(210mm * 1);
+            overflow-wrap: break-word;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
-<h1>table design doc</h1>
+<div class="document">
+    <h1>table design doc</h1>
     #foreach(${table} in ${tables})
     <hr/>
     <h2>1.${velocityCount} table:   ${table.name}</h2>
@@ -275,6 +282,6 @@
         #end
     </table>
     #end
-
+</div>
 </body>
 </html>
