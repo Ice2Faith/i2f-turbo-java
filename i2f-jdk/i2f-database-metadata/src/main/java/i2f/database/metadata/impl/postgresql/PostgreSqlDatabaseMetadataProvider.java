@@ -211,6 +211,7 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
             meta.setDesc(false);
             meta.setIndex(asInteger(row.get("key_seq"), 0));
             meta.setName(asString(row.get("column_name"), null));
+            primaryColumns.add(meta);
         }
         ret.setPrimary(primary);
     }
