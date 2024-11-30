@@ -52,24 +52,36 @@ public class DocumentUtil {
         }
     }
 
+    public static void convert(File wordFile, DocFormat saveFormat, File outFile) throws Exception {
+        convert(wordFile, saveFormat.code(), outFile);
+    }
     public static void convert(File wordFile, int saveFormat, File outFile) throws Exception {
         licence();
         Document doc = new Document(wordFile.getAbsolutePath());
         doc.save(outFile.getAbsolutePath(), saveFormat);
     }
 
+    public static void convert(InputStream wordIs, DocFormat saveFormat, OutputStream outOs) throws Exception {
+        convert(wordIs, saveFormat.code(), outOs);
+    }
     public static void convert(InputStream wordIs, int saveFormat, OutputStream outOs) throws Exception {
         File wordFile = FileUtil.getTempFile();
-        FileUtil.save(wordIs, wordFile);
-
         File outFile = FileUtil.getTempFile();
-        convert(wordFile, saveFormat, outFile);
 
-        FileInputStream fis = new FileInputStream(outFile);
-        StreamUtil.streamCopy(fis, outOs, false, true);
+        try {
+            FileUtil.save(wordIs, wordFile);
+            convert(wordFile, saveFormat, outFile);
 
-        wordFile.delete();
-        outFile.delete();
+            FileInputStream fis = new FileInputStream(outFile);
+            StreamUtil.streamCopy(fis, outOs, false, true);
+        } finally {
+            wordFile.delete();
+            outFile.delete();
+        }
+    }
+
+    public static void html2word(File htmlFile, File outFile) throws Exception {
+        convert(htmlFile, SaveFormat.DOCX, outFile);
     }
 
     public static void word2pdf(File wordFile, File outFile) throws Exception {
