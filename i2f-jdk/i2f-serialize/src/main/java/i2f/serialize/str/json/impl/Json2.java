@@ -83,13 +83,6 @@ public class Json2 {
                 buffer.append("\\t");
             } else if (Predicates.isCh(ch)) {
                 buffer.append(ch);
-            } else if (Predicates.isIn(ch, '&', '=', '<', '>', '\'')) {
-                buffer.append("\\u");
-                String hex = Integer.toHexString((int) ch & 0xffff);
-                for (int i = hex.length(); i < 4; i++) {
-                    buffer.append('0');
-                }
-                buffer.append(hex);
             } else {
                 buffer.append(ch);
             }
