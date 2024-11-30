@@ -23,15 +23,16 @@ public class WindowsDocumentUtil {
         converter.convert(is)
                 .as(inType)
                 .to(os)
-                .as(outType).execute();
+                .as(outType)
+                .execute();
         converter.shutDown();
         is.close();
         os.close();
     }
 
-    public static void convert(File inFIle, DocumentType inType,
+    public static void convert(File inFile, DocumentType inType,
                                File outFile, DocumentType outType) throws IOException {
-        InputStream is = new FileInputStream(inFIle);
+        InputStream is = new FileInputStream(inFile);
         OutputStream os = new FileOutputStream(outFile);
         convert(is, inType, os, outType);
     }
@@ -42,5 +43,13 @@ public class WindowsDocumentUtil {
 
     public static void word2pdf(File wordFile, File pdfFile) throws IOException {
         convert(wordFile, DocumentType.DOCX, pdfFile, DocumentType.PDF);
+    }
+
+    public static void html2word(InputStream wordIs, OutputStream pdfOs) throws IOException {
+        convert(wordIs, DocumentType.HTML, pdfOs, DocumentType.DOCX);
+    }
+
+    public static void html2word(File wordFile, File pdfFile) throws IOException {
+        convert(wordFile, DocumentType.HTML, pdfFile, DocumentType.DOCX);
     }
 }

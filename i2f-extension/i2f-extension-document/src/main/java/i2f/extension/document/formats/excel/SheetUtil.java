@@ -32,6 +32,9 @@ public class SheetUtil {
         }
     }
 
+    public static void convert(File excelFile, SheetFormat saveFormat, File outFile) throws Exception {
+        convert(excelFile, saveFormat.code(), outFile);
+    }
     public static void convert(File excelFile, int saveFormat, File outFile) throws Exception {
         licence();
         Workbook workbook = new Workbook(excelFile.getAbsolutePath());
@@ -44,6 +47,9 @@ public class SheetUtil {
         }
     }
 
+    public static void convert(InputStream excelIs, SheetFormat saveFormat, OutputStream outOs) throws Exception {
+        convert(excelIs, saveFormat.code(), outOs);
+    }
     public static void convert(InputStream excelIs, int saveFormat, OutputStream outOs) throws Exception {
         File excelFile = FileUtil.getTempFile();
         FileUtil.save(excelIs, excelFile);
