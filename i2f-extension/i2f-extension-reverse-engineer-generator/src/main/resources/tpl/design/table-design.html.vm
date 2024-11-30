@@ -46,11 +46,18 @@
             font-weight: normal;
             background-color: #aaaaaa;
         }
+
+        .document {
+            max-width: calc(210mm * 1);
+            overflow-wrap: break-word;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
+<div class="document">
     #foreach(${table} in ${tables})
-    <h3>1.1.${velocityCount} 表 ${_vm.ifnull(${table.comment},${table.table})}</h3>
+        <h3>1.1.${velocityCount} 表 ${_vm.ifnull(${table.comment},${table.name})}</h3>
 
     表 ${_vm.ifnull(${table.name},"")} 的列清单<br/>
     <table class="table-column-list" border="1" cellspacing="0">
@@ -234,7 +241,7 @@
         #end
     </table>
     #end
-
+</div>
 </body>
 
 </html>
