@@ -34,15 +34,9 @@
             background-color: #aaaaaa;
         }
 
-        .document {
-            max-width: calc(210mm * 1);
-            overflow-wrap: break-word;
-            margin: 0 auto;
-        }
     </style>
 </head>
 <body>
-<div class="document">
     <h1>table design doc</h1>
     #foreach(${table} in ${tables})
     <hr/>
@@ -282,6 +276,5 @@
         #end
     </table>
     #end
-</div>
 </body>
 </html>
