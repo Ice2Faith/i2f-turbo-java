@@ -3,6 +3,7 @@ package i2f.database.metadata;
 import i2f.database.metadata.data.TableMeta;
 import i2f.database.metadata.impl.dm.DmDatabaseMetadataProvider;
 import i2f.database.metadata.impl.gbase.GbaseDatabaseMetadataProvider;
+import i2f.database.metadata.impl.h2.H2DatabaseMetadataProvider;
 import i2f.database.metadata.impl.mysql.MysqlDatabaseMetadataProvider;
 import i2f.database.metadata.impl.oracle.OracleDatabaseMetadataProvider;
 import i2f.database.metadata.impl.postgresql.PostgreSqlDatabaseMetadataProvider;
@@ -74,6 +75,8 @@ public interface DatabaseMetadataProvider {
             return new PostgreSqlDatabaseMetadataProvider();
         } else if (DatabaseType.DM == databaseType) {
             return new DmDatabaseMetadataProvider();
+        } else if (DatabaseType.H2 == databaseType) {
+            return new H2DatabaseMetadataProvider();
         }
 
         throw new IllegalStateException("un-support metadata provider for product: " + productName);
