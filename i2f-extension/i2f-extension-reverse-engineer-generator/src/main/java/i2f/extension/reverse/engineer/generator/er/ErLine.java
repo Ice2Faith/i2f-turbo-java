@@ -1,4 +1,4 @@
-package i2f.reverse.engineer.generator.er;
+package i2f.extension.reverse.engineer.generator.er;
 
 import lombok.Data;
 

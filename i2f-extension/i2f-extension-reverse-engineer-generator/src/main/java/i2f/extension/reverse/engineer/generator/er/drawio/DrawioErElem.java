@@ -1,4 +1,4 @@
-package i2f.reverse.engineer.generator.er.drawio;
+package i2f.extension.reverse.engineer.generator.er.drawio;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package i2f.reverse.engineer.generator.database;
+package i2f.extension.reverse.engineer.generator.database;
 
 import i2f.database.metadata.data.TableMeta;
 import i2f.extension.velocity.GeneratorTool;

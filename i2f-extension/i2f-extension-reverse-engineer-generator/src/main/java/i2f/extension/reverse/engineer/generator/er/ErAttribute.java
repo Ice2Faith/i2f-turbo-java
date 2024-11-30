@@ -1,4 +1,4 @@
-package i2f.reverse.engineer.generator.er;
+package i2f.extension.reverse.engineer.generator.er;
 
 import i2f.database.metadata.data.ColumnMeta;
 import lombok.Data;
