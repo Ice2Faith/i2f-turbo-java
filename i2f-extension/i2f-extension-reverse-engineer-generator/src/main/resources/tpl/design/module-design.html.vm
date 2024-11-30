@@ -39,9 +39,16 @@
             font-weight: normal;
             background-color: #aaaaaa;
         }
+
+        .document {
+            max-width: calc(210mm * 1);
+            overflow-wrap: break-word;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
+<div class="document">
     #foreach(${module} in ${modules})
     <h3>1.1.${velocityCount} ${_vm.ifnull(${module.comment},"")}</h3>
 
@@ -143,6 +150,7 @@
 <br/>
 <br/>
 
+</div>
 </body>
 
 </html>
