@@ -101,46 +101,66 @@ public class ReverseEngineerGenerator {
         return er(list, template);
     }
 
-    public static String drawioEr(List<TableMeta> tables, String template) throws IOException {
+    public static String erDrawio(List<TableMeta> tables, String template) throws IOException {
         Map<String, Object> map = new HashMap<>();
         List<DrawioErElem> elems = DrawioAdapter.parseEr(tables);
         map.put("elems", elems);
         return VelocityGenerator.render(template, map);
     }
 
-    public static String drawioEr(List<TableMeta> tables) throws IOException {
+    public static String erDrawio(List<TableMeta> tables) throws IOException {
         String tpl = ResourceUtil.getClasspathResourceAsString("tpl/drawio/er/er.xml.drawio.vm", "UTF-8");
-        return drawioEr(tables, tpl);
+        return erDrawio(tables, tpl);
     }
 
-    public static String doc(List<TableMeta> tables, String template) throws Exception {
-        Map<String, Object> map = new HashMap<>();
-        map.put("tables", tables);
-        return VelocityGenerator.render(template, map);
+    public static String tablesDesignDoc(List<TableMeta> tables) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/table-design.html.vm", "UTF-8");
+        return tablesDoc(tables, tpl);
     }
 
-    public static String doc(String template, Class<?>... beanClasses) throws Exception {
+    public static String tablesStructDoc(List<TableMeta> tables) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-struct.html.vm", "UTF-8");
+        return tablesDoc(tables, tpl);
+    }
+
+    public static String tablesDdlMysql(List<TableMeta> tables) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-ddl.mysql.sql.vm", "UTF-8");
+        return tablesDoc(tables, tpl);
+    }
+
+    public static String tablesDdlOracle(List<TableMeta> tables) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-ddl.oracle.sql.vm", "UTF-8");
+        return tablesDoc(tables, tpl);
+    }
+
+    public static String tablesDoc(List<TableMeta> tables, String template) throws IOException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("tables", tables);
+        return VelocityGenerator.render(template, params);
+    }
+
+    public static String tablesDoc(String template, Class<?>... beanClasses) throws Exception {
         List<TableMeta> list = new ArrayList<>();
         for (Class<?> item : beanClasses) {
             TableMeta table = BeanDatabaseMetadataResolver.getTableMeta(item);
             list.add(table);
         }
-        return doc(list, template);
+        return tablesDoc(list, template);
     }
 
-    public static String doc(Connection conn, String template, String... tableNames) throws Exception {
+    public static String tablesDoc(Connection conn, String template, String... tableNames) throws Exception {
         List<TableMeta> list = new ArrayList<>();
         DatabaseMetadataProvider provider = DatabaseMetadataProvider.findProvider(conn);
         for (String item : tableNames) {
             TableMeta table = provider.getTableInfo(conn, null, item);
             list.add(table);
         }
-        return doc(list, template);
+        return tablesDoc(list, template);
     }
 
 
     public static String apis(List<ApiMethod> apis) throws IOException {
-        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/api-doc.html.vm", "UTF-8");
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/api-design.html.vm", "UTF-8");
         return apis(apis, tpl);
     }
 
@@ -287,9 +307,8 @@ public class ReverseEngineerGenerator {
         return apis(apis, template);
     }
 
-
     public static String modulesMvc(List<ModuleController> modules) throws IOException {
-        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/module-doc.html.vm", "UTF-8");
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/module-design.html.vm", "UTF-8");
         return modulesMvc(modules, tpl);
     }
 
@@ -343,29 +362,4 @@ public class ReverseEngineerGenerator {
         return modulesMvc(modules, template);
     }
 
-    public static String tablesDesignDoc(List<TableMeta> tables) throws IOException {
-        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/table-design.html.vm", "UTF-8");
-        return tablesDoc(tables, tpl);
-    }
-
-    public static String tablesStructDoc(List<TableMeta> tables) throws IOException {
-        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-struct.html.vm", "UTF-8");
-        return tablesDoc(tables, tpl);
-    }
-
-    public static String tablesDdlMysql(List<TableMeta> tables) throws IOException {
-        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-ddl.mysql.sql.vm", "UTF-8");
-        return tablesDoc(tables, tpl);
-    }
-
-    public static String tablesDdlOracle(List<TableMeta> tables) throws IOException {
-        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/doc/table-ddl.oracle.sql.vm", "UTF-8");
-        return tablesDoc(tables, tpl);
-    }
-
-    public static String tablesDoc(List<TableMeta> tables, String template) throws IOException {
-        Map<String, Object> params = new HashMap<>();
-        params.put("tables", tables);
-        return VelocityGenerator.render(template, params);
-    }
 }

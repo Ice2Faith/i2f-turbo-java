@@ -13,4 +13,6 @@ public class JavaCodeContext {
     private String author;
     private boolean useLombok;
     private boolean useSwagger;
+    private boolean useMybatisPlus;
+    private boolean useDbAnnotation;
 }
