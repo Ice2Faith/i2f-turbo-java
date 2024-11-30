@@ -1,10 +1,11 @@
-package i2f.database.metadata.impl.mysql;
+package i2f.database.metadata.impl.h2;
 
 import i2f.database.metadata.data.ColumnMeta;
 import i2f.database.metadata.data.IndexColumnMeta;
 import i2f.database.metadata.data.IndexMeta;
 import i2f.database.metadata.data.TableMeta;
 import i2f.database.metadata.impl.base.BaseDatabaseMetadataProvider;
+import i2f.database.metadata.impl.mysql.MySqlType;
 import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
@@ -20,14 +21,14 @@ import java.util.*;
  * @date 2024/3/14 10:56
  * @desc
  */
-public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
+public class H2DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
 
-    public static final String DRIVER_NAME = "com.mysql.cj.jdbc.Driver";
+    public static final String DRIVER_NAME = "org.h2.Driver";
 
     public static final String MAVEN_DEPENDENCY = "<dependency>\n" +
-            "            <groupId>mysql</groupId>\n" +
-            "            <artifactId>mysql-connector-java</artifactId>\n" +
-            "            <version>8.0.26</version>\n" +
+            "            <groupId>com.h2database</groupId>\n" +
+            "            <artifactId>h2</artifactId>\n" +
+            "            <version>2.2.224</version>\n" +
             "        </dependency>";
 
     @Override
@@ -47,7 +48,7 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
 
     @Override
     public List<String> getDatabases(Connection conn) throws SQLException {
-        return super.getCatalogs(conn);
+        return super.getSchemas(conn);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
         TableMeta table = new TableMeta();
         table.setCatalog(asString(row.get("TABLE_CAT"), null));
         table.setSchema(asString(row.get("TABLE_SCHEM"), null));
-        table.setDatabase(table.getCatalog());
+        table.setDatabase(table.getSchema());
         table.setName(asString(row.get("TABLE_NAME"), null));
         table.setComment(asString(row.get("REMARKS"), null));
         table.setType(asString(row.get("TABLE_TYPE"), null));
@@ -65,13 +66,13 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
 
     @Override
     public ResultSet getTables(DatabaseMetaData metaData, String database) throws SQLException {
-        return metaData.getTables(database, null, null, null);
+        return metaData.getTables(null, database, null, null);
     }
 
     @Override
     public QueryResult getTablesComment(Connection conn, String database) throws SQLException {
-        String sql = "select TABLE_CATALOG,TABLE_SCHEMA,TABLE_NAME,TABLE_TYPE,TABLE_COMMENT \n" +
-                "from information_schema.TABLES \n" +
+        String sql = " select TABLE_CATALOG,TABLE_SCHEMA,TABLE_NAME,TABLE_TYPE,REMARKS\n" +
+                " from INFORMATION_SCHEMA.TABLES \n" +
                 "where TABLE_SCHEMA  = ? ";
         QueryResult result = JdbcResolver.query(conn, sql, Arrays.asList(database));
         return result;
@@ -84,39 +85,39 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
 
     @Override
     public String extractTablesCommentTableComment(Map<String, Object> row) {
-        return asString(row.get("TABLE_COMMENT"), null);
+        return asString(row.get("REMARKS"), null);
     }
 
     @Override
     public ResultSet getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getTables(database, null, table, null);
+        return metaData.getTables(null, database, table, null);
     }
 
     @Override
     public ResultSet getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getColumns(database, null, table, null);
+        return metaData.getColumns(null, database, table, null);
     }
 
     @Override
     public ResultSet getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getPrimaryKeys(database, null, table);
+        return metaData.getPrimaryKeys(null, database, table);
     }
 
     @Override
     public ResultSet getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getIndexInfo(database, null, table, false, false);
+        return metaData.getIndexInfo(null, database, table, false, false);
     }
 
     @Override
     public QueryResult getColumnsComment(Connection conn, String database, String table) throws SQLException {
-        String sql = "select TABLE_SCHEMA,TABLE_NAME,COLUMN_NAME,ORDINAL_POSITION,COLUMN_COMMENT, \n" +
-                "COLUMN_DEFAULT,IS_NULLABLE, \n" +
-                "DATA_TYPE,COLUMN_TYPE,COLUMN_KEY, \n" +
-                "CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION,NUMERIC_SCALE \n" +
-                "from information_schema.COLUMNS \n" +
-                "where TABLE_SCHEMA  = ? \n" +
-                "and TABLE_NAME = ? \n" +
-                "order by ORDINAL_POSITION ";
+        String sql = " select TABLE_SCHEMA,TABLE_NAME,COLUMN_NAME,ORDINAL_POSITION,REMARKS, \n" +
+                " COLUMN_DEFAULT,IS_NULLABLE, \n" +
+                " CASE WHEN DATA_TYPE='CHARACTER VARYING' THEN 'VARCHAR' ELSE DATA_TYPE END AS DATA_TYPE,\n" +
+                " CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION,NUMERIC_SCALE \n" +
+                " from information_schema.COLUMNS \n" +
+                " where TABLE_SCHEMA  = ?\n" +
+                " and TABLE_NAME = ? \n" +
+                " order by ORDINAL_POSITION ";
         return JdbcResolver.query(conn, sql, Arrays.asList(database, table));
     }
 
@@ -127,15 +128,19 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
 
     @Override
     public String extractColumnsCommentColumnComment(Map<String, Object> row) {
-        return asString(row.get("COLUMN_COMMENT"), null);
+        return asString(row.get("REMARKS"), null);
     }
 
     @Override
     public ColumnMeta parseColumn(Map<String, Object> row) {
+        String typeName = asString(row.get("TYPE_NAME"), null);
+        if ("CHARACTER VARYING".equals(typeName)) {
+            typeName = "VARCHAR";
+        }
         ColumnMeta col = new ColumnMeta();
         col.setIndex(asInteger(row.get("ORDINAL_POSITION"), 0));
         col.setName(asString(row.get("COLUMN_NAME"), null));
-        col.setType(asString(row.get("TYPE_NAME"), null));
+        col.setType(typeName);
         if (col.getType() != null) {
             col.setType(col.getType().split("\\(", 2)[0]);
         }

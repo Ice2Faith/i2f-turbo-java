@@ -1106,6 +1106,19 @@
                             <nonFilteredFileExtension>zip</nonFilteredFileExtension>
                             <nonFilteredFileExtension>exe</nonFilteredFileExtension>
                             <nonFilteredFileExtension>elf</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>vm</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>json</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>yml</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>yaml</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>properties</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>conf</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>xml</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>db</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>ftl</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>drl</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>js</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>css</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>html</nonFilteredFileExtension>
                         </nonFilteredFileExtensions>
                     </configuration>
                     <executions>
@@ -1126,7 +1139,7 @@
                                     <resource>
                                         <!-- 原始目录 -->
                                         <directory>src/main/java</directory>
-                                        <filtering>true</filtering>
+                                        <filtering>false</filtering>
                                         <!-- 包含哪些文件以及去除调哪些文件等等 -->
                                         <includes>
                                             <include>**/*</include>

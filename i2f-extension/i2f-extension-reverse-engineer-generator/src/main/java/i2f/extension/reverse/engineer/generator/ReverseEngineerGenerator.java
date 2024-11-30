@@ -292,11 +292,9 @@ public class ReverseEngineerGenerator {
     public static String apiMvcsControllers(ApplicationContext context, Predicate<Class<?>> filter, Consumer<List<ApiMethod>> preProcessor, ApiMethodResolver.TraceLevel level, String template) throws IOException {
         Set<Class<?>> controllers = ApiMethodResolver.getSpringMvcControllers(context);
         List<ApiMethod> apis = new LinkedList<>();
-        if (filter != null) {
-            for (Class<?> controller : controllers) {
-                if (filter.test(controller)) {
-                    apis.addAll(ApiMethodResolver.getMvcApiMethods(controller, level));
-                }
+        for (Class<?> controller : controllers) {
+            if (filter == null || filter.test(controller)) {
+                apis.addAll(ApiMethodResolver.getMvcApiMethods(controller, level));
             }
         }
 
@@ -347,11 +345,9 @@ public class ReverseEngineerGenerator {
     public static String modulesMvcControllers(ApplicationContext context, Predicate<Class<?>> filter, Consumer<List<ModuleController>> preProcessor, String template) throws IOException {
         Set<Class<?>> controllers = ApiMethodResolver.getSpringMvcControllers(context);
         List<ModuleController> modules = new LinkedList<>();
-        if (filter != null) {
-            for (Class<?> controller : controllers) {
-                if (filter.test(controller)) {
-                    modules.add(ModuleResolver.parse(controller));
-                }
+        for (Class<?> controller : controllers) {
+            if (filter == null || filter.test(controller)) {
+                modules.add(ModuleResolver.parse(controller));
             }
         }
 
