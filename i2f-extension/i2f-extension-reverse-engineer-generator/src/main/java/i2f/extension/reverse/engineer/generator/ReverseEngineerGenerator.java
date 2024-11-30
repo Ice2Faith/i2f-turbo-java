@@ -234,8 +234,17 @@ public class ReverseEngineerGenerator {
         return apis(apis, template);
     }
 
-    public static String apiMvcsSameComments(ApplicationContext context, Predicate<Class<?>> filter, String template) throws IOException {
-        return apiMvcsSameComments(context, filter, null, template);
+    public static String apiMvcsSameComments(ApplicationContext context) throws IOException {
+        return apiMvcsSameComments(context, null, null);
+    }
+
+    public static String apiMvcsSameComments(ApplicationContext context, ApiMethodResolver.TraceLevel level) throws IOException {
+        return apiMvcsSameComments(context, null, level);
+    }
+
+    public static String apiMvcsSameComments(ApplicationContext context, Predicate<Class<?>> filter, ApiMethodResolver.TraceLevel level) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/api-design.html.vm", "UTF-8");
+        return apiMvcsSameComments(context, filter, level, tpl);
     }
 
     public static String apiMvcsSameComments(ApplicationContext context, Predicate<Class<?>> filter, ApiMethodResolver.TraceLevel level, String template) throws IOException {
@@ -285,8 +294,21 @@ public class ReverseEngineerGenerator {
         }, level, template);
     }
 
-    public static String apiMvcsControllers(ApplicationContext context, Predicate<Class<?>> filter, Consumer<List<ApiMethod>> preProcessor, String template) throws IOException {
-        return apiMvcsControllers(context, filter, preProcessor, null, template);
+    public static String apiMvcsControllers(ApplicationContext context) throws IOException {
+        return apiMvcsControllers(context, null, null, ApiMethodResolver.TraceLevel.BASIC);
+    }
+
+    public static String apiMvcsControllers(ApplicationContext context, ApiMethodResolver.TraceLevel level) throws IOException {
+        return apiMvcsControllers(context, null, null, level);
+    }
+
+    public static String apiMvcsControllers(ApplicationContext context, Consumer<List<ApiMethod>> preProcessor, ApiMethodResolver.TraceLevel level) throws IOException {
+        return apiMvcsControllers(context, null, preProcessor, level);
+    }
+
+    public static String apiMvcsControllers(ApplicationContext context, Predicate<Class<?>> filter, Consumer<List<ApiMethod>> preProcessor, ApiMethodResolver.TraceLevel level) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/api-design.html.vm", "UTF-8");
+        return apiMvcsControllers(context, filter, preProcessor, level, tpl);
     }
 
     public static String apiMvcsControllers(ApplicationContext context, Predicate<Class<?>> filter, Consumer<List<ApiMethod>> preProcessor, ApiMethodResolver.TraceLevel level, String template) throws IOException {
@@ -333,6 +355,11 @@ public class ReverseEngineerGenerator {
         return VelocityGenerator.render(template, params);
     }
 
+    public static String modulesMvc(Class<?> controller, Class<?>... controllers) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/module-design.html.vm", "UTF-8");
+        return modulesMvc(tpl, controller, controllers);
+    }
+
     public static String modulesMvc(String template, Class<?> controller, Class<?>... controllers) throws IOException {
         List<ModuleController> modules = new LinkedList<>();
         modules.add(ModuleResolver.parse(controller));
@@ -340,6 +367,19 @@ public class ReverseEngineerGenerator {
             modules.add(ModuleResolver.parse(item));
         }
         return modulesMvc(modules, template);
+    }
+
+    public static String modulesMvcControllers(ApplicationContext context) throws IOException {
+        return modulesMvcControllers(context, null, null);
+    }
+
+    public static String modulesMvcControllers(ApplicationContext context, Consumer<List<ModuleController>> preProcessor) throws IOException {
+        return modulesMvcControllers(context, null, preProcessor);
+    }
+
+    public static String modulesMvcControllers(ApplicationContext context, Predicate<Class<?>> filter, Consumer<List<ModuleController>> preProcessor) throws IOException {
+        String tpl = ResourceUtil.getClasspathResourceAsString("/tpl/design/module-design.html.vm", "UTF-8");
+        return modulesMvcControllers(context, filter, preProcessor, tpl);
     }
 
     public static String modulesMvcControllers(ApplicationContext context, Predicate<Class<?>> filter, Consumer<List<ModuleController>> preProcessor, String template) throws IOException {
