@@ -1,0 +1,29 @@
+<p style="margin: 0px; margin-top: 4px; text-align: center; "><strong>${table.name}</strong></p>
+<hr/>
+<table style="width:100%;font-size:1em;" cellpadding="2" cellspacing="0">
+    #foreach(${line} in ${table.columns})
+        <tr>
+            <td>
+                ${_vm.ifnull(${line.name},"")}
+            </td>
+            <td>
+                ${line.type}
+                #if(${line.precision}>0)
+                    (
+                    ${line.precision}
+                    #if(${line.scale}>0)
+                        ,${line.scale}
+                    #end
+                    )
+                #end
+            </td>
+            <td>
+                #if(${line.PrimaryKey})
+                    pk
+                #end
+            </td>
+        </tr>
+    #end
+</table>
+<hr/>
+<p style="margin: 0px; margin-top: 4px; "><strong>${_vm.ifnull(${table.comment},"")}</strong></p>
