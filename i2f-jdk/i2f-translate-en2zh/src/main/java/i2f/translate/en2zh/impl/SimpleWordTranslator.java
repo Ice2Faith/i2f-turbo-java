@@ -34,6 +34,7 @@ public class SimpleWordTranslator implements ITranslator {
 
     protected Map<String, String> priorWordTranslateMap = new ConcurrentHashMap<>();
     protected static LruMap<String, String> fastCacheMap = new LruMap<>(1024 * 16);
+    protected static LruMap<String, String> fastLetterCacheMap = new LruMap<>(1024 * 8);
 
     protected volatile Connection conn;
     protected volatile BqlTemplate template;
@@ -145,6 +146,10 @@ public class SimpleWordTranslator implements ITranslator {
         if (val != null) {
             return val;
         }
+        val = fastLetterCacheMap.get(str);
+        if (val != null) {
+            return val;
+        }
         StringBuilder ret = new StringBuilder();
         if (str.endsWith("'s")) {
             str = str.substring(0, str.length() - "'s".length());
@@ -160,7 +165,9 @@ public class SimpleWordTranslator implements ITranslator {
                 ret.append(item);
             }
         }
-        return ret.toString();
+        String result = ret.toString();
+        fastLetterCacheMap.put(str, result);
+        return result;
     }
 
     public synchronized String translateSingleWord(String str) {
