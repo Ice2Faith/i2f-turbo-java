@@ -1195,6 +1195,8 @@
                         </archive>
                         <includes>
                             <include>META-INF/**/*</include>
+                            <include>assets/*</include>
+                            <include>bundles/*</include>
                             <include>**/*.dll</include>
                             <include>**/*.so</include>
                             <include>**/*.class</include>
