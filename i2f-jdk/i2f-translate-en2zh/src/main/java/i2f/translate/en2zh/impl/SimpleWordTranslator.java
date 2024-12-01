@@ -95,7 +95,7 @@ public class SimpleWordTranslator implements ITranslator {
 
         if (!dbFile.isFile()) {
 
-            InputStream is = ResourceUtil.getClasspathResourceAsStream("/database/translate_en2zh.zip");
+            InputStream is = ResourceUtil.getClasspathResourceAsStream("/assets/database/translate_en2zh.zip");
 
 
             File zipFile = new File(dir, "translate_en2zh.zip");
