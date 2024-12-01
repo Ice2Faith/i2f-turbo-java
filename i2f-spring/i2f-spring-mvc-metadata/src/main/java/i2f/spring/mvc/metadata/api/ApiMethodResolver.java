@@ -284,7 +284,7 @@ public class ApiMethodResolver {
 
         ApiOperation annOpe = ReflectResolver.getAnnotation(method, ApiOperation.class);
         if (annOpe != null) {
-            if (!"".equals(comment)) {
+            if (comment.length() > 0) {
                 comment.append(" >> ");
             }
 
