@@ -121,7 +121,7 @@ public class ModuleResolver {
     }
 
     public void parseApiMethods() {
-        List<ApiMethod> methods = ApiMethodResolver.getMvcApiMethods(clazz, ApiMethodResolver.TraceLevel.NONE);
+        List<ApiMethod> methods = ApiMethodResolver.getMvcApiMethods(clazz, ApiMethodResolver.TraceLevel.NONE, false);
         module.setMethods(methods);
     }
 }

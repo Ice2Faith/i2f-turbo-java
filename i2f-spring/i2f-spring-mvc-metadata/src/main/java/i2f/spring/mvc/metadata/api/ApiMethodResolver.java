@@ -72,26 +72,43 @@ public class ApiMethodResolver {
     protected TraceLevel traceLevel = TraceLevel.BASIC;
     protected Method method;
     protected ApiMethod api;
+    protected boolean withClassAnnotation = true;
 
     public static ApiMethod parseMethod(Method method) {
         return new ApiMethodResolver(method).parse();
     }
 
     public static ApiMethod parseMethod(Method method, TraceLevel level) {
-        return new ApiMethodResolver(method, level).parse();
+        return new ApiMethodResolver(method, level, true).parse();
+    }
+
+    public static ApiMethod parseMethod(Method method, boolean withClassAnnotation) {
+        return new ApiMethodResolver(method, withClassAnnotation).parse();
+    }
+
+    public static ApiMethod parseMethod(Method method, TraceLevel level, boolean withClassAnnotation) {
+        return new ApiMethodResolver(method, level, withClassAnnotation).parse();
     }
 
     public ApiMethodResolver(Method method) {
         this.method = method;
         this.traceLevel = TraceLevel.BASIC;
+        this.withClassAnnotation = true;
     }
 
-    public ApiMethodResolver(Method method, TraceLevel level) {
+    public ApiMethodResolver(Method method, boolean withClassAnnotation) {
+        this.method = method;
+        this.traceLevel = TraceLevel.BASIC;
+        this.withClassAnnotation = withClassAnnotation;
+    }
+
+    public ApiMethodResolver(Method method, TraceLevel level, boolean withClassAnnotation) {
         this.method = method;
         if (level == null) {
             level = TraceLevel.BASIC;
         }
         this.traceLevel = level;
+        this.withClassAnnotation = withClassAnnotation;
     }
 
     public ApiMethod parse() {
@@ -243,25 +260,29 @@ public class ApiMethodResolver {
         if (!swaggerSupport()) {
             return;
         }
-        Class<?> clazz = method.getDeclaringClass();
-        Api annApi = ReflectResolver.getAnnotation(clazz, Api.class);
-        ApiOperation annOpe = ReflectResolver.getAnnotation(method, ApiOperation.class);
         StringBuilder comment = new StringBuilder();
-        if (annApi != null) {
-            comment.append(annApi.value());
-            String[] annTags = annApi.tags();
-            if (annTags.length > 0 && !(annTags.length == 1 && "".equals(annTags[0]))) {
-                comment.append("[");
-                for (int i = 0; i < annTags.length; i++) {
-                    if (i != 0) {
-                        comment.append(", ");
+
+        if (withClassAnnotation) {
+            Class<?> clazz = method.getDeclaringClass();
+            Api annApi = ReflectResolver.getAnnotation(clazz, Api.class);
+
+            if (annApi != null) {
+                comment.append(annApi.value());
+                String[] annTags = annApi.tags();
+                if (annTags.length > 0 && !(annTags.length == 1 && "".equals(annTags[0]))) {
+                    comment.append("[");
+                    for (int i = 0; i < annTags.length; i++) {
+                        if (i != 0) {
+                            comment.append(", ");
+                        }
+                        comment.append(annTags[i]);
                     }
-                    comment.append(annTags[i]);
+                    comment.append("]");
                 }
-                comment.append("]");
             }
         }
 
+        ApiOperation annOpe = ReflectResolver.getAnnotation(method, ApiOperation.class);
         if (annOpe != null) {
             if (!"".equals(comment)) {
                 comment.append(" >> ");
@@ -838,10 +859,14 @@ public class ApiMethodResolver {
     }
 
     public static List<ApiMethod> getMvcApiMethods(Class clazz, ApiMethodResolver.TraceLevel level) {
+        return getMvcApiMethods(clazz, level, true);
+    }
+
+    public static List<ApiMethod> getMvcApiMethods(Class clazz, ApiMethodResolver.TraceLevel level, boolean withClassAnnotation) {
         List<ApiMethod> apis = new ArrayList<>();
         Set<Method> set = getMvcMethods(clazz);
         for (Method item : set) {
-            apis.add(parseMethod(item, level));
+            apis.add(parseMethod(item, level, withClassAnnotation));
         }
         return apis;
     }
