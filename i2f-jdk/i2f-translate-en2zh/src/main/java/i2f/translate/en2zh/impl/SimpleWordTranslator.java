@@ -11,6 +11,8 @@ import i2f.match.regex.RegexUtil;
 import i2f.resources.ResourceUtil;
 import i2f.text.StringUtils;
 import i2f.translate.ITranslator;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Ice2Faith
  * @date 2024/12/1 10:10
  */
+@Data
+@NoArgsConstructor
 public class SimpleWordTranslator implements ITranslator {
 
     protected Map<String, String> priorWordTranslateMap = new ConcurrentHashMap<>();
@@ -64,6 +68,10 @@ public class SimpleWordTranslator implements ITranslator {
     public String translate(String str) {
         if (str == null || str.isEmpty()) {
             return str;
+        }
+        String val = priorWordTranslateMap.get(str);
+        if (val != null) {
+            return val;
         }
         try {
             if (conn == null || conn.isClosed()) {
@@ -130,6 +138,10 @@ public class SimpleWordTranslator implements ITranslator {
 
     public String translateLetters(String str) {
         String val = priorWordTranslateMap.get(str);
+        if (val != null) {
+            return val;
+        }
+        val = fastCacheMap.get(str);
         if (val != null) {
             return val;
         }
