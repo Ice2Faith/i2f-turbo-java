@@ -40,4 +40,5 @@
 **/*.bak
 **/*.tmp
 
-!assets/*
+!resources/assets/**
+!resources/bundles/**
