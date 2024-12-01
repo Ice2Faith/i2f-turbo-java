@@ -27,7 +27,7 @@ public class TestUriMeta {
                 "http://192.168.1.100:9600/web/#/login/custom?type=wechat&code=123456&callback=456",
                 "http://192.168.1.100:9600/web/?type=wechat&code=123456&callback=456#/login/custom",
                 "http://192.168.1.100:9600/web/?type=wechat&code=123456&callback=456#/login/custom",
-                "https://github.com/Ice2Faith/xxl-job-multiply.git",
+                "https://xxx@github.com/Ice2Faith/xxl-job-multiply.git",
                 "git@gitee.com:ice2faith/i2f-turbo-java.git",
                 "https://Ice2Faith:xxx123456@gitee.com/ice2faith/i2f-turbo-knowledge.git",
                 "jar:file:/path/to/jarfile.jar!/com/user/TestUser.class",
