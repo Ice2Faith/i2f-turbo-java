@@ -1,4 +1,4 @@
-package i2f.extension.reverse.engineer.generator.er.drawio;
+package i2f.extension.reverse.engineer.generator.er.er1.drawio;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class DrawioErElem {
+public class DrawIoErElem {
     private String id;
     private String text;
     // entity,attribute,link

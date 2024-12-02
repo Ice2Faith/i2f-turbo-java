@@ -1,4 +1,4 @@
-package i2f.extension.reverse.engineer.generator.er.relation.drawio;
+package i2f.extension.reverse.engineer.generator.er.er2.drawio;
 
 import i2f.database.metadata.data.TableMeta;
 import i2f.extension.velocity.VelocityGenerator;
@@ -12,10 +12,10 @@ import java.util.*;
  * @author Ice2Faith
  * @date 2024/12/1 19:29
  */
-public class RelationDrawIoGenerator {
+public class DatabaseEr2DrawIoGenerator {
     public static String render(List<TableMeta> metas) throws IOException {
-        List<RelationTableContext> list = new ArrayList<>();
-        String tpl = ResourceUtil.getClasspathResourceAsString("tpl/design/table-relation-entity.html.vm", "UTF-8");
+        List<DatabaseEr2TableContext> list = new ArrayList<>();
+        String tpl = ResourceUtil.getClasspathResourceAsString("tpl/er/er2/drawio/er-2-drawio-value.html.vm", "UTF-8");
         int x = 0;
         int y = 0;
         for (TableMeta item : metas) {
@@ -24,7 +24,7 @@ public class RelationDrawIoGenerator {
             String str = VelocityGenerator.render(tpl, param);
             str = str.replaceAll("\\s+", " ");
             str = Xml2.toXmlString(str);
-            RelationTableContext vo = new RelationTableContext();
+            DatabaseEr2TableContext vo = new DatabaseEr2TableContext();
             vo.setMeta(item);
             vo.setValue(str);
             vo.setId(UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
@@ -41,7 +41,7 @@ public class RelationDrawIoGenerator {
             }
         }
 
-        tpl = ResourceUtil.getClasspathResourceAsString("tpl/design/table-relation-design.xml.drawio.vm", "UTF-8");
+        tpl = ResourceUtil.getClasspathResourceAsString("tpl/er/er2/drawio/er-2.xml.drawio.vm", "UTF-8");
         Map<String, Object> param = new HashMap<>();
         param.put("tables", list);
         return VelocityGenerator.render(tpl, param);

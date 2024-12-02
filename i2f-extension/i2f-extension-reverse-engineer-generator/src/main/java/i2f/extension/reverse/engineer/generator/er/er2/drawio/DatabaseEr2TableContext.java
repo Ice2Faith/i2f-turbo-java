@@ -1,4 +1,4 @@
-package i2f.extension.reverse.engineer.generator.er.relation.drawio;
+package i2f.extension.reverse.engineer.generator.er.er2.drawio;
 
 import i2f.database.metadata.data.TableMeta;
 import lombok.Data;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class RelationTableContext {
+public class DatabaseEr2TableContext {
     private TableMeta meta;
     private String id;
     private String value;
