@@ -1,4 +1,4 @@
-package i2f.extension.reverse.engineer.generator.er.drawio;
+package i2f.extension.reverse.engineer.generator.er.er1.drawio;
 
 
 import i2f.database.metadata.data.ColumnMeta;
@@ -13,20 +13,20 @@ import java.util.UUID;
  * @date 2023/5/13 17:16
  * @desc
  */
-public class DrawioAdapter {
+public class DatabaseEr1DrawIoAdapter {
 
     public static String getId() {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
-    public static List<DrawioErElem> parseEr(List<TableMeta> tables) {
+    public static List<DrawIoErElem> parseEr(List<TableMeta> tables) {
 
         int y = 0;
-        List<DrawioErElem> elems = new LinkedList<>();
+        List<DrawIoErElem> elems = new LinkedList<>();
         for (TableMeta table : tables) {
             int x = 0;
             List<ColumnMeta> columns = table.getColumns();
-            DrawioErElem entity = new DrawioErElem();
+            DrawIoErElem entity = new DrawIoErElem();
             entity.setId(getId());
             entity.setText(table.getComment());
             if (entity.getText() == null || entity.getText().isEmpty()) {
@@ -41,7 +41,7 @@ public class DrawioAdapter {
 
             y += 200;
             for (ColumnMeta column : columns) {
-                DrawioErElem attribute = new DrawioErElem();
+                DrawIoErElem attribute = new DrawIoErElem();
                 attribute.setId(getId());
                 attribute.setText(column.getComment());
                 if (attribute.getText() == null || attribute.getText().isEmpty()) {
@@ -54,7 +54,7 @@ public class DrawioAdapter {
                 attribute.setHeight(60);
                 elems.add(attribute);
 
-                DrawioErElem link = new DrawioErElem();
+                DrawIoErElem link = new DrawIoErElem();
                 link.setId(getId());
                 link.setText("");
                 link.setType("link");

@@ -52,12 +52,12 @@ public class TestReverseEngineer {
             dir.mkdirs();
         }
 
-        String result = ReverseEngineerGenerator.apis(apiMethods);
+        String result = ReverseEngineerGenerator.apisDesign(apiMethods);
         File output = new File(dir, "api-design.html");
         StreamUtil.writeString(result, output);
 
         ModuleController module = ModuleResolver.parse(ReverseEngineerGenerator.class);
-        result = ReverseEngineerGenerator.modulesMvc(Arrays.asList(module));
+        result = ReverseEngineerGenerator.modulesDesignMvc(Arrays.asList(module));
         output = new File(dir, "module-design.html");
         StreamUtil.writeString(result, output);
 
@@ -118,11 +118,11 @@ public class TestReverseEngineer {
         output = new File(dir, "tables-ddl.oracle.sql");
         StreamUtil.writeString(result, output);
 
-        result = ReverseEngineerGenerator.erDrawio(tableMetas);
+        result = ReverseEngineerGenerator.er1DrawIo(tableMetas);
         output = new File(dir, "er.xml.drawio");
         StreamUtil.writeString(result, output);
 
-        result = ReverseEngineerGenerator.er(tableMetas);
+        result = ReverseEngineerGenerator.er1XmlPainter(tableMetas);
         output = new File(dir, "er.xml");
         StreamUtil.writeString(result, output);
 
