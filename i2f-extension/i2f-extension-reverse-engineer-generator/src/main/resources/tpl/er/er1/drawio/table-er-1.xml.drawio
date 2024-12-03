@@ -10,7 +10,7 @@
                 <mxCell id="1" parent="0"/>
 
                                                             <!-- 实体 -->
-                        <mxCell id="5eed7606de734e2a95aab0f9139deb87" value="sys_dict" style="rounded=0;whiteSpace=wrap;html=1;"
+                        <mxCell id="8b4c9b28c3444ad09d33d7c20c12efb5" value="任务组" style="rounded=0;whiteSpace=wrap;html=1;"
                                 parent="1" vertex="1">
                             <mxGeometry x="0" y="0" width="120" height="60"
                                         as="geometry"/>
@@ -19,7 +19,7 @@
                     
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="ecb11d594a73423bb4826df5d8c08d92" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="03a5dc5211b049b5a9e36ec600296b1e" value="ID" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="0" y="200" width="120" height="60"
                                         as="geometry"/>
@@ -28,8 +28,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="8ac3bdda83054f1f923c7aa70e667203" value="" style="endArrow=none;html=1;" parent="1"
-                                source="5eed7606de734e2a95aab0f9139deb87" target="ecb11d594a73423bb4826df5d8c08d92" edge="1">
+                        <mxCell id="6582aba41e9c4d56b6b418d0b97d5b10" value="" style="endArrow=none;html=1;" parent="1"
+                                source="8b4c9b28c3444ad09d33d7c20c12efb5" target="03a5dc5211b049b5a9e36ec600296b1e" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -37,7 +37,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="245aafce3d51481fa683988c413bbaa3" value="name" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="5ce15e16b21f4c9d9c1b186591248991" value="执行器appname" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="100" y="200" width="120" height="60"
                                         as="geometry"/>
@@ -46,8 +46,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="378a0b9e317c4ff18d10b88564d859f6" value="" style="endArrow=none;html=1;" parent="1"
-                                source="5eed7606de734e2a95aab0f9139deb87" target="245aafce3d51481fa683988c413bbaa3" edge="1">
+                        <mxCell id="1e16d86e5db84a3e91da89f8a134677a" value="" style="endArrow=none;html=1;" parent="1"
+                                source="8b4c9b28c3444ad09d33d7c20c12efb5" target="5ce15e16b21f4c9d9c1b186591248991" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -55,7 +55,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="e96abaedcdf244e2ab7a57d71659d8d4" value="no" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="4b9198d0cef7455dae5ca8753da92278" value="执行器名称" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="200" y="200" width="120" height="60"
                                         as="geometry"/>
@@ -64,8 +64,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="0536fc8ecba64b189e0c817f818c29a9" value="" style="endArrow=none;html=1;" parent="1"
-                                source="5eed7606de734e2a95aab0f9139deb87" target="e96abaedcdf244e2ab7a57d71659d8d4" edge="1">
+                        <mxCell id="5793d6c7ebc047ec9a9665e917375723" value="" style="endArrow=none;html=1;" parent="1"
+                                source="8b4c9b28c3444ad09d33d7c20c12efb5" target="4b9198d0cef7455dae5ca8753da92278" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -73,7 +73,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="efc0d12b63e8460f88536d6944dfe496" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="bf8b911f094149759edbd731db8ea61d" value="执行器地址类型：0=自动注册、1=手动录入" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="300" y="200" width="120" height="60"
                                         as="geometry"/>
@@ -82,8 +82,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="285f4ed4b2a24a61abf1f1bccc43d6d4" value="" style="endArrow=none;html=1;" parent="1"
-                                source="5eed7606de734e2a95aab0f9139deb87" target="efc0d12b63e8460f88536d6944dfe496" edge="1">
+                        <mxCell id="315a1de314b44cf99b106dae0532e612" value="" style="endArrow=none;html=1;" parent="1"
+                                source="8b4c9b28c3444ad09d33d7c20c12efb5" target="bf8b911f094149759edbd731db8ea61d" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -91,7 +91,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="f918c06c54eb402aaa60f0100726a0b4" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="dbd815ca264f4ddda643339d284ecca3" value="执行器地址列表，多地址逗号分隔" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="400" y="200" width="120" height="60"
                                         as="geometry"/>
@@ -100,8 +100,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="4a3e247d086d4af0b677d0108fba0c92" value="" style="endArrow=none;html=1;" parent="1"
-                                source="5eed7606de734e2a95aab0f9139deb87" target="f918c06c54eb402aaa60f0100726a0b4" edge="1">
+                        <mxCell id="fe49171f0e924cb4acfc24aed249fe62" value="" style="endArrow=none;html=1;" parent="1"
+                                source="8b4c9b28c3444ad09d33d7c20c12efb5" target="dbd815ca264f4ddda643339d284ecca3" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -109,7 +109,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="6cc62ca0c6c344a08fb9b92fd9f7a44e" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="b51e563bc0a944b3a6e1791b5f907fea" value="更新时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="500" y="200" width="120" height="60"
                                         as="geometry"/>
@@ -118,51 +118,15 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="4de9370b98524984a1755423b564ad49" value="" style="endArrow=none;html=1;" parent="1"
-                                source="5eed7606de734e2a95aab0f9139deb87" target="6cc62ca0c6c344a08fb9b92fd9f7a44e" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="8265ce50691d4bcb96dcbf9452773b6b" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="600" y="200" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="252ef89f052e456ea743e7a676382dd4" value="" style="endArrow=none;html=1;" parent="1"
-                                source="5eed7606de734e2a95aab0f9139deb87" target="8265ce50691d4bcb96dcbf9452773b6b" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="9b117baa3e5642dba993076fa2e00a74" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="700" y="200" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="903fa6f106bc416e91c896a4e54137d8" value="" style="endArrow=none;html=1;" parent="1"
-                                source="5eed7606de734e2a95aab0f9139deb87" target="9b117baa3e5642dba993076fa2e00a74" edge="1">
+                        <mxCell id="6e1afa1af2f04b3bb5d0b527d49faa50" value="" style="endArrow=none;html=1;" parent="1"
+                                source="8b4c9b28c3444ad09d33d7c20c12efb5" target="b51e563bc0a944b3a6e1791b5f907fea" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
                             </mxGeometry>
                         </mxCell>
                                                                                 <!-- 实体 -->
-                        <mxCell id="747abcd3b67f4b229c862d19b21f2548" value="sys_dict_item" style="rounded=0;whiteSpace=wrap;html=1;"
+                        <mxCell id="1d04bc43f9b3413e93608fa752bb66fc" value="XXL任务信息" style="rounded=0;whiteSpace=wrap;html=1;"
                                 parent="1" vertex="1">
                             <mxGeometry x="0" y="400" width="120" height="60"
                                         as="geometry"/>
@@ -171,7 +135,7 @@
                     
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="ff40e546255c4c90aa84823209060d6d" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="1c7f96ecfd3a42669be8d2b5340018f6" value="ID" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="0" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -180,8 +144,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="7c283f1623fd4cd7886b96e5400f8a70" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="ff40e546255c4c90aa84823209060d6d" edge="1">
+                        <mxCell id="87e0ffcf46e2484a92616c3bd32c1f54" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="1c7f96ecfd3a42669be8d2b5340018f6" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -189,7 +153,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="82c2727eadbd458786cc9c315977e3e0" value="dict_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="739386307100442d89c2fee0d9254fa4" value="执行器主键id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="100" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -198,8 +162,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="3e47e7bfbc444694b652bfb83b368b79" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="82c2727eadbd458786cc9c315977e3e0" edge="1">
+                        <mxCell id="6660761a10744914974fbcce14301535" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="739386307100442d89c2fee0d9254fa4" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -207,7 +171,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="ab0660aebb9942e9b6b766357a78b8a4" value="name" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="6c32b58d99474ca682faa7a228251024" value="任务降序" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="200" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -216,8 +180,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="48118756cf024bd88fc121f338659bf9" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="ab0660aebb9942e9b6b766357a78b8a4" edge="1">
+                        <mxCell id="9073c88b5d304deda84c4ee5b9d6b32e" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="6c32b58d99474ca682faa7a228251024" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -225,7 +189,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="ac60f1e6a56d4e9481c9dce6b0dc1c1d" value="no" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="45c4035354e242ad8809a6563a70cb91" value="加时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="300" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -234,8 +198,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="9580c64884644b688b37cfc63a7b2d55" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="ac60f1e6a56d4e9481c9dce6b0dc1c1d" edge="1">
+                        <mxCell id="4729d60894c5452fa81eddca83c8e38f" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="45c4035354e242ad8809a6563a70cb91" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -243,7 +207,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="83593a8ccab449ffbb5ff558378f248b" value="value" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="84d9c4e813784c6094b3e7cc5a61f12f" value="更新时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="400" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -252,8 +216,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="b3d6365bc3344f92a370bf55a096f9da" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="83593a8ccab449ffbb5ff558378f248b" edge="1">
+                        <mxCell id="38200a51a43e41d992bdd31bda9c1c3f" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="84d9c4e813784c6094b3e7cc5a61f12f" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -261,7 +225,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="5c0279087ddd4c5e96620224fb5a16ef" value="remark" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="51caeb77701542bab8ce7aeac5fca8c7" value="作者" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="500" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -270,8 +234,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="6841925032de441ebd3b3c98975bc65c" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="5c0279087ddd4c5e96620224fb5a16ef" edge="1">
+                        <mxCell id="d34d0c8edb0b4181b71461443f074f79" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="51caeb77701542bab8ce7aeac5fca8c7" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -279,7 +243,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="004eeaa75acb4d4a95b7c1af223adc55" value="parent_item_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="9d1f595df09342698bbff9bb60fa60f9" value="报警邮件" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="600" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -288,8 +252,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="5acb5dbd94b6474ba7be8f62ac788948" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="004eeaa75acb4d4a95b7c1af223adc55" edge="1">
+                        <mxCell id="1e8e2f1674ae4a4fb1c8d149f951985b" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="9d1f595df09342698bbff9bb60fa60f9" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -297,7 +261,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="ec9bb0f8d90b46228ceaea01fa477a5a" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="67b955941f524737b3eaf05a162e7335" value="调度类型" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="700" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -306,8 +270,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="d891f87801cf4f4b8f2f6a25e4a1e3d1" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="ec9bb0f8d90b46228ceaea01fa477a5a" edge="1">
+                        <mxCell id="cb6e4f51cb8349f0ab9d55a51e2e10d8" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="67b955941f524737b3eaf05a162e7335" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -315,7 +279,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="d9eb585fbaad4897b836724cd78ab98c" value="tags" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="4768cae224c74da692ebe63db4d43a62" value="调度配置，值含义取决于调度类型" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="800" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -324,8 +288,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="1a25b75e914f4d9594ab68e712f18db5" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="d9eb585fbaad4897b836724cd78ab98c" edge="1">
+                        <mxCell id="28efa173213d47d18f04634415342048" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="4768cae224c74da692ebe63db4d43a62" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -333,7 +297,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="5c2d84f8e01c4e20a523b51d9938a530" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="bc7a001b2fb94569a3f28fa208388abe" value="调度过期策略" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="900" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -342,8 +306,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="7682f161e18d49e0ae632a0b96494b74" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="5c2d84f8e01c4e20a523b51d9938a530" edge="1">
+                        <mxCell id="57c91d590c914da0bd280a2a1685dd16" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="bc7a001b2fb94569a3f28fa208388abe" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -351,7 +315,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="dca0b43100574d19b7c6fc40b555761a" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="99abe58e381146b8b478a1282d3b4192" value="执行器路由策略" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="1000" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -360,8 +324,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="1f021861eaad497697294499c53c148e" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="dca0b43100574d19b7c6fc40b555761a" edge="1">
+                        <mxCell id="05fa299eba3240b997902ba8e51a6baa" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="99abe58e381146b8b478a1282d3b4192" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -369,7 +333,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="607f36965781490a999c9a1c7dc8109d" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="304b91d19e284581830e4c3525af6c07" value="执行器任务handler" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="1100" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -378,8 +342,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="e27bc76c56944d34a683aa01e122c6c4" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="607f36965781490a999c9a1c7dc8109d" edge="1">
+                        <mxCell id="e1258de0fa3f4cedb273c7c23c7695db" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="304b91d19e284581830e4c3525af6c07" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -387,7 +351,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="6444978cfafc4f238aca3aefd0d4a2c7" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="780d8f2a8c504e82ae2c8169420d05d6" value="执行器任务参数" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="1200" y="600" width="120" height="60"
                                         as="geometry"/>
@@ -396,15 +360,213 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="60977a93081b440a97afd0eff3fea3d4" value="" style="endArrow=none;html=1;" parent="1"
-                                source="747abcd3b67f4b229c862d19b21f2548" target="6444978cfafc4f238aca3aefd0d4a2c7" edge="1">
+                        <mxCell id="28e9b3511bfa4c64b25fb9a7b7443a77" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="780d8f2a8c504e82ae2c8169420d05d6" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="38dcf7be456745b9a2f965c9b912fb76" value="阻塞处理策略" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1300" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="e8caea6ac790423e9faa88447121820d" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="38dcf7be456745b9a2f965c9b912fb76" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="70753522e1d84a2c9bdcc92042c45662" value="任务执行超时时间，单位秒" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1400" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="13604b518e90423c887f67672966d42a" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="70753522e1d84a2c9bdcc92042c45662" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="86a9219007844b95801a29b5e6e345d4" value="失败重试次数" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1500" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="2967b0dbde494cbabd59056a3d738045" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="86a9219007844b95801a29b5e6e345d4" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="d00dc7d2b16c4bd8a7c356515d58571f" value="glue类型" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1600" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="7021a27a538e4355be1a6553b8dc578b" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="d00dc7d2b16c4bd8a7c356515d58571f" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="2f7787ccd7214db1b96891a0e45051d8" value="glue源代码" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1700" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="707475d5fc274bf69504c2a99e7c8345" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="2f7787ccd7214db1b96891a0e45051d8" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="4953b46ea8d944e5993a8645ff869c70" value="胶水备注" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1800" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="6ead8de0695248b09363c36e34c510eb" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="4953b46ea8d944e5993a8645ff869c70" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="e1213cc2381046d3a4082c4696628ffc" value="glue更新时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1900" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="730c33c4531f41fdb4398ac717506636" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="e1213cc2381046d3a4082c4696628ffc" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="f033bc7d5ec047ab8b828fd3e625d63f" value="子任务id，多个逗号分隔" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="2000" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="48101d0f93724fbc95d236c038735f37" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="f033bc7d5ec047ab8b828fd3e625d63f" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="5023d7c7201d497e9da891aca50be387" value="调度状态：0-停止，1-运行" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="2100" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="4bedbe1ea0d044a2998f765a0d99bdbf" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="5023d7c7201d497e9da891aca50be387" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="15e2454c4d204d259cce0ed57d20b4bf" value="上次调度时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="2200" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="88e70ea2519d4488bb9250b568ee3a96" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="15e2454c4d204d259cce0ed57d20b4bf" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="59f75d7d4c894c3fa0b5c91576bf783e" value="下次调度时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="2300" y="600" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="b4661fda5ea140aab75f09d1378b70ab" value="" style="endArrow=none;html=1;" parent="1"
+                                source="1d04bc43f9b3413e93608fa752bb66fc" target="59f75d7d4c894c3fa0b5c91576bf783e" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
                             </mxGeometry>
                         </mxCell>
                                                                                 <!-- 实体 -->
-                        <mxCell id="63f1916f005741a2aaa2725e8ad2eca8" value="sys_log" style="rounded=0;whiteSpace=wrap;html=1;"
+                        <mxCell id="de9d1c37516842c5aec5a7c78b608942" value="XXL任务锁" style="rounded=0;whiteSpace=wrap;html=1;"
                                 parent="1" vertex="1">
                             <mxGeometry x="0" y="800" width="120" height="60"
                                         as="geometry"/>
@@ -413,7 +575,7 @@
                     
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="80839370867044a4967408111b55dfb9" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="f1591ce78aa14eeaa3dde4a7f4407818" value="锁名称" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="0" y="1000" width="120" height="60"
                                         as="geometry"/>
@@ -422,123 +584,15 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="c428bd827c4e4cdaa4ca0706e887e2c1" value="" style="endArrow=none;html=1;" parent="1"
-                                source="63f1916f005741a2aaa2725e8ad2eca8" target="80839370867044a4967408111b55dfb9" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="5c89769dd34d4a10baef3c6edbee2618" value="type" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="100" y="1000" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="48b308d4c93743b3994844da404e1c2d" value="" style="endArrow=none;html=1;" parent="1"
-                                source="63f1916f005741a2aaa2725e8ad2eca8" target="5c89769dd34d4a10baef3c6edbee2618" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="d853ec65fca249728a12c7df8a4de0de" value="title" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="200" y="1000" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="7e03cb4b1f2f4ea99d26437b0ef87c1f" value="" style="endArrow=none;html=1;" parent="1"
-                                source="63f1916f005741a2aaa2725e8ad2eca8" target="d853ec65fca249728a12c7df8a4de0de" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="4c2dd0da5e5a4167a5fb2f8edd47024a" value="target" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="300" y="1000" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="ecdd9d3bb9474e5fbfe47247b218aeb8" value="" style="endArrow=none;html=1;" parent="1"
-                                source="63f1916f005741a2aaa2725e8ad2eca8" target="4c2dd0da5e5a4167a5fb2f8edd47024a" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="506f726f3b6b44369453d557ed5eb727" value="action" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="400" y="1000" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="a9204741036a4dbe851c45f8273f8187" value="" style="endArrow=none;html=1;" parent="1"
-                                source="63f1916f005741a2aaa2725e8ad2eca8" target="506f726f3b6b44369453d557ed5eb727" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="725a30ffffa745d4a38c59976849b378" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="500" y="1000" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="b0233a4801724fe883e5eac7abcf4203" value="" style="endArrow=none;html=1;" parent="1"
-                                source="63f1916f005741a2aaa2725e8ad2eca8" target="725a30ffffa745d4a38c59976849b378" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="f7bd87a18d0443e49c8278a313af5a66" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="600" y="1000" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="b8645119f8b8481592956ece9fe1b7fd" value="" style="endArrow=none;html=1;" parent="1"
-                                source="63f1916f005741a2aaa2725e8ad2eca8" target="f7bd87a18d0443e49c8278a313af5a66" edge="1">
+                        <mxCell id="cd8d065580e24b4a9060265377329ace" value="" style="endArrow=none;html=1;" parent="1"
+                                source="de9d1c37516842c5aec5a7c78b608942" target="f1591ce78aa14eeaa3dde4a7f4407818" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
                             </mxGeometry>
                         </mxCell>
                                                                                 <!-- 实体 -->
-                        <mxCell id="7baefc1d1ef340fe9d3875bdd9bd41b7" value="sys_permission" style="rounded=0;whiteSpace=wrap;html=1;"
+                        <mxCell id="600dbbcd98d4443ebfc5d4c60fd9790f" value="XXL任务日志" style="rounded=0;whiteSpace=wrap;html=1;"
                                 parent="1" vertex="1">
                             <mxGeometry x="0" y="1200" width="120" height="60"
                                         as="geometry"/>
@@ -547,7 +601,7 @@
                     
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="674d0c3e84294dafa0609eb3d8632843" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="a9a15ec2c3f24a5781baadf3d7d6bc03" value="ID" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="0" y="1400" width="120" height="60"
                                         as="geometry"/>
@@ -556,8 +610,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="d4a1cae95f8b4eec91618fccfde79ff4" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="674d0c3e84294dafa0609eb3d8632843" edge="1">
+                        <mxCell id="fdf4ccf254a94c2e9354dc52a4ed0b1b" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="a9a15ec2c3f24a5781baadf3d7d6bc03" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -565,7 +619,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="938bc6631b5b466c96deb07576d0280f" value="name" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="93c14feba873456fab53bf50636dbf46" value="执行器主键id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="100" y="1400" width="120" height="60"
                                         as="geometry"/>
@@ -574,8 +628,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="04b0ed38ec3f4c4cb977463d73846533" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="938bc6631b5b466c96deb07576d0280f" edge="1">
+                        <mxCell id="2c69266289c7400193f779855d24df0e" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="93c14feba873456fab53bf50636dbf46" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -583,7 +637,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="e5bb948196fe4e1a8bc12d91ec876a64" value="no" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="2378555c40924db68a20e5d4adfd16ff" value="任务，主键id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="200" y="1400" width="120" height="60"
                                         as="geometry"/>
@@ -592,8 +646,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="4ac5bd4e4e1f4b54a41a6c97a3bf8edb" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="e5bb948196fe4e1a8bc12d91ec876a64" edge="1">
+                        <mxCell id="84a52dc86ea94c0a86372969b5487972" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="2378555c40924db68a20e5d4adfd16ff" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -601,7 +655,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="953b17dc97734da196ec304427a07a6d" value="type" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="f8487a2102d848d1a9d51e62cc88f33a" value="执行器地址，本次执行的地址" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="300" y="1400" width="120" height="60"
                                         as="geometry"/>
@@ -610,8 +664,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="abbd9a5adc0442fcac6e27bd40ecd6d6" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="953b17dc97734da196ec304427a07a6d" edge="1">
+                        <mxCell id="ac13d531a00348de80521d17de4d91b6" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="f8487a2102d848d1a9d51e62cc88f33a" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -619,7 +673,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="e29c3723d2f74a48ba4099b36bf75aa8" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="fbb24cf8a14946a1956c2362594828dd" value="执行器任务handler" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="400" y="1400" width="120" height="60"
                                         as="geometry"/>
@@ -628,8 +682,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="7882b85e8aa74deb92b319a60de59425" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="e29c3723d2f74a48ba4099b36bf75aa8" edge="1">
+                        <mxCell id="0981f93129684034a4ce7693b9ee127f" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="fbb24cf8a14946a1956c2362594828dd" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -637,7 +691,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="15eb48744d324142a06dbd41c20763ed" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="4e1668892a644e94b4dd6d0d371acd9e" value="执行器任务参数" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="500" y="1400" width="120" height="60"
                                         as="geometry"/>
@@ -646,8 +700,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="8195722d14ef4d9bbc473d74ef3c4a69" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="15eb48744d324142a06dbd41c20763ed" edge="1">
+                        <mxCell id="24b68cb84477469fbd34d09cff312882" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="4e1668892a644e94b4dd6d0d371acd9e" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -655,7 +709,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="fea73b8d0aad4a50b739db56a64f8a77" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="3f670fd1e4924a4e9ef6ce7b8f383fc5" value="执行器任务分片参数，格式如 1/2" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="600" y="1400" width="120" height="60"
                                         as="geometry"/>
@@ -664,8 +718,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="07ba475b57414427a3280e7918cb900b" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="fea73b8d0aad4a50b739db56a64f8a77" edge="1">
+                        <mxCell id="468bb61427bb47eb88b02c35a1f69ca1" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="3f670fd1e4924a4e9ef6ce7b8f383fc5" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -673,7 +727,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="fb8a47618e8e4d9489dc2aead5ad82e8" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="5075cd113e6d464b98a6f397712ce211" value="失败重试次数" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="700" y="1400" width="120" height="60"
                                         as="geometry"/>
@@ -682,8 +736,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="98d00e5e575646049100242c6bb1e2e6" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="fb8a47618e8e4d9489dc2aead5ad82e8" edge="1">
+                        <mxCell id="d73154cd18e441caa9df925fdb48e43c" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="5075cd113e6d464b98a6f397712ce211" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -691,7 +745,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="a9b5343c752946c98275c17db4fcf211" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="6839b46cd01e4ea89b5c4baba340c3e1" value="调度-时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="800" y="1400" width="120" height="60"
                                         as="geometry"/>
@@ -700,15 +754,123 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="e9083ec0775b4243843f079c16517799" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7baefc1d1ef340fe9d3875bdd9bd41b7" target="a9b5343c752946c98275c17db4fcf211" edge="1">
+                        <mxCell id="8e6fdd9d36e041b3891b188813223d9f" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="6839b46cd01e4ea89b5c4baba340c3e1" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="94bb5e5683af44a19b0c82a06ae7f04c" value="调度-结果" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="900" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="8b9b377a49bc492e805f9e9af6145035" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="94bb5e5683af44a19b0c82a06ae7f04c" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="1c920b9324b8411580a04fee905a31ac" value="调度-日志" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1000" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="032c10aaf5fc482c884b1b18c098d40e" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="1c920b9324b8411580a04fee905a31ac" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="f3e8e5689a024930bb458a2f7375fc7e" value="执行-时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1100" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="976dea00e8474ce7b6da702bd5c11174" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="f3e8e5689a024930bb458a2f7375fc7e" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="7032e86c32c94a61b54895cc1cfc2a4a" value="执行-状态" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1200" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="f935bdb06d9d418cba58b17ff596b1da" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="7032e86c32c94a61b54895cc1cfc2a4a" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="88135ba5cba640c482de5a1b328781a5" value="执行-日志" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1300" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="86d7bec805f048d1bf278c414f82fdc0" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="88135ba5cba640c482de5a1b328781a5" edge="1">
+                            <mxGeometry width="50" height="50" relative="1" as="geometry">
+                                <mxPoint as="sourcePoint"/>
+                                <mxPoint as="targetPoint"/>
+                            </mxGeometry>
+                        </mxCell>
+                                                        
+                                            <!-- 属性 -->
+                        <mxCell id="0e009684dba1437f862fe8b087fbc01a" value="告警状态：0-默认、1-无需告警、2-告警成功、3-告警失败" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                                vertex="1">
+                            <mxGeometry x="1400" y="1400" width="120" height="60"
+                                        as="geometry"/>
+                        </mxCell>
+                    
+                                                        
+                    
+                                            <!-- 连线 -->
+                        <mxCell id="a9c6ab029b73412c898e85202c5cd391" value="" style="endArrow=none;html=1;" parent="1"
+                                source="600dbbcd98d4443ebfc5d4c60fd9790f" target="0e009684dba1437f862fe8b087fbc01a" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
                             </mxGeometry>
                         </mxCell>
                                                                                 <!-- 实体 -->
-                        <mxCell id="1969702055004cb18e5743efd46c63c8" value="sys_role" style="rounded=0;whiteSpace=wrap;html=1;"
+                        <mxCell id="4a5da06aaf754441a212f8e3a1758349" value="XXL任务日志报表" style="rounded=0;whiteSpace=wrap;html=1;"
                                 parent="1" vertex="1">
                             <mxGeometry x="0" y="1600" width="120" height="60"
                                         as="geometry"/>
@@ -717,7 +879,7 @@
                     
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="234d21d721754c249931ff6dff4ba1a4" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="5ba77e7f86e0400fbe2d98c2a54a18ba" value="ID" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="0" y="1800" width="120" height="60"
                                         as="geometry"/>
@@ -726,8 +888,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="313d440c0a0c4d5d96141b992c25c429" value="" style="endArrow=none;html=1;" parent="1"
-                                source="1969702055004cb18e5743efd46c63c8" target="234d21d721754c249931ff6dff4ba1a4" edge="1">
+                        <mxCell id="fdd654b2239345ec8153dc746a89f66d" value="" style="endArrow=none;html=1;" parent="1"
+                                source="4a5da06aaf754441a212f8e3a1758349" target="5ba77e7f86e0400fbe2d98c2a54a18ba" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -735,7 +897,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="af502b55602243cfa7152137b1a8f69c" value="name" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="59cd943fc5144c2ea5c0f68ccf56b025" value="调度-时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="100" y="1800" width="120" height="60"
                                         as="geometry"/>
@@ -744,8 +906,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="64607308894644d2a82cd733a60c6b8c" value="" style="endArrow=none;html=1;" parent="1"
-                                source="1969702055004cb18e5743efd46c63c8" target="af502b55602243cfa7152137b1a8f69c" edge="1">
+                        <mxCell id="1ec0a48dfa1e405788efe2aaebd30c77" value="" style="endArrow=none;html=1;" parent="1"
+                                source="4a5da06aaf754441a212f8e3a1758349" target="59cd943fc5144c2ea5c0f68ccf56b025" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -753,7 +915,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="90a4d33a361f429894cadd2b0b8d3b93" value="no" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="519812858b804b70959de2b1c3008b83" value="运行中-日志数量" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="200" y="1800" width="120" height="60"
                                         as="geometry"/>
@@ -762,8 +924,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="66b91d72bf7d4029a0aeee8ddfc4c77c" value="" style="endArrow=none;html=1;" parent="1"
-                                source="1969702055004cb18e5743efd46c63c8" target="90a4d33a361f429894cadd2b0b8d3b93" edge="1">
+                        <mxCell id="f374905bedbf4f16ba29f36945e964ef" value="" style="endArrow=none;html=1;" parent="1"
+                                source="4a5da06aaf754441a212f8e3a1758349" target="519812858b804b70959de2b1c3008b83" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -771,7 +933,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="8ca1d9cd90bb457a82d640bc4dca7640" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="c89a41f3a5b445c4a997ad1b707c940b" value="执行成功-日志数量" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="300" y="1800" width="120" height="60"
                                         as="geometry"/>
@@ -780,8 +942,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="0d08835b781f4e9aa81a1ae83e4a15c6" value="" style="endArrow=none;html=1;" parent="1"
-                                source="1969702055004cb18e5743efd46c63c8" target="8ca1d9cd90bb457a82d640bc4dca7640" edge="1">
+                        <mxCell id="7793b70b330843cf92e19c6725f94d14" value="" style="endArrow=none;html=1;" parent="1"
+                                source="4a5da06aaf754441a212f8e3a1758349" target="c89a41f3a5b445c4a997ad1b707c940b" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -789,7 +951,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="142fff04a5b44dd680883b4335bd0d92" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="eca6710710a8451bbea7deca637a7898" value="执行失败-日志数量" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="400" y="1800" width="120" height="60"
                                         as="geometry"/>
@@ -798,8 +960,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="4c37a166291449fd88ed953f11449349" value="" style="endArrow=none;html=1;" parent="1"
-                                source="1969702055004cb18e5743efd46c63c8" target="142fff04a5b44dd680883b4335bd0d92" edge="1">
+                        <mxCell id="e4f4e9c007894b00913ac2885e26cfda" value="" style="endArrow=none;html=1;" parent="1"
+                                source="4a5da06aaf754441a212f8e3a1758349" target="eca6710710a8451bbea7deca637a7898" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -807,7 +969,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="97a238031a2e44ae8dd2b9e66b640460" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="431fb080c9a64fad88e745e7b68242cb" value="更新时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="500" y="1800" width="120" height="60"
                                         as="geometry"/>
@@ -816,51 +978,15 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="c7c5058cc8194f91a733703fd1938cfe" value="" style="endArrow=none;html=1;" parent="1"
-                                source="1969702055004cb18e5743efd46c63c8" target="97a238031a2e44ae8dd2b9e66b640460" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="526421bfd7c440939f302ece3c269eee" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="600" y="1800" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="bb6192ebf73b40169599cd4ff942ec79" value="" style="endArrow=none;html=1;" parent="1"
-                                source="1969702055004cb18e5743efd46c63c8" target="526421bfd7c440939f302ece3c269eee" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="eef26999db53452196d6cfe54ffc81e9" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="700" y="1800" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="069b3479b0a44a7b9f5ad1c7fa961a5a" value="" style="endArrow=none;html=1;" parent="1"
-                                source="1969702055004cb18e5743efd46c63c8" target="eef26999db53452196d6cfe54ffc81e9" edge="1">
+                        <mxCell id="7f8ca7c218bc4fa1af8e68cfe305cc17" value="" style="endArrow=none;html=1;" parent="1"
+                                source="4a5da06aaf754441a212f8e3a1758349" target="431fb080c9a64fad88e745e7b68242cb" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
                             </mxGeometry>
                         </mxCell>
                                                                                 <!-- 实体 -->
-                        <mxCell id="7fe87b6d17dc4f2fa094fa28dc9c3467" value="sys_role_permission" style="rounded=0;whiteSpace=wrap;html=1;"
+                        <mxCell id="3a6f99313d334184a572f8ab5dadd518" value="XXL任务logglue" style="rounded=0;whiteSpace=wrap;html=1;"
                                 parent="1" vertex="1">
                             <mxGeometry x="0" y="2000" width="120" height="60"
                                         as="geometry"/>
@@ -869,7 +995,7 @@
                     
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="15e0c0b85e2049bba2c0ded981930a6a" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="d52e68d21fb34e68add3d086080e0dc2" value="ID" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="0" y="2200" width="120" height="60"
                                         as="geometry"/>
@@ -878,8 +1004,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="b87f7241804d439db4c891390bd69a8e" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="15e0c0b85e2049bba2c0ded981930a6a" edge="1">
+                        <mxCell id="d3ebfd2d92cf44d7964290f63c61038d" value="" style="endArrow=none;html=1;" parent="1"
+                                source="3a6f99313d334184a572f8ab5dadd518" target="d52e68d21fb34e68add3d086080e0dc2" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -887,7 +1013,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="c429de530b0043a4881a9f0ef5571e58" value="role_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="386a5511d3014610bf47cae0d3063189" value="任务，主键id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="100" y="2200" width="120" height="60"
                                         as="geometry"/>
@@ -896,8 +1022,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="1ce98608d5294d12ad70d549b25f83a6" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="c429de530b0043a4881a9f0ef5571e58" edge="1">
+                        <mxCell id="b47a56fffbb84ef48f3b76d6c9fc21de" value="" style="endArrow=none;html=1;" parent="1"
+                                source="3a6f99313d334184a572f8ab5dadd518" target="386a5511d3014610bf47cae0d3063189" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -905,7 +1031,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="fd9754650178420cbd172be9b238a9e0" value="permission_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="5e508e0977d841f3adfb76d08d210209" value="glue类型" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="200" y="2200" width="120" height="60"
                                         as="geometry"/>
@@ -914,8 +1040,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="8420a43afbb948b387803761ec9df8d0" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="fd9754650178420cbd172be9b238a9e0" edge="1">
+                        <mxCell id="67838ea9921c46d08ae6d8e5bcb099e7" value="" style="endArrow=none;html=1;" parent="1"
+                                source="3a6f99313d334184a572f8ab5dadd518" target="5e508e0977d841f3adfb76d08d210209" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -923,7 +1049,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="cecf9fafe00248f4bc11d96591d77575" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="13416607a0654ce9ae146e2fca49ba61" value="glue源代码" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="300" y="2200" width="120" height="60"
                                         as="geometry"/>
@@ -932,8 +1058,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="6dcba159b8994abfb600f65c1a1960d0" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="cecf9fafe00248f4bc11d96591d77575" edge="1">
+                        <mxCell id="1509283914dc4ffeb85ea02912d979bd" value="" style="endArrow=none;html=1;" parent="1"
+                                source="3a6f99313d334184a572f8ab5dadd518" target="13416607a0654ce9ae146e2fca49ba61" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -941,7 +1067,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="5c273cbb8b784eda8ceaa30f9e45adff" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="aaf4813d9821485ba9ad58c4f6a16d8d" value="glue备注" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="400" y="2200" width="120" height="60"
                                         as="geometry"/>
@@ -950,8 +1076,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="2fafece081df48b4abde660770bceb04" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="5c273cbb8b784eda8ceaa30f9e45adff" edge="1">
+                        <mxCell id="343ada4b9dfe43a1978f1c7a7ced9577" value="" style="endArrow=none;html=1;" parent="1"
+                                source="3a6f99313d334184a572f8ab5dadd518" target="aaf4813d9821485ba9ad58c4f6a16d8d" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -959,7 +1085,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="72904b43cd944e8d9aa0854331fa916d" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="f7fb2b284535426a8d70c212ad441a6d" value="加时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="500" y="2200" width="120" height="60"
                                         as="geometry"/>
@@ -968,8 +1094,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="6183f3c2692845629180cb0c3b5b2e8a" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="72904b43cd944e8d9aa0854331fa916d" edge="1">
+                        <mxCell id="097f9dd2f4cb438bbca66fc9c6147d13" value="" style="endArrow=none;html=1;" parent="1"
+                                source="3a6f99313d334184a572f8ab5dadd518" target="f7fb2b284535426a8d70c212ad441a6d" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -977,7 +1103,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="7349489790ce48ff8f0baade5d4dcd8f" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="d3eb2de363d6455ebeb28ef7e30543cc" value="更新时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="600" y="2200" width="120" height="60"
                                         as="geometry"/>
@@ -986,15 +1112,15 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="6a054fc753b249239b83bc14a56c340b" value="" style="endArrow=none;html=1;" parent="1"
-                                source="7fe87b6d17dc4f2fa094fa28dc9c3467" target="7349489790ce48ff8f0baade5d4dcd8f" edge="1">
+                        <mxCell id="f0a32e5812014d338d47f760a10516e2" value="" style="endArrow=none;html=1;" parent="1"
+                                source="3a6f99313d334184a572f8ab5dadd518" target="d3eb2de363d6455ebeb28ef7e30543cc" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
                             </mxGeometry>
                         </mxCell>
                                                                                 <!-- 实体 -->
-                        <mxCell id="cbf6dfbabea8493084fd13095635872b" value="用户表" style="rounded=0;whiteSpace=wrap;html=1;"
+                        <mxCell id="9201c066535b4bd3ba0897e4d23ab0c0" value="XXL任务注册" style="rounded=0;whiteSpace=wrap;html=1;"
                                 parent="1" vertex="1">
                             <mxGeometry x="0" y="2400" width="120" height="60"
                                         as="geometry"/>
@@ -1003,7 +1129,7 @@
                     
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="1a7cbd52fc0349e48405adcfe923c24e" value="ID" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="eff81f1d56af41f0ba5ac05d7ce8c023" value="ID" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="0" y="2600" width="120" height="60"
                                         as="geometry"/>
@@ -1012,8 +1138,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="4deaf01b013a4904a322c95f642b8d8c" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="1a7cbd52fc0349e48405adcfe923c24e" edge="1">
+                        <mxCell id="47e5a3bac51f4994af86fd2dfade5dae" value="" style="endArrow=none;html=1;" parent="1"
+                                source="9201c066535b4bd3ba0897e4d23ab0c0" target="eff81f1d56af41f0ba5ac05d7ce8c023" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -1021,7 +1147,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="d54c32fce5f14455a96429590be1ee71" value="用户名" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="5e43dbbde6e4492c9a2864a94ce4e9b6" value="注册组" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="100" y="2600" width="120" height="60"
                                         as="geometry"/>
@@ -1030,8 +1156,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="a81757253c39426a979c56023036b76e" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="d54c32fce5f14455a96429590be1ee71" edge="1">
+                        <mxCell id="eab67c616be74a7da44d488dc827e9ce" value="" style="endArrow=none;html=1;" parent="1"
+                                source="9201c066535b4bd3ba0897e4d23ab0c0" target="5e43dbbde6e4492c9a2864a94ce4e9b6" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -1039,7 +1165,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="7811aae203e3424ea7702d1cb088c2c9" value="密码" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="1d5568600aae4a46b3ec5b465efeea5b" value="注册键" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="200" y="2600" width="120" height="60"
                                         as="geometry"/>
@@ -1048,8 +1174,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="e38385d0ee1846a2bdebd78a987cbfb8" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="7811aae203e3424ea7702d1cb088c2c9" edge="1">
+                        <mxCell id="c6f5834f991945fda0e6d95f4a86f646" value="" style="endArrow=none;html=1;" parent="1"
+                                source="9201c066535b4bd3ba0897e4d23ab0c0" target="1d5568600aae4a46b3ec5b465efeea5b" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -1057,7 +1183,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="1721a7abc9eb439b94edbecaac263e03" value="昵称" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="9162508aed8447c2b243d203d1c7dd9a" value="注册值" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="300" y="2600" width="120" height="60"
                                         as="geometry"/>
@@ -1066,8 +1192,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="3122d5340ac14fdcb774a49f1357875d" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="1721a7abc9eb439b94edbecaac263e03" edge="1">
+                        <mxCell id="c68db303450e452092214fdda95087dc" value="" style="endArrow=none;html=1;" parent="1"
+                                source="9201c066535b4bd3ba0897e4d23ab0c0" target="9162508aed8447c2b243d203d1c7dd9a" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -1075,7 +1201,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="a4b97f6a91c848a681c94540305450ec" value="age" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="72d4e8cd891d4a20af8ac11b1d756662" value="更新时间" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="400" y="2600" width="120" height="60"
                                         as="geometry"/>
@@ -1084,123 +1210,15 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="9c091871431d415c91ab0e482d060ccf" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="a4b97f6a91c848a681c94540305450ec" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="7d90385da98a4e6bbec946fc8addd824" value="grade" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="500" y="2600" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="0779055b89d14a2eb967c741557bc453" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="7d90385da98a4e6bbec946fc8addd824" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="18df5dbe03444f31abd97852808c2c69" value="status" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="600" y="2600" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="6643533ffec7494f8c00273fa1152c5b" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="18df5dbe03444f31abd97852808c2c69" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="c73a7e82d4f94c1ca731325115ae695f" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="700" y="2600" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="99ecc23c3a614d8b8c5c65ff0aa66211" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="c73a7e82d4f94c1ca731325115ae695f" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="f5b5f223b7ba4dfabb466f246860ae46" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="800" y="2600" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="122ad4132e234273a6be092ddee1dce3" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="f5b5f223b7ba4dfabb466f246860ae46" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="9c06dc0d903f41248baca14db141d663" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="900" y="2600" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="4815e1e6ade745e1b7f7da4f51ab6053" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="9c06dc0d903f41248baca14db141d663" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="714e5b708f34442bbc5c96fc00e81646" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="1000" y="2600" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="b4763a889d384c5f88adfabfbff314f8" value="" style="endArrow=none;html=1;" parent="1"
-                                source="cbf6dfbabea8493084fd13095635872b" target="714e5b708f34442bbc5c96fc00e81646" edge="1">
+                        <mxCell id="994aa7f5e7e84f2f8a6b663bb33c466b" value="" style="endArrow=none;html=1;" parent="1"
+                                source="9201c066535b4bd3ba0897e4d23ab0c0" target="72d4e8cd891d4a20af8ac11b1d756662" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
                             </mxGeometry>
                         </mxCell>
                                                                                 <!-- 实体 -->
-                        <mxCell id="35f8c249d51f4968a7bba9b5fe4b22e3" value="sys_user_role" style="rounded=0;whiteSpace=wrap;html=1;"
+                        <mxCell id="15f7f0ad7aa4406894fc104e1f5be44e" value="XXL任务用户" style="rounded=0;whiteSpace=wrap;html=1;"
                                 parent="1" vertex="1">
                             <mxGeometry x="0" y="2800" width="120" height="60"
                                         as="geometry"/>
@@ -1209,7 +1227,7 @@
                     
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="ee73c2ff4ed547a8ab8f8056f6c21c6f" value="id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="08e9c9bb4c5f42b682661633ed5dbd36" value="ID" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="0" y="3000" width="120" height="60"
                                         as="geometry"/>
@@ -1218,8 +1236,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="6dd3e65effaf4d73895cbabeee22769f" value="" style="endArrow=none;html=1;" parent="1"
-                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="ee73c2ff4ed547a8ab8f8056f6c21c6f" edge="1">
+                        <mxCell id="0334a13fef334bd7883ed096aec56d01" value="" style="endArrow=none;html=1;" parent="1"
+                                source="15f7f0ad7aa4406894fc104e1f5be44e" target="08e9c9bb4c5f42b682661633ed5dbd36" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -1227,7 +1245,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="1375107bde614c39ae623b19cd1af4c3" value="user_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="0278155133594961bce5f4d80c402bd0" value="账号" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="100" y="3000" width="120" height="60"
                                         as="geometry"/>
@@ -1236,8 +1254,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="2fd7c01c084a45f9bac1be594581a5ea" value="" style="endArrow=none;html=1;" parent="1"
-                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="1375107bde614c39ae623b19cd1af4c3" edge="1">
+                        <mxCell id="600f918c5eee4a5aaac4bc4f158cca90" value="" style="endArrow=none;html=1;" parent="1"
+                                source="15f7f0ad7aa4406894fc104e1f5be44e" target="0278155133594961bce5f4d80c402bd0" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -1245,7 +1263,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="721f8a91b39247ee9b5adec5be9ba599" value="role_id" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="2c28335e9d21452a946305e2b15ade22" value="密码" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="200" y="3000" width="120" height="60"
                                         as="geometry"/>
@@ -1254,8 +1272,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="bff7c65f321d4542aafe9511718a1e53" value="" style="endArrow=none;html=1;" parent="1"
-                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="721f8a91b39247ee9b5adec5be9ba599" edge="1">
+                        <mxCell id="dd4a6a5e61de41aea4adf79e1a36a57c" value="" style="endArrow=none;html=1;" parent="1"
+                                source="15f7f0ad7aa4406894fc104e1f5be44e" target="2c28335e9d21452a946305e2b15ade22" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -1263,7 +1281,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="990ccefdc84a4b80b10c37a78380631d" value="create_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="afeb8e3641ea490993f4bd9d88fecf7e" value="角色：0-普通用户、1-管理员" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="300" y="3000" width="120" height="60"
                                         as="geometry"/>
@@ -1272,8 +1290,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="fe30ebce37db411c9b04b42720a33e6d" value="" style="endArrow=none;html=1;" parent="1"
-                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="990ccefdc84a4b80b10c37a78380631d" edge="1">
+                        <mxCell id="b8681617575e49e8a4d2e215df218c35" value="" style="endArrow=none;html=1;" parent="1"
+                                source="15f7f0ad7aa4406894fc104e1f5be44e" target="afeb8e3641ea490993f4bd9d88fecf7e" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>
@@ -1281,7 +1299,7 @@
                         </mxCell>
                                                         
                                             <!-- 属性 -->
-                        <mxCell id="84f04bfe28f24eccac286ebddf4db23f" value="create_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
+                        <mxCell id="8e3ecf7ed2b448d1a0852e96253cff1f" value="权限：执行器id列表，多个逗号分割" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
                                 vertex="1">
                             <mxGeometry x="400" y="3000" width="120" height="60"
                                         as="geometry"/>
@@ -1290,44 +1308,8 @@
                                                         
                     
                                             <!-- 连线 -->
-                        <mxCell id="2aeec64d483945c6acd4eead2f1f979d" value="" style="endArrow=none;html=1;" parent="1"
-                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="84f04bfe28f24eccac286ebddf4db23f" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="3bf0aac361734415853ed837f055c4ef" value="update_time" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="500" y="3000" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="f60fae3c4de24d51ba9f7f193ec46a32" value="" style="endArrow=none;html=1;" parent="1"
-                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="3bf0aac361734415853ed837f055c4ef" edge="1">
-                            <mxGeometry width="50" height="50" relative="1" as="geometry">
-                                <mxPoint as="sourcePoint"/>
-                                <mxPoint as="targetPoint"/>
-                            </mxGeometry>
-                        </mxCell>
-                                                        
-                                            <!-- 属性 -->
-                        <mxCell id="5d8006b440de4cab998639d8209ac3cc" value="update_by" style="ellipse;whiteSpace=wrap;html=1;" parent="1"
-                                vertex="1">
-                            <mxGeometry x="600" y="3000" width="120" height="60"
-                                        as="geometry"/>
-                        </mxCell>
-                    
-                                                        
-                    
-                                            <!-- 连线 -->
-                        <mxCell id="4c7b4b1da3ed4a2791a0bd4c5e6dc993" value="" style="endArrow=none;html=1;" parent="1"
-                                source="35f8c249d51f4968a7bba9b5fe4b22e3" target="5d8006b440de4cab998639d8209ac3cc" edge="1">
+                        <mxCell id="e85bb02f86c94fc68a7080d689f14351" value="" style="endArrow=none;html=1;" parent="1"
+                                source="15f7f0ad7aa4406894fc104e1f5be44e" target="8e3ecf7ed2b448d1a0852e96253cff1f" edge="1">
                             <mxGeometry width="50" height="50" relative="1" as="geometry">
                                 <mxPoint as="sourcePoint"/>
                                 <mxPoint as="targetPoint"/>

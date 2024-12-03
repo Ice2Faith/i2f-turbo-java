@@ -1,0 +1,36 @@
+#filename mapper/${_vm.toPascal(${_vm.lower(${table.name})})}Mapper
+        package ${code.pkg}.mapper;
+
+import ${code.pkg}.data.dom.${_vm.toPascal(${_vm.lower(${table.name})})}Do;
+import ${code.pkg}.data.vo.${_vm.toPascal(${_vm.lower(${table.name})})}Vo;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+
+import java.util.*;
+
+/**
+ * @author ${code.author}
+ * @date ${_vm.format(${_vm.now()},"yyyy-MM-dd HH:mm:ss")}
+ * @desc ${table.name} ${table.comment}
+ */
+@Mapper
+public interface ${_vm.toPascal(${_vm.lower(${table.name})})}Mapper extends BaseMapper<${_vm.toPascal(${_vm.lower(${table.name})})}Do> {
+    #if(${code.pageHelper})
+        List<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> page(@Param("post")${_vm.toPascal(${_vm.lower(${table.name})})}Vo post);
+    #else
+        Page<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> page(@Param("post")${_vm.toPascal(${_vm.lower(${table.name})})}Vo post,
+                                                                  @Param("page") Page<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> page);
+    #end
+
+    List<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> list(@Param("post")${_vm.toPascal(${_vm.lower(${table.name})})}Vo post);
+
+    Long count(@Param("post")${_vm.toPascal(${_vm.lower(${table.name})})}Vo post);
+
+        ${_vm.toPascal(${_vm.lower(${table.name})})}Vo findByPk(@Param("${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}")${table.primaryKey.javaType} ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})});
+
+    int insertBatch(@Param("list") Collection<? extends ${_vm.toPascal(${_vm.lower(${table.name})})}Do> list);
+}
