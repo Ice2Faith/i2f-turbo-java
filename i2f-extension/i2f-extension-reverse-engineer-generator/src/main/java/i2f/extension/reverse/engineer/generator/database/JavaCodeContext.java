@@ -9,10 +9,14 @@ import lombok.Data;
  */
 @Data
 public class JavaCodeContext {
-    private String pkg;
-    private String author;
-    private boolean useLombok;
-    private boolean useSwagger;
-    private boolean useMybatisPlus;
-    private boolean useDbAnnotation;
+    private String author = "test";
+    private String pkg = "com.test";
+    private String api = "/api";
+    private boolean restful = true;
+    private boolean lombok = true;
+    private boolean swagger = true;
+    private boolean pageHelper = false;
+    private boolean beanCopy = true;
+    private boolean springCopy = false;
+    private boolean unionBatch = true;
 }

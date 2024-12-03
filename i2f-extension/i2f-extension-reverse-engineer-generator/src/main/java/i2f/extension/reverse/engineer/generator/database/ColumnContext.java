@@ -18,26 +18,19 @@ import java.util.List;
 public class ColumnContext {
     private String name;
     private String comment;
-
-    private String pascalName;
-    private String camelName;
-
+    private String dataType;
+    private String columnType;
+    private boolean isNullable = true;
+    private boolean isPrimary = false;
+    private boolean isAutoIncrement = false;
     private String javaType;
-    private String jdbcType;
 
     private ColumnMeta meta;
-
-    private boolean isAutoincrement = false;
-
-    private boolean isPrimaryKey = false;
 
     public static ColumnContext parse(ColumnMeta meta) {
         ColumnContext ret = new ColumnContext();
         ret.name = meta.getName();
         ret.comment = meta.getComment();
-
-        ret.camelName = GeneratorTool.toCamel(GeneratorTool.lower(ret.name));
-        ret.pascalName = GeneratorTool.toPascal(GeneratorTool.lower(ret.name));
 
         ret.javaType = meta.getJavaType();
 
@@ -49,10 +42,11 @@ public class ColumnContext {
                 ret.javaType = Date.class.getSimpleName();
             }
         }
-        ret.jdbcType = meta.getType();
-
-        ret.isAutoincrement = meta.isAutoIncrement();
-        ret.isPrimaryKey = meta.isAutoIncrement();
+        ret.dataType = meta.getType();
+        ret.columnType = meta.getColumnType();
+        ret.isNullable = meta.isNullable();
+        ret.isPrimary = meta.isPrimaryKey();
+        ret.isAutoIncrement = meta.isAutoIncrement();
 
         ret.meta = meta;
         return ret;
