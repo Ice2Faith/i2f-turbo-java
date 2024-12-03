@@ -1,10 +1,14 @@
 package i2f.extension.reverse.engineer.generator.database;
 
+import i2f.database.metadata.data.ColumnMeta;
+import i2f.database.metadata.data.IndexColumnMeta;
+import i2f.database.metadata.data.IndexMeta;
 import i2f.database.metadata.data.TableMeta;
 import i2f.extension.velocity.GeneratorTool;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author ltb
@@ -13,11 +17,10 @@ import java.util.List;
  */
 @Data
 public class TableContext {
+    private String database;
     private String name;
     private String comment;
-
-    private String pascalName;
-    private String camelName;
+    private PrimaryContext primaryKey;
 
     private List<ColumnContext> columns;
 
@@ -25,11 +28,24 @@ public class TableContext {
 
     public static TableContext parse(TableMeta meta) {
         TableContext ret = new TableContext();
+        ret.database = meta.getDatabase();
         ret.name = meta.getName();
         ret.comment = meta.getComment();
 
-        ret.camelName = GeneratorTool.toCamel(GeneratorTool.lower(ret.name));
-        ret.pascalName = GeneratorTool.toPascal(GeneratorTool.lower(ret.name));
+        ret.primaryKey = new PrimaryContext();
+        IndexMeta primary = meta.getPrimary();
+        if (primary != null) {
+            List<IndexColumnMeta> cols = primary.getColumns();
+            if (!cols.isEmpty()) {
+                IndexColumnMeta idxCol = cols.get(0);
+                ret.primaryKey.setName(idxCol.getName());
+            }
+        }
+        for (ColumnMeta column : meta.getColumns()) {
+            if (Objects.equals(column.getName(), ret.primaryKey.getName())) {
+                ret.primaryKey.setJavaType(column.getJavaType());
+            }
+        }
 
         ret.columns = ColumnContext.parse(meta.getColumns());
 

@@ -1,0 +1,28 @@
+#filename service/I${_vm.toPascal(${_vm.lower(${table.name})})}Service.java
+        package ${code.pkg}.service;
+
+import ${code.pkg}.data.dom.${_vm.toPascal(${_vm.lower(${table.name})})}Do;
+import ${code.pkg}.data.vo.${_vm.toPascal(${_vm.lower(${table.name})})}Vo;
+
+import java.util.*;
+
+/**
+ * @author ${code.author}
+ * @date ${_vm.format(${_vm.now()},"yyyy-MM-dd HH:mm:ss")}
+ * @desc ${table.name} ${table.comment}
+ */
+public interface I${_vm.toPascal(${_vm.lower(${table.name})})}Service {
+
+    ApiPage<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> page(${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo,
+                                                                 ApiPage<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> page);
+
+    List<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> list(${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo);
+
+        ${_vm.toPascal(${_vm.lower(${table.name})})}Vo find(${table.primaryKey.javaType} ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})});
+
+    void add(${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo);
+
+    void update(${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo);
+
+    void delete(${table.primaryKey.javaType} ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})});
+}

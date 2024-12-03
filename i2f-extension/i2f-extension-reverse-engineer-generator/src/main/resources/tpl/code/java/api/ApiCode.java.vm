@@ -1,0 +1,17 @@
+#filename api/ApiCode
+package ${code.pkg}.api;
+
+/**
+ * @author ${code.author}
+ * @date ${_vm.format(${_vm.now()},"yyyy-MM-dd HH:mm:ss")}
+ * @desc api response code definition
+ */
+public interface ApiCode {
+    int SUCCESS = 200;
+    int ERROR = 0;
+    int NO_LOGIN = 400;
+    int NO_AUTH = 401;
+    int UNKNOWN = 402;
+    int NOT_FOUND = 404;
+    int SYS_EXCEPTION = 500;
+}

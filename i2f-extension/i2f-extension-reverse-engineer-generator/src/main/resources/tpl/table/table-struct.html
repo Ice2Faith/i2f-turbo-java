@@ -1,0 +1,3921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>table struct doc</title>
+    <style>
+        * {
+            font-family: 'Arial';
+            font-size: 12pt;
+            margin: 0;
+            padding: 0;
+        }
+
+        hr {
+            margin: 8px 2px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin: 5px 2px;
+        }
+
+        table tr td {
+            padding: 5px 8px;
+            border: solid 1px black;
+        }
+
+        .table-column-list {
+            width: 100%;
+        }
+
+        .table-column-head {
+            text-align: center;
+            font-weight: normal;
+            background-color: #aaaaaa;
+        }
+
+    </style>
+</head>
+<body>
+<h1>table design doc</h1>
+<hr/>
+<h2>1.1 table: XXL_JOB_GROUP</h2>
+<h3>comment: 任务组</h3>
+<h3>database: PUBLIC</h3>
+<h3>schema: PUBLIC</h3>
+<h3>catalog: XXL_JOB.H2.DB</h3>
+<table border="1" cellspacing="0" style="width:100%;">
+    <tr>
+        <th class="table-column-head" style="width: 5%;">
+            number
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            name
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            type
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            precision
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            scale
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            not_null
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            primary
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            auto_increment
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            unique
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            index
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            default
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            generated
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            comment
+        </th>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            ID
+        </td>
+        <td>
+            BIGINT
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            ID
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2
+        </td>
+        <td>
+            APP_NAME
+        </td>
+        <td>
+            VARCHAR
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器appname
+        </td>
+    </tr>
+    <tr>
+        <td>
+            3
+        </td>
+        <td>
+            TITLE
+        </td>
+        <td>
+            VARCHAR
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器名称
+        </td>
+    </tr>
+    <tr>
+        <td>
+            4
+        </td>
+        <td>
+            ADDRESS_TYPE
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器地址类型：0=自动注册、1=手动录入
+        </td>
+    </tr>
+    <tr>
+        <td>
+            5
+        </td>
+        <td>
+            ADDRESS_LIST
+        </td>
+        <td>
+            VARCHAR
+            (
+            1000000000
+            )
+        </td>
+        <td>
+            1000000000
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器地址列表，多地址逗号分隔
+        </td>
+    </tr>
+    <tr>
+        <td>
+            6
+        </td>
+        <td>
+            UPDATE_TIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            更新时间
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>primary key</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            CONSTRAINT_B
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>unique index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            PRIMARY_KEY_B
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+</table>
+<hr/>
+<h2>1.2 table: XXL_JOB_INFO</h2>
+<h3>comment: XXL任务信息</h3>
+<h3>database: PUBLIC</h3>
+<h3>schema: PUBLIC</h3>
+<h3>catalog: XXL_JOB.H2.DB</h3>
+<table border="1" cellspacing="0" style="width:100%;">
+    <tr>
+        <th class="table-column-head" style="width: 5%;">
+            number
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            name
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            type
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            precision
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            scale
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            not_null
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            primary
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            auto_increment
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            unique
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            index
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            default
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            generated
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            comment
+        </th>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            ID
+        </td>
+        <td>
+            BIGINT
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            ID
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2
+        </td>
+        <td>
+            JOB_GROUP
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器主键id
+        </td>
+    </tr>
+    <tr>
+        <td>
+            3
+        </td>
+        <td>
+            JOB_DESC
+        </td>
+        <td>
+            VARCHAR
+            (
+            255
+            )
+        </td>
+        <td>
+            255
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            任务降序
+        </td>
+    </tr>
+    <tr>
+        <td>
+            4
+        </td>
+        <td>
+            ADD_TIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            加时间
+        </td>
+    </tr>
+    <tr>
+        <td>
+            5
+        </td>
+        <td>
+            UPDATE_TIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            更新时间
+        </td>
+    </tr>
+    <tr>
+        <td>
+            6
+        </td>
+        <td>
+            AUTHOR
+        </td>
+        <td>
+            VARCHAR
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            作者
+        </td>
+    </tr>
+    <tr>
+        <td>
+            7
+        </td>
+        <td>
+            ALARM_EMAIL
+        </td>
+        <td>
+            VARCHAR
+            (
+            255
+            )
+        </td>
+        <td>
+            255
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            报警邮件
+        </td>
+    </tr>
+    <tr>
+        <td>
+            8
+        </td>
+        <td>
+            SCHEDULE_TYPE
+        </td>
+        <td>
+            VARCHAR
+            (
+            50
+            )
+        </td>
+        <td>
+            50
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            'NONE'
+        </td>
+        <td>
+        </td>
+        <td>
+            调度类型
+        </td>
+    </tr>
+    <tr>
+        <td>
+            9
+        </td>
+        <td>
+            SCHEDULE_CONF
+        </td>
+        <td>
+            VARCHAR
+            (
+            128
+            )
+        </td>
+        <td>
+            128
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            调度配置，值含义取决于调度类型
+        </td>
+    </tr>
+    <tr>
+        <td>
+            10
+        </td>
+        <td>
+            MISFIRE_STRATEGY
+        </td>
+        <td>
+            VARCHAR
+            (
+            50
+            )
+        </td>
+        <td>
+            50
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            'DO_NOTHING'
+        </td>
+        <td>
+        </td>
+        <td>
+            调度过期策略
+        </td>
+    </tr>
+    <tr>
+        <td>
+            11
+        </td>
+        <td>
+            EXECUTOR_ROUTE_STRATEGY
+        </td>
+        <td>
+            VARCHAR
+            (
+            50
+            )
+        </td>
+        <td>
+            50
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器路由策略
+        </td>
+    </tr>
+    <tr>
+        <td>
+            12
+        </td>
+        <td>
+            EXECUTOR_HANDLER
+        </td>
+        <td>
+            VARCHAR
+            (
+            255
+            )
+        </td>
+        <td>
+            255
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器任务handler
+        </td>
+    </tr>
+    <tr>
+        <td>
+            13
+        </td>
+        <td>
+            EXECUTOR_PARAM
+        </td>
+        <td>
+            VARCHAR
+            (
+            512
+            )
+        </td>
+        <td>
+            512
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器任务参数
+        </td>
+    </tr>
+    <tr>
+        <td>
+            14
+        </td>
+        <td>
+            EXECUTOR_BLOCK_STRATEGY
+        </td>
+        <td>
+            VARCHAR
+            (
+            50
+            )
+        </td>
+        <td>
+            50
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            阻塞处理策略
+        </td>
+    </tr>
+    <tr>
+        <td>
+            15
+        </td>
+        <td>
+            EXECUTOR_TIMEOUT
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            任务执行超时时间，单位秒
+        </td>
+    </tr>
+    <tr>
+        <td>
+            16
+        </td>
+        <td>
+            EXECUTOR_FAIL_RETRY_COUNT
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            失败重试次数
+        </td>
+    </tr>
+    <tr>
+        <td>
+            17
+        </td>
+        <td>
+            GLUE_TYPE
+        </td>
+        <td>
+            VARCHAR
+            (
+            50
+            )
+        </td>
+        <td>
+            50
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            glue类型
+        </td>
+    </tr>
+    <tr>
+        <td>
+            18
+        </td>
+        <td>
+            GLUE_SOURCE
+        </td>
+        <td>
+            VARCHAR
+            (
+            1000000000
+            )
+        </td>
+        <td>
+            1000000000
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            glue源代码
+        </td>
+    </tr>
+    <tr>
+        <td>
+            19
+        </td>
+        <td>
+            GLUE_REMARK
+        </td>
+        <td>
+            VARCHAR
+            (
+            128
+            )
+        </td>
+        <td>
+            128
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            胶水备注
+        </td>
+    </tr>
+    <tr>
+        <td>
+            20
+        </td>
+        <td>
+            GLUE_UPDATETIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            glue更新时间
+        </td>
+    </tr>
+    <tr>
+        <td>
+            21
+        </td>
+        <td>
+            CHILD_JOBID
+        </td>
+        <td>
+            VARCHAR
+            (
+            255
+            )
+        </td>
+        <td>
+            255
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            子任务id，多个逗号分隔
+        </td>
+    </tr>
+    <tr>
+        <td>
+            22
+        </td>
+        <td>
+            TRIGGER_STATUS
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            调度状态：0-停止，1-运行
+        </td>
+    </tr>
+    <tr>
+        <td>
+            23
+        </td>
+        <td>
+            TRIGGER_LAST_TIME
+        </td>
+        <td>
+            BIGINT
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            上次调度时间
+        </td>
+    </tr>
+    <tr>
+        <td>
+            24
+        </td>
+        <td>
+            TRIGGER_NEXT_TIME
+        </td>
+        <td>
+            BIGINT
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            下次调度时间
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>primary key</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            CONSTRAINT_2
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>unique index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            PRIMARY_KEY_2
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+</table>
+<hr/>
+<h2>1.3 table: XXL_JOB_LOCK</h2>
+<h3>comment: XXL任务锁</h3>
+<h3>database: PUBLIC</h3>
+<h3>schema: PUBLIC</h3>
+<h3>catalog: XXL_JOB.H2.DB</h3>
+<table border="1" cellspacing="0" style="width:100%;">
+    <tr>
+        <th class="table-column-head" style="width: 5%;">
+            number
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            name
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            type
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            precision
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            scale
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            not_null
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            primary
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            auto_increment
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            unique
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            index
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            default
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            generated
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            comment
+        </th>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            LOCK_NAME
+        </td>
+        <td>
+            VARCHAR
+            (
+            50
+            )
+        </td>
+        <td>
+            50
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            锁名称
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>primary key</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            CONSTRAINT_2F02
+        </td>
+        <td class="table-column-body">
+            LOCK_NAME
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>unique index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            PRIMARY_KEY_2F02
+        </td>
+        <td class="table-column-body">
+            LOCK_NAME
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+</table>
+<hr/>
+<h2>1.4 table: XXL_JOB_LOG</h2>
+<h3>comment: XXL任务日志</h3>
+<h3>database: PUBLIC</h3>
+<h3>schema: PUBLIC</h3>
+<h3>catalog: XXL_JOB.H2.DB</h3>
+<table border="1" cellspacing="0" style="width:100%;">
+    <tr>
+        <th class="table-column-head" style="width: 5%;">
+            number
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            name
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            type
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            precision
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            scale
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            not_null
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            primary
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            auto_increment
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            unique
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            index
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            default
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            generated
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            comment
+        </th>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            ID
+        </td>
+        <td>
+            BIGINT
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            ID
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2
+        </td>
+        <td>
+            JOB_GROUP
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器主键id
+        </td>
+    </tr>
+    <tr>
+        <td>
+            3
+        </td>
+        <td>
+            JOB_ID
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            任务，主键id
+        </td>
+    </tr>
+    <tr>
+        <td>
+            4
+        </td>
+        <td>
+            EXECUTOR_ADDRESS
+        </td>
+        <td>
+            VARCHAR
+            (
+            255
+            )
+        </td>
+        <td>
+            255
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器地址，本次执行的地址
+        </td>
+    </tr>
+    <tr>
+        <td>
+            5
+        </td>
+        <td>
+            EXECUTOR_HANDLER
+        </td>
+        <td>
+            VARCHAR
+            (
+            255
+            )
+        </td>
+        <td>
+            255
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器任务handler
+        </td>
+    </tr>
+    <tr>
+        <td>
+            6
+        </td>
+        <td>
+            EXECUTOR_PARAM
+        </td>
+        <td>
+            VARCHAR
+            (
+            512
+            )
+        </td>
+        <td>
+            512
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器任务参数
+        </td>
+    </tr>
+    <tr>
+        <td>
+            7
+        </td>
+        <td>
+            EXECUTOR_SHARDING_PARAM
+        </td>
+        <td>
+            VARCHAR
+            (
+            20
+            )
+        </td>
+        <td>
+            20
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行器任务分片参数，格式如 1/2
+        </td>
+    </tr>
+    <tr>
+        <td>
+            8
+        </td>
+        <td>
+            EXECUTOR_FAIL_RETRY_COUNT
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            失败重试次数
+        </td>
+    </tr>
+    <tr>
+        <td>
+            9
+        </td>
+        <td>
+            TRIGGER_TIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            调度-时间
+        </td>
+    </tr>
+    <tr>
+        <td>
+            10
+        </td>
+        <td>
+            TRIGGER_CODE
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            调度-结果
+        </td>
+    </tr>
+    <tr>
+        <td>
+            11
+        </td>
+        <td>
+            TRIGGER_MSG
+        </td>
+        <td>
+            VARCHAR
+            (
+            1000000000
+            )
+        </td>
+        <td>
+            1000000000
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            调度-日志
+        </td>
+    </tr>
+    <tr>
+        <td>
+            12
+        </td>
+        <td>
+            HANDLE_TIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行-时间
+        </td>
+    </tr>
+    <tr>
+        <td>
+            13
+        </td>
+        <td>
+            HANDLE_CODE
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行-状态
+        </td>
+    </tr>
+    <tr>
+        <td>
+            14
+        </td>
+        <td>
+            HANDLE_MSG
+        </td>
+        <td>
+            VARCHAR
+            (
+            1000000000
+            )
+        </td>
+        <td>
+            1000000000
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            执行-日志
+        </td>
+    </tr>
+    <tr>
+        <td>
+            15
+        </td>
+        <td>
+            ALARM_STATUS
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            告警状态：0-默认、1-无需告警、2-告警成功、3-告警失败
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>primary key</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            CONSTRAINT_8
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>unique index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            PRIMARY_KEY_8
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            IDX_XXL_JOB_LOG_HANDLE_CODE
+        </td>
+        <td class="table-column-body">
+            HANDLE_CODE
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            2
+        </td>
+        <td class="table-column-body">
+            IDX_XXL_JOB_LOG_TRIGGER_TIME
+        </td>
+        <td class="table-column-body">
+            TRIGGER_TIME
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+<hr/>
+<h2>1.5 table: XXL_JOB_LOG_REPORT</h2>
+<h3>comment: XXL任务日志报表</h3>
+<h3>database: PUBLIC</h3>
+<h3>schema: PUBLIC</h3>
+<h3>catalog: XXL_JOB.H2.DB</h3>
+<table border="1" cellspacing="0" style="width:100%;">
+    <tr>
+        <th class="table-column-head" style="width: 5%;">
+            number
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            name
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            type
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            precision
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            scale
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            not_null
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            primary
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            auto_increment
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            unique
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            index
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            default
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            generated
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            comment
+        </th>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            ID
+        </td>
+        <td>
+            BIGINT
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            ID
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2
+        </td>
+        <td>
+            TRIGGER_DAY
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            调度-时间
+        </td>
+    </tr>
+    <tr>
+        <td>
+            3
+        </td>
+        <td>
+            RUNNING_COUNT
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            运行中-日志数量
+        </td>
+    </tr>
+    <tr>
+        <td>
+            4
+        </td>
+        <td>
+            SUC_COUNT
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            执行成功-日志数量
+        </td>
+    </tr>
+    <tr>
+        <td>
+            5
+        </td>
+        <td>
+            FAIL_COUNT
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+            执行失败-日志数量
+        </td>
+    </tr>
+    <tr>
+        <td>
+            6
+        </td>
+        <td>
+            UPDATE_TIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            更新时间
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>primary key</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            CONSTRAINT_5
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>unique index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            PRIMARY_KEY_5
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            IDX_XXL_JOB_LOG_REPORT_TRIGGER_DAY
+        </td>
+        <td class="table-column-body">
+            TRIGGER_DAY
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+<hr/>
+<h2>1.6 table: XXL_JOB_LOGGLUE</h2>
+<h3>comment: XXL任务logglue</h3>
+<h3>database: PUBLIC</h3>
+<h3>schema: PUBLIC</h3>
+<h3>catalog: XXL_JOB.H2.DB</h3>
+<table border="1" cellspacing="0" style="width:100%;">
+    <tr>
+        <th class="table-column-head" style="width: 5%;">
+            number
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            name
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            type
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            precision
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            scale
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            not_null
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            primary
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            auto_increment
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            unique
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            index
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            default
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            generated
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            comment
+        </th>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            ID
+        </td>
+        <td>
+            BIGINT
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            ID
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2
+        </td>
+        <td>
+            JOB_ID
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            任务，主键id
+        </td>
+    </tr>
+    <tr>
+        <td>
+            3
+        </td>
+        <td>
+            GLUE_TYPE
+        </td>
+        <td>
+            VARCHAR
+            (
+            50
+            )
+        </td>
+        <td>
+            50
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            glue类型
+        </td>
+    </tr>
+    <tr>
+        <td>
+            4
+        </td>
+        <td>
+            GLUE_SOURCE
+        </td>
+        <td>
+            VARCHAR
+            (
+            1000000000
+            )
+        </td>
+        <td>
+            1000000000
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            glue源代码
+        </td>
+    </tr>
+    <tr>
+        <td>
+            5
+        </td>
+        <td>
+            GLUE_REMARK
+        </td>
+        <td>
+            VARCHAR
+            (
+            128
+            )
+        </td>
+        <td>
+            128
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            glue备注
+        </td>
+    </tr>
+    <tr>
+        <td>
+            6
+        </td>
+        <td>
+            ADD_TIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            加时间
+        </td>
+    </tr>
+    <tr>
+        <td>
+            7
+        </td>
+        <td>
+            UPDATE_TIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            更新时间
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>primary key</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            CONSTRAINT_A
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>unique index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            PRIMARY_KEY_A
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+</table>
+<hr/>
+<h2>1.7 table: XXL_JOB_REGISTRY</h2>
+<h3>comment: XXL任务注册</h3>
+<h3>database: PUBLIC</h3>
+<h3>schema: PUBLIC</h3>
+<h3>catalog: XXL_JOB.H2.DB</h3>
+<table border="1" cellspacing="0" style="width:100%;">
+    <tr>
+        <th class="table-column-head" style="width: 5%;">
+            number
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            name
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            type
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            precision
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            scale
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            not_null
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            primary
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            auto_increment
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            unique
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            index
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            default
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            generated
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            comment
+        </th>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            ID
+        </td>
+        <td>
+            BIGINT
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            ID
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2
+        </td>
+        <td>
+            REGISTRY_GROUP
+        </td>
+        <td>
+            VARCHAR
+            (
+            50
+            )
+        </td>
+        <td>
+            50
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            注册组
+        </td>
+    </tr>
+    <tr>
+        <td>
+            3
+        </td>
+        <td>
+            REGISTRY_KEY
+        </td>
+        <td>
+            VARCHAR
+            (
+            255
+            )
+        </td>
+        <td>
+            255
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            注册键
+        </td>
+    </tr>
+    <tr>
+        <td>
+            4
+        </td>
+        <td>
+            REGISTRY_VALUE
+        </td>
+        <td>
+            VARCHAR
+            (
+            255
+            )
+        </td>
+        <td>
+            255
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            注册值
+        </td>
+    </tr>
+    <tr>
+        <td>
+            5
+        </td>
+        <td>
+            UPDATE_TIME
+        </td>
+        <td>
+            TIMESTAMP
+            (
+            26
+            ,6
+            )
+        </td>
+        <td>
+            26
+        </td>
+        <td>
+            6
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            更新时间
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>primary key</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            CONSTRAINT_2F
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>unique index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            PRIMARY_KEY_2F
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            IDX_XXL_JOB_REGISTRY_G_K_V
+        </td>
+        <td class="table-column-body">
+            REGISTRY_GROUP
+            ,
+            REGISTRY_KEY
+            ,
+            REGISTRY_VALUE
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+<hr/>
+<h2>1.8 table: XXL_JOB_USER</h2>
+<h3>comment: XXL任务用户</h3>
+<h3>database: PUBLIC</h3>
+<h3>schema: PUBLIC</h3>
+<h3>catalog: XXL_JOB.H2.DB</h3>
+<table border="1" cellspacing="0" style="width:100%;">
+    <tr>
+        <th class="table-column-head" style="width: 5%;">
+            number
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            name
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            type
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            precision
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            scale
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            not_null
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            primary
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            auto_increment
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            unique
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            index
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            default
+        </th>
+        <th class="table-column-head" style="width: 5%;">
+            generated
+        </th>
+        <th class="table-column-head" style="width: 20%;">
+            comment
+        </th>
+    </tr>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            ID
+        </td>
+        <td>
+            BIGINT
+            (
+            64
+            )
+        </td>
+        <td>
+            64
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            ID
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2
+        </td>
+        <td>
+            USERNAME
+        </td>
+        <td>
+            VARCHAR
+            (
+            50
+            )
+        </td>
+        <td>
+            50
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            账号
+        </td>
+    </tr>
+    <tr>
+        <td>
+            3
+        </td>
+        <td>
+            PASSWORD
+        </td>
+        <td>
+            VARCHAR
+            (
+            300
+            )
+        </td>
+        <td>
+            300
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            密码
+        </td>
+    </tr>
+    <tr>
+        <td>
+            4
+        </td>
+        <td>
+            ROLE
+        </td>
+        <td>
+            INTEGER
+            (
+            32
+            )
+        </td>
+        <td>
+            32
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            角色：0-普通用户、1-管理员
+        </td>
+    </tr>
+    <tr>
+        <td>
+            5
+        </td>
+        <td>
+            PERMISSION
+        </td>
+        <td>
+            VARCHAR
+            (
+            255
+            )
+        </td>
+        <td>
+            255
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+
+        </td>
+        <td>
+        </td>
+        <td>
+            权限：执行器id列表，多个逗号分割
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>primary key</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            CONSTRAINT_2F0
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>unique index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            1
+        </td>
+        <td class="table-column-body">
+            IDX_XXL_JOB_USER_USERNAME
+        </td>
+        <td class="table-column-body">
+            USERNAME
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+    <tr>
+        <td class="table-column-body">
+            2
+        </td>
+        <td class="table-column-body">
+            PRIMARY_KEY_2F0
+        </td>
+        <td class="table-column-body">
+            ID
+        </td>
+        <td class="table-column-body">
+
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h3>index</h3>
+<table class="table-column-list" border="1" cellspacing="0">
+    <tr>
+        <th class="table-column-head" style="width: 5%">
+            number
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            name
+        </th>
+        <th class="table-column-head" style="width: 35%">
+            columns
+        </th>
+        <th class="table-column-head" style="width: 25%">
+            remark
+        </th>
+    </tr>
+</table>
+</body>
+</html>

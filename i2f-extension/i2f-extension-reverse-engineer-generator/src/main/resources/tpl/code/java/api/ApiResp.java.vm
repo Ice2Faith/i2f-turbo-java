@@ -1,0 +1,108 @@
+#filename api/ApiResp
+        package ${code.pkg}.api;
+
+    #if(${code.lombok})
+    import lombok.Data;
+    import lombok.NoArgsConstructor;
+    #end
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author ${code.author}
+ * @date ${_vm.format(${_vm.now()},"yyyy-MM-dd HH:mm:ss")}
+ * @desc api response dto definition
+ */
+    #if(${code.lombok})
+    @Data
+    @NoArgsConstructor
+    #end
+public class ApiResp<T> {
+    private int code;
+    private String msg;
+    private T data;
+    private Map<String, Object> kvs;
+
+    public ApiResp(int code, String msg, T data) {
+        this.code = code;
+        this.msg = msg;
+        this.data = data;
+    }
+
+    public ApiResp<T> add(String key, Object val) {
+        if (kvs == null) {
+            kvs = new HashMap<>();
+        }
+        kvs.put(key, val);
+        return this;
+    }
+
+    public ApiResp<T> code(int code) {
+        this.code = code;
+        return this;
+    }
+
+    public ApiResp<T> msg(String msg) {
+        this.msg = msg;
+        return this;
+    }
+
+    public ApiResp<T> data(T data) {
+        this.data = data;
+        return this;
+    }
+
+    public static <T> ApiResp<T> success(T data) {
+        return new ApiResp<>(ApiCode.SUCCESS, "success", data);
+    }
+
+    public static <T> ApiResp<T> success(T data, String msg) {
+        return new ApiResp<>(ApiCode.SUCCESS, msg, data);
+    }
+
+    public static <T> ApiResp<T> error(String msg) {
+        return new ApiResp<>(ApiCode.ERROR, msg, null);
+    }
+
+    public static <T> ApiResp<T> error(int code, String msg) {
+        return new ApiResp<>(code, msg, null);
+    }
+
+    public static <T> ApiResp<T> resp(int code, String msg, T data) {
+        return new ApiResp<>(code, msg, data);
+    }
+
+    #if(!${code.lombok})
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(int code) {
+            this.code = code;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+
+        public void setMsg(String msg) {
+            this.msg = msg;
+        }
+
+        public T getData() {
+            return data;
+        }
+
+        public void setData(T data) {
+            this.data = data;
+        }
+
+        public Map<String, Object> getKvs() {
+            return kvs;
+        }
+
+        public void setKvs(Map<String, Object> kvs) {
+            this.kvs = kvs;
+        }#end
+}

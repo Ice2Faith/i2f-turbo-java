@@ -1,0 +1,99 @@
+#filename data/dom/${_vm.toPascal(${_vm.lower(${table.name})})}Do
+        package ${code.pkg}.data.dom;
+
+    #if(${code.swagger})
+    import io.swagger.annotations.ApiModel;
+    import io.swagger.annotations.ApiModelProperty;
+    #end
+
+    #if(${code.lombok})
+    import lombok.NoArgsConstructor;
+    import lombok.Data;
+    import lombok.EqualsAndHashCode;
+    import lombok.experimental.Accessors;
+    #end
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
+
+import java.util.*;
+
+/**
+ * @author ${code.author}
+ * @date ${_vm.format(${_vm.now()},"yyyy-MM-dd HH:mm:ss")}
+ * @desc ${table.name} ${table.comment}
+ */
+    #if(${code.lombok})
+    @Data
+    @NoArgsConstructor
+    @Accessors(chain = true)
+    @EqualsAndHashCode(callSuper = false)
+    #end
+    #if(${code.swagger})
+    @ApiModel(value = "${table.comment}Do", description = "${table.name}")
+    #end
+@TableName("${table.name}")
+public class ${_vm.toPascal(${_vm.lower(${table.name})})}Do {
+
+    #if(!${code.lombok})
+        public ${_vm.toPascal(${_vm.lower(${table.name})})}Do() {
+
+        }
+    #end
+
+    #foreach($item in ${table.columns})
+
+        /**
+         *  ${item.comment}
+         */
+        #if(${code.swagger})
+        @ApiModelProperty(value = "${item.comment}")
+        #end
+        #if(${item.isPrimaryKey})
+        @TableId(type = IdType.AUTO)
+        #end
+    protected ${item.javaType} ${_vm.toCamel(${_vm.lower(${item.name})})};
+    #end
+
+    #if(!${code.lombok})
+        #foreach($item in ${table.columns})
+
+            public ${_vm.toPascal(${_vm.lower(${table.name})})}Do set${_vm.toPascal(${item.name})}(${item.javaType} ${_vm.toCamel(${_vm.lower(${item.name})})}) {
+                this.${_vm.toCamel(${_vm.lower(${item.name})})}=${_vm.toCamel(${_vm.lower(${item.name})})};
+                return this;
+            }
+
+            public ${item.javaType} get${_vm.toPascal(${item.name})}() {
+                return this.${_vm.toCamel(${_vm.lower(${item.name})})};
+            }
+        #end
+    #end
+
+    #if(!${code.lombok})
+        @Override
+        public String toString() {
+                return "${_vm.toPascal(${_vm.lower(${table.name})})}Do{" +
+            #foreach($item in ${table.columns})
+                    "${_vm.toCamel(${_vm.lower(${item.name})})}=" +${_vm.toCamel(${_vm.lower(${item.name})})}+
+            #end
+            '}';
+        }
+    #end
+
+    #if(${code.beanCopy})
+        public <T extends ${_vm.toPascal(${_vm.lower(${table.name})})}Do> T convert(T dom) {
+            #if(${code.springCopy})
+                BeanUtils.copyProperties(this, dom);
+            #else
+                #foreach($item in ${table.columns})
+                    dom.set${_vm.toPascal(${item.name})}(this.get${_vm.toPascal(${item.name})}());
+                #end
+            #end
+            return dom;
+        }
+    #end
+}

@@ -1,0 +1,2646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>表设计文档</title>
+    <style>
+        * {
+            font-family: '新宋体';
+            font-size: 12pt;
+            margin: 0;
+            padding: 0;
+        }
+
+        hr {
+            margin: 8px 2px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin: 5px 2px;
+        }
+
+        table tr td {
+            padding: 5px 8px;
+            border: solid 1px black;
+        }
+
+        .api-desc-table {
+            width: 100%;
+        }
+
+        .api-desc-key {
+            width: 25%;
+            background-color: #e86fb2;
+        }
+
+        .api-desc-value {
+            width: 75%;
+        }
+
+        .table-column-list {
+            width: 100%;
+        }
+
+        .table-column-head {
+            text-align: center;
+            font-weight: normal;
+            background-color: #aaaaaa;
+        }
+
+        .document {
+            max-width: calc(210mm * 1);
+            overflow-wrap: break-word;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<div class="document">
+    <h3>1.1.1 表 任务组</h3>
+
+    表 XXL_JOB_GROUP 的列清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                名称
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                数据类型
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                非空
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                默认
+            </th>
+            <th class="table-column-head" style="width: 30%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+                BIGINT
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                2
+            </td>
+            <td class="table-column-body">
+                APP_NAME
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器appname
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                3
+            </td>
+            <td class="table-column-body">
+                TITLE
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器名称
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                4
+            </td>
+            <td class="table-column-body">
+                ADDRESS_TYPE
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                执行器地址类型：0=自动注册、1=手动录入
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                5
+            </td>
+            <td class="table-column-body">
+                ADDRESS_LIST
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                1000000000
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器地址列表，多地址逗号分隔
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                6
+            </td>
+            <td class="table-column-body">
+                UPDATE_TIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                更新时间
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_GROUP 的主键清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                CONSTRAINT_B
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_GROUP 的唯一清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                PRIMARY_KEY_B
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_GROUP 的索引清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+    </table>
+    <h3>1.1.2 表 XXL任务信息</h3>
+
+    表 XXL_JOB_INFO 的列清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                名称
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                数据类型
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                非空
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                默认
+            </th>
+            <th class="table-column-head" style="width: 30%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+                BIGINT
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                2
+            </td>
+            <td class="table-column-body">
+                JOB_GROUP
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器主键id
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                3
+            </td>
+            <td class="table-column-body">
+                JOB_DESC
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                255
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                任务降序
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                4
+            </td>
+            <td class="table-column-body">
+                ADD_TIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                加时间
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                5
+            </td>
+            <td class="table-column-body">
+                UPDATE_TIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                更新时间
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                6
+            </td>
+            <td class="table-column-body">
+                AUTHOR
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                作者
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                7
+            </td>
+            <td class="table-column-body">
+                ALARM_EMAIL
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                255
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                报警邮件
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                8
+            </td>
+            <td class="table-column-body">
+                SCHEDULE_TYPE
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                50
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                'NONE'
+            </td>
+            <td class="table-column-body">
+                调度类型
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                9
+            </td>
+            <td class="table-column-body">
+                SCHEDULE_CONF
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                128
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                调度配置，值含义取决于调度类型
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                10
+            </td>
+            <td class="table-column-body">
+                MISFIRE_STRATEGY
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                50
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                'DO_NOTHING'
+            </td>
+            <td class="table-column-body">
+                调度过期策略
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                11
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_ROUTE_STRATEGY
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                50
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器路由策略
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                12
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_HANDLER
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                255
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器任务handler
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                13
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_PARAM
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                512
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器任务参数
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                14
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_BLOCK_STRATEGY
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                50
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                阻塞处理策略
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                15
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_TIMEOUT
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                任务执行超时时间，单位秒
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                16
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_FAIL_RETRY_COUNT
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                失败重试次数
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                17
+            </td>
+            <td class="table-column-body">
+                GLUE_TYPE
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                50
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                glue类型
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                18
+            </td>
+            <td class="table-column-body">
+                GLUE_SOURCE
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                1000000000
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                glue源代码
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                19
+            </td>
+            <td class="table-column-body">
+                GLUE_REMARK
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                128
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                胶水备注
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                20
+            </td>
+            <td class="table-column-body">
+                GLUE_UPDATETIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                glue更新时间
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                21
+            </td>
+            <td class="table-column-body">
+                CHILD_JOBID
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                255
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                子任务id，多个逗号分隔
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                22
+            </td>
+            <td class="table-column-body">
+                TRIGGER_STATUS
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                调度状态：0-停止，1-运行
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                23
+            </td>
+            <td class="table-column-body">
+                TRIGGER_LAST_TIME
+            </td>
+            <td class="table-column-body">
+                BIGINT
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                上次调度时间
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                24
+            </td>
+            <td class="table-column-body">
+                TRIGGER_NEXT_TIME
+            </td>
+            <td class="table-column-body">
+                BIGINT
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                下次调度时间
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_INFO 的主键清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                CONSTRAINT_2
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_INFO 的唯一清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                PRIMARY_KEY_2
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_INFO 的索引清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+    </table>
+    <h3>1.1.3 表 XXL任务锁</h3>
+
+    表 XXL_JOB_LOCK 的列清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                名称
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                数据类型
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                非空
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                默认
+            </th>
+            <th class="table-column-head" style="width: 30%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                LOCK_NAME
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                50
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                锁名称
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOCK 的主键清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                CONSTRAINT_2F02
+            </td>
+            <td class="table-column-body">
+                LOCK_NAME
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOCK 的唯一清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                PRIMARY_KEY_2F02
+            </td>
+            <td class="table-column-body">
+                LOCK_NAME
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOCK 的索引清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+    </table>
+    <h3>1.1.4 表 XXL任务日志</h3>
+
+    表 XXL_JOB_LOG 的列清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                名称
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                数据类型
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                非空
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                默认
+            </th>
+            <th class="table-column-head" style="width: 30%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+                BIGINT
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                2
+            </td>
+            <td class="table-column-body">
+                JOB_GROUP
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器主键id
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                3
+            </td>
+            <td class="table-column-body">
+                JOB_ID
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                任务，主键id
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                4
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_ADDRESS
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                255
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器地址，本次执行的地址
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                5
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_HANDLER
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                255
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器任务handler
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                6
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_PARAM
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                512
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器任务参数
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                7
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_SHARDING_PARAM
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                20
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行器任务分片参数，格式如 1/2
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                8
+            </td>
+            <td class="table-column-body">
+                EXECUTOR_FAIL_RETRY_COUNT
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                失败重试次数
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                9
+            </td>
+            <td class="table-column-body">
+                TRIGGER_TIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                调度-时间
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                10
+            </td>
+            <td class="table-column-body">
+                TRIGGER_CODE
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                调度-结果
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                11
+            </td>
+            <td class="table-column-body">
+                TRIGGER_MSG
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                1000000000
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                调度-日志
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                12
+            </td>
+            <td class="table-column-body">
+                HANDLE_TIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行-时间
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                13
+            </td>
+            <td class="table-column-body">
+                HANDLE_CODE
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行-状态
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                14
+            </td>
+            <td class="table-column-body">
+                HANDLE_MSG
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                1000000000
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                执行-日志
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                15
+            </td>
+            <td class="table-column-body">
+                ALARM_STATUS
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                告警状态：0-默认、1-无需告警、2-告警成功、3-告警失败
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOG 的主键清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                CONSTRAINT_8
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOG 的唯一清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                PRIMARY_KEY_8
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOG 的索引清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                IDX_XXL_JOB_LOG_HANDLE_CODE
+            </td>
+            <td class="table-column-body">
+                HANDLE_CODE
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                2
+            </td>
+            <td class="table-column-body">
+                IDX_XXL_JOB_LOG_TRIGGER_TIME
+            </td>
+            <td class="table-column-body">
+                TRIGGER_TIME
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+    <h3>1.1.5 表 XXL任务日志报表</h3>
+
+    表 XXL_JOB_LOG_REPORT 的列清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                名称
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                数据类型
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                非空
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                默认
+            </th>
+            <th class="table-column-head" style="width: 30%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+                BIGINT
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                2
+            </td>
+            <td class="table-column-body">
+                TRIGGER_DAY
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                调度-时间
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                3
+            </td>
+            <td class="table-column-body">
+                RUNNING_COUNT
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                运行中-日志数量
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                4
+            </td>
+            <td class="table-column-body">
+                SUC_COUNT
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                执行成功-日志数量
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                5
+            </td>
+            <td class="table-column-body">
+                FAIL_COUNT
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+                0
+            </td>
+            <td class="table-column-body">
+                执行失败-日志数量
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                6
+            </td>
+            <td class="table-column-body">
+                UPDATE_TIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                更新时间
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOG_REPORT 的主键清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                CONSTRAINT_5
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOG_REPORT 的唯一清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                PRIMARY_KEY_5
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOG_REPORT 的索引清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                IDX_XXL_JOB_LOG_REPORT_TRIGGER_DAY
+            </td>
+            <td class="table-column-body">
+                TRIGGER_DAY
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+    <h3>1.1.6 表 XXL任务logglue</h3>
+
+    表 XXL_JOB_LOGGLUE 的列清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                名称
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                数据类型
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                非空
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                默认
+            </th>
+            <th class="table-column-head" style="width: 30%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+                BIGINT
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                2
+            </td>
+            <td class="table-column-body">
+                JOB_ID
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                任务，主键id
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                3
+            </td>
+            <td class="table-column-body">
+                GLUE_TYPE
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                50
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                glue类型
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                4
+            </td>
+            <td class="table-column-body">
+                GLUE_SOURCE
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                1000000000
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                glue源代码
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                5
+            </td>
+            <td class="table-column-body">
+                GLUE_REMARK
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                128
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                glue备注
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                6
+            </td>
+            <td class="table-column-body">
+                ADD_TIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                加时间
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                7
+            </td>
+            <td class="table-column-body">
+                UPDATE_TIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                更新时间
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOGGLUE 的主键清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                CONSTRAINT_A
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOGGLUE 的唯一清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                PRIMARY_KEY_A
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_LOGGLUE 的索引清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+    </table>
+    <h3>1.1.7 表 XXL任务注册</h3>
+
+    表 XXL_JOB_REGISTRY 的列清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                名称
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                数据类型
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                非空
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                默认
+            </th>
+            <th class="table-column-head" style="width: 30%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+                BIGINT
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                2
+            </td>
+            <td class="table-column-body">
+                REGISTRY_GROUP
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                50
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                注册组
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                3
+            </td>
+            <td class="table-column-body">
+                REGISTRY_KEY
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                255
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                注册键
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                4
+            </td>
+            <td class="table-column-body">
+                REGISTRY_VALUE
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                255
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                注册值
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                5
+            </td>
+            <td class="table-column-body">
+                UPDATE_TIME
+            </td>
+            <td class="table-column-body">
+                TIMESTAMP
+                (
+                26
+                ,6
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                更新时间
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_REGISTRY 的主键清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                CONSTRAINT_2F
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_REGISTRY 的唯一清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                PRIMARY_KEY_2F
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_REGISTRY 的索引清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                IDX_XXL_JOB_REGISTRY_G_K_V
+            </td>
+            <td class="table-column-body">
+                REGISTRY_GROUP
+                、
+                REGISTRY_KEY
+                、
+                REGISTRY_VALUE
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+    <h3>1.1.8 表 XXL任务用户</h3>
+
+    表 XXL_JOB_USER 的列清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                名称
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                数据类型
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                非空
+            </th>
+            <th class="table-column-head" style="width: 15%">
+                默认
+            </th>
+            <th class="table-column-head" style="width: 30%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+                BIGINT
+                (
+                64
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                2
+            </td>
+            <td class="table-column-body">
+                USERNAME
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                50
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                账号
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                3
+            </td>
+            <td class="table-column-body">
+                PASSWORD
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                300
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                密码
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                4
+            </td>
+            <td class="table-column-body">
+                ROLE
+            </td>
+            <td class="table-column-body">
+                INTEGER
+                (
+                32
+                )
+            </td>
+            <td class="table-column-body">
+                YES
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                角色：0-普通用户、1-管理员
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                5
+            </td>
+            <td class="table-column-body">
+                PERMISSION
+            </td>
+            <td class="table-column-body">
+                VARCHAR
+                (
+                255
+                )
+            </td>
+            <td class="table-column-body">
+                NO
+            </td>
+            <td class="table-column-body">
+
+            </td>
+            <td class="table-column-body">
+                权限：执行器id列表，多个逗号分割
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_USER 的主键清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                CONSTRAINT_2F0
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_USER 的唯一清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                1
+            </td>
+            <td class="table-column-body">
+                IDX_XXL_JOB_USER_USERNAME
+            </td>
+            <td class="table-column-body">
+                USERNAME
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+        <tr>
+            <td class="table-column-body">
+                2
+            </td>
+            <td class="table-column-body">
+                PRIMARY_KEY_2F0
+            </td>
+            <td class="table-column-body">
+                ID
+            </td>
+            <td class="table-column-body">
+
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+
+    表 XXL_JOB_USER 的索引清单<br/>
+    <table class="table-column-list" border="1" cellspacing="0">
+        <tr>
+            <th class="table-column-head" style="width: 5%">
+                序号
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                限制名称
+            </th>
+            <th class="table-column-head" style="width: 35%">
+                字段
+            </th>
+            <th class="table-column-head" style="width: 25%">
+                注释
+            </th>
+        </tr>
+    </table>
+</div>
+</body>
+
+</html>

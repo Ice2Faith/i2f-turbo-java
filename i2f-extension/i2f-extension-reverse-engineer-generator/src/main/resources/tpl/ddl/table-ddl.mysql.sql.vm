@@ -56,7 +56,6 @@ create table ${table.name}
 #end
 #end ;
 
-
 #if(!$_vm.isnull(${table.uniqueIndexes}))
     #foreach(${index} in ${table.uniqueIndexes})
     create unique index ${index.name}

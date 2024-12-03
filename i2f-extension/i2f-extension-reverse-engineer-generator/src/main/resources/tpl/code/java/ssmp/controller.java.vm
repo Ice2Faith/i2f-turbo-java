@@ -1,0 +1,126 @@
+#filename controller/${_vm.toPascal(${_vm.lower(${table.name})})}Controller
+        package ${code.pkg}.controller;
+
+    #if(${code.swagger})
+    import io.swagger.annotations.Api;
+    import io.swagger.annotations.ApiOperation;
+    #end
+
+    #if(${code.lombok})
+    import lombok.extern.slf4j.Slf4j;
+    #else
+    import org.slf4j.Logger;
+    import org.slf4j.LoggerFactory;
+    #end
+
+import ${code.pkg}.data.dom.${_vm.toPascal(${_vm.lower(${table.name})})}Do;
+import ${code.pkg}.data.vo.${_vm.toPascal(${_vm.lower(${table.name})})}Vo;
+import ${code.pkg}.service.I${_vm.toPascal(${_vm.lower(${table.name})})}Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+/**
+ * @author ${code.author}
+ * @date ${_vm.format(${_vm.now()},"yyyy-MM-dd HH:mm:ss")}
+ * @desc ${table.name} ${table.comment}
+ */
+    #if(${code.lombok})
+    @Slf4j
+    #end
+    #if(${code.swagger})
+    @Api(tags = "${table.comment}")
+    #end
+@RestController
+@RequestMapping("${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}")
+public class ${_vm.toPascal(${_vm.lower(${table.name})})}Controller {
+
+    #if(!${code.lombok})
+        private Logger log = LoggerFactory.getLogger(${_vm.toPascal(${_vm.lower(${table.name})})}Controller.class);
+    #end
+
+    @Autowired
+    private I${_vm.toPascal(${_vm.lower(${table.name})})}Service baseService;
+
+    #if(${code.swagger})
+    @ApiOperation(value = "${table.comment}-分页")
+    #end
+    #if(${code.restful})
+    @GetMapping(value = "/page/{size}/{index}")
+    #else
+    @PostMapping(value = "/page/{size}/{index}")
+    #end
+public ApiResp<?> page(#if(!${code.restful}) @RequestBody #end ${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo,
+                @PathVariable(value = "index") Integer index,
+                @PathVariable(value = "size") Integer size) {
+    ApiPage<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> page = new ApiPage<>(index, size);
+    ApiPage<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> ret = baseService.page(webVo, page);
+    return ApiResp.success(ret);
+}
+
+    #if(${code.swagger})
+    @ApiOperation(value = "${table.comment}-列表")
+    #end
+    #if(${code.restful})
+    @GetMapping(value = "/list")
+    #else
+    @PostMapping(value = "/list")
+    #end
+public ApiResp<?> list(#if(!${code.restful}) @RequestBody #end ${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo) {
+    List<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> ret = baseService.list(webVo);
+    return ApiResp.success(ret);
+}
+
+    #if(${code.swagger})
+    @ApiOperation(value = "${table.comment}-详情")
+    #end
+    #if(${code.restful})
+    @GetMapping(value = "/find/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}")
+    #else
+    @PostMapping(value = "/find/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}")
+    #end
+public ApiResp<?> find(@PathVariable(value = "${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}")${table.primaryKey.javaType} ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}) {
+        ${_vm.toPascal(${_vm.lower(${table.name})})}Vo ret = baseService.find(${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})});
+    return ApiResp.success(ret);
+}
+
+    #if(${code.swagger})
+    @ApiOperation(value = "${table.comment}-增加")
+    #end
+@PostMapping(value = "/add")
+public ApiResp<?> add(@RequestBody ${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo) {
+    baseService.add(webVo);
+    return ApiResp.success("ok");
+}
+
+    #if(${code.swagger})
+    @ApiOperation(value = "${table.comment}-更新")
+    #end
+    #if(${code.restful})
+    @PutMapping(value = "/update/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}")
+    #else
+    @PostMapping(value = "/update/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}")
+    #end
+public ApiResp<?> update(@PathVariable(value = "${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}")${table.primaryKey.javaType} ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})},
+                         @RequestBody ${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo) {
+    webVo.set${_vm.toPascal(${table.primaryKey.name})}(${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})});
+    baseService.update(webVo);
+    return ApiResp.success("ok");
+}
+
+    #if(${code.swagger})
+    @ApiOperation(value = "${table.comment}-删除")
+    #end
+    #if(${code.restful})
+    @DeleteMapping(value = "/delete/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}")
+    #else
+    @PostMapping(value = "/delete/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}")
+    #end
+public ApiResp<?> delete(@PathVariable(value = "${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}")${table.primaryKey.javaType} ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}) {
+    baseService.delete(${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})});
+    return ApiResp.success("ok");
+}
+
+
+}

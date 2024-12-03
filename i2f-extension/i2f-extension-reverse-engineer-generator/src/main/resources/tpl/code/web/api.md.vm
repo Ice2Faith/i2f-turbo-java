@@ -1,0 +1,217 @@
+    ${_vm.sharp} ${table.comment} 表接口
+    ---
+    - 前言
+        - author: ${code.author}
+        - date: ${_vm.format(${_vm.now()},"yyyy-MM-dd HH:mm:ss")}
+        - table: ${table.name}
+        - 相关实体，在最后的实体中给出
+
+    ---
+        ${_vm.sharp}${_vm.sharp} 分页查询接口
+    - 接口
+    ```perl
+#if(${code.restful})
+GET ${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/page/{size}/{index}
+#else
+POST ${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/page/{size}/{index}
+#end
+```
+    - 请求参数
+        - 实体：${_vm.toPascal(${_vm.lower(${table.name})})}Vo
+        - size: 分页页大小
+        - index: 分页页索引，从0开始
+
+    - 响应体
+        - 实体：ApiResp&lt;ApiPage&lt;${_vm.toPascal(${_vm.lower(${table.name})})}Vo&gt;&gt;
+
+    - 使用实例
+    ```js
+    let pageSize=50;
+    let pageIndex=0;
+    this.${_vm.dolar}axios({
+url:`${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/page/${_vm.dolar}{pageSize}/${_vm.dolar}{pageIndex}`,
+#if(${code.restful})
+method:'get',
+params:
+#else
+method:'post',
+data:
+#end
+{
+#foreach($item in ${table.columns})
+        #if(${item.javaType}=="String")
+            ${_vm.toCamel(${_vm.lower(${item.name})})}: "", // ${item.javaType} ${item.comment}
+        #else
+            ${_vm.toCamel(${_vm.lower(${item.name})})}: null, // ${item.javaType} ${item.comment}
+        #end
+    #end
+}
+}).then(({data:{code,msg,data}})=>{
+    if(code==200){
+        console.log('success',data);
+    }
+})
+```
+
+    ---
+        ${_vm.sharp}${_vm.sharp} 详情查询接口
+    - 接口
+    ```perl
+#if(${code.restful})
+GET ${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/find/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}
+#else
+POST ${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/find/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}
+#end
+```
+    - 请求参数
+        - ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}: 表的主键
+
+    - 响应体
+        - 实体：ApiResp&lt;${_vm.toPascal(${_vm.lower(${table.name})})}Vo&gt;
+
+    - 使用实例
+    ```js
+    let ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}=101;
+this.${_vm.dolar}axios({
+url:`${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/find/${_vm.dolar}{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}`,
+#if(${code.restful})
+method:'get',
+#else
+method:'post',
+#end
+}).then(({data:{code,msg,data}})=>{
+    if(code==200){
+        console.log('success',data);
+    }
+})
+```
+
+    ---
+        ${_vm.sharp}${_vm.sharp} 新增接口
+    - 接口
+    ```perl
+    POST ${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/add
+```
+    - 请求参数
+        - 实体: ${_vm.toPascal(${_vm.lower(${table.name})})}Vo
+
+    - 响应体
+        - 实体：ApiResp 直接成功或失败
+
+    - 使用实例
+    ```js
+    this.${_vm.dolar}axios({
+url:`${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/add`,
+method:'post',
+data:
+{
+#foreach($item in ${table.columns})
+        #if(${item.javaType}=="String")
+            ${_vm.toCamel(${_vm.lower(${item.name})})}: "", // ${item.javaType} ${item.comment}
+        #else
+            ${_vm.toCamel(${_vm.lower(${item.name})})}: null, // ${item.javaType} ${item.comment}
+        #end
+    #end
+}
+}).then(({data:{code,msg,data}})=>{
+    if(code==200){
+        console.log('success',data);
+    }
+})
+```
+
+    ---
+        ${_vm.sharp}${_vm.sharp} 修改接口
+    - 接口
+    ```perl
+#if(${code.restful})
+PUT ${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/update/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}
+#else
+POST ${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/update/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}
+#end
+```
+    - 请求参数
+        - 实体: ${_vm.toPascal(${_vm.lower(${table.name})})}Vo
+
+    - 响应体
+        - 实体：ApiResp 直接成功或失败
+
+    - 使用实例
+    ```js
+    let ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}=101;
+this.${_vm.dolar}axios({
+url:`${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/update/${_vm.dolar}{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}`,
+#if(${code.restful})
+method:'put',
+data:
+#else
+method:'post',
+data:
+#end
+{
+#foreach($item in ${table.columns})
+        #if(${item.javaType}=="String")
+            ${_vm.toCamel(${_vm.lower(${item.name})})}: "", // ${item.javaType} ${item.comment}
+        #else
+            ${_vm.toCamel(${_vm.lower(${item.name})})}: null, // ${item.javaType} ${item.comment}
+        #end
+    #end
+}
+}).then(({data:{code,msg,data}})=>{
+    if(code==200){
+        console.log('success',data);
+    }
+})
+```
+
+    ---
+        ${_vm.sharp}${_vm.sharp} 删除接口
+    - 接口
+    ```perl
+#if(${code.restful})
+DELETE ${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/delete/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}
+#else
+POST ${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/delete/{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}
+#end
+```
+    - 请求参数
+        - ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}: 表的主键
+
+    - 响应体
+        - 实体：ApiResp 直接成功或失败
+
+
+    - 使用实例
+    ```js
+    let ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}=101;
+this.${_vm.dolar}axios({
+url:`${code.api}/${_vm.toCamel(${_vm.lower(${table.name})})}/delete/${_vm.dolar}{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}`,
+#if(${code.restful})
+method:'delete',
+#else
+method:'post',
+#end
+}).then(({data:{code,msg,data}})=>{
+    if(code==200){
+        console.log('success',data);
+    }
+})
+```
+
+        ${_vm.sharp}${_vm.sharp} 实体介绍
+    - ${_vm.toPascal(${_vm.lower(${table.name})})}Do
+    ```js
+    let params={
+#foreach($item in ${table.columns})
+        #if(${item.javaType}=="String")
+            ${_vm.toCamel(${_vm.lower(${item.name})})}: "", // ${item.javaType} ${item.comment}
+        #else
+            ${_vm.toCamel(${_vm.lower(${item.name})})}: null, // ${item.javaType} ${item.comment}
+        #end
+    #end
+};
+```
+    - ${_vm.toPascal(${_vm.lower(${table.name})})}Vo 继承 ${_vm.toPascal(${_vm.lower(${table.name})})}Do
+    ```js
+    // 暂无更多拓展字段
+    ```
