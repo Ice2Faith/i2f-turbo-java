@@ -1,0 +1,91 @@
+#filename service/impl/${_vm.toPascal(${_vm.lower(${table.name})})}ServiceImpl.java
+        package ${code.pkg}.service.impl;
+
+    #if(${code.lombok})
+    import lombok.extern.slf4j.Slf4j;
+    #else
+    import org.slf4j.Logger;
+    import org.slf4j.LoggerFactory;
+    #end
+    #if(${code.pageHelper})
+    import com.github.pagehelper.PageHelper;
+    import com.github.pagehelper.PageInfo;
+    #end
+import ${code.pkg}.data.dom.${_vm.toPascal(${_vm.lower(${table.name})})}Do;
+import ${code.pkg}.data.vo.${_vm.toPascal(${_vm.lower(${table.name})})}Vo;
+import ${code.pkg}.service.I${_vm.toPascal(${_vm.lower(${table.name})})}Service;
+import ${code.pkg}.mapper.${_vm.toPascal(${_vm.lower(${table.name})})}Mapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.*;
+
+/**
+ * @author ${code.author}
+ * @date ${_vm.format(${_vm.now()},"yyyy-MM-dd HH:mm:ss")}
+ * @desc ${table.name} ${table.comment}
+ */
+    #if(${code.lombok})
+    @Slf4j
+    #end
+@Service
+public class ${_vm.toPascal(${_vm.lower(${table.name})})}ServiceImpl implements I${_vm.toPascal(${_vm.lower(${table.name})})}Service {
+
+    #if(!${code.lombok})
+        private Logger log = LoggerFactory.getLogger(${_vm.toPascal(${_vm.lower(${table.name})})}ServiceImpl.class);
+    #end
+
+    @Resource
+    private ${_vm.toPascal(${_vm.lower(${table.name})})}Mapper baseMapper;
+
+    @Override
+    public ApiPage<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> page(${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo,
+                                                                        ApiPage<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> page) {
+
+        #if(${code.pageHelper})
+            PageHelper.startPage(page.getIndex() + 1, page.getSize());
+            List<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> list = baseMapper.page(webVo);
+            PageInfo<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> pageInfo = new PageInfo<>(list);
+            page.data(pageInfo.getTotal(), pageInfo.getList());
+        #else
+            List<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> list = baseMapper.page(webVo, page);
+            page.data(list);
+        #end
+        return page;
+    }
+
+    @Override
+    public List<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> list(${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo) {
+
+        List<${_vm.toPascal(${_vm.lower(${table.name})})}Vo> list = baseMapper.list(webVo);
+
+        return list;
+    }
+
+    @Override
+    public ${_vm.toPascal(${_vm.lower(${table.name})})}Vo find(${table.primaryKey.javaType} ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}) {
+
+            ${_vm.toPascal(${_vm.lower(${table.name})})}Vo ret = baseMapper.findByPk(${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})});
+        return ret;
+    }
+
+    @Override
+    public void add(${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo) {
+
+        baseMapper.insertSelective(webVo);
+    }
+
+    @Override
+    public void update(${_vm.toPascal(${_vm.lower(${table.name})})}Vo webVo) {
+
+        baseMapper.updateSelectiveByPk(webVo);
+    }
+
+    @Override
+    public void delete(${table.primaryKey.javaType} ${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}) {
+
+        baseMapper.deleteByPk(${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})});
+    }
+}

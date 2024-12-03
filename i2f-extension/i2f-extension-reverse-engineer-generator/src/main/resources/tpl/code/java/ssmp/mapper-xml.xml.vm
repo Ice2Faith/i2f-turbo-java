@@ -1,0 +1,136 @@
+#filename mapper/xml/${_vm.toPascal(${_vm.lower(${table.name})})}Mapper
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${code.pkg}.mapper.${_vm.toPascal(${_vm.lower(${table.name})})}Mapper">
+    <!--
+    * @author ${code.author}
+    * @date ${_vm.format(${_vm.now()},"yyyy-MM-dd HH:mm:ss")}
+    * @desc ${table.name} ${table.comment}
+    -->
+
+    <resultMap id="mapDoResultMap" type="${code.pkg}.data.dom.${_vm.toPascal(${_vm.lower(${table.name})})}Do">
+        #foreach($item in ${table.columns})
+            #if(${item.isPrimaryKey})
+                <id property="${_vm.toCamel(${_vm.lower(${item.name})})}" column="${item.name}"/>
+            #else
+                <result property="${_vm.toCamel(${_vm.lower(${item.name})})}" column="${item.name}"/>
+            #end
+        #end
+    </resultMap>
+
+    <resultMap id="mapVoResultMap" type="${code.pkg}.data.vo.${_vm.toPascal(${_vm.lower(${table.name})})}Vo"
+               extends="mapDoResultMap">
+        #foreach($item in ${table.columns})
+            #if(${item.javaType}=="Integer")
+                <result property="${_vm.toCamel(${_vm.lower(${item.name})})}Desc" column="${item.name}_desc"/>
+            #end
+        #end
+    </resultMap>
+
+    <sql id="columnsAsCamel">
+        #foreach($item in ${table.columns})
+            #if(${item.name}==${_vm.toCamel(${_vm.lower(${item.name})})})
+                #if($velocityCount>1) , #end a.${item.name}
+            #else
+                #if($velocityCount>1) , #end a.${item.name} as ${_vm.toCamel(${_vm.lower(${item.name})})}
+            #end
+        #end
+    </sql>
+
+    <sql id="columnDescAsCamel">
+        #foreach($item in ${table.columns})
+            #if(${item.javaType}=="Integer")
+                #if($velocityCount>1) , #end a.${item.name}_desc as ${_vm.toCamel(${_vm.lower(${item.name})})}Desc
+            #end
+        #end
+    </sql>
+
+    <sql id="baseQuerySelect">
+        select
+        #foreach($item in ${table.columns})
+            #if($velocityCount>1) , #end a.${item.name}
+        #end
+    </sql>
+
+    <sql id="baseQueryTable">
+        from ${table.name} a
+    </sql>
+
+    <sql id="baseQueryBody">
+        <include refid="baseQuerySelect"></include>
+        <include refid="baseQueryTable"></include>
+    </sql>
+
+    <sql id="baseQueryCondition">
+        #foreach($item in ${table.columns})
+            #if(${item.javaType}=="String")
+                <if test="post.${_vm.toCamel(${_vm.lower(${item.name})})}!=null and post.${_vm.toCamel(${_vm.lower(${item.name})})}!=''">
+                    and instr(a.${item.name},#{post.${_vm.toCamel(${_vm.lower(${item.name})})}}) &gt; 0
+                </if>
+            #else
+                <if test="post.${_vm.toCamel(${_vm.lower(${item.name})})}!=null">
+                    and a.${item.name} = #{post.${_vm.toCamel(${_vm.lower(${item.name})})}}
+                </if>
+            #end
+        #end
+    </sql>
+
+    <sql id="baseQuery">
+        <include refid="baseQueryBody"></include>
+        <where>
+            <include refid="baseQueryCondition"></include>
+        </where>
+    </sql>
+
+
+    <select id="page" resultMap="mapVoResultMap">
+        <include refid="baseQuery"></include>
+        #if(!${code.pageHelper})
+            limit #{page.offset},#{page.size}
+        #end
+    </select>
+
+    <select id="list" resultMap="mapVoResultMap">
+        <include refid="baseQuery"></include>
+    </select>
+
+    <select id="count" resultType="java.lang.Long">
+        select count(*) cnt
+        from (
+        <include refid="baseQuery"></include>
+        ) t_cnt
+    </select>
+
+    <select id="findByPk" resultMap="mapVoResultMap">
+        <include refid="baseQueryBody"></include>
+        where a.${table.primaryKey.name} = #{${_vm.toCamel(${_vm.lower(${table.primaryKey.name})})}}
+    </select>
+
+
+    <insert id="insertBatch">
+        insert into ${table.name}
+        (
+        #foreach($item in ${table.columns})
+            #if($velocityCount>1) , #end ${item.name}
+        #end
+        )
+        #if(${code.unionBatch})
+            <foreach collection="list" item="item" separator="union all">
+                select
+                #foreach($item in ${table.columns})
+                    #if($velocityCount>1) , #end #{item.${_vm.toCamel(${_vm.lower(${item.name})})}}
+                #end
+                from dual
+            </foreach>
+        #else
+            values
+            <foreach collection="list" item="item" separator=",">
+                (
+                #foreach($item in ${table.columns})
+                    #if($velocityCount>1) , #end #{item.${_vm.toCamel(${_vm.lower(${item.name})})}}
+                #end
+                )
+            </foreach>
+        #end
+    </insert>
+</mapper>

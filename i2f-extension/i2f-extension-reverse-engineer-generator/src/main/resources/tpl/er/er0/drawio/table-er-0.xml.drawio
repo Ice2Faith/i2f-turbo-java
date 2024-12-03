@@ -1,0 +1,59 @@
+<mxfile host="drawio-plugin" modified="2024-12-02T02:22:32.839Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" version="22.1.22" etag="o5FEiDy2HAKp3DnkfqO0" type="embed">
+  <diagram id="lLh55UtcfjiDnqfjqZgB" name="Page-1">
+    <mxGraphModel dx="714" dy="372" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- 连接线 -->
+        <mxCell id="2" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="20" y="90" as="sourcePoint" />
+            <mxPoint x="-20.0" y="50" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 关系 -->
+        <mxCell id="3" value="关联" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="10" width="80" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- 实体 -->
+        
+        <mxCell id="4ab282a6b3274eec9768440c511f78b3" value="任务组" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="7910fef70d5447fb8820671de22ae513" value="XXL任务信息" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="6561dba994644a899e631d4e636e2296" value="XXL任务锁" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="71d2b7cbfc6d4da482ca0f10f53badf5" value="XXL任务日志" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="be79fb646af34cb1aefd4aebffd903ce" value="XXL任务日志报表" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="d072f8d35aa143cb8a7662649f67d663" value="XXL任务logglue" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="740" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="1c153b8df73a4a148663816c219d0635" value="XXL任务注册" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="880" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="2ed117da56d348758e5600b8ead718f8" value="XXL任务用户" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

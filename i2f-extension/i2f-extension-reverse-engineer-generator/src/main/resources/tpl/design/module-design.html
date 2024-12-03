@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>模块文档</title>
+    <style>
+        * {
+            font-family: '新宋体';
+            font-size: 12pt;
+        }
+
+        table tr td {
+            padding: 5px 8px;
+            border: solid 1px black;
+        }
+
+        .module-desc-table {
+            width: 100%;
+        }
+
+        .module-desc-key {
+            width: 25%;
+            text-align: center;
+            line-height: 100%;
+            font-weight: bold;
+            background-color: #bababa;
+        }
+
+        .module-desc-value {
+            width: 75%;
+        }
+
+        .module-data-list {
+            width: 100%;
+        }
+
+        .module-data-head {
+            text-align: center;
+            font-weight: normal;
+            background-color: #aaaaaa;
+        }
+
+        .document {
+            max-width: calc(210mm * 1);
+            overflow-wrap: break-word;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<div class="document">
+    <h3>1.1.1 索引控制器</h3>
+
+    功能涉及：<br/>
+
+    <table class="module-desc-table" border="1" cellspacing="0">
+        <tr>
+            <td class="module-desc-key">功能描述</td>
+            <td class="module-desc-value">索引控制器</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输入参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">处理描述</td>
+            <td class="module-desc-value">数据封装传输对象</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输出参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">返回值</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">数据结构与算法</td>
+            <td class="module-desc-value"></td>
+        </tr>
+    </table>
+    <br/>
+    <br/>
+
+    原型界面：
+    <br/>
+    <br/>
+    <div>
+        图 1.1.1 原型展示
+    </div>
+    <br/>
+
+    功能详细说明：<br/>
+    &emsp;类设计：<br/>
+    &emsp;1、类图<br/>
+    <br/>
+    <br/>
+    &emsp;2、类属性/方法说明<br/>
+    &emsp;IndexController类：<br/>
+
+    <table class="module-data-list" border="1" cellspacing="0">
+        <tr>
+            <th class="module-data-head" style="width: 5%">
+                序号
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                方法名
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                调用参数
+            </th>
+            <th class="module-data-head" style="width: 10%">
+                返回值
+            </th>
+            <th class="module-data-head" style="width: 35%">
+                说明
+            </th>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                1
+            </td>
+            <td class="module-data-body">
+                help
+            </td>
+            <td class="module-data-body">
+            </td>
+            <td class="module-data-body">
+                String<br/>
+            </td>
+            <td class="module-data-body">
+                帮助
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                2
+            </td>
+            <td class="module-data-body">
+                index
+            </td>
+            <td class="module-data-body">
+                model<br/>
+            </td>
+            <td class="module-data-body">
+                String<br/>
+            </td>
+            <td class="module-data-body">
+                索引
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                3
+            </td>
+            <td class="module-data-body">
+                toLogin
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                response<br/>
+                modelAndView<br/>
+            </td>
+            <td class="module-data-body">
+                ModelAndView<br/>
+            </td>
+            <td class="module-data-body">
+                到登录
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                4
+            </td>
+            <td class="module-data-body">
+                chartInfo
+            </td>
+            <td class="module-data-body">
+                startDate<br/>
+                endDate<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;Map&lt;String, Object&gt;&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                图表信息
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                5
+            </td>
+            <td class="module-data-body">
+                loginDo
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                response<br/>
+                userName<br/>
+                password<br/>
+                sign<br/>
+                ifRemember<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                登录做
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                6
+            </td>
+            <td class="module-data-body">
+                logout
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                response<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                登出
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                7
+            </td>
+            <td class="module-data-body">
+                getServerPublicKey
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                response<br/>
+                pk<br/>
+                sign<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                获取服务器公开键
+            </td>
+        </tr>
+    </table>
+    &emsp;3、调用逻辑<br/>
+    &emsp;暂无<br/>
+    &emsp;存储设计：<br/>
+    &emsp;暂无<br/>
+
+    <h3>1.1.2 任务接口控制器</h3>
+
+    功能涉及：<br/>
+
+    <table class="module-desc-table" border="1" cellspacing="0">
+        <tr>
+            <td class="module-desc-key">功能描述</td>
+            <td class="module-desc-value">任务接口控制器</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输入参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">处理描述</td>
+            <td class="module-desc-value">数据封装传输对象</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输出参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">返回值</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">数据结构与算法</td>
+            <td class="module-desc-value"></td>
+        </tr>
+    </table>
+    <br/>
+    <br/>
+
+    原型界面：
+    <br/>
+    <br/>
+    <div>
+        图 1.1.2 原型展示
+    </div>
+    <br/>
+
+    功能详细说明：<br/>
+    &emsp;类设计：<br/>
+    &emsp;1、类图<br/>
+    <br/>
+    <br/>
+    &emsp;2、类属性/方法说明<br/>
+    &emsp;JobApiController类：<br/>
+
+    <table class="module-data-list" border="1" cellspacing="0">
+        <tr>
+            <th class="module-data-head" style="width: 5%">
+                序号
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                方法名
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                调用参数
+            </th>
+            <th class="module-data-head" style="width: 10%">
+                返回值
+            </th>
+            <th class="module-data-head" style="width: 35%">
+                说明
+            </th>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                1
+            </td>
+            <td class="module-data-body">
+                api
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                uri<br/>
+                data<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                接口
+            </td>
+        </tr>
+    </table>
+    &emsp;3、调用逻辑<br/>
+    &emsp;暂无<br/>
+    &emsp;存储设计：<br/>
+    &emsp;暂无<br/>
+
+    <h3>1.1.3 任务代码控制器</h3>
+
+    功能涉及：<br/>
+
+    <table class="module-desc-table" border="1" cellspacing="0">
+        <tr>
+            <td class="module-desc-key">功能描述</td>
+            <td class="module-desc-value">任务代码控制器</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输入参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">处理描述</td>
+            <td class="module-desc-value">数据封装传输对象</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输出参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">返回值</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">数据结构与算法</td>
+            <td class="module-desc-value"></td>
+        </tr>
+    </table>
+    <br/>
+    <br/>
+
+    原型界面：
+    <br/>
+    <br/>
+    <div>
+        图 1.1.3 原型展示
+    </div>
+    <br/>
+
+    功能详细说明：<br/>
+    &emsp;类设计：<br/>
+    &emsp;1、类图<br/>
+    <br/>
+    <br/>
+    &emsp;2、类属性/方法说明<br/>
+    &emsp;JobCodeController类：<br/>
+
+    <table class="module-data-list" border="1" cellspacing="0">
+        <tr>
+            <th class="module-data-head" style="width: 5%">
+                序号
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                方法名
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                调用参数
+            </th>
+            <th class="module-data-head" style="width: 10%">
+                返回值
+            </th>
+            <th class="module-data-head" style="width: 35%">
+                说明
+            </th>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                1
+            </td>
+            <td class="module-data-body">
+                index
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                model<br/>
+                jobId<br/>
+            </td>
+            <td class="module-data-body">
+                String<br/>
+            </td>
+            <td class="module-data-body">
+                索引
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                2
+            </td>
+            <td class="module-data-body">
+                save
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                id<br/>
+                glueSource<br/>
+                glueRemark<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                保存
+            </td>
+        </tr>
+    </table>
+    &emsp;3、调用逻辑<br/>
+    &emsp;暂无<br/>
+    &emsp;存储设计：<br/>
+    &emsp;暂无<br/>
+
+    <h3>1.1.4 任务组控制器</h3>
+
+    功能涉及：<br/>
+
+    <table class="module-desc-table" border="1" cellspacing="0">
+        <tr>
+            <td class="module-desc-key">功能描述</td>
+            <td class="module-desc-value">任务组控制器</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输入参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">处理描述</td>
+            <td class="module-desc-value">数据封装传输对象</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输出参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">返回值</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">数据结构与算法</td>
+            <td class="module-desc-value"></td>
+        </tr>
+    </table>
+    <br/>
+    <br/>
+
+    原型界面：
+    <br/>
+    <br/>
+    <div>
+        图 1.1.4 原型展示
+    </div>
+    <br/>
+
+    功能详细说明：<br/>
+    &emsp;类设计：<br/>
+    &emsp;1、类图<br/>
+    <br/>
+    <br/>
+    &emsp;2、类属性/方法说明<br/>
+    &emsp;JobGroupController类：<br/>
+
+    <table class="module-data-list" border="1" cellspacing="0">
+        <tr>
+            <th class="module-data-head" style="width: 5%">
+                序号
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                方法名
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                调用参数
+            </th>
+            <th class="module-data-head" style="width: 10%">
+                返回值
+            </th>
+            <th class="module-data-head" style="width: 35%">
+                说明
+            </th>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                1
+            </td>
+            <td class="module-data-body">
+                index
+            </td>
+            <td class="module-data-body">
+                model<br/>
+            </td>
+            <td class="module-data-body">
+                String<br/>
+            </td>
+            <td class="module-data-body">
+                索引
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                2
+            </td>
+            <td class="module-data-body">
+                remove
+            </td>
+            <td class="module-data-body">
+                id<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                移除
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                3
+            </td>
+            <td class="module-data-body">
+                update
+            </td>
+            <td class="module-data-body">
+                xxlJobGroup<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                更新
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                4
+            </td>
+            <td class="module-data-body">
+                save
+            </td>
+            <td class="module-data-body">
+                xxlJobGroup<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                保存
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                5
+            </td>
+            <td class="module-data-body">
+                loadById
+            </td>
+            <td class="module-data-body">
+                id<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;XxlJobGroup&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                装入通过ID
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                6
+            </td>
+            <td class="module-data-body">
+                pageList
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                start<br/>
+                length<br/>
+                appname<br/>
+                title<br/>
+            </td>
+            <td class="module-data-body">
+                Map&lt;String, Object&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                页列表
+            </td>
+        </tr>
+    </table>
+    &emsp;3、调用逻辑<br/>
+    &emsp;暂无<br/>
+    &emsp;存储设计：<br/>
+    &emsp;暂无<br/>
+
+    <h3>1.1.5 任务信息控制器</h3>
+
+    功能涉及：<br/>
+
+    <table class="module-desc-table" border="1" cellspacing="0">
+        <tr>
+            <td class="module-desc-key">功能描述</td>
+            <td class="module-desc-value">任务信息控制器</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输入参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">处理描述</td>
+            <td class="module-desc-value">数据封装传输对象</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输出参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">返回值</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">数据结构与算法</td>
+            <td class="module-desc-value"></td>
+        </tr>
+    </table>
+    <br/>
+    <br/>
+
+    原型界面：
+    <br/>
+    <br/>
+    <div>
+        图 1.1.5 原型展示
+    </div>
+    <br/>
+
+    功能详细说明：<br/>
+    &emsp;类设计：<br/>
+    &emsp;1、类图<br/>
+    <br/>
+    <br/>
+    &emsp;2、类属性/方法说明<br/>
+    &emsp;JobInfoController类：<br/>
+
+    <table class="module-data-list" border="1" cellspacing="0">
+        <tr>
+            <th class="module-data-head" style="width: 5%">
+                序号
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                方法名
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                调用参数
+            </th>
+            <th class="module-data-head" style="width: 10%">
+                返回值
+            </th>
+            <th class="module-data-head" style="width: 35%">
+                说明
+            </th>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                1
+            </td>
+            <td class="module-data-body">
+                index
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                model<br/>
+                jobGroup<br/>
+            </td>
+            <td class="module-data-body">
+                String<br/>
+            </td>
+            <td class="module-data-body">
+                索引
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                2
+            </td>
+            <td class="module-data-body">
+                add
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                jobInfo<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                加
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                3
+            </td>
+            <td class="module-data-body">
+                remove
+            </td>
+            <td class="module-data-body">
+                id<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                移除
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                4
+            </td>
+            <td class="module-data-body">
+                update
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                jobInfo<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                更新
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                5
+            </td>
+            <td class="module-data-body">
+                start
+            </td>
+            <td class="module-data-body">
+                id<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                开始
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                6
+            </td>
+            <td class="module-data-body">
+                pageList
+            </td>
+            <td class="module-data-body">
+                start<br/>
+                length<br/>
+                jobGroup<br/>
+                triggerStatus<br/>
+                jobDesc<br/>
+                executorHandler<br/>
+                author<br/>
+            </td>
+            <td class="module-data-body">
+                Map&lt;String, Object&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                页列表
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                7
+            </td>
+            <td class="module-data-body">
+                triggerJob
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                id<br/>
+                executorParam<br/>
+                addressList<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                触发器任务
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                8
+            </td>
+            <td class="module-data-body">
+                nextTriggerTime
+            </td>
+            <td class="module-data-body">
+                scheduleType<br/>
+                scheduleConf<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;List&lt;String&gt;&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                下一个触发器时间
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                9
+            </td>
+            <td class="module-data-body">
+                pause
+            </td>
+            <td class="module-data-body">
+                id<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                中断
+            </td>
+        </tr>
+    </table>
+    &emsp;3、调用逻辑<br/>
+    &emsp;暂无<br/>
+    &emsp;存储设计：<br/>
+    &emsp;暂无<br/>
+
+    <h3>1.1.6 任务日志控制器</h3>
+
+    功能涉及：<br/>
+
+    <table class="module-desc-table" border="1" cellspacing="0">
+        <tr>
+            <td class="module-desc-key">功能描述</td>
+            <td class="module-desc-value">任务日志控制器</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输入参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">处理描述</td>
+            <td class="module-desc-value">数据封装传输对象</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输出参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">返回值</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">数据结构与算法</td>
+            <td class="module-desc-value"></td>
+        </tr>
+    </table>
+    <br/>
+    <br/>
+
+    原型界面：
+    <br/>
+    <br/>
+    <div>
+        图 1.1.6 原型展示
+    </div>
+    <br/>
+
+    功能详细说明：<br/>
+    &emsp;类设计：<br/>
+    &emsp;1、类图<br/>
+    <br/>
+    <br/>
+    &emsp;2、类属性/方法说明<br/>
+    &emsp;JobLogController类：<br/>
+
+    <table class="module-data-list" border="1" cellspacing="0">
+        <tr>
+            <th class="module-data-head" style="width: 5%">
+                序号
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                方法名
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                调用参数
+            </th>
+            <th class="module-data-head" style="width: 10%">
+                返回值
+            </th>
+            <th class="module-data-head" style="width: 35%">
+                说明
+            </th>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                1
+            </td>
+            <td class="module-data-body">
+                index
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                model<br/>
+                jobId<br/>
+            </td>
+            <td class="module-data-body">
+                String<br/>
+            </td>
+            <td class="module-data-body">
+                索引
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                2
+            </td>
+            <td class="module-data-body">
+                pageList
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                start<br/>
+                length<br/>
+                jobGroup<br/>
+                jobId<br/>
+                logStatus<br/>
+                filterTime<br/>
+            </td>
+            <td class="module-data-body">
+                Map&lt;String, Object&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                页列表
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                3
+            </td>
+            <td class="module-data-body">
+                getJobsByGroup
+            </td>
+            <td class="module-data-body">
+                jobGroup<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;List&lt;XxlJobInfo&gt;&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                获取任务通过组
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                4
+            </td>
+            <td class="module-data-body">
+                logKill
+            </td>
+            <td class="module-data-body">
+                id<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                日志杀死
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                5
+            </td>
+            <td class="module-data-body">
+                clearLog
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                jobGroup<br/>
+                jobId<br/>
+                type<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                清空日志
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                6
+            </td>
+            <td class="module-data-body">
+                logDetailPage
+            </td>
+            <td class="module-data-body">
+                id<br/>
+                model<br/>
+            </td>
+            <td class="module-data-body">
+                String<br/>
+            </td>
+            <td class="module-data-body">
+                日志明细页
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                7
+            </td>
+            <td class="module-data-body">
+                logDetailCat
+            </td>
+            <td class="module-data-body">
+                logId<br/>
+                fromLineNum<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;LogResult&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                日志明细猫
+            </td>
+        </tr>
+    </table>
+    &emsp;3、调用逻辑<br/>
+    &emsp;暂无<br/>
+    &emsp;存储设计：<br/>
+    &emsp;暂无<br/>
+
+    <h3>1.1.7 任务用户控制器</h3>
+
+    功能涉及：<br/>
+
+    <table class="module-desc-table" border="1" cellspacing="0">
+        <tr>
+            <td class="module-desc-key">功能描述</td>
+            <td class="module-desc-value">任务用户控制器</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输入参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">处理描述</td>
+            <td class="module-desc-value">数据封装传输对象</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">输出参数</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">返回值</td>
+            <td class="module-desc-value">Object</td>
+        </tr>
+        <tr>
+            <td class="module-desc-key">数据结构与算法</td>
+            <td class="module-desc-value"></td>
+        </tr>
+    </table>
+    <br/>
+    <br/>
+
+    原型界面：
+    <br/>
+    <br/>
+    <div>
+        图 1.1.7 原型展示
+    </div>
+    <br/>
+
+    功能详细说明：<br/>
+    &emsp;类设计：<br/>
+    &emsp;1、类图<br/>
+    <br/>
+    <br/>
+    &emsp;2、类属性/方法说明<br/>
+    &emsp;JobUserController类：<br/>
+
+    <table class="module-data-list" border="1" cellspacing="0">
+        <tr>
+            <th class="module-data-head" style="width: 5%">
+                序号
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                方法名
+            </th>
+            <th class="module-data-head" style="width: 25%">
+                调用参数
+            </th>
+            <th class="module-data-head" style="width: 10%">
+                返回值
+            </th>
+            <th class="module-data-head" style="width: 35%">
+                说明
+            </th>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                1
+            </td>
+            <td class="module-data-body">
+                index
+            </td>
+            <td class="module-data-body">
+                model<br/>
+            </td>
+            <td class="module-data-body">
+                String<br/>
+            </td>
+            <td class="module-data-body">
+                索引
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                2
+            </td>
+            <td class="module-data-body">
+                add
+            </td>
+            <td class="module-data-body">
+                xxlJobUser<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                加
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                3
+            </td>
+            <td class="module-data-body">
+                remove
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                id<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                移除
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                4
+            </td>
+            <td class="module-data-body">
+                update
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                xxlJobUser<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                更新
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                5
+            </td>
+            <td class="module-data-body">
+                pageList
+            </td>
+            <td class="module-data-body">
+                start<br/>
+                length<br/>
+                username<br/>
+                role<br/>
+            </td>
+            <td class="module-data-body">
+                Map&lt;String, Object&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                页列表
+            </td>
+        </tr>
+        <tr>
+            <td class="module-data-body">
+                6
+            </td>
+            <td class="module-data-body">
+                updatePwd
+            </td>
+            <td class="module-data-body">
+                request<br/>
+                password<br/>
+                repeatPassword<br/>
+                oldPassword<br/>
+                sign<br/>
+            </td>
+            <td class="module-data-body">
+                ReturnT&lt;String&gt;<br/>
+            </td>
+            <td class="module-data-body">
+                更新密码
+            </td>
+        </tr>
+    </table>
+    &emsp;3、调用逻辑<br/>
+    &emsp;暂无<br/>
+    &emsp;存储设计：<br/>
+    &emsp;暂无<br/>
+
+    <br/>
+    <br/>
+
+</div>
+</body>
+
+</html>
