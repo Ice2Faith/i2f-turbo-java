@@ -129,6 +129,7 @@
         <module>i2f-javacode-graph</module>
         <module>i2f-translate</module>
         <module>i2f-translate-en2zh</module>
+        <module>i2f-translate-zh2pinyin</module>
 
 
     </modules>
