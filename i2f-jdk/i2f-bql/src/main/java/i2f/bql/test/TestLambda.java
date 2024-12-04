@@ -2,6 +2,7 @@ package i2f.bql.test;
 
 import i2f.bindsql.BindSql;
 import i2f.bql.core.bean.Bql;
+import i2f.bql.core.value.Condition;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,36 +22,76 @@ public class TestLambda {
 
     public static void main(String[] args) {
 
+//
+//        testSelect();
+//
+//        testInsert();
+//
+//        testBatchInsert();
+//
+//        testBatchSelectInsert();
+//
+//        testUpdate();
+//
+//        testDelete();
+//
+//        testCreateTable();
+//
+//        testCreateIndex();
+//
+//        testLambda();
+//
+//        testBeanQuery();
+//
+//        testBeanUpdate();
+//
+//        testBeanDelete();
+//
+//        testMapOperation();
 
-        testSelect();
-
-        testInsert();
-
-        testBatchInsert();
-
-        testBatchSelectInsert();
-
-        testUpdate();
-
-        testDelete();
-
-        testCreateTable();
-
-        testCreateIndex();
-
-        testLambda();
-
-        testBeanQuery();
-
-        testBeanUpdate();
-
-        testBeanDelete();
-
-        testMapOperation();
+        testSimple();
 
         System.out.println("ok");
     }
 
+    public static void testSimple() {
+        BindSql bql = Bql.$lambda()
+                .$lambdaInsert(SysUser.class, e ->
+                        e.put(SysUser::getUserName, "admin")
+                                .put(SysUser::getNickName, "管理员")
+                                .put(SysUser::getStatus, 1)
+                                .put(SysUser::getDelFlag, 0)
+                ).$$();
+        System.out.println(bql);
+
+        bql = Bql.$lambda()
+                .$lambdaDelete(SysUser.class, e ->
+                        e.put(SysUser::getUserName, "admin")
+                                .put(SysUser::getDelFlag, 1)
+                ).$$();
+        System.out.println(bql);
+
+        bql = Bql.$lambda()
+                .$lambdaUpdate(SysUser.class, e -> e
+                                .put(SysUser::getNickName, "zhangsan")
+                                .put(SysUser::getStatus, 1)
+                        ,
+                        e -> e
+                                .put(SysUser::getId, 1)
+                ).$$();
+        System.out.println(bql);
+
+        bql = Bql.$lambda()
+                .$alias("a")
+                .$lambdaQuery(SysUser.class,
+                        e -> e
+                                .add(SysUser::getUserName),
+                        e -> e
+                                .put(SysUser::getId, 1)
+                                .put(SysUser::getNickName, Condition.$like("zhang"))
+                ).$$();
+        System.out.println(bql);
+    }
 
     public static String location(StackTraceElement[] trace) {
         return trace[1].getClassName() + "." + trace[1].getMethodName() + ":" + trace[1].getLineNumber();

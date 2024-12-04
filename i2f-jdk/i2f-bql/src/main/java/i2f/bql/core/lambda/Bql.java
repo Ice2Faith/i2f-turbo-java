@@ -2,6 +2,9 @@ package i2f.bql.core.lambda;
 
 
 import i2f.bindsql.BindSql;
+import i2f.bql.core.lambda.builder.AliasMapBuilder;
+import i2f.bql.core.lambda.builder.ValueListBuilder;
+import i2f.bql.core.lambda.builder.ValueMapBuilder;
 import i2f.bql.lambda.IClassTableNameResolver;
 import i2f.bql.lambda.IFieldColumnNameResolver;
 import i2f.bql.lambda.impl.DefaultClassTableNameResolver;
@@ -19,6 +22,7 @@ import i2f.lambda.inflater.LambdaInflater;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -45,6 +49,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
 
     public static final InheritableThreadLocal<IFieldColumnNameResolver> localFieldNameResolver = new InheritableThreadLocal<>();
     public static final InheritableThreadLocal<IClassTableNameResolver> localTableNameResolver = new InheritableThreadLocal<>();
+
 
     public Bql() {
         // 初始化，
@@ -226,6 +231,18 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
         return $(decorateColumnName(lambdaFieldName(column)));
     }
 
+    public H $lambdaInsert(Class<?> table, Consumer<ValueMapBuilder> consumer) {
+        ValueMapBuilder builder = ValueMapBuilder.create();
+        if (consumer != null) {
+            consumer.accept(builder);
+        }
+        return $lambdaInsert(table, builder.get());
+    }
+
+    public H $lambdaInsert(Class<?> table, ValueMapBuilder builder) {
+        return $lambdaInsert(table, builder == null ? null : builder.get());
+    }
+
     public H $lambdaInsert(Class<?> table, Map<? extends Serializable, Object> valueMap) {
         return $mapInsert(classTableName(table),
                 lm2names(valueMap));
@@ -241,6 +258,18 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
                 lm2names(values));
     }
 
+    public H $lambdaDelete(Class<?> table, Consumer<ValueMapBuilder> consumer) {
+        ValueMapBuilder builder = ValueMapBuilder.create();
+        if (consumer != null) {
+            consumer.accept(builder);
+        }
+        return $lambdaDelete(table, builder.get());
+    }
+
+    public H $lambdaDelete(Class<?> table, ValueMapBuilder builder) {
+        return $lambdaDelete(table, builder == null ? null : builder.get());
+    }
+
     public H $lambdaDelete(Class<?> table,
                            Map<? extends Serializable, Object> whereMap) {
         return $mapDelete(classTableName(table),
@@ -250,12 +279,65 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaDelete(Class<?> table,
+                           Consumer<ValueMapBuilder> whereMapConsumer,
+                           Consumer<ValueListBuilder> whereIsNullColsConsumer) {
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder whereIsNullColsBuilder = ValueListBuilder.create();
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        if (whereIsNullColsConsumer != null) {
+            whereIsNullColsConsumer.accept(whereIsNullColsBuilder);
+        }
+        return $lambdaDelete(table, whereMapBuilder.get(), whereIsNullColsBuilder.get());
+    }
+
+    public H $lambdaDelete(Class<?> table,
+                           ValueMapBuilder whereMapBuilder,
+                           ValueListBuilder whereIsNullColsBuilder) {
+        return $lambdaDelete(table,
+                whereMapBuilder == null ? null : whereMapBuilder.get(),
+                whereIsNullColsBuilder == null ? null : whereIsNullColsBuilder.get());
+    }
+
+    public H $lambdaDelete(Class<?> table,
                            Map<? extends Serializable, Object> whereMap,
                            Collection<? extends Serializable> whereIsNullCols) {
         return $mapDelete(classTableName(table),
                 lm2names(whereMap),
                 lm2names(whereIsNullCols),
                 null);
+    }
+
+    public H $lambdaDelete(Class<?> table,
+                           Consumer<ValueMapBuilder> whereMapConsumer,
+                           Consumer<ValueListBuilder> whereIsNullColsConsumer,
+                           Consumer<ValueListBuilder> whereIsNotNullColsConsumer) {
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder whereIsNullColsBuilder = ValueListBuilder.create();
+        ValueListBuilder whereIsNotNullColsBuilder = ValueListBuilder.create();
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        if (whereIsNullColsConsumer != null) {
+            whereIsNullColsConsumer.accept(whereIsNullColsBuilder);
+        }
+        if (whereIsNotNullColsConsumer != null) {
+            whereIsNotNullColsConsumer.accept(whereIsNotNullColsBuilder);
+        }
+        return $lambdaDelete(table, whereMapBuilder.get(),
+                whereIsNullColsBuilder.get(),
+                whereIsNotNullColsBuilder.get());
+    }
+
+    public H $lambdaDelete(Class<?> table,
+                           ValueMapBuilder whereMapBuilder,
+                           ValueListBuilder whereIsNullColsBuilder,
+                           ValueListBuilder whereIsNotNullColsBuilder) {
+        return $lambdaDelete(table,
+                whereMapBuilder == null ? null : whereMapBuilder.get(),
+                whereIsNullColsBuilder == null ? null : whereIsNullColsBuilder.get(),
+                whereIsNotNullColsBuilder == null ? null : whereIsNotNullColsBuilder.get());
     }
 
     public H $lambdaDelete(Class<?> table,
@@ -269,6 +351,30 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaUpdate(Class<?> table,
+                           Consumer<ValueMapBuilder> updateMapConsumer,
+                           Consumer<ValueMapBuilder> whereMapConsumer) {
+        ValueMapBuilder updateMapBuilder = ValueMapBuilder.create();
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        if (updateMapConsumer != null) {
+            updateMapConsumer.accept(updateMapBuilder);
+        }
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        return $lambdaUpdate(table,
+                updateMapBuilder.get(),
+                whereMapBuilder.get());
+    }
+
+    public H $lambdaUpdate(Class<?> table,
+                           ValueMapBuilder updateMapBuilder,
+                           ValueMapBuilder whereMapBuilder) {
+        return $lambdaUpdate(table,
+                updateMapBuilder == null ? null : updateMapBuilder.get(),
+                whereMapBuilder == null ? null : whereMapBuilder.get());
+    }
+
+    public H $lambdaUpdate(Class<?> table,
                            Map<? extends Serializable, Object> updateMap,
                            Map<? extends Serializable, Object> whereMap) {
         return $mapUpdate(classTableName(table),
@@ -277,6 +383,38 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
                 lm2names(whereMap),
                 null,
                 null);
+    }
+
+    public H $lambdaUpdate(Class<?> table,
+                           Consumer<ValueMapBuilder> updateMapConsumer,
+                           Consumer<ValueListBuilder> updateNullColsConsumer,
+                           Consumer<ValueMapBuilder> whereMapConsumer) {
+        ValueMapBuilder updateMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder updateNullColsBuilder = ValueListBuilder.create();
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        if (updateMapConsumer != null) {
+            updateMapConsumer.accept(updateMapBuilder);
+        }
+        if (updateNullColsConsumer != null) {
+            updateNullColsConsumer.accept(updateNullColsBuilder);
+        }
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        return $lambdaUpdate(table,
+                updateMapBuilder.get(),
+                updateNullColsBuilder.get(),
+                whereMapBuilder.get());
+    }
+
+    public H $lambdaUpdate(Class<?> table,
+                           ValueMapBuilder updateMapBuilder,
+                           ValueListBuilder updateNullColsBuilder,
+                           ValueMapBuilder whereMapBuilder) {
+        return $lambdaUpdate(table,
+                updateMapBuilder == null ? null : updateMapBuilder.get(),
+                updateNullColsBuilder == null ? null : updateNullColsBuilder.get(),
+                whereMapBuilder == null ? null : whereMapBuilder.get());
     }
 
     public H $lambdaUpdate(Class<?> table,
@@ -289,6 +427,46 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
                 lm2names(whereMap),
                 null,
                 null);
+    }
+
+    public H $lambdaUpdate(Class<?> table,
+                           Consumer<ValueMapBuilder> updateMapConsumer,
+                           Consumer<ValueListBuilder> updateNullColsConsumer,
+                           Consumer<ValueMapBuilder> whereMapConsumer,
+                           Consumer<ValueListBuilder> whereIsNullColsConsumer) {
+        ValueMapBuilder updateMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder updateNullColsBuilder = ValueListBuilder.create();
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder whereIsNullColsBuilder = ValueListBuilder.create();
+        if (updateMapConsumer != null) {
+            updateMapConsumer.accept(updateMapBuilder);
+        }
+        if (updateNullColsConsumer != null) {
+            updateNullColsConsumer.accept(updateNullColsBuilder);
+        }
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        if (whereIsNullColsConsumer != null) {
+            whereIsNullColsConsumer.accept(whereIsNullColsBuilder);
+        }
+        return $lambdaUpdate(table,
+                updateMapBuilder.get(),
+                updateNullColsBuilder.get(),
+                whereMapBuilder.get(),
+                whereIsNullColsBuilder.get());
+    }
+
+    public H $lambdaUpdate(Class<?> table,
+                           ValueMapBuilder updateMapBuilder,
+                           ValueListBuilder updateNullColsBuilder,
+                           ValueMapBuilder whereMapBuilder,
+                           ValueListBuilder whereIsNullColsBuilder) {
+        return $lambdaUpdate(table,
+                updateMapBuilder == null ? null : updateMapBuilder.get(),
+                updateNullColsBuilder == null ? null : updateNullColsBuilder.get(),
+                whereMapBuilder == null ? null : whereMapBuilder.get(),
+                whereIsNullColsBuilder == null ? null : whereIsNullColsBuilder.get());
     }
 
     public H $lambdaUpdate(Class<?> table,
@@ -305,6 +483,54 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaUpdate(Class<?> table,
+                           Consumer<ValueMapBuilder> updateMapConsumer,
+                           Consumer<ValueListBuilder> updateNullColsConsumer,
+                           Consumer<ValueMapBuilder> whereMapConsumer,
+                           Consumer<ValueListBuilder> whereIsNullColsConsumer,
+                           Consumer<ValueListBuilder> whereIsNotNullColsConsumer) {
+        ValueMapBuilder updateMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder updateNullColsBuilder = ValueListBuilder.create();
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder whereIsNullColsBuilder = ValueListBuilder.create();
+        ValueListBuilder whereIsNotNullColsBuilder = ValueListBuilder.create();
+        if (updateMapConsumer != null) {
+            updateMapConsumer.accept(updateMapBuilder);
+        }
+        if (updateNullColsConsumer != null) {
+            updateNullColsConsumer.accept(updateNullColsBuilder);
+        }
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        if (whereIsNullColsConsumer != null) {
+            whereIsNullColsConsumer.accept(whereIsNullColsBuilder);
+        }
+        if (whereIsNotNullColsConsumer != null) {
+            whereIsNotNullColsConsumer.accept(whereIsNotNullColsBuilder);
+        }
+        return $lambdaUpdate(table,
+                updateMapBuilder.get(),
+                updateNullColsBuilder.get(),
+                whereMapBuilder.get(),
+                whereIsNullColsBuilder.get(),
+                whereIsNotNullColsBuilder.get());
+    }
+
+    public H $lambdaUpdate(Class<?> table,
+                           ValueMapBuilder updateMapBuilder,
+                           ValueListBuilder updateNullColsBuilder,
+                           ValueMapBuilder whereMapBuilder,
+                           ValueListBuilder whereIsNullColsBuilder,
+                           ValueListBuilder whereIsNotNullColsBuilder) {
+        return $lambdaUpdate(table,
+                updateMapBuilder == null ? null : updateMapBuilder.get(),
+                updateNullColsBuilder == null ? null : updateNullColsBuilder.get(),
+                whereMapBuilder == null ? null : whereMapBuilder.get(),
+                whereIsNullColsBuilder == null ? null : whereIsNullColsBuilder.get(),
+                whereIsNotNullColsBuilder.get());
+    }
+
+    public H $lambdaUpdate(Class<?> table,
                            Map<? extends Serializable, Object> updateMap,
                            Collection<? extends Serializable> updateNullCols,
                            Map<? extends Serializable, Object> whereMap,
@@ -316,11 +542,43 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
                 lm2names(whereMap),
                 lm2names(whereIsNullCols),
                 lm2names(whereIsNotNullCols));
+    }
+
+    public H $lambdaSet(Consumer<ValueMapBuilder> updateMapConsumer) {
+        ValueMapBuilder updateMapBuilder = new ValueMapBuilder();
+        if (updateMapConsumer != null) {
+            updateMapConsumer.accept(updateMapBuilder);
+        }
+        return $lambdaSet(updateMapBuilder.get());
+    }
+
+    public H $lambdaSet(ValueMapBuilder updateMapBuilder) {
+        return $lambdaSet(updateMapBuilder == null ? null : updateMapBuilder.get());
     }
 
     public H $lambdaSet(Map<? extends Serializable, Object> updateMap) {
         return $mapSet(lm2names(updateMap),
                 null);
+    }
+
+    public H $lambdaSet(Consumer<ValueMapBuilder> updateMapConsumer,
+                        Consumer<ValueListBuilder> updateNullColsConsumer) {
+        ValueMapBuilder updateMapBuilder = new ValueMapBuilder();
+        ValueListBuilder updateNullColsBuilder = new ValueListBuilder();
+        if (updateMapConsumer != null) {
+            updateMapConsumer.accept(updateMapBuilder);
+        }
+        if (updateNullColsConsumer != null) {
+            updateNullColsConsumer.accept(updateNullColsBuilder);
+        }
+        return $lambdaSet(updateMapBuilder.get(),
+                updateNullColsBuilder.get());
+    }
+
+    public H $lambdaSet(ValueMapBuilder updateMapBuilder,
+                        ValueListBuilder updateNullColsBuilder) {
+        return $lambdaSet(updateMapBuilder == null ? null : updateMapBuilder.get(),
+                updateNullColsBuilder == null ? null : updateNullColsBuilder.get());
     }
 
     public H $lambdaSet(Map<? extends Serializable, Object> updateMap,
@@ -330,11 +588,95 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaQuery(Class<?> table,
+                          Consumer<ValueListBuilder> colsConsumer,
+                          Consumer<ValueMapBuilder> whereMapConsumer) {
+        ValueListBuilder colsBuilder = ValueListBuilder.create();
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        if (colsConsumer != null) {
+            colsConsumer.accept(colsBuilder);
+        }
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        return $lambdaQuery(table,
+                colsBuilder.get(),
+                whereMapBuilder.get());
+    }
+
+    public H $lambdaQuery(Class<?> table,
+                          ValueListBuilder colsBuilder,
+                          ValueMapBuilder whereMapBuilder) {
+        return $lambdaQuery(table,
+                colsBuilder == null ? null : colsBuilder.get(),
+                whereMapBuilder == null ? null : whereMapBuilder.get());
+    }
+
+    public H $lambdaQuery(Class<?> table,
                           Collection<? extends Serializable> cols,
                           Map<? extends Serializable, Object> whereMap) {
         return $mapQuery(classTableName(table),
                 lm2names(cols),
                 lm2names(whereMap));
+    }
+
+    public H $lambdaQuery(Class<?> table,
+                          String tableAlias,
+                          Consumer<AliasMapBuilder> colsConsumer,
+                          Consumer<ValueMapBuilder> whereMapConsumer,
+                          Consumer<ValueListBuilder> whereIsNullColsConsumer,
+                          Consumer<ValueListBuilder> whereIsNotNullColsConsumer,
+                          Consumer<ValueListBuilder> groupColsConsumer,
+                          Consumer<ValueListBuilder> orderColsConsumer) {
+        AliasMapBuilder colsBuilder = AliasMapBuilder.create();
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder whereIsNullColsBuilder = ValueListBuilder.create();
+        ValueListBuilder whereIsNotNullColsBuilder = ValueListBuilder.create();
+        ValueListBuilder groupColsBuilder = ValueListBuilder.create();
+        ValueListBuilder orderColsBuilder = ValueListBuilder.create();
+        if (colsConsumer != null) {
+            colsConsumer.accept(colsBuilder);
+        }
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        if (whereIsNullColsConsumer != null) {
+            whereIsNullColsConsumer.accept(whereIsNullColsBuilder);
+        }
+        if (whereIsNotNullColsConsumer != null) {
+            whereIsNotNullColsConsumer.accept(whereIsNotNullColsBuilder);
+        }
+        if (groupColsConsumer != null) {
+            groupColsConsumer.accept(groupColsBuilder);
+        }
+        if (orderColsConsumer != null) {
+            orderColsConsumer.accept(orderColsBuilder);
+        }
+        return $lambdaQuery(table,
+                tableAlias,
+                colsBuilder.get(),
+                whereMapBuilder.get(),
+                whereIsNullColsBuilder.get(),
+                whereIsNotNullColsBuilder.get(),
+                groupColsBuilder.get(),
+                orderColsBuilder.get());
+    }
+
+    public H $lambdaQuery(Class<?> table,
+                          String tableAlias,
+                          AliasMapBuilder colsBuilder,
+                          ValueMapBuilder whereMapBuilder,
+                          ValueListBuilder whereIsNullColsBuilder,
+                          ValueListBuilder whereIsNotNullColsBuilder,
+                          ValueListBuilder groupColsBuilder,
+                          ValueListBuilder orderColsBuilder) {
+        return $lambdaQuery(table,
+                tableAlias,
+                colsBuilder == null ? null : colsBuilder.get(),
+                whereMapBuilder == null ? null : whereMapBuilder.get(),
+                whereIsNullColsBuilder == null ? null : whereIsNullColsBuilder.get(),
+                whereIsNotNullColsBuilder == null ? null : whereIsNotNullColsBuilder.get(),
+                groupColsBuilder == null ? null : groupColsBuilder.get(),
+                orderColsBuilder == null ? null : orderColsBuilder.get());
     }
 
     public H $lambdaQuery(Class<?> table,
@@ -355,8 +697,36 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
                 lm2names(orderCols));
     }
 
+    public H $lambdaSelect(Consumer<ValueListBuilder> colsConsumer) {
+        ValueListBuilder colsBuilder = ValueListBuilder.create();
+        if (colsConsumer != null) {
+            colsConsumer.accept(colsBuilder);
+        }
+        return $lambdaSelect(colsBuilder.get());
+    }
+
+    public H $lambdaSelect(ValueListBuilder colsBuilder) {
+        return $lambdaSelect(colsBuilder == null ? null : colsBuilder.get());
+    }
+
     public H $lambdaSelect(Collection<? extends Serializable> cols) {
         return $mapSelect(lm2names(cols));
+    }
+
+    public H $lambdaSelect(String tableAlias,
+                           Consumer<ValueListBuilder> colsConsumer) {
+        ValueListBuilder colsBuilder = ValueListBuilder.create();
+        if (colsConsumer != null) {
+            colsConsumer.accept(colsBuilder);
+        }
+        return $lambdaSelect(tableAlias,
+                colsBuilder.get());
+    }
+
+    public H $lambdaSelect(String tableAlias,
+                           ValueListBuilder colsBuilder) {
+        return $lambdaSelect(tableAlias,
+                colsBuilder == null ? null : colsBuilder.get());
     }
 
     public H $lambdaSelect(String tableAlias,
@@ -365,10 +735,38 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
                 lm2names(cols));
     }
 
+    public H $lambdaSelectEx(String tableAlias,
+                             Consumer<AliasMapBuilder> colMapConsumer) {
+        AliasMapBuilder colMapBuilder = AliasMapBuilder.create();
+        if (colMapConsumer != null) {
+            colMapConsumer.accept(colMapBuilder);
+        }
+        return $lambdaSelect(tableAlias,
+                colMapBuilder.get());
+    }
+
+    public H $lambdaSelect(String tableAlias,
+                           AliasMapBuilder colMapBuilder) {
+        return $lambdaSelect(tableAlias,
+                colMapBuilder == null ? null : colMapBuilder.get());
+    }
+
     public H $lambdaSelect(String tableAlias,
                            Map<? extends Serializable, String> colMap) {
         return $mapSelect(tableAlias,
                 lm2names(colMap));
+    }
+
+    public H $lambdaWhere(Consumer<ValueMapBuilder> whereMapConsumer) {
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        return $lambdaWhere(whereMapBuilder.get());
+    }
+
+    public H $lambdaWhere(ValueMapBuilder whereMapBuilder) {
+        return $lambdaWhere(whereMapBuilder == null ? null : whereMapBuilder.get());
     }
 
     public H $lambdaWhere(Map<? extends Serializable, Object> whereMap) {
@@ -376,9 +774,45 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaWhere(String tableAlias,
+                          Consumer<ValueMapBuilder> whereMapConsumer) {
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        return $lambdaWhere(tableAlias,
+                whereMapBuilder.get());
+    }
+
+    public H $lambdaWhere(String tableAlias,
+                          ValueMapBuilder whereMapBuilder) {
+        return $lambdaWhere(tableAlias,
+                whereMapBuilder == null ? null : whereMapBuilder.get());
+    }
+
+    public H $lambdaWhere(String tableAlias,
                           Map<? extends Serializable, Object> whereMap) {
         return $mapWhere(tableAlias,
                 lm2names(whereMap));
+    }
+
+    public H $lambdaWhere(Consumer<ValueMapBuilder> whereMapConsumer,
+                          Consumer<ValueListBuilder> whereIsNullColsConsumer) {
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder whereIsNullColsBuilder = ValueListBuilder.create();
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        if (whereIsNullColsConsumer != null) {
+            whereIsNullColsConsumer.accept(whereIsNullColsBuilder);
+        }
+        return $lambdaWhere(whereMapBuilder.get(),
+                whereIsNullColsBuilder.get());
+    }
+
+    public H $lambdaWhere(ValueMapBuilder whereMapBuilder,
+                          ValueListBuilder whereIsNullColsBuilder) {
+        return $lambdaWhere(whereMapBuilder == null ? null : whereMapBuilder.get(),
+                whereIsNullColsBuilder == null ? null : whereIsNullColsBuilder.get());
     }
 
     public H $lambdaWhere(Map<? extends Serializable, Object> whereMap,
@@ -388,11 +822,68 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
     }
 
     public H $lambdaWhere(String tableAlias,
+                          Consumer<ValueMapBuilder> whereMapConsumer,
+                          Consumer<ValueListBuilder> whereIsNullColsConsumer) {
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder whereIsNullColsBuilder = ValueListBuilder.create();
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        if (whereIsNullColsConsumer != null) {
+            whereIsNullColsConsumer.accept(whereIsNullColsBuilder);
+        }
+        return $lambdaWhere(tableAlias,
+                whereMapBuilder.get(),
+                whereIsNullColsBuilder.get());
+    }
+
+    public H $lambdaWhere(String tableAlias,
+                          ValueMapBuilder whereMapBuilder,
+                          ValueListBuilder whereIsNullColsBuilder) {
+        return $lambdaWhere(tableAlias,
+                whereMapBuilder == null ? null : whereMapBuilder.get(),
+                whereIsNullColsBuilder == null ? null : whereIsNullColsBuilder.get());
+    }
+
+    public H $lambdaWhere(String tableAlias,
                           Map<? extends Serializable, Object> whereMap,
                           Collection<? extends Serializable> whereIsNullCols) {
         return $mapWhere(tableAlias,
                 lm2names(whereMap),
                 lm2names(whereIsNullCols));
+    }
+
+
+    public H $lambdaWhere(String tableAlias,
+                          Consumer<ValueMapBuilder> whereMapConsumer,
+                          Consumer<ValueListBuilder> whereIsNullColsConsumer,
+                          Consumer<ValueListBuilder> whereIsNotNullColsConsumer) {
+        ValueMapBuilder whereMapBuilder = ValueMapBuilder.create();
+        ValueListBuilder whereIsNullColsBuilder = ValueListBuilder.create();
+        ValueListBuilder whereIsNotNullColsBuilder = ValueListBuilder.create();
+        if (whereMapConsumer != null) {
+            whereMapConsumer.accept(whereMapBuilder);
+        }
+        if (whereIsNullColsConsumer != null) {
+            whereIsNullColsConsumer.accept(whereIsNullColsBuilder);
+        }
+        if (whereIsNotNullColsConsumer != null) {
+            whereIsNotNullColsConsumer.accept(whereIsNotNullColsBuilder);
+        }
+        return $lambdaWhere(tableAlias,
+                whereMapBuilder.get(),
+                whereIsNullColsBuilder.get(),
+                whereIsNotNullColsBuilder.get());
+    }
+
+    public H $lambdaWhere(String tableAlias,
+                          ValueMapBuilder whereMapBuilder,
+                          ValueListBuilder whereIsNullColsBuilder,
+                          ValueListBuilder whereIsNotNullColsBuilder) {
+        return $lambdaWhere(tableAlias,
+                whereMapBuilder == null ? null : whereMapBuilder.get(),
+                whereIsNullColsBuilder == null ? null : whereIsNullColsBuilder.get(),
+                whereIsNotNullColsBuilder == null ? null : whereIsNotNullColsBuilder.get());
     }
 
     public H $lambdaWhere(String tableAlias,
@@ -409,12 +900,44 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
         return $lambdaGroupBy(tableAlias, $arr2list(groupCols));
     }
 
+    public H $lambdaGroupBy(String tableAlias,
+                            Consumer<ValueListBuilder> groupColsConsumer) {
+        ValueListBuilder groupColsBuilder = ValueListBuilder.create();
+        if (groupColsConsumer != null) {
+            groupColsConsumer.accept(groupColsBuilder);
+        }
+        return $lambdaGroupBy(tableAlias,
+                groupColsBuilder.get());
+    }
+
+    public H $lambdaGroupBy(String tableAlias,
+                            ValueListBuilder groupColsBuilder) {
+        return $lambdaGroupBy(tableAlias,
+                groupColsBuilder == null ? null : groupColsBuilder.get());
+    }
+
     public H $lambdaGroupBy(String tableAlias, Collection<? extends Serializable> groupCols) {
         return $mapGroupBy(tableAlias, lm2names(groupCols));
     }
 
     public H $lambdaOrderBy(String tableAlias, Serializable... orderCols) {
         return $lambdaOrderBy(tableAlias, $arr2list(orderCols));
+    }
+
+    public H $lambdaOrderBy(String tableAlias,
+                            Consumer<ValueListBuilder> orderColsConsumer) {
+        ValueListBuilder orderColsBuilder = ValueListBuilder.create();
+        if (orderColsConsumer != null) {
+            orderColsConsumer.accept(orderColsBuilder);
+        }
+        return $lambdaOrderBy(tableAlias,
+                orderColsBuilder.get());
+    }
+
+    public H $lambdaOrderBy(String tableAlias,
+                            ValueListBuilder orderColsBuilder) {
+        return $lambdaOrderBy(tableAlias,
+                orderColsBuilder == null ? null : orderColsBuilder.get());
     }
 
     public H $lambdaOrderBy(String tableAlias, Collection<? extends Serializable> orderCols) {
@@ -444,32 +967,22 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
         return $selectLambdas(Bql.$arr2list(list));
     }
 
+    public H $selectLambdas(Consumer<ValueListBuilder> listConsumer) {
+        ValueListBuilder listBuilder = ValueListBuilder.create();
+        if (listConsumer != null) {
+            listConsumer.accept(listBuilder);
+        }
+        return $selectLambdas(listBuilder.get());
+    }
+
+    public H $selectLambdas(ValueListBuilder listBuilder) {
+        return $selectLambdas(listBuilder == null ? null : listBuilder.get());
+    }
+
     public H $selectLambdas(Collection<? extends Serializable> list) {
         return $select(() -> {
             Bql<?> ret = Bql.$lambda().$sepComma();
             for (Serializable lambda : list) {
-                if (lambda == null) {
-                    continue;
-                }
-                if (lambda instanceof IFunctional) {
-                    ret.$col(lambdaFieldName((IFunctional) lambda));
-                } else {
-                    ret.$col(String.valueOf(lambda));
-                }
-            }
-            return ret;
-        });
-    }
-
-
-    public H $selectMixes(Serializable... list) {
-        return $selectMixes(Bql.$arr2list(list));
-    }
-
-    public H $selectMixes(Collection<? extends Serializable> list) {
-        return $select(() -> {
-            Bql<?> ret = Bql.$lambda().$sepComma();
-            for (Object lambda : list) {
                 if (lambda == null) {
                     continue;
                 }
