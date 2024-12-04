@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,6 +25,8 @@ import java.util.*;
 public class GeneratorTool {
     private final String sharp = "#";
     private final String dolar = "$";
+
+    public static final SecureRandom random = new SecureRandom();
 
     public String getSharp() {
         return sharp;
@@ -229,15 +232,57 @@ public class GeneratorTool {
     }
 
     public static int randInt(int bound) {
-        return new Random().nextInt(bound);
+        return random.nextInt(bound);
     }
 
     public static int randInt(int begin, int end) {
-        return new Random().nextInt(end - begin) + begin;
+        return random.nextInt(end - begin) + begin;
     }
 
     public static double randDouble() {
-        return new Random().nextDouble();
+        return random.nextDouble();
+    }
+
+    public static double randDouble(double min, double max, int scale) {
+        double pow = Math.pow(10, scale);
+        int bound = (int) ((max - min) * pow);
+        return (random.nextInt() % bound) / pow + min;
+    }
+
+    public static int round(double a) {
+        return (int) Math.round(a);
+    }
+
+    public static double add(double a, double b) {
+        return a + b;
+    }
+
+    public static double sub(double a, double b) {
+        return a - b;
+    }
+
+    public static double div(double a, double b) {
+        return a / b;
+    }
+
+    public static double mul(double a, double b) {
+        return a * b;
+    }
+
+    public static double mod(double a, double b) {
+        return ((int) a) % ((int) b);
+    }
+
+    public static double pow(double a, double b) {
+        return Math.pow(a, b);
+    }
+
+    public static double sqrt(double a) {
+        return Math.sqrt(a);
+    }
+
+    public static double log(double a) {
+        return Math.log(a);
     }
 
     public static boolean equal(Object obj1, Object obj2) {
