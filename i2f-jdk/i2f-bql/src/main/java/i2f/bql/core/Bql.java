@@ -2,6 +2,7 @@ package i2f.bql.core;
 
 
 import i2f.bindsql.BindSql;
+import i2f.bql.core.value.Condition;
 import i2f.container.builder.Builders;
 import i2f.container.builder.collection.ListBuilder;
 import i2f.container.builder.map.MapBuilder;
@@ -1006,19 +1007,20 @@ public class Bql<H extends Bql<H>> {
                 for (Map.Entry<String, Object> entry : whereMap.entrySet()) {
                     String col = entry.getKey();
                     Object val = entry.getValue();
-                    if (val instanceof Collection) {
+                    if (val instanceof Condition) {
+                        Condition cond = (Condition) val;
+                        cond.apply(ret, col);
+                    } else if (val instanceof Collection) {
                         Collection<?> c = (Collection<?>) val;
                         ret.$in(col, c);
-                    }
-                    if (val instanceof Iterable) {
+                    } else if (val instanceof Iterable) {
                         List<Object> list = new ArrayList<>();
                         Iterable<?> iter = (Iterable<?>) val;
                         for (Object o : iter) {
                             list.add(o);
                         }
                         ret.$in(col, list);
-                    }
-                    if (val != null && val.getClass().isArray()) {
+                    } else if (val != null && val.getClass().isArray()) {
                         int len = Array.getLength(val);
                         if (len == 1) {
                             ret.$eq(col, Array.get(val, 0));
