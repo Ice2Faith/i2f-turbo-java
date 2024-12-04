@@ -249,6 +249,19 @@ public class GeneratorTool {
         return (random.nextInt() % bound) / pow + min;
     }
 
+    public static boolean contains(String str, String sub) {
+        if (str == null && sub == null) {
+            return true;
+        }
+        if (sub == null || sub.isEmpty()) {
+            return true;
+        }
+        if (str == null) {
+            return false;
+        }
+        return str.contains(sub);
+    }
+
     public static int round(double a) {
         return (int) Math.round(a);
     }
