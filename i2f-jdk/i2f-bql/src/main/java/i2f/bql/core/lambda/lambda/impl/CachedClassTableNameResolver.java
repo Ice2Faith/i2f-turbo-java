@@ -1,6 +1,6 @@
-package i2f.bql.lambda.impl;
+package i2f.bql.core.lambda.lambda.impl;
 
-import i2f.bql.lambda.IClassTableNameResolver;
+import i2f.bql.core.lambda.lambda.IClassTableNameResolver;
 import i2f.lru.LruMap;
 
 import java.util.function.Function;

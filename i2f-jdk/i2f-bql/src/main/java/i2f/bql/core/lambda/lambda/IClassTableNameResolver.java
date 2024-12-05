@@ -1,4 +1,4 @@
-package i2f.bql.lambda;
+package i2f.bql.core.lambda.lambda;
 
 /**
  * @author Ice2Faith
