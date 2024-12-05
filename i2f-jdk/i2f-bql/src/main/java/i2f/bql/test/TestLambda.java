@@ -2,7 +2,7 @@ package i2f.bql.test;
 
 import i2f.bindsql.BindSql;
 import i2f.bql.core.bean.Bql;
-import i2f.bql.core.value.Condition;
+import i2f.bql.core.condition.Condition;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

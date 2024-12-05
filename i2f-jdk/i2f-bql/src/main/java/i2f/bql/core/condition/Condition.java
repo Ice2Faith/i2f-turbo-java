@@ -1,4 +1,4 @@
-package i2f.bql.core.value;
+package i2f.bql.core.condition;
 
 import i2f.bql.core.Bql;
 

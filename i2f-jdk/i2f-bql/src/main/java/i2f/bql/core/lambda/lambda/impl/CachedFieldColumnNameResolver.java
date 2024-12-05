@@ -1,6 +1,6 @@
-package i2f.bql.lambda.impl;
+package i2f.bql.core.lambda.lambda.impl;
 
-import i2f.bql.lambda.IFieldColumnNameResolver;
+import i2f.bql.core.lambda.lambda.IFieldColumnNameResolver;
 import i2f.lru.LruMap;
 
 import java.lang.reflect.Field;
