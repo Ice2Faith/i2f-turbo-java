@@ -3,10 +3,6 @@ package i2f.bql.test;
 import i2f.bindsql.BindSql;
 import i2f.bql.core.bean.Bql;
 import i2f.bql.core.condition.Condition;
-import i2f.bql.core.wrapper.DeleteWrapper;
-import i2f.bql.core.wrapper.InsertWrapper;
-import i2f.bql.core.wrapper.QueryWrapper;
-import i2f.bql.core.wrapper.UpdateWrapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -96,7 +92,7 @@ public class TestLambda {
                 ).$$();
         System.out.println(bql);
 
-        bql = DeleteWrapper.from()
+        bql = Bql.$deleteWrapper()
                 .table(SysUser.class)
                 .cond(SysUser::getUserName, "zhang")
                 .cond(SysUser::getNickName, Condition.$like("li"))
@@ -104,7 +100,7 @@ public class TestLambda {
                 .$$();
         System.out.println(bql);
 
-        bql = UpdateWrapper.update()
+        bql = Bql.$updateWrapper()
                 .table(SysUser.class)
                 .set(SysUser::getNickName, "zhang")
                 .set(SysUser::getStatus, 1)
@@ -116,7 +112,7 @@ public class TestLambda {
                 .$$();
         System.out.println(bql);
 
-        bql = InsertWrapper.into()
+        bql = Bql.$insertWrapper()
                 .table(SysUser.class)
                 .set(SysUser::getNickName, "zhang")
                 .set(SysUser::getStatus, 1)
@@ -125,7 +121,7 @@ public class TestLambda {
                 .$$();
         System.out.println(bql);
 
-        bql = QueryWrapper.select()
+        bql = Bql.$queryWrapper()
                 .from(SysUser.class).alias("a")
                 .col(SysUser::getId)
                 .col(SysUser::getUserName, "userName")
