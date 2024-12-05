@@ -1,4 +1,4 @@
-package i2f.bql.lambda.impl;
+package i2f.bql.core.lambda.lambda.impl;
 
 
 import i2f.annotations.db.Column;
