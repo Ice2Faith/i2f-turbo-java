@@ -5,6 +5,7 @@ import i2f.bindsql.BindSql;
 import i2f.bql.core.condition.Condition;
 import i2f.bql.core.wrapper.DeleteWrapper;
 import i2f.bql.core.wrapper.InsertWrapper;
+import i2f.bql.core.wrapper.QueryWrapper;
 import i2f.bql.core.wrapper.UpdateWrapper;
 import i2f.container.builder.Builders;
 import i2f.container.builder.collection.ListBuilder;
@@ -42,6 +43,10 @@ public class Bql<H extends Bql<H>> {
 
     public static UpdateWrapper<?> $updateWrapper() {
         return new UpdateWrapper<>();
+    }
+
+    public static QueryWrapper<?> $queryWrapper() {
+        return new QueryWrapper<>();
     }
 
     protected static List<String> TRIM_COMMA_LIST = Collections.unmodifiableList($one2list(","));
