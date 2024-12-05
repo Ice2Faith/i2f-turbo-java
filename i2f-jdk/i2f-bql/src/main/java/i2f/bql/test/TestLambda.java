@@ -3,6 +3,10 @@ package i2f.bql.test;
 import i2f.bindsql.BindSql;
 import i2f.bql.core.bean.Bql;
 import i2f.bql.core.condition.Condition;
+import i2f.bql.core.wrapper.DeleteWrapper;
+import i2f.bql.core.wrapper.InsertWrapper;
+import i2f.bql.core.wrapper.QueryWrapper;
+import i2f.bql.core.wrapper.UpdateWrapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -90,6 +94,47 @@ public class TestLambda {
                                 .put(SysUser::getId, 1)
                                 .put(SysUser::getNickName, Condition.$like("zhang"))
                 ).$$();
+        System.out.println(bql);
+
+        bql = DeleteWrapper.from()
+                .table(SysUser.class)
+                .cond(SysUser::getUserName, "zhang")
+                .cond(SysUser::getNickName, Condition.$like("li"))
+                .get()
+                .$$();
+        System.out.println(bql);
+
+        bql = UpdateWrapper.update()
+                .table(SysUser.class)
+                .set(SysUser::getNickName, "zhang")
+                .set(SysUser::getStatus, 1)
+                .set(SysUser::getDelFlag, 0)
+                .setNull(SysUser::setAge)
+                .cond(SysUser::getId, 1)
+                .cond(SysUser::getNickName, Condition.$like("li"))
+                .get()
+                .$$();
+        System.out.println(bql);
+
+        bql = InsertWrapper.into()
+                .table(SysUser.class)
+                .set(SysUser::getNickName, "zhang")
+                .set(SysUser::getStatus, 1)
+                .set(SysUser::getDelFlag, 0)
+                .get()
+                .$$();
+        System.out.println(bql);
+
+        bql = QueryWrapper.select()
+                .from(SysUser.class).alias("a")
+                .col(SysUser::getId)
+                .col(SysUser::getUserName, "userName")
+                .col(SysUser::getNickName, "nickname")
+                .cond(SysUser::getId, 1)
+                .or()
+                .cond(SysUser::getUserName, "zhang")
+                .get()
+                .$$();
         System.out.println(bql);
     }
 

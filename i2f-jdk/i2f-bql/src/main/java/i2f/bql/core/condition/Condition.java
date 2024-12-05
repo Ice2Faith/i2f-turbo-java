@@ -2,8 +2,11 @@ package i2f.bql.core.condition;
 
 import i2f.bql.core.Bql;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -17,6 +20,36 @@ public interface Condition {
 
     static Condition of(Condition cond) {
         return cond;
+    }
+
+    static Condition def(Object value) {
+        if (value == null) {
+            return $isNull();
+        }
+        if (value instanceof Collection) {
+            return $in((Collection<? extends Object>) value);
+        }
+        if (value instanceof Iterable) {
+            List<Object> list = new ArrayList<>();
+            Iterable<?> iter = (Iterable<?>) value;
+            for (Object o : iter) {
+                list.add(o);
+            }
+            return $in(list);
+        }
+        if (value.getClass().isArray()) {
+            List<Object> list = new ArrayList<>();
+            int len = Array.getLength(value);
+            for (int i = 0; i < len; i++) {
+                list.add(Array.get(value, i));
+            }
+            return $in(list);
+        }
+        return $eq(value);
+    }
+
+    static Condition $eq(Object value) {
+        return of((q, c) -> q.$eq(c, value));
     }
 
     static Condition $like(Object value) {
@@ -81,5 +114,13 @@ public interface Condition {
 
     static Condition $notExists(Supplier<Bql<?>> caller) {
         return of((q, c) -> q.$notExists(caller));
+    }
+
+    static Condition $and(Supplier<Bql<?>> caller) {
+        return of((q, c) -> q.$and(caller));
+    }
+
+    static Condition $or(Supplier<Bql<?>> caller) {
+        return of((q, c) -> q.$or(caller));
     }
 }
