@@ -2,7 +2,7 @@ package i2f.bql.core;
 
 
 import i2f.bindsql.BindSql;
-import i2f.bql.core.value.Condition;
+import i2f.bql.core.condition.Condition;
 import i2f.container.builder.Builders;
 import i2f.container.builder.collection.ListBuilder;
 import i2f.container.builder.map.MapBuilder;
