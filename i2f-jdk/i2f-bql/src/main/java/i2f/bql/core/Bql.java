@@ -3,6 +3,9 @@ package i2f.bql.core;
 
 import i2f.bindsql.BindSql;
 import i2f.bql.core.condition.Condition;
+import i2f.bql.core.wrapper.DeleteWrapper;
+import i2f.bql.core.wrapper.InsertWrapper;
+import i2f.bql.core.wrapper.UpdateWrapper;
 import i2f.container.builder.Builders;
 import i2f.container.builder.collection.ListBuilder;
 import i2f.container.builder.map.MapBuilder;
@@ -27,6 +30,18 @@ public class Bql<H extends Bql<H>> {
 
     public static <H extends i2f.bql.core.bean.Bql<H>> i2f.bql.core.bean.Bql<H> $bean() {
         return new i2f.bql.core.bean.Bql();
+    }
+
+    public static InsertWrapper<?> $insertWrapper() {
+        return new InsertWrapper<>();
+    }
+
+    public static DeleteWrapper<?> $deleteWrapper() {
+        return new DeleteWrapper<>();
+    }
+
+    public static UpdateWrapper<?> $updateWrapper() {
+        return new UpdateWrapper<>();
     }
 
     protected static List<String> TRIM_COMMA_LIST = Collections.unmodifiableList($one2list(","));
@@ -1011,8 +1026,17 @@ public class Bql<H extends Bql<H>> {
                         Condition cond = (Condition) val;
                         cond.apply(ret, col);
                     } else if (val instanceof Collection) {
-                        Collection<?> c = (Collection<?>) val;
-                        ret.$in(col, c);
+                        if (val instanceof ArrayList) {
+                            ArrayList<?> list = (ArrayList<?>) val;
+                            if (list.size() == 1) {
+                                ret.$eq(col, list.get(0));
+                            } else {
+                                ret.$in(col, list);
+                            }
+                        } else {
+                            Collection<?> c = (Collection<?>) val;
+                            ret.$in(col, c);
+                        }
                     } else if (val instanceof Iterable) {
                         List<Object> list = new ArrayList<>();
                         Iterable<?> iter = (Iterable<?>) val;
