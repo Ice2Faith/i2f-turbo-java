@@ -76,6 +76,10 @@ public class Uid {
         return UID.nextId();
     }
 
+    public static String getIdHex() {
+        return UID.nextIdHex();
+    }
+
     /**
      * 根据MAC地址序列校验和获取实例
      *
@@ -174,6 +178,10 @@ public class Uid {
                 | (workerId << bitsSeq)
                 | seqId;
 
+    }
+
+    public String nextIdHex() {
+        return String.format("%016x", nextId());
     }
 
     /**
