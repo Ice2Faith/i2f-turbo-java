@@ -50,6 +50,10 @@ public class Iuid {
         return UID.nextId();
     }
 
+    public static String getIdHex() {
+        return UID.nextIdHex();
+    }
+
     public Iuid() {
 
     }
@@ -95,6 +99,10 @@ public class Iuid {
                 | seqId;
 
         return (int) id;
+    }
+
+    public String nextIdHex() {
+        return String.format("%08x", nextId());
     }
 
     /**
