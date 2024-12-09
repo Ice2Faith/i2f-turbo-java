@@ -175,13 +175,13 @@ function pick(){
 function help()
 {
     echo -e "\033[0;31m please input 1st arg:Option \033[0m"
-    echo -e "    options: \033[0;34m {ota|upgrade|cover|pick} \033[0m"
+    echo -e "    options: \033[0;34m {ota|o|upgrade|u|cover|v|pick|p|clean|c} \033[0m"
     echo -e "    params: \033[0;34m pick option has one param \033[0m"
-    echo -e "\033[0;34m ota     \033[0m : use ../{currentDirName}.jar ota current application and restart"
-    echo -e "\033[0;34m upgrade \033[0m : use ../{currentDirName}-upgrade.tar.gz upgrade current application and restart"
-    echo -e "\033[0;34m cover   \033[0m : use ../{currentDirName}-all.tar.gz cover current application and restart"
-    echo -e "\033[0;34m pick    \033[0m : use an file name like {currentDirName}.tar.gz.[^.]+ to cover current application ans restart"
-    echo -e "\033[0;34m clean   \033[0m : clean ../backup.{currentDirName}/*.tar.gz* and keep last $KEEP_COUNT package(s)"
+    echo -e "\033[0;34m ota/o     \033[0m : use ../{currentDirName}.jar ota(ota/o) current application and restart"
+    echo -e "\033[0;34m upgrade/u \033[0m : use ../{currentDirName}-upgrade.tar.gz upgrade(upgrade/u) current application and restart"
+    echo -e "\033[0;34m cover/v   \033[0m : use ../{currentDirName}-all.tar.gz cover(cover/v) current application and restart"
+    echo -e "\033[0;34m pick/p    \033[0m : pick(pick/p) an file name like {currentDirName}.tar.gz.[^.]+ to cover current application ans restart"
+    echo -e "\033[0;34m clean/c   \033[0m : clean(clean/c) ../backup.{currentDirName}/*.tar.gz* and keep last $KEEP_COUNT package(s)"
 
     exit 1
 }
@@ -193,13 +193,23 @@ function help()
 case $Option in
     ota)
     ota;;
+    o)
+    ota;;
     upgrade)
+    upgrade;;
+    u)
     upgrade;;
     cover)
     cover;;
+    v)
+    cover;;
     pick)
     pick;;
+    p)
+    pick;;
     clean)
+    clean;;
+    c)
     clean;;
     *)
     help;;

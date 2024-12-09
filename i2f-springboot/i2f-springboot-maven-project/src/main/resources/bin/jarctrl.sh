@@ -315,15 +315,15 @@ function verifyPidIsRunning() {
 function help()
 {
     echo -e "\033[0;31m please input 1st arg:Option \033[0m"
-    echo -e "    options: \033[0;34m {start|stop|restart|status|log|except|backup|rollback} \033[0m"
-    echo -e "\033[0;34m start    \033[0m : to run a jar which called JarName"
-    echo -e "\033[0;34m stop     \033[0m : to stop a jar which called JarName"
-    echo -e "\033[0;34m restart  \033[0m : to stop and run a jar which called JarName"
-    echo -e "\033[0;34m status   \033[0m : to check run status for a jar which called JarName"
-    echo -e "\033[0;34m log      \033[0m : to lookup the log for a jar which called JarName"
-    echo -e "\033[0;34m except   \033[0m : to lookup the exception log for a jar which called JarName"
-    echo -e "\033[0;34m backup   \033[0m : to backup to jar to backup dir for a jar which called JarName"
-    echo -e "\033[0;34m rollback \033[0m : to rollback from backup dir and backup to rollback dir for a jar which called JarName"
+    echo -e "    options: \033[0;34m {start|u|stop|d|restart|r|status|t|log|l|except|e|backup|b|rollback|o} \033[0m"
+    echo -e "\033[0;34m start/u    \033[0m : to run(up/u) a jar which called JarName"
+    echo -e "\033[0;34m stop/d     \033[0m : to stop(down/d) a jar which called JarName"
+    echo -e "\033[0;34m restart/r  \033[0m : to stop and run(restart/r) a jar which called JarName"
+    echo -e "\033[0;34m status/t   \033[0m : to check run status(status/t) for a jar which called JarName"
+    echo -e "\033[0;34m log/l      \033[0m : to lookup the log(log/l) for a jar which called JarName"
+    echo -e "\033[0;34m except/e   \033[0m : to lookup the exception(exception/e) log for a jar which called JarName"
+    echo -e "\033[0;34m backup/b   \033[0m : to backup(backup/b) to jar to backup dir for a jar which called JarName"
+    echo -e "\033[0;34m rollback/o \033[0m : to rollback(rollback/o) from backup dir and backup to rollback dir for a jar which called JarName"
 
     exit 1
 }
@@ -791,19 +791,35 @@ function mainApp(){
   case $Option in
     start)
     start;;
+    u)
+    start;;
     stop)
+    stop;;
+    d)
     stop;;
     restart)
     restart;;
+    r)
+    restart;;
     status)
+    status;;
+    t)
     status;;
     log)
     log;;
+    l)
+    log;;
     except)
+    except;;
+    e)
     except;;
     backup)
     backup;;
+    b)
+    backup;;
     rollback)
+    rollback;;
+    o)
     rollback;;
     *)
     help;;
