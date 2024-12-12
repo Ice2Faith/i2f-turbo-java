@@ -25,17 +25,88 @@ public class TestDatabaseMetadata {
             System.out.println(driver);
         }
 
-        parseOracle();
+//        parseOracle();
+//
+//        parseGbase();
+//
+//        parseMysql();
+//
+//        parseSqlite();
+//
+//        parsePostgreSql();
 
-        parseGbase();
-
-        parseMysql();
-
-        parseSqlite();
-
-        parsePostgreSql();
+//        parseSqlServer();
 
         System.out.println("ok");
+    }
+
+
+    public static void parseSqlServer() throws Exception {
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+        Connection conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=test_db",
+                "sa", "xxx123456");
+
+        DatabaseMetadataProvider provider = DatabaseMetadataProvider.findProvider(conn);
+
+        DatabaseMetaData metaData = conn.getMetaData();
+        System.out.println("---------------------user name ----------------------------------");
+        System.out.println(metaData.getUserName());
+
+        System.out.println("-------------------product name------------------------------------");
+        System.out.println(metaData.getDatabaseProductName());
+
+        System.out.println("---------------------product version----------------------------------");
+        System.out.println(metaData.getDatabaseProductVersion());
+
+        System.out.println("----------------------driver name---------------------------------");
+        System.out.println(metaData.getDriverName());
+
+        System.out.println("-----------------------driver version--------------------------------");
+        System.out.println(metaData.getDriverVersion());
+
+        System.out.println("-------------------------schemas------------------------------");
+        System.out.println(stringify(provider.getSchemas(conn)));
+
+        System.out.println("--------------------------catalogs-----------------------------");
+        System.out.println(stringify(provider.getCatalogs(conn)));
+
+        System.out.println("--------------------------databases-----------------------------");
+        System.out.println(stringify(provider.getDatabases(conn)));
+
+        System.out.println("--------------------------tables-----------------------------");
+        System.out.println(stringify(provider.getTables(conn, "test_db")));
+
+        System.out.println("---------------------table info----------------------------------");
+        System.out.println(stringify(provider.getTableInfo(conn, "test_db", "XXL_JOB_INFO")));
+
+        String sql = "SELECT a.object_id,\n" +
+                "a.name as COLUMN_NAME,\n" +
+                "a.column_id,a.system_type_id,a.user_type_id,\n" +
+                "a.max_length,a.precision,a.scale,\n" +
+                "b.name as TABLE_NAME,\n" +
+                "c.value as REMARKS,\n" +
+                "d.TABLE_CATALOG,\n" +
+                "d.TABLE_SCHEMA\n" +
+                "FROM sys.columns a\n" +
+                "left join sys.tables b on a.object_id =b.object_id \n" +
+                "left join sys.extended_properties c on b.object_id = c.major_id and a.column_id =c.minor_id \n" +
+                "left join INFORMATION_SCHEMA.TABLES d on b.name =d.TABLE_NAME\n" +
+                "where b.type='U'\n" +
+                "and d.TABLE_CATALOG = ? \n" +
+                "and b.name = ? \n" +
+                "order by a.column_id ";
+
+        PreparedStatement stat = conn.prepareStatement(sql);
+        stat.setString(1, "test_db");
+        stat.setString(2, "XXL_JOB_INFO");
+
+        System.out.println("-------------------------------------------------------");
+        System.out.println(stringify(JdbcResolver.parseResultSet(stat.executeQuery())));
+        stat.close();
+
+
+        conn.close();
     }
 
     public static void parsePostgreSql() throws Exception {
