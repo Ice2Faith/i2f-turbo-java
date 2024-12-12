@@ -203,18 +203,22 @@ public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
     public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
 //        ResultSet rs = getPrimaryKeys(metaData,ret.getDatabase(),ret.getName());
 //        QueryResult result=JdbcResolver.parseResultSet(rs);
-//        IndexMeta primary=new IndexMeta();
-//        List<IndexColumnMeta> primaryColumns=new ArrayList<>();
-//        primary.setColumns(primaryColumns);
+//        IndexMeta primary=null;
 //        for (Map<String, Object> row : result.getRows()) {
+//            if (primary == null) {
+//                primary = new IndexMeta();
+//                List<IndexColumnMeta> primaryColumns = new ArrayList<>();
+//                primary.setColumns(primaryColumns);
+//            }
 //            if(primary.getName()==null){
-//                primary.setName(parseString(row.get("PK_NAME"),null));
+//                primary.setName(asString(row.get("PK_NAME"),null));
 //                primary.setUnique(true);
 //            }
 //            IndexColumnMeta meta=new IndexColumnMeta();
 //            meta.setDesc(false);
-//            meta.setIndex(parseInteger(row.get("KEY_SEQ"),0));
-//            meta.setName(parseString(row.get("COLUMN_NAME"),null));
+//            meta.setIndex(asInteger(row.get("KEY_SEQ"),0));
+//            meta.setName(asString(row.get("COLUMN_NAME"),null));
+//            primary.getColumns().add(meta);
 //        }
 //        ret.setPrimary(primary);
     }

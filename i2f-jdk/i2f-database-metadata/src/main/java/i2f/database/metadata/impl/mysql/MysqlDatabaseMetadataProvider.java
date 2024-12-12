@@ -24,11 +24,14 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
 
     public static final String DRIVER_NAME = "com.mysql.cj.jdbc.Driver";
 
+    public static final String JDBC_URL = "jdbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai";
+
     public static final String MAVEN_DEPENDENCY = "<dependency>\n" +
             "            <groupId>mysql</groupId>\n" +
             "            <artifactId>mysql-connector-java</artifactId>\n" +
             "            <version>8.0.26</version>\n" +
             "        </dependency>";
+
 
     @Override
     public String extractTypeName(Map<String, Object> row) {
@@ -189,10 +192,13 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
     public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
         ResultSet rs = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
         QueryResult result = JdbcResolver.parseResultSet(rs);
-        IndexMeta primary = new IndexMeta();
-        List<IndexColumnMeta> primaryColumns = new ArrayList<>();
-        primary.setColumns(primaryColumns);
+        IndexMeta primary = null;
         for (Map<String, Object> row : result.getRows()) {
+            if (primary == null) {
+                primary = new IndexMeta();
+                List<IndexColumnMeta> primaryColumns = new ArrayList<>();
+                primary.setColumns(primaryColumns);
+            }
             if (primary.getName() == null) {
                 primary.setName(asString(row.get("PK_NAME"), null));
                 primary.setUnique(true);
@@ -201,7 +207,7 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
             meta.setDesc(false);
             meta.setIndex(asInteger(row.get("KEY_SEQ"), 0));
             meta.setName(asString(row.get("COLUMN_NAME"), null));
-            primaryColumns.add(meta);
+            primary.getColumns().add(meta);
         }
         ret.setPrimary(primary);
     }
