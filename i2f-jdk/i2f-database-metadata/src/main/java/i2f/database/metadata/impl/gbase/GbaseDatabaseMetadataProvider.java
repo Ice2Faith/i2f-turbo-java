@@ -15,11 +15,14 @@ public class GbaseDatabaseMetadataProvider extends MysqlDatabaseMetadataProvider
 
     public static final String DRIVER_NAME = "com.gbase.jdbc.Driver";
 
+    public static final String JDBC_URL = "jdbc:gbase://localhost:5258/xxl_job";
+
     public static final String MAVEN_DEPENDENCY = "<dependency>\n" +
             "            <groupId>com.gbase</groupId>\n" +
             "            <artifactId>gbase-jdbc</artifactId>\n" +
             "            <version>8.3.81.53-build55.2.1-bin</version>\n" +
             "        </dependency>";
+
 
     @Override
     public ColumnMeta parseColumn(Map<String, Object> row) {

@@ -8,6 +8,7 @@ import i2f.database.metadata.impl.base.BaseDatabaseMetadataProvider;
 import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
+import i2f.url.UriMeta;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -23,11 +24,23 @@ import java.util.*;
 public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
     public static final String DRIVER_NAME = "oracle.jdbc.OracleDriver";
 
+    public static final String JDBC_URL = "jdbc:oracle:thin:@localhost:1521:orcl";
+
     public static final String MAVEN_DEPENDENCY = "<dependency>\n" +
             "            <groupId>com.oracle</groupId>\n" +
             "            <artifactId>ojdbc8</artifactId>\n" +
             "            <version>12.2.0.1</version>\n" +
             "        </dependency>";
+
+    @Override
+    public String detectDefaultDatabase(String jdbcUrl) {
+        UriMeta meta = UriMeta.parseJdbcOracle(jdbcUrl);
+        String path = meta.getPath();
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+        return path;
+    }
 
     @Override
     public String extractTypeName(Map<String, Object> row) {
@@ -203,18 +216,22 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
     public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
 //        ResultSet rs = getPrimaryKeys(metaData,ret.getDatabase(),ret.getName());
 //        QueryResult result=JdbcResolver.parseResultSet(rs);
-//        IndexMeta primary=new IndexMeta();
-//        List<IndexColumnMeta> primaryColumns=new ArrayList<>();
-//        primary.setColumns(primaryColumns);
+//        IndexMeta primary=null;
 //        for (Map<String, Object> row : result.getRows()) {
+//            if (primary == null) {
+//                primary = new IndexMeta();
+//                List<IndexColumnMeta> primaryColumns = new ArrayList<>();
+//                primary.setColumns(primaryColumns);
+//            }
 //            if(primary.getName()==null){
-//                primary.setName(parseString(row.get("PK_NAME"),null));
+//                primary.setName(asString(row.get("PK_NAME"),null));
 //                primary.setUnique(true);
 //            }
 //            IndexColumnMeta meta=new IndexColumnMeta();
 //            meta.setDesc(false);
-//            meta.setIndex(parseInteger(row.get("KEY_SEQ"),0));
-//            meta.setName(parseString(row.get("COLUMN_NAME"),null));
+//            meta.setIndex(asInteger(row.get("KEY_SEQ"),0));
+//            meta.setName(asString(row.get("COLUMN_NAME"),null));
+//            primary.getColumns().add(meta);
 //        }
 //        ret.setPrimary(primary);
     }
