@@ -25,11 +25,18 @@ public class H2DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
 
     public static final String DRIVER_NAME = "org.h2.Driver";
 
+    public static final String JDBC_URL = "jdbc:h2:file:../h2/test.h2.db";
+
     public static final String MAVEN_DEPENDENCY = "<dependency>\n" +
             "            <groupId>com.h2database</groupId>\n" +
             "            <artifactId>h2</artifactId>\n" +
             "            <version>2.2.224</version>\n" +
             "        </dependency>";
+
+    @Override
+    public String detectDefaultDatabase(String jdbcUrl) {
+        return "PUBLIC";
+    }
 
     @Override
     public String extractTypeName(Map<String, Object> row) {
@@ -194,10 +201,13 @@ public class H2DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
     public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
         ResultSet rs = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
         QueryResult result = JdbcResolver.parseResultSet(rs);
-        IndexMeta primary = new IndexMeta();
-        List<IndexColumnMeta> primaryColumns = new ArrayList<>();
-        primary.setColumns(primaryColumns);
+        IndexMeta primary = null;
         for (Map<String, Object> row : result.getRows()) {
+            if (primary == null) {
+                primary = new IndexMeta();
+                List<IndexColumnMeta> primaryColumns = new ArrayList<>();
+                primary.setColumns(primaryColumns);
+            }
             if (primary.getName() == null) {
                 primary.setName(asString(row.get("PK_NAME"), null));
                 primary.setUnique(true);
@@ -206,7 +216,7 @@ public class H2DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
             meta.setDesc(false);
             meta.setIndex(asInteger(row.get("KEY_SEQ"), 0));
             meta.setName(asString(row.get("COLUMN_NAME"), null));
-            primaryColumns.add(meta);
+            primary.getColumns().add(meta);
         }
         ret.setPrimary(primary);
     }

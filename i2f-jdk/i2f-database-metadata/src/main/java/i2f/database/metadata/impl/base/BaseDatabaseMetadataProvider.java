@@ -13,6 +13,7 @@ import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
+import i2f.url.UriMeta;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -27,6 +28,29 @@ import java.util.*;
  * @desc
  */
 public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataProvider {
+
+    public String detectStandardDefaultDatabase(String jdbcUrl) {
+        if (jdbcUrl == null || jdbcUrl.isEmpty()) {
+            return null;
+        }
+        UriMeta meta = UriMeta.parse(jdbcUrl);
+        String path = meta.getPath();
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        if (path.isEmpty()) {
+            return null;
+        }
+        return path;
+    }
+
+    @Override
+    public String detectDefaultDatabase(String jdbcUrl) {
+        return detectStandardDefaultDatabase(jdbcUrl);
+    }
 
     public String extractTypeName(Map<String, Object> row) {
         return asString(row.get("TYPE_NAME"), null);
@@ -143,6 +167,14 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
         return metaData.getTables(null, database, null, null);
     }
 
+    public boolean filterTableRow(Map<String, Object> tableRow) {
+        return true;
+    }
+
+    public boolean filterTableMeta(TableMeta tableMeta) {
+        return true;
+    }
+
     @Override
     public List<TableMeta> getTables(Connection conn, String database) throws SQLException {
         DatabaseMetaData metaData = conn.getMetaData();
@@ -151,7 +183,13 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
         QueryResult result = JdbcResolver.parseResultSet(rs);
         List<TableMeta> ret = new ArrayList<>();
         for (Map<String, Object> row : result.getRows()) {
+            if (!filterTableRow(row)) {
+                continue;
+            }
             TableMeta table = parseTable(row);
+            if (!filterTableMeta(table)) {
+                continue;
+            }
             if (table.getDatabase() == null) {
                 table.setDatabase(database);
             }

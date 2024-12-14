@@ -4,6 +4,8 @@ import i2f.database.metadata.data.TableMeta;
 import i2f.database.metadata.impl.dm.DmDatabaseMetadataProvider;
 import i2f.database.metadata.impl.gbase.GbaseDatabaseMetadataProvider;
 import i2f.database.metadata.impl.h2.H2DatabaseMetadataProvider;
+import i2f.database.metadata.impl.impl.SqlServerDatabaseMetadataProvider;
+import i2f.database.metadata.impl.jdbc.JdbcDatabaseMetadataProvider;
 import i2f.database.metadata.impl.mysql.MysqlDatabaseMetadataProvider;
 import i2f.database.metadata.impl.oracle.OracleDatabaseMetadataProvider;
 import i2f.database.metadata.impl.postgresql.PostgreSqlDatabaseMetadataProvider;
@@ -77,9 +79,21 @@ public interface DatabaseMetadataProvider {
             return new DmDatabaseMetadataProvider();
         } else if (DatabaseType.H2 == databaseType) {
             return new H2DatabaseMetadataProvider();
+        } else if (DatabaseType.SQL_SERVER == databaseType
+                || DatabaseType.SQL_SERVER2005 == databaseType) {
+            return new SqlServerDatabaseMetadataProvider();
         }
+        System.err.println("un-support metadata provider for product: " + productName);
+        return new JdbcDatabaseMetadataProvider();
+    }
 
-        throw new IllegalStateException("un-support metadata provider for product: " + productName);
+    default String detectDefaultDatabase(Connection conn) throws SQLException {
+        String jdbcUrl = getConnectionUrl(conn);
+        return detectDefaultDatabase(jdbcUrl);
+    }
+
+    default String detectDefaultDatabase(String jdbcUrl) {
+        return null;
     }
 
     List<String> getDataTypes(Connection conn) throws SQLException;
