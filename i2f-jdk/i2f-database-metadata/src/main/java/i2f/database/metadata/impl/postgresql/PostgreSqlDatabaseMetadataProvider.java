@@ -24,6 +24,8 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
 
     public static final String DRIVER_NAME = "org.postgresql.Driver";
 
+    public static final String JDBC_URL = "jdbc:postgresql://localhost:5432/test_db";
+
     public static final String MAVEN_DEPENDENCY = "<dependency>\n" +
             "            <groupId>org.postgresql</groupId>\n" +
             "            <artifactId>postgresql</artifactId>\n" +
@@ -199,10 +201,13 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
     public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
         ResultSet rs = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
         QueryResult result = JdbcResolver.parseResultSet(rs);
-        IndexMeta primary = new IndexMeta();
-        List<IndexColumnMeta> primaryColumns = new ArrayList<>();
-        primary.setColumns(primaryColumns);
+        IndexMeta primary = null;
         for (Map<String, Object> row : result.getRows()) {
+            if (primary == null) {
+                primary = new IndexMeta();
+                List<IndexColumnMeta> primaryColumns = new ArrayList<>();
+                primary.setColumns(primaryColumns);
+            }
             if (primary.getName() == null) {
                 primary.setName(asString(row.get("pk_name"), null));
                 primary.setUnique(true);
@@ -211,7 +216,7 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
             meta.setDesc(false);
             meta.setIndex(asInteger(row.get("key_seq"), 0));
             meta.setName(asString(row.get("column_name"), null));
-            primaryColumns.add(meta);
+            primary.getColumns().add(meta);
         }
         ret.setPrimary(primary);
     }
