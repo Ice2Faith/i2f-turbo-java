@@ -12,7 +12,7 @@
       "type": "java.lang.String",
       "description": "admin address, multi value split by ','.",
       "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties",
-      "defaultValue": "http://127.0.0.1:8888/xxl-job-admin"
+      "defaultValue": "http://127.0.0.1:8080/xxl-job-admin"
     },
     {
       "name": "xxl.job.access-token",
@@ -32,13 +32,15 @@
       "name": "xxl.job.executor.address",
       "type": "java.lang.String",
       "description": "executor bind address.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties"
+      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties",
+      "defaultValue": ""
     },
     {
       "name": "xxl.job.executor.ip",
       "type": "java.lang.String",
       "description": "executor bind ip.",
-      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties"
+      "sourceType": "i2f.springboot.xxljob.properties.XxlJobProperties",
+      "defaultValue": ""
     },
     {
       "name": "xxl.job.executor.port",

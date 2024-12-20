@@ -1,10 +1,13 @@
 package i2f.springboot.xxljob;
 
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
+import com.xxl.job.core.handler.annotation.XxlJob;
 import i2f.springboot.xxljob.properties.XxlJobProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -13,6 +16,11 @@ import org.springframework.context.annotation.Bean;
  *
  * @author xuxueli 2017-04-28
  */
+@ConditionalOnExpression("${xxl.job.enable:true}")
+@ConditionalOnClass({
+        XxlJobSpringExecutor.class,
+        XxlJob.class
+})
 @EnableConfigurationProperties({
         XxlJobProperties.class
 })
