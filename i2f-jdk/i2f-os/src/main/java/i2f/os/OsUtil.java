@@ -1,8 +1,10 @@
 package i2f.os;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Ice2Faith
@@ -46,12 +48,15 @@ public class OsUtil {
     public static String runCmd(String cmd) {
         return runCmd(cmd, getCmdCharset());
     }
-
     public static String runCmd(String cmd, String charset) {
+        return runCmd(cmd, null, null, charset);
+    }
+
+    public static String runCmd(String cmd, String[] envp, File dir, String charset) {
         try {
             Runtime runtime = Runtime.getRuntime();
 
-            Process process = runtime.exec(cmd);
+            Process process = runtime.exec(cmd, envp, dir);
             InputStream is = process.getInputStream();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             byte[] buf = new byte[4096];
@@ -67,7 +72,7 @@ public class OsUtil {
             }
             bos.flush();
 
-            process.waitFor();
+            process.waitFor(3, TimeUnit.MINUTES);
             if (charset == null || charset.isEmpty()) {
                 charset = "UTF-8";
             }
