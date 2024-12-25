@@ -7,10 +7,14 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -129,6 +133,48 @@ public class XmlUtil {
 
     public static String getTagName(Node node) {
         return node.getNodeName();
+    }
+
+    public static String extraInnerXml(Node node) throws ParserConfigurationException, TransformerException {
+        // 创建一个新的Document来构建新的XML结构
+        DocumentBuilderFactory factory = getFactory();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document newDoc = builder.newDocument();
+
+        // 导入目标节点到新文档中，不保留其属性
+        Node importedNode = newDoc.importNode(node, true);
+        newDoc.appendChild(importedNode);
+
+        // 移除所有属性
+        NamedNodeMap attributes = importedNode.getAttributes();
+        while (attributes != null && attributes.getLength() > 0) {
+            attributes.removeNamedItem(attributes.item(0).getNodeName());
+        }
+
+        // 将新文档转换为字符串，只保留文本内容
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
+        transformer.setOutputProperty(OutputKeys.INDENT, "no"); // 不缩进输出
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(newDoc), new StreamResult(writer));
+
+        // 去除首尾空白字符
+        String rootXml = writer.toString().trim();
+
+        // 移除收尾的根节点标签
+        String nodeName = getTagName(node);
+        String prefix = "<" + nodeName + ">";
+        String suffix = "</" + nodeName + ">";
+
+        if (rootXml.startsWith(prefix)) {
+            rootXml = rootXml.substring(prefix.length());
+        }
+        if (rootXml.endsWith(suffix)) {
+            rootXml = rootXml.substring(0, rootXml.length() - suffix.length());
+        }
+        return rootXml;
     }
 
 }
