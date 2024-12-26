@@ -25,6 +25,8 @@ import java.util.*;
  * @desc
  */
 public class JdbcDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
+    public static final JdbcDatabaseMetadataProvider INSTANCE = new JdbcDatabaseMetadataProvider();
+
     @Override
     public String extractTypeName(Map<String, Object> row) {
         for (Map.Entry<String, Object> entry : row.entrySet()) {
