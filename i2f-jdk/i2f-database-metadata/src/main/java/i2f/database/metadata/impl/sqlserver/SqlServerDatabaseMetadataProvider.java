@@ -1,4 +1,4 @@
-package i2f.database.metadata.impl.impl;
+package i2f.database.metadata.impl.sqlserver;
 
 import i2f.database.metadata.data.ColumnMeta;
 import i2f.database.metadata.data.IndexColumnMeta;
@@ -8,6 +8,7 @@ import i2f.database.metadata.impl.base.BaseDatabaseMetadataProvider;
 import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
+import i2f.text.StringUtils;
 import i2f.url.FormUrlEncodedEncoder;
 import i2f.url.UriMeta;
 
@@ -23,6 +24,7 @@ import java.util.*;
  * @desc
  */
 public class SqlServerDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
+    public static final SqlServerDatabaseMetadataProvider INSTANCE = new SqlServerDatabaseMetadataProvider();
 
     public static final String DRIVER_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
@@ -143,6 +145,8 @@ public class SqlServerDatabaseMetadataProvider extends BaseDatabaseMetadataProvi
 
     @Override
     public QueryResult getColumnsComment(Connection conn, String database, String table) throws SQLException {
+        List<Object> args = new ArrayList<>();
+        args.add(table);
         String sql = "SELECT a.object_id,\n" +
                 "a.name as COLUMN_NAME,\n" +
                 "a.column_id,a.system_type_id,a.user_type_id,\n" +
@@ -156,10 +160,13 @@ public class SqlServerDatabaseMetadataProvider extends BaseDatabaseMetadataProvi
                 "left join sys.extended_properties c on b.object_id = c.major_id and a.column_id =c.minor_id \n" +
                 "left join INFORMATION_SCHEMA.TABLES d on b.name =d.TABLE_NAME\n" +
                 "where b.type='U'\n" +
-                "and d.TABLE_CATALOG = ? \n" +
-                "and b.name = ? \n" +
-                "order by a.column_id ";
-        return JdbcResolver.query(conn, sql, Arrays.asList(database, table));
+                "and b.name = ? \n";
+        if (!StringUtils.isEmpty(database)) {
+            sql += "and d.TABLE_CATALOG = ? \n";
+            args.add(database);
+        }
+        sql += "order by a.column_id ";
+        return JdbcResolver.query(conn, sql, args);
     }
 
     @Override

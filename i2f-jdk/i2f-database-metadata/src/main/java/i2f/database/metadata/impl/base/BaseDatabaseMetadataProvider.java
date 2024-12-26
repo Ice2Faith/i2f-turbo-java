@@ -199,12 +199,16 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
             ret.add(table);
         }
         if (notComment) {
-            Map<String, String> map = getTablesCommentMap(conn, database);
+            try {
+                Map<String, String> map = getTablesCommentMap(conn, database);
 
-            for (TableMeta item : ret) {
-                if (item.getComment() == null) {
-                    item.setComment(map.get(item.getName()));
+                for (TableMeta item : ret) {
+                    if (item.getComment() == null) {
+                        item.setComment(map.get(item.getName()));
+                    }
                 }
+            } catch (Exception e) {
+
             }
         }
         ret.sort((e1, e2) -> String.CASE_INSENSITIVE_ORDER.compare(e1.getName(), e2.getName()));
@@ -228,13 +232,17 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
 
     public Map<String, String> getTablesCommentMap(Connection conn, String database) throws SQLException {
         Map<String, String> map = new HashMap<>();
-        QueryResult queryResult = getTablesComment(conn, database);
-        for (Map<String, Object> row : queryResult.getRows()) {
-            String name = extractTablesCommentTableName(row);
-            String comment = extractTablesCommentTableComment(row);
-            if (name != null) {
-                map.put(name, comment);
+        try {
+            QueryResult queryResult = getTablesComment(conn, database);
+            for (Map<String, Object> row : queryResult.getRows()) {
+                String name = extractTablesCommentTableName(row);
+                String comment = extractTablesCommentTableComment(row);
+                if (name != null) {
+                    map.put(name, comment);
+                }
             }
+        } catch (Exception e) {
+
         }
         return map;
     }
@@ -269,8 +277,12 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
             ret.setDatabase(database);
         }
         if (ret.getComment() == null) {
-            Map<String, String> map = getTablesCommentMap(conn, ret.getDatabase());
-            ret.setComment(map.get(ret.getName()));
+            try {
+                Map<String, String> map = getTablesCommentMap(conn, ret.getDatabase());
+                ret.setComment(map.get(ret.getName()));
+            } catch (Exception e) {
+
+            }
         }
 
         rs = getColumns(metaData, ret.getDatabase(), ret.getName());
@@ -289,21 +301,37 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
         }
 
         if (noComment) {
-            Map<String, String> map = getColumnsCommentMap(conn, ret.getDatabase(), ret.getName());
-            for (ColumnMeta item : columns) {
-                if (item.getComment() == null) {
-                    item.setComment(map.get(item.getName()));
+            try {
+                Map<String, String> map = getColumnsCommentMap(conn, ret.getDatabase(), ret.getName());
+                for (ColumnMeta item : columns) {
+                    if (item.getComment() == null) {
+                        item.setComment(map.get(item.getName()));
+                    }
                 }
+            } catch (Exception e) {
+
             }
         }
 
-        parsePrimaryKey(metaData, ret);
+        try {
+            parsePrimaryKey(metaData, ret);
+        } catch (Exception e) {
+
+        }
 
         ret.setUniqueIndexes(new ArrayList<>());
         ret.setIndexes(new ArrayList<>());
-        parseIndexes(metaData, ret);
+        try {
+            parseIndexes(metaData, ret);
+        } catch (Exception e) {
 
-        parseMoreTableInfo(conn, ret);
+        }
+
+        try {
+            parseMoreTableInfo(conn, ret);
+        } catch (Exception e) {
+
+        }
 
         ret.getColumns().sort(ColumnMeta::compare);
 
@@ -414,11 +442,15 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
 
     public Map<String, String> getColumnsCommentMap(Connection conn, String database, String table) throws SQLException {
         Map<String, String> map = new HashMap<>();
-        QueryResult queryResult = getColumnsComment(conn, database, table);
-        for (Map<String, Object> row : queryResult.getRows()) {
-            String name = extractColumnsCommentColumnName(row);
-            String comment = extractColumnsCommentColumnComment(row);
-            map.put(name, comment);
+        try {
+            QueryResult queryResult = getColumnsComment(conn, database, table);
+            for (Map<String, Object> row : queryResult.getRows()) {
+                String name = extractColumnsCommentColumnName(row);
+                String comment = extractColumnsCommentColumnComment(row);
+                map.put(name, comment);
+            }
+        } catch (Exception e) {
+
         }
         return map;
     }

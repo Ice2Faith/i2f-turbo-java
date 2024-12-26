@@ -1,4 +1,4 @@
-package i2f.database.metadata.impl.impl;
+package i2f.database.metadata.impl.sqlserver;
 
 import i2f.database.metadata.std.StdType;
 
