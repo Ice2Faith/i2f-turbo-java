@@ -21,6 +21,8 @@ import java.util.*;
  * @desc
  */
 public class Sqlite3DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
+    public static final Sqlite3DatabaseMetadataProvider INSTANCE = new Sqlite3DatabaseMetadataProvider();
+
     public static final String DRIVER_NAME = "org.sqlite.JDBC";
 
     public static final String MAVEN_DEPENDENCY = "<dependency>\n" +

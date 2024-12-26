@@ -8,6 +8,7 @@ import i2f.database.metadata.impl.base.BaseDatabaseMetadataProvider;
 import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
+import i2f.text.StringUtils;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -21,6 +22,7 @@ import java.util.*;
  * @desc
  */
 public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
+    public static final PostgreSqlDatabaseMetadataProvider INSTANCE = new PostgreSqlDatabaseMetadataProvider();
 
     public static final String DRIVER_NAME = "org.postgresql.Driver";
 
@@ -115,6 +117,8 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
 
     @Override
     public QueryResult getColumnsComment(Connection conn, String database, String table) throws SQLException {
+        List<Object> args = new ArrayList<>();
+        args.add(table);
         String sql = "SELECT col.table_name, col.column_name, col.ordinal_position, d.description, \n" +
                 "col.table_catalog,col.table_schema, \n" +
                 "col.column_default,col.is_nullable,col.data_type,col.character_maximum_length, \n" +
@@ -122,11 +126,14 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
                 "FROM information_schema.columns col \n" +
                 "JOIN pg_class c ON c.relname = col.table_name \n" +
                 "LEFT JOIN pg_description d ON d.objoid = c.oid AND d.objsubid = col.ordinal_position \n" +
-                "WHERE col.table_catalog = ? \n" +
-                "and col.table_name = ? \n" +
-                "and col.table_schema = 'public' \n" +
+                "WHERE col.table_name = ? \n";
+        if (!StringUtils.isEmpty(database)) {
+            sql += "and col.table_catalog = ? \n";
+            args.add(database);
+        }
+        sql += "and col.table_schema = 'public' \n" +
                 "ORDER BY col.table_name, col.ordinal_position ";
-        return JdbcResolver.query(conn, sql, Arrays.asList(database, table));
+        return JdbcResolver.query(conn, sql, args);
     }
 
     @Override

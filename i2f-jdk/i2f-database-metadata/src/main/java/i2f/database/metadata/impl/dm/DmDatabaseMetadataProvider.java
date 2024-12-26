@@ -8,6 +8,7 @@ import i2f.database.metadata.impl.base.BaseDatabaseMetadataProvider;
 import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
+import i2f.text.StringUtils;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -21,6 +22,8 @@ import java.util.*;
  * @desc actual equals oracle
  */
 public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
+    public static final DmDatabaseMetadataProvider INSTANCE = new DmDatabaseMetadataProvider();
+
     public static final String DRIVER_NAME = "dm.jdbc.driver.DmDriver";
 
     public static final String MAVEN_DEPENDENCY = "<dependency>\n" +
@@ -69,11 +72,19 @@ public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
 
     @Override
     public QueryResult getTablesComment(Connection conn, String database) throws SQLException {
-        String sql = "SELECT OWNER,TABLE_NAME,TABLE_TYPE,COMMENTS \n" +
-                "\tFROM ALL_TAB_COMMENTS \n" +
-                "\tWHERE OWNER= ? ";
-        QueryResult result = JdbcResolver.query(conn, sql, Arrays.asList(database));
-        return result;
+        try {
+            String sql = "SELECT OWNER,TABLE_NAME,TABLE_TYPE,COMMENTS \n" +
+                    "\tFROM ALL_TAB_COMMENTS \n" +
+                    "\tWHERE OWNER= ? ";
+            QueryResult result = JdbcResolver.query(conn, sql, Arrays.asList(database));
+            return result;
+        } catch (Exception e) {
+            String sql = "SELECT OWNER,TABLE_NAME,TABLE_TYPE,COMMENTS \n" +
+                    "\tFROM USER_TAB_COMMENTS \n" +
+                    "\tWHERE OWNER= ? ";
+            QueryResult result = JdbcResolver.query(conn, sql, Arrays.asList(database));
+            return result;
+        }
     }
 
     @Override
@@ -109,11 +120,29 @@ public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
 
     @Override
     public QueryResult getColumnsComment(Connection conn, String database, String table) throws SQLException {
-        String sql = "SELECT OWNER,TABLE_NAME,COLUMN_NAME,COMMENTS \n" +
-                "\tFROM ALL_COL_COMMENTS \n" +
-                "\tWHERE OWNER= ? \n" +
-                "\tAND TABLE_NAME= ? ";
-        return JdbcResolver.query(conn, sql, Arrays.asList(database, table));
+        try {
+            String sql = "SELECT OWNER,TABLE_NAME,COLUMN_NAME,COMMENTS \n" +
+                    "\tFROM ALL_COL_COMMENTS \n" +
+                    "\tWHERE TABLE_NAME= ? \n";
+            List<Object> args = new ArrayList<>();
+            args.add(table);
+            if (!StringUtils.isEmpty(database)) {
+                sql += "\tAND OWNER= ? \n";
+                args.add(database);
+            }
+            return JdbcResolver.query(conn, sql, args);
+        } catch (Exception e) {
+            String sql = "SELECT OWNER,TABLE_NAME,COLUMN_NAME,COMMENTS \n" +
+                    "\tFROM USER_COL_COMMENTS \n" +
+                    "\tWHERE TABLE_NAME= ? \n";
+            List<Object> args = new ArrayList<>();
+            args.add(table);
+            if (!StringUtils.isEmpty(database)) {
+                sql += "\tAND OWNER= ? \n";
+                args.add(database);
+            }
+            return JdbcResolver.query(conn, sql, args);
+        }
     }
 
     @Override
