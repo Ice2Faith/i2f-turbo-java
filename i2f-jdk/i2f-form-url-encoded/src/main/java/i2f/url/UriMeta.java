@@ -42,7 +42,7 @@ public class UriMeta {
         } else if (uri.startsWith("git@")) {
             return parseGit(uri);
         } else if (uri.startsWith("jdbc:oracle:thin:@")) {
-            return parseJdbcOracle(uri);
+            return parseJdbcOracleBySid(uri);
         } else if (uri.startsWith("jdbc:sqlserver://")) {
             return parseJdbcSqlserver(uri);
         } else if (uri.startsWith("jdbc:h2:file:")) {
@@ -219,11 +219,49 @@ public class UriMeta {
      * @param uri
      * @return
      */
-    public static UriMeta parseJdbcOracle(String uri) {
+    public static UriMeta parseJdbcOracleBySid(String uri) {
         UriMeta ret = new UriMeta();
         ret.setSchema("jdbc:oracle:thin:@");
         String str = uri.substring("jdbc:oracle:thin:@".length());
         int idx = str.lastIndexOf(":");
+        ret.setPath(str.substring(idx + 1));
+        str = str.substring(0, idx);
+        idx = str.lastIndexOf(":");
+        ret.setHost(str.substring(0, idx));
+        ret.setPort(Integer.parseInt(str.substring(idx + 1)));
+        return ret;
+    }
+
+    /**
+     * jdbc:oracle:thin:@localhost:1521/orcl
+     *
+     * @param uri
+     * @return
+     */
+    public static UriMeta parseJdbcOracleBySid2(String uri) {
+        UriMeta ret = new UriMeta();
+        ret.setSchema("jdbc:oracle:thin:@");
+        String str = uri.substring("jdbc:oracle:thin:@".length());
+        int idx = str.lastIndexOf("/");
+        ret.setPath(str.substring(idx + 1));
+        str = str.substring(0, idx);
+        idx = str.lastIndexOf(":");
+        ret.setHost(str.substring(0, idx));
+        ret.setPort(Integer.parseInt(str.substring(idx + 1)));
+        return ret;
+    }
+
+    /**
+     * jdbc:oracle:thin:@//localhost:1521/msip
+     *
+     * @param uri
+     * @return
+     */
+    public static UriMeta parseJdbcOracleByServiceName(String uri) {
+        UriMeta ret = new UriMeta();
+        ret.setSchema("jdbc:oracle:thin:@//");
+        String str = uri.substring("jdbc:oracle:thin:@//".length());
+        int idx = str.lastIndexOf("/");
         ret.setPath(str.substring(idx + 1));
         str = str.substring(0, idx);
         idx = str.lastIndexOf(":");
@@ -308,7 +346,9 @@ public class UriMeta {
         } else if (schema.equals("git@")) {
             return toUrlStringGit(hashBefore);
         } else if (schema.equals("jdbc:oracle:thin:@")) {
-            return toUrlStringJdbcOracle(hashBefore);
+            return toUrlStringJdbcOracleSid(hashBefore);
+        } else if (schema.equals("jdbc:oracle:thin:@//")) {
+            return toUrlStringJdbcOracleServiceName(hashBefore);
         } else if (schema.equals("jdbc:sqlserver://")) {
             return toUrlStringJdbcSqlserver(hashBefore);
         } else if (schema.equals("jdbc:h2:file:")) {
@@ -380,8 +420,16 @@ public class UriMeta {
         return schema + host + ":" + user + path;
     }
 
-    public String toUrlStringJdbcOracle(boolean hashBefore) {
+    public String toUrlStringJdbcOracleSid(boolean hashBefore) {
         return schema + host + ":" + port + ":" + path;
+    }
+
+    public String toUrlStringJdbcOracleSid2(boolean hashBefore) {
+        return schema + host + ":" + port + "/" + path;
+    }
+
+    public String toUrlStringJdbcOracleServiceName(boolean hashBefore) {
+        return schema + host + ":" + port + "/" + path;
     }
 
     public String toUrlStringJdbcSqlserver(boolean hashBefore) {

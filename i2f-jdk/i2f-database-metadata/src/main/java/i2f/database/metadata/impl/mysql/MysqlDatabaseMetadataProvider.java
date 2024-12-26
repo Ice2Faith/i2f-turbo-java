@@ -8,6 +8,7 @@ import i2f.database.metadata.impl.base.BaseDatabaseMetadataProvider;
 import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
+import i2f.text.StringUtils;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -21,6 +22,7 @@ import java.util.*;
  * @desc
  */
 public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
+    public static final MysqlDatabaseMetadataProvider INSTANCE = new MysqlDatabaseMetadataProvider();
 
     public static final String DRIVER_NAME = "com.mysql.cj.jdbc.Driver";
 
@@ -112,15 +114,20 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
 
     @Override
     public QueryResult getColumnsComment(Connection conn, String database, String table) throws SQLException {
+        List<Object> args = new ArrayList<>();
+        args.add(table);
         String sql = "select TABLE_SCHEMA,TABLE_NAME,COLUMN_NAME,ORDINAL_POSITION,COLUMN_COMMENT, \n" +
                 "COLUMN_DEFAULT,IS_NULLABLE, \n" +
                 "DATA_TYPE,COLUMN_TYPE,COLUMN_KEY, \n" +
                 "CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION,NUMERIC_SCALE \n" +
                 "from information_schema.COLUMNS \n" +
-                "where TABLE_SCHEMA  = ? \n" +
-                "and TABLE_NAME = ? \n" +
-                "order by ORDINAL_POSITION ";
-        return JdbcResolver.query(conn, sql, Arrays.asList(database, table));
+                "where TABLE_NAME = ? \n";
+        if (!StringUtils.isEmpty(database)) {
+            sql += "and TABLE_SCHEMA  = ? \n";
+            args.add(database);
+        }
+        sql += "order by ORDINAL_POSITION ";
+        return JdbcResolver.query(conn, sql, args);
     }
 
     @Override

@@ -8,6 +8,7 @@ import i2f.database.metadata.impl.base.BaseDatabaseMetadataProvider;
 import i2f.database.metadata.std.StdType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
+import i2f.text.StringUtils;
 import i2f.url.UriMeta;
 
 import java.sql.Connection;
@@ -22,9 +23,13 @@ import java.util.*;
  * @desc
  */
 public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
+    public static final OracleDatabaseMetadataProvider INSTANCE = new OracleDatabaseMetadataProvider();
+
     public static final String DRIVER_NAME = "oracle.jdbc.OracleDriver";
 
-    public static final String JDBC_URL = "jdbc:oracle:thin:@localhost:1521:orcl";
+    public static final String JDBC_URL_SID = "jdbc:oracle:thin:@localhost:1521:orcl";
+    public static final String JDBC_URL_SID2 = "jdbc:oracle:thin:@localhost:1521/orcl";
+    public static final String JDBC_URL_SERVICE_NAME = "jdbc:oracle:thin:@//localhost:1521/msip";
 
     public static final String MAVEN_DEPENDENCY = "<dependency>\n" +
             "            <groupId>com.oracle</groupId>\n" +
@@ -33,8 +38,13 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
             "        </dependency>";
 
     @Override
+    public String detectDefaultDatabase(Connection conn) throws SQLException {
+        return conn.getMetaData().getUserName();
+    }
+
+    @Override
     public String detectDefaultDatabase(String jdbcUrl) {
-        UriMeta meta = UriMeta.parseJdbcOracle(jdbcUrl);
+        UriMeta meta = UriMeta.parseJdbcOracleBySid(jdbcUrl);
         String path = meta.getPath();
         if (path == null || path.isEmpty()) {
             return null;
@@ -82,11 +92,19 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
 
     @Override
     public QueryResult getTablesComment(Connection conn, String database) throws SQLException {
-        String sql = "SELECT OWNER,TABLE_NAME,TABLE_TYPE,COMMENTS \n" +
-                "\tFROM ALL_TAB_COMMENTS \n" +
-                "\tWHERE OWNER= ? ";
-        QueryResult result = JdbcResolver.query(conn, sql, Arrays.asList(database));
-        return result;
+        try {
+            String sql = "SELECT OWNER,TABLE_NAME,TABLE_TYPE,COMMENTS \n" +
+                    "\tFROM ALL_TAB_COMMENTS \n" +
+                    "\tWHERE OWNER= ? ";
+            QueryResult result = JdbcResolver.query(conn, sql, Arrays.asList(database));
+            return result;
+        } catch (Exception e) {
+            String sql = "SELECT OWNER,TABLE_NAME,TABLE_TYPE,COMMENTS \n" +
+                    "\tFROM USER_TAB_COMMENTS \n" +
+                    "\tWHERE OWNER= ? ";
+            QueryResult result = JdbcResolver.query(conn, sql, Arrays.asList(database));
+            return result;
+        }
     }
 
     @Override
@@ -122,11 +140,29 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
 
     @Override
     public QueryResult getColumnsComment(Connection conn, String database, String table) throws SQLException {
-        String sql = "SELECT OWNER,TABLE_NAME,COLUMN_NAME,COMMENTS \n" +
-                "\tFROM ALL_COL_COMMENTS \n" +
-                "\tWHERE OWNER= ? \n" +
-                "\tAND TABLE_NAME= ? ";
-        return JdbcResolver.query(conn, sql, Arrays.asList(database, table));
+        try {
+            List<Object> args = new ArrayList<>();
+            args.add(table);
+            String sql = "SELECT OWNER,TABLE_NAME,COLUMN_NAME,COMMENTS \n" +
+                    "\tFROM ALL_COL_COMMENTS \n" +
+                    "\tWHERE TABLE_NAME= ? \n";
+            if (!StringUtils.isEmpty(database)) {
+                sql += "\tAND OWNER= ? ";
+                args.add(database);
+            }
+            return JdbcResolver.query(conn, sql, args);
+        } catch (Exception e) {
+            List<Object> args = new ArrayList<>();
+            args.add(table);
+            String sql = "SELECT OWNER,TABLE_NAME,COLUMN_NAME,COMMENTS \n" +
+                    "\tFROM USER_COL_COMMENTS \n" +
+                    "\tWHERE TABLE_NAME= ? \n";
+            if (!StringUtils.isEmpty(database)) {
+                sql += "\tAND OWNER= ? ";
+                args.add(database);
+            }
+            return JdbcResolver.query(conn, sql, args);
+        }
     }
 
     @Override

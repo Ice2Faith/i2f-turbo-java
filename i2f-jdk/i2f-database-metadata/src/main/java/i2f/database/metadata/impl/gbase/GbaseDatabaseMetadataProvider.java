@@ -12,6 +12,7 @@ import java.util.Map;
  * @desc
  */
 public class GbaseDatabaseMetadataProvider extends MysqlDatabaseMetadataProvider {
+    public static final GbaseDatabaseMetadataProvider INSTANCE = new GbaseDatabaseMetadataProvider();
 
     public static final String DRIVER_NAME = "com.gbase.jdbc.Driver";
 

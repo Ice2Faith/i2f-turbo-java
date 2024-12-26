@@ -204,16 +204,18 @@ public class JdbcResolver {
     }
 
     public static <R> R query(Connection conn, String sql, List<Object> args, SQLFunction<ResultSet, R> resultSetHandler) throws SQLException {
-        PreparedStatement stat = preparedStatement(conn, sql, args);
-        ResultSet rs = stat.executeQuery();
-        try {
-            R ret = resultSetHandler.apply(rs);
-            return ret;
-        } finally {
-            if (!rs.isClosed()) {
-                rs.close();
+        try (PreparedStatement stat = preparedStatement(conn, sql, args)) {
+            try (ResultSet rs = stat.executeQuery()) {
+                try {
+                    R ret = resultSetHandler.apply(rs);
+                    return ret;
+                } finally {
+                    if (!rs.isClosed()) {
+                        rs.close();
+                    }
+                    stat.close();
+                }
             }
-            stat.close();
         }
     }
 
@@ -455,10 +457,11 @@ public class JdbcResolver {
     }
 
     public static int update(Connection conn, String sql, List<?> args) throws SQLException {
-        PreparedStatement stat = preparedStatement(conn, sql, args);
-        int ret = stat.executeUpdate();
-        stat.close();
-        return ret;
+        try (PreparedStatement stat = preparedStatement(conn, sql, args)) {
+            int ret = stat.executeUpdate();
+            stat.close();
+            return ret;
+        }
     }
 
 
@@ -633,62 +636,65 @@ public class JdbcResolver {
             return;
         }
         PreparedStatement stat = null;
-        if (batchSize < 0) {
-            while (iterator.hasNext()) {
-                T elem = iterator.next();
-                if (filter != null && !filter.test(elem)) {
-                    continue;
+        try {
+            if (batchSize < 0) {
+                while (iterator.hasNext()) {
+                    T elem = iterator.next();
+                    if (filter != null && !filter.test(elem)) {
+                        continue;
+                    }
+                    if (stat == null) {
+                        stat = conn.prepareStatement(sql);
+                    }
+                    int i = 1;
+                    for (Function<T, ?> expression : expressions) {
+                        Object val = expression.apply(elem);
+                        setStatementObject(stat, i++, val);
+                    }
+                    stat.addBatch();
                 }
-                if (stat == null) {
-                    stat = conn.prepareStatement(sql);
-                }
-                int i = 1;
-                for (Function<T, ?> expression : expressions) {
-                    Object val = expression.apply(elem);
-                    setStatementObject(stat, i++, val);
-                }
-                stat.addBatch();
-            }
-            stat.executeBatch();
-        } else {
-            List<T> once = new ArrayList<>(batchSize);
-            int count = 0;
-            while (iterator.hasNext()) {
-                T elem = iterator.next();
-                if (filter != null && !filter.test(elem)) {
-                    continue;
-                }
+                stat.executeBatch();
+            } else {
+                List<T> once = new ArrayList<>(batchSize);
+                int count = 0;
+                while (iterator.hasNext()) {
+                    T elem = iterator.next();
+                    if (filter != null && !filter.test(elem)) {
+                        continue;
+                    }
 
-                once.add(elem);
-                count++;
+                    once.add(elem);
+                    count++;
 
-                if (stat == null) {
-                    stat = conn.prepareStatement(sql);
+                    if (stat == null) {
+                        stat = conn.prepareStatement(sql);
+                    }
+                    int i = 1;
+                    for (Function<T, ?> expression : expressions) {
+                        Object val = expression.apply(elem);
+                        setStatementObject(stat, i++, val);
+                    }
+                    stat.addBatch();
+                    if (count == batchSize) {
+                        stat.executeBatch();
+                        count = 0;
+                        once.clear();
+                        stat = null;
+                    }
                 }
-                int i = 1;
-                for (Function<T, ?> expression : expressions) {
-                    Object val = expression.apply(elem);
-                    setStatementObject(stat, i++, val);
-                }
-                stat.addBatch();
-                if (count == batchSize) {
+                if (count > 0) {
                     stat.executeBatch();
                     count = 0;
                     once.clear();
                     stat = null;
                 }
             }
-            if (count > 0) {
-                stat.executeBatch();
-                count = 0;
-                once.clear();
-                stat = null;
+        } finally {
+            if (stat != null) {
+                stat.close();
             }
         }
 
-        if (stat != null) {
-            stat.close();
-        }
     }
 
     public static boolean call(Connection conn, String sql) throws SQLException {
@@ -721,18 +727,19 @@ public class JdbcResolver {
      * @throws SQLException
      */
     public static Map<Integer, Object> call(Connection conn, String sql, List<?> args, Map<Integer, SQLType> outParams) throws SQLException {
-        CallableStatement stat = callStatement(conn, sql, args, outParams);
-        boolean ok = stat.execute();
-        Map<Integer, Object> ret = new LinkedHashMap<>();
-        ret.put(-1, ok);
-        if (outParams != null) {
-            for (Map.Entry<Integer, SQLType> entry : outParams.entrySet()) {
-                Object val = stat.getObject(entry.getKey() + 1);
-                ret.put(entry.getKey(), val);
+        try (CallableStatement stat = callStatement(conn, sql, args, outParams)) {
+            boolean ok = stat.execute();
+            Map<Integer, Object> ret = new LinkedHashMap<>();
+            ret.put(-1, ok);
+            if (outParams != null) {
+                for (Map.Entry<Integer, SQLType> entry : outParams.entrySet()) {
+                    Object val = stat.getObject(entry.getKey() + 1);
+                    ret.put(entry.getKey(), val);
+                }
             }
+            stat.close();
+            return ret;
         }
-        stat.close();
-        return ret;
     }
 
     /**
@@ -829,17 +836,18 @@ public class JdbcResolver {
     public static Map<String, Object> callNaming(Connection conn, String sql, List<?> args) throws SQLException {
         Map<Integer, NamingOutputParameter> namingMap = new LinkedHashMap<>();
 
-        CallableStatement stat = namingCallableStatement(conn, sql, args, namingMap);
-        boolean ok = stat.execute();
-        Map<String, Object> ret = new LinkedHashMap<>();
-        ret.put("-1", ok);
-        for (Map.Entry<Integer, NamingOutputParameter> entry : namingMap.entrySet()) {
-            Object val = stat.getObject(entry.getKey());
-            ret.put(entry.getValue().getName(), val);
-        }
-        stat.close();
+        try (CallableStatement stat = namingCallableStatement(conn, sql, args, namingMap)) {
+            boolean ok = stat.execute();
+            Map<String, Object> ret = new LinkedHashMap<>();
+            ret.put("-1", ok);
+            for (Map.Entry<Integer, NamingOutputParameter> entry : namingMap.entrySet()) {
+                Object val = stat.getObject(entry.getKey());
+                ret.put(entry.getValue().getName(), val);
+            }
+            stat.close();
 
-        return ret;
+            return ret;
+        }
     }
 
     public static CallableStatement namingCallableStatement(Connection conn, BindSql sql, Map<Integer, NamingOutputParameter> context) throws SQLException {
@@ -1087,8 +1095,9 @@ public class JdbcResolver {
 
                 Map<String, Object> map = new LinkedHashMap<>();
                 for (int i = 0; i < columnCount; i++) {
+                    QueryColumn col = columns.get(i);
                     Object val = rs.getObject(i + 1);
-                    map.put(columns.get(i).getName(), val);
+                    map.put(col.getName(), val);
                 }
                 rows.add(map);
 
@@ -1105,6 +1114,7 @@ public class JdbcResolver {
 
         }
     }
+
 
     public static <T> List<T> parseResultSetAsBeanList(ResultSet rs, Class<T> beanClass) throws SQLException {
         return parseResultSetAsBeanList(rs, beanClass, -1, null);

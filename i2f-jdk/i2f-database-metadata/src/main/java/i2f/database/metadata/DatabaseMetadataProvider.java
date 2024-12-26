@@ -1,15 +1,16 @@
 package i2f.database.metadata;
 
 import i2f.database.metadata.data.TableMeta;
+import i2f.database.metadata.impl.delegate.DelegateDatabaseMetadataProvider;
 import i2f.database.metadata.impl.dm.DmDatabaseMetadataProvider;
 import i2f.database.metadata.impl.gbase.GbaseDatabaseMetadataProvider;
 import i2f.database.metadata.impl.h2.H2DatabaseMetadataProvider;
-import i2f.database.metadata.impl.impl.SqlServerDatabaseMetadataProvider;
 import i2f.database.metadata.impl.jdbc.JdbcDatabaseMetadataProvider;
 import i2f.database.metadata.impl.mysql.MysqlDatabaseMetadataProvider;
 import i2f.database.metadata.impl.oracle.OracleDatabaseMetadataProvider;
 import i2f.database.metadata.impl.postgresql.PostgreSqlDatabaseMetadataProvider;
 import i2f.database.metadata.impl.sqlite3.Sqlite3DatabaseMetadataProvider;
+import i2f.database.metadata.impl.sqlserver.SqlServerDatabaseMetadataProvider;
 import i2f.database.type.DatabaseType;
 import i2f.jdbc.data.QueryResult;
 
@@ -60,31 +61,43 @@ public interface DatabaseMetadataProvider {
         return conn.getMetaData().getUserName();
     }
 
+    static DatabaseMetadataProvider getProvider(Connection conn) throws SQLException {
+        DatabaseMetadataProvider provider = findProvider(conn);
+        List<DatabaseMetadataProvider> providers = new ArrayList<>();
+        if (provider != null) {
+            providers.add(provider);
+        }
+        if (!(provider instanceof JdbcDatabaseMetadataProvider)) {
+            providers.add(JdbcDatabaseMetadataProvider.INSTANCE);
+        }
+        return new DelegateDatabaseMetadataProvider(providers);
+    }
+
     static DatabaseMetadataProvider findProvider(Connection conn) throws SQLException {
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
         String productName = conn.getMetaData().getDatabaseProductName();
         if (DatabaseType.MYSQL == databaseType
                 || DatabaseType.MARIADB == databaseType) {
-            return new MysqlDatabaseMetadataProvider();
+            return MysqlDatabaseMetadataProvider.INSTANCE;
         } else if (DatabaseType.ORACLE == databaseType
                 || DatabaseType.ORACLE_12C == databaseType) {
-            return new OracleDatabaseMetadataProvider();
+            return OracleDatabaseMetadataProvider.INSTANCE;
         } else if (DatabaseType.GBASE == databaseType) {
-            return new GbaseDatabaseMetadataProvider();
+            return GbaseDatabaseMetadataProvider.INSTANCE;
         } else if (DatabaseType.SQLITE == databaseType) {
-            return new Sqlite3DatabaseMetadataProvider();
+            return Sqlite3DatabaseMetadataProvider.INSTANCE;
         } else if (DatabaseType.POSTGRE_SQL == databaseType) {
-            return new PostgreSqlDatabaseMetadataProvider();
+            return PostgreSqlDatabaseMetadataProvider.INSTANCE;
         } else if (DatabaseType.DM == databaseType) {
-            return new DmDatabaseMetadataProvider();
+            return DmDatabaseMetadataProvider.INSTANCE;
         } else if (DatabaseType.H2 == databaseType) {
-            return new H2DatabaseMetadataProvider();
+            return H2DatabaseMetadataProvider.INSTANCE;
         } else if (DatabaseType.SQL_SERVER == databaseType
                 || DatabaseType.SQL_SERVER2005 == databaseType) {
-            return new SqlServerDatabaseMetadataProvider();
+            return SqlServerDatabaseMetadataProvider.INSTANCE;
         }
         System.err.println("un-support metadata provider for product: " + productName);
-        return new JdbcDatabaseMetadataProvider();
+        return JdbcDatabaseMetadataProvider.INSTANCE;
     }
 
     default String detectDefaultDatabase(Connection conn) throws SQLException {
