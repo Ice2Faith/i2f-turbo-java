@@ -1,7 +1,8 @@
 package i2f.extension.reverse.engineer.generator.test;
 
-import i2f.database.metadata.DatabaseMetadataProvider;
 import i2f.database.metadata.data.TableMeta;
+import i2f.database.metadata.impl.DatabaseMetadataProviders;
+import i2f.database.metadata.std.DatabaseMetadataProvider;
 import i2f.extension.reverse.engineer.generator.ReverseEngineerGenerator;
 import i2f.io.stream.StreamUtil;
 import i2f.jdbc.JdbcResolver;
@@ -80,7 +81,7 @@ public class TestReverseEngineer {
                 "root",
                 "xxx123456");
 
-        DatabaseMetadataProvider provider = DatabaseMetadataProvider.findProvider(conn);
+        DatabaseMetadataProvider provider = DatabaseMetadataProviders.findProvider(conn);
 
         List<String> catalogs = provider.getCatalogs(conn);
 
