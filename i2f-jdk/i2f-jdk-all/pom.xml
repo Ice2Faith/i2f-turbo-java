@@ -82,7 +82,7 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-clock</artifactId>
+            <artifactId>i2f-clock-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -386,7 +386,7 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-serialize</artifactId>
+            <artifactId>i2f-serialize-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -418,7 +418,7 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-tuple</artifactId>
+            <artifactId>i2f-tuple-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -426,7 +426,7 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-uid</artifactId>
+            <artifactId>i2f-uid-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>

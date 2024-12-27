@@ -24,9 +24,9 @@
         <module>i2f-annotations</module>
 
         <module>i2f-jdk-all</module>
-        <module>i2f-tuple</module>
+        <module>i2f-tuple-impl</module>
         <module>i2f-streaming</module>
-        <module>i2f-clock</module>
+        <module>i2f-clock-impl</module>
         <module>i2f-bql</module>
         <module>i2f-check</module>
         <module>i2f-container</module>
@@ -42,7 +42,7 @@
         <module>i2f-exception</module>
         <module>i2f-resources</module>
         <module>i2f-lru-map</module>
-        <module>i2f-uid</module>
+        <module>i2f-uid-impl</module>
         <module>i2f-atomic</module>
         <module>i2f-array</module>
         <module>i2f-container-builder</module>
@@ -70,7 +70,7 @@
         <module>i2f-iterator</module>
         <module>i2f-reference</module>
         <module>i2f-comparator</module>
-        <module>i2f-serialize</module>
+        <module>i2f-serialize-impl</module>
         <module>i2f-os</module>
         <module>i2f-robot</module>
         <module>i2f-native-windows</module>
@@ -135,6 +135,10 @@
         <module>i2f-jdbc-data</module>
         <module>i2f-jdbc-std</module>
         <module>i2f-codec-std</module>
+        <module>i2f-serialize-std</module>
+        <module>i2f-tuple-std</module>
+        <module>i2f-clock-std</module>
+        <module>i2f-uid-std</module>
 
 
     </modules>

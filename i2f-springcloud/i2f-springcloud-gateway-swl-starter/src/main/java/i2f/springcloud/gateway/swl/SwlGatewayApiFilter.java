@@ -1,6 +1,6 @@
 package i2f.springcloud.gateway.swl;
 
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.core.SwlTransfer;
 import i2f.swl.exception.SwlException;
@@ -22,8 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.io.UnsupportedEncodingException;

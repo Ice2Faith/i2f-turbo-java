@@ -3,7 +3,7 @@ package i2f.extension.netty.tcp.rpc;
 import i2f.extension.netty.tcp.handler.ISocketChannelHandler;
 import i2f.extension.netty.tcp.rpc.handler.RpcServerSocketChannelHandler;
 import i2f.extension.netty.tcp.tcp.NettyServer;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 
 import java.util.function.Function;
 

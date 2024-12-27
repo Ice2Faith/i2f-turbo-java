@@ -5,7 +5,7 @@ import i2f.net.http.impl.HttpJsonRequestBodyHandler;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
 import i2f.net.http.interfaces.IHttpProcessor;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

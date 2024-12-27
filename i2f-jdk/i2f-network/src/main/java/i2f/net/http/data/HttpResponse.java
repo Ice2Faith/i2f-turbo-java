@@ -2,7 +2,7 @@ package i2f.net.http.data;
 
 
 import i2f.io.stream.StreamUtil;
-import i2f.serialize.str.IStringObjectSerializer;
+import i2f.serialize.std.str.IStringObjectSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

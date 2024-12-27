@@ -1,7 +1,7 @@
 package i2f.extension.netty.http;
 
 import i2f.extension.netty.http.extension.impl.HttpRequestDispatchAdapter;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;

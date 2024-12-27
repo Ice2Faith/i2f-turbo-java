@@ -1,7 +1,7 @@
 package i2f.thread;
 
 
-import i2f.type.tuple.Tuple;
+import i2f.type.tuple.Tuples;
 import i2f.type.tuple.impl.*;
 
 import java.util.Map;
@@ -57,7 +57,7 @@ public class Asyncs {
 
     public static <V1> Tuple1<V1> promise(Supplier<V1> supplier1) {
         Map<Integer, Optional<Object>> map = async(supplier1);
-        return Tuple.of((V1) map.get(0).orElse(null));
+        return Tuples.of((V1) map.get(0).orElse(null));
     }
 
     public static <V1, V2> Tuple2<V1, V2> promise(Supplier<V1> supplier1,
@@ -66,7 +66,7 @@ public class Asyncs {
         Map<Integer, Optional<Object>> map = async(supplier1,
                 supplier2
         );
-        return Tuple.of((V1) map.get(0).orElse(null),
+        return Tuples.of((V1) map.get(0).orElse(null),
                 (V2) map.get(1).orElse(null)
         );
     }
@@ -79,7 +79,7 @@ public class Asyncs {
                 supplier2,
                 supplier3
         );
-        return Tuple.of((V1) map.get(0).orElse(null),
+        return Tuples.of((V1) map.get(0).orElse(null),
                 (V2) map.get(1).orElse(null),
                 (V3) map.get(2).orElse(null)
         );
@@ -95,7 +95,7 @@ public class Asyncs {
                 supplier3,
                 supplier4
         );
-        return Tuple.of((V1) map.get(0).orElse(null),
+        return Tuples.of((V1) map.get(0).orElse(null),
                 (V2) map.get(1).orElse(null),
                 (V3) map.get(2).orElse(null),
                 (V4) map.get(3).orElse(null)
@@ -114,7 +114,7 @@ public class Asyncs {
                 supplier4,
                 supplier5
         );
-        return Tuple.of((V1) map.get(0).orElse(null),
+        return Tuples.of((V1) map.get(0).orElse(null),
                 (V2) map.get(1).orElse(null),
                 (V3) map.get(2).orElse(null),
                 (V4) map.get(3).orElse(null),
@@ -136,7 +136,7 @@ public class Asyncs {
                 supplier5,
                 supplier6
         );
-        return Tuple.of((V1) map.get(0).orElse(null),
+        return Tuples.of((V1) map.get(0).orElse(null),
                 (V2) map.get(1).orElse(null),
                 (V3) map.get(2).orElse(null),
                 (V4) map.get(3).orElse(null),
@@ -161,7 +161,7 @@ public class Asyncs {
                 supplier6,
                 supplier7
         );
-        return Tuple.of((V1) map.get(0).orElse(null),
+        return Tuples.of((V1) map.get(0).orElse(null),
                 (V2) map.get(1).orElse(null),
                 (V3) map.get(2).orElse(null),
                 (V4) map.get(3).orElse(null),
@@ -189,7 +189,7 @@ public class Asyncs {
                 supplier7,
                 supplier8
         );
-        return Tuple.of((V1) map.get(0).orElse(null),
+        return Tuples.of((V1) map.get(0).orElse(null),
                 (V2) map.get(1).orElse(null),
                 (V3) map.get(2).orElse(null),
                 (V4) map.get(3).orElse(null),
@@ -220,7 +220,7 @@ public class Asyncs {
                 supplier8,
                 supplier9
         );
-        return Tuple.of((V1) map.get(0).orElse(null),
+        return Tuples.of((V1) map.get(0).orElse(null),
                 (V2) map.get(1).orElse(null),
                 (V3) map.get(2).orElse(null),
                 (V4) map.get(3).orElse(null),
@@ -254,7 +254,7 @@ public class Asyncs {
                 supplier9,
                 supplier10
         );
-        return Tuple.of((V1) map.get(0).orElse(null),
+        return Tuples.of((V1) map.get(0).orElse(null),
                 (V2) map.get(1).orElse(null),
                 (V3) map.get(2).orElse(null),
                 (V4) map.get(3).orElse(null),
