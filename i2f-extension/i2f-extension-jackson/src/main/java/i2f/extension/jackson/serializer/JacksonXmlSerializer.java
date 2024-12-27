@@ -3,7 +3,7 @@ package i2f.extension.jackson.serializer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import i2f.serialize.str.xml.IXmlSerializer;
+import i2f.serialize.std.str.xml.IXmlSerializer;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;

@@ -3,7 +3,7 @@ package i2f.net.http.interfaces;
 
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 
 import java.io.IOException;
 import java.util.Map;

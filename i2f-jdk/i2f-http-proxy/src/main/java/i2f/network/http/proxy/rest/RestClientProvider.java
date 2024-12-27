@@ -3,7 +3,7 @@ package i2f.network.http.proxy.rest;
 
 import i2f.network.http.proxy.rest.core.RestClientProxyHandler;
 import i2f.proxy.JdkProxyUtil;
-import i2f.serialize.str.IStringObjectSerializer;
+import i2f.serialize.std.str.IStringObjectSerializer;
 
 /**
  * @author Ice2Faith

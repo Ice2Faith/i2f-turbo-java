@@ -1,7 +1,7 @@
 package i2f.graphics.d2.polygon;
 
 import i2f.graphics.d2.Point;
-import i2f.type.tuple.Tuple;
+import i2f.type.tuple.Tuples;
 import i2f.type.tuple.impl.Tuple2;
 
 import java.util.ArrayList;
@@ -139,7 +139,7 @@ public class PolygonLocationTool {
             item.setY(item.getY());
         }
 
-        return Tuple.of(retPoint, retList);
+        return Tuples.of(retPoint, retList);
     }
 
     /**

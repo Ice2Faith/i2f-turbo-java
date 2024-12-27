@@ -2,7 +2,7 @@ package i2f.springboot.swl.spring;
 
 import i2f.cache.expire.IExpireCache;
 import i2f.reflect.ReflectResolver;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.spring.web.mapping.MappingUtil;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.core.SwlTransfer;
