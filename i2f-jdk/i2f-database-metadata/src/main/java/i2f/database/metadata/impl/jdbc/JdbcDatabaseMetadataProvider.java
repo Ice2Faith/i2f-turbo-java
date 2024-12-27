@@ -286,12 +286,18 @@ public class JdbcDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
         ret.setIndexes(new ArrayList<>());
         for (Map.Entry<String, IndexMeta> entry : indexMap.entrySet()) {
             IndexMeta meta = entry.getValue();
-            String lowerName = meta.getName().toLowerCase();
-            if ("PRIMARY".equalsIgnoreCase(meta.getName())
+            String lowerName = meta.getName();
+            if (lowerName == null) {
+                lowerName = "";
+            }
+            lowerName = lowerName.toLowerCase();
+            if ("primary".equals(lowerName)
                     || lowerName.endsWith("_pkey")
+                    || lowerName.endsWith("_pri")
                     || lowerName.endsWith("_pk")
                     || lowerName.startsWith("pkey_")
                     || lowerName.startsWith("pk_")
+                    || lowerName.startsWith("pri_")
             ) {
                 ret.setPrimary(meta);
             } else if (meta.isUnique()) {

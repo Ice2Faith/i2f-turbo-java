@@ -195,10 +195,36 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
         return col;
     }
 
+    public QueryResult queryPrimaryKeyResult(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        try {
+            ResultSet rs = getPrimaryKeys(metaData, database, table);
+            QueryResult result = JdbcResolver.parseResultSet(rs);
+            return result;
+        } catch (Throwable e) {
+            List<Object> args = new ArrayList<>();
+            args.add(table);
+            String sql = "SELECT a.TABLE_SCHEMA ,a.TABLE_NAME ,\n" +
+                    "a.INDEX_NAME as PK_NAME,\n" +
+                    "a.SEQ_IN_INDEX as KEY_SEQ,\n" +
+                    "a.COLUMN_NAME,\n" +
+                    "a.`COLLATION` as ASC_OR_DESC,\n" +
+                    "a.INDEX_TYPE as \"TYPE\"\n" +
+                    "FROM information_schema.STATISTICS a\n" +
+                    "WHERE a.INDEX_NAME ='PRIMARY'\n" +
+                    "and a.TABLE_NAME = ?  \n";
+
+            if (!StringUtils.isEmpty(database)) {
+                sql += "AND a.TABLE_SCHEMA = ? ";
+                args.add(database);
+            }
+            return JdbcResolver.query(metaData.getConnection(), sql, args);
+        }
+    }
+
     @Override
     public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-        ResultSet rs = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
-        QueryResult result = JdbcResolver.parseResultSet(rs);
+        QueryResult result = queryPrimaryKeyResult(metaData, ret.getDatabase(), ret.getName());
+
         IndexMeta primary = null;
         for (Map<String, Object> row : result.getRows()) {
             if (primary == null) {
@@ -219,10 +245,38 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
         ret.setPrimary(primary);
     }
 
+
+    public QueryResult queryIndexesResult(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        try {
+            ResultSet rs = getIndexInfo(metaData, database, table);
+            QueryResult result = JdbcResolver.parseResultSet(rs);
+            return result;
+        } catch (Throwable e) {
+            List<Object> args = new ArrayList<>();
+            args.add(table);
+            String sql = "SELECT a.TABLE_SCHEMA ,a.TABLE_NAME ,\n" +
+                    "a.INDEX_NAME,\n" +
+                    "case when a.NON_UNIQUE = 0 then 'true'\n" +
+                    "else 'false'\n" +
+                    "end as NON_UNIQUE,\n" +
+                    "a.COLUMN_NAME,\n" +
+                    "a.SEQ_IN_INDEX as ORDINAL_POSITION,\n" +
+                    "a.`COLLATION` as ASC_OR_DESC,\n" +
+                    "a.INDEX_TYPE as \"TYPE\"\n" +
+                    "FROM information_schema.STATISTICS a\n" +
+                    "WHERE a.TABLE_NAME = ?  \n";
+
+            if (!StringUtils.isEmpty(database)) {
+                sql += "AND a.TABLE_SCHEMA = ? ";
+                args.add(database);
+            }
+            return JdbcResolver.query(metaData.getConnection(), sql, args);
+        }
+    }
+
     @Override
     public void parseIndexes(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-        ResultSet rs = getIndexInfo(metaData, ret.getDatabase(), ret.getName());
-        QueryResult result = JdbcResolver.parseResultSet(rs);
+        QueryResult result = queryIndexesResult(metaData, ret.getDatabase(), ret.getName());
 
         Map<String, IndexMeta> indexMap = new LinkedHashMap<>();
         for (Map<String, Object> row : result.getRows()) {
