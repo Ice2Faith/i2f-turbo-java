@@ -121,24 +121,24 @@ public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
     @Override
     public QueryResult getColumnsComment(Connection conn, String database, String table) throws SQLException {
         try {
+            List<Object> args = new ArrayList<>();
+            args.add(table);
             String sql = "SELECT OWNER,TABLE_NAME,COLUMN_NAME,COMMENTS \n" +
                     "\tFROM ALL_COL_COMMENTS \n" +
                     "\tWHERE TABLE_NAME= ? \n";
-            List<Object> args = new ArrayList<>();
-            args.add(table);
             if (!StringUtils.isEmpty(database)) {
-                sql += "\tAND OWNER= ? \n";
+                sql += "\tAND OWNER= ? ";
                 args.add(database);
             }
             return JdbcResolver.query(conn, sql, args);
         } catch (Exception e) {
+            List<Object> args = new ArrayList<>();
+            args.add(table);
             String sql = "SELECT OWNER,TABLE_NAME,COLUMN_NAME,COMMENTS \n" +
                     "\tFROM USER_COL_COMMENTS \n" +
                     "\tWHERE TABLE_NAME= ? \n";
-            List<Object> args = new ArrayList<>();
-            args.add(table);
             if (!StringUtils.isEmpty(database)) {
-                sql += "\tAND OWNER= ? \n";
+                sql += "\tAND OWNER= ? ";
                 args.add(database);
             }
             return JdbcResolver.query(conn, sql, args);
@@ -228,36 +228,89 @@ public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
         return col;
     }
 
-    @Override
-    public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-//        ResultSet rs = getPrimaryKeys(metaData,ret.getDatabase(),ret.getName());
-//        QueryResult result=JdbcResolver.parseResultSet(rs);
-//        IndexMeta primary=null;
-//        for (Map<String, Object> row : result.getRows()) {
-//            if (primary == null) {
-//                primary = new IndexMeta();
-//                List<IndexColumnMeta> primaryColumns = new ArrayList<>();
-//                primary.setColumns(primaryColumns);
-//            }
-//            if(primary.getName()==null){
-//                primary.setName(asString(row.get("PK_NAME"),null));
-//                primary.setUnique(true);
-//            }
-//            IndexColumnMeta meta=new IndexColumnMeta();
-//            meta.setDesc(false);
-//            meta.setIndex(asInteger(row.get("KEY_SEQ"),0));
-//            meta.setName(asString(row.get("COLUMN_NAME"),null));
-//            primary.getColumns().add(meta);
-//        }
-//        ret.setPrimary(primary);
+    public QueryResult queryPrimaryKeyResult(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        try {
+            ResultSet rs = getPrimaryKeys(metaData, database, table);
+            QueryResult result = JdbcResolver.parseResultSet(rs);
+            return result;
+        } catch (Throwable e) {
+            List<Object> args = new ArrayList<>();
+            args.add(table);
+            String sql = "SELECT a.OWNER,a.TABLE_NAME,\n" +
+                    "a.CONSTRAINT_NAME AS PK_NAME,\n" +
+                    "b.\"POSITION\" AS KEY_SEQ,\n" +
+                    "b.COLUMN_NAME\n" +
+                    "FROM USER_CONSTRAINTS a\n" +
+                    "LEFT JOIN USER_CONS_COLUMNS b ON a.CONSTRAINT_NAME =b.CONSTRAINT_NAME AND a.OWNER =b.OWNER\n" +
+                    "WHERE a.CONSTRAINT_TYPE ='P'\n" +
+                    "AND a.TABLE_NAME = ?\n";
+            if (!StringUtils.isEmpty(database)) {
+                sql += "AND a.OWNER = ? ";
+                args.add(database);
+            }
+            return JdbcResolver.query(metaData.getConnection(), sql, args);
+        }
     }
 
+    @Override
+    public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
+        QueryResult result = queryPrimaryKeyResult(metaData, ret.getDatabase(), ret.getName());
+        IndexMeta primary = null;
+        for (Map<String, Object> row : result.getRows()) {
+            if (primary == null) {
+                primary = new IndexMeta();
+                List<IndexColumnMeta> primaryColumns = new ArrayList<>();
+                primary.setColumns(primaryColumns);
+            }
+            if (primary.getName() == null) {
+                primary.setName(asString(row.get("PK_NAME"), null));
+                primary.setUnique(true);
+            }
+            IndexColumnMeta meta = new IndexColumnMeta();
+            meta.setDesc(false);
+            meta.setIndex(asInteger(row.get("KEY_SEQ"), 0));
+            meta.setName(asString(row.get("COLUMN_NAME"), null));
+            primary.getColumns().add(meta);
+        }
+        ret.setPrimary(primary);
+    }
+
+    public QueryResult queryIndexesResult(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        try {
+            ResultSet rs = getIndexInfo(metaData, database, table);
+            QueryResult result = JdbcResolver.parseResultSet(rs);
+            return result;
+        } catch (Throwable e) {
+            List<Object> args = new ArrayList<>();
+            args.add(table);
+            String sql = "SELECT a.OWNER,a.TABLE_NAME,\n" +
+                    "a.INDEX_NAME,\n" +
+                    "b.COLUMN_NAME,\n" +
+                    "b.COLUMN_POSITION AS ORDINAL_POSITION,\n" +
+                    "CASE WHEN a.UNIQUENESS = 'UNIQUE' THEN '0'\n" +
+                    "ELSE '1'\n" +
+                    "END AS NON_UNIQUE,\n" +
+                    "CASE WHEN b.DESCEND ='DESC' THEN '1' \n" +
+                    "ELSE '0'\n" +
+                    "END AS ASC_OR_DESC,\n" +
+                    "CASE WHEN a.INDEX_TYPE ='NORMAL' THEN '0'\n" +
+                    "ELSE NULL\n" +
+                    "END AS \"TYPE\",\n" +
+                    "NULL AS \"CARDINALITY\"\n" +
+                    "FROM ALL_INDEXES a\n" +
+                    "JOIN ALL_IND_COLUMNS b ON a.INDEX_NAME = b.INDEX_NAME AND a.OWNER=b.INDEX_OWNER \n" +
+                    "WHERE a.TABLE_NAME= ? \n";
+            if (!StringUtils.isEmpty(database)) {
+                sql += "AND a.OWNER = ? ";
+                args.add(database);
+            }
+            return JdbcResolver.query(metaData.getConnection(), sql, args);
+        }
+    }
 
     @Override
     public void parseIndexes(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-        ResultSet rs = getIndexInfo(metaData, ret.getDatabase(), ret.getName());
-        QueryResult result = JdbcResolver.parseResultSet(rs);
-
+        QueryResult result = queryIndexesResult(metaData, ret.getDatabase(), ret.getName());
 
         String primaryCardinality = null;
         IndexMeta primary = null;
@@ -275,7 +328,7 @@ public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
                 meta.setColumns(new ArrayList<>());
 
                 String cardinality = asString(row.get("CARDINALITY"), null);
-                if (cardinality.equals(primaryCardinality)) {
+                if (cardinality != null && cardinality.equals(primaryCardinality)) {
                     primary = meta;
                 }
                 indexMap.put(indexName, meta);
@@ -291,7 +344,9 @@ public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
             indexMap.get(indexName).getColumns().add(cm);
         }
 
-        ret.setPrimary(primary);
+        if (primary != null) {
+            ret.setPrimary(primary);
+        }
         ret.setUniqueIndexes(new ArrayList<>());
         ret.setIndexes(new ArrayList<>());
         for (Map.Entry<String, IndexMeta> entry : indexMap.entrySet()) {
