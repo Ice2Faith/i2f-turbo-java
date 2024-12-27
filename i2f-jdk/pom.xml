@@ -64,7 +64,7 @@
         <module>i2f-graphics-3d</module>
         <module>i2f-graphics</module>
         <module>i2f-geo</module>
-        <module>i2f-codec</module>
+        <module>i2f-codec-impl</module>
         <module>i2f-io-stream</module>
         <module>i2f-match</module>
         <module>i2f-iterator</module>
@@ -134,6 +134,7 @@
         <module>i2f-firewall</module>
         <module>i2f-jdbc-data</module>
         <module>i2f-jdbc-std</module>
+        <module>i2f-codec-std</module>
 
 
     </modules>

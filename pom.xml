@@ -153,7 +153,12 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-codec</artifactId>
+                <artifactId>i2f-codec-std</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-codec-impl</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>

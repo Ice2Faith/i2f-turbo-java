@@ -1,6 +1,6 @@
 package i2f.serialize.exception;
 
-import i2f.codec.exception.CodecException;
+import i2f.codec.std.exception.CodecException;
 
 public class SerializeException extends CodecException {
     public SerializeException() {

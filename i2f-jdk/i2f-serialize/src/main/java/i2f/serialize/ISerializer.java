@@ -1,6 +1,6 @@
 package i2f.serialize;
 
-import i2f.codec.ICodec;
+import i2f.codec.std.ICodec;
 
 /**
  * @author Ice2Faith
