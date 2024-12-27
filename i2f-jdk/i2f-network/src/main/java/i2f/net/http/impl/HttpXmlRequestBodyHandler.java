@@ -3,7 +3,7 @@ package i2f.net.http.impl;
 
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
-import i2f.serialize.str.xml.IXmlSerializer;
+import i2f.serialize.std.str.xml.IXmlSerializer;
 import i2f.serialize.str.xml.impl.Xml2Serializer;
 
 import java.io.IOException;

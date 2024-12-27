@@ -4,7 +4,7 @@ import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.extension.netty.tcp.protocol.pkg.NettyPackage;
 import i2f.extension.netty.tcp.rpc.NettyRpcClient;
 import i2f.extension.netty.tcp.rpc.handler.RpcClientSocketChannelHandler;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOutboundHandlerAdapter;

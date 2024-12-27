@@ -3,7 +3,7 @@ package i2f.extension.httpclient.impl;
 
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.StringEntity;
 

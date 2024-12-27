@@ -2,7 +2,7 @@ package i2f.log.writer.impl;
 
 import i2f.log.data.LogData;
 import i2f.log.writer.ILogWriter;
-import i2f.uid.Uid;
+import i2f.uid.SnowflakeLongUid;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -212,7 +212,7 @@ public class JdbcDatasourceLogWriter implements ILogWriter {
         PreparedStatement stat = conn.prepareStatement(sql);
         for (LogData item : list) {
             int i = 1;
-            stat.setLong(i++, Uid.getId());
+            stat.setLong(i++, SnowflakeLongUid.getId());
             stat.setString(i++, application);
             stat.setString(i++, host);
             stat.setString(i++, item.getLocation());
