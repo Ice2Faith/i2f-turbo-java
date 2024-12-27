@@ -130,6 +130,7 @@
         <module>i2f-translate</module>
         <module>i2f-translate-en2zh</module>
         <module>i2f-translate-zh2pinyin</module>
+        <module>i2f-firewall</module>
 
 
     </modules>
