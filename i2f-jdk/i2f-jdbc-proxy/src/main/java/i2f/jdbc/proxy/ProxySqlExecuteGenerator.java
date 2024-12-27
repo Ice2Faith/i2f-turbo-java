@@ -1,8 +1,8 @@
 package i2f.jdbc.proxy;
 
-import i2f.jdbc.context.JdbcInvokeContextProvider;
 import i2f.jdbc.proxy.handler.ProxyRenderSqlHandler;
 import i2f.jdbc.proxy.provider.ProxyRenderSqlProvider;
+import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 
 import java.lang.reflect.Proxy;
 

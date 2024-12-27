@@ -1,8 +1,8 @@
 package i2f.springboot.jdbc.bql.components;
 
-import i2f.jdbc.context.JdbcInvokeContextProvider;
 import i2f.jdbc.proxy.ProxySqlExecuteGenerator;
 import i2f.jdbc.proxy.provider.ProxyRenderSqlProvider;
+import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 import lombok.Data;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationContext;

@@ -47,7 +47,7 @@
         <module>i2f-array</module>
         <module>i2f-container-builder</module>
         <module>i2f-bindsql</module>
-        <module>i2f-jdbc</module>
+        <module>i2f-jdbc-impl</module>
         <module>i2f-convert</module>
         <module>i2f-typeof</module>
         <module>i2f-unsafe</module>
@@ -123,14 +123,17 @@
         <module>i2f-verifycode</module>
         <module>i2f-authentication</module>
         <module>i2f-launcher</module>
-        <module>i2f-database-metadata</module>
-        <module>i2f-database-metadata-bean</module>
         <module>i2f-database-metadata-data</module>
+        <module>i2f-database-metadata-std</module>
+        <module>i2f-database-metadata-impl</module>
+        <module>i2f-database-metadata-bean</module>
         <module>i2f-javacode-graph</module>
         <module>i2f-translate</module>
         <module>i2f-translate-en2zh</module>
         <module>i2f-translate-zh2pinyin</module>
         <module>i2f-firewall</module>
+        <module>i2f-jdbc-data</module>
+        <module>i2f-jdbc-std</module>
 
 
     </modules>

@@ -138,7 +138,7 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-database-metadata</artifactId>
+            <artifactId>i2f-database-metadata-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -258,7 +258,7 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc</artifactId>
+            <artifactId>i2f-jdbc-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
