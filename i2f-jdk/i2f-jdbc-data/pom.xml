@@ -9,18 +9,14 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-jdbc-bql</artifactId>
+    <artifactId>i2f-jdbc-data</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc-impl</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-bql</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

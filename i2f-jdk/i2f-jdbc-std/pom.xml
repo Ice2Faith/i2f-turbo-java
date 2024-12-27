@@ -9,18 +9,9 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-jdbc-proxy</artifactId>
-
+    <artifactId>i2f-jdbc-std</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.26</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -28,27 +19,7 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc-impl</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-annotations-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-annotations-db</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-match</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-bql</artifactId>
+            <artifactId>i2f-jdbc-data</artifactId>
         </dependency>
     </dependencies>
 

@@ -2,25 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>i2f.turbo</groupId>
         <artifactId>i2f-jdk</artifactId>
+        <groupId>i2f.turbo</groupId>
         <version>1.0</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>i2f-jdbc-proxy</artifactId>
-
+    <artifactId>i2f-jdbc-impl</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.26</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -28,17 +19,27 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc-impl</artifactId>
+            <artifactId>i2f-jdbc-std</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-annotations-core</artifactId>
+            <artifactId>i2f-bindsql</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-annotations-db</artifactId>
+            <artifactId>i2f-reflect</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-page</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-bindsql-page</artifactId>
         </dependency>
 
         <dependency>
@@ -47,9 +48,13 @@
         </dependency>
 
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-bql</artifactId>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.26</version>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
+
     </dependencies>
 
     <build>

@@ -213,7 +213,7 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-database-metadata</artifactId>
+                <artifactId>i2f-database-metadata-impl</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -224,6 +224,11 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-database-metadata-data</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-database-metadata-std</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -363,7 +368,17 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-jdbc</artifactId>
+                <artifactId>i2f-jdbc-data</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-jdbc-std</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-jdbc-impl</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
