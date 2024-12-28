@@ -45,12 +45,12 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-environment</artifactId>
+            <artifactId>i2f-environment-impl</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-context</artifactId>
+            <artifactId>i2f-context-impl</artifactId>
         </dependency>
     </dependencies>
 

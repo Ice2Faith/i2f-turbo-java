@@ -1,7 +1,7 @@
 package i2f.swl.core.exchanger;
 
 import i2f.clock.SystemClock;
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.pool.impl.ObjectPool;
 import i2f.swl.cert.SwlCertUtil;
 import i2f.swl.cert.data.SwlCert;

@@ -1,7 +1,7 @@
 package i2f.extension.jce.bc.encrypt.symmetric;
 
+import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricType;
 import i2f.extension.jce.bc.BcProvider;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricType;
 
 /**
  * @author Ice2Faith

@@ -1,8 +1,8 @@
 package i2f.extension.jce.bc.digest.hmac;
 
+import i2f.crypto.impl.jdk.digest.hmac.HmacMessageDigester;
 import i2f.extension.jce.bc.BcProvider;
 import i2f.extension.jce.bc.supports.MacAlgorithm;
-import i2f.jce.jdk.digest.hmac.HmacMessageDigester;
 
 import javax.crypto.Mac;
 import java.util.function.Function;
