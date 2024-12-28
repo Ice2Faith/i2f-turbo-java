@@ -1,6 +1,6 @@
 package i2f.extension.sevenz.test;
 
-import i2f.compress.ICompressor;
+import i2f.compress.std.ICompressor;
 import i2f.extension.sevenz.SevenZCompressor;
 
 import java.io.File;

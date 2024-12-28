@@ -1,11 +1,11 @@
 package i2f.extension.jce.bc.signature.test;
 
+import i2f.crypto.impl.jdk.signature.SignatureSigner;
+import i2f.crypto.impl.jdk.supports.SecureRandomAlgorithm;
 import i2f.extension.jce.bc.signature.BcSignatureSigner;
 import i2f.extension.jce.bc.signature.DsaType;
 import i2f.extension.jce.bc.signature.EcdsaType;
 import i2f.extension.jce.bc.signature.RsaType;
-import i2f.jce.jdk.signature.SignatureSigner;
-import i2f.jce.jdk.supports.SecureRandomAlgorithm;
 
 /**
  * @author Ice2Faith

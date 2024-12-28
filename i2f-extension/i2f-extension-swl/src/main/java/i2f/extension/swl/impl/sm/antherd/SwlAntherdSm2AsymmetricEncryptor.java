@@ -1,8 +1,8 @@
 package i2f.extension.swl.impl.sm.antherd;
 
 import com.antherd.smcrypto.sm2.Keypair;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.extension.jce.sm.antherd.encrypt.asymmetric.Sm2Encryptor;
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.exception.SwlException;
 import i2f.swl.std.ISwlAsymmetricEncryptor;

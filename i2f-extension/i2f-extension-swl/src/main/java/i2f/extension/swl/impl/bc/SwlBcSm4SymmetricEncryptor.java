@@ -2,10 +2,10 @@ package i2f.extension.swl.impl.bc;
 
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
 import i2f.codec.bytes.raw.HexStringByteCodec;
+import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricEncryptor;
+import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricType;
+import i2f.crypto.std.encrypt.symmetric.ISymmetricEncryptor;
 import i2f.extension.jce.bc.encrypt.symmetric.Sm4Type;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricEncryptor;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricType;
-import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.exception.SwlException;
 import i2f.swl.std.ISwlSymmetricEncryptor;

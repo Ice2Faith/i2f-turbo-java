@@ -188,7 +188,12 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-compress</artifactId>
+                <artifactId>i2f-compress-std</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-compress-impl</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -203,7 +208,12 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-context</artifactId>
+                <artifactId>i2f-context-std</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-context-impl</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -268,7 +278,12 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-environment</artifactId>
+                <artifactId>i2f-environment-std</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-environment-impl</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -373,7 +388,12 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-jce</artifactId>
+                <artifactId>i2f-crypto-std</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-crypto-impl</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>

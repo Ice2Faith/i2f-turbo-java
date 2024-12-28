@@ -1,12 +1,14 @@
 package i2f.extension.sevenz;
 
-import i2f.compress.data.CompressBindData;
 import i2f.compress.impl.AbsCompressor;
+import i2f.compress.std.data.CompressBindData;
 import i2f.extension.sevenz.callbak.CompressSevenZCallback;
 import i2f.extension.sevenz.callbak.ExtractSevenZCallback;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.sf.sevenzipjbinding.*;
+import net.sf.sevenzipjbinding.IInArchive;
+import net.sf.sevenzipjbinding.IOutCreateArchive7z;
+import net.sf.sevenzipjbinding.SevenZip;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileOutStream;
 

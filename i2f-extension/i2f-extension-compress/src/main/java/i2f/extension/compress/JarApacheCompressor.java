@@ -1,7 +1,7 @@
 package i2f.extension.compress;
 
-import i2f.compress.data.CompressBindData;
 import i2f.compress.impl.AbsCompressor;
+import i2f.compress.std.data.CompressBindData;
 import i2f.io.stream.StreamUtil;
 import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
 import org.apache.commons.compress.archivers.jar.JarArchiveInputStream;
