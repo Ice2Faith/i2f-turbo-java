@@ -230,7 +230,7 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-image</artifactId>
+            <artifactId>i2f-image-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
