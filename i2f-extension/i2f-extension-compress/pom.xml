@@ -19,7 +19,12 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-compress-impl</artifactId>
+            <artifactId>i2f-compress-std</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-io-file</artifactId>
         </dependency>
 
         <dependency>

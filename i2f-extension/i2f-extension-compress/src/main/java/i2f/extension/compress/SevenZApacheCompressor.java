@@ -1,7 +1,7 @@
 package i2f.extension.compress;
 
-import i2f.compress.impl.AbsCompressor;
 import i2f.compress.std.data.CompressBindData;
+import i2f.compress.std.impl.AbsCompressor;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
