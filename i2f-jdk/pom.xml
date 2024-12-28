@@ -32,7 +32,7 @@
         <module>i2f-container</module>
         <module>i2f-database</module>
         <module>i2f-functional</module>
-        <module>i2f-jce</module>
+        <module>i2f-crypto-impl</module>
         <module>i2f-lambda</module>
         <module>i2f-network</module>
         <module>i2f-packet</module>
@@ -89,7 +89,7 @@
         <module>i2f-cache</module>
         <module>i2f-lru-cache</module>
         <module>i2f-features</module>
-        <module>i2f-compress</module>
+        <module>i2f-compress-impl</module>
         <module>i2f-http-proxy</module>
         <module>i2f-lock</module>
         <module>i2f-io-filesystem</module>
@@ -105,8 +105,8 @@
         <module>i2f-script</module>
         <module>i2f-limit</module>
         <module>i2f-pool</module>
-        <module>i2f-context</module>
-        <module>i2f-environment</module>
+        <module>i2f-context-impl</module>
+        <module>i2f-environment-impl</module>
         <module>i2f-event</module>
         <module>i2f-i18n</module>
         <module>i2f-jdbc-proxy-xml</module>
@@ -139,6 +139,10 @@
         <module>i2f-tuple-std</module>
         <module>i2f-clock-std</module>
         <module>i2f-uid-std</module>
+        <module>i2f-compress-std</module>
+        <module>i2f-context-std</module>
+        <module>i2f-environment-std</module>
+        <module>i2f-crypto-std</module>
 
 
     </modules>

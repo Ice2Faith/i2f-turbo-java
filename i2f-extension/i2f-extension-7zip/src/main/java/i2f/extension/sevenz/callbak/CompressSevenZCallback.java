@@ -1,6 +1,6 @@
 package i2f.extension.sevenz.callbak;
 
-import i2f.compress.data.CompressBindData;
+import i2f.compress.std.data.CompressBindData;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sf.sevenzipjbinding.*;

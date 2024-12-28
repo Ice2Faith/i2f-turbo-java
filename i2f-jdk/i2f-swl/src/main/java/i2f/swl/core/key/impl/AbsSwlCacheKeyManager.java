@@ -1,6 +1,6 @@
 package i2f.swl.core.key.impl;
 
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.impl.SwlBase64Obfuscator;
 import i2f.swl.std.ISwlObfuscator;
 import lombok.Data;

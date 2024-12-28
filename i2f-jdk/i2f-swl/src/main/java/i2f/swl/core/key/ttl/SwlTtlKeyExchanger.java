@@ -1,7 +1,7 @@
 package i2f.swl.core.key.ttl;
 
 
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.core.key.SwlKeyExchanger;
 import i2f.swl.core.key.ttl.impl.SwlCacheTtlKeyManager;
 import lombok.AccessLevel;

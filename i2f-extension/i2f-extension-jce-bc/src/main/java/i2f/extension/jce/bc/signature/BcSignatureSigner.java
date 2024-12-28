@@ -1,9 +1,9 @@
 package i2f.extension.jce.bc.signature;
 
+import i2f.crypto.impl.jdk.encrypt.Encryptor;
+import i2f.crypto.impl.jdk.signature.SignatureSigner;
+import i2f.crypto.impl.jdk.signature.SignatureType;
 import i2f.extension.jce.bc.BcProvider;
-import i2f.jce.jdk.encrypt.Encryptor;
-import i2f.jce.jdk.signature.SignatureSigner;
-import i2f.jce.jdk.signature.SignatureType;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;

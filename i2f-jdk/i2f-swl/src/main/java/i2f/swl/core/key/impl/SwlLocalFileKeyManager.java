@@ -1,7 +1,7 @@
 package i2f.swl.core.key.impl;
 
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.io.file.FileUtil;
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.lru.LruMap;
 import i2f.swl.core.key.SwlKeyManager;
 import i2f.swl.impl.SwlBase64Obfuscator;

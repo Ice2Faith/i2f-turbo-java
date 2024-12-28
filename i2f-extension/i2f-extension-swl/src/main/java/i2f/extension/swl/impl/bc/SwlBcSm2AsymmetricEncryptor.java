@@ -2,9 +2,9 @@ package i2f.extension.swl.impl.bc;
 
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
 import i2f.codec.bytes.raw.HexStringByteCodec;
+import i2f.crypto.std.encrypt.asymmetric.IAsymmetricEncryptor;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.extension.jce.bc.encrypt.asymmetric.BcSm2Encryptor;
-import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.exception.SwlException;
 import i2f.swl.std.ISwlAsymmetricEncryptor;

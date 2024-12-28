@@ -20,7 +20,7 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jce</artifactId>
+            <artifactId>i2f-crypto-impl</artifactId>
         </dependency>
 
         <dependency>

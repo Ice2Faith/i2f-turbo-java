@@ -1,11 +1,11 @@
 package i2f.extension.jce.bc.encrypt.asymmetric.test;
 
+import i2f.crypto.impl.jdk.encrypt.asymmetric.AsymmetricEncryptor;
+import i2f.crypto.impl.jdk.supports.SecureRandomAlgorithm;
 import i2f.extension.jce.bc.encrypt.asymmetric.BcAsymmetricEncryptor;
 import i2f.extension.jce.bc.encrypt.asymmetric.BcSm2Encryptor;
 import i2f.extension.jce.bc.encrypt.asymmetric.ElGamalType;
 import i2f.extension.jce.bc.encrypt.asymmetric.RsaType;
-import i2f.jce.jdk.encrypt.asymmetric.AsymmetricEncryptor;
-import i2f.jce.jdk.supports.SecureRandomAlgorithm;
 
 /**
  * @author Ice2Faith
