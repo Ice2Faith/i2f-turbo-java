@@ -57,7 +57,7 @@
         <module>i2f-page</module>
         <module>i2f-proxy</module>
         <module>i2f-spi</module>
-        <module>i2f-image</module>
+        <module>i2f-image-impl</module>
         <module>i2f-color</module>
         <module>i2f-math</module>
         <module>i2f-graphics-2d</module>
@@ -143,6 +143,7 @@
         <module>i2f-context-std</module>
         <module>i2f-environment-std</module>
         <module>i2f-crypto-std</module>
+        <module>i2f-image-std</module>
 
 
     </modules>
