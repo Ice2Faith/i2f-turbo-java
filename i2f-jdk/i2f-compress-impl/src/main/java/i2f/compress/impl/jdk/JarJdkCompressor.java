@@ -1,7 +1,7 @@
 package i2f.compress.impl.jdk;
 
-import i2f.compress.impl.AbsCompressor;
 import i2f.compress.std.data.CompressBindData;
+import i2f.compress.std.impl.AbsCompressor;
 import i2f.io.stream.StreamUtil;
 
 import java.io.*;
