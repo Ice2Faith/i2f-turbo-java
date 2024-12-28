@@ -1,4 +1,4 @@
-package i2f.compress.impl;
+package i2f.compress.std.impl;
 
 
 import i2f.compress.std.ICompressor;

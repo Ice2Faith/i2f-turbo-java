@@ -1,7 +1,7 @@
 package i2f.extension.zip4j;
 
-import i2f.compress.impl.AbsCompressor;
 import i2f.compress.std.data.CompressBindData;
+import i2f.compress.std.impl.AbsCompressor;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.model.enums.AesKeyStrength;

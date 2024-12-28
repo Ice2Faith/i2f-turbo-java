@@ -17,6 +17,10 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-io-stream</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
