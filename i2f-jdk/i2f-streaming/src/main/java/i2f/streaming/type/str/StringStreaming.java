@@ -9,50 +9,54 @@ import i2f.streaming.Streaming;
  */
 public interface StringStreaming extends Streaming<String> {
 
-    default Streaming<String> notEmpty() {
-        return filter(e -> e != null && !e.isEmpty());
+    default StringStreaming notEmpty() {
+        return filter(e -> e != null && !e.isEmpty())
+                .string();
     }
 
-    default Streaming<String> notBlank() {
-        return filter(e -> e != null && !e.trim().isEmpty());
+    default StringStreaming notBlank() {
+        return filter(e -> e != null && !e.trim().isEmpty())
+                .string();
     }
 
-    default Streaming<String> startsWith(String prefix) {
-        return filter(e -> e != null && e.startsWith(prefix));
+    default StringStreaming startsWith(String prefix) {
+        return filter(e -> e != null && e.startsWith(prefix))
+                .string();
     }
 
-    default Streaming<String> endsWith(String suffix) {
-        return filter(e -> e != null && e.endsWith(suffix));
+    default StringStreaming endsWith(String suffix) {
+        return filter(e -> e != null && e.endsWith(suffix))
+                .string();
     }
 
-    default Streaming<String> toUpperCase() {
+    default StringStreaming toUpperCase() {
         return map(e -> {
             if (e == null) {
                 return null;
             }
             return e.toUpperCase();
-        });
+        }).string();
     }
 
-    default Streaming<String> toLowerCase() {
+    default StringStreaming toLowerCase() {
         return map(e -> {
             if (e == null) {
                 return null;
             }
             return e.toLowerCase();
-        });
+        }).string();
     }
 
-    default Streaming<String> trim() {
+    default StringStreaming trim() {
         return map(e -> {
             if (e == null) {
                 return null;
             }
             return e.trim();
-        });
+        }).string();
     }
 
-    default Streaming<String> split(String regex) {
+    default StringStreaming split(String regex) {
         return flatMap((e, collector) -> {
             if (e == null) {
                 return;
@@ -61,10 +65,10 @@ public interface StringStreaming extends Streaming<String> {
             for (String item : arr) {
                 collector.accept(item);
             }
-        });
+        }).string();
     }
 
-    default Streaming<String> split(String regex, int limit) {
+    default StringStreaming split(String regex, int limit) {
         return flatMap((e, collector) -> {
             if (e == null) {
                 return;
@@ -73,16 +77,16 @@ public interface StringStreaming extends Streaming<String> {
             for (String item : arr) {
                 collector.accept(item);
             }
-        });
+        }).string();
     }
 
-    default Streaming<String> replaceAll(String regex, String replacement) {
+    default StringStreaming replaceAll(String regex, String replacement) {
         return map(e -> {
             if (e == null) {
                 return null;
             }
             return e.replaceAll(regex, replacement);
-        });
+        }).string();
     }
 
 }
