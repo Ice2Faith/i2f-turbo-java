@@ -8,6 +8,8 @@ import i2f.streaming.thread.AtomicCountDownLatchRunnable;
 import i2f.streaming.thread.NamingForkJoinPool;
 import i2f.streaming.timed.TimedStreaming;
 import i2f.streaming.timed.TimedStreamingImpl;
+import i2f.streaming.type.str.StringStreaming;
+import i2f.streaming.type.str.StringStreamingImpl;
 import i2f.streaming.window.ConditionWindowInfo;
 import i2f.streaming.window.SlideWindowInfo;
 import i2f.streaming.window.ViewWindowInfo;
@@ -311,6 +313,36 @@ public class StreamingImpl<E> implements Streaming<E> {
                 }
             } finally {
 
+            }
+        }), this);
+    }
+
+    @Override
+    public Streaming<E> topN(int size, BiPredicate<E, E> replacer) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(replacer);
+            richBefore(this.holdIterator);
+            try {
+                ArrayList<E> ret = new ArrayList<>(size);
+                AtomicInteger cnt = new AtomicInteger(0);
+                while (this.holdIterator.hasNext()) {
+                    E elem = this.holdIterator.next();
+                    if (cnt.get() < size) {
+                        ret.add(elem);
+                        cnt.incrementAndGet();
+                    } else {
+                        for (int i = 0; i < size; i++) {
+                            if (replacer.test(elem, ret.get(i))) {
+                                ret.set(i, elem);
+                                break;
+                            }
+                        }
+                    }
+                }
+                return ret.iterator();
+            } finally {
+                richAfter(this.holdIterator);
+                richAfter(replacer);
             }
         }), this);
     }
@@ -2474,5 +2506,10 @@ public class StreamingImpl<E> implements Streaming<E> {
     @Override
     public TimedStreaming<E> timed(Function<E, Long> timestampMapper) {
         return new TimedStreamingImpl<>(this.holdIterator, this, timestampMapper);
+    }
+
+    @Override
+    public StringStreaming string(Function<E, String> stringifier) {
+        return new StringStreamingImpl<>(this.holdIterator, this, stringifier);
     }
 }
