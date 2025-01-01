@@ -21,6 +21,7 @@ import java.io.Writer;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -410,6 +411,98 @@ public class StreamingImpl<E> implements Streaming<E> {
             }
         }), this);
     }
+
+    @Override
+    public Streaming<E> afterN(int size, Predicate<E> filter, int limit) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(filter);
+            richBefore(this.holdIterator);
+            try {
+                AtomicInteger currLimit = new AtomicInteger(0);
+                AtomicInteger currSize = new AtomicInteger(0);
+                AtomicBoolean open = new AtomicBoolean(false);
+                return new SupplierIterator<>(() -> {
+                    while (this.holdIterator.hasNext()) {
+                        E elem = this.holdIterator.next();
+                        if (open.get()) {
+                            if (currSize.get() < size) {
+                                currSize.incrementAndGet();
+                                return Reference.of(elem);
+                            } else {
+                                if (limit >= 0) {
+                                    if (currLimit.get() >= limit) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (filter.test(elem)) {
+                            open.set(true);
+                            currSize.set(1);
+                            currLimit.incrementAndGet();
+                            return Reference.of(elem);
+                        } else {
+                            open.set(false);
+                        }
+                    }
+                    richAfter(this.holdIterator);
+                    richAfter(filter);
+                    return Reference.finish();
+                });
+
+            } finally {
+
+            }
+        }), this);
+    }
+
+    @Override
+    public Streaming<E> beforeN(int size, Predicate<E> filter, int limit) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(filter);
+            richBefore(this.holdIterator);
+            try {
+                Deque<E> deque = new LinkedBlockingDeque<>();
+                AtomicInteger count = new AtomicInteger(0);
+                AtomicInteger currLimit = new AtomicInteger(0);
+                return new SupplierBufferIterator<>(() -> {
+                    if (limit >= 0) {
+                        if (currLimit.get() >= limit) {
+                            richAfter(this.holdIterator);
+                            richAfter(filter);
+                            return Reference.finish();
+                        }
+                    }
+                    while (this.holdIterator.hasNext()) {
+                        E elem = this.holdIterator.next();
+                        deque.add(elem);
+                        count.incrementAndGet();
+                        if (count.get() > size) {
+                            deque.removeFirst();
+                            count.decrementAndGet();
+                        }
+                        if (filter.test(elem)) {
+                            currLimit.incrementAndGet();
+                            List<E> list = new LinkedList<>();
+                            while (!deque.isEmpty()) {
+                                E val = deque.removeFirst();
+                                list.add(val);
+                            }
+                            count.set(0);
+                            return Reference.of(list);
+                        }
+                    }
+                    richAfter(this.holdIterator);
+                    richAfter(filter);
+                    return Reference.finish();
+                });
+
+            } finally {
+
+            }
+        }), this);
+    }
+
 
     @Override
     public Streaming<E> rangeAll(Predicate<E> beginFilter, Predicate<E> endFilter, boolean includeBegin, boolean includeEnd) {
@@ -1834,6 +1927,72 @@ public class StreamingImpl<E> implements Streaming<E> {
             richAfter(this.holdIterator);
             richAfter(filter);
         }
+    }
+
+    @Override
+    public Streaming<E> firstN(int size, Predicate<E> filter) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(filter);
+            richBefore(this.holdIterator);
+            try {
+                AtomicLong cnt = new AtomicLong(0);
+                return new SupplierIterator<>(() -> {
+                    while (this.holdIterator.hasNext()) {
+                        E elem = this.holdIterator.next();
+                        if (cnt.get() >= size) {
+                            break;
+                        }
+                        if (filter.test(elem)) {
+                            cnt.incrementAndGet();
+                            return Reference.of(elem);
+                        }
+                    }
+                    richAfter(filter);
+                    richAfter(this.holdIterator);
+                    return Reference.finish();
+                });
+            } finally {
+
+            }
+        }), this);
+    }
+
+    @Override
+    public Streaming<E> lastN(int size, Predicate<E> filter) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(filter);
+            richBefore(this.holdIterator);
+            try {
+                Deque<E> deque = new LinkedBlockingDeque<>();
+                AtomicLong cnt = new AtomicLong(0);
+                AtomicBoolean hasProcess = new AtomicBoolean(false);
+                return new SupplierBufferIterator<>(() -> {
+                    while (this.holdIterator.hasNext()) {
+                        E elem = this.holdIterator.next();
+                        if (filter.test(elem)) {
+                            cnt.incrementAndGet();
+                            deque.add(elem);
+                            if (cnt.get() > size) {
+                                deque.removeFirst();
+                                cnt.decrementAndGet();
+                            }
+                        }
+                    }
+                    if (!hasProcess.getAndSet(true)) {
+                        List<E> list = new LinkedList<>();
+                        while (!deque.isEmpty()) {
+                            list.add(deque.removeFirst());
+                        }
+                        return Reference.of(list);
+                    }
+                    richAfter(filter);
+                    richAfter(this.holdIterator);
+                    return Reference.finish();
+                });
+            } finally {
+
+            }
+        }), this);
     }
 
     @Override

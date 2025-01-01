@@ -353,6 +353,18 @@ public interface Streaming<E> {
 
     Streaming<E> beforeAll(Predicate<E> filter);
 
+    Streaming<E> afterN(int size, Predicate<E> filter, int limit);
+
+    default Streaming<E> afterN(int size, Predicate<E> filter) {
+        return afterN(size, filter, 1);
+    }
+
+    Streaming<E> beforeN(int size, Predicate<E> filter, int limit);
+
+    default Streaming<E> beforeN(int size, Predicate<E> filter) {
+        return beforeN(size, filter, 1);
+    }
+
     default Streaming<E> rangeAll(Predicate<E> beginFilter, Predicate<E> endFilter) {
         return rangeAll(beginFilter, endFilter, true, false);
     }
@@ -603,6 +615,10 @@ public interface Streaming<E> {
     Reference<E> first(Predicate<E> filter);
 
     Reference<E> last(Predicate<E> filter);
+
+    Streaming<E> firstN(int size, Predicate<E> filter);
+
+    Streaming<E> lastN(int size, Predicate<E> filter);
 
     boolean anyMatch(Predicate<E> filter);
 
