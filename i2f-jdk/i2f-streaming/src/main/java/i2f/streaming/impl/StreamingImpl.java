@@ -806,54 +806,6 @@ public class StreamingImpl<E> implements Streaming<E> {
     }
 
     @Override
-    public Streaming<E> sort(boolean asc) {
-        return new StreamingImpl<>(new LazyIterator<>(() -> {
-            richBefore(this.holdIterator);
-            try {
-                LinkedList<E> list = new LinkedList<>();
-                while (this.holdIterator.hasNext()) {
-                    E elem = this.holdIterator.next();
-                    list.add(elem);
-                }
-                E elem = null;
-                for (E item : list) {
-                    if (item != null) {
-                        elem = item;
-                        break;
-                    }
-                }
-                Comparator<E> comparator = new Comparator<E>() {
-                    @Override
-                    public int compare(E o1, E o2) {
-                        return 0;
-                    }
-                };
-                if (elem instanceof Comparable) {
-                    comparator = new Comparator<E>() {
-                        @Override
-                        public int compare(E o1, E o2) {
-                            if (o1 == o2) {
-                                return 0;
-                            }
-                            if (o1 != null) {
-                                return ((Comparable) o1).compareTo(o2);
-                            }
-                            return 0 - (((Comparable) o2).compareTo(o1));
-                        }
-                    };
-                }
-                if (!asc) {
-                    comparator = comparator.reversed();
-                }
-                list.sort(comparator);
-                return list.iterator();
-            } finally {
-                richAfter(this.holdIterator);
-            }
-        }), this);
-    }
-
-    @Override
     public Streaming<E> sort(Comparator<E> comparator) {
         return new StreamingImpl<>(new LazyIterator<>(() -> {
             richBefore(comparator);
