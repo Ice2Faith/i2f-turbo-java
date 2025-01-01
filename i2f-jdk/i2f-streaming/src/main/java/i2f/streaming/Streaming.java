@@ -311,6 +311,24 @@ public interface Streaming<E> {
         }));
     }
 
+    static <T> int defaultComparator(T o1, T o2) {
+        if (o1 == o2) {
+            return 0;
+        }
+        if (o1 == null) {
+            return -1;
+        }
+        if (o2 == null) {
+            return 1;
+        }
+        if (o1 instanceof Comparable) {
+            Comparable c1 = (Comparable) o1;
+            Comparable c2 = (Comparable) o2;
+            return c1.compareTo(c2);
+        }
+        return Long.compare(o1.hashCode(), o2.hashCode());
+    }
+
     Streaming<E> parallel();
 
     Streaming<E> sequence();
@@ -343,10 +361,18 @@ public interface Streaming<E> {
         });
     }
 
+    default Streaming<E> maxN(int size) {
+        return maxN(size, Streaming::defaultComparator);
+    }
+
     default Streaming<E> minN(int size, Comparator<E> comparator) {
         return topN(size, (val, old) -> {
             return comparator.compare(val, old) < 0;
         });
+    }
+
+    default Streaming<E> minN(int size) {
+        return minN(size, Streaming::defaultComparator);
     }
 
     Streaming<E> afterAll(Predicate<E> filter);
@@ -459,7 +485,13 @@ public interface Streaming<E> {
         return sort(true);
     }
 
-    Streaming<E> sort(boolean asc);
+    default Streaming<E> sort(boolean asc) {
+        Comparator<E> comparator = Streaming::defaultComparator;
+        if (!asc) {
+            comparator = comparator.reversed();
+        }
+        return sort(comparator);
+    }
 
     Streaming<E> sort(Comparator<E> comparator);
 
@@ -626,7 +658,15 @@ public interface Streaming<E> {
 
     Reference<E> min(Comparator<E> comparator);
 
+    default Reference<E> min() {
+        return min(Streaming::defaultComparator);
+    }
+
     Reference<E> max(Comparator<E> comparator);
+
+    default Reference<E> max() {
+        return max(Streaming::defaultComparator);
+    }
 
     Reference<E> most();
 
