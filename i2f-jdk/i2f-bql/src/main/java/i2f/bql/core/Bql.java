@@ -257,6 +257,7 @@ public class Bql<H extends Bql<H>> {
         Optional.ofNullable(localColumnNameDecorator.get()).ifPresent((v) -> columnNameDecorator = v);
         Optional.ofNullable(localTableNameDecorator.get()).ifPresent((v) -> tableNameDecorator = v);
         Optional.ofNullable(localColumnAsDecorator.get()).ifPresent((v) -> columnAsDecorator = v);
+        store();
         return (H) this;
     }
 
@@ -281,6 +282,7 @@ public class Bql<H extends Bql<H>> {
         localColumnNameDecorator.set(null);
         localTableNameDecorator.set(null);
         localColumnAsDecorator.set(null);
+        store();
         return (H) this;
     }
 
@@ -1146,41 +1148,6 @@ public class Bql<H extends Bql<H>> {
         );
     }
 
-    public H left() {
-        return $($keywords("left"));
-    }
-
-    public H right() {
-        return $($keywords("right"));
-    }
-
-    public H inner() {
-        return $($keywords("inner"));
-    }
-
-    public H outer() {
-        return $($keywords("outer"));
-    }
-
-    public H join() {
-        return $($keywords("join"));
-    }
-
-    public H leftJoin() {
-        return left().join();
-    }
-
-    public H rightJoin() {
-        return right().join();
-    }
-
-    public H innerJoin() {
-        return inner().join();
-    }
-
-    public H outerJoin() {
-        return outer().join();
-    }
 
     public H $join(String table, String tableAlias) {
         if (tableAlias == null || tableAlias.isEmpty()) {
@@ -1391,6 +1358,7 @@ public class Bql<H extends Bql<H>> {
         this.alias = null;
         this.separator = " ";
         this.placeholder = "?";
+        this.store();
         return (H) this;
     }
 
@@ -1803,23 +1771,6 @@ public class Bql<H extends Bql<H>> {
         return $notExists(null, null, v -> caller.get());
     }
 
-
-    public H insert() {
-        return $($keywords("insert"));
-    }
-
-    public H into() {
-        return $($keywords("into"));
-    }
-
-    public H $into(String table) {
-        return into().$(table);
-    }
-
-    public H $into(String table, Supplier<Bql<?>> caller) {
-        return into().$(decorateTableName(table)).$bracket(caller);
-    }
-
     public H $bracket(Supplier<Bql<?>> caller) {
         return $trim(null, null,
                 TRIM_COMMA_LIST,
@@ -1836,21 +1787,134 @@ public class Bql<H extends Bql<H>> {
                 v -> caller.get());
     }
 
-    public H values() {
-        return $($keywords("values"));
+
+    public H count(String inner) {
+        return $($keywords("count(") + inner + ")");
+    }
+
+    public H count(Supplier<Bql<?>> caller) {
+        return $($keywords("count(")).$(caller.get()).$(")");
+    }
+
+    public H fetchCursorInto(String name, Supplier<Bql<?>> caller) {
+        return fetch().$(name).into()
+                .$trim(TRIM_COMMA_LIST,
+                        TRIM_COMMA_LIST,
+                        null, null,
+                        caller);
+    }
+
+    public H openCursor(String name) {
+        return open().$(name);
+    }
+
+    public H declareCursor(String name, Supplier<Bql<?>> caller) {
+        return declare().cursor().$(name).$for().$(caller.get());
+    }
+
+    public H forEachRow(Supplier<Bql<?>> caller) {
+        return forEachRow().$beginBlock(caller);
+    }
+
+
+    public H $into(String table) {
+        return into().$(table);
+    }
+
+    public H $into(String table, Supplier<Bql<?>> caller) {
+        return into().$(decorateTableName(table)).$bracket(caller);
     }
 
     public H $values(Supplier<Bql<?>> caller) {
         return values().$bracket(caller);
     }
 
+    public H $update(String table) {
+        return update().$(decorateTableName(table));
+    }
+
+    public H $deleteFrom(String table) {
+        return deleteFrom().$(decorateTableName(table));
+    }
+
+    public H $table(String table) {
+        return table().$(decorateTableName(table));
+    }
+
+    public static String escapeSql(String str) {
+        if (str == null) {
+            return null;
+        }
+        return str.replaceAll("'", "''");
+    }
+
+    public H $comment(String comment) {
+        return comment().$("'" + escapeSql(comment) + "'");
+    }
+
+    public H delimiter(String delimiter) {
+        return delimiter().$(delimiter).ln();
+    }
+
+    public H $truncateTable(String table) {
+        return truncate().table().$(decorateTableName(table));
+    }
+
+    public H closeCursor(String name) {
+        return close().$(name);
+    }
+
+
+    public H left() {
+        return $($keywords("left"));
+    }
+
+    public H right() {
+        return $($keywords("right"));
+    }
+
+    public H inner() {
+        return $($keywords("inner"));
+    }
+
+    public H outer() {
+        return $($keywords("outer"));
+    }
+
+    public H join() {
+        return $($keywords("join"));
+    }
+
+    public H leftJoin() {
+        return left().join();
+    }
+
+    public H rightJoin() {
+        return right().join();
+    }
+
+    public H innerJoin() {
+        return inner().join();
+    }
+
+    public H outerJoin() {
+        return outer().join();
+    }
+
+    public H insert() {
+        return $($keywords("insert"));
+    }
+
+    public H into() {
+        return $($keywords("into"));
+    }
+
+    public H values() {
+        return $($keywords("values"));
+    }
 
     public H update() {
         return $($keywords("update"));
-    }
-
-    public H $update(String table) {
-        return update().$(decorateTableName(table));
     }
 
     public H delete() {
@@ -1861,10 +1925,6 @@ public class Bql<H extends Bql<H>> {
         return delete().from();
     }
 
-    public H $deleteFrom(String table) {
-        return deleteFrom().$(decorateTableName(table));
-    }
-
     public H create() {
         return $($keywords("create"));
     }
@@ -1872,11 +1932,6 @@ public class Bql<H extends Bql<H>> {
     public H table() {
         return $($keywords("table"));
     }
-
-    public H $table(String table) {
-        return table().$(decorateTableName(table));
-    }
-
 
     public H primary() {
         return $($keywords("primary"));
@@ -1908,17 +1963,6 @@ public class Bql<H extends Bql<H>> {
 
     public H comment() {
         return $($keywords("comment"));
-    }
-
-    public static String escapeSql(String str) {
-        if (str == null) {
-            return null;
-        }
-        return str.replaceAll("'", "''");
-    }
-
-    public H $comment(String comment) {
-        return comment().$("'" + escapeSql(comment) + "'");
     }
 
     public H foreign() {
@@ -2014,7 +2058,6 @@ public class Bql<H extends Bql<H>> {
         return $(";");
     }
 
-
     public H qt() {
         return $("'");
     }
@@ -2105,10 +2148,6 @@ public class Bql<H extends Bql<H>> {
 
     public H truncateTable() {
         return truncate().table();
-    }
-
-    public H $truncateTable(String table) {
-        return truncate().table().$(decorateTableName(table));
     }
 
     public H set() {
@@ -2248,10 +2287,6 @@ public class Bql<H extends Bql<H>> {
         return $($keywords("delimiter"));
     }
 
-    public H delimiter(String delimiter) {
-        return delimiter().$(delimiter).ln();
-    }
-
     public H out() {
         return $($keywords("out"));
     }
@@ -2296,46 +2331,22 @@ public class Bql<H extends Bql<H>> {
         return $for().each().row();
     }
 
-    public H forEachRow(Supplier<Bql<?>> caller) {
-        return forEachRow().$beginBlock(caller);
-    }
 
     public H cursor() {
         return $($keywords("cursor"));
-    }
-
-    public H declareCursor(String name, Supplier<Bql<?>> caller) {
-        return declare().cursor().$(name).$for().$(caller.get());
     }
 
     public H open() {
         return $($keywords("open"));
     }
 
-    public H openCursor(String name) {
-        return open().$(name);
-    }
-
     public H close() {
         return $($keywords("close"));
-    }
-
-    public H closeCursor(String name) {
-        return close().$(name);
     }
 
     public H fetch() {
         return $($keywords("fetch"));
     }
-
-    public H fetchCursorInto(String name, Supplier<Bql<?>> caller) {
-        return fetch().$(name).into()
-                .$trim(TRIM_COMMA_LIST,
-                        TRIM_COMMA_LIST,
-                        null, null,
-                        caller);
-    }
-
 
     public H $int() {
         return $($keywords("int"));
@@ -2404,14 +2415,5 @@ public class Bql<H extends Bql<H>> {
     public H count1() {
         return $($keywords("count(1)"));
     }
-
-    public H count(String inner) {
-        return $($keywords("count(") + inner + ")");
-    }
-
-    public H count(Supplier<Bql<?>> caller) {
-        return $($keywords("count(")).$(caller.get()).$(")");
-    }
-
 
 }
