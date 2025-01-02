@@ -23,6 +23,9 @@ import java.util.function.Supplier;
  * @desc H: Inheritable
  */
 public class Bql<H extends Bql<H>> {
+    public static <H extends i2f.bql.core.map.Bql<H>> i2f.bql.core.map.Bql<H> $map() {
+        return new i2f.bql.core.map.Bql();
+    }
 
     public static <H extends i2f.bql.core.lambda.Bql<H>> i2f.bql.core.lambda.Bql<H> $lambda() {
         return new i2f.bql.core.lambda.Bql();
