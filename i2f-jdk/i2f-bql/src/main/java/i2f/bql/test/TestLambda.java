@@ -22,32 +22,32 @@ public class TestLambda {
 
     public static void main(String[] args) {
 
-//
-//        testSelect();
-//
-//        testInsert();
-//
-//        testBatchInsert();
-//
-//        testBatchSelectInsert();
-//
-//        testUpdate();
-//
-//        testDelete();
-//
-//        testCreateTable();
-//
-//        testCreateIndex();
-//
-//        testLambda();
-//
-//        testBeanQuery();
-//
-//        testBeanUpdate();
-//
-//        testBeanDelete();
-//
-//        testMapOperation();
+
+        testSelect();
+
+        testInsert();
+
+        testBatchInsert();
+
+        testBatchSelectInsert();
+
+        testUpdate();
+
+        testDelete();
+
+        testCreateTable();
+
+        testCreateIndex();
+
+        testLambda();
+
+        testBeanQuery();
+
+        testBeanUpdate();
+
+        testBeanDelete();
+
+        testMapOperation();
 
         testSimple();
 
