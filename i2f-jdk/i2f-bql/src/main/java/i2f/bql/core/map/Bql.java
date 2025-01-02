@@ -12,6 +12,15 @@ import java.util.*;
  */
 public class Bql<H extends i2f.bql.core.map.Bql<H>> extends i2f.bql.core.Bql<H> {
 
+    public static <H extends i2f.bql.core.lambda.Bql<H>> i2f.bql.core.lambda.Bql<H> $lambda() {
+        return new i2f.bql.core.lambda.Bql();
+    }
+
+
+    public static <H extends i2f.bql.core.bean.Bql<H>> i2f.bql.core.bean.Bql<H> $bean() {
+        return new i2f.bql.core.bean.Bql();
+    }
+
     public H $mapInsert(String table, Map<String, Object> valueMap) {
         return insert().$into(table, () -> {
             i2f.bql.core.Bql<?> ret = i2f.bql.core.Bql.$_().$sepComma();
