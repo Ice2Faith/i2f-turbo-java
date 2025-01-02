@@ -31,7 +31,11 @@ import java.util.function.Supplier;
  * @date 2024/4/23 10:38
  * @desc
  */
-public class Bql<H extends Bql<H>> extends i2f.bql.core.Bql<H> {
+public class Bql<H extends Bql<H>> extends i2f.bql.core.map.Bql<H> {
+
+    public static <H extends i2f.bql.core.map.Bql<H>> i2f.bql.core.map.Bql<H> $map() {
+        return new i2f.bql.core.map.Bql();
+    }
 
     public static <H extends i2f.bql.core.bean.Bql<H>> i2f.bql.core.bean.Bql<H> $bean() {
         return new i2f.bql.core.bean.Bql();
