@@ -1,8 +1,8 @@
 package i2f.extension.jce.bc.encrypt.symmetric.test;
 
+import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricEncryptor;
+import i2f.crypto.impl.jdk.supports.SecureRandomAlgorithm;
 import i2f.extension.jce.bc.encrypt.symmetric.*;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricEncryptor;
-import i2f.jce.jdk.supports.SecureRandomAlgorithm;
 
 /**
  * @author Ice2Faith

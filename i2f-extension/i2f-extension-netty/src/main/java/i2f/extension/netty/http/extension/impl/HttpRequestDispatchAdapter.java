@@ -7,7 +7,7 @@ import i2f.extension.netty.http.extension.HttpWebRequest;
 import i2f.extension.netty.http.extension.HttpWebResponse;
 import i2f.reflect.ReflectResolver;
 import i2f.resources.ResourcesLoader;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 

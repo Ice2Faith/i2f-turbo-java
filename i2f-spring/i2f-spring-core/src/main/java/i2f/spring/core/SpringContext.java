@@ -1,6 +1,6 @@
 package i2f.spring.core;
 
-import i2f.context.IWritableNamingContext;
+import i2f.context.std.IWritableNamingContext;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.BeanFactory;

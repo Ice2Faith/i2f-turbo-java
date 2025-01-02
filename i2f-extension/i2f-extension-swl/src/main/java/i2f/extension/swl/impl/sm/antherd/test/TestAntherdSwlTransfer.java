@@ -1,9 +1,9 @@
 package i2f.extension.swl.impl.sm.antherd.test;
 
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.extension.swl.impl.sm.antherd.SwlAntherdSm2AsymmetricEncryptor;
 import i2f.extension.swl.impl.sm.antherd.SwlAntherdSm3MessageDigester;
 import i2f.extension.swl.impl.sm.antherd.SwlAntherdSm4SymmetricEncryptor;
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.core.SwlTransfer;
 import i2f.swl.data.SwlData;
 import i2f.swl.impl.SwlBase64Obfuscator;

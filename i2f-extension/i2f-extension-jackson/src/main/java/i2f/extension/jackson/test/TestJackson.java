@@ -5,7 +5,7 @@ import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.extension.jackson.serializer.JacksonJsonWithTypeSerializer;
 import i2f.extension.jackson.serializer.JacksonXmlSerializer;
 import i2f.extension.jackson.serializer.JacksonYamlSerializer;
-import i2f.serialize.str.IStringObjectSerializer;
+import i2f.serialize.std.str.IStringObjectSerializer;
 
 public class TestJackson {
     public static void main(String[] args) {

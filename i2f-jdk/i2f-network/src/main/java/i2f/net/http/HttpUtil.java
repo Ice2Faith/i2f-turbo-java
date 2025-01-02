@@ -4,7 +4,7 @@ package i2f.net.http;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.impl.BasicHttpProcessorProvider;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
 
 import java.net.HttpURLConnection;

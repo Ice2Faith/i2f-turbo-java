@@ -2,7 +2,7 @@ package i2f.extension.fastjson;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 
 import java.util.Map;
 

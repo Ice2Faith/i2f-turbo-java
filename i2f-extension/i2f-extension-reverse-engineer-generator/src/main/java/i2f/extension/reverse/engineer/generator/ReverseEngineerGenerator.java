@@ -1,9 +1,10 @@
 package i2f.extension.reverse.engineer.generator;
 
 
-import i2f.database.metadata.DatabaseMetadataProvider;
 import i2f.database.metadata.bean.BeanDatabaseMetadataResolver;
 import i2f.database.metadata.data.TableMeta;
+import i2f.database.metadata.impl.DatabaseMetadataProviders;
+import i2f.database.metadata.std.DatabaseMetadataProvider;
 import i2f.extension.reverse.engineer.generator.database.JavaCodeContext;
 import i2f.extension.reverse.engineer.generator.database.TableContext;
 import i2f.extension.reverse.engineer.generator.er.er0.drawio.DatabaseEr0DrawIoGenerator;
@@ -53,12 +54,12 @@ public class ReverseEngineerGenerator {
     }
 
     public static String generate(Connection conn, String tableName, String template, JavaCodeContext codeCtx) throws Exception {
-        TableMeta table = DatabaseMetadataProvider.findProvider(conn).getTableInfo(conn, null, tableName);
+        TableMeta table = DatabaseMetadataProviders.findProvider(conn).getTableInfo(conn, null, tableName);
         return generate(table, template, codeCtx);
     }
 
     public static void batch(Connection conn, String tableName, String templatePath, String outputPath, JavaCodeContext codeCtx) throws Exception {
-        TableMeta table = DatabaseMetadataProvider.findProvider(conn).getTableInfo(conn, null, tableName);
+        TableMeta table = DatabaseMetadataProviders.findProvider(conn).getTableInfo(conn, null, tableName);
         batch(table, templatePath, outputPath, codeCtx);
     }
 
@@ -99,7 +100,7 @@ public class ReverseEngineerGenerator {
 
     public static String er1(Connection conn, String template, String... tableNames) throws Exception {
         List<TableMeta> list = new ArrayList<>();
-        DatabaseMetadataProvider provider = DatabaseMetadataProvider.findProvider(conn);
+        DatabaseMetadataProvider provider = DatabaseMetadataProviders.findProvider(conn);
         for (String item : tableNames) {
             TableMeta table = provider.getTableInfo(conn, null, item);
             list.add(table);
@@ -161,7 +162,7 @@ public class ReverseEngineerGenerator {
 
     public static String tablesDoc(Connection conn, String template, String... tableNames) throws Exception {
         List<TableMeta> list = new ArrayList<>();
-        DatabaseMetadataProvider provider = DatabaseMetadataProvider.findProvider(conn);
+        DatabaseMetadataProvider provider = DatabaseMetadataProviders.findProvider(conn);
         for (String item : tableNames) {
             TableMeta table = provider.getTableInfo(conn, null, item);
             list.add(table);
