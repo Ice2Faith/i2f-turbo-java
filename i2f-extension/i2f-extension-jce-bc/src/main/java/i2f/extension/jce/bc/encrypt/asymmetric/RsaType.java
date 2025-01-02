@@ -1,7 +1,7 @@
 package i2f.extension.jce.bc.encrypt.asymmetric;
 
+import i2f.crypto.impl.jdk.encrypt.asymmetric.AsymmetricType;
 import i2f.extension.jce.bc.BcProvider;
-import i2f.jce.jdk.encrypt.asymmetric.AsymmetricType;
 
 /**
  * @author Ice2Faith

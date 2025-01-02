@@ -40,13 +40,12 @@
 package i2f.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import i2f.database.metadata.DatabaseMetadataProvider;
+import i2f.database.metadata.std.DatabaseMetadataProvider;
 import i2f.database.metadata.data.ColumnMeta;
 import i2f.database.metadata.data.TableMeta;
 import i2f.extension.reverse.engineer.generator.ReverseEngineerGenerator;
 import i2f.extension.reverse.engineer.generator.database.TableContext;
 import i2f.extension.reverse.engineer.generator.database.JavaCodeContext;
-import i2f.extension.velocity.VelocityGenerator;
 import i2f.io.stream.StreamUtil;
 import i2f.resources.ResourceUtil;
 import i2f.spring.mvc.metadata.api.ApiLine;

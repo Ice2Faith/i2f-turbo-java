@@ -8,6 +8,8 @@ import i2f.streaming.thread.AtomicCountDownLatchRunnable;
 import i2f.streaming.thread.NamingForkJoinPool;
 import i2f.streaming.timed.TimedStreaming;
 import i2f.streaming.timed.TimedStreamingImpl;
+import i2f.streaming.type.str.StringStreaming;
+import i2f.streaming.type.str.StringStreamingImpl;
 import i2f.streaming.window.ConditionWindowInfo;
 import i2f.streaming.window.SlideWindowInfo;
 import i2f.streaming.window.ViewWindowInfo;
@@ -19,6 +21,7 @@ import java.io.Writer;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -316,6 +319,36 @@ public class StreamingImpl<E> implements Streaming<E> {
     }
 
     @Override
+    public Streaming<E> topN(int size, BiPredicate<E, E> replacer) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(replacer);
+            richBefore(this.holdIterator);
+            try {
+                ArrayList<E> ret = new ArrayList<>(size);
+                AtomicInteger cnt = new AtomicInteger(0);
+                while (this.holdIterator.hasNext()) {
+                    E elem = this.holdIterator.next();
+                    if (cnt.get() < size) {
+                        ret.add(elem);
+                        cnt.incrementAndGet();
+                    } else {
+                        for (int i = 0; i < size; i++) {
+                            if (replacer.test(elem, ret.get(i))) {
+                                ret.set(i, elem);
+                                break;
+                            }
+                        }
+                    }
+                }
+                return ret.iterator();
+            } finally {
+                richAfter(this.holdIterator);
+                richAfter(replacer);
+            }
+        }), this);
+    }
+
+    @Override
     public Streaming<E> afterAll(Predicate<E> filter) {
         return new StreamingImpl<>(new LazyIterator<>(() -> {
             richBefore(filter);
@@ -378,6 +411,98 @@ public class StreamingImpl<E> implements Streaming<E> {
             }
         }), this);
     }
+
+    @Override
+    public Streaming<E> afterN(int size, Predicate<E> filter, int limit) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(filter);
+            richBefore(this.holdIterator);
+            try {
+                AtomicInteger currLimit = new AtomicInteger(0);
+                AtomicInteger currSize = new AtomicInteger(0);
+                AtomicBoolean open = new AtomicBoolean(false);
+                return new SupplierIterator<>(() -> {
+                    while (this.holdIterator.hasNext()) {
+                        E elem = this.holdIterator.next();
+                        if (open.get()) {
+                            if (currSize.get() < size) {
+                                currSize.incrementAndGet();
+                                return Reference.of(elem);
+                            } else {
+                                if (limit >= 0) {
+                                    if (currLimit.get() >= limit) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (filter.test(elem)) {
+                            open.set(true);
+                            currSize.set(1);
+                            currLimit.incrementAndGet();
+                            return Reference.of(elem);
+                        } else {
+                            open.set(false);
+                        }
+                    }
+                    richAfter(this.holdIterator);
+                    richAfter(filter);
+                    return Reference.finish();
+                });
+
+            } finally {
+
+            }
+        }), this);
+    }
+
+    @Override
+    public Streaming<E> beforeN(int size, Predicate<E> filter, int limit) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(filter);
+            richBefore(this.holdIterator);
+            try {
+                Deque<E> deque = new LinkedBlockingDeque<>();
+                AtomicInteger count = new AtomicInteger(0);
+                AtomicInteger currLimit = new AtomicInteger(0);
+                return new SupplierBufferIterator<>(() -> {
+                    if (limit >= 0) {
+                        if (currLimit.get() >= limit) {
+                            richAfter(this.holdIterator);
+                            richAfter(filter);
+                            return Reference.finish();
+                        }
+                    }
+                    while (this.holdIterator.hasNext()) {
+                        E elem = this.holdIterator.next();
+                        deque.add(elem);
+                        count.incrementAndGet();
+                        if (count.get() > size) {
+                            deque.removeFirst();
+                            count.decrementAndGet();
+                        }
+                        if (filter.test(elem)) {
+                            currLimit.incrementAndGet();
+                            List<E> list = new LinkedList<>();
+                            while (!deque.isEmpty()) {
+                                E val = deque.removeFirst();
+                                list.add(val);
+                            }
+                            count.set(0);
+                            return Reference.of(list);
+                        }
+                    }
+                    richAfter(this.holdIterator);
+                    richAfter(filter);
+                    return Reference.finish();
+                });
+
+            } finally {
+
+            }
+        }), this);
+    }
+
 
     @Override
     public Streaming<E> rangeAll(Predicate<E> beginFilter, Predicate<E> endFilter, boolean includeBegin, boolean includeEnd) {
@@ -674,54 +799,6 @@ public class StreamingImpl<E> implements Streaming<E> {
                     }
                 }
                 return ret.iterator();
-            } finally {
-                richAfter(this.holdIterator);
-            }
-        }), this);
-    }
-
-    @Override
-    public Streaming<E> sort(boolean asc) {
-        return new StreamingImpl<>(new LazyIterator<>(() -> {
-            richBefore(this.holdIterator);
-            try {
-                LinkedList<E> list = new LinkedList<>();
-                while (this.holdIterator.hasNext()) {
-                    E elem = this.holdIterator.next();
-                    list.add(elem);
-                }
-                E elem = null;
-                for (E item : list) {
-                    if (item != null) {
-                        elem = item;
-                        break;
-                    }
-                }
-                Comparator<E> comparator = new Comparator<E>() {
-                    @Override
-                    public int compare(E o1, E o2) {
-                        return 0;
-                    }
-                };
-                if (elem instanceof Comparable) {
-                    comparator = new Comparator<E>() {
-                        @Override
-                        public int compare(E o1, E o2) {
-                            if (o1 == o2) {
-                                return 0;
-                            }
-                            if (o1 != null) {
-                                return ((Comparable) o1).compareTo(o2);
-                            }
-                            return 0 - (((Comparable) o2).compareTo(o1));
-                        }
-                    };
-                }
-                if (!asc) {
-                    comparator = comparator.reversed();
-                }
-                list.sort(comparator);
-                return list.iterator();
             } finally {
                 richAfter(this.holdIterator);
             }
@@ -1805,6 +1882,72 @@ public class StreamingImpl<E> implements Streaming<E> {
     }
 
     @Override
+    public Streaming<E> firstN(int size, Predicate<E> filter) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(filter);
+            richBefore(this.holdIterator);
+            try {
+                AtomicLong cnt = new AtomicLong(0);
+                return new SupplierIterator<>(() -> {
+                    while (this.holdIterator.hasNext()) {
+                        E elem = this.holdIterator.next();
+                        if (cnt.get() >= size) {
+                            break;
+                        }
+                        if (filter.test(elem)) {
+                            cnt.incrementAndGet();
+                            return Reference.of(elem);
+                        }
+                    }
+                    richAfter(filter);
+                    richAfter(this.holdIterator);
+                    return Reference.finish();
+                });
+            } finally {
+
+            }
+        }), this);
+    }
+
+    @Override
+    public Streaming<E> lastN(int size, Predicate<E> filter) {
+        return new StreamingImpl<>(new LazyIterator<>(() -> {
+            richBefore(filter);
+            richBefore(this.holdIterator);
+            try {
+                Deque<E> deque = new LinkedBlockingDeque<>();
+                AtomicLong cnt = new AtomicLong(0);
+                AtomicBoolean hasProcess = new AtomicBoolean(false);
+                return new SupplierBufferIterator<>(() -> {
+                    while (this.holdIterator.hasNext()) {
+                        E elem = this.holdIterator.next();
+                        if (filter.test(elem)) {
+                            cnt.incrementAndGet();
+                            deque.add(elem);
+                            if (cnt.get() > size) {
+                                deque.removeFirst();
+                                cnt.decrementAndGet();
+                            }
+                        }
+                    }
+                    if (!hasProcess.getAndSet(true)) {
+                        List<E> list = new LinkedList<>();
+                        while (!deque.isEmpty()) {
+                            list.add(deque.removeFirst());
+                        }
+                        return Reference.of(list);
+                    }
+                    richAfter(filter);
+                    richAfter(this.holdIterator);
+                    return Reference.finish();
+                });
+            } finally {
+
+            }
+        }), this);
+    }
+
+    @Override
     public boolean anyMatch(Predicate<E> filter) {
         richBefore(filter);
         richBefore(this.holdIterator);
@@ -2474,5 +2617,10 @@ public class StreamingImpl<E> implements Streaming<E> {
     @Override
     public TimedStreaming<E> timed(Function<E, Long> timestampMapper) {
         return new TimedStreamingImpl<>(this.holdIterator, this, timestampMapper);
+    }
+
+    @Override
+    public StringStreaming string(Function<E, String> stringifier) {
+        return new StringStreamingImpl<>(this.holdIterator, this, stringifier);
     }
 }

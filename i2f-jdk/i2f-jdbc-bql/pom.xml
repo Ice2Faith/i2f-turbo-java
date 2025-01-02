@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc</artifactId>
+            <artifactId>i2f-jdbc-impl</artifactId>
         </dependency>
 
         <dependency>

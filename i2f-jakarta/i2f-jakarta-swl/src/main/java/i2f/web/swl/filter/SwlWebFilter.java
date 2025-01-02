@@ -2,7 +2,7 @@ package i2f.web.swl.filter;
 
 import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.swl.core.SwlTransfer;
 import i2f.swl.data.SwlData;
 import i2f.swl.data.SwlHeader;

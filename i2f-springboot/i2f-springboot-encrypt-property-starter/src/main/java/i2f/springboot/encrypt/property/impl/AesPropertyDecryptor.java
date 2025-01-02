@@ -2,9 +2,9 @@ package i2f.springboot.encrypt.property.impl;
 
 
 import i2f.codec.CodecUtil;
-import i2f.jce.jdk.encrypt.symmetric.AesType;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricEncryptor;
-import i2f.jce.jdk.supports.SecureRandomAlgorithm;
+import i2f.crypto.impl.jdk.encrypt.symmetric.AesType;
+import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricEncryptor;
+import i2f.crypto.impl.jdk.supports.SecureRandomAlgorithm;
 import i2f.springboot.encrypt.property.core.ITextEncryptor;
 import i2f.springboot.encrypt.property.core.PrefixPropertyDecryptor;
 

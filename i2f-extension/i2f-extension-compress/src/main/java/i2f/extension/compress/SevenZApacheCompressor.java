@@ -1,11 +1,14 @@
 package i2f.extension.compress;
 
-import i2f.compress.data.CompressBindData;
-import i2f.compress.impl.AbsCompressor;
+import i2f.compress.std.data.CompressBindData;
+import i2f.compress.std.impl.AbsCompressor;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
-import java.io.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 

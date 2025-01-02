@@ -4,7 +4,7 @@ import i2f.cache.expire.IExpireCache;
 import i2f.cache.impl.container.MapCache;
 import i2f.cache.impl.expire.ObjectExpireCacheWrapper;
 import i2f.clock.SystemClock;
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.lru.LruMap;
 import i2f.swl.core.key.impl.AbsSwlCacheKeyManager;
 import i2f.swl.core.key.ttl.SwlTtlKeyManager;

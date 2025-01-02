@@ -24,15 +24,15 @@
         <module>i2f-annotations</module>
 
         <module>i2f-jdk-all</module>
-        <module>i2f-tuple</module>
+        <module>i2f-tuple-impl</module>
         <module>i2f-streaming</module>
-        <module>i2f-clock</module>
+        <module>i2f-clock-impl</module>
         <module>i2f-bql</module>
         <module>i2f-check</module>
         <module>i2f-container</module>
         <module>i2f-database</module>
         <module>i2f-functional</module>
-        <module>i2f-jce</module>
+        <module>i2f-crypto-impl</module>
         <module>i2f-lambda</module>
         <module>i2f-network</module>
         <module>i2f-packet</module>
@@ -42,12 +42,12 @@
         <module>i2f-exception</module>
         <module>i2f-resources</module>
         <module>i2f-lru-map</module>
-        <module>i2f-uid</module>
+        <module>i2f-uid-impl</module>
         <module>i2f-atomic</module>
         <module>i2f-array</module>
         <module>i2f-container-builder</module>
         <module>i2f-bindsql</module>
-        <module>i2f-jdbc</module>
+        <module>i2f-jdbc-impl</module>
         <module>i2f-convert</module>
         <module>i2f-typeof</module>
         <module>i2f-unsafe</module>
@@ -57,20 +57,20 @@
         <module>i2f-page</module>
         <module>i2f-proxy</module>
         <module>i2f-spi</module>
-        <module>i2f-image</module>
+        <module>i2f-image-impl</module>
         <module>i2f-color</module>
         <module>i2f-math</module>
         <module>i2f-graphics-2d</module>
         <module>i2f-graphics-3d</module>
         <module>i2f-graphics</module>
         <module>i2f-geo</module>
-        <module>i2f-codec</module>
+        <module>i2f-codec-impl</module>
         <module>i2f-io-stream</module>
         <module>i2f-match</module>
         <module>i2f-iterator</module>
         <module>i2f-reference</module>
         <module>i2f-comparator</module>
-        <module>i2f-serialize</module>
+        <module>i2f-serialize-impl</module>
         <module>i2f-os</module>
         <module>i2f-robot</module>
         <module>i2f-native-windows</module>
@@ -89,7 +89,7 @@
         <module>i2f-cache</module>
         <module>i2f-lru-cache</module>
         <module>i2f-features</module>
-        <module>i2f-compress</module>
+        <module>i2f-compress-impl</module>
         <module>i2f-http-proxy</module>
         <module>i2f-lock</module>
         <module>i2f-io-filesystem</module>
@@ -105,8 +105,8 @@
         <module>i2f-script</module>
         <module>i2f-limit</module>
         <module>i2f-pool</module>
-        <module>i2f-context</module>
-        <module>i2f-environment</module>
+        <module>i2f-context-impl</module>
+        <module>i2f-environment-impl</module>
         <module>i2f-event</module>
         <module>i2f-i18n</module>
         <module>i2f-jdbc-proxy-xml</module>
@@ -123,14 +123,27 @@
         <module>i2f-verifycode</module>
         <module>i2f-authentication</module>
         <module>i2f-launcher</module>
-        <module>i2f-database-metadata</module>
-        <module>i2f-database-metadata-bean</module>
         <module>i2f-database-metadata-data</module>
+        <module>i2f-database-metadata-std</module>
+        <module>i2f-database-metadata-impl</module>
+        <module>i2f-database-metadata-bean</module>
         <module>i2f-javacode-graph</module>
         <module>i2f-translate</module>
         <module>i2f-translate-en2zh</module>
         <module>i2f-translate-zh2pinyin</module>
         <module>i2f-firewall</module>
+        <module>i2f-jdbc-data</module>
+        <module>i2f-jdbc-std</module>
+        <module>i2f-codec-std</module>
+        <module>i2f-serialize-std</module>
+        <module>i2f-tuple-std</module>
+        <module>i2f-clock-std</module>
+        <module>i2f-uid-std</module>
+        <module>i2f-compress-std</module>
+        <module>i2f-context-std</module>
+        <module>i2f-environment-std</module>
+        <module>i2f-crypto-std</module>
+        <module>i2f-image-std</module>
 
 
     </modules>

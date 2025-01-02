@@ -8,7 +8,7 @@ import i2f.extension.netty.tcp.rpc.data.NettyRpcResp;
 import i2f.extension.netty.tcp.rpc.handler.RpcClientSocketChannelHandler;
 import i2f.extension.netty.tcp.rpc.proxy.JdkRpcProxyHandler;
 import i2f.extension.netty.tcp.tcp.NettyClient;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import io.netty.util.concurrent.DefaultPromise;
 import lombok.Getter;
 

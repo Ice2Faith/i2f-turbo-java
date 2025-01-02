@@ -5,7 +5,7 @@ import i2f.extension.netty.tcp.protocol.pkg.NettyPackage;
 import i2f.extension.netty.tcp.protocol.pkg.NettyPackages;
 import i2f.extension.netty.tcp.rpc.data.NettyRpcReq;
 import i2f.extension.netty.tcp.rpc.data.NettyRpcResp;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.lang.reflect.InvocationTargetException;

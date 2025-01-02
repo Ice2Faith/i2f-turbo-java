@@ -2,11 +2,11 @@ package i2f.swl.impl;
 
 import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
-import i2f.jce.jdk.encrypt.asymmetric.AsymmetricEncryptor;
-import i2f.jce.jdk.encrypt.asymmetric.AsymmetricType;
-import i2f.jce.jdk.encrypt.asymmetric.RsaType;
-import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.crypto.impl.jdk.encrypt.asymmetric.AsymmetricEncryptor;
+import i2f.crypto.impl.jdk.encrypt.asymmetric.AsymmetricType;
+import i2f.crypto.impl.jdk.encrypt.asymmetric.RsaType;
+import i2f.crypto.std.encrypt.asymmetric.IAsymmetricEncryptor;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.exception.SwlException;
 import i2f.swl.std.ISwlAsymmetricEncryptor;

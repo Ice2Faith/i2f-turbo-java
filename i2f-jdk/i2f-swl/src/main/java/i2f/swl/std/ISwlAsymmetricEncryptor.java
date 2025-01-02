@@ -1,6 +1,6 @@
 package i2f.swl.std;
 
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 
 /**
  * @author Ice2Faith

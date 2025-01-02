@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-clock</artifactId>
+            <artifactId>i2f-clock-impl</artifactId>
         </dependency>
 
         <dependency>

@@ -6,7 +6,7 @@ import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.HttpProcessorProvider;
 import i2f.net.http.interfaces.IHttpProcessor;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 
 import java.io.IOException;
 import java.util.Map;

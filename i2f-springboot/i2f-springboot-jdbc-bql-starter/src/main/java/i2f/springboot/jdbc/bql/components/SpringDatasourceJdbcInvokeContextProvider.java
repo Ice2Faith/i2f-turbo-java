@@ -1,6 +1,6 @@
 package i2f.springboot.jdbc.bql.components;
 
-import i2f.jdbc.context.JdbcInvokeContextProvider;
+import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;

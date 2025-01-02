@@ -1,7 +1,7 @@
 package i2f.springboot.swl.spring;
 
 import i2f.reflect.ReflectResolver;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.spring.matcher.MatcherUtil;
 import i2f.spring.web.mapping.MappingUtil;
 import i2f.swl.annotation.SecureParams;

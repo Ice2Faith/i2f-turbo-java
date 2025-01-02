@@ -1,9 +1,9 @@
 package i2f.extension.jce.bc.encrypt.symmetric;
 
+import i2f.crypto.impl.jdk.encrypt.Encryptor;
+import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricEncryptor;
+import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricType;
 import i2f.extension.jce.bc.BcProvider;
-import i2f.jce.jdk.encrypt.Encryptor;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricEncryptor;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricType;
 
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;

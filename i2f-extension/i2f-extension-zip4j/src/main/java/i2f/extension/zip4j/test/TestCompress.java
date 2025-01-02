@@ -1,6 +1,6 @@
 package i2f.extension.zip4j.test;
 
-import i2f.compress.ICompressor;
+import i2f.compress.std.ICompressor;
 import i2f.extension.zip4j.ZipZip4jCompressor;
 
 import java.io.File;

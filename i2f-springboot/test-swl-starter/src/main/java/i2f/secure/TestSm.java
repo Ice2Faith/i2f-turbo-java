@@ -4,8 +4,8 @@ import com.antherd.smcrypto.sm2.Keypair;
 import com.antherd.smcrypto.sm2.Sm2;
 import com.antherd.smcrypto.sm3.Sm3;
 import com.antherd.smcrypto.sm4.Sm4;
+import i2f.crypto.std.encrypt.asymmetric.IAsymmetricEncryptor;
 import i2f.extension.jce.sm.antherd.encrypt.asymmetric.Sm2Encryptor;
-import i2f.jce.std.encrypt.asymmetric.IAsymmetricEncryptor;
 
 /**
  * @author Ice2Faith

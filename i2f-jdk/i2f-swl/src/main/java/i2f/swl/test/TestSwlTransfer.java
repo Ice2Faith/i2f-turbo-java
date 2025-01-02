@@ -1,9 +1,7 @@
 package i2f.swl.test;
 
-import i2f.jce.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.core.SwlTransfer;
-import i2f.swl.core.SwlTransferRefactor;
-import i2f.swl.core.key.SwlKeyExchanger;
 import i2f.swl.data.SwlData;
 import i2f.swl.impl.SwlAesSymmetricEncryptor;
 import i2f.swl.impl.SwlBase64Obfuscator;

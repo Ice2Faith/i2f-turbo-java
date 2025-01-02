@@ -1,6 +1,6 @@
 package i2f.spring.enviroment;
 
-import i2f.environment.IEnvironment;
+import i2f.environment.std.IEnvironment;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.context.EnvironmentAware;
