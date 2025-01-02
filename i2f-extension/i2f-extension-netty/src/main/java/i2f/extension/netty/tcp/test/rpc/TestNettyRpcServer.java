@@ -5,7 +5,7 @@ import i2f.extension.netty.tcp.protocol.pkg.NettyPackage;
 import i2f.extension.netty.tcp.rpc.NettyRpcServer;
 import i2f.extension.netty.tcp.rpc.handler.InstanceBeanSupplier;
 import i2f.extension.netty.tcp.rpc.handler.RpcServerSocketChannelHandler;
-import i2f.serialize.str.json.IJsonSerializer;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOutboundHandlerAdapter;

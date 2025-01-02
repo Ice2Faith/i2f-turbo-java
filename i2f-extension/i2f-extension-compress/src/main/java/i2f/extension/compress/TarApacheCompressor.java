@@ -1,7 +1,7 @@
 package i2f.extension.compress;
 
-import i2f.compress.data.CompressBindData;
-import i2f.compress.impl.AbsCompressor;
+import i2f.compress.std.data.CompressBindData;
+import i2f.compress.std.impl.AbsCompressor;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;

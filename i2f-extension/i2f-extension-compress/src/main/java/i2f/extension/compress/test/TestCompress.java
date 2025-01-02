@@ -1,6 +1,6 @@
 package i2f.extension.compress.test;
 
-import i2f.compress.ICompressor;
+import i2f.compress.std.ICompressor;
 import i2f.extension.compress.*;
 
 import java.io.File;

@@ -4,6 +4,7 @@ import i2f.streaming.impl.*;
 import i2f.streaming.index.DecimalIndex;
 import i2f.streaming.patten.StreamingPatten;
 import i2f.streaming.timed.TimedStreaming;
+import i2f.streaming.type.str.StringStreaming;
 import i2f.streaming.window.ConditionWindowInfo;
 import i2f.streaming.window.SlideWindowInfo;
 import i2f.streaming.window.ViewWindowInfo;
@@ -15,6 +16,9 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.SecureRandom;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -188,7 +192,7 @@ public interface Streaming<E> {
     static Streaming<String> of(Reader reader) {
         return new StreamingImpl<>(new ResourcesIterator<>(reader, (res, iter) -> {
             try {
-                BufferedReader buffer = new BufferedReader(reader);
+                BufferedReader buffer = new BufferedReader(res);
                 return new SupplierIterator<>(() -> {
                     String line = null;
                     try {
@@ -213,6 +217,118 @@ public interface Streaming<E> {
         }));
     }
 
+    static Streaming<Map<String, Object>> of(PreparedStatement stat) {
+        Map.Entry<PreparedStatement, ResultSet> resource = new AbstractMap.SimpleEntry<>(stat, null);
+        return new StreamingImpl<>(new ResourcesIterator<>(resource, (res, iter) -> {
+            try {
+                if (res.getValue() == null) {
+                    res.setValue(res.getKey().executeQuery());
+                }
+                ResultSet rs = res.getValue();
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+                List<String> columnNames = new ArrayList<>();
+                for (int i = 0; i < columnCount; i++) {
+                    String name = metaData.getColumnLabel(i + 1);
+                    if (name == null) {
+                        name = metaData.getColumnName(i + 1);
+                    }
+                    columnNames.add(name);
+                }
+                return new SupplierIterator<>(() -> {
+                    Map<String, Object> row = null;
+                    try {
+                        if (rs.next()) {
+                            row = new LinkedHashMap<>();
+                            for (int i = 0; i < columnCount; i++) {
+                                Object val = rs.getObject(i + 1);
+                                row.put(columnNames.get(i), val);
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new IllegalStateException("read rs exception", e);
+                    }
+                    if (row == null) {
+                        return Reference.finish();
+                    }
+                    return Reference.of(row);
+                });
+            } catch (Exception e) {
+                throw new IllegalStateException("initial rs exception", e);
+            }
+        }, (res, iter) -> {
+            try {
+                if (res.getValue() != null) {
+                    res.getValue().close();
+                }
+                res.getKey().close();
+            } catch (Exception e) {
+                throw new IllegalStateException("close rs exception", e);
+            }
+        }));
+    }
+
+    static Streaming<Map<String, Object>> of(ResultSet rs) {
+        return new StreamingImpl<>(new ResourcesIterator<>(rs, (res, iter) -> {
+            try {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+                List<String> columnNames = new ArrayList<>();
+                for (int i = 0; i < columnCount; i++) {
+                    String name = metaData.getColumnLabel(i + 1);
+                    if (name == null) {
+                        name = metaData.getColumnName(i + 1);
+                    }
+                    columnNames.add(name);
+                }
+                return new SupplierIterator<>(() -> {
+                    Map<String, Object> row = null;
+                    try {
+                        if (rs.next()) {
+                            row = new LinkedHashMap<>();
+                            for (int i = 0; i < columnCount; i++) {
+                                Object val = rs.getObject(i + 1);
+                                row.put(columnNames.get(i), val);
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new IllegalStateException("read rs exception", e);
+                    }
+                    if (row == null) {
+                        return Reference.finish();
+                    }
+                    return Reference.of(row);
+                });
+            } catch (Exception e) {
+                throw new IllegalStateException("initial rs exception", e);
+            }
+        }, (res, iter) -> {
+            try {
+                res.close();
+            } catch (Exception e) {
+                throw new IllegalStateException("close rs exception", e);
+            }
+        }));
+    }
+
+    static <T> int defaultComparator(T o1, T o2) {
+        if (o1 == o2) {
+            return 0;
+        }
+        if (o1 == null) {
+            return -1;
+        }
+        if (o2 == null) {
+            return 1;
+        }
+        if (o1 instanceof Comparable) {
+            Comparable c1 = (Comparable) o1;
+            Comparable c2 = (Comparable) o2;
+            return c1.compareTo(c2);
+        }
+        return Long.compare(o1.hashCode(), o2.hashCode());
+    }
+
     Streaming<E> parallel();
 
     Streaming<E> sequence();
@@ -233,9 +349,47 @@ public interface Streaming<E> {
 
     Streaming<E> filter(Predicate<E> filter);
 
+    default Streaming<E> notNull() {
+        return filter(Objects::nonNull);
+    }
+
+    Streaming<E> topN(int size, BiPredicate<E, E> replacer);
+
+    default Streaming<E> maxN(int size, Comparator<E> comparator) {
+        return topN(size, (val, old) -> {
+            return comparator.compare(val, old) >= 0;
+        });
+    }
+
+    default Streaming<E> maxN(int size) {
+        return maxN(size, Streaming::defaultComparator);
+    }
+
+    default Streaming<E> minN(int size, Comparator<E> comparator) {
+        return topN(size, (val, old) -> {
+            return comparator.compare(val, old) < 0;
+        });
+    }
+
+    default Streaming<E> minN(int size) {
+        return minN(size, Streaming::defaultComparator);
+    }
+
     Streaming<E> afterAll(Predicate<E> filter);
 
     Streaming<E> beforeAll(Predicate<E> filter);
+
+    Streaming<E> afterN(int size, Predicate<E> filter, int limit);
+
+    default Streaming<E> afterN(int size, Predicate<E> filter) {
+        return afterN(size, filter, 1);
+    }
+
+    Streaming<E> beforeN(int size, Predicate<E> filter, int limit);
+
+    default Streaming<E> beforeN(int size, Predicate<E> filter) {
+        return beforeN(size, filter, 1);
+    }
 
     default Streaming<E> rangeAll(Predicate<E> beginFilter, Predicate<E> endFilter) {
         return rangeAll(beginFilter, endFilter, true, false);
@@ -251,7 +405,71 @@ public interface Streaming<E> {
 
     <R> Streaming<R> map(Function<E, R> mapper);
 
+    default <R> Streaming<R> mapNonNull(Function<E, R> mapper) {
+        return map(e -> {
+            if (e == null) {
+                return null;
+            }
+            return mapper.apply(e);
+        });
+    }
+
     <R> Streaming<R> flatMap(BiConsumer<E, Consumer<R>> collector);
+
+    default <R> Streaming<R> flatMapArray(Function<E, R[]> mapper) {
+        return flatMap((e, collector) -> {
+            R[] arr = mapper.apply(e);
+            if (arr != null) {
+                for (R item : arr) {
+                    collector.accept(item);
+                }
+            }
+        });
+    }
+
+    default Streaming<Integer> flatMapIntArray(Function<E, int[]> mapper) {
+        return flatMap((e, collector) -> {
+            int[] arr = mapper.apply(e);
+            if (arr != null) {
+                for (int item : arr) {
+                    collector.accept(item);
+                }
+            }
+        });
+    }
+
+    default Streaming<Long> flatMapLongArray(Function<E, long[]> mapper) {
+        return flatMap((e, collector) -> {
+            long[] arr = mapper.apply(e);
+            if (arr != null) {
+                for (long item : arr) {
+                    collector.accept(item);
+                }
+            }
+        });
+    }
+
+    default Streaming<Character> flatMapCharArray(Function<E, char[]> mapper) {
+        return flatMap((e, collector) -> {
+            char[] arr = mapper.apply(e);
+            if (arr != null) {
+                for (char item : arr) {
+                    collector.accept(item);
+                }
+            }
+        });
+    }
+
+    default <R> Streaming<R> flatMapIterable(Function<E, Iterable<R>> mapper) {
+        return flatMap((e, collector) -> {
+            Iterable<R> arr = mapper.apply(e);
+            if (arr != null) {
+                for (R item : arr) {
+                    collector.accept(item);
+                }
+            }
+        });
+    }
 
     Streaming<E> recursive(BiConsumer<E, Consumer<E>> collector);
 
@@ -267,7 +485,13 @@ public interface Streaming<E> {
         return sort(true);
     }
 
-    Streaming<E> sort(boolean asc);
+    default Streaming<E> sort(boolean asc) {
+        Comparator<E> comparator = Streaming::defaultComparator;
+        if (!asc) {
+            comparator = comparator.reversed();
+        }
+        return sort(comparator);
+    }
 
     Streaming<E> sort(Comparator<E> comparator);
 
@@ -424,13 +648,25 @@ public interface Streaming<E> {
 
     Reference<E> last(Predicate<E> filter);
 
+    Streaming<E> firstN(int size, Predicate<E> filter);
+
+    Streaming<E> lastN(int size, Predicate<E> filter);
+
     boolean anyMatch(Predicate<E> filter);
 
     boolean allMatch(Predicate<E> filter);
 
     Reference<E> min(Comparator<E> comparator);
 
+    default Reference<E> min() {
+        return min(Streaming::defaultComparator);
+    }
+
     Reference<E> max(Comparator<E> comparator);
+
+    default Reference<E> max() {
+        return max(Streaming::defaultComparator);
+    }
 
     Reference<E> most();
 
@@ -479,6 +715,10 @@ public interface Streaming<E> {
 
     <C extends Collection<E>> void batch(int batchSize, Supplier<C> containerSupplier, Consumer<C> consumer);
 
+    default void batch(int batchSize, Consumer<List<E>> consumer) {
+        batch(batchSize, () -> new ArrayList<>(batchSize), consumer);
+    }
+
     default String stringify(String separator) {
         return stringify(null, separator, null);
     }
@@ -514,4 +754,18 @@ public interface Streaming<E> {
     void toWriter(Writer writer, String prefix, String separator, String suffix) throws IOException;
 
     TimedStreaming<E> timed(Function<E, Long> timestampMapper);
+
+    StringStreaming string(Function<E, String> stringifier);
+
+    default StringStreaming string() {
+        return string(e -> {
+            if (e == null) {
+                return null;
+            }
+            if (e instanceof String) {
+                return (String) e;
+            }
+            return String.valueOf(e);
+        });
+    }
 }

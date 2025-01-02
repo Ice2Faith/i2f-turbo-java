@@ -1,7 +1,7 @@
 package i2f.extension.jce.bc.signature;
 
+import i2f.crypto.impl.jdk.signature.SignatureType;
 import i2f.extension.jce.bc.BcProvider;
-import i2f.jce.jdk.signature.SignatureType;
 
 /**
  * @author Ice2Faith

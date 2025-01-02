@@ -1,11 +1,11 @@
 package i2f.extension.jce.bc.encrypt.symmetric;
 
+import i2f.crypto.impl.jdk.encrypt.Encryptor;
+import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricType;
+import i2f.crypto.impl.jdk.supports.CipherAlgorithm;
+import i2f.crypto.impl.jdk.supports.CipherMode;
+import i2f.crypto.impl.jdk.supports.CipherPadding;
 import i2f.extension.jce.bc.BcProvider;
-import i2f.jce.jdk.encrypt.Encryptor;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricType;
-import i2f.jce.jdk.supports.CipherAlgorithm;
-import i2f.jce.jdk.supports.CipherMode;
-import i2f.jce.jdk.supports.CipherPadding;
 
 /**
  * @author Ice2Faith

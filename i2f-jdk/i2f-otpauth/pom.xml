@@ -20,12 +20,12 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jce</artifactId>
+            <artifactId>i2f-crypto-impl</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-codec</artifactId>
+            <artifactId>i2f-codec-impl</artifactId>
         </dependency>
 
         <dependency>
