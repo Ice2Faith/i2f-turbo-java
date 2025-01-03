@@ -201,6 +201,56 @@ public class Bql<H extends Bql<H>> {
         COLUMN_AS_DECORATOR_HOLDER.set(NONE_COLUMN_AS_DECORATOR);
     }
 
+    public H dialectGlobalMysql() {
+        globalMysqlMode();
+        return (H) this;
+    }
+
+    public H dialectGlobalOracle() {
+        globalOracleMode();
+        return (H) this;
+    }
+
+    public H dialectGlobalReset() {
+        globalReset();
+        return (H) this;
+    }
+
+    public H dialectThreadMysql() {
+        threadMysqlMode();
+        return (H) this;
+    }
+
+    public H dialectThreadOracle() {
+        threadOracleMode();
+        return (H) this;
+    }
+
+    public H dialectThreadReset() {
+        threadReset();
+        return (H) this;
+    }
+
+    public H dialectGlobalQuotaColumnAs() {
+        globalQuotaColumnAs();
+        return (H) this;
+    }
+
+    public H dialectGlobalNoneColumnAs() {
+        globalNoneColumnAs();
+        return (H) this;
+    }
+
+    public H dialectThreadQuotaColumnAs() {
+        threadQuotaColumnAs();
+        return (H) this;
+    }
+
+    public H dialectThreadNoneColumnAs() {
+        threadNoneColumnAs();
+        return (H) this;
+    }
+
     protected LinkedList<BindSql> builder = new LinkedList<>();
     protected String link = "and";
     protected String separator = " ";
