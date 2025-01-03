@@ -464,6 +464,18 @@ public class Bql<H extends Bql<H>> {
         return $(new BindSql(sql, $arr2list(args)));
     }
 
+    public H $(Appendable appendable) {
+        return $(appendable.toString());
+    }
+
+    public H $(StringBuilder builder) {
+        return $(builder.toString());
+    }
+
+    public H $(StringBuffer buffer) {
+        return $(buffer.toString());
+    }
+
 
     public H $clear() {
         this.builder.clear();
@@ -771,6 +783,14 @@ public class Bql<H extends Bql<H>> {
 
     public H $format(String format, Object... args) {
         return $(String.format(format, args));
+    }
+
+    public H $concat(Object... args) {
+        StringBuilder builder = new StringBuilder();
+        for (Object item : args) {
+            builder.append(item);
+        }
+        return $(builder.toString());
     }
 
     public H $var(Object val) {
