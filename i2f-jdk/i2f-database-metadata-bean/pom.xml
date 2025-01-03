@@ -40,11 +40,6 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-database-metadata-data</artifactId>
         </dependency>
 
