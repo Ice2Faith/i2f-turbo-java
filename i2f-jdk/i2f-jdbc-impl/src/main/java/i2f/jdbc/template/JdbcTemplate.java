@@ -2,6 +2,7 @@ package i2f.jdbc.template;
 
 import i2f.bindsql.BindSql;
 import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.context.impl.DirectJdbcInvokeContextProvider;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 import i2f.jdbc.std.func.SQLBiFunction;
@@ -30,6 +31,10 @@ import java.util.function.Predicate;
 public class JdbcTemplate {
 
     protected JdbcInvokeContextProvider<?> contextProvider;
+
+    public JdbcTemplate(Connection conn) {
+        this(new DirectJdbcInvokeContextProvider(conn));
+    }
 
     public JdbcTemplate(JdbcInvokeContextProvider<?> contextProvider) {
         this.contextProvider = contextProvider;
