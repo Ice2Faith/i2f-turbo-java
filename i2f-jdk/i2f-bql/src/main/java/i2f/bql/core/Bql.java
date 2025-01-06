@@ -288,6 +288,7 @@ public class Bql<H extends Bql<H>> {
     public H refresh(){
         global();
         inherit();
+        return (H) this;
     }
 
     public H global(){
