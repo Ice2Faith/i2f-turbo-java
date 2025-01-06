@@ -203,51 +203,61 @@ public class Bql<H extends Bql<H>> {
 
     public H dialectGlobalMysql() {
         globalMysqlMode();
+        refresh();
         return (H) this;
     }
 
     public H dialectGlobalOracle() {
         globalOracleMode();
+        refresh();
         return (H) this;
     }
 
     public H dialectGlobalReset() {
         globalReset();
+        refresh();
         return (H) this;
     }
 
     public H dialectThreadMysql() {
         threadMysqlMode();
+        refresh();
         return (H) this;
     }
 
     public H dialectThreadOracle() {
         threadOracleMode();
+        refresh();
         return (H) this;
     }
 
     public H dialectThreadReset() {
         threadReset();
+        refresh();
         return (H) this;
     }
 
     public H dialectGlobalQuotaColumnAs() {
         globalQuotaColumnAs();
+        refresh();
         return (H) this;
     }
 
     public H dialectGlobalNoneColumnAs() {
         globalNoneColumnAs();
+        refresh();
         return (H) this;
     }
 
     public H dialectThreadQuotaColumnAs() {
         threadQuotaColumnAs();
+        refresh();
         return (H) this;
     }
 
     public H dialectThreadNoneColumnAs() {
         threadNoneColumnAs();
+        refresh();
         return (H) this;
     }
 
@@ -272,6 +282,15 @@ public class Bql<H extends Bql<H>> {
     public static final InheritableThreadLocal<Function<String, String>> localColumnAsDecorator = new InheritableThreadLocal<>();
 
     public Bql() {
+        refresh();
+    }
+
+    public H refresh(){
+        global();
+        inherit();
+    }
+
+    public H global(){
         if (GLOBAL_UPPER_KEYWORDS != null) {
             this.upperKeywords = GLOBAL_UPPER_KEYWORDS;
         }
@@ -300,7 +319,7 @@ public class Bql<H extends Bql<H>> {
             this.columnAsDecorator = COLUMN_AS_DECORATOR_HOLDER.get();
         }
 
-        inherit();
+        return (H)this;
     }
 
     public H inherit() {
