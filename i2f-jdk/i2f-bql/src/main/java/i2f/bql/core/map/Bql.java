@@ -209,7 +209,6 @@ public class Bql<H extends i2f.bql.core.map.Bql<H>> extends i2f.bql.core.Bql<H> 
                        Collection<String> whereIsNotNullCols,
                        Collection<String> groupCols,
                        Collection<String> orderCols) {
-
         return $mapSelect(tableAlias, colMap)
                 .$from(table, tableAlias)
                 .$mapWhere(tableAlias, whereMap, whereIsNullCols, whereIsNotNullCols)
@@ -224,11 +223,13 @@ public class Bql<H extends i2f.bql.core.map.Bql<H>> extends i2f.bql.core.Bql<H> 
     public H $mapSelect(String tableAlias,
                         Collection<String> cols) {
         Map<String, String> colMap = new LinkedHashMap<>();
-        for (String col : cols) {
-            if (col == null) {
-                continue;
+        if (cols != null) {
+            for (String col : cols) {
+                if (col == null) {
+                    continue;
+                }
+                colMap.put(col, null);
             }
-            colMap.put(col, null);
         }
         return $mapSelect(tableAlias, colMap);
     }
@@ -237,10 +238,14 @@ public class Bql<H extends i2f.bql.core.map.Bql<H>> extends i2f.bql.core.Bql<H> 
                         Map<String, String> colMap) {
         return $select(() -> {
             i2f.bql.core.Bql<?> ret = i2f.bql.core.Bql.$_().$sepComma().$alias(tableAlias);
-            for (Map.Entry<String, String> entry : colMap.entrySet()) {
-                String col = entry.getKey();
-                String as = entry.getValue();
-                ret.$col(col, as);
+            if (colMap != null && !colMap.isEmpty()) {
+                for (Map.Entry<String, String> entry : colMap.entrySet()) {
+                    String col = entry.getKey();
+                    String as = entry.getValue();
+                    ret.$col(col, as);
+                }
+            } else {
+                ret.$col("*");
             }
             return ret;
         });
