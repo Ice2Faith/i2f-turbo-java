@@ -49,7 +49,6 @@ public class BindSql {
         this.args = args;
     }
 
-
     public static BindSql of(Type type, String sql, Object... args) {
         return of(sql, args).setType(type);
     }
@@ -60,6 +59,21 @@ public class BindSql {
             list.add(arg);
         }
         return new BindSql(sql, list);
+    }
+
+    public BindSql concat(String sql, Object... args) {
+        return concat(of(sql, args));
+    }
+
+    public BindSql concat(BindSql bindSql) {
+        if (bindSql == null) {
+            return this;
+        }
+        String sql = this.sql + bindSql.sql;
+        List<Object> args = new ArrayList<>();
+        args.addAll(this.args);
+        args.addAll(bindSql.args);
+        return new BindSql(sql, args);
     }
 
     public Type getType() {
