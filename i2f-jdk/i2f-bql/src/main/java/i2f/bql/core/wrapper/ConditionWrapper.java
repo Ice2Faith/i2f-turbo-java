@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -67,56 +68,260 @@ public class ConditionWrapper<H extends ConditionWrapper<H>> implements BqlWrapp
         return (H) this;
     }
 
+    public H cond(boolean test, Serializable column, Object value) {
+        if (test) {
+            cond(column, value);
+        }
+        return (H) this;
+    }
+
+    public <V> H cond(V arg, Predicate<V> tester, Serializable column, Object value) {
+        if (tester == null || tester.test(arg)) {
+            cond(column, value);
+        }
+        return (H) this;
+    }
+
+
     public H cond(Serializable column, Condition cond) {
         return cond(column, (Object) cond);
     }
+
+    public H cond(boolean test, Serializable column, Condition value) {
+        if (test) {
+            cond(column, value);
+        }
+        return (H) this;
+    }
+
+    public <V> H cond(V arg, Predicate<V> tester, Serializable column, Condition value) {
+        if (tester == null || tester.test(arg)) {
+            cond(column, value);
+        }
+        return (H) this;
+    }
+
 
     public H cond(IFunctional func, Condition cond) {
         return cond((Serializable) func, cond);
     }
 
+    public H cond(boolean test, IFunctional func, Condition value) {
+        if (test) {
+            cond(func, value);
+        }
+        return (H) this;
+    }
+
+    public <V> H cond(V arg, Predicate<V> tester, IFunctional func, Condition value) {
+        if (tester == null || tester.test(arg)) {
+            cond(func, value);
+        }
+        return (H) this;
+    }
+
+
     public H cond(IFunctional func, Object value) {
         return cond((Serializable) func, value);
+    }
+
+
+    public H cond(boolean test, IFunctional func, Object value) {
+        if (test) {
+            cond(func, value);
+        }
+        return (H) this;
+    }
+
+    public <V> H cond(V arg, Predicate<V> tester, IFunctional func, Object value) {
+        if (tester == null || tester.test(arg)) {
+            cond(func, value);
+        }
+        return (H) this;
     }
 
     public H cond(String col, Condition cond) {
         return cond((Serializable) col, cond);
     }
 
+    public H cond(boolean test, String col, Condition value) {
+        if (test) {
+            cond(col, value);
+        }
+        return (H) this;
+    }
+
+    public <V> H cond(V arg, Predicate<V> tester, String col, Condition value) {
+        if (tester == null || tester.test(arg)) {
+            cond(col, value);
+        }
+        return (H) this;
+    }
+
     public H cond(String col, Object value) {
         return cond((Serializable) col, value);
+    }
+
+
+    public H cond(boolean test, String col, Object value) {
+        if (test) {
+            cond(col, value);
+        }
+        return (H) this;
+    }
+
+    public <V> H cond(V arg, Predicate<V> tester, String col, Object value) {
+        if (tester == null || tester.test(arg)) {
+            cond(col, value);
+        }
+        return (H) this;
     }
 
     public <R, T> H cond(IGetter<R, T> getter, Condition cond) {
         return cond((Serializable) getter, cond);
     }
 
+
+    public <R, T> H cond(boolean test, IGetter<R, T> getter, Condition value) {
+        if (test) {
+            cond(getter, value);
+        }
+        return (H) this;
+    }
+
+    public <R, T, V> H cond(V arg, Predicate<V> tester, IGetter<R, T> getter, Condition value) {
+        if (tester == null || tester.test(arg)) {
+            cond(getter, value);
+        }
+        return (H) this;
+    }
+
     public <R, T> H cond(IGetter<R, T> getter, Object value) {
         return cond((Serializable) getter, value);
+    }
+
+
+    public <R, T> H cond(boolean test, IGetter<R, T> getter, Object value) {
+        if (test) {
+            cond(getter, value);
+        }
+        return (H) this;
+    }
+
+    public <R, T, V> H cond(V arg, Predicate<V> tester, IGetter<R, T> getter, Object value) {
+        if (tester == null || tester.test(arg)) {
+            cond(getter, value);
+        }
+        return (H) this;
     }
 
     public <T, V> H cond(ISetter<T, V> setter, Condition cond) {
         return cond((Serializable) setter, cond);
     }
 
+    public <T, V> H cond(boolean test, ISetter<T, V> setter, Condition value) {
+        if (test) {
+            cond(setter, value);
+        }
+        return (H) this;
+    }
+
+    public <T, V, U> H cond(U arg, Predicate<U> tester, ISetter<T, V> setter, Condition value) {
+        if (tester == null || tester.test(arg)) {
+            cond(setter, value);
+        }
+        return (H) this;
+    }
+
     public <T, V> H cond(ISetter<T, V> setter, Object value) {
         return cond((Serializable) setter, value);
     }
 
+    public <T, V> H cond(boolean test, ISetter<T, V> setter, Object value) {
+        if (test) {
+            cond(setter, value);
+        }
+        return (H) this;
+    }
+
+    public <T, V, U> H cond(U arg, Predicate<U> tester, ISetter<T, V> setter, Object value) {
+        if (tester == null || tester.test(arg)) {
+            cond(setter, value);
+        }
+        return (H) this;
+    }
     public <R, T, V> H cond(IBuilder<R, T, V> builder, Condition cond) {
         return cond((Serializable) builder, cond);
+    }
+
+
+    public <R, T, V> H cond(boolean test, IBuilder<R, T, V> builder, Condition value) {
+        if (test) {
+            cond(builder, value);
+        }
+        return (H) this;
+    }
+
+    public <R, T, V, U> H cond(U arg, Predicate<U> tester, IBuilder<R, T, V> builder, Condition value) {
+        if (tester == null || tester.test(arg)) {
+            cond(builder, value);
+        }
+        return (H) this;
     }
 
     public <R, T, V> H cond(IBuilder<R, T, V> builder, Object value) {
         return cond((Serializable) builder, value);
     }
 
+    public <R, T, V> H cond(boolean test, IBuilder<R, T, V> builder, Object value) {
+        if (test) {
+            cond(builder, value);
+        }
+        return (H) this;
+    }
+
+    public <R, T, V, U> H cond(U arg, Predicate<U> tester, IBuilder<R, T, V> builder, Object value) {
+        if (tester == null || tester.test(arg)) {
+            cond(builder, value);
+        }
+        return (H) this;
+    }
+
     public <T> H cond(IExecute<T> exec, Condition cond) {
         return cond((Serializable) exec, cond);
     }
 
+
+    public <T> H cond(boolean test, IExecute<T> exec, Condition value) {
+        if (test) {
+            cond(exec, value);
+        }
+        return (H) this;
+    }
+
+    public <T, V> H cond(V arg, Predicate<V> tester, IExecute<T> exec, Condition value) {
+        if (tester == null || tester.test(arg)) {
+            cond(exec, value);
+        }
+        return (H) this;
+    }
+
     public <T> H cond(IExecute<T> exec, Object value) {
         return cond((Serializable) exec, value);
+    }
+
+    public <T> H cond(boolean test, IExecute<T> exec, Object value) {
+        if (test) {
+            cond(exec, value);
+        }
+        return (H) this;
+    }
+
+    public <T, V> H cond(V arg, Predicate<V> tester, IExecute<T> exec, Object value) {
+        if (tester == null || tester.test(arg)) {
+            cond(exec, value);
+        }
+        return (H) this;
     }
 
     public <R, T> H eq(IGetter<R, T> getter, Object value) {
