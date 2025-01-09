@@ -21,6 +21,7 @@
         <module>i2f-spring-redis</module>
         <module>i2f-spring-authentication</module>
         <module>i2f-spring-mvc-metadata</module>
+        <module>i2f-spring-swl</module>
     </modules>
 
     <properties>
