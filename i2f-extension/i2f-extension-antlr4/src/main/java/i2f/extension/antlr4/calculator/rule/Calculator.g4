@@ -106,37 +106,54 @@ OTC_LETTER:[0-7]; // 8进制字符
 BIN_LETTER:[01]; // 2进制字符
 HIGH_LETTER:[0-9a-zA-Z]; // 自定义进制字符
 
+
 constNumber: // 常量
      'pi' | 'PI' // 常量 π
     | 'e' | 'E' // 常量 e
     | 'randf' // 随机小数，取 0-1 之间的小数
     ;
 
-decNumber: // 十进制数字
-     (DIGIT)+ ('.' (DIGIT)+)? ('e' ('-')? (DIGIT)+)? // 科学计数法
-    | (DIGIT)+ // 整数
+TYPE_DEC_NUMBER:
+    (DIGIT)+ ('.' (DIGIT)+)? ('e' ('-')? (DIGIT)+)?
     ;
 
+decNumber: // 十进制数字
+    TYPE_DEC_NUMBER
+    | (DIGIT)+ ('.' (DIGIT)+)?
+    ;
 
+TYPE_HEX_NUMBER:
+    '0X' (HEX_LETTER)+
+    | '0x' (HEX_LETTER)+;
 
 hexNumber: // 16进制数
-    '0X' (HEX_LETTER)+
-    | '0x' (HEX_LETTER)+
+    TYPE_HEX_NUMBER
+    ;
+
+TYPE_OTC_NUMBER:
+    '0T' (HEX_LETTER)+
+    | '0t' (HEX_LETTER)+
     ;
 
 otcNumber: // 8进制数
-    '0T' (OTC_LETTER)+
-    | '0t' (OTC_LETTER)+
+    TYPE_OTC_NUMBER
+    ;
+
+TYPE_BIN_NUMBER:
+    '0B' (HEX_LETTER)+
+    | '0b' (HEX_LETTER)+
     ;
 
 binNumber: // 2进制数
-    '0B' (BIN_LETTER)+
-    '0b' (BIN_LETTER)+
+    TYPE_BIN_NUMBER
+    ;
+
+TYPE_HIGN_NUMBER: '0H' (HEX_LETTER)+
+    | '0h' (HEX_LETTER)+
     ;
 
 highNumber: // 任意进制数
-    '0H' (DIGIT)+ ':' (HIGH_LETTER)+ // 0h12:56ab
-    | '0h' (DIGIT)+ ':' (HIGH_LETTER)+ // 0h12:56ab
+    TYPE_HIGN_NUMBER
     ;
 
 IDENTIFIER: // 标识符
