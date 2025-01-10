@@ -41,7 +41,7 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
             }
             TerminalNode nextTerm = (TerminalNode) equal;
             String term = (String) visitTerminal(nextTerm);
-            if (!"=".equals(term)) {
+            if (!"=".equalsIgnoreCase(term)) {
                 throw new IllegalArgumentException("invalid formula ending, expect '=' but found '" + term + "'!");
             }
         }
@@ -170,8 +170,8 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
     }
 
     public static BigDecimal resolveDoubleOperator(BigDecimal left, String oper, BigDecimal right) {
-        if ("**".equals(oper)
-                || "muls".equals(oper)) {
+        if ("**".equalsIgnoreCase(oper)
+                || "muls".equalsIgnoreCase(oper)) {
             BigDecimal min = new BigDecimal(left.min(right).toString(), MATH_CONTEXT);
             BigDecimal max = new BigDecimal(left.max(right).toString(), MATH_CONTEXT);
             BigDecimal ret = BigDecimal.ONE;
@@ -180,8 +180,8 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
                 min = min.add(BigDecimal.ONE, MATH_CONTEXT);
             }
             return ret;
-        } else if ("++".equals(oper)
-                || "adds".equals(oper)) {
+        } else if ("++".equalsIgnoreCase(oper)
+                || "adds".equalsIgnoreCase(oper)) {
             BigDecimal min = new BigDecimal(left.min(right).toString(), MATH_CONTEXT);
             BigDecimal max = new BigDecimal(left.max(right).toString(), MATH_CONTEXT);
             BigDecimal ret = BigDecimal.ZERO;
@@ -190,54 +190,54 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
                 min = min.add(BigDecimal.ONE, MATH_CONTEXT);
             }
             return ret;
-        } else if ("&".equals(oper)
-                || "and".equals(oper)) {
+        } else if ("&".equalsIgnoreCase(oper)
+                || "and".equalsIgnoreCase(oper)) {
             long vl = left.longValue();
             long vr = right.longValue();
             return BigDecimal.valueOf(vl & vr);
-        } else if ("|".equals(oper)
-                || "or".equals(oper)) {
+        } else if ("|".equalsIgnoreCase(oper)
+                || "or".equalsIgnoreCase(oper)) {
             long vl = left.longValue();
             long vr = right.longValue();
             return BigDecimal.valueOf(vl | vr);
-        } else if ("xor".equals(oper)) {
+        } else if ("xor".equalsIgnoreCase(oper)) {
             long vl = left.longValue();
             long vr = right.longValue();
             return BigDecimal.valueOf(vl ^ vr);
-        } else if ("<<".equals(oper)
-                || "lmov".equals(oper)) {
+        } else if ("<<".equalsIgnoreCase(oper)
+                || "lmov".equalsIgnoreCase(oper)) {
             long vl = left.longValue();
             long vr = right.longValue();
             return BigDecimal.valueOf(vl << vr);
-        } else if (">>".equals(oper)
-                || "rmov".equals(oper)) {
+        } else if (">>".equalsIgnoreCase(oper)
+                || "rmov".equalsIgnoreCase(oper)) {
             long vl = left.longValue();
             long vr = right.longValue();
             return BigDecimal.valueOf(vl >> vr);
-        } else if (">>>".equals(oper)
-                || "srmov".equals(oper)) {
+        } else if (">>>".equalsIgnoreCase(oper)
+                || "srmov".equalsIgnoreCase(oper)) {
             long vl = left.longValue();
             long vr = right.longValue();
             return BigDecimal.valueOf(vl >>> vr);
-        } else if ("log".equals(oper)) {
+        } else if ("log".equalsIgnoreCase(oper)) {
             double vl = left.doubleValue();
             double vr = right.doubleValue();
             return BigDecimal.valueOf(Math.log(vr)).divide(BigDecimal.valueOf(Math.log(vl)), MATH_CONTEXT);
-        } else if ("^".equals(oper)
-                || "pow".equals(oper)) {
+        } else if ("^".equalsIgnoreCase(oper)
+                || "pow".equalsIgnoreCase(oper)) {
             double vl = left.doubleValue();
             double vr = right.doubleValue();
             return BigDecimal.valueOf(Math.pow(vl, vr));
-        } else if ("//".equals(oper)) {
+        } else if ("//".equalsIgnoreCase(oper)) {
             return left.divide(right, MATH_CONTEXT).setScale(0, RoundingMode.FLOOR);
-        } else if ("*".equals(oper)
-                || "mul".equals(oper)) {
+        } else if ("*".equalsIgnoreCase(oper)
+                || "mul".equalsIgnoreCase(oper)) {
             return left.multiply(right, MATH_CONTEXT);
-        } else if ("/".equals(oper)
-                || "div".equals(oper)) {
+        } else if ("/".equalsIgnoreCase(oper)
+                || "div".equalsIgnoreCase(oper)) {
             return left.divide(right, MATH_CONTEXT);
-        } else if ("%".equals(oper)
-                || "mod".equals(oper)) {
+        } else if ("%".equalsIgnoreCase(oper)
+                || "mod".equalsIgnoreCase(oper)) {
             long vl = left.longValue();
             long vr = right.longValue();
             boolean isNeg = vl < 0;
@@ -245,105 +245,105 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
             vr = Math.abs(vr);
             long num = vl % vr;
             return BigDecimal.valueOf(isNeg ? -num : num);
-        } else if ("+".equals(oper)
-                || "add".equals(oper)) {
+        } else if ("+".equalsIgnoreCase(oper)
+                || "add".equalsIgnoreCase(oper)) {
             return left.add(right, MATH_CONTEXT);
-        } else if ("-".equals(oper)
-                || "sub".equals(oper)) {
+        } else if ("-".equalsIgnoreCase(oper)
+                || "sub".equalsIgnoreCase(oper)) {
             return left.subtract(right, MATH_CONTEXT);
-        } else if (">=".equals(oper)
-                || "gte".equals(oper)) {
+        } else if (">=".equalsIgnoreCase(oper)
+                || "gte".equalsIgnoreCase(oper)) {
             return left.compareTo(right) >= 0 ? BigDecimal.ONE : BigDecimal.ZERO;
-        } else if ("<=".equals(oper)
-                || "lte".equals(oper)) {
+        } else if ("<=".equalsIgnoreCase(oper)
+                || "lte".equalsIgnoreCase(oper)) {
             return left.compareTo(right) <= 0 ? BigDecimal.ONE : BigDecimal.ZERO;
-        } else if ("!=".equals(oper)
-                || "neq".equals(oper)
-                || "<>".equals(oper)
-                || "ne".equals(oper)) {
+        } else if ("!=".equalsIgnoreCase(oper)
+                || "neq".equalsIgnoreCase(oper)
+                || "<>".equalsIgnoreCase(oper)
+                || "ne".equalsIgnoreCase(oper)) {
             return left.compareTo(right) != 0 ? BigDecimal.ONE : BigDecimal.ZERO;
-        } else if ("==".equals(oper)
-                || "eq".equals(oper)) {
+        } else if ("==".equalsIgnoreCase(oper)
+                || "eq".equalsIgnoreCase(oper)) {
             return left.compareTo(right) == 0 ? BigDecimal.ONE : BigDecimal.ZERO;
-        } else if (">".equals(oper)
-                || "gt".equals(oper)) {
+        } else if (">".equalsIgnoreCase(oper)
+                || "gt".equalsIgnoreCase(oper)) {
             return left.compareTo(right) > 0 ? BigDecimal.ONE : BigDecimal.ZERO;
-        } else if ("<".equals(oper)
-                || "lt".equals(oper)) {
+        } else if ("<".equalsIgnoreCase(oper)
+                || "lt".equalsIgnoreCase(oper)) {
             return left.compareTo(right) < 0 ? BigDecimal.ONE : BigDecimal.ZERO;
         }
         throw new IllegalArgumentException("un-support double operator found : " + oper);
     }
 
     public static BigDecimal resolvePrefixOperator(BigDecimal ret, String prefix) {
-        if ("+".equals(prefix)) {
+        if ("+".equalsIgnoreCase(prefix)) {
             return ret;
-        } else if ("-".equals(prefix)
-                || "neg".equals(prefix)) {
+        } else if ("-".equalsIgnoreCase(prefix)
+                || "neg".equalsIgnoreCase(prefix)) {
             return ret.multiply(CONST_NEG_1, MATH_CONTEXT);
-        } else if ("abs".equals(prefix)) {
+        } else if ("abs".equalsIgnoreCase(prefix)) {
             return ret.abs(MATH_CONTEXT);
-        } else if ("ln".equals(prefix)) {
+        } else if ("ln".equalsIgnoreCase(prefix)) {
             double num = ret.doubleValue();
             num = Math.log(num);
             return BigDecimal.valueOf(num);
-        } else if ("sin".equals(prefix)) {
+        } else if ("sin".equalsIgnoreCase(prefix)) {
             double num = ret.doubleValue();
             num = Math.sin(num);
             return BigDecimal.valueOf(num);
-        } else if ("cos".equals(prefix)) {
+        } else if ("cos".equalsIgnoreCase(prefix)) {
             double num = ret.doubleValue();
             num = Math.cos(num);
             return BigDecimal.valueOf(num);
-        } else if ("tan".equals(prefix)) {
+        } else if ("tan".equalsIgnoreCase(prefix)) {
             double num = ret.doubleValue();
             num = Math.tan(num);
             return BigDecimal.valueOf(num);
-        } else if ("arcsin".equals(prefix)) {
+        } else if ("arcsin".equalsIgnoreCase(prefix)) {
             double num = ret.doubleValue();
             num = Math.asin(num);
             return BigDecimal.valueOf(num);
-        } else if ("arccos".equals(prefix)) {
+        } else if ("arccos".equalsIgnoreCase(prefix)) {
             double num = ret.doubleValue();
             num = Math.acos(num);
             return BigDecimal.valueOf(num);
-        } else if ("arctan".equals(prefix)) {
+        } else if ("arctan".equalsIgnoreCase(prefix)) {
             double num = ret.doubleValue();
             num = Math.atan(num);
             return BigDecimal.valueOf(num);
-        } else if ("angle".equals(prefix)) {
+        } else if ("angle".equalsIgnoreCase(prefix)) {
             return ret.divide(CONST_PI, MATH_CONTEXT).multiply(CONST_180, MATH_CONTEXT);
-        } else if ("radian".equals(prefix)) {
+        } else if ("radian".equalsIgnoreCase(prefix)) {
             return ret.divide(CONST_180, MATH_CONTEXT).multiply(CONST_PI, MATH_CONTEXT);
-        } else if ("floor".equals(prefix)) {
+        } else if ("floor".equalsIgnoreCase(prefix)) {
             return ret.setScale(0, RoundingMode.FLOOR);
-        } else if ("round".equals(prefix)) {
+        } else if ("round".equalsIgnoreCase(prefix)) {
             return ret.setScale(0, RoundingMode.HALF_UP);
-        } else if ("ceil".equals(prefix)) {
+        } else if ("ceil".equalsIgnoreCase(prefix)) {
             return ret.setScale(0, RoundingMode.CEILING);
-        } else if ("rand".equals(prefix)) {
+        } else if ("rand".equalsIgnoreCase(prefix)) {
             long num = ret.longValue();
             boolean isNeg = num < 0;
             num = Math.abs(num);
             num = RANDOM.nextLong(num);
             return BigDecimal.valueOf(isNeg ? -num : num);
-        } else if ("feibo".equals(prefix)) {
+        } else if ("feibo".equalsIgnoreCase(prefix)) {
             return calcFeibo(ret);
-        } else if ("~".equals(prefix)
-                || "not".equals(prefix)) {
+        } else if ("~".equalsIgnoreCase(prefix)
+                || "not".equalsIgnoreCase(prefix)) {
             long num = ret.longValue();
             return BigDecimal.valueOf(~num);
-        } else if ("sqrt".equals(prefix)) {
+        } else if ("sqrt".equalsIgnoreCase(prefix)) {
             return ret.sqrt(MATH_CONTEXT);
         }
         throw new IllegalArgumentException("un-support prefix operator found : " + prefix);
     }
 
     public static BigDecimal resolveSuffixOperator(BigDecimal ret, String suffix) {
-        if ("!".equals(suffix)) {
+        if ("!".equalsIgnoreCase(suffix)) {
             return calcFactorial(ret);
-        } else if ("%".equals(suffix)
-                || "per".equals(suffix)) {
+        } else if ("%%".equalsIgnoreCase(suffix)
+                || "per".equalsIgnoreCase(suffix)) {
             return ret.divide(CONST_100, MATH_CONTEXT);
         }
         throw new IllegalArgumentException("un-support suffix operator found : " + suffix);
@@ -424,7 +424,7 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
     }
 
     public static BigDecimal resolveConvertor(String name, List<BigDecimal> numbers) {
-        if ("min".equals(name)) {
+        if ("min".equalsIgnoreCase(name)) {
             if (numbers.isEmpty()) {
                 throw new IllegalArgumentException("min convertor require least one argument!");
             }
@@ -435,7 +435,7 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
                 }
             }
             return ret;
-        } else if ("max".equals(name)) {
+        } else if ("max".equalsIgnoreCase(name)) {
             if (numbers.isEmpty()) {
                 throw new IllegalArgumentException("max convertor require least one argument!");
             }
@@ -446,13 +446,13 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
                 }
             }
             return ret;
-        } else if ("sum".equals(name)) {
+        } else if ("sum".equalsIgnoreCase(name)) {
             BigDecimal sum = BigDecimal.ZERO;
             for (BigDecimal item : numbers) {
                 sum = sum.add(item, MATH_CONTEXT);
             }
             return sum;
-        } else if ("avg".equals(name)) {
+        } else if ("avg".equalsIgnoreCase(name)) {
             BigDecimal sum = BigDecimal.ZERO;
             int count = 0;
             for (BigDecimal item : numbers) {
@@ -516,11 +516,11 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
     }
 
     public BigDecimal resolveConstNumber(String oper) {
-        if ("pi".equals(oper)) {
+        if ("pi".equalsIgnoreCase(oper)) {
             return CONST_PI;
-        } else if ("e".equals(oper)) {
+        } else if ("e".equalsIgnoreCase(oper)) {
             return CONST_E;
-        } else if ("randf".equals(oper)) {
+        } else if ("randf".equalsIgnoreCase(oper)) {
             return BigDecimal.valueOf(RANDOM.nextDouble());
         }
         throw new IllegalArgumentException("invalid const number found: " + oper);
@@ -528,34 +528,34 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
 
     @Override
     public Object visitDecNumber(CalculatorParser.DecNumberContext ctx) {
-        String text = ctx.getText();
+        String text = ctx.getText().replaceAll("\\_", "");
         return new BigDecimal(text);
     }
 
     @Override
     public Object visitHexNumber(CalculatorParser.HexNumberContext ctx) {
-        String text = ctx.getText();
+        String text = ctx.getText().replaceAll("\\_", "");
         String hex = text.substring(2);
         return BigDecimal.valueOf(Long.parseLong(hex, 16));
     }
 
     @Override
     public Object visitOtcNumber(CalculatorParser.OtcNumberContext ctx) {
-        String text = ctx.getText();
+        String text = ctx.getText().replaceAll("\\_", "");
         String hex = text.substring(2);
         return BigDecimal.valueOf(Long.parseLong(hex, 8));
     }
 
     @Override
     public Object visitBinNumber(CalculatorParser.BinNumberContext ctx) {
-        String text = ctx.getText();
+        String text = ctx.getText().replaceAll("\\_", "");
         String hex = text.substring(2);
         return BigDecimal.valueOf(Long.parseLong(hex, 2));
     }
 
     @Override
     public Object visitHighNumber(CalculatorParser.HighNumberContext ctx) {
-        String text = ctx.getText();
+        String text = ctx.getText().replaceAll("\\_", "");
         String pair = text.substring(2);
         String[] arr = pair.split(":");
         int radix = Integer.parseInt(arr[0]);
