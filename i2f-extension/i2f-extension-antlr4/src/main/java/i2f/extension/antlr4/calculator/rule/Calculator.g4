@@ -8,19 +8,17 @@ EQUAL: '=' // 等号
     ;
 
 eval: // 入口
-     number // 数字
-    | expr // 表达式
-    | number EQUAL // 数字，带等号后缀
-    | expr EQUAL // 表达式，带等号后缀
+     number (EQUAL)? // 数字
+    | expr (EQUAL)?// 表达式
     ;
 
 number: // 数值
-     CONST // 常量
-    | DEC_NUMBER // 十进制数字
-    | HEX_NUMBER // 16进制数字
-    | OTC_NUMBER // 8进制数字
-    | BIN_NUMBER // 二进制数字
-    | HIGH_NUMBER // 自定义进制数字
+     constNumber // 常量
+    | decNumber // 十进制数字
+    | hexNumber // 16进制数字
+    | otcNumber // 8进制数字
+    | binNumber // 二进制数字
+    | highNumber // 自定义进制数字
     ;
 
 
@@ -38,16 +36,17 @@ expr: // 表达式
     | number // 数字
     ;
 
-convertor: // 函数
-     IDENTIFIER  '(' expr (',' expr)* ')' // 函数
-    ;
-
 bracket: // 括号
      '(' expr ')' // 括号
     ;
 
+convertor: // 函数
+     IDENTIFIER  '(' expr (',' expr)* ')' // 函数
+    ;
+
+
 prefixOperator:  // 前置单目运算符
-     '+' | '-'
+    '~' | 'not' // 位取反
     | 'abs' // 绝对值
     | 'neg' // 负数
     | 'ln' // log(e,x)
@@ -70,65 +69,75 @@ operatorV5: // 5级双目运算符
 ;
 
 operatorV4: // 4级双目运算符
-     '&' | '|' | '~' | 'xor' | '<<' | '>>' // 与、或、非、异或、左移、右移
-    | 'and' | 'or' | 'not' | 'lmov' | 'rmov'
+    | '>>>' | 'srmov' // 带符号右移
+    | '&' | '|'  | 'xor' | '<<' | '>>'  // 与、或、非、异或、左移、右移
+    | 'and' | 'or'  | 'lmov' | 'rmov'
 ;
 
 operatorV3: // 3级双目运算符
-     'log' | 'sqrt' // log(x,y) 、 sqrt(a,b)
+     'log'  // log(x,y) 、 sqrt(a,b)
     | '^' | 'pow' // x^y
 ;
 
 operatorV2: // 2级双目运算符
-     '*' | '/' | '%' // 乘、除、模数
+    | '//' // 整除
+    | '*' | '/' | '%'  // 乘、除、模数
     | 'mul' | 'div' | 'mod'
 ;
 
 operatorV1: // 1级双目运算符
      '+' | '-' // 加、减
+     | 'add' | 'sub'
     ;
 
 operatorV0: // 0级双目运算符
     | '>=' | '<=' | '!=' | '<>' | '==' // 大等于、小等于、不等于、不等于、等于
+    | 'gte' | 'lte' | 'neq' | 'ne' | 'eq'
     | '>' | '<' // 大于、小于
+    | 'gt' | 'lt'
     ;
 
 
-fragment DIGIT:[0-9]; // 数字
-fragment LETTER:[a-zA-Z]; // 字母
+DIGIT:[0-9]; // 数字
+LETTER:[a-zA-Z]; // 字母
+HEX_LETTER:[0-9a-fA-F]; // 16进制字符
+OTC_LETTER:[0-7]; // 8进制字符
+BIN_LETTER:[01]; // 2进制字符
+HIGH_LETTER:[0-9a-zA-Z]; // 自定义进制字符
 
-CONST: // 常量
-     [pP][iI] // 常量 π
-    | [eE] // 常量 e
+constNumber: // 常量
+     'pi' // 常量 π
+    | 'e' // 常量 e
     | 'randf' // 随机小数，取 0-1 之间的小数
     ;
 
-DEC_NUMBER: // 十进制数字
+decNumber: // 十进制数字
     (DIGIT)+ // 整数
     | (DIGIT)+ '.' (DIGIT)+ // 小数
-    | (DIGIT)+ '.' (DIGIT) [eE] (DIGIT)+ // 科学计数法
-    | (DIGIT)+ '.' (DIGIT) [eE] '-' (DIGIT)+ // 科学计数法
+    | (DIGIT)+ '.' (DIGIT) 'e' (DIGIT)+ // 科学计数法
+    | (DIGIT)+ '.' (DIGIT) 'e' '-' (DIGIT)+ // 科学计数法
     ;
 
-HEX_NUMBER: // 16进制数
-    '0' [xX] ([0-9a-fA-F])+
+
+
+hexNumber: // 16进制数
+    '0' ('x'|'X') (HEX_LETTER)+
     ;
 
-OTC_NUMBER: // 8进制数
-    '0' [tT] ([0-7])+
+otcNumber: // 8进制数
+    '0' ('t'|'T') (OTC_LETTER)+
     ;
 
-BIN_NUMBER: // 2进制数
-    '0' [bB] ([01])+
+binNumber: // 2进制数
+    '0' ('b'|'B') (BIN_LETTER)+
     ;
 
-HIGH_NUMBER: // 任意进制数
-    '0' [hH] (DIGIT)+ ':' ([0-9a-zA-Z])+ // 0h12:56ab
+highNumber: // 任意进制数
+    '0' ('h'|'H') (DIGIT)+ ':' (HIGH_LETTER)+ // 0h12:56ab
     ;
 
 IDENTIFIER: // 标识符
-    (LETTER|'_')+ // 字母或下划线构成
-    | (LETTER|'_')+ (DIGIT|LETTER|'_')+ // 字母或数字或下划线开头，并不以数字开头
+     (LETTER|'_')+ (DIGIT|LETTER|'_')* // 字母或数字或下划线开头，并不以数字开头
     ;
 
 WS: // 空白符
