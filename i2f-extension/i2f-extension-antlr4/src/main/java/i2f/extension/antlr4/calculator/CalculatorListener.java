@@ -52,20 +52,6 @@ public interface CalculatorListener extends ParseTreeListener {
     void exitExpr(CalculatorParser.ExprContext ctx);
 
     /**
-     * Enter a parse tree produced by {@link CalculatorParser#convertor}.
-     *
-     * @param ctx the parse tree
-     */
-    void enterConvertor(CalculatorParser.ConvertorContext ctx);
-
-    /**
-     * Exit a parse tree produced by {@link CalculatorParser#convertor}.
-     *
-     * @param ctx the parse tree
-     */
-    void exitConvertor(CalculatorParser.ConvertorContext ctx);
-
-    /**
      * Enter a parse tree produced by {@link CalculatorParser#bracket}.
      *
      * @param ctx the parse tree
@@ -78,6 +64,20 @@ public interface CalculatorListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void exitBracket(CalculatorParser.BracketContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link CalculatorParser#convertor}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterConvertor(CalculatorParser.ConvertorContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link CalculatorParser#convertor}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitConvertor(CalculatorParser.ConvertorContext ctx);
 
     /**
      * Enter a parse tree produced by {@link CalculatorParser#prefixOperator}.
@@ -190,4 +190,88 @@ public interface CalculatorListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void exitOperatorV0(CalculatorParser.OperatorV0Context ctx);
+
+    /**
+     * Enter a parse tree produced by {@link CalculatorParser#constNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterConstNumber(CalculatorParser.ConstNumberContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link CalculatorParser#constNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitConstNumber(CalculatorParser.ConstNumberContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link CalculatorParser#decNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterDecNumber(CalculatorParser.DecNumberContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link CalculatorParser#decNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitDecNumber(CalculatorParser.DecNumberContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link CalculatorParser#hexNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterHexNumber(CalculatorParser.HexNumberContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link CalculatorParser#hexNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitHexNumber(CalculatorParser.HexNumberContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link CalculatorParser#otcNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterOtcNumber(CalculatorParser.OtcNumberContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link CalculatorParser#otcNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitOtcNumber(CalculatorParser.OtcNumberContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link CalculatorParser#binNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterBinNumber(CalculatorParser.BinNumberContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link CalculatorParser#binNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitBinNumber(CalculatorParser.BinNumberContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link CalculatorParser#highNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterHighNumber(CalculatorParser.HighNumberContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link CalculatorParser#highNumber}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitHighNumber(CalculatorParser.HighNumberContext ctx);
 }
