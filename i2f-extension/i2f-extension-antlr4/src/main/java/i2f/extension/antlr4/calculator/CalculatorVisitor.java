@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  * by {@link CalculatorParser}.
  *
  * @param <T> The return type of the visit operation. Use {@link Void} for
- *            operations with no return type.
+ * operations with no return type.
  */
 public interface CalculatorVisitor<T> extends ParseTreeVisitor<T> {
     /**
@@ -37,20 +37,20 @@ public interface CalculatorVisitor<T> extends ParseTreeVisitor<T> {
     T visitExpr(CalculatorParser.ExprContext ctx);
 
     /**
-     * Visit a parse tree produced by {@link CalculatorParser#convertor}.
-     *
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    T visitConvertor(CalculatorParser.ConvertorContext ctx);
-
-    /**
      * Visit a parse tree produced by {@link CalculatorParser#bracket}.
      *
      * @param ctx the parse tree
      * @return the visitor result
      */
     T visitBracket(CalculatorParser.BracketContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link CalculatorParser#convertor}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitConvertor(CalculatorParser.ConvertorContext ctx);
 
     /**
      * Visit a parse tree produced by {@link CalculatorParser#prefixOperator}.
@@ -115,4 +115,52 @@ public interface CalculatorVisitor<T> extends ParseTreeVisitor<T> {
      * @return the visitor result
      */
     T visitOperatorV0(CalculatorParser.OperatorV0Context ctx);
+
+    /**
+     * Visit a parse tree produced by {@link CalculatorParser#constNumber}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitConstNumber(CalculatorParser.ConstNumberContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link CalculatorParser#decNumber}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitDecNumber(CalculatorParser.DecNumberContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link CalculatorParser#hexNumber}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitHexNumber(CalculatorParser.HexNumberContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link CalculatorParser#otcNumber}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitOtcNumber(CalculatorParser.OtcNumberContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link CalculatorParser#binNumber}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitBinNumber(CalculatorParser.BinNumberContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link CalculatorParser#highNumber}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitHighNumber(CalculatorParser.HighNumberContext ctx);
 }

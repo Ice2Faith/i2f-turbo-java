@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
  * of the available methods.
  *
  * @param <T> The return type of the visit operation. Use {@link Void} for
- *            operations with no return type.
+ * operations with no return type.
  */
 @SuppressWarnings("CheckReturnValue")
 public class CalculatorBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements CalculatorVisitor<T> {
@@ -54,7 +54,7 @@ public class CalculatorBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override
-    public T visitConvertor(CalculatorParser.ConvertorContext ctx) {
+    public T visitBracket(CalculatorParser.BracketContext ctx) {
         return visitChildren(ctx);
     }
 
@@ -65,7 +65,7 @@ public class CalculatorBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override
-    public T visitBracket(CalculatorParser.BracketContext ctx) {
+    public T visitConvertor(CalculatorParser.ConvertorContext ctx) {
         return visitChildren(ctx);
     }
 
@@ -154,6 +154,72 @@ public class CalculatorBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
      */
     @Override
     public T visitOperatorV0(CalculatorParser.OperatorV0Context ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitConstNumber(CalculatorParser.ConstNumberContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitDecNumber(CalculatorParser.DecNumberContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitHexNumber(CalculatorParser.HexNumberContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitOtcNumber(CalculatorParser.OtcNumberContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitBinNumber(CalculatorParser.BinNumberContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitHighNumber(CalculatorParser.HighNumberContext ctx) {
         return visitChildren(ctx);
     }
 }

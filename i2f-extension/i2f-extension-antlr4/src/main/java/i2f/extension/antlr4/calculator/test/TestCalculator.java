@@ -2,10 +2,9 @@ package i2f.extension.antlr4.calculator.test;
 
 import i2f.extension.antlr4.calculator.CalculatorLexer;
 import i2f.extension.antlr4.calculator.CalculatorParser;
+import i2f.extension.antlr4.calculator.CalculatorVisitor;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 /**
  * @author Ice2Faith
@@ -13,7 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
  */
 public class TestCalculator {
     public static void main(String[] args) {
-        String sql = "1+1>(2+3==4)";
+        String sql = "avg(4+3,5,6)";
         ANTLRInputStream input = new ANTLRInputStream(sql);
         CalculatorLexer lexer = new CalculatorLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -21,7 +20,8 @@ public class TestCalculator {
         CalculatorParser.EvalContext tree = parser.eval();
         System.out.println(tree.toStringTree(parser));
 
-        ParseTreeListener listener = new CalculatorListener();
-        ParseTreeWalker.DEFAULT.walk(listener, tree);
+        CalculatorVisitor visitor = new CalculatorVisitorImpl();
+        Object ret = visitor.visit(tree);
+        System.out.println(ret);
     }
 }
