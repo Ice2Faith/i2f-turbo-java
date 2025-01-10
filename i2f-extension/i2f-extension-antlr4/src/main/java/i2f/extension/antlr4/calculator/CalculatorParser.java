@@ -34,9 +34,9 @@ public class CalculatorParser extends Parser {
             T__52 = 53, T__53 = 54, T__54 = 55, T__55 = 56, T__56 = 57, T__57 = 58, T__58 = 59,
             T__59 = 60, T__60 = 61, T__61 = 62, T__62 = 63, T__63 = 64, T__64 = 65, T__65 = 66,
             T__66 = 67, T__67 = 68, T__68 = 69, T__69 = 70, T__70 = 71, T__71 = 72, EQUAL = 73,
-            DIGIT = 74, LETTER = 75, HEX_LETTER = 76, OTC_LETTER = 77, BIN_LETTER = 78, HIGH_LETTER = 79,
-            TYPE_DEC_NUMBER = 80, TYPE_HEX_NUMBER = 81, TYPE_OTC_NUMBER = 82, TYPE_BIN_NUMBER = 83,
-            TYPE_HIGN_NUMBER = 84, IDENTIFIER = 85, WS = 86, UNRECOGNIZED = 87;
+            DIGIT = 74, NUM = 75, LETTER = 76, HEX_LETTER = 77, OTC_LETTER = 78, BIN_LETTER = 79,
+            HIGH_LETTER = 80, TYPE_DEC_NUMBER = 81, TYPE_HEX_NUMBER = 82, TYPE_OTC_NUMBER = 83,
+            TYPE_BIN_NUMBER = 84, TYPE_HIGN_NUMBER = 85, IDENTIFIER = 86, WS = 87, UNRECOGNIZED = 88;
 	public static final int
             RULE_eval = 0, RULE_number = 1, RULE_expr = 2, RULE_bracket = 3, RULE_convertor = 4,
             RULE_prefixOperator = 5, RULE_suffixOperator = 6, RULE_operatorV5 = 7,
@@ -75,8 +75,8 @@ public class CalculatorParser extends Parser {
                 null, null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null, null,
-                null, "EQUAL", "DIGIT", "LETTER", "HEX_LETTER", "OTC_LETTER", "BIN_LETTER",
-                "HIGH_LETTER", "TYPE_DEC_NUMBER", "TYPE_HEX_NUMBER", "TYPE_OTC_NUMBER",
+                null, "EQUAL", "DIGIT", "NUM", "LETTER", "HEX_LETTER", "OTC_LETTER",
+                "BIN_LETTER", "HIGH_LETTER", "TYPE_DEC_NUMBER", "TYPE_HEX_NUMBER", "TYPE_OTC_NUMBER",
                 "TYPE_BIN_NUMBER", "TYPE_HIGN_NUMBER", "IDENTIFIER", "WS", "UNRECOGNIZED"
 		};
 	}
@@ -1836,7 +1836,7 @@ public class CalculatorParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-            "\u0004\u0001W\u00be\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002" +
+            "\u0004\u0001X\u00be\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002" +
                     "\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002" +
                     "\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002" +
                     "\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002" +
@@ -1905,7 +1905,7 @@ public class CalculatorParser extends Parser {
                     "\u0000\u0000\u0000][\u0001\u0000\u0000\u0000]^\u0001\u0000\u0000\u0000" +
                     "^\u0005\u0001\u0000\u0000\u0000_]\u0001\u0000\u0000\u0000`a\u0005\u0001" +
                     "\u0000\u0000ab\u0003\u0004\u0002\u0000bc\u0005\u0002\u0000\u0000c\u0007" +
-                    "\u0001\u0000\u0000\u0000de\u0005U\u0000\u0000ef\u0005\u0001\u0000\u0000" +
+                    "\u0001\u0000\u0000\u0000de\u0005V\u0000\u0000ef\u0005\u0001\u0000\u0000" +
                     "fk\u0003\u0004\u0002\u0000gh\u0005\u0003\u0000\u0000hj\u0003\u0004\u0002" +
                     "\u0000ig\u0001\u0000\u0000\u0000jm\u0001\u0000\u0000\u0000ki\u0001\u0000" +
                     "\u0000\u0000kl\u0001\u0000\u0000\u0000ln\u0001\u0000\u0000\u0000mk\u0001" +
@@ -1948,7 +1948,7 @@ public class CalculatorParser extends Parser {
                     "\u00a1\u009d\u0001\u0000\u0000\u0000\u00a1\u009e\u0001\u0000\u0000\u0000" +
                     "\u00a1\u009f\u0001\u0000\u0000\u0000\u00a1\u00a0\u0001\u0000\u0000\u0000" +
                     "\u00a2\u0019\u0001\u0000\u0000\u0000\u00a3\u00a4\u0007\u0005\u0000\u0000" +
-                    "\u00a4\u001b\u0001\u0000\u0000\u0000\u00a5\u00b4\u0005P\u0000\u0000\u00a6" +
+                    "\u00a4\u001b\u0001\u0000\u0000\u0000\u00a5\u00b4\u0005Q\u0000\u0000\u00a6" +
                     "\u00a8\u0005J\u0000\u0000\u00a7\u00a6\u0001\u0000\u0000\u0000\u00a8\u00a9" +
                     "\u0001\u0000\u0000\u0000\u00a9\u00a7\u0001\u0000\u0000\u0000\u00a9\u00aa" +
                     "\u0001\u0000\u0000\u0000\u00aa\u00b1\u0001\u0000\u0000\u0000\u00ab\u00ad" +
@@ -1958,10 +1958,10 @@ public class CalculatorParser extends Parser {
                     "\u0000\u0000\u00b1\u00ab\u0001\u0000\u0000\u0000\u00b1\u00b2\u0001\u0000" +
                     "\u0000\u0000\u00b2\u00b4\u0001\u0000\u0000\u0000\u00b3\u00a5\u0001\u0000" +
                     "\u0000\u0000\u00b3\u00a7\u0001\u0000\u0000\u0000\u00b4\u001d\u0001\u0000" +
-                    "\u0000\u0000\u00b5\u00b6\u0005Q\u0000\u0000\u00b6\u001f\u0001\u0000\u0000" +
-                    "\u0000\u00b7\u00b8\u0005R\u0000\u0000\u00b8!\u0001\u0000\u0000\u0000\u00b9" +
-                    "\u00ba\u0005S\u0000\u0000\u00ba#\u0001\u0000\u0000\u0000\u00bb\u00bc\u0005" +
-                    "T\u0000\u0000\u00bc%\u0001\u0000\u0000\u0000\u000f(,.6?[]k\u0082\u008e" +
+                    "\u0000\u0000\u00b5\u00b6\u0005R\u0000\u0000\u00b6\u001f\u0001\u0000\u0000" +
+                    "\u0000\u00b7\u00b8\u0005S\u0000\u0000\u00b8!\u0001\u0000\u0000\u0000\u00b9" +
+                    "\u00ba\u0005T\u0000\u0000\u00ba#\u0001\u0000\u0000\u0000\u00bb\u00bc\u0005" +
+                    "U\u0000\u0000\u00bc%\u0001\u0000\u0000\u0000\u000f(,.6?[]k\u0082\u008e" +
                     "\u00a1\u00a9\u00af\u00b1\u00b3";
 	public static final ATN _ATN =
             new ATNDeserializer().deserialize(_serializedATN.toCharArray());
