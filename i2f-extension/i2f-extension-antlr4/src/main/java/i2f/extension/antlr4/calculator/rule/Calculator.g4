@@ -13,17 +13,18 @@ eval: // 入口
     ;
 
 number: // 数值
-     constNumber // 常量
-    | decNumber // 十进制数字
-    | hexNumber // 16进制数字
+    hexNumber // 16进制数字
     | otcNumber // 8进制数字
     | binNumber // 二进制数字
     | highNumber // 自定义进制数字
+    | decNumber // 十进制数字
+    | constNumber // 常量
     ;
 
 
 expr: // 表达式
-     bracket // 括号
+     number // 数字
+    | bracket // 括号
     | convertor // 内建函数
     | expr suffixOperator // 后置单运算符
     | prefixOperator expr // 前置单运算符
@@ -33,7 +34,7 @@ expr: // 表达式
     | expr operatorV2 expr // 2级双目运算符
     | expr operatorV1 expr // 1级双目运算符
     | expr operatorV0 expr // 0级双目运算符
-    | number // 数字
+
     ;
 
 bracket: // 括号
@@ -106,34 +107,36 @@ BIN_LETTER:[01]; // 2进制字符
 HIGH_LETTER:[0-9a-zA-Z]; // 自定义进制字符
 
 constNumber: // 常量
-     'pi' // 常量 π
-    | 'e' // 常量 e
+     'pi' | 'PI' // 常量 π
+    | 'e' | 'E' // 常量 e
     | 'randf' // 随机小数，取 0-1 之间的小数
     ;
 
 decNumber: // 十进制数字
-    (DIGIT)+ // 整数
-    | (DIGIT)+ '.' (DIGIT)+ // 小数
-    | (DIGIT)+ '.' (DIGIT) 'e' (DIGIT)+ // 科学计数法
-    | (DIGIT)+ '.' (DIGIT) 'e' '-' (DIGIT)+ // 科学计数法
+     (DIGIT)+ ('.' (DIGIT)+)? ('e' ('-')? (DIGIT)+)? // 科学计数法
+    | (DIGIT)+ // 整数
     ;
 
 
 
 hexNumber: // 16进制数
-    '0' ('x'|'X') (HEX_LETTER)+
+    '0X' (HEX_LETTER)+
+    | '0x' (HEX_LETTER)+
     ;
 
 otcNumber: // 8进制数
-    '0' ('t'|'T') (OTC_LETTER)+
+    '0T' (OTC_LETTER)+
+    | '0t' (OTC_LETTER)+
     ;
 
 binNumber: // 2进制数
-    '0' ('b'|'B') (BIN_LETTER)+
+    '0B' (BIN_LETTER)+
+    '0b' (BIN_LETTER)+
     ;
 
 highNumber: // 任意进制数
-    '0' ('h'|'H') (DIGIT)+ ':' (HIGH_LETTER)+ // 0h12:56ab
+    '0H' (DIGIT)+ ':' (HIGH_LETTER)+ // 0h12:56ab
+    | '0h' (DIGIT)+ ':' (HIGH_LETTER)+ // 0h12:56ab
     ;
 
 IDENTIFIER: // 标识符
