@@ -33,17 +33,16 @@ public class CalculatorParser extends Parser {
 			T__45 = 46, T__46 = 47, T__47 = 48, T__48 = 49, T__49 = 50, T__50 = 51, T__51 = 52,
 			T__52 = 53, T__53 = 54, T__54 = 55, T__55 = 56, T__56 = 57, T__57 = 58, T__58 = 59,
 			T__59 = 60, T__60 = 61, T__61 = 62, T__62 = 63, T__63 = 64, T__64 = 65, T__65 = 66,
-			T__66 = 67, T__67 = 68, T__68 = 69, T__69 = 70, T__70 = 71, T__71 = 72, T__72 = 73,
-			T__73 = 74, T__74 = 75, T__75 = 76, T__76 = 77, T__77 = 78, T__78 = 79, T__79 = 80,
-			EQUAL = 81, DIGIT = 82, LETTER = 83, HEX_LETTER = 84, OTC_LETTER = 85, BIN_LETTER = 86,
-			HIGH_LETTER = 87, IDENTIFIER = 88, WS = 89, UNRECOGNIZED = 90;
+			T__66 = 67, T__67 = 68, T__68 = 69, T__69 = 70, T__70 = 71, EQUAL = 72, DIGIT = 73,
+			LETTER = 74, HEX_LETTER = 75, OTC_LETTER = 76, BIN_LETTER = 77, HIGH_LETTER = 78,
+			CONST_PI = 79, CONST_E = 80, CONST_X = 81, CONST_T = 82, CONST_B = 83, CONST_H = 84,
+			IDENTIFIER = 85, WS = 86, UNRECOGNIZED = 87;
 	public static final int
 			RULE_eval = 0, RULE_number = 1, RULE_expr = 2, RULE_bracket = 3, RULE_convertor = 4,
 			RULE_prefixOperator = 5, RULE_suffixOperator = 6, RULE_operatorV5 = 7,
 			RULE_operatorV4 = 8, RULE_operatorV3 = 9, RULE_operatorV2 = 10, RULE_operatorV1 = 11,
 			RULE_operatorV0 = 12, RULE_constNumber = 13, RULE_decNumber = 14, RULE_hexNumber = 15,
 			RULE_otcNumber = 16, RULE_binNumber = 17, RULE_highNumber = 18;
-
 	private static String[] makeRuleNames() {
 		return new String[]{
 				"eval", "number", "expr", "bracket", "convertor", "prefixOperator", "suffixOperator",
@@ -52,7 +51,6 @@ public class CalculatorParser extends Parser {
 				"highNumber"
 		};
 	}
-
 	public static final String[] ruleNames = makeRuleNames();
 
 	private static String[] makeLiteralNames() {
@@ -65,13 +63,10 @@ public class CalculatorParser extends Parser {
 				"'log'", "'^'", "'pow'", "'//'", "'*'", "'/'", "'mul'", "'div'", "'mod'",
 				"'+'", "'-'", "'add'", "'sub'", "'>='", "'<='", "'!='", "'<>'", "'=='",
 				"'gte'", "'lte'", "'neq'", "'ne'", "'eq'", "'>'", "'<'", "'gt'", "'lt'",
-				"'pi'", "'e'", "'randf'", "'.'", "'0'", "'x'", "'X'", "'t'", "'T'", "'b'",
-				"'B'", "'h'", "'H'", "':'", "'='"
+				"'randf'", "'.'", "'e'", "'0'", "':'", "'='"
 		};
 	}
-
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
-
 	private static String[] makeSymbolicNames() {
 		return new String[]{
 				null, null, null, null, null, null, null, null, null, null, null, null,
@@ -80,12 +75,11 @@ public class CalculatorParser extends Parser {
 				null, null, null, null, null, null, null, null, null, null, null, null,
 				null, null, null, null, null, null, null, null, null, null, null, null,
 				null, null, null, null, null, null, null, null, null, null, null, null,
-				null, null, null, null, null, null, null, null, null, "EQUAL", "DIGIT",
-				"LETTER", "HEX_LETTER", "OTC_LETTER", "BIN_LETTER", "HIGH_LETTER", "IDENTIFIER",
-				"WS", "UNRECOGNIZED"
+				"EQUAL", "DIGIT", "LETTER", "HEX_LETTER", "OTC_LETTER", "BIN_LETTER",
+				"HIGH_LETTER", "CONST_PI", "CONST_E", "CONST_X", "CONST_T", "CONST_B",
+				"CONST_H", "IDENTIFIER", "WS", "UNRECOGNIZED"
 		};
 	}
-
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -94,7 +88,6 @@ public class CalculatorParser extends Parser {
 	 */
 	@Deprecated
 	public static final String[] tokenNames;
-
 	static {
 		tokenNames = new String[_SYMBOLIC_NAMES.length];
 		for (int i = 0; i < tokenNames.length; i++) {
@@ -155,11 +148,9 @@ public class CalculatorParser extends Parser {
 		public TerminalNode EQUAL() {
 			return getToken(CalculatorParser.EQUAL, 0);
 		}
-
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class, 0);
 		}
-
 		public EvalContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -168,17 +159,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_eval;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterEval(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitEval(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor) return ((CalculatorVisitor<? extends T>) visitor).visitEval(this);
@@ -244,27 +232,21 @@ public class CalculatorParser extends Parser {
 		public ConstNumberContext constNumber() {
 			return getRuleContext(ConstNumberContext.class, 0);
 		}
-
 		public DecNumberContext decNumber() {
 			return getRuleContext(DecNumberContext.class, 0);
 		}
-
 		public HexNumberContext hexNumber() {
 			return getRuleContext(HexNumberContext.class, 0);
 		}
-
 		public OtcNumberContext otcNumber() {
 			return getRuleContext(OtcNumberContext.class, 0);
 		}
-
 		public BinNumberContext binNumber() {
 			return getRuleContext(BinNumberContext.class, 0);
 		}
-
 		public HighNumberContext highNumber() {
 			return getRuleContext(HighNumberContext.class, 0);
 		}
-
 		public NumberContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -273,17 +255,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_number;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterNumber(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitNumber(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -357,55 +336,42 @@ public class CalculatorParser extends Parser {
 		public BracketContext bracket() {
 			return getRuleContext(BracketContext.class, 0);
 		}
-
 		public ConvertorContext convertor() {
 			return getRuleContext(ConvertorContext.class, 0);
 		}
-
 		public PrefixOperatorContext prefixOperator() {
 			return getRuleContext(PrefixOperatorContext.class, 0);
 		}
-
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
-
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class, i);
 		}
-
 		public NumberContext number() {
 			return getRuleContext(NumberContext.class, 0);
 		}
-
 		public OperatorV5Context operatorV5() {
 			return getRuleContext(OperatorV5Context.class, 0);
 		}
-
 		public OperatorV4Context operatorV4() {
 			return getRuleContext(OperatorV4Context.class, 0);
 		}
-
 		public OperatorV3Context operatorV3() {
 			return getRuleContext(OperatorV3Context.class, 0);
 		}
-
 		public OperatorV2Context operatorV2() {
 			return getRuleContext(OperatorV2Context.class, 0);
 		}
-
 		public OperatorV1Context operatorV1() {
 			return getRuleContext(OperatorV1Context.class, 0);
 		}
-
 		public OperatorV0Context operatorV0() {
 			return getRuleContext(OperatorV0Context.class, 0);
 		}
-
 		public SuffixOperatorContext suffixOperator() {
 			return getRuleContext(SuffixOperatorContext.class, 0);
 		}
-
 		public ExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -414,17 +380,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_expr;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterExpr(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitExpr(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor) return ((CalculatorVisitor<? extends T>) visitor).visitExpr(this);
@@ -485,10 +448,10 @@ public class CalculatorParser extends Parser {
 					}
 					break;
 					case T__66:
-					case T__67:
-					case T__68:
-					case T__70:
-					case DIGIT: {
+					case T__69:
+					case DIGIT:
+					case CONST_PI:
+					case CONST_E: {
 						setState(62);
 						number();
 					}
@@ -613,7 +576,6 @@ public class CalculatorParser extends Parser {
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class, 0);
 		}
-
 		public BracketContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -622,17 +584,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_bracket;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterBracket(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitBracket(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -669,15 +628,12 @@ public class CalculatorParser extends Parser {
 		public TerminalNode IDENTIFIER() {
 			return getToken(CalculatorParser.IDENTIFIER, 0);
 		}
-
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
-
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class, i);
 		}
-
 		public ConvertorContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -686,17 +642,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_convertor;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterConvertor(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitConvertor(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -757,17 +710,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_prefixOperator;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterPrefixOperator(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitPrefixOperator(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -813,17 +763,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_suffixOperator;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterSuffixOperator(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitSuffixOperator(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -869,17 +816,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_operatorV5;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterOperatorV5(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitOperatorV5(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -925,17 +869,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_operatorV4;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterOperatorV4(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitOperatorV4(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -971,10 +912,10 @@ public class CalculatorParser extends Parser {
 				case T__19:
 				case T__20:
 				case T__66:
-				case T__67:
-				case T__68:
-				case T__70:
+				case T__69:
 				case DIGIT:
+				case CONST_PI:
+				case CONST_E:
 				case IDENTIFIER:
 					enterOuterAlt(_localctx, 1);
 				{
@@ -1080,17 +1021,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_operatorV3;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterOperatorV3(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitOperatorV3(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -1136,17 +1074,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_operatorV2;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterOperatorV2(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitOperatorV2(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -1182,10 +1117,10 @@ public class CalculatorParser extends Parser {
 				case T__19:
 				case T__20:
 				case T__66:
-				case T__67:
-				case T__68:
-				case T__70:
+				case T__69:
 				case DIGIT:
+				case CONST_PI:
+				case CONST_E:
 				case IDENTIFIER:
 					enterOuterAlt(_localctx, 1);
 				{
@@ -1263,17 +1198,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_operatorV1;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterOperatorV1(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitOperatorV1(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -1319,17 +1251,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_operatorV0;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterOperatorV0(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitOperatorV0(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -1365,10 +1294,10 @@ public class CalculatorParser extends Parser {
 				case T__19:
 				case T__20:
 				case T__66:
-				case T__67:
-				case T__68:
-				case T__70:
+				case T__69:
 				case DIGIT:
+				case CONST_PI:
+				case CONST_E:
 				case IDENTIFIER:
 					enterOuterAlt(_localctx, 1);
 				{
@@ -1487,6 +1416,13 @@ public class CalculatorParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class ConstNumberContext extends ParserRuleContext {
+		public TerminalNode CONST_PI() {
+			return getToken(CalculatorParser.CONST_PI, 0);
+		}
+
+		public TerminalNode CONST_E() {
+			return getToken(CalculatorParser.CONST_E, 0);
+		}
 		public ConstNumberContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1495,17 +1431,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_constNumber;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterConstNumber(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitConstNumber(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -1523,7 +1456,7 @@ public class CalculatorParser extends Parser {
 			{
 				setState(163);
 				_la = _input.LA(1);
-				if (!(((((_la - 67)) & ~0x3f) == 0 && ((1L << (_la - 67)) & 7L) != 0))) {
+				if (!(((((_la - 67)) & ~0x3f) == 0 && ((1L << (_la - 67)) & 12289L) != 0))) {
 					_errHandler.recoverInline(this);
 				} else {
 					if (_input.LA(1) == Token.EOF) matchedEOF = true;
@@ -1546,11 +1479,9 @@ public class CalculatorParser extends Parser {
 		public List<TerminalNode> DIGIT() {
 			return getTokens(CalculatorParser.DIGIT);
 		}
-
 		public TerminalNode DIGIT(int i) {
 			return getToken(CalculatorParser.DIGIT, i);
 		}
-
 		public DecNumberContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1559,17 +1490,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_decNumber;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterDecNumber(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitDecNumber(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -1629,7 +1557,7 @@ public class CalculatorParser extends Parser {
 						_la = _input.LA(1);
 					} while (_la == DIGIT);
 					setState(175);
-					match(T__69);
+					match(T__67);
 					setState(177);
 					_errHandler.sync(this);
 					_alt = 1;
@@ -1669,13 +1597,13 @@ public class CalculatorParser extends Parser {
 						_la = _input.LA(1);
 					} while (_la == DIGIT);
 					setState(186);
-					match(T__69);
+					match(T__67);
 					{
 						setState(187);
 						match(DIGIT);
 					}
 					setState(188);
-					match(T__67);
+					match(T__68);
 					setState(190);
 					_errHandler.sync(this);
 					_alt = 1;
@@ -1715,13 +1643,13 @@ public class CalculatorParser extends Parser {
 						_la = _input.LA(1);
 					} while (_la == DIGIT);
 					setState(199);
-					match(T__69);
+					match(T__67);
 					{
 						setState(200);
 						match(DIGIT);
 					}
 					setState(201);
-					match(T__67);
+					match(T__68);
 					setState(202);
 					match(T__49);
 					setState(204);
@@ -1758,14 +1686,16 @@ public class CalculatorParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class HexNumberContext extends ParserRuleContext {
+		public TerminalNode CONST_X() {
+			return getToken(CalculatorParser.CONST_X, 0);
+		}
+
 		public List<TerminalNode> HEX_LETTER() {
 			return getTokens(CalculatorParser.HEX_LETTER);
 		}
-
 		public TerminalNode HEX_LETTER(int i) {
 			return getToken(CalculatorParser.HEX_LETTER, i);
 		}
-
 		public HexNumberContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1774,17 +1704,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_hexNumber;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterHexNumber(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitHexNumber(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -1796,22 +1723,14 @@ public class CalculatorParser extends Parser {
 	public final HexNumberContext hexNumber() throws RecognitionException {
 		HexNumberContext _localctx = new HexNumberContext(_ctx, getState());
 		enterRule(_localctx, 30, RULE_hexNumber);
-		int _la;
 		try {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
 				setState(210);
-				match(T__70);
+				match(T__69);
 				setState(211);
-				_la = _input.LA(1);
-				if (!(_la == T__71 || _la == T__72)) {
-					_errHandler.recoverInline(this);
-				} else {
-					if (_input.LA(1) == Token.EOF) matchedEOF = true;
-					_errHandler.reportMatch(this);
-					consume();
-				}
+				match(CONST_X);
 				setState(213);
 				_errHandler.sync(this);
 				_alt = 1;
@@ -1844,14 +1763,16 @@ public class CalculatorParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class OtcNumberContext extends ParserRuleContext {
+		public TerminalNode CONST_T() {
+			return getToken(CalculatorParser.CONST_T, 0);
+		}
+
 		public List<TerminalNode> OTC_LETTER() {
 			return getTokens(CalculatorParser.OTC_LETTER);
 		}
-
 		public TerminalNode OTC_LETTER(int i) {
 			return getToken(CalculatorParser.OTC_LETTER, i);
 		}
-
 		public OtcNumberContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1860,17 +1781,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_otcNumber;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterOtcNumber(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitOtcNumber(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -1882,22 +1800,14 @@ public class CalculatorParser extends Parser {
 	public final OtcNumberContext otcNumber() throws RecognitionException {
 		OtcNumberContext _localctx = new OtcNumberContext(_ctx, getState());
 		enterRule(_localctx, 32, RULE_otcNumber);
-		int _la;
 		try {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
 				setState(217);
-				match(T__70);
+				match(T__69);
 				setState(218);
-				_la = _input.LA(1);
-				if (!(_la == T__73 || _la == T__74)) {
-					_errHandler.recoverInline(this);
-				} else {
-					if (_input.LA(1) == Token.EOF) matchedEOF = true;
-					_errHandler.reportMatch(this);
-					consume();
-				}
+				match(CONST_T);
 				setState(220);
 				_errHandler.sync(this);
 				_alt = 1;
@@ -1930,14 +1840,16 @@ public class CalculatorParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class BinNumberContext extends ParserRuleContext {
+		public TerminalNode CONST_B() {
+			return getToken(CalculatorParser.CONST_B, 0);
+		}
+
 		public List<TerminalNode> BIN_LETTER() {
 			return getTokens(CalculatorParser.BIN_LETTER);
 		}
-
 		public TerminalNode BIN_LETTER(int i) {
 			return getToken(CalculatorParser.BIN_LETTER, i);
 		}
-
 		public BinNumberContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1946,17 +1858,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_binNumber;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterBinNumber(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitBinNumber(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -1968,22 +1877,14 @@ public class CalculatorParser extends Parser {
 	public final BinNumberContext binNumber() throws RecognitionException {
 		BinNumberContext _localctx = new BinNumberContext(_ctx, getState());
 		enterRule(_localctx, 34, RULE_binNumber);
-		int _la;
 		try {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
 				setState(224);
-				match(T__70);
+				match(T__69);
 				setState(225);
-				_la = _input.LA(1);
-				if (!(_la == T__75 || _la == T__76)) {
-					_errHandler.recoverInline(this);
-				} else {
-					if (_input.LA(1) == Token.EOF) matchedEOF = true;
-					_errHandler.reportMatch(this);
-					consume();
-				}
+				match(CONST_B);
 				setState(227);
 				_errHandler.sync(this);
 				_alt = 1;
@@ -2016,10 +1917,13 @@ public class CalculatorParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class HighNumberContext extends ParserRuleContext {
+		public TerminalNode CONST_H() {
+			return getToken(CalculatorParser.CONST_H, 0);
+		}
+
 		public List<TerminalNode> DIGIT() {
 			return getTokens(CalculatorParser.DIGIT);
 		}
-
 		public TerminalNode DIGIT(int i) {
 			return getToken(CalculatorParser.DIGIT, i);
 		}
@@ -2027,11 +1931,9 @@ public class CalculatorParser extends Parser {
 		public List<TerminalNode> HIGH_LETTER() {
 			return getTokens(CalculatorParser.HIGH_LETTER);
 		}
-
 		public TerminalNode HIGH_LETTER(int i) {
 			return getToken(CalculatorParser.HIGH_LETTER, i);
 		}
-
 		public HighNumberContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2040,17 +1942,14 @@ public class CalculatorParser extends Parser {
 		public int getRuleIndex() {
 			return RULE_highNumber;
 		}
-
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).enterHighNumber(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof CalculatorListener) ((CalculatorListener) listener).exitHighNumber(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof CalculatorVisitor)
@@ -2068,16 +1967,9 @@ public class CalculatorParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 				setState(231);
-				match(T__70);
+				match(T__69);
 				setState(232);
-				_la = _input.LA(1);
-				if (!(_la == T__77 || _la == T__78)) {
-					_errHandler.recoverInline(this);
-				} else {
-					if (_input.LA(1) == Token.EOF) matchedEOF = true;
-					_errHandler.reportMatch(this);
-					consume();
-				}
+				match(CONST_H);
 				setState(234);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -2093,7 +1985,7 @@ public class CalculatorParser extends Parser {
 					_la = _input.LA(1);
 				} while (_la == DIGIT);
 				setState(238);
-				match(T__79);
+				match(T__70);
 				setState(240);
 				_errHandler.sync(this);
 				_alt = 1;
@@ -2131,7 +2023,6 @@ public class CalculatorParser extends Parser {
 		}
 		return true;
 	}
-
 	private boolean expr_sempred(ExprContext _localctx, int predIndex) {
 		switch (predIndex) {
 			case 0:
@@ -2153,7 +2044,7 @@ public class CalculatorParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-			"\u0004\u0001Z\u00f5\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002" +
+			"\u0004\u0001W\u00f5\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002" +
 					"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002" +
 					"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002" +
 					"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002" +
@@ -2193,139 +2084,137 @@ public class CalculatorParser extends Parser {
 					"\f\u0012\u00ec\u0001\u0012\u0001\u0012\u0004\u0012\u00f1\b\u0012\u000b" +
 					"\u0012\f\u0012\u00f2\u0001\u0012\u0000\u0001\u0004\u0013\u0000\u0002\u0004" +
 					"\u0006\b\n\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u001c\u001e \"" +
-					"$\u0000\n\u0001\u0000\u0004\u0015\u0001\u0000\u0016\u0018\u0001\u0000" +
-					"\u0019\u001c\u0001\u0000(*\u0001\u000014\u0001\u0000CE\u0001\u0000HI\u0001" +
-					"\u0000JK\u0001\u0000LM\u0001\u0000NO\u0123\u0000.\u0001\u0000\u0000\u0000" +
-					"\u00026\u0001\u0000\u0000\u0000\u0004?\u0001\u0000\u0000\u0000\u0006`" +
-					"\u0001\u0000\u0000\u0000\bd\u0001\u0000\u0000\u0000\np\u0001\u0000\u0000" +
-					"\u0000\fr\u0001\u0000\u0000\u0000\u000et\u0001\u0000\u0000\u0000\u0010" +
-					"\u0082\u0001\u0000\u0000\u0000\u0012\u0084\u0001\u0000\u0000\u0000\u0014" +
-					"\u008e\u0001\u0000\u0000\u0000\u0016\u0090\u0001\u0000\u0000\u0000\u0018" +
-					"\u00a1\u0001\u0000\u0000\u0000\u001a\u00a3\u0001\u0000\u0000\u0000\u001c" +
-					"\u00d0\u0001\u0000\u0000\u0000\u001e\u00d2\u0001\u0000\u0000\u0000 \u00d9" +
-					"\u0001\u0000\u0000\u0000\"\u00e0\u0001\u0000\u0000\u0000$\u00e7\u0001" +
-					"\u0000\u0000\u0000&(\u0003\u0002\u0001\u0000\')\u0005Q\u0000\u0000(\'" +
-					"\u0001\u0000\u0000\u0000()\u0001\u0000\u0000\u0000)/\u0001\u0000\u0000" +
-					"\u0000*,\u0003\u0004\u0002\u0000+-\u0005Q\u0000\u0000,+\u0001\u0000\u0000" +
-					"\u0000,-\u0001\u0000\u0000\u0000-/\u0001\u0000\u0000\u0000.&\u0001\u0000" +
-					"\u0000\u0000.*\u0001\u0000\u0000\u0000/\u0001\u0001\u0000\u0000\u0000" +
-					"07\u0003\u001a\r\u000017\u0003\u001c\u000e\u000027\u0003\u001e\u000f\u0000" +
-					"37\u0003 \u0010\u000047\u0003\"\u0011\u000057\u0003$\u0012\u000060\u0001" +
-					"\u0000\u0000\u000061\u0001\u0000\u0000\u000062\u0001\u0000\u0000\u0000" +
-					"63\u0001\u0000\u0000\u000064\u0001\u0000\u0000\u000065\u0001\u0000\u0000" +
-					"\u00007\u0003\u0001\u0000\u0000\u000089\u0006\u0002\uffff\uffff\u0000" +
-					"9@\u0003\u0006\u0003\u0000:@\u0003\b\u0004\u0000;<\u0003\n\u0005\u0000" +
-					"<=\u0003\u0004\u0002\b=@\u0001\u0000\u0000\u0000>@\u0003\u0002\u0001\u0000" +
-					"?8\u0001\u0000\u0000\u0000?:\u0001\u0000\u0000\u0000?;\u0001\u0000\u0000" +
-					"\u0000?>\u0001\u0000\u0000\u0000@]\u0001\u0000\u0000\u0000AB\n\u0007\u0000" +
-					"\u0000BC\u0003\u000e\u0007\u0000CD\u0003\u0004\u0002\bD\\\u0001\u0000" +
-					"\u0000\u0000EF\n\u0006\u0000\u0000FG\u0003\u0010\b\u0000GH\u0003\u0004" +
-					"\u0002\u0007H\\\u0001\u0000\u0000\u0000IJ\n\u0005\u0000\u0000JK\u0003" +
-					"\u0012\t\u0000KL\u0003\u0004\u0002\u0006L\\\u0001\u0000\u0000\u0000MN" +
-					"\n\u0004\u0000\u0000NO\u0003\u0014\n\u0000OP\u0003\u0004\u0002\u0005P" +
-					"\\\u0001\u0000\u0000\u0000QR\n\u0003\u0000\u0000RS\u0003\u0016\u000b\u0000" +
-					"ST\u0003\u0004\u0002\u0004T\\\u0001\u0000\u0000\u0000UV\n\u0002\u0000" +
-					"\u0000VW\u0003\u0018\f\u0000WX\u0003\u0004\u0002\u0003X\\\u0001\u0000" +
-					"\u0000\u0000YZ\n\t\u0000\u0000Z\\\u0003\f\u0006\u0000[A\u0001\u0000\u0000" +
-					"\u0000[E\u0001\u0000\u0000\u0000[I\u0001\u0000\u0000\u0000[M\u0001\u0000" +
-					"\u0000\u0000[Q\u0001\u0000\u0000\u0000[U\u0001\u0000\u0000\u0000[Y\u0001" +
-					"\u0000\u0000\u0000\\_\u0001\u0000\u0000\u0000][\u0001\u0000\u0000\u0000" +
-					"]^\u0001\u0000\u0000\u0000^\u0005\u0001\u0000\u0000\u0000_]\u0001\u0000" +
-					"\u0000\u0000`a\u0005\u0001\u0000\u0000ab\u0003\u0004\u0002\u0000bc\u0005" +
-					"\u0002\u0000\u0000c\u0007\u0001\u0000\u0000\u0000de\u0005X\u0000\u0000" +
-					"ef\u0005\u0001\u0000\u0000fk\u0003\u0004\u0002\u0000gh\u0005\u0003\u0000" +
-					"\u0000hj\u0003\u0004\u0002\u0000ig\u0001\u0000\u0000\u0000jm\u0001\u0000" +
-					"\u0000\u0000ki\u0001\u0000\u0000\u0000kl\u0001\u0000\u0000\u0000ln\u0001" +
-					"\u0000\u0000\u0000mk\u0001\u0000\u0000\u0000no\u0005\u0002\u0000\u0000" +
-					"o\t\u0001\u0000\u0000\u0000pq\u0007\u0000\u0000\u0000q\u000b\u0001\u0000" +
-					"\u0000\u0000rs\u0007\u0001\u0000\u0000s\r\u0001\u0000\u0000\u0000tu\u0007" +
-					"\u0002\u0000\u0000u\u000f\u0001\u0000\u0000\u0000v\u0083\u0001\u0000\u0000" +
-					"\u0000w\u0083\u0005\u001d\u0000\u0000x\u0083\u0005\u001e\u0000\u0000y" +
-					"\u0083\u0005\u001f\u0000\u0000z\u0083\u0005 \u0000\u0000{\u0083\u0005" +
-					"!\u0000\u0000|\u0083\u0005\"\u0000\u0000}\u0083\u0005#\u0000\u0000~\u0083" +
-					"\u0005$\u0000\u0000\u007f\u0083\u0005%\u0000\u0000\u0080\u0083\u0005&" +
-					"\u0000\u0000\u0081\u0083\u0005\'\u0000\u0000\u0082v\u0001\u0000\u0000" +
-					"\u0000\u0082w\u0001\u0000\u0000\u0000\u0082x\u0001\u0000\u0000\u0000\u0082" +
-					"y\u0001\u0000\u0000\u0000\u0082z\u0001\u0000\u0000\u0000\u0082{\u0001" +
-					"\u0000\u0000\u0000\u0082|\u0001\u0000\u0000\u0000\u0082}\u0001\u0000\u0000" +
-					"\u0000\u0082~\u0001\u0000\u0000\u0000\u0082\u007f\u0001\u0000\u0000\u0000" +
-					"\u0082\u0080\u0001\u0000\u0000\u0000\u0082\u0081\u0001\u0000\u0000\u0000" +
-					"\u0083\u0011\u0001\u0000\u0000\u0000\u0084\u0085\u0007\u0003\u0000\u0000" +
-					"\u0085\u0013\u0001\u0000\u0000\u0000\u0086\u008f\u0001\u0000\u0000\u0000" +
-					"\u0087\u008f\u0005+\u0000\u0000\u0088\u008f\u0005,\u0000\u0000\u0089\u008f" +
-					"\u0005-\u0000\u0000\u008a\u008f\u0005\u0017\u0000\u0000\u008b\u008f\u0005" +
-					".\u0000\u0000\u008c\u008f\u0005/\u0000\u0000\u008d\u008f\u00050\u0000" +
-					"\u0000\u008e\u0086\u0001\u0000\u0000\u0000\u008e\u0087\u0001\u0000\u0000" +
-					"\u0000\u008e\u0088\u0001\u0000\u0000\u0000\u008e\u0089\u0001\u0000\u0000" +
-					"\u0000\u008e\u008a\u0001\u0000\u0000\u0000\u008e\u008b\u0001\u0000\u0000" +
-					"\u0000\u008e\u008c\u0001\u0000\u0000\u0000\u008e\u008d\u0001\u0000\u0000" +
-					"\u0000\u008f\u0015\u0001\u0000\u0000\u0000\u0090\u0091\u0007\u0004\u0000" +
-					"\u0000\u0091\u0017\u0001\u0000\u0000\u0000\u0092\u00a2\u0001\u0000\u0000" +
-					"\u0000\u0093\u00a2\u00055\u0000\u0000\u0094\u00a2\u00056\u0000\u0000\u0095" +
-					"\u00a2\u00057\u0000\u0000\u0096\u00a2\u00058\u0000\u0000\u0097\u00a2\u0005" +
-					"9\u0000\u0000\u0098\u00a2\u0005:\u0000\u0000\u0099\u00a2\u0005;\u0000" +
-					"\u0000\u009a\u00a2\u0005<\u0000\u0000\u009b\u00a2\u0005=\u0000\u0000\u009c" +
-					"\u00a2\u0005>\u0000\u0000\u009d\u00a2\u0005?\u0000\u0000\u009e\u00a2\u0005" +
-					"@\u0000\u0000\u009f\u00a2\u0005A\u0000\u0000\u00a0\u00a2\u0005B\u0000" +
-					"\u0000\u00a1\u0092\u0001\u0000\u0000\u0000\u00a1\u0093\u0001\u0000\u0000" +
-					"\u0000\u00a1\u0094\u0001\u0000\u0000\u0000\u00a1\u0095\u0001\u0000\u0000" +
-					"\u0000\u00a1\u0096\u0001\u0000\u0000\u0000\u00a1\u0097\u0001\u0000\u0000" +
-					"\u0000\u00a1\u0098\u0001\u0000\u0000\u0000\u00a1\u0099\u0001\u0000\u0000" +
-					"\u0000\u00a1\u009a\u0001\u0000\u0000\u0000\u00a1\u009b\u0001\u0000\u0000" +
-					"\u0000\u00a1\u009c\u0001\u0000\u0000\u0000\u00a1\u009d\u0001\u0000\u0000" +
-					"\u0000\u00a1\u009e\u0001\u0000\u0000\u0000\u00a1\u009f\u0001\u0000\u0000" +
-					"\u0000\u00a1\u00a0\u0001\u0000\u0000\u0000\u00a2\u0019\u0001\u0000\u0000" +
-					"\u0000\u00a3\u00a4\u0007\u0005\u0000\u0000\u00a4\u001b\u0001\u0000\u0000" +
-					"\u0000\u00a5\u00a7\u0005R\u0000\u0000\u00a6\u00a5\u0001\u0000\u0000\u0000" +
-					"\u00a7\u00a8\u0001\u0000\u0000\u0000\u00a8\u00a6\u0001\u0000\u0000\u0000" +
-					"\u00a8\u00a9\u0001\u0000\u0000\u0000\u00a9\u00d1\u0001\u0000\u0000\u0000" +
-					"\u00aa\u00ac\u0005R\u0000\u0000\u00ab\u00aa\u0001\u0000\u0000\u0000\u00ac" +
-					"\u00ad\u0001\u0000\u0000\u0000\u00ad\u00ab\u0001\u0000\u0000\u0000\u00ad" +
-					"\u00ae\u0001\u0000\u0000\u0000\u00ae\u00af\u0001\u0000\u0000\u0000\u00af" +
-					"\u00b1\u0005F\u0000\u0000\u00b0\u00b2\u0005R\u0000\u0000\u00b1\u00b0\u0001" +
-					"\u0000\u0000\u0000\u00b2\u00b3\u0001\u0000\u0000\u0000\u00b3\u00b1\u0001" +
-					"\u0000\u0000\u0000\u00b3\u00b4\u0001\u0000\u0000\u0000\u00b4\u00d1\u0001" +
-					"\u0000\u0000\u0000\u00b5\u00b7\u0005R\u0000\u0000\u00b6\u00b5\u0001\u0000" +
-					"\u0000\u0000\u00b7\u00b8\u0001\u0000\u0000\u0000\u00b8\u00b6\u0001\u0000" +
-					"\u0000\u0000\u00b8\u00b9\u0001\u0000\u0000\u0000\u00b9\u00ba\u0001\u0000" +
-					"\u0000\u0000\u00ba\u00bb\u0005F\u0000\u0000\u00bb\u00bc\u0005R\u0000\u0000" +
-					"\u00bc\u00be\u0005D\u0000\u0000\u00bd\u00bf\u0005R\u0000\u0000\u00be\u00bd" +
-					"\u0001\u0000\u0000\u0000\u00bf\u00c0\u0001\u0000\u0000\u0000\u00c0\u00be" +
-					"\u0001\u0000\u0000\u0000\u00c0\u00c1\u0001\u0000\u0000\u0000\u00c1\u00d1" +
-					"\u0001\u0000\u0000\u0000\u00c2\u00c4\u0005R\u0000\u0000\u00c3\u00c2\u0001" +
-					"\u0000\u0000\u0000\u00c4\u00c5\u0001\u0000\u0000\u0000\u00c5\u00c3\u0001" +
-					"\u0000\u0000\u0000\u00c5\u00c6\u0001\u0000\u0000\u0000\u00c6\u00c7\u0001" +
-					"\u0000\u0000\u0000\u00c7\u00c8\u0005F\u0000\u0000\u00c8\u00c9\u0005R\u0000" +
-					"\u0000\u00c9\u00ca\u0005D\u0000\u0000\u00ca\u00cc\u00052\u0000\u0000\u00cb" +
-					"\u00cd\u0005R\u0000\u0000\u00cc\u00cb\u0001\u0000\u0000\u0000\u00cd\u00ce" +
-					"\u0001\u0000\u0000\u0000\u00ce\u00cc\u0001\u0000\u0000\u0000\u00ce\u00cf" +
-					"\u0001\u0000\u0000\u0000\u00cf\u00d1\u0001\u0000\u0000\u0000\u00d0\u00a6" +
-					"\u0001\u0000\u0000\u0000\u00d0\u00ab\u0001\u0000\u0000\u0000\u00d0\u00b6" +
-					"\u0001\u0000\u0000\u0000\u00d0\u00c3\u0001\u0000\u0000\u0000\u00d1\u001d" +
-					"\u0001\u0000\u0000\u0000\u00d2\u00d3\u0005G\u0000\u0000\u00d3\u00d5\u0007" +
-					"\u0006\u0000\u0000\u00d4\u00d6\u0005T\u0000\u0000\u00d5\u00d4\u0001\u0000" +
-					"\u0000\u0000\u00d6\u00d7\u0001\u0000\u0000\u0000\u00d7\u00d5\u0001\u0000" +
-					"\u0000\u0000\u00d7\u00d8\u0001\u0000\u0000\u0000\u00d8\u001f\u0001\u0000" +
-					"\u0000\u0000\u00d9\u00da\u0005G\u0000\u0000\u00da\u00dc\u0007\u0007\u0000" +
-					"\u0000\u00db\u00dd\u0005U\u0000\u0000\u00dc\u00db\u0001\u0000\u0000\u0000" +
-					"\u00dd\u00de\u0001\u0000\u0000\u0000\u00de\u00dc\u0001\u0000\u0000\u0000" +
-					"\u00de\u00df\u0001\u0000\u0000\u0000\u00df!\u0001\u0000\u0000\u0000\u00e0" +
-					"\u00e1\u0005G\u0000\u0000\u00e1\u00e3\u0007\b\u0000\u0000\u00e2\u00e4" +
-					"\u0005V\u0000\u0000\u00e3\u00e2\u0001\u0000\u0000\u0000\u00e4\u00e5\u0001" +
-					"\u0000\u0000\u0000\u00e5\u00e3\u0001\u0000\u0000\u0000\u00e5\u00e6\u0001" +
-					"\u0000\u0000\u0000\u00e6#\u0001\u0000\u0000\u0000\u00e7\u00e8\u0005G\u0000" +
-					"\u0000\u00e8\u00ea\u0007\t\u0000\u0000\u00e9\u00eb\u0005R\u0000\u0000" +
-					"\u00ea\u00e9\u0001\u0000\u0000\u0000\u00eb\u00ec\u0001\u0000\u0000\u0000" +
-					"\u00ec\u00ea\u0001\u0000\u0000\u0000\u00ec\u00ed\u0001\u0000\u0000\u0000" +
-					"\u00ed\u00ee\u0001\u0000\u0000\u0000\u00ee\u00f0\u0005P\u0000\u0000\u00ef" +
-					"\u00f1\u0005W\u0000\u0000\u00f0\u00ef\u0001\u0000\u0000\u0000\u00f1\u00f2" +
-					"\u0001\u0000\u0000\u0000\u00f2\u00f0\u0001\u0000\u0000\u0000\u00f2\u00f3" +
-					"\u0001\u0000\u0000\u0000\u00f3%\u0001\u0000\u0000\u0000\u0018(,.6?[]k" +
-					"\u0082\u008e\u00a1\u00a8\u00ad\u00b3\u00b8\u00c0\u00c5\u00ce\u00d0\u00d7" +
-					"\u00de\u00e5\u00ec\u00f2";
+					"$\u0000\u0006\u0001\u0000\u0004\u0015\u0001\u0000\u0016\u0018\u0001\u0000" +
+					"\u0019\u001c\u0001\u0000(*\u0001\u000014\u0002\u0000CCOP\u0123\u0000." +
+					"\u0001\u0000\u0000\u0000\u00026\u0001\u0000\u0000\u0000\u0004?\u0001\u0000" +
+					"\u0000\u0000\u0006`\u0001\u0000\u0000\u0000\bd\u0001\u0000\u0000\u0000" +
+					"\np\u0001\u0000\u0000\u0000\fr\u0001\u0000\u0000\u0000\u000et\u0001\u0000" +
+					"\u0000\u0000\u0010\u0082\u0001\u0000\u0000\u0000\u0012\u0084\u0001\u0000" +
+					"\u0000\u0000\u0014\u008e\u0001\u0000\u0000\u0000\u0016\u0090\u0001\u0000" +
+					"\u0000\u0000\u0018\u00a1\u0001\u0000\u0000\u0000\u001a\u00a3\u0001\u0000" +
+					"\u0000\u0000\u001c\u00d0\u0001\u0000\u0000\u0000\u001e\u00d2\u0001\u0000" +
+					"\u0000\u0000 \u00d9\u0001\u0000\u0000\u0000\"\u00e0\u0001\u0000\u0000" +
+					"\u0000$\u00e7\u0001\u0000\u0000\u0000&(\u0003\u0002\u0001\u0000\')\u0005" +
+					"H\u0000\u0000(\'\u0001\u0000\u0000\u0000()\u0001\u0000\u0000\u0000)/\u0001" +
+					"\u0000\u0000\u0000*,\u0003\u0004\u0002\u0000+-\u0005H\u0000\u0000,+\u0001" +
+					"\u0000\u0000\u0000,-\u0001\u0000\u0000\u0000-/\u0001\u0000\u0000\u0000" +
+					".&\u0001\u0000\u0000\u0000.*\u0001\u0000\u0000\u0000/\u0001\u0001\u0000" +
+					"\u0000\u000007\u0003\u001a\r\u000017\u0003\u001c\u000e\u000027\u0003\u001e" +
+					"\u000f\u000037\u0003 \u0010\u000047\u0003\"\u0011\u000057\u0003$\u0012" +
+					"\u000060\u0001\u0000\u0000\u000061\u0001\u0000\u0000\u000062\u0001\u0000" +
+					"\u0000\u000063\u0001\u0000\u0000\u000064\u0001\u0000\u0000\u000065\u0001" +
+					"\u0000\u0000\u00007\u0003\u0001\u0000\u0000\u000089\u0006\u0002\uffff" +
+					"\uffff\u00009@\u0003\u0006\u0003\u0000:@\u0003\b\u0004\u0000;<\u0003\n" +
+					"\u0005\u0000<=\u0003\u0004\u0002\b=@\u0001\u0000\u0000\u0000>@\u0003\u0002" +
+					"\u0001\u0000?8\u0001\u0000\u0000\u0000?:\u0001\u0000\u0000\u0000?;\u0001" +
+					"\u0000\u0000\u0000?>\u0001\u0000\u0000\u0000@]\u0001\u0000\u0000\u0000" +
+					"AB\n\u0007\u0000\u0000BC\u0003\u000e\u0007\u0000CD\u0003\u0004\u0002\b" +
+					"D\\\u0001\u0000\u0000\u0000EF\n\u0006\u0000\u0000FG\u0003\u0010\b\u0000" +
+					"GH\u0003\u0004\u0002\u0007H\\\u0001\u0000\u0000\u0000IJ\n\u0005\u0000" +
+					"\u0000JK\u0003\u0012\t\u0000KL\u0003\u0004\u0002\u0006L\\\u0001\u0000" +
+					"\u0000\u0000MN\n\u0004\u0000\u0000NO\u0003\u0014\n\u0000OP\u0003\u0004" +
+					"\u0002\u0005P\\\u0001\u0000\u0000\u0000QR\n\u0003\u0000\u0000RS\u0003" +
+					"\u0016\u000b\u0000ST\u0003\u0004\u0002\u0004T\\\u0001\u0000\u0000\u0000" +
+					"UV\n\u0002\u0000\u0000VW\u0003\u0018\f\u0000WX\u0003\u0004\u0002\u0003" +
+					"X\\\u0001\u0000\u0000\u0000YZ\n\t\u0000\u0000Z\\\u0003\f\u0006\u0000[" +
+					"A\u0001\u0000\u0000\u0000[E\u0001\u0000\u0000\u0000[I\u0001\u0000\u0000" +
+					"\u0000[M\u0001\u0000\u0000\u0000[Q\u0001\u0000\u0000\u0000[U\u0001\u0000" +
+					"\u0000\u0000[Y\u0001\u0000\u0000\u0000\\_\u0001\u0000\u0000\u0000][\u0001" +
+					"\u0000\u0000\u0000]^\u0001\u0000\u0000\u0000^\u0005\u0001\u0000\u0000" +
+					"\u0000_]\u0001\u0000\u0000\u0000`a\u0005\u0001\u0000\u0000ab\u0003\u0004" +
+					"\u0002\u0000bc\u0005\u0002\u0000\u0000c\u0007\u0001\u0000\u0000\u0000" +
+					"de\u0005U\u0000\u0000ef\u0005\u0001\u0000\u0000fk\u0003\u0004\u0002\u0000" +
+					"gh\u0005\u0003\u0000\u0000hj\u0003\u0004\u0002\u0000ig\u0001\u0000\u0000" +
+					"\u0000jm\u0001\u0000\u0000\u0000ki\u0001\u0000\u0000\u0000kl\u0001\u0000" +
+					"\u0000\u0000ln\u0001\u0000\u0000\u0000mk\u0001\u0000\u0000\u0000no\u0005" +
+					"\u0002\u0000\u0000o\t\u0001\u0000\u0000\u0000pq\u0007\u0000\u0000\u0000" +
+					"q\u000b\u0001\u0000\u0000\u0000rs\u0007\u0001\u0000\u0000s\r\u0001\u0000" +
+					"\u0000\u0000tu\u0007\u0002\u0000\u0000u\u000f\u0001\u0000\u0000\u0000" +
+					"v\u0083\u0001\u0000\u0000\u0000w\u0083\u0005\u001d\u0000\u0000x\u0083" +
+					"\u0005\u001e\u0000\u0000y\u0083\u0005\u001f\u0000\u0000z\u0083\u0005 " +
+					"\u0000\u0000{\u0083\u0005!\u0000\u0000|\u0083\u0005\"\u0000\u0000}\u0083" +
+					"\u0005#\u0000\u0000~\u0083\u0005$\u0000\u0000\u007f\u0083\u0005%\u0000" +
+					"\u0000\u0080\u0083\u0005&\u0000\u0000\u0081\u0083\u0005\'\u0000\u0000" +
+					"\u0082v\u0001\u0000\u0000\u0000\u0082w\u0001\u0000\u0000\u0000\u0082x" +
+					"\u0001\u0000\u0000\u0000\u0082y\u0001\u0000\u0000\u0000\u0082z\u0001\u0000" +
+					"\u0000\u0000\u0082{\u0001\u0000\u0000\u0000\u0082|\u0001\u0000\u0000\u0000" +
+					"\u0082}\u0001\u0000\u0000\u0000\u0082~\u0001\u0000\u0000\u0000\u0082\u007f" +
+					"\u0001\u0000\u0000\u0000\u0082\u0080\u0001\u0000\u0000\u0000\u0082\u0081" +
+					"\u0001\u0000\u0000\u0000\u0083\u0011\u0001\u0000\u0000\u0000\u0084\u0085" +
+					"\u0007\u0003\u0000\u0000\u0085\u0013\u0001\u0000\u0000\u0000\u0086\u008f" +
+					"\u0001\u0000\u0000\u0000\u0087\u008f\u0005+\u0000\u0000\u0088\u008f\u0005" +
+					",\u0000\u0000\u0089\u008f\u0005-\u0000\u0000\u008a\u008f\u0005\u0017\u0000" +
+					"\u0000\u008b\u008f\u0005.\u0000\u0000\u008c\u008f\u0005/\u0000\u0000\u008d" +
+					"\u008f\u00050\u0000\u0000\u008e\u0086\u0001\u0000\u0000\u0000\u008e\u0087" +
+					"\u0001\u0000\u0000\u0000\u008e\u0088\u0001\u0000\u0000\u0000\u008e\u0089" +
+					"\u0001\u0000\u0000\u0000\u008e\u008a\u0001\u0000\u0000\u0000\u008e\u008b" +
+					"\u0001\u0000\u0000\u0000\u008e\u008c\u0001\u0000\u0000\u0000\u008e\u008d" +
+					"\u0001\u0000\u0000\u0000\u008f\u0015\u0001\u0000\u0000\u0000\u0090\u0091" +
+					"\u0007\u0004\u0000\u0000\u0091\u0017\u0001\u0000\u0000\u0000\u0092\u00a2" +
+					"\u0001\u0000\u0000\u0000\u0093\u00a2\u00055\u0000\u0000\u0094\u00a2\u0005" +
+					"6\u0000\u0000\u0095\u00a2\u00057\u0000\u0000\u0096\u00a2\u00058\u0000" +
+					"\u0000\u0097\u00a2\u00059\u0000\u0000\u0098\u00a2\u0005:\u0000\u0000\u0099" +
+					"\u00a2\u0005;\u0000\u0000\u009a\u00a2\u0005<\u0000\u0000\u009b\u00a2\u0005" +
+					"=\u0000\u0000\u009c\u00a2\u0005>\u0000\u0000\u009d\u00a2\u0005?\u0000" +
+					"\u0000\u009e\u00a2\u0005@\u0000\u0000\u009f\u00a2\u0005A\u0000\u0000\u00a0" +
+					"\u00a2\u0005B\u0000\u0000\u00a1\u0092\u0001\u0000\u0000\u0000\u00a1\u0093" +
+					"\u0001\u0000\u0000\u0000\u00a1\u0094\u0001\u0000\u0000\u0000\u00a1\u0095" +
+					"\u0001\u0000\u0000\u0000\u00a1\u0096\u0001\u0000\u0000\u0000\u00a1\u0097" +
+					"\u0001\u0000\u0000\u0000\u00a1\u0098\u0001\u0000\u0000\u0000\u00a1\u0099" +
+					"\u0001\u0000\u0000\u0000\u00a1\u009a\u0001\u0000\u0000\u0000\u00a1\u009b" +
+					"\u0001\u0000\u0000\u0000\u00a1\u009c\u0001\u0000\u0000\u0000\u00a1\u009d" +
+					"\u0001\u0000\u0000\u0000\u00a1\u009e\u0001\u0000\u0000\u0000\u00a1\u009f" +
+					"\u0001\u0000\u0000\u0000\u00a1\u00a0\u0001\u0000\u0000\u0000\u00a2\u0019" +
+					"\u0001\u0000\u0000\u0000\u00a3\u00a4\u0007\u0005\u0000\u0000\u00a4\u001b" +
+					"\u0001\u0000\u0000\u0000\u00a5\u00a7\u0005I\u0000\u0000\u00a6\u00a5\u0001" +
+					"\u0000\u0000\u0000\u00a7\u00a8\u0001\u0000\u0000\u0000\u00a8\u00a6\u0001" +
+					"\u0000\u0000\u0000\u00a8\u00a9\u0001\u0000\u0000\u0000\u00a9\u00d1\u0001" +
+					"\u0000\u0000\u0000\u00aa\u00ac\u0005I\u0000\u0000\u00ab\u00aa\u0001\u0000" +
+					"\u0000\u0000\u00ac\u00ad\u0001\u0000\u0000\u0000\u00ad\u00ab\u0001\u0000" +
+					"\u0000\u0000\u00ad\u00ae\u0001\u0000\u0000\u0000\u00ae\u00af\u0001\u0000" +
+					"\u0000\u0000\u00af\u00b1\u0005D\u0000\u0000\u00b0\u00b2\u0005I\u0000\u0000" +
+					"\u00b1\u00b0\u0001\u0000\u0000\u0000\u00b2\u00b3\u0001\u0000\u0000\u0000" +
+					"\u00b3\u00b1\u0001\u0000\u0000\u0000\u00b3\u00b4\u0001\u0000\u0000\u0000" +
+					"\u00b4\u00d1\u0001\u0000\u0000\u0000\u00b5\u00b7\u0005I\u0000\u0000\u00b6" +
+					"\u00b5\u0001\u0000\u0000\u0000\u00b7\u00b8\u0001\u0000\u0000\u0000\u00b8" +
+					"\u00b6\u0001\u0000\u0000\u0000\u00b8\u00b9\u0001\u0000\u0000\u0000\u00b9" +
+					"\u00ba\u0001\u0000\u0000\u0000\u00ba\u00bb\u0005D\u0000\u0000\u00bb\u00bc" +
+					"\u0005I\u0000\u0000\u00bc\u00be\u0005E\u0000\u0000\u00bd\u00bf\u0005I" +
+					"\u0000\u0000\u00be\u00bd\u0001\u0000\u0000\u0000\u00bf\u00c0\u0001\u0000" +
+					"\u0000\u0000\u00c0\u00be\u0001\u0000\u0000\u0000\u00c0\u00c1\u0001\u0000" +
+					"\u0000\u0000\u00c1\u00d1\u0001\u0000\u0000\u0000\u00c2\u00c4\u0005I\u0000" +
+					"\u0000\u00c3\u00c2\u0001\u0000\u0000\u0000\u00c4\u00c5\u0001\u0000\u0000" +
+					"\u0000\u00c5\u00c3\u0001\u0000\u0000\u0000\u00c5\u00c6\u0001\u0000\u0000" +
+					"\u0000\u00c6\u00c7\u0001\u0000\u0000\u0000\u00c7\u00c8\u0005D\u0000\u0000" +
+					"\u00c8\u00c9\u0005I\u0000\u0000\u00c9\u00ca\u0005E\u0000\u0000\u00ca\u00cc" +
+					"\u00052\u0000\u0000\u00cb\u00cd\u0005I\u0000\u0000\u00cc\u00cb\u0001\u0000" +
+					"\u0000\u0000\u00cd\u00ce\u0001\u0000\u0000\u0000\u00ce\u00cc\u0001\u0000" +
+					"\u0000\u0000\u00ce\u00cf\u0001\u0000\u0000\u0000\u00cf\u00d1\u0001\u0000" +
+					"\u0000\u0000\u00d0\u00a6\u0001\u0000\u0000\u0000\u00d0\u00ab\u0001\u0000" +
+					"\u0000\u0000\u00d0\u00b6\u0001\u0000\u0000\u0000\u00d0\u00c3\u0001\u0000" +
+					"\u0000\u0000\u00d1\u001d\u0001\u0000\u0000\u0000\u00d2\u00d3\u0005F\u0000" +
+					"\u0000\u00d3\u00d5\u0005Q\u0000\u0000\u00d4\u00d6\u0005K\u0000\u0000\u00d5" +
+					"\u00d4\u0001\u0000\u0000\u0000\u00d6\u00d7\u0001\u0000\u0000\u0000\u00d7" +
+					"\u00d5\u0001\u0000\u0000\u0000\u00d7\u00d8\u0001\u0000\u0000\u0000\u00d8" +
+					"\u001f\u0001\u0000\u0000\u0000\u00d9\u00da\u0005F\u0000\u0000\u00da\u00dc" +
+					"\u0005R\u0000\u0000\u00db\u00dd\u0005L\u0000\u0000\u00dc\u00db\u0001\u0000" +
+					"\u0000\u0000\u00dd\u00de\u0001\u0000\u0000\u0000\u00de\u00dc\u0001\u0000" +
+					"\u0000\u0000\u00de\u00df\u0001\u0000\u0000\u0000\u00df!\u0001\u0000\u0000" +
+					"\u0000\u00e0\u00e1\u0005F\u0000\u0000\u00e1\u00e3\u0005S\u0000\u0000\u00e2" +
+					"\u00e4\u0005M\u0000\u0000\u00e3\u00e2\u0001\u0000\u0000\u0000\u00e4\u00e5" +
+					"\u0001\u0000\u0000\u0000\u00e5\u00e3\u0001\u0000\u0000\u0000\u00e5\u00e6" +
+					"\u0001\u0000\u0000\u0000\u00e6#\u0001\u0000\u0000\u0000\u00e7\u00e8\u0005" +
+					"F\u0000\u0000\u00e8\u00ea\u0005T\u0000\u0000\u00e9\u00eb\u0005I\u0000" +
+					"\u0000\u00ea\u00e9\u0001\u0000\u0000\u0000\u00eb\u00ec\u0001\u0000\u0000" +
+					"\u0000\u00ec\u00ea\u0001\u0000\u0000\u0000\u00ec\u00ed\u0001\u0000\u0000" +
+					"\u0000\u00ed\u00ee\u0001\u0000\u0000\u0000\u00ee\u00f0\u0005G\u0000\u0000" +
+					"\u00ef\u00f1\u0005N\u0000\u0000\u00f0\u00ef\u0001\u0000\u0000\u0000\u00f1" +
+					"\u00f2\u0001\u0000\u0000\u0000\u00f2\u00f0\u0001\u0000\u0000\u0000\u00f2" +
+					"\u00f3\u0001\u0000\u0000\u0000\u00f3%\u0001\u0000\u0000\u0000\u0018(," +
+					".6?[]k\u0082\u008e\u00a1\u00a8\u00ad\u00b3\u00b8\u00c0\u00c5\u00ce\u00d0" +
+					"\u00d7\u00de\u00e5\u00ec\u00f2";
 	public static final ATN _ATN =
 			new ATNDeserializer().deserialize(_serializedATN.toCharArray());
-
 	static {
 		_decisionToDFA = new DFA[_ATN.getNumberOfDecisions()];
 		for (int i = 0; i < _ATN.getNumberOfDecisions(); i++) {
