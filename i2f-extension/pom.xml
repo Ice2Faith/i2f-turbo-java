@@ -69,6 +69,7 @@
         <module>i2f-extension-elasticsearch</module>
         <module>i2f-extension-canal</module>
         <module>i2f-extension-reverse-engineer-generator</module>
+        <module>i2f-extension-antlr4</module>
     </modules>
 
 
