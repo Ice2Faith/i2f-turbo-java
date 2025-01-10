@@ -100,11 +100,12 @@ operatorV0: // 0级双目运算符
 
 
 DIGIT:[0-9]; // 数字
+NUM:[0-9]([0-9_])?;
 LETTER:[a-zA-Z]; // 字母
-HEX_LETTER:[0-9a-fA-F]; // 16进制字符
-OTC_LETTER:[0-7]; // 8进制字符
-BIN_LETTER:[01]; // 2进制字符
-HIGH_LETTER:[0-9a-zA-Z]; // 自定义进制字符
+HEX_LETTER:[0-9a-fA-F_]; // 16进制字符
+OTC_LETTER:[0-7_]; // 8进制字符
+BIN_LETTER:[01_]; // 2进制字符
+HIGH_LETTER:[0-9a-zA-Z_]; // 自定义进制字符
 
 
 constNumber: // 常量
@@ -114,7 +115,7 @@ constNumber: // 常量
     ;
 
 TYPE_DEC_NUMBER:
-    (DIGIT)+ ('.' (DIGIT)+)? ('e' ('-')? (DIGIT)+)?
+    (NUM)+ ('.' (NUM)+)? ('e' ('-')? (NUM)+)?
     ;
 
 decNumber: // 十进制数字
@@ -148,8 +149,8 @@ binNumber: // 2进制数
     TYPE_BIN_NUMBER
     ;
 
-TYPE_HIGN_NUMBER: '0H' (HEX_LETTER)+
-    | '0h' (HEX_LETTER)+
+TYPE_HIGN_NUMBER: '0H' (NUM)+ ':' (HIGH_LETTER)+
+    | '0h' (NUM)+ ':' (HIGH_LETTER)+
     ;
 
 highNumber: // 任意进制数
@@ -157,7 +158,7 @@ highNumber: // 任意进制数
     ;
 
 IDENTIFIER: // 标识符
-     (LETTER|'_')+ (DIGIT|LETTER|'_')* // 字母或数字或下划线开头，并不以数字开头
+     ([a-zA-Z_])+ ([0-9a-zA-Z_])* // 字母或数字或下划线开头，并不以数字开头
     ;
 
 WS: // 空白符
