@@ -74,24 +74,6 @@ public class CalculatorBaseListener implements CalculatorListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
-    public void enterConvertor(CalculatorParser.ConvertorContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override
-    public void exitConvertor(CalculatorParser.ConvertorContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override
     public void enterBracket(CalculatorParser.BracketContext ctx) {
     }
 
@@ -102,6 +84,24 @@ public class CalculatorBaseListener implements CalculatorListener {
      */
     @Override
     public void exitBracket(CalculatorParser.BracketContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterConvertor(CalculatorParser.ConvertorContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitConvertor(CalculatorParser.ConvertorContext ctx) {
     }
 
     /**
@@ -254,7 +254,7 @@ public class CalculatorBaseListener implements CalculatorListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
-    public void enterEveryRule(ParserRuleContext ctx) {
+    public void enterConstNumber(CalculatorParser.ConstNumberContext ctx) {
     }
 
     /**
@@ -263,7 +263,7 @@ public class CalculatorBaseListener implements CalculatorListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
-    public void exitEveryRule(ParserRuleContext ctx) {
+    public void exitConstNumber(CalculatorParser.ConstNumberContext ctx) {
     }
 
     /**
@@ -272,7 +272,7 @@ public class CalculatorBaseListener implements CalculatorListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
-    public void visitTerminal(TerminalNode node) {
+    public void enterDecNumber(CalculatorParser.DecNumberContext ctx) {
     }
 
     /**
@@ -281,6 +281,104 @@ public class CalculatorBaseListener implements CalculatorListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
-    public void visitErrorNode(ErrorNode node) {
+    public void exitDecNumber(CalculatorParser.DecNumberContext ctx) {
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterHexNumber(CalculatorParser.HexNumberContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitHexNumber(CalculatorParser.HexNumberContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterOtcNumber(CalculatorParser.OtcNumberContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitOtcNumber(CalculatorParser.OtcNumberContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterBinNumber(CalculatorParser.BinNumberContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitBinNumber(CalculatorParser.BinNumberContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterHighNumber(CalculatorParser.HighNumberContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitHighNumber(CalculatorParser.HighNumberContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterEveryRule(ParserRuleContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEveryRule(ParserRuleContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void visitTerminal(TerminalNode node) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void visitErrorNode(ErrorNode node) { }
 }
