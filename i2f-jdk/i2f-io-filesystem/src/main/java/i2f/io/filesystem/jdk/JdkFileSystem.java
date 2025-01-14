@@ -10,6 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JdkFileSystem extends AbsFileSystem {
+    private static volatile JdkFileSystem sharedFs = new JdkFileSystem();
+
+    public static JdkFileSystem getInstance() {
+        return sharedFs;
+    }
+
+    private JdkFileSystem() {
+
+    }
     @Override
     public String pathSeparator() {
         return File.separator;

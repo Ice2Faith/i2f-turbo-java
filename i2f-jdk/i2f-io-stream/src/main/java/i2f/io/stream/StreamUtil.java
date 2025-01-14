@@ -4,6 +4,7 @@ import i2f.io.stream.impl.TempFileInputStream;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.function.Function;
@@ -261,6 +262,9 @@ public class StreamUtil {
         writeString(str, StandardCharsets.UTF_8.name(), file);
     }
 
+    public static void writeString(String str, Charset charset, File file) throws IOException {
+        writeString(str, charset.name(), file);
+    }
     public static void writeString(String str, String charset, File file) throws IOException {
         if (!file.getParentFile().exists()) {
             file.mkdirs();
