@@ -145,17 +145,25 @@ public abstract class AbsFile implements IFile {
 
     @Override
     public void copyTo(IFile file) throws IOException {
-        InputStream is = this.getInputStream();
-        OutputStream os = file.getOutputStream();
-        StreamUtil.streamCopy(is, os);
+        if (this.getFileSystem() == file.getFileSystem()) {
+            this.getFileSystem().copyTo(this.getPath(), file.getPath());
+        } else {
+            InputStream is = this.getInputStream();
+            OutputStream os = file.getOutputStream();
+            StreamUtil.streamCopy(is, os);
+        }
     }
 
     @Override
     public void moveTo(IFile file) throws IOException {
-        InputStream is = this.getInputStream();
-        OutputStream os = file.getOutputStream();
-        StreamUtil.streamCopy(is, os);
-        this.delete();
+        if (this.getFileSystem() == file.getFileSystem()) {
+            this.getFileSystem().moveTo(this.getPath(), file.getPath());
+        } else {
+            InputStream is = this.getInputStream();
+            OutputStream os = file.getOutputStream();
+            StreamUtil.streamCopy(is, os);
+            this.delete();
+        }
     }
 
     @Override
@@ -205,7 +213,7 @@ public abstract class AbsFile implements IFile {
         BufferedReader reader = null;
         List<String> ret = new LinkedList<>();
         try {
-            new BufferedReader(new InputStreamReader(this.getInputStream(), charset));
+            reader = new BufferedReader(new InputStreamReader(this.getInputStream(), charset));
             String line = null;
             while ((line = reader.readLine()) != null) {
                 ret.add(line);
