@@ -70,6 +70,7 @@
         <module>i2f-extension-canal</module>
         <module>i2f-extension-reverse-engineer-generator</module>
         <module>i2f-extension-antlr4</module>
+        <module>i2f-extension-image-metadata</module>
     </modules>
 
 
