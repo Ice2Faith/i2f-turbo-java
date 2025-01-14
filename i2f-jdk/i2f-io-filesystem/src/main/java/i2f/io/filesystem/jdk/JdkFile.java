@@ -10,12 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JdkFile extends AbsFile {
-    private static volatile IFileSystem sharedFs = new JdkFileSystem();
 
     private IFileSystem fs;
 
     {
-        fs = sharedFs;
+        fs = JdkFileSystem.getInstance();
     }
 
     protected File file;
