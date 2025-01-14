@@ -10,7 +10,7 @@
 
 ```java
 public static void testJdkFs() {
-    IFileSystem fs = new JdkFileSystem();
+    IFileSystem fs = JdkFileSystem.getInstance();
 
     IFile file = fs.getFile("D:\\01test\\test.txt");
 
