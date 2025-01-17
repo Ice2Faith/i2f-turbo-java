@@ -4,6 +4,7 @@ package i2f.extension.easyexcel.core.impl;
 import i2f.extension.easyexcel.core.ExcelExportPage;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -12,6 +13,10 @@ import java.util.List;
 public class ListDataProvider extends AbsDataProviderAdapter {
     private List<?> data;
     private Class<?> clazz;
+
+    public ListDataProvider(List<Map<?, ?>> data) {
+        this(data, Map.class);
+    }
 
     public ListDataProvider(List<?> data, Class<?> clazz) {
         this.data = data;
