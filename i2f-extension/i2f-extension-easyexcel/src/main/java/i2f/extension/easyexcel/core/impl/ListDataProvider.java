@@ -14,7 +14,8 @@ public class ListDataProvider extends AbsDataProviderAdapter {
     private List<?> data;
     private Class<?> clazz;
 
-    public ListDataProvider(List<Map<?, ?>> data) {
+
+    public ListDataProvider(List<Map<String, Object>> data) {
         this(data, Map.class);
     }
 

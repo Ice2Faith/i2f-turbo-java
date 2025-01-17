@@ -49,7 +49,7 @@ public class TestExcelUtil {
         map.put("age", 18);
         list.add(map);
         list.add(map);
-        ExcelExportUtil.write(new ListDataProvider(list, Map.class),
+        ExcelExportUtil.write(new ListDataProvider(list),
                 file,
                 "用户信息表");
     }
