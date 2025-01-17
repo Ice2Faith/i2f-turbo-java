@@ -15,6 +15,7 @@
     <modules>
         <module>i2f-spring6-web</module>
         <module>i2f-spring6-all</module>
+        <module>i2f-spring6-swl</module>
     </modules>
 
 
