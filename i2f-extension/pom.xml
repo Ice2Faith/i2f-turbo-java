@@ -71,6 +71,7 @@
         <module>i2f-extension-reverse-engineer-generator</module>
         <module>i2f-extension-antlr4</module>
         <module>i2f-extension-image-metadata</module>
+        <module>i2f-extension-fastexcel</module>
     </modules>
 
 
