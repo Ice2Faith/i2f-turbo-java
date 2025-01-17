@@ -8,9 +8,7 @@ import i2f.extension.easyexcel.core.impl.ListDataProvider;
 import i2f.extension.easyexcel.core.impl.ServiceDataProviderAdapter;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -20,12 +18,40 @@ import java.util.List;
 public class TestExcelUtil {
     public static void main(String[] args) throws Exception {
         long ts = System.currentTimeMillis();
-        testServiceExport();
-        System.out.println("exportTs:" + (System.currentTimeMillis() - ts));
+        testExportMap();
+        System.out.println("exportMapTs:" + (System.currentTimeMillis() - ts));
 
-        ts = System.currentTimeMillis();
-        testImport();
-        System.out.println("importTs:" + (System.currentTimeMillis() - ts));
+        File file = new File("./output/export.xlsx");
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        List<Map<String, Object>> list = ExcelImportUtil.read(file);
+        System.out.println(list);
+//
+//        ts = System.currentTimeMillis();
+//        testServiceExport();
+//        System.out.println("exportTs:" + (System.currentTimeMillis() - ts));
+//
+//        ts = System.currentTimeMillis();
+//        testImport();
+//        System.out.println("importTs:" + (System.currentTimeMillis() - ts));
+    }
+
+    public static void testExportMap() throws Exception {
+        File file = new File("./output/export.xlsx");
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", "1");
+        map.put("name", "test");
+        map.put("age", 18);
+        list.add(map);
+        list.add(map);
+        ExcelExportUtil.write(new ListDataProvider(list, Map.class),
+                file,
+                "用户信息表");
     }
 
     public static void testImport() throws Exception {
