@@ -1,4 +1,4 @@
-package i2f.database.metadata;
+package i2f.database.metadata.std;
 
 import i2f.database.metadata.data.TableMeta;
 import i2f.jdbc.data.QueryResult;
