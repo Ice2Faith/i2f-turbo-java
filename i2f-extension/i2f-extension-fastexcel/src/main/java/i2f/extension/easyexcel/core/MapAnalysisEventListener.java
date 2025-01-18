@@ -3,7 +3,9 @@ package i2f.extension.easyexcel.core;
 import cn.idev.excel.context.AnalysisContext;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * @author Ice2Faith
@@ -12,6 +14,17 @@ import java.util.Map;
  */
 public class MapAnalysisEventListener extends WrapAnalysisEventListener<Map<Integer, Object>, Map<String, Object>> {
     protected Map<Integer, String> mapHead;
+
+    public MapAnalysisEventListener() {
+    }
+
+    public MapAnalysisEventListener(BiConsumer<List<Map<String, Object>>, List<Map<String, Object>>> batchConsumer) {
+        super(batchConsumer);
+    }
+
+    public MapAnalysisEventListener(int batchSize, BiConsumer<List<Map<String, Object>>, List<Map<String, Object>>> batchConsumer) {
+        super(batchSize, batchConsumer);
+    }
 
     @Override
     protected Map<String, Object> beforeConvert(Map<Integer, Object> bean, AnalysisContext context) {
