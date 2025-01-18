@@ -9,7 +9,7 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-database-metadata-impl</artifactId>
+    <artifactId>i2f-database-metadata</artifactId>
 
 
     <dependencies>
@@ -20,7 +20,7 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-database-metadata-std</artifactId>
+            <artifactId>i2f-database-metadata-data</artifactId>
         </dependency>
 
         <dependency>

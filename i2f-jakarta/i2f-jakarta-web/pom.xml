@@ -47,6 +47,11 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-firewall</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-firewall</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

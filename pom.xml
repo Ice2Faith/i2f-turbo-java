@@ -46,6 +46,30 @@
         <lombok.version>1.18.30</lombok.version>
     </properties>
 
+
+    <licenses>
+        <license>
+            <name>GNU General Public License version 3</name>
+            <url>https://opensource.org/licenses/GPL-3.0</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <tag>master</tag>
+        <url>https://github.com/Ice2Faith/i2f-turbo-java.git</url>
+        <connection>scm:git:https://github.com/Ice2Faith/i2f-turbo-java.git</connection>
+        <developerConnection>scm:git:git@github.com:Ice2Faith/i2f-turbo-java.git</developerConnection>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>${root.project.author}</id>
+            <name>${root.project.author}</name>
+            <email>${root.link.email}</email>
+            <url>https://github.com/Ice2Faith</url>
+        </developer>
+    </developers>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
