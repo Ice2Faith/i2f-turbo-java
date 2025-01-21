@@ -19,9 +19,11 @@ public interface JdbcProcedureExecutor {
 
     void execAsProducer(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
 
-    Object applyFeatures(Object value, List<String> features,
-                         Map<String,Object> params,
-                         XmlNode node);
+    Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
+
+    Object resultValue(Object value, List<String> features, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
+
+    void setParamsObject(Map<String, Object> params, String result, Object value);
 
     Class<?> loadClass(String className);
 

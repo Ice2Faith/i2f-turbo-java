@@ -34,9 +34,10 @@ public class SqlQueryObjectNode implements ExecutorNode {
         } else {
             script = node.getTagBody();
         }
-        Object row = executor.sqlQueryObject(datasource, script, params, resultType);
+        Object obj = executor.sqlQueryObject(datasource, script, params, resultType);
         if (result != null && !result.isEmpty()) {
-            params.put(result, row);
+            obj = executor.resultValue(obj, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
+            executor.setParamsObject(params, result, obj);
         }
     }
 

@@ -31,7 +31,8 @@ public class SqlUpdateNode implements ExecutorNode {
         }
         int row = executor.sqlUpdate(datasource, script, params);
         if (result != null && !result.isEmpty()) {
-            params.put(result, row);
+            Object val = executor.resultValue(row, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
+            executor.setParamsObject(params, result, val);
         }
     }
 

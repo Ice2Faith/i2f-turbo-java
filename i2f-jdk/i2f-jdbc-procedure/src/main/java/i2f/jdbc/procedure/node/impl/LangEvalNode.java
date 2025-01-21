@@ -26,6 +26,8 @@ public class LangEvalNode implements ExecutorNode {
         String result = node.getTagAttrMap().get("result");
         if (result != null && !result.isEmpty()) {
             params.put(result, val);
+            val = executor.resultValue(val, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
+            executor.setParamsObject(params, result, val);
         }
     }
 

@@ -4,7 +4,6 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +25,7 @@ public class LangPrintfNode implements ExecutorNode {
         String tag = node.getTagAttrMap().get("tag");
         String value = node.getTagAttrMap().get("value");
         if(value!=null){
-            Object obj = executor.applyFeatures(value, node.getAttrFeatureMap().get("value"),null, params, node);
+            Object obj = executor.attrValue("value", "visit", node, params, nodeMap);
             if(obj!=null){
                 value=String.valueOf(obj);
             }

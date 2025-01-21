@@ -40,9 +40,11 @@ public class LangWhileNode implements ExecutorNode {
 
         boolean isFirst = true;
         int index = 0;
-        while (executor.test(script, params)) {
+        while ((boolean) executor.attrValue("test", "test", node, params, nodeMap)) {
             params.put(firstName, isFirst);
             params.put(indexName, index);
+            isFirst = false;
+            index++;
             try {
                 executor.execAsProducer(node, params, nodeMap);
             } catch (ContinueSignalException e) {
@@ -50,8 +52,6 @@ public class LangWhileNode implements ExecutorNode {
             } catch (BreakSignalException e) {
                 break;
             }
-            isFirst = false;
-            index++;
         }
         // 还原堆栈
         params.put(firstName, bakParams.get(firstName));

@@ -25,21 +25,24 @@ public class LangTryNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
         List<XmlNode> nodes = node.getChildren();
+        if (nodes == null) {
+            return;
+        }
         XmlNode bodyNode = null;
         List<XmlNode> catchNodes = new ArrayList<>();
         XmlNode finallyNode = null;
-        for (XmlNode itemNode : nodes) {
-            if (!"element".equals(itemNode.getTagName())) {
+        for (XmlNode item : nodes) {
+            if (!"element".equals(item.getNodeType())) {
                 continue;
             }
-            if ("lang-body".equals(itemNode.getTagName())) {
-                bodyNode = itemNode;
+            if ("lang-body".equals(item.getTagName())) {
+                bodyNode = item;
             }
-            if ("lang-catch".equals(itemNode.getTagName())) {
-                catchNodes.add(itemNode);
+            if ("lang-catch".equals(item.getTagName())) {
+                catchNodes.add(item);
             }
-            if ("lang-finally".equals(itemNode.getTagName())) {
-                finallyNode = itemNode;
+            if ("lang-finally".equals(item.getTagName())) {
+                finallyNode = item;
             }
         }
 

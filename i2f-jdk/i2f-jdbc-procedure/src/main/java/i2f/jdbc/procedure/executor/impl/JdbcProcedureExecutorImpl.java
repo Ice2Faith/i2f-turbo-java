@@ -12,7 +12,6 @@ import lombok.Data;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         ret.add(new LangTryNode());
         ret.add(new LangWhenNode());
         ret.add(new LangWhileNode());
-        ret.add(new ProducerNode());
+        ret.add(new ProcedureNode());
         ret.add(new ScriptIncludeNode());
         ret.add(new ScriptSegmentNode());
         ret.add(new SqlQueryListNode());
@@ -79,31 +78,31 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public void execAsProducer(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
-        ProducerNode execNode = null;
+        ProcedureNode execNode = null;
         for (ExecutorNode item : nodes) {
-            if (item instanceof ProducerNode) {
-                execNode = (ProducerNode) item;
+            if (item instanceof ProcedureNode) {
+                execNode = (ProcedureNode) item;
                 break;
             }
         }
         if (execNode == null) {
-            execNode = ProducerNode.INSTANCE;
+            execNode = ProcedureNode.INSTANCE;
         }
         execNode.exec(node, params, nodeMap, this);
     }
 
     @Override
-    public Object applyFeatures(Object value, List<String> features,
-                                Map<String,Object> params,
-                                XmlNode node) {
-        if(features==null){
-            return value;
+    public Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+        String attrScript = node.getTagAttrMap().get(attr);
+        if (attrScript == null) {
+            return null;
         }
+        Object value = attrScript;
 
         String radixText = node.getTagAttrMap().get("radix");
         if(radixText!=null && !radixText.isEmpty()){
             try {
-                Object radixObj = applyFeatures(radixText, node.getAttrFeatureMap().get("radix"), params, node);
+                Object radixObj = attrValue("radix", "visit", node, params, nodeMap);
                 if(radixObj!=null){
                     radixObj = ObjectConvertor.tryConvertAsType(radixObj, Integer.class);
                     if(radixObj instanceof Integer){
@@ -115,80 +114,121 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
             }
         }
 
+        List<String> features = node.getAttrFeatureMap().get(attr);
+        if (features != null && !features.isEmpty()) {
+            for (String feature : features) {
+                if (feature == null || feature.isEmpty()) {
+                    continue;
+                }
+                value = resolveFeature(value, feature, node, params, nodeMap);
+            }
+        } else {
+            value = resolveFeature(attrScript, action, node, params, nodeMap);
+        }
+
+        return value;
+    }
+
+    public Object resultValue(Object value, List<String> features, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+        if (features == null || features.isEmpty()) {
+            return value;
+        }
         for (String feature : features) {
             if(feature==null || feature.isEmpty()){
                 continue;
             }
-            if("int".equals(feature)){
-                value= ObjectConvertor.tryConvertAsType(value,Integer.class);
-            }else if("double".equals(feature)){
-                value= ObjectConvertor.tryConvertAsType(value,Double.class);
-            }else if("float".equals(feature)){
-                value= ObjectConvertor.tryConvertAsType(value,Float.class);
-            }else if("string".equals(feature)){
-                value= ObjectConvertor.tryConvertAsType(value,String.class);
-            }else if("long".equals(feature)){
-                value= ObjectConvertor.tryConvertAsType(value,Long.class);
-            }else if("short".equals(feature)){
-                value= ObjectConvertor.tryConvertAsType(value,Short.class);
-            }else if("char".equals(feature)){
-                value= ObjectConvertor.tryConvertAsType(value,Character.class);
-            }else if("byte".equals(feature)){
-                value= ObjectConvertor.tryConvertAsType(value,Byte.class);
-            }else if("boolean".equals(feature)){
-                value= ObjectConvertor.tryConvertAsType(value,Boolean.class);
-            }else if("render".equals(feature)){
-                String text=value==null?"":String.valueOf(value);
-                value= render(text, params);
-            }else if("visit".equals(feature)){
-                String text=value==null?"":String.valueOf(value);
-                value= visit(text,params);
-            }else if("eval".equals(feature)){
-                String text=value==null?"":String.valueOf(value);
-                value= eval(text,params);
-            }else if("test".equals(feature)){
-                String text=value==null?"":String.valueOf(value);
-                value= test(text,params);
-            }else if("null".equals(feature)){
-                value= null;
-            }else if("date".equals(feature)){
-                String text=String.valueOf(value);
-                String patternText = node.getTagAttrMap().get("pattern");
-                try {
-                    if(patternText!=null){
-                        value= new SimpleDateFormat(patternText).parse(text);
-                    }
-                } catch (Exception e) {
+            value = resolveFeature(value, feature, node, params, nodeMap);
+        }
+        return value;
+    }
 
-                }
-                value= ObjectConvertor.tryParseDate(text);
-            }else if("trim".equals(feature)){
-                if(value==null){
-                    value= value;
-                }
-                value= String.valueOf(value).trim();
-            }else if("align".equals(feature)){
-                if(value==null){
-                    value= value;
-                }
-                String text=String.valueOf(value);
-                String[] lines = text.split("\n");
-                StringBuilder builder=new StringBuilder();
-                for (String line : lines) {
-                    int idx=line.indexOf("|");
-                    if(idx>=0){
-                        builder.append(line.substring(idx+1));
-                    }else{
-                        builder.append(line);
+    @Override
+    public void setParamsObject(Map<String, Object> params, String result, Object value) {
+        Visitor visitor = Visitor.visit(result, params);
+        visitor.set(value);
+    }
+
+    public Object resolveFeature(Object value, String feature, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+        if (feature == null || feature.isEmpty()) {
+            return value;
+        }
+        if ("int".equals(feature)) {
+            return ObjectConvertor.tryConvertAsType(value, Integer.class);
+        } else if ("double".equals(feature)) {
+            return ObjectConvertor.tryConvertAsType(value, Double.class);
+        } else if ("float".equals(feature)) {
+            return ObjectConvertor.tryConvertAsType(value, Float.class);
+        } else if ("string".equals(feature)) {
+            return ObjectConvertor.tryConvertAsType(value, String.class);
+        } else if ("long".equals(feature)) {
+            return ObjectConvertor.tryConvertAsType(value, Long.class);
+        } else if ("short".equals(feature)) {
+            return ObjectConvertor.tryConvertAsType(value, Short.class);
+        } else if ("char".equals(feature)) {
+            return ObjectConvertor.tryConvertAsType(value, Character.class);
+        } else if ("byte".equals(feature)) {
+            return ObjectConvertor.tryConvertAsType(value, Byte.class);
+        } else if ("boolean".equals(feature)) {
+            return ObjectConvertor.tryConvertAsType(value, Boolean.class);
+        } else if ("render".equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return render(text, params);
+        } else if ("visit".equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return visit(text, params);
+        } else if ("eval".equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return eval(text, params);
+        } else if ("test".equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return test(text, params);
+        } else if ("null".equals(feature)) {
+            return null;
+        } else if ("date".equals(feature)) {
+            String text = String.valueOf(value);
+            String patternText = node.getTagAttrMap().get("pattern");
+            boolean processed = false;
+            try {
+                if (patternText != null) {
+                    Object patternValue = attrValue("radix", "visit", node, params, nodeMap);
+                    if (patternValue != null) {
+                        value= new SimpleDateFormat(patternText).parse(text);
+                        processed = true;
                     }
-                    builder.append("\n");
                 }
-                value= builder.toString();
-            }else if("body-text".equals(feature)){
-                value= node.getTextBody();
-            }else if("body-xml".equals(feature)){
-                value= node.getTagBody();
+            } catch (Exception e) {
+
             }
+            if (!processed) {
+                value= ObjectConvertor.tryParseDate(text);
+            }
+            return value;
+        } else if ("trim".equals(feature)) {
+            if (value == null) {
+                return null;
+            }
+            return String.valueOf(value).trim();
+        } else if ("align".equals(feature)) {
+            if (value == null) {
+                return null;
+            }
+            String text = String.valueOf(value);
+            String[] lines = text.split("\n");
+            StringBuilder builder = new StringBuilder();
+            for (String line : lines) {
+                int idx = line.indexOf("|");
+                if (idx >= 0) {
+                    builder.append(line.substring(idx + 1));
+                } else {
+                    builder.append(line);
+                }
+                builder.append("\n");
+            }
+            return builder.toString();
+        } else if ("body-text".equals(feature)) {
+            return node.getTextBody();
+        } else if ("body-xml".equals(feature)) {
+            return node.getTagBody();
         }
         return value;
     }

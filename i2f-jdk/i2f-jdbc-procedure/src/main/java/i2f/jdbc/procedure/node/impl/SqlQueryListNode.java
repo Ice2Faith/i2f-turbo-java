@@ -37,7 +37,7 @@ public class SqlQueryListNode implements ExecutorNode {
         }
         List<?> row = executor.sqlQueryList(datasource, script, params, resultType);
         if (result != null && !result.isEmpty()) {
-            params.put(result, row);
+            executor.setParamsObject(params, result, row);
         }
     }
 

@@ -24,7 +24,8 @@ public class TextNode implements ExecutorNode {
         String result = node.getTagAttrMap().get("result");
         String text = node.getTextBody();
         if (result != null && !result.isEmpty()) {
-            params.put(result, text);
+            Object obj = executor.resultValue(text, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
+            executor.setParamsObject(params, result, obj);
         }
     }
 }
