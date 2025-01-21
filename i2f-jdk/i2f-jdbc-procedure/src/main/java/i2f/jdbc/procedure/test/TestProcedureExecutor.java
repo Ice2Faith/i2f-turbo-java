@@ -1,8 +1,8 @@
 package i2f.jdbc.procedure.test;
 
-import i2f.jdbc.procedure.executor.SqlProcedureExecutor;
-import i2f.jdbc.procedure.executor.impl.SqlProcedureExecutorImpl;
-import i2f.jdbc.procedure.parser.SqlProcedureParser;
+import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.impl.JdbcProcedureExecutorImpl;
+import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.io.File;
@@ -19,10 +19,10 @@ import java.util.Map;
 public class TestProcedureExecutor {
     public static void main(String[] args) throws Exception {
         File file = new File("./i2f-jdk/i2f-jdbc-producer/src/main/java/i2f/jdbc/producer/test.xml");
-        XmlNode node = SqlProcedureParser.parse(new FileInputStream(file));
+        XmlNode node = JdbcProcedureParser.parse(new FileInputStream(file));
 
 
-        SqlProcedureExecutor executor = SqlProcedureExecutorImpl.create();
+        JdbcProcedureExecutor executor = JdbcProcedureExecutorImpl.create();
 
         Map<String, Object> params = new HashMap<>();
         Map<String, XmlNode> nodeMap = new HashMap<>();
