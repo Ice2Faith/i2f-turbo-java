@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.executor.impl;
 
 import i2f.bindsql.BindSql;
+import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -11,6 +12,8 @@ import lombok.Data;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +90,107 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
             execNode = ProducerNode.INSTANCE;
         }
         execNode.exec(node, params, nodeMap, this);
+    }
+
+    @Override
+    public Object applyFeatures(Object value, List<String> features,
+                                Map<String,Object> params,
+                                XmlNode node) {
+        if(features==null){
+            return value;
+        }
+
+        String radixText = node.getTagAttrMap().get("radix");
+        if(radixText!=null && !radixText.isEmpty()){
+            try {
+                Object radixObj = applyFeatures(radixText, node.getAttrFeatureMap().get("radix"), params, node);
+                if(radixObj!=null){
+                    radixObj = ObjectConvertor.tryConvertAsType(radixObj, Integer.class);
+                    if(radixObj instanceof Integer){
+                        value=Long.parseLong(String.valueOf(value),(int)radixObj);
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+        }
+
+        for (String feature : features) {
+            if(feature==null || feature.isEmpty()){
+                continue;
+            }
+            if("int".equals(feature)){
+                value= ObjectConvertor.tryConvertAsType(value,Integer.class);
+            }else if("double".equals(feature)){
+                value= ObjectConvertor.tryConvertAsType(value,Double.class);
+            }else if("float".equals(feature)){
+                value= ObjectConvertor.tryConvertAsType(value,Float.class);
+            }else if("string".equals(feature)){
+                value= ObjectConvertor.tryConvertAsType(value,String.class);
+            }else if("long".equals(feature)){
+                value= ObjectConvertor.tryConvertAsType(value,Long.class);
+            }else if("short".equals(feature)){
+                value= ObjectConvertor.tryConvertAsType(value,Short.class);
+            }else if("char".equals(feature)){
+                value= ObjectConvertor.tryConvertAsType(value,Character.class);
+            }else if("byte".equals(feature)){
+                value= ObjectConvertor.tryConvertAsType(value,Byte.class);
+            }else if("boolean".equals(feature)){
+                value= ObjectConvertor.tryConvertAsType(value,Boolean.class);
+            }else if("render".equals(feature)){
+                String text=value==null?"":String.valueOf(value);
+                value= render(text, params);
+            }else if("visit".equals(feature)){
+                String text=value==null?"":String.valueOf(value);
+                value= visit(text,params);
+            }else if("eval".equals(feature)){
+                String text=value==null?"":String.valueOf(value);
+                value= eval(text,params);
+            }else if("test".equals(feature)){
+                String text=value==null?"":String.valueOf(value);
+                value= test(text,params);
+            }else if("null".equals(feature)){
+                value= null;
+            }else if("date".equals(feature)){
+                String text=String.valueOf(value);
+                String patternText = node.getTagAttrMap().get("pattern");
+                try {
+                    if(patternText!=null){
+                        value= new SimpleDateFormat(patternText).parse(text);
+                    }
+                } catch (Exception e) {
+
+                }
+                value= ObjectConvertor.tryParseDate(text);
+            }else if("trim".equals(feature)){
+                if(value==null){
+                    value= value;
+                }
+                value= String.valueOf(value).trim();
+            }else if("align".equals(feature)){
+                if(value==null){
+                    value= value;
+                }
+                String text=String.valueOf(value);
+                String[] lines = text.split("\n");
+                StringBuilder builder=new StringBuilder();
+                for (String line : lines) {
+                    int idx=line.indexOf("|");
+                    if(idx>=0){
+                        builder.append(line.substring(idx+1));
+                    }else{
+                        builder.append(line);
+                    }
+                    builder.append("\n");
+                }
+                value= builder.toString();
+            }else if("body-text".equals(feature)){
+                value= node.getTextBody();
+            }else if("body-xml".equals(feature)){
+                value= node.getTagBody();
+            }
+        }
+        return value;
     }
 
     @Override
