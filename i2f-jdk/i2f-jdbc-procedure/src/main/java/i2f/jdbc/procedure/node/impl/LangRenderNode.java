@@ -26,7 +26,8 @@ public class LangRenderNode implements ExecutorNode {
         String val = executor.render(script, params);
         String result = node.getTagAttrMap().get("result");
         if (result != null && !result.isEmpty()) {
-            params.put(result, val);
+            Object res = executor.resultValue(val, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
+            executor.setParamsObject(params, result, res);
         }
     }
 

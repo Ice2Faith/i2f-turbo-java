@@ -6,6 +6,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 
+import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -50,11 +51,14 @@ public class LangForeachNode implements ExecutorNode {
             Iterable<?> iter = (Iterable<?>) obj;
             boolean isFirst = true;
             int index = 0;
-            for (Object val : iter) {
+            for (Object item : iter) {
+                Object val = executor.resultValue(item, node.getAttrFeatureMap().get("item"), node, params, nodeMap);
                 // 覆盖堆栈
                 params.put(itemName, val);
                 params.put(firstName, isFirst);
                 params.put(indexName, index);
+                isFirst = false;
+                index++;
                 try {
                     executor.execAsProducer(node, params, nodeMap);
                 } catch (ContinueSignalException e) {
@@ -62,8 +66,29 @@ public class LangForeachNode implements ExecutorNode {
                 } catch (BreakSignalException e) {
                     break;
                 }
+
+            }
+        } else if (obj.getClass().isArray()) {
+            boolean isFirst = true;
+            int index = 0;
+            int len = Array.getLength(obj);
+            for (int i = 0; i < len; i++) {
+                Object val = Array.get(obj, i);
+                val = executor.resultValue(val, node.getAttrFeatureMap().get("item"), node, params, nodeMap);
+
+                // 覆盖堆栈
+                params.put(itemName, val);
+                params.put(firstName, isFirst);
+                params.put(indexName, index);
                 isFirst = false;
                 index++;
+                try {
+                    executor.execAsProducer(node, params, nodeMap);
+                } catch (ContinueSignalException e) {
+                    continue;
+                } catch (BreakSignalException e) {
+                    break;
+                }
             }
         }
         // 还原堆栈

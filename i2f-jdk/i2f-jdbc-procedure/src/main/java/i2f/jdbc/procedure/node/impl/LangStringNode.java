@@ -24,7 +24,8 @@ public class LangStringNode implements ExecutorNode {
         String text = node.getTextBody();
         String result = node.getTagAttrMap().get("result");
         if (result != null && !result.isEmpty()) {
-            params.put(result, text);
+            Object res = executor.resultValue(text, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
+            executor.setParamsObject(params, result, res);
         }
     }
 }

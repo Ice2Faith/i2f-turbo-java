@@ -37,7 +37,7 @@ public class ScriptIncludeNode implements ExecutorNode {
             String script = entry.getValue();
             // 备份堆栈
             bakParams.put(name, params.get(script));
-            Object val = executor.eval(script, params);
+            Object val = executor.attrValue(name, "visit", node, params, nodeMap);
             params.put(name, val);
         }
 

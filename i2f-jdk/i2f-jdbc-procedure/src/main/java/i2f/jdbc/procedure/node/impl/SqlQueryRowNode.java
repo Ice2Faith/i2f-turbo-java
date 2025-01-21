@@ -36,7 +36,7 @@ public class SqlQueryRowNode implements ExecutorNode {
         }
         Object row = executor.sqlQueryRow(datasource, script, params, resultType);
         if (result != null && !result.isEmpty()) {
-            params.put(result, row);
+            executor.setParamsObject(params, result, row);
         }
     }
 

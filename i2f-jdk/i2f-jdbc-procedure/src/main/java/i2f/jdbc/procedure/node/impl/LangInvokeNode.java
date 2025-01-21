@@ -91,7 +91,7 @@ public class LangInvokeNode implements ExecutorNode {
                 String argScript = argEntry.getValue();
                 Object evalObj=null;
                 try{
-                    evalObj=executor.applyFeatures(argScript,node.getAttrFeatureMap().get("arg"+ argEntry.getKey()),params,node);
+                    evalObj = executor.attrValue("arg" + argEntry.getKey(), "visit", node, params, nodeMap);
                 }catch(Exception e){
                 }
                 if(evalObj==null){
@@ -106,7 +106,8 @@ public class LangInvokeNode implements ExecutorNode {
                 Object res = constructor.newInstance(invokeArgs);
 
                 if (result != null && !result.isEmpty()) {
-                    params.put(result, res);
+                    res = executor.resultValue(res, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
+                    executor.setParamsObject(params, result, res);
                 }
             } catch (ReflectiveOperationException e) {
                 throw new IllegalStateException(e.getMessage(),e);
@@ -166,7 +167,7 @@ public class LangInvokeNode implements ExecutorNode {
                 String argScript = argEntry.getValue();
                 Object evalObj=null;
                 try{
-                    evalObj=executor.applyFeatures(argScript,node.getAttrFeatureMap().get("arg"+ argEntry.getKey()),params,node);
+                    executor.attrValue("arg" + argEntry.getKey(), "visit", node, params, nodeMap);
                 }catch(Exception e){
                 }
                 if(evalObj==null){
@@ -187,7 +188,8 @@ public class LangInvokeNode implements ExecutorNode {
                 Object res = method.invoke(invokeObject, invokeArgs);
 
                 if (result != null && !result.isEmpty()) {
-                    params.put(result, res);
+                    res = executor.resultValue(res, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
+                    executor.setParamsObject(params, result, res);
                 }
             } catch (ReflectiveOperationException e) {
                 throw new IllegalStateException(e.getMessage(),e);

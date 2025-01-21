@@ -23,10 +23,6 @@ public class LangPrintlnNode implements ExecutorNode {
     public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
         StringBuilder builder = new StringBuilder();
         String tag = node.getTagAttrMap().get("tag");
-        Object tagObj=executor.applyFeatures(tag,node.getAttrFeatureMap().get("tag"),params,node);
-        if(tagObj!=null){
-            tag=String.valueOf(tagObj);
-        }
         builder.append("[").append(tag == null ? "" : tag).append("]");
         boolean isFirst = true;
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
@@ -37,8 +33,7 @@ public class LangPrintlnNode implements ExecutorNode {
                 builder.append(", ");
             }
             String script = entry.getValue();
-            Object val = executor.visit(script, params);
-            val=executor.applyFeatures(val,node.getAttrFeatureMap().get(entry.getKey()),params,node);
+            Object val = executor.attrValue(entry.getKey(), "visit", node, params, nodeMap);
             builder.append(entry.getKey()).append(":").append(val);
             isFirst = false;
         }

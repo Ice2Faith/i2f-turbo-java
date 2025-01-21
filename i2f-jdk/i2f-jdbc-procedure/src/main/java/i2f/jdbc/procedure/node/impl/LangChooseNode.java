@@ -32,8 +32,7 @@ public class LangChooseNode implements ExecutorNode {
             }
             if ("lang-when".equals(itemNode.getTagName())) {
                 if (testNode == null) {
-                    String test = itemNode.getTagAttrMap().get("test");
-                    boolean ok = executor.test(test, params);
+                    boolean ok = (boolean) executor.attrValue("test", "test", node, params, nodeMap);
                     if (ok) {
                         testNode = itemNode;
                     }

@@ -11,15 +11,15 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/1/20 10:37
  */
-public class ProducerNode implements ExecutorNode {
-    public static final ProducerNode INSTANCE = new ProducerNode();
+public class ProcedureNode implements ExecutorNode {
+    public static final ProcedureNode INSTANCE = new ProcedureNode();
 
     @Override
     public boolean support(XmlNode node) {
         if (!"element".equals(node.getNodeType())) {
             return false;
         }
-        return "producer".equals(node.getTagName());
+        return "procedure".equals(node.getTagName());
     }
 
     @Override
@@ -27,6 +27,9 @@ public class ProducerNode implements ExecutorNode {
         List<XmlNode> children = node.getChildren();
         for (int i = 0; i < children.size(); i++) {
             XmlNode item = children.get(i);
+            if (item == null) {
+                continue;
+            }
             executor.exec(item, params, nodeMap);
         }
     }
