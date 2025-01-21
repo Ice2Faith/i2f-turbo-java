@@ -2,7 +2,7 @@ package i2f.jdbc.procedure.executor.impl;
 
 import i2f.bindsql.BindSql;
 import i2f.jdbc.JdbcResolver;
-import i2f.jdbc.procedure.executor.SqlProcedureExecutor;
+import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -21,10 +21,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @date 2025/1/20 14:40
  */
 @Data
-public class SqlProcedureExecutorImpl implements SqlProcedureExecutor {
+public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
     protected final CopyOnWriteArrayList<ExecutorNode> nodes = new CopyOnWriteArrayList<>();
 
-    private SqlProcedureExecutorImpl() {
+    private JdbcProcedureExecutorImpl() {
 
     }
 
@@ -58,8 +58,8 @@ public class SqlProcedureExecutorImpl implements SqlProcedureExecutor {
         return ret;
     }
 
-    public static SqlProcedureExecutor create() {
-        SqlProcedureExecutorImpl ret = new SqlProcedureExecutorImpl();
+    public static JdbcProcedureExecutor create() {
+        JdbcProcedureExecutorImpl ret = new JdbcProcedureExecutorImpl();
         ret.getNodes().addAll(defaultExecutorNodes());
         return ret;
     }

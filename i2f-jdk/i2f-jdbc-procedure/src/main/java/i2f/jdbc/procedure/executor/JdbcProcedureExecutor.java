@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/1/20 10:38
  */
-public interface SqlProcedureExecutor {
+public interface JdbcProcedureExecutor {
     List<ExecutorNode> getNodes();
 
     void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);

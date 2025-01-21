@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/1/20 9:24
  */
-public class SqlProcedureParser {
+public class JdbcProcedureParser {
 
     public static XmlNode parse(InputStream is) throws Exception {
         Document document = XmlUtil.parseXml(is);
