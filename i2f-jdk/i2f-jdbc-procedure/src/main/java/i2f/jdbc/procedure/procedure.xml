@@ -164,21 +164,23 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     <sql-trans-none/>
 
     <!-- 异步执行，await表示是否需要等待执行结束，delay表示延迟多长时间再开始执行 -->
-    <lang-async await.boolean="" delay="">
+    <lang-async await.boolean="" delay="" time-unit="">
 
     </lang-async>
     <!-- java 中的count-down-latch -->
     <lang-latch count="" result=""/>
     <!-- 多个任务并行 -->
-    <lang-async-all await="" delay="">
+    <lang-async-all await="">
         <!-- 每个任务仅有delay延时可用 -->
-        <lang-async delay="">
+        <lang-async delay="" time-unit="">
             <!-- 对name对应的latch对象进行count-down操作 -->
             <lang-latch-down name=""/>
         </lang-async>
     </lang-async-all>
     <!-- 等待名为name的latch对象 -->
-    <lang-latch-await name=""/>
+    <lang-latch-await name="" timeout="" time-unit=""/>
+
+
     <!-- 通过遍历结果集的方式，提供类似游标的操作能力，通过sql-query-list进行查询遍历，将item的值提供给lang-body进行执行 -->
     <sql-cursor>
         <!-- item 为每次迭代的对象名称 -->
