@@ -1,0 +1,191 @@
+<!--
+定义一个顺序的处理流程，能够进行逻辑控制与SQL执行，
+实现使用脚本定义的方式，达到与存储过程相似的能力，核心使用一个Map构成的执行栈来维护执行的变量，
+预期是既有编程语言的控制灵活度，也有数据库语句直接编写的识别度，
+避免在java等编程语言中进行SQL语句的拼接操作
+实现方案
+采用xml格式编写控制脚本，语言控制与SQL语句都在xml中书写
+script-开头的用于提供复用性片段
+lang-开头的用于提供流程控制等能力，实现上考虑使用ongl/spel+velocity实现
+sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml格式进行处理
+属性修饰符：用在输入时，表示值怎么取，用在输出时，表示输出的目标类型，用在声明时，表示期待的输入类型
+多个修饰符顺序执行，用.小数点隔开
+:/:context 从环境中取值
+:int 整型
+:double 浮点型
+:float 短浮点型
+:string 字符串
+:long 长整型
+:short 短整型
+:char 字符型
+:byte 字节型
+:boolean 布尔型
+:render 渲染占位
+:visit 访问属性
+:eval 计算值
+:var 表示值是一个访问描述符，需要根据这个访问描述符设置值，用于result.var="xxx",表示result的值设置到params[params[xxx]]属性中
+:null 空值
+:date 日期时间型
+:trim 用于在字符型变量时进行先trim后使用，输出时，先trim后输出
+:align 用于在字符值时，对左边多余的空白符号予以去除，但是需要以|引导字符串行
+:body-text 用于表示值从标签内部获取
+:body-xml 用于表示值从标签内部获取
+ -->
+<procedure id="">
+    <!-- 使用系统输出行，以tag开头，其余变量附加在其他属性上即可 -->
+    <lang-println tag="" aaa=""/>
+
+    <!-- 使用value指定的模版进行渲染输出,同样支持tag属性标签 -->
+    <lang-printf tag="" value:body-xml.trim=""/>
+
+    <!-- 语句段，可使用script-include进行引用，id唯一即可，root表示语句段使用的根变量名称 -->
+    <script-segment id="" root="">
+        <![CDATA[
+            112
+        ]]>
+    </script-segment>
+    <!-- 引用语句段，可使用script-segment定义的语句段，refid表示引用的语句段，其他属性表示传递给语句段的根变量 -->
+    <script-include refid="" root="" aaa=""/>
+
+    <!--
+    从value指定的值赋值到result指定的值中，
+    如果为数值型，可以使用radix指定进制
+    如果为日期型，可以使用pattern指定格式化的串
+    这里value为输入，又添加了:int修饰符，则表示这个值是一个int型立即数，不需要从context里面取
+     -->
+    <lang-set value:int="" radix="" pattern="" result=""/>
+    <!-- 从上下文中移除指定name的变量 -->
+    <lang-remove name=""/>
+    <!-- 格式化 -->
+    <lang-format-date value="" patten="" result=""/>
+    <lang-format-number value="" patten="" result=""/>
+    <!-- 解析 -->
+    <lang-parse-date value="" patten="" result=""/>
+
+    <lang-string-append source="" value="" result=""/>
+
+    <!-- 调用其他存储过程，id表示目标的id,直接使用目标变量age名来传递值 -->
+    <procedure-call refid="" age=""/>
+
+    <!-- 返回，结束此过程 -->
+    <lang-return/>
+
+    <!-- 抛出异常，value指定为message内容，type指定为异常类型，cause可选为造成异常的异常对象 -->
+    <lang-throw value="" type="" cause=""/>
+
+    <!-- 用于指定一小段脚本，来设置一个变量值到result指定的变量名中 -->
+    <lang-eval result="">
+        11
+    </lang-eval>
+    <!-- 用于指定一段字符串到result指定的变量名中 -->
+    <lang-string result="">
+
+    </lang-string>
+    <!-- 用于使用模版引擎进行渲染一段字符串到result指定的变量名中 -->
+    <lang-render result="">
+
+    </lang-render>
+    <!-- lang-开头的表示语言的基本语句，这个就是对应if语句，test表示判定条件语句 -->
+    <lang-if test="">
+
+    </lang-if>
+    <!-- 对应的就是if-else-if这种语句或者Switch这种分支语句 -->
+    <lang-choose>
+        <!-- 表示一个分支 -->
+        <lang-when test="">
+
+        </lang-when>
+        <!-- 其他分支，当所有when分支都不满足时，执行此分支，对应else分支 -->
+        <lang-otherwise>
+
+        </lang-otherwise>
+    </lang-choose>
+    <!-- 对应一个foreach循环，对一个集合进行迭代，collection表示被迭代的集合，item表示迭代变量的名称 -->
+    <lang-foreach collection="" item="" first="" index="">
+
+    </lang-foreach>
+    <!-- 对应一个计数型循环，表示从begin数开始每次增加incr的步长直到end结束，item表示迭代变量的名称 -->
+    <lang-fori begin="" end="" incr="" item="" first="" index="">
+
+    </lang-fori>
+    <!-- 对应一个while语句，test表示循环条件的判断语句 -->
+    <lang-while test="" first="" index="">
+        <!-- 对应continue-->
+        <lang-continue/>
+        <!-- 对应break -->
+        <lang-break/>
+    </lang-while>
+    <!--
+    调用函数，
+    method是全限定的方法名（即类名.方法名，例如Math.random）,
+    target表示在哪个对象上调用（有target时，不需要指定全限定方法名，只需要方法名即可）,
+    argx表示传入的参数，后面的数字表示参数的次序，
+    result用于记录调用的结果保存到哪个变量中
+     -->
+    <lang-invoke method="" target="" arg0="" arg1="" result=""/>
+    <!-- 对应一个异常处理块try-catch-finally -->
+    <lang-try>
+        <!-- 表示异常处理的内容，对应try的内容块 -->
+        <lang-body>
+
+        </lang-body>
+        <!-- 表示一个异常catch块，type指定要捕获的异常类型，var表示异常的变量名 -->
+        <lang-catch type="" e="">
+
+        </lang-catch>
+        <!-- 对应finally语句块 -->
+        <lang-finally>
+
+        </lang-finally>
+    </lang-try>
+    <!-- 异步执行，await表示是否需要等待执行结束，delay表示延迟多长时间再开始执行 -->
+    <lang-async await.boolean="" delay="">
+
+    </lang-async>
+    <!-- java 中的count-down-latch -->
+    <lang-latch count="" result=""/>
+    <!-- 多个任务并行 -->
+    <lang-async-all await="" delay="">
+        <!-- 每个任务仅有delay延时可用 -->
+        <lang-async delay="">
+            <!-- 对name对应的latch对象进行count-down操作 -->
+            <lang-latch-down name=""/>
+        </lang-async>
+    </lang-async-all>
+    <!-- 等待名为name的latch对象 -->
+    <lang-latch-await name=""/>
+    <!--
+    表示一个查询语句，预期为一行数据，执行结果放到result指定的变量名中；
+    对于sql-开头的标签，都允许带有datasource属性来制定使用哪个数据源，也都允许带有script属性指定要执行的SQL来源于哪个变量，
+    对于sql-query-开头的标签，都允许带有result-type属性来指定结果集转换为什么类型
+     -->
+    <sql-query-row datasource="" script="" result="" result-type="">
+
+    </sql-query-row>
+    <!-- 表示一个查询语句，预期为多行数据，执行结果放到result指定的变量名中 -->
+    <sql-query-list result="">
+
+    </sql-query-list>
+    <!-- 表示一个查询语句，预期为单个值，仅一行一列的值，执行结果放到result指定的变量中 -->
+    <sql-query-object result="">
+
+    </sql-query-object>
+    <!-- 表示一个更新语句，预期为JDBC执行update的返回值，执行结果放到result指定的变量中 -->
+    <sql-update result="">
+
+    </sql-update>
+    <!-- 通过遍历结果集的方式，提供类似游标的操作能力，通过sql-query-list进行查询遍历，将item的值提供给lang-body进行执行 -->
+    <sql-cursor>
+        <!-- item 为每次迭代的对象名称 -->
+        <sql-query-list datasource="" script="" item="" result-type="">
+
+        </sql-query-list>
+        <lang-body>
+        </lang-body>
+    </sql-cursor>
+    <!-- 表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务 -->
+    <sql-trans-begin isolation="" propagation=""/>
+    <sql-trans-commit/>
+    <sql-trans-rollback/>
+    <sql-trans-none/>
+</procedure>
