@@ -7,6 +7,7 @@ import i2f.jdbc.producer.parser.data.XmlNode;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

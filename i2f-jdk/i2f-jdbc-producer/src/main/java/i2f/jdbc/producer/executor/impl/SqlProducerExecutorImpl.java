@@ -37,6 +37,7 @@ public class SqlProducerExecutorImpl implements SqlProducerExecutor {
         ret.add(new LangForeachNode());
         ret.add(new LangForiNode());
         ret.add(new LangIfNode());
+        ret.add(new LangInvokeNode());
         ret.add(new LangPrintlnNode());
         ret.add(new LangRenderNode());
         ret.add(new LangStringNode());
@@ -122,9 +123,21 @@ public class SqlProducerExecutorImpl implements SqlProducerExecutor {
                 "java.math.",
                 "java.io.",
                 "java.time.",
-                "java.reflect.",
+                "java.text.",
+                "java.lang.reflect.",
                 "java.concurrent.",
-                "java.concurrent.atomic."
+                "java.util.regex.",
+                "javax.sql.",
+                "jakarta.sql.",
+                "java.nio.",
+                "java.nio.charset.",
+                "java.nio.file.",
+                "java.concurrent.atomic.",
+                "java.concurrent.locks.",
+                "java.time.chrono.",
+                "java.time.format.",
+                "java,time.temporal.",
+                "java.time.zone.",
         };
         Class<?> clazz = null;
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -194,7 +207,7 @@ public class SqlProducerExecutorImpl implements SqlProducerExecutor {
         if (params.containsKey(script)) {
             return params.get(script);
         }
-        return Visitor.visit(script, params);
+        return Visitor.visit(script, params).get();
     }
 
     @Override

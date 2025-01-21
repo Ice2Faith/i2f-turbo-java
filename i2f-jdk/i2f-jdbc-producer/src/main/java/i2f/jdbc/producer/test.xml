@@ -1,4 +1,8 @@
 <producer>
+    <lang-invoke method="SimpleDateFormat.new" arg0="yyyy-MM-dd HH:mm:ss.SSS" result="fmt"/>
+    <lang-invoke method="Date.new" result="now"/>
+    <lang-invoke method="format" target="fmt" arg0="now" result="str"/>
+    <lang-println tag="now" now="str"/>
     <lang-eval result="now">
         new Date()
     </lang-eval>

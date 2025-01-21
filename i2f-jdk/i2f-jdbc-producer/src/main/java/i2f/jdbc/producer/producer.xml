@@ -62,6 +62,14 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
         <!-- 对应break -->
         <lang-break/>
     </lang-while>
+    <!--
+    调用函数，
+    method是全限定的方法名（即类名.方法名，例如Math.random）,
+    target表示在哪个对象上调用（有target时，不需要指定全限定方法名，只需要方法名即可）,
+    argx表示传入的参数，后面的数字表示参数的次序，
+    result用于记录调用的结果保存到哪个变量中
+     -->
+    <lang-invoke method="" target="" arg0="" arg1="" result=""/>
     <!-- 对应一个异常处理块try-catch-finally -->
     <lang-try>
         <!-- 表示异常处理的内容，对应try的内容块 -->
