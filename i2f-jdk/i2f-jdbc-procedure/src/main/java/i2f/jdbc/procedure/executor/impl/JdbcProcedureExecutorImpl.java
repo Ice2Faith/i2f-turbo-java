@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
 import i2f.reflect.vistor.Visitor;
 import lombok.Data;
 
@@ -68,11 +69,15 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
-        for (ExecutorNode item : nodes) {
-            if (item.support(node)) {
-                item.exec(node, params, nodeMap, this);
-                break;
+        try {
+            for (ExecutorNode item : nodes) {
+                if (item.support(node)) {
+                    item.exec(node, params, nodeMap, this);
+                    break;
+                }
             }
+        } catch (ReturnSignalException e) {
+
         }
     }
 

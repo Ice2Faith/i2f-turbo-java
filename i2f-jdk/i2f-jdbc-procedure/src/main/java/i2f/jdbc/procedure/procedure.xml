@@ -55,15 +55,12 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     这里value为输入，又添加了:int修饰符，则表示这个值是一个int型立即数，不需要从context里面取
      -->
     <lang-set value.int="" radix="" pattern="" result=""/>
-    <!-- 从上下文中移除指定name的变量 -->
-    <lang-remove name=""/>
     <!-- 格式化 -->
-    <lang-format-date value="" patten="" result=""/>
-    <lang-format-number value="" patten="" result=""/>
-    <!-- 解析 -->
-    <lang-parse-date value="" patten="" result=""/>
+    <lang-format-date value="" pattern="" result=""/>
+    <lang-format value="" pattern="" result=""/>
 
-    <lang-string-append source="" value="" result=""/>
+    <!-- 字符串拼接 -->
+    <lang-string-join separator="" result="" arg0="" arg1=""/>
 
     <!-- 调用其他存储过程，id表示目标的id,直接使用目标变量age名来传递值 -->
     <procedure-call refid="" age=""/>
@@ -139,22 +136,6 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
 
         </lang-finally>
     </lang-try>
-    <!-- 异步执行，await表示是否需要等待执行结束，delay表示延迟多长时间再开始执行 -->
-    <lang-async await.boolean="" delay="">
-
-    </lang-async>
-    <!-- java 中的count-down-latch -->
-    <lang-latch count="" result=""/>
-    <!-- 多个任务并行 -->
-    <lang-async-all await="" delay="">
-        <!-- 每个任务仅有delay延时可用 -->
-        <lang-async delay="">
-            <!-- 对name对应的latch对象进行count-down操作 -->
-            <lang-latch-down name=""/>
-        </lang-async>
-    </lang-async-all>
-    <!-- 等待名为name的latch对象 -->
-    <lang-latch-await name=""/>
     <!--
     表示一个查询语句，预期为一行数据，执行结果放到result指定的变量名中；
     对于sql-开头的标签，都允许带有datasource属性来制定使用哪个数据源，也都允许带有script属性指定要执行的SQL来源于哪个变量，
@@ -175,6 +156,29 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     <sql-update result="">
 
     </sql-update>
+
+    <!-- 表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务 -->
+    <sql-trans-begin isolation="" propagation=""/>
+    <sql-trans-commit/>
+    <sql-trans-rollback/>
+    <sql-trans-none/>
+
+    <!-- 异步执行，await表示是否需要等待执行结束，delay表示延迟多长时间再开始执行 -->
+    <lang-async await.boolean="" delay="">
+
+    </lang-async>
+    <!-- java 中的count-down-latch -->
+    <lang-latch count="" result=""/>
+    <!-- 多个任务并行 -->
+    <lang-async-all await="" delay="">
+        <!-- 每个任务仅有delay延时可用 -->
+        <lang-async delay="">
+            <!-- 对name对应的latch对象进行count-down操作 -->
+            <lang-latch-down name=""/>
+        </lang-async>
+    </lang-async-all>
+    <!-- 等待名为name的latch对象 -->
+    <lang-latch-await name=""/>
     <!-- 通过遍历结果集的方式，提供类似游标的操作能力，通过sql-query-list进行查询遍历，将item的值提供给lang-body进行执行 -->
     <sql-cursor>
         <!-- item 为每次迭代的对象名称 -->
@@ -184,9 +188,4 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
         <lang-body>
         </lang-body>
     </sql-cursor>
-    <!-- 表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务 -->
-    <sql-trans-begin isolation="" propagation=""/>
-    <sql-trans-commit/>
-    <sql-trans-rollback/>
-    <sql-trans-none/>
 </procedure>
