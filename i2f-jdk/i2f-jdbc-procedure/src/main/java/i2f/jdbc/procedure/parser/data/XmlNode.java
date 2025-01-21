@@ -16,6 +16,7 @@ public class XmlNode {
     protected String nodeType;
     protected String tagName;
     protected Map<String, String> tagAttrMap;
+    protected Map<String,List<String>> attrFeatureMap;
     protected String tagBody;
     protected String textBody;
     protected List<XmlNode> children;

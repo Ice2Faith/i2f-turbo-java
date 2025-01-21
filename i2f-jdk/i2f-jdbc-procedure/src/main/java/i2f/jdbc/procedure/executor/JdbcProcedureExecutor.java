@@ -18,6 +18,10 @@ public interface JdbcProcedureExecutor {
 
     void execAsProducer(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
 
+    Object applyFeatures(Object value, List<String> features,
+                         Map<String,Object> params,
+                         XmlNode node);
+
     Class<?> loadClass(String className);
 
     boolean test(String test, Map<String, Object> params);

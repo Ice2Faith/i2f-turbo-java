@@ -53,9 +53,23 @@ public class JdbcProcedureParser {
         } else if (nodeType == Node.ELEMENT_NODE) {
             XmlNode ret = new XmlNode();
             ret.setNodeType("element");
-            Map<String, String> tagAttrMap = XmlUtil.getAttributes(node);
+            Map<String,String> tagAttrMap=new LinkedHashMap<>();
+            Map<String,List<String>> attrFeatureMap=new LinkedHashMap<>();
+            Map<String, String> rawAttrMap = XmlUtil.getAttributes(node);
+            for (Map.Entry<String, String> entry : rawAttrMap.entrySet()) {
+                String key = entry.getKey();
+                String[] arr = key.split("\\.");
+                tagAttrMap.put(arr[0],entry.getValue());
+                for (int i = 1; i < arr.length; i++) {
+                    if(!attrFeatureMap.containsKey(arr[0])){
+                        attrFeatureMap.put(arr[0],new ArrayList<>());
+                    }
+                    attrFeatureMap.get(arr[0]).add(arr[i]);
+                }
+            }
             ret.setTagName(XmlUtil.getTagName(node));
             ret.setTagAttrMap(tagAttrMap);
+            ret.setAttrFeatureMap(attrFeatureMap);
             ret.setTagBody(XmlUtil.extraInnerXml(node));
             ret.setTextBody(XmlUtil.getNodeContent(node));
             List<XmlNode> children = new ArrayList<>();
