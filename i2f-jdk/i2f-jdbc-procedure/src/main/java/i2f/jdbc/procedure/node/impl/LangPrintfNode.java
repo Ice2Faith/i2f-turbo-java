@@ -26,7 +26,7 @@ public class LangPrintfNode implements ExecutorNode {
         String tag = node.getTagAttrMap().get("tag");
         String value = node.getTagAttrMap().get("value");
         if(value!=null){
-            Object obj = executor.applyFeatures(value, node.getAttrFeatureMap().get("value"), params, node);
+            Object obj = executor.applyFeatures(value, node.getAttrFeatureMap().get("value"),null, params, node);
             if(obj!=null){
                 value=String.valueOf(obj);
             }

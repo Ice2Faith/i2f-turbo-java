@@ -45,11 +45,6 @@ public class LangInvokeNode implements ExecutorNode {
 
         args.sort((o1,o2)->Integer.compare(o1.getKey(),o2.getKey()));
 
-        List<String> argsList=new ArrayList<>();
-        for (Map.Entry<Integer, String> item : args) {
-            argsList.add(item.getValue());
-        }
-
         int idx = fullMethodName.lastIndexOf(".");
         String className="";
         String methodName=fullMethodName;
@@ -65,7 +60,7 @@ public class LangInvokeNode implements ExecutorNode {
             if(constructor==null) {
                 Constructor[] constructors = clazz.getConstructors();
                 for (Constructor item : constructors) {
-                        if (item.getParameterCount() == argsList.size()) {
+                        if (item.getParameterCount() == args.size()) {
                             constructor = item;
                             break;
                         }
@@ -75,7 +70,7 @@ public class LangInvokeNode implements ExecutorNode {
             if(constructor==null) {
                 Constructor[] declaredConstructors = clazz.getDeclaredConstructors();
                 for (Constructor item : declaredConstructors) {
-                        if (item.getParameterCount() == argsList.size()) {
+                        if (item.getParameterCount() == args.size()) {
                             constructor = item;
                             break;
                         }
@@ -84,7 +79,7 @@ public class LangInvokeNode implements ExecutorNode {
             }
 
             if(constructor==null){
-                throw new IllegalArgumentException("not found constructor : "+ fullMethodName +" with args count "+argsList.size());
+                throw new IllegalArgumentException("not found constructor : "+ fullMethodName +" with args count "+args.size());
             }
 
             Class<?>[] parameterTypes = constructor.getParameterTypes();
@@ -92,10 +87,11 @@ public class LangInvokeNode implements ExecutorNode {
 
             for (int i = 0; i < parameterTypes.length; i++) {
                 Class<?> paramType=parameterTypes[i];
-                String argScript = argsList.get(i);
+                Map.Entry<Integer,String> argEntry=args.get(i);
+                String argScript = argEntry.getValue();
                 Object evalObj=null;
                 try{
-                    evalObj=executor.visit(argScript,params);
+                    evalObj=executor.applyFeatures(argScript,node.getAttrFeatureMap().get("arg"+ argEntry.getKey()),params,node);
                 }catch(Exception e){
                 }
                 if(evalObj==null){
@@ -135,7 +131,7 @@ public class LangInvokeNode implements ExecutorNode {
                 Method[] methods = clazz.getMethods();
                 for (Method item : methods) {
                     if (item.getName().equals(methodName)) {
-                        if (item.getParameterCount() == argsList.size()) {
+                        if (item.getParameterCount() == args.size()) {
                             method = item;
                             break;
                         }
@@ -147,7 +143,7 @@ public class LangInvokeNode implements ExecutorNode {
                 Method[] declaredMethods = clazz.getDeclaredMethods();
                 for (Method item : declaredMethods) {
                     if (item.getName().equals(methodName)) {
-                        if (item.getParameterCount() == argsList.size()) {
+                        if (item.getParameterCount() == args.size()) {
                             method = item;
                             break;
                         }
@@ -156,7 +152,7 @@ public class LangInvokeNode implements ExecutorNode {
             }
 
             if(method==null){
-                throw new IllegalArgumentException("not found method : "+ fullMethodName +" with args count "+argsList.size());
+                throw new IllegalArgumentException("not found method : "+ fullMethodName +" with args count "+args.size());
             }
 
 
@@ -166,10 +162,11 @@ public class LangInvokeNode implements ExecutorNode {
 
             for (int i = 0; i < parameterTypes.length; i++) {
                 Class<?> paramType=parameterTypes[i];
-                String argScript = argsList.get(i);
+                Map.Entry<Integer,String> argEntry=args.get(i);
+                String argScript = argEntry.getValue();
                 Object evalObj=null;
                 try{
-                    evalObj=executor.visit(argScript,params);
+                    evalObj=executor.applyFeatures(argScript,node.getAttrFeatureMap().get("arg"+ argEntry.getKey()),params,node);
                 }catch(Exception e){
                 }
                 if(evalObj==null){

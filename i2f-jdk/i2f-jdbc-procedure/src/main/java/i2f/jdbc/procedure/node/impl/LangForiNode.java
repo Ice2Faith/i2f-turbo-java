@@ -45,13 +45,14 @@ public class LangForiNode implements ExecutorNode {
         bakParams.put(firstName, params.get(firstName));
         bakParams.put(indexName, params.get(indexName));
 
-        int begin = (int) executor.eval(beginExpr, params);
-        int end = (int) executor.eval(endExpr, params);
-        int incr = (int) executor.eval(incrExpr, params);
+        int begin = (int) executor.applyFeatures(beginExpr, node.getAttrFeatureMap().get("begin"),params,node);
+        int end = (int) executor.applyFeatures(endExpr,  node.getAttrFeatureMap().get("end"),params,node);
+        int incr = (int) executor.applyFeatures(incrExpr, node.getAttrFeatureMap().get("incr"),params,node);
 
+        boolean loop=begin<end;
         boolean isFirst = true;
         int index = 0;
-        for (int j = begin; j < end; j += incr) {
+        for (int j = begin; loop==(j < end); j += incr) {
             // 覆盖堆栈
             params.put(itemName, j);
             params.put(firstName, isFirst);
