@@ -1,0 +1,76 @@
+package i2f.jdbc.procedure.executor.impl;
+
+import i2f.convert.obj.ObjectConvertor;
+import i2f.extension.ognl.OgnlUtil;
+import i2f.extension.velocity.VelocityGenerator;
+import i2f.reflect.vistor.Visitor;
+
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Map;
+
+/**
+ * @author Ice2Faith
+ * @date 2025/1/22 10:06
+ */
+public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
+    @Override
+    public boolean innerTest(String test, Map<String, Object> params) {
+        try {
+            Object obj = OgnlUtil.evaluateExpression(test, params);
+            if (obj == null) {
+                return false;
+            }
+            if (obj instanceof Boolean) {
+                return (Boolean) obj;
+            }
+            if (obj instanceof String) {
+                if (!"".equals(obj)) {
+                    return true;
+                }
+            }
+            if (obj instanceof Collection) {
+                Collection<?> col = (Collection<?>) obj;
+                if (!col.isEmpty()) {
+                    return true;
+                }
+            }
+            if (obj.getClass().isArray()) {
+                if (Array.getLength(obj) > 0) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+        return false;
+    }
+
+    @Override
+    public Object innerEval(String script, Map<String, Object> params) {
+        try {
+            return OgnlUtil.evaluateExpression(script, params);
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Object innerVisit(String script, Map<String, Object> params) {
+        try {
+            return OgnlUtil.evaluateExpression(script, params);
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public String innerRender(String script, Map<String, Object> params) {
+        try {
+            return VelocityGenerator.render(script, params);
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+}

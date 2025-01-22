@@ -22,18 +22,18 @@ public class LangNewParamsNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get("result");
-        Map<String, Object> newParams=executor.newParams(params,nodeMap);
+        Map<String, Object> newParams = executor.newParams(params, nodeMap);
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
             String key = entry.getKey();
-            if("result".equals(key)){
+            if ("result".equals(key)) {
                 continue;
             }
             Object value = executor.attrValue(key, "visit", node, params, nodeMap);
-            executor.setParamsObject(newParams,key,value);
+            executor.setParamsObject(newParams, key, value);
         }
-        if(result!=null && !result.isEmpty()){
+        if (result != null && !result.isEmpty()) {
             Object res = executor.resultValue(newParams, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
-            executor.setParamsObject(params,result,res);
+            executor.setParamsObject(params, result, res);
         }
     }
 }

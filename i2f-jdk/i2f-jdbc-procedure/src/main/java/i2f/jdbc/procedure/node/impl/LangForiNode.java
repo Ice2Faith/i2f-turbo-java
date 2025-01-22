@@ -49,10 +49,10 @@ public class LangForiNode implements ExecutorNode {
         int end = (int) executor.attrValue("end", "visit", node, params, nodeMap);
         int incr = (int) executor.attrValue("incr", "visit", node, params, nodeMap);
 
-        boolean loop=begin<end;
+        boolean loop = begin < end;
         boolean isFirst = true;
         int index = 0;
-        for (int j = begin; loop==(j < end); j += incr) {
+        for (int j = begin; loop == (j < end); j += incr) {
             Object val = j;
             val = executor.resultValue(val, node.getAttrFeatureMap().get("item"), node, params, nodeMap);
             // 覆盖堆栈

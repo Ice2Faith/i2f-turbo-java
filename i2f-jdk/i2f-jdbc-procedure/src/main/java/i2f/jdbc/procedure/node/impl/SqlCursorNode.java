@@ -6,7 +6,6 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 
-import javax.sql.DataSource;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,76 +26,76 @@ public class SqlCursorNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
-        if(children==null || children.isEmpty()){
+        if (children == null || children.isEmpty()) {
             return;
         }
-        XmlNode queryNode=null;
-        XmlNode bodyNode=null;
+        XmlNode queryNode = null;
+        XmlNode bodyNode = null;
         for (XmlNode item : children) {
-            if("sql-query-list".equals(item.getTagName())){
-                queryNode=item;
+            if ("sql-query-list".equals(item.getTagName())) {
+                queryNode = item;
             }
-            if("lang-body".equals(item.getTagName())){
-                bodyNode=item;
+            if ("lang-body".equals(item.getTagName())) {
+                bodyNode = item;
             }
         }
 
-        if(queryNode==null){
+        if (queryNode == null) {
             throw new IllegalStateException("missing cursor query node!");
         }
 
-        if(bodyNode==null){
+        if (bodyNode == null) {
             throw new IllegalStateException("missing cursor body node!");
         }
 
         Integer batchSize = (Integer) executor.attrValue("batch-size", "int", node, params, nodeMap);
         String item = node.getTagAttrMap().get("item");
-        if(item==null || item.isEmpty()) {
+        if (item == null || item.isEmpty()) {
             item = "item";
         }
 
-        String datasource = (String)executor.attrValue("datasource","visit",node,params,nodeMap);
-        String script = (String)executor.attrValue("script","visit",node,params,nodeMap);
-        String resultTypeName = (String)executor.attrValue("result-type","visit",node,params,nodeMap);
+        String datasource = (String) executor.attrValue("datasource", "visit", node, params, nodeMap);
+        String script = (String) executor.attrValue("script", "visit", node, params, nodeMap);
+        String resultTypeName = (String) executor.attrValue("result-type", "visit", node, params, nodeMap);
         Class<?> resultType = executor.loadClass(resultTypeName);
         if (resultType == null) {
             resultType = Map.class;
         }
-        if (script==null || script.isEmpty()){
+        if (script == null || script.isEmpty()) {
             script = node.getTagBody();
         }
 
-        int pageIndex=0;
-        if(batchSize==null || batchSize<=0){
-            batchSize=2000;
+        int pageIndex = 0;
+        if (batchSize == null || batchSize <= 0) {
+            batchSize = 2000;
         }
-        Map<String,Object> bakParams=new LinkedHashMap<>();
-        bakParams.put(item,executor.visit(item,params));
-        while(true){
+        Map<String, Object> bakParams = new LinkedHashMap<>();
+        bakParams.put(item, executor.visit(item, params));
+        while (true) {
             List<?> list = executor.sqlQueryPage(datasource, script, params, resultType, pageIndex, batchSize);
-            if(list.isEmpty()){
+            if (list.isEmpty()) {
                 break;
             }
 
-            boolean breakSignal=false;
-            int count=0;
+            boolean breakSignal = false;
+            int count = 0;
             for (Object obj : list) {
                 count++;
-                try{
-                    executor.setParamsObject(params,item,obj);
-                }catch(ContinueSignalException e){
+                try {
+                    executor.setParamsObject(params, item, obj);
+                } catch (ContinueSignalException e) {
                     continue;
-                }catch (BreakSignalException e){
-                    breakSignal=true;
+                } catch (BreakSignalException e) {
+                    breakSignal = true;
                     break;
                 }
             }
 
-            if(breakSignal){
+            if (breakSignal) {
                 break;
             }
 
-            if(count<batchSize){
+            if (count < batchSize) {
                 break;
             }
 
@@ -104,7 +103,7 @@ public class SqlCursorNode implements ExecutorNode {
         }
 
         for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
-            executor.setParamsObject(params,entry.getKey(),entry.getValue());
+            executor.setParamsObject(params, entry.getKey(), entry.getValue());
         }
     }
 }
