@@ -146,6 +146,11 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
 
         </lang-finally>
     </lang-try>
+
+    <!-- 对应synchronized关键字,允许指定target，不指定则对当前节点的上下文context同步 -->
+    <lang-synchronized target="">
+
+    </lang-synchronized>
     <!--
     表示一个查询语句，预期为一行数据，执行结果放到result指定的变量名中；
     对于sql-开头的标签，都允许带有datasource属性来制定使用哪个数据源，也都允许带有script属性指定要执行的SQL来源于哪个变量，

@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.executor;
 
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
@@ -15,17 +16,17 @@ import java.util.function.Supplier;
 public interface JdbcProcedureExecutor {
     List<ExecutorNode> getNodes();
 
-    void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
+    void exec(XmlNode node, ExecuteContext context);
 
-    void execAsProcedure(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
+    void execAsProcedure(XmlNode node, ExecuteContext context);
 
-    Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
+    Object attrValue(String attr, String action, XmlNode node, ExecuteContext context);
 
-    Object resultValue(Object value, List<String> features, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
+    Object resultValue(Object value, List<String> features, XmlNode node, ExecuteContext context);
 
     void setParamsObject(Map<String, Object> params, String result, Object value);
 
-    Map<String, Object> newParams(Map<String, Object> params, Map<String, XmlNode> nodeMap);
+    Map<String, Object> newParams(ExecuteContext context);
 
     void debugLog(Supplier<String> supplier);
 

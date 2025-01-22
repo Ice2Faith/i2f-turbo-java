@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -20,7 +21,7 @@ public class LangPrintlnNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         StringBuilder builder = new StringBuilder();
         String tag = node.getTagAttrMap().get("tag");
         builder.append("[").append(tag == null ? "" : tag).append("]");
@@ -33,7 +34,7 @@ public class LangPrintlnNode implements ExecutorNode {
                 builder.append(", ");
             }
             String script = entry.getValue();
-            Object val = executor.attrValue(entry.getKey(), "visit", node, params, nodeMap);
+            Object val = executor.attrValue(entry.getKey(), "visit", node, context);
             builder.append(entry.getKey()).append(":").append(val);
             isFirst = false;
         }

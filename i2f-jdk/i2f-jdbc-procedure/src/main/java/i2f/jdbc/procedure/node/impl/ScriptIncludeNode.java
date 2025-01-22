@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -21,9 +22,9 @@ public class ScriptIncludeNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String refid = node.getTagAttrMap().get("refid");
-        XmlNode nextNode = nodeMap.get(refid);
+        XmlNode nextNode = context.getNodeMap().get(refid);
         if (nextNode == null) {
             return;
         }
@@ -36,15 +37,15 @@ public class ScriptIncludeNode implements ExecutorNode {
             }
             String script = entry.getValue();
             // 备份堆栈
-            bakParams.put(name, params.get(script));
-            Object val = executor.attrValue(name, "visit", node, params, nodeMap);
-            params.put(name, val);
+            bakParams.put(name, context.getParams().get(script));
+            Object val = executor.attrValue(name, "visit", node, context);
+            context.getParams().put(name, val);
         }
 
-        executor.execAsProcedure(nextNode, params, nodeMap);
+        executor.execAsProcedure(nextNode, context);
 
         // 恢复堆栈
-        params.putAll(bakParams);
+        context.getParams().putAll(bakParams);
     }
 
 }

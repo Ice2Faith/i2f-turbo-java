@@ -5,6 +5,7 @@ import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
@@ -95,12 +96,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+    public void exec(XmlNode node, ExecuteContext context) {
         try {
             for (ExecutorNode item : nodes) {
                 if (item.support(node)) {
                     debugLog(() -> "exec " + node.getTagName() + " by " + item.getClass().getSimpleName());
-                    item.exec(node, params, nodeMap, this);
+                    item.exec(node, context, this);
                     break;
                 }
             }
@@ -110,7 +111,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public void execAsProcedure(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+    public void execAsProcedure(XmlNode node, ExecuteContext context) {
         ProcedureNode execNode = null;
         for (ExecutorNode item : nodes) {
             if (item instanceof ProcedureNode) {
@@ -122,11 +123,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             execNode = ProcedureNode.INSTANCE;
         }
         debugLog(() -> "exec as procedure " + node.getTagName());
-        execNode.exec(node, params, nodeMap, this);
+        execNode.exec(node, context, this);
     }
 
     @Override
-    public Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+    public Object attrValue(String attr, String action, XmlNode node, ExecuteContext context) {
         String attrScript = node.getTagAttrMap().get(attr);
         if (attrScript == null) {
             return null;
@@ -136,7 +137,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         String radixText = node.getTagAttrMap().get("radix");
         if (radixText != null && !radixText.isEmpty()) {
             try {
-                Object radixObj = attrValue("radix", "visit", node, params, nodeMap);
+                Object radixObj = attrValue("radix", "visit", node, context);
                 if (radixObj != null) {
                     radixObj = ObjectConvertor.tryConvertAsType(radixObj, Integer.class);
                     if (radixObj instanceof Integer) {
@@ -154,17 +155,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 if (feature == null || feature.isEmpty()) {
                     continue;
                 }
-                value = resolveFeature(value, feature, node, params, nodeMap);
+                value = resolveFeature(value, feature, node, context);
             }
         } else {
-            value = resolveFeature(attrScript, action, node, params, nodeMap);
+            value = resolveFeature(attrScript, action, node, context);
         }
 
         return value;
     }
 
     @Override
-    public Object resultValue(Object value, List<String> features, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+    public Object resultValue(Object value, List<String> features, XmlNode node, ExecuteContext context) {
         if (features == null || features.isEmpty()) {
             return value;
         }
@@ -172,7 +173,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if (feature == null || feature.isEmpty()) {
                 continue;
             }
-            value = resolveFeature(value, feature, node, params, nodeMap);
+            value = resolveFeature(value, feature, node, context);
         }
         return value;
     }
@@ -184,16 +185,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public Map<String, Object> newParams(Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+    public Map<String, Object> newParams(ExecuteContext context) {
         Map<String, Object> ret = new LinkedHashMap<>();
-        ret.put("context", params.get("context"));
-        ret.put("datasources", params.get("datasources"));
-        ret.put("beans", params.get("beans"));
+        ret.put("context", context.getParams().get("context"));
+        ret.put("datasources", context.getParams().get("datasources"));
+        ret.put("beans", context.getParams().get("beans"));
 
         return ret;
     }
 
-    public Object resolveFeature(Object value, String feature, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+    public Object resolveFeature(Object value, String feature, XmlNode node, ExecuteContext context) {
         if (feature == null || feature.isEmpty()) {
             return value;
         }
@@ -217,16 +218,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             return ObjectConvertor.tryConvertAsType(value, Boolean.class);
         } else if ("render".equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
-            return render(text, params);
+            return render(text, context.getParams());
         } else if ("visit".equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
-            return visit(text, params);
+            return visit(text, context.getParams());
         } else if ("eval".equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
-            return eval(text, params);
+            return eval(text, context.getParams());
         } else if ("test".equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
-            return test(text, params);
+            return test(text, context.getParams());
         } else if ("null".equals(feature)) {
             return null;
         } else if ("date".equals(feature)) {
@@ -235,7 +236,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             boolean processed = false;
             try {
                 if (patternText != null) {
-                    Object patternValue = attrValue("radix", "visit", node, params, nodeMap);
+                    Object patternValue = attrValue("radix", "visit", node, context);
                     if (patternValue != null) {
                         value = new SimpleDateFormat(patternText).parse(text);
                         processed = true;
@@ -348,55 +349,55 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
             }
         }
-        if(clazz==null){
-            clazz=innerLoadClass(className,loader);
+        if (clazz == null) {
+            clazz = innerLoadClass(className, loader);
         }
         return clazz;
     }
 
-    public Class<?> innerLoadClass(String className,ClassLoader loader){
+    public Class<?> innerLoadClass(String className, ClassLoader loader) {
         return null;
     }
 
-    public String unescapeTestScript(String script){
-        if(script==null){
+    public String unescapeTestScript(String script) {
+        if (script == null) {
             return script;
         }
-        script=script.replaceAll("\\s+gte\\s+"," >= ");
-        script=script.replaceAll("\\s+lte\\s+"," <= ");
-        script=script.replaceAll("\\s+ge\\s+"," >= ");
-        script=script.replaceAll("\\s+le\\s+"," <= ");
-        script=script.replaceAll("\\s+gt\\s+"," > ");
-        script=script.replaceAll("\\s+lt\\s+"," < ");
-        script=script.replaceAll("\\s+eq\\s+"," == ");
-        script=script.replaceAll("\\s+ne\\s+"," != ");
+        script = script.replaceAll("\\s+gte\\s+", " >= ");
+        script = script.replaceAll("\\s+lte\\s+", " <= ");
+        script = script.replaceAll("\\s+ge\\s+", " >= ");
+        script = script.replaceAll("\\s+le\\s+", " <= ");
+        script = script.replaceAll("\\s+gt\\s+", " > ");
+        script = script.replaceAll("\\s+lt\\s+", " < ");
+        script = script.replaceAll("\\s+eq\\s+", " == ");
+        script = script.replaceAll("\\s+ne\\s+", " != ");
         return script;
     }
 
-    public String unescapeXmlScript(String script){
-        if(script==null){
+    public String unescapeXmlScript(String script) {
+        if (script == null) {
             return script;
         }
-        script=script.replaceAll("&gt;",">");
-        script=script.replaceAll("&lt;","<");
-        script=script.replaceAll("&nbsp;"," ");
-        script=script.replaceAll("&emsp;","\t");
+        script = script.replaceAll("&gt;", ">");
+        script = script.replaceAll("&lt;", "<");
+        script = script.replaceAll("&nbsp;", " ");
+        script = script.replaceAll("&emsp;", "\t");
         return script;
     }
 
     @Override
     public boolean test(String script, Map<String, Object> params) {
-        String test=unescapeTestScript(script);
+        String test = unescapeTestScript(script);
         debugLog(() -> "test:" + test);
         try {
             Boolean ok = ObjectConvertor.tryParseBoolean(test);
-            if(ok!=null){
+            if (ok != null) {
                 return ok;
             }
         } catch (Exception e) {
 
         }
-        return innerTest(test,params);
+        return innerTest(test, params);
     }
 
     public boolean innerTest(String test, Map<String, Object> params) {
@@ -418,7 +419,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         }
         try {
             Boolean ok = ObjectConvertor.tryParseBoolean(script);
-            if(ok!=null){
+            if (ok != null) {
                 return ok;
             }
         } catch (Exception e) {
@@ -429,7 +430,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         } catch (Exception e) {
 
         }
-       return innerEval(script,params);
+        return innerEval(script, params);
     }
 
     public Object innerEval(String script, Map<String, Object> params) {
@@ -443,10 +444,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             return params.get(script);
         }
         Visitor visitor = Visitor.visit(script, params);
-        if(visitor!=null){
+        if (visitor != null) {
             return visitor.get();
         }
-        return innerVisit(script,params);
+        return innerVisit(script, params);
     }
 
     public Object innerVisit(String script, Map<String, Object> params) {
@@ -456,7 +457,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public String render(String script, Map<String, Object> params) {
         debugLog(() -> "render:" + script);
-        return innerRender(script,params);
+        return innerRender(script, params);
     }
 
     public String innerRender(String script, Map<String, Object> params) {

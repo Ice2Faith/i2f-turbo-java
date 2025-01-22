@@ -5,28 +5,27 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
-import java.util.concurrent.CountDownLatch;
-
 /**
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangLatchNode implements ExecutorNode {
+public class LangSynchronizedNode implements ExecutorNode {
     @Override
     public boolean support(XmlNode node) {
         if (!"element".equals(node.getNodeType())) {
             return false;
         }
-        return "lang-latch".equals(node.getTagName());
+        return "lang-synchronized".equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        int count = (int) executor.attrValue("count", "visit", node, context);
-        String result = node.getTagAttrMap().get("result");
-        if (result != null && !result.isEmpty()) {
-            CountDownLatch latch = new CountDownLatch(count);
-            executor.setParamsObject(context.getParams(), result, latch);
+        Object target = executor.attrValue("target", "visit", node, context);
+        if(target==null){
+            target=context;
+        }
+        synchronized (target){
+            executor.execAsProcedure(node,context);
         }
     }
 }

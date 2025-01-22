@@ -1,10 +1,9 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -20,10 +19,10 @@ public class LangWhenNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
-        boolean ok = (boolean) executor.attrValue("test", "test", node, params, nodeMap);
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+        boolean ok = (boolean) executor.attrValue("test", "test", node, context);
         if (ok) {
-            executor.execAsProcedure(node, params, nodeMap);
+            executor.execAsProcedure(node, context);
         }
     }
 

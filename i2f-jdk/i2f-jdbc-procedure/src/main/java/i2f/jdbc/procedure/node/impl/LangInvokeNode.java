@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -27,7 +28,7 @@ public class LangInvokeNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String fullMethodName = node.getTagAttrMap().get("method");
         String targetScript = node.getTagAttrMap().get("target");
         String result = node.getTagAttrMap().get("result");
@@ -91,7 +92,7 @@ public class LangInvokeNode implements ExecutorNode {
                 String argScript = argEntry.getValue();
                 Object evalObj = null;
                 try {
-                    evalObj = executor.attrValue("arg" + argEntry.getKey(), "visit", node, params, nodeMap);
+                    evalObj = executor.attrValue("arg" + argEntry.getKey(), "visit", node, context);
                 } catch (Exception e) {
                 }
                 if (evalObj == null) {
@@ -106,8 +107,8 @@ public class LangInvokeNode implements ExecutorNode {
                 Object res = constructor.newInstance(invokeArgs);
 
                 if (result != null && !result.isEmpty()) {
-                    res = executor.resultValue(res, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
-                    executor.setParamsObject(params, result, res);
+                    res = executor.resultValue(res, node.getAttrFeatureMap().get("result"), node, context);
+                    executor.setParamsObject(context.getParams(), result, res);
                 }
             } catch (ReflectiveOperationException e) {
                 throw new IllegalStateException(e.getMessage(), e);
@@ -116,7 +117,7 @@ public class LangInvokeNode implements ExecutorNode {
             Class<?> clazz = null;
             Object invokeObject = null;
             if (targetScript != null && !targetScript.isEmpty()) {
-                invokeObject = executor.visit(targetScript, params);
+                invokeObject = executor.visit(targetScript, context.getParams());
             }
             if (invokeObject != null) {
                 clazz = invokeObject.getClass();
@@ -166,7 +167,7 @@ public class LangInvokeNode implements ExecutorNode {
                 String argScript = argEntry.getValue();
                 Object evalObj = null;
                 try {
-                    evalObj = executor.attrValue("arg" + argEntry.getKey(), "visit", node, params, nodeMap);
+                    evalObj = executor.attrValue("arg" + argEntry.getKey(), "visit", node, context);
                 } catch (Exception e) {
                 }
                 if (evalObj == null) {
@@ -187,8 +188,8 @@ public class LangInvokeNode implements ExecutorNode {
                 Object res = method.invoke(invokeObject, invokeArgs);
 
                 if (result != null && !result.isEmpty()) {
-                    res = executor.resultValue(res, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
-                    executor.setParamsObject(params, result, res);
+                    res = executor.resultValue(res, node.getAttrFeatureMap().get("result"), node, context);
+                    executor.setParamsObject(context.getParams(), result, res);
                 }
             } catch (ReflectiveOperationException e) {
                 throw new IllegalStateException(e.getMessage(), e);

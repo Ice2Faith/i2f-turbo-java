@@ -1,12 +1,12 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.lang.reflect.Constructor;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -22,11 +22,11 @@ public class LangThrowNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
-        String message = (String) executor.attrValue("value", "visit", node, params, nodeMap);
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+        String message = (String) executor.attrValue("value", "visit", node, context);
         String exceptionType = node.getTagAttrMap().get("type");
         String cause = node.getTagAttrMap().get("cause");
-        Throwable ex = (Throwable) executor.visit(cause, params);
+        Throwable ex = (Throwable) executor.visit(cause, context.getParams());
         Class<?> clazz = executor.loadClass(exceptionType);
 
         try {

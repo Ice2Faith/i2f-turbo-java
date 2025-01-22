@@ -1,11 +1,11 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -23,9 +23,9 @@ public class LangAsyncNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
-        Boolean await = (Boolean) executor.attrValue("await", "visit", node, params, nodeMap);
-        Long delay = (Long) executor.attrValue("delay", "visit", node, params, nodeMap);
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+        Boolean await = (Boolean) executor.attrValue("await", "visit", node, context);
+        Long delay = (Long) executor.attrValue("delay", "visit", node, context);
         String timeUnit = node.getTagAttrMap().get("time-unit");
         TimeUnit unit = TimeUnit.SECONDS;
         if ("SECONDS".equalsIgnoreCase(timeUnit)) {
@@ -53,7 +53,7 @@ public class LangAsyncNode implements ExecutorNode {
                     } catch (Exception e) {
                     }
                 }
-                executor.execAsProcedure(node, params, nodeMap);
+                executor.execAsProcedure(node, context);
             } catch (Throwable e) {
                 e.printStackTrace();
             } finally {

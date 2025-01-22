@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -23,7 +24,7 @@ public class LangWhileNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String script = node.getTagAttrMap().get("test");
         String firstName = node.getTagAttrMap().get("first");
         String indexName = node.getTagAttrMap().get("index");
@@ -35,18 +36,18 @@ public class LangWhileNode implements ExecutorNode {
         }
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
-        bakParams.put(firstName, params.get(firstName));
-        bakParams.put(indexName, params.get(indexName));
+        bakParams.put(firstName, context.getParams().get(firstName));
+        bakParams.put(indexName, context.getParams().get(indexName));
 
         boolean isFirst = true;
         int index = 0;
-        while ((boolean) executor.attrValue("test", "test", node, params, nodeMap)) {
-            params.put(firstName, isFirst);
-            params.put(indexName, index);
+        while ((boolean) executor.attrValue("test", "test", node, context)) {
+            context.getParams().put(firstName, isFirst);
+            context.getParams().put(indexName, index);
             isFirst = false;
             index++;
             try {
-                executor.execAsProcedure(node, params, nodeMap);
+                executor.execAsProcedure(node, context);
             } catch (ContinueSignalException e) {
                 continue;
             } catch (BreakSignalException e) {
@@ -54,8 +55,8 @@ public class LangWhileNode implements ExecutorNode {
             }
         }
         // 还原堆栈
-        params.put(firstName, bakParams.get(firstName));
-        params.put(indexName, bakParams.get(indexName));
+        context.getParams().put(firstName, bakParams.get(firstName));
+        context.getParams().put(indexName, bakParams.get(indexName));
     }
 
 }

@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -23,7 +24,7 @@ public class LangTryNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<XmlNode> nodes = node.getChildren();
         if (nodes == null) {
             return;
@@ -51,7 +52,7 @@ public class LangTryNode implements ExecutorNode {
         }
 
         try {
-            executor.execAsProcedure(bodyNode, params, nodeMap);
+            executor.execAsProcedure(bodyNode, context);
         } catch (Throwable e) {
             boolean handled = false;
             for (XmlNode catchNode : catchNodes) {
@@ -62,26 +63,26 @@ public class LangTryNode implements ExecutorNode {
                 }
                 // 备份堆栈
                 Map<String, Object> bakParams = new LinkedHashMap<>();
-                bakParams.put(exName, params.get(exName));
+                bakParams.put(exName, context.getParams().get(exName));
 
                 Class<?> clazz = executor.loadClass(type);
                 if (clazz == null) {
                     throw new IllegalStateException("missing catch exception type of : " + type);
                 }
                 if (clazz.isAssignableFrom(e.getClass())) {
-                    executor.execAsProcedure(catchNode, params, nodeMap);
+                    executor.execAsProcedure(catchNode, context);
                     handled = true;
                 }
 
                 // 还原堆栈
-                params.put(exName, bakParams.get(exName));
+                context.getParams().put(exName, bakParams.get(exName));
             }
             if (!handled) {
                 throw e;
             }
         } finally {
             if (finallyNode != null) {
-                executor.execAsProcedure(finallyNode, params, nodeMap);
+                executor.execAsProcedure(finallyNode, context);
             }
         }
     }

@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -23,7 +24,7 @@ public class LangForiNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String beginExpr = node.getTagAttrMap().get("begin");
         String endExpr = node.getTagAttrMap().get("end");
         String incrExpr = node.getTagAttrMap().get("incr");
@@ -41,28 +42,28 @@ public class LangForiNode implements ExecutorNode {
         }
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
-        bakParams.put(itemName, params.get(itemName));
-        bakParams.put(firstName, params.get(firstName));
-        bakParams.put(indexName, params.get(indexName));
+        bakParams.put(itemName, context.getParams().get(itemName));
+        bakParams.put(firstName, context.getParams().get(firstName));
+        bakParams.put(indexName, context.getParams().get(indexName));
 
-        int begin = (int) executor.attrValue("begin", "visit", node, params, nodeMap);
-        int end = (int) executor.attrValue("end", "visit", node, params, nodeMap);
-        int incr = (int) executor.attrValue("incr", "visit", node, params, nodeMap);
+        int begin = (int) executor.attrValue("begin", "visit", node, context);
+        int end = (int) executor.attrValue("end", "visit", node, context);
+        int incr = (int) executor.attrValue("incr", "visit", node, context);
 
         boolean loop = begin < end;
         boolean isFirst = true;
         int index = 0;
         for (int j = begin; loop == (j < end); j += incr) {
             Object val = j;
-            val = executor.resultValue(val, node.getAttrFeatureMap().get("item"), node, params, nodeMap);
+            val = executor.resultValue(val, node.getAttrFeatureMap().get("item"), node, context);
             // 覆盖堆栈
-            params.put(itemName, val);
-            params.put(firstName, isFirst);
-            params.put(indexName, index);
+            context.getParams().put(itemName, val);
+            context.getParams().put(firstName, isFirst);
+            context.getParams().put(indexName, index);
             isFirst = false;
             index++;
             try {
-                executor.execAsProcedure(node, params, nodeMap);
+                executor.execAsProcedure(node, context);
             } catch (ContinueSignalException e) {
                 continue;
             } catch (BreakSignalException e) {
@@ -71,9 +72,9 @@ public class LangForiNode implements ExecutorNode {
         }
 
         // 还原堆栈
-        params.put(itemName, bakParams.get(itemName));
-        params.put(firstName, bakParams.get(firstName));
-        params.put(indexName, bakParams.get(indexName));
+        context.getParams().put(itemName, bakParams.get(itemName));
+        context.getParams().put(firstName, bakParams.get(firstName));
+        context.getParams().put(indexName, bakParams.get(indexName));
     }
 
 }

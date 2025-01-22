@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -21,7 +22,7 @@ public class SqlQueryListNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String datasource = node.getTagAttrMap().get("datasource");
         String script = node.getTagAttrMap().get("script");
         String result = node.getTagAttrMap().get("result");
@@ -31,13 +32,13 @@ public class SqlQueryListNode implements ExecutorNode {
             resultType = Map.class;
         }
         if (script != null && !script.isEmpty()) {
-            script = (String) executor.visit(script, params);
+            script = (String) executor.visit(script, context.getParams());
         } else {
             script = node.getTagBody();
         }
-        List<?> row = executor.sqlQueryList(datasource, script, params, resultType);
+        List<?> row = executor.sqlQueryList(datasource, script, context.getParams(), resultType);
         if (result != null && !result.isEmpty()) {
-            executor.setParamsObject(params, result, row);
+            executor.setParamsObject(context.getParams(), result, row);
         }
     }
 
