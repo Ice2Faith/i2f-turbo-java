@@ -53,9 +53,9 @@ public class SqlCursorNode implements ExecutorNode {
             item = "item";
         }
 
-        List<Map.Entry<String,String>> dialectScriptList=new ArrayList<>();
+        List<Map.Entry<String, String>> dialectScriptList = new ArrayList<>();
         List<XmlNode> queryChildren = queryNode.getChildren();
-        if(queryChildren!=null) {
+        if (queryChildren != null) {
             for (XmlNode iter : queryChildren) {
                 if ("sql-dialect".equals(iter.getTagName())) {
                     String databases = iter.getTagAttrMap().get("databases");
@@ -79,8 +79,8 @@ public class SqlCursorNode implements ExecutorNode {
         if (script == null || script.isEmpty()) {
             script = node.getTagBody();
         }
-        if(dialectScriptList.isEmpty()){
-            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null,script));
+        if (dialectScriptList.isEmpty()) {
+            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
 
         int pageIndex = 0;

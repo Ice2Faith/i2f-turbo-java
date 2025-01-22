@@ -16,8 +16,8 @@ import java.util.regex.Pattern;
  * @date 2025/1/20 14:07
  */
 public class LangEvalJavaNode implements ExecutorNode {
-    public static final String CLASS_NAME_HOLDER="$#$##$###";
-    public static final Pattern RETURN_PATTERN =Pattern.compile("\\s*return\\s*");
+    public static final String CLASS_NAME_HOLDER = "$#$##$###";
+    public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s*");
 
     @Override
     public boolean support(XmlNode node) {
@@ -31,46 +31,46 @@ public class LangEvalJavaNode implements ExecutorNode {
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get("result");
         List<XmlNode> children = node.getChildren();
-        XmlNode importNode=null;
-        XmlNode memberNode=null;
-        XmlNode bodyNode=null;
-        if(children!=null && !children.isEmpty()){
+        XmlNode importNode = null;
+        XmlNode memberNode = null;
+        XmlNode bodyNode = null;
+        if (children != null && !children.isEmpty()) {
             for (XmlNode item : children) {
-                if("lang-java-import".equals(item.getTagName())){
-                    importNode=item;
+                if ("lang-java-import".equals(item.getTagName())) {
+                    importNode = item;
                 }
-                if("lang-java-member".equals(item.getTagName())){
-                    memberNode=item;
+                if ("lang-java-member".equals(item.getTagName())) {
+                    memberNode = item;
                 }
-                if("lang-java-body".equals(item.getTagName())){
-                    bodyNode=node;
+                if ("lang-java-body".equals(item.getTagName())) {
+                    bodyNode = node;
                 }
             }
         }
 
-        if(bodyNode==null){
-            bodyNode=node;
+        if (bodyNode == null) {
+            bodyNode = node;
         }
 
-        String importSegment="";
-        String memberSegment="";
-        String bodySegment="";
-        if(importNode!=null){
-            importSegment= importNode.getTextBody();
+        String importSegment = "";
+        String memberSegment = "";
+        String bodySegment = "";
+        if (importNode != null) {
+            importSegment = importNode.getTextBody();
         }
-        if(memberNode!=null){
-            memberSegment=memberNode.getTextBody();
+        if (memberNode != null) {
+            memberSegment = memberNode.getTextBody();
         }
-        if(bodyNode!=null){
-            bodySegment=bodyNode.getTextBody();
+        if (bodyNode != null) {
+            bodySegment = bodyNode.getTextBody();
         }
 
-        bodySegment=bodySegment.trim();
+        bodySegment = bodySegment.trim();
 
         Matcher matcher = RETURN_PATTERN.matcher(bodySegment);
 
-        String className="RC" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
-        StringBuilder builder=new StringBuilder();
+        String className = "RC" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
+        StringBuilder builder = new StringBuilder();
         builder.append("import ").append(ExecuteContext.class.getName()).append(";").append("\n");
         builder.append("import ").append(JdbcProcedureExecutor.class.getName()).append(";").append("\n");
         builder.append("import ").append("java.util.*").append(";").append("\n");
@@ -81,50 +81,50 @@ public class LangEvalJavaNode implements ExecutorNode {
         builder.append("public class ").append(CLASS_NAME_HOLDER).append("{").append("\n");
         builder.append(memberSegment).append("\n");
         builder.append("public Object exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable {").append("\n");
-        if(!matcher.find()){
+        if (!matcher.find()) {
             String[] lines = bodySegment.split("\n");
             for (int i = 0; i < lines.length; i++) {
-                String line=lines[i];
-                if(i==lines.length-1) {
+                String line = lines[i];
+                if (i == lines.length - 1) {
                     String str = line.trim();
                     builder.append(" return ");
                     builder.append(line);
-                    if(!str.endsWith(";")){
+                    if (!str.endsWith(";")) {
                         builder.append(";");
                     }
                     builder.append("\n");
-                }else{
+                } else {
                     builder.append(line).append("\n");
                 }
             }
-        }else {
+        } else {
             builder.append(bodySegment);
-            if(!bodySegment.endsWith(";")){
+            if (!bodySegment.endsWith(";")) {
                 builder.append(";");
             }
         }
         builder.append("}").append("\n");
         builder.append("}").append("\n");
 
-        String javaSourceCode=builder.toString();
+        String javaSourceCode = builder.toString();
 
-        javaSourceCode=javaSourceCode.replace(CLASS_NAME_HOLDER,className);
+        javaSourceCode = javaSourceCode.replace(CLASS_NAME_HOLDER, className);
 
         Object obj = null;
         try {
-            obj= MemoryCompiler.compileCall(javaSourceCode,
+            obj = MemoryCompiler.compileCall(javaSourceCode,
                     className + ".java",
                     className,
                     "exec",
                     context, executor, context.getParams()
             );
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
 
-        if(result!=null && !result.isEmpty()) {
+        if (result != null && !result.isEmpty()) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get("result"), node, context);
-            executor.setParamsObject(context.getParams(),result,obj);
+            executor.setParamsObject(context.getParams(), result, obj);
         }
 
     }

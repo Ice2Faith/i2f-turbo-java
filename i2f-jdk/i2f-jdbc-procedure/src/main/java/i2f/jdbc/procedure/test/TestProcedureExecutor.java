@@ -10,8 +10,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -27,7 +25,7 @@ public class TestProcedureExecutor {
         BasicJdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
         executor.getDebug().set(true);
 
-        ExecuteContext context=new ExecuteContext();
+        ExecuteContext context = new ExecuteContext();
 
         context.getParams().put("list", new ArrayList<>(Arrays.asList(9, 8, 7, 6, 5, 4, 3, 2, 1)));
         executor.exec(node, context);

@@ -40,15 +40,15 @@ public interface JdbcProcedureExecutor {
 
     String render(String script, Map<String, Object> params);
 
-    List<?> sqlQueryList(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
+    List<?> sqlQueryList(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
 
-    Object sqlQueryObject(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
+    Object sqlQueryObject(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
 
-    Object sqlQueryRow(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
+    Object sqlQueryRow(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
 
-    int sqlUpdate(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params);
+    int sqlUpdate(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params);
 
-    List<?> sqlQueryPage(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize);
+    List<?> sqlQueryPage(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize);
 
     void sqlTransBegin(String datasource, int isolation, Map<String, Object> params);
 
