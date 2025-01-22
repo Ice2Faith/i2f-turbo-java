@@ -6,6 +6,10 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.temporal.ValueRange;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -69,7 +73,6 @@ public class LangEvalJavaNode implements ExecutorNode {
 
         Matcher matcher = RETURN_PATTERN.matcher(bodySegment);
 
-        String className = "RC" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
         StringBuilder builder = new StringBuilder();
         builder.append("import ").append(ExecuteContext.class.getName()).append(";").append("\n");
         builder.append("import ").append(JdbcProcedureExecutor.class.getName()).append(";").append("\n");
@@ -108,6 +111,17 @@ public class LangEvalJavaNode implements ExecutorNode {
 
         String javaSourceCode = builder.toString();
 
+        StringBuilder hexBuilder=new StringBuilder();
+        try {
+            MessageDigest digest=MessageDigest.getInstance("SHA-1");
+            byte[] hex = digest.digest(javaSourceCode.getBytes());
+            for (int i = 0; i < hex.length; i++) {
+                hexBuilder.append(String.format("%02x",(int)(hex[i]&0x0ff)));
+            }
+        } catch (NoSuchAlgorithmException e) {
+            hexBuilder.append(UUID.randomUUID().toString().replaceAll("-","").toLowerCase());
+        }
+        String className = "RC" + hexBuilder;
         javaSourceCode = javaSourceCode.replace(CLASS_NAME_HOLDER, className);
 
         Object obj = null;
