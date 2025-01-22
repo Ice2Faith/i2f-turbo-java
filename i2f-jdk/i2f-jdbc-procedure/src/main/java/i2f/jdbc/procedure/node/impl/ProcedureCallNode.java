@@ -49,7 +49,7 @@ public class ProcedureCallNode implements ExecutorNode {
             // 备份堆栈
             bakParams.put(name, params.get(script));
             Object val = executor.attrValue(name, "visit", node, params, nodeMap);
-            params.put(name, val);
+            callParams.put(name, val);
         }
 
         executor.execAsProcedure(nextNode, callParams, nodeMap);
