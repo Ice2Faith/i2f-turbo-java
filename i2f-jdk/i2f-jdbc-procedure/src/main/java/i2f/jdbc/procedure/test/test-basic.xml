@@ -41,11 +41,14 @@
         long ts = System.currentTimeMillis();
         String str=Long.toString(ts,16);
         System.out.println("ts-hex:"+str);
-        return new Date()
+        return new Date();
     </lang-eval-java>
     <lang-println date="date"/>
     <lang-eval-javascript result="js">
-        'hello' + (1 + 2)
+        function test(){
+            return 'hello' + (1 + 2);
+        }
+        test()
     </lang-eval-javascript>
     <lang-println js="js"/>
 </procedure>
