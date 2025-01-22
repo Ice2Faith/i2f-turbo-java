@@ -50,6 +50,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new LangBreakNode());
         ret.add(new LangChooseNode());
         ret.add(new LangContinueNode());
+        ret.add(new LangEvalJavaNode());
+        ret.add(new LangEvalJavascriptNode());
         ret.add(new LangEvalNode());
         ret.add(new LangForeachNode());
         ret.add(new LangForiNode());
@@ -102,9 +104,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 if (item.support(node)) {
                     debugLog(() -> "exec " + node.getTagName() + " by " + item.getClass().getSimpleName());
                     item.exec(node, context, this);
-                    break;
+                    return;
                 }
             }
+            debugLog(() -> "waring! tag " + node.getTagName() + " not found any executor!");
         } catch (ReturnSignalException e) {
             debugLog(() -> "return signal");
         }

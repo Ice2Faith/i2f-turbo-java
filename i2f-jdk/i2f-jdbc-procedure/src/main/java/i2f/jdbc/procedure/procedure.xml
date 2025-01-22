@@ -204,4 +204,25 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
         <lang-body>
         </lang-body>
     </sql-cursor>
+
+    <!-- 动态编译为java类进行执行 -->
+    <lang-eval-java result="">
+        <!-- import 语句部分 -->
+        <lang-java-import>
+
+        </lang-java-import>
+        <!-- member语句部分，也就是成员变量和成员函数 -->
+        <lang-java-member>
+
+        </lang-java-member>
+        <!-- body部分，需要带有return语句 -->
+        <lang-java-body>
+
+        </lang-java-body>
+    </lang-eval-java>
+
+    <!-- 动态执行javascript脚本 -->
+    <lang-eval-javascript>
+
+    </lang-eval-javascript>
 </procedure>
