@@ -43,6 +43,11 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-reflect</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jdbc-proxy-xml</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

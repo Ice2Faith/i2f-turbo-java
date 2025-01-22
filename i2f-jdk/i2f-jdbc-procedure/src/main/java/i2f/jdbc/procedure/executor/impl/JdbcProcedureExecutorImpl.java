@@ -1,6 +1,8 @@
 package i2f.jdbc.procedure.executor.impl;
 
 import i2f.bindsql.BindSql;
+import i2f.bindsql.page.IPageWrapper;
+import i2f.bindsql.page.PageWrappers;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
@@ -8,15 +10,18 @@ import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
+import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
+import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
+import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
+import i2f.page.ApiPage;
 import i2f.reflect.vistor.Visitor;
 import lombok.Data;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -33,28 +38,43 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     public static List<ExecutorNode> defaultExecutorNodes() {
         List<ExecutorNode> ret = new ArrayList<>();
+        ret.add(new LangAsyncAllNode());
+        ret.add(new LangAsyncNode());
         ret.add(new LangBreakNode());
         ret.add(new LangChooseNode());
         ret.add(new LangContinueNode());
         ret.add(new LangEvalNode());
         ret.add(new LangForeachNode());
         ret.add(new LangForiNode());
+        ret.add(new LangFormatDateNode());
+        ret.add(new LangFormatNode());
         ret.add(new LangIfNode());
         ret.add(new LangInvokeNode());
+        ret.add(new LangLatchAwaitNode());
+        ret.add(new LangLatchDownNode());
+        ret.add(new LangLatchNode());
+        ret.add(new LangNewParamsNode());
+        ret.add(new LangPrintfNode());
         ret.add(new LangPrintlnNode());
         ret.add(new LangRenderNode());
+        ret.add(new LangSetNode());
+        ret.add(new LangStringJoinNode());
         ret.add(new LangStringNode());
+        ret.add(new LangThrowNode());
         ret.add(new LangTryNode());
         ret.add(new LangWhenNode());
         ret.add(new LangWhileNode());
+        ret.add(new ProcedureCallNode());
         ret.add(new ProcedureNode());
         ret.add(new ScriptIncludeNode());
         ret.add(new ScriptSegmentNode());
+        ret.add(new SqlCursorNode());
         ret.add(new SqlQueryListNode());
         ret.add(new SqlQueryObjectNode());
         ret.add(new SqlQueryRowNode());
         ret.add(new SqlTransBeginNode());
         ret.add(new SqlTransCommitNode());
+        ret.add(new SqlTransNoneNode());
         ret.add(new SqlTransRollbackNode());
         ret.add(new SqlUpdateNode());
         ret.add(new TextNode());
@@ -105,13 +125,13 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         Object value = attrScript;
 
         String radixText = node.getTagAttrMap().get("radix");
-        if(radixText!=null && !radixText.isEmpty()){
+        if (radixText != null && !radixText.isEmpty()) {
             try {
                 Object radixObj = attrValue("radix", "visit", node, params, nodeMap);
-                if(radixObj!=null){
+                if (radixObj != null) {
                     radixObj = ObjectConvertor.tryConvertAsType(radixObj, Integer.class);
-                    if(radixObj instanceof Integer){
-                        value=Long.parseLong(String.valueOf(value),(int)radixObj);
+                    if (radixObj instanceof Integer) {
+                        value = Long.parseLong(String.valueOf(value), (int) radixObj);
                     }
                 }
             } catch (Exception e) {
@@ -134,12 +154,13 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         return value;
     }
 
+    @Override
     public Object resultValue(Object value, List<String> features, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
         if (features == null || features.isEmpty()) {
             return value;
         }
         for (String feature : features) {
-            if(feature==null || feature.isEmpty()){
+            if (feature == null || feature.isEmpty()) {
                 continue;
             }
             value = resolveFeature(value, feature, node, params, nodeMap);
@@ -151,6 +172,13 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
     public void setParamsObject(Map<String, Object> params, String result, Object value) {
         Visitor visitor = Visitor.visit(result, params);
         visitor.set(value);
+    }
+
+    @Override
+    public Map<String, Object> newParams(Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+        Map<String, Object> ret = new LinkedHashMap<>();
+
+        return ret;
     }
 
     public Object resolveFeature(Object value, String feature, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
@@ -197,7 +225,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
                 if (patternText != null) {
                     Object patternValue = attrValue("radix", "visit", node, params, nodeMap);
                     if (patternValue != null) {
-                        value= new SimpleDateFormat(patternText).parse(text);
+                        value = new SimpleDateFormat(patternText).parse(text);
                         processed = true;
                     }
                 }
@@ -205,7 +233,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
             }
             if (!processed) {
-                value= ObjectConvertor.tryParseDate(text);
+                value = ObjectConvertor.tryParseDate(text);
             }
             return value;
         } else if ("trim".equals(feature)) {
@@ -321,7 +349,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         } catch (Exception e) {
 
         }
-        return true;
+        return MybatisMapperInflater.INSTANCE.testExpression(test,params);
     }
 
     @Override
@@ -347,7 +375,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         } catch (Exception e) {
 
         }
-        return null;
+        return MybatisMapperInflater.INSTANCE.evalExpression(script,params);
     }
 
     @Override
@@ -365,13 +393,54 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         return script;
     }
 
+    public static final ThreadLocal<Map<String, Connection>> connectionMapHolder = ThreadLocal.withInitial(() -> new HashMap<>());
+
     public Connection getConnection(String datasource, Map<String, Object> params) {
         if (datasource == null || datasource.isEmpty()) {
             datasource = "primary";
         }
-        Map<String, Connection> datasourceMap = (Map<String, Connection>) params.get("datasources");
-        Connection conn = datasourceMap.get(datasource);
+        Map<String, Connection> connectionMap = connectionMapHolder.get();
+        Connection conn = connectionMap.get(datasource);
+        if (conn != null) {
+            return conn;
+        }
+
+        Map<String, Connection> connMap = (Map<String, Connection>) params.get("connections");
+        if (conn == null) {
+            if (connMap != null) {
+                conn = connMap.get(datasource);
+            }
+        }
+
+
+        if (conn == null) {
+            Map<String, DataSource> datasourceMap = (Map<String, DataSource>) params.get("datasources");
+            DataSource ds = datasourceMap.get(datasource);
+            if (ds != null) {
+                try {
+                    conn = ds.getConnection();
+                } catch (SQLException e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+            }
+        }
+
+        if (conn != null) {
+            if (connectionMap != null) {
+                connectionMap.put(datasource, conn);
+            }
+            if (connMap != null) {
+                connMap.put(datasource, conn);
+            }
+        }
+
         return conn;
+    }
+
+    public BindSql resolveSqlScript(String script,Map<String,Object> params) throws Exception {
+        MybatisMapperNode mapperNode = MybatisMapperParser.parseScriptNode(script);
+        BindSql bql = MybatisMapperInflater.INSTANCE.inflateSqlNode(mapperNode, params, new HashMap<>());
+        return bql;
     }
 
     @Override
@@ -379,9 +448,10 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         System.out.println("sqlQueryList:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
-            List<?> list = JdbcResolver.list(conn, new BindSql(script), resultType);
+            BindSql bql = resolveSqlScript(script, params);
+            List<?> list = JdbcResolver.list(conn, bql, resultType);
             return list;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
@@ -392,9 +462,10 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         System.out.println("sqlQueryObject:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
-            Object obj = JdbcResolver.get(conn, new BindSql(script), resultType);
+            BindSql bql = resolveSqlScript(script, params);
+            Object obj = JdbcResolver.get(conn,bql, resultType);
             return obj;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
@@ -404,9 +475,10 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         System.out.println("sqlQueryRow:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
-            Object row = JdbcResolver.find(conn, new BindSql(script), resultType);
+            BindSql bql = resolveSqlScript(script, params);
+            Object row = JdbcResolver.find(conn, bql, resultType);
             return row;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
@@ -416,9 +488,25 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         System.out.println("sqlUpdate:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
-            int num = JdbcResolver.update(conn, new BindSql(script));
+            BindSql bql = resolveSqlScript(script, params);
+            int num = JdbcResolver.update(conn, bql);
             return num;
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<?> sqlQueryPage(String datasource, String script, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize) {
+        System.out.println("sqlQueryPage:" + datasource + ", " + script);
+        try {
+            Connection conn = getConnection(datasource, params);
+            BindSql bql = resolveSqlScript(script, params);
+            IPageWrapper wrapper = PageWrappers.wrapper(conn);
+            BindSql pageBql = wrapper.apply(bql, ApiPage.of(pageIndex, pageSize));
+            List<?> list = JdbcResolver.list(conn, pageBql, resultType);
+            return list;
+        } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }

@@ -97,6 +97,16 @@ public class MybatisMapperParser {
         return ret;
     }
 
+    public static MybatisMapperNode parseScriptNode(String script) throws Exception {
+        StringBuilder builder=new StringBuilder();
+        builder.append("<script>");
+        builder.append(script);
+        builder.append("</script>");
+        Document document = XmlUtil.parseXml(builder.toString());
+        Node node = XmlUtil.getRootNode(document);
+        return parseSqlNode(node);
+    }
+
     public static MybatisMapperNode parseSqlNode(Node node) {
         MybatisMapperNode ret = new MybatisMapperNode();
         short nodeType = node.getNodeType();
