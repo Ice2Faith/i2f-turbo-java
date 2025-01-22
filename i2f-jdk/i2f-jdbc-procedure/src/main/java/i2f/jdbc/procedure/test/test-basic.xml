@@ -37,4 +37,12 @@
             <lang-println tag.string="-->fori-foreach" i="item" is-first="first" index="index"/>
         </lang-fori>
     </lang-foreach>
+    <lang-eval-java result="date">
+        new Date()
+    </lang-eval-java>
+    <lang-println date="date"/>
+    <lang-eval-javascript result="js">
+        'hello' + (1 + 2)
+    </lang-eval-javascript>
+    <lang-println js="js"/>
 </procedure>
