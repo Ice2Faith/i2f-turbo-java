@@ -4,6 +4,7 @@ import i2f.bindsql.BindSql;
 import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
 import i2f.convert.obj.ObjectConvertor;
+import i2f.database.type.DatabaseType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
@@ -517,11 +518,46 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return bql;
     }
 
+    public String getDialectSqlScript(List<Map.Entry<String,String>> dialectScriptList,Connection conn) throws Exception {
+        DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+        String name = databaseType.db();
+        String enumName=databaseType.name();
+        String firstScript=null;
+        String nullScript=null;
+        for (Map.Entry<String, String> entry : dialectScriptList) {
+            if(firstScript==null){
+                firstScript=entry.getValue();
+            }
+            String key = entry.getKey();
+            if(key==null || key.isEmpty()){
+                if(nullScript==null){
+                    nullScript=entry.getValue();
+                }
+            }
+            if(key!=null){
+                String[] arr = key.split(",");
+                for (String item : arr) {
+                    if(item.equalsIgnoreCase(name)){
+                        return entry.getValue();
+                    }
+                    if(item.equalsIgnoreCase(enumName)){
+                        return entry.getValue();
+                    }
+                }
+            }
+        }
+        if(nullScript!=null){
+            return nullScript;
+        }
+        return firstScript;
+    }
+
     @Override
-    public List<?> sqlQueryList(String datasource, String script, Map<String, Object> params, Class<?> resultType) {
-        debugLog(() -> "sqlQueryList:" + datasource + ", " + script);
+    public List<?> sqlQueryList(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params, Class<?> resultType) {
         try {
             Connection conn = getConnection(datasource, params);
+            String script=getDialectSqlScript(dialectScriptList,conn);
+            debugLog(() -> "sqlQueryList:" + datasource + ", " + script);
             BindSql bql = resolveSqlScript(script, params);
             List<?> list = JdbcResolver.list(conn, bql, resultType);
             return list;
@@ -532,10 +568,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
 
     @Override
-    public Object sqlQueryObject(String datasource, String script, Map<String, Object> params, Class<?> resultType) {
-        debugLog(() -> "sqlQueryObject:" + datasource + ", " + script);
+    public Object sqlQueryObject(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params, Class<?> resultType) {
         try {
             Connection conn = getConnection(datasource, params);
+            String script=getDialectSqlScript(dialectScriptList,conn);
+            debugLog(() -> "sqlQueryObject:" + datasource + ", " + script);
             BindSql bql = resolveSqlScript(script, params);
             Object obj = JdbcResolver.get(conn, bql, resultType);
             return obj;
@@ -545,10 +582,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public Object sqlQueryRow(String datasource, String script, Map<String, Object> params, Class<?> resultType) {
-        debugLog(() -> "sqlQueryRow:" + datasource + ", " + script);
+    public Object sqlQueryRow(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params, Class<?> resultType) {
         try {
             Connection conn = getConnection(datasource, params);
+            String script=getDialectSqlScript(dialectScriptList,conn);
+            debugLog(() -> "sqlQueryRow:" + datasource + ", " + script);
             BindSql bql = resolveSqlScript(script, params);
             Object row = JdbcResolver.find(conn, bql, resultType);
             return row;
@@ -558,10 +596,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public int sqlUpdate(String datasource, String script, Map<String, Object> params) {
-        debugLog(() -> "sqlUpdate:" + datasource + ", " + script);
+    public int sqlUpdate(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params) {
         try {
             Connection conn = getConnection(datasource, params);
+            String script=getDialectSqlScript(dialectScriptList,conn);
+            debugLog(() -> "sqlUpdate:" + datasource + ", " + script);
             BindSql bql = resolveSqlScript(script, params);
             int num = JdbcResolver.update(conn, bql);
             return num;
@@ -571,10 +610,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public List<?> sqlQueryPage(String datasource, String script, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize) {
-        debugLog(() -> "sqlQueryPage:" + datasource + ", " + script);
+    public List<?> sqlQueryPage(String datasource, List<Map.Entry<String,String>> dialectScriptList, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize) {
         try {
             Connection conn = getConnection(datasource, params);
+            String script=getDialectSqlScript(dialectScriptList,conn);
+            debugLog(() -> "sqlQueryPage:" + datasource + ", " + script);
             BindSql bql = resolveSqlScript(script, params);
             IPageWrapper wrapper = PageWrappers.wrapper(conn);
             BindSql pageBql = wrapper.apply(bql, ApiPage.of(pageIndex, pageSize));
