@@ -25,6 +25,8 @@ public interface JdbcProcedureExecutor {
 
     void setParamsObject(Map<String, Object> params, String result, Object value);
 
+    Map<String, Object> newParams(Map<String, Object> params, Map<String, XmlNode> nodeMap);
+
     Class<?> loadClass(String className);
 
     boolean test(String test, Map<String, Object> params);
@@ -43,6 +45,8 @@ public interface JdbcProcedureExecutor {
 
     int sqlUpdate(String datasource, String script, Map<String, Object> params);
 
+    List<?> sqlQueryPage(String datasource, String script, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize);
+
     void sqlTransBegin(String datasource, int isolation, Map<String, Object> params);
 
     void sqlTransCommit(String datasource, Map<String, Object> params);
@@ -50,4 +54,5 @@ public interface JdbcProcedureExecutor {
     void sqlTransRollback(String datasource, Map<String, Object> params);
 
     void sqlTransNone(String datasource, Map<String, Object> params);
+
 }

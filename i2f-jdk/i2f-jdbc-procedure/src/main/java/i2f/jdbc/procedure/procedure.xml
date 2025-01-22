@@ -62,8 +62,18 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     <!-- 字符串拼接 -->
     <lang-string-join separator="" result="" arg0="" arg1=""/>
 
-    <!-- 调用其他存储过程，id表示目标的id,直接使用目标变量age名来传递值 -->
-    <procedure-call refid="" age=""/>
+    <!--
+    创建一个新的参数，用于为内部调用其他过程提供干净的上下文参数，避免参数污染
+    同时，由于被调用方的上下文参数在调用方持有，调用方也可以获取到被调用方执行完的结果
+    -->
+    <lang-new-params result="" aaa="" bbb=""/>
+
+    <!--
+    调用其他存储过程，id表示目标的id,
+    可以指定一个params参数作为根上下文参数，这样可以避免上下文污染
+    直接使用目标变量age名来传递值
+     -->
+    <procedure-call refid="" params="" age=""/>
 
     <!-- 返回，结束此过程 -->
     <lang-return/>
@@ -181,10 +191,9 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     <lang-latch-await name="" timeout="" time-unit=""/>
 
 
-    <!-- 通过遍历结果集的方式，提供类似游标的操作能力，通过sql-query-list进行查询遍历，将item的值提供给lang-body进行执行 -->
-    <sql-cursor>
-        <!-- item 为每次迭代的对象名称 -->
-        <sql-query-list datasource="" script="" item="" result-type="">
+    <!-- 通过遍历结果集的方式，提供类似游标的操作能力，通过sql-query-list进行查询遍历，每次查询分页大小为batch-size，将item的值提供给lang-body进行执行 -->
+    <sql-cursor batch-size="300" item="">
+        <sql-query-list datasource="" script="" result-type="">
 
         </sql-query-list>
         <lang-body>

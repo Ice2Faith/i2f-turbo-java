@@ -38,6 +38,15 @@ public class XmlUtil {
         return parseXml(bis);
     }
 
+    public static Document parseXml(String str) throws Exception {
+        return parseXml(str, "UTF-8");
+    }
+
+    public static Document parseXml(String str, String charset) throws Exception {
+        byte[] bytes = str.getBytes(charset);
+        return parseXml(bytes);
+    }
+
     public static Document parseXml(File file) throws Exception {
         FileInputStream fis = new FileInputStream(file);
         return parseXml(fis);

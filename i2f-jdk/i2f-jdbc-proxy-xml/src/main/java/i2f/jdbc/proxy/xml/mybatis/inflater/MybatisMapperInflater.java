@@ -21,6 +21,12 @@ public class MybatisMapperInflater {
         try {
             expression = expression.replaceAll("\\s+and\\s+", " && ");
             expression = expression.replaceAll("\\s+or\\s+", " || ");
+            expression = expression.replaceAll("\\s+gte\\s+", " >= ");
+            expression = expression.replaceAll("\\s+lte\\s+", " <= ");
+            expression = expression.replaceAll("\\s+gt\\s+", " > ");
+            expression = expression.replaceAll("\\s+lt\\s+", " < ");
+            expression = expression.replaceAll("&gt;", " > ");
+            expression = expression.replaceAll("&lt;", " < ");
             expression = "return " + expression + ";";
             String additionalImports = "import i2f.reflect.vistor.Visitor;";
             String additionalMethods = "\n" +

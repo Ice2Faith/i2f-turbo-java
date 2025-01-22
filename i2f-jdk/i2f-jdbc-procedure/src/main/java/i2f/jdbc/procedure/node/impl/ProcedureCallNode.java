@@ -27,11 +27,22 @@ public class ProcedureCallNode implements ExecutorNode {
         if (nextNode == null) {
             return;
         }
+        Map<String,Object> callParams=params;
+        String paramsText = node.getTagAttrMap().get("params");
+        if(paramsText!=null && !paramsText.isEmpty()){
+            Object value = executor.attrValue("params", "visit", node, params, nodeMap);
+            if(value instanceof Map){
+                callParams=(Map<String,Object>)value;
+            }
+        }
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
             String name = entry.getKey();
             if ("refid".equals(name)) {
+                continue;
+            }
+            if("params".equals(name)){
                 continue;
             }
             String script = entry.getValue();
@@ -41,7 +52,7 @@ public class ProcedureCallNode implements ExecutorNode {
             params.put(name, val);
         }
 
-        executor.execAsProducer(nextNode, params, nodeMap);
+        executor.execAsProducer(nextNode, callParams, nodeMap);
 
         // 恢复堆栈
         params.putAll(bakParams);
