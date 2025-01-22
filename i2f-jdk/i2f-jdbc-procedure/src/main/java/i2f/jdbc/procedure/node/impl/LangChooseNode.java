@@ -48,7 +48,7 @@ public class LangChooseNode implements ExecutorNode {
             invokeNode = otherNode;
         }
         if (invokeNode != null) {
-            executor.execAsProducer(invokeNode, params, nodeMap);
+            executor.execAsProcedure(invokeNode, params, nodeMap);
         }
     }
 

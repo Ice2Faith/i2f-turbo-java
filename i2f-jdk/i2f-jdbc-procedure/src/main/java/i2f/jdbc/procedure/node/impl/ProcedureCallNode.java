@@ -52,7 +52,7 @@ public class ProcedureCallNode implements ExecutorNode {
             params.put(name, val);
         }
 
-        executor.execAsProducer(nextNode, callParams, nodeMap);
+        executor.execAsProcedure(nextNode, callParams, nodeMap);
 
         // 恢复堆栈
         params.putAll(bakParams);

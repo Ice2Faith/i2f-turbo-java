@@ -372,13 +372,13 @@ public class ObjectConvertor {
         String valStr = String.valueOf(val);
         if (TypeOf.typeOfAny(targetType, numericTypes)) {
             BigDecimal decimal = null;
-            if (valStr.matches("(\\+|\\-)?[1-9]([0-9]+)?")) {
+            if (valStr.matches("(\\+|\\-)?([1-9]([0-9]+)?|0)")) {
                 decimal = new BigDecimal(String.valueOf(val));
             } else if (valStr.matches("(0x|0X)[a-fA-F0-9]+")) {
                 Long num = Long.valueOf(valStr.substring(2), 16);
                 decimal = new BigDecimal(num);
             } else if (valStr.matches("0([0-9]+)?")) {
-                Long num = Long.valueOf(valStr.substring(2), 8);
+                Long num = Long.valueOf(valStr.substring(1), 8);
                 decimal = new BigDecimal(String.valueOf(num));
             } else if (valStr.matches("(0b|0B)[0-1]+")) {
                 Long num = Long.valueOf(valStr.substring(2), 2);

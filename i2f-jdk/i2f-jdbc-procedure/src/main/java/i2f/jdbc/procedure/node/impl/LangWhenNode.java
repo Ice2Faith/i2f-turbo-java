@@ -23,7 +23,7 @@ public class LangWhenNode implements ExecutorNode {
     public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
         boolean ok = (boolean) executor.attrValue("test", "test", node, params, nodeMap);
         if (ok) {
-            executor.execAsProducer(node, params, nodeMap);
+            executor.execAsProcedure(node, params, nodeMap);
         }
     }
 

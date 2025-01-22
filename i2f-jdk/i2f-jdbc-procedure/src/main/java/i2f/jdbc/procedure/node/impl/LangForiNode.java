@@ -62,7 +62,7 @@ public class LangForiNode implements ExecutorNode {
             isFirst = false;
             index++;
             try {
-                executor.execAsProducer(node, params, nodeMap);
+                executor.execAsProcedure(node, params, nodeMap);
             } catch (ContinueSignalException e) {
                 continue;
             } catch (BreakSignalException e) {

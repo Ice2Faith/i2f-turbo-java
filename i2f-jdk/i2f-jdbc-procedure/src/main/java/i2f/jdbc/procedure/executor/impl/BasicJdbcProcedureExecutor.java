@@ -21,19 +21,25 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
  * @date 2025/1/20 14:40
  */
 @Data
-public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
+public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     protected final CopyOnWriteArrayList<ExecutorNode> nodes = new CopyOnWriteArrayList<>();
+    protected final AtomicBoolean debug=new AtomicBoolean(false);
+    protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
 
-    private JdbcProcedureExecutorImpl() {
-
+    {
+        this.nodes.addAll(defaultExecutorNodes());
     }
 
     public static List<ExecutorNode> defaultExecutorNodes() {
@@ -81,10 +87,11 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         return ret;
     }
 
-    public static JdbcProcedureExecutor create() {
-        JdbcProcedureExecutorImpl ret = new JdbcProcedureExecutorImpl();
-        ret.getNodes().addAll(defaultExecutorNodes());
-        return ret;
+    @Override
+    public void debugLog(Supplier<String> supplier){
+        if(debug.get()){
+            System.out.println(String.format("%s [%5s] [%10s] : %s",logTimeFormatter.format(LocalDateTime.now()),"DEBUG",Thread.currentThread().getName(),supplier.get()));
+        }
     }
 
     @Override
@@ -92,17 +99,18 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         try {
             for (ExecutorNode item : nodes) {
                 if (item.support(node)) {
+                    debugLog(()->"exec "+node.getTagName()+" by "+ item.getClass().getSimpleName());
                     item.exec(node, params, nodeMap, this);
                     break;
                 }
             }
         } catch (ReturnSignalException e) {
-
+            debugLog(()->"return signal");
         }
     }
 
     @Override
-    public void execAsProducer(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+    public void execAsProcedure(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap) {
         ProcedureNode execNode = null;
         for (ExecutorNode item : nodes) {
             if (item instanceof ProcedureNode) {
@@ -113,6 +121,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
         if (execNode == null) {
             execNode = ProcedureNode.INSTANCE;
         }
+        debugLog(()->"exec as procedure "+ node.getTagName());
         execNode.exec(node, params, nodeMap, this);
     }
 
@@ -342,7 +351,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public boolean test(String test, Map<String, Object> params) {
-        System.out.println("test:" + test);
+        debugLog(()->"test:" + test);
         try {
             boolean ok = Boolean.parseBoolean(test);
             return ok;
@@ -354,7 +363,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public Object eval(String script, Map<String, Object> params) {
-        System.out.println("eval:" + script);
+        debugLog(()->"eval:" + script);
         try {
             return Integer.parseInt(script);
         } catch (Exception e) {
@@ -380,7 +389,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public Object visit(String script, Map<String, Object> params) {
-        System.out.println("visit:" + script);
+        debugLog(()->"visit:" + script);
         if (params.containsKey(script)) {
             return params.get(script);
         }
@@ -389,7 +398,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public String render(String script, Map<String, Object> params) {
-        System.out.println("render:" + script);
+        debugLog(()->"render:" + script);
         return script;
     }
 
@@ -445,7 +454,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public List<?> sqlQueryList(String datasource, String script, Map<String, Object> params, Class<?> resultType) {
-        System.out.println("sqlQueryList:" + datasource + ", " + script);
+        debugLog(()->"sqlQueryList:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
@@ -459,7 +468,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public Object sqlQueryObject(String datasource, String script, Map<String, Object> params, Class<?> resultType) {
-        System.out.println("sqlQueryObject:" + datasource + ", " + script);
+        debugLog(()->"sqlQueryObject:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
@@ -472,7 +481,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public Object sqlQueryRow(String datasource, String script, Map<String, Object> params, Class<?> resultType) {
-        System.out.println("sqlQueryRow:" + datasource + ", " + script);
+        debugLog(()->"sqlQueryRow:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
@@ -485,7 +494,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public int sqlUpdate(String datasource, String script, Map<String, Object> params) {
-        System.out.println("sqlUpdate:" + datasource + ", " + script);
+        debugLog(()->"sqlUpdate:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
@@ -498,7 +507,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public List<?> sqlQueryPage(String datasource, String script, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize) {
-        System.out.println("sqlQueryPage:" + datasource + ", " + script);
+        debugLog(()->"sqlQueryPage:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
@@ -513,7 +522,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransBegin(String datasource, int isolation, Map<String, Object> params) {
-        System.out.println("sqlTransBegin:" + datasource);
+        debugLog(()->"sqlTransBegin:" + datasource);
         try {
             if (isolation < 0) {
                 isolation = Connection.TRANSACTION_READ_COMMITTED;
@@ -528,7 +537,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransCommit(String datasource, Map<String, Object> params) {
-        System.out.println("sqlTransCommit:" + datasource);
+        debugLog(()->"sqlTransCommit:" + datasource);
         try {
             Connection conn = getConnection(datasource, params);
             conn.commit();
@@ -539,7 +548,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransRollback(String datasource, Map<String, Object> params) {
-        System.out.println("sqlTransRollback:" + datasource);
+        debugLog(()->"sqlTransRollback:" + datasource);
         try {
             Connection conn = getConnection(datasource, params);
             conn.rollback();
@@ -550,7 +559,7 @@ public class JdbcProcedureExecutorImpl implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransNone(String datasource, Map<String, Object> params) {
-        System.out.println("sqlTransNone:" + datasource);
+        debugLog(()->"sqlTransNone:" + datasource);
         try {
             Connection conn = getConnection(datasource, params);
             conn.setAutoCommit(true);
