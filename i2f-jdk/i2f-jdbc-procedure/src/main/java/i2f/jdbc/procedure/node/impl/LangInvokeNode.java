@@ -32,73 +32,73 @@ public class LangInvokeNode implements ExecutorNode {
         String targetScript = node.getTagAttrMap().get("target");
         String result = node.getTagAttrMap().get("result");
 
-        List<Map.Entry<Integer,String>> args=new ArrayList<>();
+        List<Map.Entry<Integer, String>> args = new ArrayList<>();
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
             String key = entry.getKey();
-            if(!key.startsWith("arg")){
+            if (!key.startsWith("arg")) {
                 continue;
             }
             String idxStr = key.substring("arg".length());
-            int idx=Integer.parseInt(idxStr);
-            args.add(new AbstractMap.SimpleEntry<>(idx,entry.getValue()));
+            int idx = Integer.parseInt(idxStr);
+            args.add(new AbstractMap.SimpleEntry<>(idx, entry.getValue()));
         }
 
-        args.sort((o1,o2)->Integer.compare(o1.getKey(),o2.getKey()));
+        args.sort((o1, o2) -> Integer.compare(o1.getKey(), o2.getKey()));
 
         int idx = fullMethodName.lastIndexOf(".");
-        String className="";
-        String methodName=fullMethodName;
-        if(idx>=0){
-            className=fullMethodName.substring(0,idx);
-            methodName=fullMethodName.substring(idx+1);
+        String className = "";
+        String methodName = fullMethodName;
+        if (idx >= 0) {
+            className = fullMethodName.substring(0, idx);
+            methodName = fullMethodName.substring(idx + 1);
         }
 
 
-        if("new".equals(methodName)){
+        if ("new".equals(methodName)) {
             Class<?> clazz = executor.loadClass(className);
-            Constructor<?> constructor=null;
-            if(constructor==null) {
+            Constructor<?> constructor = null;
+            if (constructor == null) {
                 Constructor[] constructors = clazz.getConstructors();
                 for (Constructor item : constructors) {
-                        if (item.getParameterCount() == args.size()) {
-                            constructor = item;
-                            break;
-                        }
+                    if (item.getParameterCount() == args.size()) {
+                        constructor = item;
+                        break;
+                    }
 
                 }
             }
-            if(constructor==null) {
+            if (constructor == null) {
                 Constructor[] declaredConstructors = clazz.getDeclaredConstructors();
                 for (Constructor item : declaredConstructors) {
-                        if (item.getParameterCount() == args.size()) {
-                            constructor = item;
-                            break;
-                        }
+                    if (item.getParameterCount() == args.size()) {
+                        constructor = item;
+                        break;
+                    }
 
                 }
             }
 
-            if(constructor==null){
-                throw new IllegalArgumentException("not found constructor : "+ fullMethodName +" with args count "+args.size());
+            if (constructor == null) {
+                throw new IllegalArgumentException("not found constructor : " + fullMethodName + " with args count " + args.size());
             }
 
             Class<?>[] parameterTypes = constructor.getParameterTypes();
-            Object[] invokeArgs=new Object[parameterTypes.length];
+            Object[] invokeArgs = new Object[parameterTypes.length];
 
             for (int i = 0; i < parameterTypes.length; i++) {
-                Class<?> paramType=parameterTypes[i];
-                Map.Entry<Integer,String> argEntry=args.get(i);
+                Class<?> paramType = parameterTypes[i];
+                Map.Entry<Integer, String> argEntry = args.get(i);
                 String argScript = argEntry.getValue();
-                Object evalObj=null;
-                try{
+                Object evalObj = null;
+                try {
                     evalObj = executor.attrValue("arg" + argEntry.getKey(), "visit", node, params, nodeMap);
-                }catch(Exception e){
+                } catch (Exception e) {
                 }
-                if(evalObj==null){
-                    evalObj=argScript;
+                if (evalObj == null) {
+                    evalObj = argScript;
                 }
                 Object val = ObjectConvertor.tryConvertAsType(evalObj, paramType);
-                invokeArgs[i]=val;
+                invokeArgs[i] = val;
             }
 
             try {
@@ -110,25 +110,25 @@ public class LangInvokeNode implements ExecutorNode {
                     executor.setParamsObject(params, result, res);
                 }
             } catch (ReflectiveOperationException e) {
-                throw new IllegalStateException(e.getMessage(),e);
+                throw new IllegalStateException(e.getMessage(), e);
             }
-        }else{
-            Class<?> clazz=null;
-            Object invokeObject=null;
-            if(targetScript!=null && !targetScript.isEmpty()){
-                invokeObject=executor.visit(targetScript,params);
+        } else {
+            Class<?> clazz = null;
+            Object invokeObject = null;
+            if (targetScript != null && !targetScript.isEmpty()) {
+                invokeObject = executor.visit(targetScript, params);
             }
-            if(invokeObject!=null){
-                clazz=invokeObject.getClass();
+            if (invokeObject != null) {
+                clazz = invokeObject.getClass();
             }
-            if(className!=null && !className.isEmpty()){
-                clazz=executor.loadClass(className);
+            if (className != null && !className.isEmpty()) {
+                clazz = executor.loadClass(className);
             }
-            if(clazz==null){
-                throw new IllegalArgumentException("cannot found class by method : " +fullMethodName);
+            if (clazz == null) {
+                throw new IllegalArgumentException("cannot found class by method : " + fullMethodName);
             }
-            Method method=null;
-            if(method==null) {
+            Method method = null;
+            if (method == null) {
                 Method[] methods = clazz.getMethods();
                 for (Method item : methods) {
                     if (item.getName().equals(methodName)) {
@@ -140,7 +140,7 @@ public class LangInvokeNode implements ExecutorNode {
                 }
             }
 
-            if(method==null) {
+            if (method == null) {
                 Method[] declaredMethods = clazz.getDeclaredMethods();
                 for (Method item : declaredMethods) {
                     if (item.getName().equals(methodName)) {
@@ -152,35 +152,34 @@ public class LangInvokeNode implements ExecutorNode {
                 }
             }
 
-            if(method==null){
-                throw new IllegalArgumentException("not found method : "+ fullMethodName +" with args count "+args.size());
+            if (method == null) {
+                throw new IllegalArgumentException("not found method : " + fullMethodName + " with args count " + args.size());
             }
 
 
-
             Class<?>[] parameterTypes = method.getParameterTypes();
-            Object[] invokeArgs=new Object[parameterTypes.length];
+            Object[] invokeArgs = new Object[parameterTypes.length];
 
             for (int i = 0; i < parameterTypes.length; i++) {
-                Class<?> paramType=parameterTypes[i];
-                Map.Entry<Integer,String> argEntry=args.get(i);
+                Class<?> paramType = parameterTypes[i];
+                Map.Entry<Integer, String> argEntry = args.get(i);
                 String argScript = argEntry.getValue();
-                Object evalObj=null;
-                try{
-                    evalObj=executor.attrValue("arg" + argEntry.getKey(), "visit", node, params, nodeMap);
-                }catch(Exception e){
+                Object evalObj = null;
+                try {
+                    evalObj = executor.attrValue("arg" + argEntry.getKey(), "visit", node, params, nodeMap);
+                } catch (Exception e) {
                 }
-                if(evalObj==null){
-                    evalObj=argScript;
+                if (evalObj == null) {
+                    evalObj = argScript;
                 }
                 Object val = ObjectConvertor.tryConvertAsType(evalObj, paramType);
-                invokeArgs[i]=val;
+                invokeArgs[i] = val;
             }
 
             try {
                 method.setAccessible(true);
-                if(!Modifier.isStatic(method.getModifiers())){
-                    if(invokeObject==null) {
+                if (!Modifier.isStatic(method.getModifiers())) {
+                    if (invokeObject == null) {
                         invokeObject = method.getDeclaringClass().newInstance();
                     }
                 }
@@ -192,7 +191,7 @@ public class LangInvokeNode implements ExecutorNode {
                     executor.setParamsObject(params, result, res);
                 }
             } catch (ReflectiveOperationException e) {
-                throw new IllegalStateException(e.getMessage(),e);
+                throw new IllegalStateException(e.getMessage(), e);
             }
         }
 

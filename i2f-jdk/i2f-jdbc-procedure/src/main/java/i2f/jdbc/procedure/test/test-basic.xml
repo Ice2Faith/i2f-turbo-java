@@ -3,14 +3,17 @@
     <lang-invoke method="Date.new" result="now"/>
     <lang-invoke method="format" target="fmt" arg0="now" result="str"/>
     <lang-println tag="now" now="str"/>
-    <lang-eval result="now">
-        new Date()
-    </lang-eval>
+    <lang-printf>
+        <lang-eval result="now">
+            new Date()
+        </lang-eval>
+    </lang-printf>
     <lang-printf>
         <sql-query-object result="count" result-type="Long">
             select count(1) from sys_user where del_flag=1
         </sql-query-object>
     </lang-printf>
+    <lang-set value.int="1" result="count"/>
 
     <lang-if test="count gt 0">
         <lang-printf>

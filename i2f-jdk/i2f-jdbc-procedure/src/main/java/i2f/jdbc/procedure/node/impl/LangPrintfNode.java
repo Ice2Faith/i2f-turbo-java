@@ -24,13 +24,13 @@ public class LangPrintfNode implements ExecutorNode {
         StringBuilder builder = new StringBuilder();
         String tag = node.getTagAttrMap().get("tag");
         String value = node.getTagAttrMap().get("value");
-        if(value!=null){
+        if (value != null) {
             Object obj = executor.attrValue("value", "visit", node, params, nodeMap);
-            if(obj!=null){
-                value=String.valueOf(obj);
+            if (obj != null) {
+                value = String.valueOf(obj);
             }
-        }else{
-            value=node.getTagBody();
+        } else {
+            value = node.getTagBody();
         }
         builder.append("[").append(tag == null ? "" : tag).append("]");
         String str = executor.render(value, params);

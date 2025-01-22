@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 @Data
 public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     protected final CopyOnWriteArrayList<ExecutorNode> nodes = new CopyOnWriteArrayList<>();
-    protected final AtomicBoolean debug=new AtomicBoolean(false);
+    protected final AtomicBoolean debug = new AtomicBoolean(false);
     protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
 
     {
@@ -88,9 +88,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public void debugLog(Supplier<String> supplier){
-        if(debug.get()){
-            System.out.println(String.format("%s [%5s] [%10s] : %s",logTimeFormatter.format(LocalDateTime.now()),"DEBUG",Thread.currentThread().getName(),supplier.get()));
+    public void debugLog(Supplier<String> supplier) {
+        if (debug.get()) {
+            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), supplier.get()));
         }
     }
 
@@ -99,13 +99,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             for (ExecutorNode item : nodes) {
                 if (item.support(node)) {
-                    debugLog(()->"exec "+node.getTagName()+" by "+ item.getClass().getSimpleName());
+                    debugLog(() -> "exec " + node.getTagName() + " by " + item.getClass().getSimpleName());
                     item.exec(node, params, nodeMap, this);
                     break;
                 }
             }
         } catch (ReturnSignalException e) {
-            debugLog(()->"return signal");
+            debugLog(() -> "return signal");
         }
     }
 
@@ -121,7 +121,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         if (execNode == null) {
             execNode = ProcedureNode.INSTANCE;
         }
-        debugLog(()->"exec as procedure "+ node.getTagName());
+        debugLog(() -> "exec as procedure " + node.getTagName());
         execNode.exec(node, params, nodeMap, this);
     }
 
@@ -186,6 +186,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public Map<String, Object> newParams(Map<String, Object> params, Map<String, XmlNode> nodeMap) {
         Map<String, Object> ret = new LinkedHashMap<>();
+        ret.put("context", params.get("context"));
+        ret.put("datasources", params.get("datasources"));
+        ret.put("beans", params.get("beans"));
 
         return ret;
     }
@@ -345,25 +348,64 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
             }
         }
+        if(clazz==null){
+            clazz=innerLoadClass(className,loader);
+        }
         return clazz;
     }
 
+    public Class<?> innerLoadClass(String className,ClassLoader loader){
+        return null;
+    }
+
+    public String unescapeTestScript(String script){
+        if(script==null){
+            return script;
+        }
+        script=script.replaceAll("\\s+gte\\s+"," >= ");
+        script=script.replaceAll("\\s+lte\\s+"," <= ");
+        script=script.replaceAll("\\s+ge\\s+"," >= ");
+        script=script.replaceAll("\\s+le\\s+"," <= ");
+        script=script.replaceAll("\\s+gt\\s+"," > ");
+        script=script.replaceAll("\\s+lt\\s+"," < ");
+        script=script.replaceAll("\\s+eq\\s+"," == ");
+        script=script.replaceAll("\\s+ne\\s+"," != ");
+        return script;
+    }
+
+    public String unescapeXmlScript(String script){
+        if(script==null){
+            return script;
+        }
+        script=script.replaceAll("&gt;",">");
+        script=script.replaceAll("&lt;","<");
+        script=script.replaceAll("&nbsp;"," ");
+        script=script.replaceAll("&emsp;","\t");
+        return script;
+    }
 
     @Override
-    public boolean test(String test, Map<String, Object> params) {
-        debugLog(()->"test:" + test);
+    public boolean test(String script, Map<String, Object> params) {
+        String test=unescapeTestScript(script);
+        debugLog(() -> "test:" + test);
         try {
-            boolean ok = Boolean.parseBoolean(test);
-            return ok;
+            Boolean ok = ObjectConvertor.tryParseBoolean(test);
+            if(ok!=null){
+                return ok;
+            }
         } catch (Exception e) {
 
         }
-        return MybatisMapperInflater.INSTANCE.testExpression(test,params);
+        return innerTest(test,params);
+    }
+
+    public boolean innerTest(String test, Map<String, Object> params) {
+        return MybatisMapperInflater.INSTANCE.testExpression(test, params);
     }
 
     @Override
     public Object eval(String script, Map<String, Object> params) {
-        debugLog(()->"eval:" + script);
+        debugLog(() -> "eval:" + script);
         try {
             return Integer.parseInt(script);
         } catch (Exception e) {
@@ -375,7 +417,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         }
         try {
-            return Boolean.parseBoolean(script);
+            Boolean ok = ObjectConvertor.tryParseBoolean(script);
+            if(ok!=null){
+                return ok;
+            }
         } catch (Exception e) {
 
         }
@@ -384,21 +429,37 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         } catch (Exception e) {
 
         }
-        return MybatisMapperInflater.INSTANCE.evalExpression(script,params);
+       return innerEval(script,params);
+    }
+
+    public Object innerEval(String script, Map<String, Object> params) {
+        return MybatisMapperInflater.INSTANCE.evalExpression(script, params);
     }
 
     @Override
     public Object visit(String script, Map<String, Object> params) {
-        debugLog(()->"visit:" + script);
+        debugLog(() -> "visit:" + script);
         if (params.containsKey(script)) {
             return params.get(script);
         }
-        return Visitor.visit(script, params).get();
+        Visitor visitor = Visitor.visit(script, params);
+        if(visitor!=null){
+            return visitor.get();
+        }
+        return innerVisit(script,params);
+    }
+
+    public Object innerVisit(String script, Map<String, Object> params) {
+        return null;
     }
 
     @Override
     public String render(String script, Map<String, Object> params) {
-        debugLog(()->"render:" + script);
+        debugLog(() -> "render:" + script);
+        return innerRender(script,params);
+    }
+
+    public String innerRender(String script, Map<String, Object> params) {
         return script;
     }
 
@@ -446,7 +507,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return conn;
     }
 
-    public BindSql resolveSqlScript(String script,Map<String,Object> params) throws Exception {
+    public BindSql resolveSqlScript(String script, Map<String, Object> params) throws Exception {
         MybatisMapperNode mapperNode = MybatisMapperParser.parseScriptNode(script);
         BindSql bql = MybatisMapperInflater.INSTANCE.inflateSqlNode(mapperNode, params, new HashMap<>());
         return bql;
@@ -454,7 +515,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public List<?> sqlQueryList(String datasource, String script, Map<String, Object> params, Class<?> resultType) {
-        debugLog(()->"sqlQueryList:" + datasource + ", " + script);
+        debugLog(() -> "sqlQueryList:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
@@ -468,11 +529,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public Object sqlQueryObject(String datasource, String script, Map<String, Object> params, Class<?> resultType) {
-        debugLog(()->"sqlQueryObject:" + datasource + ", " + script);
+        debugLog(() -> "sqlQueryObject:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
-            Object obj = JdbcResolver.get(conn,bql, resultType);
+            Object obj = JdbcResolver.get(conn, bql, resultType);
             return obj;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -481,7 +542,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public Object sqlQueryRow(String datasource, String script, Map<String, Object> params, Class<?> resultType) {
-        debugLog(()->"sqlQueryRow:" + datasource + ", " + script);
+        debugLog(() -> "sqlQueryRow:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
@@ -494,7 +555,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public int sqlUpdate(String datasource, String script, Map<String, Object> params) {
-        debugLog(()->"sqlUpdate:" + datasource + ", " + script);
+        debugLog(() -> "sqlUpdate:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
@@ -507,7 +568,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public List<?> sqlQueryPage(String datasource, String script, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize) {
-        debugLog(()->"sqlQueryPage:" + datasource + ", " + script);
+        debugLog(() -> "sqlQueryPage:" + datasource + ", " + script);
         try {
             Connection conn = getConnection(datasource, params);
             BindSql bql = resolveSqlScript(script, params);
@@ -522,7 +583,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransBegin(String datasource, int isolation, Map<String, Object> params) {
-        debugLog(()->"sqlTransBegin:" + datasource);
+        debugLog(() -> "sqlTransBegin:" + datasource);
         try {
             if (isolation < 0) {
                 isolation = Connection.TRANSACTION_READ_COMMITTED;
@@ -537,7 +598,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransCommit(String datasource, Map<String, Object> params) {
-        debugLog(()->"sqlTransCommit:" + datasource);
+        debugLog(() -> "sqlTransCommit:" + datasource);
         try {
             Connection conn = getConnection(datasource, params);
             conn.commit();
@@ -548,7 +609,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransRollback(String datasource, Map<String, Object> params) {
-        debugLog(()->"sqlTransRollback:" + datasource);
+        debugLog(() -> "sqlTransRollback:" + datasource);
         try {
             Connection conn = getConnection(datasource, params);
             conn.rollback();
@@ -559,7 +620,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransNone(String datasource, Map<String, Object> params) {
-        debugLog(()->"sqlTransNone:" + datasource);
+        debugLog(() -> "sqlTransNone:" + datasource);
         try {
             Connection conn = getConnection(datasource, params);
             conn.setAutoCommit(true);

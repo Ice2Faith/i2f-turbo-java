@@ -419,30 +419,9 @@ public class ObjectConvertor {
 
         // 字符串字面值
         if (TypeOf.typeOfAny(targetType, boolTypes)) {
-            String str = valStr.toLowerCase();
-            if ("true".equals(str)) {
-                return true;
-            }
-            if ("false".equals(str)) {
-                return false;
-            }
-            if ("1".equals(str)) {
-                return true;
-            }
-            if ("0".equals(str)) {
-                return false;
-            }
-            if ("y".equals(str)) {
-                return true;
-            }
-            if ("n".equals(str)) {
-                return false;
-            }
-            if ("t".equals(str)) {
-                return true;
-            }
-            if ("f".equals(str)) {
-                return false;
+            Boolean bl = tryParseBoolean(valStr);
+            if(bl!=null){
+                return bl;
             }
         }
 
@@ -638,6 +617,38 @@ public class ObjectConvertor {
 
 
         return val;
+    }
+
+    public static Boolean tryParseBoolean(String valStr){
+        if(valStr==null){
+            return null;
+        }
+        String str = valStr.toLowerCase();
+        if ("true".equals(str)) {
+            return true;
+        }
+        if ("false".equals(str)) {
+            return false;
+        }
+        if ("1".equals(str)) {
+            return true;
+        }
+        if ("0".equals(str)) {
+            return false;
+        }
+        if ("y".equals(str)) {
+            return true;
+        }
+        if ("n".equals(str)) {
+            return false;
+        }
+        if ("t".equals(str)) {
+            return true;
+        }
+        if ("f".equals(str)) {
+            return false;
+        }
+        return null;
     }
 
     public static Date tryParseDate(String valStr) {

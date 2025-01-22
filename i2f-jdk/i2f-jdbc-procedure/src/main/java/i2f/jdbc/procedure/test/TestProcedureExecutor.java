@@ -1,7 +1,7 @@
 package i2f.jdbc.procedure.test;
 
-import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.impl.BasicJdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
@@ -18,11 +18,12 @@ import java.util.Map;
  */
 public class TestProcedureExecutor {
     public static void main(String[] args) throws Exception {
-        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test.xml");
+        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test/test-basic.xml");
         XmlNode node = JdbcProcedureParser.parse(new FileInputStream(file));
 
+//        BasicJdbcProcedureExecutor executor = new BasicJdbcProcedureExecutor();
 
-        BasicJdbcProcedureExecutor executor = new BasicJdbcProcedureExecutor();
+        BasicJdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
         executor.getDebug().set(true);
 
         Map<String, Object> params = new HashMap<>();
