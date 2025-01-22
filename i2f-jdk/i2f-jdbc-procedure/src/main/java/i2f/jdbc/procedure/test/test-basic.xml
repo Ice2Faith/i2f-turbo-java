@@ -38,7 +38,10 @@
         </lang-fori>
     </lang-foreach>
     <lang-eval-java result="date">
-        new Date()
+        long ts = System.currentTimeMillis();
+        String str=Long.toString(ts,16);
+        System.out.println("ts-hex:"+str);
+        return new Date()
     </lang-eval-java>
     <lang-println date="date"/>
     <lang-eval-javascript result="js">
