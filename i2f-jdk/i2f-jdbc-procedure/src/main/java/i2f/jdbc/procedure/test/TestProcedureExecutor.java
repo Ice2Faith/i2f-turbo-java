@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.test;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.impl.BasicJdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
@@ -26,11 +27,10 @@ public class TestProcedureExecutor {
         BasicJdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
         executor.getDebug().set(true);
 
-        Map<String, Object> params = new HashMap<>();
-        Map<String, XmlNode> nodeMap = new HashMap<>();
+        ExecuteContext context=new ExecuteContext();
 
-        params.put("list", new ArrayList<>(Arrays.asList(9, 8, 7, 6, 5, 4, 3, 2, 1)));
-        executor.exec(node, params, nodeMap);
+        context.getParams().put("list", new ArrayList<>(Arrays.asList(9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        executor.exec(node, context);
 
     }
 }
