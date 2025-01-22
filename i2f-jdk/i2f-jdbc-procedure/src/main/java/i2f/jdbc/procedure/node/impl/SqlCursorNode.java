@@ -7,9 +7,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -55,15 +53,34 @@ public class SqlCursorNode implements ExecutorNode {
             item = "item";
         }
 
-        String datasource = (String) executor.attrValue("datasource", "visit", node, context);
-        String script = (String) executor.attrValue("script", "visit", node, context);
-        String resultTypeName = (String) executor.attrValue("result-type", "visit", node, context);
+        List<Map.Entry<String,String>> dialectScriptList=new ArrayList<>();
+        List<XmlNode> queryChildren = queryNode.getChildren();
+        if(queryChildren!=null) {
+            for (XmlNode iter : queryChildren) {
+                if ("sql-dialect".equals(iter.getTagName())) {
+                    String databases = iter.getTagAttrMap().get("databases");
+                    String script = queryNode.getTagAttrMap().get("script");
+                    if (script != null && !script.isEmpty()) {
+                        script = (String) executor.visit(script, context.getParams());
+                    } else {
+                        script = queryNode.getTagBody();
+                    }
+                    dialectScriptList.add(new AbstractMap.SimpleEntry<>(databases, script));
+                }
+            }
+        }
+        String datasource = (String) executor.attrValue("datasource", "visit", queryNode, context);
+        String script = (String) executor.attrValue("script", "visit", queryNode, context);
+        String resultTypeName = (String) executor.attrValue("result-type", "visit", queryNode, context);
         Class<?> resultType = executor.loadClass(resultTypeName);
         if (resultType == null) {
             resultType = Map.class;
         }
         if (script == null || script.isEmpty()) {
             script = node.getTagBody();
+        }
+        if(dialectScriptList.isEmpty()){
+            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null,script));
         }
 
         int pageIndex = 0;
@@ -73,7 +90,7 @@ public class SqlCursorNode implements ExecutorNode {
         Map<String, Object> bakParams = new LinkedHashMap<>();
         bakParams.put(item, executor.visit(item, context.getParams()));
         while (true) {
-            List<?> list = executor.sqlQueryPage(datasource, script, context.getParams(), resultType, pageIndex, batchSize);
+            List<?> list = executor.sqlQueryPage(datasource, dialectScriptList, context.getParams(), resultType, pageIndex, batchSize);
             if (list.isEmpty()) {
                 break;
             }

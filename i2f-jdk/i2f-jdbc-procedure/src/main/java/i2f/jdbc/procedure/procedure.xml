@@ -169,11 +169,27 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     </sql-query-object>
     <!-- 表示一个更新语句，预期为JDBC执行update的返回值，执行结果放到result指定的变量中 -->
     <sql-update result="">
+        <!--
+         用于在sql-系列的标签中，用于解决数据库的方言问题
+         通过databases指定支持的数据库类型列表，多个用逗号分隔
+         这个标签是可选的
+         -->
+        <sql-dialect databases="mysql,gbase,mariadb">
 
+        </sql-dialect>
+        <sql-dialect databases="oracle,dm">
+
+        </sql-dialect>
+        <sql-dialect databases="postgre">
+
+        </sql-dialect>
+        <sql-dialect databases="sqlserver">
+
+        </sql-dialect>
     </sql-update>
 
     <!-- 表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务 -->
-    <sql-trans-begin isolation="" propagation=""/>
+    <sql-trans-begin isolation=""/>
     <sql-trans-commit/>
     <sql-trans-rollback/>
     <sql-trans-none/>

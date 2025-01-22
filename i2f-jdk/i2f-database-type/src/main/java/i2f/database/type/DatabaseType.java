@@ -122,6 +122,14 @@ public enum DatabaseType {
      */
     private final String desc;
 
+    public String db(){
+        return this.db;
+    }
+
+    public String desc(){
+        return this.desc;
+    }
+
     private DatabaseType(String db, String desc) {
         this.db = db;
         this.desc = desc;
