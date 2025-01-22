@@ -65,9 +65,9 @@ public class LangEvalJavaNode implements ExecutorNode {
             bodySegment=bodyNode.getTextBody();
         }
 
+        bodySegment=bodySegment.trim();
 
         Matcher matcher = RETURN_PATTERN.matcher(bodySegment);
-
 
         String className="RC" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
         StringBuilder builder=new StringBuilder();
@@ -82,7 +82,7 @@ public class LangEvalJavaNode implements ExecutorNode {
         builder.append(memberSegment).append("\n");
         builder.append("public Object exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable {").append("\n");
         if(!matcher.find()){
-            String[] lines = bodySegment.trim().split("\n");
+            String[] lines = bodySegment.split("\n");
             for (int i = 0; i < lines.length; i++) {
                 String line=lines[i];
                 if(i==lines.length-1) {
@@ -99,6 +99,9 @@ public class LangEvalJavaNode implements ExecutorNode {
             }
         }else {
             builder.append(bodySegment);
+            if(!bodySegment.endsWith(";")){
+                builder.append(";");
+            }
         }
         builder.append("}").append("\n");
         builder.append("}").append("\n");
