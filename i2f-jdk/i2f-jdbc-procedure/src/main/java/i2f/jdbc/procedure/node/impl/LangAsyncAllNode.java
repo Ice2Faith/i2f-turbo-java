@@ -1,12 +1,12 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -23,15 +23,15 @@ public class LangAsyncAllNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
-        Boolean await = (Boolean) executor.attrValue("await", "visit", node, params, nodeMap);
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+        Boolean await = (Boolean) executor.attrValue("await", "visit", node, context);
 
         List<XmlNode> children = node.getChildren();
         CountDownLatch latch = new CountDownLatch(children.size());
         for (XmlNode item : children) {
             new Thread(() -> {
                 try {
-                    executor.execAsProcedure(item, params, nodeMap);
+                    executor.execAsProcedure(item, context);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 } finally {

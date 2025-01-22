@@ -1,11 +1,11 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -23,14 +23,14 @@ public class ProcedureNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
         for (int i = 0; i < children.size(); i++) {
             XmlNode item = children.get(i);
             if (item == null) {
                 continue;
             }
-            executor.exec(item, params, nodeMap);
+            executor.exec(item, context);
         }
     }
 }

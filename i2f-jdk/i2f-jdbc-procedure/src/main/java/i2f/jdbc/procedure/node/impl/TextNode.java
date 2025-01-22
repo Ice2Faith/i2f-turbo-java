@@ -1,10 +1,9 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -20,12 +19,12 @@ public class TextNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get("result");
         String text = node.getTextBody();
         if (result != null && !result.isEmpty()) {
-            Object obj = executor.resultValue(text, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
-            executor.setParamsObject(params, result, obj);
+            Object obj = executor.resultValue(text, node.getAttrFeatureMap().get("result"), node, context);
+            executor.setParamsObject(context.getParams(), result, obj);
         }
     }
 }

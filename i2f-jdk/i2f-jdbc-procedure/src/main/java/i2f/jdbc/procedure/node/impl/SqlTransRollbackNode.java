@@ -1,10 +1,9 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -20,9 +19,9 @@ public class SqlTransRollbackNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String datasource = node.getTagAttrMap().get("datasource");
-        executor.sqlTransRollback(datasource, params);
+        executor.sqlTransRollback(datasource, context.getParams());
     }
 
 }

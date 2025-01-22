@@ -1,11 +1,11 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -21,7 +21,7 @@ public class LangChooseNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<XmlNode> list = node.getChildren();
         XmlNode testNode = null;
         XmlNode otherNode = null;
@@ -32,7 +32,7 @@ public class LangChooseNode implements ExecutorNode {
             }
             if ("lang-when".equals(itemNode.getTagName())) {
                 if (testNode == null) {
-                    boolean ok = (boolean) executor.attrValue("test", "test", node, params, nodeMap);
+                    boolean ok = (boolean) executor.attrValue("test", "test", node, context);
                     if (ok) {
                         testNode = itemNode;
                     }
@@ -48,7 +48,7 @@ public class LangChooseNode implements ExecutorNode {
             invokeNode = otherNode;
         }
         if (invokeNode != null) {
-            executor.execAsProcedure(invokeNode, params, nodeMap);
+            executor.execAsProcedure(invokeNode, context);
         }
     }
 

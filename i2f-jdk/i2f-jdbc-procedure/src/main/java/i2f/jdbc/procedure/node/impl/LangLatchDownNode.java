@@ -1,10 +1,10 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -21,8 +21,8 @@ public class LangLatchDownNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
-        CountDownLatch latch = (CountDownLatch) executor.attrValue("name", "visit", node, params, nodeMap);
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+        CountDownLatch latch = (CountDownLatch) executor.attrValue("name", "visit", node, context);
         latch.countDown();
     }
 }

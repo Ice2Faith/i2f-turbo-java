@@ -1,9 +1,8 @@
 package i2f.jdbc.procedure.node;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -12,5 +11,5 @@ import java.util.Map;
 public interface ExecutorNode {
     boolean support(XmlNode node);
 
-    void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor);
+    void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor);
 }

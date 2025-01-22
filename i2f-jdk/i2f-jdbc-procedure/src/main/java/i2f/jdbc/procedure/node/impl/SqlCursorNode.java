@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -24,7 +25,7 @@ public class SqlCursorNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
         if (children == null || children.isEmpty()) {
             return;
@@ -48,15 +49,15 @@ public class SqlCursorNode implements ExecutorNode {
             throw new IllegalStateException("missing cursor body node!");
         }
 
-        Integer batchSize = (Integer) executor.attrValue("batch-size", "int", node, params, nodeMap);
+        Integer batchSize = (Integer) executor.attrValue("batch-size", "int", node, context);
         String item = node.getTagAttrMap().get("item");
         if (item == null || item.isEmpty()) {
             item = "item";
         }
 
-        String datasource = (String) executor.attrValue("datasource", "visit", node, params, nodeMap);
-        String script = (String) executor.attrValue("script", "visit", node, params, nodeMap);
-        String resultTypeName = (String) executor.attrValue("result-type", "visit", node, params, nodeMap);
+        String datasource = (String) executor.attrValue("datasource", "visit", node, context);
+        String script = (String) executor.attrValue("script", "visit", node, context);
+        String resultTypeName = (String) executor.attrValue("result-type", "visit", node, context);
         Class<?> resultType = executor.loadClass(resultTypeName);
         if (resultType == null) {
             resultType = Map.class;
@@ -70,9 +71,9 @@ public class SqlCursorNode implements ExecutorNode {
             batchSize = 2000;
         }
         Map<String, Object> bakParams = new LinkedHashMap<>();
-        bakParams.put(item, executor.visit(item, params));
+        bakParams.put(item, executor.visit(item, context.getParams()));
         while (true) {
-            List<?> list = executor.sqlQueryPage(datasource, script, params, resultType, pageIndex, batchSize);
+            List<?> list = executor.sqlQueryPage(datasource, script, context.getParams(), resultType, pageIndex, batchSize);
             if (list.isEmpty()) {
                 break;
             }
@@ -82,7 +83,7 @@ public class SqlCursorNode implements ExecutorNode {
             for (Object obj : list) {
                 count++;
                 try {
-                    executor.setParamsObject(params, item, obj);
+                    executor.setParamsObject(context.getParams(), item, obj);
                 } catch (ContinueSignalException e) {
                     continue;
                 } catch (BreakSignalException e) {
@@ -103,7 +104,7 @@ public class SqlCursorNode implements ExecutorNode {
         }
 
         for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
-            executor.setParamsObject(params, entry.getKey(), entry.getValue());
+            executor.setParamsObject(context.getParams(), entry.getKey(), entry.getValue());
         }
     }
 }

@@ -1,10 +1,9 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -20,19 +19,19 @@ public class SqlUpdateNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String datasource = node.getTagAttrMap().get("datasource");
         String script = node.getTagAttrMap().get("script");
         String result = node.getTagAttrMap().get("result");
         if (script != null && !script.isEmpty()) {
-            script = (String) executor.visit(script, params);
+            script = (String) executor.visit(script, context.getParams());
         } else {
             script = node.getTagBody();
         }
-        int row = executor.sqlUpdate(datasource, script, params);
+        int row = executor.sqlUpdate(datasource, script, context.getParams());
         if (result != null && !result.isEmpty()) {
-            Object val = executor.resultValue(row, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
-            executor.setParamsObject(params, result, val);
+            Object val = executor.resultValue(row, node.getAttrFeatureMap().get("result"), node, context);
+            executor.setParamsObject(context.getParams(), result, val);
         }
     }
 

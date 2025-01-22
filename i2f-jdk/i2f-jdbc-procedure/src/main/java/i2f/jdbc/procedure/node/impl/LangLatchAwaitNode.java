@@ -1,11 +1,11 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -23,10 +23,10 @@ public class LangLatchAwaitNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
-        long timeout = (long) executor.attrValue("timeout", "visit", node, params, nodeMap);
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+        long timeout = (long) executor.attrValue("timeout", "visit", node, context);
         String timeUnit = node.getTagAttrMap().get("time-unit");
-        CountDownLatch latch = (CountDownLatch) executor.attrValue("name", "visit", node, params, nodeMap);
+        CountDownLatch latch = (CountDownLatch) executor.attrValue("name", "visit", node, context);
         try {
             if (timeout >= 0) {
                 TimeUnit unit = TimeUnit.SECONDS;

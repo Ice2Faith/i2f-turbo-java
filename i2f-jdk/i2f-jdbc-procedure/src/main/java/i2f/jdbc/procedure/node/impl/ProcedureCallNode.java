@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -21,16 +22,16 @@ public class ProcedureCallNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String refid = node.getTagAttrMap().get("refid");
-        XmlNode nextNode = nodeMap.get(refid);
+        XmlNode nextNode = context.getNodeMap().get(refid);
         if (nextNode == null) {
             return;
         }
-        Map<String, Object> callParams = params;
+        Map<String, Object> callParams = context.getParams();
         String paramsText = node.getTagAttrMap().get("params");
         if (paramsText != null && !paramsText.isEmpty()) {
-            Object value = executor.attrValue("params", "visit", node, params, nodeMap);
+            Object value = executor.attrValue("params", "visit", node, context);
             if (value instanceof Map) {
                 callParams = (Map<String, Object>) value;
             }
@@ -47,15 +48,18 @@ public class ProcedureCallNode implements ExecutorNode {
             }
             String script = entry.getValue();
             // 备份堆栈
-            bakParams.put(name, params.get(script));
-            Object val = executor.attrValue(name, "visit", node, params, nodeMap);
+            bakParams.put(name, context.getParams().get(script));
+            Object val = executor.attrValue(name, "visit", node, context);
             callParams.put(name, val);
         }
 
-        executor.execAsProcedure(nextNode, callParams, nodeMap);
+        ExecuteContext callContext = new ExecuteContext();
+        callContext.setNodeMap(context.getNodeMap());
+        callContext.setParams(callParams);
+        executor.execAsProcedure(nextNode, callContext);
 
         // 恢复堆栈
-        params.putAll(bakParams);
+        context.getParams().putAll(bakParams);
     }
 
 }

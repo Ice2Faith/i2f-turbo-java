@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -23,8 +24,8 @@ public class LangStringJoinNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap, JdbcProcedureExecutor executor) {
-        Object separator = executor.attrValue("separator", "visit", node, params, nodeMap);
+    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+        Object separator = executor.attrValue("separator", "visit", node, context);
         String result = node.getTagAttrMap().get("result");
         StringBuilder builder = new StringBuilder();
         List<Map.Entry<Integer, String>> argList = new ArrayList<>();
@@ -44,15 +45,15 @@ public class LangStringJoinNode implements ExecutorNode {
                     builder.append(separator);
                 }
             }
-            Object val = executor.attrValue(attrName, "visit", node, params, nodeMap);
+            Object val = executor.attrValue(attrName, "visit", node, context);
             builder.append(val);
             isFirst = false;
         }
 
         Object value = builder.toString();
         if (result != null && !result.isEmpty()) {
-            value = executor.resultValue(value, node.getAttrFeatureMap().get("result"), node, params, nodeMap);
-            executor.setParamsObject(params, result, value);
+            value = executor.resultValue(value, node.getAttrFeatureMap().get("result"), node, context);
+            executor.setParamsObject(context.getParams(), result, value);
         }
     }
 
