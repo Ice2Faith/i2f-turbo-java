@@ -1,0 +1,9 @@
+<!-- procedure.dtd -->
+<!ELEMENT procedure (
+        lang-println*
+        |lang-printf*
+        |script-segment*
+        )>
+<!ELEMENT lang-println (#PCDATA)>
+<!ELEMENT lang-printf (#PCDATA)>
+<!ELEMENT script-segment (#PCDATA)>
