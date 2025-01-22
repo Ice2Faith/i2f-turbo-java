@@ -70,6 +70,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new LangSetNode());
         ret.add(new LangStringJoinNode());
         ret.add(new LangStringNode());
+        ret.add(new LangSynchronizedNode());
         ret.add(new LangThrowNode());
         ret.add(new LangTryNode());
         ret.add(new LangWhenNode());
@@ -518,12 +519,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return bql;
     }
 
-    public Map.Entry<String,String> getDialectSqlScript(List<Map.Entry<String, String>> dialectScriptList, Connection conn) throws Exception {
+    public Map.Entry<String, String> getDialectSqlScript(List<Map.Entry<String, String>> dialectScriptList, Connection conn) throws Exception {
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
         String name = databaseType.db();
         String enumName = databaseType.name();
-        Map.Entry<String,String> firstScript = null;
-        Map.Entry<String,String> nullScript = null;
+        Map.Entry<String, String> firstScript = null;
+        Map.Entry<String, String> nullScript = null;
         for (Map.Entry<String, String> entry : dialectScriptList) {
             if (firstScript == null) {
                 firstScript = entry;
@@ -556,9 +557,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     public List<?> sqlQueryList(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String,String> entry = getDialectSqlScript(dialectScriptList, conn);
-            String script=entry.getValue();
-            debugLog(() -> "sqlQueryList:datasource=" + datasource+", dialect="+entry.getKey() + ", script=" + script);
+            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            String script = entry.getValue();
+            debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
             List<?> list = JdbcResolver.list(conn, bql, resultType);
             return list;
@@ -572,9 +573,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     public Object sqlQueryObject(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String,String> entry = getDialectSqlScript(dialectScriptList, conn);
-            String script=entry.getValue();
-            debugLog(() -> "sqlQueryObject:datasource=" + datasource+", dialect="+entry.getKey() + ", script=" + script);
+            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            String script = entry.getValue();
+            debugLog(() -> "sqlQueryObject:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
             Object obj = JdbcResolver.get(conn, bql, resultType);
             return obj;
@@ -587,9 +588,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     public Object sqlQueryRow(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String,String> entry = getDialectSqlScript(dialectScriptList, conn);
-            String script=entry.getValue();
-            debugLog(() -> "sqlQueryRow:datasource=" + datasource+", dialect="+entry.getKey() + ", script=" + script);
+            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            String script = entry.getValue();
+            debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
             Object row = JdbcResolver.find(conn, bql, resultType);
             return row;
@@ -602,9 +603,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     public int sqlUpdate(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String,String> entry = getDialectSqlScript(dialectScriptList, conn);
-            String script=entry.getValue();
-            debugLog(() -> "sqlUpdate:datasource=" + datasource+", dialect="+entry.getKey() + ", script=" + script);
+            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            String script = entry.getValue();
+            debugLog(() -> "sqlUpdate:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
             int num = JdbcResolver.update(conn, bql);
             return num;
@@ -617,9 +618,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     public List<?> sqlQueryPage(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String,String> entry = getDialectSqlScript(dialectScriptList, conn);
-            String script=entry.getValue();
-            debugLog(() -> "sqlQueryPage:datasource=" + datasource+", dialect="+entry.getKey() + ", script=" + script);
+            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            String script = entry.getValue();
+            debugLog(() -> "sqlQueryPage:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
             IPageWrapper wrapper = PageWrappers.wrapper(conn);
             BindSql pageBql = wrapper.apply(bql, ApiPage.of(pageIndex, pageSize));
