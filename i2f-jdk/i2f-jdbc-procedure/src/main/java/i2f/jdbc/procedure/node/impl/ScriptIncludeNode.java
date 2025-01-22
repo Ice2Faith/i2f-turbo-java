@@ -41,7 +41,7 @@ public class ScriptIncludeNode implements ExecutorNode {
             params.put(name, val);
         }
 
-        executor.execAsProducer(nextNode, params, nodeMap);
+        executor.execAsProcedure(nextNode, params, nodeMap);
 
         // 恢复堆栈
         params.putAll(bakParams);

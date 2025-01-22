@@ -53,7 +53,7 @@ public class LangAsyncNode implements ExecutorNode {
                     } catch (Exception e) {
                     }
                 }
-                executor.execAsProducer(node, params, nodeMap);
+                executor.execAsProcedure(node, params, nodeMap);
             } catch (Throwable e) {
                 e.printStackTrace();
             } finally {

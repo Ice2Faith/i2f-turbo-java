@@ -31,7 +31,7 @@ public class LangAsyncAllNode implements ExecutorNode {
         for (XmlNode item : children) {
             new Thread(() -> {
                 try {
-                    executor.execAsProducer(item, params, nodeMap);
+                    executor.execAsProcedure(item, params, nodeMap);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 } finally {

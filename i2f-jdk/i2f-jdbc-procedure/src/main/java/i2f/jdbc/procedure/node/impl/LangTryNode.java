@@ -51,7 +51,7 @@ public class LangTryNode implements ExecutorNode {
         }
 
         try {
-            executor.execAsProducer(bodyNode, params, nodeMap);
+            executor.execAsProcedure(bodyNode, params, nodeMap);
         } catch (Throwable e) {
             boolean handled = false;
             for (XmlNode catchNode : catchNodes) {
@@ -69,7 +69,7 @@ public class LangTryNode implements ExecutorNode {
                     throw new IllegalStateException("missing catch exception type of : " + type);
                 }
                 if (clazz.isAssignableFrom(e.getClass())) {
-                    executor.execAsProducer(catchNode, params, nodeMap);
+                    executor.execAsProcedure(catchNode, params, nodeMap);
                     handled = true;
                 }
 
@@ -81,7 +81,7 @@ public class LangTryNode implements ExecutorNode {
             }
         } finally {
             if (finallyNode != null) {
-                executor.execAsProducer(finallyNode, params, nodeMap);
+                executor.execAsProcedure(finallyNode, params, nodeMap);
             }
         }
     }

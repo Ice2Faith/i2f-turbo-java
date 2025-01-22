@@ -6,7 +6,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -17,7 +17,7 @@ public interface JdbcProcedureExecutor {
 
     void exec(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
 
-    void execAsProducer(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
+    void execAsProcedure(XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
 
     Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params, Map<String, XmlNode> nodeMap);
 
@@ -26,6 +26,8 @@ public interface JdbcProcedureExecutor {
     void setParamsObject(Map<String, Object> params, String result, Object value);
 
     Map<String, Object> newParams(Map<String, Object> params, Map<String, XmlNode> nodeMap);
+
+    void debugLog(Supplier<String> supplier);
 
     Class<?> loadClass(String className);
 

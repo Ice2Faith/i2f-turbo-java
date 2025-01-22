@@ -167,7 +167,7 @@ public class LangInvokeNode implements ExecutorNode {
                 String argScript = argEntry.getValue();
                 Object evalObj=null;
                 try{
-                    executor.attrValue("arg" + argEntry.getKey(), "visit", node, params, nodeMap);
+                    evalObj=executor.attrValue("arg" + argEntry.getKey(), "visit", node, params, nodeMap);
                 }catch(Exception e){
                 }
                 if(evalObj==null){

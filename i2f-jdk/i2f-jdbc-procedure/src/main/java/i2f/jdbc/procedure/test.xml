@@ -1,4 +1,4 @@
-<producer>
+<procedure>
     <lang-invoke method="SimpleDateFormat.new" arg0.string="yyyy-MM-dd HH:mm:ss.SSS" result="fmt"/>
     <lang-invoke method="Date.new" result="now"/>
     <lang-invoke method="format" target="fmt" arg0="now" result="str"/>
@@ -6,14 +6,19 @@
     <lang-eval result="now">
         new Date()
     </lang-eval>
-    <sql-query-object result="count" result-type="Long">
-        select count(1) from sys_user where del_flag=1
-    </sql-query-object>
+    <lang-printf>
+        <sql-query-object result="count" result-type="Long">
+            select count(1) from sys_user where del_flag=1
+        </sql-query-object>
+    </lang-printf>
+
     <lang-if test="count gt 0">
-        <sql-update result="updateCount">
-            delete from sys_user
-            where del_flag=1
-        </sql-update>
+        <lang-printf>
+            <sql-update result="updateCount">
+                delete from sys_user
+                where del_flag=1
+            </sql-update>
+        </lang-printf>
     </lang-if>
     <lang-fori begin.int="0" end.int="10" incr.int="1" item="item">
         <lang-println tag.string="fori" i="item" is-first="first" index="index"/>
@@ -29,4 +34,4 @@
             <lang-println tag.string="-->fori-foreach" i="item" is-first="first" index="index"/>
         </lang-fori>
     </lang-foreach>
-</producer>
+</procedure>
