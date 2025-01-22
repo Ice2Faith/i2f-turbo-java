@@ -21,11 +21,11 @@ public class LangSynchronizedNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         Object target = executor.attrValue("target", "visit", node, context);
-        if(target==null){
-            target=context;
+        if (target == null) {
+            target = context;
         }
-        synchronized (target){
-            executor.execAsProcedure(node,context);
+        synchronized (target) {
+            executor.execAsProcedure(node, context);
         }
     }
 }

@@ -1,6 +1,5 @@
 package i2f.jdbc.procedure.node.impl;
 
-import i2f.compiler.MemoryCompiler;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -9,8 +8,6 @@ import i2f.script.ScriptProvider;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * @author Ice2Faith
@@ -30,22 +27,22 @@ public class LangEvalJavascriptNode implements ExecutorNode {
         String result = node.getTagAttrMap().get("result");
         ScriptProvider provider = ScriptProvider.getJavaScriptInstance();
         Bindings bindings = provider.createBindings();
-        bindings.put("context",context);
-        bindings.put("executor",executor);
-        bindings.put("params",context.getParams());
+        bindings.put("context", context);
+        bindings.put("executor", executor);
+        bindings.put("params", context.getParams());
 
-        String script=node.getTextBody();
+        String script = node.getTextBody();
         Object obj = null;
 
         try {
-            obj=provider.eval(script, bindings);
+            obj = provider.eval(script, bindings);
         } catch (ScriptException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
 
-        if(result!=null && !result.isEmpty()) {
+        if (result != null && !result.isEmpty()) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get("result"), node, context);
-            executor.setParamsObject(context.getParams(),result,obj);
+            executor.setParamsObject(context.getParams(), result, obj);
         }
 
     }

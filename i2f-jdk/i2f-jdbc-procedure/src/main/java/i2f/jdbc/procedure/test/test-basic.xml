@@ -55,7 +55,7 @@
     <lang-println date="date"/>
     <lang-eval-javascript result="js">
         function test(){
-            return 'hello' + (1 + 2);
+        return 'hello' + (1 + 2);
         }
         test()
     </lang-eval-javascript>

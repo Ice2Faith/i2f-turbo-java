@@ -25,9 +25,9 @@ public class SqlQueryObjectNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        List<Map.Entry<String,String>> dialectScriptList=new ArrayList<>();
+        List<Map.Entry<String, String>> dialectScriptList = new ArrayList<>();
         List<XmlNode> children = node.getChildren();
-        if(children!=null) {
+        if (children != null) {
             for (XmlNode item : children) {
                 if ("sql-dialect".equals(item.getTagName())) {
                     String databases = item.getTagAttrMap().get("databases");
@@ -54,8 +54,8 @@ public class SqlQueryObjectNode implements ExecutorNode {
         } else {
             script = node.getTagBody();
         }
-        if(dialectScriptList.isEmpty()){
-            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null,script));
+        if (dialectScriptList.isEmpty()) {
+            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
         Object obj = executor.sqlQueryObject(datasource, dialectScriptList, context.getParams(), resultType);
         if (result != null && !result.isEmpty()) {

@@ -5,7 +5,10 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -22,9 +25,9 @@ public class SqlQueryListNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        List<Map.Entry<String,String>> dialectScriptList=new ArrayList<>();
+        List<Map.Entry<String, String>> dialectScriptList = new ArrayList<>();
         List<XmlNode> children = node.getChildren();
-        if(children!=null) {
+        if (children != null) {
             for (XmlNode item : children) {
                 if ("sql-dialect".equals(item.getTagName())) {
                     String databases = item.getTagAttrMap().get("databases");
@@ -51,8 +54,8 @@ public class SqlQueryListNode implements ExecutorNode {
         } else {
             script = node.getTagBody();
         }
-        if(dialectScriptList.isEmpty()){
-            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null,script));
+        if (dialectScriptList.isEmpty()) {
+            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
         List<?> row = executor.sqlQueryList(datasource, dialectScriptList, context.getParams(), resultType);
         if (result != null && !result.isEmpty()) {
