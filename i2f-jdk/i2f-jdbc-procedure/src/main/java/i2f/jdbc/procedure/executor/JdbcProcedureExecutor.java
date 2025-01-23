@@ -26,6 +26,8 @@ public interface JdbcProcedureExecutor {
 
     void setParamsObject(Map<String, Object> params, String result, Object value);
 
+    Map<String,Object> createParams();
+
     Map<String, Object> newParams(ExecuteContext context);
 
     void debugLog(Supplier<String> supplier);

@@ -16,4 +16,13 @@ import java.util.Map;
 public class ExecuteContext {
     protected Map<String, Object> params = new HashMap<>();
     protected Map<String, XmlNode> nodeMap = new HashMap<>();
+
+    public ExecuteContext(Map<String, Object> params) {
+        this.params = params;
+    }
+
+    public ExecuteContext(Map<String, Object> params, Map<String, XmlNode> nodeMap) {
+        this.params = params;
+        this.nodeMap = nodeMap;
+    }
 }
