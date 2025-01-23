@@ -194,6 +194,20 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
+    public Map<String, Object> createParams() {
+        Map<String, Object> ret = new LinkedHashMap<>();
+        ret.put(ParamsConsts.CONTEXT, new HashMap<>());
+        ret.put(ParamsConsts.ENVIRONMENT, new HashMap<>());
+        ret.put(ParamsConsts.BEANS, new HashMap<>());
+
+        ret.put(ParamsConsts.DATASOURCES, new HashMap<>());
+
+        ret.put(ParamsConsts.GLOBAL, new HashMap<>());
+
+        return ret;
+    }
+
+    @Override
     public Map<String, Object> newParams(ExecuteContext context) {
         Map<String, Object> ret = new LinkedHashMap<>();
         ret.put(ParamsConsts.CONTEXT, context.getParams().get(ParamsConsts.CONTEXT));

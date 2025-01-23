@@ -17,7 +17,6 @@ import java.util.logging.Logger;
  * @author Ice2Faith
  * @date 2025/1/23 15:21
  */
-@Data
 @NoArgsConstructor
 public class DirectConnectionDatasource implements DataSource {
     protected ConnectionSupplier connectionSupplier;
@@ -30,6 +29,14 @@ public class DirectConnectionDatasource implements DataSource {
 
     public DirectConnectionDatasource(JdbcMeta meta) {
         this.connectionSupplier = new JdbcMetaConnectionSupplier(meta);
+    }
+
+    public ConnectionSupplier getConnectionSupplier() {
+        return this.connectionSupplier;
+    }
+
+    public void setConnectionSupplier(ConnectionSupplier connectionSupplier) {
+        this.connectionSupplier = connectionSupplier;
     }
 
     @Override
