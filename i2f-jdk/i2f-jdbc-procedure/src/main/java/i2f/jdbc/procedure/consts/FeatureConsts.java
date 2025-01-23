@@ -32,5 +32,10 @@ public interface FeatureConsts {
     String EVAL="eval";
     String TEST="test";
 
+    String EVAL_JAVA="eval-java";
+    String EVAL_JS="eval-js";
+    String CLASS=".class";
+
+    String NOT="not";
 
 }

@@ -24,7 +24,7 @@ public class LangPrintfNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         StringBuilder builder = new StringBuilder();
-        String tag = node.getTagAttrMap().get(AttrConsts.TAG);
+        String tag =(String)executor.attrValue(AttrConsts.TAG,FeatureConsts.STRING,node,context);
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
         if (value != null) {
             Object obj = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);

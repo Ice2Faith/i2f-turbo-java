@@ -17,32 +17,10 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
     public boolean innerTest(String test, Map<String, Object> params) {
         try {
             Object obj = OgnlUtil.evaluateExpression(test, params);
-            if (obj == null) {
-                return false;
-            }
-            if (obj instanceof Boolean) {
-                return (Boolean) obj;
-            }
-            if (obj instanceof String) {
-                if (!"".equals(obj)) {
-                    return true;
-                }
-            }
-            if (obj instanceof Collection) {
-                Collection<?> col = (Collection<?>) obj;
-                if (!col.isEmpty()) {
-                    return true;
-                }
-            }
-            if (obj.getClass().isArray()) {
-                if (Array.getLength(obj) > 0) {
-                    return true;
-                }
-            }
+            return toBoolean(obj);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
-        return false;
     }
 
     @Override

@@ -23,6 +23,7 @@ import i2f.reflect.vistor.Visitor;
 import lombok.Data;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -286,8 +287,46 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             return node.getTextBody();
         } else if (FeatureConsts.BODY_XML.equals(feature)) {
             return node.getTagBody();
+        } else if (FeatureConsts.EVAL_JAVA.equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalJavaNode.evalJava(context,this,"","",text);
+        } else if (FeatureConsts.EVAL_JS.equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalJavascriptNode.evalJavascript(text,context,this);
+        } else if (FeatureConsts.CLASS.equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return loadClass(text);
+        } else if (FeatureConsts.NOT.equals(feature)) {
+            boolean ok=toBoolean(value);
+            return !ok;
         }
         return value;
+    }
+
+    public boolean toBoolean(Object obj){
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        }
+        if (obj instanceof String) {
+            if (!"".equals(obj)) {
+                return true;
+            }
+        }
+        if (obj instanceof Collection) {
+            Collection<?> col = (Collection<?>) obj;
+            if (!col.isEmpty()) {
+                return true;
+            }
+        }
+        if (obj.getClass().isArray()) {
+            if (Array.getLength(obj) > 0) {
+                return true;
+            }
+        }
+        return true;
     }
 
     @Override
