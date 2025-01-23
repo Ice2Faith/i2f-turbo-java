@@ -20,7 +20,11 @@ public class LangEvalNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        String script = node.getTextBody();
+        String value = node.getTagAttrMap().get("value");
+        String script=node.getTextBody();
+        if(value!=null &&!value.isEmpty()){
+            script=(String)executor.attrValue("value","visit",node,context);
+        }
         Object val = executor.eval(script, context.getParams());
         String result = node.getTagAttrMap().get("result");
         if (result != null && !result.isEmpty()) {

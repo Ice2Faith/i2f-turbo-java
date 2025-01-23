@@ -58,6 +58,9 @@ public class LangTryNode implements ExecutorNode {
             for (XmlNode catchNode : catchNodes) {
                 String type = catchNode.getTagAttrMap().get("type");
                 String exName = catchNode.getTagAttrMap().get("e");
+                if(type==null || type.isEmpty()){
+                    type="java.lang.Throwable";
+                }
                 if (exName == null || exName.isEmpty()) {
                     exName = "e";
                 }

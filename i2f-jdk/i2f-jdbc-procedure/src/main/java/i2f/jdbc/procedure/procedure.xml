@@ -41,7 +41,7 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     <!-- 使用value指定的模版进行渲染输出,同样支持tag属性标签 -->
     <lang-printf tag="" value.body-xml.trim=""/>
 
-    <!-- 语句段，可使用script-include进行引用，id唯一即可，root表示语句段使用的根变量名称 -->
+    <!-- 语句段，可使用script-include进行引用，id唯一即可，root表示语句段使用了哪些变量，可以作为变量声明 -->
     <script-segment id="" root="">
         <![CDATA[
             112
@@ -84,7 +84,7 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     <lang-throw value="" type="" cause=""/>
 
     <!-- 用于指定一小段脚本，来设置一个变量值到result指定的变量名中 -->
-    <lang-eval result="">
+    <lang-eval value="" result="">
         11
     </lang-eval>
     <!-- 用于指定一段字符串到result指定的变量名中 -->
@@ -240,7 +240,7 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     </lang-eval-java>
 
     <!-- 动态执行javascript脚本 -->
-    <lang-eval-javascript>
+    <lang-eval-javascript result="">
 
     </lang-eval-javascript>
 </procedure>

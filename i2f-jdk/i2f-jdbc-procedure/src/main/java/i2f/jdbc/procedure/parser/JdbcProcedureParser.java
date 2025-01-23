@@ -1,11 +1,14 @@
 package i2f.jdbc.procedure.parser;
 
+import i2f.io.stream.StreamUtil;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,9 +21,32 @@ import java.util.Map;
  */
 public class JdbcProcedureParser {
 
+    public static String removeProcedureDtd(String str){
+        if(str==null){
+            return str;
+        }
+        return str.replaceAll("<\\!DOCTYPE\\s+procedure\\s+[^>]+>"," ");
+    }
+
+    public static XmlNode parse(String xml) throws Exception {
+        if(xml==null){
+            return null;
+        }
+        String str=removeProcedureDtd(xml);
+        ByteArrayInputStream bis=new ByteArrayInputStream(str.getBytes("UTF-8"));
+        Document document = XmlUtil.parseXml(bis);
+        bis.close();
+        return parse(document);
+    }
+
     public static XmlNode parse(InputStream is) throws Exception {
-        Document document = XmlUtil.parseXml(is);
-        is.close();
+        ByteArrayOutputStream bos=new ByteArrayOutputStream();
+        StreamUtil.streamCopy(is,bos);
+        String str=new String(bos.toByteArray(),"UTF-8");
+        str=removeProcedureDtd(str);
+        ByteArrayInputStream bis=new ByteArrayInputStream(str.getBytes("UTF-8"));
+        Document document = XmlUtil.parseXml(bis);
+        bis.close();
         return parse(document);
     }
 
