@@ -1,6 +1,47 @@
 <!-- procedure.dtd -->
 
-<!ELEMENT procedure (ANY)>
+<!ELEMENT procedure (
+        lang-println*
+        |lang-printf*
+        |script-segment*
+        |script-include*
+        |lang-body*
+        |lang-set*
+        |lang-format-date*
+        |lang-format*
+        |lang-string-join*
+        |lang-new-params*
+        |procedure-call*
+        |lang-return*
+        |lang-throw*
+        |lang-eval*
+        |lang-string*
+        |lang-render*
+        |lang-if*
+        |lang-choose*
+        |lang-foreach*
+        |lang-fori*
+        |lang-while*
+        |lang-invoke*
+        |lang-try*
+        |lang-synchronized*
+        |sql-query-row*
+        |sql-query-list*
+        |sql-query-object*
+        |sql-update*
+        |sql-trans-begin*
+        |sql-trans-commit*
+        |sql-trans-rollback*
+        |sql-trans-none*
+        |lang-async*
+        |lang-latch*
+        |lang-async-all*
+        |lang-latch-await*
+        |lang-latch-down*
+        |sql-cursor*
+        |lang-eval-java*
+        |lang-eval-javascript*
+        )>
 <!ATTLIST procedure id CDATA #IMPLIED>
 
 
@@ -113,32 +154,75 @@
 <!ELEMENT lang-synchronized (ANY|EMPTY)>
 <!ATTLIST lang-synchronized target CDATA #IMPLIED>
 
-<!ELEMENT sql-query-row (ANY|EMPTY|sql-dialect*)>
+<!ELEMENT sql-query-row (EMPTY|sql-dialect*
+        |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
+        )>
 <!ATTLIST sql-query-row datasource CDATA #IMPLIED>
 <!ATTLIST sql-query-row script CDATA #IMPLIED>
 <!ATTLIST sql-query-row result CDATA #IMPLIED>
 <!ATTLIST sql-query-row result-type CDATA #IMPLIED>
 
-<!ELEMENT sql-query-list (ANY|EMPTY|sql-dialect*)>
+<!ELEMENT sql-query-list (EMPTY|sql-dialect*
+        |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
+        )>
 <!ATTLIST sql-query-list datasource CDATA #IMPLIED>
 <!ATTLIST sql-query-list script CDATA #IMPLIED>
 <!ATTLIST sql-query-list result CDATA #IMPLIED>
 <!ATTLIST sql-query-list result-type CDATA #IMPLIED>
 
-<!ELEMENT sql-query-object (ANY|EMPTY|sql-dialect*)>
+<!ELEMENT sql-query-object (EMPTY|sql-dialect*
+        |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
+        )>
 <!ATTLIST sql-query-object datasource CDATA #IMPLIED>
 <!ATTLIST sql-query-object script CDATA #IMPLIED>
 <!ATTLIST sql-query-object result CDATA #IMPLIED>
 <!ATTLIST sql-query-object result-type CDATA #IMPLIED>
 
-<!ELEMENT sql-update (ANY|EMPTY|sql-dialect*)>
+<!ELEMENT sql-update (EMPTY|sql-dialect*
+        |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
+        )>
 <!ATTLIST sql-update datasource CDATA #IMPLIED>
 <!ATTLIST sql-update script CDATA #IMPLIED>
 <!ATTLIST sql-update result CDATA #IMPLIED>
 <!ATTLIST sql-update result-type CDATA #IMPLIED>
 
-<!ELEMENT sql-dialect (ANY|EMPTY)>
+<!ELEMENT sql-dialect (EMPTY
+        |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
+        )>
 <!ATTLIST sql-dialect databases CDATA #IMPLIED>
+
+<!-- for mybatis tag begin -->
+<!ELEMENT where (#PCDATA|if*|foreach*|trim*|choose*|include*)>
+
+<!ELEMENT if (#PCDATA|where|if*|foreach*|trim*|set|choose*|include*)>
+<!ATTLIST if test CDATA #REQUIRED>
+
+<!ELEMENT foreach (#PCDATA|if*|foreach*|trim*|choose*|include*)>
+<!ATTLIST foreach collection CDATA #REQUIRED>
+<!ATTLIST foreach item CDATA #REQUIRED>
+<!ATTLIST foreach open CDATA #IMPLIED>
+<!ATTLIST foreach separator CDATA #IMPLIED>
+<!ATTLIST foreach close CDATA #IMPLIED>
+
+<!ELEMENT trim (#PCDATA|where|if*|foreach*|trim*|set|choose*|include*)>
+<!ATTLIST trim prefix CDATA #IMPLIED>
+<!ATTLIST trim suffix CDATA #IMPLIED>
+<!ATTLIST trim prefixOverrides CDATA #IMPLIED>
+<!ATTLIST trim suffixOverrides CDATA #IMPLIED>
+
+<!ELEMENT set (#PCDATA|if*|foreach*|trim*|choose*|include*)>
+
+<!ELEMENT choose (when*|otherwise)>
+
+<!ELEMENT include (EMPTY|#PCDATA)>
+<!ATTLIST include refid CDATA #REQUIRED>
+
+<!ELEMENT when (#PCDATA|where|if*|foreach*|trim*|set|choose*|include*)>
+<!ATTLIST when test CDATA #REQUIRED>
+
+<!ELEMENT otherwise (#PCDATA|where|if*|foreach*|trim*|set|choose*|include*)>
+
+<!-- for mybatis tag end -->
 
 <!ELEMENT sql-trans-begin (EMPTY)>
 <!ATTLIST sql-trans-begin datasource CDATA #IMPLIED>
@@ -188,8 +272,3 @@
 
 <!ELEMENT lang-eval-javascript (#PCDATA)>
 <!ATTLIST lang-eval-javascript result CDATA #IMPLIED>
-
-
-
-
-
