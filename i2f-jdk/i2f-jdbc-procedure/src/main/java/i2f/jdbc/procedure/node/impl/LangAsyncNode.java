@@ -1,8 +1,11 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.base.NodeTime;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
@@ -14,36 +17,21 @@ import java.util.concurrent.TimeUnit;
  * @date 2025/1/20 14:07
  */
 public class LangAsyncNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-async";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-async".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        Boolean await = (Boolean) executor.attrValue("await", "visit", node, context);
-        Long delay = (Long) executor.attrValue("delay", "visit", node, context);
-        String timeUnit = node.getTagAttrMap().get("time-unit");
-        TimeUnit unit = TimeUnit.SECONDS;
-        if ("SECONDS".equalsIgnoreCase(timeUnit)) {
-            unit = TimeUnit.MILLISECONDS;
-        } else if ("MILLISECONDS".equalsIgnoreCase(timeUnit)) {
-            unit = TimeUnit.MILLISECONDS;
-        } else if ("NANOSECONDS".equalsIgnoreCase(timeUnit)) {
-            unit = TimeUnit.NANOSECONDS;
-        } else if ("MICROSECONDS".equalsIgnoreCase(timeUnit)) {
-            unit = TimeUnit.MICROSECONDS;
-        } else if ("MINUTES".equalsIgnoreCase(timeUnit)) {
-            unit = TimeUnit.MINUTES;
-        } else if ("HOURS".equalsIgnoreCase(timeUnit)) {
-            unit = TimeUnit.HOURS;
-        } else if ("DAYS".equalsIgnoreCase(timeUnit)) {
-            unit = TimeUnit.DAYS;
-        }
-        TimeUnit delayUnit = unit;
+        Boolean await = (Boolean) executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context);
+        Long delay = (Long) executor.attrValue(AttrConsts.DELAY, FeatureConsts.LONG, node, context);
+        String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
+        TimeUnit delayUnit = NodeTime.getTimeUnit(timeUnit,TimeUnit.SECONDS);
         CountDownLatch latch = new CountDownLatch(1);
         Thread thread = new Thread(() -> {
             try {

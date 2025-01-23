@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -12,29 +14,30 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangPrintlnNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-println";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-println".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         StringBuilder builder = new StringBuilder();
-        String tag = node.getTagAttrMap().get("tag");
+        String tag = node.getTagAttrMap().get(AttrConsts.TAG);
         builder.append("[").append(tag == null ? "" : tag).append("]");
         boolean isFirst = true;
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
-            if ("tag".equals(entry.getKey())) {
+            if (AttrConsts.TAG.equals(entry.getKey())) {
                 continue;
             }
             if (!isFirst) {
                 builder.append(", ");
             }
             String script = entry.getValue();
-            Object val = executor.attrValue(entry.getKey(), "visit", node, context);
+            Object val = executor.attrValue(entry.getKey(), FeatureConsts.VISIT, node, context);
             builder.append(entry.getKey()).append(":").append(val);
             isFirst = false;
         }

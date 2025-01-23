@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -16,28 +17,29 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangForeachNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-foreach";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-foreach".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        String collectionScript = node.getTagAttrMap().get("collection");
-        String itemName = node.getTagAttrMap().get("item");
-        String firstName = node.getTagAttrMap().get("first");
-        String indexName = node.getTagAttrMap().get("index");
+        String collectionScript = node.getTagAttrMap().get(AttrConsts.COLLECTION);
+        String itemName = node.getTagAttrMap().get(AttrConsts.ITEM);
+        String firstName = node.getTagAttrMap().get(AttrConsts.FIRST);
+        String indexName = node.getTagAttrMap().get(AttrConsts.INDEX);
         if (itemName == null || itemName.isEmpty()) {
-            itemName = "item";
+            itemName = AttrConsts.ITEM;
         }
         if (firstName == null || firstName.isEmpty()) {
-            firstName = "first";
+            firstName = AttrConsts.FIRST;
         }
         if (indexName == null || indexName.isEmpty()) {
-            indexName = "index";
+            indexName = AttrConsts.INDEX;
         }
         Object obj = executor.visit(collectionScript, context.getParams());
         if (obj == null) {
@@ -53,7 +55,7 @@ public class LangForeachNode implements ExecutorNode {
             boolean isFirst = true;
             int index = 0;
             for (Object item : iter) {
-                Object val = executor.resultValue(item, node.getAttrFeatureMap().get("item"), node, context);
+                Object val = executor.resultValue(item, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
                 // 覆盖堆栈
                 context.getParams().put(itemName, val);
                 context.getParams().put(firstName, isFirst);
@@ -75,7 +77,7 @@ public class LangForeachNode implements ExecutorNode {
             int len = Array.getLength(obj);
             for (int i = 0; i < len; i++) {
                 Object val = Array.get(obj, i);
-                val = executor.resultValue(val, node.getAttrFeatureMap().get("item"), node, context);
+                val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
 
                 // 覆盖堆栈
                 context.getParams().put(itemName, val);

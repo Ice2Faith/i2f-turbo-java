@@ -1,6 +1,8 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -19,27 +21,28 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangInvokeNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-invoke";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-invoke".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        String fullMethodName = node.getTagAttrMap().get("method");
-        String targetScript = node.getTagAttrMap().get("target");
-        String result = node.getTagAttrMap().get("result");
+        String fullMethodName = node.getTagAttrMap().get(AttrConsts.METHOD);
+        String targetScript = node.getTagAttrMap().get(AttrConsts.TARGET);
+        String result = node.getTagAttrMap().get(AttrConsts.RESULT);
 
         List<Map.Entry<Integer, String>> args = new ArrayList<>();
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
             String key = entry.getKey();
-            if (!key.startsWith("arg")) {
+            if (!key.startsWith(AttrConsts.ARG)) {
                 continue;
             }
-            String idxStr = key.substring("arg".length());
+            String idxStr = key.substring(AttrConsts.ARG.length());
             int idx = Integer.parseInt(idxStr);
             args.add(new AbstractMap.SimpleEntry<>(idx, entry.getValue()));
         }
@@ -92,7 +95,7 @@ public class LangInvokeNode implements ExecutorNode {
                 String argScript = argEntry.getValue();
                 Object evalObj = null;
                 try {
-                    evalObj = executor.attrValue("arg" + argEntry.getKey(), "visit", node, context);
+                    evalObj = executor.attrValue(AttrConsts.ARG + argEntry.getKey(), FeatureConsts.VISIT, node, context);
                 } catch (Exception e) {
                 }
                 if (evalObj == null) {
@@ -107,7 +110,7 @@ public class LangInvokeNode implements ExecutorNode {
                 Object res = constructor.newInstance(invokeArgs);
 
                 if (result != null && !result.isEmpty()) {
-                    res = executor.resultValue(res, node.getAttrFeatureMap().get("result"), node, context);
+                    res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
                     executor.setParamsObject(context.getParams(), result, res);
                 }
             } catch (ReflectiveOperationException e) {
@@ -167,7 +170,7 @@ public class LangInvokeNode implements ExecutorNode {
                 String argScript = argEntry.getValue();
                 Object evalObj = null;
                 try {
-                    evalObj = executor.attrValue("arg" + argEntry.getKey(), "visit", node, context);
+                    evalObj = executor.attrValue(AttrConsts.ARG + argEntry.getKey(), FeatureConsts.VISIT, node, context);
                 } catch (Exception e) {
                 }
                 if (evalObj == null) {
@@ -188,7 +191,7 @@ public class LangInvokeNode implements ExecutorNode {
                 Object res = method.invoke(invokeObject, invokeArgs);
 
                 if (result != null && !result.isEmpty()) {
-                    res = executor.resultValue(res, node.getAttrFeatureMap().get("result"), node, context);
+                    res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
                     executor.setParamsObject(context.getParams(), result, res);
                 }
             } catch (ReflectiveOperationException e) {

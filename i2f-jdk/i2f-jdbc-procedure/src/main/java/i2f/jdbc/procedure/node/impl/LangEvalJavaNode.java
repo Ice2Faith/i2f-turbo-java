@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.compiler.MemoryCompiler;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -20,20 +21,21 @@ import java.util.regex.Pattern;
  * @date 2025/1/20 14:07
  */
 public class LangEvalJavaNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-eval-java";
     public static final String CLASS_NAME_HOLDER = "$#$##$###";
     public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s*");
 
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-eval-java".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        String result = node.getTagAttrMap().get("result");
+        String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         List<XmlNode> children = node.getChildren();
         XmlNode importNode = null;
         XmlNode memberNode = null;
@@ -69,10 +71,27 @@ public class LangEvalJavaNode implements ExecutorNode {
             bodySegment = bodyNode.getTextBody();
         }
 
+        Object obj = evalJava(context, executor, importSegment, memberSegment, bodySegment);
+
+        if (result != null && !result.isEmpty()) {
+            obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
+            executor.setParamsObject(context.getParams(), result, obj);
+        }
+
+    }
+
+    public static Object evalJava(ExecuteContext context, JdbcProcedureExecutor executor, String importSegment, String memberSegment, String bodySegment) {
+        if(importSegment==null){
+            importSegment="";
+        }
+        if(memberSegment==null){
+            memberSegment="";
+        }
+        if(bodySegment==null){
+            bodySegment="";
+        }
         bodySegment = bodySegment.trim();
-
         Matcher matcher = RETURN_PATTERN.matcher(bodySegment);
-
         StringBuilder builder = new StringBuilder();
         builder.append("import ").append(ExecuteContext.class.getName()).append(";").append("\n");
         builder.append("import ").append(JdbcProcedureExecutor.class.getName()).append(";").append("\n");
@@ -135,11 +154,6 @@ public class LangEvalJavaNode implements ExecutorNode {
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
-
-        if (result != null && !result.isEmpty()) {
-            obj = executor.resultValue(obj, node.getAttrFeatureMap().get("result"), node, context);
-            executor.setParamsObject(context.getParams(), result, obj);
-        }
-
+        return obj;
     }
 }

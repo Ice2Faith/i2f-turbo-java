@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -12,12 +14,13 @@ import java.util.List;
  * @date 2025/1/20 14:07
  */
 public class LangChooseNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-choose";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-choose".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
@@ -27,12 +30,12 @@ public class LangChooseNode implements ExecutorNode {
         XmlNode otherNode = null;
         for (XmlNode itemNode : list) {
             String type = itemNode.getNodeType();
-            if (!"element".equals(type)) {
+            if (!XmlNode.NODE_ELEMENT.equals(type)) {
                 continue;
             }
             if ("lang-when".equals(itemNode.getTagName())) {
                 if (testNode == null) {
-                    boolean ok = (boolean) executor.attrValue("test", "test", node, context);
+                    boolean ok = (boolean) executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, node, context);
                     if (ok) {
                         testNode = itemNode;
                     }

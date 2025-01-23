@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -13,19 +15,20 @@ import java.lang.reflect.Constructor;
  * @date 2025/1/20 14:07
  */
 public class LangThrowNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-throw";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-throw".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        String message = (String) executor.attrValue("value", "visit", node, context);
-        String exceptionType = node.getTagAttrMap().get("type");
-        String cause = node.getTagAttrMap().get("cause");
+        String message = (String) executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
+        String exceptionType = node.getTagAttrMap().get(AttrConsts.TYPE);
+        String cause = node.getTagAttrMap().get(AttrConsts.CAUSE);
         Throwable ex = (Throwable) executor.visit(cause, context.getParams());
         Class<?> clazz = executor.loadClass(exceptionType);
 

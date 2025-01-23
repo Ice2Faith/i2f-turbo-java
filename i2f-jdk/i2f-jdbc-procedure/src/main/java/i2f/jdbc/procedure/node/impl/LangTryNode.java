@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -15,12 +16,13 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangTryNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-try";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-try".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
@@ -33,7 +35,7 @@ public class LangTryNode implements ExecutorNode {
         List<XmlNode> catchNodes = new ArrayList<>();
         XmlNode finallyNode = null;
         for (XmlNode item : nodes) {
-            if (!"element".equals(item.getNodeType())) {
+            if (!XmlNode.NODE_ELEMENT.equals(item.getNodeType())) {
                 continue;
             }
             if ("lang-body".equals(item.getTagName())) {
@@ -56,13 +58,13 @@ public class LangTryNode implements ExecutorNode {
         } catch (Throwable e) {
             boolean handled = false;
             for (XmlNode catchNode : catchNodes) {
-                String type = catchNode.getTagAttrMap().get("type");
-                String exName = catchNode.getTagAttrMap().get("e");
+                String type = catchNode.getTagAttrMap().get(AttrConsts.TYPE);
+                String exName = catchNode.getTagAttrMap().get(AttrConsts.E);
                 if(type==null || type.isEmpty()){
                     type="java.lang.Throwable";
                 }
                 if (exName == null || exName.isEmpty()) {
-                    exName = "e";
+                    exName = AttrConsts.E;
                 }
                 // 备份堆栈
                 Map<String, Object> bakParams = new LinkedHashMap<>();

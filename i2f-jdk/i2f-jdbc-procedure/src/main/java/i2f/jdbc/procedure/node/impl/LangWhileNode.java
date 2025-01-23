@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -15,24 +16,25 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangWhileNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-while";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-while".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        String script = node.getTagAttrMap().get("test");
-        String firstName = node.getTagAttrMap().get("first");
-        String indexName = node.getTagAttrMap().get("index");
+        String script = node.getTagAttrMap().get(AttrConsts.TEST);
+        String firstName = node.getTagAttrMap().get(AttrConsts.FIRST);
+        String indexName = node.getTagAttrMap().get(AttrConsts.INDEX);
         if (firstName == null || firstName.isEmpty()) {
-            firstName = "first";
+            firstName = AttrConsts.FIRST;
         }
         if (indexName == null || indexName.isEmpty()) {
-            indexName = "index";
+            indexName = AttrConsts.INDEX;
         }
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
@@ -41,7 +43,7 @@ public class LangWhileNode implements ExecutorNode {
 
         boolean isFirst = true;
         int index = 0;
-        while ((boolean) executor.attrValue("test", "test", node, context)) {
+        while ((boolean) executor.attrValue(AttrConsts.TEST, AttrConsts.TEST, node, context)) {
             context.getParams().put(firstName, isFirst);
             context.getParams().put(indexName, index);
             isFirst = false;
