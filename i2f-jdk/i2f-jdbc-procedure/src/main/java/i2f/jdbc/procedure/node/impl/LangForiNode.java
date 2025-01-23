@@ -46,9 +46,15 @@ public class LangForiNode implements ExecutorNode {
         bakParams.put(firstName, context.getParams().get(firstName));
         bakParams.put(indexName, context.getParams().get(indexName));
 
-        int begin = (int) executor.attrValue("begin", "visit", node, context);
+        int begin = 0;
+        if(beginExpr!=null && !beginExpr.isEmpty()){
+            begin=(int) executor.attrValue("begin", "visit", node, context);
+        }
         int end = (int) executor.attrValue("end", "visit", node, context);
-        int incr = (int) executor.attrValue("incr", "visit", node, context);
+        int incr = 1;
+        if(endExpr!=null && !endExpr.isEmpty()){
+            end=(int) executor.attrValue("incr", "visit", node, context);
+        }
 
         boolean loop = begin < end;
         boolean isFirst = true;

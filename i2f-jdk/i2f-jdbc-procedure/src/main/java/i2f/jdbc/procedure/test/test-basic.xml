@@ -1,3 +1,5 @@
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+
 <procedure>
     <lang-invoke method="SimpleDateFormat.new" arg0.string="yyyy-MM-dd HH:mm:ss.SSS" result="fmt"/>
     <lang-invoke method="Date.new" result="now"/>
