@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -10,21 +12,22 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
  * @date 2025/1/20 14:07
  */
 public class LangPrintfNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-printf";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-printf".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         StringBuilder builder = new StringBuilder();
-        String tag = node.getTagAttrMap().get("tag");
-        String value = node.getTagAttrMap().get("value");
+        String tag = node.getTagAttrMap().get(AttrConsts.TAG);
+        String value = node.getTagAttrMap().get(AttrConsts.VALUE);
         if (value != null) {
-            Object obj = executor.attrValue("value", "visit", node, context);
+            Object obj = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
             if (obj != null) {
                 value = String.valueOf(obj);
             }

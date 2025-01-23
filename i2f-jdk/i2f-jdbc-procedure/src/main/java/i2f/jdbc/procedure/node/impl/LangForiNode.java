@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -15,30 +17,31 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangForiNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-fori";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-fori".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        String beginExpr = node.getTagAttrMap().get("begin");
-        String endExpr = node.getTagAttrMap().get("end");
-        String incrExpr = node.getTagAttrMap().get("incr");
-        String itemName = node.getTagAttrMap().get("item");
-        String firstName = node.getTagAttrMap().get("first");
-        String indexName = node.getTagAttrMap().get("index");
+        String beginExpr = node.getTagAttrMap().get(AttrConsts.BEGIN);
+        String endExpr = node.getTagAttrMap().get(AttrConsts.END);
+        String incrExpr = node.getTagAttrMap().get(AttrConsts.INCR);
+        String itemName = node.getTagAttrMap().get(AttrConsts.ITEM);
+        String firstName = node.getTagAttrMap().get(AttrConsts.FIRST);
+        String indexName = node.getTagAttrMap().get(AttrConsts.INDEX);
         if (itemName == null || itemName.isEmpty()) {
-            itemName = "item";
+            itemName = AttrConsts.ITEM;
         }
         if (firstName == null || firstName.isEmpty()) {
-            firstName = "first";
+            firstName = AttrConsts.FIRST;
         }
         if (indexName == null || indexName.isEmpty()) {
-            indexName = "index";
+            indexName = AttrConsts.INDEX;
         }
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
@@ -48,12 +51,12 @@ public class LangForiNode implements ExecutorNode {
 
         int begin = 0;
         if(beginExpr!=null && !beginExpr.isEmpty()){
-            begin=(int) executor.attrValue("begin", "visit", node, context);
+            begin=(int) executor.attrValue(AttrConsts.BEGIN, FeatureConsts.INT, node, context);
         }
-        int end = (int) executor.attrValue("end", "visit", node, context);
+        int end = (int) executor.attrValue(AttrConsts.END, FeatureConsts.INT, node, context);
         int incr = 1;
         if(endExpr!=null && !endExpr.isEmpty()){
-            end=(int) executor.attrValue("incr", "visit", node, context);
+            end=(int) executor.attrValue(AttrConsts.INCR, FeatureConsts.INT, node, context);
         }
 
         boolean loop = begin < end;
@@ -61,7 +64,7 @@ public class LangForiNode implements ExecutorNode {
         int index = 0;
         for (int j = begin; loop == (j < end); j += incr) {
             Object val = j;
-            val = executor.resultValue(val, node.getAttrFeatureMap().get("item"), node, context);
+            val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
             // 覆盖堆栈
             context.getParams().put(itemName, val);
             context.getParams().put(firstName, isFirst);

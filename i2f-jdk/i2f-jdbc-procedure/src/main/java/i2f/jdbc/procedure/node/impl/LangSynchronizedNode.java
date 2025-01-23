@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -10,17 +12,18 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
  * @date 2025/1/20 14:07
  */
 public class LangSynchronizedNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-synchronized";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-synchronized".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        Object target = executor.attrValue("target", "visit", node, context);
+        Object target = executor.attrValue(AttrConsts.TARGET, FeatureConsts.VISIT, node, context);
         if (target == null) {
             target = context;
         }

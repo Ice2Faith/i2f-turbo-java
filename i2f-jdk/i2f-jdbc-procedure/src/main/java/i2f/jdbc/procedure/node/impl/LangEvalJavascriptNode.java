@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -14,17 +15,18 @@ import javax.script.ScriptException;
  * @date 2025/1/20 14:07
  */
 public class LangEvalJavascriptNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-eval-javascript";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-eval-javascript".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        String result = node.getTagAttrMap().get("result");
+        String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         ScriptProvider provider = ScriptProvider.getJavaScriptInstance();
         Bindings bindings = provider.createBindings();
         bindings.put("context", context);
@@ -41,7 +43,7 @@ public class LangEvalJavascriptNode implements ExecutorNode {
         }
 
         if (result != null && !result.isEmpty()) {
-            obj = executor.resultValue(obj, node.getAttrFeatureMap().get("result"), node, context);
+            obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.setParamsObject(context.getParams(), result, obj);
         }
 

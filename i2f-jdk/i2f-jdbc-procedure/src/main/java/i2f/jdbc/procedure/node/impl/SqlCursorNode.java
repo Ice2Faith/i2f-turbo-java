@@ -1,8 +1,11 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
@@ -14,12 +17,13 @@ import java.util.*;
  * @date 2025/1/20 14:07
  */
 public class SqlCursorNode implements ExecutorNode {
+    public static final String TAG_NAME="sql-cursor";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "sql-cursor".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
@@ -31,7 +35,7 @@ public class SqlCursorNode implements ExecutorNode {
         XmlNode queryNode = null;
         XmlNode bodyNode = null;
         for (XmlNode item : children) {
-            if ("sql-query-list".equals(item.getTagName())) {
+            if (SqlQueryListNode.TAG_NAME.equals(item.getTagName())) {
                 queryNode = item;
             }
             if ("lang-body".equals(item.getTagName())) {
@@ -47,31 +51,16 @@ public class SqlCursorNode implements ExecutorNode {
             throw new IllegalStateException("missing cursor body node!");
         }
 
-        Integer batchSize = (Integer) executor.attrValue("batch-size", "int", node, context);
-        String item = node.getTagAttrMap().get("item");
+        Integer batchSize = (Integer) executor.attrValue(AttrConsts.BATCH_SIZE, FeatureConsts.INT, node, context);
+        String item = node.getTagAttrMap().get(AttrConsts.ITEM);
         if (item == null || item.isEmpty()) {
-            item = "item";
+            item = AttrConsts.ITEM;
         }
 
-        List<Map.Entry<String, String>> dialectScriptList = new ArrayList<>();
-        List<XmlNode> queryChildren = queryNode.getChildren();
-        if (queryChildren != null) {
-            for (XmlNode iter : queryChildren) {
-                if ("sql-dialect".equals(iter.getTagName())) {
-                    String databases = iter.getTagAttrMap().get("databases");
-                    String script = queryNode.getTagAttrMap().get("script");
-                    if (script != null && !script.isEmpty()) {
-                        script = (String) executor.visit(script, context.getParams());
-                    } else {
-                        script = queryNode.getTagBody();
-                    }
-                    dialectScriptList.add(new AbstractMap.SimpleEntry<>(databases, script));
-                }
-            }
-        }
-        String datasource = (String) executor.attrValue("datasource", "visit", queryNode, context);
-        String script = (String) executor.attrValue("script", "visit", queryNode, context);
-        String resultTypeName = (String) executor.attrValue("result-type", "visit", queryNode, context);
+        List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(queryNode,context,executor);
+        String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, queryNode, context);
+        String script = (String) executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, queryNode, context);
+        String resultTypeName = (String) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.STRING, queryNode, context);
         Class<?> resultType = executor.loadClass(resultTypeName);
         if (resultType == null) {
             resultType = Map.class;

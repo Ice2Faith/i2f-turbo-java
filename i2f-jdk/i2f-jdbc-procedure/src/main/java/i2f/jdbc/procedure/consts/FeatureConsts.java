@@ -1,0 +1,36 @@
+package i2f.jdbc.procedure.consts;
+
+/**
+ * @author Ice2Faith
+ * @date 2025/1/23 10:01
+ */
+public interface FeatureConsts {
+    // 基础类型组
+    String INT="int";
+    String DOUBLE="double";
+    String FLOAT="float";
+    String STRING="string";
+    String LONG="long";
+    String SHORT="short";
+    String CHAR="char";
+    String BYTE="byte";
+    String BOOLEAN="boolean";
+    String NULL="null";
+
+    // 复合类型组
+    String DATE="date";
+
+    // 字符串组
+    String RENDER="render";
+    String TRIM="trim";
+    String ALIGN="align";
+    String BODY_TEXT="body-text";
+    String BODY_XML="body-xml";
+
+    // 处理转换组
+    String VISIT="visit";
+    String EVAL="eval";
+    String TEST="test";
+
+
+}

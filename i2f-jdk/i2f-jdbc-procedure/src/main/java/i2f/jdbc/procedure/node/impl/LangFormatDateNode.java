@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -15,19 +17,20 @@ import java.util.Date;
  * @date 2025/1/20 14:07
  */
 public class LangFormatDateNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-format-date";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-format-date".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        Object value = executor.attrValue("value", "visit", node, context);
-        String pattern = (String) executor.attrValue("pattern", "visit", node, context);
-        String result = node.getTagAttrMap().get("result");
+        Object value = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
+        String pattern = (String) executor.attrValue(AttrConsts.PATTERN, FeatureConsts.STRING, node, context);
+        String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (value instanceof Date) {
             SimpleDateFormat fmt = new SimpleDateFormat(pattern);
             value = fmt.format((Date) value);
@@ -36,7 +39,7 @@ public class LangFormatDateNode implements ExecutorNode {
             value = formatter.format((Temporal) value);
         }
         if (result != null && !result.isEmpty()) {
-            value = executor.resultValue(value, node.getAttrFeatureMap().get("result"), node, context);
+            value = executor.resultValue(value, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.setParamsObject(context.getParams(), result, value);
         }
     }

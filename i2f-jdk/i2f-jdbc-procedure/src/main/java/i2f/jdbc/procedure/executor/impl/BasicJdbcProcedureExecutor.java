@@ -6,6 +6,9 @@ import i2f.bindsql.page.PageWrappers;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.database.type.DatabaseType;
 import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -139,10 +142,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         }
         Object value = attrScript;
 
-        String radixText = node.getTagAttrMap().get("radix");
+        String radixText = node.getTagAttrMap().get(AttrConsts.RADIX);
         if (radixText != null && !radixText.isEmpty()) {
             try {
-                Object radixObj = attrValue("radix", "visit", node, context);
+                Object radixObj = attrValue(AttrConsts.RADIX, FeatureConsts.VISIT, node, context);
                 if (radixObj != null) {
                     radixObj = ObjectConvertor.tryConvertAsType(radixObj, Integer.class);
                     if (radixObj instanceof Integer) {
@@ -192,10 +195,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public Map<String, Object> newParams(ExecuteContext context) {
         Map<String, Object> ret = new LinkedHashMap<>();
-        ret.put("context", context.getParams().get("context"));
-        ret.put("datasources", context.getParams().get("datasources"));
-        ret.put("beans", context.getParams().get("beans"));
+        ret.put(ParamsConsts.CONTEXT, context.getParams().get(ParamsConsts.CONTEXT));
+        ret.put(ParamsConsts.ENVIRONMENT, context.getParams().get(ParamsConsts.ENVIRONMENT));
+        ret.put(ParamsConsts.BEANS, context.getParams().get(ParamsConsts.BEANS));
 
+        ret.put(ParamsConsts.DATASOURCES, context.getParams().get(ParamsConsts.DATASOURCES));
+
+        ret.put(ParamsConsts.GLOBAL, context.getParams().get(ParamsConsts.GLOBAL));
         return ret;
     }
 
@@ -203,45 +209,45 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         if (feature == null || feature.isEmpty()) {
             return value;
         }
-        if ("int".equals(feature)) {
+        if (FeatureConsts.INT.equals(feature)) {
             return ObjectConvertor.tryConvertAsType(value, Integer.class);
-        } else if ("double".equals(feature)) {
+        } else if (FeatureConsts.DOUBLE.equals(feature)) {
             return ObjectConvertor.tryConvertAsType(value, Double.class);
-        } else if ("float".equals(feature)) {
+        } else if (FeatureConsts.FLOAT.equals(feature)) {
             return ObjectConvertor.tryConvertAsType(value, Float.class);
-        } else if ("string".equals(feature)) {
+        } else if (FeatureConsts.STRING.equals(feature)) {
             return ObjectConvertor.tryConvertAsType(value, String.class);
-        } else if ("long".equals(feature)) {
+        } else if (FeatureConsts.LONG.equals(feature)) {
             return ObjectConvertor.tryConvertAsType(value, Long.class);
-        } else if ("short".equals(feature)) {
+        } else if (FeatureConsts.SHORT.equals(feature)) {
             return ObjectConvertor.tryConvertAsType(value, Short.class);
-        } else if ("char".equals(feature)) {
+        } else if (FeatureConsts.CHAR.equals(feature)) {
             return ObjectConvertor.tryConvertAsType(value, Character.class);
-        } else if ("byte".equals(feature)) {
+        } else if (FeatureConsts.BYTE.equals(feature)) {
             return ObjectConvertor.tryConvertAsType(value, Byte.class);
-        } else if ("boolean".equals(feature)) {
+        } else if (FeatureConsts.BOOLEAN.equals(feature)) {
             return ObjectConvertor.tryConvertAsType(value, Boolean.class);
-        } else if ("render".equals(feature)) {
+        } else if (FeatureConsts.RENDER.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return render(text, context.getParams());
-        } else if ("visit".equals(feature)) {
+        } else if (FeatureConsts.VISIT.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return visit(text, context.getParams());
-        } else if ("eval".equals(feature)) {
+        } else if (FeatureConsts.EVAL.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return eval(text, context.getParams());
-        } else if ("test".equals(feature)) {
+        } else if (FeatureConsts.TEST.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return test(text, context.getParams());
-        } else if ("null".equals(feature)) {
+        } else if (FeatureConsts.NULL.equals(feature)) {
             return null;
-        } else if ("date".equals(feature)) {
+        } else if (FeatureConsts.DATE.equals(feature)) {
             String text = String.valueOf(value);
-            String patternText = node.getTagAttrMap().get("pattern");
+            String patternText = node.getTagAttrMap().get(AttrConsts.PATTERN);
             boolean processed = false;
             try {
                 if (patternText != null) {
-                    Object patternValue = attrValue("radix", "visit", node, context);
+                    Object patternValue = attrValue(AttrConsts.PATTERN, FeatureConsts.VISIT, node, context);
                     if (patternValue != null) {
                         value = new SimpleDateFormat(patternText).parse(text);
                         processed = true;
@@ -254,12 +260,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 value = ObjectConvertor.tryParseDate(text);
             }
             return value;
-        } else if ("trim".equals(feature)) {
+        } else if (FeatureConsts.TRIM.equals(feature)) {
             if (value == null) {
                 return null;
             }
             return String.valueOf(value).trim();
-        } else if ("align".equals(feature)) {
+        } else if (FeatureConsts.ALIGN.equals(feature)) {
             if (value == null) {
                 return null;
             }
@@ -276,9 +282,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 builder.append("\n");
             }
             return builder.toString();
-        } else if ("body-text".equals(feature)) {
+        } else if (FeatureConsts.BODY_TEXT.equals(feature)) {
             return node.getTextBody();
-        } else if ("body-xml".equals(feature)) {
+        } else if (FeatureConsts.BODY_XML.equals(feature)) {
             return node.getTagBody();
         }
         return value;
@@ -469,45 +475,34 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return script;
     }
 
-    public static final ThreadLocal<Map<String, Connection>> connectionMapHolder = ThreadLocal.withInitial(() -> new HashMap<>());
 
     public Connection getConnection(String datasource, Map<String, Object> params) {
         if (datasource == null || datasource.isEmpty()) {
-            datasource = "primary";
+            datasource = ParamsConsts.DEFAULT_DATASOURCE;
         }
-        Map<String, Connection> connectionMap = connectionMapHolder.get();
+        Map<String, Connection> connectionMap = (Map<String, Connection>) params.get(ParamsConsts.CONNECTIONS);
+        if (connectionMap == null) {
+            connectionMap = new LinkedHashMap<>();
+            params.put(ParamsConsts.CONNECTIONS, connectionMap);
+        }
         Connection conn = connectionMap.get(datasource);
         if (conn != null) {
             return conn;
         }
 
-        Map<String, Connection> connMap = (Map<String, Connection>) params.get("connections");
-        if (conn == null) {
-            if (connMap != null) {
-                conn = connMap.get(datasource);
+        Map<String, DataSource> datasourceMap = (Map<String, DataSource>) params.get(ParamsConsts.DATASOURCES);
+        DataSource ds = datasourceMap.get(datasource);
+        if (ds != null) {
+            try {
+                conn = ds.getConnection();
+            } catch (SQLException e) {
+                throw new IllegalStateException(e.getMessage(), e);
             }
         }
 
-
-        if (conn == null) {
-            Map<String, DataSource> datasourceMap = (Map<String, DataSource>) params.get("datasources");
-            DataSource ds = datasourceMap.get(datasource);
-            if (ds != null) {
-                try {
-                    conn = ds.getConnection();
-                } catch (SQLException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
-                }
-            }
-        }
 
         if (conn != null) {
-            if (connectionMap != null) {
-                connectionMap.put(datasource, conn);
-            }
-            if (connMap != null) {
-                connMap.put(datasource, conn);
-            }
+            connectionMap.put(datasource, conn);
         }
 
         return conn;

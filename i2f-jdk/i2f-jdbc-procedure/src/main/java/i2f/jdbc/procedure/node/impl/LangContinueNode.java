@@ -11,12 +11,13 @@ import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
  * @date 2025/1/20 14:07
  */
 public class LangContinueNode implements ExecutorNode {
+    public static final String TAG_NAME="lang-continue";
     @Override
     public boolean support(XmlNode node) {
-        if (!"element".equals(node.getNodeType())) {
+        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
             return false;
         }
-        return "lang-continue".equals(node.getTagName());
+        return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
