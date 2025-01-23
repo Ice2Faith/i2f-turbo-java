@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * @author Ice2Faith
@@ -25,4 +26,18 @@ public class ExecuteContext {
         this.params = params;
         this.nodeMap = nodeMap;
     }
+
+    public void paramsSet(String key, Object value) {
+        this.params.put(key, value);
+    }
+
+    public <T> T paramsGet(String key) {
+        return (T) params.get(key);
+    }
+
+    public <T> T paramsComputeIfAbsent(String key, Function<String, T> valueSupplier) {
+        return (T) params.computeIfAbsent(key, valueSupplier);
+    }
+
+
 }

@@ -12,7 +12,7 @@ import java.util.List;
  * @date 2025/1/20 10:37
  */
 public class ProcedureNode implements ExecutorNode {
-    public static final String TAG_NAME="procedure";
+    public static final String TAG_NAME = "procedure";
     public static final ProcedureNode INSTANCE = new ProcedureNode();
 
     @Override
@@ -31,7 +31,7 @@ public class ProcedureNode implements ExecutorNode {
             if (item == null) {
                 continue;
             }
-            executor.exec(item, context);
+            executor.exec(item, context, false, false);
         }
     }
 }

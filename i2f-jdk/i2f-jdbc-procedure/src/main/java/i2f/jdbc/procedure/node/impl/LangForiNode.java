@@ -17,7 +17,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangForiNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-fori";
+    public static final String TAG_NAME = "lang-fori";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -50,13 +51,13 @@ public class LangForiNode implements ExecutorNode {
         bakParams.put(indexName, context.getParams().get(indexName));
 
         int begin = 0;
-        if(beginExpr!=null && !beginExpr.isEmpty()){
-            begin=(int) executor.attrValue(AttrConsts.BEGIN, FeatureConsts.INT, node, context);
+        if (beginExpr != null && !beginExpr.isEmpty()) {
+            begin = (int) executor.attrValue(AttrConsts.BEGIN, FeatureConsts.INT, node, context);
         }
         int end = (int) executor.attrValue(AttrConsts.END, FeatureConsts.INT, node, context);
         int incr = 1;
-        if(endExpr!=null && !endExpr.isEmpty()){
-            end=(int) executor.attrValue(AttrConsts.INCR, FeatureConsts.INT, node, context);
+        if (endExpr != null && !endExpr.isEmpty()) {
+            end = (int) executor.attrValue(AttrConsts.INCR, FeatureConsts.INT, node, context);
         }
 
         boolean loop = begin < end;
@@ -72,7 +73,7 @@ public class LangForiNode implements ExecutorNode {
             isFirst = false;
             index++;
             try {
-                executor.execAsProcedure(node, context);
+                executor.execAsProcedure(node, context, false, false);
             } catch (ContinueSignalException e) {
                 continue;
             } catch (BreakSignalException e) {

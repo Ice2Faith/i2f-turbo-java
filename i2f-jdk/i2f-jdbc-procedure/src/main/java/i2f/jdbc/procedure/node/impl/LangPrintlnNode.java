@@ -14,7 +14,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangPrintlnNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-println";
+    public static final String TAG_NAME = "lang-println";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -26,8 +27,10 @@ public class LangPrintlnNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         StringBuilder builder = new StringBuilder();
-        String tag = (String)executor.attrValue(AttrConsts.TAG,FeatureConsts.STRING,node,context);
-        builder.append("[").append(tag == null ? "" : tag).append("]");
+        String tag = (String) executor.attrValue(AttrConsts.TAG, FeatureConsts.STRING, node, context);
+        if (tag != null) {
+            builder.append("[").append(tag).append("]");
+        }
         boolean isFirst = true;
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
             if (AttrConsts.TAG.equals(entry.getKey())) {

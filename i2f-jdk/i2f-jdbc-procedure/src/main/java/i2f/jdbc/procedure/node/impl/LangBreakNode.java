@@ -11,7 +11,8 @@ import i2f.jdbc.procedure.signal.impl.BreakSignalException;
  * @date 2025/1/20 14:07
  */
 public class LangBreakNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-break";
+    public static final String TAG_NAME = "lang-break";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {

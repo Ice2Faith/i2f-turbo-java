@@ -20,6 +20,7 @@ import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
 import i2f.page.ApiPage;
 import i2f.reflect.vistor.Visitor;
+import i2f.typeof.TypeOf;
 import lombok.Data;
 
 import javax.sql.DataSource;
@@ -104,12 +105,26 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context) {
+    public void exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
             for (ExecutorNode item : nodes) {
                 if (item.support(node)) {
                     debugLog(() -> "exec " + node.getTagName() + " by " + item.getClass().getSimpleName());
-                    item.exec(node, context, this);
+                    Map<String, Connection> bakConnection = context.paramsComputeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
+                    if (beforeNewConnection) {
+                        context.getParams().put(ParamsConsts.CONNECTIONS, new HashMap<>());
+                    }
+                    try {
+                        item.exec(node, context, this);
+                    } finally {
+                        if (beforeNewConnection) {
+                            closeConnections(context);
+                            context.paramsSet(ParamsConsts.CONNECTIONS, bakConnection);
+                        }
+                        if (afterCloseConnection) {
+                            closeConnections(context);
+                        }
+                    }
                     return;
                 }
             }
@@ -119,8 +134,31 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         }
     }
 
+    public void closeConnections(Map<String, Object> params) {
+        if (params == null) {
+            return;
+        }
+        Map<String, Connection> closeConnections = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
+        for (Map.Entry<String, Connection> entry : closeConnections.entrySet()) {
+            Connection conn = entry.getValue();
+            if (conn != null) {
+                try {
+                    debugLog(() -> "close connection : " + entry.getKey());
+                    conn.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+        params.put(ParamsConsts.CONNECTIONS, new HashMap<>());
+    }
+
+    public void closeConnections(ExecuteContext context) {
+        closeConnections(context.getParams());
+    }
+
     @Override
-    public void execAsProcedure(XmlNode node, ExecuteContext context) {
+    public void execAsProcedure(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection) {
         ProcedureNode execNode = null;
         for (ExecutorNode item : nodes) {
             if (item instanceof ProcedureNode) {
@@ -132,7 +170,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             execNode = ProcedureNode.INSTANCE;
         }
         debugLog(() -> "exec as procedure " + node.getTagName());
-        execNode.exec(node, context, this);
+
+        Map<String, Connection> bakConnection = context.paramsComputeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
+        if (beforeNewConnection) {
+            context.getParams().put(ParamsConsts.CONNECTIONS, new HashMap<>());
+        }
+        try {
+            execNode.exec(node, context, this);
+        } finally {
+            if (beforeNewConnection) {
+                closeConnections(context);
+                context.paramsSet(ParamsConsts.CONNECTIONS, bakConnection);
+            }
+            if (afterCloseConnection) {
+                closeConnections(context);
+            }
+        }
     }
 
     @Override
@@ -303,21 +356,21 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             return node.getTagBody();
         } else if (FeatureConsts.EVAL_JAVA.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
-            return LangEvalJavaNode.evalJava(context,this,"","",text);
+            return LangEvalJavaNode.evalJava(context, this, "", "", text);
         } else if (FeatureConsts.EVAL_JS.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
-            return LangEvalJavascriptNode.evalJavascript(text,context,this);
+            return LangEvalJavascriptNode.evalJavascript(text, context, this);
         } else if (FeatureConsts.CLASS.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return loadClass(text);
         } else if (FeatureConsts.NOT.equals(feature)) {
-            boolean ok=toBoolean(value);
+            boolean ok = toBoolean(value);
             return !ok;
         }
         return value;
     }
 
-    public boolean toBoolean(Object obj){
+    public boolean toBoolean(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -609,7 +662,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             String script = entry.getValue();
             debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
-            List<?> list = JdbcResolver.list(conn, bql, resultType);
+            List<?> list = JdbcResolver.list(conn, bql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
             return list;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -640,7 +693,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             String script = entry.getValue();
             debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
-            Object row = JdbcResolver.find(conn, bql, resultType);
+            Object row = JdbcResolver.find(conn, bql, resultType, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
             return row;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -672,7 +725,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             BindSql bql = resolveSqlScript(script, params);
             IPageWrapper wrapper = PageWrappers.wrapper(conn);
             BindSql pageBql = wrapper.apply(bql, ApiPage.of(pageIndex, pageSize));
-            List<?> list = JdbcResolver.list(conn, pageBql, resultType);
+            List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
             return list;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);

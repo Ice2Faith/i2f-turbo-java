@@ -9,8 +9,6 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.temporal.ValueRange;
-import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -21,7 +19,7 @@ import java.util.regex.Pattern;
  * @date 2025/1/20 14:07
  */
 public class LangEvalJavaNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-eval-java";
+    public static final String TAG_NAME = "lang-eval-java";
     public static final String CLASS_NAME_HOLDER = "$#$##$###";
     public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s*");
 
@@ -81,14 +79,14 @@ public class LangEvalJavaNode implements ExecutorNode {
     }
 
     public static Object evalJava(ExecuteContext context, JdbcProcedureExecutor executor, String importSegment, String memberSegment, String bodySegment) {
-        if(importSegment==null){
-            importSegment="";
+        if (importSegment == null) {
+            importSegment = "";
         }
-        if(memberSegment==null){
-            memberSegment="";
+        if (memberSegment == null) {
+            memberSegment = "";
         }
-        if(bodySegment==null){
-            bodySegment="";
+        if (bodySegment == null) {
+            bodySegment = "";
         }
         bodySegment = bodySegment.trim();
         Matcher matcher = RETURN_PATTERN.matcher(bodySegment);
@@ -130,15 +128,15 @@ public class LangEvalJavaNode implements ExecutorNode {
 
         String javaSourceCode = builder.toString();
 
-        StringBuilder hexBuilder=new StringBuilder();
+        StringBuilder hexBuilder = new StringBuilder();
         try {
-            MessageDigest digest=MessageDigest.getInstance("SHA-1");
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
             byte[] hex = digest.digest(javaSourceCode.getBytes());
             for (int i = 0; i < hex.length; i++) {
-                hexBuilder.append(String.format("%02x",(int)(hex[i]&0x0ff)));
+                hexBuilder.append(String.format("%02x", (int) (hex[i] & 0x0ff)));
             }
         } catch (NoSuchAlgorithmException e) {
-            hexBuilder.append(UUID.randomUUID().toString().replaceAll("-","").toLowerCase());
+            hexBuilder.append(UUID.randomUUID().toString().replaceAll("-", "").toLowerCase());
         }
         String className = "RC" + hexBuilder;
         javaSourceCode = javaSourceCode.replace(CLASS_NAME_HOLDER, className);

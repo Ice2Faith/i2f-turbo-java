@@ -15,7 +15,8 @@ import javax.script.ScriptException;
  * @date 2025/1/20 14:07
  */
 public class LangEvalJavascriptNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-eval-javascript";
+    public static final String TAG_NAME = "lang-eval-javascript";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {

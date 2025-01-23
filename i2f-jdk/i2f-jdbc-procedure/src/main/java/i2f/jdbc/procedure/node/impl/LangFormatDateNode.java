@@ -17,7 +17,8 @@ import java.util.Date;
  * @date 2025/1/20 14:07
  */
 public class LangFormatDateNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-format-date";
+    public static final String TAG_NAME = "lang-format-date";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {

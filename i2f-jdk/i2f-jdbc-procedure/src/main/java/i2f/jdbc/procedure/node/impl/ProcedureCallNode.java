@@ -15,7 +15,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class ProcedureCallNode implements ExecutorNode {
-    public static final String TAG_NAME="procedure-call";
+    public static final String TAG_NAME = "procedure-call";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -59,7 +60,7 @@ public class ProcedureCallNode implements ExecutorNode {
         ExecuteContext callContext = new ExecuteContext();
         callContext.setNodeMap(context.getNodeMap());
         callContext.setParams(callParams);
-        executor.execAsProcedure(nextNode, callContext);
+        executor.execAsProcedure(nextNode, callContext, false, false);
 
         // 恢复堆栈
         context.getParams().putAll(bakParams);

@@ -12,7 +12,8 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
  * @date 2025/1/20 14:07
  */
 public class LangPrintfNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-printf";
+    public static final String TAG_NAME = "lang-printf";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -24,7 +25,7 @@ public class LangPrintfNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         StringBuilder builder = new StringBuilder();
-        String tag =(String)executor.attrValue(AttrConsts.TAG,FeatureConsts.STRING,node,context);
+        String tag = (String) executor.attrValue(AttrConsts.TAG, FeatureConsts.STRING, node, context);
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
         if (value != null) {
             Object obj = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
@@ -34,7 +35,9 @@ public class LangPrintfNode implements ExecutorNode {
         } else {
             value = node.getTagBody();
         }
-        builder.append("[").append(tag == null ? "" : tag).append("]");
+        if (tag != null) {
+            builder.append("[").append(tag).append("]");
+        }
         String str = executor.render(value, context.getParams());
         builder.append(str);
         System.out.println(builder.toString());

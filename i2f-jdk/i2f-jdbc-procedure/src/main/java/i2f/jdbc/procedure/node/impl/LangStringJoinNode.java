@@ -17,7 +17,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangStringJoinNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-string-join";
+    public static final String TAG_NAME = "lang-string-join";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -35,7 +36,7 @@ public class LangStringJoinNode implements ExecutorNode {
         Map<String, String> attrMap = node.getTagAttrMap();
         for (Map.Entry<String, String> entry : attrMap.entrySet()) {
             String key = entry.getKey();
-            if(!key.startsWith(AttrConsts.ARG)){
+            if (!key.startsWith(AttrConsts.ARG)) {
                 continue;
             }
             int idx = Integer.parseInt(key.substring(AttrConsts.ARG.length()));

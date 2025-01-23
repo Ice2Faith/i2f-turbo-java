@@ -6,59 +6,59 @@ package i2f.jdbc.procedure.consts;
  */
 public interface AttrConsts {
 
-    String ID="id";
+    String ID = "id";
 
-    String VALUE="value";
-    String RESULT="result";
+    String VALUE = "value";
+    String RESULT = "result";
 
-    String RADIX="radix";
-    String PATTERN="pattern";
+    String RADIX = "radix";
+    String PATTERN = "pattern";
 
-    String AWAIT="await";
-    String DELAY="delay";
-    String TIME_UNIT="time-unit";
+    String AWAIT = "await";
+    String DELAY = "delay";
+    String TIME_UNIT = "time-unit";
 
-    String TEST="test";
+    String TEST = "test";
 
-    String COLLECTION="collection";
-    String ITEM="item";
-    String FIRST="first";
-    String INDEX="index";
+    String COLLECTION = "collection";
+    String ITEM = "item";
+    String FIRST = "first";
+    String INDEX = "index";
 
-    String BEGIN="begin";
-    String END="end";
-    String INCR="incr";
+    String BEGIN = "begin";
+    String END = "end";
+    String INCR = "incr";
 
-    String METHOD="method";
-    String TARGET="target";
+    String METHOD = "method";
+    String TARGET = "target";
 
-    String ARG="arg";
+    String ARG = "arg";
 
-    String TIMEOUT="timeout";
+    String TIMEOUT = "timeout";
 
-    String NAME="name";
+    String NAME = "name";
 
-    String COUNT="count";
+    String COUNT = "count";
 
-    String TAG="tag";
+    String TAG = "tag";
 
-    String SEPARATOR="separator";
+    String SEPARATOR = "separator";
 
-    String TYPE="type";
-    String E="e";
-    String CAUSE="cause";
+    String TYPE = "type";
+    String E = "e";
+    String CAUSE = "cause";
 
-    String REFID="refid";
-    String PARAMS="params";
+    String REFID = "refid";
+    String PARAMS = "params";
 
-    String BATCH_SIZE="batch-size";
+    String BATCH_SIZE = "batch-size";
 
-    String DATABASES="databases";
+    String DATABASES = "databases";
 
-    String SCRIPT="script";
+    String SCRIPT = "script";
 
-    String DATASOURCE="datasource";
-    String RESULT_TYPE="result-type";
+    String DATASOURCE = "datasource";
+    String RESULT_TYPE = "result-type";
 
-    String ISOLATION="isolation";
+    String ISOLATION = "isolation";
 }

@@ -21,30 +21,30 @@ import java.util.Map;
  */
 public class JdbcProcedureParser {
 
-    public static String removeProcedureDtd(String str){
-        if(str==null){
+    public static String removeProcedureDtd(String str) {
+        if (str == null) {
             return str;
         }
-        return str.replaceAll("<\\!DOCTYPE\\s+procedure\\s+[^>]+>"," ");
+        return str.replaceAll("<\\!DOCTYPE\\s+procedure\\s+[^>]+>", " ");
     }
 
     public static XmlNode parse(String xml) throws Exception {
-        if(xml==null){
+        if (xml == null) {
             return null;
         }
-        String str=removeProcedureDtd(xml);
-        ByteArrayInputStream bis=new ByteArrayInputStream(str.getBytes("UTF-8"));
+        String str = removeProcedureDtd(xml);
+        ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes("UTF-8"));
         Document document = XmlUtil.parseXml(bis);
         bis.close();
         return parse(document);
     }
 
     public static XmlNode parse(InputStream is) throws Exception {
-        ByteArrayOutputStream bos=new ByteArrayOutputStream();
-        StreamUtil.streamCopy(is,bos);
-        String str=new String(bos.toByteArray(),"UTF-8");
-        str=removeProcedureDtd(str);
-        ByteArrayInputStream bis=new ByteArrayInputStream(str.getBytes("UTF-8"));
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        StreamUtil.streamCopy(is, bos);
+        String str = new String(bos.toByteArray(), "UTF-8");
+        str = removeProcedureDtd(str);
+        ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes("UTF-8"));
         Document document = XmlUtil.parseXml(bis);
         bis.close();
         return parse(document);

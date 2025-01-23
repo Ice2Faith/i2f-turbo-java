@@ -6,36 +6,36 @@ package i2f.jdbc.procedure.consts;
  */
 public interface FeatureConsts {
     // 基础类型组
-    String INT="int";
-    String DOUBLE="double";
-    String FLOAT="float";
-    String STRING="string";
-    String LONG="long";
-    String SHORT="short";
-    String CHAR="char";
-    String BYTE="byte";
-    String BOOLEAN="boolean";
-    String NULL="null";
+    String INT = "int";
+    String DOUBLE = "double";
+    String FLOAT = "float";
+    String STRING = "string";
+    String LONG = "long";
+    String SHORT = "short";
+    String CHAR = "char";
+    String BYTE = "byte";
+    String BOOLEAN = "boolean";
+    String NULL = "null";
 
     // 复合类型组
-    String DATE="date";
+    String DATE = "date";
 
     // 字符串组
-    String RENDER="render";
-    String TRIM="trim";
-    String ALIGN="align";
-    String BODY_TEXT="body-text";
-    String BODY_XML="body-xml";
+    String RENDER = "render";
+    String TRIM = "trim";
+    String ALIGN = "align";
+    String BODY_TEXT = "body-text";
+    String BODY_XML = "body-xml";
 
     // 处理转换组
-    String VISIT="visit";
-    String EVAL="eval";
-    String TEST="test";
+    String VISIT = "visit";
+    String EVAL = "eval";
+    String TEST = "test";
 
-    String EVAL_JAVA="eval-java";
-    String EVAL_JS="eval-js";
-    String CLASS=".class";
+    String EVAL_JAVA = "eval-java";
+    String EVAL_JS = "eval-js";
+    String CLASS = ".class";
 
-    String NOT="not";
+    String NOT = "not";
 
 }

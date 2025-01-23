@@ -11,7 +11,8 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
  * @date 2025/1/20 14:07
  */
 public class SqlTransRollbackNode implements ExecutorNode {
-    public static final String TAG_NAME="sql-trans-rollback";
+    public static final String TAG_NAME = "sql-trans-rollback";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {

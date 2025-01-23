@@ -8,7 +8,7 @@ import java.util.Arrays;
  * @date 2025/1/23 11:30
  */
 public class JdbcTrans {
-    public static int getJdbcTransIsolation(String isolation){
+    public static int getJdbcTransIsolation(String isolation) {
         int val = Connection.TRANSACTION_READ_COMMITTED;
         try {
             val = Integer.parseInt(isolation);

@@ -14,7 +14,8 @@ import java.util.List;
  * @date 2025/1/20 14:07
  */
 public class LangChooseNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-choose";
+    public static final String TAG_NAME = "lang-choose";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -51,7 +52,7 @@ public class LangChooseNode implements ExecutorNode {
             invokeNode = otherNode;
         }
         if (invokeNode != null) {
-            executor.execAsProcedure(invokeNode, context);
+            executor.execAsProcedure(invokeNode, context, false, false);
         }
     }
 

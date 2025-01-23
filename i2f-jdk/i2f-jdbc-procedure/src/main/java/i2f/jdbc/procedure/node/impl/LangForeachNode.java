@@ -17,7 +17,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangForeachNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-foreach";
+    public static final String TAG_NAME = "lang-foreach";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -63,7 +64,7 @@ public class LangForeachNode implements ExecutorNode {
                 isFirst = false;
                 index++;
                 try {
-                    executor.execAsProcedure(node, context);
+                    executor.execAsProcedure(node, context, false, false);
                 } catch (ContinueSignalException e) {
                     continue;
                 } catch (BreakSignalException e) {
@@ -86,7 +87,7 @@ public class LangForeachNode implements ExecutorNode {
                 isFirst = false;
                 index++;
                 try {
-                    executor.execAsProcedure(node, context);
+                    executor.execAsProcedure(node, context, false, false);
                 } catch (ContinueSignalException e) {
                     continue;
                 } catch (BreakSignalException e) {

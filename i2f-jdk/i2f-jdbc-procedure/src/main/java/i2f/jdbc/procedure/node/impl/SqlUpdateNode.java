@@ -8,7 +8,6 @@ import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +16,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class SqlUpdateNode implements ExecutorNode {
-    public static final String TAG_NAME="sql-update";
+    public static final String TAG_NAME = "sql-update";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -28,7 +28,7 @@ public class SqlUpdateNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        List<Map.Entry<String, String>> dialectScriptList= SqlDialect.getSqlDialectList(node,context,executor);
+        List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node, context, executor);
         String datasource = node.getTagAttrMap().get(AttrConsts.DATASOURCE);
         String script = node.getTagAttrMap().get(AttrConsts.SCRIPT);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
