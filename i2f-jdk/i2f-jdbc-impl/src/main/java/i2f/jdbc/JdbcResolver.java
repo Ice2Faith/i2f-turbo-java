@@ -1165,14 +1165,19 @@ public class JdbcResolver {
                     map.put(columnNames.get(i), val);
                 }
 
-                try {
-                    T bean = ReflectResolver.getInstance(beanClass);
-                    ReflectResolver.map2bean(map, bean);
+                Object item=map;
+                if(beanClass==null || !TypeOf.typeOf(beanClass,Map.class)) {
+                    try {
+                        T bean = ReflectResolver.getInstance(beanClass);
+                        ReflectResolver.map2bean(map, bean);
 
-                    ret.add(bean);
-                } catch (Exception e) {
-                    throw new IllegalStateException(e.getMessage(), e);
+                        item=bean;
+                    } catch (Exception e) {
+                        throw new IllegalStateException(e.getMessage(), e);
+                    }
                 }
+
+                ret.add((T)item);
 
                 currCount++;
 

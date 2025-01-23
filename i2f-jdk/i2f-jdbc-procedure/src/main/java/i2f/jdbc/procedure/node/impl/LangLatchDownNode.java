@@ -14,7 +14,8 @@ import java.util.concurrent.CountDownLatch;
  * @date 2025/1/20 14:07
  */
 public class LangLatchDownNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-latch-down";
+    public static final String TAG_NAME = "lang-latch-down";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {

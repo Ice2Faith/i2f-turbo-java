@@ -17,7 +17,8 @@ import java.util.concurrent.TimeUnit;
  * @date 2025/1/20 14:07
  */
 public class LangAsyncNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-async";
+    public static final String TAG_NAME = "lang-async";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -31,7 +32,7 @@ public class LangAsyncNode implements ExecutorNode {
         Boolean await = (Boolean) executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context);
         Long delay = (Long) executor.attrValue(AttrConsts.DELAY, FeatureConsts.LONG, node, context);
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
-        TimeUnit delayUnit = NodeTime.getTimeUnit(timeUnit,TimeUnit.SECONDS);
+        TimeUnit delayUnit = NodeTime.getTimeUnit(timeUnit, TimeUnit.SECONDS);
         CountDownLatch latch = new CountDownLatch(1);
         Thread thread = new Thread(() -> {
             try {
@@ -41,7 +42,7 @@ public class LangAsyncNode implements ExecutorNode {
                     } catch (Exception e) {
                     }
                 }
-                executor.execAsProcedure(node, context);
+                executor.execAsProcedure(node, context, false, false);
             } catch (Throwable e) {
                 e.printStackTrace();
             } finally {

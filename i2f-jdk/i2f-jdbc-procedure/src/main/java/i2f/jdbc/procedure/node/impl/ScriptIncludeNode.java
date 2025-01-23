@@ -15,7 +15,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class ScriptIncludeNode implements ExecutorNode {
-    public static final String TAG_NAME="script-include";
+    public static final String TAG_NAME = "script-include";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -45,7 +46,7 @@ public class ScriptIncludeNode implements ExecutorNode {
             context.getParams().put(name, val);
         }
 
-        executor.execAsProcedure(nextNode, context);
+        executor.execAsProcedure(nextNode, context, false, false);
 
         // 恢复堆栈
         context.getParams().putAll(bakParams);

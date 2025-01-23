@@ -12,7 +12,8 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
  * @date 2025/1/20 14:07
  */
 public class LangSynchronizedNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-synchronized";
+    public static final String TAG_NAME = "lang-synchronized";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -28,7 +29,7 @@ public class LangSynchronizedNode implements ExecutorNode {
             target = context;
         }
         synchronized (target) {
-            executor.execAsProcedure(node, context);
+            executor.execAsProcedure(node, context, false, false);
         }
     }
 }

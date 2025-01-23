@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2025/1/23 11:43
  */
 public class NodeTime {
-    public static TimeUnit getTimeUnit(String timeUnit,TimeUnit defVal){
+    public static TimeUnit getTimeUnit(String timeUnit, TimeUnit defVal) {
         TimeUnit unit = defVal;
         if ("SECONDS".equalsIgnoreCase(timeUnit)) {
             unit = TimeUnit.MILLISECONDS;

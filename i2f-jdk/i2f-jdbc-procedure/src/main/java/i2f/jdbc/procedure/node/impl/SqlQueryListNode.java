@@ -9,7 +9,6 @@ import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +17,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class SqlQueryListNode implements ExecutorNode {
-    public static final String TAG_NAME="sql-query-list";
+    public static final String TAG_NAME = "sql-query-list";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -29,11 +29,11 @@ public class SqlQueryListNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node,context,executor);
-        String datasource =(String)executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING,node,context);
-        String script = (String)executor.attrValue(AttrConsts.SCRIPT,FeatureConsts.VISIT,node,context);
+        List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node, context, executor);
+        String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
+        String script = (String) executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        Class<?> resultType = (Class<?>)executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.CLASS,node,context);
+        Class<?> resultType = (Class<?>) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.CLASS, node, context);
         if (resultType == null) {
             resultType = Map.class;
         }

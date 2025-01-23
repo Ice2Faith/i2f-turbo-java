@@ -21,7 +21,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangInvokeNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-invoke";
+    public static final String TAG_NAME = "lang-invoke";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {

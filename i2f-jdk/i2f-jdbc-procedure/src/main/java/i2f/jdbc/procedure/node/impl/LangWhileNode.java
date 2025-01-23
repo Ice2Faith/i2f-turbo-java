@@ -16,7 +16,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangWhileNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-while";
+    public static final String TAG_NAME = "lang-while";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -49,7 +50,7 @@ public class LangWhileNode implements ExecutorNode {
             isFirst = false;
             index++;
             try {
-                executor.execAsProcedure(node, context);
+                executor.execAsProcedure(node, context, false, false);
             } catch (ContinueSignalException e) {
                 continue;
             } catch (BreakSignalException e) {

@@ -1,0 +1,61 @@
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+
+<procedure id="MAIN">
+    <lang-invoke method="Date.new" result="now"/>
+    <lang-invoke method="UUID.randomUUID" result="procedureId"/>
+    <lang-set value="procedureId" result.string="procedureId"/>
+    <lang-invoke method="replaceAll" target="procedureId" arg0.string="-" arg1.string="" result="procedureId"/>
+    <lang-format-date value="now" pattern="yyyy-MM-dd HH:mm:ss" result="nowStr"/>
+    <lang-println nowStr="nowStr" procedureId="procedureId"/>
+
+    <lang-set value.eval-java="new Date()" result="now1"/>
+    <lang-println now1="now1"/>
+
+    <lang-set value.body-xml.trim.eval-java="" result="now2">
+        Date d=new Date();
+        SimpleDateFormat fmt=new SimpleDateFormat("yyyyMMdd-HHmmss-SSS");
+        fmt.format(d)
+    </lang-set>
+    <lang-println now2="now2"/>
+
+    <sql-query-object result="userCount" result-type="Long">
+        <sql-dialect databases="oracle">
+            select count(1) from sys_user
+        </sql-dialect>
+    </sql-query-object>
+    <lang-println userCount="userCount"/>
+
+    <sql-query-object datasource="local" result="organCount" result-type="Long">
+        <sql-dialect databases="oracle">
+            select count(1) from ext_organ
+        </sql-dialect>
+        <sql-dialect databases="gbase">
+            select count(1) from sys_organ
+        </sql-dialect>
+    </sql-query-object>
+    <lang-println organCount="organCount"/>
+
+    <lang-string result="bodySql">
+        select * from sys_organ
+    </lang-string>
+    <lang-println bodySql="bodySql"/>
+
+    <lang-render result="executeSql">
+        select count(1) from (
+        ${bodySql}
+        limit ${userCount},${organCount}
+        ) a
+    </lang-render>
+
+    <lang-println executeSql="executeSql"/>
+
+    <sql-query-object script="executeSql" datasource="gbase" result="diffCount" result-type="Long"/>
+
+    <lang-println diffCount="diffCount"/>
+
+    <sql-query-row datasource="gbase" result="organ">
+        select * from sys_organ limit 1
+    </sql-query-row>
+
+    <lang-println organ="organ"/>
+</procedure>

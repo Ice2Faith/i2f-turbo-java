@@ -15,7 +15,8 @@ import java.lang.reflect.Constructor;
  * @date 2025/1/20 14:07
  */
 public class LangThrowNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-throw";
+    public static final String TAG_NAME = "lang-throw";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {

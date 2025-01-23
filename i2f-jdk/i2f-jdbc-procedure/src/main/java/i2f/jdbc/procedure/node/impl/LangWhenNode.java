@@ -12,7 +12,8 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
  * @date 2025/1/20 14:07
  */
 public class LangWhenNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-when";
+    public static final String TAG_NAME = "lang-when";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -25,7 +26,7 @@ public class LangWhenNode implements ExecutorNode {
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         boolean ok = (boolean) executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, node, context);
         if (ok) {
-            executor.execAsProcedure(node, context);
+            executor.execAsProcedure(node, context, false, false);
         }
     }
 

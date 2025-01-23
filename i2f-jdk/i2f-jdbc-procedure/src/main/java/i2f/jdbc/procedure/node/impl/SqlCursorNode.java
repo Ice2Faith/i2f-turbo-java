@@ -10,14 +10,18 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
 public class SqlCursorNode implements ExecutorNode {
-    public static final String TAG_NAME="sql-cursor";
+    public static final String TAG_NAME = "sql-cursor";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -57,7 +61,7 @@ public class SqlCursorNode implements ExecutorNode {
             item = AttrConsts.ITEM;
         }
 
-        List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(queryNode,context,executor);
+        List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(queryNode, context, executor);
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, queryNode, context);
         String script = (String) executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, queryNode, context);
         String resultTypeName = (String) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.STRING, queryNode, context);

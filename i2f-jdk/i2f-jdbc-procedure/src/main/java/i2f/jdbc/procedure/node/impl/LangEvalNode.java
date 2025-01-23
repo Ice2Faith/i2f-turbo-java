@@ -12,7 +12,8 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
  * @date 2025/1/20 14:07
  */
 public class LangEvalNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-eval";
+    public static final String TAG_NAME = "lang-eval";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -24,9 +25,9 @@ public class LangEvalNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
-        String script=node.getTextBody();
-        if(value!=null &&!value.isEmpty()){
-            script=(String)executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING,node,context);
+        String script = node.getTextBody();
+        if (value != null && !value.isEmpty()) {
+            script = (String) executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
         }
         Object val = executor.eval(script, context.getParams());
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);

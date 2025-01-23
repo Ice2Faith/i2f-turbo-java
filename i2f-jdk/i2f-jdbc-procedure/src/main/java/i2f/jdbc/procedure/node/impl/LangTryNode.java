@@ -16,7 +16,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangTryNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-try";
+    public static final String TAG_NAME = "lang-try";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -54,14 +55,14 @@ public class LangTryNode implements ExecutorNode {
         }
 
         try {
-            executor.execAsProcedure(bodyNode, context);
+            executor.execAsProcedure(bodyNode, context, false, false);
         } catch (Throwable e) {
             boolean handled = false;
             for (XmlNode catchNode : catchNodes) {
                 String type = catchNode.getTagAttrMap().get(AttrConsts.TYPE);
                 String exName = catchNode.getTagAttrMap().get(AttrConsts.E);
-                if(type==null || type.isEmpty()){
-                    type="java.lang.Throwable";
+                if (type == null || type.isEmpty()) {
+                    type = "java.lang.Throwable";
                 }
                 if (exName == null || exName.isEmpty()) {
                     exName = AttrConsts.E;
@@ -75,7 +76,7 @@ public class LangTryNode implements ExecutorNode {
                     throw new IllegalStateException("missing catch exception type of : " + type);
                 }
                 if (clazz.isAssignableFrom(e.getClass())) {
-                    executor.execAsProcedure(catchNode, context);
+                    executor.execAsProcedure(catchNode, context, false, false);
                     handled = true;
                 }
 
@@ -87,7 +88,7 @@ public class LangTryNode implements ExecutorNode {
             }
         } finally {
             if (finallyNode != null) {
-                executor.execAsProcedure(finallyNode, context);
+                executor.execAsProcedure(finallyNode, context, false, false);
             }
         }
     }

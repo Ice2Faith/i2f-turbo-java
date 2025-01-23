@@ -16,7 +16,7 @@ import java.util.concurrent.CountDownLatch;
  * @date 2025/1/20 14:07
  */
 public class LangAsyncAllNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-async-all";
+    public static final String TAG_NAME = "lang-async-all";
 
     @Override
     public boolean support(XmlNode node) {
@@ -35,7 +35,7 @@ public class LangAsyncAllNode implements ExecutorNode {
         for (XmlNode item : children) {
             new Thread(() -> {
                 try {
-                    executor.execAsProcedure(item, context);
+                    executor.execAsProcedure(item, context, false, false);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 } finally {

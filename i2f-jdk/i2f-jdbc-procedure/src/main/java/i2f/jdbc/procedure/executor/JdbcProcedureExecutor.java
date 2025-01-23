@@ -16,9 +16,17 @@ import java.util.function.Supplier;
 public interface JdbcProcedureExecutor {
     List<ExecutorNode> getNodes();
 
-    void exec(XmlNode node, ExecuteContext context);
+    default void exec(XmlNode node, ExecuteContext context) {
+        exec(node, context, false, true);
+    }
 
-    void execAsProcedure(XmlNode node, ExecuteContext context);
+    void exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
+
+    default void execAsProcedure(XmlNode node, ExecuteContext context) {
+        execAsProcedure(node, context, false, true);
+    }
+
+    void execAsProcedure(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
 
     Object attrValue(String attr, String action, XmlNode node, ExecuteContext context);
 
@@ -26,7 +34,7 @@ public interface JdbcProcedureExecutor {
 
     void setParamsObject(Map<String, Object> params, String result, Object value);
 
-    Map<String,Object> createParams();
+    Map<String, Object> createParams();
 
     Map<String, Object> newParams(ExecuteContext context);
 

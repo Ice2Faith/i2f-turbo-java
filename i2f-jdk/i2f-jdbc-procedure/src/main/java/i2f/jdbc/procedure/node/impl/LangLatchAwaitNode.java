@@ -17,7 +17,8 @@ import java.util.concurrent.TimeUnit;
  * @date 2025/1/20 14:07
  */
 public class LangLatchAwaitNode implements ExecutorNode {
-    public static final String TAG_NAME="lang-latch-await";
+    public static final String TAG_NAME = "lang-latch-await";
+
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -33,7 +34,7 @@ public class LangLatchAwaitNode implements ExecutorNode {
         CountDownLatch latch = (CountDownLatch) executor.attrValue(AttrConsts.NAME, FeatureConsts.VISIT, node, context);
         try {
             if (timeout >= 0) {
-                TimeUnit unit = NodeTime.getTimeUnit(timeUnit,TimeUnit.SECONDS);
+                TimeUnit unit = NodeTime.getTimeUnit(timeUnit, TimeUnit.SECONDS);
                 latch.await(timeout, unit);
             } else {
                 latch.await();
