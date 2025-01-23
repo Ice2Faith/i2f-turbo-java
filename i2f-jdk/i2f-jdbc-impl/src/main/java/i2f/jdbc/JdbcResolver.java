@@ -8,6 +8,7 @@ import i2f.jdbc.data.NamingOutputParameter;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.data.TypedArgument;
+import i2f.jdbc.meta.JdbcMeta;
 import i2f.jdbc.std.func.SQLBiFunction;
 import i2f.jdbc.std.func.SQLFunction;
 import i2f.match.regex.RegexUtil;
@@ -37,18 +38,14 @@ import java.util.function.Predicate;
 public class JdbcResolver {
     public static Connection getConnection(String driver,
                                            String url) throws SQLException {
-        try {
-            Class.forName(driver);
-        } catch (Exception e) {
-            throw new SQLException(e.getMessage(), e);
-        }
+        loadDriver(driver);
         return DriverManager.getConnection(url);
     }
 
-    public static Connection getConnection(String driver,
-                                           String url,
-                                           String username,
-                                           String password) throws SQLException {
+    public static void loadDriver(String driver) throws SQLException {
+        if(driver==null || driver.isEmpty()){
+            return;
+        }
         Exception ex = null;
         try {
             Class.forName(driver);
@@ -63,18 +60,32 @@ public class JdbcResolver {
         if (ex != null) {
             throw new SQLException(ex.getMessage(), ex);
         }
+    }
+
+    public static Connection getConnection(String driver,
+                                           String url,
+                                           String username,
+                                           String password) throws SQLException {
+        loadDriver(driver);
         return DriverManager.getConnection(url, username, password);
     }
 
     public static Connection getConnection(String driver,
                                            String url,
                                            Properties properties) throws SQLException {
-        try {
-            Class.forName(driver);
-        } catch (Exception e) {
-            throw new SQLException(e.getMessage(), e);
-        }
+        loadDriver(driver);
         return DriverManager.getConnection(url, properties);
+    }
+
+    public static Connection getConnection(JdbcMeta meta) throws SQLException{
+        loadDriver(meta.getDriver());
+        if(meta.getProperties()!=null && !meta.getProperties().isEmpty()){
+            return DriverManager.getConnection(meta.getUrl(),meta.getProperties());
+        }
+        if(meta.getUsername()!=null || meta.getPassword()!=null){
+            return DriverManager.getConnection(meta.getUrl(),meta.getUsername(),meta.getPassword());
+        }
+        return DriverManager.getConnection(meta.getUrl());
     }
 
     public static Connection begin(Connection conn) throws SQLException {

@@ -189,6 +189,7 @@
 <!ELEMENT sql-dialect (EMPTY
         |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
         )>
+<!ATTLIST sql-dialect script CDATA #IMPLIED>
 <!ATTLIST sql-dialect databases CDATA #IMPLIED>
 
 <!-- for mybatis tag begin -->

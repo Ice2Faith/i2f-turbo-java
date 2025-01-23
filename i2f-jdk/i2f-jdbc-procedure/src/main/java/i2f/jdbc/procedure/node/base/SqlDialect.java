@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.base;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -24,10 +25,8 @@ public class SqlDialect {
             for (XmlNode item : children) {
                 if (TAG_NAME.equals(item.getTagName())) {
                     String databases = item.getTagAttrMap().get(AttrConsts.DATABASES);
-                    String script = node.getTagAttrMap().get(AttrConsts.SCRIPT);
-                    if (script != null && !script.isEmpty()) {
-                        script = (String) executor.visit(script, context.getParams());
-                    } else {
+                    String script = (String)executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT,node,context);
+                    if (script == null || script.isEmpty()) {
                         script = node.getTagBody();
                     }
                     dialectScriptList.add(new AbstractMap.SimpleEntry<>(databases, script));

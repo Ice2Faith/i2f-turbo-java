@@ -1,18 +1,23 @@
 
+<!--
+为了编写这份xml的时候，减少一些记忆，借助编辑器对dtd的补全联想能力，因此提供一份参考的dtd约束
+这份dtd约束，只是为了方便编写这份脚本，实际运行时会被删除这个约束，不影响实际运行结果
+ -->
 <!DOCTYPE procedure SYSTEM "procedure.dtd">
 <!--
 定义一个顺序的处理流程，能够进行逻辑控制与SQL执行，
 实现使用脚本定义的方式，达到与存储过程相似的能力，核心使用一个Map构成的执行栈来维护执行的变量，
 预期是既有编程语言的控制灵活度，也有数据库语句直接编写的识别度，
 避免在java等编程语言中进行SQL语句的拼接操作
+
 实现方案
 采用xml格式编写控制脚本，语言控制与SQL语句都在xml中书写
 script-开头的用于提供复用性片段
 lang-开头的用于提供流程控制等能力，实现上考虑使用ongl/spel+velocity实现
 sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml格式进行处理
+
 属性修饰符：用在输入时，表示值怎么取，用在输出时，表示输出的目标类型，用在声明时，表示期待的输入类型
 多个修饰符顺序执行，用.小数点隔开
-./.context 从环境中取值
 .int 整型
 .double 浮点型
 .float 短浮点型
@@ -22,13 +27,12 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
 .char 字符型
 .byte 字节型
 .boolean 布尔型
-.render 渲染占位
-.visit 访问属性
-.eval 计算值
-.test 使用测试方法
-?.var 表示值是一个访问描述符，需要根据这个访问描述符设置值，用于result.var="xxx",表示result的值设置到params[params[xxx]]属性中
+.render 渲染占位，以模版引擎方式渲染字符串
+.visit 访问属性，使用访问属性方式访问params中的属性
+.eval 计算值，使用默认方式计算表达式的值
+.test 使用测试方法，使用默认方式测试表达式的值
 .null 空值
-.date 日期时间型
+.date 日期时间型，需要标签指定pattern属性，没有的话会尝试可行的解析
 .trim 用于在字符型变量时进行先trim后使用，输出时，先trim后输出
 .align 用于在字符值时，对左边多余的空白符号予以去除，但是需要以|引导字符串行
 .body-text 用于表示值从标签内部获取
@@ -39,12 +43,34 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
 .class 转换为Class<?> 对象
 .not boolean值取反
 
+属性修饰符，使用举例说明
+value.string.long.int=“1”
+表示value属性的值，从表达式1开始
+先转为string字符串
+再转为long数值型
+再转为int整形
+最终就是整形的1
+
+还有，再一些场景中
+某些属性具有默认的属性修饰符，也就是默认行为
+可以通过添加自己的属性修饰符，大概改变默认行为的目的
+比如，tag默认是string的修饰符，也就是字节取属性的字符串，但是可以通过 tag.visit改变行为为从params参数取一个字符串
+也可以用于类型转换的场景中使用
+再比如，再lang-set场景中，value默认是visit修饰符，
+可以使用value.string直接输入字符串，
+或者使用eval/eval-java等修饰符改变行为为获取eval的结果
  -->
 <procedure id="">
-    <!-- 使用系统输出行，以tag开头，其余变量附加在其他属性上即可 -->
+    <!--
+    使用系统输出行，以tag开头，其余变量附加在其他属性上即可
+    tag默认以字符串方式解析，等价于 tag.string
+     -->
     <lang-println tag="" aaa=""/>
 
-    <!-- 使用value指定的模版进行渲染输出,同样支持tag属性标签 -->
+    <!--
+    使用value指定的模版进行渲染输出,同样支持tag属性标签
+    tag默认以字符串方式解析，等价于 tag.string
+     -->
     <lang-printf tag="" value.body-xml.trim=""/>
 
     <!-- 语句段，可使用script-include进行引用，id唯一即可，root表示语句段使用了哪些变量，可以作为变量声明 -->
@@ -61,18 +87,35 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     如果为数值型，可以使用radix指定进制
     如果为日期型，可以使用pattern指定格式化的串
     这里value为输入，又添加了:int修饰符，则表示这个值是一个int型立即数，不需要从context里面取
+    value默认以visit访问，等价于 value.visit
+    radix默认以int访问，等价于 radix.int
+    pattern默认以string访问，等价于 pattern.string
      -->
     <lang-set value.int="" radix="" pattern="" result=""/>
-    <!-- 格式化 -->
+    <!--
+    格式化日期
+    value默认以visit访问，等价于 value.visit
+    pattern默认以string访问，等价于 pattern.string
+     -->
     <lang-format-date value="" pattern="" result=""/>
+    <!--
+    格式化字符串
+    value默认以visit访问，等价于 value.visit
+    pattern默认以string访问，等价于 pattern.string
+     -->
     <lang-format value="" pattern="" result=""/>
 
-    <!-- 字符串拼接 -->
+    <!--
+    字符串拼接
+    separator默认以string访问，等价于 separator.string
+    其他argx以visit访问，等价于 argx.visit
+     -->
     <lang-string-join separator="" result="" arg0="" arg1=""/>
 
     <!--
     创建一个新的参数，用于为内部调用其他过程提供干净的上下文参数，避免参数污染
     同时，由于被调用方的上下文参数在调用方持有，调用方也可以获取到被调用方执行完的结果
+    传入参数默认以visit访问，等价于 aaa.visit
     -->
     <lang-new-params result="" aaa="" bbb=""/>
 
@@ -80,16 +123,26 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     调用其他存储过程，id表示目标的id,
     可以指定一个params参数作为根上下文参数，这样可以避免上下文污染
     直接使用目标变量age名来传递值
+    params默认以visit访问，等价于 params.visit
+    其他传入参数默认以visit访问，等价于 age.visit
      -->
     <procedure-call refid="" params="" age=""/>
 
     <!-- 返回，结束此过程 -->
     <lang-return/>
 
-    <!-- 抛出异常，value指定为message内容，type指定为异常类型，cause可选为造成异常的异常对象 -->
+    <!--
+    抛出异常，value指定为message内容，type指定为异常类型，cause可选为造成异常的异常对象
+    value默认以string访问，等价于 value.string
+    type以string访问，不支持修饰符
+    cause以visit访问，不支持修饰符
+     -->
     <lang-throw value="" type="" cause=""/>
 
-    <!-- 用于指定一小段脚本，来设置一个变量值到result指定的变量名中 -->
+    <!--
+    用于指定一小段脚本，来设置一个变量值到result指定的变量名中
+    value默认以string访问，等价于 value.string
+     -->
     <lang-eval value="" result="">
         11
     </lang-eval>
@@ -101,13 +154,19 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     <lang-render result="">
 
     </lang-render>
-    <!-- lang-开头的表示语言的基本语句，这个就是对应if语句，test表示判定条件语句 -->
+    <!--
+    lang-开头的表示语言的基本语句，这个就是对应if语句，test表示判定条件语句
+    test默认以test访问，等价于 test.test
+     -->
     <lang-if test="">
 
     </lang-if>
     <!-- 对应的就是if-else-if这种语句或者Switch这种分支语句 -->
     <lang-choose>
-        <!-- 表示一个分支 -->
+        <!--
+        表示一个分支
+        test默认以test访问，等价于 test.test
+         -->
         <lang-when test="">
 
         </lang-when>
@@ -116,15 +175,44 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
 
         </lang-otherwise>
     </lang-choose>
-    <!-- 对应一个foreach循环，对一个集合进行迭代，collection表示被迭代的集合，item表示迭代变量的名称 -->
+    <!--
+    对应一个foreach循环，对一个集合进行迭代，collection表示被迭代的集合，item表示迭代变量的名称
+    item默认值为item，可缺省
+    first默认值为first，可缺省
+    index默认值为index，可缺省
+    collection以visit访问，不支持修饰符
+    item以string访问，不支持修饰符
+    first以string访问，不支持修饰符
+    index以string访问，不支持修饰符
+     -->
     <lang-foreach collection="" item="" first="" index="">
 
     </lang-foreach>
-    <!-- 对应一个计数型循环，表示从begin数开始每次增加incr的步长直到end结束，item表示迭代变量的名称 -->
+    <!--
+    对应一个计数型循环，表示从begin数开始每次增加incr的步长直到end结束，item表示迭代变量的名称
+    begin默认值为0，可缺省
+    incr默认值为1，可缺省
+    item默认值为item，可缺省
+    first默认值为first，可缺省
+    index默认值为index，可缺省
+    begin默认以int访问，等价于 begin.int
+    end默认以int访问，等价于 end.int
+    incr默认以int访问，等价于 incr.int
+    item以string访问，不支持修饰符
+    first以string访问，不支持修饰符
+    index以string访问，不支持修饰符
+     -->
     <lang-fori begin="" end="" incr="" item="" first="" index="">
 
     </lang-fori>
-    <!-- 对应一个while语句，test表示循环条件的判断语句 -->
+    <!--
+    对应一个while语句，test表示循环条件的判断语句
+    first默认值为first，可缺省
+    index默认值为index，可缺省
+    test默认以test访问，等价于 test.test
+    first以string访问，不支持修饰符
+    index以string访问，不支持修饰符
+     -->
     <lang-while test="" first="" index="">
         <!-- 对应continue-->
         <lang-continue/>
@@ -132,11 +220,16 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
         <lang-break/>
     </lang-while>
     <!--
-    调用函数，
-    method是全限定的方法名（即类名.方法名，例如Math.random）,
+    调用函数，在target指定的对象上调用method方法，并传入argx参数
+    当指定target时，method不用指定类名
+    当method是静态函数式，target没有影响
+    method是全限定的方法名（即类名.方法名，例如Math.random,Date.new）,
+    new方法名，指调用构造函数
     target表示在哪个对象上调用（有target时，不需要指定全限定方法名，只需要方法名即可）,
     argx表示传入的参数，后面的数字表示参数的次序，
     result用于记录调用的结果保存到哪个变量中
+    method以string访问，不支持修饰符
+    target默认以visit访问，等价于 target.visit
      -->
     <lang-invoke method="" target="" arg0="" arg1="" result=""/>
     <!-- 对应一个异常处理块try-catch-finally -->
@@ -145,7 +238,11 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
         <lang-body>
 
         </lang-body>
-        <!-- 表示一个异常catch块，type指定要捕获的异常类型，var表示异常的变量名 -->
+        <!--
+        表示一个异常catch块，type指定要捕获的异常类型，var表示异常的变量名
+        type以string访问，不支持修饰符
+        e以string访问，不支持修饰符
+         -->
         <lang-catch type="" e="">
 
         </lang-catch>
@@ -155,7 +252,10 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
         </lang-finally>
     </lang-try>
 
-    <!-- 对应synchronized关键字,允许指定target，不指定则对当前节点的上下文context同步 -->
+    <!--
+    对应synchronized关键字,允许指定target，不指定则对当前节点的上下文context同步
+    target默认以visit访问，等价于 target.visit
+     -->
     <lang-synchronized target="">
 
     </lang-synchronized>
@@ -163,6 +263,9 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     表示一个查询语句，预期为一行数据，执行结果放到result指定的变量名中；
     对于sql-开头的标签，都允许带有datasource属性来制定使用哪个数据源，也都允许带有script属性指定要执行的SQL来源于哪个变量，
     对于sql-query-开头的标签，都允许带有result-type属性来指定结果集转换为什么类型
+    datasource默认以string访问，等价于 datasource.string
+    script默认以visit访问，等价于 script.visit
+    result-type默认以class访问，等价于 result-type.class
      -->
     <sql-query-row datasource="" script="" result="" result-type="">
 
@@ -206,10 +309,13 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     <sql-update result="">
         <!--
          用于在sql-系列的标签中，用于解决数据库的方言问题
-         通过databases指定支持的数据库类型列表，多个用逗号分隔
+         通过databases指定支持的数据库类型列表，多个用逗号分隔，不区分大小写
+         允许使用script属性指定脚本
          这个标签是可选的
+          script默认以visit访问，等价于 script.visit
+          databases以string访问，不支持修饰符
          -->
-        <sql-dialect databases="mysql,gbase,mariadb">
+        <sql-dialect script="" databases="mysql,gbase,mariadb">
             update sys_user
             <set>
                 <if test="true">
@@ -246,31 +352,60 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
         </sql-dialect>
     </sql-update>
 
-    <!-- 表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务 -->
+    <!--
+    表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务
+    isolation以string访问，支持Connection.TRANSACTION_xxx的数字值，或者xxx的字符值，不区分大小写
+     -->
     <sql-trans-begin isolation=""/>
     <sql-trans-commit/>
     <sql-trans-rollback/>
     <sql-trans-none/>
 
-    <!-- 异步执行，await表示是否需要等待执行结束，delay表示延迟多长时间再开始执行 -->
+    <!--
+    异步执行，await表示是否需要等待执行结束，delay表示延迟多长时间再开始执行
+    await默认以boolean访问，等价于 await.boolean
+    delay默认以long访问，等价于 delay.long
+    time-unit以string访问，不支持修饰符，为TimeUnit的枚举字符串值，不区分大小写
+     -->
     <lang-async await.boolean="" delay="" time-unit="">
 
     </lang-async>
-    <!-- java 中的count-down-latch -->
+    <!--
+    java 中的count-down-latch
+    count默认以eval访问，等价于 count.eval ，因为使用latch的场景大多数和集合等有关，所以选用默认eval类方便获取集合的大小
+     -->
     <lang-latch count="" result=""/>
-    <!-- 多个任务并行 -->
+    <!--
+    多个任务并行
+    await默认以boolean访问，等价于 await.boolean
+     -->
     <lang-async-all await="">
         <!-- 每个任务仅有delay延时可用 -->
         <lang-async delay="" time-unit="">
-            <!-- 对name对应的latch对象进行count-down操作 -->
+            <!--
+            对name对应的latch对象进行count-down操作
+            name默认以visit访问，等价于 name.visit 目的是取到对应的latch对象
+             -->
             <lang-latch-down name=""/>
         </lang-async>
     </lang-async-all>
-    <!-- 等待名为name的latch对象 -->
+    <!--
+    等待名为name的latch对象
+    name默认以visit访问，等价于 name.visit 目的是取到对应的latch对象
+    timeout默认以long访问，等价于 timeout.long
+    time-unit以string访问，不支持修饰符，为TimeUnit的枚举字符串值，不区分大小写
+     -->
     <lang-latch-await name="" timeout="" time-unit=""/>
 
 
-    <!-- 通过遍历结果集的方式，提供类似游标的操作能力，通过sql-query-list进行查询遍历，每次查询分页大小为batch-size，将item的值提供给lang-body进行执行 -->
+    <!--
+    通过遍历结果集的方式，提供类似游标的操作能力，通过sql-query-list进行查询遍历，
+    每次查询分页大小为batch-size，将item的值提供给lang-body进行执行
+    batch-szie默认值为2000，可缺省
+    item默认值为item，可缺省
+    batch-size默认以int访问，等价于 batch-size.int
+    item以string访问，不支持修饰符
+     -->
     <sql-cursor batch-size="300" item="">
         <sql-query-list datasource="" script="" result-type="">
 

@@ -26,7 +26,7 @@ public class LangPrintlnNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         StringBuilder builder = new StringBuilder();
-        String tag = node.getTagAttrMap().get(AttrConsts.TAG);
+        String tag = (String)executor.attrValue(AttrConsts.TAG,FeatureConsts.STRING,node,context);
         builder.append("[").append(tag == null ? "" : tag).append("]");
         boolean isFirst = true;
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {

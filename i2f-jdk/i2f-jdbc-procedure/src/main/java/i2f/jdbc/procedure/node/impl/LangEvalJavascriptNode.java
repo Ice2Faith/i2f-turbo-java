@@ -27,13 +27,23 @@ public class LangEvalJavascriptNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
+        String script = node.getTextBody();
+        Object obj = evalJavascript(script, context, executor);
+
+        if (result != null && !result.isEmpty()) {
+            obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
+            executor.setParamsObject(context.getParams(), result, obj);
+        }
+
+    }
+
+    public static Object evalJavascript(String script, ExecuteContext context, JdbcProcedureExecutor executor) {
         ScriptProvider provider = ScriptProvider.getJavaScriptInstance();
         Bindings bindings = provider.createBindings();
         bindings.put("context", context);
         bindings.put("executor", executor);
         bindings.put("params", context.getParams());
 
-        String script = node.getTextBody();
         Object obj = null;
 
         try {
@@ -41,11 +51,6 @@ public class LangEvalJavascriptNode implements ExecutorNode {
         } catch (ScriptException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
-
-        if (result != null && !result.isEmpty()) {
-            obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-            executor.setParamsObject(context.getParams(), result, obj);
-        }
-
+        return obj;
     }
 }

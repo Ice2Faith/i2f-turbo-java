@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -29,17 +30,14 @@ public class SqlQueryRowNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node,context,executor);
-        String datasource = node.getTagAttrMap().get(AttrConsts.DATASOURCE);
-        String script = node.getTagAttrMap().get(AttrConsts.SCRIPT);
+        String datasource =(String)executor.attrValue(AttrConsts.DATASOURCE,FeatureConsts.STRING,node,context);
+        String script = (String)executor.attrValue(AttrConsts.SCRIPT,FeatureConsts.VISIT,node,context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        String resultTypeName = node.getTagAttrMap().get(AttrConsts.RESULT_TYPE);
-        Class<?> resultType = executor.loadClass(resultTypeName);
+        Class<?> resultType = (Class<?>)executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.CLASS,node,context);
         if (resultType == null) {
             resultType = Map.class;
         }
-        if (script != null && !script.isEmpty()) {
-            script = (String) executor.visit(script, context.getParams());
-        } else {
+        if (script == null || script.isEmpty()) {
             script = node.getTagBody();
         }
         if (dialectScriptList.isEmpty()) {
