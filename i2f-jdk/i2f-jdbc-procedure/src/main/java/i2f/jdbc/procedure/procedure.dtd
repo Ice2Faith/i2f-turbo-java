@@ -272,12 +272,18 @@
         <!ATTLIST lang-async delay CDATA #IMPLIED>
         <!ATTLIST lang-async time-unit CDATA #IMPLIED>
 
+        <!ATTLIST lang-async await.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-async await.test CDATA #IMPLIED>
+
         <!ELEMENT lang-latch (EMPTY)>
         <!ATTLIST lang-latch count CDATA #IMPLIED>
         <!ATTLIST lang-latch result CDATA #REQUIRED>
 
         <!ELEMENT lang-async-all (lang-async*)>
         <!ATTLIST lang-async-all await CDATA #IMPLIED>
+
+        <!ATTLIST lang-async-all await.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-async-all await.test CDATA #IMPLIED>
 
         <!ELEMENT lang-latch-down (EMPTY)>
         <!ATTLIST lang-latch-down name CDATA #REQUIRED>

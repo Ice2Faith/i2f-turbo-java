@@ -299,7 +299,7 @@ value.string.long.int=“1”
             <foreach collection="list" item="item" open="(" separator="," close=")">
 
             </foreach>
-            <include refid="permsCondition"></include>
+            <include refid="permsCondition"/>
         </where>
     </sql-query-list>
     <!-- 表示一个查询语句，预期为单个值，仅一行一列的值，执行结果放到result指定的变量中 -->
