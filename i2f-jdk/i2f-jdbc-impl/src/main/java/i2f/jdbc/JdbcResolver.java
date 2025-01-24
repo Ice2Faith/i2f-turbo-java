@@ -692,6 +692,7 @@ public class JdbcResolver {
                         stat.executeBatch();
                         count = 0;
                         once.clear();
+                        stat.close();
                         stat = null;
                     }
                 }
@@ -699,6 +700,67 @@ public class JdbcResolver {
                     stat.executeBatch();
                     count = 0;
                     once.clear();
+                    stat.close();
+                    stat = null;
+                }
+            }
+        } finally {
+            if (stat != null) {
+                stat.close();
+            }
+        }
+
+    }
+
+    public static void batchByListableValues(Connection conn, String sql, Iterator<List<Object>> iterator, int batchSize) throws SQLException {
+        if (iterator == null) {
+            return;
+        }
+        PreparedStatement stat = null;
+        try {
+            if (batchSize < 0) {
+                while (iterator.hasNext()) {
+                    List<Object> elem = iterator.next();
+                    if (stat == null) {
+                        stat = conn.prepareStatement(sql);
+                    }
+                    int i = 1;
+                    for (Object val : elem) {
+                        setStatementObject(stat, i++, val);
+                    }
+                    stat.addBatch();
+                }
+                stat.executeBatch();
+            } else {
+                List<List<Object>> once = new ArrayList<>(batchSize);
+                int count = 0;
+                while (iterator.hasNext()) {
+                    List<Object> elem = iterator.next();
+
+                    once.add(elem);
+                    count++;
+
+                    if (stat == null) {
+                        stat = conn.prepareStatement(sql);
+                    }
+                    int i = 1;
+                    for (Object val : elem) {
+                        setStatementObject(stat, i++, val);
+                    }
+                    stat.addBatch();
+                    if (count == batchSize) {
+                        stat.executeBatch();
+                        count = 0;
+                        once.clear();
+                        stat.close();
+                        stat = null;
+                    }
+                }
+                if (count > 0) {
+                    stat.executeBatch();
+                    count = 0;
+                    once.clear();
+                    stat.close();
                     stat = null;
                 }
             }

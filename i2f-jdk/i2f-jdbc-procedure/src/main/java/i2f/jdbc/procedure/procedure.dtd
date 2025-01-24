@@ -42,6 +42,8 @@
                 |lang-eval-java*
                 |lang-eval-javascript*
                 |sql-scope*
+                |lang-sleep*
+                |sql-etl*
                 )>
         <!ATTLIST procedure id CDATA #IMPLIED>
 
@@ -263,6 +265,7 @@
         <!ELEMENT sql-cursor (sql-query-list|lang-body)>
         <!ATTLIST sql-cursor batch-size CDATA #IMPLIED>
         <!ATTLIST sql-cursor item CDATA #IMPLIED>
+        <!ATTLIST sql-cursor accept-batch CDATA #IMPLIED>
 
         <!ELEMENT lang-eval-java (lang-java-import?|lang-java-member?|lang-java-body?|#PCDATA)>
         <!ATTLIST lang-eval-java result CDATA #IMPLIED>
@@ -278,3 +281,25 @@
 
         <!ELEMENT sql-scope (#PCDATA)>
         <!ATTLIST sql-scope datasources CDATA #IMPLIED>
+
+        <!ELEMENT lang-sleep (EMPTY)>
+        <!ATTLIST lang-sleep timeout CDATA #IMPLIED>
+        <!ATTLIST lang-sleep time-unit CDATA #IMPLIED>
+
+        <!ELEMENT sql-etl (sql-query-list|etl-transform+|etl-load|etl-before|etl-after)>
+        <!ATTLIST sql-etl read-batch-size CDATA #IMPLIED>
+        <!ATTLIST sql-etl write-batch-size CDATA #IMPLIED>
+        <!ATTLIST sql-etl before-truncate CDATA #IMPLIED>
+        <!ATTLIST sql-etl commit-size CDATA #IMPLIED>
+
+        <!ELEMENT etl-transform (EMPTY)>
+        <!ATTLIST etl-transform source CDATA #IMPLIED>
+        <!ATTLIST etl-transform target CDATA #IMPLIED>
+
+        <!ELEMENT etl-load (EMPTY)>
+        <!ATTLIST etl-load datasource CDATA #IMPLIED>
+        <!ATTLIST etl-load table CDATA #IMPLIED>
+
+        <!ELEMENT etl-before (ANY)>
+
+        <!ELEMENT etl-after (ANY)>

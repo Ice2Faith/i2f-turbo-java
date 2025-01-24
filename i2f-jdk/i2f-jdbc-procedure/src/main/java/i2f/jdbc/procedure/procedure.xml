@@ -91,6 +91,7 @@ value.string.long.int=“1”
     pattern默认以string访问，等价于 pattern.string
      -->
     <lang-set value.int="" radix="" pattern="" result=""/>
+
     <!--
     格式化日期
     value默认以visit访问，等价于 value.visit
@@ -401,12 +402,16 @@ value.string.long.int=“1”
     <!--
     通过遍历结果集的方式，提供类似游标的操作能力，通过sql-query-list进行查询遍历，
     每次查询分页大小为batch-size，将item的值提供给lang-body进行执行
+    如果accept-batch值为true，则传递给lang-body的item参数为一个batch-size大小的list
+    否则，只是一行数据传给item
     batch-szie默认值为2000，可缺省
     item默认值为item，可缺省
+    accept-batch默认值为false，可缺省
     batch-size默认以int访问，等价于 batch-size.int
     item以string访问，不支持修饰符
+    accept-batch默认以boolean访问，等价于 accept-batch.boolean
      -->
-    <sql-cursor batch-size="300" item="">
+    <sql-cursor batch-size="300" item="" accept-batch="false">
         <sql-query-list datasource="" script="" result-type="">
 
         </sql-query-list>
@@ -445,4 +450,48 @@ value.string.long.int=“1”
     <sql-scope datasources="">
 
     </sql-scope>
+
+    <!-- 对当前线程进行休眠 -->
+    <lang-sleep timeout="" time-unit=""/>
+
+    <!--
+    进行数据库表ETL对拷，注意，此过程全程使用的是新链接
+    每次从sql-query-list中读取read-batch-size个元素
+    写入到load指定的数据源datasource的table表中
+    允许在开头是进行before-truncate清空表操作
+    在进行commit-size条数据的写入之后，提交一次事务
+     -->
+    <sql-etl read-batch-size=""
+             write-batch-size=""
+             before-truncate=""
+             commit-size="">
+        <sql-query-list>
+
+        </sql-query-list>
+        <!--
+        进行列的转换，只有在target写明的列才会进行传输
+        source表示原始的列名
+        target表示目标列名，将用于load中构造插入语句的目标列名
+        source默认使用string访问，等价于 source.string ,可使用其他修饰符实现原始数据的转换或覆盖
+        target使用string访问，等价于 target.string, 不支持修饰符
+        -->
+        <etl-transform source="" target="" />
+        <!--
+        进行数据的写入，将数据写入到datasource指定的数据源中
+        目标表用table表示
+        -->
+        <etl-load datasource="" table=""/>
+
+        <!--
+        两个声明周期钩子，分别对应ETL前和执行后的操作
+        例如执行前清空表，或者删除目标表的部分数据
+        或者ETL到的是临时表，ETL结束后再批量插入到目标表等场景
+         -->
+        <etl-before>
+
+        </etl-before>
+        <etl-after>
+
+        </etl-after>
+    </sql-etl>
 </procedure>

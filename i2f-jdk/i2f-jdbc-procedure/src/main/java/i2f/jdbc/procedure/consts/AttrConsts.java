@@ -52,6 +52,7 @@ public interface AttrConsts {
     String PARAMS = "params";
 
     String BATCH_SIZE = "batch-size";
+    String ACCEPT_BATCH="accept-batch";
 
     String DATABASES = "databases";
 
@@ -63,4 +64,12 @@ public interface AttrConsts {
     String ISOLATION = "isolation";
 
     String DATASOURCES = "datasources";
+
+    String READ_BATCH_SIZE="read-batch-size";
+    String WRITE_BATCH_SIZE="write-batch-size";
+    String BEFORE_TRUNCATE="before-truncate";
+    String COMMIT_SIZE="commit-size";
+
+    String SOURCE="source";
+    String TABLE="table";
 }
