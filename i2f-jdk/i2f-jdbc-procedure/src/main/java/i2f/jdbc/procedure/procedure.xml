@@ -15,6 +15,21 @@ script-开头的用于提供复用性片段
 lang-开头的用于提供流程控制等能力，实现上考虑使用ongl/spel+velocity实现
 sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml格式进行处理
 
+相关知识介绍：
+xml XML解析技术
+    实现：org.w3c.dom.Document
+    用途：解析xml文件格式为XmlNode树节点
+ognl 对象图导航语言
+    实现：ognl.Ognl
+    用途：用于eval/visit/test等用途，Mybatis中就是使用ognl来实现test和取值的
+        因此，这部分，用法和Mybatis中基本一致，不排除ognl版本导致的一些差异/初始化ognl上下文导致的操作
+    取值上：不需要进行任何包含
+        但是在sql场景中，使用${}/#{}取值，用法上和Mybatis基本一致
+velocity 文本模板引擎
+    实现：org.apache.velocity.app.VelocityEngine
+    用途：用于render用户，提供对字符串的模版渲染能力，可以用于字符串动态拼接等场景
+    取值上：${}包含，表达式上：#()包含
+
 属性修饰符：用在输入时，表示值怎么取，用在输出时，表示输出的目标类型，用在声明时，表示期待的输入类型
 多个修饰符顺序执行，用.小数点隔开
 .int 整型
