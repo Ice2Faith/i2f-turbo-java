@@ -10,6 +10,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -119,6 +120,12 @@ public class ResourceUtil {
      * @throws IOException
      */
     public static Map<URL, String> resources(String path, String patten, IMatcher matcher) throws IOException {
+        return matchResources(path,matcher==null?null:(fname)->{
+            return matcher.matched(matcher.match(fname, patten));
+        });
+    }
+
+    public static Map<URL, String> matchResources(String path, Predicate<String> itemFilter) throws IOException {
         Map<URL, String> ret = new HashMap<>();
         URL[] urls = getResources(path);
         for (URL url : urls) {
@@ -128,8 +135,8 @@ public class ResourceUtil {
                 File[] files = file.listFiles();
                 for (File item : files) {
                     String fname = item.getName();
-                    if (matcher != null) {
-                        if (matcher.matched(matcher.match(fname, patten))) {
+                    if (itemFilter != null) {
+                        if (itemFilter.test(fname)) {
                             URL url1 = item.toURI().toURL();
                             ret.put(url1, fname);
                         }
@@ -157,8 +164,8 @@ public class ResourceUtil {
                         if (pidx >= 0) {
                             fname = name.substring(pidx + 1);
                         }
-                        if (matcher != null) {
-                            if (matcher.matched(matcher.match(fname, patten))) {
+                        if (itemFilter != null) {
+                            if (itemFilter.test(fname)) {
                                 URL[] all = getClasspathResources(name);
                                 for (URL pitem : all) {
                                     ret.put(pitem, fname);
