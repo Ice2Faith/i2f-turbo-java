@@ -51,10 +51,13 @@
         <!ELEMENT lang-println (ANY|EMPTY)>
         <!ATTLIST lang-println tag CDATA #IMPLIED>
 
+        <!ATTLIST lang-println tag.string CDATA #IMPLIED>
+
         <!ELEMENT lang-printf (ANY|EMPTY)>
         <!ATTLIST lang-printf tag CDATA #IMPLIED>
         <!ATTLIST lang-printf value CDATA #IMPLIED>
 
+        <!ATTLIST lang-printf tag.string CDATA #IMPLIED>
 
         <!ELEMENT script-segment (ANY)>
         <!ATTLIST script-segment id CDATA #REQUIRED>
@@ -66,7 +69,22 @@
         <!ATTLIST lang-set value CDATA #IMPLIED>
         <!ATTLIST lang-set radix CDATA #IMPLIED>
         <!ATTLIST lang-set pattern CDATA #IMPLIED>
-        <!ATTLIST lang-set result CDATA #REQUIRED>
+        <!ATTLIST lang-set result CDATA #IMPLIED>
+
+        <!ATTLIST lang-set value.int CDATA #IMPLIED>
+        <!ATTLIST lang-set value.string CDATA #IMPLIED>
+        <!ATTLIST lang-set value.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-set value.double CDATA #IMPLIED>
+        <!ATTLIST lang-set value.date CDATA #IMPLIED>
+        <!ATTLIST lang-set value.eval CDATA #IMPLIED>
+        <!ATTLIST lang-set value.test CDATA #IMPLIED>
+        <!ATTLIST lang-set value.visit CDATA #IMPLIED>
+        <!ATTLIST lang-set value.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-set result.int CDATA #IMPLIED>
+        <!ATTLIST lang-set result.string CDATA #IMPLIED>
+        <!ATTLIST lang-set result.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-set result double #IMPLIED>
+        <!ATTLIST lang-set result.date CDATA #IMPLIED>
 
         <!ELEMENT lang-format-date (ANY|EMPTY)>
         <!ATTLIST lang-format-date value CDATA #IMPLIED>
@@ -80,7 +98,8 @@
 
         <!ELEMENT lang-string-join (ANY|EMPTY)>
         <!ATTLIST lang-string-join separator CDATA #IMPLIED>
-        <!ATTLIST lang-string-join result CDATA #REQUIRED>
+        <!ATTLIST lang-string-join result CDATA #IMPLIED>
+        <!ATTLIST lang-string-join result.trim CDATA #IMPLIED>
 
         <!ELEMENT lang-new-params (ANY|EMPTY)>
         <!ATTLIST lang-new-params result CDATA #REQUIRED>
@@ -102,10 +121,12 @@
         <!ATTLIST lang-eval result CDATA #IMPLIED>
 
         <!ELEMENT lang-string (ANY|EMPTY)>
-        <!ATTLIST lang-string result CDATA #REQUIRED>
+        <!ATTLIST lang-string result CDATA #IMPLIED>
+        <!ATTLIST lang-string result.trim CDATA #IMPLIED>
 
         <!ELEMENT lang-render (ANY|EMPTY)>
-        <!ATTLIST lang-render result CDATA #REQUIRED>
+        <!ATTLIST lang-render result CDATA #IMPLIED>
+        <!ATTLIST lang-render result.trim CDATA #IMPLIED>
 
         <!ELEMENT lang-if (ANY|EMPTY)>
         <!ATTLIST lang-if test CDATA #REQUIRED>
@@ -125,11 +146,15 @@
 
         <!ELEMENT lang-fori (ANY|EMPTY)>
         <!ATTLIST lang-fori begin CDATA #IMPLIED>
-        <!ATTLIST lang-fori end CDATA #REQUIRED>
+        <!ATTLIST lang-fori end CDATA #IMPLIED>
         <!ATTLIST lang-fori incr CDATA #IMPLIED>
         <!ATTLIST lang-fori item CDATA #IMPLIED>
         <!ATTLIST lang-fori first CDATA #IMPLIED>
         <!ATTLIST lang-fori index CDATA #IMPLIED>
+
+        <!ATTLIST lang-fori begin.int CDATA #IMPLIED>
+        <!ATTLIST lang-fori end.int CDATA #IMPLIED>
+        <!ATTLIST lang-fori incr.int CDATA #IMPLIED>
 
         <!ELEMENT lang-while (ANY|EMPTY)>
         <!ATTLIST lang-while test CDATA #REQUIRED>
@@ -295,6 +320,11 @@
         <!ELEMENT etl-transform (EMPTY)>
         <!ATTLIST etl-transform source CDATA #IMPLIED>
         <!ATTLIST etl-transform target CDATA #IMPLIED>
+
+        <!ATTLIST etl-transform source.visit CDATA #IMPLIED>
+        <!ATTLIST etl-transform source.eval CDATA #IMPLIED>
+        <!ATTLIST etl-transform source.eval-java CDATA #IMPLIED>
+        <!ATTLIST etl-transform source.test CDATA #IMPLIED>
 
         <!ELEMENT etl-load (EMPTY)>
         <!ATTLIST etl-load datasource CDATA #IMPLIED>
