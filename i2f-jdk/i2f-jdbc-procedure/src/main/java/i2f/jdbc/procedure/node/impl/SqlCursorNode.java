@@ -57,6 +57,7 @@ public class SqlCursorNode implements ExecutorNode {
 
         Integer batchSize = (Integer) executor.attrValue(AttrConsts.BATCH_SIZE, FeatureConsts.INT, node, context);
         String item = node.getTagAttrMap().get(AttrConsts.ITEM);
+        boolean acceptBatch = (boolean) executor.attrValue(AttrConsts.ACCEPT_BATCH, FeatureConsts.BOOLEAN, node, context);
         if (item == null || item.isEmpty()) {
             item = AttrConsts.ITEM;
         }
@@ -70,7 +71,7 @@ public class SqlCursorNode implements ExecutorNode {
             resultType = Map.class;
         }
         if (script == null || script.isEmpty()) {
-            script = node.getTagBody();
+            script = queryNode.getTagBody();
         }
         if (dialectScriptList.isEmpty()) {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
@@ -88,26 +89,38 @@ public class SqlCursorNode implements ExecutorNode {
                 break;
             }
 
-            boolean breakSignal = false;
-            int count = 0;
-            for (Object obj : list) {
-                count++;
+            if(acceptBatch){
                 try {
-                    executor.setParamsObject(context.getParams(), item, obj);
+                    executor.setParamsObject(context.getParams(), item, list);
+                    executor.execAsProcedure(bodyNode,context,false,false);
                 } catch (ContinueSignalException e) {
                     continue;
                 } catch (BreakSignalException e) {
-                    breakSignal = true;
                     break;
                 }
-            }
+            }else {
+                boolean breakSignal = false;
+                int count = 0;
+                for (Object obj : list) {
+                    count++;
+                    try {
+                        executor.setParamsObject(context.getParams(), item, obj);
+                        executor.execAsProcedure(bodyNode, context, false, false);
+                    } catch (ContinueSignalException e) {
+                        continue;
+                    } catch (BreakSignalException e) {
+                        breakSignal = true;
+                        break;
+                    }
+                }
 
-            if (breakSignal) {
-                break;
-            }
+                if (breakSignal) {
+                    break;
+                }
 
-            if (count < batchSize) {
-                break;
+                if (count < batchSize) {
+                    break;
+                }
             }
 
             pageIndex++;

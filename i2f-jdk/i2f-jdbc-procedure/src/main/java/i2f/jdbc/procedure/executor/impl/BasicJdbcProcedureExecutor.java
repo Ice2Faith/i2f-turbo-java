@@ -73,6 +73,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new LangPrintlnNode());
         ret.add(new LangRenderNode());
         ret.add(new LangSetNode());
+        ret.add(new LangSleepNode());
         ret.add(new LangStringJoinNode());
         ret.add(new LangStringNode());
         ret.add(new LangSynchronizedNode());
@@ -85,6 +86,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new ScriptIncludeNode());
         ret.add(new ScriptSegmentNode());
         ret.add(new SqlCursorNode());
+        ret.add(new SqlEtlNode());
         ret.add(new SqlQueryListNode());
         ret.add(new SqlQueryObjectNode());
         ret.add(new SqlQueryRowNode());
