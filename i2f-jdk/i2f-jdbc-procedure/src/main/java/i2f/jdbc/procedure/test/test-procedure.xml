@@ -58,4 +58,16 @@
     </sql-query-row>
 
     <lang-println organ="organ"/>
+
+    <lang-set value.eval-java="new Date()" result="now"/>
+    <sql-etl before-truncate="true">
+        <sql-query-list datasource="gbase">
+            select * from sys_organ
+        </sql-query-list>
+        <etl-transform source="id" target="ID"/>
+        <etl-transform source="name" target="NAME"/>
+        <etl-transform source="code" target="CODE"/>
+        <etl-transform source.visit="now" target="GMT_CREATE"/>
+        <etl-load datasource="local" table="SYS_ORGANIZATION_TMP"/>
+    </sql-etl>
 </procedure>
