@@ -120,12 +120,13 @@ value.string.long.int=“1”
 
     <!--
     调用其他存储过程，id表示目标的id,
-    可以指定一个params参数作为根上下文参数，这样可以避免上下文污染
+    可以指定一个params参数作为根上下文参数，这样可以避免上下文污染，如果不指定，则直接使用新的上下文，新的上下文可用过result进行获取到
     直接使用目标变量age名来传递值
     params默认以visit访问，等价于 params.visit
+    result为保存调用的参数，可用于从中获取调用的结果，如果同时指定的params，则result可以不用指定，因为result里面的值，实际上就是params里面的值
     其他传入参数默认以visit访问，等价于 age.visit
      -->
-    <procedure-call refid="" params="" age=""/>
+    <procedure-call refid="" params="" age="" result=""/>
 
     <!-- 返回，结束此过程 -->
     <lang-return/>
@@ -433,4 +434,15 @@ value.string.long.int=“1”
     <lang-eval-javascript result="">
 
     </lang-eval-javascript>
+
+    <!--
+     创建一个数据库连接范围，对datasources中指定的这些数据源
+     创建新的连接进行使用，使用完毕之后自动关闭新创建的这些连接
+     同时，执行完毕之后，恢复域外的连接到上下文中
+     多个数据源用逗号分隔，特别的，all表示全部数据源
+     datasources使用string访问，不支持修饰符
+     -->
+    <sql-scope datasources="">
+
+    </sql-scope>
 </procedure>

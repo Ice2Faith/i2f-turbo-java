@@ -1,12 +1,10 @@
 package i2f.jdbc.procedure.signal.impl;
 
-import i2f.jdbc.procedure.signal.SignalException;
-
 /**
  * @author Ice2Faith
  * @date 2025/1/20 11:33
  */
-public class BreakSignalException extends SignalException {
+public class BreakSignalException extends ControlSignalException {
     public BreakSignalException() {
     }
 
