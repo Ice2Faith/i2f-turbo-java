@@ -26,7 +26,7 @@ public class MysqlPageWrapper implements IPageWrapper {
             builder.append(bql.getSql())
                     .append(" limit ?, ? ");
 
-            pageSql.getArgs().add(page.getIndex());
+            pageSql.getArgs().add(page.getOffset());
             pageSql.getArgs().add(page.getSize());
         } else if (page.getSize() != null) {
 

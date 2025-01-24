@@ -675,8 +675,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             List<String> databaseNames = detectDatabaseType(conn);
             setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
-            debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
+            debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+bql);
             List<?> list = JdbcResolver.list(conn, bql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
             return list;
         } catch (Exception e) {
@@ -693,8 +693,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             List<String> databaseNames = detectDatabaseType(conn);
             setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
-            debugLog(() -> "sqlQueryObject:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
+            debugLog(() -> "sqlQueryObject:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+bql);
             Object obj = JdbcResolver.get(conn, bql, resultType);
             return obj;
         } catch (Exception e) {
@@ -710,8 +710,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             List<String> databaseNames = detectDatabaseType(conn);
             setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
-            debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
+            debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+bql);
             Object row = JdbcResolver.find(conn, bql, resultType, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
             return row;
         } catch (Exception e) {
@@ -727,8 +727,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             List<String> databaseNames = detectDatabaseType(conn);
             setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
-            debugLog(() -> "sqlUpdate:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
+            debugLog(() -> "sqlUpdate:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+bql);
             int num = JdbcResolver.update(conn, bql);
             return num;
         } catch (Exception e) {
@@ -744,10 +744,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             List<String> databaseNames = detectDatabaseType(conn);
             setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
-            debugLog(() -> "sqlQueryPage:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
             IPageWrapper wrapper = PageWrappers.wrapper(conn);
             BindSql pageBql = wrapper.apply(bql, ApiPage.of(pageIndex, pageSize));
+            debugLog(() -> "sqlQueryPage:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+pageBql);
             List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
             return list;
         } catch (Exception e) {

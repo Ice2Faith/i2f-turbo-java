@@ -28,7 +28,7 @@ public class PostgreSqlPageWrapper implements IPageWrapper {
                     .append(" offset ? ");
 
             pageSql.getArgs().add(page.getSize());
-            pageSql.getArgs().add(page.getIndex());
+            pageSql.getArgs().add(page.getOffset());
         } else if (page.getSize() != null) {
 
             builder.append(bql.getSql())
