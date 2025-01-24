@@ -6,8 +6,8 @@ import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -32,7 +32,7 @@ public class ProcedureCallNode implements ExecutorNode {
         if (nextNode == null) {
             return;
         }
-        Map<String, Object> callParams = context.getParams();
+        Map<String, Object> callParams = null;
         String paramsText = node.getTagAttrMap().get(AttrConsts.PARAMS);
         if (paramsText != null && !paramsText.isEmpty()) {
             Object value = executor.attrValue(AttrConsts.PARAMS, FeatureConsts.VISIT, node, context);
@@ -40,8 +40,9 @@ public class ProcedureCallNode implements ExecutorNode {
                 callParams = (Map<String, Object>) value;
             }
         }
-        // 备份堆栈
-        Map<String, Object> bakParams = new LinkedHashMap<>();
+        if (callParams == null) {
+            callParams = executor.newParams(context);
+        }
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
             String name = entry.getKey();
             if (AttrConsts.REFID.equals(name)) {
@@ -50,9 +51,10 @@ public class ProcedureCallNode implements ExecutorNode {
             if (AttrConsts.PARAMS.equals(name)) {
                 continue;
             }
+            if (AttrConsts.RESULT.equals(name)) {
+                continue;
+            }
             String script = entry.getValue();
-            // 备份堆栈
-            bakParams.put(name, context.getParams().get(script));
             Object val = executor.attrValue(name, FeatureConsts.VISIT, node, context);
             callParams.put(name, val);
         }
@@ -60,10 +62,12 @@ public class ProcedureCallNode implements ExecutorNode {
         ExecuteContext callContext = new ExecuteContext();
         callContext.setNodeMap(context.getNodeMap());
         callContext.setParams(callParams);
-        executor.execAsProcedure(nextNode, callContext, false, false);
+        try {
+            executor.execAsProcedure(nextNode, callContext, false, false);
+        } catch (ControlSignalException e) {
 
-        // 恢复堆栈
-        context.getParams().putAll(bakParams);
+        }
+
     }
 
 }

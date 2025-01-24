@@ -61,4 +61,6 @@ public interface AttrConsts {
     String RESULT_TYPE = "result-type";
 
     String ISOLATION = "isolation";
+
+    String DATASOURCES = "datasources";
 }

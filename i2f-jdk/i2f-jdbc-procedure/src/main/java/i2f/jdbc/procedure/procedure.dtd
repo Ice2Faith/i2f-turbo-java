@@ -41,6 +41,7 @@
                 |sql-cursor*
                 |lang-eval-java*
                 |lang-eval-javascript*
+                |sql-scope*
                 )>
         <!ATTLIST procedure id CDATA #IMPLIED>
 
@@ -85,6 +86,7 @@
         <!ELEMENT procedure-call (ANY|EMPTY)>
         <!ATTLIST procedure-call params CDATA #IMPLIED>
         <!ATTLIST procedure-call refid CDATA #REQUIRED>
+        <!ATTLIST procedure-call result CDATA #IMPLIED>
 
         <!ELEMENT lang-return (EMPTY)>
 
@@ -273,3 +275,6 @@
 
         <!ELEMENT lang-eval-javascript (#PCDATA)>
         <!ATTLIST lang-eval-javascript result CDATA #IMPLIED>
+
+        <!ELEMENT sql-scope (#PCDATA)>
+        <!ATTLIST sql-scope datasources CDATA #IMPLIED>

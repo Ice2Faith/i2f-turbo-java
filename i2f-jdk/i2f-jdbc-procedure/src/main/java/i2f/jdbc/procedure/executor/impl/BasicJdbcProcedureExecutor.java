@@ -88,6 +88,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new SqlQueryListNode());
         ret.add(new SqlQueryObjectNode());
         ret.add(new SqlQueryRowNode());
+        ret.add(new SqlScopeNode());
         ret.add(new SqlTransBeginNode());
         ret.add(new SqlTransCommitNode());
         ret.add(new SqlTransNoneNode());
@@ -620,10 +621,21 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return bql;
     }
 
-    public Map.Entry<String, String> getDialectSqlScript(List<Map.Entry<String, String>> dialectScriptList, Connection conn) throws Exception {
+    public List<String> detectDatabaseType(Connection conn) throws Exception {
+        List<String> ret = new ArrayList<>();
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+        if (databaseType == null) {
+            return ret;
+        }
         String name = databaseType.db();
         String enumName = databaseType.name();
+        ret.add(name.toLowerCase());
+        ret.add(enumName.toLowerCase());
+        return ret;
+    }
+
+    public Map.Entry<String, String> getDialectSqlScript(List<Map.Entry<String, String>> dialectScriptList, Connection conn) throws Exception {
+        List<String> databaseNames = detectDatabaseType(conn);
         Map.Entry<String, String> firstScript = null;
         Map.Entry<String, String> nullScript = null;
         for (Map.Entry<String, String> entry : dialectScriptList) {
@@ -639,11 +651,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if (key != null) {
                 String[] arr = key.split(",");
                 for (String item : arr) {
-                    if (item.equalsIgnoreCase(name)) {
-                        return entry;
-                    }
-                    if (item.equalsIgnoreCase(enumName)) {
-                        return entry;
+                    for (String databaseName : databaseNames) {
+                        if (item.equalsIgnoreCase(databaseName)) {
+                            return entry;
+                        }
                     }
                 }
             }
@@ -659,6 +670,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            List<String> databaseNames = detectDatabaseType(conn);
+            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
             debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
@@ -675,6 +688,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            List<String> databaseNames = detectDatabaseType(conn);
+            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
             debugLog(() -> "sqlQueryObject:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
@@ -690,6 +705,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            List<String> databaseNames = detectDatabaseType(conn);
+            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
             debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
@@ -705,6 +722,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            List<String> databaseNames = detectDatabaseType(conn);
+            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
             debugLog(() -> "sqlUpdate:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
@@ -720,6 +739,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            List<String> databaseNames = detectDatabaseType(conn);
+            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
             debugLog(() -> "sqlQueryPage:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script);
             BindSql bql = resolveSqlScript(script, params);
