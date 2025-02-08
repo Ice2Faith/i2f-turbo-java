@@ -1,3 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   i2f.springboot.jdbc.bql.autoconfiguration.JdbcBqlAutoConfiguration,\
-  i2f.springboot.jdbc.bql.autoconfiguration.JdbcProxyAutoConfiguration
+  i2f.springboot.jdbc.bql.autoconfiguration.JdbcProxyAutoConfiguration,\
+  i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration

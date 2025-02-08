@@ -16,11 +16,19 @@ import java.util.function.Supplier;
 public interface JdbcProcedureExecutor {
     List<ExecutorNode> getNodes();
 
+    default void exec(String nodeId,ExecuteContext context){
+        exec(context.getNodeMap().get(nodeId),context);
+    }
+
     default void exec(XmlNode node, ExecuteContext context) {
         exec(node, context, false, true);
     }
 
     void exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
+
+    default void execAsProcedure(String nodeId, ExecuteContext context) {
+        execAsProcedure(context.getNodeMap().get(nodeId), context, false, true);
+    }
 
     default void execAsProcedure(XmlNode node, ExecuteContext context) {
         execAsProcedure(node, context, false, true);
