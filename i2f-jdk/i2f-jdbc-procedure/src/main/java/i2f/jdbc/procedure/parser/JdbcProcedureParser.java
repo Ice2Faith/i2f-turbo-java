@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.parser;
 
 import i2f.io.stream.StreamUtil;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -53,6 +54,23 @@ public class JdbcProcedureParser {
     public static XmlNode parse(Document document) throws Exception {
         Node rootNode = XmlUtil.getRootNode(document);
         return parseNode(rootNode);
+    }
+
+    public static void resolveEmbedIdNode(XmlNode node,Map<String,XmlNode> nodeMap){
+        if(node==null || nodeMap==null){
+            return;
+        }
+        String id = node.getTagAttrMap().get(AttrConsts.ID);
+        if(id!=null){
+            nodeMap.put(id,node);
+        }
+        List<XmlNode> children = node.getChildren();
+        if(children==null){
+            return;
+        }
+        for (XmlNode item : children) {
+            resolveEmbedIdNode(item,nodeMap);
+        }
     }
 
     public static XmlNode parseNode(Node node) throws Exception {

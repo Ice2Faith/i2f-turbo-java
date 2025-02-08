@@ -258,6 +258,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         ret.put(ParamsConsts.DATASOURCES, new HashMap<>());
 
+        ret.put(ParamsConsts.CONNECTIONS,new HashMap<>());
+
         ret.put(ParamsConsts.GLOBAL, new HashMap<>());
 
         return ret;
@@ -266,6 +268,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public Map<String, Object> newParams(ExecuteContext context) {
         Map<String, Object> ret = new LinkedHashMap<>();
+        if(context==null){
+            return createParams();
+        }
         ret.put(ParamsConsts.CONTEXT, context.getParams().get(ParamsConsts.CONTEXT));
         ret.put(ParamsConsts.ENVIRONMENT, context.getParams().get(ParamsConsts.ENVIRONMENT));
         ret.put(ParamsConsts.BEANS, context.getParams().get(ParamsConsts.BEANS));
