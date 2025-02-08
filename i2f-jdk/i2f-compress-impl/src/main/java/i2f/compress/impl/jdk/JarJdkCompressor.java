@@ -31,7 +31,7 @@ public class JarJdkCompressor extends AbsCompressor {
                 continue;
             }
             JarEntry entry = new JarEntry(path);
-            if(input.getSize()>=0){
+            if (input.getSize() >= 0) {
                 entry.setSize(input.getSize());
             }
             zos.putNextEntry(entry);

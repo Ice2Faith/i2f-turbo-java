@@ -49,10 +49,10 @@
     },
     {
       "name": "i2f.jdbc.procedure.xml-locations",
-      "type": "java.lang.Boolean",
+      "type": "java.lang.String",
       "description": "whether enable auto-configuration for jdbc procedure xml locations.",
       "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
-      "defaultValue": true
+      "defaultValue": "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml"
     },
     {
       "name": "i2f.jdbc.procedure.refresh-xml-interval-seconds",

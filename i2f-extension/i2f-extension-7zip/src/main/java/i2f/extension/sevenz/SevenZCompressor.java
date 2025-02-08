@@ -53,14 +53,14 @@ public class SevenZCompressor extends AbsCompressor {
     public void release(File input, File output, BiConsumer<CompressBindData, File> consumer) throws IOException {
         RandomAccessFile randomAccessFile = new RandomAccessFile(input, "r");
         IInArchive inArchive = SevenZip.openInArchive(null, // autodetect archive type
-                new RandomAccessFileInStream(randomAccessFile),password);
+                new RandomAccessFileInStream(randomAccessFile), password);
 
         int[] in = new int[inArchive.getNumberOfItems()];
         for (int i = 0; i < in.length; i++) {
             in[i] = i;
         }
         inArchive.extract(in, false, // Non-test mode
-                new ExtractSevenZCallback(password,inArchive,output));
+                new ExtractSevenZCallback(password, inArchive, output));
 
         inArchive.close();
 

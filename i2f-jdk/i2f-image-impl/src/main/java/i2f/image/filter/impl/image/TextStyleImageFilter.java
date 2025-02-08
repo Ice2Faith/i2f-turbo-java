@@ -16,6 +16,7 @@ public class TextStyleImageFilter implements IImageFilter {
     static {
         FontUtil.registryDefaultFonts();
     }
+
     protected String str;
     protected int fontSize;
     protected String fontFamily = "黑体";

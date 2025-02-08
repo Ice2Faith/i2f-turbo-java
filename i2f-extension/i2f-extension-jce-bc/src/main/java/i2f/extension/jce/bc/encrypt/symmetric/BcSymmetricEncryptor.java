@@ -38,11 +38,11 @@ public class BcSymmetricEncryptor extends SymmetricEncryptor {
         super(algorithm, key);
         this.providerName = BcProvider.PROVIDER_NAME;
     }
+
     public BcSymmetricEncryptor(SymmetricType algorithm) {
         super(algorithm);
         this.providerName = BcProvider.PROVIDER_NAME;
     }
-
 
 
     public static SymmetricEncryptor genKeyEncryptor(SymmetricType algorithm) throws Exception {

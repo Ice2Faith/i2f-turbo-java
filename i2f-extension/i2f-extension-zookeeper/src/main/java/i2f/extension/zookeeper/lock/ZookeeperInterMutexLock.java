@@ -12,8 +12,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class ZookeeperInterMutexLock implements ILock {
     protected InterProcessMutex mutex;
-    public ZookeeperInterMutexLock(InterProcessMutex mutex){
-        this.mutex=mutex;
+
+    public ZookeeperInterMutexLock(InterProcessMutex mutex) {
+        this.mutex = mutex;
     }
 
     @Override
@@ -26,7 +27,7 @@ public class ZookeeperInterMutexLock implements ILock {
         mutex.release();
     }
 
-    public void lock(long time, TimeUnit timeUnit) throws Throwable{
-        mutex.acquire(time,timeUnit);
+    public void lock(long time, TimeUnit timeUnit) throws Throwable {
+        mutex.acquire(time, timeUnit);
     }
 }

@@ -42,7 +42,7 @@ public class CompressSevenZCallback implements IOutCreateCallback<IOutItem7z>, I
 
     @Override
     public void setOperationResult(boolean b) throws SevenZipException {
-        this.operationResult=b;
+        this.operationResult = b;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class CompressSevenZCallback implements IOutCreateCallback<IOutItem7z>, I
             item.setPropertyIsDir(true);
         } else {
             // File
-            if(bindData.getSize()>=0) {
+            if (bindData.getSize() >= 0) {
                 item.setDataSize(bindData.getSize());
             }
         }
@@ -71,7 +71,7 @@ public class CompressSevenZCallback implements IOutCreateCallback<IOutItem7z>, I
     @Override
     public ISequentialInStream getStream(int i) throws SevenZipException {
         InputStream is = inputs.get(i).getInputStream();
-        if(is==null){
+        if (is == null) {
             return null;
         }
         return new InputStreamSequentialInStream(is);
@@ -79,11 +79,11 @@ public class CompressSevenZCallback implements IOutCreateCallback<IOutItem7z>, I
 
     @Override
     public void setTotal(long l) throws SevenZipException {
-        this.total=l;
+        this.total = l;
     }
 
     @Override
     public void setCompleted(long l) throws SevenZipException {
-        this.completed=l;
+        this.completed = l;
     }
 }

@@ -89,16 +89,16 @@ public class SqlCursorNode implements ExecutorNode {
                 break;
             }
 
-            if(acceptBatch){
+            if (acceptBatch) {
                 try {
                     executor.setParamsObject(context.getParams(), item, list);
-                    executor.execAsProcedure(bodyNode,context,false,false);
+                    executor.execAsProcedure(bodyNode, context, false, false);
                 } catch (ContinueSignalException e) {
                     continue;
                 } catch (BreakSignalException e) {
                     break;
                 }
-            }else {
+            } else {
                 boolean breakSignal = false;
                 int count = 0;
                 for (Object obj : list) {

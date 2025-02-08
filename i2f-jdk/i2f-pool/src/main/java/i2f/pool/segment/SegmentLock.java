@@ -19,16 +19,16 @@ public class SegmentLock<T extends Lock> extends SegmentObjectProvider<T> {
         super(segmentSize, supplier);
     }
 
-    public T getLock(Object object){
+    public T getLock(Object object) {
         return getSegmentObject(object);
     }
 
-    public void lock(Object object){
+    public void lock(Object object) {
         Lock lock = getSegmentObject(object);
         lock.lock();
     }
 
-    public void unlock(Object object){
+    public void unlock(Object object) {
         Lock lock = getSegmentObject(object);
         lock.unlock();
     }

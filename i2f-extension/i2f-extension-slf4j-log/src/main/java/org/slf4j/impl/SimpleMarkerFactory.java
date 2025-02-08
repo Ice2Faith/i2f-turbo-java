@@ -20,7 +20,7 @@ public class SimpleMarkerFactory implements IMarkerFactory {
         if (name == null) {
             throw new IllegalArgumentException("Marker name cannot be null");
         }
-        Marker marker = this.markerMap.computeIfAbsent(name,(nm)->new SimpleMarker(nm));
+        Marker marker = this.markerMap.computeIfAbsent(name, (nm) -> new SimpleMarker(nm));
         return marker;
 
     }

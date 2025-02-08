@@ -25,7 +25,7 @@ public interface IMatcher {
     double match(String str, String patten);
 
     default boolean isMatch(String str, String patten) {
-        return matched(match(str,patten));
+        return matched(match(str, patten));
     }
 
     default boolean matched(double rate) {

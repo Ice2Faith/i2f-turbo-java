@@ -55,6 +55,7 @@ public class DocumentUtil {
     public static void convert(File wordFile, DocFormat saveFormat, File outFile) throws Exception {
         convert(wordFile, saveFormat.code(), outFile);
     }
+
     public static void convert(File wordFile, int saveFormat, File outFile) throws Exception {
         licence();
         Document doc = new Document(wordFile.getAbsolutePath());
@@ -64,6 +65,7 @@ public class DocumentUtil {
     public static void convert(InputStream wordIs, DocFormat saveFormat, OutputStream outOs) throws Exception {
         convert(wordIs, saveFormat.code(), outOs);
     }
+
     public static void convert(InputStream wordIs, int saveFormat, OutputStream outOs) throws Exception {
         File wordFile = FileUtil.getTempFile();
         File outFile = FileUtil.getTempFile();

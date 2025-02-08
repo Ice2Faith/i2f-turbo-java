@@ -18,5 +18,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RestMapping {
     String value() default "";
+
     String method() default "";
 }

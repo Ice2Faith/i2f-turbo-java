@@ -14,7 +14,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @SpringBootApplication
 public class SpringBootMavenApplication extends WarBootApplication {
 
-    public static void main(String[] args){
-        startup(SpringBootMavenApplication.class,args);
+    public static void main(String[] args) {
+        startup(SpringBootMavenApplication.class, args);
     }
 }

@@ -76,7 +76,7 @@ public class SwlSpringAop implements InitializingBean {
         // 特殊标记返回值为String的方法
         Class<?> returnType = method.getReturnType();
         if (String.class.isAssignableFrom(returnType)) {
-            request.setAttribute(SwlWebConsts.SWL_STRING_RESPONSE,true);
+            request.setAttribute(SwlWebConsts.SWL_STRING_RESPONSE, true);
             log.debug("mapping return string type.");
         }
 

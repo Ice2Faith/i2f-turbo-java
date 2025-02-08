@@ -23,6 +23,7 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
         NashornProvider.printNonNashorn();
         SmAntherdProvider.printNonDependency();
     }
+
     private String keyHex;
 
     public Sm4Encryptor() {

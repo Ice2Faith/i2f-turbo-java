@@ -98,7 +98,7 @@ public class MybatisMapperParser {
     }
 
     public static MybatisMapperNode parseScriptNode(String script) throws Exception {
-        StringBuilder builder=new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         builder.append("<script>");
         builder.append(script);
         builder.append("</script>");

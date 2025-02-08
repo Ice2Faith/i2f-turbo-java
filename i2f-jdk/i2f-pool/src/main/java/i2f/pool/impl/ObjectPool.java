@@ -25,7 +25,7 @@ public class ObjectPool<T> implements IPool<T> {
         this.supplier = supplier;
     }
 
-    public ObjectPool(Supplier<T> supplier,int maxCount) {
+    public ObjectPool(Supplier<T> supplier, int maxCount) {
         this.supplier = supplier;
         this.maxCount.set(maxCount);
     }
@@ -38,17 +38,17 @@ public class ObjectPool<T> implements IPool<T> {
         return maxCount.get();
     }
 
-    public void setMaxCount(int maxCount){
+    public void setMaxCount(int maxCount) {
         this.maxCount.set(maxCount);
     }
 
-    public void setSupplier(Supplier<T> supplier){
+    public void setSupplier(Supplier<T> supplier) {
         lock.writeLock().lock();
-        try{
-            this.supplier=supplier;
+        try {
+            this.supplier = supplier;
             queue.clear();
             count.set(0);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
     }

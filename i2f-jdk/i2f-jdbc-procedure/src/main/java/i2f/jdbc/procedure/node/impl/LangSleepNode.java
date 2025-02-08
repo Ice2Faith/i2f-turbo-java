@@ -7,9 +7,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.base.NodeTime;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**

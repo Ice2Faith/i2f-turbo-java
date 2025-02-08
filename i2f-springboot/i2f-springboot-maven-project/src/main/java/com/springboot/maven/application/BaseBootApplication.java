@@ -37,12 +37,12 @@ public class BaseBootApplication {
     public static WebApplicationType webType;
     public static Class<?> mainClass;
     public static String[] mainArgs;
-    public static AtomicBoolean RUN_BANNER=new AtomicBoolean(false);
+    public static AtomicBoolean RUN_BANNER = new AtomicBoolean(false);
 
-    public static void registerStartup(WebApplicationType webType,Class<?> mainClass,String[] args){
-        BaseBootApplication.webType=webType;
-        BaseBootApplication.mainClass=mainClass;
-        BaseBootApplication.mainArgs=args;
+    public static void registerStartup(WebApplicationType webType, Class<?> mainClass, String[] args) {
+        BaseBootApplication.webType = webType;
+        BaseBootApplication.mainClass = mainClass;
+        BaseBootApplication.mainArgs = args;
     }
 
     public static void startup(Class<?> mainClass, String[] args) {
@@ -52,7 +52,7 @@ public class BaseBootApplication {
     public static void startup(WebApplicationType webType, Class<?> mainClass, String[] args) {
         Slf4jPrintStream.redirectSysoutSyserr();
 
-        registerStartup(webType,mainClass,args);
+        registerStartup(webType, mainClass, args);
 
         SpringApplicationBuilder builder = new SpringApplicationBuilder();
 
@@ -60,16 +60,16 @@ public class BaseBootApplication {
             builder.web(WebApplicationType.NONE);
         }
         builder.sources(mainClass)
-                .listeners(getStartedListener(webType,mainClass))
+                .listeners(getStartedListener(webType, mainClass))
                 .run(args);
     }
 
 
-    public static ApplicationListener<ApplicationStartedEvent> getStartedListener(WebApplicationType webType, Class<?> mainClass){
+    public static ApplicationListener<ApplicationStartedEvent> getStartedListener(WebApplicationType webType, Class<?> mainClass) {
         return new ApplicationListener<ApplicationStartedEvent>() {
             @Override
             public void onApplicationEvent(ApplicationStartedEvent event) {
-                if(BaseBootApplication.RUN_BANNER.getAndSet(true)){
+                if (BaseBootApplication.RUN_BANNER.getAndSet(true)) {
                     return;
                 }
                 BaseBootApplication.webType = event.getSpringApplication().getWebApplicationType();
@@ -110,8 +110,8 @@ public class BaseBootApplication {
         if (isNoVerify()) {
             builder.append("\tverify :\t").append(false).append("\n");
         }
-        if(webType==null){
-            webType=BaseBootApplication.webType;
+        if (webType == null) {
+            webType = BaseBootApplication.webType;
         }
         if (webType != null) {
             builder.append("\tweb    :\t").append(webType).append("\n");
@@ -125,11 +125,11 @@ public class BaseBootApplication {
                 if (contextPath == null) {
                     contextPath = "";
                 }
-                if(contextPath.endsWith("/")){
-                    contextPath=contextPath.substring(0,contextPath.length()-1);
+                if (contextPath.endsWith("/")) {
+                    contextPath = contextPath.substring(0, contextPath.length() - 1);
                 }
-                if(!"".equals(contextPath) && !contextPath.startsWith("/")){
-                    contextPath="/"+contextPath;
+                if (!"".equals(contextPath) && !contextPath.startsWith("/")) {
+                    contextPath = "/" + contextPath;
                 }
 
 
@@ -216,33 +216,33 @@ public class BaseBootApplication {
 
         ServiceLoader<Provider> providers = ServiceLoader.load(Provider.class);
         if (providers != null) {
-            boolean isFirst=true;
+            boolean isFirst = true;
             for (Provider provider : providers) {
-                if(isFirst){
+                if (isFirst) {
                     builder.append("\tjce:\n");
                 }
-                isFirst=false;
+                isFirst = false;
                 builder.append("\t\t").append(String.format("%-6s", provider.getName())).append(":").append(provider.getClass().getName()).append("\n");
             }
         }
 
         ServiceLoader<IIOServiceProvider> ios = ServiceLoader.load(IIOServiceProvider.class);
         if (ios != null) {
-            boolean isFirst=true;
+            boolean isFirst = true;
             for (IIOServiceProvider io : ios) {
-                if(isFirst){
+                if (isFirst) {
                     builder.append("\tio:\n");
                 }
-                isFirst=false;
+                isFirst = false;
                 builder.append("\t\t").append(io.getClass().getName()).append("\n");
             }
         }
 
-        String mainClassName="UNKNOWN";
-        if(mainClass!=null){
-            mainClassName=mainClass.getName();
-        }else if(BaseBootApplication.mainClass!=null){
-            mainClassName=BaseBootApplication.mainClass.getName();
+        String mainClassName = "UNKNOWN";
+        if (mainClass != null) {
+            mainClassName = mainClass.getName();
+        } else if (BaseBootApplication.mainClass != null) {
+            mainClassName = BaseBootApplication.mainClass.getName();
         }
 
         Runtime runtime = Runtime.getRuntime();

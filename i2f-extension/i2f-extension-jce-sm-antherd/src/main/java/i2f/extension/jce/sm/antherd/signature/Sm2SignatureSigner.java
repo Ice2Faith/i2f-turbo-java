@@ -21,6 +21,7 @@ public class Sm2SignatureSigner implements ISignatureSigner {
         NashornProvider.printNonNashorn();
         SmAntherdProvider.printNonDependency();
     }
+
     protected String publicKey;
     protected String privateKey;
 

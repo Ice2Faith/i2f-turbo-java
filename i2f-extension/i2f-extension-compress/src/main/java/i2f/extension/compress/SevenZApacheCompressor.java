@@ -20,7 +20,7 @@ import java.util.function.BiConsumer;
 public class SevenZApacheCompressor extends AbsCompressor {
     @Override
     public void compressBindData(File output, Collection<CompressBindData> inputs) throws IOException {
-        SevenZOutputFile zFile=new SevenZOutputFile(output);
+        SevenZOutputFile zFile = new SevenZOutputFile(output);
         for (CompressBindData input : inputs) {
             String path = input.getDirectory() + "/" + input.getFileName();
             if (path.startsWith("/")) {

@@ -197,8 +197,8 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
             } catch (Throwable e) {
                 // 异常直接进行捕获，方便在后续的流程中进行处理
                 nextRequest.setAttribute(SwlWebConsts.SWL_REQUEST_DECRYPT_EXCEPTION_ATTR_KEY, e);
-                boolean needResponse=onException(request,response,e);
-                if(needResponse){
+                boolean needResponse = onException(request, response, e);
+                if (needResponse) {
                     return;
                 }
             }
@@ -278,8 +278,8 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         String responseText = new String(responseBody, responseCharset);
 
         Object responseString = request.getAttribute(SwlWebConsts.SWL_STRING_RESPONSE);
-        if(Boolean.TRUE.equals(responseString)){
-            responseText=jsonSerializer.serialize(responseText);
+        if (Boolean.TRUE.equals(responseString)) {
+            responseText = jsonSerializer.serialize(responseText);
         }
 
 

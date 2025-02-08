@@ -48,7 +48,7 @@ public class SwlCertExchanger extends SwlExchanger {
                                    String certId,
                                    String clientId) {
         SwlCert cert = certManager.loadClient(certId);
-        return receiveByCert( request, cert,clientId);
+        return receiveByCert(request, cert, clientId);
     }
 
 
@@ -75,7 +75,7 @@ public class SwlCertExchanger extends SwlExchanger {
                                   String certId,
                                   String clientId) {
         SwlCert cert = certManager.loadServer(certId);
-        return receiveByCert( request, cert,clientId);
+        return receiveByCert(request, cert, clientId);
     }
 
 

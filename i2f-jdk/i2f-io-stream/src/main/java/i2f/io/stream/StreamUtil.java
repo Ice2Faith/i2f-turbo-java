@@ -265,6 +265,7 @@ public class StreamUtil {
     public static void writeString(String str, Charset charset, File file) throws IOException {
         writeString(str, charset.name(), file);
     }
+
     public static void writeString(String str, String charset, File file) throws IOException {
         if (!file.getParentFile().exists()) {
             file.mkdirs();
@@ -311,7 +312,7 @@ public class StreamUtil {
     }
 
     public static InputStream localStream(InputStream is, int memLimit) throws IOException {
-        int defaultMaxLimit = 5*1024*1024;//5MB
+        int defaultMaxLimit = 5 * 1024 * 1024;//5MB
         if (memLimit < 0) {
             memLimit = defaultMaxLimit;
         }

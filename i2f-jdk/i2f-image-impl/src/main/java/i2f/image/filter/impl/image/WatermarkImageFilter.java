@@ -18,6 +18,7 @@ public class WatermarkImageFilter implements IImageFilter {
     static {
         FontUtil.registryDefaultFonts();
     }
+
     private String text;
     private boolean gridMode = true;
     private String fontFamily;

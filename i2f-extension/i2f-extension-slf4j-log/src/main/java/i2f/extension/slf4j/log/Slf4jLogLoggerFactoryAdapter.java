@@ -12,10 +12,11 @@ import org.slf4j.Logger;
  * @desc
  */
 public class Slf4jLogLoggerFactoryAdapter implements ILoggerFactory {
-    public static final Slf4jLogLoggerFactoryAdapter INSTANCE=new Slf4jLogLoggerFactoryAdapter();
+    public static final Slf4jLogLoggerFactoryAdapter INSTANCE = new Slf4jLogLoggerFactoryAdapter();
     public static LruMap<String, Logger> CACHE = new LruMap<>(1024);
+
     @Override
     public Logger getLogger(String location) {
-        return CACHE.computeIfAbsent(location,(loc)->new Slf4jLogLoggerAdapter(LoggerFactory.getLogger(loc)));
+        return CACHE.computeIfAbsent(location, (loc) -> new Slf4jLogLoggerAdapter(LoggerFactory.getLogger(loc)));
     }
 }

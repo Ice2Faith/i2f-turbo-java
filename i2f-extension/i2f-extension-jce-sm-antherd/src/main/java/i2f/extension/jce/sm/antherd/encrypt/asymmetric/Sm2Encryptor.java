@@ -28,6 +28,7 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
         NashornProvider.printNonNashorn();
         SmAntherdProvider.printNonDependency();
     }
+
     public static final int MODE_C1C3C2 = 0;
     public static final int MODE_C1C2C3 = 1;
 

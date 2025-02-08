@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class ZookeeperCache implements IExpireContainerCache<String, Object>,
         IPersistCache<String, Object>,
         IDistributedCache<String, Object> {
-    protected String prefix="/cache";
+    protected String prefix = "/cache";
     private ZookeeperManager manager;
 
 
@@ -32,14 +32,14 @@ public class ZookeeperCache implements IExpireContainerCache<String, Object>,
         manager.mkdirs(prefix);
     }
 
-    public String getPath(String key){
-        if(prefix==null || "".equals(prefix)){
-            prefix="/";
+    public String getPath(String key) {
+        if (prefix == null || "".equals(prefix)) {
+            prefix = "/";
         }
-        if(key.startsWith("/")){
-            key=key.substring(1);
+        if (key.startsWith("/")) {
+            key = key.substring(1);
         }
-        return prefix+"/"+key;
+        return prefix + "/" + key;
     }
 
     @Override
@@ -50,13 +50,13 @@ public class ZookeeperCache implements IExpireContainerCache<String, Object>,
 
     @Override
     public boolean exists(String key) {
-        String path=getPath(key);
+        String path = getPath(key);
         return manager.exists(key);
     }
 
     @Override
     public Object get(String key) {
-        String path=getPath(key);
+        String path = getPath(key);
         return manager.get(path);
     }
 

@@ -1,9 +1,7 @@
 package i2f.springboot.shiro.def;
 
-import i2f.cache.base.ICache;
 import i2f.cache.expire.IExpireCache;
 import i2f.cache.impl.container.MapCache;
-import i2f.cache.impl.expire.ExpireCacheWrapper;
 import i2f.cache.impl.expire.ObjectExpireCacheWrapper;
 import i2f.springboot.shiro.ShiroAutoConfiguration;
 import i2f.springboot.shiro.token.AbstractShiroTokenHolder;

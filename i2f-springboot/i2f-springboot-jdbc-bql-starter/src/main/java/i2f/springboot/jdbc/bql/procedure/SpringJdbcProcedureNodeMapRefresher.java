@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,73 +24,73 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class SpringJdbcProcedureNodeMapRefresher {
 
-    protected final CopyOnWriteArraySet<String> xmlLocations=new CopyOnWriteArraySet<>();
-    protected final PathMatchingResourcePatternResolver resourcePatternResolver=new PathMatchingResourcePatternResolver();
+    protected final CopyOnWriteArraySet<String> xmlLocations = new CopyOnWriteArraySet<>();
+    protected final PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-    protected final ConcurrentHashMap<String,XmlNode> nodeMap=new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String, XmlNode> nodeMap = new ConcurrentHashMap<>();
 
-    protected volatile Thread refreshThread=null;
-    protected AtomicBoolean refreshing=new AtomicBoolean(false);
+    protected volatile Thread refreshThread = null;
+    protected AtomicBoolean refreshing = new AtomicBoolean(false);
 
     public SpringJdbcProcedureNodeMapRefresher(List<String> xmlLocations) {
-        if(xmlLocations==null){
+        if (xmlLocations == null) {
             return;
         }
         this.xmlLocations.addAll(xmlLocations);
     }
 
-    public Map<String,XmlNode> getNodeMap(){
-        if(nodeMap.isEmpty()){
+    public Map<String, XmlNode> getNodeMap() {
+        if (nodeMap.isEmpty()) {
             refreshNodeMap();
         }
         return new HashMap<>(nodeMap);
     }
 
-    public void startRefreshThread(long intervalSeconds){
-        if(intervalSeconds<0){
+    public void startRefreshThread(long intervalSeconds) {
+        if (intervalSeconds < 0) {
             refreshing.set(false);
-            if(refreshThread!=null){
+            if (refreshThread != null) {
                 refreshThread.interrupt();
             }
-            refreshThread=null;
+            refreshThread = null;
         }
         refreshing.set(true);
-        Thread thread=new Thread(()->{
-           while(refreshing.get()){
-               try{
-                   refreshNodeMap();
-               }catch(Exception e){
-               }
-               try{
-                   Thread.sleep(intervalSeconds*1000);
-               }catch(Exception e){
-               }
-           }
+        Thread thread = new Thread(() -> {
+            while (refreshing.get()) {
+                try {
+                    refreshNodeMap();
+                } catch (Exception e) {
+                }
+                try {
+                    Thread.sleep(intervalSeconds * 1000);
+                } catch (Exception e) {
+                }
+            }
         });
         thread.setName("procedure-xml-refresher");
         thread.setDaemon(true);
         thread.start();
-        refreshThread=thread;
+        refreshThread = thread;
     }
 
-    public void refreshNodeMap(){
+    public void refreshNodeMap() {
         Map<String, XmlNode> map = parseResources();
         nodeMap.putAll(map);
     }
 
-    public Map<String, XmlNode> parseResources(){
-        Map<String,XmlNode> ret=new HashMap<>();
-        if(xmlLocations==null || xmlLocations.isEmpty()){
+    public Map<String, XmlNode> parseResources() {
+        Map<String, XmlNode> ret = new HashMap<>();
+        if (xmlLocations == null || xmlLocations.isEmpty()) {
             return ret;
         }
-        Set<Resource> resources=new HashSet<>();
+        Set<Resource> resources = new HashSet<>();
         for (String location : xmlLocations) {
-            if(location==null || location.isEmpty()){
+            if (location == null || location.isEmpty()) {
                 continue;
             }
             try {
                 Resource[] arr = resourcePatternResolver.getResources(location);
-                if(arr!=null){
+                if (arr != null) {
                     resources.addAll(Arrays.asList(arr));
                 }
             } catch (IOException e) {
@@ -99,7 +98,7 @@ public class SpringJdbcProcedureNodeMapRefresher {
             }
         }
         for (Resource resource : resources) {
-            try(InputStream is = resource.getInputStream()) {
+            try (InputStream is = resource.getInputStream()) {
                 XmlNode node = JdbcProcedureParser.parse(is);
                 String id = node.getTagAttrMap().get("id");
                 if (id == null) {
@@ -122,8 +121,8 @@ public class SpringJdbcProcedureNodeMapRefresher {
                         ret.put(childId, entry.getValue());
                     }
                 }
-            }catch (Exception e){
-                log.warn(e.getMessage(),e);
+            } catch (Exception e) {
+                log.warn(e.getMessage(), e);
             }
         }
         return ret;

@@ -20,7 +20,7 @@ public class TestSlf4jLogAdapter {
 
         LogHolder.getOrNewTraceId();
 
-        Logger logger= LoggerFactory.getLogger(TestSlf4jLogAdapter.class);
+        Logger logger = LoggerFactory.getLogger(TestSlf4jLogAdapter.class);
         logger.info("adapter");
 
         LogHolder.removeTraceId();

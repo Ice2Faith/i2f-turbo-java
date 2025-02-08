@@ -1,6 +1,5 @@
 package i2f.jdbc.procedure.node.impl;
 
-import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -24,7 +23,7 @@ public class LangBodyNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        executor.execAsProcedure(node,context,false,false);
+        executor.execAsProcedure(node, context, false, false);
     }
 
 }

@@ -420,7 +420,7 @@ public class ObjectConvertor {
         // 字符串字面值
         if (TypeOf.typeOfAny(targetType, boolTypes)) {
             Boolean bl = tryParseBoolean(valStr);
-            if(bl!=null){
+            if (bl != null) {
                 return bl;
             }
         }
@@ -444,76 +444,76 @@ public class ObjectConvertor {
 
         // 其他特殊目标类型的处理
         // 处理URL
-        if(TypeOf.typeOf(targetType, URL.class)){
-            if(TypeOf.typeOf(sourceType,File.class)){
-                try{
+        if (TypeOf.typeOf(targetType, URL.class)) {
+            if (TypeOf.typeOf(sourceType, File.class)) {
+                try {
                     File file = (File) val;
                     return file.toURI().toURL();
-                }catch(Exception e){
+                } catch (Exception e) {
 
                 }
             }
-            try{
+            try {
                 return new URL(valStr);
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
         // 处理URI
-        if(TypeOf.typeOf(targetType, URI.class)){
-            if(TypeOf.typeOf(sourceType,File.class)){
-                try{
+        if (TypeOf.typeOf(targetType, URI.class)) {
+            if (TypeOf.typeOf(sourceType, File.class)) {
+                try {
                     File file = (File) val;
                     return file.toURI();
-                }catch(Exception e){
+                } catch (Exception e) {
 
                 }
             }
-            try{
+            try {
                 return new URI(valStr);
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
         // 处理Charset
-        if(TypeOf.typeOf(targetType, Charset.class)){
-            try{
+        if (TypeOf.typeOf(targetType, Charset.class)) {
+            try {
                 return Charset.forName(valStr);
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
         // 处理File
-        if(TypeOf.typeOf(targetType, File.class)){
-            if(TypeOf.typeOf(sourceType,URL.class)){
+        if (TypeOf.typeOf(targetType, File.class)) {
+            if (TypeOf.typeOf(sourceType, URL.class)) {
                 URL url = (URL) val;
                 return new File(url.getFile());
             }
-            if(TypeOf.typeOf(sourceType,URI.class)){
+            if (TypeOf.typeOf(sourceType, URI.class)) {
                 URI uri = (URI) val;
                 return new File(uri.getPath());
             }
             return new File(valStr);
         }
         // 处理目标Enum
-        if(targetType.isEnum()){
+        if (targetType.isEnum()) {
             Object[] enums = targetType.getEnumConstants();
-            if(enums!=null){
+            if (enums != null) {
                 boolean isIntVal = TypeOf.isBigIntegerCompatibleType(sourceType);
-                int intVal=-1;
-                if(isIntVal){
-                    intVal=new BigDecimal(valStr).intValue();
+                int intVal = -1;
+                if (isIntVal) {
+                    intVal = new BigDecimal(valStr).intValue();
                 }
                 for (Object item : enums) {
                     Enum<?> enu = (Enum<?>) item;
                     String name = enu.name();
                     int ordinal = enu.ordinal();
-                    if(isIntVal){
-                        if(ordinal==intVal){
+                    if (isIntVal) {
+                        if (ordinal == intVal) {
                             return enu;
                         }
-                    }else{
-                        if(name.equalsIgnoreCase(valStr)){
+                    } else {
+                        if (name.equalsIgnoreCase(valStr)) {
                             return enu;
                         }
                     }
@@ -521,106 +521,105 @@ public class ObjectConvertor {
             }
         }
         // 处理源Enum
-        if(sourceType.isEnum()){
+        if (sourceType.isEnum()) {
             Enum<?> enu = (Enum<?>) val;
             String name = enu.name();
             int ordinal = enu.ordinal();
-            if(TypeOf.isBigDecimalCompatibleType(targetType)){
-                return tryConvertAsType(ordinal,targetType);
-            }else if(TypeOf.typeOf(targetType, String.class)){
+            if (TypeOf.isBigDecimalCompatibleType(targetType)) {
+                return tryConvertAsType(ordinal, targetType);
+            } else if (TypeOf.typeOf(targetType, String.class)) {
                 return name;
             }
         }
 
         // 处理目标位Class
-        if(TypeOf.typeOf(targetType,Class.class)){
-            try{
+        if (TypeOf.typeOf(targetType, Class.class)) {
+            try {
                 Class<?> clazz = Class.forName(valStr);
-                if(clazz!=null){
+                if (clazz != null) {
                     return clazz;
                 }
-            }catch(Throwable e){
+            } catch (Throwable e) {
             }
-            try{
+            try {
                 Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(valStr);
-                if(clazz!=null){
+                if (clazz != null) {
                     return clazz;
                 }
-            }catch(Throwable e){
+            } catch (Throwable e) {
             }
         }
 
         // 处理MessageDigest
-        if(TypeOf.typeOf(targetType,MessageDigest.class)){
-            try{
+        if (TypeOf.typeOf(targetType, MessageDigest.class)) {
+            try {
                 MessageDigest md = MessageDigest.getInstance(valStr);
-                if(md!=null){
+                if (md != null) {
                     return md;
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
 
         // 处理MessageDigest
-        if(TypeOf.typeOf(targetType, Mac.class)){
-            try{
+        if (TypeOf.typeOf(targetType, Mac.class)) {
+            try {
                 Mac md = Mac.getInstance(valStr);
-                if(md!=null){
+                if (md != null) {
                     return md;
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
 
         // 处理Cipher
-        if(TypeOf.typeOf(targetType, Cipher.class)){
-            try{
+        if (TypeOf.typeOf(targetType, Cipher.class)) {
+            try {
                 Cipher md = Cipher.getInstance(valStr);
-                if(md!=null){
+                if (md != null) {
                     return md;
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
 
         // 处理InetAddress
-        if(TypeOf.typeOf(targetType, Inet4Address.class)){
-            try{
+        if (TypeOf.typeOf(targetType, Inet4Address.class)) {
+            try {
                 InetAddress inet = Inet4Address.getByName(valStr);
                 return inet;
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
-        if(TypeOf.typeOf(targetType, Inet6Address.class)){
-            try{
+        if (TypeOf.typeOf(targetType, Inet6Address.class)) {
+            try {
                 InetAddress inet = Inet6Address.getByName(valStr);
                 return inet;
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
 
         // 处理Locale
-        if(TypeOf.typeOf(targetType, Locale.class)){
-            try{
+        if (TypeOf.typeOf(targetType, Locale.class)) {
+            try {
                 Locale loc = new Locale(valStr);
                 return loc;
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
 
 
-
         return val;
     }
 
-    public static Boolean tryParseBoolean(String valStr){
-        if(valStr==null){
+    public static Boolean tryParseBoolean(String valStr) {
+        if (valStr == null) {
             return null;
         }
         String str = valStr.toLowerCase();

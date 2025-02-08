@@ -7,6 +7,8 @@ package i2f.lock;
  */
 public interface INotify {
     void signal() throws Throwable;
+
     void signalAll() throws Throwable;
+
     void await() throws Throwable;
 }

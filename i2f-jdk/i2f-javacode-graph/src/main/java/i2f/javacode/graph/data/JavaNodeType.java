@@ -17,8 +17,7 @@ public enum JavaNodeType {
     RETURN(8, "return"),
     EXCEPTION(9, "exception"),
     TYPE(10, "type"),
-    GENERIC(11, "generic")
-    ;
+    GENERIC(11, "generic");
 
     private int code;
     private String text;

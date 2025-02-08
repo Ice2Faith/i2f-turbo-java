@@ -20,8 +20,7 @@ import java.util.*;
 /**
  * @author Ice2Faith
  * @date 2024/7/31 10:26
- * @desc
- * 使用 opencv 进行人脸检测与识别
+ * @desc 使用 opencv 进行人脸检测与识别
  * 默认使用LBPH进行人脸识别
  * 训练train和测试test均使用图片目录结构
  * 目录结构一致
@@ -30,12 +29,12 @@ import java.util.*;
  * 子目录中的文件就是人脸图片
  * 所以，目录结构大致这样
  * trained
- *      tom
- *          tom-01.png
- *          tom-02.jpg
- *      jack
- *          jack-01.png
- *          jack-02.jpeg
+ * tom
+ * tom-01.png
+ * tom-02.jpg
+ * jack
+ * jack-01.png
+ * jack-02.jpeg
  * 另外，支持模型的保存save和载入load
  * 以模型文件 test.xml 为例
  * 则会产生如下文件

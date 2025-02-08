@@ -102,7 +102,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
 
         // 获取安全头，优先从请求头获取，获取不到则从请求参数获取
-        AtomicReference<String> swlh=new AtomicReference<>(null);
+        AtomicReference<String> swlh = new AtomicReference<>(null);
         swlh.set(request.getHeaders().getFirst(config.getHeaderName()));
         if (swlh.get() == null || swlh.get().isEmpty()) {
             swlh.set(request.getQueryParams().getFirst(config.getHeaderName()));
@@ -224,7 +224,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         }
 
                         // 覆盖请求参数
-                        if(replaceParameterMap!=null) {
+                        if (replaceParameterMap != null) {
                             queryParams.putAll(replaceParameterMap);
                         }
 
@@ -285,9 +285,6 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
         }
 
 
-
-
-
         // 进行下游处理
         ServerWebExchange mutatedExchange = exchange.mutate()
                 .request(request)
@@ -301,7 +298,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                                               SwlWebCtrl ctrl,
                                               AtomicReference<String> clientAsymSign,
                                               AtomicReference<String> serverAsymSign
-                                              ){
+    ) {
         if (ctrl.isOut()) {
             return wrapperServerHttpResponse(response, clientAsymSign, serverAsymSign);
         }
@@ -461,7 +458,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
         // 将随机Asym加密模糊之后的Symm秘钥放入响应头，并设置可访问权限
         Collection<String> oldHeaders = response.getHeaders().get(SwlWebConsts.ACCESS_CONTROL_EXPOSE_HEADERS);
         Set<String> headers = new LinkedHashSet<>();
-        if(oldHeaders!=null) {
+        if (oldHeaders != null) {
             for (String header : oldHeaders) {
                 String[] arr = header.split(",");
                 for (String item : arr) {

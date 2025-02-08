@@ -15,19 +15,19 @@ public class JdkReentrantLock implements INotifyLock {
     protected ReentrantLock lock;
     protected Condition cond;
 
-    public JdkReentrantLock(){
-        lock=new ReentrantLock();
-        cond=lock.newCondition();
+    public JdkReentrantLock() {
+        lock = new ReentrantLock();
+        cond = lock.newCondition();
     }
 
-    public JdkReentrantLock(ReentrantLock lock){
-        this.lock=lock;
-        this.cond=this.lock.newCondition();
+    public JdkReentrantLock(ReentrantLock lock) {
+        this.lock = lock;
+        this.cond = this.lock.newCondition();
     }
 
-    public JdkReentrantLock(ReentrantLock lock,Condition cond){
-        this.lock=lock;
-        this.cond=cond;
+    public JdkReentrantLock(ReentrantLock lock, Condition cond) {
+        this.lock = lock;
+        this.cond = cond;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class JdkReentrantLock implements INotifyLock {
     }
 
     @Override
-    public void signal() throws Throwable{
+    public void signal() throws Throwable {
         cond.signal();
     }
 
@@ -51,7 +51,7 @@ public class JdkReentrantLock implements INotifyLock {
     }
 
     @Override
-    public void await() throws Throwable{
+    public void await() throws Throwable {
         cond.await();
     }
 }

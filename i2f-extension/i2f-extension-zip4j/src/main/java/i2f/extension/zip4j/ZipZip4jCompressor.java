@@ -23,33 +23,36 @@ import java.util.function.BiConsumer;
 public class ZipZip4jCompressor extends AbsCompressor {
     private ZipParameters zipParameters;
     private String password;
-    public ZipZip4jCompressor(){
+
+    public ZipZip4jCompressor() {
         this(null);
     }
-    public ZipZip4jCompressor(String password){
-        this.password=password;
+
+    public ZipZip4jCompressor(String password) {
+        this.password = password;
         ZipParameters parameters = new ZipParameters();
         // 压缩级别
         parameters.setCompressionMethod(CompressionMethod.DEFLATE);
         parameters.setCompressionLevel(CompressionLevel.NORMAL);
 
-        if(password!=null && !password.isEmpty()){
+        if (password != null && !password.isEmpty()) {
             parameters.setEncryptFiles(true);
             parameters.setEncryptionMethod(EncryptionMethod.AES);
             parameters.setAesKeyStrength(AesKeyStrength.KEY_STRENGTH_128);
         }
 
-        this.zipParameters=parameters;
+        this.zipParameters = parameters;
     }
-    public ZipZip4jCompressor(ZipParameters zipParameters,String password){
-        this.zipParameters=zipParameters;
-        this.password=password;
+
+    public ZipZip4jCompressor(ZipParameters zipParameters, String password) {
+        this.zipParameters = zipParameters;
+        this.password = password;
     }
 
     @Override
     public void compressBindData(File output, Collection<CompressBindData> inputs) throws IOException {
-        ZipFile zipFile=new ZipFile(output);
-        if(password!=null && !"".equals(password)){
+        ZipFile zipFile = new ZipFile(output);
+        if (password != null && !"".equals(password)) {
             zipFile.setPassword(password.toCharArray());
         }
         for (CompressBindData input : inputs) {
@@ -67,7 +70,7 @@ public class ZipZip4jCompressor extends AbsCompressor {
             if (input.getSize() >= 0) {
                 parameters.setEntrySize(input.getSize());
             }
-            zipFile.addStream(is,parameters);
+            zipFile.addStream(is, parameters);
 
             is.close();
 
@@ -78,8 +81,8 @@ public class ZipZip4jCompressor extends AbsCompressor {
 
     @Override
     public void release(File input, File output, BiConsumer<CompressBindData, File> consumer) throws IOException {
-        ZipFile zipFile=new ZipFile(input);
-        if(zipFile.isEncrypted()){
+        ZipFile zipFile = new ZipFile(input);
+        if (zipFile.isEncrypted()) {
             zipFile.setPassword(password.toCharArray());
         }
         zipFile.extractAll(output.getAbsolutePath());

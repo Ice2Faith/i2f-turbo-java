@@ -285,13 +285,13 @@ public class Bql<H extends Bql<H>> {
         refresh();
     }
 
-    public H refresh(){
+    public H refresh() {
         global();
         inherit();
         return (H) this;
     }
 
-    public H global(){
+    public H global() {
         if (GLOBAL_UPPER_KEYWORDS != null) {
             this.upperKeywords = GLOBAL_UPPER_KEYWORDS;
         }
@@ -320,7 +320,7 @@ public class Bql<H extends Bql<H>> {
             this.columnAsDecorator = COLUMN_AS_DECORATOR_HOLDER.get();
         }
 
-        return (H)this;
+        return (H) this;
     }
 
     public H inherit() {

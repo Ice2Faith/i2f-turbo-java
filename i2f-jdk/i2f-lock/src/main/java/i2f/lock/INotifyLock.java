@@ -5,5 +5,5 @@ package i2f.lock;
  * @date 2022/4/15 8:44
  * @desc
  */
-public interface INotifyLock extends ILock,INotify{
+public interface INotifyLock extends ILock, INotify {
 }

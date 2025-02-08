@@ -65,7 +65,7 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
 
         if (KEY_PATH.equals(path)) {
             String selfSwapKey = transfer.getSelfSwapKey();
-            selfSwapKey=jsonSerializer.serialize(selfSwapKey);
+            selfSwapKey = jsonSerializer.serialize(selfSwapKey);
             byte[] bytes = null;
             try {
                 bytes = selfSwapKey.getBytes("UTF-8");
@@ -95,17 +95,17 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
                             charset = StandardCharsets.UTF_8;
                         }
 
-                        String clientSwapKey=new String(dataBytes,charset);
+                        String clientSwapKey = new String(dataBytes, charset);
 
                         try {
-                            clientSwapKey = (String)jsonSerializer.deserialize(clientSwapKey);
+                            clientSwapKey = (String) jsonSerializer.deserialize(clientSwapKey);
                         } catch (Exception e) {
                         }
 
                         transfer.acceptOtherSwapKey(clientSwapKey);
 
                         String selfSwapKey = transfer.getSelfSwapKey();
-                        selfSwapKey=jsonSerializer.serialize(selfSwapKey);
+                        selfSwapKey = jsonSerializer.serialize(selfSwapKey);
 
                         byte[] bytes = null;
                         try {

@@ -1,8 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.JdbcResolver;
-import i2f.jdbc.data.QueryColumn;
-import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
@@ -11,8 +9,6 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.signal.impl.BreakSignalException;
-import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.reflect.vistor.Visitor;
 
@@ -42,10 +38,10 @@ public class SqlEtlNode implements ExecutorNode {
             return;
         }
         XmlNode queryNode = null;
-        List<XmlNode> transformNodeList=new ArrayList<>();
-        XmlNode loadNode=null;
-        XmlNode beforeNode=null;
-        XmlNode afterNode=null;
+        List<XmlNode> transformNodeList = new ArrayList<>();
+        XmlNode loadNode = null;
+        XmlNode beforeNode = null;
+        XmlNode afterNode = null;
         for (XmlNode item : children) {
             if (SqlQueryListNode.TAG_NAME.equals(item.getTagName())) {
                 queryNode = item;
@@ -53,14 +49,14 @@ public class SqlEtlNode implements ExecutorNode {
             if ("etl-transform".equals(item.getTagName())) {
                 transformNodeList.add(item);
             }
-            if("etl-load".equals(item.getTagName())){
-                loadNode=item;
+            if ("etl-load".equals(item.getTagName())) {
+                loadNode = item;
             }
-            if("etl-before".equals(item.getTagName())){
-                beforeNode=item;
+            if ("etl-before".equals(item.getTagName())) {
+                beforeNode = item;
             }
-            if("etl-after".equals(item.getTagName())){
-                afterNode=item;
+            if ("etl-after".equals(item.getTagName())) {
+                afterNode = item;
             }
         }
 
@@ -72,21 +68,21 @@ public class SqlEtlNode implements ExecutorNode {
             throw new IllegalStateException("missing etl load node!");
         }
 
-        Map<String,XmlNode> targetNodeMap=new LinkedHashMap<>();
-        Map<String,Map.Entry<String,List<String>>> targetMap=new LinkedHashMap<>();
-        if(!transformNodeList.isEmpty()){
+        Map<String, XmlNode> targetNodeMap = new LinkedHashMap<>();
+        Map<String, Map.Entry<String, List<String>>> targetMap = new LinkedHashMap<>();
+        if (!transformNodeList.isEmpty()) {
             for (XmlNode item : transformNodeList) {
                 String target = item.getTagAttrMap().get(AttrConsts.TARGET);
-                if(target!=null && !target.isEmpty()){
+                if (target != null && !target.isEmpty()) {
                     String column = item.getTagAttrMap().get(AttrConsts.SOURCE);
                     List<String> features = item.getAttrFeatureMap().get(AttrConsts.SOURCE);
-                    targetMap.put(target,new AbstractMap.SimpleEntry<>(column,features));
+                    targetMap.put(target, new AbstractMap.SimpleEntry<>(column, features));
                 }
-                targetNodeMap.put(target,item);
+                targetNodeMap.put(target, item);
             }
         }
 
-        if(targetMap.isEmpty()){
+        if (targetMap.isEmpty()) {
             throw new IllegalStateException("missing etl transform node!");
         }
 
@@ -95,17 +91,17 @@ public class SqlEtlNode implements ExecutorNode {
         Integer writeBatchSize = (Integer) executor.attrValue(AttrConsts.WRITE_BATCH_SIZE, FeatureConsts.INT, node, context);
         Boolean beforeTruncate = (Boolean) executor.attrValue(AttrConsts.BEFORE_TRUNCATE, FeatureConsts.BOOLEAN, node, context);
         Integer commitSize = (Integer) executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context);
-        if(readBatchSize==null){
-            readBatchSize=2000;
+        if (readBatchSize == null) {
+            readBatchSize = 2000;
         }
-        if(writeBatchSize==null){
-            writeBatchSize=500;
+        if (writeBatchSize == null) {
+            writeBatchSize = 500;
         }
-        if(beforeTruncate==null){
-            beforeTruncate=false;
+        if (beforeTruncate == null) {
+            beforeTruncate = false;
         }
-        if(commitSize==null){
-            commitSize=writeBatchSize;
+        if (commitSize == null) {
+            commitSize = writeBatchSize;
         }
 
         String loadDatasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, loadNode, context);
@@ -127,30 +123,30 @@ public class SqlEtlNode implements ExecutorNode {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
 
-        StringBuilder loadSqlBuilder=new StringBuilder();
+        StringBuilder loadSqlBuilder = new StringBuilder();
         loadSqlBuilder.append("insert into ").append(loadTable).append(" ( ");
-        boolean isFirst=true;
+        boolean isFirst = true;
         for (Map.Entry<String, Map.Entry<String, List<String>>> entry : targetMap.entrySet()) {
-            if(!isFirst){
+            if (!isFirst) {
                 loadSqlBuilder.append(", ");
             }
             loadSqlBuilder.append(entry.getKey());
-            isFirst=false;
+            isFirst = false;
         }
         loadSqlBuilder.append(" ) ");
         loadSqlBuilder.append(" values ").append(" ( ");
-        isFirst=true;
+        isFirst = true;
         for (Map.Entry<String, Map.Entry<String, List<String>>> entry : targetMap.entrySet()) {
-            if(!isFirst){
+            if (!isFirst) {
                 loadSqlBuilder.append(", ");
             }
             loadSqlBuilder.append("?");
-            isFirst=false;
+            isFirst = false;
         }
         loadSqlBuilder.append(" ) ");
 
-        Map<String, Connection> bakConn=context.paramsComputeIfAbsent(ParamsConsts.CONNECTIONS,(key->new HashMap<>()));
-        context.paramsSet(ParamsConsts.CONNECTIONS,new HashMap<>());
+        Map<String, Connection> bakConn = context.paramsComputeIfAbsent(ParamsConsts.CONNECTIONS, (key -> new HashMap<>()));
+        context.paramsSet(ParamsConsts.CONNECTIONS, new HashMap<>());
         try {
             executor.sqlTransBegin(loadDatasource, Connection.TRANSACTION_READ_COMMITTED, context.getParams());
             Map<String, Connection> conns = context.paramsGet(ParamsConsts.CONNECTIONS);
@@ -160,8 +156,8 @@ public class SqlEtlNode implements ExecutorNode {
                 executor.execAsProcedure(beforeNode, context, false, false);
             }
 
-            if(beforeTruncate){
-                JdbcResolver.update(loadConn,"truncate table "+loadTable,new ArrayList<>());
+            if (beforeTruncate) {
+                JdbcResolver.update(loadConn, "truncate table " + loadTable, new ArrayList<>());
             }
 
             String loadSql = loadSqlBuilder.toString();
@@ -173,19 +169,19 @@ public class SqlEtlNode implements ExecutorNode {
                 if (list.isEmpty()) {
                     break;
                 }
-                int currentCount=0;
+                int currentCount = 0;
                 List<List<Object>> loadArgs = new ArrayList<>();
                 for (Object obj : list) {
                     List<Object> elems = new ArrayList<>();
                     for (Map.Entry<String, Map.Entry<String, List<String>>> entry : targetMap.entrySet()) {
                         Map.Entry<String, List<String>> value = entry.getValue();
                         Object val = Visitor.visit(value.getKey(), obj).get();
-                        boolean isAttrValue=false;
-                        if(val==null){
-                            val=executor.attrValue(AttrConsts.SOURCE,FeatureConsts.EVAL,targetNodeMap.get(entry.getKey()),context);
-                            isAttrValue=true;
+                        boolean isAttrValue = false;
+                        if (val == null) {
+                            val = executor.attrValue(AttrConsts.SOURCE, FeatureConsts.EVAL, targetNodeMap.get(entry.getKey()), context);
+                            isAttrValue = true;
                         }
-                        if(!isAttrValue) {
+                        if (!isAttrValue) {
                             val = executor.resultValue(val, value.getValue(), targetNodeMap.get(entry.getKey()), context);
                         }
                         elems.add(val);
@@ -200,10 +196,10 @@ public class SqlEtlNode implements ExecutorNode {
 
                 if (commitCount >= commitSize) {
                     executor.sqlTransCommit(loadDatasource, context.getParams());
-                    commitCount=0;
+                    commitCount = 0;
                 }
 
-                if(currentCount<readBatchSize){
+                if (currentCount < readBatchSize) {
                     break;
                 }
 
@@ -217,14 +213,14 @@ public class SqlEtlNode implements ExecutorNode {
             }
 
             executor.sqlTransCommit(loadDatasource, context.getParams());
-        }catch (SQLException e){
-            executor.sqlTransRollback(loadDatasource,context.getParams());
-            throw new ThrowSignalException(e.getMessage(),e);
-        }finally {
+        } catch (SQLException e) {
+            executor.sqlTransRollback(loadDatasource, context.getParams());
+            throw new ThrowSignalException(e.getMessage(), e);
+        } finally {
             Map<String, Connection> conns = context.paramsGet(ParamsConsts.CONNECTIONS);
             for (Map.Entry<String, Connection> entry : conns.entrySet()) {
                 Connection conn = entry.getValue();
-                if(conn!=null){
+                if (conn != null) {
                     try {
                         conn.close();
                     } catch (SQLException e) {
@@ -233,7 +229,7 @@ public class SqlEtlNode implements ExecutorNode {
                 }
             }
 
-            context.paramsSet(ParamsConsts.CONNECTIONS,bakConn);
+            context.paramsSet(ParamsConsts.CONNECTIONS, bakConn);
         }
 
     }

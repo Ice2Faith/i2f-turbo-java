@@ -1,7 +1,6 @@
 package i2f.springboot.jdbc.bql.procedure;
 
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.springboot.jdbc.bql.properties.JdbcBqlProperties;
 import lombok.Data;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,21 +34,21 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext=applicationContext;
+        this.applicationContext = applicationContext;
     }
 
     @ConditionalOnMissingBean(JdbcProcedureExecutor.class)
     @Bean
-    public JdbcProcedureExecutor jdbcProcedureExecutor(){
+    public JdbcProcedureExecutor jdbcProcedureExecutor() {
         return new SpringContextJdbcProcedureExecutor(applicationContext);
     }
 
     @Bean
-    public SpringJdbcProcedureNodeMapRefresher springJdbcProcedureNodeMapRefresher(){
+    public SpringJdbcProcedureNodeMapRefresher springJdbcProcedureNodeMapRefresher() {
         SpringJdbcProcedureNodeMapRefresher ret = new SpringJdbcProcedureNodeMapRefresher();
         String xmlLocations = jdbcProcedureProperties.getXmlLocations();
-        if(xmlLocations==null){
-            xmlLocations=SpringJdbcProcedureProperties.DEFAULT_XML_LOCATIONS;
+        if (xmlLocations == null) {
+            xmlLocations = SpringJdbcProcedureProperties.DEFAULT_XML_LOCATIONS;
         }
         String[] arr = xmlLocations.split("[,;\n]");
         ret.getXmlLocations().addAll(Arrays.asList(arr));
@@ -59,7 +58,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
 
     @Bean
     public SpringContextJdbcProcedureExecutorCaller springContextJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor,
-                                                                                             SpringJdbcProcedureNodeMapRefresher refresher){
-        return new SpringContextJdbcProcedureExecutorCaller(executor,refresher);
+                                                                                             SpringJdbcProcedureNodeMapRefresher refresher) {
+        return new SpringContextJdbcProcedureExecutorCaller(executor, refresher);
     }
 }

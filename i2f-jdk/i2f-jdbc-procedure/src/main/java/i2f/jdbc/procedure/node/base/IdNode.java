@@ -12,25 +12,26 @@ import java.util.Map;
  * @date 2025/1/24 9:19
  */
 public class IdNode {
-    public static Map<String,XmlNode> getAllIdNode(XmlNode node){
-        Map<String,XmlNode> nodeMap=new HashMap<>();
-        getAllIdNode(node,nodeMap);
+    public static Map<String, XmlNode> getAllIdNode(XmlNode node) {
+        Map<String, XmlNode> nodeMap = new HashMap<>();
+        getAllIdNode(node, nodeMap);
         return nodeMap;
     }
-    public static void getAllIdNode(XmlNode node, Map<String,XmlNode> nodeMap){
-        if(node==null){
+
+    public static void getAllIdNode(XmlNode node, Map<String, XmlNode> nodeMap) {
+        if (node == null) {
             return;
         }
         String id = node.getTagAttrMap().get(AttrConsts.ID);
-        if(id!=null && !id.isEmpty()){
-            nodeMap.put(id,node);
+        if (id != null && !id.isEmpty()) {
+            nodeMap.put(id, node);
         }
         List<XmlNode> children = node.getChildren();
-        if(children==null){
+        if (children == null) {
             return;
         }
         for (XmlNode item : children) {
-            getAllIdNode(item,nodeMap);
+            getAllIdNode(item, nodeMap);
         }
     }
 }

@@ -1,7 +1,6 @@
 package i2f.springboot.security.def.token;
 
 
-import i2f.cache.base.ICache;
 import i2f.cache.expire.IExpireCache;
 import i2f.extension.redis.cache.RedisCache;
 import lombok.Data;
