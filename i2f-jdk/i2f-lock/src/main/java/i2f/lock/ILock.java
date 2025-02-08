@@ -7,5 +7,6 @@ package i2f.lock;
  */
 public interface ILock {
     void lock() throws Throwable;
+
     void unlock() throws Throwable;
 }

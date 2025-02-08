@@ -19,6 +19,7 @@ public class Iterables {
     public static <E> Iterable<E> of(Enumeration<E> enumeration) {
         return new IteratorIterable<>(new EnumerationIterator<>(enumeration));
     }
+
     public static <E> Iterable<E> of(Iterator<E> iterator) {
         return new IteratorIterable<>(iterator);
     }

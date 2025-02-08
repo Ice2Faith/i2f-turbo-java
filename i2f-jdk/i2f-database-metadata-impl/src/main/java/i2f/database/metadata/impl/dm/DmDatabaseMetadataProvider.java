@@ -23,7 +23,6 @@ public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
             "        </dependency>";
 
 
-
     @Override
     public ColumnMeta parseColumn(Map<String, Object> row) {
         ColumnMeta col = new ColumnMeta();

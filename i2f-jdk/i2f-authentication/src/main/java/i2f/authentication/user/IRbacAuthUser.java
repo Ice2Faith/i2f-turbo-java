@@ -1,7 +1,6 @@
 package i2f.authentication.user;
 
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * @author Ice2Faith

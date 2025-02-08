@@ -36,26 +36,26 @@ public class ExtractSevenZCallback implements IArchiveExtractCallback, ICryptoGe
 
     @Override
     public ISequentialOutStream getStream(int i, ExtractAskMode extractAskMode) throws SevenZipException {
-        if(extractAskMode != ExtractAskMode.EXTRACT){
+        if (extractAskMode != ExtractAskMode.EXTRACT) {
             return null;
         }
         boolean isFolder = (Boolean) inArchive
                 .getProperty(i, PropID.IS_FOLDER);
-        String name = (String)inArchive.getProperty(i, PropID.PATH);
-        File file=new File(output,name);
+        String name = (String) inArchive.getProperty(i, PropID.PATH);
+        File file = new File(output, name);
         if (isFolder) {
             file.mkdirs();
             return null;
         }
 
-        try{
-            if(!file.getParentFile().exists()){
+        try {
+            if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
-            RandomAccessFile accessFile=new RandomAccessFile(file,"rw");
+            RandomAccessFile accessFile = new RandomAccessFile(file, "rw");
             return new RandomAccessFileOutStream(accessFile);
-        }catch(Exception e){
-            throw new SevenZipException(e.getMessage(),e);
+        } catch (Exception e) {
+            throw new SevenZipException(e.getMessage(), e);
         }
     }
 
@@ -66,7 +66,7 @@ public class ExtractSevenZCallback implements IArchiveExtractCallback, ICryptoGe
 
     @Override
     public void setOperationResult(ExtractOperationResult extractOperationResult) throws SevenZipException {
-        this.operationResult=extractOperationResult;
+        this.operationResult = extractOperationResult;
     }
 
     @Override
@@ -76,11 +76,11 @@ public class ExtractSevenZCallback implements IArchiveExtractCallback, ICryptoGe
 
     @Override
     public void setTotal(long l) throws SevenZipException {
-        this.total=l;
+        this.total = l;
     }
 
     @Override
     public void setCompleted(long l) throws SevenZipException {
-        this.completed=l;
+        this.completed = l;
     }
 }

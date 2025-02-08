@@ -38,6 +38,7 @@ public class UnsafeHacker {
             System.out.println("nashorn missing, maybe add dependency : \n" + NASHORN_MAVEN_DEPENDENCY);
         }
     }
+
     public static Unsafe getUnsafe() {
         if (unsafe == null) {
             synchronized (UnsafeHacker.class) {

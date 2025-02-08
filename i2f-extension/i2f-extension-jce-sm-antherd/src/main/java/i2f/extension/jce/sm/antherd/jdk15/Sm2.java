@@ -23,6 +23,7 @@ public class Sm2 {
         NashornProvider.printNonNashorn();
         SmAntherdProvider.printNonDependency();
     }
+
     private static Invocable invocable = null;
 
     public Sm2() {
@@ -32,14 +33,14 @@ public class Sm2 {
         Bindings bindings = null;
 
         try {
-            bindings = (Bindings)invocable.invokeFunction("generateKeyPairHex", new Object[0]);
+            bindings = (Bindings) invocable.invokeFunction("generateKeyPairHex", new Object[0]);
             System.out.println("ok");
         } catch (NoSuchMethodException | ScriptException var2) {
             Exception e = var2;
             e.printStackTrace();
         }
 
-        return new Keypair((String)bindings.get("privateKey"), (String)bindings.get("publicKey"));
+        return new Keypair((String) bindings.get("privateKey"), (String) bindings.get("publicKey"));
     }
 
     public static String doEncrypt(String msg, String publicKey, int cipherMode) {
@@ -48,7 +49,7 @@ public class Sm2 {
 
             try {
                 Object[] param = new Object[]{msg, publicKey, cipherMode};
-                encryptMsg = (String)invocable.invokeFunction("doEncrypt", param);
+                encryptMsg = (String) invocable.invokeFunction("doEncrypt", param);
             } catch (NoSuchMethodException | ScriptException var5) {
                 Exception e = var5;
                 e.printStackTrace();
@@ -70,7 +71,7 @@ public class Sm2 {
 
             try {
                 Object[] param = new Object[]{encryptData, privateKey, cipherMode};
-                msg = (String)invocable.invokeFunction("doDecrypt", param);
+                msg = (String) invocable.invokeFunction("doDecrypt", param);
             } catch (NoSuchMethodException | ScriptException var5) {
                 Exception e = var5;
                 e.printStackTrace();
@@ -90,7 +91,7 @@ public class Sm2 {
         String signature = null;
 
         try {
-            signature = (String)invocable.invokeFunction("doSignature", new Object[]{msg, publicKey, getOptionsMap(signatureOptions)});
+            signature = (String) invocable.invokeFunction("doSignature", new Object[]{msg, publicKey, getOptionsMap(signatureOptions)});
         } catch (NoSuchMethodException | ScriptException var5) {
             Exception e = var5;
             e.printStackTrace();
@@ -100,14 +101,14 @@ public class Sm2 {
     }
 
     public static String doSignature(String msg, String publicKey) {
-        return doSignature(msg, publicKey, (SignatureOptions)null);
+        return doSignature(msg, publicKey, (SignatureOptions) null);
     }
 
     public static boolean doVerifySignature(String msg, String signHex, String publicKey, SignatureOptions signatureOptions) {
         boolean result = false;
 
         try {
-            result = (Boolean)invocable.invokeFunction("doVerifySignature", new Object[]{msg, signHex, publicKey, getOptionsMap(signatureOptions)});
+            result = (Boolean) invocable.invokeFunction("doVerifySignature", new Object[]{msg, signHex, publicKey, getOptionsMap(signatureOptions)});
         } catch (NoSuchMethodException | ScriptException var6) {
             Exception e = var6;
             e.printStackTrace();
@@ -117,7 +118,7 @@ public class Sm2 {
     }
 
     public static boolean doVerifySignature(String msg, String signHex, String publicKey) {
-        return doVerifySignature(msg, signHex, publicKey, (SignatureOptions)null);
+        return doVerifySignature(msg, signHex, publicKey, (SignatureOptions) null);
     }
 
     private static Map<String, Object> getOptionsMap(SignatureOptions signatureOptions) {
@@ -155,8 +156,8 @@ public class Sm2 {
         Point point = null;
 
         try {
-            Bindings bindings = (Bindings)invocable.invokeFunction("getPoint", new Object[0]);
-            point = new Point((String)bindings.get("privateKey"), (String)bindings.get("publicKey"), (Map)bindings.get("k"), (Map)bindings.get("x1"));
+            Bindings bindings = (Bindings) invocable.invokeFunction("getPoint", new Object[0]);
+            point = new Point((String) bindings.get("privateKey"), (String) bindings.get("publicKey"), (Map) bindings.get("k"), (Map) bindings.get("x1"));
         } catch (NoSuchMethodException | ScriptException var2) {
             Exception e = var2;
             e.printStackTrace();
@@ -170,7 +171,7 @@ public class Sm2 {
             InputStream inputStream = com.antherd.smcrypto.sm2.Sm2.class.getClassLoader().getResourceAsStream("sm2.js");
             ScriptEngine engine = (new ScriptEngineManager()).getEngineByName("nashorn");
             engine.eval(new BufferedReader(new InputStreamReader(inputStream)));
-            invocable = (Invocable)engine;
+            invocable = (Invocable) engine;
         } catch (ScriptException var2) {
             ScriptException e = var2;
             e.printStackTrace();

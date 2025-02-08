@@ -16,8 +16,8 @@ import java.util.function.Supplier;
 public interface JdbcProcedureExecutor {
     List<ExecutorNode> getNodes();
 
-    default void exec(String nodeId,ExecuteContext context){
-        exec(context.getNodeMap().get(nodeId),context);
+    default void exec(String nodeId, ExecuteContext context) {
+        exec(context.getNodeMap().get(nodeId), context);
     }
 
     default void exec(XmlNode node, ExecuteContext context) {

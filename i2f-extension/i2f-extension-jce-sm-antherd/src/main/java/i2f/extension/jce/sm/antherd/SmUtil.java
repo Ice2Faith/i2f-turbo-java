@@ -14,6 +14,7 @@ public class SmUtil {
         NashornProvider.printNonNashorn();
         SmAntherdProvider.printNonDependency();
     }
+
     public static String sm3(String str) throws Exception {
         return Sm3Digester.INSTANCE.digest(str);
     }

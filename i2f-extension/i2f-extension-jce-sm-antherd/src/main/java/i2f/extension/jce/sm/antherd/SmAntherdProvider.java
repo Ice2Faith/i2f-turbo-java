@@ -29,7 +29,7 @@ public class SmAntherdProvider {
     }
 
     public static void printNonDependency() {
-        if(printed.getAndSet(true)){
+        if (printed.getAndSet(true)) {
             return;
         }
         boolean has = checkDependency();

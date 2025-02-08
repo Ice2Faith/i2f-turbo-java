@@ -43,7 +43,7 @@ public class JdbcResolver {
     }
 
     public static void loadDriver(String driver) throws SQLException {
-        if(driver==null || driver.isEmpty()){
+        if (driver == null || driver.isEmpty()) {
             return;
         }
         Exception ex = null;
@@ -77,13 +77,13 @@ public class JdbcResolver {
         return DriverManager.getConnection(url, properties);
     }
 
-    public static Connection getConnection(JdbcMeta meta) throws SQLException{
+    public static Connection getConnection(JdbcMeta meta) throws SQLException {
         loadDriver(meta.getDriver());
-        if(meta.getProperties()!=null && !meta.getProperties().isEmpty()){
-            return DriverManager.getConnection(meta.getUrl(),meta.getProperties());
+        if (meta.getProperties() != null && !meta.getProperties().isEmpty()) {
+            return DriverManager.getConnection(meta.getUrl(), meta.getProperties());
         }
-        if(meta.getUsername()!=null || meta.getPassword()!=null){
-            return DriverManager.getConnection(meta.getUrl(),meta.getUsername(),meta.getPassword());
+        if (meta.getUsername() != null || meta.getPassword() != null) {
+            return DriverManager.getConnection(meta.getUrl(), meta.getUsername(), meta.getPassword());
         }
         return DriverManager.getConnection(meta.getUrl());
     }
@@ -1227,19 +1227,19 @@ public class JdbcResolver {
                     map.put(columnNames.get(i), val);
                 }
 
-                Object item=map;
-                if(beanClass==null || !TypeOf.typeOf(beanClass,Map.class)) {
+                Object item = map;
+                if (beanClass == null || !TypeOf.typeOf(beanClass, Map.class)) {
                     try {
                         T bean = ReflectResolver.getInstance(beanClass);
                         ReflectResolver.map2bean(map, bean);
 
-                        item=bean;
+                        item = bean;
                     } catch (Exception e) {
                         throw new IllegalStateException(e.getMessage(), e);
                     }
                 }
 
-                ret.add((T)item);
+                ret.add((T) item);
 
                 currCount++;
 

@@ -11,10 +11,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "i2f.jdbc.procedure")
 public class SpringJdbcProcedureProperties {
-    public static final String DEFAULT_XML_LOCATIONS="classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml";
+    public static final String DEFAULT_XML_LOCATIONS = "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml";
     private boolean enable;
 
-    private String xmlLocations=DEFAULT_XML_LOCATIONS;
+    private String xmlLocations = DEFAULT_XML_LOCATIONS;
 
-    private long refreshXmlIntervalSeconds=-1;
+    private long refreshXmlIntervalSeconds = -1;
 }

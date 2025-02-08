@@ -292,6 +292,7 @@ public class MemoryCompiler {
         String sourceCode = javaSourceCode.replaceAll(CLASS_NAME_TAG, randomClassName);
         return compileCall(sourceCode, randomClassName, randomClassName, methodName, args);
     }
+
     ;
 
     /**
@@ -474,8 +475,8 @@ public class MemoryCompiler {
      * @return
      */
     public static String wrapExpressionAsJavaSourceCode0(String expression, String className,
-                                                        String additionalImports,
-                                                        String additionalMethods) {
+                                                         String additionalImports,
+                                                         String additionalMethods) {
         String[] arr = expression.split(IMPORT_SPLIT_TAG, 2);
         String imports = arr.length > 1 ? arr[0] : "";
         String body = arr.length > 1 ? arr[1] : arr[0];

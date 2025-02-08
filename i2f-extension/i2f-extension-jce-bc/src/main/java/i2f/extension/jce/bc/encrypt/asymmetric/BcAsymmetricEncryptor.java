@@ -47,7 +47,6 @@ public class BcAsymmetricEncryptor extends AsymmetricEncryptor {
     }
 
 
-
     public static KeyPair keyPairOf(AsymmetricType algorithm, byte[] publicKey, byte[] privateKey) throws Exception {
         return Encryptor.keyPairOf(algorithm, publicKey, privateKey);
     }

@@ -17,10 +17,10 @@ import java.util.function.Supplier;
 public class SegmentObjectProvider<T> {
     private final int segmentSize;
     private final Supplier<T> supplier;
-    private final ConcurrentHashMap<String,T> objectMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, T> objectMap = new ConcurrentHashMap<>();
 
     public SegmentObjectProvider(Supplier<T> supplier) {
-        this(1024,supplier);
+        this(1024, supplier);
     }
 
     public SegmentObjectProvider(int segmentSize, Supplier<T> supplier) {
@@ -31,6 +31,7 @@ public class SegmentObjectProvider<T> {
 
     /**
      * 获取指定对象在segmentSize上的hash值
+     *
      * @param key
      * @return
      */
@@ -40,8 +41,8 @@ public class SegmentObjectProvider<T> {
         return hash;
     }
 
-    public T getSegmentObject(Object object){
+    public T getSegmentObject(Object object) {
         String key = getObjectHash(object);
-        return objectMap.computeIfAbsent(key,k->supplier.get());
+        return objectMap.computeIfAbsent(key, k -> supplier.get());
     }
 }

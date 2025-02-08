@@ -79,7 +79,7 @@ public class DefaultI18nProvider implements I18nProvider {
         if (lang == null) {
             return;
         }
-        synchronized (String.valueOf(Math.abs(lang.hashCode())%32).intern()) {
+        synchronized (String.valueOf(Math.abs(lang.hashCode()) % 32).intern()) {
             List<I18nItem> items = new ArrayList<>();
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             for (String fileName : fileNames) {

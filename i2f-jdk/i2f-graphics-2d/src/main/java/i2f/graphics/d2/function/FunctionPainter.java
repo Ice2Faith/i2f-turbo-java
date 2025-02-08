@@ -2,16 +2,14 @@ package i2f.graphics.d2.function;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-
-import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -32,24 +30,24 @@ public class FunctionPainter {
                 15, 15,
                 FunctionType.ARGUMENTS,
                 (t) -> new double[]{
-                        16*Math.pow(Math.sin(t),3.0),
-                        13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t),
-                        5*t,
-                        t*Math.sin(3*t)
+                        16 * Math.pow(Math.sin(t), 3.0),
+                        13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t),
+                        5 * t,
+                        t * Math.sin(3 * t)
                 });
         ImageIO.write(img, "png", new File("./tmp.png"));
     }
 
     public static void testCenter() throws IOException {
-        BufferedImage img = drawFunction(0, Math.PI*2, 0.02,
+        BufferedImage img = drawFunction(0, Math.PI * 2, 0.02,
                 -1, -1,
                 null,
                 15, 15,
                 FunctionType.CENTER,
                 (x) -> new double[]{
                         x,
-                        Math.sin(x)+x*Math.cos(x),
-                        Math.abs(Math.sin(x))+Math.abs(Math.cos(x))
+                        Math.sin(x) + x * Math.cos(x),
+                        Math.abs(Math.sin(x)) + Math.abs(Math.cos(x))
 
                 });
         ImageIO.write(img, "png", new File("./tmp.png"));
@@ -74,28 +72,30 @@ public class FunctionPainter {
         CENTER, // 极坐标，返回值 yArr: radius1,radius2 ...
         ARGUMENTS // 参数方程，返回值 yArr: x1,y1,x2,y2,...
     }
+
     public static BufferedImage drawFunction(double beginX, double endX, double accX,
                                              Function<Double, double[]> yValueMapper) {
-        return drawFunction(beginX,endX,accX,
-                1080,720,null,
-                20,20,FunctionType.CROSS,
+        return drawFunction(beginX, endX, accX,
+                1080, 720, null,
+                20, 20, FunctionType.CROSS,
                 yValueMapper);
     }
+
     public static BufferedImage drawFunction(double beginX, double endX, double accX,
                                              int width, int height,
                                              Function<Double, double[]> yValueMapper) {
-        return drawFunction(beginX,endX,accX,
-                width,height,null,
-                20,20,FunctionType.CROSS,
+        return drawFunction(beginX, endX, accX,
+                width, height, null,
+                20, 20, FunctionType.CROSS,
                 yValueMapper);
     }
 
     public static BufferedImage drawFunction(double beginX, double endX, double accX,
                                              int width, int height, BufferedImage img,
                                              Function<Double, double[]> yValueMapper) {
-        return drawFunction(beginX,endX,accX,
-                width,height,img,
-                20,20,FunctionType.CROSS,
+        return drawFunction(beginX, endX, accX,
+                width, height, img,
+                20, 20, FunctionType.CROSS,
                 yValueMapper);
     }
 
@@ -103,9 +103,9 @@ public class FunctionPainter {
                                              int width, int height, BufferedImage img,
                                              double xAxisCount, double yAxisCount,
                                              Function<Double, double[]> yValueMapper) {
-        return drawFunction(beginX,endX,accX,
-                width,height,img,
-                xAxisCount,yAxisCount,FunctionType.CROSS,
+        return drawFunction(beginX, endX, accX,
+                width, height, img,
+                xAxisCount, yAxisCount, FunctionType.CROSS,
                 yValueMapper);
     }
 
@@ -145,13 +145,13 @@ public class FunctionPainter {
 
         Double minY = null;
         Double maxY = null;
-        Double minX=beginX;
-        Double maxX=endX;
+        Double minX = beginX;
+        Double maxX = endX;
 
-        List<List<double[]>> lines=new ArrayList<>();
+        List<List<double[]>> lines = new ArrayList<>();
         for (double x = beginX; x <= endX; x += accX) {
             double[] yArr = yValueMapper.apply(x);
-            if (type==FunctionType.CROSS){
+            if (type == FunctionType.CROSS) {
                 // yArr: y1,y2,y3 ...
                 for (int i = 0; i < yArr.length; i++) {
                     double cx = x;
@@ -165,14 +165,14 @@ public class FunctionPainter {
                         maxY = arr[1];
                     }
 
-                    if(minX==null || arr[0] <minX){
-                        minX=arr[0];
+                    if (minX == null || arr[0] < minX) {
+                        minX = arr[0];
                     }
-                    if(maxX==null || arr[0]>maxX){
-                        maxX=arr[0];
+                    if (maxX == null || arr[0] > maxX) {
+                        maxX = arr[0];
                     }
 
-                    if(lines.size()<=i){
+                    if (lines.size() <= i) {
                         lines.add(new ArrayList<>(100));
                     }
                     lines.get(i).add(arr);
@@ -181,7 +181,7 @@ public class FunctionPainter {
                 double angle = x;
                 // yArr: radius1,radius2 ...
                 for (int i = 0; i < yArr.length; i++) {
-                    double radius=yArr[i];
+                    double radius = yArr[i];
                     double cx = radius * Math.cos(angle);
                     double cy = radius * Math.sin(angle);
                     double[] arr = new double[]{cx, cy};
@@ -193,25 +193,25 @@ public class FunctionPainter {
                         maxY = arr[1];
                     }
 
-                    if(minX==null || arr[0] <minX){
-                        minX=arr[0];
+                    if (minX == null || arr[0] < minX) {
+                        minX = arr[0];
                     }
-                    if(maxX==null || arr[0]>maxX){
-                        maxX=arr[0];
+                    if (maxX == null || arr[0] > maxX) {
+                        maxX = arr[0];
                     }
 
 
-                    if(lines.size()<=i){
+                    if (lines.size() <= i) {
                         lines.add(new ArrayList<>(100));
                     }
                     lines.get(i).add(arr);
                 }
 
-            } else if(type == FunctionType.ARGUMENTS){
+            } else if (type == FunctionType.ARGUMENTS) {
                 // yArr: x1,y1,x2,y2,...
-                for (int i = 0; (i+1) < yArr.length; i+=2) {
+                for (int i = 0; (i + 1) < yArr.length; i += 2) {
                     double cx = yArr[i];
-                    double cy = yArr[i+1];
+                    double cy = yArr[i + 1];
                     double[] arr = new double[]{cx, cy};
 
                     if (minY == null || arr[1] < minY) {
@@ -222,15 +222,15 @@ public class FunctionPainter {
                     }
 
 
-                    if(minX==null || arr[0] <minX){
-                        minX=arr[0];
+                    if (minX == null || arr[0] < minX) {
+                        minX = arr[0];
                     }
-                    if(maxX==null || arr[0]>maxX){
-                        maxX=arr[0];
+                    if (maxX == null || arr[0] > maxX) {
+                        maxX = arr[0];
                     }
 
-                    int j=i/2;
-                    if(lines.size()<=j){
+                    int j = i / 2;
+                    if (lines.size() <= j) {
                         lines.add(new ArrayList<>(100));
                     }
                     lines.get(j).add(arr);
@@ -337,10 +337,10 @@ public class FunctionPainter {
         for (int i = 0; i < lines.size(); i++) {
             g.setColor(colors[i]);
 
-            List<double[]> line=lines.get(i);
+            List<double[]> line = lines.get(i);
 
-            double lastX=0;
-            double lastY=0;
+            double lastX = 0;
+            double lastY = 0;
             boolean isFirst = true;
             for (double[] xy : line) {
                 double x = xy[0];

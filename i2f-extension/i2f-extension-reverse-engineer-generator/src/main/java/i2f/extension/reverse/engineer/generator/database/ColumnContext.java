@@ -1,7 +1,6 @@
 package i2f.extension.reverse.engineer.generator.database;
 
 import i2f.database.metadata.data.ColumnMeta;
-import i2f.extension.velocity.GeneratorTool;
 import lombok.Data;
 
 import java.sql.Timestamp;

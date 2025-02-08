@@ -20,10 +20,13 @@ import java.lang.annotation.Target;
 public @interface RestHeader {
     // header name
     String name() default "";
+
     // header value
     String value() default "";
+
     // header from which parameter
     String param() default "";
+
     // header from which parameter's which attr
     String attr() default "";
 }

@@ -8,7 +8,7 @@ import org.slf4j.spi.MDCAdapter;
  * @desc
  */
 public class StaticMDCBinder {
-    public static final String BINDER_NAME="log";
+    public static final String BINDER_NAME = "log";
 
     public static final StaticMDCBinder SINGLETON = new StaticMDCBinder();
 

@@ -94,6 +94,7 @@ public class VelocityGenerator {
             }
         }
     }
+
     /**
      * 通过模板字符串通过渲染参数进行渲染，并返回结果
      * 实际上是借助临时文件达到目的

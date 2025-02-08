@@ -20,7 +20,7 @@ public class SwlWebConfig {
     protected String realContentTypeHeaderName = "swlct";
     protected String parameterName = "swlp";
     protected String responseCharset = "UTF-8";
-    protected boolean filterResponseException=false;
+    protected boolean filterResponseException = false;
     protected List<String> whiteListIn;
     protected List<String> whiteListOut;
     protected List<String> attachedHeaderNames;

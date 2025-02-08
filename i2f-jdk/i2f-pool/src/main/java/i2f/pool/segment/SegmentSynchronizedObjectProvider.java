@@ -1,7 +1,6 @@
 package i2f.pool.segment;
 
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -22,7 +21,7 @@ import java.util.function.Supplier;
  * 则实现了基于hash的分段锁
  */
 public class SegmentSynchronizedObjectProvider {
-    public static final SegmentSynchronizedObjectProvider INSTANCE=new SegmentSynchronizedObjectProvider();
+    public static final SegmentSynchronizedObjectProvider INSTANCE = new SegmentSynchronizedObjectProvider();
     private final int segmentSize;
 
     public SegmentSynchronizedObjectProvider() {
@@ -40,20 +39,20 @@ public class SegmentSynchronizedObjectProvider {
         return hash.intern();
     }
 
-    public void synchronize(Object key,Runnable runnable) {
-        synchronized (getSynchronizedObject(key)){
+    public void synchronize(Object key, Runnable runnable) {
+        synchronized (getSynchronizedObject(key)) {
             runnable.run();
         }
     }
 
-    public<V> V synchronize(Object key, Supplier<V> callable) {
-        synchronized (getSynchronizedObject(key)){
+    public <V> V synchronize(Object key, Supplier<V> callable) {
+        synchronized (getSynchronizedObject(key)) {
             return callable.get();
         }
     }
 
-    public <R,T> R synchronize(Object key, Function<T,R> function,T arg) {
-        synchronized (getSynchronizedObject(key)){
+    public <R, T> R synchronize(Object key, Function<T, R> function, T arg) {
+        synchronized (getSynchronizedObject(key)) {
             return function.apply(arg);
         }
     }

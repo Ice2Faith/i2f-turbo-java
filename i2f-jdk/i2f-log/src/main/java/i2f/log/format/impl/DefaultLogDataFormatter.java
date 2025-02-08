@@ -25,7 +25,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class DefaultLogDataFormatter implements ILogDataFormatter {
-    public static LruMap<String,String> CACHE_LOCATION=new LruMap<>(1024);
+    public static LruMap<String, String> CACHE_LOCATION = new LruMap<>(1024);
     protected ThreadLocal<SimpleDateFormat> dateFormat = ThreadLocal.withInitial(() -> new SimpleDateFormat("MM-dd HH:mm:ss.SSS"));
     protected int locationLen = 32;
     protected int threadLen = 12;
@@ -67,7 +67,7 @@ public class DefaultLogDataFormatter implements ILogDataFormatter {
         if (data.getMethodName() != null) {
             builder.append(wrapStdoutText(String.format(" --@%s.%s(%s:%d)", data.getClassName(), data.getMethodName(), data.getFileName(), data.getLineNumber()), stdout, ConsoleColor.BRIGHT_CYAN));
         }
-        if(data.getTraceId()!=null){
+        if (data.getTraceId() != null) {
             builder.append(wrapStdoutText(String.format(" --#%s", data.getTraceId()), stdout, ConsoleColor.BRIGHT_MAGENTA));
         }
         if (data.getEx() != null) {
@@ -111,9 +111,9 @@ public class DefaultLogDataFormatter implements ILogDataFormatter {
         if (location.length() <= len) {
             return location;
         }
-        String cacheKey=len+"#"+location;
+        String cacheKey = len + "#" + location;
         String cacheValue = CACHE_LOCATION.get(cacheKey);
-        if(cacheValue!=null){
+        if (cacheValue != null) {
             return cacheValue;
         }
         String[] arr = location.split("\\.");
@@ -157,7 +157,7 @@ public class DefaultLogDataFormatter implements ILogDataFormatter {
         if (str.length() > len) {
             str = str.substring(str.length() - len);
         }
-        CACHE_LOCATION.put(cacheKey,str);
+        CACHE_LOCATION.put(cacheKey, str);
         return str;
     }
 }

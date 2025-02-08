@@ -37,13 +37,13 @@ import java.util.function.Supplier;
 @NoArgsConstructor
 public class SwlExchanger {
 
-    protected boolean enableTimestamp=true;
+    protected boolean enableTimestamp = true;
     protected long timestampExpireWindowSeconds = 30;
 
-    protected boolean enableNonce=false;
+    protected boolean enableNonce = false;
     protected long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
 
-    protected boolean enableDigital=true;
+    protected boolean enableDigital = true;
 
     @Setter(AccessLevel.NONE)
     protected Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier = new SwlRsaAsymmetricEncryptorSupplier();
@@ -227,8 +227,8 @@ public class SwlExchanger {
         ret.getHeader().setSign(sign);
         ret.getContext().setSign(sign);
 
-        String digital="none";
-        if(enableDigital) {
+        String digital = "none";
+        if (enableDigital) {
             asymmetricEncryptor.setPrivateKey(selfPrivateKey);
             digital = asymmetricEncryptor.sign(sign);
         }
@@ -304,7 +304,7 @@ public class SwlExchanger {
         long window = timestampExpireWindowSeconds;
         ret.getContext().setWindow(String.valueOf(window));
 
-        if(enableTimestamp) {
+        if (enableTimestamp) {
             if (Math.abs(currentTimestamp - ts) > window) {
                 throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION.code(), "timestamp is exceed allow window seconds!");
             }
@@ -316,7 +316,7 @@ public class SwlExchanger {
             throw new SwlException(SwlCode.NONCE_MISSING_EXCEPTION.code(), "nonce cannot is empty!");
         }
 
-        if(enableNonce) {
+        if (enableNonce) {
             if (nonceManager != null) {
                 String nonceKey = timestamp + "-" + nonce;
                 if (clientId != null && !clientId.isEmpty()) {
@@ -397,7 +397,7 @@ public class SwlExchanger {
         ISwlAsymmetricEncryptor asymmetricEncryptor = asymmetricEncryptorObjectPool.require();
         asymmetricEncryptor.setPublicKey(remotePublicKey);
 
-        if(enableDigital){
+        if (enableDigital) {
             boolean digitalOk = asymmetricEncryptor.verify(digital, sign);
             ret.getContext().setDigitalOk(digitalOk);
             if (!digitalOk) {

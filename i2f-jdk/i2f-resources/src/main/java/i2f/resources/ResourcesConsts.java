@@ -178,7 +178,7 @@ public class ResourcesConsts {
             "com.sun."
     };
 
-    public static final String[] DEFAULT_JDK_JAR_NAMES={
+    public static final String[] DEFAULT_JDK_JAR_NAMES = {
             "access-bridge-64.jar",
             "charsets.jar",
             "cldrdata.jar",

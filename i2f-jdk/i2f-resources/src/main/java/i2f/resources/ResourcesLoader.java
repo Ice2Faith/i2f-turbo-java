@@ -100,57 +100,57 @@ public class ResourcesLoader {
         }
     }
 
-    public static Map<String, Class<?>> scanClassNamesBasePackages(String ... basePackages) throws IOException {
-        return scanClassNamesBasePackages(true,null,(jarName,embed)->{
+    public static Map<String, Class<?>> scanClassNamesBasePackages(String... basePackages) throws IOException {
+        return scanClassNamesBasePackages(true, null, (jarName, embed) -> {
             return isDefaultExcludeScanJarName(jarName);
-        },basePackages);
+        }, basePackages);
     }
 
     public static Map<String, Class<?>> scanClassNamesBasePackages(BiPredicate<String, Class<?>> filter,
-                                                            String ... basePackages) throws IOException {
-        return scanClassNamesBasePackages(true,filter,(jarName,embed)->{
+                                                                   String... basePackages) throws IOException {
+        return scanClassNamesBasePackages(true, filter, (jarName, embed) -> {
             return isDefaultExcludeScanJarName(jarName);
-        },basePackages);
+        }, basePackages);
     }
 
     public static Map<String, Class<?>> scanClassNamesBasePackages(boolean jumpJre,
-                                                            BiPredicate<String, Class<?>> filter,
-                                                            String ... basePackages) throws IOException {
-        return scanClassNamesBasePackages(jumpJre,filter,(jarName,embed)->{
+                                                                   BiPredicate<String, Class<?>> filter,
+                                                                   String... basePackages) throws IOException {
+        return scanClassNamesBasePackages(jumpJre, filter, (jarName, embed) -> {
             return isDefaultExcludeScanJarName(jarName);
-        },basePackages);
+        }, basePackages);
     }
 
     public static Map<String, Class<?>> scanClassNamesBasePackages(boolean jumpJre,
-                                                            BiPredicate<String, Class<?>> filter,
-                                                            BiPredicate<String, Boolean> jarFilter,
-                                                            String ... basePackages) throws IOException {
+                                                                   BiPredicate<String, Class<?>> filter,
+                                                                   BiPredicate<String, Boolean> jarFilter,
+                                                                   String... basePackages) throws IOException {
         List<String> items = getShortlyClassNamePrefixes(basePackages);
         List<String> paths = items.stream()
                 .map(e -> e.replaceAll("\\.", "/"))
                 .collect(Collectors.toList());
-        Map<String, Class<?>> map = getClasses(jumpJre, (name,clazz)->{
-            if(items.isEmpty()){
-                if(filter!=null){
-                    return filter.test(name,clazz);
+        Map<String, Class<?>> map = getClasses(jumpJre, (name, clazz) -> {
+            if (items.isEmpty()) {
+                if (filter != null) {
+                    return filter.test(name, clazz);
                 }
                 return true;
             }
             for (String prefix : items) {
-                if(name.startsWith(prefix)){
-                    if(filter!=null){
-                        return filter.test(name,clazz);
+                if (name.startsWith(prefix)) {
+                    if (filter != null) {
+                        return filter.test(name, clazz);
                     }
                     return true;
                 }
             }
             return false;
-        }, jarFilter, (url,path)->{
-            if(paths.isEmpty()){
+        }, jarFilter, (url, path) -> {
+            if (paths.isEmpty()) {
                 return true;
             }
             for (String prefix : paths) {
-                if(path.startsWith(prefix)){
+                if (path.startsWith(prefix)) {
                     return true;
                 }
             }
@@ -162,71 +162,73 @@ public class ResourcesLoader {
     // 取多个包名的最短前缀包：
     // 输入： com com.i2f org org.cglib
     // 输出： com org
-    public static List<String> getShortlyClassNamePrefixes(String ... pfxes) {
-        return getShortlyCommonPrefixes(".","\\.",pfxes);
+    public static List<String> getShortlyClassNamePrefixes(String... pfxes) {
+        return getShortlyCommonPrefixes(".", "\\.", pfxes);
     }
-    public static List<String> getShortlyUrlPathPrefixes(String ... pfxes) {
-        return getShortlyCommonPrefixes("/","\\/",pfxes);
+
+    public static List<String> getShortlyUrlPathPrefixes(String... pfxes) {
+        return getShortlyCommonPrefixes("/", "\\/", pfxes);
     }
-    public static List<String> getShortlyCommonPrefixes(String separator,String separatorRegex,String ... pfxes) {
-        Set<String> set=new HashSet<>(Arrays.asList(pfxes));
-        String[] arr=new String[set.size()];
-        int p=0;
-        for(String item : set){
-            arr[p++]=item;
+
+    public static List<String> getShortlyCommonPrefixes(String separator, String separatorRegex, String... pfxes) {
+        Set<String> set = new HashSet<>(Arrays.asList(pfxes));
+        String[] arr = new String[set.size()];
+        int p = 0;
+        for (String item : set) {
+            arr[p++] = item;
         }
-        List<String> ret=new ArrayList<>(arr.length);
-        List<String[]> partsList=new ArrayList<>(arr.length);
-        Set<Integer> lens=new TreeSet<>();
-        int maxStrLen=0;
-        for(String item : arr){
-            String[] parts=item.split(separatorRegex);
+        List<String> ret = new ArrayList<>(arr.length);
+        List<String[]> partsList = new ArrayList<>(arr.length);
+        Set<Integer> lens = new TreeSet<>();
+        int maxStrLen = 0;
+        for (String item : arr) {
+            String[] parts = item.split(separatorRegex);
             partsList.add(parts);
-            if(item.length()>maxStrLen){
-                maxStrLen=item.length();
+            if (item.length() > maxStrLen) {
+                maxStrLen = item.length();
             }
             lens.add(parts.length);
         }
-        StringBuilder builder=new StringBuilder(maxStrLen+8);
+        StringBuilder builder = new StringBuilder(maxStrLen + 8);
         Set<Integer> excludeIdx = new TreeSet<>();
-        Iterator<Integer> it=lens.iterator();
-        while(it.hasNext()){
-            int len=it.next();
+        Iterator<Integer> it = lens.iterator();
+        while (it.hasNext()) {
+            int len = it.next();
 
-            for(int i=0;i<arr.length;i++){
-                String[] item= partsList.get(i);
-                if(item.length<len){
+            for (int i = 0; i < arr.length; i++) {
+                String[] item = partsList.get(i);
+                if (item.length < len) {
                     continue;
                 }
-                if(excludeIdx.contains(i)){
+                if (excludeIdx.contains(i)) {
                     continue;
                 }
                 builder.setLength(0);
-                for(int j=0;j<len;j++){
-                    if(j!=0){
+                for (int j = 0; j < len; j++) {
+                    if (j != 0) {
                         builder.append(separator);
                     }
                     builder.append(item[j]);
                 }
-                String prefix=builder.toString();
+                String prefix = builder.toString();
 
-                if(!set.contains(prefix)){
+                if (!set.contains(prefix)) {
                     continue;
                 }
-                for(int j=0;j<arr.length;j++){
-                    if(excludeIdx.contains(j)){
+                for (int j = 0; j < arr.length; j++) {
+                    if (excludeIdx.contains(j)) {
                         continue;
                     }
-                    if(arr[j].equals(prefix)){
+                    if (arr[j].equals(prefix)) {
                         continue;
                     }
-                    String pitem=arr[j];
-                    if(pitem.length()>prefix.length()){
-                        if(pitem.startsWith(prefix+separator)){
+                    String pitem = arr[j];
+                    if (pitem.length() > prefix.length()) {
+                        if (pitem.startsWith(prefix + separator)) {
                             excludeIdx.add(j);
                         }
-                    }else{
-                        if(pitem.startsWith(prefix)){
+                    } else {
+                        if (pitem.startsWith(prefix)) {
                             excludeIdx.add(j);
                         }
                     }
@@ -236,8 +238,8 @@ public class ResourcesLoader {
             }
         }
 
-        for(int i=0;i<arr.length;i++){
-            if(!excludeIdx.contains(i)){
+        for (int i = 0; i < arr.length; i++) {
+            if (!excludeIdx.contains(i)) {
                 ret.add(arr[i]);
             }
         }
@@ -287,26 +289,26 @@ public class ResourcesLoader {
     }
 
     public static Map<String, Class<?>> getDefaultClasses(BiPredicate<String, Class<?>> filter) {
-        return getDefaultClasses(true, filter,null);
+        return getDefaultClasses(true, filter, null);
     }
 
     public static Map<String, Class<?>> getDefaultClasses(boolean jumpJre,
                                                           BiPredicate<String, Class<?>> filter) {
-        return getDefaultClasses(jumpJre, filter,null);
+        return getDefaultClasses(jumpJre, filter, null);
     }
 
     public static Map<String, Class<?>> getDefaultClasses(boolean jumpJre,
-                                                   BiPredicate<String, Class<?>> filter,
-                                                   BiPredicate<URL, String> resourceFilter
+                                                          BiPredicate<String, Class<?>> filter,
+                                                          BiPredicate<URL, String> resourceFilter
     ) {
-        Map<URL, String> classes = scanResources(jumpJre,(jarName, embed) -> {
+        Map<URL, String> classes = scanResources(jumpJre, (jarName, embed) -> {
             return isDefaultExcludeScanJarName(jarName);
-        } , (url,str)->{
-            boolean ok=isLegalClassFile(str);
-            if(!ok || resourceFilter==null){
+        }, (url, str) -> {
+            boolean ok = isLegalClassFile(str);
+            if (!ok || resourceFilter == null) {
                 return ok;
             }
-            return resourceFilter.test(url,str);
+            return resourceFilter.test(url, str);
         });
         return convertResourceAsClassMap(classes, filter);
     }
@@ -316,12 +318,12 @@ public class ResourcesLoader {
     }
 
     public static Map<String, Class<?>> getClasses(boolean jumpJre) {
-        return getClasses(jumpJre, null,null,null);
+        return getClasses(jumpJre, null, null, null);
     }
 
     public static Map<String, Class<?>> getClasses(boolean jumpJre, BiPredicate<String, Class<?>> filter) {
 
-        return getClasses(jumpJre,filter,null,(url, str) -> {
+        return getClasses(jumpJre, filter, null, (url, str) -> {
             return isLegalClassFile(str);
         });
     }
@@ -330,7 +332,7 @@ public class ResourcesLoader {
                                                    BiPredicate<String, Class<?>> filter,
                                                    BiPredicate<String, Boolean> jarFilter
     ) {
-        return getClasses(jumpJre,filter,jarFilter,(url, str) -> {
+        return getClasses(jumpJre, filter, jarFilter, (url, str) -> {
             return isLegalClassFile(str);
         });
     }
@@ -339,13 +341,13 @@ public class ResourcesLoader {
                                                    BiPredicate<String, Class<?>> filter,
                                                    BiPredicate<String, Boolean> jarFilter,
                                                    BiPredicate<URL, String> resourceFilter
-                                                   ) {
-        Map<URL, String> classes = scanResources(jumpJre, jarFilter, (url,str)->{
-            boolean ok=isLegalClassFile(str);
-            if(!ok || resourceFilter==null){
+    ) {
+        Map<URL, String> classes = scanResources(jumpJre, jarFilter, (url, str) -> {
+            boolean ok = isLegalClassFile(str);
+            if (!ok || resourceFilter == null) {
                 return ok;
             }
-            return resourceFilter.test(url,str);
+            return resourceFilter.test(url, str);
         });
         return convertResourceAsClassMap(classes, filter);
     }
@@ -358,7 +360,7 @@ public class ResourcesLoader {
                 continue;
             }
             Class<?> clazz = ReflectResolver.loadClass(ReflectResolver.path2ClassName(value));
-            if(clazz==null){
+            if (clazz == null) {
                 continue;
             }
             if (filter == null || filter.test(value, clazz)) {
@@ -376,7 +378,7 @@ public class ResourcesLoader {
 
     public static boolean isDefaultExcludeScanJarName(String jarName) {
         for (String name : ResourcesConsts.DEFAULT_JDK_JAR_NAMES) {
-            if(name.equals(jarName)) {
+            if (name.equals(jarName)) {
                 return false;
             }
         }

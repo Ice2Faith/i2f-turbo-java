@@ -185,7 +185,7 @@ public class RichConverter {
         Object cvt = ObjectConvertor.tryConvertAsType(obj, targetClass);
         if (cvt != null && targetArgumentTypes == null) {
             Class<?> cvtClass = cvt.getClass();
-            if (TypeOf.typeOf(cvtClass,targetClass)) {
+            if (TypeOf.typeOf(cvtClass, targetClass)) {
                 return (T) cvt;
             }
         }
@@ -215,8 +215,8 @@ public class RichConverter {
         }
 
         if (ret == null) {
-            if(TypeOf.instanceOf(cvt,targetClass)){
-                return (T)cvt;
+            if (TypeOf.instanceOf(cvt, targetClass)) {
+                return (T) cvt;
             }
             throw new IllegalArgumentException("un-support instance type:" + type);
         }

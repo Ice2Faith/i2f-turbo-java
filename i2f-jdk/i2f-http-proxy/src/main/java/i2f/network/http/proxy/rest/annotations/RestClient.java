@@ -20,6 +20,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RestClient {
     String url() default "";
+
     String path() default "";
+
     Class<? extends IHttpProcessor> http() default HttpUrlConnectProcessor.class;
 }

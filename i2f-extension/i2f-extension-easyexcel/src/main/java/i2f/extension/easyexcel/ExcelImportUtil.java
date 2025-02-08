@@ -20,6 +20,7 @@ public class ExcelImportUtil {
             return read(is);
         }
     }
+
     public static <T> List<T> read(File file, Class<T> beanClass) throws IOException {
         ObjectAnalysisEventListener<T> listener = new ObjectAnalysisEventListener<T>();
         try (InputStream is = new FileInputStream(file)) {
@@ -38,6 +39,7 @@ public class ExcelImportUtil {
     public static List<Map<String, Object>> read(InputStream is) {
         return read(is, null, 0, new MapAnalysisEventListener());
     }
+
     public static <T> List<T> read(InputStream is, Class<T> beanClass) {
         return read(is, beanClass, 0, new ObjectAnalysisEventListener<T>());
     }

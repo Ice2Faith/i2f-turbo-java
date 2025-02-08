@@ -37,7 +37,7 @@ public class ZookeeperAutoConfiguration implements EnvironmentAware {
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.environment=environment;
+        this.environment = environment;
     }
 
     @Bean
@@ -46,7 +46,7 @@ public class ZookeeperAutoConfiguration implements EnvironmentAware {
     }
 
     @Bean
-    public ZookeeperCache zookeeperCache(@Autowired ZookeeperManager zookeeperManager){
+    public ZookeeperCache zookeeperCache(@Autowired ZookeeperManager zookeeperManager) {
         return new ZookeeperCache(zookeeperManager);
     }
 
@@ -63,13 +63,13 @@ public class ZookeeperAutoConfiguration implements EnvironmentAware {
 
     @ConditionalOnClass(CuratorFramework.class)
     @Bean
-    public CuratorFramework curatorFramework(){
+    public CuratorFramework curatorFramework() {
         return ZookeeperLockUtil.getClient(zkConfig.getConnectString(), zkConfig.getSessionTimeout());
     }
 
     @ConditionalOnClass(CuratorFramework.class)
     @Bean
-    public ZookeeperLockProvider zookeeperLockProvider(@Autowired CuratorFramework curator){
+    public ZookeeperLockProvider zookeeperLockProvider(@Autowired CuratorFramework curator) {
         return new ZookeeperLockProvider(curator);
     }
 

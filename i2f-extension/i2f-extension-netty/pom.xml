@@ -12,7 +12,6 @@
     <artifactId>i2f-extension-netty</artifactId>
 
 
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>

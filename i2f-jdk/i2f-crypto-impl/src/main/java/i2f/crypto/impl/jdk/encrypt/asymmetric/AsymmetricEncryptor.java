@@ -93,7 +93,7 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
         this.providerName = algorithm.provider();
         this.noPadding = algorithm.noPadding();
         this.privateEncrypt = algorithm.privateEncrypt();
-        if(keyPair!=null) {
+        if (keyPair != null) {
             this.privateKey = keyPair.getPrivate();
             this.publicKey = keyPair.getPublic();
         }
@@ -255,7 +255,7 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
     @Override
     public boolean verify(byte[] sign, byte[] data) throws Exception {
         byte[] bytes = publicDecrypt(sign);
-        return ArrayUtil.equal(bytes,data);
+        return ArrayUtil.equal(bytes, data);
     }
 
     public String getAlgorithmName() {
@@ -336,7 +336,7 @@ public class AsymmetricEncryptor implements IAsymmetricEncryptor {
                 Objects.equals(algorithmName, that.algorithmName) &&
                 Objects.equals(providerName, that.providerName) &&
                 Objects.equals(privateKey, that.privateKey) &&
-                Objects.equals(publicKey, that.publicKey) ;
+                Objects.equals(publicKey, that.publicKey);
     }
 
     @Override

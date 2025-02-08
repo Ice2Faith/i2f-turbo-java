@@ -23,7 +23,7 @@ public class SwlMissingBeanConfiguration {
 
     @ConditionalOnMissingBean(IExpireCache.class)
     @Bean
-    public IExpireCache<String,Object> concurrentHashMapExpireCache(){
+    public IExpireCache<String, Object> concurrentHashMapExpireCache() {
         return new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));
     }
 }

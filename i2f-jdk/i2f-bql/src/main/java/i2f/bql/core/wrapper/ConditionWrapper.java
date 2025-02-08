@@ -250,6 +250,7 @@ public class ConditionWrapper<H extends ConditionWrapper<H>> implements BqlWrapp
         }
         return (H) this;
     }
+
     public <R, T, V> H cond(IBuilder<R, T, V> builder, Condition cond) {
         return cond((Serializable) builder, cond);
     }

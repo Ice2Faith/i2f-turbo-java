@@ -12,7 +12,7 @@ import java.util.Locale;
  */
 public class TestI18n {
     public static void main(String[] args) {
-        if(I18n.DEFAULT_PROVIDER instanceof DefaultI18nProvider){
+        if (I18n.DEFAULT_PROVIDER instanceof DefaultI18nProvider) {
             DefaultI18nProvider defaultProvider = (DefaultI18nProvider) I18n.DEFAULT_PROVIDER;
             defaultProvider.getFileNames()
                     .addAll(Arrays.asList(

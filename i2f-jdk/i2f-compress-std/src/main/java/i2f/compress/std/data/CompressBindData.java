@@ -19,7 +19,7 @@ public class CompressBindData {
     private String fileName;
     private String directory;
     private InputStream inputStream;
-    private long size=-1;
+    private long size = -1;
 
     public CompressBindData(String fileName, String directory, InputStream inputStream) {
         this.fileName = fileName;
@@ -40,7 +40,7 @@ public class CompressBindData {
         if (file.isFile()) {
             is = new FileInputStream(file);
         }
-        return new CompressBindData(file.getName(), bindFile.getDirectory(), is,file.length());
+        return new CompressBindData(file.getName(), bindFile.getDirectory(), is, file.length());
     }
 
     public static CompressBindData instance() {

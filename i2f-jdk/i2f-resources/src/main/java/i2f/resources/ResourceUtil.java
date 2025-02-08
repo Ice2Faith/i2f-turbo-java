@@ -120,7 +120,7 @@ public class ResourceUtil {
      * @throws IOException
      */
     public static Map<URL, String> resources(String path, String patten, IMatcher matcher) throws IOException {
-        return matchResources(path,matcher==null?null:(fname)->{
+        return matchResources(path, matcher == null ? null : (fname) -> {
             return matcher.matched(matcher.match(fname, patten));
         });
     }

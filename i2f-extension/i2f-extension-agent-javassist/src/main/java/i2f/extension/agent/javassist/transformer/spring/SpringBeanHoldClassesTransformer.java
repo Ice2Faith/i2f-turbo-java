@@ -59,18 +59,18 @@ public class SpringBeanHoldClassesTransformer implements ClassFileTransformer, I
                 && !lowerName.contains(".beans.")
                 && !lowerName.contains(".core.env.")
                 && !lowerName.contains(".web.")
-                ) {
+        ) {
             return null;
         }
 
         for (String[] pair : SpringApplicationContextHoldClassesTransformer.INJECT_APPLICATION_CONTEXT_CLASS_FIELD_ARRAY) {
-            if(pair[0].equals(className)){
+            if (pair[0].equals(className)) {
                 return null;
             }
         }
 
         for (String[] pair : SpringApplicationHoldClassesTransformer.INJECT_APPLICATION_CLASS_FIELD_ARRAY) {
-            if(pair[0].equals(className)){
+            if (pair[0].equals(className)) {
                 return null;
             }
         }

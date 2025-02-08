@@ -23,10 +23,10 @@ public class SpringContextJdbcProcedureExecutorCaller {
         this.refresher = refresher;
     }
 
-    public void call(String procedureId, Map<String,Object> params){
+    public void call(String procedureId, Map<String, Object> params) {
         Map<String, XmlNode> nodeMap = refresher.getNodeMap();
         XmlNode node = nodeMap.get(procedureId);
         ExecuteContext context = new ExecuteContext(params, nodeMap);
-        executor.exec(node,context);
+        executor.exec(node, context);
     }
 }

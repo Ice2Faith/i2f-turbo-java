@@ -18,12 +18,12 @@ public class GzipSingleCompressor implements ISingleCompressor {
     @Override
     public void compress(InputStream is, OutputStream os) throws IOException {
         GZIPOutputStream gos = new GZIPOutputStream(os);
-        StreamUtil.streamCopy(is,gos,true,true);
+        StreamUtil.streamCopy(is, gos, true, true);
     }
 
     @Override
     public void release(InputStream is, OutputStream os) throws IOException {
-        GZIPInputStream gis=new GZIPInputStream(is);
-        StreamUtil.streamCopy(gis,os,true,true);
+        GZIPInputStream gis = new GZIPInputStream(is);
+        StreamUtil.streamCopy(gis, os, true, true);
     }
 }

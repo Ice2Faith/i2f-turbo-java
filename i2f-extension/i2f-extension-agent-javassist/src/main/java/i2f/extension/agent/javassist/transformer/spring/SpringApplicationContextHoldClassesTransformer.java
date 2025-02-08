@@ -93,7 +93,7 @@ public class SpringApplicationContextHoldClassesTransformer implements ClassFile
                 if (method.isEmpty()) {
                     continue;
                 }
-                if(Modifier.isStatic(method.getModifiers())){
+                if (Modifier.isStatic(method.getModifiers())) {
                     continue;
                 }
                 if (Arrays.asList("equals", "hashCode", "clone",

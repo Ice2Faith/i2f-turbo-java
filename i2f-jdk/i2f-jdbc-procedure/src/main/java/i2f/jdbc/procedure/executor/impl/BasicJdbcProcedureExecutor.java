@@ -258,7 +258,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         ret.put(ParamsConsts.DATASOURCES, new HashMap<>());
 
-        ret.put(ParamsConsts.CONNECTIONS,new HashMap<>());
+        ret.put(ParamsConsts.CONNECTIONS, new HashMap<>());
 
         ret.put(ParamsConsts.GLOBAL, new HashMap<>());
 
@@ -268,7 +268,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public Map<String, Object> newParams(ExecuteContext context) {
         Map<String, Object> ret = new LinkedHashMap<>();
-        if(context==null){
+        if (context == null) {
             return createParams();
         }
         ret.put(ParamsConsts.CONTEXT, context.getParams().get(ParamsConsts.CONTEXT));
@@ -681,7 +681,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
-            debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+bql);
+            debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
             List<?> list = JdbcResolver.list(conn, bql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
             return list;
         } catch (Exception e) {
@@ -699,7 +699,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
-            debugLog(() -> "sqlQueryObject:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+bql);
+            debugLog(() -> "sqlQueryObject:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
             Object obj = JdbcResolver.get(conn, bql, resultType);
             return obj;
         } catch (Exception e) {
@@ -716,7 +716,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
-            debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+bql);
+            debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
             Object row = JdbcResolver.find(conn, bql, resultType, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
             return row;
         } catch (Exception e) {
@@ -733,7 +733,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
-            debugLog(() -> "sqlUpdate:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+bql);
+            debugLog(() -> "sqlUpdate:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
             int num = JdbcResolver.update(conn, bql);
             return num;
         } catch (Exception e) {
@@ -752,7 +752,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             BindSql bql = resolveSqlScript(script, params);
             IPageWrapper wrapper = PageWrappers.wrapper(conn);
             BindSql pageBql = wrapper.apply(bql, ApiPage.of(pageIndex, pageSize));
-            debugLog(() -> "sqlQueryPage:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script+ " \n\tbql:\n"+pageBql);
+            debugLog(() -> "sqlQueryPage:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + pageBql);
             List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
             return list;
         } catch (Exception e) {

@@ -27,7 +27,7 @@ public class RedissonLock implements ILock {
         rlock.unlock();
     }
 
-    public void lock(long time, TimeUnit timeUnit) throws Throwable{
-        rlock.lock(time,timeUnit);
+    public void lock(long time, TimeUnit timeUnit) throws Throwable {
+        rlock.lock(time, timeUnit);
     }
 }

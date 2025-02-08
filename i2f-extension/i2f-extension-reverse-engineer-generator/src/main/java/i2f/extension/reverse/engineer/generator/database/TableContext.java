@@ -4,7 +4,6 @@ import i2f.database.metadata.data.ColumnMeta;
 import i2f.database.metadata.data.IndexColumnMeta;
 import i2f.database.metadata.data.IndexMeta;
 import i2f.database.metadata.data.TableMeta;
-import i2f.extension.velocity.GeneratorTool;
 import lombok.Data;
 
 import java.util.List;

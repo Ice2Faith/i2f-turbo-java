@@ -42,7 +42,7 @@ public class SwlTtlKeyExchanger extends SwlKeyExchanger {
     });
 
     public SwlTtlKeyExchanger() {
-        this.keyManager=new SwlCacheTtlKeyManager();
+        this.keyManager = new SwlCacheTtlKeyManager();
     }
 
     public SwlTtlKeyExchanger(SwlTtlKeyManager keyManager) {

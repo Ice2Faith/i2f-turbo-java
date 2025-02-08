@@ -16,6 +16,7 @@ public class AsciiStyleImageFilter implements IImageFilter {
     static {
         FontUtil.registryDefaultFonts();
     }
+
     public static final char[] DEFAULT_ASCII_CHARS = {' ', '`', '.', '^', ',', ':', '~', '"', '<', '!', 'c', 't', '+',
             '{', 'i', '7', '?', 'u', '3', '0', 'p', 'w', '4', 'A', '8', 'D', 'X', '%', '#', 'H', 'W', 'M'};
 

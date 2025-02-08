@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
  * @desc
  */
 public interface IExpireCache<K, V> extends ICache<K, V> {
-    default boolean preferSetAndTtl(){
+    default boolean preferSetAndTtl() {
         return true;
     }
 

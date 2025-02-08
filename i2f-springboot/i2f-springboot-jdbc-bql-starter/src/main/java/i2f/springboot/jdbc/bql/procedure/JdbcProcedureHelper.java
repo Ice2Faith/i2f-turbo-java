@@ -14,18 +14,19 @@ import java.util.concurrent.CountDownLatch;
 public class JdbcProcedureHelper implements ApplicationContextAware {
     public static ApplicationContext applicationContext;
     private static volatile SpringContextJdbcProcedureExecutorCaller caller;
-    private static final CountDownLatch latch=new CountDownLatch(1);
+    private static final CountDownLatch latch = new CountDownLatch(1);
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        JdbcProcedureHelper.applicationContext=applicationContext;
-        JdbcProcedureHelper.caller=applicationContext.getBean(SpringContextJdbcProcedureExecutorCaller.class);
+        JdbcProcedureHelper.applicationContext = applicationContext;
+        JdbcProcedureHelper.caller = applicationContext.getBean(SpringContextJdbcProcedureExecutorCaller.class);
         latch.countDown();
     }
 
-    public static void call(String procedureId, Map<String,Object> params){
-        try{
+    public static void call(String procedureId, Map<String, Object> params) {
+        try {
             latch.await();
-        }catch(Exception e){
+        } catch (Exception e) {
 
         }
         caller.call(procedureId, params);

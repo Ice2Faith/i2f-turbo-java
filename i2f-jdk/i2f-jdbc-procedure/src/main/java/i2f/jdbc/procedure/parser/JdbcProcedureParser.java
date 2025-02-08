@@ -56,20 +56,20 @@ public class JdbcProcedureParser {
         return parseNode(rootNode);
     }
 
-    public static void resolveEmbedIdNode(XmlNode node,Map<String,XmlNode> nodeMap){
-        if(node==null || nodeMap==null){
+    public static void resolveEmbedIdNode(XmlNode node, Map<String, XmlNode> nodeMap) {
+        if (node == null || nodeMap == null) {
             return;
         }
         String id = node.getTagAttrMap().get(AttrConsts.ID);
-        if(id!=null){
-            nodeMap.put(id,node);
+        if (id != null) {
+            nodeMap.put(id, node);
         }
         List<XmlNode> children = node.getChildren();
-        if(children==null){
+        if (children == null) {
             return;
         }
         for (XmlNode item : children) {
-            resolveEmbedIdNode(item,nodeMap);
+            resolveEmbedIdNode(item, nodeMap);
         }
     }
 

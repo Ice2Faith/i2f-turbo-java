@@ -11,22 +11,26 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
  * @desc
  */
 public class ZookeeperLockUtil {
-    public static ZookeeperInterMutexLock getZkMutexLock(String path,CuratorFramework client){
+    public static ZookeeperInterMutexLock getZkMutexLock(String path, CuratorFramework client) {
         return new ZookeeperInterMutexLock(getMutexLock(path, client));
     }
-    public static ZookeeperInterMutexLock getZkMutexLock(String path,String connectString,int sessionTimeout){
+
+    public static ZookeeperInterMutexLock getZkMutexLock(String path, String connectString, int sessionTimeout) {
         return new ZookeeperInterMutexLock(getMutexLock(path, connectString, sessionTimeout));
     }
-    public static InterProcessMutex getMutexLock(String path,String connectString,int sessionTimeout){
-        return getMutexLock(path,getClient(connectString, sessionTimeout));
-    }
-    public static InterProcessMutex getMutexLock(String path, CuratorFramework client){
-        return new InterProcessMutex(client,path);
-    }
-    public static CuratorFramework getClient(String connectString,int sessionTimeout){
-        ExponentialBackoffRetry retry=new ExponentialBackoffRetry(3000,3);
 
-        CuratorFramework client= CuratorFrameworkFactory
+    public static InterProcessMutex getMutexLock(String path, String connectString, int sessionTimeout) {
+        return getMutexLock(path, getClient(connectString, sessionTimeout));
+    }
+
+    public static InterProcessMutex getMutexLock(String path, CuratorFramework client) {
+        return new InterProcessMutex(client, path);
+    }
+
+    public static CuratorFramework getClient(String connectString, int sessionTimeout) {
+        ExponentialBackoffRetry retry = new ExponentialBackoffRetry(3000, 3);
+
+        CuratorFramework client = CuratorFrameworkFactory
                 .builder()
                 .connectString(connectString)
                 .connectionTimeoutMs(3000)

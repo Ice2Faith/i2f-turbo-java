@@ -97,20 +97,20 @@ public class SwlSpringAutoConfiguration {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
 
-        try{
+        try {
             Class<? extends ISwlMessageDigester> clazz = webProperties.getDigestAlgoClass();
             ISwlMessageDigester digester = getBeanByTypeOrNewInstance(clazz);
             ret.setMessageDigester(digester);
-        }catch(Exception e){
-            throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(),e.getMessage(),e);
+        } catch (Exception e) {
+            throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
 
-        try{
+        try {
             Class<? extends ISwlObfuscator> clazz = webProperties.getObfuscateAlgoClass();
             ISwlObfuscator obfuscator = getBeanByTypeOrNewInstance(clazz);
             ret.setObfuscator(obfuscator);
-        }catch(Exception e){
-            throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(),e.getMessage(),e);
+        } catch (Exception e) {
+            throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
 
         ret.setCache(new IExpireCache<String, String>() {

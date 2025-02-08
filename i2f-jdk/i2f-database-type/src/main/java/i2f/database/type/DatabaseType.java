@@ -122,11 +122,11 @@ public enum DatabaseType {
      */
     private final String desc;
 
-    public String db(){
+    public String db() {
         return this.db;
     }
 
-    public String desc(){
+    public String desc() {
         return this.desc;
     }
 

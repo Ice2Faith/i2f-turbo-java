@@ -18,12 +18,12 @@ public class DeflaterSingleCompressor implements ISingleCompressor {
     @Override
     public void compress(InputStream is, OutputStream os) throws IOException {
         DeflaterOutputStream gos = new DeflaterOutputStream(os);
-        StreamUtil.streamCopy(is,gos,true,true);
+        StreamUtil.streamCopy(is, gos, true, true);
     }
 
     @Override
     public void release(InputStream is, OutputStream os) throws IOException {
-        DeflaterInputStream gis=new DeflaterInputStream(is);
-        StreamUtil.streamCopy(gis,os,true,true);
+        DeflaterInputStream gis = new DeflaterInputStream(is);
+        StreamUtil.streamCopy(gis, os, true, true);
     }
 }

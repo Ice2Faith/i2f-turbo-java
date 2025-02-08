@@ -19,11 +19,11 @@ public class ZookeeperLockProvider {
         this.curator = curator;
     }
 
-    public ZookeeperInterMutexLock getLock(String path){
-        return ZookeeperLockUtil.getZkMutexLock(path,curator);
+    public ZookeeperInterMutexLock getLock(String path) {
+        return ZookeeperLockUtil.getZkMutexLock(path, curator);
     }
 
-    public InterProcessMutex getMutex(String path){
-        return ZookeeperLockUtil.getMutexLock(path,curator);
+    public InterProcessMutex getMutex(String path) {
+        return ZookeeperLockUtil.getMutexLock(path, curator);
     }
 }

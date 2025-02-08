@@ -16,6 +16,7 @@ public class Enumerations {
     public static <E> Enumeration<E> of(Iterable<E> iterable) {
         return new IteratorEnumeration<>(iterable.iterator());
     }
+
     public static <E> Enumeration<E> of(Iterator<E> iterator) {
         return new IteratorEnumeration<>(iterator);
     }

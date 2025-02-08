@@ -27,7 +27,7 @@ public class NashornProvider {
     }
 
     public static void printNonNashorn() {
-        if(printed.getAndSet(true)){
+        if (printed.getAndSet(true)) {
             return;
         }
         boolean has = checkHasNashorn();

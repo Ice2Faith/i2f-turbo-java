@@ -37,15 +37,14 @@ public class TestMybatisMapperContext {
         params.put("offset", 0);
         params.put("size", 100);
 
-            System.out.println("=====================================================");
-            MybatisMapperContext context = new MybatisMapperContext();
-            context.setInflater(MybatisMapperInflater.INSTANCE);
+        System.out.println("=====================================================");
+        MybatisMapperContext context = new MybatisMapperContext();
+        context.setInflater(MybatisMapperInflater.INSTANCE);
 
         String file = "i2f-jdk/i2f-jdbc-proxy-xml/src/main/resources/sample/TestMapper.xml";
-            Document document = XmlUtil.parseXml(new File(file));
-            context.loadDocuments(Arrays.asList(document));
-            testContext(context, params);
-
+        Document document = XmlUtil.parseXml(new File(file));
+        context.loadDocuments(Arrays.asList(document));
+        testContext(context, params);
 
 
     }

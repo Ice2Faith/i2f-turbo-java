@@ -9,7 +9,8 @@ import java.util.function.Supplier;
  * @desc 分段互斥锁
  */
 public class SegmentReentrantLock extends SegmentLock<ReentrantLock> {
-    public static final Supplier<ReentrantLock> LOCK_SUPPLIER=ReentrantLock::new;
+    public static final Supplier<ReentrantLock> LOCK_SUPPLIER = ReentrantLock::new;
+
     public SegmentReentrantLock() {
         super(LOCK_SUPPLIER);
     }

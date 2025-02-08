@@ -190,7 +190,7 @@ public class XxeGuardClassTransformer implements ClassFileTransformer, Instrumen
                             "    supportDtdField.set($zObj,$zFalse);\n" +
                             "    java.lang.reflect.Field processExternalEntitiesField = $zClazz.getDeclaredField(\"processExternalEntities\");\n" +
                             "    processExternalEntitiesField.setAccessible(true);\n" +
-                            "    processExternalEntitiesField.set($zObj,$zFalse);\n"+
+                            "    processExternalEntitiesField.set($zObj,$zFalse);\n" +
                             "    System.out.println(\"disabled xxe features : SourceHttpMessageConverter()\"); \n" +
                             "}\n");
                 }

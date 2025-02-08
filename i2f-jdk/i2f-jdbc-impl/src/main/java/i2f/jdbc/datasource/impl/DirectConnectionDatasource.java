@@ -1,9 +1,7 @@
 package i2f.jdbc.datasource.impl;
 
-import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.datasource.ConnectionSupplier;
 import i2f.jdbc.meta.JdbcMeta;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.sql.DataSource;
@@ -20,8 +18,8 @@ import java.util.logging.Logger;
 @NoArgsConstructor
 public class DirectConnectionDatasource implements DataSource {
     protected ConnectionSupplier connectionSupplier;
-    protected PrintWriter printWriter=new PrintWriter(System.out);
-    protected int loginTimeout=0;
+    protected PrintWriter printWriter = new PrintWriter(System.out);
+    protected int loginTimeout = 0;
 
     public DirectConnectionDatasource(ConnectionSupplier connectionSupplier) {
         this.connectionSupplier = connectionSupplier;
@@ -56,12 +54,12 @@ public class DirectConnectionDatasource implements DataSource {
 
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
-        this.printWriter=out;
+        this.printWriter = out;
     }
 
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
-        this.loginTimeout=seconds;
+        this.loginTimeout = seconds;
     }
 
     @Override

@@ -31,7 +31,7 @@ public class ZipJdkCompressor extends AbsCompressor {
                 continue;
             }
             ZipEntry entry = new ZipEntry(path);
-            if(input.getSize()>=0){
+            if (input.getSize() >= 0) {
                 entry.setSize(input.getSize());
             }
             zos.putNextEntry(entry);

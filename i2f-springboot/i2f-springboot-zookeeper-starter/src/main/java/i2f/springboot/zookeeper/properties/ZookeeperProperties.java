@@ -8,6 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @date 2024/6/30 18:07
  * @desc
  */
-@ConfigurationProperties(prefix="i2f.zookeeper")
+@ConfigurationProperties(prefix = "i2f.zookeeper")
 public class ZookeeperProperties extends ZookeeperConfig {
 }

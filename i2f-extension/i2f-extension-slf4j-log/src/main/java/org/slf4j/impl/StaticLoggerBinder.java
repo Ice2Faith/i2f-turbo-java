@@ -10,12 +10,12 @@ import org.slf4j.spi.LoggerFactoryBinder;
  * @desc
  */
 public class StaticLoggerBinder implements LoggerFactoryBinder {
-    public static final String BINDER_NAME="log";
+    public static final String BINDER_NAME = "log";
 
     public static final String REQUESTED_API_VERSION = "1.7.30";
     public static final StaticLoggerBinder SINGLETON = new StaticLoggerBinder();
 
-    public static StaticLoggerBinder getSingleton(){
+    public static StaticLoggerBinder getSingleton() {
         return SINGLETON;
     }
 

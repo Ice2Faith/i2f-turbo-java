@@ -18,6 +18,7 @@ public class Sm3Digester implements IMessageDigester {
         NashornProvider.printNonNashorn();
         SmAntherdProvider.printNonDependency();
     }
+
     public static final Sm3Digester INSTANCE = new Sm3Digester();
 
     public Sm3Digester() {

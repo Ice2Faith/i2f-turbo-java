@@ -1,6 +1,5 @@
 package i2f.springboot.security.def.token;
 
-import i2f.cache.base.ICache;
 import i2f.cache.expire.IExpireCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

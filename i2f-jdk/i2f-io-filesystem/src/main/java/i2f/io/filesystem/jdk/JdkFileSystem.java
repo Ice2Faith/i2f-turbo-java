@@ -19,6 +19,7 @@ public class JdkFileSystem extends AbsFileSystem {
     private JdkFileSystem() {
 
     }
+
     @Override
     public String pathSeparator() {
         return File.separator;

@@ -19,7 +19,7 @@ import java.security.ProtectionDomain;
  * @desc
  */
 public class FileUsedClassesTransformer implements ClassFileTransformer, InstrumentTransformerFeature {
-    public static final String FILE_CLASS_NAME= File.class.getName();
+    public static final String FILE_CLASS_NAME = File.class.getName();
 
     @Override
     public boolean canRetransform() {
@@ -50,7 +50,7 @@ public class FileUsedClassesTransformer implements ClassFileTransformer, Instrum
                             byte[] classfileBuffer) throws IllegalClassFormatException {
 
         className = className.replaceAll("/", ".");
-        if(!FILE_CLASS_NAME.equals(className)){
+        if (!FILE_CLASS_NAME.equals(className)) {
             return null;
         }
 

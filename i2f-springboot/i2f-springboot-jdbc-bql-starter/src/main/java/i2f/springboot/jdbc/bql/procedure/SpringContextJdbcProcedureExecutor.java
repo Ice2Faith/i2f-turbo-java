@@ -27,11 +27,11 @@ import java.util.function.Supplier;
 public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExecutor {
     protected ApplicationContext applicationContext;
     protected Environment environment;
-    protected static final Logger log= LoggerFactory.getLogger(SpringContextJdbcProcedureExecutor.class);
+    protected static final Logger log = LoggerFactory.getLogger(SpringContextJdbcProcedureExecutor.class);
 
     public SpringContextJdbcProcedureExecutor(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-        this.environment=applicationContext.getEnvironment();
+        this.environment = applicationContext.getEnvironment();
     }
 
     public SpringContextJdbcProcedureExecutor(ApplicationContext applicationContext, Environment environment) {
@@ -46,40 +46,40 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
         ret.put(ParamsConsts.ENVIRONMENT, environment);
 
         String[] names = applicationContext.getBeanDefinitionNames();
-        Map<String,Object> beanMap=new TreeMap<>();
+        Map<String, Object> beanMap = new TreeMap<>();
         for (String name : names) {
             Object bean = applicationContext.getBean(name);
-            beanMap.put(name,bean);
+            beanMap.put(name, bean);
         }
         ret.put(ParamsConsts.BEANS, beanMap);
 
         ret.put(ParamsConsts.DATASOURCES, getDatasourceMap());
 
-        ret.put(ParamsConsts.CONNECTIONS,new HashMap<>());
+        ret.put(ParamsConsts.CONNECTIONS, new HashMap<>());
 
         ret.put(ParamsConsts.GLOBAL, new HashMap<>());
 
         return ret;
     }
 
-    public Map<String, DataSource> getDatasourceMap(){
-        try{
+    public Map<String, DataSource> getDatasourceMap() {
+        try {
             AbstractRoutingDataSource bean = applicationContext.getBean(AbstractRoutingDataSource.class);
-            if(bean!=null){
-                Map<String,DataSource> ret= new HashMap<>();
+            if (bean != null) {
+                Map<String, DataSource> ret = new HashMap<>();
                 Map<Object, DataSource> dataSources = bean.getResolvedDataSources();
                 for (Map.Entry<Object, DataSource> entry : dataSources.entrySet()) {
-                    ret.put(String.valueOf(entry.getKey()),entry.getValue());
+                    ret.put(String.valueOf(entry.getKey()), entry.getValue());
                 }
                 return ret;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
         }
-        try{
+        try {
             DynamicRoutingDataSource bean = applicationContext.getBean(DynamicRoutingDataSource.class);
             Map<String, DataSource> ret = bean.getDataSources();
             return ret;
-        }catch(Exception e){
+        } catch (Exception e) {
         }
         return new HashMap<>();
     }
