@@ -9,6 +9,11 @@
       "name": "i2f.jdbc.proxy",
       "type": "i2f.springboot.jdbc.bql.properties.JdbcProxyProperties",
       "sourceType": "i2f.springboot.jdbc.bql.properties.JdbcProxyProperties"
+    },
+    {
+      "name": "i2f.jdbc.procedure",
+      "type": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties"
     }
   ],
   "properties": [
