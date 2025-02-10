@@ -57,6 +57,15 @@ velocity 文本模板引擎
 .class 转换为Class<?> 对象
 .not boolean值取反
 
+注意，未标明的修饰符
+不会被处理，会被跳过处理
+因此，请注意修饰符的拼写
+同时，这也允许你使用一些自己喜欢的标识符来说明一些事情
+比如：
+.in 表示入参
+.out 表述出参
+.inout 表示入出参
+
 属性修饰符，使用举例说明
 value.string.long.int=“1”
 表示value属性的值，从表达式1开始
@@ -73,6 +82,27 @@ value.string.long.int=“1”
 再比如，再lang-set场景中，value默认是visit修饰符，
 可以使用value.string直接输入字符串，
 或者使用eval/eval-java等修饰符改变行为为获取eval的结果
+
+eval是使用ognl进行实现
+ognl将会以上下文的Map对象为根对象
+同时会添加名为$root的变量，也是这个上下文Map
+参见：DefaultJdbcProcedureExecutor.innerEval
+
+eval-java是使用jdk的内存编译技术实现的
+原理是封装为一个临时的类，执行固定方法实现
+函数原型如下：
+public Object exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable {
+}
+因此，你要做的就是补全函数体内部的内容
+如果是多行或者单行时，会自动检测最后的return关键字和分号进行补全
+例如：new Date()
+即可，不用 return new Date();
+但是如果比较复杂，那最好还是自己完善语法
+
+eval-js使用java中的js引擎进行处理
+以局部作用域的方式运行，局部变量中和java一样，传递了三个参数context,executor,params
+你可以添加自己的逻辑
+js引擎执行完毕之后，会返回之后一次执行的结果
  -->
 <procedure id="">
     <!--
