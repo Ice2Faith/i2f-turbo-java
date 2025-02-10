@@ -93,6 +93,7 @@ eval-java是使用jdk的内存编译技术实现的
 函数原型如下：
 public Object exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable {
 }
+或者参见：JdbcProcedureJavaCaller接口定义
 因此，你要做的就是补全函数体内部的内容
 如果是多行或者单行时，会自动检测最后的return关键字和分号进行补全
 例如：new Date()
@@ -173,6 +174,16 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     其他传入参数默认以visit访问，等价于 age.visit
      -->
     <procedure-call refid="" params="" age="" result=""/>
+
+    <!--
+    调用java指定的回调方法
+    target需要为JdbcProcedureJavaCaller的实现类
+    优先从上下文Map的beans中进行获取
+    如果获取不到再从params中获取
+    获取得到，并且是实现类则进行调用
+    否则不进行调用
+    -->
+    <java-call target="" result=""/>
 
     <!-- 返回，结束此过程 -->
     <lang-return/>

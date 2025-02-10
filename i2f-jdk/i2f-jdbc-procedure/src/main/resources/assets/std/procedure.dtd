@@ -44,6 +44,7 @@
                 |sql-scope*
                 |lang-sleep*
                 |sql-etl*
+                |java-call*
                 )>
         <!ATTLIST procedure id CDATA #IMPLIED>
 
@@ -219,6 +220,10 @@
         <!ATTLIST procedure-call params CDATA #IMPLIED>
         <!ATTLIST procedure-call refid CDATA #REQUIRED>
         <!ATTLIST procedure-call result CDATA #IMPLIED>
+
+        <!ELEMENT java-call (ANY|EMPTY)>
+        <!ATTLIST java-call target CDATA #IMPLIED>
+        <!ATTLIST java-call result CDATA #IMPLIED>
 
         <!ELEMENT lang-return (EMPTY)>
 
