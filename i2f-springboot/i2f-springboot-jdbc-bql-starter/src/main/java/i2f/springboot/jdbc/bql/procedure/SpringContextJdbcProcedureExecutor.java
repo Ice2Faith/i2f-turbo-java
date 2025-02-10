@@ -3,6 +3,7 @@ package i2f.springboot.jdbc.bql.procedure;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
+import i2f.jdbc.procedure.node.ExecutorNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
@@ -29,11 +30,23 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     public SpringContextJdbcProcedureExecutor(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         this.environment = applicationContext.getEnvironment();
+        this.applyNodeExecutorComponents();
     }
 
     public SpringContextJdbcProcedureExecutor(ApplicationContext applicationContext, Environment environment) {
         this.applicationContext = applicationContext;
         this.environment = environment;
+        this.applyNodeExecutorComponents();
+    }
+
+    public void applyNodeExecutorComponents(){
+        String[] names = applicationContext.getBeanDefinitionNames();
+        for (String name : names) {
+            Object bean = applicationContext.getBean(name);
+            if(bean instanceof ExecutorNode){
+                this.nodes.add(0,(ExecutorNode) bean);
+            }
+        }
     }
 
     @Override
