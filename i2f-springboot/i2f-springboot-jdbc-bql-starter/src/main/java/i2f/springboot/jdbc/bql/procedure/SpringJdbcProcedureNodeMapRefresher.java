@@ -117,8 +117,11 @@ public class SpringJdbcProcedureNodeMapRefresher {
                     Map<String, XmlNode> next = new HashMap<>();
                     JdbcProcedureParser.resolveEmbedIdNode(node, next);
                     for (Map.Entry<String, XmlNode> entry : next.entrySet()) {
-                        String childId = id + "." + entry.getKey();
-                        ret.put(childId, entry.getValue());
+                        ret.put(entry.getKey(), entry.getValue());
+                        if(!entry.getKey().equals(id)){
+                            String childId = id + "." + entry.getKey();
+                            ret.put(childId, entry.getValue());
+                        }
                     }
                 }
             } catch (Exception e) {
