@@ -1,12 +1,16 @@
 package i2f.jdbc.procedure.node.impl;
 
+
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.Map;
 
@@ -29,8 +33,12 @@ public class ProcedureCallNode implements ExecutorNode {
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);
         XmlNode nextNode = context.getNodeMap().get(refid);
+        JdbcProcedureJavaCaller caller=null;
         if (nextNode == null) {
-            return;
+            caller=context.getJavaMap().get(refid);
+            if(caller==null) {
+                return;
+            }
         }
         Map<String, Object> callParams = null;
         String paramsText = node.getTagAttrMap().get(AttrConsts.PARAMS);
@@ -61,11 +69,26 @@ public class ProcedureCallNode implements ExecutorNode {
 
         ExecuteContext callContext = new ExecuteContext();
         callContext.setNodeMap(context.getNodeMap());
+        callContext.setJavaMap(context.getJavaMap());
         callContext.setParams(callParams);
-        try {
-            executor.execAsProcedure(nextNode, callContext, false, false);
-        } catch (ControlSignalException e) {
+        if(nextNode!=null) {
+            try {
+                executor.execAsProcedure(nextNode, callContext, false, false);
+            } catch (ControlSignalException e) {
 
+            }
+        }else{
+            try{
+                caller.exec(callContext,executor,callContext.getParams());
+            }catch(ControlSignalException e){
+
+            }catch (Throwable e){
+                if(e instanceof SignalException){
+                    throw (SignalException)e;
+                }else{
+                    throw new ThrowSignalException(e.getMessage(),e);
+                }
+            }
         }
 
     }
