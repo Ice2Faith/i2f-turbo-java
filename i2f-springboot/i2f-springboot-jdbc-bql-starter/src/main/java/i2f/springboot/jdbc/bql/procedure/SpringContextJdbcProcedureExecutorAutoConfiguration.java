@@ -1,6 +1,7 @@
 package i2f.springboot.jdbc.bql.procedure;
 
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import lombok.Data;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +13,17 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
  * @date 2025/2/8 10:05
  */
 @Data
-@ConditionalOnExpression("${i2f.jdbc.procedure.enable:true}")
+@ConditionalOnExpression("${jdbc.xml.procedure.enable:true}")
 @Import({
         JdbcProcedureHelper.class
 })
@@ -59,6 +63,13 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @Bean
     public SpringContextJdbcProcedureExecutorCaller springContextJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor,
                                                                                              SpringJdbcProcedureNodeMapRefresher refresher) {
-        return new SpringContextJdbcProcedureExecutorCaller(executor, refresher);
+        return new SpringContextJdbcProcedureExecutorCaller(executor, refresher,()->{
+            List<JdbcProcedureJavaCaller> ret=new ArrayList<>();
+            Map<String, JdbcProcedureJavaCaller> beanMap = applicationContext.getBeansOfType(JdbcProcedureJavaCaller.class);
+            for (Map.Entry<String, JdbcProcedureJavaCaller> entry : beanMap.entrySet()) {
+                ret.add(entry.getValue());
+            }
+            return ret;
+        });
     }
 }
