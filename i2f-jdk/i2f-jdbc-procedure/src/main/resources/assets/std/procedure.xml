@@ -172,6 +172,9 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     params默认以visit访问，等价于 params.visit
     result为保存调用的参数，可用于从中获取调用的结果，如果同时指定的params，则result可以不用指定，因为result里面的值，实际上就是params里面的值
     其他传入参数默认以visit访问，等价于 age.visit
+    refid的值，不仅仅只有procedure标签上的ID才算，其他的XML标签上的ID也算
+    同时，在bean中，如果是JdbcProcedureJavaCaller的实现类，同时类上具有@JdbcProcedure注解指定过程名称
+    如果被加入到beans中的话，注解指定的名称也可以使用，这样就实现了JAVA类实现与XML脚本实现的统一调用
      -->
     <procedure-call refid="" params="" age="" result=""/>
 
@@ -180,7 +183,10 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     target需要为JdbcProcedureJavaCaller的实现类
     优先从上下文Map的beans中进行获取
     如果获取不到再从params中获取
-    获取得到，并且是实现类则进行调用
+    如果依旧获取不到，则把target的值当做class的类名进行反射调用
+    因此，查找优先级为：bean名称>params访问变量>bean全类名>bean短类名>反射类名
+    获取得到，并且是实现类则进行调用，注意，此过程不会创建新的params上下文，直接使用所在的params上下文
+    因此不需要进行参数传递，这点区别于procedure-call
     否则不进行调用
     -->
     <java-call target="" result=""/>
