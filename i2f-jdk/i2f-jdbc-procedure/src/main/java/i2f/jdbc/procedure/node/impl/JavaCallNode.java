@@ -1,6 +1,5 @@
 package i2f.jdbc.procedure.node.impl;
 
-
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
@@ -10,6 +9,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.reflect.ReflectResolver;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +52,16 @@ public class JavaCallNode implements ExecutorNode {
                         break;
                     }
                 }
+            }
+        }
+        if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
+            try {
+                Class<?> clazz = executor.loadClass(targetExpression);
+                if(clazz!=null){
+                    target= ReflectResolver.getInstance(clazz);
+                }
+            } catch (IllegalAccessException e) {
+
             }
         }
         if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
