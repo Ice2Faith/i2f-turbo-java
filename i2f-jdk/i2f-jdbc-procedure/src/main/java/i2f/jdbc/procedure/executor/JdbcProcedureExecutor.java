@@ -1,9 +1,11 @@
 package i2f.jdbc.procedure.executor;
 
-
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.SignalException;
+import i2f.jdbc.procedure.signal.impl.ControlSignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +19,23 @@ public interface JdbcProcedureExecutor {
     List<ExecutorNode> getNodes();
 
     default void exec(String nodeId, ExecuteContext context) {
-        exec(context.getNodeMap().get(nodeId), context);
+        XmlNode callNode = context.getNodeMap().get(nodeId);
+        if(callNode!=null){
+            exec(callNode, context);
+            return;
+        }
+        JdbcProcedureJavaCaller javaCaller = context.getJavaMap().get(nodeId);
+        try{
+            javaCaller.exec(context,this,context.getParams());
+        }catch(ControlSignalException e){
+
+        }catch (Throwable e){
+            if(e instanceof SignalException){
+                throw (SignalException)e;
+            }else{
+                throw new ThrowSignalException(e.getMessage(),e);
+            }
+        }
     }
 
     default void exec(XmlNode node, ExecuteContext context) {
@@ -27,7 +45,23 @@ public interface JdbcProcedureExecutor {
     void exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
 
     default void execAsProcedure(String nodeId, ExecuteContext context) {
-        execAsProcedure(context.getNodeMap().get(nodeId), context, false, true);
+        XmlNode callNode = context.getNodeMap().get(nodeId);
+        if(callNode!=null) {
+            execAsProcedure(callNode, context, false, true);
+            return;
+        }
+        JdbcProcedureJavaCaller javaCaller = context.getJavaMap().get(nodeId);
+        try{
+            javaCaller.exec(context,this,context.getParams());
+        }catch(ControlSignalException e){
+
+        }catch (Throwable e){
+            if(e instanceof SignalException){
+                throw (SignalException)e;
+            }else{
+                throw new ThrowSignalException(e.getMessage(),e);
+            }
+        }
     }
 
     default void execAsProcedure(XmlNode node, ExecuteContext context) {

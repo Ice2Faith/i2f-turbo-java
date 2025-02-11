@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.context;
 
+import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.function.Function;
 public class ExecuteContext {
     protected Map<String, Object> params = new HashMap<>();
     protected Map<String, XmlNode> nodeMap = new HashMap<>();
+    protected Map<String, JdbcProcedureJavaCaller> javaMap=new HashMap<>();
 
     public ExecuteContext(Map<String, Object> params) {
         this.params = params;
@@ -25,6 +27,12 @@ public class ExecuteContext {
     public ExecuteContext(Map<String, Object> params, Map<String, XmlNode> nodeMap) {
         this.params = params;
         this.nodeMap = nodeMap;
+    }
+
+    public ExecuteContext(Map<String, Object> params, Map<String, XmlNode> nodeMap, Map<String, JdbcProcedureJavaCaller> javaMap) {
+        this.params = params;
+        this.nodeMap = nodeMap;
+        this.javaMap = javaMap;
     }
 
     public void paramsSet(String key, Object value) {

@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
@@ -30,10 +31,28 @@ public class JavaCallNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        Map<String,Object> map = context.paramsComputeIfAbsent(ParamsConsts.BEANS,(key)->new HashMap<>());
-        Object target=map.get(node.getTagAttrMap().get(AttrConsts.TARGET));
+        String targetExpression = node.getTagAttrMap().get(AttrConsts.TARGET);
+        Map<String,Object> beanMap = context.paramsComputeIfAbsent(ParamsConsts.BEANS,(key)->new HashMap<>());
+        Object target=beanMap.get(targetExpression);
         if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
             target=executor.attrValue(AttrConsts.TARGET, FeatureConsts.VISIT,node,context);
+        }
+        if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
+            for (Map.Entry<String, Object> entry : beanMap.entrySet()) {
+                Object bean = entry.getValue();
+                if(bean instanceof JdbcProcedureJavaCaller){
+                    String fullName = bean.getClass().getName();
+                    if(fullName.equals(targetExpression)){
+                        target=bean;
+                        break;
+                    }
+                    String simpleName = bean.getClass().getSimpleName();
+                    if(simpleName.equals(targetExpression)){
+                        target=bean;
+                        break;
+                    }
+                }
+            }
         }
         if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
             return;
