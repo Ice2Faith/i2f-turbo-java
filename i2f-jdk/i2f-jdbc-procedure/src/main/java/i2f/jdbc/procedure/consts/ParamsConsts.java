@@ -21,4 +21,6 @@ public interface ParamsConsts {
 
     String DATABASE_TYPE_LIST = "databaseTypeList";
 
+    // 返回值
+    String RETURN="return";
 }

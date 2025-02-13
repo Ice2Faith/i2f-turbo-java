@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 
+
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
@@ -19,8 +20,8 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class ProcedureCallNode implements ExecutorNode {
-    public static final String TAG_NAME = "procedure-call";
+public class FunctionCallNode implements ExecutorNode {
+    public static final String TAG_NAME = "function-call";
 
     @Override
     public boolean support(XmlNode node) {
@@ -95,7 +96,8 @@ public class ProcedureCallNode implements ExecutorNode {
 
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if(result!=null){
-            context.paramsSet(result,callParams);
+            Object ret = callContext.paramsGet(ParamsConsts.RETURN);
+            context.paramsSet(result,ret);
         }
     }
 

@@ -179,6 +179,17 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     <procedure-call refid="" params="" age="" result=""/>
 
     <!--
+    参数使用和procedure-call一致
+    区别为，当procedure-call调用要取返回值时，result得到的是调用的全部params参数的Map
+    而function-call针对function函数类型进行了调整，result的值取到的就是函数调用的返回值，而不是params这个Map
+    此类调用，需要结合<lang-return value=""/>进行使用
+    即返回时携带返回值返回
+    内部实际上是通过子过程的params对象Map绑定的
+    这个result就是绑定到ParamsConsts.RETURN绑定的键上
+    -->
+    <function-call refid="" params="" age="" result=""/>
+
+    <!--
     调用java指定的回调方法
     target需要为JdbcProcedureJavaCaller的实现类
     优先从上下文Map的beans中进行获取
@@ -191,8 +202,16 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     -->
     <java-call target="" result=""/>
 
-    <!-- 返回，结束此过程 -->
-    <lang-return/>
+    <!--
+    返回，结束此过程
+    如果过程只返回一个值，为函数型调用时，可以使用value属性指定返回值
+    指定的返回值可使用function-call调用的result获取到，
+    这个value值将会绑定到ParamsConsts.RETURN绑定的键上
+    也可以使用procedure-call的result获取返回值
+    但是，区别是result得到的是params的Map
+    还需要从这个Map中取名为ParamsConsts.RETURN的键的值，才是这里返回的value值
+    -->
+    <lang-return value=""/>
 
     <!--
     抛出异常，value指定为message内容，type指定为异常类型，cause可选为造成异常的异常对象
