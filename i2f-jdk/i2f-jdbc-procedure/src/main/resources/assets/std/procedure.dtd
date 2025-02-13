@@ -45,6 +45,7 @@
                 |lang-sleep*
                 |sql-etl*
                 |java-call*
+                |function-call*
                 )>
         <!ATTLIST procedure id CDATA #IMPLIED>
 
@@ -221,11 +222,43 @@
         <!ATTLIST procedure-call refid CDATA #REQUIRED>
         <!ATTLIST procedure-call result CDATA #IMPLIED>
 
+        <!ELEMENT function-call (ANY|EMPTY)>
+        <!ATTLIST function-call params CDATA #IMPLIED>
+        <!ATTLIST function-call refid CDATA #REQUIRED>
+        <!ATTLIST function-call result CDATA #IMPLIED>
+
         <!ELEMENT java-call (ANY|EMPTY)>
         <!ATTLIST java-call target CDATA #IMPLIED>
         <!ATTLIST java-call result CDATA #IMPLIED>
 
         <!ELEMENT lang-return (EMPTY)>
+        <!ATTLIST lang-return value CDATA #IMPLIED>
+        <!ATTLIST lang-return radix CDATA #IMPLIED>
+        <!ATTLIST lang-return pattern CDATA #IMPLIED>
+
+        <!ATTLIST lang-return value.int CDATA #IMPLIED>
+        <!ATTLIST lang-return value.double #IMPLIED>
+        <!ATTLIST lang-return value.float #IMPLIED>
+        <!ATTLIST lang-return value.string CDATA #IMPLIED>
+        <!ATTLIST lang-return value.long #IMPLIED>
+        <!ATTLIST lang-return value.short #IMPLIED>
+        <!ATTLIST lang-return value.char #IMPLIED>
+        <!ATTLIST lang-return value.byte #IMPLIED>
+        <!ATTLIST lang-return value.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-return value.render CDATA #IMPLIED>
+        <!ATTLIST lang-return value.visit CDATA #IMPLIED>
+        <!ATTLIST lang-return value.eval CDATA #IMPLIED>
+        <!ATTLIST lang-return value.test CDATA #IMPLIED>
+        <!ATTLIST lang-return value.null CDATA #IMPLIED>
+        <!ATTLIST lang-return value.date CDATA #IMPLIED>
+        <!ATTLIST lang-return value.trim CDATA #IMPLIED>
+        <!ATTLIST lang-return value.align CDATA #IMPLIED>
+        <!ATTLIST lang-return value.body-text CDATA #IMPLIED>
+        <!ATTLIST lang-return value.body-xml CDATA #IMPLIED>
+        <!ATTLIST lang-return value.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-return value.eval-js CDATA #IMPLIED>
+        <!ATTLIST lang-return value.class CDATA #IMPLIED>
+        <!ATTLIST lang-return value.not CDATA #IMPLIED>
 
         <!ELEMENT lang-throw (ANY|EMPTY)>
         <!ATTLIST lang-throw value CDATA #IMPLIED>
