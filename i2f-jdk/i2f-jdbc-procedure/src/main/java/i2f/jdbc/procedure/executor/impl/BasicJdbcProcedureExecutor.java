@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.executor.impl;
 
+
+
 import i2f.bindsql.BindSql;
 import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
@@ -163,32 +165,36 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void execAsProcedure(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection) {
-        ProcedureNode execNode = null;
-        for (ExecutorNode item : nodes) {
-            if (item instanceof ProcedureNode) {
-                execNode = (ProcedureNode) item;
-                break;
-            }
-        }
-        if (execNode == null) {
-            execNode = ProcedureNode.INSTANCE;
-        }
-        debugLog(() -> "exec as procedure " + node.getTagName());
-
-        Map<String, Connection> bakConnection = context.paramsComputeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
-        if (beforeNewConnection) {
-            context.getParams().put(ParamsConsts.CONNECTIONS, new HashMap<>());
-        }
         try {
-            execNode.exec(node, context, this);
-        } finally {
+            ProcedureNode execNode = null;
+            for (ExecutorNode item : nodes) {
+                if (item instanceof ProcedureNode) {
+                    execNode = (ProcedureNode) item;
+                    break;
+                }
+            }
+            if (execNode == null) {
+                execNode = ProcedureNode.INSTANCE;
+            }
+            debugLog(() -> "exec as procedure " + node.getTagName());
+
+            Map<String, Connection> bakConnection = context.paramsComputeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
             if (beforeNewConnection) {
-                closeConnections(context);
-                context.paramsSet(ParamsConsts.CONNECTIONS, bakConnection);
+                context.getParams().put(ParamsConsts.CONNECTIONS, new HashMap<>());
             }
-            if (afterCloseConnection) {
-                closeConnections(context);
+            try {
+                execNode.exec(node, context, this);
+            } finally {
+                if (beforeNewConnection) {
+                    closeConnections(context);
+                    context.paramsSet(ParamsConsts.CONNECTIONS, bakConnection);
+                }
+                if (afterCloseConnection) {
+                    closeConnections(context);
+                }
             }
+        } catch (ReturnSignalException e) {
+            debugLog(() -> "return signal");
         }
     }
 
@@ -430,6 +436,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         }
         if ("boolean".equals(className)) {
             return Boolean.class;
+        }
+        if ("string".equals(className)) {
+            return String.class;
         }
         String[] prefixes = {
                 "",
