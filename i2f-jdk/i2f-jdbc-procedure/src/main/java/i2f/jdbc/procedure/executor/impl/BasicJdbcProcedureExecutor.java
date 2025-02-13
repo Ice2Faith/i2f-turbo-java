@@ -53,6 +53,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     public static List<ExecutorNode> defaultExecutorNodes() {
         List<ExecutorNode> ret = new ArrayList<>();
+        ret.add(new FunctionCallNode());
         ret.add(new JavaCallNode());
         ret.add(new LangAsyncAllNode());
         ret.add(new LangAsyncNode());
@@ -75,6 +76,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new LangPrintfNode());
         ret.add(new LangPrintlnNode());
         ret.add(new LangRenderNode());
+        ret.add(new LangReturnNode());
         ret.add(new LangSetNode());
         ret.add(new LangSleepNode());
         ret.add(new LangStringJoinNode());
