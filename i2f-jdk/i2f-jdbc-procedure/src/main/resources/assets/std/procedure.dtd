@@ -109,6 +109,15 @@
         <!ATTLIST lang-set value.body-text.align CDATA #IMPLIED>
         <!ATTLIST lang-set value.body-xml.align CDATA #IMPLIED>
 
+        <!ATTLIST lang-set value.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-set value.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-set value.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-set value.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-set value.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-set value.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-set value.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-set value.snow-uid CDATA #IMPLIED>
+
         <!ATTLIST lang-set result.int CDATA #IMPLIED>
         <!ATTLIST lang-set result.double #IMPLIED>
         <!ATTLIST lang-set result.float #IMPLIED>
@@ -136,6 +145,15 @@
         <!ATTLIST lang-set result.body-xml.trim CDATA #IMPLIED>
         <!ATTLIST lang-set result.body-text.align CDATA #IMPLIED>
         <!ATTLIST lang-set result.body-xml.align CDATA #IMPLIED>
+
+        <!ATTLIST lang-set result.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-set result.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-set result.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-set result.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-set result.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-set result.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-set result.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-set result.snow-uid CDATA #IMPLIED>
 
 
         <!ELEMENT lang-format-date (ANY|EMPTY)>
@@ -214,6 +232,96 @@
         <!ATTLIST lang-string-join arg8.long CDATA #IMPLIED>
         <!ATTLIST lang-string-join arg9.long CDATA #IMPLIED>
 
+        <!ATTLIST lang-string-join arg0.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg0.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg0.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg0.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg0.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg0.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg0.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg0.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg1.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg2.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg3.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg4.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg5.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg6.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg7.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg8.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg9.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.snow-uid CDATA #IMPLIED>
+
         <!ELEMENT lang-new-params (ANY|EMPTY)>
         <!ATTLIST lang-new-params result CDATA #REQUIRED>
 
@@ -260,6 +368,15 @@
         <!ATTLIST lang-return value.class CDATA #IMPLIED>
         <!ATTLIST lang-return value.not CDATA #IMPLIED>
 
+        <!ATTLIST lang-return value.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-return value.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-return value.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-return value.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-return value.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-return value.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-return value.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-return value.snow-uid CDATA #IMPLIED>
+
         <!ELEMENT lang-throw (ANY|EMPTY)>
         <!ATTLIST lang-throw value CDATA #IMPLIED>
         <!ATTLIST lang-throw type CDATA #REQUIRED>
@@ -278,12 +395,18 @@
         <!ATTLIST lang-render result.trim CDATA #IMPLIED>
 
         <!ELEMENT lang-if (ANY|EMPTY)>
-        <!ATTLIST lang-if test CDATA #REQUIRED>
+        <!ATTLIST lang-if test CDATA #IMPLIED>
+        <!ATTLIST lang-if datasource CDATA #IMPLIED>
+        <!ATTLIST lang-if test.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-if test.dialect CDATA #IMPLIED>
 
         <!ELEMENT lang-choose (lang-when*|lang-otherwise?)>
 
         <!ELEMENT lang-when (ANY|EMPTY)>
-        <!ATTLIST lang-when test CDATA #REQUIRED>
+        <!ATTLIST lang-when test CDATA #IMPLIED>
+        <!ATTLIST lang-when datasource CDATA #IMPLIED>
+        <!ATTLIST lang-when test.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-when test.dialect CDATA #IMPLIED>
 
         <!ELEMENT lang-otherwise (ANY|EMPTY)>
 
@@ -306,9 +429,12 @@
         <!ATTLIST lang-fori incr.int CDATA #IMPLIED>
 
         <!ELEMENT lang-while (ANY|EMPTY)>
-        <!ATTLIST lang-while test CDATA #REQUIRED>
         <!ATTLIST lang-while first CDATA #IMPLIED>
         <!ATTLIST lang-while index CDATA #IMPLIED>
+        <!ATTLIST lang-while test CDATA #IMPLIED>
+        <!ATTLIST lang-while datasource CDATA #IMPLIED>
+        <!ATTLIST lang-while test.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-while test.dialect CDATA #IMPLIED>
 
         <!ELEMENT lang-continue (EMPTY)>
 
@@ -379,6 +505,96 @@
         <!ATTLIST lang-invoke arg7.long CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg8.long CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg9.long CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg0.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg0.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg0.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg0.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg0.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg0.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg0.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg0.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg1.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg2.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg3.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg4.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg5.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg6.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg7.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg8.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.snow-uid CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg9.is-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.is-not-null CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.is-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.is-not-empty CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.uuid CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.current-time-millis CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.snow-uid CDATA #IMPLIED>
 
         <!ELEMENT lang-try (lang-body|lang-catch*|lang-finally?)>
 

@@ -38,4 +38,18 @@ public interface FeatureConsts {
 
     String NOT = "not";
 
+    String DIALECT = "dialect";
+
+    // 主要用于test进行判断
+    String IS_NULL = "is-null";
+    String IS_NOT_NULL = "is-not-null";
+    String IS_EMPTY = "is-empty";
+    String IS_NOT_EMPTY = "is-not-empty";
+
+    // 环境值
+    String DATE_NOW = "date-now";
+    String UUID = "uuid";
+    String CURRENT_TIME_MILLIS = "current-time-millis";
+    String SNOW_UID = "snow-uid";
+
 }

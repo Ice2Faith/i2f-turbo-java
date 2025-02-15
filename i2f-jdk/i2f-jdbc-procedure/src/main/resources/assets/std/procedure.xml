@@ -9,11 +9,15 @@
 预期是既有编程语言的控制灵活度，也有数据库语句直接编写的识别度，
 避免在java等编程语言中进行SQL语句的拼接操作
 
+======================================================
+
 实现方案
 采用xml格式编写控制脚本，语言控制与SQL语句都在xml中书写
 script-开头的用于提供复用性片段
 lang-开头的用于提供流程控制等能力，实现上考虑使用ongl/spel+velocity实现
 sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml格式进行处理
+
+======================================================
 
 相关知识介绍：
 xml XML解析技术
@@ -29,6 +33,8 @@ velocity 文本模板引擎
     实现：org.apache.velocity.app.VelocityEngine
     用途：用于render用户，提供对字符串的模版渲染能力，可以用于字符串动态拼接等场景
     取值上：${}包含，表达式上：#()包含
+
+======================================================
 
 属性修饰符：用在输入时，表示值怎么取，用在输出时，表示输出的目标类型，用在声明时，表示期待的输入类型
 多个修饰符顺序执行，用.小数点隔开
@@ -57,6 +63,23 @@ velocity 文本模板引擎
 .class 转换为Class<?> 对象
 .not boolean值取反
 
+.dialect 方言属性，主要用于test属性上，用于表示指定的datasource支持哪些数据库类型
+    用法：<lang-if test.dialect="mysql,oracle" datasource="primary">
+    解释：需要使用.dialect修饰符，使用此修饰符时，需要添加datasource属性指定判断的数据源，如果datasource属性没指定，则表示对主数据源进行判断
+    "mysql,oracle"就表示兼容的数据库类型
+    这个示例中，表示需要判断datasource为primary的数据库类型在mysql,oracle中任意一个满足即可
+
+is-null 判断是否为null
+is-not-null 判断是否不为null
+is-empty 判断是否为空，适用于string类型
+is-not-empty 判断是否不为空，适用于string类型
+
+date-now 当前时间，也就是值 new Date()
+uuid 随机的UUID，也就是值 UUID.randomUUID().toString()
+current-time-millis 当前的毫秒值，也就是值 System.currentTimeMillis()
+snow-uid 雪花ID，也就是值 SnowflakeLongUid.getId()
+
+======================================================
 注意，未标明的修饰符
 不会被处理，会被跳过处理
 因此，请注意修饰符的拼写

@@ -23,6 +23,7 @@ import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
 import i2f.page.ApiPage;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
+import i2f.uid.SnowflakeLongUid;
 import lombok.Data;
 
 import javax.sql.DataSource;
@@ -383,6 +384,32 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         } else if (FeatureConsts.NOT.equals(feature)) {
             boolean ok = toBoolean(value);
             return !ok;
+        } else if (FeatureConsts.DIALECT.equals(feature)) {
+            try {
+                String databases = value == null ? null : String.valueOf(value);
+                String datasource = node.getTagAttrMap().get(AttrConsts.DATASOURCE);
+                boolean ok = supportDatabaseDialect(datasource, databases, context.getParams());
+                return ok;
+            } catch (Exception e) {
+
+            }
+            return false;
+        } else if (FeatureConsts.IS_NULL.equals(feature)) {
+            return value == null;
+        } else if (FeatureConsts.IS_NOT_NULL.equals(feature)) {
+            return value != null;
+        } else if (FeatureConsts.IS_EMPTY.equals(feature)) {
+            return value == null || "".equals(value);
+        } else if (FeatureConsts.IS_NOT_EMPTY.equals(feature)) {
+            return value != null && !"".equals(value);
+        } else if (FeatureConsts.DATE_NOW.equals(feature)) {
+            return new Date();
+        } else if (FeatureConsts.UUID.equals(feature)) {
+            return UUID.randomUUID().toString();
+        } else if (FeatureConsts.CURRENT_TIME_MILLIS.equals(feature)) {
+            return System.currentTimeMillis();
+        } else if (FeatureConsts.SNOW_UID.equals(feature)) {
+            return SnowflakeLongUid.getId();
         }
         return value;
     }
@@ -638,6 +665,23 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         MybatisMapperNode mapperNode = MybatisMapperParser.parseScriptNode(script);
         BindSql bql = MybatisMapperInflater.INSTANCE.inflateSqlNode(mapperNode, params, new HashMap<>());
         return bql;
+    }
+
+    public boolean supportDatabaseDialect(String datasource, String databases, Map<String, Object> params) throws Exception {
+        if (databases == null) {
+            return false;
+        }
+        Connection conn = getConnection(datasource, params);
+        List<String> databaseNames = detectDatabaseType(conn);
+        String[] arr = databases.split(",");
+        for (String item : arr) {
+            for (String databaseName : databaseNames) {
+                if (item.equalsIgnoreCase(databaseName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public List<String> detectDatabaseType(Connection conn) throws Exception {
