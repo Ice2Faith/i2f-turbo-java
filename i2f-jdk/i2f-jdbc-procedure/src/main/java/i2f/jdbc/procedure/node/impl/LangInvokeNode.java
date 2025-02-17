@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -30,6 +31,7 @@ public class LangInvokeNode implements ExecutorNode {
         }
         return TAG_NAME.equals(node.getTagName());
     }
+
 
     @Override
     public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
@@ -129,10 +131,18 @@ public class LangInvokeNode implements ExecutorNode {
             if (className != null && !className.isEmpty()) {
                 clazz = executor.loadClass(className);
             }
+            Method method = null;
+            if(targetScript==null || targetScript.isEmpty()){
+                method= ContextHolder.INVOKE_METHOD_MAP.get(methodName);
+                if(clazz==null){
+                    clazz=method.getDeclaringClass();
+                }
+            }
+
             if (clazz == null) {
                 throw new IllegalArgumentException("cannot found class by method : " + fullMethodName);
             }
-            Method method = null;
+
             if (method == null) {
                 Method[] methods = clazz.getMethods();
                 for (Method item : methods) {
