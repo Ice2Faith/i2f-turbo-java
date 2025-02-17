@@ -46,6 +46,9 @@
                 |sql-etl*
                 |java-call*
                 |function-call*
+                |context-load-package*
+                |context-invoke-method-class*
+                |context-convert-method-class*
                 )>
         <!ATTLIST procedure id CDATA #IMPLIED>
 
@@ -765,3 +768,13 @@
         <!ELEMENT etl-before (ANY)>
 
         <!ELEMENT etl-after (ANY)>
+
+        <!ELEMENT context-load-package (EMPTY)>
+        <!ATTLIST context-load-package package CDATA #IMPLIED>
+        <!ATTLIST context-load-package class CDATA #IMPLIED>
+
+        <!ELEMENT context-invoke-method-class (EMPTY)>
+        <!ATTLIST context-invoke-method-class class CDATA #IMPLIED>
+
+        <!ELEMENT context-convert-method-class (EMPTY)>
+        <!ATTLIST context-convert-method-class class CDATA #IMPLIED>

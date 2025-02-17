@@ -598,4 +598,44 @@ js引擎执行完毕之后，会返回之后一次执行的结果
 
         </etl-after>
     </sql-etl>
+
+    <!--
+    添加指定的包名前缀，或使用类名所在的包名前缀，
+    用于简化lang-invoke是的method，
+    或者其他的需要进行查找class的过程中，在JdbcProcedureExecutor.loadClass中进行查找类使用
+    不用写全限定类名，只需要用短类名，
+    例如：原本要写method=org.apache.StringUtils.trim方法
+    如果，已经注册了
+    <context-load-package package="org.apache."/>
+    或者
+    <context-load-package class="org.apache.StringUtils"/>
+    都添加了包名前缀：org.apache.
+    这样，只需要写method=StringUtils.trim
+    这样，也就能够直接等价于method=org.apache.StringUtils.trim
+    实际，作用于ContextHolder.LOAD_PACKAGE_SET中
+     -->
+    <context-load-package package="" class=""/>
+
+    <!--
+    添加class中的所有public方法，
+    这个方法名将会直接适用于lang-invoke是的method，
+    例如有这样的一个方法 public static String org.apache.StringUtils.regexReplace(...)
+    则，method=regexReplace就会被注册，
+    当lang-invoke的method=regexReplace被调用时，就会优先调用这个被注册的方法
+    实际，作用于ContextHolder.INVOKE_METHOD_MAP中
+    -->
+    <context-invoke-method-class class=""/>
+
+    <!--
+    添加class中的所有public static方法，
+    这个方法名将会直接适用于修饰符上，则修饰符就添加了这个类中的静态方法
+    要求，静态方法，一个入参，带有返回值
+    定义大致为：public static Object name(Object v);
+    例如有这样的一个方法 public static org.apache.StringUtils.trimAll(String str)
+    则，method=trimAll就会被注册，
+    当lang-invoke的method=trimAll被调用时，就会优先调用这个被注册的方法
+    实际，作用于ContextHolder.CONVERT_METHOD_MAP中
+    -->
+    <context-convert-method-class class=""/>
+
 </procedure>

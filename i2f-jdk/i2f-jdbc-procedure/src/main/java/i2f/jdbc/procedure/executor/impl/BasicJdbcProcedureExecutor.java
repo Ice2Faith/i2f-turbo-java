@@ -55,6 +55,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     public static List<ExecutorNode> defaultExecutorNodes() {
         List<ExecutorNode> ret = new ArrayList<>();
+        ret.add(new ContextConvertMethodClassNode());
+        ret.add(new ContextInvokeMethodClassNode());
+        ret.add(new ContextLoadPackageNode());
         ret.add(new FunctionCallNode());
         ret.add(new JavaCallNode());
         ret.add(new LangAsyncAllNode());
