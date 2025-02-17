@@ -1,7 +1,5 @@
 package i2f.jdbc.procedure.executor.impl;
 
-
-
 import i2f.bindsql.BindSql;
 import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
@@ -11,6 +9,7 @@ import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -28,6 +27,7 @@ import lombok.Data;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -410,6 +411,23 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             return System.currentTimeMillis();
         } else if (FeatureConsts.SNOW_UID.equals(feature)) {
             return SnowflakeLongUid.getId();
+        }else{
+            try {
+                Method method = ContextHolder.CONVERT_METHOD_MAP.get(feature);
+                if(method!=null){
+                    return method.invoke(null, value);
+                }
+            } catch (Exception e) {
+
+            }
+            try {
+                Function function = ContextHolder.CONVERT_FUNC_MAP.get(feature);
+                if(function!=null){
+                    return function.apply(value);
+                }
+            } catch (Exception e) {
+
+            }
         }
         return value;
     }
@@ -469,7 +487,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         if ("string".equals(className)) {
             return String.class;
         }
-        String[] prefixes = {
+        List<String> prefixes =new ArrayList<>(Arrays.asList(new String[] {
                 "",
                 "java.lang.",
                 "java.util.",
@@ -492,7 +510,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 "java.time.format.",
                 "java,time.temporal.",
                 "java.time.zone.",
-        };
+        }));
+        prefixes.addAll(ContextHolder.LOAD_PACKAGE_SET);
         Class<?> clazz = null;
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         for (String prefix : prefixes) {
