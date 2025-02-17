@@ -2,12 +2,15 @@ package i2f.jdbc.proxy.xml.mybatis.inflater;
 
 import i2f.bindsql.BindSql;
 import i2f.compiler.MemoryCompiler;
+import i2f.database.type.DatabaseType;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.match.regex.RegexUtil;
 import i2f.reflect.vistor.Visitor;
 import org.w3c.dom.Node;
 
 import java.lang.reflect.Array;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -15,7 +18,16 @@ import java.util.*;
  * @date 2024/10/9 18:43
  */
 public class MybatisMapperInflater {
+    public static final String DATABASE_TYPE = "databaseType";
+
     public static final MybatisMapperInflater INSTANCE = new MybatisMapperInflater();
+
+    protected String databaseType;
+
+    public MybatisMapperInflater databaseType(String databaseType) {
+        this.databaseType = databaseType;
+        return this;
+    }
 
     public boolean testExpression(String expression, Map<String, Object> params) {
         try {
@@ -28,7 +40,7 @@ public class MybatisMapperInflater {
             expression = expression.replaceAll("&gt;", " > ");
             expression = expression.replaceAll("&lt;", " < ");
             expression = "return " + expression + ";";
-            String additionalImports = "import i2f.reflect.vistor.Visitor;";
+            String additionalImports = "import " + Visitor.class.getName() + ";";
             String additionalMethods = "\n" +
                     "    public static Object eval(String expression,Object root){\n" +
                     "        return Visitor.visit(expression,root).get();\n" +
@@ -48,6 +60,17 @@ public class MybatisMapperInflater {
         return Visitor.visit(expression, params).get();
     }
 
+    public BindSql inflateSql(Connection conn, String unqId, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) throws SQLException {
+        DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+        params.put(DATABASE_TYPE, databaseType);
+        return inflateSql(unqId, params, nodeMap);
+    }
+
+    public BindSql inflateSql(DatabaseType databaseType, String unqId, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) {
+        params.put(DATABASE_TYPE, databaseType);
+        return inflateSql(unqId, params, nodeMap);
+    }
+
     public BindSql inflateSql(String unqId, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) {
         MybatisMapperNode node = nodeMap.get(unqId);
         if (node == null) {
@@ -56,7 +79,24 @@ public class MybatisMapperInflater {
         return inflateSqlNode(node, params, nodeMap);
     }
 
+    public BindSql inflateSqlNode(Connection conn, MybatisMapperNode node, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) throws SQLException {
+        DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+        params.put(DATABASE_TYPE, databaseType);
+        return inflateSqlNode(node, params, nodeMap);
+    }
+
+    public BindSql inflateSqlNode(DatabaseType databaseType, MybatisMapperNode node, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) {
+        params.put(DATABASE_TYPE, databaseType);
+        return inflateSqlNode(node, params, nodeMap);
+    }
+
     public BindSql inflateSqlNode(MybatisMapperNode node, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) {
+        Object type = params.get(DATABASE_TYPE);
+        if (type == null) {
+            if (databaseType != null) {
+                params.put(DATABASE_TYPE, databaseType);
+            }
+        }
         Map<String, Object> workParam = new LinkedHashMap<>(params);
         if (!node.isXmlType()) {
             if (Node.COMMENT_NODE == node.getNodeType()) {
@@ -91,6 +131,20 @@ public class MybatisMapperInflater {
 
                 continue;
             }
+            if ("dialect".equalsIgnoreCase(tagName)) {
+                String databases = child.getAttributes().get("databases");
+
+                Object databaseType = params.get(DATABASE_TYPE);
+                boolean testOk = supportDatabases(databaseType, databases);
+
+                if (testOk) {
+                    BindSql next = inflateSqlNode(child, params, nodeMap);
+                    builder.append(next.getSql());
+                    args.addAll(next.getArgs());
+                }
+
+                continue;
+            }
             if ("choose".equalsIgnoreCase(tagName)) {
                 List<MybatisMapperNode> nexts = child.getChildren();
                 for (MybatisMapperNode next : nexts) {
@@ -107,6 +161,30 @@ public class MybatisMapperInflater {
                         }
                     }
                     if ("otherwise".equalsIgnoreCase(nextTagName)) {
+                        BindSql recur = inflateSqlNode(next, params, nodeMap);
+                        builder.append(recur.getSql());
+                        args.addAll(recur.getArgs());
+                    }
+                }
+                continue;
+            }
+            if ("dialect-choose".equalsIgnoreCase(tagName)) {
+                List<MybatisMapperNode> nexts = child.getChildren();
+                for (MybatisMapperNode next : nexts) {
+                    String nextTagName = next.getTagName();
+                    if ("dialect-when".equalsIgnoreCase(nextTagName)) {
+                        String databases = next.getAttributes().get("databases");
+                        Object databaseType = params.get(DATABASE_TYPE);
+                        boolean testOk = supportDatabases(databaseType, databases);
+
+                        if (testOk) {
+                            BindSql recur = inflateSqlNode(next, params, nodeMap);
+                            builder.append(recur.getSql());
+                            args.addAll(recur.getArgs());
+                            break;
+                        }
+                    }
+                    if ("dialect-otherwise".equalsIgnoreCase(nextTagName)) {
                         BindSql recur = inflateSqlNode(next, params, nodeMap);
                         builder.append(recur.getSql());
                         args.addAll(recur.getArgs());
@@ -352,6 +430,46 @@ public class MybatisMapperInflater {
             }
         });
         return new BindSql(str, args);
+    }
+
+    public boolean supportDatabases(Object databaseType, String databases) {
+        if (databases == null || databases.isEmpty()) {
+            return true;
+        }
+        if (databaseType == null) {
+            return false;
+        }
+        if (databaseType instanceof DatabaseType) {
+            DatabaseType dt = (DatabaseType) databaseType;
+            List<String> databaseTypes = Arrays.asList(dt.db(), String.valueOf(dt));
+            return supportDatabases(databaseTypes, Arrays.asList(databases.split(",|;")));
+        } else {
+            List<String> databaseTypes = Arrays.asList(String.valueOf(databaseType));
+            return supportDatabases(databaseTypes, Arrays.asList(databases.split(",|;")));
+        }
+    }
+
+    public boolean supportDatabases(List<String> databaseTypes, List<String> databases) {
+        if (databases == null || databases.isEmpty()) {
+            return true;
+        }
+        if (databaseTypes == null || databaseTypes.isEmpty()) {
+            return false;
+        }
+        for (String databaseType : databaseTypes) {
+            if (databaseType == null || databaseType.isEmpty()) {
+                continue;
+            }
+            for (String database : databases) {
+                if (database == null || database.isEmpty()) {
+                    continue;
+                }
+                if (databaseType.equalsIgnoreCase(database)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
