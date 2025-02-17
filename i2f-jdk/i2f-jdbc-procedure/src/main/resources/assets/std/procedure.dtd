@@ -736,7 +736,7 @@
         <!ELEMENT lang-eval-javascript (#PCDATA)>
         <!ATTLIST lang-eval-javascript result CDATA #IMPLIED>
 
-        <!ELEMENT sql-scope (#PCDATA)>
+        <!ELEMENT sql-scope (ANY)>
         <!ATTLIST sql-scope datasources CDATA #IMPLIED>
 
         <!ELEMENT lang-sleep (EMPTY)>
