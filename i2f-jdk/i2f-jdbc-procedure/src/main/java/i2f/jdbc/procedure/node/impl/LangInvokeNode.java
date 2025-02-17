@@ -12,10 +12,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -62,6 +59,15 @@ public class LangInvokeNode implements ExecutorNode {
 
 
         if ("new".equals(methodName)) {
+            if (Map.class.getSimpleName().equals(className)) {
+                className = HashMap.class.getName();
+            } else if (List.class.getSimpleName().equals(className)) {
+                className = ArrayList.class.getName();
+            } else if (Collection.class.getSimpleName().equals(className)) {
+                className = ArrayList.class.getName();
+            } else if (Set.class.getSimpleName().equals(className)) {
+                className = HashSet.class.getName();
+            }
             Class<?> clazz = executor.loadClass(className);
             Constructor<?> constructor = null;
             if (constructor == null) {
