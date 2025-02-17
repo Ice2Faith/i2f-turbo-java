@@ -72,4 +72,7 @@ public interface AttrConsts {
 
     String SOURCE = "source";
     String TABLE = "table";
+
+    String PACKAGE = "package";
+    String CLASS = "class";
 }
