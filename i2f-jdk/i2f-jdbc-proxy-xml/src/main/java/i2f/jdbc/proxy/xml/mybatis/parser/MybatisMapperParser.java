@@ -67,7 +67,10 @@ public class MybatisMapperParser {
         Node rootNode = XmlUtil.getRootNode(document);
         String namespace = Optional.ofNullable(XmlUtil.getAttribute(rootNode, "namespace")).orElse("");
 
-        List<Node> rootNodes = XmlUtil.getChildNodes(rootNode, Arrays.asList("resultMap", "sql", "select", "update", "insert", "delete"));
+        List<Node> rootNodes = XmlUtil.getChildNodes(rootNode, Arrays.asList(
+                "resultMap", "sql", "select", "update", "insert", "delete",
+                "dialect", "dialect-choose", "dialect-when", "dialect-otherwise"
+        ));
         for (Node node : rootNodes) {
             MybatisMapperNode sqlNode = parseSqlNode(node);
             sqlNode.setNamespace(namespace);
