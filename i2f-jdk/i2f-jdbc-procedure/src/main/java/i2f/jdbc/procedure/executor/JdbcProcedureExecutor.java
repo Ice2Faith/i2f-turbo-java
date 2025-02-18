@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.executor;
 
+import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -26,7 +27,8 @@ public interface JdbcProcedureExecutor {
         }
         JdbcProcedureJavaCaller javaCaller = context.getJavaMap().get(nodeId);
         try{
-            javaCaller.exec(context,this,context.getParams());
+            Object ret = javaCaller.exec(context, this, context.getParams());
+            context.getParams().put(ParamsConsts.RETURN, ret);
         }catch(ControlSignalException e){
 
         }catch (Throwable e){
@@ -52,7 +54,8 @@ public interface JdbcProcedureExecutor {
         }
         JdbcProcedureJavaCaller javaCaller = context.getJavaMap().get(nodeId);
         try{
-            javaCaller.exec(context,this,context.getParams());
+            Object ret = javaCaller.exec(context, this, context.getParams());
+            context.getParams().put(ParamsConsts.RETURN, ret);
         }catch(ControlSignalException e){
 
         }catch (Throwable e){

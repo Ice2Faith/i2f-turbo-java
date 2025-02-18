@@ -3,6 +3,11 @@ package i2f.jdbc.procedure.test;
 import i2f.jdbc.datasource.impl.DirectConnectionDatasource;
 import i2f.jdbc.meta.JdbcMeta;
 import i2f.jdbc.procedure.annotations.JdbcProcedure;
+import i2f.jdbc.procedure.caller.JdbcProcedureExecutorCaller;
+import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
+import i2f.jdbc.procedure.caller.impl.ListableJdbcProcedureJavaCallerMapSupplier;
+import i2f.jdbc.procedure.caller.impl.StaticJdbcProcedureNodeMapCacheSupplier;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.impl.BasicJdbcProcedureExecutor;
@@ -90,8 +95,12 @@ public class TestProcedureExecutor {
         ExecuteContext context = new ExecuteContext(params);
 
         context.getParams().put("list", new ArrayList<>(Arrays.asList(9, 8, 7, 6, 5, 4, 3, 2, 1)));
+
+        context.getNodeMap().put(node.getTagAttrMap().get(AttrConsts.ID), node);
+
         TestSimpleJavaCaller caller = new TestSimpleJavaCaller();
         context.getJavaMap().put("SIMPLE",caller);
+
         Class<? extends TestSimpleJavaCaller> clazz = caller.getClass();
         JdbcProcedure ann = ReflectResolver.getAnnotation(clazz,JdbcProcedure.class);
         if(ann!=null){
@@ -102,5 +111,14 @@ public class TestProcedureExecutor {
             executor.exec(ann.value(), context);
         }
         executor.exec("SIMPLE",context);
+
+        System.out.println("===========================================");
+        JdbcProcedureExecutorCaller executorCaller = new DefaultJdbcProcedureExecutorCaller(executor,
+                new StaticJdbcProcedureNodeMapCacheSupplier(context.getNodeMap()),
+                new ListableJdbcProcedureJavaCallerMapSupplier(context.getJavaMap()));
+
+        executorCaller.call("SIMPLE", context.getParams());
+
+        executorCaller.call("BASIC", context.getParams());
     }
 }
