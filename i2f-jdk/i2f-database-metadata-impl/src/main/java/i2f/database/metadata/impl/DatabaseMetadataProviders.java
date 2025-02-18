@@ -59,6 +59,12 @@ public class DatabaseMetadataProviders {
         } else if (DatabaseType.SQL_SERVER == databaseType
                 || DatabaseType.SQL_SERVER2005 == databaseType) {
             return SqlServerDatabaseMetadataProvider.INSTANCE;
+        } else if (DatabaseType.OCEAN_BASE == databaseType) {
+            String userName = conn.getMetaData().getUserName();
+            if (userName.toLowerCase().contains("oracle")) {
+                return OracleDatabaseMetadataProvider.INSTANCE;
+            }
+            return MysqlDatabaseMetadataProvider.INSTANCE;
         }
         System.err.println("un-support metadata provider for product: " + productName);
         return JdbcDatabaseMetadataProvider.INSTANCE;
