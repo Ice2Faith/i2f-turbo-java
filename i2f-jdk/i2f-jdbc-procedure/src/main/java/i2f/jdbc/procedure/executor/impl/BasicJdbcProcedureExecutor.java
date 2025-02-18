@@ -755,8 +755,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
-            List<String> databaseNames = detectDatabaseType(conn);
-            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
             debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
@@ -773,8 +773,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
-            List<String> databaseNames = detectDatabaseType(conn);
-            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
             debugLog(() -> "sqlQueryObject:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
@@ -790,8 +790,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
-            List<String> databaseNames = detectDatabaseType(conn);
-            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
             debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
@@ -807,8 +807,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
-            List<String> databaseNames = detectDatabaseType(conn);
-            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
             debugLog(() -> "sqlUpdate:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
@@ -824,8 +824,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
-            List<String> databaseNames = detectDatabaseType(conn);
-            setParamsObject(params, ParamsConsts.DATABASE_TYPE_LIST, databaseNames);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
             IPageWrapper wrapper = PageWrappers.wrapper(conn);

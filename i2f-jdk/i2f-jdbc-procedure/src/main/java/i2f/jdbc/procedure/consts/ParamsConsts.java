@@ -19,8 +19,6 @@ public interface ParamsConsts {
     String CONNECTIONS = "connections";
     String DEFAULT_DATASOURCE = "primary";
 
-    String DATABASE_TYPE_LIST = "databaseTypeList";
-
     // 返回值
     String RETURN="return";
 }
