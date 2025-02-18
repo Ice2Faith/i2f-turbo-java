@@ -1,6 +1,29 @@
 <!DOCTYPE procedure SYSTEM "procedure.dtd">
 
 <procedure>
+    <lang-invoke method="decode" arg0.int="1"
+                 arg1.int="0" arg2.string="unknown"
+                 arg3.int="1" arg4.string="man"
+                 arg5.int="2" arg6.string="woman"
+                 result="dec"/>
+    <lang-println tag="dec1" dec="dec"/>
+
+    <lang-invoke method="decode" arg0.int="1"
+                 arg1.int="0" arg2.string="unknown"
+                 arg7.string="undefined"
+                 result="dec"/>
+    <lang-println tag="dec2" dec="dec"/>
+
+    <lang-invoke method="decode" arg0.int="1"
+                 arg1.int="0" arg2.string="unknown"
+                 result="dec"/>
+    <lang-println tag="dec3" dec="dec"/>
+
+    <lang-invoke method="decode" arg0.int="1"
+                 arg2.string="unknown"
+                 result="dec"/>
+    <lang-println tag="dec4" dec="dec"/>
+
     <lang-invoke method="SimpleDateFormat.new" arg0.string="yyyy-MM-dd HH:mm:ss.SSS" result="fmt"/>
     <lang-invoke method="Date.new" result="now"/>
     <lang-invoke method="format" target="fmt" arg0="now" result="str"/>
