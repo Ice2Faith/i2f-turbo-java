@@ -26,6 +26,8 @@ public class TestDatabaseMetadata {
             System.out.println(driver);
         }
 
+        parseOceanBaseOracle();
+
 //        parseOracle();
 //
 //        parseGbase();
@@ -403,6 +405,65 @@ public class TestDatabaseMetadata {
 
         PreparedStatement stat = conn.prepareStatement(sql);
         stat.setString(1, "SPSV_DEV");
+        stat.setString(2, "SYS_USER");
+
+        System.out.println("-------------------------------------------------------");
+        System.out.println(stringify(JdbcResolver.parseResultSet(stat.executeQuery())));
+        stat.close();
+
+
+        conn.close();
+    }
+
+
+    public static void parseOceanBaseOracle() throws Exception {
+
+        Class.forName("com.oceanbase.jdbc.Driver");
+
+        Connection conn = DriverManager.getConnection("jdbc:oceanbase://127.0.0.1:2883/testdb?pool=false",
+                "testdb@oracle_utf8#dev_test", "xxx123456");
+
+        DatabaseMetadataProvider provider = DatabaseMetadataProviders.findProvider(conn);
+
+        DatabaseMetaData metaData = conn.getMetaData();
+        System.out.println("---------------------user name ----------------------------------");
+        System.out.println(metaData.getUserName());
+
+        System.out.println("-------------------product name------------------------------------");
+        System.out.println(metaData.getDatabaseProductName());
+
+        System.out.println("---------------------product version----------------------------------");
+        System.out.println(metaData.getDatabaseProductVersion());
+
+        System.out.println("----------------------driver name---------------------------------");
+        System.out.println(metaData.getDriverName());
+
+        System.out.println("-----------------------driver version--------------------------------");
+        System.out.println(metaData.getDriverVersion());
+
+        System.out.println("-------------------------schemas------------------------------");
+        System.out.println(stringify(provider.getSchemas(conn)));
+
+        System.out.println("--------------------------catalogs-----------------------------");
+        System.out.println(stringify(provider.getCatalogs(conn)));
+
+        System.out.println("--------------------------databases-----------------------------");
+        System.out.println(stringify(provider.getDatabases(conn)));
+
+        System.out.println("--------------------------tables-----------------------------");
+        System.out.println(stringify(provider.getTables(conn, "TESTDB")));
+
+        System.out.println("---------------------table info----------------------------------");
+        System.out.println(stringify(provider.getTableInfo(conn, "TESTDB", "SYS_USER")));
+
+        String sql = "SELECT a.* FROM ALL_COL_COMMENTS a\n" +
+                "\tLEFT JOIN ALL_TAB_COLUMNS b ON a.OWNER = b.OWNER AND a.TABLE_NAME =b.TABLE_NAME AND a.COLUMN_NAME =b.COLUMN_NAME \n" +
+                "\tWHERE a.OWNER LIKE ?\n" +
+                "\tAND a.TABLE_NAME LIKE ?\n" +
+                "\tORDER BY b.COLUMN_ID ASC ";
+
+        PreparedStatement stat = conn.prepareStatement(sql);
+        stat.setString(1, "TESTDB");
         stat.setString(2, "SYS_USER");
 
         System.out.println("-------------------------------------------------------");
