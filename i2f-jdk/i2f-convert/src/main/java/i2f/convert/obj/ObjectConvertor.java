@@ -6,6 +6,9 @@ import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.*;
@@ -614,9 +617,61 @@ public class ObjectConvertor {
             }
         }
 
+        Object ret = tryConvertAsTypeWithConstructor(val, targetType);
+        if (ret != val) {
+            return ret;
+        }
 
         return val;
     }
+
+    public static Object tryConvertAsTypeWithConstructor(Object val, Class<?> targetType) {
+        if (val == null) {
+            return val;
+        }
+        Class<?> clazz = val.getClass();
+        Constructor<?>[] constructors = targetType.getConstructors();
+        for (Constructor<?> item : constructors) {
+            int count = item.getParameterCount();
+            if (count == 0) {
+                continue;
+            }
+            Class<?> paramType = item.getParameterTypes()[0];
+            if (TypeOf.typeOf(clazz, paramType)) {
+                try {
+                    return item.newInstance(val);
+                } catch (Exception e) {
+                }
+            }
+        }
+        Method[] methods = targetType.getMethods();
+        for (Method item : methods) {
+            int mod = item.getModifiers();
+            if (!Modifier.isPublic(mod)) {
+                continue;
+            }
+            if (!Modifier.isStatic(mod)) {
+                continue;
+            }
+            int count = item.getParameterCount();
+            if (count != 1) {
+                continue;
+            }
+            Class<?> returnType = item.getReturnType();
+            if (!TypeOf.typeOf(returnType, targetType)) {
+                continue;
+            }
+            Class<?> paramType = item.getParameterTypes()[0];
+            if (TypeOf.typeOf(clazz, paramType)) {
+                try {
+                    return item.invoke(null, val);
+                } catch (Exception e) {
+                }
+            }
+        }
+        return val;
+    }
+
 
     public static Boolean tryParseBoolean(String valStr) {
         if (valStr == null) {
