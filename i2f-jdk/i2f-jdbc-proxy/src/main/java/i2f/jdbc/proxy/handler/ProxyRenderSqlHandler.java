@@ -3,6 +3,7 @@ package i2f.jdbc.proxy.handler;
 import i2f.annotations.core.naming.Name;
 import i2f.bindsql.BindSql;
 import i2f.convert.obj.ObjectConvertor;
+import i2f.database.type.DatabaseType;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.proxy.annotations.IgnorePage;
@@ -80,34 +81,41 @@ public class ProxyRenderSqlHandler implements InvocationHandler {
             params.put(name, arg);
         }
 
-        BindSql sql = sqlProvider.render(methodId, params, method, args);
-
-        Type returnType = method.getGenericReturnType();
-        Class<?> returnClass = method.getReturnType();
-
-        BindSql.Type type = sql.getType();
-        if (type == null || type == BindSql.Type.UNSET) {
-            type = JdbcResolver.detectType(sql.getSql());
-        }
-
-        Type[] relTypes = null;
-        if (!(returnType instanceof Class)) {
-            String cacheKey = proxyClass.getName() + "#" + method.getDeclaringClass().getName();
-            Reference<Type[]> ref = CACHE_REL_TYPES.get(cacheKey);
-
-            if (ref != null) {
-                relTypes = ref.get();
-            } else {
-                relTypes = RichConverter.fetchRelType(proxyClass, method.getDeclaringClass());
-                CACHE_REL_TYPES.put(cacheKey, Reference.of(relTypes));
-            }
-        }
-
-
         Object context = contextProvider.beginContext();
         Connection conn = contextProvider.getConnectionInner(context);
 
         try {
+            if (params.get("databaseType") == null) {
+                DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+                params.put("databaseType", databaseType);
+            }
+            if (params.get("connection") == null) {
+                params.put("connection", conn);
+            }
+
+            BindSql sql = sqlProvider.render(methodId, params, method, args);
+
+            Type returnType = method.getGenericReturnType();
+            Class<?> returnClass = method.getReturnType();
+
+            BindSql.Type type = sql.getType();
+            if (type == null || type == BindSql.Type.UNSET) {
+                type = JdbcResolver.detectType(sql.getSql());
+            }
+
+            Type[] relTypes = null;
+            if (!(returnType instanceof Class)) {
+                String cacheKey = proxyClass.getName() + "#" + method.getDeclaringClass().getName();
+                Reference<Type[]> ref = CACHE_REL_TYPES.get(cacheKey);
+
+                if (ref != null) {
+                    relTypes = ref.get();
+                } else {
+                    relTypes = RichConverter.fetchRelType(proxyClass, method.getDeclaringClass());
+                    CACHE_REL_TYPES.put(cacheKey, Reference.of(relTypes));
+                }
+            }
+
 
             if (type == BindSql.Type.UPDATE) {
                 int val = JdbcResolver.update(conn, sql);
