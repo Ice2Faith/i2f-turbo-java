@@ -22,7 +22,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -614,6 +614,129 @@ public class ObjectConvertor {
                 return loc;
             } catch (Exception e) {
 
+            }
+        }
+
+        // 处理Map
+        if (TypeOf.typeOf(targetType, Map.class)) {
+            if (val == null) {
+                return val;
+            }
+            if (val instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) val;
+                if (TypeOf.instanceOf(map, targetType)) {
+                    return val;
+                }
+                Map dstMap = null;
+                if (HashMap.class.equals(targetType)) {
+                    dstMap = new HashMap();
+                } else if (LinkedHashMap.class.equals(targetType)) {
+                    dstMap = new LinkedHashMap();
+                } else if (TreeMap.class.equals(targetType)) {
+                    dstMap = new TreeMap();
+                } else if (ConcurrentHashMap.class.equals(targetType)) {
+                    dstMap = new ConcurrentHashMap();
+                } else if (IdentityHashMap.class.equals(targetType)) {
+                    dstMap = new IdentityHashMap();
+                } else if (WeakHashMap.class.equals(targetType)) {
+                    dstMap = new WeakHashMap();
+                } else if (Hashtable.class.equals(targetType)) {
+                    dstMap = new Hashtable();
+                } else if (Properties.class.equals(targetType)) {
+                    dstMap = new Properties();
+                }
+                if (dstMap != null) {
+                    dstMap.putAll(map);
+                    return dstMap;
+                }
+            }
+        }
+
+        // 处理Collection
+        if (TypeOf.typeOf(targetType, Collection.class)) {
+            if (val == null) {
+                return val;
+            }
+            Collection col = null;
+            if (val instanceof Collection) {
+                col = (Collection<?>) val;
+            }
+            if (val.getClass().isArray()) {
+                col = new ArrayList<>();
+                int len = Array.getLength(val);
+                for (int i = 0; i < len; i++) {
+                    col.add(Array.get(val, i));
+                }
+            }
+
+            if (col != null) {
+                if (TypeOf.instanceOf(col, targetType)) {
+                    return val;
+                }
+                Collection dstCol = null;
+                if (ArrayList.class.equals(targetType)) {
+                    dstCol = new ArrayList();
+                } else if (LinkedList.class.equals(targetType)) {
+                    dstCol = new LinkedList();
+                } else if (Vector.class.equals(targetType)) {
+                    dstCol = new Vector();
+                } else if (CopyOnWriteArrayList.class.equals(targetType)) {
+                    dstCol = new CopyOnWriteArrayList();
+                } else if (HashSet.class.equals(targetType)) {
+                    dstCol = new HashSet();
+                } else if (LinkedHashSet.class.equals(targetType)) {
+                    dstCol = new LinkedHashSet();
+                } else if (CopyOnWriteArraySet.class.equals(targetType)) {
+                    dstCol = new CopyOnWriteArraySet();
+                } else if (TreeSet.class.equals(targetType)) {
+                    dstCol = new TreeSet();
+                } else if (Stack.class.equals(targetType)) {
+                    dstCol = new Stack();
+                } else if (PriorityQueue.class.equals(targetType)) {
+                    dstCol = new PriorityQueue();
+                } else if (LinkedBlockingQueue.class.equals(targetType)) {
+                    dstCol = new LinkedBlockingQueue();
+                } else if (ConcurrentLinkedQueue.class.equals(targetType)) {
+                    dstCol = new ConcurrentLinkedQueue();
+                }
+
+                if (dstCol != null) {
+                    dstCol.addAll(col);
+                    return dstCol;
+                }
+            }
+        }
+
+        // 处理数组
+        if (targetType.isArray()) {
+            if (val == null) {
+                return val;
+            }
+            Class<?> elemType = targetType.getComponentType();
+            List list = null;
+            if (val instanceof Collection) {
+                if (list == null) {
+                    list = new ArrayList();
+                }
+                list.addAll((Collection<?>) val);
+            }
+            if (val.getClass().isArray()) {
+                if (list == null) {
+                    list = new ArrayList();
+                }
+                int len = Array.getLength(val);
+                for (int i = 0; i < len; i++) {
+                    list.add(Array.get(val, i));
+                }
+            }
+            if (list != null) {
+                Object ret = Array.newInstance(elemType, list.size());
+                int idx = 0;
+                for (Object item : list) {
+                    Array.set(ret, idx, item);
+                    idx++;
+                }
+                return ret;
             }
         }
 
