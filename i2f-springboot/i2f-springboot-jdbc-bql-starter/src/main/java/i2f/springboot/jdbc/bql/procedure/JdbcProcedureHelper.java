@@ -23,6 +23,15 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         latch.countDown();
     }
 
+    public static <T> T invoke(String procedureId,Map<String,Object> params){
+        try {
+            latch.await();
+        } catch (Exception e) {
+
+        }
+        return caller.invoke(procedureId, params);
+    }
+
     public static void call(String procedureId, Map<String, Object> params) {
         try {
             latch.await();

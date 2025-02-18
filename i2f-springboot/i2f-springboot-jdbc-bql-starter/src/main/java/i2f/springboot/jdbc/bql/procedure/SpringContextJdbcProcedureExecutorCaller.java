@@ -38,6 +38,11 @@ public class SpringContextJdbcProcedureExecutorCaller {
         this.callerSupplier = callerSupplier;
     }
 
+    public <T> T invoke(String procedureId,Map<String,Object> params){
+        call(procedureId,params);
+        return (T)executor.visit(ParamsConsts.RETURN, params);
+    }
+
     public void call(String procedureId, Map<String, Object> params) {
         Map<String, XmlNode> nodeMap = refresher.getNodeMap();
         XmlNode node = nodeMap.get(procedureId);
