@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.context;
 
+import java.util.Objects;
+
 /**
  * @author Ice2Faith
  * @date 2025/2/17 16:09
@@ -97,6 +99,18 @@ public class ContextFunctions {
         return nvl(v1,v2);
     }
 
-    // decode
+    public static Object decode(Object target, Object... args) {
+        int i = 0;
+        while (i + 1 < args.length) {
+            if (Objects.equals(target, args[i])) {
+                return args[i + 1];
+            }
+            i += 2;
+        }
+        if (args.length % 2 != 0) {
+            return args[args.length - 1];
+        }
+        return target;
+    }
 
 }

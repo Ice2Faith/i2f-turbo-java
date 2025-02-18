@@ -14,7 +14,6 @@ import i2f.reflect.ReflectResolver;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileInputStream;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -25,7 +24,9 @@ import java.util.Map;
  */
 public class TestProcedureExecutor {
     public static void main(String[] args) throws Exception {
-        testProcedure();
+//        testProcedure();
+
+        testBasic();
     }
 
     public static void testProcedure() throws Exception {

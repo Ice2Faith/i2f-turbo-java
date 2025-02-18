@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -70,25 +71,48 @@ public class LangInvokeNode implements ExecutorNode {
             }
             Class<?> clazz = executor.loadClass(className);
             Constructor<?> constructor = null;
-            if (constructor == null) {
+            Constructor<?> constructorArgs = null;
+            if (constructor == null || constructorArgs == null) {
                 Constructor[] constructors = clazz.getConstructors();
                 for (Constructor item : constructors) {
                     if (item.getParameterCount() == args.size()) {
-                        constructor = item;
-                        break;
+                        if (constructor == null) {
+                            constructor = item;
+                        }
                     }
-
+                    if (args.size() > item.getParameterCount()) {
+                        if (item.getParameterCount() > 0) {
+                            if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
+                                if (constructorArgs == null) {
+                                    constructorArgs = item;
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            if (constructor == null) {
+            if (constructor == null || constructorArgs == null) {
                 Constructor[] declaredConstructors = clazz.getDeclaredConstructors();
                 for (Constructor item : declaredConstructors) {
                     if (item.getParameterCount() == args.size()) {
+                        if (constructor == null) {
                         constructor = item;
-                        break;
+                        }
                     }
-
+                    if (args.size() > item.getParameterCount()) {
+                        if (item.getParameterCount() > 0) {
+                            if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
+                                if (constructorArgs == null) {
+                                    constructorArgs = item;
+                                }
+                            }
+                        }
+                    }
                 }
+            }
+
+            if (constructor == null) {
+                constructor = constructorArgs;
             }
 
             if (constructor == null) {
@@ -98,8 +122,17 @@ public class LangInvokeNode implements ExecutorNode {
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             Object[] invokeArgs = new Object[parameterTypes.length];
 
-            for (int i = 0; i < parameterTypes.length; i++) {
-                Class<?> paramType = parameterTypes[i];
+            for (int i = 0; i < args.size(); i++) {
+                Class<?> paramType = null;
+                if (i < invokeArgs.length - 1) {
+                    paramType = parameterTypes[i];
+                } else {
+                    if (parameterTypes[parameterTypes.length - 1].isArray()) {
+                        paramType = parameterTypes[parameterTypes.length - 1].getComponentType();
+                    } else {
+                        paramType = parameterTypes[parameterTypes.length - 1];
+                    }
+                }
                 Map.Entry<Integer, String> argEntry = args.get(i);
                 String argScript = argEntry.getValue();
                 Object evalObj = null;
@@ -111,8 +144,20 @@ public class LangInvokeNode implements ExecutorNode {
                     evalObj = argScript;
                 }
                 Object val = ObjectConvertor.tryConvertAsType(evalObj, paramType);
-                invokeArgs[i] = val;
+                if (i < parameterTypes.length - 1) {
+                    invokeArgs[i] = val;
+                } else {
+                    if (parameterTypes[parameterTypes.length - 1].isArray()) {
+                        if (invokeArgs[parameterTypes.length - 1] == null) {
+                            invokeArgs[parameterTypes.length - 1] = Array.newInstance(paramType, args.size() - parameterTypes.length + 1);
+                        }
+                        Array.set(invokeArgs[parameterTypes.length - 1], i - parameterTypes.length + 1, val);
+                    } else {
+                        invokeArgs[i] = val;
+                    }
+                }
             }
+
 
             try {
                 constructor.setAccessible(true);
@@ -138,6 +183,7 @@ public class LangInvokeNode implements ExecutorNode {
                 clazz = executor.loadClass(className);
             }
             Method method = null;
+            Method methodArgs = null;
             if(targetScript==null || targetScript.isEmpty()){
                 method= ContextHolder.INVOKE_METHOD_MAP.get(methodName);
                 if(clazz==null){
@@ -149,28 +195,52 @@ public class LangInvokeNode implements ExecutorNode {
                 throw new IllegalArgumentException("cannot found class by method : " + fullMethodName);
             }
 
-            if (method == null) {
+            if (method == null || methodArgs == null) {
                 Method[] methods = clazz.getMethods();
                 for (Method item : methods) {
                     if (item.getName().equals(methodName)) {
                         if (item.getParameterCount() == args.size()) {
-                            method = item;
-                            break;
+                            if (method == null) {
+                                method = item;
+                            }
+                        }
+                        if (args.size() > item.getParameterCount()) {
+                            if (item.getParameterCount() > 0) {
+                                if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
+                                    if (methodArgs == null) {
+                                        methodArgs = item;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (method == null || methodArgs == null) {
+                Method[] declaredMethods = clazz.getDeclaredMethods();
+                for (Method item : declaredMethods) {
+                    if (item.getName().equals(methodName)) {
+                        if (item.getParameterCount() == args.size()) {
+                            if (method == null) {
+                                method = item;
+                            }
+                        }
+                        if (args.size() > item.getParameterCount()) {
+                            if (item.getParameterCount() > 0) {
+                                if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
+                                    if (methodArgs == null) {
+                                        methodArgs = item;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
             if (method == null) {
-                Method[] declaredMethods = clazz.getDeclaredMethods();
-                for (Method item : declaredMethods) {
-                    if (item.getName().equals(methodName)) {
-                        if (item.getParameterCount() == args.size()) {
-                            method = item;
-                            break;
-                        }
-                    }
-                }
+                method = methodArgs;
             }
 
             if (method == null) {
@@ -181,8 +251,17 @@ public class LangInvokeNode implements ExecutorNode {
             Class<?>[] parameterTypes = method.getParameterTypes();
             Object[] invokeArgs = new Object[parameterTypes.length];
 
-            for (int i = 0; i < parameterTypes.length; i++) {
-                Class<?> paramType = parameterTypes[i];
+            for (int i = 0; i < args.size(); i++) {
+                Class<?> paramType = null;
+                if (i < invokeArgs.length - 1) {
+                    paramType = parameterTypes[i];
+                } else {
+                    if (parameterTypes[parameterTypes.length - 1].isArray()) {
+                        paramType = parameterTypes[parameterTypes.length - 1].getComponentType();
+                    } else {
+                        paramType = parameterTypes[parameterTypes.length - 1];
+                    }
+                }
                 Map.Entry<Integer, String> argEntry = args.get(i);
                 String argScript = argEntry.getValue();
                 Object evalObj = null;
@@ -194,7 +273,18 @@ public class LangInvokeNode implements ExecutorNode {
                     evalObj = argScript;
                 }
                 Object val = ObjectConvertor.tryConvertAsType(evalObj, paramType);
-                invokeArgs[i] = val;
+                if (i < parameterTypes.length - 1) {
+                    invokeArgs[i] = val;
+                } else {
+                    if (parameterTypes[parameterTypes.length - 1].isArray()) {
+                        if (invokeArgs[parameterTypes.length - 1] == null) {
+                            invokeArgs[parameterTypes.length - 1] = Array.newInstance(paramType, args.size() - parameterTypes.length + 1);
+                        }
+                        Array.set(invokeArgs[parameterTypes.length - 1], i - parameterTypes.length + 1, val);
+                    } else {
+                        invokeArgs[i] = val;
+                    }
+                }
             }
 
             try {
