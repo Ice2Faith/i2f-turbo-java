@@ -1,5 +1,6 @@
 package i2f.springboot.jdbc.bql.procedure;
 
+import i2f.jdbc.procedure.caller.impl.AbstractJdbcProcedureNodeMapCacheSupplier;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import lombok.Data;
@@ -11,9 +12,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Ice2Faith
@@ -22,62 +21,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Data
 @NoArgsConstructor
 @Slf4j
-public class SpringJdbcProcedureNodeMapRefresher {
+public class SpringJdbcProcedureNodeMapCacheSupplier extends AbstractJdbcProcedureNodeMapCacheSupplier {
 
     protected final CopyOnWriteArraySet<String> xmlLocations = new CopyOnWriteArraySet<>();
     protected final PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-    protected final ConcurrentHashMap<String, XmlNode> nodeMap = new ConcurrentHashMap<>();
-
-    protected volatile Thread refreshThread = null;
-    protected AtomicBoolean refreshing = new AtomicBoolean(false);
-
-    public SpringJdbcProcedureNodeMapRefresher(List<String> xmlLocations) {
+    public SpringJdbcProcedureNodeMapCacheSupplier(List<String> xmlLocations) {
         if (xmlLocations == null) {
             return;
         }
         this.xmlLocations.addAll(xmlLocations);
     }
 
-    public Map<String, XmlNode> getNodeMap() {
-        if (nodeMap.isEmpty()) {
-            refreshNodeMap();
-        }
-        return new HashMap<>(nodeMap);
-    }
-
-    public void startRefreshThread(long intervalSeconds) {
-        if (intervalSeconds < 0) {
-            refreshing.set(false);
-            if (refreshThread != null) {
-                refreshThread.interrupt();
-            }
-            refreshThread = null;
-        }
-        refreshing.set(true);
-        Thread thread = new Thread(() -> {
-            while (refreshing.get()) {
-                try {
-                    refreshNodeMap();
-                } catch (Exception e) {
-                }
-                try {
-                    Thread.sleep(intervalSeconds * 1000);
-                } catch (Exception e) {
-                }
-            }
-        });
-        thread.setName("procedure-xml-refresher");
-        thread.setDaemon(true);
-        thread.start();
-        refreshThread = thread;
-    }
-
-    public void refreshNodeMap() {
-        Map<String, XmlNode> map = parseResources();
-        nodeMap.putAll(map);
-    }
-
+    @Override
     public Map<String, XmlNode> parseResources() {
         Map<String, XmlNode> ret = new HashMap<>();
         if (xmlLocations == null || xmlLocations.isEmpty()) {

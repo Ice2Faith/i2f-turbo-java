@@ -1,5 +1,7 @@
 package i2f.springboot.jdbc.bql.procedure;
 
+import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
+import i2f.jdbc.procedure.caller.impl.ListableJdbcProcedureJavaCallerMapSupplier;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import lombok.Data;
@@ -13,9 +15,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -48,8 +49,8 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     }
 
     @Bean
-    public SpringJdbcProcedureNodeMapRefresher springJdbcProcedureNodeMapRefresher() {
-        SpringJdbcProcedureNodeMapRefresher ret = new SpringJdbcProcedureNodeMapRefresher();
+    public SpringJdbcProcedureNodeMapCacheSupplier springJdbcProcedureNodeMapCacheSupplier() {
+        SpringJdbcProcedureNodeMapCacheSupplier ret = new SpringJdbcProcedureNodeMapCacheSupplier();
         String xmlLocations = jdbcProcedureProperties.getXmlLocations();
         if (xmlLocations == null) {
             xmlLocations = SpringJdbcProcedureProperties.DEFAULT_XML_LOCATIONS;
@@ -61,13 +62,13 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     }
 
     @Bean
-    public SpringContextJdbcProcedureExecutorCaller springContextJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor,
-                                                                                             SpringJdbcProcedureNodeMapRefresher refresher) {
-        return new SpringContextJdbcProcedureExecutorCaller(executor, refresher,()->{
-            List<JdbcProcedureJavaCaller> ret=new ArrayList<>();
+    public DefaultJdbcProcedureExecutorCaller defaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor,
+                                                                                 SpringJdbcProcedureNodeMapCacheSupplier refresher) {
+        return new DefaultJdbcProcedureExecutorCaller(executor, refresher, () -> {
+            Map<String, JdbcProcedureJavaCaller> ret = new HashMap<>();
             Map<String, JdbcProcedureJavaCaller> beanMap = applicationContext.getBeansOfType(JdbcProcedureJavaCaller.class);
             for (Map.Entry<String, JdbcProcedureJavaCaller> entry : beanMap.entrySet()) {
-                ret.add(entry.getValue());
+                ListableJdbcProcedureJavaCallerMapSupplier.addCaller(entry.getValue(), ret);
             }
             return ret;
         });

@@ -1,6 +1,6 @@
 <!DOCTYPE procedure SYSTEM "procedure.dtd">
 
-<procedure>
+<procedure id="BASIC">
     <lang-invoke method="decode" arg0.int="1"
                  arg1.int="0" arg2.string="unknown"
                  arg3.int="1" arg4.string="man"
