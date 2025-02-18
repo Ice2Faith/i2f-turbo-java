@@ -88,4 +88,15 @@ public class ContextFunctions {
             return str;
         }
     }
+
+    public static Object nvl(Object v1,Object v2){
+        return v1!=null?v1:v2;
+    }
+
+    public static Object ifnull(Object v1,Object v2){
+        return nvl(v1,v2);
+    }
+
+    // decode
+
 }
