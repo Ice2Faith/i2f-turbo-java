@@ -25,6 +25,12 @@ public class DefaultJdbcProcedureExecutorCaller implements JdbcProcedureExecutor
     protected JdbcProcedureNodeMapSupplier nodeSupplier;
     protected JdbcProcedureJavaCallerMapSupplier javaCallerSupplier;
 
+    public DefaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor, ExecuteContext context){
+        this.executor=executor;
+        this.nodeSupplier=new StaticJdbcProcedureNodeMapCacheSupplier(context.getNodeMap());
+        this.javaCallerSupplier=new ListableJdbcProcedureJavaCallerMapSupplier(context.getJavaMap());
+    }
+
     public DefaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor, JdbcProcedureNodeMapSupplier nodeSupplier) {
         this.executor = executor;
         this.nodeSupplier = nodeSupplier;
