@@ -81,7 +81,7 @@ public class SpringJdbcProcedureNodeMapCacheSupplier extends AbstractJdbcProcedu
                     }
                 }
             } catch (Exception e) {
-                log.warn(e.getMessage(), e);
+                log.warn(resource.getFilename()+" parse error: "+e.getMessage(), e);
             }
         }
         return ret;

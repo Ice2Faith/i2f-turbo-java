@@ -1,5 +1,6 @@
 package i2f.springboot.jdbc.bql.procedure;
 
+import i2f.jdbc.procedure.caller.JdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -20,8 +21,18 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         JdbcProcedureHelper.applicationContext = applicationContext;
-        JdbcProcedureHelper.caller = applicationContext.getBean(DefaultJdbcProcedureExecutorCaller.class);
         latch.countDown();
+    }
+
+    public static JdbcProcedureExecutorCaller getCaller(){
+        if(caller==null){
+            synchronized (latch){
+                if(caller==null) {
+                    caller = applicationContext.getBean(DefaultJdbcProcedureExecutorCaller.class);
+                }
+            }
+        }
+        return caller;
     }
 
     public static <T> T invoke(String procedureId,Map<String,Object> params){
@@ -39,6 +50,6 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         } catch (Exception e) {
 
         }
-        caller.call(procedureId, params);
+        getCaller().call(procedureId, params);
     }
 }
