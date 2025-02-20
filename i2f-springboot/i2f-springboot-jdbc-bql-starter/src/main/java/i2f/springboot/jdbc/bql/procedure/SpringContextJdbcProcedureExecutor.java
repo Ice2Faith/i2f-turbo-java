@@ -14,6 +14,7 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 import javax.sql.DataSource;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -26,17 +27,16 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     protected ApplicationContext applicationContext;
     protected Environment environment;
     protected static final Logger log = LoggerFactory.getLogger(SpringContextJdbcProcedureExecutor.class);
+    protected static final AtomicBoolean hasApplyNodes=new AtomicBoolean(false);
 
     public SpringContextJdbcProcedureExecutor(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         this.environment = applicationContext.getEnvironment();
-        this.applyNodeExecutorComponents();
     }
 
     public SpringContextJdbcProcedureExecutor(ApplicationContext applicationContext, Environment environment) {
         this.applicationContext = applicationContext;
         this.environment = environment;
-        this.applyNodeExecutorComponents();
     }
 
     public void applyNodeExecutorComponents(){
@@ -47,6 +47,14 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
                 this.nodes.add(0,(ExecutorNode) bean);
             }
         }
+    }
+
+    @Override
+    public List<ExecutorNode> getNodes() {
+        if(!hasApplyNodes.getAndSet(true)){
+            applyNodeExecutorComponents();
+        }
+        return super.getNodes();
     }
 
     @Override

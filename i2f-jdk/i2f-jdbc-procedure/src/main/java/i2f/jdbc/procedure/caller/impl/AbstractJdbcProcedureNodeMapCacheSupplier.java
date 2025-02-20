@@ -37,6 +37,7 @@ public abstract class AbstractJdbcProcedureNodeMapCacheSupplier implements JdbcP
                 refreshThread.interrupt();
             }
             refreshThread = null;
+            return;
         }
         refreshing.set(true);
         Thread thread = new Thread(() -> {

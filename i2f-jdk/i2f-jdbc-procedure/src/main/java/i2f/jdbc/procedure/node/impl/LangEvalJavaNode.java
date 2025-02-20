@@ -133,11 +133,11 @@ public class LangEvalJavaNode implements ExecutorNode {
         builder.append("import ").append("java.io.*").append(";").append("\n");
         builder.append("import ").append("java.lang.reflect.*").append(";").append("\n");
         builder.append("import ").append("javax.sql.*").append(";").append("\n");
-        builder.append("import ").append("java.concurrent.*").append(";").append("\n");
+        builder.append("import ").append("java.util.concurrent.*").append(";").append("\n");
         builder.append("import ").append("java.nio.*").append(";").append("\n");
         builder.append("import ").append("java.nio.charset.*").append(";").append("\n");
-        builder.append("import ").append("java.concurrent.atomic.*").append(";").append("\n");
-        builder.append("import ").append("java.concurrent.locks.*").append(";").append("\n");
+        builder.append("import ").append("java.util.concurrent.atomic.*").append(";").append("\n");
+        builder.append("import ").append("java.util.concurrent.locks.*").append(";").append("\n");
         builder.append("import ").append("java.time.chrono.*").append(";").append("\n");
         builder.append("import ").append("java.time.format.*").append(";").append("\n");
         builder.append("import ").append("java.time.temporal.*").append(";").append("\n");

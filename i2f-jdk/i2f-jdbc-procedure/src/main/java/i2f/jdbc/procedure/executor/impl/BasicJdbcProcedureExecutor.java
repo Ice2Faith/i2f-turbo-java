@@ -110,6 +110,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return ret;
     }
 
+    public List<ExecutorNode> getNodes(){
+        return nodes;
+    }
+
     @Override
     public void debugLog(Supplier<String> supplier) {
         if (debug.get()) {
@@ -120,7 +124,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public void exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
-            for (ExecutorNode item : nodes) {
+            for (ExecutorNode item : getNodes()) {
                 if (item.support(node)) {
                     debugLog(() -> "exec " + node.getTagName() + " by " + item.getClass().getSimpleName());
                     Map<String, Connection> bakConnection = context.paramsComputeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
@@ -174,7 +178,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     public void execAsProcedure(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
             ProcedureNode execNode = null;
-            for (ExecutorNode item : nodes) {
+            for (ExecutorNode item : getNodes()) {
                 if (item instanceof ProcedureNode) {
                     execNode = (ProcedureNode) item;
                     break;
