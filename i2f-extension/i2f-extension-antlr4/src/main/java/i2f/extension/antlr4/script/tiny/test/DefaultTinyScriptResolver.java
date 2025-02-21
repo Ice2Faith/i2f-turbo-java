@@ -69,35 +69,40 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 return left + "" + right;
             } else if (right instanceof Appendable) {
                 return left + "" + right;
-            } else if (left instanceof Number && right instanceof Number) {
+            } else if (ObjectConvertor.isNumericType(left.getClass())
+            &&ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.add(rv, MATH_CONTEXT);
                 return convertNumberType(ret, (Number) left, (Number) right);
             }
         } else if ("-".equals(operator)) {
-            if (left instanceof Number && right instanceof Number) {
+            if (ObjectConvertor.isNumericType(left.getClass())
+            &&ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.subtract(rv, MATH_CONTEXT);
                 return convertNumberType(ret, (Number) left, (Number) right);
             }
         } else if ("*".equals(operator)) {
-            if (left instanceof Number && right instanceof Number) {
+            if (ObjectConvertor.isNumericType(left.getClass())
+            &&ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.multiply(rv, MATH_CONTEXT);
                 return convertNumberType(ret, (Number) left, (Number) right);
             }
         } else if ("/".equals(operator)) {
-            if (left instanceof Number && right instanceof Number) {
+            if (ObjectConvertor.isNumericType(left.getClass())
+            &&ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.divide(rv, MATH_CONTEXT);
                 return convertNumberType(ret, (Number) left, (Number) right);
             }
         } else if ("%".equals(operator)) {
-            if (left instanceof Number && right instanceof Number) {
+            if (ObjectConvertor.isNumericType(left.getClass())
+            &&ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 long num = lv.longValue() % rv.longValue();
@@ -158,18 +163,51 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 return ((Comparable) left).compareTo(right);
             }
         }
-        if (left instanceof Comparable<?>) {
-            return ((Comparable) left).compareTo(right);
+        if(TypeOf.typeOf(right.getClass(),left.getClass())){
+            if (left instanceof Comparable<?>) {
+                return ((Comparable) left).compareTo(right);
+            }
         }
-        if (right instanceof Comparable<?>) {
-            int ret = ((Comparable) right).compareTo(left);
-            if (ret == 0) {
-                return 0;
+        if(TypeOf.typeOf(left.getClass(),right.getClass())){
+            if (left instanceof Comparable<?>) {
+                int ret= ((Comparable) left).compareTo(right);
+                if (ret == 0) {
+                    return 0;
+                }
+                if (ret > 0) {
+                    return -1;
+                }
+                return 1;
             }
-            if (ret > 0) {
-                return -1;
+        }
+        if(ObjectConvertor.isNumericType(left.getClass())
+        &&ObjectConvertor.isNumericType(right.getClass())){
+            BigDecimal bl=new BigDecimal(String.valueOf(left));
+            BigDecimal br=new BigDecimal(String.valueOf(right));
+            return bl.compareTo(br);
+        }
+        if(TypeOf.instanceOf(left,CharSequence.class)
+        || TypeOf.instanceOf(right,CharSequence.class)){
+            String sl=String.valueOf(left);
+            String sr=String.valueOf(right);
+            return sl.compareTo(sr);
+        }
+        try {
+            if (left instanceof Comparable<?>) {
+                return ((Comparable) left).compareTo(right);
             }
-            return 1;
+            if (right instanceof Comparable<?>) {
+                int ret = ((Comparable) right).compareTo(left);
+                if (ret == 0) {
+                    return 0;
+                }
+                if (ret > 0) {
+                    return -1;
+                }
+                return 1;
+            }
+        } catch (Exception e) {
+
         }
         return Integer.compare(left.hashCode(), right.hashCode());
     }
