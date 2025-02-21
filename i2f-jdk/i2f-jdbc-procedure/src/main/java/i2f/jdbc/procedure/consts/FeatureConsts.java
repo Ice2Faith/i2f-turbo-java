@@ -34,6 +34,8 @@ public interface FeatureConsts {
 
     String EVAL_JAVA = "eval-java";
     String EVAL_JS = "eval-js";
+    String EVAL_TINYSCRIPT = "eval-tinyscript";
+    String EVAL_TS = "eval-ts";
     String CLASS = ".class";
 
     String NOT = "not";

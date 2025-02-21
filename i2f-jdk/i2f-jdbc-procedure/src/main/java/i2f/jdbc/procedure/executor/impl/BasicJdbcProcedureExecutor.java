@@ -27,7 +27,6 @@ import i2f.uid.SnowflakeLongUid;
 import lombok.Data;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -68,6 +67,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new LangContinueNode());
         ret.add(new LangEvalJavaNode());
         ret.add(new LangEvalJavascriptNode());
+        ret.add(new LangEvalTinyScriptNode());
         ret.add(new LangEvalNode());
         ret.add(new LangForeachNode());
         ret.add(new LangForiNode());
@@ -108,9 +108,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new SqlTransRollbackNode());
         ret.add(new SqlUpdateNode());
         ret.add(new TextNode());
+
+        ServiceLoader<ExecutorNode> nodes = ServiceLoader.load(ExecutorNode.class);
+        for (ExecutorNode item : nodes) {
+            ret.add(item);
+        }
         return ret;
     }
 
+    @Override
     public List<ExecutorNode> getNodes(){
         return nodes;
     }
@@ -387,6 +393,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         } else if (FeatureConsts.EVAL_JS.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalJavascriptNode.evalJavascript(text, context, this);
+        } else if (FeatureConsts.EVAL_TINYSCRIPT.equals(feature)
+        ||FeatureConsts.EVAL_TS.equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalTinyScriptNode.evalTinyScript(text, context, this);
         } else if (FeatureConsts.CLASS.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return loadClass(text);

@@ -60,6 +60,7 @@ velocity 文本模板引擎
 
 .eval-java 以java表达式解析
 .eval-js 以js表达式解析
+.eval-tinyscript 以tinyscript表达式解析，别名：.eval-ts
 .class 转换为Class<?> 对象
 .not boolean值取反
 
@@ -543,6 +544,21 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     <lang-eval-javascript result="">
 
     </lang-eval-javascript>
+
+    <!-- 动态执行javascript脚本,实际上是一个别名 -->
+    <lang-eval-js result="">
+
+    </lang-eval-js>
+
+    <!-- 动态执行tiny-script脚本 -->
+    <lang-eval-tinyscript result="">
+
+    </lang-eval-tinyscript>
+
+    <!-- 动态执行tiny-script脚本,实际上是一个别名 -->
+    <lang-eval-ts result="">
+
+    </lang-eval-ts>
 
     <!--
      创建一个数据库连接范围，对datasources中指定的这些数据源
