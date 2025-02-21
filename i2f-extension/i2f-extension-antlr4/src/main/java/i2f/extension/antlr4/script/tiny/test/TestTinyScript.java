@@ -24,7 +24,10 @@ public class TestTinyScript {
                 " image: ${str},\n" +
                 " len: String.length(),\n" +
                 " token: null\n" +
-                "}];";
+                "}];\n";
+        formula+="streq=${str}==${sadd};\n";
+        formula+="strneq=${str}==${tmp};\n";
+        formula+="numeeq=${num}>=${slen};\n";
         CommonTokenStream tokens = TinyScript.parseTokens(formula);
         TinyScriptParser parser = new TinyScriptParser(tokens);
         TinyScriptParser.ScriptContext tree = parser.script();
