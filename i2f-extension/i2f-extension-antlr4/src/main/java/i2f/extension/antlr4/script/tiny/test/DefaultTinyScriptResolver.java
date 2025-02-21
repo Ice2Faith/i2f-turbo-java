@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.tiny.test;
 
+import i2f.convert.obj.ObjectConvertor;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
@@ -32,7 +33,15 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
 
     @Override
     public Object resolveDoubleOperator(Object left, String operator, Object right) {
-        if (">=".equals(operator) || "gte".equals(operator)) {
+        if ("&&".equals(operator) || "and".equals(operator)) {
+            boolean bl = ObjectConvertor.toBoolean(left);
+            boolean br = ObjectConvertor.toBoolean(right);
+            return bl&&br;
+        }else if ("||".equals(operator) || "or".equals(operator)) {
+            boolean bl = ObjectConvertor.toBoolean(left);
+            boolean br = ObjectConvertor.toBoolean(right);
+            return bl||br;
+        }else if (">=".equals(operator) || "gte".equals(operator)) {
             int num = compare(left, right);
             return num >= 0;
         } else if ("<=".equals(operator) || "lte".equals(operator)) {
@@ -96,6 +105,15 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             }
         }
         throw new IllegalArgumentException("un-support operator :" + operator);
+    }
+
+    @Override
+    public Object resolvePrefixOperator(String operator, Object value) {
+        if ("!".equals(operator) || "not".equals(operator)) {
+            boolean bv = ObjectConvertor.toBoolean(value);
+            return !bv;
+        }
+        throw new IllegalArgumentException("un-support prefix operator :" + operator);
     }
 
     public Object convertNumberType(BigDecimal num, Number left, Number right) {

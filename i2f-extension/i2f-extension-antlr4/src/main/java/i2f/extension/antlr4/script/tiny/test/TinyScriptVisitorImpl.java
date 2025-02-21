@@ -8,10 +8,7 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -20,7 +17,7 @@ import java.util.Map;
  */
 public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     protected Map<String, Object> context = new HashMap<>();
-    protected TinyScriptResolver resolver=new DefaultTinyScriptResolver();
+    protected TinyScriptResolver resolver = new DefaultTinyScriptResolver();
 
     public TinyScriptVisitorImpl(Map<String, Object> context) {
         this.context = context;
@@ -88,6 +85,49 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else {
                 throw new IllegalArgumentException("invalid grammar express expect 3 parts for double operator, but found " + count + "!");
             }
+        } else if (item instanceof TerminalNode) {
+            TerminalNode termNode = (TerminalNode) item;
+            String term = (String) visitTerminal(termNode);
+            if ("(".equals(term)) {
+                if (count == 3) {
+                    ParseTree lParenNode = item;
+                    ParseTree expressNode = ctx.getChild(1);
+                    ParseTree rParenNode = ctx.getChild(2);
+                    if (!(lParenNode instanceof TerminalNode)) {
+                        throw new IllegalArgumentException("invalid paren left node, expect '(', but found type: " + lParenNode.getClass());
+                    }
+                    if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
+                        throw new IllegalArgumentException("invalid paren right node, expect express, but found type: " + lParenNode.getClass());
+                    }
+                    if (!(rParenNode instanceof TerminalNode)) {
+                        throw new IllegalArgumentException("invalid paren right node, expect ')', but found type: " + lParenNode.getClass());
+                    }
+                    TerminalNode lParenCtx = (TerminalNode) lParenNode;
+                    TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
+                    TerminalNode rParenCtx = (TerminalNode) rParenNode;
+                    String lParen = (String) visitTerminal(lParenCtx);
+                    String rParen = (String) visitTerminal(rParenCtx);
+                    if (!"(".equals(lParen)) {
+                        throw new IllegalArgumentException("invalid paren left node, expect '(', but found : " + lParen);
+                    }
+                    if (!")".equals(rParen)) {
+                        throw new IllegalArgumentException("invalid paren right node, expect '(', but found : " + rParen);
+                    }
+                    Object value = visitExpress(expressCtx);
+                    return value;
+                } else {
+                    throw new IllegalArgumentException("invalid grammar express expect 3 parts for paren segment (...), but found " + count + "!");
+                }
+            } else if (count == 2) {
+                String prefixOperator = term;
+                ParseTree expressNode = ctx.getChild(1);
+                if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
+                    throw new IllegalArgumentException("invalid double-operator right node, expect express, but found type: " + expressNode.getClass());
+                }
+                TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
+                Object value = visitExpress(expressCtx);
+                return resolver.resolvePrefixOperator(prefixOperator, value);
+            }
         } else if (item instanceof TinyScriptParser.EqualValueContext) {
             TinyScriptParser.EqualValueContext nextCtx = (TinyScriptParser.EqualValueContext) item;
             return visitEqualValue(nextCtx);
@@ -103,6 +143,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         } else if (item instanceof TinyScriptParser.RefValueContext) {
             TinyScriptParser.RefValueContext nextCtx = (TinyScriptParser.RefValueContext) item;
             return visitRefValue(nextCtx);
+        } else if (item instanceof TinyScriptParser.JsonValueContext) {
+            TinyScriptParser.JsonValueContext nextCtx = (TinyScriptParser.JsonValueContext) item;
+            return visitJsonValue(nextCtx);
         }
         throw new IllegalArgumentException("un-support express found : " + ctx.getText());
     }
@@ -137,7 +180,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             throw new IllegalArgumentException("invalid equal value, expect naming, but found '" + naming + "'!");
         }
         Object value = visitExpress(expressCtx);
-        resolver.setValue(context,naming, value);
+        resolver.setValue(context, naming, value);
         return value;
     }
 
@@ -345,7 +388,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         if (item instanceof TinyScriptParser.ConstBoolContext) {
             TinyScriptParser.ConstBoolContext nextCtx = (TinyScriptParser.ConstBoolContext) item;
             return visitConstBool(nextCtx);
-        } else if (item instanceof TinyScriptParser.ConstStringContext) {
+        } else if (item instanceof TinyScriptParser.ConstNullContext) {
+            TinyScriptParser.ConstNullContext nextCtx = (TinyScriptParser.ConstNullContext) item;
+            return visitConstNull(nextCtx);
+        }else if (item instanceof TinyScriptParser.ConstStringContext) {
             TinyScriptParser.ConstStringContext nextCtx = (TinyScriptParser.ConstStringContext) item;
             return visitConstString(nextCtx);
         } else if (item instanceof TinyScriptParser.DecNumberContext) {
@@ -380,7 +426,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             term = term.trim();
             term = term.substring("${".length(), term.length() - "}".length());
             term = term.trim();
-            Object value = resolver.getValue(context,term);
+            Object value = resolver.getValue(context, term);
             return value;
         }
         throw new IllegalArgumentException("un-support ref value found : " + ctx.getText());
@@ -408,6 +454,28 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             throw new IllegalArgumentException("bad const boolean value: " + term + "!");
         }
         throw new IllegalArgumentException("un-support const boolean found : " + ctx.getText());
+    }
+
+    @Override
+    public Object visitConstNull(TinyScriptParser.ConstNullContext ctx) {
+        int count = ctx.getChildCount();
+        if (count < 0) {
+            throw new IllegalArgumentException("missing const null!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if (item instanceof TerminalNode) {
+            TerminalNode nextTerm = (TerminalNode) item;
+            String term = (String) visitTerminal(nextTerm);
+            if (term == null) {
+                throw new IllegalArgumentException("missing const null!");
+            }
+            term = term.trim();
+            if ("null".equals(term)) {
+                return null;
+            }
+            throw new IllegalArgumentException("bad const null value: " + term + "!");
+        }
+        throw new IllegalArgumentException("un-support const null found : " + ctx.getText());
     }
 
     @Override
@@ -556,6 +624,244 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     }
 
     @Override
+    public Object visitJsonValue(TinyScriptParser.JsonValueContext ctx) {
+        int count = ctx.getChildCount();
+        if (count < 0) {
+            throw new IllegalArgumentException("missing json value!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if (item instanceof TinyScriptParser.InvokeFunctionContext) {
+            TinyScriptParser.InvokeFunctionContext nextCtx = (TinyScriptParser.InvokeFunctionContext) item;
+            return visitInvokeFunction(nextCtx);
+        } else if (item instanceof TinyScriptParser.ConstValueContext) {
+            TinyScriptParser.ConstValueContext nextCtx = (TinyScriptParser.ConstValueContext) item;
+            return visitConstValue(nextCtx);
+        } else if (item instanceof TinyScriptParser.RefValueContext) {
+            TinyScriptParser.RefValueContext nextCtx = (TinyScriptParser.RefValueContext) item;
+            return visitRefValue(nextCtx);
+        } else if (item instanceof TinyScriptParser.JsonArrayValueContext) {
+            TinyScriptParser.JsonArrayValueContext nextCtx = (TinyScriptParser.JsonArrayValueContext) item;
+            return visitJsonArrayValue(nextCtx);
+        } else if (item instanceof TinyScriptParser.JsonMapValueContext) {
+            TinyScriptParser.JsonMapValueContext nextCtx = (TinyScriptParser.JsonMapValueContext) item;
+            return visitJsonMapValue(nextCtx);
+        }
+        throw new IllegalArgumentException("un-support json value found : " + ctx.getText());
+    }
+
+    @Override
+    public Object visitJsonMapValue(TinyScriptParser.JsonMapValueContext ctx) {
+        Map<String, Object> ret = new LinkedHashMap<>();
+        int count = ctx.getChildCount();
+        if (count != 2 && count != 3) {
+            throw new IllegalArgumentException("missing json map value!");
+        }
+        ParseTree leftNode = ctx.getChild(0);
+        ParseTree pairsNode = null;
+        ParseTree rightNode = null;
+        if (count == 2) {
+            rightNode = ctx.getChild(1);
+        } else {
+            pairsNode = ctx.getChild(1);
+            rightNode = ctx.getChild(2);
+        }
+        if (!(leftNode instanceof TerminalNode)) {
+            throw new IllegalArgumentException("invalid json map value left node, expect '{', but found type: " + leftNode.getClass());
+        }
+        if (!(rightNode instanceof TerminalNode)) {
+            throw new IllegalArgumentException("invalid json map value right node, expect '}', but found type: " + rightNode.getClass());
+        }
+        if (pairsNode != null) {
+            if (!(pairsNode instanceof TinyScriptParser.JsonPairsContext)) {
+                throw new IllegalArgumentException("invalid json map value middle node, expect json pairs node, but found type: " + pairsNode.getClass());
+            }
+        }
+        TerminalNode leftCtx = (TerminalNode) leftNode;
+        TinyScriptParser.JsonPairsContext pairsCtx = null;
+        TerminalNode rightCtx = (TerminalNode) rightNode;
+        if (pairsNode != null) {
+            pairsCtx = (TinyScriptParser.JsonPairsContext) pairsNode;
+        }
+        String left = (String) visitTerminal(leftCtx);
+        String right = (String) visitTerminal(rightCtx);
+        if (!"{".equals(left)) {
+            throw new IllegalArgumentException("invalid json map value left node, expect '{', but found : " + left);
+        }
+        if (!"}".equals(right)) {
+            throw new IllegalArgumentException("invalid json map value right right node, expect '}', but found : " + right);
+        }
+        if (pairsCtx != null) {
+            return visitJsonPairs(new JsonPairsContextImpl(pairsCtx, ret));
+        }
+        return ret;
+    }
+
+    public static class JsonPairsContextImpl extends TinyScriptParser.JsonPairsContext {
+        public TinyScriptParser.JsonPairsContext target;
+        public Object value;
+
+        public JsonPairsContextImpl(TinyScriptParser.JsonPairsContext target, Object value) {
+            super(null, 0);
+            this.target = target;
+            this.value = value;
+        }
+    }
+
+    @Override
+    public Object visitJsonPairs(TinyScriptParser.JsonPairsContext ctx) {
+        Map<String, Object> ret = new LinkedHashMap<>();
+        if (ctx instanceof JsonPairsContextImpl) {
+            JsonPairsContextImpl impl = (JsonPairsContextImpl) ctx;
+            ctx = impl.target;
+            ret = (Map<String, Object>) impl.value;
+        }
+        int count = ctx.getChildCount();
+        for (int i = 0; i < count; i++) {
+            ParseTree item = ctx.getChild(i);
+            if (item instanceof TerminalNode) {
+                TerminalNode nextTerm = (TerminalNode) item;
+                String term = (String) visitTerminal(nextTerm);
+                if (!",".equals(term)) {
+                    throw new IllegalArgumentException("invalid json pairs separator, expect ',' buf found '" + term + "'!");
+                }
+            } else if (item instanceof TinyScriptParser.JsonPairContext) {
+                TinyScriptParser.JsonPairContext nextCtx = (TinyScriptParser.JsonPairContext) item;
+                Map.Entry<String, Object> value = (Map.Entry<String, Object>) visitJsonPair(nextCtx);
+                ret.put(value.getKey(), value.getValue());
+            } else {
+                throw new IllegalArgumentException("invalid json pairs node type: " + item.getClass());
+            }
+        }
+        return ret;
+    }
+
+    @Override
+    public Object visitJsonPair(TinyScriptParser.JsonPairContext ctx) {
+        int count = ctx.getChildCount();
+        if (count != 3) {
+            throw new IllegalArgumentException("missing json pair!");
+        }
+        ParseTree keyNode = ctx.getChild(0);
+        ParseTree separatorNode = ctx.getChild(1);
+        ParseTree valueNode = ctx.getChild(2);
+        if (!(keyNode instanceof TerminalNode) && !(keyNode instanceof TinyScriptParser.ConstStringContext)) {
+            throw new IllegalArgumentException("invalid json pair key node, expect naming/string, but found type: " + keyNode.getClass());
+        }
+        if (!(separatorNode instanceof TerminalNode)) {
+            throw new IllegalArgumentException("invalid json pair separator node, expect ':', but found type: " + separatorNode.getClass());
+        }
+        if (!(valueNode instanceof TinyScriptParser.JsonValueContext)) {
+            throw new IllegalArgumentException("invalid json pair value node, expect json value node, but found type: " + valueNode.getClass());
+        }
+
+        TerminalNode sepCtx = (TerminalNode) separatorNode;
+        String sep=(String)visitTerminal(sepCtx);
+        if (!":".equals(sep)) {
+            throw new IllegalArgumentException("invalid json pair separator node, expect ':', but found : " + sep);
+        }
+
+        String key=null;
+        if(keyNode instanceof TerminalNode){
+            TerminalNode termCtx = (TerminalNode) keyNode;
+            key=(String)visitTerminal(termCtx);
+        }else{
+            TinyScriptParser.ConstStringContext nextCtx = (TinyScriptParser.ConstStringContext) keyNode;
+            key=(String)visitConstString(nextCtx);
+        }
+
+        TinyScriptParser.JsonValueContext valueCtx = (TinyScriptParser.JsonValueContext) valueNode;
+        Object value = visitJsonValue(valueCtx);
+
+        return new AbstractMap.SimpleEntry<>(key,value);
+    }
+
+    @Override
+    public Object visitJsonArrayValue(TinyScriptParser.JsonArrayValueContext ctx) {
+        List<Object> ret = new ArrayList<>();
+        int count = ctx.getChildCount();
+        if (count != 2 && count != 3) {
+            throw new IllegalArgumentException("missing json array value!");
+        }
+        ParseTree leftNode = ctx.getChild(0);
+        ParseTree itemsNode = null;
+        ParseTree rightNode = null;
+        if (count == 2) {
+            rightNode = ctx.getChild(1);
+        } else {
+            itemsNode = ctx.getChild(1);
+            rightNode = ctx.getChild(2);
+        }
+        if (!(leftNode instanceof TerminalNode)) {
+            throw new IllegalArgumentException("invalid json array value left node, expect '[', but found type: " + leftNode.getClass());
+        }
+        if (!(rightNode instanceof TerminalNode)) {
+            throw new IllegalArgumentException("invalid json array value right node, expect ']', but found type: " + rightNode.getClass());
+        }
+        if (itemsNode != null) {
+            if (!(itemsNode instanceof TinyScriptParser.JsonItemListContext)) {
+                throw new IllegalArgumentException("invalid json array value middle node, expect json pairs node, but found type: " + itemsNode.getClass());
+            }
+        }
+        TerminalNode leftCtx = (TerminalNode) leftNode;
+        TinyScriptParser.JsonItemListContext itemsCtx = null;
+        TerminalNode rightCtx = (TerminalNode) rightNode;
+        if (itemsNode != null) {
+            itemsCtx = (TinyScriptParser.JsonItemListContext) itemsNode;
+        }
+        String left = (String) visitTerminal(leftCtx);
+        String right = (String) visitTerminal(rightCtx);
+        if (!"[".equals(left)) {
+            throw new IllegalArgumentException("invalid json array value left node, expect '[', but found : " + left);
+        }
+        if (!"]".equals(right)) {
+            throw new IllegalArgumentException("invalid json array value right right node, expect ']', but found : " + right);
+        }
+        if (itemsCtx != null) {
+            return visitJsonItemList(new JsonItemListContextImpl(itemsCtx, ret));
+        }
+        return ret;
+    }
+
+    public static class JsonItemListContextImpl extends TinyScriptParser.JsonItemListContext {
+        public TinyScriptParser.JsonItemListContext target;
+        public Object value;
+
+        public JsonItemListContextImpl(TinyScriptParser.JsonItemListContext target, Object value) {
+            super(null, 0);
+            this.target = target;
+            this.value = value;
+        }
+    }
+
+    @Override
+    public Object visitJsonItemList(TinyScriptParser.JsonItemListContext ctx) {
+        List<Object> ret = new ArrayList<>();
+        if (ctx instanceof JsonItemListContextImpl) {
+            JsonItemListContextImpl impl = (JsonItemListContextImpl) ctx;
+            ctx = impl.target;
+            ret = (List<Object>) impl.value;
+        }
+        int count = ctx.getChildCount();
+        for (int i = 0; i < count; i++) {
+            ParseTree item = ctx.getChild(i);
+            if (item instanceof TerminalNode) {
+                TerminalNode nextTerm = (TerminalNode) item;
+                String term = (String) visitTerminal(nextTerm);
+                if (!",".equals(term)) {
+                    throw new IllegalArgumentException("invalid json item list separator, expect ',' buf found '" + term + "'!");
+                }
+            } else if (item instanceof TinyScriptParser.JsonValueContext) {
+                TinyScriptParser.JsonValueContext nextCtx = (TinyScriptParser.JsonValueContext) item;
+                Object value = visitJsonValue(nextCtx);
+                ret.add(value);
+            } else {
+                throw new IllegalArgumentException("invalid json item list node type: " + item.getClass());
+            }
+        }
+        return ret;
+    }
+
+    @Override
     public Object visit(ParseTree tree) {
         if (tree instanceof TinyScriptParser.ScriptContext) {
             TinyScriptParser.ScriptContext nextCtx = (TinyScriptParser.ScriptContext) tree;
@@ -602,6 +908,27 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         } else if (tree instanceof TinyScriptParser.BinNumberContext) {
             TinyScriptParser.BinNumberContext nextCtx = (TinyScriptParser.BinNumberContext) tree;
             return visitBinNumber(nextCtx);
+        } else if (tree instanceof TinyScriptParser.ConstNullContext) {
+            TinyScriptParser.ConstNullContext nextCtx = (TinyScriptParser.ConstNullContext) tree;
+            return visitConstNull(nextCtx);
+        } else if (tree instanceof TinyScriptParser.JsonValueContext) {
+            TinyScriptParser.JsonValueContext nextCtx = (TinyScriptParser.JsonValueContext) tree;
+            return visitJsonValue(nextCtx);
+        } else if (tree instanceof TinyScriptParser.JsonArrayValueContext) {
+            TinyScriptParser.JsonArrayValueContext nextCtx = (TinyScriptParser.JsonArrayValueContext) tree;
+            return visitJsonArrayValue(nextCtx);
+        } else if (tree instanceof TinyScriptParser.JsonMapValueContext) {
+            TinyScriptParser.JsonMapValueContext nextCtx = (TinyScriptParser.JsonMapValueContext) tree;
+            return visitJsonMapValue(nextCtx);
+        } else if (tree instanceof TinyScriptParser.JsonPairsContext) {
+            TinyScriptParser.JsonPairsContext nextCtx = (TinyScriptParser.JsonPairsContext) tree;
+            return visitJsonPairs(nextCtx);
+        } else if (tree instanceof TinyScriptParser.JsonPairContext) {
+            TinyScriptParser.JsonPairContext nextCtx = (TinyScriptParser.JsonPairContext) tree;
+            return visitJsonPair(nextCtx);
+        } else if (tree instanceof TinyScriptParser.JsonItemListContext) {
+            TinyScriptParser.JsonItemListContext nextCtx = (TinyScriptParser.JsonItemListContext) tree;
+            return visitJsonItemList(nextCtx);
         }
         throw new IllegalArgumentException("un-support visit type: " + tree.getClass().getSimpleName());
     }

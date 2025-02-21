@@ -16,5 +16,9 @@ public interface TinyScriptResolver {
 
     Object resolveDoubleOperator(Object left, String operator, Object right);
 
+    Object resolvePrefixOperator(String prefixOperator, Object value);
+
     Object resolveFunctionCall(Object target, boolean isNew, String naming, List<Object> args);
+
+
 }
