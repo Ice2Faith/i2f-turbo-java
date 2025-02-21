@@ -1,4 +1,4 @@
-// Generated from D:/IDEA_ROOT/DevCenter/i2f-turbo/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -182,6 +182,42 @@ public class TinyScriptBaseListener implements TinyScriptListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitConstString(TinyScriptParser.ConstStringContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override
+	public void enterConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override
+	public void exitConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override
+	public void enterConstRenderString(TinyScriptParser.ConstRenderStringContext ctx) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override
+	public void exitConstRenderString(TinyScriptParser.ConstRenderStringContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
