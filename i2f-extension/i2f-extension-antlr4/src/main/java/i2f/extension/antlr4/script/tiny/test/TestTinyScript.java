@@ -16,6 +16,15 @@ public class TestTinyScript {
 
     public static void main(String[] args) {
         String formula = "num=1+1.125;num2=${num}+10L;tmp=new String(\"@@@\");str=${str}+1;sadd=${str};svl=String.valueOf(1L);slen=${str}.length();srptlen=${str}.repeat(2).length();\n";
+        formula+="complex=[{\n" +
+                " username: \"123\",\n" +
+                " roles: [\"admin\",\"log\"],\n" +
+                " status: true,\n" +
+                " age: 12,\n" +
+                " image: ${str},\n" +
+                " len: String.length(),\n" +
+                " token: null\n" +
+                "}];";
         CommonTokenStream tokens = TinyScript.parseTokens(formula);
         TinyScriptParser parser = new TinyScriptParser(tokens);
         TinyScriptParser.ScriptContext tree = parser.script();

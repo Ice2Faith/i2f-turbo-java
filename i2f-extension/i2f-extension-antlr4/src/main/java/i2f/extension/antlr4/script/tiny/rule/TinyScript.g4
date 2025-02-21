@@ -40,7 +40,21 @@ ESCAPED_CHAR: '\\' ( '\\' | '"' | '\'' | 'r' | 't' | 'n' );
 NAMING: ID (DOT ID)*;
 ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
 
-DOUBLE_OPERAOTR: '+' | '-' | '*' | '/' | '%' | '>=' | 'gte' | '<=' | 'lte' | '!=' | 'ne' | '<>' | 'neq' | '==' | 'eq' | '>' | 'gt' | '<' | 'lt';
+DOUBLE_OPERAOTR:
+    '>=' | 'gte'
+    | '<=' | 'lte'
+    | '!=' | 'ne'
+    | '<>' | 'neq'
+    | '==' | 'eq'
+    | '>' | 'gt' | '<' | 'lt'
+    | '&&' | 'and'
+    | '||' | 'or'
+    |'+' | '-' | '*' | '/' | '%'
+    ;
+
+PREFIX_OPERATOR:
+    '!' | 'not'
+    ;
 
 LPAREN   : '(' ;
 RPAREN   : ')' ;
@@ -107,13 +121,15 @@ script:
 
 
 express:
-    equalValue
+    LPAREN express RPAREN
+    | PREFIX_OPERATOR express
+    |equalValue
     | newInstance
     | invokeFunction
-    | express DOUBLE_OPERAOTR express
     | constValue
     | refValue
     | jsonValue
+    | express DOUBLE_OPERAOTR express
     ;
 
 
@@ -211,7 +227,7 @@ jsonPairs:
     ;
 
 jsonPair:
-    (NAMING|STRING) ':' jsonValue
+    (NAMING|constString) ':' jsonValue
     ;
 
 jsonArrayValue:
