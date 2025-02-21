@@ -1,7 +1,6 @@
-package i2f.extension.antlr4.script.tiny.test;
+package i2f.extension.antlr4.script.tiny.impl;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -9,10 +8,9 @@ import java.util.Map;
  */
 public interface TinyScriptResolver {
 
-    void setValue(Map<String,Object> context, String name, Object value);
+    void setValue(Object context, String name, Object value);
 
-
-    Object getValue(Map<String,Object> context, String name);
+    Object getValue(Object context, String name);
 
     Object resolveDoubleOperator(Object left, String operator, Object right);
 

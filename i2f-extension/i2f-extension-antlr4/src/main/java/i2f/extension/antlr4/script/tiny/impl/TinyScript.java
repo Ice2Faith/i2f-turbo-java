@@ -1,4 +1,4 @@
-package i2f.extension.antlr4.script.tiny.test;
+package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.extension.antlr4.script.tiny.TinyScriptLexer;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;

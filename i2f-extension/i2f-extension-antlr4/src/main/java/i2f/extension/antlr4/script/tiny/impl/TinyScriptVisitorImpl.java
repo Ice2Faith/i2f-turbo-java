@@ -1,4 +1,4 @@
-package i2f.extension.antlr4.script.tiny.test;
+package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
@@ -16,14 +16,14 @@ import java.util.*;
  * @desc
  */
 public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
-    protected Map<String, Object> context = new HashMap<>();
+    protected Object context = new HashMap<>();
     protected TinyScriptResolver resolver = new DefaultTinyScriptResolver();
 
-    public TinyScriptVisitorImpl(Map<String, Object> context) {
+    public TinyScriptVisitorImpl(Object context) {
         this.context = context;
     }
 
-    public TinyScriptVisitorImpl(Map<String, Object> context, TinyScriptResolver resolver) {
+    public TinyScriptVisitorImpl(Object context, TinyScriptResolver resolver) {
         this.context = context;
         this.resolver = resolver;
     }

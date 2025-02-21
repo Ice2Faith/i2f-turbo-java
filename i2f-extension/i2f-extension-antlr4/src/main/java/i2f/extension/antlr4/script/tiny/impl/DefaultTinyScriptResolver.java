@@ -1,16 +1,16 @@
-package i2f.extension.antlr4.script.tiny.test;
+package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.convert.obj.ObjectConvertor;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -20,13 +20,13 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     public static final MathContext MATH_CONTEXT = new MathContext(20, RoundingMode.HALF_UP);
 
     @Override
-    public void setValue(Map<String,Object> context, String name, Object value) {
+    public void setValue(Object context, String name, Object value) {
         Visitor visitor = Visitor.visit(name, context);
         visitor.set(value);
     }
 
     @Override
-    public Object getValue(Map<String,Object> context, String name) {
+    public Object getValue(Object context, String name) {
         Visitor visitor = Visitor.visit(name, context);
         return visitor.get();
     }
@@ -212,18 +212,26 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return Integer.compare(left.hashCode(), right.hashCode());
     }
 
+    public Class<?> loadClass(String className){
+        return ReflectResolver.loadClass(className);
+    }
+
+    public Method findMethod(String naming,List<Object> args){
+        return null;
+    }
+
     @Override
     public Object resolveFunctionCall(Object target, boolean isNew, String naming, List<Object> args) {
         Class<?> clazz = null;
         if (isNew) {
-            clazz = ReflectResolver.loadClass(naming);
+            clazz = loadClass(naming);
         } else {
             if (target == null) {
                 int idx = naming.lastIndexOf(".");
                 if (idx > 0) {
                     String className = naming.substring(0, idx);
                     naming = naming.substring(idx + 1);
-                    clazz = ReflectResolver.loadClass(className);
+                    clazz = loadClass(className);
                 }
             } else {
                 clazz = target.getClass();
@@ -234,6 +242,12 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             return ret;
         } else {
             String methodName = naming;
+
+            Method method = findMethod(naming, args);
+            if(method!=null){
+                Object ret = ReflectResolver.execMethod(target, method, args);
+                return ret;
+            }
 
             Object ret = ReflectResolver.execMethod(target, clazz, methodName, args);
             return ret;
