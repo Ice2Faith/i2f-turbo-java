@@ -29,7 +29,7 @@ public class TestTinyScript {
     }
 
     public static void main(String[] args) {
-        String formula = "tmp=new String(\"@@@\");str=${str}+1;replace(${str},\"\\\\s+\",\" \");String.valueof(1L);org.apache.StringUtils.trimAll(${str},\"\\\\s+\");${str}.length();${str}.repeat(2).length();\n";
+        String formula = "num=1+1.125;num2=${num}+10L;tmp=new String(\"@@@\");str=${str}+1;sadd=${str};svl=String.valueOf(1L);slen=${str}.length();srptlen=${str}.repeat(2).length();\n";
         CommonTokenStream tokens = parseTokens(formula);
         TinyScriptParser parser = new TinyScriptParser(tokens);
         TinyScriptParser.ScriptContext tree = parser.script();
@@ -39,5 +39,6 @@ public class TestTinyScript {
         context.put("str", "1,2,3 4-5-6  7  8  9");
         Object ret = script(tree, context);
         System.out.println(ret);
+        System.out.println(context);
     }
 }

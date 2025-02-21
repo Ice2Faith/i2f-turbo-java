@@ -1,19 +1,22 @@
 package i2f.extension.antlr4.script.tiny.test;
 
+import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
+import i2f.reflect.ReflectResolver;
+import i2f.reflect.vistor.Visitor;
+import i2f.typeof.TypeOf;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -28,11 +31,13 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     }
 
     public void setValue(String name, Object value) {
-        context.put(name, value);
+        Visitor visitor = Visitor.visit(name, context);
+        visitor.set(value);
     }
 
     public Object getValue(String name) {
-        return context.get(name);
+        Visitor visitor = Visitor.visit(name, context);
+        return visitor.get();
     }
 
     public static final MathContext MATH_CONTEXT = new MathContext(20, RoundingMode.HALF_UP);
@@ -70,28 +75,28 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.add(rv, MATH_CONTEXT);
-                return ret.doubleValue();
+                return convertNumberType(ret,(Number) left,(Number)right);
             }
         } else if ("-".equals(operator)) {
             if (left instanceof Number && right instanceof Number) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.subtract(rv, MATH_CONTEXT);
-                return ret.doubleValue();
+                return convertNumberType(ret,(Number) left,(Number)right);
             }
         } else if ("*".equals(operator)) {
             if (left instanceof Number && right instanceof Number) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.multiply(rv, MATH_CONTEXT);
-                return ret.doubleValue();
+                return convertNumberType(ret,(Number) left,(Number)right);
             }
         } else if ("/".equals(operator)) {
             if (left instanceof Number && right instanceof Number) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.divide(rv, MATH_CONTEXT);
-                return ret.doubleValue();
+                return convertNumberType(ret,(Number) left,(Number)right);
             }
         } else if ("%".equals(operator)) {
             if (left instanceof Number && right instanceof Number) {
@@ -102,6 +107,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             }
         }
         throw new IllegalArgumentException("un-support operator :" + operator);
+    }
+
+    public Object convertNumberType(BigDecimal num,Number left,Number right){
+        return num.doubleValue();
     }
 
     public int compare(Object left, Object right) {
@@ -141,133 +150,28 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     public Object resolveFunctionCall(Object target, boolean isNew, String naming, List<Object> args) {
         Class<?> clazz = null;
         if (isNew) {
-            int idx = naming.lastIndexOf(".");
-            if (idx > 0) {
-                String className = naming.substring(0, idx);
-                naming = naming.substring(idx + 1);
-                clazz = loadClass(className);
-            }
+            clazz = ReflectResolver.loadClass(naming);
         } else {
-            clazz = target.getClass();
+            if (target == null) {
+                int idx = naming.lastIndexOf(".");
+                if (idx > 0) {
+                    String className = naming.substring(0, idx);
+                    naming = naming.substring(idx + 1);
+                    clazz = ReflectResolver.loadClass(className);
+                }
+            } else {
+                clazz = target.getClass();
+            }
         }
         if (isNew) {
-            Constructor constructor = null;
-            Constructor<?>[] constructors = clazz.getConstructors();
-            for (Constructor<?> item : constructors) {
-                int mod = item.getModifiers();
-                if (!Modifier.isPublic(mod)) {
-                    continue;
-                }
-                if (item.getParameterCount() == args.size()) {
-                    constructor = item;
-                }
-            }
-            try {
-                Object ret = constructor.newInstance(args.toArray());
-                return ret;
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
+            Object ret = ReflectResolver.execNewInstance(clazz, args);
+            return ret;
         } else {
-            Method method = null;
-            Method[] methods = clazz.getMethods();
-            for (Method item : methods) {
-                if (!item.getName().equals(naming)) {
-                    continue;
-                }
-                int mod = item.getModifiers();
-                if (!Modifier.isPublic(mod)) {
-                    continue;
-                }
-                if (Modifier.isAbstract(mod)) {
-                    continue;
-                }
-                if (item.getParameterCount() == args.size()) {
-                    method = item;
-                }
-            }
-            try {
-                Object ret = method.invoke(target, args.toArray());
-                return ret;
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }
-    }
+            String methodName = naming;
 
-    public Class<?> loadClass(String className) {
-        if ("long".equals(className)) {
-            return Long.class;
+            Object ret = ReflectResolver.execMethod(target, clazz, methodName, args);
+            return ret;
         }
-        if ("int".equals(className)) {
-            return Integer.class;
-        }
-        if ("short".equals(className)) {
-            return Short.class;
-        }
-        if ("byte".equals(className)) {
-            return Byte.class;
-        }
-        if ("char".equals(className)) {
-            return Character.class;
-        }
-        if ("float".equals(className)) {
-            return Float.class;
-        }
-        if ("double".equals(className)) {
-            return Double.class;
-        }
-        if ("boolean".equals(className)) {
-            return Boolean.class;
-        }
-        if ("string".equals(className)) {
-            return String.class;
-        }
-        List<String> prefixes = new ArrayList<>(Arrays.asList(new String[]{
-                "",
-                "java.lang.",
-                "java.util.",
-                "java.sql.",
-                "java.math.",
-                "java.io.",
-                "java.time.",
-                "java.text.",
-                "java.lang.reflect.",
-                "java.concurrent.",
-                "java.util.regex.",
-                "javax.sql.",
-                "jakarta.sql.",
-                "java.nio.",
-                "java.nio.charset.",
-                "java.nio.file.",
-                "java.concurrent.atomic.",
-                "java.concurrent.locks.",
-                "java.time.chrono.",
-                "java.time.format.",
-                "java,time.temporal.",
-                "java.time.zone.",
-        }));
-        Class<?> clazz = null;
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        for (String prefix : prefixes) {
-            try {
-                clazz = loader.loadClass(prefix + className);
-                if (clazz != null) {
-                    return clazz;
-                }
-            } catch (Exception e) {
-
-            }
-            try {
-                clazz = Class.forName(prefix + className);
-                if (clazz != null) {
-                    return clazz;
-                }
-            } catch (Exception e) {
-
-            }
-        }
-        return clazz;
     }
 
     @Override
@@ -518,7 +422,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         if (argsCtx != null) {
             args = (List<Object>) visitArgumentList(argsCtx);
         }
-        if (args != null) {
+        if (args == null) {
             args = new ArrayList<>();
         }
 
