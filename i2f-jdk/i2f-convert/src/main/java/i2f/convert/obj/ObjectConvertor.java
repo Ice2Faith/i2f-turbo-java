@@ -402,22 +402,7 @@ public class ObjectConvertor {
 
         // boolean 的宽泛转换
         if (TypeOf.typeOfAny(targetType, boolTypes)) {
-            if (val == null) {
-                return false;
-            }
-            if (val instanceof Number) {
-                return ((Number) val).intValue() != 0;
-            }
-            if (val instanceof String) {
-                return !((String) val).isEmpty();
-            }
-            if (val instanceof Map) {
-                return !((Map<?, ?>) val).isEmpty();
-            }
-            if (val instanceof Collection) {
-                return !((Collection<?>) val).isEmpty();
-            }
-            return true;
+            return toBoolean(val);
         }
 
         // 字符串字面值
@@ -746,6 +731,43 @@ public class ObjectConvertor {
         }
 
         return val;
+    }
+
+
+    public static boolean toBoolean(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        }
+        if(obj instanceof Number){
+            BigDecimal num=new BigDecimal(String.valueOf(obj));
+            return num.compareTo(BigDecimal.ZERO)!=0;
+        }
+        if (obj instanceof String) {
+            if (!"".equals(obj)) {
+                return true;
+            }
+        }
+        if (obj instanceof Collection) {
+            Collection<?> col = (Collection<?>) obj;
+            if (!col.isEmpty()) {
+                return true;
+            }
+        }
+        if(obj instanceof Map){
+            Map<?, ?> map = (Map<?, ?>) obj;
+            if(!map.isEmpty()){
+                return true;
+            }
+        }
+        if (obj.getClass().isArray()) {
+            if (Array.getLength(obj) > 0) {
+                return true;
+            }
+        }
+        return true;
     }
 
     public static Object tryConvertAsTypeWithConstructor(Object val, Class<?> targetType) {

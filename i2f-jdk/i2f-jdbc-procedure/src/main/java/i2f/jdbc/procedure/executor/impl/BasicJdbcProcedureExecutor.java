@@ -390,7 +390,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             String text = value == null ? "" : String.valueOf(value);
             return loadClass(text);
         } else if (FeatureConsts.NOT.equals(feature)) {
-            boolean ok = toBoolean(value);
+            boolean ok = ObjectConvertor.toBoolean(value);
             return !ok;
         } else if (FeatureConsts.DIALECT.equals(feature)) {
             try {
@@ -439,31 +439,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return value;
     }
 
-    public boolean toBoolean(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj instanceof Boolean) {
-            return (Boolean) obj;
-        }
-        if (obj instanceof String) {
-            if (!"".equals(obj)) {
-                return true;
-            }
-        }
-        if (obj instanceof Collection) {
-            Collection<?> col = (Collection<?>) obj;
-            if (!col.isEmpty()) {
-                return true;
-            }
-        }
-        if (obj.getClass().isArray()) {
-            if (Array.getLength(obj) > 0) {
-                return true;
-            }
-        }
-        return true;
-    }
 
     @Override
     public Class<?> loadClass(String className) {

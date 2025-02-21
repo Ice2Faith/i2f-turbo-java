@@ -17,4 +17,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-typeof</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-convert</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>
