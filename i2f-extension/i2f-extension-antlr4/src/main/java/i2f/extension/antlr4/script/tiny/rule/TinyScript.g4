@@ -26,6 +26,10 @@ TYPE_BOOL:
     'true' | 'false'
     ;
 
+TYPE_NULL:
+    'null'
+    ;
+
 // Lexer rules
 STRING: QUOTE (ESCAPED_CHAR | ~[\\"])* QUOTE;
 
@@ -109,6 +113,7 @@ express:
     | express DOUBLE_OPERAOTR express
     | constValue
     | refValue
+    | jsonValue
     ;
 
 
@@ -141,10 +146,12 @@ argument
     : invokeFunction
     | constValue
     | refValue
+    | jsonValue
     ;
 
 constValue:
     constBool
+    | constNull
     | constString
     | decNumber
     | hexNumber
@@ -157,6 +164,10 @@ refValue
 
 constBool:
     TYPE_BOOL
+    ;
+
+constNull:
+    TYPE_NULL
     ;
 
 constString:
@@ -181,4 +192,33 @@ otcNumber: // 8进制数
 
 binNumber: // 2进制数
     TYPE_BIN_NUMBER
+    ;
+
+jsonValue:
+    invokeFunction
+    | constValue
+    | refValue
+    | jsonArrayValue
+    | jsonMapValue
+    ;
+
+jsonMapValue:
+    LCURLY jsonPairs? RCURLY;
+
+jsonPairs:
+    jsonPair
+    | jsonPair (',' jsonPair)*
+    ;
+
+jsonPair:
+    (NAMING|STRING) ':' jsonValue
+    ;
+
+jsonArrayValue:
+    '[' jsonItemList? ']'
+    ;
+
+jsonItemList:
+    jsonValue
+    | jsonValue (',' jsonValue)*
     ;
