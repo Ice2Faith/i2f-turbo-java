@@ -25,7 +25,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     public TinyScriptVisitorImpl(Object context, TinyScriptResolver resolver) {
         this.context = context;
-        this.resolver = resolver;
+        if (resolver != null) {
+            this.resolver = resolver;
+        }
     }
 
     @Override

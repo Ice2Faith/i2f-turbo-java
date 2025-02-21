@@ -1,11 +1,8 @@
 package i2f.jdbc.procedure.node.impl;
 
-import i2f.extension.antlr4.script.tiny.TinyScriptParser;
-import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
 import i2f.extension.antlr4.script.tiny.impl.DefaultTinyScriptResolver;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.antlr4.script.tiny.impl.TinyScriptResolver;
-import i2f.extension.antlr4.script.tiny.impl.TinyScriptVisitorImpl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
@@ -53,10 +50,8 @@ public class LangEvalTinyScriptNode implements ExecutorNode {
         Object obj = null;
 
         try {
-            TinyScriptParser.ScriptContext tree = TinyScript.parse(script);
             TinyScriptResolver resolver=new ProcedureTinyScriptResolver(context,executor);
-            TinyScriptVisitor<Object> visitor = new TinyScriptVisitorImpl(context.getParams(),resolver);
-            obj = visitor.visit(tree);
+            obj = TinyScript.script(script, context.getParams(), resolver);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
