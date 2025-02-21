@@ -1,0 +1,292 @@
+# TinyScript 表达式引擎
+- 主要用于提供嵌套函数调用的功能
+- 另外支持多条语句执行
+- 调用返回最后一条语句执行的结果
+- 基于一个根上下文进行操作
+
+## 核心设计
+- 核心使用antlr4生成与解析语法规则
+- 暴露TinyScript.script()方法
+- 方法声明如下
+```shell
+public static Object script(String formula, Object context);
+```
+- 函数说明
+- 对formula表达式进行执行，表达式允许对context进行读取
+- 最终返回最后一条formula语句执行的结果
+- 同时，需要记住，formula是允许对context进行读写的
+- 常见的context可能是一个Map对象或者一个普通对象
+
+## 表达式规则
+### 基础数据类型
+- 包含，int,long，float,double,null,boolean,string基础类型
+- int书写
+```shell
+1;
+123;
+0xabc;
+0t754;
+0b10110;
+```
+- 默认情况下，不带小数点的，都是int类型
+- 其中0x表示16进制，0t表示8进制，0b表示2进制
+- long书写
+```shell
+1L;
+123L;
+0xabcL;
+0t754L;
+0b10110L;
+```
+- long的规则和int类型基本一致，只不过在最后添加字符L，大小写均可
+- double书写
+```shell
+1.1;
+1.1e6;
+```
+- 默认情况下，带小数点的都是double类型
+- 没有0x/0t/0b这种写法
+- 支持科学计数法
+- float书写
+```shell
+1.1F;
+1.1e6F;
+```
+- float的规则和double类型基本一致，只不过在最后添加字符F，大小写均可
+- null书写规则
+```shell
+null;
+```
+- 固定关键字，区分大小写
+- boolean书写规则
+```shell
+true;
+false;
+```
+- 固定两个关键字，区分大小写
+- string书写规则
+```shell
+"aa\r\n\t \"\\bb\'"
+```
+- 书写规则和各种语言中的基本一致，支持使用转义符号转义
+
+### 复杂数据类型
+- 支持JSON数据类型
+- 使用上和JSON的规则差不多
+- 但是融合了脚本语言的特性
+- 实际上，内部将会转换为LinkedHashMap和ArrayList对象
+- 直接看例子
+```shell
+[
+  {
+    name: "xxx",
+    "age": 12,
+    roles: ["admin","logger",3,true],
+    image: ${images.defaultImage},
+    status: decode(${user.status},1,"正常",0,"禁用"),
+    platform.prefer: "windows"
+  }
+]
+```
+- 从这个例子中，便可以看到
+- 大体和JSON类似
+- 但是具有一些JS构建对象的便利性
+- 可以使用函数调用decode
+- 可以不用引号包含键名name/roles
+- 可以使用${}从环境中取值
+
+## 语法介绍
+- 语句分隔
+- 表达式允许有多条语句，语句之间使用分号[;]分隔
+- 例如
+```shell
+1;
+2.15;
+true;
+"hello"
+```
+- 取值语句
+- 表达式使用${}来访问context中的值
+- 定义
+```shell
+${要访问的变量路径}
+```
+- 例如：
+```shell
+${user.name}
+${user.roles[0].name}
+```
+- 赋值语句
+- 修改context里面的值，通过赋值语句修改
+- 定义
+```shell
+修改或保存的变量路径 = 变量值
+```
+- 举例
+```shell
+name = "zhang";
+age = 12;
+role = {
+  name: "root",
+  id: 123L
+};
+status: ${config.user.defaultStatus};
+user.roles[1].name="logger";
+```
+- 括号表达式
+- 定义
+```shell
+(...)
+```
+- 举例
+```shell
+1+(1+1);
+1+(2-${cnt});
+```
+- 前置操作符表达式
+- 定义
+```shell
+操作符 表达式
+```
+- 操作符说明
+```shell
+! 取反
+not 取反
+```
+- 举例
+```shell
+!${flag};
+not ${flag};
+```
+- 创建对象
+- 定义
+```shell
+new 类名(参数列表)
+```
+- 一些常用的类名可以不写完整的全限定类名
+- 例如java.lang/java.util/java.time等包下面的
+- 可以直接写简短类名，例如Date
+- 举例
+```shell
+new String("xxx");
+new Date();
+new org.apache.User(1L,"xxx",${status},decode(${str},"是",1,0));
+```
+- 函数调用
+- 函数名需要携带类名，也就是全限定函数名
+- 一些常用的类名可以不写完整的类名，同创建对象时的类名
+- 不过，有一些情况下，用户可以定义自己的内建函数
+- 这种函数只需要写函数名即可
+- 内建函数需要用户自己注册到TinyScript.BUILTIN_METHOD中
+- 这是一个静态变量，向其中添加即可
+- 通过调用TinyScript.registryBuiltinMethod(Method)方法实现
+- 默认情况下，具有一些内建函数，在String类的join/format方法，Integer/Long/Float/Double/Boolean类的parse/to开头的方法
+- 定义
+```shell
+函数名(参数列表)
+```
+- 举例
+```shell
+String.valueOf(1);
+org.apache.Test.run("xxx",true);
+```
+- 函数支持链式调用
+- 和java链式调用一致
+- 举例
+```shell
+String.valueOf(1).repeat(2).length();
+```
+- 可以在值上面调用函数
+```shell
+${user}.getName().length();
+```
+- 双目运算符
+- 也就是需要两个运算参数左值和右值，中间是操作符的表达式
+- 常见的例如加减乘除
+- 定义
+```shell
+表达式 运算符 表达式
+```
+- 运算符含义说明
+```shell
+>= 大于等于
+gte 大于等于
+<= 小于等于
+lte 小于等于
+!= 不等于
+ne 不等于
+<> 不等于
+neq 不等于
+== 相等
+eq 相等
+> 大于
+gt 大于 
+< 小于
+lt 小于
+&& 逻辑与
+and 逻辑与
+|| 逻辑或
+or 逻辑或
++ 加
+- 减
+* 乘
+/ 除
+% 取模，结果一定是int
+```
+- 举例
+```shell
+1>2;
+"xxx"+1;
+```
+
+## 特别注意
+- 本脚本不支持自然意义上的数学运算优先级
+- 也就是先乘除后加减的规则，以及从左向右计算的规则
+- 如果涉及到这种情况，请使用括号表达式进行限制运算顺序
+
+## 综合使用案例
+- 简单用法示例
+```shell
+num=1+1.125;
+num2=${num}+10L;
+tmp=new String("@@@");
+str=${str}+1;
+sadd=${str};
+svl=String.valueOf(1L);
+slen=${str}.length();
+srptlen=${str}.repeat(2).length();
+
+complex=[{
+ username: "123",
+ roles: ["admin","log"],
+ status: true,
+ age: 12,
+ image: ${str},
+ len: String.length(),
+ token: null
+}];
+
+streq=${str}==${sadd};
+strneq=${str}==${tmp};
+numeeq=${num}>=${slen};
+```
+- 运行输入上下文，准备参数如下
+```java
+Map<String, Object> context = new HashMap<>();
+context.put("str", "1,2,3 4-5-6  7  8  9");
+Object ret = TinyScript.script(formula, context);
+System.out.println(ret);
+System.out.println(context);
+```
+- 运行输出结果如下
+```shell
+false
+{str=1,2,3 4-5-6  7  8  91, numeeq=false, tmp=@@@, streq=true, num=2.125, slen=21, srptlen=42, complex=[{username=123, roles=[admin, log], status=true, age=12, image=1,2,3 4-5-6  7  8  91, len=0, token=null}], svl=1, sadd=1,2,3 4-5-6  7  8  91, strneq=false, num2=12.125}
+
+```
+
+- 复杂使用案例
+  - 此案例仅说明复杂的场景，不具有实际运行性
+```shell
+user.status=new BigDecimal(${role.perm}.lrtim(Func.rtrim(replace(${user.name}.isEmpty("user",true).length().size(),"s+",12.125f,0x56l,0t27,0b101L,true),";"),",")).intValue()
+```

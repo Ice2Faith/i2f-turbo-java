@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author Ice2Faith
@@ -36,12 +37,12 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         if ("&&".equals(operator) || "and".equals(operator)) {
             boolean bl = ObjectConvertor.toBoolean(left);
             boolean br = ObjectConvertor.toBoolean(right);
-            return bl&&br;
-        }else if ("||".equals(operator) || "or".equals(operator)) {
+            return bl && br;
+        } else if ("||".equals(operator) || "or".equals(operator)) {
             boolean bl = ObjectConvertor.toBoolean(left);
             boolean br = ObjectConvertor.toBoolean(right);
-            return bl||br;
-        }else if (">=".equals(operator) || "gte".equals(operator)) {
+            return bl || br;
+        } else if (">=".equals(operator) || "gte".equals(operator)) {
             int num = compare(left, right);
             return num >= 0;
         } else if ("<=".equals(operator) || "lte".equals(operator)) {
@@ -70,7 +71,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             } else if (right instanceof Appendable) {
                 return left + "" + right;
             } else if (ObjectConvertor.isNumericType(left.getClass())
-            &&ObjectConvertor.isNumericType(right.getClass())) {
+                    && ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.add(rv, MATH_CONTEXT);
@@ -78,7 +79,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             }
         } else if ("-".equals(operator)) {
             if (ObjectConvertor.isNumericType(left.getClass())
-            &&ObjectConvertor.isNumericType(right.getClass())) {
+                    && ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.subtract(rv, MATH_CONTEXT);
@@ -86,7 +87,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             }
         } else if ("*".equals(operator)) {
             if (ObjectConvertor.isNumericType(left.getClass())
-            &&ObjectConvertor.isNumericType(right.getClass())) {
+                    && ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.multiply(rv, MATH_CONTEXT);
@@ -94,7 +95,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             }
         } else if ("/".equals(operator)) {
             if (ObjectConvertor.isNumericType(left.getClass())
-            &&ObjectConvertor.isNumericType(right.getClass())) {
+                    && ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.divide(rv, MATH_CONTEXT);
@@ -102,7 +103,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             }
         } else if ("%".equals(operator)) {
             if (ObjectConvertor.isNumericType(left.getClass())
-            &&ObjectConvertor.isNumericType(right.getClass())) {
+                    && ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 long num = lv.longValue() % rv.longValue();
@@ -122,24 +123,24 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     public Object convertNumberType(BigDecimal num, Number left, Number right) {
-        if(TypeOf.instanceOf(left, BigDecimal.class)
-                ||TypeOf.instanceOf(right,BigDecimal.class)){
+        if (TypeOf.instanceOf(left, BigDecimal.class)
+                || TypeOf.instanceOf(right, BigDecimal.class)) {
             return num;
         }
-        if(TypeOf.instanceOf(left, BigInteger.class)
-                ||TypeOf.instanceOf(right,BigDecimal.class)){
+        if (TypeOf.instanceOf(left, BigInteger.class)
+                || TypeOf.instanceOf(right, BigDecimal.class)) {
             return num.toBigInteger();
         }
-        if(TypeOf.instanceOf(left,Double.class)
-                ||TypeOf.instanceOf(right,Double.class)){
+        if (TypeOf.instanceOf(left, Double.class)
+                || TypeOf.instanceOf(right, Double.class)) {
             return num.doubleValue();
         }
-        if(TypeOf.instanceOf(left,Float.class)
-                ||TypeOf.instanceOf(right,Float.class)){
+        if (TypeOf.instanceOf(left, Float.class)
+                || TypeOf.instanceOf(right, Float.class)) {
             return num.floatValue();
         }
-        if(TypeOf.instanceOf(left,Long.class)
-                ||TypeOf.instanceOf(right,Long.class)){
+        if (TypeOf.instanceOf(left, Long.class)
+                || TypeOf.instanceOf(right, Long.class)) {
             return num.longValue();
         }
         return num.intValue();
@@ -163,14 +164,14 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 return ((Comparable) left).compareTo(right);
             }
         }
-        if(TypeOf.typeOf(right.getClass(),left.getClass())){
+        if (TypeOf.typeOf(right.getClass(), left.getClass())) {
             if (left instanceof Comparable<?>) {
                 return ((Comparable) left).compareTo(right);
             }
         }
-        if(TypeOf.typeOf(left.getClass(),right.getClass())){
+        if (TypeOf.typeOf(left.getClass(), right.getClass())) {
             if (left instanceof Comparable<?>) {
-                int ret= ((Comparable) left).compareTo(right);
+                int ret = ((Comparable) left).compareTo(right);
                 if (ret == 0) {
                     return 0;
                 }
@@ -180,16 +181,16 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 return 1;
             }
         }
-        if(ObjectConvertor.isNumericType(left.getClass())
-        &&ObjectConvertor.isNumericType(right.getClass())){
-            BigDecimal bl=new BigDecimal(String.valueOf(left));
-            BigDecimal br=new BigDecimal(String.valueOf(right));
+        if (ObjectConvertor.isNumericType(left.getClass())
+                && ObjectConvertor.isNumericType(right.getClass())) {
+            BigDecimal bl = new BigDecimal(String.valueOf(left));
+            BigDecimal br = new BigDecimal(String.valueOf(right));
             return bl.compareTo(br);
         }
-        if(TypeOf.instanceOf(left,CharSequence.class)
-        || TypeOf.instanceOf(right,CharSequence.class)){
-            String sl=String.valueOf(left);
-            String sr=String.valueOf(right);
+        if (TypeOf.instanceOf(left, CharSequence.class)
+                || TypeOf.instanceOf(right, CharSequence.class)) {
+            String sl = String.valueOf(left);
+            String sr = String.valueOf(right);
             return sl.compareTo(sr);
         }
         try {
@@ -212,11 +213,15 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return Integer.compare(left.hashCode(), right.hashCode());
     }
 
-    public Class<?> loadClass(String className){
+    public Class<?> loadClass(String className) {
         return ReflectResolver.loadClass(className);
     }
 
-    public Method findMethod(String naming,List<Object> args){
+    public Method findMethod(String naming, List<Object> args) {
+        CopyOnWriteArrayList<Method> list = TinyScript.BUILTIN_METHOD.get(naming);
+        if(list!=null && !list.isEmpty()){
+            return ReflectResolver.matchExecutable(list, args);
+        }
         return null;
     }
 
@@ -244,7 +249,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             String methodName = naming;
 
             Method method = findMethod(naming, args);
-            if(method!=null){
+            if (method != null) {
                 Object ret = ReflectResolver.execMethod(target, method, args);
                 return ret;
             }
