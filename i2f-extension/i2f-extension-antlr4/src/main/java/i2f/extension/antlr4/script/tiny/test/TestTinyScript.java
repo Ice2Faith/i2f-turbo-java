@@ -1,6 +1,7 @@
 package i2f.extension.antlr4.script.tiny.test;
 
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
+import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.util.HashMap;
@@ -15,6 +16,35 @@ public class TestTinyScript {
 
 
     public static void main(String[] args) {
+
+        testImpl();
+
+        testRaw();
+    }
+
+    public static void testImpl(){
+        String formula = "num=1+1.125;num2=${num}+10L;tmp=new String(\"@@@\");str=${str}+1;sadd=${str};svl=String.valueOf(1L);slen=${str}.length();srptlen=${str}.repeat(2).length();\n";
+        formula+="complex=[{\n" +
+                " username: \"123\",\n" +
+                " roles: [\"admin\",\"log\"],\n" +
+                " status: true,\n" +
+                " age: 12,\n" +
+                " image: ${str},\n" +
+                " len: String.length(),\n" +
+                " token: null\n" +
+                "}];\n";
+        formula+="streq=${str}==${sadd};\n";
+        formula+="strneq=${str}==${tmp};\n";
+        formula+="numeeq=${num}>=${slen};\n";
+
+        Map<String, Object> context = new HashMap<>();
+        context.put("str", "1,2,3 4-5-6  7  8  9");
+        Object ret = TinyScript.script(formula, context);
+        System.out.println(ret);
+        System.out.println(context);
+    }
+
+    public static void testRaw(){
         String formula = "num=1+1.125;num2=${num}+10L;tmp=new String(\"@@@\");str=${str}+1;sadd=${str};svl=String.valueOf(1L);slen=${str}.length();srptlen=${str}.repeat(2).length();\n";
         formula+="complex=[{\n" +
                 " username: \"123\",\n" +
