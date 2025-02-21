@@ -21,6 +21,17 @@ grammar TinyScript;
     package i2f.extension.antlr4.script.tiny;
 }
 
+// Lexer rules
+SINGLE_LINE_COMMENT: '//' (~('\n'))* '\n' -> skip;
+
+MULTI_LINE_COMMENT: '/*' (~('*') | '\\' ('*') )* '*/' -> skip;
+
+MULTILINE_STRING: '```' NAMING? [ \t]* '\n' (~('`') | '\\' ('`'|'\\'))* '\n' [ \t]* '```';
+
+RENDER_STRING: [rR] QUOTE (ESCAPED_CHAR | ~[\\"])* QUOTE;
+
+STRING: QUOTE (ESCAPED_CHAR | ~[\\"])* QUOTE;
+
 
 TYPE_BOOL:
     'true' | 'false'
@@ -30,12 +41,11 @@ TYPE_NULL:
     'null'
     ;
 
-// Lexer rules
-STRING: QUOTE (ESCAPED_CHAR | ~[\\"])* QUOTE;
 
 // 词法规则
 QUOTE: '"';
 ESCAPED_CHAR: '\\' ( '\\' | '"' | '\'' | 'r' | 't' | 'n' );
+
 
 NAMING: ID (DOT ID)*;
 ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
@@ -168,6 +178,8 @@ argument
 constValue:
     constBool
     | constNull
+    | constMultilineString
+    | constRenderString
     | constString
     | decNumber
     | hexNumber
@@ -188,6 +200,14 @@ constNull:
 
 constString:
     STRING
+    ;
+
+constMultilineString:
+    MULTILINE_STRING
+    ;
+
+constRenderString:
+    RENDER_STRING
     ;
 
 decNumber: // 十进制数字

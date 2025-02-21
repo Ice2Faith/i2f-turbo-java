@@ -1,4 +1,4 @@
-// Generated from D:/IDEA_ROOT/DevCenter/i2f-turbo/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -149,6 +149,33 @@ public interface TinyScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitConstString(TinyScriptParser.ConstStringContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScriptParser#constMultilineString}.
+	 * @param ctx the parse tree
+	 */
+	void enterConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx);
+
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#constMultilineString}.
+	 *
+	 * @param ctx the parse tree
+	 */
+	void exitConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link TinyScriptParser#constRenderString}.
+	 *
+	 * @param ctx the parse tree
+	 */
+	void enterConstRenderString(TinyScriptParser.ConstRenderStringContext ctx);
+
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#constRenderString}.
+	 *
+	 * @param ctx the parse tree
+	 */
+	void exitConstRenderString(TinyScriptParser.ConstRenderStringContext ctx);
+
 	/**
 	 * Enter a parse tree produced by {@link TinyScriptParser#decNumber}.
 	 * @param ctx the parse tree

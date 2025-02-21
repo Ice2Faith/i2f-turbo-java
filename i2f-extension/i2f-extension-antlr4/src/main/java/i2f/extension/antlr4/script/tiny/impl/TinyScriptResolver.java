@@ -18,5 +18,7 @@ public interface TinyScriptResolver {
 
     Object resolveFunctionCall(Object target, boolean isNew, String naming, List<Object> args);
 
+    String renderString(String text, Object context);
 
+    String multilineString(String text, List<String> features, Object context);
 }

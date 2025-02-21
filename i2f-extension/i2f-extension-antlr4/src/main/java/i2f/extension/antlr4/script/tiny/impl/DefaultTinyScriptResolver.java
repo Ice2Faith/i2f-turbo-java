@@ -1,6 +1,7 @@
 package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.match.regex.RegexUtil;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
@@ -257,5 +258,40 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             Object ret = ReflectResolver.execMethod(target, clazz, methodName, args);
             return ret;
         }
+    }
+
+    @Override
+    public String renderString(String text, Object context) {
+        return RegexUtil.regexFindAndReplace(text, "[\\\\]*\\$\\{[^}]+\\}", (str) -> {
+            str = str.substring("${".length(), str.length() - "}".length());
+            str = str.trim();
+            Object value = getValue(context, str);
+            return String.valueOf(value);
+        });
+    }
+
+    @Override
+    public String multilineString(String text, List<String> features, Object context) {
+        for (String feature : features) {
+            if ("trim".equals(feature)) {
+                text = text.trim();
+            } else if ("align".equals(feature)) {
+                StringBuilder builder = new StringBuilder();
+                String[] arr = text.split("\n");
+                for (String item : arr) {
+                    int idx = item.indexOf("|");
+                    if (idx >= 0) {
+                        builder.append(item.substring(idx + 1));
+                    } else {
+                        builder.append(item);
+                    }
+                    builder.append("\n");
+                }
+                text = builder.toString();
+            } else if ("render".equals(feature)) {
+                text = renderString(text, context);
+            }
+        }
+        return text;
     }
 }

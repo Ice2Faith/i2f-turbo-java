@@ -493,15 +493,88 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             }
             term = term.trim();
             term = term.substring("\"".length(), term.length() - "\"".length());
-            term = term.replace("\\r", "\r");
-            term = term.replace("\\n", "\n");
-            term = term.replace("\\t", "\t");
-            term = term.replace("\\\\", "\\");
-            term = term.replace("\\\"", "\"");
-            term = term.replace("\\'", "'");
+            term = unescapeString(term);
             return term;
         }
         throw new IllegalArgumentException("un-support const string found : " + ctx.getText());
+    }
+
+    public static String unescapeString(String term) {
+        term = term.replace("\\r", "\r");
+        term = term.replace("\\n", "\n");
+        term = term.replace("\\t", "\t");
+        term = term.replace("\\\"", "\"");
+        term = term.replace("\\'", "'");
+        term = term.replace("\\\\", "\\");
+        return term;
+    }
+
+    @Override
+    public Object visitConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx) {
+        int count = ctx.getChildCount();
+        if (count < 0) {
+            throw new IllegalArgumentException("missing const multiline string!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if (item instanceof TerminalNode) {
+            TerminalNode nextTerm = (TerminalNode) item;
+            String term = (String) visitTerminal(nextTerm);
+            if (term == null) {
+                throw new IllegalArgumentException("missing const multiline string!");
+            }
+            term = term.trim();
+            StringBuilder builder = new StringBuilder();
+            String firstLine = "";
+            String[] arr = term.split("\n");
+            for (int i = 0; i < arr.length; i++) {
+                String str = arr[i];
+                str = str.replace("\\`", "`");
+                str = str.replace("\\\\", "\\");
+                if (i == 0) {
+                    firstLine = arr[0];
+                    continue;
+                }
+                if (i == arr.length - 1) {
+                    continue;
+                }
+                builder.append(str).append("\n");
+            }
+            firstLine = firstLine.trim();
+            firstLine = firstLine.substring("```".length());
+            String[] features = firstLine.split("\\.");
+            List<String> featuresList = new ArrayList<>();
+            for (String feature : features) {
+                if (feature.isEmpty()) {
+                    continue;
+                }
+                featuresList.add(feature);
+            }
+            term = resolver.multilineString(builder.toString(), featuresList, context);
+            return term;
+        }
+        throw new IllegalArgumentException("un-support const multiline string found : " + ctx.getText());
+    }
+
+    @Override
+    public Object visitConstRenderString(TinyScriptParser.ConstRenderStringContext ctx) {
+        int count = ctx.getChildCount();
+        if (count < 0) {
+            throw new IllegalArgumentException("missing const render string!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if (item instanceof TerminalNode) {
+            TerminalNode nextTerm = (TerminalNode) item;
+            String term = (String) visitTerminal(nextTerm);
+            if (term == null) {
+                throw new IllegalArgumentException("missing const render string!");
+            }
+            term = term.trim();
+            term = term.substring("r\"".length(), term.length() - "\"".length());
+            term = unescapeString(term);
+            term = resolver.renderString(term, context);
+            return term;
+        }
+        throw new IllegalArgumentException("un-support const render string found : " + ctx.getText());
     }
 
     @Override
