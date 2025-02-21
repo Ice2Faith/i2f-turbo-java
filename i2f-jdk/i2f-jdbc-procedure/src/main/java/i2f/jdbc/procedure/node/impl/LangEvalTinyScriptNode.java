@@ -92,6 +92,11 @@ public class LangEvalTinyScriptNode implements ExecutorNode {
 
             return super.findMethod(naming, args);
         }
+
+        @Override
+        public String renderString(String text, Object context) {
+            return executor.render(text, (Map<String, Object>) context);
+        }
     }
 
 
