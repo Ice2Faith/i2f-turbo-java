@@ -2,7 +2,9 @@ package i2f.jdbc.procedure.context;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 
@@ -12,7 +14,7 @@ import java.util.function.Function;
  */
 public class ContextHolder {
     // 用于静态直接根据方法名在这个集合类中查找同名的方法，使用于LangInvokeNode中，方法需要为public的，不限制是否为static的方法
-    public static final ConcurrentHashMap<String, Method> INVOKE_METHOD_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, List<Method>> INVOKE_METHOD_MAP = new ConcurrentHashMap<>();
 
     // 用于静态直接根据方法名在这个集合类中查找同名的方法，使用于BasicJdbcProcedureExecutor的Feature中，方法需要为public static的，且一个入参，具有返回值
     public static final ConcurrentHashMap<String, Method> CONVERT_METHOD_MAP = new ConcurrentHashMap<>();
@@ -71,7 +73,8 @@ public class ContextHolder {
                 continue;
             }
             String name = method.getName();
-            INVOKE_METHOD_MAP.put(name, method);
+            List<Method> list = INVOKE_METHOD_MAP.computeIfAbsent(name, (key) -> new CopyOnWriteArrayList<>());
+            list.add(method);
         }
     }
 

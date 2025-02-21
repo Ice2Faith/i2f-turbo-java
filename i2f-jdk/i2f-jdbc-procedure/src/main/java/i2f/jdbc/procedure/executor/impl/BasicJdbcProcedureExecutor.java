@@ -20,6 +20,7 @@ import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
 import i2f.page.ApiPage;
+import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 import i2f.uid.SnowflakeLongUid;
@@ -390,7 +391,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             String text = value == null ? "" : String.valueOf(value);
             return loadClass(text);
         } else if (FeatureConsts.NOT.equals(feature)) {
-            boolean ok = ObjectConvertor.toBoolean(value);
+            boolean ok = toBoolean(value);
             return !ok;
         } else if (FeatureConsts.DIALECT.equals(feature)) {
             try {
@@ -439,74 +440,26 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return value;
     }
 
+    public boolean toBoolean(Object obj){
+        return ObjectConvertor.toBoolean(obj);
+    }
+
 
     @Override
     public Class<?> loadClass(String className) {
-        if ("long".equals(className)) {
-            return Long.class;
+        Class<?> ret = ReflectResolver.loadClass(className);
+        if(ret!=null){
+            return ret;
         }
-        if ("int".equals(className)) {
-            return Integer.class;
-        }
-        if ("short".equals(className)) {
-            return Short.class;
-        }
-        if ("byte".equals(className)) {
-            return Byte.class;
-        }
-        if ("char".equals(className)) {
-            return Character.class;
-        }
-        if ("float".equals(className)) {
-            return Float.class;
-        }
-        if ("double".equals(className)) {
-            return Double.class;
-        }
-        if ("boolean".equals(className)) {
-            return Boolean.class;
-        }
-        if ("string".equals(className)) {
-            return String.class;
-        }
+
         List<String> prefixes =new ArrayList<>(Arrays.asList(new String[] {
                 "",
-                "java.lang.",
-                "java.util.",
-                "java.sql.",
-                "java.math.",
-                "java.io.",
-                "java.time.",
-                "java.text.",
-                "java.lang.reflect.",
-                "java.concurrent.",
-                "java.util.regex.",
-                "javax.sql.",
-                "jakarta.sql.",
-                "java.nio.",
-                "java.nio.charset.",
-                "java.nio.file.",
-                "java.concurrent.atomic.",
-                "java.concurrent.locks.",
-                "java.time.chrono.",
-                "java.time.format.",
-                "java,time.temporal.",
-                "java.time.zone.",
         }));
         prefixes.addAll(ContextHolder.LOAD_PACKAGE_SET);
         Class<?> clazz = null;
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
         for (String prefix : prefixes) {
             try {
-                clazz = loader.loadClass(prefix + className);
-                if (clazz != null) {
-                    return clazz;
-                }
-            } catch (Exception e) {
-
-            }
-            try {
-                clazz = Class.forName(prefix + className);
+                clazz = ReflectResolver.loadClass0(prefix + className);
                 if (clazz != null) {
                     return clazz;
                 }
@@ -514,6 +467,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
             }
         }
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
         if (clazz == null) {
             clazz = innerLoadClass(className, loader);
         }

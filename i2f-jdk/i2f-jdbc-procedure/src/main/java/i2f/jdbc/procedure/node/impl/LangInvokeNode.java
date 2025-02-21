@@ -114,7 +114,8 @@ public class LangInvokeNode implements ExecutorNode {
             }
             Method method = null;
             if (targetScript == null || targetScript.isEmpty()) {
-                method = ContextHolder.INVOKE_METHOD_MAP.get(methodName);
+                List<Method> list= ContextHolder.INVOKE_METHOD_MAP.get(methodName);
+                method = ReflectResolver.matchExecutable(list, callArgs);
                 if (clazz == null) {
                     clazz = method.getDeclaringClass();
                 }
