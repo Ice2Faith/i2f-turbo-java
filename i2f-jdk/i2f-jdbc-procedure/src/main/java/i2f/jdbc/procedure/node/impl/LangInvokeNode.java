@@ -8,11 +8,10 @@ import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.reflect.ReflectResolver;
+import i2f.typeof.TypeOf;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -58,6 +57,21 @@ public class LangInvokeNode implements ExecutorNode {
             methodName = fullMethodName.substring(idx + 1);
         }
 
+        List<Object> callArgs = new ArrayList<>();
+        for (int i = 0; i < args.size(); i++) {
+            Map.Entry<Integer, String> argEntry = args.get(i);
+            String argScript = argEntry.getValue();
+            Object evalObj = null;
+            try {
+                evalObj = executor.attrValue(AttrConsts.ARG + argEntry.getKey(), FeatureConsts.VISIT, node, context);
+            } catch (Exception e) {
+            }
+            if (evalObj == null) {
+                evalObj = argScript;
+            }
+            callArgs.add(evalObj);
+        }
+
 
         if ("new".equals(methodName)) {
             if (Map.class.getSimpleName().equals(className)) {
@@ -70,104 +84,20 @@ public class LangInvokeNode implements ExecutorNode {
                 className = HashSet.class.getName();
             }
             Class<?> clazz = executor.loadClass(className);
-            Constructor<?> constructor = null;
-            Constructor<?> constructorArgs = null;
-            if (constructor == null || constructorArgs == null) {
-                Constructor[] constructors = clazz.getConstructors();
-                for (Constructor item : constructors) {
-                    if (item.getParameterCount() == args.size()) {
-                        if (constructor == null) {
-                            constructor = item;
-                        }
-                    }
-                    if (args.size() > item.getParameterCount()) {
-                        if (item.getParameterCount() > 0) {
-                            if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
-                                if (constructorArgs == null) {
-                                    constructorArgs = item;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (constructor == null || constructorArgs == null) {
-                Constructor[] declaredConstructors = clazz.getDeclaredConstructors();
-                for (Constructor item : declaredConstructors) {
-                    if (item.getParameterCount() == args.size()) {
-                        if (constructor == null) {
-                        constructor = item;
-                        }
-                    }
-                    if (args.size() > item.getParameterCount()) {
-                        if (item.getParameterCount() > 0) {
-                            if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
-                                if (constructorArgs == null) {
-                                    constructorArgs = item;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (constructor == null) {
-                constructor = constructorArgs;
-            }
+            Constructor<?> constructor = ReflectResolver.matchExecConstructor(clazz,callArgs);
 
             if (constructor == null) {
                 throw new IllegalArgumentException("not found constructor : " + fullMethodName + " with args count " + args.size());
             }
 
-            Class<?>[] parameterTypes = constructor.getParameterTypes();
-            Object[] invokeArgs = new Object[parameterTypes.length];
-
-            for (int i = 0; i < args.size(); i++) {
-                Class<?> paramType = null;
-                if (i < invokeArgs.length - 1) {
-                    paramType = parameterTypes[i];
-                } else {
-                    if (parameterTypes[parameterTypes.length - 1].isArray()) {
-                        paramType = parameterTypes[parameterTypes.length - 1].getComponentType();
-                    } else {
-                        paramType = parameterTypes[parameterTypes.length - 1];
-                    }
-                }
-                Map.Entry<Integer, String> argEntry = args.get(i);
-                String argScript = argEntry.getValue();
-                Object evalObj = null;
-                try {
-                    evalObj = executor.attrValue(AttrConsts.ARG + argEntry.getKey(), FeatureConsts.VISIT, node, context);
-                } catch (Exception e) {
-                }
-                if (evalObj == null) {
-                    evalObj = argScript;
-                }
-                Object val = ObjectConvertor.tryConvertAsType(evalObj, paramType);
-                if (i < parameterTypes.length - 1) {
-                    invokeArgs[i] = val;
-                } else {
-                    if (parameterTypes[parameterTypes.length - 1].isArray()) {
-                        if (invokeArgs[parameterTypes.length - 1] == null) {
-                            invokeArgs[parameterTypes.length - 1] = Array.newInstance(paramType, args.size() - parameterTypes.length + 1);
-                        }
-                        Array.set(invokeArgs[parameterTypes.length - 1], i - parameterTypes.length + 1, val);
-                    } else {
-                        invokeArgs[i] = val;
-                    }
-                }
-            }
-
-
             try {
-                constructor.setAccessible(true);
-                Object res = constructor.newInstance(invokeArgs);
+                Object res = ReflectResolver.execConstructor(constructor,callArgs);
 
                 if (result != null && !result.isEmpty()) {
                     res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
                     executor.setParamsObject(context.getParams(), result, res);
                 }
-            } catch (ReflectiveOperationException e) {
+            } catch (Exception e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
         } else {
@@ -183,11 +113,10 @@ public class LangInvokeNode implements ExecutorNode {
                 clazz = executor.loadClass(className);
             }
             Method method = null;
-            Method methodArgs = null;
-            if(targetScript==null || targetScript.isEmpty()){
-                method= ContextHolder.INVOKE_METHOD_MAP.get(methodName);
-                if(clazz==null){
-                    clazz=method.getDeclaringClass();
+            if (targetScript == null || targetScript.isEmpty()) {
+                method = ContextHolder.INVOKE_METHOD_MAP.get(methodName);
+                if (clazz == null) {
+                    clazz = method.getDeclaringClass();
                 }
             }
 
@@ -195,116 +124,27 @@ public class LangInvokeNode implements ExecutorNode {
                 throw new IllegalArgumentException("cannot found class by method : " + fullMethodName);
             }
 
-            if (method == null || methodArgs == null) {
-                Method[] methods = clazz.getMethods();
-                for (Method item : methods) {
-                    if (item.getName().equals(methodName)) {
-                        if (item.getParameterCount() == args.size()) {
-                            if (method == null) {
-                                method = item;
-                            }
-                        }
-                        if (args.size() > item.getParameterCount()) {
-                            if (item.getParameterCount() > 0) {
-                                if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
-                                    if (methodArgs == null) {
-                                        methodArgs = item;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (method == null || methodArgs == null) {
-                Method[] declaredMethods = clazz.getDeclaredMethods();
-                for (Method item : declaredMethods) {
-                    if (item.getName().equals(methodName)) {
-                        if (item.getParameterCount() == args.size()) {
-                            if (method == null) {
-                                method = item;
-                            }
-                        }
-                        if (args.size() > item.getParameterCount()) {
-                            if (item.getParameterCount() > 0) {
-                                if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
-                                    if (methodArgs == null) {
-                                        methodArgs = item;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (method == null) {
-                method = methodArgs;
+            if(method==null){
+                method= ReflectResolver.matchExecMethod(clazz,methodName,callArgs);
             }
 
             if (method == null) {
                 throw new IllegalArgumentException("not found method : " + fullMethodName + " with args count " + args.size());
             }
 
-
-            Class<?>[] parameterTypes = method.getParameterTypes();
-            Object[] invokeArgs = new Object[parameterTypes.length];
-
-            for (int i = 0; i < args.size(); i++) {
-                Class<?> paramType = null;
-                if (i < invokeArgs.length - 1) {
-                    paramType = parameterTypes[i];
-                } else {
-                    if (parameterTypes[parameterTypes.length - 1].isArray()) {
-                        paramType = parameterTypes[parameterTypes.length - 1].getComponentType();
-                    } else {
-                        paramType = parameterTypes[parameterTypes.length - 1];
-                    }
-                }
-                Map.Entry<Integer, String> argEntry = args.get(i);
-                String argScript = argEntry.getValue();
-                Object evalObj = null;
-                try {
-                    evalObj = executor.attrValue(AttrConsts.ARG + argEntry.getKey(), FeatureConsts.VISIT, node, context);
-                } catch (Exception e) {
-                }
-                if (evalObj == null) {
-                    evalObj = argScript;
-                }
-                Object val = ObjectConvertor.tryConvertAsType(evalObj, paramType);
-                if (i < parameterTypes.length - 1) {
-                    invokeArgs[i] = val;
-                } else {
-                    if (parameterTypes[parameterTypes.length - 1].isArray()) {
-                        if (invokeArgs[parameterTypes.length - 1] == null) {
-                            invokeArgs[parameterTypes.length - 1] = Array.newInstance(paramType, args.size() - parameterTypes.length + 1);
-                        }
-                        Array.set(invokeArgs[parameterTypes.length - 1], i - parameterTypes.length + 1, val);
-                    } else {
-                        invokeArgs[i] = val;
-                    }
-                }
-            }
-
             try {
-                method.setAccessible(true);
-                if (!Modifier.isStatic(method.getModifiers())) {
-                    if (invokeObject == null) {
-                        invokeObject = method.getDeclaringClass().newInstance();
-                    }
-                }
 
-                Object res = method.invoke(invokeObject, invokeArgs);
+                Object res = ReflectResolver.execMethod(invokeObject,method,callArgs);
 
                 if (result != null && !result.isEmpty()) {
                     res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
                     executor.setParamsObject(context.getParams(), result, res);
                 }
-            } catch (ReflectiveOperationException e) {
+            } catch (Exception e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
         }
 
     }
+
 }
