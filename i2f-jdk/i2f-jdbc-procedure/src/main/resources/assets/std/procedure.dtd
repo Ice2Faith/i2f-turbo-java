@@ -41,6 +41,9 @@
                 |sql-cursor*
                 |lang-eval-java*
                 |lang-eval-javascript*
+                |lang-eval-js*
+                |lang-eval-tinyscript*
+                |lang-eval-ts*
                 |sql-scope*
                 |lang-sleep*
                 |sql-etl*
@@ -105,6 +108,8 @@
         <!ATTLIST lang-set value.body-xml CDATA #IMPLIED>
         <!ATTLIST lang-set value.eval-java CDATA #IMPLIED>
         <!ATTLIST lang-set value.eval-js CDATA #IMPLIED>
+        <!ATTLIST lang-set value.eval-tinyscript CDATA #IMPLIED>
+        <!ATTLIST lang-set value.eval-ts CDATA #IMPLIED>
         <!ATTLIST lang-set value.class CDATA #IMPLIED>
         <!ATTLIST lang-set value.not CDATA #IMPLIED>
         <!ATTLIST lang-set value.body-text.trim CDATA #IMPLIED>
@@ -142,6 +147,8 @@
         <!ATTLIST lang-set result.body-xml CDATA #IMPLIED>
         <!ATTLIST lang-set result.eval-java CDATA #IMPLIED>
         <!ATTLIST lang-set result.eval-js CDATA #IMPLIED>
+        <!ATTLIST lang-set result.eval-tinyscript CDATA #IMPLIED>
+        <!ATTLIST lang-set result.eval-ts CDATA #IMPLIED>
         <!ATTLIST lang-set result.class CDATA #IMPLIED>
         <!ATTLIST lang-set result.not CDATA #IMPLIED>
         <!ATTLIST lang-set result.body-text.trim CDATA #IMPLIED>
@@ -368,6 +375,8 @@
         <!ATTLIST lang-return value.body-xml CDATA #IMPLIED>
         <!ATTLIST lang-return value.eval-java CDATA #IMPLIED>
         <!ATTLIST lang-return value.eval-js CDATA #IMPLIED>
+        <!ATTLIST lang-return value.eval-tinyscript CDATA #IMPLIED>
+        <!ATTLIST lang-return value.eval-ts CDATA #IMPLIED>
         <!ATTLIST lang-return value.class CDATA #IMPLIED>
         <!ATTLIST lang-return value.not CDATA #IMPLIED>
 
@@ -738,6 +747,15 @@
 
         <!ELEMENT lang-eval-javascript (#PCDATA)>
         <!ATTLIST lang-eval-javascript result CDATA #IMPLIED>
+
+        <!ELEMENT lang-eval-js (#PCDATA)>
+        <!ATTLIST lang-eval-js result CDATA #IMPLIED>
+
+        <!ELEMENT lang-eval-tinyscript (#PCDATA)>
+        <!ATTLIST lang-eval-tinyscript result CDATA #IMPLIED>
+
+        <!ELEMENT lang-eval-ts (#PCDATA)>
+        <!ATTLIST lang-eval-ts result CDATA #IMPLIED>
 
         <!ELEMENT sql-scope (ANY)>
         <!ATTLIST sql-scope datasources CDATA #IMPLIED>
