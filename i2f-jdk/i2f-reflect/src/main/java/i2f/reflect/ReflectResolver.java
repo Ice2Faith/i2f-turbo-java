@@ -987,8 +987,8 @@ public class ReflectResolver {
         return invokeArgs;
     }
 
-    public static Executable matchExecutable(List<Executable> executables, List<Object> args) {
-        Executable ret = matchExecutable(executables, args, false);
+    public static<T extends Executable> T matchExecutable(List<T> executables, List<Object> args) {
+        T ret = matchExecutable(executables, args, false);
         if (ret != null) {
             return ret;
         }
@@ -996,12 +996,12 @@ public class ReflectResolver {
         return ret;
     }
 
-    public static Executable matchExecutable(List<Executable> executables, List<Object> args, boolean supportConvert) {
-        Executable exec = null;
-        Executable execArgs = null;
-        Executable execMatched = null;
-        Executable execArgsMatched = null;
-        for (Executable item : executables) {
+    public static<T extends Executable> T matchExecutable(List<T> executables, List<Object> args, boolean supportConvert) {
+        T exec = null;
+        T execArgs = null;
+        T execMatched = null;
+        T execArgsMatched = null;
+        for (T item : executables) {
             if (item.getParameterCount() == args.size()) {
                 if (exec == null) {
                     exec = item;
