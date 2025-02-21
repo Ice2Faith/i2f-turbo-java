@@ -44,15 +44,28 @@ public class TinyScript {
             String name = method.getName();
             return name.startsWith("to") || name.startsWith("parse");
         });
+        registryBuiltMethodByStaticMethod(Math.class, (method) -> {
+            String name = method.getName();
+            return !name.startsWith("copy")
+                    && !name.startsWith("next");
+        });
     }
 
     public static Object script(String formula, Object context) {
+        return script(formula, context, null);
+    }
+
+    public static Object script(String formula, Object context, TinyScriptResolver resolver) {
         TinyScriptParser.ScriptContext tree = parse(formula);
-        return script(tree, context);
+        return script(tree, context, resolver);
     }
 
     public static Object script(TinyScriptParser.ScriptContext tree, Object context) {
-        TinyScriptVisitor<Object> visitor = new TinyScriptVisitorImpl(context);
+        return script(tree, context, null);
+    }
+
+    public static Object script(TinyScriptParser.ScriptContext tree, Object context, TinyScriptResolver resolver) {
+        TinyScriptVisitor<Object> visitor = new TinyScriptVisitorImpl(context, resolver);
         Object ret = visitor.visit(tree);
         return ret;
     }
