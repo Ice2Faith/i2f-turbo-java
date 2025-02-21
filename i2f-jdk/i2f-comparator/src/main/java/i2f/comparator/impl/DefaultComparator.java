@@ -28,7 +28,16 @@ public class DefaultComparator<T> implements Comparator<T> {
     public static <T> int compareDefault(T o1, T o2, boolean reverseNull, boolean reverseResult) {
         int ret = NullableComparator.compareNull(o1, o2, reverseNull);
         if (ret != NullableComparator.COMPARE_UN_NULL_RETURN_VALUE) {
-            return ret;
+            if(ret==0){
+                return 0;
+            }
+            return reverseResult?-ret:ret;
+        }
+        if (o1.getClass().equals(o2.getClass())) {
+            if (o1 instanceof Comparable<?>) {
+                ret= ((Comparable) o1).compareTo(o2);
+                return reverseResult?-ret:ret;
+            }
         }
         if (o1 instanceof Comparable) {
             ret = ((Comparable) o1).compareTo(o2);

@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -192,6 +193,31 @@ public class ReflectResolver {
             "com.sun.nio.zipfs."
     };
 
+    public static final String[] LOAD_CLASS_PREFIXES=new String[]{
+            "",
+            "java.lang.",
+            "java.util.",
+            "java.sql.",
+            "java.math.",
+            "java.io.",
+            "java.time.",
+            "java.text.",
+            "java.lang.reflect.",
+            "java.concurrent.",
+            "java.util.regex.",
+            "javax.sql.",
+            "jakarta.sql.",
+            "java.nio.",
+            "java.nio.charset.",
+            "java.nio.file.",
+            "java.concurrent.atomic.",
+            "java.concurrent.locks.",
+            "java.time.chrono.",
+            "java.time.format.",
+            "java,time.temporal.",
+            "java.time.zone.",
+    };
+
     public static boolean isJdkClas(Class<?> clazz) {
         return isJdkClassName(clazz.getName());
     }
@@ -242,7 +268,51 @@ public class ReflectResolver {
         return ret;
     }
 
+
     public static Class<?> loadClass(String className) {
+        if ("long".equals(className)) {
+            return Long.class;
+        }
+        if ("int".equals(className)) {
+            return Integer.class;
+        }
+        if ("short".equals(className)) {
+            return Short.class;
+        }
+        if ("byte".equals(className)) {
+            return Byte.class;
+        }
+        if ("char".equals(className)) {
+            return Character.class;
+        }
+        if ("float".equals(className)) {
+            return Float.class;
+        }
+        if ("double".equals(className)) {
+            return Double.class;
+        }
+        if ("boolean".equals(className)) {
+            return Boolean.class;
+        }
+        if ("string".equals(className)) {
+            return String.class;
+        }
+        List<String> prefixes = new ArrayList<>(Arrays.asList(LOAD_CLASS_PREFIXES));
+        Class<?> clazz = null;
+        for (String prefix : prefixes) {
+            try {
+                clazz = loadClass0(prefix + className);
+                if (clazz != null) {
+                    return clazz;
+                }
+            } catch (Exception e) {
+
+            }
+        }
+        return clazz;
+    }
+
+    public static Class<?> loadClass0(String className) {
         if (className == null) {
             return null;
         }
@@ -798,6 +868,247 @@ public class ReflectResolver {
             }
         }
         return ret;
+    }
+
+    public static Object execNewInstance(Class<?> clazz, List<Object> args) {
+        Constructor<?> constructor = matchExecConstructor(clazz, args);
+        if (constructor == null) {
+            throw new IllegalArgumentException("not found constructor : " + clazz + " with args count " + args.size());
+        }
+        return execConstructor(constructor,args);
+    }
+
+    public static Object execConstructor( Constructor<?> constructor,List<Object> args) {
+        
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        Object[] invokeArgs = convertAsExecutableArgs(parameterTypes, args);
+
+        try {
+            constructor.setAccessible(true);
+            Object ret = constructor.newInstance(invokeArgs);
+            return ret;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    public static Constructor<?> matchExecConstructor(Class<?> clazz, List<Object> args) {
+        List<Executable> executables = new ArrayList<>();
+        executables.addAll(Arrays.asList(clazz.getConstructors()));
+        executables.addAll(Arrays.asList(clazz.getDeclaredConstructors()));
+        Executable executable = matchExecutable(executables, args);
+        Constructor<?> constructor = (Constructor<?>) executable;
+        return constructor;
+    }
+
+    public static Object execMethod(Class<?> clazz, String methodName, List<Object> args) {
+        return execMethod(null, clazz, methodName, args);
+    }
+
+    public static Object execMethod(Object target, String methodName, List<Object> args) {
+        return execMethod(target, null, methodName, args);
+    }
+
+    public static Object execMethod(Object target, Class<?> clazz, String methodName, List<Object> args) {
+        if (clazz == null) {
+            if (target != null) {
+                clazz = target.getClass();
+            }
+        }
+        if (clazz == null) {
+            throw new IllegalArgumentException("cannot found class by method : " + methodName);
+        }
+
+        Method method = matchExecMethod(clazz, methodName, args);
+
+        if (method == null) {
+            throw new IllegalArgumentException("not found method : " + methodName + " with args count " + args.size());
+        }
+
+        return execMethod(target, method, args);
+    }
+
+    public static Object execMethod(Object target,Method method, List<Object> args ) {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Object[] invokeArgs = convertAsExecutableArgs(parameterTypes, args);
+
+        try {
+            method.setAccessible(true);
+            if (!Modifier.isStatic(method.getModifiers())) {
+                if (target == null) {
+                    target = execNewInstance(method.getDeclaringClass(), new ArrayList<>());
+                }
+            }
+            Object ret = method.invoke(target, invokeArgs);
+            return ret;
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static Method matchExecMethod(Class<?> clazz, String methodName, List<Object> args) {
+        List<Executable> executables = new ArrayList<>();
+        executables.addAll(Arrays.stream(clazz.getMethods()).filter(e -> e.getName().equals(methodName)).collect(Collectors.toList()));
+        executables.addAll(Arrays.stream(clazz.getDeclaredMethods()).filter(e -> e.getName().equals(methodName)).collect(Collectors.toList()));
+        Executable executable = matchExecutable(executables, args);
+        Method method = (Method) executable;
+        return method;
+    }
+
+    public static Object[] convertAsExecutableArgs(Class<?>[] parameterTypes, List<Object> args) {
+        Object[] invokeArgs = new Object[parameterTypes.length];
+
+        for (int i = 0; i < args.size(); i++) {
+            Class<?> paramType = null;
+            if (i < invokeArgs.length - 1) {
+                paramType = parameterTypes[i];
+            } else {
+                if (parameterTypes[parameterTypes.length - 1].isArray()) {
+                    paramType = parameterTypes[parameterTypes.length - 1].getComponentType();
+                } else {
+                    paramType = parameterTypes[parameterTypes.length - 1];
+                }
+            }
+            Object evalObj = args.get(i);
+            Object val = ObjectConvertor.tryConvertAsType(evalObj, paramType);
+            if (i < parameterTypes.length - 1) {
+                invokeArgs[i] = val;
+            } else {
+                if (parameterTypes[parameterTypes.length - 1].isArray()) {
+                    if (invokeArgs[parameterTypes.length - 1] == null) {
+                        invokeArgs[parameterTypes.length - 1] = Array.newInstance(paramType, args.size() - parameterTypes.length + 1);
+                    }
+                    Array.set(invokeArgs[parameterTypes.length - 1], i - parameterTypes.length + 1, val);
+                } else {
+                    invokeArgs[i] = val;
+                }
+            }
+        }
+        return invokeArgs;
+    }
+
+    public static Executable matchExecutable(List<Executable> executables, List<Object> args) {
+        Executable ret = matchExecutable(executables, args, false);
+        if (ret != null) {
+            return ret;
+        }
+        ret = matchExecutable(executables, args, true);
+        return ret;
+    }
+
+    public static Executable matchExecutable(List<Executable> executables, List<Object> args, boolean supportConvert) {
+        Executable exec = null;
+        Executable execArgs = null;
+        Executable execMatched = null;
+        Executable execArgsMatched = null;
+        for (Executable item : executables) {
+            if (item.getParameterCount() == args.size()) {
+                if (exec == null) {
+                    exec = item;
+                }
+                if (execMatched == null) {
+                    boolean matched = true;
+                    Class[] parameterTypes = item.getParameterTypes();
+                    for (int i = 0; i < parameterTypes.length; i++) {
+                        Object val = args.get(i);
+                        if (val == null) {
+                            continue;
+                        }
+                        Class<?> argType = val.getClass();
+                        Class<?> paramType = parameterTypes[i];
+                        if (TypeOf.typeOf(argType, paramType)) {
+                            continue;
+                        }
+                        if (supportConvert) {
+                            Object test = ObjectConvertor.tryConvertAsType(val, paramType);
+                            if (TypeOf.instanceOf(test, paramType)) {
+                                continue;
+                            }
+                        }
+                        matched = false;
+                        if (matched == false) {
+                            break;
+                        }
+                    }
+                    if (matched) {
+                        execMatched = item;
+                        return execMatched;
+                    }
+                }
+            }
+            if (args.size() > item.getParameterCount()) {
+                if (item.getParameterCount() > 0) {
+                    if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
+                        if (execArgs == null) {
+                            execArgs = item;
+                        }
+                        if (execArgsMatched == null) {
+                            boolean matched = true;
+                            Class[] parameterTypes = item.getParameterTypes();
+                            for (int i = 0; i < parameterTypes.length - 1; i++) {
+                                Object val = args.get(i);
+                                if (val == null) {
+                                    continue;
+                                }
+                                Class<?> argType = val.getClass();
+                                Class<?> paramType = parameterTypes[i];
+                                if (TypeOf.typeOf(argType, paramType)) {
+                                    continue;
+                                }
+                                if (supportConvert) {
+                                    Object test = ObjectConvertor.tryConvertAsType(val, paramType);
+                                    if (TypeOf.instanceOf(test, paramType)) {
+                                        continue;
+                                    }
+                                }
+                                matched = false;
+                                if (matched == false) {
+                                    break;
+                                }
+                            }
+                            Class<?> elemType = parameterTypes[parameterTypes.length - 1].getComponentType();
+                            for (int i = parameterTypes.length; i < args.size(); i++) {
+                                Object val = args.get(i);
+                                if (val == null) {
+                                    continue;
+                                }
+                                Class<?> argType = val.getClass();
+                                if (TypeOf.typeOf(argType, elemType)) {
+                                    continue;
+                                }
+                                if (supportConvert) {
+                                    Object test = ObjectConvertor.tryConvertAsType(val, elemType);
+                                    if (TypeOf.instanceOf(test, elemType)) {
+                                        continue;
+                                    }
+                                }
+                                matched = false;
+                                if (matched == false) {
+                                    break;
+                                }
+                            }
+                            if (matched) {
+                                execArgsMatched = item;
+                                return execArgsMatched;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (execMatched != null) {
+            return execMatched;
+        }
+        if (execArgsMatched != null) {
+            return execArgsMatched;
+        }
+
+        if (execArgs != null) {
+            return execArgs;
+        }
+
+        return exec;
     }
 
     public static Object valueGetStatic(Class<?> clazz, String fieldName) throws IllegalArgumentException, IllegalAccessException {
