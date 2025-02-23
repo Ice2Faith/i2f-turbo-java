@@ -126,12 +126,13 @@ TYPE_BIN_NUMBER:
 
 
 script:
-    express (';' (express)?)*
+     express (';' (express)?)*
     ;
 
 
 express:
-    LPAREN express RPAREN
+    ifSegment
+    | LPAREN express RPAREN
     | PREFIX_OPERATOR express
     |equalValue
     | newInstance
@@ -142,6 +143,18 @@ express:
     | express DOUBLE_OPERAOTR express
     ;
 
+
+ifSegment:
+    'if' '(' conditionBlock ')' scriptBlock (  'else' 'if' '(' conditionBlock ')' scriptBlock )* ('else' scriptBlock)?
+    ;
+
+conditionBlock:
+    express
+    ;
+
+scriptBlock:
+    '{' script '}'
+    ;
 
 
 equalValue:

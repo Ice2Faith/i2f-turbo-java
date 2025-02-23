@@ -1,4 +1,4 @@
-// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from D:/IDEA_ROOT/DevCenter/i2f-turbo/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -24,6 +24,24 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExpress(TinyScriptParser.ExpressContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyScriptParser#ifSegment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfSegment(TinyScriptParser.IfSegmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyScriptParser#conditionBlock}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConditionBlock(TinyScriptParser.ConditionBlockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyScriptParser#scriptBlock}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitScriptBlock(TinyScriptParser.ScriptBlockContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#equalValue}.
 	 * @param ctx the parse tree
@@ -102,15 +120,12 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx);
-
 	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#constRenderString}.
-	 *
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitConstRenderString(TinyScriptParser.ConstRenderStringContext ctx);
-
 	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#decNumber}.
 	 * @param ctx the parse tree

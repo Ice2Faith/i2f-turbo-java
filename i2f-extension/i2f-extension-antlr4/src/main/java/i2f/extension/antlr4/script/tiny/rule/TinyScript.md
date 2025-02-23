@@ -283,6 +283,32 @@ or 逻辑或
 1>2;
 "xxx"+1;
 ```
+- if-else条件语句
+- 定义
+```shell
+if(条件表达式){
+  语句块
+} else if(条件表达式){
+  语句块
+} else {
+  语句块
+};
+```
+- 用法和Java中类似
+- 条件语句块比较特殊，不一样需要时boolean值
+- 内部会自动转换为boolean值
+- 比如，null空值,""空字符串,{}空Map,[]空Collection都认为是false
+- 需要注意的是，if语句也算是一条语句，因此最后需要添加分号[;]结尾
+- 举例
+```shell
+if(${num}>0){
+    ok=1;
+}else if(${role}){
+    ok=2;
+}else{
+    ok=3;
+};
+```
 
 ## 特别注意
 - 本脚本不支持自然意义上的数学运算优先级
@@ -314,6 +340,15 @@ complex=[{
 streq=${str}==${sadd};
 strneq=${str}==${tmp};
 numeeq=${num}>=${slen};
+
+if(${num}>4){
+    ok=3;
+}else if(${num}>3){
+    ok=2;
+}else{
+    ok=1;
+};
+
 ```
 - 运行输入上下文，准备参数如下
 ```java
@@ -325,8 +360,8 @@ System.out.println(context);
 ```
 - 运行输出结果如下
 ```shell
-false
-{str=1,2,3 4-5-6  7  8  91, numeeq=false, tmp=@@@, streq=true, num=2.125, slen=21, srptlen=42, complex=[{username=123, roles=[admin, log], status=true, age=12, image=1,2,3 4-5-6  7  8  91, len=0, token=null}], svl=1, sadd=1,2,3 4-5-6  7  8  91, strneq=false, num2=12.125}
+1
+{num=2.125, srptlen=42, svl=1, str=1,2,3 4-5-6  7  8  91, numeeq=false, tmp=@@@, streq=true, slen=21, complex=[{username=123, roles=[admin, log], status=true, age=12, image=1,2,3 4-5-6  7  8  91, len=0, token=null}], sadd=1,2,3 4-5-6  7  8  91, strneq=false, ok=1, num2=12.125}
 
 ```
 
