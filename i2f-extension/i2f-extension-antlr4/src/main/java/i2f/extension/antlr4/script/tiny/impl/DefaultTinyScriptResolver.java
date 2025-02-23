@@ -34,6 +34,11 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
+    public boolean toBoolean(Object ret) {
+        return ObjectConvertor.toBoolean(ret);
+    }
+
+    @Override
     public Object resolveDoubleOperator(Object left, String operator, Object right) {
         if ("&&".equals(operator) || "and".equals(operator)) {
             boolean bl = ObjectConvertor.toBoolean(left);

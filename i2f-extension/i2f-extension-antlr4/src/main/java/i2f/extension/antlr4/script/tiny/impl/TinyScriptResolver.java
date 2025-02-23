@@ -12,6 +12,8 @@ public interface TinyScriptResolver {
 
     Object getValue(Object context, String name);
 
+    boolean toBoolean(Object ret);
+
     Object resolveDoubleOperator(Object left, String operator, Object right);
 
     Object resolvePrefixOperator(String prefixOperator, Object value);
@@ -21,4 +23,5 @@ public interface TinyScriptResolver {
     String renderString(String text, Object context);
 
     String multilineString(String text, List<String> features, Object context);
+
 }

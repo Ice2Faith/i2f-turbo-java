@@ -63,7 +63,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             throw new IllegalArgumentException("missing express!");
         }
         ParseTree item = ctx.getChild(0);
-        if (item instanceof TinyScriptParser.ExpressContext) {
+        if(item instanceof TinyScriptParser.IfSegmentContext){
+            TinyScriptParser.IfSegmentContext nextCtx = (TinyScriptParser.IfSegmentContext) item;
+            return visitIfSegment(nextCtx);
+        } else if (item instanceof TinyScriptParser.ExpressContext) {
             if (count == 3) {
                 ParseTree leftNode = item;
                 ParseTree operatorNode = ctx.getChild(1);
@@ -99,10 +102,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                         throw new IllegalArgumentException("invalid paren left node, expect '(', but found type: " + lParenNode.getClass());
                     }
                     if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
-                        throw new IllegalArgumentException("invalid paren right node, expect express, but found type: " + lParenNode.getClass());
+                        throw new IllegalArgumentException("invalid paren right node, expect express, but found type: " + expressNode.getClass());
                     }
                     if (!(rParenNode instanceof TerminalNode)) {
-                        throw new IllegalArgumentException("invalid paren right node, expect ')', but found type: " + lParenNode.getClass());
+                        throw new IllegalArgumentException("invalid paren right node, expect ')', but found type: " + rParenNode.getClass());
                     }
                     TerminalNode lParenCtx = (TerminalNode) lParenNode;
                     TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
@@ -150,6 +153,96 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             return visitJsonValue(nextCtx);
         }
         throw new IllegalArgumentException("un-support express found : " + ctx.getText());
+    }
+
+    @Override
+    public Object visitIfSegment(TinyScriptParser.IfSegmentContext ctx) {
+        int count = ctx.getChildCount();
+        if (count < 1) {
+            throw new IllegalArgumentException("missing if segment!");
+        }
+        boolean cond=false;
+        boolean open=false;
+        TinyScriptParser.ScriptBlockContext elseCtx=null;
+        for (int i = 0; i < count; i++) {
+            ParseTree item = ctx.getChild(i);
+            if (item instanceof TerminalNode) {
+                TerminalNode nextTerm = (TerminalNode) item;
+                String term = (String) visitTerminal(nextTerm);
+                if (!Arrays.asList("if","(",")","else").contains(term)) {
+                    throw new IllegalArgumentException("invalid if segment separator, expect 'if/(/)/else' buf found '" + term + "'!");
+                }
+            } else if (item instanceof TinyScriptParser.ConditionBlockContext) {
+                TinyScriptParser.ConditionBlockContext nextCtx = (TinyScriptParser.ConditionBlockContext) item;
+                cond = (Boolean) visitConditionBlock(nextCtx);
+                open=true;
+            }  else if (item instanceof TinyScriptParser.ScriptBlockContext) {
+                TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) item;
+                open=false;
+                elseCtx=nextCtx;
+                if(cond) {
+                    Object value = visitScriptBlock(nextCtx);
+                    return value;
+                }
+            } else {
+                throw new IllegalArgumentException("invalid if segment node type: " + item.getClass());
+            }
+        }
+        if(!open){
+            if(elseCtx!=null){
+                Object value = visitScriptBlock(elseCtx);
+                return value;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitConditionBlock(TinyScriptParser.ConditionBlockContext ctx) {
+        int count = ctx.getChildCount();
+        if (count != 1) {
+            throw new IllegalArgumentException("missing condition block, expect 1 express, but found " + count + "!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if(!(item instanceof TinyScriptParser.ExpressContext)){
+            throw new IllegalArgumentException("invalid condition block express node, expect express, but found type: " + item.getClass());
+        }
+        TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) item;
+        Object ret= visitExpress(expressCtx);
+        return resolver.toBoolean(ret);
+    }
+
+    @Override
+    public Object visitScriptBlock(TinyScriptParser.ScriptBlockContext ctx) {
+        int count = ctx.getChildCount();
+        if (count != 3) {
+            throw new IllegalArgumentException("missing script block, expect 3 parts, but found " + count + "!");
+        }
+        ParseTree leftNode = ctx.getChild(0);
+        ParseTree scriptNode = ctx.getChild(1);
+        ParseTree rightNode = ctx.getChild(2);
+        if (!(leftNode instanceof TerminalNode)) {
+            throw new IllegalArgumentException("invalid script block left node, expect '{', but found type: " + leftNode.getClass());
+        }
+        if (!(scriptNode instanceof TinyScriptParser.ScriptContext)) {
+            throw new IllegalArgumentException("invalid script block right node, expect express, but found type: " + scriptNode.getClass());
+        }
+        if (!(rightNode instanceof TerminalNode)) {
+            throw new IllegalArgumentException("invalid script block right node, expect '}', but found type: " + rightNode.getClass());
+        }
+        TerminalNode leftCtx = (TerminalNode) leftNode;
+        TinyScriptParser.ScriptContext scriptCtx = (TinyScriptParser.ScriptContext) scriptNode;
+        TerminalNode rightCtx = (TerminalNode) rightNode;
+        String left = (String) visitTerminal(leftCtx);
+        String right = (String) visitTerminal(rightCtx);
+        if (!"{".equals(left)) {
+            throw new IllegalArgumentException("invalid script block left node, expect '(', but found : " + left);
+        }
+        if (!"}".equals(right)) {
+            throw new IllegalArgumentException("invalid script block right node, expect '(', but found : " + right);
+        }
+        Object value = visitScript(scriptCtx);
+        return value;
     }
 
     @Override
