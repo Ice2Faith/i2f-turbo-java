@@ -211,6 +211,16 @@
         <!ATTLIST lang-string-join arg7.string CDATA #IMPLIED>
         <!ATTLIST lang-string-join arg8.string CDATA #IMPLIED>
         <!ATTLIST lang-string-join arg9.string CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg0.render CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.render CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.render CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.render CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.render CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.render CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.render CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.render CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.render CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.render CDATA #IMPLIED>
         <!ATTLIST lang-string-join arg0.boolean CDATA #IMPLIED>
         <!ATTLIST lang-string-join arg1.boolean CDATA #IMPLIED>
         <!ATTLIST lang-string-join arg2.boolean CDATA #IMPLIED>
@@ -241,6 +251,49 @@
         <!ATTLIST lang-string-join arg7.long CDATA #IMPLIED>
         <!ATTLIST lang-string-join arg8.long CDATA #IMPLIED>
         <!ATTLIST lang-string-join arg9.long CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg0.null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.null CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.null CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg0.eval CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.eval CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.eval CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.eval CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.eval CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.eval CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.eval CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.eval CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.eval CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.eval CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg0.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.eval-java CDATA #IMPLIED>
+
+        <!ATTLIST lang-string-join arg0.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg1.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg2.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg3.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg4.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg5.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg6.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg7.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg8.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-string-join arg9.eval-ts CDATA #IMPLIED>
 
         <!ATTLIST lang-string-join arg0.is-null CDATA #IMPLIED>
         <!ATTLIST lang-string-join arg0.is-not-null CDATA #IMPLIED>
@@ -487,6 +540,16 @@
         <!ATTLIST lang-invoke arg7.string CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg8.string CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg9.string CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg0.render CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.render CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.render CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.render CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.render CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.render CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.render CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.render CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.render CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.render CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg0.boolean CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg1.boolean CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg2.boolean CDATA #IMPLIED>
@@ -517,6 +580,39 @@
         <!ATTLIST lang-invoke arg7.long CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg8.long CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg9.long CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg0.eval CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.eval CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.eval CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.eval CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.eval CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.eval CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.eval CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.eval CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.eval CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.eval CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg0.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.eval-java CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.eval-java CDATA #IMPLIED>
+
+        <!ATTLIST lang-invoke arg0.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg1.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg2.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg3.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg4.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg5.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg6.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg7.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg8.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-invoke arg9.eval-ts CDATA #IMPLIED>
 
         <!ATTLIST lang-invoke arg0.is-null CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg0.is-not-null CDATA #IMPLIED>
