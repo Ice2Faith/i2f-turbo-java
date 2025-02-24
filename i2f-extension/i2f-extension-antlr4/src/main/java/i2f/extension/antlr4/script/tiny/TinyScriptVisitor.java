@@ -1,4 +1,4 @@
-// Generated from D:/IDEA_ROOT/DevCenter/i2f-turbo/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -84,6 +84,13 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitArgument(TinyScriptParser.ArgumentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyScriptParser#argumentValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArgumentValue(TinyScriptParser.ArgumentValueContext ctx);
+
 	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#constValue}.
 	 * @param ctx the parse tree

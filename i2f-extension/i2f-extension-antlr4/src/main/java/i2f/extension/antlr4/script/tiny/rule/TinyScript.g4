@@ -181,7 +181,11 @@ refCall:
 argumentList
     : argument ( COMMA argument )* ;
 
-argument
+argument:
+    (NAMING ':')? argumentValue
+    ;
+
+argumentValue
     : invokeFunction
     | constValue
     | refValue

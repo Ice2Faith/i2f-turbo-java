@@ -3,12 +3,15 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.extension.antlr4.script.tiny.impl.DefaultTinyScriptResolver;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.antlr4.script.tiny.impl.TinyScriptResolver;
+import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
+import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 
 import java.lang.reflect.Method;
@@ -80,6 +83,18 @@ public class LangEvalTinyScriptNode implements ExecutorNode {
         @Override
         public Class<?> loadClass(String className) {
             return executor.loadClass(className);
+        }
+
+        @Override
+        public Reference<Object> beforeFunctionCall(Object target, boolean isNew, String naming, List<Object> argList) {
+            DefaultJdbcProcedureExecutorCaller caller = new DefaultJdbcProcedureExecutorCaller(executor, context);
+            try {
+                Map<String, Object> callParams = castArgumentListAsNamingMap(argList);
+                Object ret = caller.invoke(naming, callParams);
+                return Reference.of(ret);
+            } catch (NotFoundSignalException e) {
+                return Reference.nop();
+            }
         }
 
         @Override

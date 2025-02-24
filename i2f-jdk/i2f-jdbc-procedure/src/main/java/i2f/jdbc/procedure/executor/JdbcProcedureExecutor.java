@@ -6,6 +6,7 @@ import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
+import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.List;
@@ -26,18 +27,21 @@ public interface JdbcProcedureExecutor {
             return;
         }
         JdbcProcedureJavaCaller javaCaller = context.getJavaMap().get(nodeId);
-        try{
-            Object ret = javaCaller.exec(context, this, context.getParams());
-            context.getParams().put(ParamsConsts.RETURN, ret);
-        }catch(ControlSignalException e){
+        if (javaCaller != null) {
+            try {
+                Object ret = javaCaller.exec(context, this, context.getParams());
+                context.getParams().put(ParamsConsts.RETURN, ret);
+            } catch (ControlSignalException e) {
 
-        }catch (Throwable e){
-            if(e instanceof SignalException){
-                throw (SignalException)e;
-            }else{
-                throw new ThrowSignalException(e.getMessage(),e);
+            } catch (Throwable e) {
+                if (e instanceof SignalException) {
+                    throw (SignalException) e;
+                } else {
+                    throw new ThrowSignalException(e.getMessage(), e);
+                }
             }
         }
+        throw new NotFoundSignalException("not found node: " + nodeId);
     }
 
     default void exec(XmlNode node, ExecuteContext context) {
@@ -53,18 +57,21 @@ public interface JdbcProcedureExecutor {
             return;
         }
         JdbcProcedureJavaCaller javaCaller = context.getJavaMap().get(nodeId);
-        try{
-            Object ret = javaCaller.exec(context, this, context.getParams());
-            context.getParams().put(ParamsConsts.RETURN, ret);
-        }catch(ControlSignalException e){
+        if (javaCaller != null) {
+            try {
+                Object ret = javaCaller.exec(context, this, context.getParams());
+                context.getParams().put(ParamsConsts.RETURN, ret);
+            } catch (ControlSignalException e) {
 
-        }catch (Throwable e){
-            if(e instanceof SignalException){
-                throw (SignalException)e;
-            }else{
-                throw new ThrowSignalException(e.getMessage(),e);
+            } catch (Throwable e) {
+                if (e instanceof SignalException) {
+                    throw (SignalException) e;
+                } else {
+                    throw new ThrowSignalException(e.getMessage(), e);
+                }
             }
         }
+        throw new NotFoundSignalException("not found node: " + nodeId);
     }
 
     default void execAsProcedure(XmlNode node, ExecuteContext context) {
