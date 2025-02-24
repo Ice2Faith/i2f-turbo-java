@@ -524,7 +524,22 @@ js引擎执行完毕之后，会返回之后一次执行的结果
         </lang-body>
     </sql-cursor>
 
-    <!-- 动态编译为java类进行执行 -->
+    <!--
+    动态编译为java类进行执行
+    允许没有import/member部分
+    允许没有body部分
+    则eval-java内部直接为Java代码
+    实际上，eval-java的body内容
+    会放到JdbcProcedureJavaCaller的实现类函数中执行
+    也就是在这样的函数环境中执行
+    public Object exec(ExecuteContext context, JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable {
+        ...
+    }
+    因此，常规来说，需要满足Java函数段的语法规则
+    也就是具有return语句，以及分号
+    但是，为了适应脚本语言特点
+    允许忽略最后一行的return以及分号
+     -->
     <lang-eval-java result="">
         <!-- import 语句部分 -->
         <lang-java-import>
