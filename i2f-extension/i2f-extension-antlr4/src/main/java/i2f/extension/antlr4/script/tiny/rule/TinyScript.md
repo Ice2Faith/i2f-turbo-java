@@ -310,6 +310,43 @@ if(${num}>0){
 };
 ```
 
+- 具名参数函数
+- 和常规函数调用一样，只不过，这种调用，适用于一些特殊的场景
+- 常常将参数名和值最终合并为一个Map对象调用目标方法
+- 定义
+
+```shell
+函数名(具名参数列表)
+```
+
+- 具名参数定义
+
+```shell
+参数名 : 参数值
+```
+
+- 举例
+
+```shell
+render(str: "123",regex:"\\d+",replacement:"true")
+```
+
+- 这种，一般适用于这样的转换目标函数
+
+```shell
+Object render(Map<String,Object> params);
+params.put("str","123");
+params.put("regex","\\d+");
+params.put("replacement","true");
+```
+
+- 或者也可以用于一些自定义参数，却不是Java类函数的场景中
+- 总之，适用于需要自己解析这样的Map作为函数参数的场景
+- DefaultTinyScriptResolver.beforeFunctionCall
+- 根据需要重写此函数
+- 使用Reference.of()方法正确的返回值，如果处理不了
+- 则使用Reference.nop()表示无法处理
+
 ## 特别注意
 - 本脚本不支持自然意义上的数学运算优先级
 - 也就是先乘除后加减的规则，以及从左向右计算的规则
