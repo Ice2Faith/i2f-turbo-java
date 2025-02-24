@@ -2,6 +2,7 @@ package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.convert.obj.ObjectConvertor;
 import i2f.match.regex.RegexUtil;
+import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
@@ -11,7 +12,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -231,8 +235,38 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return null;
     }
 
+    public Reference<Object> beforeFunctionCall(Object target, boolean isNew, String naming, List<Object> argList) {
+        return Reference.nop();
+    }
+
+    public Map<String, Object> castArgumentListAsNamingMap(List<Object> argList) {
+        Map<String, Object> map = new HashMap<>();
+        for (Object arg : argList) {
+            if (arg instanceof TinyScriptVisitorImpl.NamingBindArgument) {
+                TinyScriptVisitorImpl.NamingBindArgument val = (TinyScriptVisitorImpl.NamingBindArgument) arg;
+                map.put(val.naming, val);
+            }
+        }
+        return map;
+    }
+
     @Override
-    public Object resolveFunctionCall(Object target, boolean isNew, String naming, List<Object> args) {
+    public Object resolveFunctionCall(Object target, boolean isNew, String naming, List<Object> argList) {
+        Reference<Object> ref = beforeFunctionCall(target, isNew, naming, argList);
+        if (ref != null) {
+            if (ref.isValue()) {
+                return ref.get();
+            }
+        }
+        List<Object> args = new ArrayList<>();
+        for (Object arg : argList) {
+            if (arg instanceof TinyScriptVisitorImpl.NamingBindArgument) {
+                TinyScriptVisitorImpl.NamingBindArgument val = (TinyScriptVisitorImpl.NamingBindArgument) arg;
+                args.add(val.value);
+            } else {
+                args.add(arg);
+            }
+        }
         Class<?> clazz = null;
         if (isNew) {
             clazz = loadClass(naming);

@@ -453,11 +453,65 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         return ret;
     }
 
+    public static class NamingBindArgument {
+        public String naming;
+        public Object value;
+
+        public NamingBindArgument() {
+
+        }
+
+        public NamingBindArgument(String naming, Object value) {
+            this.naming = naming;
+            this.value = value;
+        }
+    }
+
     @Override
     public Object visitArgument(TinyScriptParser.ArgumentContext ctx) {
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing argument!");
+        }
+        if (count == 3) {
+            ParseTree namingNode = ctx.getChild(0);
+            ParseTree sepNode = ctx.getChild(1);
+            ParseTree valueNode = ctx.getChild(2);
+            if (!(namingNode instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid argument, expect naming node, but found " + namingNode.getClass() + "!");
+            }
+            if (!(sepNode instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid argument, expect separator ':' node, but found " + sepNode.getClass() + "!");
+            }
+            if (!(valueNode instanceof TinyScriptParser.ArgumentValueContext)) {
+                throw new IllegalArgumentException("invalid argument, expect argument-value node, but found " + valueNode.getClass() + "!");
+            }
+            TerminalNode namingCtx = (TerminalNode) namingNode;
+            TerminalNode sepCtx = (TerminalNode) sepNode;
+            TinyScriptParser.ArgumentValueContext valueCtx = (TinyScriptParser.ArgumentValueContext) valueNode;
+            String naming = (String) visitTerminal(namingCtx);
+            String sep = (String) visitTerminal(sepCtx);
+            if (!":".equals(sep)) {
+                throw new IllegalArgumentException("invalid argument, expect separator ':' node, but found '" + sep + "'!");
+            }
+            Object value = visitArgumentValue(valueCtx);
+            return new NamingBindArgument(naming, value);
+        } else if (count == 1) {
+            ParseTree argNode = ctx.getChild(0);
+            if (!(argNode instanceof TinyScriptParser.ArgumentValueContext)) {
+                throw new IllegalArgumentException("invalid argument, expect argument-value node, but found " + argNode.getClass() + "!");
+            }
+            TinyScriptParser.ArgumentValueContext nextCtx = (TinyScriptParser.ArgumentValueContext) argNode;
+            return visitArgumentValue(nextCtx);
+        }
+        throw new IllegalArgumentException("un-support argument found : " + ctx.getText());
+    }
+
+    @Override
+    public Object visitArgumentValue(TinyScriptParser.ArgumentValueContext ctx) {
+        int count = ctx.getChildCount();
+        if (count < 0) {
+            throw new IllegalArgumentException("missing argument value!");
         }
         ParseTree item = ctx.getChild(0);
         if (item instanceof TinyScriptParser.InvokeFunctionContext) {
@@ -470,7 +524,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             TinyScriptParser.RefValueContext nextCtx = (TinyScriptParser.RefValueContext) item;
             return visitRefValue(nextCtx);
         }
-        throw new IllegalArgumentException("un-support argument found : " + ctx.getText());
+        throw new IllegalArgumentException("un-support argument value found : " + ctx.getText());
     }
 
     @Override
