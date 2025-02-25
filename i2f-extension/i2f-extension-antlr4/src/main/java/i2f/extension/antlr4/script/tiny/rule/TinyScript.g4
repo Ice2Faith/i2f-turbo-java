@@ -18,7 +18,7 @@ grammar TinyScript;
 // count=1;count=${role.count};count=${user}.getRoleList().size()
 
 @header {
-    package i2f.extension.antlr4.script.tiny;
+    package com.newland.bi3.extension.antlr4.script.tiny;
 }
 
 // Lexer rules
@@ -139,7 +139,7 @@ express:
     | controlSegment
     | LPAREN express RPAREN
     | PREFIX_OPERATOR express
-    |equalValue
+    | equalValue
     | newInstance
     | invokeFunction
     | constValue
@@ -216,6 +216,7 @@ argumentValue
     | constValue
     | refValue
     | jsonValue
+    | express
     ;
 
 constValue:
