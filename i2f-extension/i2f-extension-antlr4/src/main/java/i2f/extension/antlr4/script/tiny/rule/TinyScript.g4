@@ -57,6 +57,7 @@ DOUBLE_OPERAOTR:
     | '<>' | 'neq'
     | '==' | 'eq'
     | '>' | 'gt' | '<' | 'lt'
+    | 'in' | 'notin'
     | '&&' | 'and'
     | '||' | 'or'
     |'+' | '-' | '*' | '/' | '%'
@@ -132,6 +133,10 @@ script:
 
 express:
     ifSegment
+    | foreachSegment
+    | forSegment
+    | whileSegment
+    | controlSegment
     | LPAREN express RPAREN
     | PREFIX_OPERATOR express
     |equalValue
@@ -143,9 +148,30 @@ express:
     | express DOUBLE_OPERAOTR express
     ;
 
+controlSegment:
+    'break'
+    | 'continue'
+    | 'return' (express)?
+    ;
+
+whileSegment:
+    'while' '(' conditionBlock ')' scriptBlock
+    ;
+
+forSegment:
+    'for' '(' express ';' conditionBlock ';' express ')' scriptBlock
+    ;
+
+foreachSegment:
+    'foreach' '(' namingBlock ':' express ')' scriptBlock
+    ;
+
+namingBlock:
+    NAMING
+    ;
 
 ifSegment:
-    'if' '(' conditionBlock ')' scriptBlock (  'else' 'if' '(' conditionBlock ')' scriptBlock )* ('else' scriptBlock)?
+    'f' '(' conditionBlock ')' scriptBlock (  'else' 'if' '(' conditionBlock ')' scriptBlock )* ('else' scriptBlock)?
     ;
 
 conditionBlock:

@@ -7,6 +7,7 @@ import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -44,7 +45,75 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
 
     @Override
     public Object resolveDoubleOperator(Object left, String operator, Object right) {
-        if ("&&".equals(operator) || "and".equals(operator)) {
+        if("in".equals(operator) || "notin".equals(operator)){
+            if(right==null){
+                return false;
+            }
+            if(right instanceof Iterable){
+                Iterable<?> iterable = (Iterable<?>) right;
+                boolean isIn=false;
+                for (Object item : iterable) {
+                    int cmp = compare(left, item);
+                    if(cmp==0){
+                        isIn=true;
+                        break;
+                    }
+                }
+                if("in".equals(operator)){
+                    return isIn;
+                }
+                if("notin".equals(operator)){
+                    return !isIn;
+                }
+            }if(right instanceof Map){
+                Map<?,?> map = (Map<?,?>) right;
+                boolean isIn=false;
+                for (Object item : map.keySet()) {
+                    int cmp = compare(left, item);
+                    if(cmp==0){
+                        isIn=true;
+                        break;
+                    }
+                }
+                if("in".equals(operator)){
+                    return isIn;
+                }
+                if("notin".equals(operator)){
+                    return !isIn;
+                }
+            }else if(right.getClass().isArray()){
+                boolean isIn=false;
+                int len= Array.getLength(right);
+                for (int i=0;i<len;i++) {
+                    Object item=Array.get(right,i);
+                    int cmp = compare(left, item);
+                    if(cmp==0){
+                        isIn=true;
+                        break;
+                    }
+                }
+                if("in".equals(operator)){
+                    return isIn;
+                }
+                if("notin".equals(operator)){
+                    return !isIn;
+                }
+            }else{
+                boolean isIn=false;
+                Object item=right;
+                int cmp = compare(left, item);
+                if(cmp==0){
+                    isIn=true;
+                }
+                if("in".equals(operator)){
+                    return isIn;
+                }
+                if("notin".equals(operator)){
+                    return !isIn;
+                }
+            }
+            return false;
+        }else if ("&&".equals(operator) || "and".equals(operator)) {
             boolean bl = ObjectConvertor.toBoolean(left);
             boolean br = ObjectConvertor.toBoolean(right);
             return bl && br;

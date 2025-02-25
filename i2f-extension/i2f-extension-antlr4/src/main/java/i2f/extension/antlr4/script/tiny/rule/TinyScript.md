@@ -268,6 +268,8 @@ eq 相等
 gt 大于 
 < 小于
 lt 小于
+in 元素在其中
+notin 元素不在其中
 && 逻辑与
 and 逻辑与
 || 逻辑或
@@ -308,6 +310,105 @@ if(${num}>0){
 }else{
     ok=3;
 };
+```
+
+- foreach循环语句
+- 定义
+```shell
+foreach(迭代变量名 : 被迭代值){
+  迭代循环体
+};
+```
+- 用法和Java中类似
+- 需要注意的是，foreach语句也算是一条语句，因此最后需要添加分号[;]结尾
+- 举例
+```shell
+sum=0;
+foreach(item : [1,2,3,4,5]){
+  sum=${sum}+${item};
+}
+foreach(item : ${arr}){
+  if(${arr}==null){
+    continue;
+  };
+  sum=${sum}+${item};
+  if(${sum}>10){
+    break;
+  };
+}
+${sum};
+```
+- 在这个例子中,介绍了大多数情况下foreach语句的使用场景
+- 包含直接使用立即值[1,2,3,4,5]进行迭代和使用引用值${arr}进行迭代
+- 同时演示了结合if进行continue和break控制的场景
+
+- for循环语句
+- 定义
+```shell
+for(初始化语句 ; 条件语句 ; 增量语句){
+  循环体
+};
+```
+- 和Java中常用的for-i循环的结构一致
+- 需要注意的是，for语句也算是一条语句，因此最后需要添加分号[;]结尾
+- 举例
+```shell
+sum=0;
+for(i=0;i<10;i=${i}+1){
+  if(${i}%2==0){
+    sum=${sum}+${i};
+  };
+};
+${sum};
+```
+- 在这个例子中，就展示了和Java中对应的for-i循环的使用方法
+
+- while循环语句
+- 定义
+```shell
+while(条件语句){
+  循环体
+};
+```
+- 和Java中的while循环的结构一致
+- 需要注意的是，while语句也算是一条语句，因此最后需要添加分号[;]结尾
+- 举例
+```shell
+sum=0;
+i=0;
+while(${i}<10){
+  if(${i}%2==0){
+    sum=${sum}+${i};
+  };
+  i=${i}+1;
+};
+${sum};
+```
+- 在这个例子中，就展示了while循环的使用方法
+
+- return语句
+- 定义
+```shell
+return;
+return 变量;
+```
+- return语句可以不返回值，也可以返回一个值
+- 区别，不带返回值，则整个脚本的返回值为null
+- 带了返回值，则整个脚本的返回值为被返回的值
+- 举例
+```shell
+return;
+return 1;
+return ${sum};
+```
+
+- break/continue语句
+- 用于在循环(foreach/for/while)中进行控制
+- 属于关键字
+- 定义
+```shell
+break;
+continue;
 ```
 
 - 具名参数函数
