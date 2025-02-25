@@ -64,6 +64,7 @@ public class LangTryNode implements ExecutorNode {
                 if (type == null || type.isEmpty()) {
                     type = "java.lang.Throwable";
                 }
+                type=type.trim();
                 if (exName == null || exName.isEmpty()) {
                     exName = AttrConsts.E;
                 }
@@ -71,14 +72,23 @@ public class LangTryNode implements ExecutorNode {
                 Map<String, Object> bakParams = new LinkedHashMap<>();
                 bakParams.put(exName, context.getParams().get(exName));
 
-                Class<?> clazz = executor.loadClass(type);
-                if (clazz == null) {
-                    throw new IllegalStateException("missing catch exception type of : " + type);
+                String[] arr = type.split("\\|");
+                for (String item : arr) {
+                    String clsName=item.trim();
+                    if(clsName.isEmpty()){
+                        continue;
+                    }
+                    Class<?> clazz = executor.loadClass(item);
+                    if (clazz == null) {
+                        throw new IllegalStateException("missing catch exception type of : " + item);
+                    }
+                    if (clazz.isAssignableFrom(e.getClass())) {
+                        executor.execAsProcedure(catchNode, context, false, false);
+                        handled = true;
+                        break;
+                    }
                 }
-                if (clazz.isAssignableFrom(e.getClass())) {
-                    executor.execAsProcedure(catchNode, context, false, false);
-                    handled = true;
-                }
+
 
                 // 还原堆栈
                 context.getParams().put(exName, bakParams.get(exName));
