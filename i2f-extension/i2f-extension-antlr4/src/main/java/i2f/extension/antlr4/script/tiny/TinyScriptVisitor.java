@@ -1,4 +1,4 @@
-// Generated from D:/IDEA_ROOT/DevCenter/i2f-turbo/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -25,6 +25,61 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpress(TinyScriptParser.ExpressContext ctx);
 	/**
+     * Visit a parse tree produced by {@link TinyScriptParser#trySegment}.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitTrySegment(TinyScriptParser.TrySegmentContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#tryBodyBlock}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitTryBodyBlock(TinyScriptParser.TryBodyBlockContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#catchBodyBlock}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitCatchBodyBlock(TinyScriptParser.CatchBodyBlockContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#finallyBodyBlock}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitFinallyBodyBlock(TinyScriptParser.FinallyBodyBlockContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#classNameBlock}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitClassNameBlock(TinyScriptParser.ClassNameBlockContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#parenSegment}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitParenSegment(TinyScriptParser.ParenSegmentContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#prefixOperatorSegment}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitPrefixOperatorSegment(TinyScriptParser.PrefixOperatorSegmentContext ctx);
+
+    /**
 	 * Visit a parse tree produced by {@link TinyScriptParser#controlSegment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

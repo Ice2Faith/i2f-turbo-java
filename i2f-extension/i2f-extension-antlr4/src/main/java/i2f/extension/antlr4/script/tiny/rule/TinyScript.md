@@ -491,6 +491,32 @@ break;
 continue;
 ```
 
+- try语句
+- 和Java中使用方式一样
+- 需要注意的是，try语句也算是一条语句，因此最后需要添加分号[;]结尾
+
+```shell
+try{
+  语句块
+} catch(捕获类型 捕获变量){
+  语句块
+} finally {
+  语句块
+};
+```
+
+- 举例
+
+```shell
+try{
+  
+}catch(NullPointerException|SQLException e){
+  
+}finally{
+  
+};
+```
+
 - 具名参数函数
 - 和常规函数调用一样，只不过，这种调用，适用于一些特殊的场景
 - 常常将参数名和值最终合并为一个Map对象调用目标方法

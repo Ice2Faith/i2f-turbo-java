@@ -1,0 +1,47 @@
+// 判断公式中是否含多个表达式
+V_N=${IN_FORMUAL_CONTEN}.length()-${IN_FORMUAL_CONTEN}.replace(";","").length()+1;
+V_FORMULA_CONTEN=${IN_FORMUAL_CONTEN};
+for(i=0;${i}<${V_N};i=${i}+1){
+    tmp_idx=${V_FORMULA_CONTEN}.indexOf(";");
+    if(${tmp_idx}<0){
+        V_SUB_FORMULA_CONTEN=${V_FORMULA_CONTEN};
+    }else{
+        V_SUB_FORMULA_CONTEN=${V_FORMULA_CONTEN}.substring(0,${tmp_idx}-1);
+    };
+    tmp_idx=${V_FORMULA_CONTEN}.indexOf(":");
+    V_RWD_FORMULA_CONTEN=${V_SUB_FORMULA_CONTEN}.substring(0,${tmp_idx}+1);
+    tmp_idx=${V_FORMULA_CONTEN}.indexOf(":");
+    V_RWD_FORMULA_CONTEN=${V_SUB_FORMULA_CONTEN}.substring(0,${tmp_idx}+1);
+    // 计算公式中含有常量
+    if(regexLike(${V_RWD_FORMULA_CONTEN},"^(\\+|\\-)?(\\d)(\\.)?(\\d)+$")){ // 只有常量
+        v_code=0;
+    }else if(regexLike(${V_RWD_FORMULA_CONTEN},"^(.)+(\\+|\\-)(\\d)(\\.)?(\\d)+$")){ // 以常量结尾如a+0.3
+        v_code=0;
+    }else if(regexLike(${V_RWD_FORMULA_CONTEN},"^(\\+|\\-)?(\\d)(\\.)?(\\d)+(\\+|\\-)(.)+$")){ // 以常量开始如0.3+A
+        v_code=0;
+    }else if(regexLike(${V_RWD_FORMULA_CONTEN},"^(.)*(\\+|\\-)(\\()?(\\d)+(\\.)?(\\d)*(\\))?(\\+|\\-)(.)*$")){ // 在公式中间含有+-常量
+        v_code=0;
+    }else{
+        v_code=1;
+    };
+
+    if(${v_code}==0){
+        return 0;
+    };
+
+    // 计算公式中有除以变量
+    if(regexLike(${V_RWD_FORMULA_CONTEN},"^(.)+(\\/)([[:alpha:]])(.)*$")){ // 如70+e/b
+        v_code=0;
+    }else if(regexLike(${V_RWD_FORMULA_CONTEN},"^(.)+(\\/)(\\()(.)*(\\D)(.)*(\\))(.)*$")){ // 如70+e/(3+b+c)
+        v_code=0;
+    }else{
+        v_code=1;
+    };
+
+
+    if(${v_code}==0){
+        return 0;
+    };
+};
+
+return 1;

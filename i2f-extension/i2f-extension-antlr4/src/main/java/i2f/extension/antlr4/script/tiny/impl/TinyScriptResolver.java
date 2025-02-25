@@ -24,4 +24,5 @@ public interface TinyScriptResolver {
 
     String multilineString(String text, List<String> features, Object context);
 
+    Class<?> loadClass(String className);
 }

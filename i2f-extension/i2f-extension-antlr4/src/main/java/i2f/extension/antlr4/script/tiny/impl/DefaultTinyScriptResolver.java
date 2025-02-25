@@ -202,6 +202,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         throw new IllegalArgumentException("un-support prefix operator :" + operator);
     }
 
+
     public Object convertNumberType(BigDecimal num, Number left, Number right) {
         if (TypeOf.instanceOf(left, BigDecimal.class)
                 || TypeOf.instanceOf(right, BigDecimal.class)) {
@@ -293,6 +294,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return Integer.compare(left.hashCode(), right.hashCode());
     }
 
+    @Override
     public Class<?> loadClass(String className) {
         return ReflectResolver.loadClass(className);
     }

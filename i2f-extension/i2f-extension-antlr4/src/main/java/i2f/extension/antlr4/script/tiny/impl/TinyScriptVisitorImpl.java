@@ -5,6 +5,7 @@ import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptContinueException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptReturnException;
+import i2f.typeof.TypeOf;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -12,7 +13,10 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -20,8 +24,10 @@ import java.util.*;
  * @desc
  */
 public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
+    public static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
     protected Object context = new HashMap<>();
     protected TinyScriptResolver resolver = new DefaultTinyScriptResolver();
+    protected volatile boolean debug = false;
 
     public TinyScriptVisitorImpl(Object context) {
         this.context = context;
@@ -34,8 +40,28 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         }
     }
 
+    public void debug(boolean enable) {
+        this.debug = enable;
+    }
+
+    public void debugLog(Supplier<Object> supplier) {
+        if (debug) {
+            System.out.println(String.format("%s [%5s] [%15s] : %s",
+                    LOG_TIME_FORMATTER.format(LocalDateTime.now()),
+                    "DEBUG",
+                    "tiny-script",
+                    String.valueOf(supplier.get())
+            ));
+        }
+    }
+
+    public void debugNode(ParseTree context) {
+        debugLog(() -> context.getClass().getSimpleName().replace("$", ".") + ": " + context.getText());
+    }
+
     @Override
     public Object visitScript(TinyScriptParser.ScriptContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 1) {
             throw new IllegalArgumentException("missing script!");
@@ -62,6 +88,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitExpress(TinyScriptParser.ExpressContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 1) {
             throw new IllegalArgumentException("missing express!");
@@ -70,6 +97,21 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         if (item instanceof TinyScriptParser.IfSegmentContext) {
             TinyScriptParser.IfSegmentContext nextCtx = (TinyScriptParser.IfSegmentContext) item;
             return visitIfSegment(nextCtx);
+        } else if (item instanceof TinyScriptParser.ForeachSegmentContext) {
+            TinyScriptParser.ForeachSegmentContext nextCtx = (TinyScriptParser.ForeachSegmentContext) item;
+            return visitForeachSegment(nextCtx);
+        } else if (item instanceof TinyScriptParser.ForSegmentContext) {
+            TinyScriptParser.ForSegmentContext nextCtx = (TinyScriptParser.ForSegmentContext) item;
+            return visitForSegment(nextCtx);
+        } else if (item instanceof TinyScriptParser.WhileSegmentContext) {
+            TinyScriptParser.WhileSegmentContext nextCtx = (TinyScriptParser.WhileSegmentContext) item;
+            return visitWhileSegment(nextCtx);
+        } else if (item instanceof TinyScriptParser.ControlSegmentContext) {
+            TinyScriptParser.ControlSegmentContext nextCtx = (TinyScriptParser.ControlSegmentContext) item;
+            return visitControlSegment(nextCtx);
+        } else if (item instanceof TinyScriptParser.TrySegmentContext) {
+            TinyScriptParser.TrySegmentContext nextCtx = (TinyScriptParser.TrySegmentContext) item;
+            return visitTrySegment(nextCtx);
         } else if (item instanceof TinyScriptParser.ExpressContext) {
             if (count == 3) {
                 ParseTree leftNode = item;
@@ -94,49 +136,12 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else {
                 throw new IllegalArgumentException("invalid grammar express expect 3 parts for double operator, but found " + count + "!");
             }
-        } else if (item instanceof TerminalNode) {
-            TerminalNode termNode = (TerminalNode) item;
-            String term = (String) visitTerminal(termNode);
-            if ("(".equals(term)) {
-                if (count == 3) {
-                    ParseTree lParenNode = item;
-                    ParseTree expressNode = ctx.getChild(1);
-                    ParseTree rParenNode = ctx.getChild(2);
-                    if (!(lParenNode instanceof TerminalNode)) {
-                        throw new IllegalArgumentException("invalid paren left node, expect '(', but found type: " + lParenNode.getClass());
-                    }
-                    if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
-                        throw new IllegalArgumentException("invalid paren right node, expect express, but found type: " + expressNode.getClass());
-                    }
-                    if (!(rParenNode instanceof TerminalNode)) {
-                        throw new IllegalArgumentException("invalid paren right node, expect ')', but found type: " + rParenNode.getClass());
-                    }
-                    TerminalNode lParenCtx = (TerminalNode) lParenNode;
-                    TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
-                    TerminalNode rParenCtx = (TerminalNode) rParenNode;
-                    String lParen = (String) visitTerminal(lParenCtx);
-                    String rParen = (String) visitTerminal(rParenCtx);
-                    if (!"(".equals(lParen)) {
-                        throw new IllegalArgumentException("invalid paren left node, expect '(', but found : " + lParen);
-                    }
-                    if (!")".equals(rParen)) {
-                        throw new IllegalArgumentException("invalid paren right node, expect '(', but found : " + rParen);
-                    }
-                    Object value = visitExpress(expressCtx);
-                    return value;
-                } else {
-                    throw new IllegalArgumentException("invalid grammar express expect 3 parts for paren segment (...), but found " + count + "!");
-                }
-            } else if (count == 2) {
-                String prefixOperator = term;
-                ParseTree expressNode = ctx.getChild(1);
-                if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
-                    throw new IllegalArgumentException("invalid double-operator right node, expect express, but found type: " + expressNode.getClass());
-                }
-                TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
-                Object value = visitExpress(expressCtx);
-                return resolver.resolvePrefixOperator(prefixOperator, value);
-            }
+        } else if (item instanceof TinyScriptParser.ParenSegmentContext) {
+            TinyScriptParser.ParenSegmentContext nextCtx = (TinyScriptParser.ParenSegmentContext) item;
+            return visitParenSegment(nextCtx);
+        } else if (item instanceof TinyScriptParser.PrefixOperatorSegmentContext) {
+            TinyScriptParser.PrefixOperatorSegmentContext nextCtx = (TinyScriptParser.PrefixOperatorSegmentContext) item;
+            return visitPrefixOperatorSegment(nextCtx);
         } else if (item instanceof TinyScriptParser.EqualValueContext) {
             TinyScriptParser.EqualValueContext nextCtx = (TinyScriptParser.EqualValueContext) item;
             return visitEqualValue(nextCtx);
@@ -159,8 +164,214 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         throw new IllegalArgumentException("un-support express found : " + ctx.getText());
     }
 
+    public static class CatchMetadata {
+        public TinyScriptParser.CatchBodyBlockContext catchBodyCtx;
+        public TinyScriptParser.NamingBlockContext namingCtx;
+        public List<TinyScriptParser.ClassNameBlockContext> classNameCtxList;
+    }
+
+    @Override
+    public Object visitTrySegment(TinyScriptParser.TrySegmentContext ctx) {
+        debugNode(ctx);
+        int count = ctx.getChildCount();
+        if (count < 1) {
+            throw new IllegalArgumentException("missing try segment!");
+        }
+        TinyScriptParser.TryBodyBlockContext tryBodyCtx = null;
+        List<CatchMetadata> catchList = new ArrayList<>();
+        TinyScriptParser.FinallyBodyBlockContext finallyCtx = null;
+        CatchMetadata catchMetadata = new CatchMetadata();
+        for (int i = 0; i < count; i++) {
+            ParseTree item = ctx.getChild(i);
+            if (item instanceof TerminalNode) {
+                TerminalNode nextTerm = (TerminalNode) item;
+                String term = (String) visitTerminal(nextTerm);
+                if (!Arrays.asList("try", "catch", "(", "|", ")", "finally").equals(term)) {
+                    throw new IllegalArgumentException("invalid grammar separator, expect 'try/catch/(/|/)/finally' buf found '" + term + "'!");
+                }
+            } else if (item instanceof TinyScriptParser.TryBodyBlockContext) {
+                TinyScriptParser.TryBodyBlockContext nextCtx = (TinyScriptParser.TryBodyBlockContext) item;
+                tryBodyCtx = nextCtx;
+            } else if (item instanceof TinyScriptParser.ClassNameBlockContext) {
+                catchMetadata = new CatchMetadata();
+                TinyScriptParser.ClassNameBlockContext nextCtx = (TinyScriptParser.ClassNameBlockContext) item;
+                catchMetadata.classNameCtxList.add(nextCtx);
+            } else if (item instanceof TinyScriptParser.NamingBlockContext) {
+                TinyScriptParser.NamingBlockContext nextCtx = (TinyScriptParser.NamingBlockContext) item;
+                catchMetadata.namingCtx = nextCtx;
+            } else if (item instanceof TinyScriptParser.CatchBodyBlockContext) {
+                TinyScriptParser.CatchBodyBlockContext nextCtx = (TinyScriptParser.CatchBodyBlockContext) item;
+                catchMetadata.catchBodyCtx = nextCtx;
+                catchList.add(catchMetadata);
+            } else if (item instanceof TinyScriptParser.FinallyBodyBlockContext) {
+                TinyScriptParser.FinallyBodyBlockContext nextCtx = (TinyScriptParser.FinallyBodyBlockContext) item;
+                finallyCtx = nextCtx;
+            } else {
+                throw new IllegalArgumentException("invalid try segment node type: " + item.getClass());
+            }
+        }
+        try {
+            return visitTryBodyBlock(tryBodyCtx);
+        } catch (Throwable e) {
+            for (CatchMetadata item : catchList) {
+                if (item.classNameCtxList == null || item.classNameCtxList.isEmpty()) {
+                    continue;
+                }
+                List<TinyScriptParser.ClassNameBlockContext> ctxList = item.classNameCtxList;
+                boolean matched = false;
+                for (TinyScriptParser.ClassNameBlockContext clsCtx : ctxList) {
+                    String clsName = (String) visitClassNameBlock(clsCtx);
+                    Class<?> clazz = resolver.loadClass(clsName);
+                    if (clazz != null) {
+                        if (TypeOf.instanceOf(e, clazz)) {
+                            matched = true;
+                            break;
+                        }
+                    }
+                }
+                if (matched) {
+                    if (item.namingCtx != null) {
+                        String naming = (String) visitNamingBlock(item.namingCtx);
+                        resolver.setValue(context, naming, e);
+                    }
+                    if (item.catchBodyCtx != null) {
+                        visitCatchBodyBlock(item.catchBodyCtx);
+                    }
+                    break;
+                }
+            }
+        } finally {
+            if (finallyCtx != null) {
+                visitFinallyBodyBlock(finallyCtx);
+            }
+        }
+        throw new IllegalArgumentException("un-support try segment found : " + ctx.getText());
+    }
+
+    @Override
+    public Object visitTryBodyBlock(TinyScriptParser.TryBodyBlockContext ctx) {
+        debugNode(ctx);
+        int count = ctx.getChildCount();
+        if (count < 1) {
+            throw new IllegalArgumentException("missing try body block!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if (!(item instanceof TinyScriptParser.ScriptBlockContext)) {
+            throw new IllegalArgumentException("invalid try body block, expect script block, but found " + ctx.getClass() + "!");
+        }
+        TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) item;
+        return visitScriptBlock(nextCtx);
+    }
+
+    @Override
+    public Object visitCatchBodyBlock(TinyScriptParser.CatchBodyBlockContext ctx) {
+        debugNode(ctx);
+        int count = ctx.getChildCount();
+        if (count < 1) {
+            throw new IllegalArgumentException("missing catch body block!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if (!(item instanceof TinyScriptParser.ScriptBlockContext)) {
+            throw new IllegalArgumentException("invalid catch body block, expect script block, but found " + ctx.getClass() + "!");
+        }
+        TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) item;
+        return visitScriptBlock(nextCtx);
+    }
+
+    @Override
+    public Object visitFinallyBodyBlock(TinyScriptParser.FinallyBodyBlockContext ctx) {
+        debugNode(ctx);
+        int count = ctx.getChildCount();
+        if (count < 1) {
+            throw new IllegalArgumentException("missing finally body block!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if (!(item instanceof TinyScriptParser.ScriptBlockContext)) {
+            throw new IllegalArgumentException("invalid finally body block, expect script block, but found " + ctx.getClass() + "!");
+        }
+        TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) item;
+        return visitScriptBlock(nextCtx);
+    }
+
+    @Override
+    public Object visitClassNameBlock(TinyScriptParser.ClassNameBlockContext ctx) {
+        debugNode(ctx);
+        int count = ctx.getChildCount();
+        if (count < 1) {
+            throw new IllegalArgumentException("missing class name block!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if (!(item instanceof TerminalNode)) {
+            throw new IllegalArgumentException("invalid class name block expect naming, but found " + ctx.getClass() + "!");
+        }
+        TerminalNode terminalNode = (TerminalNode) item;
+        String className = (String) visitTerminal(terminalNode);
+        return className;
+    }
+
+    @Override
+    public Object visitParenSegment(TinyScriptParser.ParenSegmentContext ctx) {
+        debugNode(ctx);
+        int count = ctx.getChildCount();
+        if (count < 1) {
+            throw new IllegalArgumentException("missing parent segment!");
+        }
+        if (count == 3) {
+            ParseTree lParenNode = ctx.getChild(0);
+            ParseTree expressNode = ctx.getChild(1);
+            ParseTree rParenNode = ctx.getChild(2);
+            if (!(lParenNode instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid paren left node, expect '(', but found type: " + lParenNode.getClass());
+            }
+            if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
+                throw new IllegalArgumentException("invalid paren right node, expect express, but found type: " + expressNode.getClass());
+            }
+            if (!(rParenNode instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid paren right node, expect ')', but found type: " + rParenNode.getClass());
+            }
+            TerminalNode lParenCtx = (TerminalNode) lParenNode;
+            TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
+            TerminalNode rParenCtx = (TerminalNode) rParenNode;
+            String lParen = (String) visitTerminal(lParenCtx);
+            String rParen = (String) visitTerminal(rParenCtx);
+            if (!"(".equals(lParen)) {
+                throw new IllegalArgumentException("invalid paren left node, expect '(', but found : " + lParen);
+            }
+            if (!")".equals(rParen)) {
+                throw new IllegalArgumentException("invalid paren right node, expect '(', but found : " + rParen);
+            }
+            Object value = visitExpress(expressCtx);
+            return value;
+        }
+        throw new IllegalArgumentException("invalid grammar parent segment expect 3 parts for paren segment (...), but found " + count + "!");
+    }
+
+    @Override
+    public Object visitPrefixOperatorSegment(TinyScriptParser.PrefixOperatorSegmentContext ctx) {
+        debugNode(ctx);
+        int count = ctx.getChildCount();
+        if (count < 1) {
+            throw new IllegalArgumentException("missing parent segment!");
+        }
+        if (count == 2) {
+            TerminalNode termNode = (TerminalNode) ctx.getChild(0);
+            String term = (String) visitTerminal(termNode);
+            String prefixOperator = term;
+            ParseTree expressNode = ctx.getChild(1);
+            if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
+                throw new IllegalArgumentException("invalid double-operator right node, expect express, but found type: " + expressNode.getClass());
+            }
+            TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
+            Object value = visitExpress(expressCtx);
+            return resolver.resolvePrefixOperator(prefixOperator, value);
+        }
+
+        throw new IllegalArgumentException("un-support parent segment found : " + ctx.getText());
+    }
+
     @Override
     public Object visitIfSegment(TinyScriptParser.IfSegmentContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 1) {
             throw new IllegalArgumentException("missing if segment!");
@@ -213,6 +424,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitControlSegment(TinyScriptParser.ControlSegmentContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 1) {
             throw new IllegalArgumentException("missing control segment!");
@@ -245,6 +457,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitWhileSegment(TinyScriptParser.WhileSegmentContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 1) {
             throw new IllegalArgumentException("missing while segment!");
@@ -264,7 +477,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 }
                 TerminalNode terminalNode = (TerminalNode) item;
                 String term = (String) visitTerminal(terminalNode);
-                if (!Arrays.asList("(", ")").contains(term)) {
+                if (!Arrays.asList("while", "(", ")").contains(term)) {
                     throw new IllegalArgumentException("invalid while segment node , expect '(/)' , but found '" + term + "'!");
                 }
             }
@@ -294,6 +507,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitForSegment(TinyScriptParser.ForSegmentContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 1) {
             throw new IllegalArgumentException("missing for segment!");
@@ -320,7 +534,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 }
                 TerminalNode terminalNode = (TerminalNode) item;
                 String term = (String) visitTerminal(terminalNode);
-                if (!Arrays.asList("(", ";", ")").contains(term)) {
+                if (!Arrays.asList("for", "(", ";", ")").contains(term)) {
                     throw new IllegalArgumentException("invalid for segment node , expect '(/;/)' , but found '" + term + "'!");
                 }
             }
@@ -361,6 +575,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitForeachSegment(TinyScriptParser.ForeachSegmentContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 1) {
             throw new IllegalArgumentException("missing foreach segment!");
@@ -382,7 +597,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 }
                 TerminalNode terminalNode = (TerminalNode) item;
                 String term = (String) visitTerminal(terminalNode);
-                if (!Arrays.asList("(", ":", ")").contains(term)) {
+                if (!Arrays.asList("foreach", "(", ":", ")").contains(term)) {
                     throw new IllegalArgumentException("invalid foreach segment node , expect '(/:/)' , but found '" + term + "'!");
                 }
             }
@@ -454,6 +669,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitConditionBlock(TinyScriptParser.ConditionBlockContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count != 1) {
             throw new IllegalArgumentException("missing condition block, expect 1 express, but found " + count + "!");
@@ -469,6 +685,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitNamingBlock(TinyScriptParser.NamingBlockContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 1) {
             throw new IllegalArgumentException("missing naming block!");
@@ -484,6 +701,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitEqualValue(TinyScriptParser.EqualValueContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count != 3) {
             throw new IllegalArgumentException("missing equal value, expect 3 parts, but found " + count + "!");
@@ -518,6 +736,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitNewInstance(TinyScriptParser.NewInstanceContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count != 2) {
             throw new IllegalArgumentException("missing new instance, expect 2 parts, but found " + count + "!");
@@ -542,6 +761,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitInvokeFunction(TinyScriptParser.InvokeFunctionContext ctx) {
+        debugNode(ctx);
         boolean isNew = false;
         if (ctx instanceof InvokeFunctionContextImpl) {
             InvokeFunctionContextImpl implCtx = (InvokeFunctionContextImpl) ctx;
@@ -586,6 +806,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitFunctionCall(TinyScriptParser.FunctionCallContext ctx) {
+        debugNode(ctx);
         boolean isNew = false;
         Object value = null;
         if (ctx instanceof FunctionCallContextImpl) {
@@ -639,6 +860,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitRefCall(TinyScriptParser.RefCallContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count != 3 && count != 4) {
             throw new IllegalArgumentException("missing ref call, expect 3 parts, but found " + count + " !");
@@ -669,6 +891,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitArgumentList(TinyScriptParser.ArgumentListContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         List<Object> ret = new ArrayList<>();
         for (int i = 0; i < count; i++) {
@@ -692,6 +915,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitScriptBlock(TinyScriptParser.ScriptBlockContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count != 3) {
             throw new IllegalArgumentException("missing script block, expect 3 parts, but found " + count + "!");
@@ -725,6 +949,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitArgument(TinyScriptParser.ArgumentContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing argument!");
@@ -765,20 +990,15 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitArgumentValue(TinyScriptParser.ArgumentValueContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing argument value!");
         }
         ParseTree item = ctx.getChild(0);
-        if (item instanceof TinyScriptParser.InvokeFunctionContext) {
-            TinyScriptParser.InvokeFunctionContext nextCtx = (TinyScriptParser.InvokeFunctionContext) item;
-            return visitInvokeFunction(nextCtx);
-        } else if (item instanceof TinyScriptParser.ConstValueContext) {
-            TinyScriptParser.ConstValueContext nextCtx = (TinyScriptParser.ConstValueContext) item;
-            return visitConstValue(nextCtx);
-        } else if (item instanceof TinyScriptParser.RefValueContext) {
-            TinyScriptParser.RefValueContext nextCtx = (TinyScriptParser.RefValueContext) item;
-            return visitRefValue(nextCtx);
+        if (item instanceof TinyScriptParser.ExpressContext) {
+            TinyScriptParser.ExpressContext nextCtx = (TinyScriptParser.ExpressContext) item;
+            return visitExpress(nextCtx);
         }
         throw new IllegalArgumentException("un-support argument value found : " + ctx.getText());
     }
@@ -817,6 +1037,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitRefValue(TinyScriptParser.RefValueContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing ref value!");
@@ -839,6 +1060,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitConstBool(TinyScriptParser.ConstBoolContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing const boolean!");
@@ -863,6 +1085,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitConstNull(TinyScriptParser.ConstNullContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing const null!");
@@ -885,6 +1108,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitConstString(TinyScriptParser.ConstStringContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing const string!");
@@ -906,6 +1130,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visit(ParseTree tree) {
+        debugNode(tree);
         try {
             if (tree instanceof TinyScriptParser.ScriptContext) {
                 TinyScriptParser.ScriptContext nextCtx = (TinyScriptParser.ScriptContext) tree;
@@ -997,6 +1222,24 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.ControlSegmentContext) {
                 TinyScriptParser.ControlSegmentContext nextCtx = (TinyScriptParser.ControlSegmentContext) tree;
                 return visitControlSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ParenSegmentContext) {
+                TinyScriptParser.ParenSegmentContext nextCtx = (TinyScriptParser.ParenSegmentContext) tree;
+                return visitParenSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.PrefixOperatorSegmentContext) {
+                TinyScriptParser.PrefixOperatorSegmentContext nextCtx = (TinyScriptParser.PrefixOperatorSegmentContext) tree;
+                return visitPrefixOperatorSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.TrySegmentContext) {
+                TinyScriptParser.TrySegmentContext nextCtx = (TinyScriptParser.TrySegmentContext) tree;
+                return visitTrySegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.TryBodyBlockContext) {
+                TinyScriptParser.TryBodyBlockContext nextCtx = (TinyScriptParser.TryBodyBlockContext) tree;
+                return visitTryBodyBlock(nextCtx);
+            } else if (tree instanceof TinyScriptParser.CatchBodyBlockContext) {
+                TinyScriptParser.CatchBodyBlockContext nextCtx = (TinyScriptParser.CatchBodyBlockContext) tree;
+                return visitCatchBodyBlock(nextCtx);
+            } else if (tree instanceof TinyScriptParser.FinallyBodyBlockContext) {
+                TinyScriptParser.FinallyBodyBlockContext nextCtx = (TinyScriptParser.FinallyBodyBlockContext) tree;
+                return visitFinallyBodyBlock(nextCtx);
             }
         } catch (TinyScriptBreakException e) {
 
@@ -1014,6 +1257,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing const multiline string!");
@@ -1060,6 +1304,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitConstRenderString(TinyScriptParser.ConstRenderStringContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing const render string!");
@@ -1082,6 +1327,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitDecNumber(TinyScriptParser.DecNumberContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing dec number!");
@@ -1117,6 +1363,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitHexNumber(TinyScriptParser.HexNumberContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing hex number!");
@@ -1145,6 +1392,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitOtcNumber(TinyScriptParser.OtcNumberContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing otc number!");
@@ -1173,6 +1421,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitBinNumber(TinyScriptParser.BinNumberContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing bin number!");
@@ -1201,6 +1450,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitJsonValue(TinyScriptParser.JsonValueContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count < 0) {
             throw new IllegalArgumentException("missing json value!");
@@ -1227,6 +1477,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitJsonMapValue(TinyScriptParser.JsonMapValueContext ctx) {
+        debugNode(ctx);
         Map<String, Object> ret = new LinkedHashMap<>();
         int count = ctx.getChildCount();
         if (count != 2 && count != 3) {
@@ -1285,6 +1536,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitJsonPairs(TinyScriptParser.JsonPairsContext ctx) {
+        debugNode(ctx);
         Map<String, Object> ret = new LinkedHashMap<>();
         if (ctx instanceof JsonPairsContextImpl) {
             JsonPairsContextImpl impl = (JsonPairsContextImpl) ctx;
@@ -1313,6 +1565,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitJsonPair(TinyScriptParser.JsonPairContext ctx) {
+        debugNode(ctx);
         int count = ctx.getChildCount();
         if (count != 3) {
             throw new IllegalArgumentException("missing json pair!");
@@ -1326,8 +1579,8 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         if (!(separatorNode instanceof TerminalNode)) {
             throw new IllegalArgumentException("invalid json pair separator node, expect ':', but found type: " + separatorNode.getClass());
         }
-        if (!(valueNode instanceof TinyScriptParser.JsonValueContext)) {
-            throw new IllegalArgumentException("invalid json pair value node, expect json value node, but found type: " + valueNode.getClass());
+        if (!(valueNode instanceof TinyScriptParser.ExpressContext)) {
+            throw new IllegalArgumentException("invalid json pair value node, expect express node, but found type: " + valueNode.getClass());
         }
 
         TerminalNode sepCtx = (TerminalNode) separatorNode;
@@ -1345,14 +1598,15 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             key = (String) visitConstString(nextCtx);
         }
 
-        TinyScriptParser.JsonValueContext valueCtx = (TinyScriptParser.JsonValueContext) valueNode;
-        Object value = visitJsonValue(valueCtx);
+        TinyScriptParser.ExpressContext valueCtx = (TinyScriptParser.ExpressContext) valueNode;
+        Object value = visitExpress(valueCtx);
 
         return new AbstractMap.SimpleEntry<>(key, value);
     }
 
     @Override
     public Object visitJsonArrayValue(TinyScriptParser.JsonArrayValueContext ctx) {
+        debugNode(ctx);
         List<Object> ret = new ArrayList<>();
         int count = ctx.getChildCount();
         if (count != 2 && count != 3) {
@@ -1411,6 +1665,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitJsonItemList(TinyScriptParser.JsonItemListContext ctx) {
+        debugNode(ctx);
         List<Object> ret = new ArrayList<>();
         if (ctx instanceof JsonItemListContextImpl) {
             JsonItemListContextImpl impl = (JsonItemListContextImpl) ctx;
@@ -1426,9 +1681,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 if (!",".equals(term)) {
                     throw new IllegalArgumentException("invalid json item list separator, expect ',' buf found '" + term + "'!");
                 }
-            } else if (item instanceof TinyScriptParser.JsonValueContext) {
-                TinyScriptParser.JsonValueContext nextCtx = (TinyScriptParser.JsonValueContext) item;
-                Object value = visitJsonValue(nextCtx);
+            } else if (item instanceof TinyScriptParser.ExpressContext) {
+                TinyScriptParser.ExpressContext nextCtx = (TinyScriptParser.ExpressContext) item;
+                Object value = visitExpress(nextCtx);
                 ret.add(value);
             } else {
                 throw new IllegalArgumentException("invalid json item list node type: " + item.getClass());
@@ -1453,16 +1708,19 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitChildren(RuleNode node) {
+        debugNode(node);
         return null;
     }
 
     @Override
     public Object visitTerminal(TerminalNode node) {
+        debugNode(node);
         return node.getText();
     }
 
     @Override
     public Object visitErrorNode(ErrorNode node) {
+        debugNode(node);
         return null;
     }
 
