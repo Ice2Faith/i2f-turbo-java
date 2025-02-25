@@ -1,4 +1,4 @@
-// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from D:/IDEA_ROOT/DevCenter/i2f-turbo/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -29,6 +29,56 @@ public interface TinyScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpress(TinyScriptParser.ExpressContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScriptParser#controlSegment}.
+	 * @param ctx the parse tree
+	 */
+	void enterControlSegment(TinyScriptParser.ControlSegmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#controlSegment}.
+	 * @param ctx the parse tree
+	 */
+	void exitControlSegment(TinyScriptParser.ControlSegmentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScriptParser#whileSegment}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhileSegment(TinyScriptParser.WhileSegmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#whileSegment}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhileSegment(TinyScriptParser.WhileSegmentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScriptParser#forSegment}.
+	 * @param ctx the parse tree
+	 */
+	void enterForSegment(TinyScriptParser.ForSegmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#forSegment}.
+	 * @param ctx the parse tree
+	 */
+	void exitForSegment(TinyScriptParser.ForSegmentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScriptParser#foreachSegment}.
+	 * @param ctx the parse tree
+	 */
+	void enterForeachSegment(TinyScriptParser.ForeachSegmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#foreachSegment}.
+	 * @param ctx the parse tree
+	 */
+	void exitForeachSegment(TinyScriptParser.ForeachSegmentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScriptParser#namingBlock}.
+	 * @param ctx the parse tree
+	 */
+	void enterNamingBlock(TinyScriptParser.NamingBlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#namingBlock}.
+	 * @param ctx the parse tree
+	 */
+	void exitNamingBlock(TinyScriptParser.NamingBlockContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinyScriptParser#ifSegment}.
 	 * @param ctx the parse tree
@@ -130,19 +180,16 @@ public interface TinyScriptListener extends ParseTreeListener {
 	 */
 	void exitArgument(TinyScriptParser.ArgumentContext ctx);
 	/**
-     * Enter a parse tree produced by {@link TinyScriptParser#argumentValue}.
-     * @param ctx the parse tree
-     */
-    void enterArgumentValue(TinyScriptParser.ArgumentValueContext ctx);
-
-    /**
-     * Exit a parse tree produced by {@link TinyScriptParser#argumentValue}.
-     *
-     * @param ctx the parse tree
-     */
-    void exitArgumentValue(TinyScriptParser.ArgumentValueContext ctx);
-
-    /**
+	 * Enter a parse tree produced by {@link TinyScriptParser#argumentValue}.
+	 * @param ctx the parse tree
+	 */
+	void enterArgumentValue(TinyScriptParser.ArgumentValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#argumentValue}.
+	 * @param ctx the parse tree
+	 */
+	void exitArgumentValue(TinyScriptParser.ArgumentValueContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TinyScriptParser#constValue}.
 	 * @param ctx the parse tree
 	 */
