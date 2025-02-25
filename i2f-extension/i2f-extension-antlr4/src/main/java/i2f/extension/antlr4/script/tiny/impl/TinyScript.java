@@ -3,6 +3,7 @@ package i2f.extension.antlr4.script.tiny.impl;
 import i2f.extension.antlr4.script.tiny.TinyScriptLexer;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
+import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
@@ -49,6 +50,13 @@ public class TinyScript {
             return !name.startsWith("copy")
                     && !name.startsWith("next");
         });
+        registryBuiltMethodByStaticMethod(Thread.class, (method) -> {
+            String name = method.getName();
+            return !name.startsWith("sleep")
+                    && !name.startsWith("yield");
+        });
+        registryBuiltMethodByStaticMethod(System.class);
+        registryBuiltMethodByStaticMethod(TinyScriptFunctions.class);
     }
 
     public static Object script(String formula, Object context) {

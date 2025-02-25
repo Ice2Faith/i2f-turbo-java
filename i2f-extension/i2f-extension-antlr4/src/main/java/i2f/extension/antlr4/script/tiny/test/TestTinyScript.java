@@ -4,6 +4,10 @@ import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,11 +19,43 @@ import java.util.Map;
 public class TestTinyScript {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-        testImpl();
+        TinyScript.registryBuiltMethodByStaticMethod(TestTinyScript.class, (method) -> {
+            return method.getName().startsWith("regex");
+        });
+
+        File file = new File("i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/test/test.ts.txt");
+        StringBuilder builder = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            builder.append(line);
+            builder.append("\n");
+        }
+        reader.close();
+
+        String script = builder.toString();
+        Map<String, Object> params = new HashMap<>();
+        params.put("IN_FORMUAL_CONTEN", "a.username, a.age, a.username");
+
+        Object ret = TinyScript.script(script, params);
+        System.out.println("ok");
+
+
+//        testImpl();
 
 //        testRaw();
+    }
+
+    public static boolean regexLike(String str, String regex) {
+        if (str == regex) {
+            return true;
+        }
+        if (str == null || regex == null) {
+            return false;
+        }
+        return str.matches(regex);
     }
 
     public static void testImpl(){

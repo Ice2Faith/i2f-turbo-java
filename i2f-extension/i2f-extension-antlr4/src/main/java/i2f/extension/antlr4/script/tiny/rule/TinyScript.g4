@@ -137,8 +137,9 @@ express:
     | forSegment
     | whileSegment
     | controlSegment
-    | LPAREN express RPAREN
-    | PREFIX_OPERATOR express
+    | trySegment
+    | parenSegment
+    | prefixOperatorSegment
     | equalValue
     | newInstance
     | invokeFunction
@@ -146,6 +147,34 @@ express:
     | refValue
     | jsonValue
     | express DOUBLE_OPERAOTR express
+    ;
+
+trySegment:
+    'try' tryBodyBlock ('catch' '(' (classNameBlock ('|' classNameBlock)*) namingBlock ')' catchBodyBlock)* ('finally' finallyBodyBlock)?
+    ;
+
+tryBodyBlock:
+    scriptBlock
+    ;
+
+catchBodyBlock:
+    scriptBlock
+    ;
+
+finallyBodyBlock:
+    scriptBlock
+    ;
+
+classNameBlock:
+    NAMING
+    ;
+
+parenSegment:
+    LPAREN express RPAREN
+    ;
+
+prefixOperatorSegment:
+    PREFIX_OPERATOR express
     ;
 
 controlSegment:
@@ -171,7 +200,7 @@ namingBlock:
     ;
 
 ifSegment:
-    'f' '(' conditionBlock ')' scriptBlock (  'else' 'if' '(' conditionBlock ')' scriptBlock )* ('else' scriptBlock)?
+    'if' '(' conditionBlock ')' scriptBlock (  'else' 'if' '(' conditionBlock ')' scriptBlock )* ('else' scriptBlock)?
     ;
 
 conditionBlock:
@@ -212,11 +241,7 @@ argument:
     ;
 
 argumentValue
-    : invokeFunction
-    | constValue
-    | refValue
-    | jsonValue
-    | express
+    : express
     ;
 
 constValue:
@@ -291,7 +316,7 @@ jsonPairs:
     ;
 
 jsonPair:
-    (NAMING|constString) ':' jsonValue
+    (NAMING|constString) ':' express
     ;
 
 jsonArrayValue:
@@ -299,6 +324,6 @@ jsonArrayValue:
     ;
 
 jsonItemList:
-    jsonValue
-    | jsonValue (',' jsonValue)*
+    express
+    | express (',' express)*
     ;
