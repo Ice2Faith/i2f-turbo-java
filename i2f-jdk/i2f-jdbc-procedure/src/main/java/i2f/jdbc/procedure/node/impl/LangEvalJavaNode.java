@@ -99,6 +99,39 @@ public class LangEvalJavaNode implements ExecutorNode {
         return className.substring(0, idx + 1) + "*";
     }
 
+    public static final String EVAL_JAVA_IMPORTS = new StringBuilder()
+            .append("import ").append(castAsImportPackageName(JdbcProcedure.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ExecuteContext.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(XmlNode.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureExecutor.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureExecutorCaller.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(DefaultJdbcProcedureExecutorCaller.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(FeatureConsts.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcResolver.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(RegexUtil.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ReflectResolver.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(Visitor.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ObjectConvertor.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(SystemClock.class.getName())).append(";").append("\n")
+            .append("import ").append("java.util.*").append(";").append("\n")
+            .append("import ").append("java.math.*").append(";").append("\n")
+            .append("import ").append("java.time.*").append(";").append("\n")
+            .append("import ").append("java.text.*").append(";").append("\n")
+            .append("import ").append("java.util.regex.*").append(";").append("\n")
+            .append("import ").append("java.io.*").append(";").append("\n")
+            .append("import ").append("java.lang.reflect.*").append(";").append("\n")
+            .append("import ").append("javax.sql.*").append(";").append("\n")
+            .append("import ").append("java.util.concurrent.*").append(";").append("\n")
+            .append("import ").append("java.nio.*").append(";").append("\n")
+            .append("import ").append("java.nio.charset.*").append(";").append("\n")
+            .append("import ").append("java.util.concurrent.atomic.*").append(";").append("\n")
+            .append("import ").append("java.util.concurrent.locks.*").append(";").append("\n")
+            .append("import ").append("java.time.chrono.*").append(";").append("\n")
+            .append("import ").append("java.time.format.*").append(";").append("\n")
+            .append("import ").append("java.time.temporal.*").append(";").append("\n")
+            .append("import ").append("java.time.zone.*").append(";").append("\n")
+            .toString();
+
     public static Object evalJava(ExecuteContext context, JdbcProcedureExecutor executor, String importSegment, String memberSegment, String bodySegment) {
         if (importSegment == null) {
             importSegment = "";
@@ -112,36 +145,7 @@ public class LangEvalJavaNode implements ExecutorNode {
         bodySegment = bodySegment.trim();
         Matcher matcher = RETURN_PATTERN.matcher(bodySegment);
         StringBuilder builder = new StringBuilder();
-        builder.append("import ").append(castAsImportPackageName(JdbcProcedure.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(ExecuteContext.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(XmlNode.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(JdbcProcedureExecutor.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(JdbcProcedureExecutorCaller.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(DefaultJdbcProcedureExecutorCaller.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(FeatureConsts.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(JdbcResolver.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(RegexUtil.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(ReflectResolver.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(Visitor.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(ObjectConvertor.class.getName())).append(";").append("\n");
-        builder.append("import ").append(castAsImportPackageName(SystemClock.class.getName())).append(";").append("\n");
-        builder.append("import ").append("java.util.*").append(";").append("\n");
-        builder.append("import ").append("java.math.*").append(";").append("\n");
-        builder.append("import ").append("java.time.*").append(";").append("\n");
-        builder.append("import ").append("java.text.*").append(";").append("\n");
-        builder.append("import ").append("java.util.regex.*").append(";").append("\n");
-        builder.append("import ").append("java.io.*").append(";").append("\n");
-        builder.append("import ").append("java.lang.reflect.*").append(";").append("\n");
-        builder.append("import ").append("javax.sql.*").append(";").append("\n");
-        builder.append("import ").append("java.util.concurrent.*").append(";").append("\n");
-        builder.append("import ").append("java.nio.*").append(";").append("\n");
-        builder.append("import ").append("java.nio.charset.*").append(";").append("\n");
-        builder.append("import ").append("java.util.concurrent.atomic.*").append(";").append("\n");
-        builder.append("import ").append("java.util.concurrent.locks.*").append(";").append("\n");
-        builder.append("import ").append("java.time.chrono.*").append(";").append("\n");
-        builder.append("import ").append("java.time.format.*").append(";").append("\n");
-        builder.append("import ").append("java.time.temporal.*").append(";").append("\n");
-        builder.append("import ").append("java.time.zone.*").append(";").append("\n");
+        builder.append(EVAL_JAVA_IMPORTS);
 
         builder.append(importSegment).append("\n");
         builder.append("public class ").append(CLASS_NAME_HOLDER).append("{").append("\n");

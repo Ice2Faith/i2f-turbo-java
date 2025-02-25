@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class LangEvalTinyScriptNode implements ExecutorNode {
     public static final String TAG_NAME = "lang-eval-tinyscript";
-    public static final String ALIAS_TAG_NAME="lang-eval-ts";
+    public static final String ALIAS_TAG_NAME = "lang-eval-ts";
 
     @Override
     public boolean support(XmlNode node) {
@@ -53,7 +53,7 @@ public class LangEvalTinyScriptNode implements ExecutorNode {
         Object obj = null;
 
         try {
-            TinyScriptResolver resolver=new ProcedureTinyScriptResolver(context,executor);
+            TinyScriptResolver resolver = new ProcedureTinyScriptResolver(context, executor);
             obj = TinyScript.script(script, context.getParams(), resolver);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -61,7 +61,7 @@ public class LangEvalTinyScriptNode implements ExecutorNode {
         return obj;
     }
 
-    public static class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver{
+    public static class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
         protected ExecuteContext context;
         protected JdbcProcedureExecutor executor;
 
@@ -72,12 +72,12 @@ public class LangEvalTinyScriptNode implements ExecutorNode {
 
         @Override
         public void setValue(Object context, String name, Object value) {
-            executor.setParamsObject((Map<String,Object>)context,name,value);
+            executor.setParamsObject((Map<String, Object>) context, name, value);
         }
 
         @Override
         public Object getValue(Object context, String name) {
-            return executor.visit(name,(Map<String,Object>)context);
+            return executor.visit(name, (Map<String, Object>) context);
         }
 
         @Override
@@ -99,10 +99,12 @@ public class LangEvalTinyScriptNode implements ExecutorNode {
 
         @Override
         public Method findMethod(String naming, List<Object> args) {
-            List<Method> list= ContextHolder.INVOKE_METHOD_MAP.get(naming);
-            Method method = ReflectResolver.matchExecutable(list, args);
-            if(method!=null){
-                return method;
+            List<Method> list = ContextHolder.INVOKE_METHOD_MAP.get(naming);
+            if (list != null && !list.isEmpty()) {
+                Method method = ReflectResolver.matchExecutable(list, args);
+                if (method != null) {
+                    return method;
+                }
             }
 
             return super.findMethod(naming, args);
