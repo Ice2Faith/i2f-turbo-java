@@ -40,6 +40,7 @@ public interface JdbcProcedureExecutor {
                     throw new ThrowSignalException(e.getMessage(), e);
                 }
             }
+            return;
         }
         throw new NotFoundSignalException("not found node: " + nodeId);
     }
@@ -70,6 +71,7 @@ public interface JdbcProcedureExecutor {
                     throw new ThrowSignalException(e.getMessage(), e);
                 }
             }
+            return;
         }
         throw new NotFoundSignalException("not found node: " + nodeId);
     }
