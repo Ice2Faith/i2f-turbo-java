@@ -17,6 +17,7 @@ import i2f.reflect.ReflectResolver;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -68,6 +69,16 @@ public class LangEvalTinyScriptNode implements ExecutorNode {
         public ProcedureTinyScriptResolver(ExecuteContext context, JdbcProcedureExecutor executor) {
             this.context = context;
             this.executor = executor;
+        }
+
+        @Override
+        public void debugLog(Supplier<Object> supplier) {
+            executor.debugLog(()->"tiny-script:"+supplier.get());
+        }
+
+        @Override
+        public void openDebugger(String tag, Object context, String conditionExpression) {
+            executor.openDebugger("tiny-script:"+tag, context, conditionExpression);
         }
 
         @Override

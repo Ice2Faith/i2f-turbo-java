@@ -27,7 +27,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     protected ApplicationContext applicationContext;
     protected Environment environment;
     protected static final Logger log = LoggerFactory.getLogger(SpringContextJdbcProcedureExecutor.class);
-    protected static final AtomicBoolean hasApplyNodes=new AtomicBoolean(false);
+    protected static final AtomicBoolean hasApplyNodes = new AtomicBoolean(false);
 
     public SpringContextJdbcProcedureExecutor(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
@@ -51,7 +51,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
 
     @Override
     public List<ExecutorNode> getNodes() {
-        if(!hasApplyNodes.getAndSet(true)){
+        if (!hasApplyNodes.getAndSet(true)) {
             applyNodeExecutorComponents();
         }
         return super.getNodes();
@@ -151,9 +151,9 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
 
 
     @Override
-    public void debugLog(Supplier<String> supplier) {
+    public void debugLog(Supplier<Object> supplier) {
         if (debug.get()) {
-            log.debug(supplier.get());
+            log.debug(String.valueOf(supplier.get()));
         }
     }
 }
