@@ -864,15 +864,20 @@
         <!ATTLIST lang-sleep timeout CDATA #IMPLIED>
         <!ATTLIST lang-sleep time-unit CDATA #IMPLIED>
 
-        <!ELEMENT sql-etl (sql-query-list|etl-transform+|etl-load|etl-before|etl-after)>
+        <!ELEMENT sql-etl (sql-query-list|etl-extra|etl-transform+|etl-load|etl-before|etl-after)>
         <!ATTLIST sql-etl read-batch-size CDATA #IMPLIED>
         <!ATTLIST sql-etl write-batch-size CDATA #IMPLIED>
         <!ATTLIST sql-etl before-truncate CDATA #IMPLIED>
         <!ATTLIST sql-etl commit-size CDATA #IMPLIED>
 
+        <!ELEMENT etl-extra (EMPTY)>
+        <!ATTLIST etl-extra datasource CDATA #IMPLIED>
+        <!ATTLIST etl-extra table CDATA #IMPLIED>
+
         <!ELEMENT etl-transform (EMPTY)>
         <!ATTLIST etl-transform source CDATA #IMPLIED>
         <!ATTLIST etl-transform target CDATA #IMPLIED>
+        <!ATTLIST etl-transform type CDATA #IMPLIED>
 
         <!ATTLIST etl-transform source.visit CDATA #IMPLIED>
         <!ATTLIST etl-transform source.eval CDATA #IMPLIED>
