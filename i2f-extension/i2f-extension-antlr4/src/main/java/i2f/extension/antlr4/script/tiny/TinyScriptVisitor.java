@@ -1,4 +1,4 @@
-// Generated from E:/MySystemDefaultFiles/Desktop/30OfficeCenter/102-CjRoot/rwd-2025/RWD_SVC/jdbc-procedure-starter/src/main/java/com/newland/bi3/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -192,6 +192,13 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitConstNull(TinyScriptParser.ConstNullContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyScriptParser#constClass}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConstClass(TinyScriptParser.ConstClassContext ctx);
+
 	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#constString}.
 	 * @param ctx the parse tree

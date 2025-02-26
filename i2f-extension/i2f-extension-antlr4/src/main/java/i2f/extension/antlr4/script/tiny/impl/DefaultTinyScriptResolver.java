@@ -15,7 +15,10 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -74,7 +77,41 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
 
     @Override
     public Object resolveDoubleOperator(Object left, String operator, Object right) {
-        if ("in".equals(operator) || "notin".equals(operator)) {
+        if ("as".equals(operator) || "cast".equals(operator)) {
+            if (right == null) {
+                throw new ClassCastException("target type is null");
+            }
+            if (left == null) {
+                return null;
+            }
+            Class<?> type = right.getClass();
+            if (right instanceof Class) {
+                type = (Class<?>) right;
+            }
+            Object ret = ObjectConvertor.tryConvertAsType(left, type);
+            if (ret != left) {
+                return ret;
+            }
+            if (!TypeOf.instanceOf(ret, type)) {
+                throw new ClassCastException("Cannot cast " + (left == null ? null : left.getClass()) + " to " + type);
+            }
+        } else if ("is".equals(operator) || "instanceof".equals(operator) || "typeof".equals(operator)) {
+            if (left == null) {
+                return false;
+            }
+            if (right == null) {
+                return false;
+            }
+            Class<?> clsLeft = left.getClass();
+            Class<?> clsRight = right.getClass();
+            if (left instanceof Class) {
+                clsLeft = (Class<?>) left;
+            }
+            if (right instanceof Class) {
+                clsRight = (Class<?>) right;
+            }
+            return TypeOf.typeOf(clsLeft, clsRight);
+        } else if ("in".equals(operator) || "notin".equals(operator)) {
             if (right == null) {
                 return false;
             }

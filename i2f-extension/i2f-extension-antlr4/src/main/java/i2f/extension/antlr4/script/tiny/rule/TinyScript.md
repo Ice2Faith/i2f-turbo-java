@@ -134,6 +134,25 @@ R"abc ${count} def $${size} gh"
     - 也就是说，允许重复使用特性
     - 例如：trim.render.trim
 
+- class书写规则
+- 用于表示Class类型
+- 定义
+
+```shell
+类名.class
+```
+
+- 示例
+
+```shell
+int.class;
+string.class;
+java.util.Map.class;
+```
+
+- 部分基础类型和jdk类可使用简短类名
+- 否则应该使用全限定类名
+
 ### 复杂数据类型
 
 - 支持JSON数据类型
@@ -332,6 +351,17 @@ notin 元素不在其中
 and 逻辑与
 || 逻辑或
 or 逻辑或
+as 类型转换运算符，前面的值转换为后面的值类型
+  定义：值 as (值|class)
+  例如：${str} as int.class;${str} as ${cnt};
+  注意：左边为null,则允许直接转换；右边为null，则抛出类转换异常；不能转换，则抛出类转换异常
+cast 用法和as一样，是as的别名
+is 类型判断运算符，前面的值是否是后面的值的类型，
+  定义：值 is (值|class)
+  例如：${str} is string.class;${str} is ${name};${obj}.getClass() is string.class;
+  注意：前后任意值为null,结果都为false
+instanceof 用法和is一样，是is的别名
+typeof 用法和is一样，是is的别名
 + 加
 - 减
 * 乘

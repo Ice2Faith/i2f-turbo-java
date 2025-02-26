@@ -13,11 +13,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -1060,6 +1056,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         } else if (item instanceof TinyScriptParser.BinNumberContext) {
             TinyScriptParser.BinNumberContext nextCtx = (TinyScriptParser.BinNumberContext) item;
             return visitBinNumber(nextCtx);
+        } else if (item instanceof TinyScriptParser.ConstClassContext) {
+            TinyScriptParser.ConstClassContext nextCtx = (TinyScriptParser.ConstClassContext) item;
+            return visitConstClass(nextCtx);
         }
         throw new IllegalArgumentException("un-support const value found : " + ctx.getText());
     }
@@ -1086,6 +1085,30 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         }
         throw new IllegalArgumentException("un-support ref value found : " + ctx.getText());
     }
+
+    @Override
+    public Object visitConstClass(TinyScriptParser.ConstClassContext ctx) {
+        debugNode(ctx);
+        int count = ctx.getChildCount();
+        if (count < 0) {
+            throw new IllegalArgumentException("missing const class!");
+        }
+        ParseTree item = ctx.getChild(0);
+        if (item instanceof TerminalNode) {
+            TerminalNode nextTerm = (TerminalNode) item;
+            String term = (String) visitTerminal(nextTerm);
+            if (term == null) {
+                throw new IllegalArgumentException("missing const class!");
+            }
+            term = term.trim();
+            if (term.endsWith(".class")) {
+                term = term.substring(0, term.length() - ".class".length());
+            }
+            return resolver.loadClass(term);
+        }
+        throw new IllegalArgumentException("un-support const class found : " + ctx.getText());
+    }
+
 
     @Override
     public Object visitConstBool(TinyScriptParser.ConstBoolContext ctx) {
@@ -1272,6 +1295,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.DebuggerSegmentContext) {
                 TinyScriptParser.DebuggerSegmentContext nextCtx = (TinyScriptParser.DebuggerSegmentContext) tree;
                 return visitDebuggerSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ConstClassContext) {
+                TinyScriptParser.ConstClassContext nextCtx = (TinyScriptParser.ConstClassContext) tree;
+                return visitConstClass(nextCtx);
             }
         } catch (TinyScriptBreakException e) {
 
