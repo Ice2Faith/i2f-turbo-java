@@ -18,7 +18,7 @@ grammar TinyScript;
 // count=1;count=${role.count};count=${user}.getRoleList().size()
 
 @header {
-    package com.newland.bi3.extension.antlr4.script.tiny;
+    package i2f.extension.antlr4.script.tiny;
 }
 
 // Lexer rules
