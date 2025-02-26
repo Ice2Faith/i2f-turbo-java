@@ -602,6 +602,7 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     <!--
     进行数据库表ETL对拷，注意，此过程全程使用的是新链接
     每次从sql-query-list中读取read-batch-size个元素
+    也允许不使用sql-query-list,直接使用etl-extra指定源表即可
     写入到load指定的数据源datasource的table表中
     允许在开头是进行before-truncate清空表操作
     在进行commit-size条数据的写入之后，提交一次事务
@@ -613,14 +614,17 @@ js引擎执行完毕之后，会返回之后一次执行的结果
         <sql-query-list>
 
         </sql-query-list>
+        <etl-extra datasource="" table=""/>
+
         <!--
         进行列的转换，只有在target写明的列才会进行传输
         source表示原始的列名
         target表示目标列名，将用于load中构造插入语句的目标列名
+        type用于指定目标接受的类型，值应该是一个class类型
         source默认使用string访问，等价于 source.string ,可使用其他修饰符实现原始数据的转换或覆盖
         target使用string访问，等价于 target.string, 不支持修饰符
         -->
-        <etl-transform source="" target="" />
+        <etl-transform source="" target="" type=""/>
         <!--
         进行数据的写入，将数据写入到datasource指定的数据源中
         目标表用table表示

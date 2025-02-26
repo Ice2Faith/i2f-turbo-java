@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -107,6 +108,8 @@ public interface JdbcProcedureExecutor {
     Object visit(String collectionScript, Map<String, Object> params);
 
     String render(String script, Map<String, Object> params);
+
+    Connection getConnection(String datasource, Map<String, Object> params);
 
     List<?> sqlQueryList(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
 
