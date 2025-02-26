@@ -46,6 +46,8 @@ TYPE_NULL:
 QUOTE: '"';
 ESCAPED_CHAR: '\\' ( '\\' | '"' | '\'' | 'r' | 't' | 'n' );
 
+TYPE_CLASS:
+    NAMING '.' 'class';
 
 NAMING: ID (DOT ID)*;
 ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
@@ -60,6 +62,8 @@ DOUBLE_OPERAOTR:
     | 'in' | 'notin'
     | '&&' | 'and'
     | '||' | 'or'
+    | 'as' | 'cast'
+    | 'is' | 'instanceof' | 'typeof'
     |'+' | '-' | '*' | '/' | '%'
     ;
 
@@ -251,6 +255,7 @@ argumentValue
 
 constValue:
     constBool
+    | constClass
     | constNull
     | constMultilineString
     | constRenderString
@@ -270,6 +275,10 @@ constBool:
 
 constNull:
     TYPE_NULL
+    ;
+
+constClass:
+    TYPE_CLASS
     ;
 
 constString:
