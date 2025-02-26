@@ -1,12 +1,18 @@
 package i2f.extension.antlr4.script.tiny.impl;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
  * @date 2025/2/21 11:31
  */
 public interface TinyScriptResolver {
+    void debug(boolean enable);
+
+    void debugLog(Supplier<Object> supplier);
+
+    void openDebugger(String tag,Object context,String conditionExpression);
 
     void setValue(Object context, String name, Object value);
 

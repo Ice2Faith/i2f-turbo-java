@@ -46,7 +46,7 @@ import java.util.function.Supplier;
 @Data
 public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     protected final CopyOnWriteArrayList<ExecutorNode> nodes = new CopyOnWriteArrayList<>();
-    protected final AtomicBoolean debug = new AtomicBoolean(false);
+    protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
 
     {
@@ -58,6 +58,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new ContextConvertMethodClassNode());
         ret.add(new ContextInvokeMethodClassNode());
         ret.add(new ContextLoadPackageNode());
+        ret.add(new DebuggerNode());
         ret.add(new FunctionCallNode());
         ret.add(new JavaCallNode());
         ret.add(new LangAsyncAllNode());
@@ -117,14 +118,27 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public List<ExecutorNode> getNodes(){
+    public List<ExecutorNode> getNodes() {
         return nodes;
     }
 
     @Override
-    public void debugLog(Supplier<String> supplier) {
+    public void debug(boolean enable) {
+        this.debug.set(enable);
+    }
+
+    @Override
+    public void debugLog(Supplier<Object> supplier) {
         if (debug.get()) {
-            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), supplier.get()));
+            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        }
+    }
+
+    @Override
+    public void openDebugger(String tag,Object context,String conditionExpression){
+        if(debug.get()){
+            System.out.println("debugger ["+tag+"] ["+conditionExpression+"] wait for input line to continue.");
+            System.out.println("continue.");
         }
     }
 
@@ -394,7 +408,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalJavascriptNode.evalJavascript(text, context, this);
         } else if (FeatureConsts.EVAL_TINYSCRIPT.equals(feature)
-        ||FeatureConsts.EVAL_TS.equals(feature)) {
+                || FeatureConsts.EVAL_TS.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalTinyScriptNode.evalTinyScript(text, context, this);
         } else if (FeatureConsts.CLASS.equals(feature)) {
@@ -450,7 +464,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return value;
     }
 
-    public boolean toBoolean(Object obj){
+    public boolean toBoolean(Object obj) {
         return ObjectConvertor.toBoolean(obj);
     }
 
@@ -458,7 +472,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public Class<?> loadClass(String className) {
         Class<?> ret = ReflectResolver.loadClass(className);
-        if(ret!=null){
+        if (ret != null) {
             return ret;
         }
 

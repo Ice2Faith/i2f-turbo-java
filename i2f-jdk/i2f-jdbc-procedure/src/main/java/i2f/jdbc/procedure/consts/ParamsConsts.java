@@ -7,16 +7,16 @@ package i2f.jdbc.procedure.consts;
 public interface ParamsConsts {
 
     // 全局部分
-    String CONTEXT = "context";
-    String ENVIRONMENT = "env";
-    String BEANS = "beans";
+    String CONTEXT = "_context";
+    String ENVIRONMENT = "_env";
+    String BEANS = "_beans";
 
-    String DATASOURCES = "datasources";
+    String DATASOURCES = "_datasources";
 
-    String GLOBAL = "global";
+    String GLOBAL = "_global";
 
     // 连接部分
-    String CONNECTIONS = "connections";
+    String CONNECTIONS = "_connections";
     String DEFAULT_DATASOURCE = "primary";
 
     // 返回值

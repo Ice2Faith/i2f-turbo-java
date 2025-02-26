@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -24,10 +25,8 @@ import java.util.function.Supplier;
  * @desc
  */
 public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
-    public static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
     protected Object context = new HashMap<>();
     protected TinyScriptResolver resolver = new DefaultTinyScriptResolver();
-    protected volatile boolean debug = false;
 
     public TinyScriptVisitorImpl(Object context) {
         this.context = context;
@@ -40,24 +39,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         }
     }
 
-    public void debug(boolean enable) {
-        this.debug = enable;
-    }
-
-    public void debugLog(Supplier<Object> supplier) {
-        if (debug) {
-            System.out.println(String.format("%s [%5s] [%15s] : %s",
-                    LOG_TIME_FORMATTER.format(LocalDateTime.now()),
-                    "DEBUG",
-                    "tiny-script",
-                    String.valueOf(supplier.get())
-            ));
-        }
-    }
-
     public void debugNode(ParseTree context) {
-        debugLog(() -> context.getClass().getSimpleName().replace("$", ".") + ": " + context.getText());
+        resolver.debugLog(() -> context.getClass().getSimpleName().replace("$", ".") + ": " + context.getText());
     }
+
 
     @Override
     public Object visitScript(TinyScriptParser.ScriptContext ctx) {
@@ -160,6 +145,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         } else if (item instanceof TinyScriptParser.JsonValueContext) {
             TinyScriptParser.JsonValueContext nextCtx = (TinyScriptParser.JsonValueContext) item;
             return visitJsonValue(nextCtx);
+        } else if (item instanceof TinyScriptParser.DebuggerSegmentContext) {
+            TinyScriptParser.DebuggerSegmentContext nextCtx = (TinyScriptParser.DebuggerSegmentContext) item;
+            return visitDebuggerSegment(nextCtx);
         }
         throw new IllegalArgumentException("un-support express found : " + ctx.getText());
     }
@@ -186,7 +174,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (item instanceof TerminalNode) {
                 TerminalNode nextTerm = (TerminalNode) item;
                 String term = (String) visitTerminal(nextTerm);
-                if (!Arrays.asList("try", "catch", "(", "|", ")", "finally").equals(term)) {
+                if (!Arrays.asList("try", "catch", "(", "|", ")", "finally").contains(term)) {
                     throw new IllegalArgumentException("invalid grammar separator, expect 'try/catch/(/|/)/finally' buf found '" + term + "'!");
                 }
             } else if (item instanceof TinyScriptParser.TryBodyBlockContext) {
@@ -367,6 +355,47 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         }
 
         throw new IllegalArgumentException("un-support parent segment found : " + ctx.getText());
+    }
+
+    @Override
+    public Object visitDebuggerSegment(TinyScriptParser.DebuggerSegmentContext ctx) {
+        debugNode(ctx);
+        int count = ctx.getChildCount();
+        if (count < 1) {
+            throw new IllegalArgumentException("missing debugger segment!");
+        }
+        TinyScriptParser.NamingBlockContext namingCtx=null;
+        TinyScriptParser.ConditionBlockContext condCtx=null;
+        for (int i = 0; i < count; i++) {
+            ParseTree item = ctx.getChild(i);
+            if (item instanceof TerminalNode) {
+                TerminalNode nextTerm = (TerminalNode) item;
+                String term = (String) visitTerminal(nextTerm);
+                if (!Arrays.asList("debugger",  "(",  ")").contains(term)) {
+                    throw new IllegalArgumentException("invalid grammar separator, expect 'debugger/(/)' buf found '" + term + "'!");
+                }
+            } else if (item instanceof TinyScriptParser.ConditionBlockContext) {
+                TinyScriptParser.ConditionBlockContext nextCtx = (TinyScriptParser.ConditionBlockContext) item;
+                condCtx = nextCtx;
+            } else if (item instanceof TinyScriptParser.NamingBlockContext) {
+                TinyScriptParser.NamingBlockContext nextCtx = (TinyScriptParser.NamingBlockContext) item;
+                namingCtx = nextCtx;
+            }else {
+                throw new IllegalArgumentException("invalid debugger segment node type: " + item.getClass());
+            }
+        }
+        String tag=null;
+        boolean ok=true;
+        if(namingCtx!=null){
+            tag=(String)visitNamingBlock(namingCtx);
+        }
+        if(condCtx!=null){
+            ok=(Boolean)visitConditionBlock(condCtx);
+        }
+        if(ok){
+            resolver.openDebugger(tag,context,(condCtx==null?null:condCtx.getText()));
+        }
+        return null;
     }
 
     @Override
@@ -1240,6 +1269,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.FinallyBodyBlockContext) {
                 TinyScriptParser.FinallyBodyBlockContext nextCtx = (TinyScriptParser.FinallyBodyBlockContext) tree;
                 return visitFinallyBodyBlock(nextCtx);
+            } else if (tree instanceof TinyScriptParser.DebuggerSegmentContext) {
+                TinyScriptParser.DebuggerSegmentContext nextCtx = (TinyScriptParser.DebuggerSegmentContext) tree;
+                return visitDebuggerSegment(nextCtx);
             }
         } catch (TinyScriptBreakException e) {
 

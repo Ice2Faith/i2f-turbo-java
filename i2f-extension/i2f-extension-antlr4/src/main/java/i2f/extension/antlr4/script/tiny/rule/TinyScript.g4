@@ -132,7 +132,8 @@ script:
 
 
 express:
-    ifSegment
+    debuggerSegment
+    | ifSegment
     | foreachSegment
     | forSegment
     | whileSegment
@@ -147,6 +148,10 @@ express:
     | refValue
     | jsonValue
     | express DOUBLE_OPERAOTR express
+    ;
+
+debuggerSegment:
+    'debugger' (namingBlock)? ('(' conditionBlock ')')?
     ;
 
 trySegment:

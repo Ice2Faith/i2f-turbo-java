@@ -517,6 +517,27 @@ try{
 };
 ```
 
+### debugger 调试语法
+- 调试语法，用于帮助进行断点调试的
+- 需要结合集成开发环境的断点调试功能共同使用
+- 定义
+```shell
+debugger 断点标签 (断点条件);
+```
+- 说明，断点标签必须是一个满足Java类型格式的名称，也就是字母数字下划线组成，可分多段用.分隔
+- 断点条件是可选的，没有断点条件时，断点条件所携带的括号也不要有
+- 举例
+```shell
+debugger;
+debugger entry1;
+debugger (${count}==null);
+debugger user.loop (${item}==null);
+```
+- 配合IDE进行断点调试
+- 推荐对 DefaultTinyScriptResolver.openDebugger 方法添加断点
+- 也可以对 TinyScriptVisitorImpl.visitDebuggerSegment 方法添加断点
+
+
 ### 具名参数函数
 - 和常规函数调用一样，只不过，这种调用，适用于一些特殊的场景
 - 常常将参数名和值最终合并为一个Map对象调用目标方法

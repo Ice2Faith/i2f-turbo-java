@@ -92,7 +92,11 @@ public interface JdbcProcedureExecutor {
 
     Map<String, Object> newParams(ExecuteContext context);
 
-    void debugLog(Supplier<String> supplier);
+    void debug(boolean enable);
+
+    void debugLog(Supplier<Object> supplier);
+
+    void openDebugger(String tag,Object context,String conditionExpression);
 
     Class<?> loadClass(String className);
 

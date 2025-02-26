@@ -52,9 +52,13 @@
                 |context-load-package*
                 |context-invoke-method-class*
                 |context-convert-method-class*
+                |debugger*
                 )>
         <!ATTLIST procedure id CDATA #IMPLIED>
 
+        <!ELEMENT debugger (ANY|EMPTY)>
+        <!ATTLIST debugger test CDATA #IMPLIED>
+        <!ATTLIST debugger tag CDATA #IMPLIED>
 
         <!ELEMENT lang-println (ANY|EMPTY)>
         <!ATTLIST lang-println tag CDATA #IMPLIED>

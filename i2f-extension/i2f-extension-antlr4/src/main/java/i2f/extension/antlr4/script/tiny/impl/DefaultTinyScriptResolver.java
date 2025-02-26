@@ -13,11 +13,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -25,6 +26,34 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class DefaultTinyScriptResolver implements TinyScriptResolver {
     public static final MathContext MATH_CONTEXT = new MathContext(20, RoundingMode.HALF_UP);
+
+    public static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
+    protected final AtomicBoolean debug = new AtomicBoolean(true);
+
+    @Override
+    public void debug(boolean enable) {
+        this.debug.set(enable);
+    }
+
+    @Override
+    public void debugLog(Supplier<Object> supplier) {
+        if (debug.get()) {
+            System.out.println(String.format("%s [%5s] [%15s] : %s",
+                    LOG_TIME_FORMATTER.format(LocalDateTime.now()),
+                    "DEBUG",
+                    "tiny-script",
+                    String.valueOf(supplier.get())
+            ));
+        }
+    }
+
+    @Override
+    public void openDebugger(String tag, Object context, String conditionExpression) {
+        if (debug.get()) {
+            System.out.println("debugger [" + tag + "] [" + conditionExpression + "] wait for input line to continue.");
+            System.out.println("continue.");
+        }
+    }
 
     @Override
     public void setValue(Object context, String name, Object value) {

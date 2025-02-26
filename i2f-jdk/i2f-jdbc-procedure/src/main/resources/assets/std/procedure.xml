@@ -131,6 +131,16 @@ js引擎执行完毕之后，会返回之后一次执行的结果
  -->
 <procedure id="">
     <!--
+    调试器，在此处中断执行，等待继续执行
+    可用于在此时查看上下文变量
+    test用于作为条件断点使用
+    tag可用于标识是哪个断点
+    推荐对 BasicJdbcProcedureExecutor.openDebugger 方法添加断点
+    以结合此处的作用，使用到IDEA的断点功能
+    或者在 DebuggerNode 节点上添加断点也可实现
+    -->
+    <debugger tag="" test=""/>
+    <!--
     使用系统输出行，以tag开头，其余变量附加在其他属性上即可
     tag默认以字符串方式解析，等价于 tag.string
      -->
