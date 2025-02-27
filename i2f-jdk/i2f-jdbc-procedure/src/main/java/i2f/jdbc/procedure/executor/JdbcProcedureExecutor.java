@@ -97,6 +97,12 @@ public interface JdbcProcedureExecutor {
 
     void debugLog(Supplier<Object> supplier);
 
+    default void errorLog(Supplier<Object> supplier) {
+        errorLog(supplier, null);
+    }
+
+    void errorLog(Supplier<Object> supplier, Throwable e);
+
     void openDebugger(String tag,Object context,String conditionExpression);
 
     Class<?> loadClass(String className);

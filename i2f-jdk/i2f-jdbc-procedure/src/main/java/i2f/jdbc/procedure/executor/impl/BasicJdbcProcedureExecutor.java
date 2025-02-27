@@ -16,6 +16,7 @@ import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
@@ -135,6 +136,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
+    public void errorLog(Supplier<Object> supplier, Throwable e) {
+        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        if (e != null) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void openDebugger(String tag,Object context,String conditionExpression){
         if(debug.get()){
             System.out.println("debugger ["+tag+"] ["+conditionExpression+"] wait for input line to continue.");
@@ -154,6 +163,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     }
                     try {
                         item.exec(node, context, this);
+                    } catch (Throwable e) {
+                        errorLog(() -> "exec node error, at file:" + node.getLocationFile() + ", line:" + node.getLocationLineNumber() + ", message:" + e.getMessage(), e);
+                        if (e instanceof RuntimeException) {
+                            throw (RuntimeException) e;
+                        } else {
+                            throw new ThrowSignalException(e.getMessage(), e);
+                        }
                     } finally {
                         if (beforeNewConnection) {
                             closeConnections(context);
@@ -216,6 +232,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             }
             try {
                 execNode.exec(node, context, this);
+            } catch (Throwable e) {
+                errorLog(() -> "exec node error, at file:" + node.getLocationFile() + ", line:" + node.getLocationLineNumber() + ", message:" + e.getMessage(), e);
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                } else {
+                    throw new ThrowSignalException(e.getMessage(), e);
+                }
             } finally {
                 if (beforeNewConnection) {
                     closeConnections(context);

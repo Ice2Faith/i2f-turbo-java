@@ -8,9 +8,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,13 +40,44 @@ public class JdbcProcedureParser {
         return parse(document);
     }
 
+    public static XmlNode parse(URL url) throws Exception {
+        String name = null;
+        if (name == null) {
+            try {
+                String path = url.getPath();
+                File file = new File(path);
+                name = file.getName();
+            } catch (Exception e) {
+
+            }
+        }
+        if (name == null) {
+            try {
+                String path = url.getFile();
+                File file = new File(path);
+                name = file.getName();
+            } catch (Exception e) {
+
+            }
+        }
+        return parse(name, url.openStream());
+    }
+
+    public static XmlNode parse(File file) throws Exception {
+        return parse(file.getName(), new FileInputStream(file));
+    }
+
     public static XmlNode parse(InputStream is) throws Exception {
+        return parse(null, is);
+    }
+
+    public static XmlNode parse(String fileName, InputStream is) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         StreamUtil.streamCopy(is, bos);
         String str = new String(bos.toByteArray(), "UTF-8");
         str = removeProcedureDtd(str);
         ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes("UTF-8"));
-        Document document = XmlUtil.parseXml(bis);
+        Document document = XmlUtil.parseXml(fileName, bis);
         bis.close();
         return parse(document);
     }
@@ -102,6 +133,19 @@ public class JdbcProcedureParser {
             Map<String, String> rawAttrMap = XmlUtil.getAttributes(node);
             for (Map.Entry<String, String> entry : rawAttrMap.entrySet()) {
                 String key = entry.getKey();
+                try {
+                    if (XmlUtil.ATTR_FILE.equals(key)) {
+                        ret.setLocationFile(URLDecoder.decode(entry.getValue(), "UTF-8"));
+                        continue;
+                    }
+                    if (XmlUtil.ATTR_LINE_NUMBER.equals(key)) {
+                        String value = entry.getValue();
+                        ret.setLocationLineNumber(Integer.parseInt(value));
+                        continue;
+                    }
+                } catch (Exception e) {
+
+                }
                 String[] arr = key.split("\\.");
                 tagAttrMap.put(arr[0], entry.getValue());
                 for (int i = 1; i < arr.length; i++) {
