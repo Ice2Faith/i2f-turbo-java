@@ -235,6 +235,9 @@ public class XmlUtil {
         attributes.removeNamedItem(ATTR_FILE);
         attributes.removeNamedItem(ATTR_LINE_NUMBER);
         NodeList childNodes = node.getChildNodes();
+        if (childNodes == null) {
+            return;
+        }
         int len = childNodes.getLength();
         for (int i = 0; i < len; i++) {
             Node item = childNodes.item(i);
