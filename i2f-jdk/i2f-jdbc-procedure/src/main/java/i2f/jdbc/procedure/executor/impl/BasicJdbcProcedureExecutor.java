@@ -301,6 +301,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         ret.put(ParamsConsts.GLOBAL, new HashMap<>());
 
+        ret.put(ParamsConsts.EXECUTOR,this);
         return ret;
     }
 
@@ -317,6 +318,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.put(ParamsConsts.DATASOURCES, context.getParams().get(ParamsConsts.DATASOURCES));
 
         ret.put(ParamsConsts.GLOBAL, context.getParams().get(ParamsConsts.GLOBAL));
+
+        ret.put(ParamsConsts.EXECUTOR,this);
         return ret;
     }
 
