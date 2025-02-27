@@ -25,4 +25,7 @@ public class XmlNode {
     protected String tagBody;
     protected String textBody;
     protected List<XmlNode> children;
+
+    protected String locationFile;
+    protected int locationLineNumber = -1;
 }

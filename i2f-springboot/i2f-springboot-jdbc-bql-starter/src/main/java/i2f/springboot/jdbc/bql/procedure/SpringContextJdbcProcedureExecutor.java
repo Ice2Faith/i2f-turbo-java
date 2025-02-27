@@ -156,4 +156,13 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
             log.debug(String.valueOf(supplier.get()));
         }
     }
+
+    @Override
+    public void errorLog(Supplier<Object> supplier, Throwable e) {
+        if (e != null) {
+            log.error(String.valueOf(supplier.get()), e);
+        } else {
+            log.error(String.valueOf(supplier.get()));
+        }
+    }
 }

@@ -18,7 +18,6 @@ import i2f.reflect.ReflectResolver;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -36,7 +35,7 @@ public class TestProcedureExecutor {
 
     public static void testProcedure() throws Exception {
         File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test/test-procedure.xml");
-        XmlNode node = JdbcProcedureParser.parse(new FileInputStream(file));
+        XmlNode node = JdbcProcedureParser.parse(file);
 
         BasicJdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
         executor.getDebug().set(true);
@@ -84,7 +83,7 @@ public class TestProcedureExecutor {
 
     public static void testBasic() throws Exception {
         File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test/test-basic.xml");
-        XmlNode node = JdbcProcedureParser.parse(new FileInputStream(file));
+        XmlNode node = JdbcProcedureParser.parse(file);
 
 //        BasicJdbcProcedureExecutor executor = new BasicJdbcProcedureExecutor();
 

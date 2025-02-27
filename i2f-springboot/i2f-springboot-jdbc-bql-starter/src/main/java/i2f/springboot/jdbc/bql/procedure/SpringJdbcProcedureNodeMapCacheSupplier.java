@@ -65,7 +65,7 @@ public class SpringJdbcProcedureNodeMapCacheSupplier extends AbstractJdbcProcedu
 
         for (Resource resource : resources) {
             try (InputStream is = resource.getInputStream()) {
-                XmlNode node = JdbcProcedureParser.parse(is);
+                XmlNode node = JdbcProcedureParser.parse(resource.getFilename(), is);
                 String id = node.getTagAttrMap().get("id");
                 String filename = resource.getFilename();
                 String fileNameId=filename;

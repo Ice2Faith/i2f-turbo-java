@@ -3,7 +3,6 @@ package i2f.jdbc.procedure.caller.impl;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
-import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,8 +24,8 @@ public class ListableJdbcProcedureNodeMapCacheSupplier extends AbstractJdbcProce
     public Map<String, XmlNode> parseResources() {
         Map<String, XmlNode> ret = new HashMap<>();
         for (URL resource : resourceList) {
-            try (InputStream is = resource.openStream()) {
-                XmlNode node = JdbcProcedureParser.parse(is);
+            try {
+                XmlNode node = JdbcProcedureParser.parse(resource);
                 String id = node.getTagAttrMap().get("id");
                 if (id != null) {
                     ret.put(id, node);

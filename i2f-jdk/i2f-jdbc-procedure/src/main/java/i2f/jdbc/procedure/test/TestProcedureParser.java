@@ -4,7 +4,6 @@ import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.io.File;
-import java.io.FileInputStream;
 
 /**
  * @author Ice2Faith
@@ -12,8 +11,8 @@ import java.io.FileInputStream;
  */
 public class TestProcedureParser {
     public static void main(String[] args) throws Exception {
-        File file = new File("./i2f-jdk/i2f-jdbc-producer/src/main/java/i2f/jdbc/producer/producer.xml");
-        XmlNode node = JdbcProcedureParser.parse(new FileInputStream(file));
+        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test/test-basic.xml");
+        XmlNode node = JdbcProcedureParser.parse(file);
 
         System.out.println("ok");
     }

@@ -1,5 +1,6 @@
 package i2f.xml;
 
+import i2f.match.regex.RegexUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -15,6 +16,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +29,8 @@ import java.util.Map;
  * @desc
  */
 public class XmlUtil {
+    public static final String ATTR_FILE = "__file";
+    public static final String ATTR_LINE_NUMBER = "__line";
 
     public static DocumentBuilderFactory getFactory() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -54,19 +59,90 @@ public class XmlUtil {
         return parseXml(bytes);
     }
 
+    public static Document parseXml(URL url) throws Exception {
+        String name = null;
+        if (name == null) {
+            try {
+                String path = url.getPath();
+                File file = new File(path);
+                name = file.getName();
+            } catch (Exception e) {
+
+            }
+        }
+        if (name == null) {
+            try {
+                String path = url.getFile();
+                File file = new File(path);
+                name = file.getName();
+            } catch (Exception e) {
+
+            }
+        }
+        return parseXml(name, url.openStream());
+    }
+
     public static Document parseXml(File file) throws Exception {
         FileInputStream fis = new FileInputStream(file);
-        return parseXml(fis);
+        return parseXml(file.getName(), fis);
     }
 
     public static Document parseXml(InputStream is) throws Exception {
+        return parseXml(null, is);
+    }
+
+    public static Document parseXml(String fileName, InputStream is) throws Exception {
         DocumentBuilderFactory factory = getFactory();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        Document document = builder.parse(is);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] buff = new byte[4096];
+        int len = 0;
+        while ((len = is.read(buff)) > 0) {
+            bos.write(buff, 0, len);
+        }
         is.close();
 
-        return document;
+        try {
+
+
+            if (fileName == null) {
+                fileName = "";
+            }
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+
+            String xmlFileName = fileName;
+            StringBuilder xml = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
+            String line = null;
+            int lineNumber = 1;
+            while ((line = reader.readLine()) != null) {
+                String locationAttributes =
+                        " " + ATTR_LINE_NUMBER + "=\"" + lineNumber + "\""
+                                + " " + ATTR_FILE + "=\"" + xmlFileName + "\""
+                                + " ";
+                String str = RegexUtil.regexFindAndReplace(line, "<[a-zA-Z0-9\\-\\_:]+(\\s+|\\s*>)", (group) -> {
+                    if (group.endsWith(">")) {
+                        return group.substring(0, group.length() - 1) + locationAttributes + ">";
+                    } else {
+                        return group + locationAttributes;
+                    }
+                });
+                xml.append(str).append("\n");
+                lineNumber++;
+            }
+
+            is = new ByteArrayInputStream(xml.toString().getBytes());
+
+            Document document = builder.parse(is);
+            is.close();
+            return document;
+        } catch (Exception e) {
+            is = new ByteArrayInputStream(bos.toByteArray());
+            Document document = builder.parse(is);
+            is.close();
+            return document;
+        }
     }
 
     public static Node getRootNode(Document document) {
