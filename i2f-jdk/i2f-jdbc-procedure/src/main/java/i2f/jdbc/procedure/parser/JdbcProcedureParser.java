@@ -158,7 +158,7 @@ public class JdbcProcedureParser {
             ret.setTagName(XmlUtil.getTagName(node));
             ret.setTagAttrMap(tagAttrMap);
             ret.setAttrFeatureMap(attrFeatureMap);
-            ret.setTagBody(XmlUtil.extraInnerXml(node));
+            ret.setTagBody(XmlUtil.extraInnerXml(node, true));
             ret.setTextBody(XmlUtil.getNodeContent(node));
             List<XmlNode> children = new ArrayList<>();
             NodeList childNodes = node.getChildNodes();

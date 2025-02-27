@@ -227,7 +227,26 @@ public class XmlUtil {
         return node.getNodeName();
     }
 
+    public static void removeNodeLocationAttributes(Node node) {
+        if (node == null) {
+            return;
+        }
+        NamedNodeMap attributes = node.getAttributes();
+        attributes.removeNamedItem(ATTR_FILE);
+        attributes.removeNamedItem(ATTR_LINE_NUMBER);
+        NodeList childNodes = node.getChildNodes();
+        int len = childNodes.getLength();
+        for (int i = 0; i < len; i++) {
+            Node item = childNodes.item(i);
+            removeNodeLocationAttributes(item);
+        }
+    }
+
     public static String extraInnerXml(Node node) throws ParserConfigurationException, TransformerException {
+        return extraInnerXml(node, false);
+    }
+
+    public static String extraInnerXml(Node node, boolean removeLocationAttribute) throws ParserConfigurationException, TransformerException {
         // 创建一个新的Document来构建新的XML结构
         DocumentBuilderFactory factory = getFactory();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -241,6 +260,10 @@ public class XmlUtil {
         NamedNodeMap attributes = importedNode.getAttributes();
         while (attributes != null && attributes.getLength() > 0) {
             attributes.removeNamedItem(attributes.item(0).getNodeName());
+        }
+
+        if (removeLocationAttribute) {
+            removeNodeLocationAttributes(newDoc);
         }
 
         // 将新文档转换为字符串，只保留文本内容
