@@ -418,8 +418,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 open = true;
             } else if (item instanceof TinyScriptParser.ScriptBlockContext) {
                 TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) item;
+                if(!open){
+                    elseCtx = nextCtx;
+                }
                 open = false;
-                elseCtx = nextCtx;
                 if (cond) {
                     Object value = visitScriptBlock(nextCtx);
                     return value;
