@@ -13,8 +13,13 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
+import org.apache.velocity.runtime.resource.util.StringResourceRepository;
+import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -105,19 +110,7 @@ public class VelocityGenerator {
      * @throws IOException
      */
     public static String render(String template, Map<String, Object> params) throws IOException {
-//        URL url=Thread.currentThread().getContextClassLoader().getResource("");
-//        String filePath=url.getFile();
-        String filePath = System.getProperty("java.io.tmpdir");
-
-        String fileName = "_tpl_" + UUID.randomUUID().toString().replaceAll("-", "") + ".vm";
-        File file = new File(filePath, fileName);
-        OutputStream os = new FileOutputStream(file);
-        os.write(template.getBytes("UTF-8"));
-        os.flush();
-        os.close();
-        String rs = render(null, false, file.getAbsolutePath(), params);
-        file.delete();
-        return rs;
+        return renderByStringResource(null, template, params);
     }
 
     /**
@@ -130,37 +123,67 @@ public class VelocityGenerator {
      * @param params        渲染参数
      * @return
      */
-    public static String render(Properties config, boolean isInClassPath, String fileName, Map<String, Object> params) {
+    public static String renderByFileResource(Properties config, boolean isInClassPath, String fileName, Map<String, Object> params) {
         //初始化引擎，默认从classpath加载模板文件
         VelocityEngine engine = new VelocityEngine();
 
+        settingEngine(engine);
+
+        String templateName = useFileResource(engine, isInClassPath, fileName);
+
+        initEngine(config, engine);
+
+        return renderAsString(engine, templateName, params);
+    }
+
+    public static String renderByStringResource(Properties config, String template, Map<String, Object> params) {
+        //初始化引擎，默认从classpath加载模板文件
+        VelocityEngine engine = new VelocityEngine();
+
+        settingEngine(engine);
+
+        // 设置资源加载器为字符串资源加载器
+        engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "string");
+        engine.setProperty("resource.loader.string.class", StringResourceLoader.class.getName());
+        engine.setProperty("resource.loader.string.repository.name", "stringRepo");
+        engine.setProperty("resource.loader.string.repository.class", StringResourceRepositoryImpl.class.getName());
+
+        initEngine(config, engine);
+
+        String templateName = useStringResource(engine, template);
+
+        return renderAsString(engine, templateName, params);
+    }
+
+    public static String useStringResource(VelocityEngine engine, String template) {
+        // 创建并配置字符串资源仓库
+        StringResourceRepository repo = (StringResourceRepository) engine.getApplicationAttribute("stringRepo");
+        if (repo == null) {
+            repo = StringResourceLoader.getRepository();
+            engine.setApplicationAttribute("stringRepo", repo);
+        }
+        String templateName = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
+        repo.putStringResource(templateName, template);
+
+        return templateName;
+    }
+
+    public static String useFileResource(VelocityEngine engine, boolean isInClassPath, String fileName) {
+        String templateName = fileName;
         if (isInClassPath) {
             engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
             engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
         } else {
             File file = new File(fileName);
             engine.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH, file.getParentFile().getAbsolutePath());
-            fileName = file.getName();
+            templateName = file.getName();
         }
-        engine.loadDirective(TrimDirective.class.getName());
-        engine.loadDirective(ReplaceAllDirective.class.getName());
-        engine.loadDirective(SqlWhereDirective.class.getName());
-        engine.loadDirective(SqlSetDirective.class.getName());
-        engine.loadDirective(RichForDirective.class.getName());
-        engine.loadDirective(ForiDirective.class.getName());
+        return templateName;
+    }
 
-        engine.setProperty(Velocity.ENCODING_DEFAULT, "UTF-8");
-        engine.setProperty(Velocity.OUTPUT_ENCODING, "UTF-8");
-        engine.setProperty(Velocity.INPUT_ENCODING, "UTF-8");
-        //有指定配置则使用配置覆盖
-        if (config == null || config.isEmpty()) {
-            engine.init();
-        } else {
-            engine.init(config);
-        }
-
+    public static String renderAsString(VelocityEngine engine, String templateName, Map<String, Object> params) {
         //创建模板对象
-        Template template = engine.getTemplate(fileName);
+        Template template = engine.getTemplate(templateName);
 
         //创建绑定对象
         VelocityContext ctx = new VelocityContext(params);
@@ -173,6 +196,28 @@ public class VelocityGenerator {
         template.merge(ctx, writer);
 
         return writer.toString();
+    }
+
+    public static void settingEngine(VelocityEngine engine) {
+        engine.loadDirective(TrimDirective.class.getName());
+        engine.loadDirective(ReplaceAllDirective.class.getName());
+        engine.loadDirective(SqlWhereDirective.class.getName());
+        engine.loadDirective(SqlSetDirective.class.getName());
+        engine.loadDirective(RichForDirective.class.getName());
+        engine.loadDirective(ForiDirective.class.getName());
+
+        engine.setProperty(Velocity.ENCODING_DEFAULT, "UTF-8");
+        engine.setProperty(Velocity.OUTPUT_ENCODING, "UTF-8");
+        engine.setProperty(Velocity.INPUT_ENCODING, "UTF-8");
+    }
+
+    public static void initEngine(Properties config, VelocityEngine engine) {
+        //有指定配置则使用配置覆盖
+        if (config == null || config.isEmpty()) {
+            engine.init();
+        } else {
+            engine.init(config);
+        }
     }
 
 }
