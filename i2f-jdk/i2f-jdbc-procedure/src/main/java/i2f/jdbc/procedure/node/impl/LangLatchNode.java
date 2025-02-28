@@ -4,7 +4,7 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.concurrent.CountDownLatch;
@@ -13,7 +13,7 @@ import java.util.concurrent.CountDownLatch;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangLatchNode implements ExecutorNode {
+public class LangLatchNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-latch";
 
     @Override
@@ -25,7 +25,7 @@ public class LangLatchNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         int count = (int) executor.attrValue(AttrConsts.COUNT, FeatureConsts.EVAL, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null && !result.isEmpty()) {

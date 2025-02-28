@@ -2,7 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
  * @author Ice2Faith
  * @date 2025/1/20 10:37
  */
-public class ProcedureNode implements ExecutorNode {
+public class ProcedureNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "procedure";
     public static final ProcedureNode INSTANCE = new ProcedureNode();
 
@@ -24,7 +24,7 @@ public class ProcedureNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
         for (int i = 0; i < children.size(); i++) {
             XmlNode item = children.get(i);

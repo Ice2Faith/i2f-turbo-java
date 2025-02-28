@@ -11,7 +11,7 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.match.regex.RegexUtil;
 import i2f.reflect.ReflectResolver;
@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangEvalJavaNode implements ExecutorNode {
+public class LangEvalJavaNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-eval-java";
     public static final String CLASS_NAME_HOLDER = "$#$##$###";
     public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s*");
@@ -42,7 +42,7 @@ public class LangEvalJavaNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         List<XmlNode> children = node.getChildren();
         XmlNode importNode = null;

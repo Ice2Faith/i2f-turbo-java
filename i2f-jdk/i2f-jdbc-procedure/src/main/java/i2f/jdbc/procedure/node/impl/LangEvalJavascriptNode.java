@@ -3,7 +3,7 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.script.ScriptProvider;
 
@@ -14,7 +14,7 @@ import javax.script.ScriptException;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangEvalJavascriptNode implements ExecutorNode {
+public class LangEvalJavascriptNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-eval-javascript";
     public static final String ALIAS_TAG_NAME="lang-eval-js";
 
@@ -28,7 +28,7 @@ public class LangEvalJavascriptNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         String script = node.getTextBody();
         Object obj = evalJavascript(script, context, executor);

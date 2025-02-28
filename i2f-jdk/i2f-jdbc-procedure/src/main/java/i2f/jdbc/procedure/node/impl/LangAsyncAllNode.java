@@ -4,7 +4,7 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
@@ -15,7 +15,7 @@ import java.util.concurrent.CountDownLatch;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangAsyncAllNode implements ExecutorNode {
+public class LangAsyncAllNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-async-all";
 
     @Override
@@ -27,7 +27,7 @@ public class LangAsyncAllNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         Boolean await = (Boolean) executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context);
 
         List<XmlNode> children = node.getChildren();

@@ -4,8 +4,8 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.base.NodeTime;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangAsyncNode implements ExecutorNode {
+public class LangAsyncNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-async";
 
     @Override
@@ -28,7 +28,7 @@ public class LangAsyncNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         Boolean await = (Boolean) executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context);
         Long delay = (Long) executor.attrValue(AttrConsts.DELAY, FeatureConsts.LONG, node, context);
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);

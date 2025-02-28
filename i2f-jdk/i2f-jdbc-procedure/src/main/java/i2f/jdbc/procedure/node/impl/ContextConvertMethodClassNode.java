@@ -4,14 +4,14 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 /**
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class ContextConvertMethodClassNode implements ExecutorNode {
+public class ContextConvertMethodClassNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "context-convert-method-class";
 
     @Override
@@ -23,7 +23,7 @@ public class ContextConvertMethodClassNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String clazz = node.getTagAttrMap().get(AttrConsts.CLASS);
         if (clazz != null && !"".equals(clazz)) {
             Class<?> cls = executor.loadClass(clazz);

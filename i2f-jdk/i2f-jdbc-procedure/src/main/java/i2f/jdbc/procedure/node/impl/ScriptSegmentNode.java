@@ -3,7 +3,7 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 
@@ -11,7 +11,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class ScriptSegmentNode implements ExecutorNode {
+public class ScriptSegmentNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "script-segment";
 
     @Override
@@ -23,7 +23,7 @@ public class ScriptSegmentNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String id = node.getTagAttrMap().get(AttrConsts.ID);
         if (id != null && !id.isEmpty()) {
             context.getNodeMap().put(id, node);
