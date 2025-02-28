@@ -4,8 +4,8 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.base.SqlDialect;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
@@ -19,7 +19,7 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class SqlCursorNode implements ExecutorNode {
+public class SqlCursorNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "sql-cursor";
 
     @Override
@@ -31,7 +31,7 @@ public class SqlCursorNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
         if (children == null || children.isEmpty()) {
             return;

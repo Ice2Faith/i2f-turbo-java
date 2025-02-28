@@ -163,13 +163,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     }
                     try {
                         item.exec(node, context, this);
-                    } catch (Throwable e) {
-                        errorLog(() -> "exec node error, at file:" + node.getLocationFile() + ", line:" + node.getLocationLineNumber() + ", message:" + e.getMessage(), e);
-                        if (e instanceof RuntimeException) {
-                            throw (RuntimeException) e;
-                        } else {
-                            throw new ThrowSignalException(e.getMessage(), e);
-                        }
                     } finally {
                         if (beforeNewConnection) {
                             closeConnections(context);
@@ -232,13 +225,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             }
             try {
                 execNode.exec(node, context, this);
-            } catch (Throwable e) {
-                errorLog(() -> "exec node error, at file:" + node.getLocationFile() + ", line:" + node.getLocationLineNumber() + ", message:" + e.getMessage(), e);
-                if (e instanceof RuntimeException) {
-                    throw (RuntimeException) e;
-                } else {
-                    throw new ThrowSignalException(e.getMessage(), e);
-                }
             } finally {
                 if (beforeNewConnection) {
                     closeConnections(context);

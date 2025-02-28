@@ -3,7 +3,7 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangForeachNode implements ExecutorNode {
+public class LangForeachNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-foreach";
 
     @Override
@@ -28,7 +28,7 @@ public class LangForeachNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String collectionScript = node.getTagAttrMap().get(AttrConsts.COLLECTION);
         String itemName = node.getTagAttrMap().get(AttrConsts.ITEM);
         String firstName = node.getTagAttrMap().get(AttrConsts.FIRST);

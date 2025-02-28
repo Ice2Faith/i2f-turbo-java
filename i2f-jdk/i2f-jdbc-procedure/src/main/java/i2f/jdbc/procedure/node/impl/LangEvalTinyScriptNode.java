@@ -8,7 +8,7 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.reference.Reference;
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangEvalTinyScriptNode implements ExecutorNode {
+public class LangEvalTinyScriptNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-eval-tinyscript";
     public static final String ALIAS_TAG_NAME = "lang-eval-ts";
 
@@ -37,7 +37,7 @@ public class LangEvalTinyScriptNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         String script = node.getTextBody();
         Object obj = evalTinyScript(script, context, executor);

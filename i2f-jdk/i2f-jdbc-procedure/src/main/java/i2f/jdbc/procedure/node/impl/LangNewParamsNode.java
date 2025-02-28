@@ -4,7 +4,7 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.Map;
@@ -13,7 +13,7 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangNewParamsNode implements ExecutorNode {
+public class LangNewParamsNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-new-params";
 
     @Override
@@ -25,7 +25,7 @@ public class LangNewParamsNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         Map<String, Object> newParams = executor.newParams(context);
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {

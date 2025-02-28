@@ -9,8 +9,8 @@ import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.base.SqlDialect;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.reflect.vistor.Visitor;
@@ -24,7 +24,7 @@ import java.util.*;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class SqlEtlNode implements ExecutorNode {
+public class SqlEtlNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "sql-etl";
 
     @Override
@@ -36,7 +36,7 @@ public class SqlEtlNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
         if (children == null || children.isEmpty()) {
             return;

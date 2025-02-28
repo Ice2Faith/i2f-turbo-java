@@ -6,7 +6,7 @@ import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
-import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.reflect.ReflectResolver;
@@ -18,7 +18,7 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class JavaCallNode implements ExecutorNode {
+public class JavaCallNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "java-call";
 
     @Override
@@ -30,7 +30,7 @@ public class JavaCallNode implements ExecutorNode {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String targetExpression = node.getTagAttrMap().get(AttrConsts.TARGET);
         Map<String,Object> beanMap = context.paramsComputeIfAbsent(ParamsConsts.BEANS,(key)->new HashMap<>());
         Object target=beanMap.get(targetExpression);
