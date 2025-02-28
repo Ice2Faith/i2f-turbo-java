@@ -7,7 +7,6 @@ import i2f.reflect.ReflectResolver;
 import javax.tools.*;
 import java.io.*;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -228,19 +227,13 @@ public class MemoryCompiler {
      */
     public static Object compileCall(String javaSourceCode, String javaFileName, String fullClassName, String methodName, Object... args) throws Exception {
         Class<?> clazz = findCompileClass(javaSourceCode, javaFileName, fullClassName);
-        Method method = ReflectResolver.matchMethod(clazz, methodName, args);
+        List<Object> callArgs = Arrays.asList(args);
+        Method method = ReflectResolver.matchExecMethod(clazz, methodName, callArgs);
         if (method == null) {
             throw new NoSuchMethodException(fullClassName + "." + methodName + " with args count " + args.length);
         }
-        if (Modifier.isStatic(method.getModifiers())) {
-            Object ret = ReflectResolver.invokeMethodeDirect(null, method, args);
-            return ret;
-        }
-        Object obj = ReflectResolver.getInstance(clazz);
-        Object ret = ReflectResolver.invokeMethodeDirect(obj, method, args);
+        Object ret = ReflectResolver.execMethod(null, method, callArgs);
         return ret;
-
-
     }
 
     public static Object evaluateExpression(String expression, Object root) throws Exception {

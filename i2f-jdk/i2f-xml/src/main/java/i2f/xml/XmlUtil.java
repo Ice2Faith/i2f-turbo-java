@@ -232,8 +232,16 @@ public class XmlUtil {
             return;
         }
         NamedNodeMap attributes = node.getAttributes();
-        attributes.removeNamedItem(ATTR_FILE);
-        attributes.removeNamedItem(ATTR_LINE_NUMBER);
+        if(attributes!=null){
+            Node fileNode = attributes.getNamedItem(ATTR_FILE);
+            if(fileNode!=null){
+                attributes.removeNamedItem(ATTR_FILE);
+            }
+            Node lineNode = attributes.getNamedItem(ATTR_LINE_NUMBER);
+            if(lineNode!=null) {
+                attributes.removeNamedItem(ATTR_LINE_NUMBER);
+            }
+        }
         NodeList childNodes = node.getChildNodes();
         if (childNodes == null) {
             return;
