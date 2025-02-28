@@ -4,6 +4,7 @@ import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
@@ -21,8 +22,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 throw (ControlSignalException)e;
             }
             executor.errorLog(() -> "exec node error, at node:"+node.getTagName()+", file:" + node.getLocationFile() + ", line:" + node.getLocationLineNumber() +", attrs:"+node.getTagAttrMap()+ ", message:" + e.getMessage(), e);
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
+            if(e instanceof SignalException){
+                throw (SignalException)e;
             } else {
                 throw new ThrowSignalException(e.getMessage(), e);
             }

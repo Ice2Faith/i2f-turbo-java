@@ -16,7 +16,6 @@ import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
-import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
@@ -730,7 +729,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
             debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
-            List<?> list = JdbcResolver.list(conn, bql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
+            List<?> list = JdbcResolver.list(conn, bql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
             return list;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -765,7 +764,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
             debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
-            Object row = JdbcResolver.find(conn, bql, resultType, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
+            Object row = JdbcResolver.find(conn, bql, resultType, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
             return row;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -801,7 +800,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             IPageWrapper wrapper = PageWrappers.wrapper(conn);
             BindSql pageBql = wrapper.apply(bql, ApiPage.of(pageIndex, pageSize));
             debugLog(() -> "sqlQueryPage:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + pageBql);
-            List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toLowerCase) : null);
+            List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
             return list;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);

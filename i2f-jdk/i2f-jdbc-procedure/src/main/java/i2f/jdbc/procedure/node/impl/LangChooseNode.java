@@ -36,7 +36,7 @@ public class LangChooseNode extends AbstractExecutorNode {
             }
             if ("lang-when".equals(itemNode.getTagName())) {
                 if (testNode == null) {
-                    boolean ok = (boolean) executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, node, context);
+                    boolean ok = (boolean) executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, itemNode, context);
                     if (ok) {
                         testNode = itemNode;
                     }
