@@ -4,6 +4,7 @@ import i2f.extension.antlr4.script.tiny.TinyScriptLexer;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
 import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
+import i2f.lru.LruMap;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
@@ -20,6 +21,7 @@ import java.util.function.Predicate;
  */
 public class TinyScript {
     public static final ConcurrentHashMap<String, CopyOnWriteArrayList<Method>> BUILTIN_METHOD=new ConcurrentHashMap<>();
+    public static final LruMap<String,TinyScriptParser.ScriptContext> TREE_MAP=new LruMap<>(4096);
 
     static {
         registryBuiltMethodByStaticMethod(String.class,(method)->{
@@ -79,9 +81,22 @@ public class TinyScript {
     }
 
     public static TinyScriptParser.ScriptContext parse(String formula) {
+        try {
+            TinyScriptParser.ScriptContext ret = TREE_MAP.get(formula);
+            if(ret!=null){
+                return ret;
+            }
+        } catch (Exception e) {
+
+        }
         CommonTokenStream tokens = parseTokens(formula);
         TinyScriptParser parser = new TinyScriptParser(tokens);
         TinyScriptParser.ScriptContext tree = parser.script();
+        try {
+            TREE_MAP.put(formula,tree);
+        } catch (Exception e) {
+
+        }
         return tree;
     }
 

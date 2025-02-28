@@ -114,9 +114,11 @@ public class LangInvokeNode extends AbstractExecutorNode {
             Method method = null;
             if (targetScript == null || targetScript.isEmpty()) {
                 List<Method> list= ContextHolder.INVOKE_METHOD_MAP.get(methodName);
-                method = ReflectResolver.matchExecutable(list, callArgs);
-                if (clazz == null) {
-                    clazz = method.getDeclaringClass();
+                if(list!=null && !list.isEmpty()) {
+                    method = ReflectResolver.matchExecutable(list, callArgs);
+                    if (clazz == null) {
+                        clazz = method.getDeclaringClass();
+                    }
                 }
             }
 

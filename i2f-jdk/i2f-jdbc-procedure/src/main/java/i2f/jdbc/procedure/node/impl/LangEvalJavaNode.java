@@ -13,13 +13,16 @@ import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.lru.LruMap;
 import i2f.match.regex.RegexUtil;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -132,7 +135,27 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
             .append("import ").append("java.time.zone.*").append(";").append("\n")
             .toString();
 
+    public static final LruMap<String,Map.Entry<String,String>> FULL_JAVA_SOURCE_MAP=new LruMap<>(2048);
+
     public static Object evalJava(ExecuteContext context, JdbcProcedureExecutor executor, String importSegment, String memberSegment, String bodySegment) {
+        Map.Entry<String, String> codeEntry = getFullJavaSourceCode(importSegment, memberSegment, bodySegment);
+        String className= codeEntry.getKey();
+        String javaSourceCode=codeEntry.getValue();
+        Object obj = null;
+        try {
+            obj = MemoryCompiler.compileCall(javaSourceCode,
+                    className + ".java",
+                    className,
+                    "exec",
+                    context, executor, context.getParams()
+            );
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+        return obj;
+    }
+
+    public static Map.Entry<String,String> getFullJavaSourceCode(String importSegment, String memberSegment, String bodySegment){
         if (importSegment == null) {
             importSegment = "";
         }
@@ -142,6 +165,12 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
         if (bodySegment == null) {
             bodySegment = "";
         }
+        String cacheKey=importSegment+"###"+memberSegment+"###"+bodySegment+"###";
+        Map.Entry<String,String> ret = FULL_JAVA_SOURCE_MAP.get(cacheKey);
+        if(ret!=null){
+            return new AbstractMap.SimpleEntry<>(ret.getKey(),ret.getValue());
+        }
+
         bodySegment = bodySegment.trim();
         Matcher matcher = RETURN_PATTERN.matcher(bodySegment);
         StringBuilder builder = new StringBuilder();
@@ -191,17 +220,12 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
         String className = "RC" + hexBuilder;
         javaSourceCode = javaSourceCode.replace(CLASS_NAME_HOLDER, className);
 
-        Object obj = null;
-        try {
-            obj = MemoryCompiler.compileCall(javaSourceCode,
-                    className + ".java",
-                    className,
-                    "exec",
-                    context, executor, context.getParams()
-            );
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+        Map.Entry<String,String> val= new AbstractMap.SimpleEntry<>(className,javaSourceCode);
+        try{
+            FULL_JAVA_SOURCE_MAP.put(cacheKey,new AbstractMap.SimpleEntry<>(val.getKey(),val.getValue()));
+        }catch(Exception e){
+
         }
-        return obj;
+        return val;
     }
 }
