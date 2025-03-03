@@ -1,6 +1,7 @@
 package i2f.jdbc.proxy.xml.mybatis.inflater;
 
 import i2f.bindsql.BindSql;
+import i2f.bql.core.Bql;
 import i2f.compiler.MemoryCompiler;
 import i2f.database.type.DatabaseType;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
@@ -419,12 +420,34 @@ public class MybatisMapperInflater {
             String expression = patten.trim();
             if (isDolar) {
                 Object obj = evalExpression(expression, workParam);
+                if(obj instanceof Bql){
+                    Bql<?> bql = (Bql<?>) obj;
+                    BindSql ql = bql.$$();
+                    args.addAll(ql.getArgs());
+                    return ql.getSql();
+                }
+                if(obj instanceof BindSql){
+                    BindSql bql = (BindSql) obj;
+                    args.addAll(bql.getArgs());
+                    return bql.getSql();
+                }
                 return obj == null ? "" : String.valueOf(obj);
             } else {
                 String[] arr = expression.split(",");
                 expression = arr[0];
                 // TODO resolve jdbcType=,handler=,...
                 Object obj = evalExpression(expression, workParam);
+                if(obj instanceof Bql){
+                    Bql<?> bql = (Bql<?>) obj;
+                    BindSql ql = bql.$$();
+                    args.addAll(ql.getArgs());
+                    return ql.getSql();
+                }
+                if(obj instanceof BindSql){
+                    BindSql bql = (BindSql) obj;
+                    args.addAll(bql.getArgs());
+                    return bql.getSql();
+                }
                 args.add(obj);
                 return "?";
             }
