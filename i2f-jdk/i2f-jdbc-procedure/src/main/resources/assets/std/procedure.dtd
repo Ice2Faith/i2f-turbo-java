@@ -458,10 +458,12 @@
         <!ELEMENT lang-string (ANY|EMPTY)>
         <!ATTLIST lang-string result CDATA #IMPLIED>
         <!ATTLIST lang-string result.trim CDATA #IMPLIED>
+        <!ATTLIST lang-string _lang CDATA #IMPLIED>
 
         <!ELEMENT lang-render (ANY|EMPTY)>
         <!ATTLIST lang-render result CDATA #IMPLIED>
         <!ATTLIST lang-render result.trim CDATA #IMPLIED>
+        <!ATTLIST lang-render _lang CDATA #IMPLIED>
 
         <!ELEMENT lang-if (ANY|EMPTY)>
         <!ATTLIST lang-if test CDATA #IMPLIED>

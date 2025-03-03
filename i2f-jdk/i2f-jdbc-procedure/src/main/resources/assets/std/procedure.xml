@@ -262,12 +262,20 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     <lang-eval value="" result="">
         11
     </lang-eval>
-    <!-- 用于指定一段字符串到result指定的变量名中 -->
-    <lang-string result="">
+    <!--
+    用于指定一段字符串到result指定的变量名中
+    对于lang-string/lang-render可以添加_lang属性，
+    用于配合插件对内部的文本进行对应的高亮，例如：_lang="sql"
+    支持的语言包括，java,sql
+    还有你的IDEA支持的一些其他语言，可能的值有 scala,shell,groovy,sql,java,mysql,oracle,vue等等
+    具体依赖于你的IDEA安装过哪些语言的插件，
+    你也可以通过尝试的方式，看看内部的内容是否发生了高亮/颜色变化来判断是否支持该语言
+     -->
+    <lang-string result="" _lang="java">
 
     </lang-string>
     <!-- 用于使用模版引擎进行渲染一段字符串到result指定的变量名中 -->
-    <lang-render result="">
+    <lang-render result="" _lang="sql">
 
     </lang-render>
     <!--
