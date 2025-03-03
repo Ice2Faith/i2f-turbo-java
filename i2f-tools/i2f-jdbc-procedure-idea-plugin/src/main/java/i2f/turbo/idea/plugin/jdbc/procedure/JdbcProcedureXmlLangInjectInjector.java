@@ -1,5 +1,6 @@
 package i2f.turbo.idea.plugin.jdbc.procedure;
 
+import com.intellij.database.dialects.sqlite.sql.SqliteDialect;
 import com.intellij.json.JsonLanguage;
 import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostInjector;
@@ -7,18 +8,23 @@ import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.vcs.changes.ignore.lang.IgnoreLanguage;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLanguageInjectionHost;
+import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlText;
+import com.intellij.sql.dialects.clickhouse.CHouseDialect;
+import com.intellij.sql.dialects.db2.iseries.Db2ISDialect;
+import com.intellij.sql.dialects.hive.HiveDialect;
+import com.intellij.sql.dialects.maria.MariaDialect;
+import com.intellij.sql.dialects.mysql.MysqlDialect;
+import com.intellij.sql.dialects.oracle.OraDialect;
+import com.intellij.sql.dialects.spark.SparkDialect;
 import com.intellij.sql.psi.SqlLanguage;
 import org.intellij.lang.regexp.RegExpLanguage;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -96,13 +102,179 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
         String name = tag.getName();
         if (isTagOfType(name, "sql")) {
+            Set<String> dialects = new HashSet<>();
+            XmlAttribute database = tag.getAttribute("database");
+            if (database != null) {
+                String value = database.getValue();
+                if (value != null) {
+                    dialects.addAll(Arrays.asList(value.split("[,;|/]")));
+                }
+            }
+            XmlAttribute databases = tag.getAttribute("databases");
+            if (databases != null) {
+                String value = databases.getValue();
+                if (value != null) {
+                    dialects.addAll(Arrays.asList(value.split("[,;|/]")));
+                }
+            }
+            for (String dialect : dialects) {
+                dialect = dialect.trim();
+                if ("mariadb".equalsIgnoreCase(dialect)
+                        || "maria".equalsIgnoreCase(dialect)) {
+                    return MariaDialect.INSTANCE;
+                }
+                if ("mysql".equalsIgnoreCase(dialect)
+                        || "gbase".equalsIgnoreCase(dialect)) {
+                    return MysqlDialect.INSTANCE;
+                }
+                if ("oracle".equalsIgnoreCase(dialect)) {
+                    return OraDialect.INSTANCE;
+                }
+                if ("posrgre".equalsIgnoreCase(dialect)
+                        || "posrgresql".equalsIgnoreCase(dialect)) {
+                    return SparkDialect.INSTANCE;
+                }
+
+                if ("db2".equalsIgnoreCase(dialect)) {
+                    return Db2ISDialect.INSTANCE;
+                }
+                if ("clickhouse".equalsIgnoreCase(dialect)) {
+                    return CHouseDialect.INSTANCE;
+                }
+                if ("hive".equalsIgnoreCase(dialect)) {
+                    return HiveDialect.INSTANCE;
+                }
+                if ("spark".equalsIgnoreCase(dialect)) {
+                    return SparkDialect.INSTANCE;
+                }
+                if ("sqlite".equalsIgnoreCase(dialect)) {
+                    return SqliteDialect.INSTANCE;
+                }
+            }
+
+
             return SqlLanguage.INSTANCE;
         }
         if (isTagOfType(name, "java")) {
             return JavaLanguage.INSTANCE;
         }
-        if (isTagOfType(name, "gitignore")) {
-            return IgnoreLanguage.INSTANCE;
+        if (isTagOfType(name, "string")
+                || isTagOfType(name, "render")) {
+            Set<String> dialects = new HashSet<>();
+            XmlAttribute lang = tag.getAttribute("_lang");
+            if (lang != null) {
+                String value = lang.getValue();
+                if (value != null) {
+                    dialects.addAll(Arrays.asList(value.split("[,;|/]")));
+                }
+            }
+            XmlAttribute type = tag.getAttribute("_type");
+            if (type != null) {
+                String value = type.getValue();
+                if (value != null) {
+                    dialects.addAll(Arrays.asList(value.split("[,;|/]")));
+                }
+            }
+            for (String dialect : dialects) {
+                dialect = dialect.trim();
+                if ("sql".equalsIgnoreCase(dialect)) {
+                    return SqlLanguage.INSTANCE;
+                }
+                if ("java".equalsIgnoreCase(dialect)) {
+                    return JavaLanguage.INSTANCE;
+                }
+                if ("json".equalsIgnoreCase(dialect)) {
+                    return JsonLanguage.INSTANCE;
+                }
+                if ("javascript".equalsIgnoreCase(dialect)
+                        || "js".equalsIgnoreCase(dialect)) {
+                    Language ret = Language.findLanguageByID("JavaScript");
+                    if (ret != null) {
+                        return ret;
+                    }
+                }
+                if ("shell".equalsIgnoreCase(dialect)
+                        || "bash".equalsIgnoreCase(dialect)) {
+                    Language ret = Language.findLanguageByID("Shell Script");
+                    if (ret != null) {
+                        return ret;
+                    }
+                }
+                if ("dockerfile".equalsIgnoreCase(dialect)) {
+                    Language ret = Language.findLanguageByID("Dockerfile");
+                    if (ret != null) {
+                        return ret;
+                    }
+                }
+                if ("vue".equalsIgnoreCase(dialect)) {
+                    Language ret = Language.findLanguageByID("Vue");
+                    if (ret != null) {
+                        return ret;
+                    }
+                }
+                if ("yaml".equalsIgnoreCase(dialect)) {
+                    Language ret = Language.findLanguageByID("yaml");
+                    if (ret != null) {
+                        return ret;
+                    }
+                }
+                if ("groovy".equalsIgnoreCase(dialect)) {
+                    Language ret = Language.findLanguageByID("Groovy");
+                    if (ret != null) {
+                        return ret;
+                    }
+                }
+                if ("markdown".equalsIgnoreCase(dialect)
+                        || "md".equalsIgnoreCase(dialect)) {
+                    Language ret = Language.findLanguageByID("Markdown");
+                    if (ret != null) {
+                        return ret;
+                    }
+                }
+                if ("mariadb".equalsIgnoreCase(dialect)
+                        || "maria".equalsIgnoreCase(dialect)) {
+                    return MariaDialect.INSTANCE;
+                }
+                if ("mysql".equalsIgnoreCase(dialect)
+                        || "gbase".equalsIgnoreCase(dialect)) {
+                    return MysqlDialect.INSTANCE;
+                }
+                if ("oracle".equalsIgnoreCase(dialect)) {
+                    return OraDialect.INSTANCE;
+                }
+                if ("posrgre".equalsIgnoreCase(dialect)
+                        || "posrgresql".equalsIgnoreCase(dialect)) {
+                    return SparkDialect.INSTANCE;
+                }
+
+                if ("db2".equalsIgnoreCase(dialect)) {
+                    return Db2ISDialect.INSTANCE;
+                }
+                if ("clickhouse".equalsIgnoreCase(dialect)) {
+                    return CHouseDialect.INSTANCE;
+                }
+                if ("hive".equalsIgnoreCase(dialect)) {
+                    return HiveDialect.INSTANCE;
+                }
+                if ("spark".equalsIgnoreCase(dialect)) {
+                    return SparkDialect.INSTANCE;
+                }
+                if ("sqlite".equalsIgnoreCase(dialect)) {
+                    return SqliteDialect.INSTANCE;
+                }
+                Collection<Language> langs = Language.getRegisteredLanguages();
+                for (Language item : langs) {
+                    String id = item.getID();
+//            log.warn("found registry lang: " + id);
+                    if (id == null) {
+                        continue;
+                    }
+                    if (dialect.equalsIgnoreCase(id)) {
+                        return item;
+                    }
+                }
+            }
+            return SqlLanguage.INSTANCE;
         }
         if (isTagOfType(name, "json")) {
             return JsonLanguage.INSTANCE;
@@ -122,6 +294,21 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
         if (Arrays.asList(SQL_LANG_TAGS).contains(name)) {
             return SqlLanguage.INSTANCE;
+        }
+        if (Arrays.asList("lang-eval-ts",
+                "lang-eval-tinyscript").contains(name)) {
+            Language lang = Language.findLanguageByID("Scala");
+            if (lang != null) {
+                return lang;
+            }
+            lang = Language.findLanguageByID("Groovy");
+            if (lang != null) {
+                return lang;
+            }
+            lang = Language.findLanguageByID("Shell Script");
+            if (lang != null) {
+                return lang;
+            }
         }
         if (isTagOfType(name, "shell")
                 || isTagOfType(name, "bash")) {
@@ -177,7 +364,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
         if (isTagOfType(name, "markdown")
-        ||isTagOfType(name, "md")) {
+                || isTagOfType(name, "md")) {
             Language lang = Language.findLanguageByID("Markdown");
             if (lang != null) {
                 return lang;
