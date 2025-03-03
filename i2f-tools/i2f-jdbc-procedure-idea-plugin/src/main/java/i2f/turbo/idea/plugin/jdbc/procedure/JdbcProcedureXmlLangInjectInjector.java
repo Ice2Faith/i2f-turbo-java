@@ -1,12 +1,12 @@
 package i2f.turbo.idea.plugin.jdbc.procedure;
 
-import com.intellij.database.dialects.sqlite.sql.SqliteDialect;
 import com.intellij.json.JsonLanguage;
 import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostInjector;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.fileTypes.impl.AbstractFileTypeBase;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLanguageInjectionHost;
@@ -21,8 +21,10 @@ import com.intellij.sql.dialects.mysql.MysqlDialect;
 import com.intellij.sql.dialects.oracle.OraDialect;
 import com.intellij.sql.dialects.spark.SparkDialect;
 import com.intellij.sql.psi.SqlLanguage;
+import org.apache.velocity.VelocityContext;
 import org.intellij.lang.regexp.RegExpLanguage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.java.generate.velocity.VelocityFactory;
 
 import java.util.*;
 
@@ -101,6 +103,17 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             return null;
         }
         String name = tag.getName();
+        if (Arrays.asList(
+                "lang-body",
+                "lang-catch",
+                "lang-finally",
+                "script-segment",
+                "lang-synchronized",
+                "lang-async",
+                "sql-scope"
+        ).contains(name)) {
+            return null;
+        }
         if (isTagOfType(name, "sql")) {
             Set<String> dialects = new HashSet<>();
             XmlAttribute database = tag.getAttribute("database");
@@ -146,9 +159,6 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 }
                 if ("spark".equalsIgnoreCase(dialect)) {
                     return SparkDialect.INSTANCE;
-                }
-                if ("sqlite".equalsIgnoreCase(dialect)) {
-                    return SqliteDialect.INSTANCE;
                 }
             }
 
@@ -259,9 +269,6 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 if ("spark".equalsIgnoreCase(dialect)) {
                     return SparkDialect.INSTANCE;
                 }
-                if ("sqlite".equalsIgnoreCase(dialect)) {
-                    return SqliteDialect.INSTANCE;
-                }
                 Collection<Language> langs = Language.getRegisteredLanguages();
                 for (Language item : langs) {
                     String id = item.getID();
@@ -274,7 +281,11 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     }
                 }
             }
-            return SqlLanguage.INSTANCE;
+            Language ret = Language.findLanguageByID("Shell Script");
+            if (ret != null) {
+                return ret;
+            }
+            return null;
         }
         if (isTagOfType(name, "json")) {
             return JsonLanguage.INSTANCE;
