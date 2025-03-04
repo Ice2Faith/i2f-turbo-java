@@ -613,7 +613,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
-                        .addPlace("class MyDsl { public int v=java.sql.Connection.TRANSACTION_",
+                        .addPlace("class MyDsl { public int v=java.sql.Connection.",
                                 ";}",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))

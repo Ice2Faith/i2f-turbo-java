@@ -495,7 +495,7 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务
     isolation以string访问，支持Connection.TRANSACTION_xxx的数字值，或者xxx的字符值，不区分大小写
      -->
-    <sql-trans-begin isolation=""/>
+    <sql-trans-begin isolation="Conne"/>
     <sql-trans-commit/>
     <sql-trans-rollback/>
     <sql-trans-none/>

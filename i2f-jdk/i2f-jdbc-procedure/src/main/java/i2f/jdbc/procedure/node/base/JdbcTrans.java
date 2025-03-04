@@ -13,15 +13,20 @@ public class JdbcTrans {
         try {
             val = Integer.parseInt(isolation);
         } catch (Exception e) {
-            if ("NONE".equalsIgnoreCase(isolation)) {
+            if ("NONE".equalsIgnoreCase(isolation)
+                    || "TRANSACTION_NONE".equalsIgnoreCase(isolation)) {
                 val = Connection.TRANSACTION_NONE;
-            } else if ("READ_COMMITTED".equalsIgnoreCase(isolation)) {
+            } else if ("READ_COMMITTED".equalsIgnoreCase(isolation)
+                    || "TRANSACTION_READ_COMMITTED".equalsIgnoreCase(isolation)) {
                 val = Connection.TRANSACTION_READ_COMMITTED;
-            } else if ("READ_UNCOMMITTED".equalsIgnoreCase(isolation)) {
+            } else if ("READ_UNCOMMITTED".equalsIgnoreCase(isolation)
+                    || "TRANSACTION_READ_UNCOMMITTED".equalsIgnoreCase(isolation)) {
                 val = Connection.TRANSACTION_READ_UNCOMMITTED;
-            } else if ("REPEATABLE_READ;".equalsIgnoreCase(isolation)) {
+            } else if ("REPEATABLE_READ;".equalsIgnoreCase(isolation)
+                    || "TRANSACTION_REPEATABLE_READ".equalsIgnoreCase(isolation)) {
                 val = Connection.TRANSACTION_REPEATABLE_READ;
-            } else if ("SERIALIZABLE".equalsIgnoreCase(isolation)) {
+            } else if ("SERIALIZABLE".equalsIgnoreCase(isolation)
+                    || "TRANSACTION_SERIALIZABLE".equalsIgnoreCase(isolation)) {
                 val = Connection.TRANSACTION_SERIALIZABLE;
             }
         }
