@@ -44,6 +44,7 @@
                 |lang-eval-js*
                 |lang-eval-tinyscript*
                 |lang-eval-ts*
+                |lang-eval-groovy*
                 |sql-scope*
                 |lang-sleep*
                 |sql-etl*
@@ -858,6 +859,9 @@
 
         <!ELEMENT lang-eval-ts (#PCDATA)>
         <!ATTLIST lang-eval-ts result CDATA #IMPLIED>
+
+        <!ELEMENT lang-eval-groovy (#PCDATA)>
+        <!ATTLIST lang-eval-groovy result CDATA #IMPLIED>
 
         <!ELEMENT sql-scope (ANY)>
         <!ATTLIST sql-scope datasources CDATA #IMPLIED>

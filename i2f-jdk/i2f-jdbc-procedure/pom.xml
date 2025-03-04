@@ -64,6 +64,19 @@
             <artifactId>i2f-uid-impl</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-groovy</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>4.0.18</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
         <!--
         如果Java环境高于java15,则需要添加此依赖，否则不要添加
         原因是 nashorn 的 JavaScript 引擎在 java15 被正式移除

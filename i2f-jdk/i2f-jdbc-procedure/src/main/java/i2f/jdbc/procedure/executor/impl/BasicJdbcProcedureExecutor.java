@@ -66,6 +66,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new LangBreakNode());
         ret.add(new LangChooseNode());
         ret.add(new LangContinueNode());
+        ret.add(new LangEvalGroovyNode());
         ret.add(new LangEvalJavaNode());
         ret.add(new LangEvalJavascriptNode());
         ret.add(new LangEvalTinyScriptNode());
@@ -422,6 +423,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 || FeatureConsts.EVAL_TS.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalTinyScriptNode.evalTinyScript(text, context, this);
+        } else if (FeatureConsts.EVAL_GROOVY.equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalGroovyNode.evalGroovyScript(text, context, this);
         } else if (FeatureConsts.CLASS.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return loadClass(text);
