@@ -72,6 +72,7 @@
         <module>i2f-extension-antlr4</module>
         <module>i2f-extension-image-metadata</module>
         <module>i2f-extension-fastexcel</module>
+        <module>i2f-extension-groovy</module>
     </modules>
 
 
