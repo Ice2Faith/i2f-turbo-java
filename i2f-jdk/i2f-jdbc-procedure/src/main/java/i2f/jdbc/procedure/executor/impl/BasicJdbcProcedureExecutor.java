@@ -104,6 +104,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new SqlQueryObjectNode());
         ret.add(new SqlQueryRowNode());
         ret.add(new SqlScopeNode());
+        ret.add(new SqlScriptNode());
         ret.add(new SqlTransBeginNode());
         ret.add(new SqlTransCommitNode());
         ret.add(new SqlTransNoneNode());
@@ -144,9 +145,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public void openDebugger(String tag,Object context,String conditionExpression){
-        if(debug.get()){
-            System.out.println("debugger ["+tag+"] ["+conditionExpression+"] wait for input line to continue.");
+    public void openDebugger(String tag, Object context, String conditionExpression) {
+        if (debug.get()) {
+            System.out.println("debugger [" + tag + "] [" + conditionExpression + "] wait for input line to continue.");
             System.out.println("continue.");
         }
     }
@@ -310,7 +311,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         ret.put(ParamsConsts.GLOBAL, new HashMap<>());
 
-        ret.put(ParamsConsts.EXECUTOR,this);
+        ret.put(ParamsConsts.EXECUTOR, this);
         return ret;
     }
 
@@ -328,7 +329,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         ret.put(ParamsConsts.GLOBAL, context.getParams().get(ParamsConsts.GLOBAL));
 
-        ret.put(ParamsConsts.EXECUTOR,this);
+        ret.put(ParamsConsts.EXECUTOR, this);
         return ret;
     }
 
@@ -413,6 +414,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             return node.getTextBody();
         } else if (FeatureConsts.BODY_XML.equals(feature)) {
             return node.getTagBody();
+        } else if (FeatureConsts.SPACING_LEFT.equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return " " + text;
+        } else if (FeatureConsts.SPACING_RIGHT.equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return text + " ";
+        } else if (FeatureConsts.SPACING.equals(feature)) {
+            String text = value == null ? "" : String.valueOf(value);
+            return " " + text + " ";
         } else if (FeatureConsts.EVAL_JAVA.equals(feature)) {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalJavaNode.evalJava(context, this, "", "", text);
@@ -458,10 +468,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             return System.currentTimeMillis();
         } else if (FeatureConsts.SNOW_UID.equals(feature)) {
             return SnowflakeLongUid.getId();
-        }else{
+        } else {
             try {
                 Method method = ContextHolder.CONVERT_METHOD_MAP.get(feature);
-                if(method!=null){
+                if (method != null) {
                     return method.invoke(null, value);
                 }
             } catch (Exception e) {
@@ -469,7 +479,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             }
             try {
                 Function function = ContextHolder.CONVERT_FUNC_MAP.get(feature);
-                if(function!=null){
+                if (function != null) {
                     return function.apply(value);
                 }
             } catch (Exception e) {
@@ -491,7 +501,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             return ret;
         }
 
-        List<String> prefixes =new ArrayList<>(Arrays.asList(new String[] {
+        List<String> prefixes = new ArrayList<>(Arrays.asList(new String[]{
                 "",
         }));
         prefixes.addAll(ContextHolder.LOAD_PACKAGE_SET);
@@ -783,10 +793,26 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             String script = entry.getValue();
-            BindSql bql = resolveSqlScript(script, params);
+            BindSql bql = sqlScript(datasource, dialectScriptList, params);
             debugLog(() -> "sqlUpdate:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
             int num = JdbcResolver.update(conn, bql);
             return num;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            String script = entry.getValue();
+            BindSql bql = resolveSqlScript(script, params);
+            debugLog(() -> "sqlScript:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
+            return bql;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }

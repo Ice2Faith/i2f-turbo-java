@@ -57,6 +57,9 @@ velocity 文本模板引擎
 .align 用于在字符值时，对左边多余的空白符号予以去除，但是需要以|引导字符串行
 .body-text 用于表示值从标签内部获取
 .body-xml 用于表示值从标签内部获取
+.spacing-left 左边填充空格
+.spacing-right 右边填充空格
+.spacing 两边都填充空格
 
 .eval-java 以java表达式解析
 .eval-js 以js表达式解析
@@ -384,6 +387,17 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     <lang-synchronized target="">
 
     </lang-synchronized>
+
+    <!--
+    用法类似lang-render
+    区别是lang-render的结果是string类型，需要自信处理以避免sql注入
+    而sql-script的结果是BindSql类型，使用占位符表示值，内部就是mybatis支持的标签，对标mybatis的sql标签
+    这个result结果，可用于在其他sql-script/sql-query-*/sql-update等sql语句中作为#{}/${}占位符使用
+    -->
+    <sql-script result="">
+
+    </sql-script>
+
     <!--
     表示一个查询语句，预期为一行数据，执行结果放到result指定的变量名中；
     对于sql-开头的标签，都允许带有datasource属性来制定使用哪个数据源，也都允许带有script属性指定要执行的SQL来源于哪个变量，

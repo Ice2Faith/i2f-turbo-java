@@ -29,6 +29,7 @@
                 |sql-query-list*
                 |sql-query-object*
                 |sql-update*
+                |sql-script*
                 |sql-trans-begin*
                 |sql-trans-commit*
                 |sql-trans-rollback*
@@ -755,6 +756,12 @@
         <!ATTLIST sql-update script CDATA #IMPLIED>
         <!ATTLIST sql-update result CDATA #IMPLIED>
         <!ATTLIST sql-update result-type CDATA #IMPLIED>
+
+        <!ELEMENT sql-script (EMPTY|sql-dialect*
+                |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
+                )>
+        <!ATTLIST sql-script datasource CDATA #IMPLIED>
+        <!ATTLIST sql-script result CDATA #IMPLIED>
 
         <!ELEMENT sql-dialect (EMPTY
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*

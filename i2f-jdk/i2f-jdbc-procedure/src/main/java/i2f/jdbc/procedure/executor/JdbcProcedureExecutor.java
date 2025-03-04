@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.executor;
 
+import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -124,6 +125,8 @@ public interface JdbcProcedureExecutor {
     Object sqlQueryRow(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
 
     int sqlUpdate(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params);
+
+    BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params);
 
     List<?> sqlQueryPage(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize);
 

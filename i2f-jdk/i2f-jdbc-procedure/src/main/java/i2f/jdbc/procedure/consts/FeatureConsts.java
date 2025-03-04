@@ -27,6 +27,10 @@ public interface FeatureConsts {
     String BODY_TEXT = "body-text";
     String BODY_XML = "body-xml";
 
+    String SPACING_LEFT = "spacing-left";
+    String SPACING_RIGHT = "spacing-right";
+    String SPACING = "spacing";
+
     // 处理转换组
     String VISIT = "visit";
     String EVAL = "eval";
