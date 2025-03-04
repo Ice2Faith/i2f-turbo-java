@@ -14,6 +14,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -110,10 +111,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 TinyScriptParser.ExpressContext leftCtx = (TinyScriptParser.ExpressContext) leftNode;
                 TerminalNode operatorCtx = (TerminalNode) operatorNode;
                 TinyScriptParser.ExpressContext rightCtx = (TinyScriptParser.ExpressContext) rightNode;
-                Object leftValue = visitExpress(leftCtx);
+                Supplier<Object> leftSupplier = () -> visitExpress(leftCtx);
+                Supplier<Object> rightSupplier = () -> visitExpress(rightCtx);
                 String operator = (String) visitTerminal(operatorCtx);
-                Object rightValue = visitExpress(rightCtx);
-                return resolver.resolveDoubleOperator(leftValue, operator, rightValue);
+                return resolver.resolveDoubleOperator(leftSupplier, operator, rightSupplier);
             } else {
                 throw new IllegalArgumentException("invalid grammar express expect 3 parts for double operator, but found " + count + "!");
             }

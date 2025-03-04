@@ -20,6 +20,8 @@ public interface TinyScriptResolver {
 
     boolean toBoolean(Object ret);
 
+    Object resolveDoubleOperator(Supplier<Object> left, String operator, Supplier<Object> right);
+
     Object resolveDoubleOperator(Object left, String operator, Object right);
 
     Object resolvePrefixOperator(String prefixOperator, Object value);

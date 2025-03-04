@@ -76,6 +76,27 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
+    public Object resolveDoubleOperator(Supplier<Object> left, String operator, Supplier<Object> right) {
+        if ("&&".equals(operator) || "and".equals(operator)) {
+            boolean bl = ObjectConvertor.toBoolean(left);
+            if (!bl) {
+                return bl;
+            }
+            boolean br = ObjectConvertor.toBoolean(right);
+            return br;
+        } else if ("||".equals(operator) || "or".equals(operator)) {
+            boolean bl = ObjectConvertor.toBoolean(left);
+            if (bl) {
+                return bl;
+            }
+            boolean br = ObjectConvertor.toBoolean(right);
+            return br;
+        } else {
+            return resolveDoubleOperator(left.get(), operator, right);
+        }
+    }
+
+    @Override
     public Object resolveDoubleOperator(Object left, String operator, Object right) {
         if ("as".equals(operator) || "cast".equals(operator)) {
             if (right == null) {
@@ -180,14 +201,6 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 }
             }
             return false;
-        } else if ("&&".equals(operator) || "and".equals(operator)) {
-            boolean bl = ObjectConvertor.toBoolean(left);
-            boolean br = ObjectConvertor.toBoolean(right);
-            return bl && br;
-        } else if ("||".equals(operator) || "or".equals(operator)) {
-            boolean bl = ObjectConvertor.toBoolean(left);
-            boolean br = ObjectConvertor.toBoolean(right);
-            return bl || br;
         } else if (">=".equals(operator) || "gte".equals(operator)) {
             int num = compare(left, right);
             return num >= 0;
