@@ -61,6 +61,7 @@ velocity 文本模板引擎
 .eval-java 以java表达式解析
 .eval-js 以js表达式解析
 .eval-tinyscript 以tinyscript表达式解析，别名：.eval-ts
+.eval-groovy 以groovy脚本运行
 .class 转换为Class<?> 对象
 .not boolean值取反
 
@@ -573,7 +574,14 @@ js引擎执行完毕之后，会返回之后一次执行的结果
         </lang-java-body>
     </lang-eval-java>
 
-    <!-- 动态执行javascript脚本 -->
+    <!--
+    动态执行javascript脚本
+    环境中具有以下变量，所有的变量都存储在params中
+    因此，取值和保存值都通过操作params实现
+    ExecuteContext context
+    JdbcProcedureExecutor executor
+    Map<String,Object> params
+     -->
     <lang-eval-javascript result="">
 
     </lang-eval-javascript>
@@ -592,6 +600,18 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     <lang-eval-ts result="">
 
     </lang-eval-ts>
+
+    <!--
+    动态执行groovy脚本
+    环境中具有以下变量，所有的变量都存储在params中
+    因此，取值和保存值都通过操作params实现
+    ExecuteContext context
+    JdbcProcedureExecutor executor
+    Map<String,Object> params
+     -->
+    <lang-eval-groovy result="">
+
+    </lang-eval-groovy>
 
     <!--
      创建一个数据库连接范围，对datasources中指定的这些数据源
