@@ -14,6 +14,7 @@ import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlText;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -607,6 +608,17 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                             .doneInjecting();
                     return;
                 }
+            }
+        }else if("isolation".equalsIgnoreCase(attrName)){
+            Language lang = findPossibleLanguage("java");
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace("class MyDsl { public int v=java.sql.Connection.TRANSACTION_",
+                                ";}",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
             }
         } else if ("class".equalsIgnoreCase(attrName)) {
             Language lang = findPossibleLanguage("java");
