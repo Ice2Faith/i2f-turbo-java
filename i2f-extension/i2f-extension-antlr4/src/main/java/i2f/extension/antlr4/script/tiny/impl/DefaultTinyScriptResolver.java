@@ -92,7 +92,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             boolean br = ObjectConvertor.toBoolean(right);
             return br;
         } else {
-            return resolveDoubleOperator(left.get(), operator, right);
+            return resolveDoubleOperator(left.get(), operator, right.get());
         }
     }
 
