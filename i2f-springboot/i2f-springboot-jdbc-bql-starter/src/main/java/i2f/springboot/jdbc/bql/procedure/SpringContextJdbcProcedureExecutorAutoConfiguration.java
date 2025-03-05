@@ -1,7 +1,7 @@
 package i2f.springboot.jdbc.bql.procedure;
 
 import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
-import i2f.jdbc.procedure.context.ProcedureContext;
+import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import lombok.Data;
 import org.springframework.beans.BeansException;
@@ -65,14 +65,14 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
 
 
     @Bean
-    public ProcedureContext procedureContext(SpringJdbcProcedureNodeMapCacheSupplier nodeMapCacheSupplier,
-                                             SpringJdbcProcedureJavaCallerMapCacheSupplier javaCallerMapCacheSupplier) {
-        return new ProcedureContext(nodeMapCacheSupplier, javaCallerMapCacheSupplier);
+    public JdbcProcedureContext procedureContext(SpringJdbcProcedureNodeMapCacheSupplier nodeMapCacheSupplier,
+                                                 SpringJdbcProcedureJavaCallerMapCacheSupplier javaCallerMapCacheSupplier) {
+        return new JdbcProcedureContext(nodeMapCacheSupplier, javaCallerMapCacheSupplier);
     }
 
     @Bean
     public DefaultJdbcProcedureExecutorCaller defaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor,
-                                                                                 ProcedureContext procedureContext) {
+                                                                                 JdbcProcedureContext procedureContext) {
         return new DefaultJdbcProcedureExecutorCaller(executor, procedureContext);
     }
 }
