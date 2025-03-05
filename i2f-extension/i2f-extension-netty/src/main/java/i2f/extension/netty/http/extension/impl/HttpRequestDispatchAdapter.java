@@ -255,7 +255,7 @@ public class HttpRequestDispatchAdapter extends AbstractHttpRequestHandler {
         if (type.isArray()) {
 
         } else {
-            if (params.size() > 0) {
+            if (!params.isEmpty()) {
                 Object obj = params.get(0);
                 if (String.class.equals(type)) {
                     retVal = String.valueOf(obj);
