@@ -217,7 +217,7 @@ public class ObjectFinder {
             }
             possibleMethod.add(item);
         }
-        if (possibleMethod.size() == 0) {
+        if (possibleMethod.isEmpty()) {
             return obj;
         }
 
@@ -225,7 +225,7 @@ public class ObjectFinder {
         Object retVal = obj;
         Method method = possibleMethod.get(0);
         Object ivkObj = obj;
-        if (matchMethod.size() > 0) {
+        if (!matchMethod.isEmpty()) {
             isMatch = true;
             method = matchMethod.get(0);
             method.setAccessible(true);
@@ -322,13 +322,13 @@ public class ObjectFinder {
             }
             possibleConstructors.add(item);
         }
-        if (possibleConstructors.size() == 0) {
+        if (possibleConstructors.isEmpty()) {
             return obj;
         }
         Object retVal = obj;
         boolean isMatch = false;
         Constructor cons = possibleConstructors.get(0);
-        if (matchConstructors.size() > 0) {
+        if (!matchConstructors.isEmpty()) {
             isMatch = true;
             cons = matchConstructors.get(0);
         } else {

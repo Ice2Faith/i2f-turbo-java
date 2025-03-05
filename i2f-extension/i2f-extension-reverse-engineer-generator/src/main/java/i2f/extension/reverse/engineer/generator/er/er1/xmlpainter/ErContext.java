@@ -35,7 +35,7 @@ public class ErContext {
             int maxWid = 0;
             List<ErAttribute> attrs = item.getAttrs();
             offHei += item.getHeight();
-            if (attrs != null && attrs.size() > 0) {
+            if (attrs != null && !attrs.isEmpty()) {
                 offHei += attrs.get(0).getHeight();
 
                 int acnt = 0;

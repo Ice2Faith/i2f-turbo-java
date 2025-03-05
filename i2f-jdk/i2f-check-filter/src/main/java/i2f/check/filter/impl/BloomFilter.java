@@ -40,7 +40,7 @@ public class BloomFilter<T> implements ICheckFilter<T> {
         this.bits = new byte[0];
 
         this.bitLen = bitLen;
-        if (providers != null && providers.size() > 0) {
+        if (providers != null && !providers.isEmpty()) {
             this.hashs.addAll(providers);
         } else {
             this.hashs.add(new ObjectHashcodeHashProvider<T>());

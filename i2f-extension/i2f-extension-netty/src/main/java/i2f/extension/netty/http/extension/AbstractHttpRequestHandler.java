@@ -70,7 +70,7 @@ public abstract class AbstractHttpRequestHandler extends SimpleChannelInboundHan
             ret.headers().set("Content-Type", "text/plain;charset=UTF-8");
             ret.headers().set("Content_Length", ret.content().readableBytes());
             HttpHeaders headers = response.getHeaders();
-            if (headers.size() > 0) {
+            if (!headers.isEmpty()) {
                 for (Map.Entry<String, String> item : headers) {
                     ret.headers().set(item.getKey(), item.getValue());
                 }

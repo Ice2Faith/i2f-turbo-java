@@ -57,11 +57,11 @@ public class DictResolver {
             List<DictItem> dicts = new ArrayList<>();
             for (IDictProvider provider : providers) {
                 dicts = provider.getDictItems(field, dictField);
-                if (dicts.size() > 0) {
+                if (!dicts.isEmpty()) {
                     break;
                 }
             }
-            if (dicts.size() == 0) {
+            if (dicts.isEmpty()) {
                 continue;
             }
 
@@ -123,11 +123,11 @@ public class DictResolver {
             List<DictItem> dicts = new ArrayList<>();
             for (IDictProvider provider : providers) {
                 dicts = provider.getDictItems(field, dictField);
-                if (dicts.size() > 0) {
+                if (!dicts.isEmpty()) {
                     break;
                 }
             }
-            if (dicts.size() == 0) {
+            if (dicts.isEmpty()) {
                 continue;
             }
 
