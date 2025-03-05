@@ -23,7 +23,7 @@ public class ContextHolder {
     public static final ConcurrentHashMap<String, Function> CONVERT_FUNC_MAP = new ConcurrentHashMap<>();
 
     // 使用于JdbcProcedureExecutor的loadClass方法中，用于简写的类名，允许查找哪些包，值例如：java.util.
-    public static final CopyOnWriteArraySet<String> LOAD_PACKAGE_SET=new CopyOnWriteArraySet<>();
+    public static final CopyOnWriteArraySet<String> LOAD_PACKAGE_SET = new CopyOnWriteArraySet<>();
 
     static {
         registryAllInvokeMethods(ContextFunctions.class);
@@ -33,10 +33,10 @@ public class ContextHolder {
                 Integer.class,
                 Double.class,
                 Boolean.class
-                );
+        );
 
-        CONVERT_FUNC_MAP.put("upperCase",(Function<String,String>)String::toUpperCase);
-        CONVERT_FUNC_MAP.put("lowerCase",(Function<String,String>)String::toLowerCase);
+        CONVERT_FUNC_MAP.put("upperCase", (Function<String, String>) String::toUpperCase);
+        CONVERT_FUNC_MAP.put("lowerCase", (Function<String, String>) String::toLowerCase);
 
         registryLoadPackages(ContextHolder.class);
     }
@@ -133,11 +133,11 @@ public class ContextHolder {
                 return;
             }
             String name = clazz.getName();
-            int idx=name.lastIndexOf(".");
-            if(idx<0){
+            int idx = name.lastIndexOf(".");
+            if (idx < 0) {
                 continue;
             }
-            String packageName=name.substring(0,idx+1);
+            String packageName = name.substring(0, idx + 1);
             LOAD_PACKAGE_SET.add(packageName);
         }
     }
