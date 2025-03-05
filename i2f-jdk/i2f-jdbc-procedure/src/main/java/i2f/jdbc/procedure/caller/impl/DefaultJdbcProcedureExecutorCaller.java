@@ -8,6 +8,7 @@ import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,8 +24,8 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class DefaultJdbcProcedureExecutorCaller implements JdbcProcedureExecutorCaller {
-    protected JdbcProcedureExecutor executor;
-    protected JdbcProcedureContext context;
+    protected JdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
+    protected JdbcProcedureContext context = new JdbcProcedureContext();
 
     public DefaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> map) {
         this.executor = executor;
