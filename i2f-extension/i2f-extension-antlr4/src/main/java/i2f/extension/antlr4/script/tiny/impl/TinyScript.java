@@ -5,6 +5,7 @@ import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
 import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
 import i2f.lru.LruMap;
+import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
@@ -22,6 +23,8 @@ import java.util.function.Predicate;
 public class TinyScript {
     public static final ConcurrentHashMap<String, CopyOnWriteArrayList<Method>> BUILTIN_METHOD=new ConcurrentHashMap<>();
     public static final LruMap<String,TinyScriptParser.ScriptContext> TREE_MAP=new LruMap<>(4096);
+
+    public static final CopyOnWriteArrayList<ANTLRErrorListener> ERROR_LISTENER=new CopyOnWriteArrayList<>();
 
     static {
         registryBuiltMethodByStaticMethod(String.class,(method)->{
@@ -59,6 +62,8 @@ public class TinyScript {
         });
         registryBuiltMethodByStaticMethod(System.class);
         registryBuiltMethodByStaticMethod(TinyScriptFunctions.class);
+
+        ERROR_LISTENER.add(DefaultAntlrErrorListener.INSTANCE);
     }
 
     public static Object script(String formula, Object context) {
@@ -91,6 +96,12 @@ public class TinyScript {
         }
         CommonTokenStream tokens = parseTokens(formula);
         TinyScriptParser parser = new TinyScriptParser(tokens);
+        for (ANTLRErrorListener item : ERROR_LISTENER) {
+            if(item==null){
+                continue;
+            }
+            parser.addErrorListener(item);
+        }
         TinyScriptParser.ScriptContext tree = parser.script();
         try {
             TREE_MAP.put(formula,tree);
@@ -103,6 +114,12 @@ public class TinyScript {
     public static CommonTokenStream parseTokens(String formula) {
         ANTLRInputStream input = new ANTLRInputStream(formula);
         TinyScriptLexer lexer = new TinyScriptLexer(input);
+        for (ANTLRErrorListener item : ERROR_LISTENER) {
+            if(item==null){
+                continue;
+            }
+            lexer.addErrorListener(item);
+        }
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         return tokens;
     }
