@@ -4,9 +4,7 @@ import i2f.io.stream.StreamUtil;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.xml.XmlUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import i2f.xml.data.Xml;
 
 import java.io.*;
 import java.net.URL;
@@ -35,9 +33,7 @@ public class JdbcProcedureParser {
         }
         String str = removeProcedureDtd(xml);
         ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes("UTF-8"));
-        Document document = XmlUtil.parseXml(bis);
-        bis.close();
-        return parse(document);
+        return parse(bis);
     }
 
     public static XmlNode parse(URL url) throws Exception {
@@ -77,14 +73,15 @@ public class JdbcProcedureParser {
         String str = new String(bos.toByteArray(), "UTF-8");
         str = removeProcedureDtd(str);
         ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes("UTF-8"));
-        Document document = XmlUtil.parseXml(fileName, bis);
+        Xml document = XmlUtil.parseXmlSax(fileName, bis);
         bis.close();
         return parse(document);
     }
 
-    public static XmlNode parse(Document document) throws Exception {
-        Node rootNode = XmlUtil.getRootNode(document);
-        return parseNode(rootNode);
+    public static XmlNode parse(Xml node) throws Exception {
+        Xml root = XmlUtil.getRootNode(node);
+        XmlUtil.walkFillDomAndInnerXml(node, true);
+        return parseNode(root);
     }
 
     public static void resolveEmbedIdNode(XmlNode node, Map<String, XmlNode> nodeMap) {
@@ -104,68 +101,84 @@ public class JdbcProcedureParser {
         }
     }
 
-    public static XmlNode parseNode(Node node) throws Exception {
+    public static XmlNode parseNode(Xml node) throws Exception {
         if (node == null) {
             return null;
         }
-        short nodeType = node.getNodeType();
-        if (nodeType == Node.TEXT_NODE) {
+        Xml.Type nodeType = node.getType();
+        if (nodeType == Xml.Type.TEXT) {
             XmlNode ret = new XmlNode();
             ret.setNodeType(XmlNode.NODE_TEXT);
             ret.setTagName(null);
             ret.setTagAttrMap(new LinkedHashMap<>());
-            ret.setTagBody(XmlUtil.getNodeContent(node));
-            ret.setTextBody(XmlUtil.getNodeContent(node));
+            ret.setAttrFeatureMap(new LinkedHashMap<>());
+            ret.setTagBody(node.getValue());
+            ret.setTextBody(node.getValue());
             ret.setChildren(null);
-        } else if (nodeType == Node.CDATA_SECTION_NODE) {
+
+            ret.setLocationFile(node.getLocationName());
+            ret.setLocationLineNumber(node.getLocationLineNumber());
+        } else if (nodeType == Xml.Type.CDATA) {
             XmlNode ret = new XmlNode();
             ret.setNodeType(XmlNode.NODE_CDATA);
             ret.setTagName(null);
             ret.setTagAttrMap(new LinkedHashMap<>());
-            ret.setTagBody(XmlUtil.getNodeContent(node));
-            ret.setTextBody(XmlUtil.getNodeContent(node));
+            ret.setAttrFeatureMap(new LinkedHashMap<>());
+            ret.setTagBody(node.getValue());
+            ret.setTextBody(node.getValue());
             ret.setChildren(null);
-        } else if (nodeType == Node.ELEMENT_NODE) {
+
+            ret.setLocationFile(node.getLocationName());
+            ret.setLocationLineNumber(node.getLocationLineNumber());
+        } else if (nodeType == Xml.Type.ELEMENT) {
             XmlNode ret = new XmlNode();
             ret.setNodeType(XmlNode.NODE_ELEMENT);
+            ret.setTagName(node.getName());
+            ret.setTagAttrMap(new LinkedHashMap<>());
+            ret.setAttrFeatureMap(new LinkedHashMap<>());
+            ret.setTagBody(node.getInnerXml());
+            ret.setTextBody(node.getValue());
+
+            ret.setLocationFile(node.getLocationName());
+            ret.setLocationLineNumber(node.getLocationLineNumber());
+
             Map<String, String> tagAttrMap = new LinkedHashMap<>();
             Map<String, List<String>> attrFeatureMap = new LinkedHashMap<>();
-            Map<String, String> rawAttrMap = XmlUtil.getAttributes(node);
-            for (Map.Entry<String, String> entry : rawAttrMap.entrySet()) {
-                String key = entry.getKey();
-                try {
-                    if (XmlUtil.ATTR_FILE.equals(key)) {
-                        ret.setLocationFile(URLDecoder.decode(entry.getValue(), "UTF-8"));
-                        continue;
-                    }
-                    if (XmlUtil.ATTR_LINE_NUMBER.equals(key)) {
-                        String value = entry.getValue();
-                        ret.setLocationLineNumber(Integer.parseInt(value));
-                        continue;
-                    }
-                } catch (Exception e) {
+            List<Xml> attributes = node.getAttributes();
+            if (attributes != null) {
+                for (Xml entry : attributes) {
+                    String key = entry.getName();
+                    try {
+                        if (XmlUtil.ATTR_FILE.equals(key)) {
+                            ret.setLocationFile(URLDecoder.decode(entry.getValue(), "UTF-8"));
+                            continue;
+                        }
+                        if (XmlUtil.ATTR_LINE_NUMBER.equals(key)) {
+                            String value = entry.getValue();
+                            ret.setLocationLineNumber(Integer.parseInt(value));
+                            continue;
+                        }
+                    } catch (Exception e) {
 
-                }
-                String[] arr = key.split("\\.");
-                tagAttrMap.put(arr[0], entry.getValue());
-                for (int i = 1; i < arr.length; i++) {
-                    if (!attrFeatureMap.containsKey(arr[0])) {
-                        attrFeatureMap.put(arr[0], new ArrayList<>());
                     }
-                    attrFeatureMap.get(arr[0]).add(arr[i]);
+                    String[] arr = key.split("\\.");
+                    tagAttrMap.put(arr[0], entry.getValue());
+                    for (int i = 1; i < arr.length; i++) {
+                        if (!attrFeatureMap.containsKey(arr[0])) {
+                            attrFeatureMap.put(arr[0], new ArrayList<>());
+                        }
+                        attrFeatureMap.get(arr[0]).add(arr[i]);
+                    }
                 }
             }
-            ret.setTagName(XmlUtil.getTagName(node));
+
             ret.setTagAttrMap(tagAttrMap);
             ret.setAttrFeatureMap(attrFeatureMap);
-            ret.setTagBody(XmlUtil.extraInnerXml(node, true));
-            ret.setTextBody(XmlUtil.getNodeContent(node));
+
             List<XmlNode> children = new ArrayList<>();
-            NodeList childNodes = node.getChildNodes();
+            List<Xml> childNodes = node.getChildren();
             if (childNodes != null) {
-                int len = childNodes.getLength();
-                for (int i = 0; i < len; i++) {
-                    Node item = childNodes.item(i);
+                for (Xml item : childNodes) {
                     if (item != null) {
                         XmlNode nextNode = parseNode(item);
                         if (nextNode != null) {
@@ -173,7 +186,6 @@ public class JdbcProcedureParser {
                         }
                     }
                 }
-
             }
             ret.setChildren(children);
             return ret;
