@@ -8,6 +8,7 @@ import i2f.jdbc.procedure.context.ExecuteContext;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,11 +61,21 @@ public class JavaCallerHelper extends ContextFunctions implements JdbcProcedureE
     }
 
     @Override
-    public void call(String procedureId, Map<String, Object> params) {
-        this.caller.call(procedureId, params);
+    public Map<String,Object> call(String procedureId, Map<String, Object> params) {
+        return this.caller.call(procedureId, params);
     }
 
-    public MapBuilder<String,Object,? extends Map<String,Object>> newHashMap(){
-        return new MapBuilder<>(new HashMap<>(),String.class,Object.class);
+    @Override
+    public <T> T invoke(String procedureId, List<Object> args) {
+        return this.caller.invoke(procedureId,args);
+    }
+
+    @Override
+    public Map<String, Object> call(String procedureId, List<Object> args) {
+        return this.caller.call(procedureId,args);
+    }
+
+    public MapBuilder<String, Object, ? extends Map<String, Object>> newHashMap() {
+        return new MapBuilder<>(new HashMap<>(), String.class, Object.class);
     }
 }
