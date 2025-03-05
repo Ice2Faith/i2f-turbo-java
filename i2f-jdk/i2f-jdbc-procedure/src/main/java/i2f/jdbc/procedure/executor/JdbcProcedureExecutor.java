@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.executor;
 import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
+import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.SignalException;
@@ -22,14 +23,16 @@ import java.util.function.Supplier;
 public interface JdbcProcedureExecutor {
     List<ExecutorNode> getNodes();
 
-    default void exec(String nodeId, ExecuteContext context) {
-        XmlNode callNode = context.getNodeMap().get(nodeId);
-        if(callNode!=null){
-            exec(callNode, context);
-            return;
+    default Map<String, Object> exec(String nodeId, ExecuteContext context) {
+        ProcedureMeta callNode = context.getNodeMap().get(nodeId);
+        if (callNode == null) {
+            throw new NotFoundSignalException("not found node: " + nodeId);
         }
-        JdbcProcedureJavaCaller javaCaller = context.getJavaMap().get(nodeId);
-        if (javaCaller != null) {
+        Object target = callNode.getTarget();
+        if (callNode.getType() == ProcedureMeta.Type.XML) {
+            return exec((XmlNode) target, context);
+        } else if (callNode.getType() == ProcedureMeta.Type.JAVA) {
+            JdbcProcedureJavaCaller javaCaller = (JdbcProcedureJavaCaller) target;
             try {
                 Object ret = javaCaller.exec(context, this, context.getParams());
                 context.getParams().put(ParamsConsts.RETURN, ret);
@@ -42,25 +45,28 @@ public interface JdbcProcedureExecutor {
                     throw new ThrowSignalException(e.getMessage(), e);
                 }
             }
-            return;
+            return context.getParams();
+        } else {
+            throw new ThrowSignalException("not supported node type: " + callNode.getType());
         }
-        throw new NotFoundSignalException("not found node: " + nodeId);
     }
 
-    default void exec(XmlNode node, ExecuteContext context) {
-        exec(node, context, false, true);
+    default Map<String, Object> exec(XmlNode node, ExecuteContext context) {
+        return exec(node, context, false, true);
     }
 
-    void exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
+    Map<String, Object> exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
 
-    default void execAsProcedure(String nodeId, ExecuteContext context) {
-        XmlNode callNode = context.getNodeMap().get(nodeId);
-        if(callNode!=null) {
-            execAsProcedure(callNode, context, false, true);
-            return;
+    default Map<String, Object> execAsProcedure(String nodeId, ExecuteContext context) {
+        ProcedureMeta callNode = context.getNodeMap().get(nodeId);
+        if (callNode == null) {
+            throw new NotFoundSignalException("not found node: " + nodeId);
         }
-        JdbcProcedureJavaCaller javaCaller = context.getJavaMap().get(nodeId);
-        if (javaCaller != null) {
+        Object target = callNode.getTarget();
+        if (callNode.getType() == ProcedureMeta.Type.XML) {
+            return execAsProcedure((XmlNode) target, context);
+        } else if (callNode.getType() == ProcedureMeta.Type.JAVA) {
+            JdbcProcedureJavaCaller javaCaller = (JdbcProcedureJavaCaller) target;
             try {
                 Object ret = javaCaller.exec(context, this, context.getParams());
                 context.getParams().put(ParamsConsts.RETURN, ret);
@@ -73,16 +79,17 @@ public interface JdbcProcedureExecutor {
                     throw new ThrowSignalException(e.getMessage(), e);
                 }
             }
-            return;
+            return context.getParams();
+        } else {
+            throw new ThrowSignalException("not supported node type: " + callNode.getType());
         }
-        throw new NotFoundSignalException("not found node: " + nodeId);
     }
 
-    default void execAsProcedure(XmlNode node, ExecuteContext context) {
-        execAsProcedure(node, context, false, true);
+    default Map<String, Object> execAsProcedure(XmlNode node, ExecuteContext context) {
+        return execAsProcedure(node, context, false, true);
     }
 
-    void execAsProcedure(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
+    Map<String, Object> execAsProcedure(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
 
     Object attrValue(String attr, String action, XmlNode node, ExecuteContext context);
 

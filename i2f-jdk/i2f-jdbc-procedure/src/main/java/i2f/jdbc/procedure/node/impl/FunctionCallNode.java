@@ -6,7 +6,6 @@ import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.SignalException;
@@ -33,14 +32,8 @@ public class FunctionCallNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);
-        XmlNode nextNode = context.getNodeMap().get(refid);
-        JdbcProcedureJavaCaller caller=null;
-        if (nextNode == null) {
-            caller=context.getJavaMap().get(refid);
-            if(caller==null) {
-                return;
-            }
-        }
+
+
         Map<String, Object> callParams = null;
         String paramsText = node.getTagAttrMap().get(AttrConsts.PARAMS);
         if (paramsText != null && !paramsText.isEmpty()) {
@@ -68,28 +61,19 @@ public class FunctionCallNode extends AbstractExecutorNode {
             callParams.put(name, val);
         }
 
+
         ExecuteContext callContext = new ExecuteContext();
         callContext.setNodeMap(context.getNodeMap());
-        callContext.setJavaMap(context.getJavaMap());
         callContext.setParams(callParams);
-        if(nextNode!=null) {
-            try {
-                executor.execAsProcedure(nextNode, callContext, false, false);
-            } catch (ControlSignalException e) {
+        try {
+            callParams = executor.exec(refid, callContext);
+        } catch (ControlSignalException e) {
 
-            }
-        }else{
-            try{
-                Object ret=caller.exec(callContext,executor,callContext.getParams());
-                callParams.put(ParamsConsts.RETURN,ret);
-            }catch(ControlSignalException e){
-
-            }catch (Throwable e){
-                if(e instanceof SignalException){
-                    throw (SignalException)e;
-                }else{
-                    throw new ThrowSignalException(e.getMessage(),e);
-                }
+        } catch (Throwable e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(e.getMessage(), e);
             }
         }
 

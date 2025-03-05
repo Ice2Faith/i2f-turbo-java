@@ -153,7 +153,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public void exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection) {
+    public Map<String, Object> exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
             for (ExecutorNode item : getNodes()) {
                 if (item.support(node)) {
@@ -173,13 +173,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                             closeConnections(context);
                         }
                     }
-                    return;
+                    return context.getParams();
                 }
             }
             debugLog(() -> "waring! tag " + node.getTagName() + " not found any executor!");
         } catch (ReturnSignalException e) {
             debugLog(() -> "return signal");
         }
+        return context.getParams();
     }
 
     public void closeConnections(Map<String, Object> params) {
@@ -206,7 +207,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public void execAsProcedure(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection) {
+    public Map<String, Object> execAsProcedure(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
             ProcedureNode execNode = null;
             for (ExecutorNode item : getNodes()) {
@@ -238,6 +239,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         } catch (ReturnSignalException e) {
             debugLog(() -> "return signal");
         }
+        return context.getParams();
     }
 
     @Override

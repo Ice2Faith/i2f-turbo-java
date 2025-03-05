@@ -5,6 +5,7 @@ import i2f.jdbc.procedure.caller.JdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.context.ContextFunctions;
 import i2f.jdbc.procedure.context.ExecuteContext;
+import i2f.jdbc.procedure.context.ProcedureContext;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
@@ -24,7 +25,7 @@ public class JavaCallerHelper extends ContextFunctions implements JdbcProcedureE
     public JavaCallerHelper(ExecuteContext context, JdbcProcedureExecutor executor) {
         this.context = context;
         this.executor = executor;
-        this.caller = new DefaultJdbcProcedureExecutorCaller(executor, context);
+        this.caller = new DefaultJdbcProcedureExecutorCaller(executor, new ProcedureContext(context.getNodeMap()));
     }
 
     public <T> T visit(String expression) {
