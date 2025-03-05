@@ -6,7 +6,7 @@ import i2f.jdbc.procedure.caller.JdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
-import i2f.jdbc.procedure.context.ProcedureContext;
+import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.impl.BasicJdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
@@ -109,7 +109,7 @@ public class TestProcedureExecutor {
 
         System.out.println("===========================================");
         JdbcProcedureExecutorCaller executorCaller = new DefaultJdbcProcedureExecutorCaller(executor,
-                new ProcedureContext(context.getNodeMap()));
+                new JdbcProcedureContext(context.getNodeMap()));
 
         executorCaller.call("SIMPLE", context.getParams());
 

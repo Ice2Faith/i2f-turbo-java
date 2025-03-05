@@ -5,7 +5,7 @@ import i2f.jdbc.procedure.caller.JdbcProcedureJavaCallerMapSupplier;
 import i2f.jdbc.procedure.caller.JdbcProcedureNodeMapSupplier;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
-import i2f.jdbc.procedure.context.ProcedureContext;
+import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
@@ -24,21 +24,21 @@ import java.util.Map;
 @NoArgsConstructor
 public class DefaultJdbcProcedureExecutorCaller implements JdbcProcedureExecutorCaller {
     protected JdbcProcedureExecutor executor;
-    protected ProcedureContext context;
+    protected JdbcProcedureContext context;
 
-    public DefaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor, ProcedureContext context) {
+    public DefaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor, JdbcProcedureContext context) {
         this.executor = executor;
         this.context = context;
     }
 
     public DefaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor, JdbcProcedureNodeMapSupplier nodeSupplier) {
         this.executor = executor;
-        this.context = new ProcedureContext(nodeSupplier, null);
+        this.context = new JdbcProcedureContext(nodeSupplier, null);
     }
 
     public DefaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor, JdbcProcedureNodeMapSupplier nodeSupplier, JdbcProcedureJavaCallerMapSupplier javaCallerSupplier) {
         this.executor = executor;
-        this.context = new ProcedureContext(nodeSupplier, javaCallerSupplier);
+        this.context = new JdbcProcedureContext(nodeSupplier, javaCallerSupplier);
     }
 
     @Override

@@ -18,20 +18,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * @desc
  */
 @Data
-public class ProcedureContext extends CacheObjectRefresherSupplier<Map<String, ProcedureMeta>, ConcurrentHashMap<String, ProcedureMeta>> {
+public class JdbcProcedureContext extends CacheObjectRefresherSupplier<Map<String, ProcedureMeta>, ConcurrentHashMap<String, ProcedureMeta>> {
     protected volatile JdbcProcedureNodeMapSupplier nodeSupplier;
     protected volatile JdbcProcedureJavaCallerMapSupplier javaCallerSupplier;
 
-    public ProcedureContext() {
+    public JdbcProcedureContext() {
         super(new ConcurrentHashMap<>(), "procedure-context-refresher");
     }
 
-    public ProcedureContext(Map<String, ProcedureMeta> map) {
+    public JdbcProcedureContext(Map<String, ProcedureMeta> map) {
         this();
         registry(map);
     }
 
-    public ProcedureContext(JdbcProcedureNodeMapSupplier nodeSupplier, JdbcProcedureJavaCallerMapSupplier javaCallerSupplier) {
+    public JdbcProcedureContext(JdbcProcedureNodeMapSupplier nodeSupplier, JdbcProcedureJavaCallerMapSupplier javaCallerSupplier) {
         this();
         this.nodeSupplier = nodeSupplier;
         this.javaCallerSupplier = javaCallerSupplier;
