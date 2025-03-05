@@ -1,9 +1,15 @@
 package i2f.jdbc.procedure.executor.impl;
 
+import i2f.bindsql.BindSql;
 import i2f.extension.ognl.OgnlUtil;
 import i2f.extension.velocity.VelocityGenerator;
+import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
+import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
+import i2f.jdbc.proxy.xml.mybatis.inflater.impl.OgnlMybatisMapperInflater;
+import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,5 +52,12 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public BindSql resolveSqlScript(String script, Map<String, Object> params) throws Exception {
+        MybatisMapperNode mapperNode = MybatisMapperParser.parseScriptNode(script);
+        BindSql bql = OgnlMybatisMapperInflater.INSTANCE.inflateSqlNode(mapperNode, params, new HashMap<>());
+        return bql;
     }
 }
