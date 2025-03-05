@@ -55,6 +55,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     public static List<ExecutorNode> defaultExecutorNodes() {
         List<ExecutorNode> ret = new ArrayList<>();
+        ServiceLoader<ExecutorNode> nodes = ServiceLoader.load(ExecutorNode.class);
+        for (ExecutorNode item : nodes) {
+            ret.add(item);
+        }
         ret.add(new ContextConvertMethodClassNode());
         ret.add(new ContextInvokeMethodClassNode());
         ret.add(new ContextLoadPackageNode());
@@ -112,10 +116,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new SqlUpdateNode());
         ret.add(new TextNode());
 
-        ServiceLoader<ExecutorNode> nodes = ServiceLoader.load(ExecutorNode.class);
-        for (ExecutorNode item : nodes) {
-            ret.add(item);
-        }
+
         return ret;
     }
 
