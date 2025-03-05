@@ -2,6 +2,7 @@ package i2f.springboot.jdbc.bql.procedure;
 
 import i2f.jdbc.procedure.caller.JdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -13,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
  * @author Ice2Faith
  * @date 2025/2/8 11:09
  */
+@Slf4j
 public class JdbcProcedureHelper implements ApplicationContextAware {
     public static ApplicationContext applicationContext;
     private static volatile DefaultJdbcProcedureExecutorCaller caller;
@@ -20,6 +22,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        log.info("xproc4j config JdbcProcedureHelper ...");
         JdbcProcedureHelper.applicationContext = applicationContext;
         latch.countDown();
     }
