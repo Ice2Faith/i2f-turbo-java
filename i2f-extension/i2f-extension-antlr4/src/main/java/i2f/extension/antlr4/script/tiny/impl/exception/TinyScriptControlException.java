@@ -4,7 +4,7 @@ package i2f.extension.antlr4.script.tiny.impl.exception;
  * @author Ice2Faith
  * @date 2025/2/25 9:00
  */
-public class TinyScriptControlException extends RuntimeException{
+public class TinyScriptControlException extends TinyScriptException{
     public TinyScriptControlException() {
     }
 
