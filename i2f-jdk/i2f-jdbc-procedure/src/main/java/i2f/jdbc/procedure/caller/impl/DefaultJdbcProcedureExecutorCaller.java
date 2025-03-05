@@ -26,6 +26,11 @@ public class DefaultJdbcProcedureExecutorCaller implements JdbcProcedureExecutor
     protected JdbcProcedureExecutor executor;
     protected JdbcProcedureContext context;
 
+    public DefaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> map) {
+        this.executor = executor;
+        this.context = new JdbcProcedureContext(map);
+    }
+
     public DefaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor, JdbcProcedureContext context) {
         this.executor = executor;
         this.context = context;
