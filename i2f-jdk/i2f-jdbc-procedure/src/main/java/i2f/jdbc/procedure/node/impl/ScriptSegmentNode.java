@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
+import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -26,7 +27,7 @@ public class ScriptSegmentNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String id = node.getTagAttrMap().get(AttrConsts.ID);
         if (id != null && !id.isEmpty()) {
-            context.getNodeMap().put(id, node);
+            context.getNodeMap().put(id, ProcedureMeta.ofMeta(node));
         }
     }
 

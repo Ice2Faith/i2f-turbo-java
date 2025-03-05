@@ -150,13 +150,13 @@
             <optional>true</optional>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>com.gbase.jdbc</groupId>
             <artifactId>gbase-connnector-java</artifactId>
             <version>8.3.81.53-build55.2.1</version>
             <scope>system</scope>
             <systemPath>${pom.basedir}/lib/gbase-connector-java-8.3.81.53-build55.2.1-bin.jar</systemPath>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
 

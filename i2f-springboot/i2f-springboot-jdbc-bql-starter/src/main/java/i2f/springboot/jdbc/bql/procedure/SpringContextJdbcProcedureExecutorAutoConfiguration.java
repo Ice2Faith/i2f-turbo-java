@@ -1,9 +1,8 @@
 package i2f.springboot.jdbc.bql.procedure;
 
 import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
-import i2f.jdbc.procedure.caller.impl.ListableJdbcProcedureJavaCallerMapSupplier;
+import i2f.jdbc.procedure.context.ProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import lombok.Data;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -62,15 +59,20 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     }
 
     @Bean
+    public SpringJdbcProcedureJavaCallerMapCacheSupplier springJdbcProcedureJavaCallerMapCacheSupplier() {
+        return new SpringJdbcProcedureJavaCallerMapCacheSupplier(applicationContext);
+    }
+
+
+    @Bean
+    public ProcedureContext procedureContext(SpringJdbcProcedureNodeMapCacheSupplier nodeMapCacheSupplier,
+                                             SpringJdbcProcedureJavaCallerMapCacheSupplier javaCallerMapCacheSupplier) {
+        return new ProcedureContext(nodeMapCacheSupplier, javaCallerMapCacheSupplier);
+    }
+
+    @Bean
     public DefaultJdbcProcedureExecutorCaller defaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor,
-                                                                                 SpringJdbcProcedureNodeMapCacheSupplier refresher) {
-        return new DefaultJdbcProcedureExecutorCaller(executor, refresher, () -> {
-            Map<String, JdbcProcedureJavaCaller> ret = new HashMap<>();
-            Map<String, JdbcProcedureJavaCaller> beanMap = applicationContext.getBeansOfType(JdbcProcedureJavaCaller.class);
-            for (Map.Entry<String, JdbcProcedureJavaCaller> entry : beanMap.entrySet()) {
-                ListableJdbcProcedureJavaCallerMapSupplier.addCaller(entry.getValue(), ret);
-            }
-            return ret;
-        });
+                                                                                 ProcedureContext procedureContext) {
+        return new DefaultJdbcProcedureExecutorCaller(executor, procedureContext);
     }
 }

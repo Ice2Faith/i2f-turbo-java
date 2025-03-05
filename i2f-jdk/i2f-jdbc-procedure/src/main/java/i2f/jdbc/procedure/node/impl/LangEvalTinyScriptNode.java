@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
+import i2f.jdbc.procedure.context.ProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -98,7 +99,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
 
         @Override
         public Reference<Object> beforeFunctionCall(Object target, boolean isNew, String naming, List<Object> argList) {
-            DefaultJdbcProcedureExecutorCaller caller = new DefaultJdbcProcedureExecutorCaller(executor, context);
+            DefaultJdbcProcedureExecutorCaller caller = new DefaultJdbcProcedureExecutorCaller(executor, new ProcedureContext(context.getNodeMap()));
             try {
                 Map<String, Object> callParams = castArgumentListAsNamingMap(argList);
                 Object ret = caller.invoke(naming, callParams);

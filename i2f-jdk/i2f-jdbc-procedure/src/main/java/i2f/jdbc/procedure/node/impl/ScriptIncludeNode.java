@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
+import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -28,10 +29,14 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);
-        XmlNode nextNode = context.getNodeMap().get(refid);
-        if (nextNode == null) {
+        ProcedureMeta meta = context.getNodeMap().get(refid);
+        if (meta == null) {
             return;
         }
+        if (meta.getType() != ProcedureMeta.Type.XML) {
+            return;
+        }
+        XmlNode nextNode = (XmlNode) meta.getTarget();
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
