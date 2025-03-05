@@ -12,7 +12,7 @@ import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
 import i2f.jdbc.proxy.xml.mybatis.provider.MybatisMapperProxyRenderSqlProvider;
 import i2f.springboot.jdbc.bql.components.SpringJdbcProxyMapperFactoryBean;
 import i2f.springboot.jdbc.bql.components.VelocityProxyRenderSqlProvider;
-import i2f.springboot.jdbc.bql.mybatis.OgnlMybatisMapperInflater;
+import i2f.jdbc.proxy.xml.mybatis.inflater.impl.OgnlMybatisMapperInflater;
 import i2f.springboot.jdbc.bql.properties.JdbcProxyProperties;
 import lombok.Data;
 import ognl.Ognl;
