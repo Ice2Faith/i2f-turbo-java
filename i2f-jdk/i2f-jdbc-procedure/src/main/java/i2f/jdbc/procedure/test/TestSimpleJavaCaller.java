@@ -11,7 +11,13 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/2/11 9:24
  */
-@JdbcProcedure("SP_SIMPLE")
+@JdbcProcedure(
+        value = "SP_SIMPLE",
+        arguments = {
+                "str.string",
+                "return.null"
+        }
+)
 public class TestSimpleJavaCaller implements JdbcProcedureJavaCaller {
     @Override
     public Object exec(ExecuteContext context, JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable {

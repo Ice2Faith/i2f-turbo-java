@@ -9,10 +9,7 @@ import i2f.xml.data.Xml;
 import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -101,6 +98,16 @@ public class JdbcProcedureParser {
         }
     }
 
+    public static Map.Entry<String,List<String>> parseAttrFeatures(String key){
+        String[] arr = key.split("\\.");
+        String name=arr[0];
+        List<String> features=new ArrayList<>();
+        for (int i = 1; i < arr.length; i++) {
+            features.add(arr[i]);
+        }
+        return new AbstractMap.SimpleEntry<>(name,features);
+    }
+
     public static XmlNode parseNode(Xml node) throws Exception {
         if (node == null) {
             return null;
@@ -161,14 +168,12 @@ public class JdbcProcedureParser {
                     } catch (Exception e) {
 
                     }
-                    String[] arr = key.split("\\.");
-                    tagAttrMap.put(arr[0], entry.getValue());
-                    for (int i = 1; i < arr.length; i++) {
-                        if (!attrFeatureMap.containsKey(arr[0])) {
-                            attrFeatureMap.put(arr[0], new ArrayList<>());
-                        }
-                        attrFeatureMap.get(arr[0]).add(arr[i]);
+                    Map.Entry<String, List<String>> attrFeatures = parseAttrFeatures(key);
+                    tagAttrMap.put(attrFeatures.getKey(), entry.getValue());
+                    if (!attrFeatureMap.containsKey(attrFeatures.getKey())) {
+                        attrFeatureMap.put(attrFeatures.getKey(), new ArrayList<>());
                     }
+                    attrFeatureMap.get(attrFeatures.getKey()).addAll(attrFeatures.getValue());
                 }
             }
 

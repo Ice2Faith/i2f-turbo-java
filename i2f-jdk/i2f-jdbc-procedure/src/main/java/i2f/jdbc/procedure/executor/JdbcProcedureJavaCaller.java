@@ -11,8 +11,8 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface JdbcProcedureJavaCaller {
-    default JavaCallerHelper helper(ExecuteContext context,JdbcProcedureExecutor executor){
-        return new JavaCallerHelper(context,executor);
+    default JavaCallerHelper helper(ExecuteContext context, JdbcProcedureExecutor executor) {
+        return new JavaCallerHelper(context, executor);
     }
 
     Object exec(ExecuteContext context, JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable;
