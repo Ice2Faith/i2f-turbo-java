@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class ExecuteContext {
     protected Map<String, Object> params = new HashMap<>();
     protected Map<String, XmlNode> nodeMap = new HashMap<>();
-    protected Map<String, JdbcProcedureJavaCaller> javaMap=new HashMap<>();
+    protected Map<String, JdbcProcedureJavaCaller> javaMap = new HashMap<>();
 
     public ExecuteContext(Map<String, Object> params) {
         this.params = params;

@@ -17,11 +17,11 @@ import java.util.regex.Pattern;
  * @date 2025/2/17 16:09
  */
 public class ContextFunctions {
-    public static String replace(String str,String target,String replacement){
-        if(str==null){
+    public static String replace(String str, String target, String replacement) {
+        if (str == null) {
             return str;
         }
-        return str.replace(target,replacement);
+        return str.replace(target, replacement);
     }
 
     public static String regexReplace(String str, String regex, String replacement) {
@@ -51,90 +51,95 @@ public class ContextFunctions {
         }
         return Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(str).matches();
     }
-    public static String trim(String str){
-        if(str==null){
+
+    public static String trim(String str) {
+        if (str == null) {
             return str;
         }
         return str.trim();
     }
-    public static String upper(String str){
-        if(str==null){
+
+    public static String upper(String str) {
+        if (str == null) {
             return str;
         }
         return str.toUpperCase();
     }
-    public static String lower(String str){
-        if(str==null){
+
+    public static String lower(String str) {
+        if (str == null) {
             return str;
         }
         return str.toLowerCase();
     }
-    public static String chr(int ascii){
-        char ch=(char) ascii;
-        return ""+ch;
+
+    public static String chr(int ascii) {
+        char ch = (char) ascii;
+        return "" + ch;
     }
-    public static String rtrim(String str,String substr){
-        if(str==null){
+
+    public static String rtrim(String str, String substr) {
+        if (str == null) {
             return str;
         }
-        if(substr==null){
-            int idx=str.length()-1;
-            while(idx>=0){
+        if (substr == null) {
+            int idx = str.length() - 1;
+            while (idx >= 0) {
                 char ch = str.charAt(idx);
-                if(!Character.isWhitespace(ch)){
+                if (!Character.isWhitespace(ch)) {
                     break;
                 }
                 idx--;
             }
-            if(idx>=0){
-                return str.substring(0,idx+1);
+            if (idx >= 0) {
+                return str.substring(0, idx + 1);
             }
             return str;
-        }else{
-            if(substr.isEmpty()){
+        } else {
+            if (substr.isEmpty()) {
                 return str;
             }
-            while(str.endsWith(substr)){
-                str=str.substring(0,str.length()-substr.length());
+            while (str.endsWith(substr)) {
+                str = str.substring(0, str.length() - substr.length());
             }
             return str;
         }
     }
 
-    public static String ltrim(String str,String substr){
-        if(str==null){
+    public static String ltrim(String str, String substr) {
+        if (str == null) {
             return str;
         }
-        if(substr==null){
-            int idx=0;
-            while(idx<str.length()){
+        if (substr == null) {
+            int idx = 0;
+            while (idx < str.length()) {
                 char ch = str.charAt(idx);
-                if(!Character.isWhitespace(ch)){
+                if (!Character.isWhitespace(ch)) {
                     break;
                 }
                 idx++;
             }
-            if(idx>=0){
+            if (idx >= 0) {
                 return str.substring(idx);
             }
             return str;
-        }else{
-            if(substr.isEmpty()){
+        } else {
+            if (substr.isEmpty()) {
                 return str;
             }
-            while(str.startsWith(substr)){
-                str=str.substring(substr.length());
+            while (str.startsWith(substr)) {
+                str = str.substring(substr.length());
             }
             return str;
         }
     }
 
-    public static Object nvl(Object v1,Object v2){
-        return v1!=null?v1:v2;
+    public static Object nvl(Object v1, Object v2) {
+        return v1 != null ? v1 : v2;
     }
 
-    public static Object ifnull(Object v1,Object v2){
-        return nvl(v1,v2);
+    public static Object ifnull(Object v1, Object v2) {
+        return nvl(v1, v2);
     }
 
     public static Object decode(Object target, Object... args) {
@@ -151,61 +156,61 @@ public class ContextFunctions {
         return target;
     }
 
-    public static Object cast(Object val,Object type){
-        if(type==null){
+    public static Object cast(Object val, Object type) {
+        if (type == null) {
             throw new ClassCastException("cannot cast value to type null");
         }
-        if(val==null){
+        if (val == null) {
             return null;
         }
-        Class<?> clazz=type.getClass();
-        if(type instanceof Class){
-            clazz=(Class<?>) type;
+        Class<?> clazz = type.getClass();
+        if (type instanceof Class) {
+            clazz = (Class<?>) type;
         }
-        return ObjectConvertor.tryConvertAsType(val,clazz);
+        return ObjectConvertor.tryConvertAsType(val, clazz);
     }
 
-    public static Object date_add(Object date,String unit,long interval){
-        if(date==null){
+    public static Object date_add(Object date, String unit, long interval) {
+        if (date == null) {
             return null;
         }
-        if(unit==null || unit.isEmpty()){
-            unit=ChronoUnit.DAYS.toString();
+        if (unit == null || unit.isEmpty()) {
+            unit = ChronoUnit.DAYS.toString();
         }
         ChronoUnit chronoUnit = ChronoUnit.valueOf(unit.trim().toUpperCase());
         LocalDateTime v = (LocalDateTime) ObjectConvertor.tryConvertAsType(date, LocalDateTime.class);
         LocalDateTime rv = v.plus(interval, chronoUnit);
         Class<?> rawType = date.getClass();
-        return ObjectConvertor.tryConvertAsType(rv,rawType);
+        return ObjectConvertor.tryConvertAsType(rv, rawType);
     }
 
-    public static Date to_date(String str,String pattern){
-        if(str==null || str.isEmpty()){
+    public static Date to_date(String str, String pattern) {
+        if (str == null || str.isEmpty()) {
             return null;
         }
-        if(pattern==null || pattern.isEmpty()){
-            pattern="yyyy-MM-dd HH:mm:ss";
+        if (pattern == null || pattern.isEmpty()) {
+            pattern = "yyyy-MM-dd HH:mm:ss";
         }
         try {
             return new SimpleDateFormat(pattern).parse(str);
         } catch (ParseException e) {
-            throw new IllegalArgumentException(e.getMessage(),e);
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
 
-    public static String date_format(Object date,String pattern){
-        if(date==null){
+    public static String date_format(Object date, String pattern) {
+        if (date == null) {
             return null;
         }
-        if(pattern==null || pattern.isEmpty()){
-            pattern="yyyy-MM-dd HH:mm:ss";
+        if (pattern == null || pattern.isEmpty()) {
+            pattern = "yyyy-MM-dd HH:mm:ss";
         }
-        if(date instanceof Date) {
+        if (date instanceof Date) {
             return new SimpleDateFormat(pattern).format(date);
-        }else if(date instanceof Temporal){
-            return DateTimeFormatter.ofPattern(pattern).format((Temporal)date);
+        } else if (date instanceof Temporal) {
+            return DateTimeFormatter.ofPattern(pattern).format((Temporal) date);
         }
-        throw new IllegalArgumentException("un-support date type["+date.getClass()+"] format!");
+        throw new IllegalArgumentException("un-support date type[" + date.getClass() + "] format!");
     }
 
 }
