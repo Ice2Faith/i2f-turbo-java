@@ -21,11 +21,12 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             if(e instanceof ControlSignalException){
                 throw (ControlSignalException)e;
             }
-            executor.errorLog(() -> "exec node error, at node:"+node.getTagName()+", file:" + node.getLocationFile() + ", line:" + node.getLocationLineNumber() +", attrs:"+node.getTagAttrMap()+ ", message:" + e.getMessage(), e);
+            String errorMsg="exec node error, at node:"+node.getTagName()+", file:" + node.getLocationFile() + ", line:" + node.getLocationLineNumber() +", attrs:"+node.getTagAttrMap()+ ", message: " + e.getMessage();
+            executor.errorLog(() -> errorMsg, e);
             if(e instanceof SignalException){
                 throw (SignalException)e;
             } else {
-                throw new ThrowSignalException(e.getMessage(), e);
+                throw new ThrowSignalException(errorMsg, e);
             }
         }
     }
