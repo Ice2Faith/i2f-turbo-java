@@ -20,19 +20,26 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
 ======================================================
 
 相关知识介绍：
-xml XML解析技术
-    实现：org.w3c.dom.Document
-    用途：解析xml文件格式为XmlNode树节点
-ognl 对象图导航语言
-    实现：ognl.Ognl
-    用途：用于eval/visit/test等用途，Mybatis中就是使用ognl来实现test和取值的
-        因此，这部分，用法和Mybatis中基本一致，不排除ognl版本导致的一些差异/初始化ognl上下文导致的操作
-    取值上：不需要进行任何包含
-        但是在sql场景中，使用${}/#{}取值，用法上和Mybatis基本一致
-velocity 文本模板引擎
-    实现：org.apache.velocity.app.VelocityEngine
-    用途：用于render用户，提供对字符串的模版渲染能力，可以用于字符串动态拼接等场景
-    取值上：${}包含，表达式上：#()包含
+    xml XML解析技术
+        实现：org.w3c.dom.Document
+        用途：解析xml文件格式为XmlNode树节点
+    ognl 对象图导航语言
+        实现：ognl.Ognl
+        用途：用于eval/visit/test等用途，Mybatis中就是使用ognl来实现test和取值的
+            因此，这部分，用法和Mybatis中基本一致，不排除ognl版本导致的一些差异/初始化ognl上下文导致的操作
+        取值上：不需要进行任何包含
+            但是在sql场景中，使用${}/#{}取值，用法上和Mybatis基本一致
+        语法官网：https://commons.apache.org/dormant/commons-ognl/language-guide.html
+    velocity 文本模板引擎
+        实现：org.apache.velocity.app.VelocityEngine
+        用途：用于render用户，提供对字符串的模版渲染能力，可以用于字符串动态拼接等场景
+        取值上：${}包含，表达式上：#()包含
+        使用官网：https://velocity.apache.org/engine/devel/user-guide.html
+额外技术：
+    groovy 一种JVM平台的脚本语言，可理解为简化版的Java
+        实现：groovy.lang.GroovyShell
+        用途：用于支持习惯使用Groovy作为脚本语言的用户实现脚本嵌入
+        使用官网：https://www.groovy-lang.org/syntax.html
 
 ======================================================
 

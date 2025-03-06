@@ -5,19 +5,17 @@ import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.antlr4.script.tiny.impl.TinyScriptResolver;
 import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
-import org.antlr.v4.runtime.ANTLRErrorListener;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -45,18 +43,8 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String script = node.getTextBody();
-        ANTLRErrorListener listener=new BaseErrorListener(){
-            @Override
-            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                String errorMsg="line " + line + ":" + charPositionInLine + " " + msg;
-                warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+errorMsg);
-            }
-        };
-        TinyScript.ERROR_LISTENER.add(listener);
-        try {
-            TinyScript.parse(script);
-        }finally {
-            TinyScript.ERROR_LISTENER.remove(listener);
+        if(script!=null && !script.isEmpty()) {
+            GrammarReporter.reportExprFeatureGrammar(script, FeatureConsts.EVAL_TINYSCRIPT, node, "element body ", warnPoster);
         }
     }
 

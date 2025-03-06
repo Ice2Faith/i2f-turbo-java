@@ -1,10 +1,12 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 
@@ -32,6 +34,13 @@ public class LangWhileNode extends AbstractExecutorNode {
         String test = node.getTagAttrMap().get(AttrConsts.TEST);
         if(test==null || test.isEmpty()){
             warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.TEST);
+        }
+        if(test!=null && !test.isEmpty()) {
+            try {
+                GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST,node,FeatureConsts.EVAL,warnPoster);
+            } catch (Exception e) {
+                warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST+"["+test+"]"+" expression maybe wrong!");
+            }
         }
     }
 

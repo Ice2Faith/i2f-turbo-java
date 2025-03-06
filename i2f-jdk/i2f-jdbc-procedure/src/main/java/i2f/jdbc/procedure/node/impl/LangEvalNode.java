@@ -6,6 +6,9 @@ import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
+
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -20,6 +23,33 @@ public class LangEvalNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String value = node.getTagAttrMap().get(AttrConsts.VALUE);
+        String script = node.getTextBody();
+        if((value==null || value.isEmpty()) && (script==null || script.isEmpty())){
+            String errorMsg="missing value attribute or element body";
+            warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+errorMsg);
+            return;
+        }
+        if(value!=null && !value.isEmpty()){
+            try{
+                GrammarReporter.reportExprFeatureGrammar(value,FeatureConsts.EVAL,node,"attribute "+AttrConsts.VALUE,warnPoster);
+            }catch(Exception e){
+                String errorMsg="attribute "+AttrConsts.VALUE+" expression error: "+e.getMessage();
+                warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+errorMsg);
+            }
+        }
+        if(script!=null && !script.isEmpty()){
+            try{
+                GrammarReporter.reportExprFeatureGrammar(script,FeatureConsts.EVAL,node,"element body",warnPoster);
+            }catch(Exception e){
+                String errorMsg="element body expression error: "+e.getMessage();
+                warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+errorMsg);
+            }
+        }
     }
 
     @Override
