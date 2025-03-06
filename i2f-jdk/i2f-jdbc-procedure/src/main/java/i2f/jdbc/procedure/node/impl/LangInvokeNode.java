@@ -12,6 +12,7 @@ import i2f.reflect.ReflectResolver;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -28,6 +29,13 @@ public class LangInvokeNode extends AbstractExecutorNode {
         return TAG_NAME.equals(node.getTagName());
     }
 
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String method = node.getTagAttrMap().get(AttrConsts.METHOD);
+        if(method==null || method.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.METHOD);
+        }
+    }
 
     @Override
     public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {

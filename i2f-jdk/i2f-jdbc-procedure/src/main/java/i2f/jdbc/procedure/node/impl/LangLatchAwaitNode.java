@@ -11,6 +11,7 @@ import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -28,8 +29,20 @@ public class LangLatchAwaitNode extends AbstractExecutorNode {
     }
 
     @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String name = node.getTagAttrMap().get(AttrConsts.NAME);
+        if(name==null || name.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.NAME);
+        }
+    }
+
+    @Override
     public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
-        long timeout = (long) executor.attrValue(AttrConsts.TIMEOUT, FeatureConsts.LONG, node, context);
+        long timeout = -1;
+        String ttl = node.getTagAttrMap().get(AttrConsts.TIMEOUT);
+        if(ttl!=null && !ttl.isEmpty()){
+            timeout=(long) executor.attrValue(AttrConsts.TIMEOUT, FeatureConsts.LONG, node, context);
+        }
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
         CountDownLatch latch = (CountDownLatch) executor.attrValue(AttrConsts.NAME, FeatureConsts.VISIT, node, context);
         try {

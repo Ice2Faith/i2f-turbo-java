@@ -1,11 +1,14 @@
 package i2f.jdbc.procedure.node.impl;
 
+import groovy.lang.GroovyShell;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -20,6 +23,15 @@ public class ContextLoadPackageNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String pkg = node.getTagAttrMap().get(AttrConsts.PACKAGE);
+        String clazz = node.getTagAttrMap().get(AttrConsts.CLASS);
+        if((pkg==null || pkg.isEmpty()) && (clazz==null || clazz.isEmpty())){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.PACKAGE+"/"+AttrConsts.CLASS);
+        }
     }
 
     @Override

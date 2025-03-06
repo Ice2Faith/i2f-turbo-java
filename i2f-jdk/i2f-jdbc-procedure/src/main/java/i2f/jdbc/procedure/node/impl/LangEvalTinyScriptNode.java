@@ -18,6 +18,7 @@ import i2f.reflect.ReflectResolver;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -35,6 +36,12 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
         }
         return TAG_NAME.equals(node.getTagName())
                 || ALIAS_TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String script = node.getTextBody();
+        TinyScript.parse(script);
     }
 
     @Override

@@ -7,6 +7,8 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
+import java.util.function.Consumer;
+
 
 /**
  * @author Ice2Faith
@@ -21,6 +23,14 @@ public class ScriptSegmentNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String id = node.getTagAttrMap().get(AttrConsts.ID);
+        if(id==null || id.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.ID);
+        }
     }
 
     @Override

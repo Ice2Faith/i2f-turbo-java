@@ -13,6 +13,7 @@ import i2f.reflect.ReflectResolver;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -27,6 +28,14 @@ public class JavaCallNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String target = node.getTagAttrMap().get(AttrConsts.TARGET);
+        if(target==null || target.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.TARGET);
+        }
     }
 
     @Override
