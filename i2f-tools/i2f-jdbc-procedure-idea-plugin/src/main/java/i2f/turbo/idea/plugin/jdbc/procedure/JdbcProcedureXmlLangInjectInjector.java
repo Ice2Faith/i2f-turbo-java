@@ -56,6 +56,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             "import i2f.reflect.vistor.*;\n" +
             "import i2f.convert.obj.*;\n" +
             "import i2f.clock.*;\n" +
+
+
             "import java.util.*;\n" +
             "import java.math.*;\n" +
             "import java.time.*;\n" +
@@ -467,7 +469,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
-            } else if ("lang-java-body".equals(tagName)) {
+            } else if ("lang-java-body".equals(tagName)
+                    || "lang-eval-java".equals(tagName)) {
                 registrar.startInjecting(targetLang)
                         .addPlace(EVAL_JAVA_IMPORTS + "\n"
                                         + "public class MyJavaProcedure { "
@@ -479,7 +482,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             } else {
 
                 registrar.startInjecting(targetLang)
-                        .addPlace("public class MyJavaEval { public void eval() throws Throwable{ ",
+                        .addPlace("public class MyJavaEval { public Object eval() throws Throwable{ ",
                                 "} }",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
@@ -494,6 +497,25 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                             (PsiLanguageInjectionHost) xmlText,
                             new TextRange(0, xmlText.getTextRange().getLength()))
                     .doneInjecting();
+        } else if (Arrays.asList("groovy").contains(targetLang.getID().toLowerCase())) {
+
+            if("lang-eval-groovy".equals(tagName)){
+                registrar.startInjecting(targetLang)
+                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                                        + "class MyGroovyProcedure { "
+                                        + "def exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) { ",
+                                "} }",
+                                (PsiLanguageInjectionHost) xmlText,
+                                new TextRange(0, xmlText.getTextRange().getLength()))
+                        .doneInjecting();
+            }else{
+                registrar.startInjecting(targetLang)
+                        .addPlace("",
+                                "",
+                                (PsiLanguageInjectionHost) xmlText,
+                                new TextRange(0, xmlText.getTextRange().getLength()))
+                        .doneInjecting();
+            }
         } else {
             registrar.startInjecting(targetLang)
                     .addPlace("",
@@ -609,7 +631,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        }else if("isolation".equalsIgnoreCase(attrName)){
+        } else if ("isolation".equalsIgnoreCase(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -684,6 +706,21 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                                         "var executor={};\n" +
                                         "var params={};\n",
                                 "",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
+            }
+        }
+
+        if (attrName.contains(".eval-groovy")) {
+            Language lang = findPossibleLanguage("groovy");
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                                        + "class MyGroovyProcedure { "
+                                        + "def exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) { ",
+                                "} }",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))
                         .doneInjecting();
