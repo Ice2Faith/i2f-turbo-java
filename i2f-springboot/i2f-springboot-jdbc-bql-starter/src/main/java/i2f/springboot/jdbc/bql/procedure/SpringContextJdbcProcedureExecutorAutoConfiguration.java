@@ -74,9 +74,11 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
 
     @Bean
     public JdbcProcedureContext procedureContext(SpringJdbcProcedureNodeMapCacheSupplier nodeMapCacheSupplier,
-                                                 SpringJdbcProcedureJavaCallerMapCacheSupplier javaCallerMapCacheSupplier) {
+                                                 SpringJdbcProcedureJavaCallerMapCacheSupplier javaCallerMapCacheSupplier,
+                                                 JdbcProcedureExecutor executor) {
         log.info("xproc4j config JdbcProcedureContext ...");
         JdbcProcedureContext ret = new JdbcProcedureContext(nodeMapCacheSupplier, javaCallerMapCacheSupplier);
+        ret.listener((ctx)->ctx.reportGrammar(executor,(msg)->log.warn(msg)));
         ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
         return ret;
     }
