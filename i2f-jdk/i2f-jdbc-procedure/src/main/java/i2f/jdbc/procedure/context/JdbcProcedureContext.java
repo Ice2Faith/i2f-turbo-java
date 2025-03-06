@@ -11,6 +11,7 @@ import lombok.Data;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -144,25 +145,62 @@ public class JdbcProcedureContext extends CacheObjectRefresherSupplier<Map<Strin
     }
 
     public void reportGrammar(JdbcProcedureExecutor executor,Consumer<String> warnPoster){
+        AtomicInteger allReportCount=new AtomicInteger(0);
+        AtomicInteger allNodeCount=new AtomicInteger(0);
         Map<String,ProcedureMeta> map=new HashMap<>(cache);
-        List<ExecutorNode> nodes = executor.getNodes();
         for (Map.Entry<String, ProcedureMeta> entry : map.entrySet()) {
             ProcedureMeta meta = entry.getValue();
             if(meta.getType()== ProcedureMeta.Type.XML){
                 XmlNode node = (XmlNode) meta.getTarget();
-                for (ExecutorNode executorNode : nodes) {
-                    if(executorNode.support(node)){
-                        try {
-                            executorNode.reportGrammar(node,(msg)->{
-                                warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+msg);
-                            });
-                        } catch (Throwable e) {
-                            warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+e.getMessage());
-                        }
-                        break;
-                    }
+                AtomicInteger reportCount=new AtomicInteger(0);
+                AtomicInteger nodeCount=new AtomicInteger(0);
+                reportGrammar(node,executor,warnPoster,reportCount,nodeCount);
+                allReportCount.addAndGet(reportCount.get());
+                allNodeCount.addAndGet(nodeCount.get());
+                if(reportCount.get()>0){
+                    warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+" found issue statistic, issue:"+reportCount.get()+", nodes:"+nodeCount.get());
                 }
             }
+        }
+        warnPoster.accept("xproc4j report grammar final statistic, issue:"+allReportCount.get()+", nodes:"+allNodeCount.get());
+    }
+
+    public void reportGrammar(XmlNode node,
+                              JdbcProcedureExecutor executor,
+                              Consumer<String> warnPoster,
+                              AtomicInteger reportCount,
+                              AtomicInteger nodeCount){
+        if(node==null){
+            return;
+        }
+        if(nodeCount!=null){
+            nodeCount.incrementAndGet();
+        }
+        List<ExecutorNode> nodes = executor.getNodes();
+        for (ExecutorNode executorNode : nodes) {
+            if(executorNode.support(node)){
+                try {
+                    executorNode.reportGrammar(node,(msg)->{
+                        if(reportCount!=null){
+                            reportCount.incrementAndGet();
+                        }
+                        warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+msg);
+                    });
+                } catch (Throwable e) {
+                    if(reportCount!=null){
+                        reportCount.incrementAndGet();
+                    }
+                    warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+e.getMessage());
+                }
+                break;
+            }
+        }
+        List<XmlNode> children = node.getChildren();
+        if(children==null){
+            return;
+        }
+        for (XmlNode item : children) {
+            reportGrammar(item,executor,warnPoster,reportCount,nodeCount);
         }
     }
 }
