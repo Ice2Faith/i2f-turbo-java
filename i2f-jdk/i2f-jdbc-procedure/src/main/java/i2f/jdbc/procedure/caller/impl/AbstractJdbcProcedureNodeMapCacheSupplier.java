@@ -41,6 +41,7 @@ public abstract class AbstractJdbcProcedureNodeMapCacheSupplier
         return new HashMap<>(ret);
     }
 
+    @Override
     public void refresh() {
         Map<String, XmlNode> map = parseResources();
         cache.putAll(map);

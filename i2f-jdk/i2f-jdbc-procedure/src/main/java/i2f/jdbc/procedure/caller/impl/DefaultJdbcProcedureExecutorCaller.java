@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.caller.impl;
 import i2f.jdbc.procedure.caller.JdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.caller.JdbcProcedureJavaCallerMapSupplier;
 import i2f.jdbc.procedure.caller.JdbcProcedureNodeMapSupplier;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
@@ -74,6 +75,9 @@ public class DefaultJdbcProcedureExecutorCaller implements JdbcProcedureExecutor
             List<String> arguments = node.getArguments();
             int i=0;
             for (String name : arguments) {
+                if(AttrConsts.ID.equals(name)){
+                    continue;
+                }
                 if(ParamsConsts.RETURN.equals(name)){
                     continue;
                 }

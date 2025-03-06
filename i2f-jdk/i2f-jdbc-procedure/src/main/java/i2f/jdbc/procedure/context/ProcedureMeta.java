@@ -48,6 +48,15 @@ public class ProcedureMeta {
         meta.setType(ProcedureMeta.Type.XML);
         meta.setName(key);
         meta.setTarget(value);
+        meta.setArguments(new ArrayList<>());
+        meta.setArgumentFeatures(new HashMap<>());
+        for (String attr : value.getTagAttrMap().keySet()) {
+            if(AttrConsts.ID.equals(attr)){
+                continue;
+            }
+            meta.getArguments().add(attr);
+            meta.getArgumentFeatures().put(attr,new ArrayList<>(value.getAttrFeatureMap().get(attr)));
+        }
         meta.setArguments(new ArrayList<>(value.getTagAttrMap().keySet()));
         meta.setArgumentFeatures(value.getAttrFeatureMap());
         return meta;
