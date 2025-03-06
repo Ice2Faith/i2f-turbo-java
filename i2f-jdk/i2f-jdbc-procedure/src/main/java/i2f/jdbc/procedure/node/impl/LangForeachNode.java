@@ -11,6 +11,7 @@ import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -25,6 +26,14 @@ public class LangForeachNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String collection = node.getTagAttrMap().get(AttrConsts.COLLECTION);
+        if(collection==null || collection.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.COLLECTION);
+        }
     }
 
     @Override

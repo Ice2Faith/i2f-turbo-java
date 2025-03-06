@@ -31,6 +31,9 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
         Boolean await = (Boolean) executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context);
 
         List<XmlNode> children = node.getChildren();
+        if(children==null || children.isEmpty()){
+            return;
+        }
         CountDownLatch latch = new CountDownLatch(children.size());
         for (XmlNode item : children) {
             new Thread(() -> {

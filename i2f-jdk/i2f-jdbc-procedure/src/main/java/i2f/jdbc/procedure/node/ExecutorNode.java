@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 public interface ExecutorNode {
     boolean support(XmlNode node);
 
-    default void assertGrammar(XmlNode node){
+    default void reportGrammar(XmlNode node, Consumer<String> warnPoster){
 
     }
 

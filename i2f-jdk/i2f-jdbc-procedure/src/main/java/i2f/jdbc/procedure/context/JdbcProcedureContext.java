@@ -153,7 +153,9 @@ public class JdbcProcedureContext extends CacheObjectRefresherSupplier<Map<Strin
                 for (ExecutorNode executorNode : nodes) {
                     if(executorNode.support(node)){
                         try {
-                            executorNode.assertGrammar(node);
+                            executorNode.reportGrammar(node,(msg)->{
+                                warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+msg);
+                            });
                         } catch (Throwable e) {
                             warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+e.getMessage());
                         }

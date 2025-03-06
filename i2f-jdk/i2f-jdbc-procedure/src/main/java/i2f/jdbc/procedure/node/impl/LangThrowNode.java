@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.lang.reflect.Constructor;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -23,6 +24,14 @@ public class LangThrowNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String type = node.getTagAttrMap().get(AttrConsts.TYPE);
+        if(type==null || type.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.TYPE);
+        }
     }
 
     @Override

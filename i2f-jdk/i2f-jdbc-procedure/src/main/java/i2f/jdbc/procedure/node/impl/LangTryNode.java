@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -24,6 +25,28 @@ public class LangTryNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        List<XmlNode> nodes = node.getChildren();
+        if (nodes == null) {
+            warnPoster.accept(TAG_NAME+" missing child element");
+            return;
+        }
+        XmlNode bodyNode = null;
+        for (XmlNode item : nodes) {
+            if (!XmlNode.NODE_ELEMENT.equals(item.getNodeType())) {
+                continue;
+            }
+            if ("lang-body".equals(item.getTagName())) {
+                bodyNode = item;
+            }
+        }
+
+        if (bodyNode == null) {
+            warnPoster.accept(TAG_NAME+" missing try segment body lang-body element!");
+        }
     }
 
     @Override

@@ -8,6 +8,7 @@ import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -22,6 +23,14 @@ public class LangLatchNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String count = node.getTagAttrMap().get(AttrConsts.COUNT);
+        if(count==null || count.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.COUNT);
+        }
     }
 
     @Override

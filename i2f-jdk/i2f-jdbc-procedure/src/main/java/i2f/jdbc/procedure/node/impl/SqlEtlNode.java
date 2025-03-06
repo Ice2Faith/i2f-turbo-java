@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -33,6 +34,49 @@ public class SqlEtlNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        List<XmlNode> children = node.getChildren();
+        if (children == null || children.isEmpty()) {
+            warnPoster.accept(TAG_NAME+" missing child element");
+            return;
+        }
+        XmlNode queryNode = null;
+        XmlNode extraNode = null;
+        List<XmlNode> transformNodeList = new ArrayList<>();
+        XmlNode loadNode = null;
+        XmlNode beforeNode = null;
+        XmlNode afterNode = null;
+        for (XmlNode item : children) {
+            if (SqlQueryListNode.TAG_NAME.equals(item.getTagName())) {
+                queryNode = item;
+            }
+            if ("etl-extra".equals(item.getTagName())) {
+                extraNode = item;
+            }
+            if ("etl-transform".equals(item.getTagName())) {
+                transformNodeList.add(item);
+            }
+            if ("etl-load".equals(item.getTagName())) {
+                loadNode = item;
+            }
+            if ("etl-before".equals(item.getTagName())) {
+                beforeNode = item;
+            }
+            if ("etl-after".equals(item.getTagName())) {
+                afterNode = item;
+            }
+        }
+
+        if (queryNode == null && extraNode == null) {
+            warnPoster.accept(TAG_NAME+" missing elt query node "+SqlQueryListNode.TAG_NAME+"/etl-extra child element");
+        }
+
+        if (loadNode == null) {
+            warnPoster.accept(TAG_NAME+" missing etl load node etl-load child element");
+        }
     }
 
     @Override

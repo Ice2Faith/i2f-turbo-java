@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -23,6 +24,14 @@ public class LangSleepNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String timeout = node.getTagAttrMap().get(AttrConsts.TIMEOUT);
+        if(timeout==null || timeout.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.TIMEOUT);
+        }
     }
 
     @Override

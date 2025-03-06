@@ -12,6 +12,7 @@ import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -26,6 +27,14 @@ public class ProcedureCallNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String refid = node.getTagAttrMap().get(AttrConsts.REFID);
+        if(refid==null || refid.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.REFID);
+        }
     }
 
     @Override

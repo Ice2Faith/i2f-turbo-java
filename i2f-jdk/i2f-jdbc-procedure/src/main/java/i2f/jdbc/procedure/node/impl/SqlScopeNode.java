@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -28,6 +29,14 @@ public class SqlScopeNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String datasources = node.getTagAttrMap().get(AttrConsts.DATASOURCES);
+        if(datasources==null || datasources.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.DATASOURCES);
+        }
     }
 
     @Override

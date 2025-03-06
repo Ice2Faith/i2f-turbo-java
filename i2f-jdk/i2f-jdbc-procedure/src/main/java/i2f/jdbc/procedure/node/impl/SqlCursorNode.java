@@ -14,6 +14,7 @@ import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -28,6 +29,33 @@ public class SqlCursorNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        List<XmlNode> children = node.getChildren();
+        if (children == null || children.isEmpty()) {
+            warnPoster.accept(TAG_NAME+" missing child element");
+            return;
+        }
+        XmlNode queryNode = null;
+        XmlNode bodyNode = null;
+        for (XmlNode item : children) {
+            if (SqlQueryListNode.TAG_NAME.equals(item.getTagName())) {
+                queryNode = item;
+            }
+            if (LangBodyNode.TAG_NAME.equals(item.getTagName())) {
+                bodyNode = item;
+            }
+        }
+
+        if (queryNode == null) {
+            warnPoster.accept(TAG_NAME+ "missing cursor query node "+SqlQueryListNode.TAG_NAME+" child element");
+        }
+
+        if (bodyNode == null) {
+            warnPoster.accept(TAG_NAME+ "missing cursor body node "+LangBodyNode.TAG_NAME+" child element");
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.Date;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -25,6 +26,18 @@ public class LangFormatDateNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String value = node.getTagAttrMap().get(AttrConsts.VALUE);
+        if(value==null || value.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.VALUE);
+        }
+        String pattern = node.getTagAttrMap().get(AttrConsts.PATTERN);
+        if(pattern==null || pattern.isEmpty()){
+            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.PATTERN);
+        }
     }
 
     @Override
