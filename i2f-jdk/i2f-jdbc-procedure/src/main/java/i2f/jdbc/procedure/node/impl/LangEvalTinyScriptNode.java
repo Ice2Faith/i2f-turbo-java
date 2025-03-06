@@ -14,6 +14,10 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
+import org.antlr.v4.runtime.ANTLRErrorListener;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -41,7 +45,19 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String script = node.getTextBody();
-        TinyScript.parse(script);
+        ANTLRErrorListener listener=new BaseErrorListener(){
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                String errorMsg="line " + line + ":" + charPositionInLine + " " + msg;
+                warnPoster.accept("xproc4j report xml grammar, at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" error: "+errorMsg);
+            }
+        };
+        TinyScript.ERROR_LISTENER.add(listener);
+        try {
+            TinyScript.parse(script);
+        }finally {
+            TinyScript.ERROR_LISTENER.remove(listener);
+        }
     }
 
     @Override
