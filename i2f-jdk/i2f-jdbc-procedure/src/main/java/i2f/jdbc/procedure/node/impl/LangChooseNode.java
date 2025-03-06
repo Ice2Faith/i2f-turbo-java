@@ -6,8 +6,10 @@ import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -25,8 +27,35 @@ public class LangChooseNode extends AbstractExecutorNode {
     }
 
     @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        List<XmlNode> list = node.getChildren();
+        if(list==null ||list.isEmpty()){
+            return;
+        }
+        for (XmlNode itemNode : list) {
+            String type = itemNode.getNodeType();
+            if (!XmlNode.NODE_ELEMENT.equals(type)) {
+                continue;
+            }
+            if ("lang-when".equals(itemNode.getTagName())) {
+                String test=itemNode.getTagAttrMap().get(AttrConsts.TEST);
+                if(test!=null && !test.isEmpty()) {
+                    try {
+                        GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST,node,FeatureConsts.EVAL,warnPoster);
+                    } catch (Exception e) {
+                        warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST+"["+test+"]"+" expression maybe wrong!");
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<XmlNode> list = node.getChildren();
+        if(list==null ||list.isEmpty()){
+            return;
+        }
         XmlNode testNode = null;
         XmlNode otherNode = null;
         for (XmlNode itemNode : list) {

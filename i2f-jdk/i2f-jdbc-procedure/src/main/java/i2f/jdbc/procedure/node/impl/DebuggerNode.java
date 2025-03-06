@@ -6,6 +6,9 @@ import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
+
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -20,6 +23,18 @@ public class DebuggerNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        String test = node.getTagAttrMap().get(AttrConsts.TEST);
+        if(test!=null && !test.isEmpty()){
+            try {
+                GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST,node,FeatureConsts.EVAL,warnPoster);
+            } catch (Exception e) {
+                warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST+"["+test+"]"+" expression maybe wrong!");
+            }
+        }
     }
 
     @Override

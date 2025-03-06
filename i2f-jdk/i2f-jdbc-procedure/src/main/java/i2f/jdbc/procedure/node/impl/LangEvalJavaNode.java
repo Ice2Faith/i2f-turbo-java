@@ -24,6 +24,7 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +43,51 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        List<XmlNode> children = node.getChildren();
+        XmlNode importNode = null;
+        XmlNode memberNode = null;
+        XmlNode bodyNode = null;
+        if (children != null && !children.isEmpty()) {
+            for (XmlNode item : children) {
+                if ("lang-java-import".equals(item.getTagName())) {
+                    importNode = item;
+                }
+                if ("lang-java-member".equals(item.getTagName())) {
+                    memberNode = item;
+                }
+                if ("lang-java-body".equals(item.getTagName())) {
+                    bodyNode = node;
+                }
+            }
+        }
+
+        if (bodyNode == null) {
+            bodyNode = node;
+        }
+
+        String importSegment = "";
+        String memberSegment = "";
+        String bodySegment = "";
+        if (importNode != null) {
+            importSegment = importNode.getTextBody();
+        }
+        if (memberNode != null) {
+            memberSegment = memberNode.getTextBody();
+        }
+        if (bodyNode != null) {
+            bodySegment = bodyNode.getTextBody();
+        }
+        Map.Entry<String, String> codeEntry = getFullJavaSourceCode(importSegment, memberSegment, bodySegment);
+
+        try {
+            MemoryCompiler.findCompileClass(codeEntry.getValue(),codeEntry.getKey()+".java",codeEntry.getKey());
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage()+"\n\tcompile source code:\n"+codeEntry.getValue(),e);
+        }
     }
 
     @Override
@@ -150,7 +196,7 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
                     context, executor, context.getParams()
             );
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage()+"\n\tcompile source code:\n"+codeEntry.getValue(), e);
         }
         return obj;
     }
@@ -186,10 +232,14 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
                 String line = lines[i];
                 if (i == lines.length - 1) {
                     String str = line.trim();
-                    builder.append(" return ");
-                    builder.append(line);
-                    if (!str.endsWith(";")) {
-                        builder.append(";");
+                    if(!str.isEmpty() && !"}".equals(str)) {
+                        builder.append(" return ");
+                        builder.append(line);
+                        if (!str.endsWith(";")) {
+                            builder.append(";");
+                        }
+                    }else{
+                        builder.append(line);
                     }
                     builder.append("\n");
                 } else {
@@ -198,7 +248,7 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
             }
         } else {
             builder.append(bodySegment);
-            if (!bodySegment.endsWith(";")) {
+            if (!bodySegment.endsWith(";") && !bodySegment.endsWith("}")) {
                 builder.append(";");
             }
         }

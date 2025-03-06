@@ -3,6 +3,7 @@ package i2f.springboot.jdbc.bql.procedure;
 import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -16,6 +17,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Ice2Faith
@@ -35,6 +42,11 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
 
     @Autowired
     private SpringJdbcProcedureProperties jdbcProcedureProperties;
+
+    private final ExecutorService reportPool= new ThreadPoolExecutor(1, 3,
+                                      0L,TimeUnit.MILLISECONDS,
+                                      new LinkedBlockingQueue<>(),
+                                        new ThreadPoolExecutor.DiscardOldestPolicy());
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -78,7 +90,16 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
                                                  JdbcProcedureExecutor executor) {
         log.info("xproc4j config JdbcProcedureContext ...");
         JdbcProcedureContext ret = new JdbcProcedureContext(nodeMapCacheSupplier, javaCallerMapCacheSupplier);
-        ret.listener((ctx)->ctx.reportGrammar(executor,(msg)->log.warn(msg)));
+        AtomicBoolean isInit=new AtomicBoolean(true);
+        ret.listener((ctx)->{
+            if(isInit.getAndSet(false)){
+                GrammarReporter.reportGrammar(executor, new HashMap<>(ctx.getCache()), (msg) -> log.warn(msg));
+            }else {
+                reportPool.submit(() -> {
+                    GrammarReporter.reportGrammar(executor, new HashMap<>(ctx.getCache()), (msg) -> log.warn(msg));
+                });
+            }
+        });
         ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
         return ret;
     }

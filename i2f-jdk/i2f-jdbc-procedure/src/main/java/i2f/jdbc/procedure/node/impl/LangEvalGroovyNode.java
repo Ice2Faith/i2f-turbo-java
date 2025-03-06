@@ -1,12 +1,13 @@
 package i2f.jdbc.procedure.node.impl;
 
-import groovy.lang.GroovyShell;
 import i2f.extension.groovy.GroovyScript;
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,8 +31,9 @@ public class LangEvalGroovyNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String script = node.getTextBody();
-        GroovyShell shell=new GroovyShell();
-        shell.parse(script);
+        if(script!=null && !script.isEmpty()) {
+            GrammarReporter.reportExprFeatureGrammar(script, FeatureConsts.EVAL_GROOVY, node, "element body ", warnPoster);
+        }
     }
 
     @Override

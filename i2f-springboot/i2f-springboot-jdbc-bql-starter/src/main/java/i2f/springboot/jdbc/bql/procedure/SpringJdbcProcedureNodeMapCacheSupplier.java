@@ -114,7 +114,7 @@ public class SpringJdbcProcedureNodeMapCacheSupplier extends AbstractJdbcProcedu
                 +", success count="+successCnt
                 +", failure count="+failureCnt
                 +", node count="+nodeCnt
-                +", result count"+ret.size());
+                +", result count="+ret.size());
         return ret;
     }
 
