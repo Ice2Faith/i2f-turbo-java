@@ -52,19 +52,18 @@ TYPE_CLASS:
 NAMING: ID (DOT ID)*;
 ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
 
+
 DOUBLE_OPERAOTR:
-    '>=' | 'gte'
+     '>=' | 'gte'
     | '<=' | 'lte'
     | '!=' | 'ne'
     | '<>' | 'neq'
     | '==' | 'eq'
     | '>' | 'gt' | '<' | 'lt'
     | 'in' | 'notin'
-    | '&&' | 'and'
-    | '||' | 'or'
     | 'as' | 'cast'
     | 'is' | 'instanceof' | 'typeof'
-    |'+' | '-' | '*' | '/' | '%'
+    |'+' | '-'
     ;
 
 PREFIX_OPERATOR:
@@ -151,7 +150,9 @@ express:
     | constValue
     | refValue
     | jsonValue
+    | express ('*' | '/' | '%') express
     | express DOUBLE_OPERAOTR express
+    | express ('&&' | 'and' | '||' | 'or') express
     ;
 
 debuggerSegment:
