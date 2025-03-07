@@ -1585,10 +1585,12 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 term = term.trim();
                 StringBuilder builder = new StringBuilder();
                 String firstLine = "";
+                String firstChar=term.substring(0,1);
+                String escapeFirstCharRegex="\\"+firstChar;
                 String[] arr = term.split("\n");
                 for (int i = 0; i < arr.length; i++) {
                     String str = arr[i];
-                    str = str.replace("\\`", "`");
+                    str = str.replace(escapeFirstCharRegex, firstChar);
                     str = str.replace("\\\\", "\\");
                     if (i == 0) {
                         firstLine = arr[0];

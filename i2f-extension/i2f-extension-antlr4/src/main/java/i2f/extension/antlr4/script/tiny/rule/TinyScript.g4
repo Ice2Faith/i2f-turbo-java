@@ -26,12 +26,14 @@ SINGLE_LINE_COMMENT: '//' (~('\n'))* '\n' -> skip;
 
 MULTI_LINE_COMMENT: '/*' (~('*') | '\\' ('*') )* '*/' -> skip;
 
-MULTILINE_STRING: '```' NAMING? [ \t]* '\n' (~('`') | '\\' ('`'|'\\'))* '\n' [ \t]* '```';
+MULTILINE_STRING: '```' NAMING? [ \t]* '\n' (~('`') | '\\' ('`'|'``'|'```'|'\\'))* '\n' [ \t]* '```';
+MULTILINE_QUOTE_STRING: '"""' NAMING? [ \t]* '\n' (~('"') | '\\' ('"'|'""'|'"""'|'\\'))* '\n' [ \t]* '"""';
 
 RENDER_STRING: [rR] QUOTE (ESCAPED_CHAR | ~[\\"])* QUOTE;
+RENDER_SINGLE_STRING: [rR] '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
 
 STRING: QUOTE (ESCAPED_CHAR | ~[\\"])* QUOTE;
-
+SINGLE_STRING: '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
 
 TYPE_BOOL:
     'true' | 'false'
@@ -52,19 +54,6 @@ TYPE_CLASS:
 NAMING: ID (DOT ID)*;
 ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
 
-
-DOUBLE_OPERAOTR:
-     '>=' | 'gte'
-    | '<=' | 'lte'
-    | '!=' | 'ne'
-    | '<>' | 'neq'
-    | '==' | 'eq'
-    | '>' | 'gt' | '<' | 'lt'
-    | 'in' | 'notin'
-    | 'as' | 'cast'
-    | 'is' | 'instanceof' | 'typeof'
-    |'+' | '-'
-    ;
 
 PREFIX_OPERATOR:
     '!' | 'not'
@@ -151,7 +140,9 @@ express:
     | refValue
     | jsonValue
     | express ('*' | '/' | '%') express
-    | express DOUBLE_OPERAOTR express
+    | express ( 'in' | 'notin'| 'as' | 'cast'  | 'is' | 'instanceof' | 'typeof') express
+    | express ('+' | '-') express
+    | express ('>=' | 'gte' | '<=' | 'lte' | '!=' | 'ne' | '<>' | 'neq' | '==' | 'eq' | '>' | 'gt' | '<' | 'lt') express
     | express ('&&' | 'and' | '||' | 'or') express
     ;
 
@@ -284,14 +275,17 @@ constClass:
 
 constString:
     STRING
+    |SINGLE_STRING
     ;
 
 constMultilineString:
     MULTILINE_STRING
+    |MULTILINE_QUOTE_STRING
     ;
 
 constRenderString:
     RENDER_STRING
+    |RENDER_SINGLE_STRING
     ;
 
 decNumber: // 十进制数字
