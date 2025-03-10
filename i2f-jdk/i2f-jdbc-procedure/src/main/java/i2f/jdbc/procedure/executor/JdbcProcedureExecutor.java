@@ -125,17 +125,17 @@ public interface JdbcProcedureExecutor {
 
     Connection getConnection(String datasource, Map<String, Object> params);
 
-    List<?> sqlQueryList(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
+    List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType);
 
-    Object sqlQueryObject(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
+    Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType);
 
-    Object sqlQueryRow(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType);
+    Object sqlQueryRow(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType);
 
-    int sqlUpdate(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params);
+    int sqlUpdate(String datasource, BindSql bql, Map<String, Object> params);
 
     BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params);
 
-    List<?> sqlQueryPage(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize);
+    List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize);
 
     void sqlTransBegin(String datasource, int isolation, Map<String, Object> params);
 

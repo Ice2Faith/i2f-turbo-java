@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
@@ -43,7 +44,8 @@ public class SqlQueryListNode extends AbstractExecutorNode {
         if (dialectScriptList.isEmpty()) {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
-        List<?> row = executor.sqlQueryList(datasource, dialectScriptList, context.getParams(), resultType);
+        BindSql bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
+        List<?> row = executor.sqlQueryList(datasource, bql, context.getParams(), resultType);
         if (result != null && !result.isEmpty()) {
             executor.setParamsObject(context.getParams(), result, row);
         }
