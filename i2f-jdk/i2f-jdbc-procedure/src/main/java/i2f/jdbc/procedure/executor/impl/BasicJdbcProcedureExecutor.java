@@ -737,15 +737,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public List<?> sqlQueryList(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType) {
+    public List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            String script = entry.getValue();
-            BindSql bql = resolveSqlScript(script, params);
-            debugLog(() -> "sqlQueryList:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
+            debugLog(() -> "sqlQueryList:datasource=" + datasource + " \n\tbql:\n" + bql);
             List<?> list = JdbcResolver.list(conn, bql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
             return list;
         } catch (Exception e) {
@@ -755,15 +752,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
 
     @Override
-    public Object sqlQueryObject(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType) {
+    public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            String script = entry.getValue();
-            BindSql bql = resolveSqlScript(script, params);
-            debugLog(() -> "sqlQueryObject:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
+            debugLog(() -> "sqlQueryObject:datasource=" + datasource + " \n\tbql:\n" + bql);
             Object obj = JdbcResolver.get(conn, bql, resultType);
             return obj;
         } catch (Exception e) {
@@ -772,15 +766,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public Object sqlQueryRow(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType) {
+    public Object sqlQueryRow(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            String script = entry.getValue();
-            BindSql bql = resolveSqlScript(script, params);
-            debugLog(() -> "sqlQueryRow:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
+            debugLog(() -> "sqlQueryRow:datasource=" + datasource + " \n\tbql:\n" + bql);
             Object row = JdbcResolver.find(conn, bql, resultType, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
             return row;
         } catch (Exception e) {
@@ -789,15 +780,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public int sqlUpdate(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params) {
+    public int sqlUpdate(String datasource, BindSql bql, Map<String, Object> params) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            String script = entry.getValue();
-            BindSql bql = sqlScript(datasource, dialectScriptList, params);
-            debugLog(() -> "sqlUpdate:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
+            debugLog(() -> "sqlUpdate:datasource=" + datasource + " \n\tbql:\n" + bql);
             int num = JdbcResolver.update(conn, bql);
             return num;
         } catch (Exception e) {
@@ -822,17 +810,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public List<?> sqlQueryPage(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize) {
+    public List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             setParamsObject(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            String script = entry.getValue();
-            BindSql bql = resolveSqlScript(script, params);
             IPageWrapper wrapper = PageWrappers.wrapper(conn);
             BindSql pageBql = wrapper.apply(bql, ApiPage.of(pageIndex, pageSize));
-            debugLog(() -> "sqlQueryPage:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + pageBql);
+            debugLog(() -> "sqlQueryPage:datasource=" + datasource + " \n\tbql:\n" + pageBql);
             List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
             return list;
         } catch (Exception e) {

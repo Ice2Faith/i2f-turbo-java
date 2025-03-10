@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.bindsql.BindSql;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
@@ -191,7 +192,8 @@ public class SqlEtlNode extends AbstractExecutorNode {
             int pageIndex = 0;
             int commitCount = 0;
             while (true) {
-                List<?> list = executor.sqlQueryPage(extraDatasource, dialectScriptList, context.getParams(), resultType, pageIndex, readBatchSize);
+                BindSql bql = executor.sqlScript(extraDatasource, dialectScriptList, context.getParams());
+                List<?> list = executor.sqlQueryPage(extraDatasource, bql, context.getParams(), resultType, pageIndex, readBatchSize);
                 if (list.isEmpty()) {
                     break;
                 }

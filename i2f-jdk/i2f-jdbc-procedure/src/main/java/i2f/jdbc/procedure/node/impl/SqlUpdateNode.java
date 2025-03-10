@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
@@ -40,7 +41,8 @@ public class SqlUpdateNode extends AbstractExecutorNode {
         if (dialectScriptList.isEmpty()) {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
-        int row = executor.sqlUpdate(datasource, dialectScriptList, context.getParams());
+        BindSql bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
+        int row = executor.sqlUpdate(datasource, bql, context.getParams());
         if (result != null && !result.isEmpty()) {
             Object val = executor.resultValue(row, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.setParamsObject(context.getParams(), result, val);

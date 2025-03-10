@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
@@ -112,7 +113,8 @@ public class SqlCursorNode extends AbstractExecutorNode {
         Map<String, Object> bakParams = new LinkedHashMap<>();
         bakParams.put(item, executor.visit(item, context.getParams()));
         while (true) {
-            List<?> list = executor.sqlQueryPage(datasource, dialectScriptList, context.getParams(), resultType, pageIndex, batchSize);
+            BindSql bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
+            List<?> list = executor.sqlQueryPage(datasource, bql, context.getParams(), resultType, pageIndex, batchSize);
             if (list.isEmpty()) {
                 break;
             }
