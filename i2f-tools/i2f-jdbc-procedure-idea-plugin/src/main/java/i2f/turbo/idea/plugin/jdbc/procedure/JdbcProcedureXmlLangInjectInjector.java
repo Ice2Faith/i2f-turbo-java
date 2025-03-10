@@ -14,7 +14,6 @@ import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlText;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -185,7 +184,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 return ret;
             }
         }
-        if ("yaml".equalsIgnoreCase(dialect)) {
+        if ("yaml".equalsIgnoreCase(dialect)
+                || "yml".equalsIgnoreCase(dialect)) {
             Language ret = Language.findLanguageByID("yaml");
             if (ret != null) {
                 return ret;
@@ -200,6 +200,64 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         if ("markdown".equalsIgnoreCase(dialect)
                 || "md".equalsIgnoreCase(dialect)) {
             Language ret = Language.findLanguageByID("Markdown");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("csv".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("CSV");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("cron".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("CronExp");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("expr".equalsIgnoreCase(dialect)
+                || "el".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("EL");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("spel".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("SpEL");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("typescript".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("TypeScript");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("thymeleaf".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("ThymeleafExpressions");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("vtl".equalsIgnoreCase(dialect)
+                || "vm".equalsIgnoreCase(dialect)
+                || "velocity".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("VTL");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("freemarker".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("InjectedFreeMarker");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("dotenv".equalsIgnoreCase(dialect)
+                || "env".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("DotEnt");
             if (ret != null) {
                 return ret;
             }
@@ -319,6 +377,22 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 return ret;
             }
         }
+        if ("cassandra".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("CassandraQL");
+            if (ret != null) {
+                return ret;
+            }
+        }
+        if ("mongodb".equalsIgnoreCase(dialect)) {
+            Language ret = Language.findLanguageByID("Micronaut-MongoDB-JSON");
+            if (ret != null) {
+                return ret;
+            }
+            ret = Language.findLanguageByID("MongoDB-JSON");
+            if (ret != null) {
+                return ret;
+            }
+        }
         return null;
     }
 
@@ -395,7 +469,16 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return ret;
                 }
             }
-            Language ret = Language.findLanguageByID("Shell Script");
+            Language ret = Language.findLanguageByID("VTL");
+            if (ret == null) {
+                ret = Language.findLanguageByID("InjectedFreeMarker");
+            }
+            if (ret == null) {
+                ret = Language.findLanguageByID("ThymeleafExpressions");
+            }
+            if (ret == null) {
+                ret = Language.findLanguageByID("Shell Script");
+            }
             if (ret != null) {
                 return ret;
             }
@@ -499,7 +582,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     .doneInjecting();
         } else if (Arrays.asList("groovy").contains(targetLang.getID().toLowerCase())) {
 
-            if("lang-eval-groovy".equals(tagName)){
+            if ("lang-eval-groovy".equals(tagName)) {
                 registrar.startInjecting(targetLang)
                         .addPlace(EVAL_JAVA_IMPORTS + "\n"
                                         + "class MyGroovyProcedure { "
@@ -508,7 +591,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
-            }else{
+            } else {
                 registrar.startInjecting(targetLang)
                         .addPlace("",
                                 "",
@@ -684,7 +767,38 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
 
         if (attrName.contains(".render")) {
-            Language lang = Language.findLanguageByID("Shell Script");
+            Language lang = Language.findLanguageByID("VTL");
+            if (lang == null) {
+                lang = Language.findLanguageByID("InjectedFreeMarker");
+            }
+            if (lang == null) {
+                lang = Language.findLanguageByID("ThymeleafExpressions");
+            }
+            if (lang == null) {
+                lang = Language.findLanguageByID("Shell Script");
+            }
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace("",
+                                "",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
+            }
+        }
+
+        if (attrName.equals("test")
+                || attrName.equals("collection")
+                || attrName.contains(".eval.")
+                || attrName.endsWith(".eval")) {
+            Language lang = Language.findLanguageByID("Spring EL");
+            if (lang == null) {
+                lang = Language.findLanguageByID("EL");
+            }
+            if (lang == null) {
+                lang = Language.findLanguageByID("JavaScript");
+            }
             if (lang != null) {
                 registrar.startInjecting(lang)
                         .addPlace("",
@@ -718,6 +832,26 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .addPlace("var context={};\n" +
                                         "var executor={};\n" +
                                         "var params={};\n",
+                                "",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
+            }
+        }
+
+        if (attrName.contains(".eval-ts")
+                || attrName.contains(".eval-tinyscript")) {
+            Language lang = findPossibleLanguage("Scala");
+            if (lang == null) {
+                findPossibleLanguage("Groovy");
+            }
+            if (lang == null) {
+                findPossibleLanguage("ShellScript");
+            }
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace("",
                                 "",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))
