@@ -683,6 +683,19 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
+        if (attrName.contains(".render")) {
+            Language lang = Language.findLanguageByID("Shell Script");
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace("",
+                                "",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
+            }
+        }
+
         if (attrName.contains(".eval-java")) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
