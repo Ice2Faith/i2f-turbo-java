@@ -6,9 +6,11 @@ import i2f.extension.antlr4.script.tiny.impl.TinyScriptResolver;
 import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
+import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -112,8 +114,15 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
         public Reference<Object> beforeFunctionCall(Object target, boolean isNew, String naming, List<Object> argList) {
             DefaultJdbcProcedureExecutorCaller caller = new DefaultJdbcProcedureExecutorCaller(executor, new JdbcProcedureContext(context.getNodeMap()));
             try {
+                ProcedureMeta meta = context.getNodeMap().get(naming);
+                if (meta == null) {
+                    return Reference.nop();
+                }
                 Map<String, Object> callParams = castArgumentListAsNamingMap(argList);
-                Object ret = caller.invoke(naming, callParams);
+                Map<String, Object> ret = caller.call(naming, callParams);
+                if (ret.containsKey(ParamsConsts.RETURN)) {
+                    return Reference.of(ret.get(ParamsConsts.RETURN));
+                }
                 return Reference.of(ret);
             } catch (NotFoundSignalException e) {
                 return Reference.nop();
