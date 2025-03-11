@@ -3,6 +3,9 @@ package i2f.database.type;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -149,8 +152,22 @@ public enum DatabaseType {
         return OTHER;
     }
 
+    protected static final  Map<Connection,DatabaseType> TYPE_MAP= new WeakHashMap<>();
+
     public static DatabaseType typeOfConnection(Connection conn) throws SQLException {
-        return typeOfJdbcUrl(conn.getMetaData().getURL());
+        DatabaseType type = TYPE_MAP.get(conn);
+        if(type!=null){
+            return type;
+        }
+        synchronized (TYPE_MAP) {
+            type = TYPE_MAP.get(conn);
+            if(type!=null){
+                return type;
+            }
+            type = typeOfJdbcUrl(conn.getMetaData().getURL());
+            TYPE_MAP.put(conn, type);
+            return type;
+        }
     }
 
     /**
