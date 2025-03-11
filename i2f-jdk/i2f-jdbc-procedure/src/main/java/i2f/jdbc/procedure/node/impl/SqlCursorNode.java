@@ -93,17 +93,25 @@ public class SqlCursorNode extends AbstractExecutorNode {
 
         List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(queryNode, context, executor);
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, queryNode, context);
-        String script = (String) executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, queryNode, context);
+        Object scriptObj = executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, queryNode, context);
         String resultTypeName = (String) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.STRING, queryNode, context);
         Class<?> resultType = executor.loadClass(resultTypeName);
         if (resultType == null) {
             resultType = Map.class;
         }
-        if (script == null || script.isEmpty()) {
-            script = queryNode.getTagBody();
+        String script="";
+        BindSql bql=null;
+        if(scriptObj instanceof BindSql){
+            bql=(BindSql) scriptObj;
+        }else{
+            script=String.valueOf(scriptObj==null?"":scriptObj);
         }
         if (dialectScriptList.isEmpty()) {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
+        }
+
+        if(bql==null) {
+            bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
         }
 
         int pageIndex = 0;
@@ -113,7 +121,6 @@ public class SqlCursorNode extends AbstractExecutorNode {
         Map<String, Object> bakParams = new LinkedHashMap<>();
         bakParams.put(item, executor.visit(item, context.getParams()));
         while (true) {
-            BindSql bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
             List<?> list = executor.sqlQueryPage(datasource, bql, context.getParams(), resultType, pageIndex, batchSize);
             if (list.isEmpty()) {
                 break;
