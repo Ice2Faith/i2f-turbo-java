@@ -15,6 +15,7 @@ import com.intellij.psi.xml.XmlText;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Ice2Faith
@@ -23,6 +24,50 @@ import java.util.*;
  */
 final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     public static final Logger log = Logger.getInstance(JdbcProcedureXmlLangInjectInjector.class);
+    public static final String LANG_JAVA_ENUM_CLASS_NAME="InjectLangEnum";
+    public static volatile String LANG_JAVA_ENUM="public static enum "+LANG_JAVA_ENUM_CLASS_NAME+" {" +
+            "JAVA,SQL,VTL" +
+            "};";
+    public static final ConcurrentHashMap<String,Language> LANG_JAVA_ENUM_MAP=new ConcurrentHashMap<>();
+
+    static{
+        Thread thread = new Thread(() -> {
+            do {
+                Collection<Language> langs = Language.getRegisteredLanguages();
+                for (Language lang : langs) {
+                    String id = lang.getID();
+                    if (id == null || id.isEmpty()) {
+                        continue;
+                    }
+                    if (!id.matches("[a-zA-Z0-9\\-\\_ ]+")) {
+                        continue;
+                    }
+                    id = id.replaceAll(" ", "_");
+                    id = id.replaceAll("-", "_");
+                    LANG_JAVA_ENUM_MAP.put(id,lang);
+                }
+                StringBuilder builder = new StringBuilder();
+                builder.append("public static enum ").append(LANG_JAVA_ENUM_CLASS_NAME).append(" {");
+                boolean isFirst = true;
+                for (Map.Entry<String, Language> entry : LANG_JAVA_ENUM_MAP.entrySet()) {
+                    if (!isFirst) {
+                        builder.append(",");
+                    }
+                    builder.append(entry.getKey());
+                    isFirst = false;
+                }
+                builder.append("}");
+                LANG_JAVA_ENUM = builder.toString();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+
+                }
+            } while (true);
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
 
     public static final String[] JAVA_LANG_TAGS = {
             "lang-eval",
@@ -294,18 +339,15 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        Collection<Language> langs = Language.getRegisteredLanguages();
-        for (Language item : langs) {
-            String id = item.getID();
-//            log.warn("found registry lang: " + id);
-            if (id == null) {
-                continue;
-            }
-            if (dialect.equalsIgnoreCase(id)) {
-                return item;
+        String dialectId = dialect.replaceAll(" ", "_");
+        dialectId = dialectId.replaceAll("-", "_");
+        for (Map.Entry<String, Language> entry : LANG_JAVA_ENUM_MAP.entrySet()) {
+            if(entry.getKey().equalsIgnoreCase(dialectId)) {
+                return entry.getValue();
             }
         }
-        for (Language item : langs) {
+
+        for (Language item : LANG_JAVA_ENUM_MAP.values()) {
             String id = item.getID();
 //            log.warn("found registry lang: " + id);
             if (id == null) {
@@ -511,10 +553,88 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
+        if (Arrays.asList("lang-eval").contains(name)) {
+            Language lang = Language.findLanguageByID("Spring EL");
+            if (lang == null) {
+                lang = Language.findLanguageByID("EL");
+            }
+            if (lang == null) {
+                lang = Language.findLanguageByID("JavaScript");
+            }
+            if(lang!=null){
+                return lang;
+            }
+        }
+
         if (true) {
             Language ret = findPossibleTagLanguage(name);
             if (ret != null) {
                 return ret;
+            }
+        }
+
+        XmlAttribute[] attributes = tag.getAttributes();
+        if(attributes!=null){
+            for (XmlAttribute attr : attributes) {
+                String attrName = attr.getName();
+                if(attrName==null || attrName.isEmpty()){
+                    continue;
+                }
+                String[] arr = attrName.split("[\\.;:]");
+                Set<String> set = new LinkedHashSet<>(Arrays.asList(arr));
+                if(set.contains("body-xml")
+                ||set.contains("body-text")){
+                    if(set.contains("eval-java")){
+                        return Language.findLanguageByID("JAVA");
+                    }else if(set.contains("eval-js")){
+                        return Language.findLanguageByID("JavaScript");
+                    }else if(set.contains("eval-js")){
+                        return Language.findLanguageByID("Groovy");
+                    }else if(set.contains("eval-ts")
+                    ||set.contains("eval-tinyscript")){
+                        Language lang = Language.findLanguageByID("TinyScript");
+                        if (lang != null) {
+                            return lang;
+                        }
+                        lang = Language.findLanguageByID("Scala");
+                        if (lang != null) {
+                            return lang;
+                        }
+                        lang = Language.findLanguageByID("Groovy");
+                        if (lang != null) {
+                            return lang;
+                        }
+                        lang = Language.findLanguageByID("Shell Script");
+                        if (lang != null) {
+                            return lang;
+                        }
+                    }else if(set.contains("render")){
+                        Language ret = Language.findLanguageByID("VTL");
+                        if (ret == null) {
+                            ret = Language.findLanguageByID("InjectedFreeMarker");
+                        }
+                        if (ret == null) {
+                            ret = Language.findLanguageByID("ThymeleafExpressions");
+                        }
+                        if (ret == null) {
+                            ret = Language.findLanguageByID("Shell Script");
+                        }
+                        if (ret != null) {
+                            return ret;
+                        }
+                    }else if(set.contains("eval")){
+                        Language lang = Language.findLanguageByID("Spring EL");
+                        if (lang == null) {
+                            lang = Language.findLanguageByID("EL");
+                        }
+                        if (lang == null) {
+                            lang = Language.findLanguageByID("JavaScript");
+                        }
+                        if(lang!=null){
+                            return lang;
+                        }
+                    }
+                }
             }
         }
         return detectLanguage(tag.getParentTag());
@@ -868,6 +988,21 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                                         + "class MyGroovyProcedure { "
                                         + "def exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) { ",
                                 "} }",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
+            }
+        }
+
+        if(attrName.equals("_lang")){
+            Language lang = findPossibleLanguage("java");
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace("public class MyDsl { "
+                                        +LANG_JAVA_ENUM+"\n"
+                                +" public Object v="+LANG_JAVA_ENUM_CLASS_NAME+".",
+                                ";}",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))
                         .doneInjecting();
