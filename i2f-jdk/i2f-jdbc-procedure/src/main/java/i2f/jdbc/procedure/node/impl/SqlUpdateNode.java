@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
@@ -30,18 +31,25 @@ public class SqlUpdateNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node, context, executor);
-        String datasource = node.getTagAttrMap().get(AttrConsts.DATASOURCE);
-        String script = node.getTagAttrMap().get(AttrConsts.SCRIPT);
+        String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
+        Object scriptObj = executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        if (script != null && !script.isEmpty()) {
-            script = (String) executor.visit(script, context.getParams());
-        } else {
+        String script="";
+        BindSql bql=null;
+        if(scriptObj instanceof BindSql){
+            bql=(BindSql) scriptObj;
+        }else{
+            script=String.valueOf(scriptObj==null?"":scriptObj);
+        }
+        if (script == null || script.isEmpty()) {
             script = node.getTagBody();
         }
         if (dialectScriptList.isEmpty()) {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
-        BindSql bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
+        if(bql==null) {
+            bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
+        }
         int row = executor.sqlUpdate(datasource, bql, context.getParams());
         if (result != null && !result.isEmpty()) {
             Object val = executor.resultValue(row, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
