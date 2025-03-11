@@ -146,14 +146,21 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
         Class<?> resultType = Map.class;
         String extraDatasource = null;
+        BindSql bql=null;
         if (queryNode != null) {
             dialectScriptList = SqlDialect.getSqlDialectList(queryNode, context, executor);
             extraDatasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, queryNode, context);
-            String script = (String) executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, queryNode, context);
+            Object scriptObj = executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, queryNode, context);
             String resultTypeName = (String) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.STRING, queryNode, context);
             resultType = executor.loadClass(resultTypeName);
             if (resultType == null) {
                 resultType = Map.class;
+            }
+            String script="";
+            if(scriptObj instanceof BindSql){
+                bql=(BindSql) scriptObj;
+            }else{
+                script=String.valueOf(scriptObj==null?"":scriptObj);
             }
             if (script == null || script.isEmpty()) {
                 script = queryNode.getTagBody();
@@ -189,10 +196,13 @@ public class SqlEtlNode extends AbstractExecutorNode {
             Map<String, Class<?>> targetTypeMap = new LinkedHashMap<>();
             String loadSql = "";
 
+            if(bql==null) {
+                bql = executor.sqlScript(extraDatasource, dialectScriptList, context.getParams());
+            }
+
             int pageIndex = 0;
             int commitCount = 0;
             while (true) {
-                BindSql bql = executor.sqlScript(extraDatasource, dialectScriptList, context.getParams());
                 List<?> list = executor.sqlQueryPage(extraDatasource, bql, context.getParams(), resultType, pageIndex, readBatchSize);
                 if (list.isEmpty()) {
                     break;

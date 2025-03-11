@@ -32,11 +32,18 @@ public class SqlQueryListNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
         List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node, context, executor);
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
-        String script = (String) executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, node, context);
+        Object scriptObj = executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         Class<?> resultType = (Class<?>) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.CLASS, node, context);
         if (resultType == null) {
             resultType = Map.class;
+        }
+        String script="";
+        BindSql bql=null;
+        if(scriptObj instanceof BindSql){
+            bql=(BindSql) scriptObj;
+        }else{
+            script=String.valueOf(scriptObj==null?"":scriptObj);
         }
         if (script == null || script.isEmpty()) {
             script = node.getTagBody();
@@ -44,7 +51,9 @@ public class SqlQueryListNode extends AbstractExecutorNode {
         if (dialectScriptList.isEmpty()) {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
-        BindSql bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
+        if(bql==null) {
+            bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
+        }
         List<?> row = executor.sqlQueryList(datasource, bql, context.getParams(), resultType);
         if (result != null && !result.isEmpty()) {
             executor.setParamsObject(context.getParams(), result, row);
