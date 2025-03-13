@@ -268,6 +268,7 @@ user.roles[1].name="logger";
 ```shell
 ! 取反
 not 取反
+- 取负数,由于可能和其他操作符发生结合性问题，如果在复杂的表达式中使用，请使用括号包裹
 ```
 
 - 举例
@@ -275,6 +276,46 @@ not 取反
 ```shell
 !${flag};
 not ${flag};
+-1;
+-${cnt};
+```
+
+### 后置操作符表达式
+- 定义
+
+```shell
+表达式 操作符
+```
+
+- 操作符说明
+
+```shell
+% 百分数
+```
+
+- 举例
+
+```shell
+15%;
+${per}%;
+```
+
+### 三元运算符表达式
+- 定义
+
+```shell
+表达式 ? 表达式 : 表达式
+```
+
+- 和JAVA中一样
+- 但是，返回的两个可选值，不要求是同类型的数据，不做这个限制
+- 同时条件表达式也是宽泛值，不要求是严格的boolean类型
+
+- 举例
+
+```shell
+${cnt}>1?"ok":null;
+loginStatus=${user}?1:0;
 ```
 
 ### 创建对象
@@ -395,6 +436,20 @@ typeof 用法和is一样，是is的别名
 if(条件表达式){
   语句块
 } else if(条件表达式){
+  语句块
+} else {
+  语句块
+};
+```
+
+- 其中 else if 可以运行使用别名 elif
+- 也就是允许这样写
+```shell
+if(条件表达式){
+  语句块
+} else if(条件表达式){
+  语句块
+} elif(条件表达式){
   语句块
 } else {
   语句块
@@ -557,6 +612,27 @@ try{
 }finally{
   
 };
+```
+
+### throw 语句
+- 和JAVA中使用方式一样
+- 需要注意的是，抛出的对象，如果是引用对象的话，需要使用${}进行引用
+
+```shell
+throw 抛出表达式;
+```
+
+- 举例
+
+```shell
+throw new Throwable("xxx");
+
+try{
+  cnt=1/0;
+}catch(Throwable e){
+  throw new RuntimeException(${e}.getMessage(),${e});
+  // throw ${e};
+}
 ```
 
 ### debugger 调试语法
