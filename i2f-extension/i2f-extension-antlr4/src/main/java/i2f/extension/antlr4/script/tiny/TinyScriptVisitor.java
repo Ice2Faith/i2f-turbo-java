@@ -25,6 +25,12 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpress(TinyScriptParser.ExpressContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TinyScriptParser#negtiveSegment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#debuggerSegment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -36,6 +42,12 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTrySegment(TinyScriptParser.TrySegmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyScriptParser#throwSegment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitThrowSegment(TinyScriptParser.ThrowSegmentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#tryBodyBlock}.
 	 * @param ctx the parse tree

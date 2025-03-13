@@ -22,104 +22,113 @@ grammar TinyScript;
 }
 
 // Lexer rules
-SINGLE_LINE_COMMENT: '//' (~('\n'))* '\n' -> skip;
+TERM_COMMENT_SINGLE_LINE: '//' (~('\n'))* '\n' -> skip;
 
-MULTI_LINE_COMMENT: '/*' (~('*') | '\\' ('*') )* '*/' -> skip;
+TERM_COMMENT_MULTI_LINE: '/*' .*? '*/' -> skip;
 
-MULTILINE_STRING: '```' NAMING? [ \t]* '\n' (~('`') | '\\' ('`'|'``'|'```'|'\\'))* '\n' [ \t]* '```';
-MULTILINE_QUOTE_STRING: '"""' NAMING? [ \t]* '\n' (~('"') | '\\' ('"'|'""'|'"""'|'\\'))* '\n' [ \t]* '"""';
+TERM_CONST_STRING_MULTILINE: '```' NAMING? [ \t]* '\n' (~('`') | '\\' ('`'|'``'|'```'|'\\'))* '\n' [ \t]* '```';
+TERM_CONST_STRING_MULTILINE_QUOTE: '"""' NAMING? [ \t]* '\n' (~('"') | '\\' ('"'|'""'|'"""'|'\\'))* '\n' [ \t]* '"""';
 
-RENDER_STRING: [rR] QUOTE (ESCAPED_CHAR | ~[\\"])* QUOTE;
-RENDER_SINGLE_STRING: [rR] '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
+TERM_CONST_STRING_RENDER: [rR] TERM_QUOTE (ESCAPED_CHAR | ~[\\"])* TERM_QUOTE;
+TERM_CONST_STRING_RENDER_SINGLE: [rR] '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
 
-STRING: QUOTE (ESCAPED_CHAR | ~[\\"])* QUOTE;
-SINGLE_STRING: '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
+TERM_CONST_STRING: TERM_QUOTE (ESCAPED_CHAR | ~[\\"])* TERM_QUOTE;
+TERM_CONST_STRING_SINGLE: '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
 
-TYPE_BOOL:
+TERM_CONST_BOOLEAN:
     'true' | 'false'
     ;
 
-TYPE_NULL:
+TERM_CONST_NULL:
     'null'
     ;
 
-
-// 词法规则
-QUOTE: '"';
-ESCAPED_CHAR: '\\' ( '\\' | '"' | '\'' | 'r' | 't' | 'n' );
-
-TYPE_CLASS:
+TERM_CONST_TYPE_CLASS:
     NAMING '.' 'class';
 
-NAMING: ID (DOT ID)*;
-ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
 
+REF_EXPRESS : TERM_DOLLAR TERM_CURLY_L (~[}])* TERM_CURLY_R ;
+
+
+TERM_CONST_NUMBER_SCIEN_2:
+     TERM_CONST_NUMBER_FLOAT CH_E TERM_INTEGER [fF]?
+    ;
+
+TERM_CONST_NUMBER_SCIEN_1:
+     TERM_INTEGER CH_E TERM_INTEGER [lL]?
+    ;
+
+TERM_CONST_NUMBER_FLOAT:
+    TERM_INTEGER TERM_DOT TERM_INTEGER [fF]?
+    ;
+
+TERM_CONST_NUMBER:
+   TERM_INTEGER  [lL]?
+;
+
+
+TERM_CONST_NUMBER_HEX:
+    CH_0X (TERM_HEX_LETTER)+ [lL]?
+    ;
+
+
+TERM_CONST_NUMBER_OTC:
+    CH_0T (TERM_OTC_LETTER)+ [lL]?
+    ;
+
+
+TERM_CONST_NUMBER_BIN:
+    CH_0B (TERM_BIN_LETTER)+ [lL]?
+    ;
+
+TERM_INTEGER:
+    (TERM_DIGIT)+ ('_' TERM_DIGIT+)*
+    ;
 
 PREFIX_OPERATOR:
     '!' | 'not'
     ;
 
-LPAREN   : '(' ;
-RPAREN   : ')' ;
-COMMA    : ',' ;
-DOT      : '.' ;
-DOLLAR   : '$' ;
-LCURLY   : '{' ;
-RCURLY   : '}' ;
-WS       : [ \t\r\n]+ -> skip ;
 
-REF_EXPRESS : DOLLAR LCURLY (~[}])* RCURLY ;
-
-DIGIT:[0-9]; // 数字
-HEX_LETTER:[0-9a-fA-F_]; // 16进制字符
-OTC_LETTER:[0-7_]; // 8进制字符
-BIN_LETTER:[01_]; // 2进制字符
+NAMING: ID (TERM_DOT ID)*;
+ROUTE_NAMING: ID (TERM_BRACKET_SQUARE_L TERM_INTEGER TERM_BRACKET_SQUARE_R)? (TERM_DOT ID (TERM_BRACKET_SQUARE_L TERM_INTEGER TERM_BRACKET_SQUARE_R)? )*;
+ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 
+// 词法规则
+TERM_QUOTE: '"';
+ESCAPED_CHAR: '\\' ( '\\' | '"' | '\'' | 'r' | 't' | 'n' );
 
-INT_NUM:
-    (DIGIT)+ ('_' DIGIT+)* [lL]?
-;
+TERM_PAREN_L   : '(' ;
+TERM_PAREN_R   : ')' ;
+TERM_COMMA    : ',' ;
+TERM_DOT      : '.' ;
+TERM_DOLLAR   : '$' ;
+TERM_CURLY_L   : '{' ;
+TERM_CURLY_R   : '}' ;
 
-FLOAT_NUM:
-    INT_NUM '.' INT_NUM [fF]?
-    ;
+TERM_SEMICOLON : ';';
+TERM_COLON : ':';
+
+TERM_BRACKET_SQUARE_L : '[';
+TERM_BRACKET_SQUARE_R : ']';
 
 CH_E: [eE] ('-')?;
 
-SCIEN_NUM_1:
-     INT_NUM CH_E INT_NUM [lL]?
-    ;
-
-SCIEN_NUM_2:
-     FLOAT_NUM CH_E INT_NUM [fF]?
-    ;
-
-
 CH_0X: '0' [xX];
-
-TYPE_HEX_NUMBER:
-    CH_0X (HEX_LETTER)+ [lL]?
-    ;
-
-
 CH_0T: '0' [tT];
-
-TYPE_OTC_NUMBER:
-    CH_0T (HEX_LETTER)+ [lL]?
-    ;
-
-
-
 CH_0B: '0' [bB];
 
-TYPE_BIN_NUMBER:
-    CH_0B (HEX_LETTER)+ [lL]?
-    ;
+TERM_DIGIT:[0-9]; // 数字
+TERM_HEX_LETTER:[0-9a-fA-F_]; // 16进制字符
+TERM_OTC_LETTER:[0-7_]; // 8进制字符
+TERM_BIN_LETTER:[01_]; // 2进制字符
+
+WS       : [ \t\r\n]+ -> skip ;
 
 
 script:
-     express (';' (express)?)*
+     express (TERM_SEMICOLON express)* (TERM_SEMICOLON)?
     ;
 
 
@@ -131,6 +140,7 @@ express:
     | whileSegment
     | controlSegment
     | trySegment
+    | throwSegment
     | parenSegment
     | prefixOperatorSegment
     | equalValue
@@ -139,19 +149,30 @@ express:
     | constValue
     | refValue
     | jsonValue
+    | express ( 'as' | 'cast'  | 'is' | 'instanceof' | 'typeof') express
     | express ('*' | '/' | '%') express
-    | express ( 'in' | 'notin'| 'as' | 'cast'  | 'is' | 'instanceof' | 'typeof') express
     | express ('+' | '-') express
-    | express ('>=' | 'gte' | '<=' | 'lte' | '!=' | 'ne' | '<>' | 'neq' | '==' | 'eq' | '>' | 'gt' | '<' | 'lt') express
+    | express ('in' | 'notin' | '>=' | 'gte' | '<=' | 'lte' | '!=' | 'ne' | '<>' | 'neq' | '==' | 'eq' | '>' | 'gt' | '<' | 'lt') express
     | express ('&&' | 'and' | '||' | 'or') express
+    | express '%'
+    | negtiveSegment
+    | express '?' express ':' express
+    ;
+
+negtiveSegment:
+    '-' express
     ;
 
 debuggerSegment:
-    'debugger' (namingBlock)? ('(' conditionBlock ')')?
+    'debugger' (namingBlock)? (TERM_PAREN_L conditionBlock TERM_PAREN_R)?
     ;
 
 trySegment:
-    'try' tryBodyBlock ('catch' '(' (classNameBlock ('|' classNameBlock)*) namingBlock ')' catchBodyBlock)* ('finally' finallyBodyBlock)?
+    'try' tryBodyBlock ('catch' TERM_PAREN_L (classNameBlock ('|' classNameBlock)*) namingBlock TERM_PAREN_R catchBodyBlock)* ('finally' finallyBodyBlock)?
+    ;
+
+throwSegment:
+    'throw' express
     ;
 
 tryBodyBlock:
@@ -171,7 +192,7 @@ classNameBlock:
     ;
 
 parenSegment:
-    LPAREN express RPAREN
+    TERM_PAREN_L express TERM_PAREN_R
     ;
 
 prefixOperatorSegment:
@@ -185,15 +206,15 @@ controlSegment:
     ;
 
 whileSegment:
-    'while' '(' conditionBlock ')' scriptBlock
+    'while' TERM_PAREN_L conditionBlock TERM_PAREN_R scriptBlock
     ;
 
 forSegment:
-    'for' '(' express ';' conditionBlock ';' express ')' scriptBlock
+    'for' TERM_PAREN_L express TERM_SEMICOLON conditionBlock TERM_SEMICOLON express TERM_PAREN_R scriptBlock
     ;
 
 foreachSegment:
-    'foreach' '(' namingBlock ':' express ')' scriptBlock
+    'foreach' TERM_PAREN_L namingBlock TERM_COLON express TERM_PAREN_R scriptBlock
     ;
 
 namingBlock:
@@ -201,7 +222,7 @@ namingBlock:
     ;
 
 ifSegment:
-    'if' '(' conditionBlock ')' scriptBlock (  'else' 'if' '(' conditionBlock ')' scriptBlock )* ('else' scriptBlock)?
+    'if' TERM_PAREN_L conditionBlock TERM_PAREN_R scriptBlock (  ('else' 'if' | 'elif') TERM_PAREN_L conditionBlock TERM_PAREN_R scriptBlock )* ('else' scriptBlock)?
     ;
 
 conditionBlock:
@@ -209,12 +230,12 @@ conditionBlock:
     ;
 
 scriptBlock:
-    '{' script '}'
+    TERM_CURLY_L script TERM_CURLY_R
     ;
 
 
 equalValue:
-    NAMING '=' express
+    (ROUTE_NAMING|NAMING) ('=') express
     ;
 
 newInstance:
@@ -222,27 +243,28 @@ newInstance:
     ;
 
 invokeFunction:
-    refCall (DOT functionCall)*
-    | functionCall (DOT functionCall)*
+    refCall (TERM_DOT functionCall)*
+    | functionCall (TERM_DOT functionCall)*
     ;
 
 functionCall:
-    NAMING LPAREN argumentList? RPAREN
+    NAMING TERM_PAREN_L argumentList? TERM_PAREN_R
     ;
 
 refCall:
-    refValue DOT functionCall
+    refValue TERM_DOT functionCall
     ;
 
-argumentList
-    : argument ( COMMA argument )* ;
+argumentList:
+    argument ( TERM_COMMA argument )*
+    ;
 
 argument:
-    (NAMING ':')? argumentValue
+    ((NAMING|constString) TERM_COLON)? argumentValue
     ;
 
-argumentValue
-    : express
+argumentValue:
+    express
     ;
 
 constValue:
@@ -258,54 +280,55 @@ constValue:
     | binNumber
     ;
 
-refValue
-    : REF_EXPRESS ;
+refValue:
+    REF_EXPRESS
+    ;
 
 constBool:
-    TYPE_BOOL
+    TERM_CONST_BOOLEAN
     ;
 
 constNull:
-    TYPE_NULL
+    TERM_CONST_NULL
     ;
 
 constClass:
-    TYPE_CLASS
+    TERM_CONST_TYPE_CLASS
     ;
 
 constString:
-    STRING
-    |SINGLE_STRING
+    TERM_CONST_STRING
+    |TERM_CONST_STRING_SINGLE
     ;
 
 constMultilineString:
-    MULTILINE_STRING
-    |MULTILINE_QUOTE_STRING
+    TERM_CONST_STRING_MULTILINE
+    |TERM_CONST_STRING_MULTILINE_QUOTE
     ;
 
 constRenderString:
-    RENDER_STRING
-    |RENDER_SINGLE_STRING
+    TERM_CONST_STRING_RENDER
+    |TERM_CONST_STRING_RENDER_SINGLE
     ;
 
 decNumber: // 十进制数字
-     SCIEN_NUM_2
-    | SCIEN_NUM_1
-    | FLOAT_NUM
-    | INT_NUM
-    | DIGIT
+     TERM_CONST_NUMBER_SCIEN_2
+    | TERM_CONST_NUMBER_SCIEN_1
+    | TERM_CONST_NUMBER_FLOAT
+    | TERM_CONST_NUMBER
+    | TERM_DIGIT
     ;
 
 hexNumber: // 16进制数
-    TYPE_HEX_NUMBER
+    TERM_CONST_NUMBER_HEX
     ;
 
 otcNumber: // 8进制数
-    TYPE_OTC_NUMBER
+    TERM_CONST_NUMBER_OTC
     ;
 
 binNumber: // 2进制数
-    TYPE_BIN_NUMBER
+    TERM_CONST_NUMBER_BIN
     ;
 
 jsonValue:
@@ -317,22 +340,21 @@ jsonValue:
     ;
 
 jsonMapValue:
-    LCURLY jsonPairs? RCURLY;
+    TERM_CURLY_L jsonPairs? TERM_CURLY_R
+    ;
 
 jsonPairs:
-    jsonPair
-    | jsonPair (',' jsonPair)*
+    jsonPair (TERM_COMMA jsonPair)*
     ;
 
 jsonPair:
-    (NAMING|constString) ':' express
+    (NAMING|constString) TERM_COLON express
     ;
 
 jsonArrayValue:
-    '[' jsonItemList? ']'
+    TERM_BRACKET_SQUARE_L jsonItemList? TERM_BRACKET_SQUARE_R
     ;
 
 jsonItemList:
-    express
-    | express (',' express)*
+    express (TERM_COMMA express)*
     ;

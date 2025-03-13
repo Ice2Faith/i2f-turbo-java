@@ -43,6 +43,18 @@ public class TinyScriptBaseListener implements TinyScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDebuggerSegment(TinyScriptParser.DebuggerSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -62,6 +74,18 @@ public class TinyScriptBaseListener implements TinyScriptListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTrySegment(TinyScriptParser.TrySegmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterThrowSegment(TinyScriptParser.ThrowSegmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitThrowSegment(TinyScriptParser.ThrowSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

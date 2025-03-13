@@ -29,6 +29,7 @@ import java.util.function.Supplier;
  */
 public class DefaultTinyScriptResolver implements TinyScriptResolver {
     public static final MathContext MATH_CONTEXT = new MathContext(20, RoundingMode.HALF_UP);
+    public static final BigDecimal NUM_100=new BigDecimal("100");
 
     public static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
     protected final AtomicBoolean debug = new AtomicBoolean(true);
@@ -278,9 +279,31 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             boolean bv = ObjectConvertor.toBoolean(value);
             return !bv;
         }
+        if("-".equals(operator)){
+            if (value != null) {
+                if (ObjectConvertor.isNumericType(value.getClass())) {
+                    BigDecimal lv = new BigDecimal(String.valueOf(value));
+                    BigDecimal ret = lv.negate();
+                    return convertNumberType(ret, (Number) ret, (Number) ret);
+                }
+            }
+        }
         throw new IllegalArgumentException("un-support prefix operator :" + operator);
     }
 
+    @Override
+    public Object resolveSuffixOperator(Object value, String operator) {
+        if("%".equals(operator)){
+            if (value != null) {
+                if (ObjectConvertor.isNumericType(value.getClass())) {
+                    BigDecimal lv = new BigDecimal(String.valueOf(value));
+                    BigDecimal ret = lv.divide(NUM_100,MATH_CONTEXT);
+                    return convertNumberType(ret, (Number) ret, (Number) ret);
+                }
+            }
+        }
+        throw new IllegalArgumentException("un-support prefix operator :" + operator);
+    }
 
     public Object convertNumberType(BigDecimal num, Number left, Number right) {
         if (TypeOf.instanceOf(left, BigDecimal.class)
