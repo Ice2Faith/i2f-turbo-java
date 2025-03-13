@@ -238,7 +238,7 @@ role = {
   name: "root",
   id: 123L
 };
-status: ${config.user.defaultStatus};
+status= ${config.user.defaultStatus};
 user.roles[1].name="logger";
 ```
 
