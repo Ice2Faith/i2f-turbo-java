@@ -30,6 +30,16 @@ public interface TinyScriptListener extends ParseTreeListener {
 	 */
 	void exitExpress(TinyScriptParser.ExpressContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TinyScriptParser#negtiveSegment}.
+	 * @param ctx the parse tree
+	 */
+	void enterNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#negtiveSegment}.
+	 * @param ctx the parse tree
+	 */
+	void exitNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TinyScriptParser#debuggerSegment}.
 	 * @param ctx the parse tree
 	 */
@@ -49,6 +59,16 @@ public interface TinyScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTrySegment(TinyScriptParser.TrySegmentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScriptParser#throwSegment}.
+	 * @param ctx the parse tree
+	 */
+	void enterThrowSegment(TinyScriptParser.ThrowSegmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#throwSegment}.
+	 * @param ctx the parse tree
+	 */
+	void exitThrowSegment(TinyScriptParser.ThrowSegmentContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinyScriptParser#tryBodyBlock}.
 	 * @param ctx the parse tree

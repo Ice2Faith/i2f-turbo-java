@@ -26,6 +26,8 @@ public interface TinyScriptResolver {
 
     Object resolvePrefixOperator(String prefixOperator, Object value);
 
+    Object resolveSuffixOperator(Object left, String operator);
+
     Object resolveFunctionCall(Object target, boolean isNew, String naming, List<Object> args);
 
     String renderString(String text, Object context);
@@ -33,4 +35,6 @@ public interface TinyScriptResolver {
     String multilineString(String text, List<String> features, Object context);
 
     Class<?> loadClass(String className);
+
+
 }

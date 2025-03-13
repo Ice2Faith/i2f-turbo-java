@@ -125,7 +125,22 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 TinyScriptParser.TrySegmentContext nextCtx = (TinyScriptParser.TrySegmentContext) item;
                 return visitTrySegment(nextCtx);
             } else if (item instanceof TinyScriptParser.ExpressContext) {
-                if (count == 3) {
+                if(count==2){
+                    ParseTree leftNode = item;
+                    ParseTree operatorNode = ctx.getChild(1);
+                    if (!(leftNode instanceof TinyScriptParser.ExpressContext)) {
+                        throw new IllegalArgumentException("invalid suffix-operator left node, expect express, but found type: " + leftNode.getClass());
+                    }
+                    if (!(operatorNode instanceof TerminalNode)) {
+                        throw new IllegalArgumentException("invalid suffix-operator operator node, expect operator, but found type: " + operatorNode.getClass());
+                    }
+
+                    TinyScriptParser.ExpressContext leftCtx = (TinyScriptParser.ExpressContext) leftNode;
+                    TerminalNode operatorCtx = (TerminalNode) operatorNode;
+                    Object left =  visitExpress(leftCtx);
+                    String operator = (String) visitTerminal(operatorCtx);
+                    return resolver.resolveSuffixOperator(left, operator);
+                }else if (count == 3) {
                     ParseTree leftNode = item;
                     ParseTree operatorNode = ctx.getChild(1);
                     ParseTree rightNode = ctx.getChild(2);
@@ -145,8 +160,50 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     Supplier<Object> rightSupplier = () -> visitExpress(rightCtx);
                     String operator = (String) visitTerminal(operatorCtx);
                     return resolver.resolveDoubleOperator(leftSupplier, operator, rightSupplier);
+                }else if(count==5){
+                    ParseTree condNode = item;
+                    ParseTree questionNode = ctx.getChild(1);
+                    ParseTree trueNode = ctx.getChild(2);
+                    ParseTree elseNode = ctx.getChild(3);
+                    ParseTree falseNode = ctx.getChild(4);
+                    if (!(condNode instanceof TinyScriptParser.ExpressContext)) {
+                        throw new IllegalArgumentException("invalid ternary-operator condition node, expect express, but found type: " + condNode.getClass());
+                    }
+                    if (!(questionNode instanceof TerminalNode)) {
+                        throw new IllegalArgumentException("invalid ternary-operator '?' terminal node, expect operator, but found type: " + questionNode.getClass());
+                    }
+                    if (!(trueNode instanceof TinyScriptParser.ExpressContext)) {
+                        throw new IllegalArgumentException("invalid ternary-operator true-value node, expect express, but found type: " + trueNode.getClass());
+                    }
+                    if (!(elseNode instanceof TerminalNode)) {
+                        throw new IllegalArgumentException("invalid ternary-operator ':' terminal node, expect operator, but found type: " + elseNode.getClass());
+                    }
+                    if (!(falseNode instanceof TinyScriptParser.ExpressContext)) {
+                        throw new IllegalArgumentException("invalid ternary-operator false-value node, expect express, but found type: " + falseNode.getClass());
+                    }
+                    TinyScriptParser.ExpressContext condCtx = (TinyScriptParser.ExpressContext) condNode;
+                    TerminalNode questionCtx = (TerminalNode) questionNode;
+                    TinyScriptParser.ExpressContext trueCtx = (TinyScriptParser.ExpressContext) trueNode;
+                    TerminalNode elseCtx = (TerminalNode) elseNode;
+                    TinyScriptParser.ExpressContext falseCtx = (TinyScriptParser.ExpressContext) falseNode;
+
+                    String question=(String) visitTerminal(questionCtx);
+                    if(!"?".equals(question)){
+                        throw new IllegalArgumentException("invalid  ternary-operator operator, expect '?' buf found '" + question + "'!");
+                    }
+                    String elseSep=(String)visitTerminal(elseCtx);
+                    if(!":".equals(elseSep)){
+                        throw new IllegalArgumentException("invalid  ternary-operator operator, expect ':' buf found '" + elseSep + "'!");
+                    }
+                    Object obj = visitExpress(condCtx);
+                    boolean ok = resolver.toBoolean(obj);
+                    if(ok){
+                        return visitExpress(trueCtx);
+                    }else{
+                        return visitExpress(falseCtx);
+                    }
                 } else {
-                    throw new IllegalArgumentException("invalid grammar express expect 3 parts for double operator, but found " + count + "!");
+                    throw new IllegalArgumentException("invalid grammar express expect 2/3/5 parts for double operator, but found " + count + "!");
                 }
             } else if (item instanceof TinyScriptParser.ParenSegmentContext) {
                 TinyScriptParser.ParenSegmentContext nextCtx = (TinyScriptParser.ParenSegmentContext) item;
@@ -175,8 +232,46 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.DebuggerSegmentContext) {
                 TinyScriptParser.DebuggerSegmentContext nextCtx = (TinyScriptParser.DebuggerSegmentContext) item;
                 return visitDebuggerSegment(nextCtx);
+            } else if (item instanceof TinyScriptParser.ThrowSegmentContext) {
+                TinyScriptParser.ThrowSegmentContext nextCtx = (TinyScriptParser.ThrowSegmentContext) item;
+                return visitThrowSegment(nextCtx);
+            } else if (item instanceof TinyScriptParser.NegtiveSegmentContext) {
+                TinyScriptParser.NegtiveSegmentContext nextCtx = (TinyScriptParser.NegtiveSegmentContext) item;
+                return visitNegtiveSegment(nextCtx);
             }
             throw new IllegalArgumentException("un-support express found : " + ctx.getText());
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Object visitNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx) {
+        try {
+            debugNode(ctx);
+            int count = ctx.getChildCount();
+            if (count != 2) {
+                throw new IllegalArgumentException("missing negtive segment block!");
+            }
+            ParseTree termNode = ctx.getChild(0);
+            ParseTree objectNode = ctx.getChild(1);
+            if (!(termNode instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid negtive segment block, expect terminal node, but found " + ctx.getClass() + "!");
+            }
+            if (!(objectNode instanceof TinyScriptParser.ExpressContext)) {
+                throw new IllegalArgumentException("invalid negtive segment block, expect express node, but found " + ctx.getClass() + "!");
+            }
+            TerminalNode termCtx = (TerminalNode) termNode;
+            String term=(String)visitTerminal(termCtx);
+            if(!"-".equals(term)){
+                throw new IllegalArgumentException("invalid negtive operator, expect '-' buf found '" + term + "'!");
+            }
+            TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) objectNode;
+            Object obj = visitExpress(expressCtx);
+            return resolver.resolvePrefixOperator(term, obj);
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
@@ -268,6 +363,42 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 }
             }
             throw new IllegalArgumentException("un-support try segment found : " + ctx.getText());
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Object visitThrowSegment(TinyScriptParser.ThrowSegmentContext ctx) {
+        try {
+            debugNode(ctx);
+            int count = ctx.getChildCount();
+            if (count != 2) {
+                throw new IllegalArgumentException("missing throw segment block!");
+            }
+            ParseTree termNode = ctx.getChild(0);
+            ParseTree objectNode = ctx.getChild(1);
+            if (!(termNode instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid throw segment block, expect terminal node, but found " + ctx.getClass() + "!");
+            }
+            if (!(objectNode instanceof TinyScriptParser.ExpressContext)) {
+                throw new IllegalArgumentException("invalid throw segment block, expect express node, but found " + ctx.getClass() + "!");
+            }
+            TerminalNode termCtx = (TerminalNode) termNode;
+            String term=(String)visitTerminal(termCtx);
+            if(!"throw".equals(term)){
+                throw new IllegalArgumentException("invalid keyword, expect 'throw' buf found '" + term + "'!");
+            }
+            TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) objectNode;
+            Object obj = visitExpress(expressCtx);
+            if(obj instanceof Throwable){
+                throw (Throwable)obj;
+            }else{
+                throw new IllegalArgumentException("invalid throw object type, expect type of Throwable.class, but found " + (obj==null?"null":obj.getClass()) + "!");
+            }
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
@@ -503,8 +634,8 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 if (item instanceof TerminalNode) {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
-                    if (!Arrays.asList("if", "(", ")", "else").contains(term)) {
-                        throw new IllegalArgumentException("invalid if segment separator, expect 'if/(/)/else' buf found '" + term + "'!");
+                    if (!Arrays.asList("if", "(", ")", "else","elif").contains(term)) {
+                        throw new IllegalArgumentException("invalid if segment separator, expect 'if/(/)/else/elif' buf found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.ConditionBlockContext) {
                     TinyScriptParser.ConditionBlockContext nextCtx = (TinyScriptParser.ConditionBlockContext) item;
@@ -1177,8 +1308,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 ParseTree namingNode = ctx.getChild(0);
                 ParseTree sepNode = ctx.getChild(1);
                 ParseTree valueNode = ctx.getChild(2);
-                if (!(namingNode instanceof TerminalNode)) {
-                    throw new IllegalArgumentException("invalid argument, expect naming node, but found " + namingNode.getClass() + "!");
+                if (!(namingNode instanceof TerminalNode)
+                && !(namingNode instanceof TinyScriptParser.ConstStringContext)) {
+                    throw new IllegalArgumentException("invalid argument, expect naming/string node, but found " + namingNode.getClass() + "!");
                 }
                 if (!(sepNode instanceof TerminalNode)) {
                     throw new IllegalArgumentException("invalid argument, expect separator ':' node, but found " + sepNode.getClass() + "!");
@@ -1186,10 +1318,19 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 if (!(valueNode instanceof TinyScriptParser.ArgumentValueContext)) {
                     throw new IllegalArgumentException("invalid argument, expect argument-value node, but found " + valueNode.getClass() + "!");
                 }
-                TerminalNode namingCtx = (TerminalNode) namingNode;
+                String naming = null;
+                if(namingNode instanceof TerminalNode){
+                    TerminalNode namingCtx = (TerminalNode) namingNode;
+                    naming=(String) visitTerminal(namingCtx);
+                }else if(namingNode instanceof TinyScriptParser.ConstStringContext){
+                    TinyScriptParser.ConstStringContext namingCtx = (TinyScriptParser.ConstStringContext) namingNode;
+                    naming=(String)visitConstString(namingCtx);
+                }
+                if(naming==null || naming.isEmpty()){
+                    throw new IllegalArgumentException("invalid argument naming, expect naming, but found '" + naming + "'!");
+                }
                 TerminalNode sepCtx = (TerminalNode) sepNode;
                 TinyScriptParser.ArgumentValueContext valueCtx = (TinyScriptParser.ArgumentValueContext) valueNode;
-                String naming = (String) visitTerminal(namingCtx);
                 String sep = (String) visitTerminal(sepCtx);
                 if (!":".equals(sep)) {
                     throw new IllegalArgumentException("invalid argument, expect separator ':' node, but found '" + sep + "'!");
@@ -1547,6 +1688,12 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.ConstClassContext) {
                 TinyScriptParser.ConstClassContext nextCtx = (TinyScriptParser.ConstClassContext) tree;
                 return visitConstClass(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ThrowSegmentContext) {
+                TinyScriptParser.ThrowSegmentContext nextCtx = (TinyScriptParser.ThrowSegmentContext) tree;
+                return visitThrowSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.NegtiveSegmentContext) {
+                TinyScriptParser.NegtiveSegmentContext nextCtx = (TinyScriptParser.NegtiveSegmentContext) tree;
+                return visitNegtiveSegment(nextCtx);
             }
         } catch (TinyScriptBreakException e) {
 
