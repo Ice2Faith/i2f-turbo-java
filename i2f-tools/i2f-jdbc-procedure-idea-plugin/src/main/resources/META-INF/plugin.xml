@@ -7,6 +7,8 @@
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
     <name>Jdbc-Procedure</name>
 
+    <version>1.0</version>
+
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="ugex_savelar@163.com"
             url="https://github.com/Ice2Faith">
@@ -21,6 +23,11 @@
     provide highlight & completion for sql/java code<br/>
   ]]></description>
 
+    <change-notes><![CDATA[
+      release
+    ]]>
+    </change-notes>
+
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
@@ -34,6 +41,34 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- 注册语言注入器 -->
         <multiHostInjector
+                order="first"
                 implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlLangInjectInjector"/>
+
+        <!-- 注册补全注入器 -->
+        <completion.contributor
+                language="XML"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
+
+        <!-- 注册文件类型 -->
+        <fileType name="TinyScript"
+                  implementationClass="i2f.turbo.idea.plugin.tinyscript.TinyScriptFileType"
+                  fieldName="INSTANCE"
+                  language="TinyScript"
+                  extensions="tis"/>
+
+        <!-- 注册语言解析器 -->
+        <lang.parserDefinition
+                language="TinyScript"
+                implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.TinyScriptParserDefinition"/>
+
+        <!-- 定义语法高亮 -->
+        <lang.syntaxHighlighterFactory
+                language="TinyScript"
+                implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.highlighter.TinyScriptSyntaxHighlighterFactory"/>
+
+        <!-- 定义颜色配置页 -->
+        <colorSettingsPage
+                implementation="i2f.turbo.idea.plugin.tinyscript.lang.highlighter.TinyScriptColorSettingsPage"/>
     </extensions>
 </idea-plugin>

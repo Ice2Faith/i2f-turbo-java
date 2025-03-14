@@ -24,13 +24,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     public static final Logger log = Logger.getInstance(JdbcProcedureXmlLangInjectInjector.class);
-    public static final String LANG_JAVA_ENUM_CLASS_NAME="InjectLangEnum";
-    public static volatile String LANG_JAVA_ENUM="public static enum "+LANG_JAVA_ENUM_CLASS_NAME+" {" +
+    public static final String LANG_JAVA_ENUM_CLASS_NAME = "InjectLangEnum";
+    public static volatile String LANG_JAVA_ENUM = "public static enum " + LANG_JAVA_ENUM_CLASS_NAME + " {" +
             "JAVA,SQL,VTL" +
             "};";
-    public static final ConcurrentHashMap<String,Language> LANG_JAVA_ENUM_MAP=new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, Language> LANG_JAVA_ENUM_MAP = new ConcurrentHashMap<>();
 
-    static{
+    static {
         Thread thread = new Thread(() -> {
             do {
                 Collection<Language> langs = Language.getRegisteredLanguages();
@@ -44,7 +44,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     }
                     id = id.replaceAll(" ", "_");
                     id = id.replaceAll("-", "_");
-                    LANG_JAVA_ENUM_MAP.put(id,lang);
+                    LANG_JAVA_ENUM_MAP.put(id, lang);
                 }
                 StringBuilder builder = new StringBuilder();
                 builder.append("public static enum ").append(LANG_JAVA_ENUM_CLASS_NAME).append(" {");
@@ -88,7 +88,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     };
 
     public static final String EVAL_JAVA_IMPORTS = "\n" +
-            "import i2f.jdbc.procedure.context.*;\n" +
+            "import i2f.context.*;\n" +
             "import i2f.jdbc.procedure.parser.data.*;\n" +
             "import i2f.jdbc.procedure.executor.*;\n" +
             "import i2f.jdbc.procedure.caller.*;\n" +
@@ -100,7 +100,6 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             "import i2f.reflect.vistor.*;\n" +
             "import i2f.convert.obj.*;\n" +
             "import i2f.clock.*;\n" +
-
 
             "import java.util.*;\n" +
             "import java.math.*;\n" +
@@ -155,7 +154,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 || name.endsWith("-" + type);
     }
 
-    public Language findPossibleTagLanguage(String tagName) {
+    public Language findPossibleTagNameLanguage(String tagName) {
         if (tagName == null) {
             return null;
         }
@@ -342,7 +341,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         String dialectId = dialect.replaceAll(" ", "_");
         dialectId = dialectId.replaceAll("-", "_");
         for (Map.Entry<String, Language> entry : LANG_JAVA_ENUM_MAP.entrySet()) {
-            if(entry.getKey().equalsIgnoreCase(dialectId)) {
+            if (entry.getKey().equalsIgnoreCase(dialectId)) {
                 return entry.getValue();
             }
         }
@@ -438,9 +437,110 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         return null;
     }
 
+    public Language findPossibleDatabaseDialectSplit(String value) {
+        if (value != null) {
+            String[] arr = value.split("[,;|/]");
+            for (String item : arr) {
+                Language lang = findPossibleDatabaseDialect(item);
+                if (lang != null) {
+                    return lang;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Language detectPossibleLanguageSplit(String value) {
+        if (value != null) {
+            String[] arr = value.split("[,;|/]");
+            for (String item : arr) {
+                Language lang = findPossibleLanguage(item);
+                if (lang != null) {
+                    return lang;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Language detectXmlTagLangAttribute(XmlTag tag) {
+        XmlAttribute attr = tag.getAttribute("_lang");
+
+        if (attr != null) {
+            String value = attr.getValue();
+            Language lang = detectPossibleLanguageSplit(value);
+            if (lang != null) {
+                return lang;
+            }
+        }
+        XmlAttribute type = tag.getAttribute("_type");
+        if (type != null) {
+            String value = type.getValue();
+            Language lang = detectPossibleLanguageSplit(value);
+            if (lang != null) {
+                return lang;
+            }
+        }
+        return null;
+    }
+
+    public Language getPossibleRenderLanguage() {
+        Language ret = Language.findLanguageByID("VTL");
+        if (ret != null) {
+            return ret;
+        }
+        ret = Language.findLanguageByID("InjectedFreeMarker");
+        if (ret != null) {
+            return ret;
+        }
+        ret = Language.findLanguageByID("ThymeleafExpressions");
+        if (ret != null) {
+            return ret;
+        }
+
+        ret = Language.findLanguageByID("Shell Script");
+        return ret;
+    }
+
+    public Language getPossibleTinyScriptLanguage(){
+        Language lang = Language.findLanguageByID("TinyScript");
+        if (lang != null) {
+            return lang;
+        }
+        lang = Language.findLanguageByID("Scala");
+        if (lang != null) {
+            return lang;
+        }
+        lang = Language.findLanguageByID("Groovy");
+        if (lang != null) {
+            return lang;
+        }
+        lang = Language.findLanguageByID("Shell Script");
+        return lang;
+    }
+
+    public Language getPossibleEvalLanguage(){
+        Language lang = Language.findLanguageByID("Spring EL");
+        if (lang != null) {
+            return lang;
+        }
+        lang = Language.findLanguageByID("EL");
+        if (lang != null) {
+            return lang;
+        }
+        lang = Language.findLanguageByID("JavaScript");
+        return lang;
+    }
+
     public Language detectLanguage(XmlTag tag) {
         if (tag == null) {
             return null;
+        }
+        if (tag != null) {
+            Language lang = detectXmlTagLangAttribute(tag);
+            if (lang != null) {
+                return lang;
+            }
         }
         String name = tag.getName();
         if (Arrays.asList(
@@ -454,30 +554,24 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         ).contains(name)) {
             return null;
         }
+
         if (isTagOfType(name, "sql")) {
-            Set<String> dialects = new HashSet<>();
             XmlAttribute database = tag.getAttribute("database");
             if (database != null) {
                 String value = database.getValue();
-                if (value != null) {
-                    dialects.addAll(Arrays.asList(value.split("[,;|/]")));
+                Language ret = findPossibleDatabaseDialectSplit(value);
+                if (ret != null) {
+                    return ret;
                 }
             }
             XmlAttribute databases = tag.getAttribute("databases");
             if (databases != null) {
                 String value = databases.getValue();
-                if (value != null) {
-                    dialects.addAll(Arrays.asList(value.split("[,;|/]")));
-                }
-            }
-            for (String dialect : dialects) {
-                dialect = dialect.trim();
-                Language ret = findPossibleDatabaseDialect(dialect);
+                Language ret = findPossibleDatabaseDialectSplit(value);
                 if (ret != null) {
                     return ret;
                 }
             }
-
 
             return Language.findLanguageByID("SQL");
         }
@@ -489,42 +583,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
         if (isTagOfType(name, "string")
                 || isTagOfType(name, "render")) {
-            Set<String> dialects = new HashSet<>();
-            XmlAttribute lang = tag.getAttribute("_lang");
-            if (lang != null) {
-                String value = lang.getValue();
-                if (value != null) {
-                    dialects.addAll(Arrays.asList(value.split("[,;|/]")));
-                }
-            }
-            XmlAttribute type = tag.getAttribute("_type");
-            if (type != null) {
-                String value = type.getValue();
-                if (value != null) {
-                    dialects.addAll(Arrays.asList(value.split("[,;|/]")));
-                }
-            }
-            for (String dialect : dialects) {
-                dialect = dialect.trim();
-                Language ret = findPossibleLanguage(dialect);
-                if (ret != null) {
-                    return ret;
-                }
-            }
-            Language ret = Language.findLanguageByID("VTL");
-            if (ret == null) {
-                ret = Language.findLanguageByID("InjectedFreeMarker");
-            }
-            if (ret == null) {
-                ret = Language.findLanguageByID("ThymeleafExpressions");
-            }
-            if (ret == null) {
-                ret = Language.findLanguageByID("Shell Script");
-            }
-            if (ret != null) {
-                return ret;
-            }
-            return null;
+            return getPossibleRenderLanguage();
         }
 
         if (Arrays.asList(JAVA_LANG_TAGS).contains(name)) {
@@ -535,102 +594,57 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
         if (Arrays.asList("lang-eval-ts",
                 "lang-eval-tinyscript").contains(name)) {
-            Language lang = Language.findLanguageByID("TinyScript");
-            if (lang != null) {
-                return lang;
-            }
-            lang = Language.findLanguageByID("Scala");
-            if (lang != null) {
-                return lang;
-            }
-            lang = Language.findLanguageByID("Groovy");
-            if (lang != null) {
-                return lang;
-            }
-            lang = Language.findLanguageByID("Shell Script");
+            Language lang = getPossibleTinyScriptLanguage();
             if (lang != null) {
                 return lang;
             }
         }
 
         if (Arrays.asList("lang-eval").contains(name)) {
-            Language lang = Language.findLanguageByID("Spring EL");
-            if (lang == null) {
-                lang = Language.findLanguageByID("EL");
-            }
-            if (lang == null) {
-                lang = Language.findLanguageByID("JavaScript");
-            }
-            if(lang!=null){
+            Language lang = getPossibleEvalLanguage();
+            if (lang != null) {
                 return lang;
             }
         }
 
         if (true) {
-            Language ret = findPossibleTagLanguage(name);
+            Language ret = findPossibleTagNameLanguage(name);
             if (ret != null) {
                 return ret;
             }
         }
 
         XmlAttribute[] attributes = tag.getAttributes();
-        if(attributes!=null){
+        if (attributes != null) {
             for (XmlAttribute attr : attributes) {
                 String attrName = attr.getName();
-                if(attrName==null || attrName.isEmpty()){
+                if (attrName == null || attrName.isEmpty()) {
                     continue;
                 }
                 String[] arr = attrName.split("[\\.;:]");
                 Set<String> set = new LinkedHashSet<>(Arrays.asList(arr));
-                if(set.contains("body-xml")
-                ||set.contains("body-text")){
-                    if(set.contains("eval-java")){
+                if (set.contains("body-xml")
+                        || set.contains("body-text")) {
+                    if (set.contains("eval-java")) {
                         return Language.findLanguageByID("JAVA");
-                    }else if(set.contains("eval-js")){
+                    } else if (set.contains("eval-js")) {
                         return Language.findLanguageByID("JavaScript");
-                    }else if(set.contains("eval-js")){
+                    } else if (set.contains("eval-js")) {
                         return Language.findLanguageByID("Groovy");
-                    }else if(set.contains("eval-ts")
-                    ||set.contains("eval-tinyscript")){
-                        Language lang = Language.findLanguageByID("TinyScript");
+                    } else if (set.contains("eval-ts")
+                            || set.contains("eval-tinyscript")) {
+                        Language lang = getPossibleTinyScriptLanguage();
                         if (lang != null) {
                             return lang;
                         }
-                        lang = Language.findLanguageByID("Scala");
-                        if (lang != null) {
-                            return lang;
-                        }
-                        lang = Language.findLanguageByID("Groovy");
-                        if (lang != null) {
-                            return lang;
-                        }
-                        lang = Language.findLanguageByID("Shell Script");
-                        if (lang != null) {
-                            return lang;
-                        }
-                    }else if(set.contains("render")){
-                        Language ret = Language.findLanguageByID("VTL");
-                        if (ret == null) {
-                            ret = Language.findLanguageByID("InjectedFreeMarker");
-                        }
-                        if (ret == null) {
-                            ret = Language.findLanguageByID("ThymeleafExpressions");
-                        }
-                        if (ret == null) {
-                            ret = Language.findLanguageByID("Shell Script");
-                        }
+                    } else if (set.contains("render")) {
+                        Language ret = getPossibleRenderLanguage();
                         if (ret != null) {
                             return ret;
                         }
-                    }else if(set.contains("eval")){
-                        Language lang = Language.findLanguageByID("Spring EL");
-                        if (lang == null) {
-                            lang = Language.findLanguageByID("EL");
-                        }
-                        if (lang == null) {
-                            lang = Language.findLanguageByID("JavaScript");
-                        }
-                        if(lang!=null){
+                    } else if (set.contains("eval")) {
+                        Language lang = getPossibleEvalLanguage();
+                        if (lang != null) {
                             return lang;
                         }
                     }
@@ -654,7 +668,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
 
         String tagName = tag.getName();
 
-        log.info("xml tag :" + tagName + ", with lang:" + targetLang.getDisplayName());
+//        log.info("xml tag :" + tagName + ", with lang:" + targetLang.getDisplayName());
 
         if (targetLang instanceof JavaLanguage) {
             if ("lang-java-import".equals(tagName)) {
@@ -728,11 +742,14 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     .doneInjecting();
         }
 
-        log.info("xml inject success tag :" + tagName + ", with lang:" + targetLang.getDisplayName());
+//        log.info("xml inject success tag :" + tagName + ", with lang:" + targetLang.getDisplayName());
     }
 
     public void injectXmlAttribute(MultiHostRegistrar registrar, XmlAttribute attr) {
         XmlAttributeValue attrValueElement = attr.getValueElement();
+        if(attrValueElement==null){
+            return;
+        }
         XmlTag tag = attr.getParent();
         String tagName = tag.getName();
         String attrName = attr.getName();
@@ -887,16 +904,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
 
         if (attrName.contains(".render")) {
-            Language lang = Language.findLanguageByID("VTL");
-            if (lang == null) {
-                lang = Language.findLanguageByID("InjectedFreeMarker");
-            }
-            if (lang == null) {
-                lang = Language.findLanguageByID("ThymeleafExpressions");
-            }
-            if (lang == null) {
-                lang = Language.findLanguageByID("Shell Script");
-            }
+            Language lang = getPossibleRenderLanguage();
             if (lang != null) {
                 registrar.startInjecting(lang)
                         .addPlace("",
@@ -912,13 +920,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 || attrName.equals("collection")
                 || attrName.contains(".eval.")
                 || attrName.endsWith(".eval")) {
-            Language lang = Language.findLanguageByID("Spring EL");
-            if (lang == null) {
-                lang = Language.findLanguageByID("EL");
-            }
-            if (lang == null) {
-                lang = Language.findLanguageByID("JavaScript");
-            }
+            Language lang = getPossibleEvalLanguage();
             if (lang != null) {
                 registrar.startInjecting(lang)
                         .addPlace("",
@@ -962,13 +964,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
 
         if (attrName.contains(".eval-ts")
                 || attrName.contains(".eval-tinyscript")) {
-            Language lang = findPossibleLanguage("Scala");
-            if (lang == null) {
-                findPossibleLanguage("Groovy");
-            }
-            if (lang == null) {
-                findPossibleLanguage("ShellScript");
-            }
+            Language lang = getPossibleTinyScriptLanguage();
             if (lang != null) {
                 registrar.startInjecting(lang)
                         .addPlace("",
@@ -995,13 +991,13 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if(attrName.equals("_lang")){
+        if (attrName.equals("_lang")) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
                         .addPlace("public class MyDsl { "
-                                        +LANG_JAVA_ENUM+"\n"
-                                +" public Object v="+LANG_JAVA_ENUM_CLASS_NAME+".",
+                                        + LANG_JAVA_ENUM + "\n"
+                                        + " public Object v=" + LANG_JAVA_ENUM_CLASS_NAME + ".",
                                 ";}",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))
