@@ -1,0 +1,126 @@
+
+// //////////////////////////////////////////////////////////////////////////////////////
+[
+  {
+    name: "xxx",
+    "age": 12,
+    roles: ["admin","logger",3,true],
+    image: ${images.defaultImage},
+    status: decode(${user.status},1,"正常",0,"禁用"),
+    platform.prefer: "windows"
+  }
+];
+
+name = "zhang";
+age = 12;
+role = {
+  name: "root",
+  id: 123L
+};
+status= ${config.user.defaultStatus};
+user.roles[1].name="logger";
+
+${cnt}>1?"ok":null;
+loginStatus=${user}?1:0;
+
+new String("xxx");
+new Date();
+new org.apache.User(1L,"xxx",${status},decode(${str},"是",1,0));
+
+if(${num}>0){
+    ok=1;
+}else if(${role}){
+    ok=2;
+}else{
+    ok=3;
+};
+
+sum=0;
+foreach(item : [1,2,3,4,5]){
+  sum=${sum}+${item};
+};
+foreach(item : ${arr}){
+  if(${arr}==null){
+    continue;
+  };
+  sum=${sum}+${item};
+  if(${sum}>10){
+    break;
+  };
+};
+${sum};
+
+sum=0;
+for(i=0;${i}<10;i=${i}+1){
+  if(${i}%2==0){
+    sum=${sum}+${i};
+  };
+};
+${sum};
+
+sum=0;
+i=0;
+while(${i}<10){
+  if(${i}%2==0){
+    sum=${sum}+${i};
+  };
+  i=${i}+1;
+};
+${sum};
+
+try{
+  null;
+}catch(NullPointerException|SQLException e){
+  null;
+}finally{
+  null;
+};
+
+
+throw new Throwable("xxx");
+
+try{
+  cnt=1/0;
+}catch(Throwable e){
+  throw new RuntimeException(${e}.getMessage(),${e});
+  // throw ${e};
+};
+
+debugger;
+debugger entry1;
+debugger (${count}==null);
+debugger user.loop (${item}==null);
+
+
+num=1+1.125;
+num2=${num}+10L;
+tmp=new String("@@@");
+str=${str}+1;
+sadd=${str};
+svl=String.valueOf(1L);
+slen=${str}.length();
+srptlen=${str}.repeat(2).length();
+
+complex=[{
+ username: "123",
+ roles: ["admin","log"],
+ status: true,
+ age: 12,
+ image: ${str},
+ len: String.length(),
+ token: null
+}];
+
+streq=${str}==${sadd};
+strneq=${str}==${tmp};
+numeeq=${num}>=${slen};
+
+if(${num}>4){
+    ok=3;
+}else if(${num}>3){
+    ok=2;
+}else{
+    ok=1;
+};
+
+user.status=new BigDecimal(${role.perm}.lrtim(Func.rtrim(replace(${user.name}.isEmpty("user",true).length().size(),"s+",12.125f,0x56l,0t27,0b101L,true),";"),",")).intValue();

@@ -1,0 +1,414 @@
+// 第七步:定义bnf语法
+// 第八步:右键生成parse code
+// 第九步:右键生成flex文件
+{
+  // 语言解析器,由Grammar-Kit插件根据bnf语法文件自动生成
+  parserClass="i2f.turbo.idea.plugin.tinyscript.grammar.parser.TinyScriptParser"
+  // 定义辅助类,供 TinyScriptParser 类使用
+  parserUtilClass="i2f.turbo.idea.plugin.tinyscript.lang.parser.TinyScriptParserUtil"
+
+  // 指定生成的PsiElement子类需要继承的父类
+  extends="i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptPsiElement"
+
+  // 指定所有生成的PsiElement类的类名前缀
+  psiClassPrefix="TinyScript"
+  // 指定所有生成的PsiElement实现类的类名后缀
+  psiImplClassSuffix="Impl"
+  // 指定所有生成的PsiElement类的包位置
+  psiPackage="i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements"
+  // 指定所有生成的PsiElement实现类的包位置
+  psiImplPackage="i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.impl"
+
+  // 指定ElementType所在的类,由Grammar-Kit自动生成
+  elementTypeHolderClass="i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes"
+  // 定义elementType类型,供 TinyScriptTypes 类使用
+  elementTypeClass="i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptElementType"
+  // 定义tokenType类型,供 TinyScriptTypes 类使用
+  tokenTypeClass="i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptTokenType"
+  // 定义工具类,供所有PsiElement实现类使用
+  psiImplUtilClass="i2f.turbo.idea.plugin.tinyscript.lang.psi.impl.TinyScriptPsiImplUtil"
+
+    extends(".*script")=script
+  // 定义终结符，这里目前只会使用regexp来进行正则表达式匹配得到终结符
+  // 研究不深，还不知道怎么对终结符进行重用，也就是一个终极符分解为多个终结符的语法
+  tokens=[
+    TERM_COMMENT_SINGLE_LINE= "regexp://[^\n]*\n"
+
+    TERM_COMMENT_MULTI_LINE= "regexp:/\*([^*]|(\*+([^*/])))*\*+/";
+
+    TERM_CONST_STRING_MULTILINE= "regexp:```(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)```"
+    TERM_CONST_STRING_MULTILINE_QUOTE= 'regexp:"""(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)"""'
+
+    TERM_CONST_STRING_RENDER= "regexp:[rR]\"((\\\")+|[^\"])*\""
+    TERM_CONST_STRING_RENDER_SINGLE= "regexp:[rR]'((\\')+|[^'])*'"
+
+    TERM_CONST_STRING= "regexp:\"((\\\")+|[^\"])*\""
+    TERM_CONST_STRING_SINGLE= "regexp:'((\\\\')+|[^'])*'"
+
+    TERM_CONST_BOOLEAN="regexp:true|false"
+
+    TERM_CONST_NULL="null"
+
+    TERM_CONST_TYPE_CLASS= "regexp:(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)\\.class"
+
+    REF_EXPRESS= "regexp:\$\{[^}]*}"
+
+    TERM_CONST_NUMBER_SCIEN_2="regexp:[0-9]+[0-9_]*\.[0-9]+[0-9_]*[eE][-]?[0-9]+[0-9_]*[fF]?"
+
+    TERM_CONST_NUMBER_SCIEN_1="regexp:[0-9]+[0-9_]*[eE][-]?[0-9]+[0-9_]*[lL]?"
+
+    TERM_CONST_NUMBER_FLOAT="regexp:[0-9]+[0-9_]*\.[0-9]+[0-9_]*[fF]?"
+
+    TERM_CONST_NUMBER="regexp:[0-9]+[0-9_]*[lL]?"
+
+    TERM_CONST_NUMBER_HEX="regexp:0[xX][0-9a-fA-F_]+[lL]?"
+
+    TERM_CONST_NUMBER_OTC="regexp:0[tT][0-7_]+[lL]?"
+
+    TERM_CONST_NUMBER_BIN="regexp:0[bB][0-7_]+[lL]?"
+
+    TERM_INTEGER="regexp:[0-9]+[0-9_]*"
+
+    NAMING="regexp:(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)"
+    ROUTE_NAMING="regexp:(([a-zA-Z_][a-zA-Z0-9_]*(\[[0-9]+[0-9_]*])?)(\.[a-zA-Z_][a-zA-Z0-9_]*(\[[0-9]+[0-9_]*])?)*)"
+    ID="regexp:[a-zA-Z_][a-zA-Z0-9_]*"
+
+    TERM_PAREN_L   = '('
+    TERM_PAREN_R   = ')'
+    TERM_COMMA    = ','
+    TERM_DOT      = '.'
+    TERM_DOLLAR   = '$'
+    TERM_CURLY_L   = '{'
+    TERM_CURLY_R   = '}'
+
+    TERM_SEMICOLON=';';
+    TERM_COLON=':';
+
+    TERM_BRACKET_SQUARE_L='[';
+    TERM_BRACKET_SQUARE_R=']';
+
+    TERM_QUESTION='?';
+
+    OP_MUL='*';
+    OP_DIV='/';
+    OP_MOD='%';
+    OP_IN='in';
+    OP_NOT_IN='notin';
+    OP_AS='as';
+    OP_CAST='cast';
+    OP_IS='is';
+    OP_INSTANCE_OF='instanceof';
+    OP_TYPE_OF='typeof';
+    OP_ADD='+';
+    OP_SUB='-';
+    OP_GTE='>=';
+    OP_GTE_STR='gte';
+    OP_LTE='<=';
+    OP_LTE_STR='lte';
+    OP_NE='!=';
+    OP_NE_STR='ne';
+    OP_NEQ='<>';
+    OP_NEQ_STR='neq';
+    OP_EQ='==';
+    OP_EQ_STR='eq';
+    OP_GT='>';
+    OP_GT_STR='gt';
+    OP_LT='<';
+    OP_LT_STR='lt';
+    OP_AND='&&';
+    OP_AND_STR='and';
+    OP_OR='||';
+    OP_OR_STR='or';
+    OP_EXCLAM='!';
+    OP_NOT='not';
+
+    OP_ASSIGN='=';
+    OP_VERTICAL_BAR='|';
+
+    KEY_CLASS='class';
+    KEY_DEBUGGER='debugger';
+    KEY_TRY='try';
+    KEY_CATCH='catch';
+    KEY_FINALLY='finally';
+    KEY_THROW='throw';
+    KEY_BREAK='break';
+    KEY_CONTINUE='continue';
+    KEY_RETURN='return';
+    KEY_WHILE='while';
+    KEY_FOR='for';
+    KEY_FOREACH='foreach';
+    KEY_IF='if';
+    KEY_ELSE='else';
+    KEY_NEW='new';
+
+    TERM_DIGIT="regexp:[0-9]"; // 数字
+
+    WORD="regexp:\w+"
+
+    // 定义空白符
+    WS="regexp:[ \t\r\n]+"
+  ]
+}
+
+root::=
+    script
+    ;
+
+// 语法正文
+script::=
+    segment+
+    |express (TERM_SEMICOLON)? <<eof>>
+    ;
+
+segment::=
+    express TERM_SEMICOLON
+    | commentSegment
+    ;
+
+express::=
+    expressSegment (operatorSegment)*
+
+//    {extends=express}
+//    {
+//       recoverWhile="content_recover"
+//    }
+    ;
+    // 因为定义上每条语句独立，因此配置recoverWhile
+    // 这样就算某一条语句报错，也不影响IDEA与其他语句的分析操作
+
+    // 对于不满足语法的，都用当WORD字符处理
+//    private content_recover ::= !(WORD)
+
+commentSegment::=
+    TERM_COMMENT_SINGLE_LINE | TERM_COMMENT_MULTI_LINE
+    ;
+
+operatorSegment::=
+     ( OP_AS | OP_CAST  | OP_IS | OP_INSTANCE_OF | OP_TYPE_OF) express
+    |  (OP_MUL | OP_DIV | OP_MOD) express
+    | (OP_ADD | OP_SUB) express
+    | (OP_IN | OP_NOT_IN| OP_GTE | OP_GTE_STR | OP_LTE | OP_LTE_STR | OP_NE | OP_NE_STR | OP_NEQ | OP_NEQ_STR | OP_EQ | OP_EQ_STR | OP_GT | OP_GT_STR | OP_LT | OP_LT_STR) express
+    | (OP_AND | OP_AND_STR | OP_OR | OP_OR_STR) express
+    | OP_MOD
+    | TERM_QUESTION express TERM_COLON express
+        ;
+
+expressSegment::=
+        debuggerSegment
+        | ifSegment
+        | foreachSegment
+        | forSegment
+        | whileSegment
+        | controlSegment
+        | trySegment
+        | throwSegment
+        | parenSegment
+        | prefixOperatorSegment
+        | equalValue
+        | newInstance
+        | invokeFunction
+        | constValue
+        | refValue
+        | jsonValue
+        | negtiveSegment
+        ;
+
+negtiveSegment::=
+    OP_SUB express
+    ;
+
+debuggerSegment::=
+    KEY_DEBUGGER (namingBlock)? (TERM_PAREN_L conditionBlock TERM_PAREN_R)?
+    ;
+
+trySegment::=
+    KEY_TRY tryBodyBlock (KEY_CATCH TERM_PAREN_L (classNameBlock (OP_VERTICAL_BAR classNameBlock)*) namingBlock TERM_PAREN_R catchBodyBlock)* (KEY_FINALLY finallyBodyBlock)?
+    ;
+
+throwSegment::=
+    KEY_THROW express
+    ;
+
+tryBodyBlock::=
+    scriptBlock
+    ;
+
+catchBodyBlock::=
+    scriptBlock
+    ;
+
+finallyBodyBlock::=
+    scriptBlock
+    ;
+
+classNameBlock::=
+    NAMING
+    ;
+
+parenSegment::=
+    TERM_PAREN_L express TERM_PAREN_R
+    ;
+
+prefixOperatorSegment::=
+    (OP_EXCLAM | OP_NOT) express
+    ;
+
+controlSegment::=
+    KEY_BREAK
+    | KEY_CONTINUE
+    | KEY_RETURN (express)?
+    ;
+
+whileSegment::=
+    KEY_WHILE TERM_PAREN_L conditionBlock TERM_PAREN_R scriptBlock
+    ;
+
+forSegment::=
+    KEY_FOR TERM_PAREN_L express TERM_SEMICOLON conditionBlock TERM_SEMICOLON express TERM_PAREN_R scriptBlock
+    ;
+
+foreachSegment::=
+    KEY_FOREACH TERM_PAREN_L namingBlock TERM_COLON express TERM_PAREN_R scriptBlock
+    ;
+
+namingBlock::=
+    NAMING
+    ;
+
+ifSegment::=
+    KEY_IF TERM_PAREN_L conditionBlock TERM_PAREN_R scriptBlock (  (KEY_ELSE KEY_IF | KEY_ELIF) TERM_PAREN_L conditionBlock TERM_PAREN_R scriptBlock )* (KEY_ELSE scriptBlock)?
+    ;
+
+conditionBlock::=
+    express
+    ;
+
+scriptBlock::=
+    TERM_CURLY_L script TERM_CURLY_R
+    ;
+
+
+equalValue::=
+    (ROUTE_NAMING|NAMING) (OP_ASSIGN) express
+    ;
+
+newInstance::=
+    KEY_NEW invokeFunction
+    ;
+
+invokeFunction::=
+    refCall (TERM_DOT functionCall)*
+    | functionCall (TERM_DOT functionCall)*
+    ;
+
+functionCall::=
+    NAMING TERM_PAREN_L argumentList? TERM_PAREN_R
+    ;
+
+refCall::=
+    refValue TERM_DOT functionCall
+    ;
+
+argumentList::=
+    argument ( TERM_COMMA argument )*
+    ;
+
+argument::=
+    ((NAMING|constString) TERM_COLON)? argumentValue
+    ;
+
+argumentValue::=
+    express
+    ;
+
+constValue::=
+    constBool
+    | constClass
+    | constNull
+    | constMultilineString
+    | constRenderString
+    | constString
+    | decNumber
+    | hexNumber
+    | otcNumber
+    | binNumber
+    ;
+
+refValue::=
+    REF_EXPRESS
+    ;
+
+constBool::=
+    TERM_CONST_BOOLEAN
+    ;
+
+constNull::=
+    TERM_CONST_NULL
+    ;
+
+constClass::=
+    TERM_CONST_TYPE_CLASS
+    ;
+
+constString::=
+    TERM_CONST_STRING
+    |TERM_CONST_STRING_SINGLE
+    ;
+
+constMultilineString::=
+    TERM_CONST_STRING_MULTILINE
+    |TERM_CONST_STRING_MULTILINE_QUOTE
+    ;
+
+constRenderString::=
+    TERM_CONST_STRING_RENDER
+    |TERM_CONST_STRING_RENDER_SINGLE
+    ;
+
+decNumber::= // 十进制数字
+     TERM_CONST_NUMBER_SCIEN_2
+    | TERM_CONST_NUMBER_SCIEN_1
+    | TERM_CONST_NUMBER_FLOAT
+    | TERM_CONST_NUMBER
+    | TERM_DIGIT
+    ;
+
+hexNumber::= // 16进制数
+    TERM_CONST_NUMBER_HEX
+    ;
+
+otcNumber::= // 8进制数
+    TERM_CONST_NUMBER_OTC
+    ;
+
+binNumber::= // 2进制数
+    TERM_CONST_NUMBER_BIN
+    ;
+
+jsonValue::=
+    invokeFunction
+    | constValue
+    | refValue
+    | jsonArrayValue
+    | jsonMapValue
+    ;
+
+jsonMapValue::=
+    TERM_CURLY_L jsonPairs? TERM_CURLY_R
+    ;
+
+jsonPairs::=
+    jsonPair (TERM_COMMA jsonPair)*
+    ;
+
+jsonPair::=
+    (NAMING|constString) TERM_COLON express
+    ;
+
+jsonArrayValue::=
+    TERM_BRACKET_SQUARE_L jsonItemList? TERM_BRACKET_SQUARE_R
+    ;
+
+jsonItemList::=
+    express (TERM_COMMA express)*
+    ;
