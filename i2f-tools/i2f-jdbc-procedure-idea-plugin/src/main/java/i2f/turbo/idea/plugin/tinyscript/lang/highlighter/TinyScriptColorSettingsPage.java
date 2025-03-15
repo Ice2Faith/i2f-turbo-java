@@ -16,9 +16,9 @@ import java.util.Map;
 public class TinyScriptColorSettingsPage implements ColorSettingsPage {
     @SuppressWarnings("DialogTitleCapitalization")
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
-            new AttributesDescriptor("关键字", TinyScriptSyntaxHighlighter.KEYWORD),
-            new AttributesDescriptor("数值", TinyScriptSyntaxHighlighter.NUMBER),
-            new AttributesDescriptor("字符串", TinyScriptSyntaxHighlighter.STRING),
+            new AttributesDescriptor("Keywords", TinyScriptSyntaxHighlighter.KEYWORD),
+            new AttributesDescriptor("Value", TinyScriptSyntaxHighlighter.NUMBER),
+            new AttributesDescriptor("String", TinyScriptSyntaxHighlighter.STRING),
             new AttributesDescriptor("Bad value", TinyScriptSyntaxHighlighter.BAD_CHARACTER)
     };
     @Nullable
