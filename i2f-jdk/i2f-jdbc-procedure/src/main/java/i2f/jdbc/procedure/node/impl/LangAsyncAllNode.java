@@ -2,13 +2,14 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
+import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -27,7 +28,7 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         Boolean await = (Boolean) executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context);
 
         List<XmlNode> children = node.getChildren();
@@ -36,9 +37,10 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
         }
         CountDownLatch latch = new CountDownLatch(children.size());
         for (XmlNode item : children) {
+            final XmlNode itemNode=item;
             new Thread(() -> {
                 try {
-                    executor.execAsProcedure(item, context, false, false);
+                    Map<String, Object> map = executor.execAsProcedure(item, context, false, false);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 } finally {

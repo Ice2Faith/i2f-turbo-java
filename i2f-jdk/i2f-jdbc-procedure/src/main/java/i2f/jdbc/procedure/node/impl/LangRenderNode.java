@@ -1,10 +1,11 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+
+import java.util.Map;
 
 
 /**
@@ -23,13 +24,13 @@ public class LangRenderNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String script = node.getTextBody();
-        String val = executor.render(script, context.getParams());
+        String val = executor.render(script, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null && !result.isEmpty()) {
             Object res = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-            executor.setParamsObject(context.getParams(), result, res);
+            executor.visitSet(context, result, res);
         }
     }
 

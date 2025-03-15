@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.context;
 
 import i2f.convert.obj.ObjectConvertor;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -29,6 +30,10 @@ public class ContextFunctions {
             return str;
         }
         return Pattern.compile(regex).matcher(str).replaceAll(replacement);
+    }
+
+    public static String regex_replace(String str, String regex, String replacement) {
+        return regexReplace(str,regex,replacement);
     }
 
     public static String regexReplaceIgnoreCase(String str, String regex, String replacement) {
@@ -211,6 +216,50 @@ public class ContextFunctions {
             return DateTimeFormatter.ofPattern(pattern).format((Temporal) date);
         }
         throw new IllegalArgumentException("un-support date type[" + date.getClass() + "] format!");
+    }
+
+    public static Object last_day(Object date){
+        if (date == null) {
+            return null;
+        }
+
+        LocalDateTime v = (LocalDateTime) ObjectConvertor.tryConvertAsType(date, LocalDateTime.class);
+        LocalDateTime rv = v.withDayOfMonth(1).plusMonths(1).plusDays(-1);
+        Class<?> rawType = date.getClass();
+        return ObjectConvertor.tryConvertAsType(rv, rawType);
+    }
+
+    public static String to_char(Object obj){
+        return to_char(obj,null);
+    }
+
+    public static String to_char(Object obj,String pattern){
+        if(obj==null){
+            return null;
+        }
+        if(pattern==null || pattern.isEmpty()){
+            return String.valueOf(obj);
+        }
+        Class<?> clazz = obj.getClass();
+        if(ObjectConvertor.isDateType(clazz)){
+            return date_format(obj,pattern);
+        }else if(ObjectConvertor.isNumericType(clazz)){
+            BigDecimal num = (BigDecimal)ObjectConvertor.tryConvertAsType(obj, BigDecimal.class);
+            return String.format(pattern,num.doubleValue());
+        }
+        return String.valueOf(obj);
+    }
+
+    public static Date sysdate(){
+        return new Date();
+    }
+
+    public static Date now(){
+        return new Date();
+    }
+
+    public Object add_months(Object date,long interval){
+        return date_add(date,ChronoUnit.MONTHS.name(), interval);
     }
 
 }

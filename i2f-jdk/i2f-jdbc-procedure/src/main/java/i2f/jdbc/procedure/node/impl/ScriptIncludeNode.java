@@ -2,7 +2,6 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -36,9 +35,9 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);
-        ProcedureMeta meta = context.getNodeMap().get(refid);
+        ProcedureMeta meta = executor.getMeta(refid);
         if (meta == null) {
             return;
         }
@@ -55,15 +54,17 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
             }
             String script = entry.getValue();
             // 备份堆栈
-            bakParams.put(name, context.getParams().get(script));
+            bakParams.put(name, executor.visit(script,context));
             Object val = executor.attrValue(name, FeatureConsts.VISIT, node, context);
-            context.getParams().put(name, val);
+            executor.visitSet(context,name, val);
         }
 
         executor.execAsProcedure(nextNode, context, false, false);
 
         // 恢复堆栈
-        context.getParams().putAll(bakParams);
+        for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
+            executor.visitSet(context,entry.getKey(),entry.getValue());
+        }
     }
 
 }

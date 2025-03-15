@@ -3,7 +3,6 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -38,7 +37,7 @@ public class ProcedureCallNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);
 
         Map<String, Object> callParams = null;
@@ -68,12 +67,9 @@ public class ProcedureCallNode extends AbstractExecutorNode {
             callParams.put(name, val);
         }
 
-        ExecuteContext callContext = new ExecuteContext();
-        callContext.setNodeMap(context.getNodeMap());
-        callContext.setParams(callParams);
 
         try {
-            callParams = executor.exec(refid, callContext);
+            callParams = executor.exec(refid, callParams);
         } catch (ControlSignalException e) {
 
         } catch (Throwable e) {
@@ -85,8 +81,8 @@ public class ProcedureCallNode extends AbstractExecutorNode {
         }
 
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        if(result!=null){
-            context.paramsSet(result,callParams);
+        if(result!=null && !result.isEmpty()){
+            executor.visitSet(context,result,callParams);
         }
     }
 

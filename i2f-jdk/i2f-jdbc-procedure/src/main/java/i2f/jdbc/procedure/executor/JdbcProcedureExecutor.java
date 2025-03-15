@@ -1,8 +1,10 @@
 package i2f.jdbc.procedure.executor;
 
 import i2f.bindsql.BindSql;
+import i2f.container.builder.map.MapBuilder;
+import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.procedure.consts.ParamsConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
+import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -12,8 +14,11 @@ import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -21,10 +26,59 @@ import java.util.function.Supplier;
  * @date 2025/1/20 10:38
  */
 public interface JdbcProcedureExecutor {
+    JdbcProcedureContext getContext();
+
+    default Map<String,ProcedureMeta> getMetaMap(){
+        return getContext().getMetaMap();
+    }
+
+    default ProcedureMeta getMeta(String procedureId){
+        return getMetaMap().get(procedureId);
+    }
+
     List<ExecutorNode> getNodes();
 
-    default Map<String, Object> exec(String nodeId, ExecuteContext context) {
-        ProcedureMeta callNode = context.getNodeMap().get(nodeId);
+    default <T> T convertAs(Object obj,Class<?> type){
+        return (T)ObjectConvertor.tryConvertAsType(obj,type);
+    }
+
+    default MapBuilder<String, Object, ? extends Map<String, Object>> mapBuilder() {
+        return new MapBuilder<>(new HashMap<>(), String.class, Object.class);
+    }
+
+    default <T> T invoke(String procedureId, Consumer<MapBuilder<String, Object, ? extends Map<String, Object>>> consumer) {
+        MapBuilder<String, Object, HashMap<String, Object>> builder = new MapBuilder<>(new HashMap<String, Object>());
+        consumer.accept(builder);
+        return invoke(procedureId, builder.get());
+    }
+
+    <T> T invoke(String procedureId, Map<String, Object> params);
+
+    default <T> T invoke(String procedureId, Object ... args){
+        return invoke(procedureId, Arrays.asList(args));
+    }
+
+    <T> T invoke(String procedureId, List<Object> args);
+
+    default  Map<String,Object> call(String procedureId, Consumer<MapBuilder<String, Object, ? extends Map<String, Object>>> consumer) {
+        MapBuilder<String, Object, HashMap<String, Object>> builder = new MapBuilder<>(new HashMap<String, Object>());
+        consumer.accept(builder);
+        return exec(procedureId, builder.get());
+    }
+
+    default Map<String, Object> call(String nodeId, Map<String,Object> context) {
+        return exec(nodeId,context);
+    }
+
+    default Map<String,Object> call(String procedureId, Object ... args){
+        return call(procedureId, Arrays.asList(args));
+    }
+
+    Map<String,Object> call(String procedureId, List<Object> args);
+
+
+    default Map<String, Object> exec(String nodeId, Map<String,Object> context) {
+        ProcedureMeta callNode = getMeta(nodeId);
         if (callNode == null) {
             throw new NotFoundSignalException("not found node: " + nodeId);
         }
@@ -32,10 +86,11 @@ public interface JdbcProcedureExecutor {
         if (callNode.getType() == ProcedureMeta.Type.XML) {
             return exec((XmlNode) target, context);
         } else if (callNode.getType() == ProcedureMeta.Type.JAVA) {
+            prepareParams(context);
             JdbcProcedureJavaCaller javaCaller = (JdbcProcedureJavaCaller) target;
             try {
-                Object ret = javaCaller.exec(context, this, context.getParams());
-                context.getParams().put(ParamsConsts.RETURN, ret);
+                Object ret = javaCaller.exec(this, context);
+                visitSet(context,ParamsConsts.RETURN, ret);
             } catch (ControlSignalException e) {
 
             } catch (Throwable e) {
@@ -45,20 +100,22 @@ public interface JdbcProcedureExecutor {
                     throw new ThrowSignalException(e.getMessage(), e);
                 }
             }
-            return context.getParams();
+            return context;
         } else {
             throw new ThrowSignalException("not supported node type: " + callNode.getType());
         }
     }
 
-    default Map<String, Object> exec(XmlNode node, ExecuteContext context) {
+    Map<String,Object> prepareParams(Map<String,Object> context);
+
+    default Map<String, Object> exec(XmlNode node, Map<String,Object> context) {
         return exec(node, context, false, true);
     }
 
-    Map<String, Object> exec(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
+    Map<String, Object> exec(XmlNode node, Map<String,Object> context, boolean beforeNewConnection, boolean afterCloseConnection);
 
-    default Map<String, Object> execAsProcedure(String nodeId, ExecuteContext context) {
-        ProcedureMeta callNode = context.getNodeMap().get(nodeId);
+    default Map<String, Object> execAsProcedure(String nodeId, Map<String,Object> context) {
+        ProcedureMeta callNode = getMeta(nodeId);
         if (callNode == null) {
             throw new NotFoundSignalException("not found node: " + nodeId);
         }
@@ -66,10 +123,11 @@ public interface JdbcProcedureExecutor {
         if (callNode.getType() == ProcedureMeta.Type.XML) {
             return execAsProcedure((XmlNode) target, context);
         } else if (callNode.getType() == ProcedureMeta.Type.JAVA) {
+            prepareParams(context);
             JdbcProcedureJavaCaller javaCaller = (JdbcProcedureJavaCaller) target;
             try {
-                Object ret = javaCaller.exec(context, this, context.getParams());
-                context.getParams().put(ParamsConsts.RETURN, ret);
+                Object ret = javaCaller.exec(this,context);
+                visitSet(context,ParamsConsts.RETURN, ret);
             } catch (ControlSignalException e) {
 
             } catch (Throwable e) {
@@ -79,31 +137,46 @@ public interface JdbcProcedureExecutor {
                     throw new ThrowSignalException(e.getMessage(), e);
                 }
             }
-            return context.getParams();
+            return context;
         } else {
             throw new ThrowSignalException("not supported node type: " + callNode.getType());
         }
     }
 
-    default Map<String, Object> execAsProcedure(XmlNode node, ExecuteContext context) {
+    default Map<String, Object> execAsProcedure(XmlNode node, Map<String,Object> context) {
         return execAsProcedure(node, context, false, true);
     }
 
-    Map<String, Object> execAsProcedure(XmlNode node, ExecuteContext context, boolean beforeNewConnection, boolean afterCloseConnection);
+    Map<String, Object> execAsProcedure(XmlNode node, Map<String,Object> context, boolean beforeNewConnection, boolean afterCloseConnection);
 
-    Object attrValue(String attr, String action, XmlNode node, ExecuteContext context);
+    Object attrValue(String attr, String action, XmlNode node, Map<String,Object> context);
 
-    Object resultValue(Object value, List<String> features, XmlNode node, ExecuteContext context);
+    Object resultValue(Object value, List<String> features, XmlNode node, Map<String,Object> context);
 
-    void setParamsObject(Map<String, Object> params, String result, Object value);
+    void visitSet(Map<String, Object> params, String result, Object value);
+
+    void visitDelete(Map<String,Object> params,String result);
 
     Map<String, Object> createParams();
 
-    Map<String, Object> newParams(ExecuteContext context);
+    Map<String, Object> newParams(Map<String,Object> context);
 
     void debug(boolean enable);
 
     void debugLog(Supplier<Object> supplier);
+
+    default void infoLog(Supplier<Object> supplier) {
+        infoLog(supplier, null);
+    }
+
+    void infoLog(Supplier<Object> supplier, Throwable e);
+
+    default void warnLog(Supplier<Object> supplier) {
+        warnLog(supplier, null);
+    }
+
+    void warnLog(Supplier<Object> supplier, Throwable e);
+
 
     default void errorLog(Supplier<Object> supplier) {
         errorLog(supplier, null);
@@ -111,17 +184,26 @@ public interface JdbcProcedureExecutor {
 
     void errorLog(Supplier<Object> supplier, Throwable e);
 
+
     void openDebugger(String tag,Object context,String conditionExpression);
 
     Class<?> loadClass(String className);
 
-    boolean test(String test, Map<String, Object> params);
+    boolean test(String test, Object params);
 
-    Object eval(String script, Map<String, Object> params);
+    default<T> T evalAs(String script,Object params){
+        return (T)eval(script,params);
+    }
 
-    Object visit(String collectionScript, Map<String, Object> params);
+    Object eval(String script, Object params);
 
-    String render(String script, Map<String, Object> params);
+    default <T> T visitAs(String script,Object params){
+        return (T)visit(script,params);
+    }
+
+    Object visit(String script, Object params);
+
+    String render(String script, Object params);
 
     Connection getConnection(String datasource, Map<String, Object> params);
 

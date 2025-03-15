@@ -1,10 +1,11 @@
 package i2f.jdbc.procedure.node.impl;
 
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
+
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -22,7 +23,7 @@ public class LangContinueNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         throw new ContinueSignalException();
     }
 

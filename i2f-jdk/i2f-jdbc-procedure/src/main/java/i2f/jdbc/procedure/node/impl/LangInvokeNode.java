@@ -3,7 +3,6 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -38,7 +37,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String fullMethodName = node.getTagAttrMap().get(AttrConsts.METHOD);
         String targetScript = node.getTagAttrMap().get(AttrConsts.TARGET);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
@@ -72,6 +71,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
             try {
                 evalObj = executor.attrValue(AttrConsts.ARG + argEntry.getKey(), FeatureConsts.VISIT, node, context);
             } catch (Exception e) {
+                executor.warnLog(()->e.getMessage(),e);
             }
             if (evalObj == null) {
                 evalObj = argScript;
@@ -102,7 +102,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
 
                 if (result != null && !result.isEmpty()) {
                     res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-                    executor.setParamsObject(context.getParams(), result, res);
+                    executor.visitSet(context, result, res);
                 }
             } catch (Exception e) {
                 throw new IllegalStateException(e.getMessage(), e);
@@ -111,7 +111,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
             Class<?> clazz = null;
             Object invokeObject = null;
             if (targetScript != null && !targetScript.isEmpty()) {
-                invokeObject = executor.visit(targetScript, context.getParams());
+                invokeObject = executor.visit(targetScript, context);
             }
             if (invokeObject != null) {
                 clazz = invokeObject.getClass();
@@ -148,7 +148,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
 
                 if (result != null && !result.isEmpty()) {
                     res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-                    executor.setParamsObject(context.getParams(), result, res);
+                    executor.visitSet(context, result, res);
                 }
             } catch (Exception e) {
                 throw new IllegalStateException(e.getMessage(), e);

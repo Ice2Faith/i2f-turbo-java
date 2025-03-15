@@ -15,9 +15,12 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.codehaus.groovy.control.CompilationFailedException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -26,7 +29,6 @@ import java.util.function.Consumer;
  * @date 2025/3/6 15:49
  */
 public class GrammarReporter {
-
     public static void reportGrammar(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> map, Consumer<String> warnPoster) {
         if(map==null){
             return;

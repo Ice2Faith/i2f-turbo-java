@@ -1,8 +1,5 @@
 package i2f.jdbc.procedure.executor;
 
-
-import i2f.jdbc.procedure.context.ExecuteContext;
-
 import java.util.Map;
 
 /**
@@ -11,9 +8,6 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface JdbcProcedureJavaCaller {
-    default JavaCallerHelper helper(ExecuteContext context, JdbcProcedureExecutor executor) {
-        return new JavaCallerHelper(context, executor);
-    }
 
-    Object exec(ExecuteContext context, JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable;
+    Object exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable;
 }

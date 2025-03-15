@@ -3,8 +3,6 @@ package i2f.jdbc.proxy.xml.mybatis.inflater.impl;
 import i2f.extension.ognl.OgnlUtil;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 
-import java.util.Map;
-
 /**
  * @author Ice2Faith
  * @date 2024/10/9 18:45
@@ -14,7 +12,7 @@ public class OgnlMybatisMapperInflater extends MybatisMapperInflater {
     public static final OgnlMybatisMapperInflater INSTANCE = new OgnlMybatisMapperInflater();
 
     @Override
-    public boolean testExpression(String expression, Map<String, Object> params) {
+    public boolean testExpression(String expression, Object params) {
         try {
             Object ret = OgnlUtil.evaluateExpression(expression, params);
             if (ret instanceof Boolean) {
@@ -27,7 +25,7 @@ public class OgnlMybatisMapperInflater extends MybatisMapperInflater {
     }
 
     @Override
-    public Object evalExpression(String expression, Map<String, Object> params) {
+    public Object evalExpression(String expression, Object params) {
         try {
             return OgnlUtil.evaluateExpression(expression, params);
         } catch (Exception e) {

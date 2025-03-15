@@ -26,7 +26,9 @@ import java.util.Map;
  */
 public class JdbcProcedureXmlCompletionContributor extends CompletionContributor {
     public static final Logger log = Logger.getInstance(JdbcProcedureXmlCompletionContributor.class);
-
+    {
+        JdbcProcedureProjectMetaHolder.refreshThreadTask();
+    }
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
 //        log.warn("xml-attr completion override");

@@ -1,12 +1,12 @@
 package i2f.springboot.jdbc.bql.procedure;
 
-import i2f.jdbc.procedure.caller.JdbcProcedureExecutorCaller;
-import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
+import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -16,8 +16,8 @@ import java.util.concurrent.CountDownLatch;
  */
 @Slf4j
 public class JdbcProcedureHelper implements ApplicationContextAware {
-    public static ApplicationContext applicationContext;
-    private static volatile DefaultJdbcProcedureExecutorCaller caller;
+    public static volatile ApplicationContext applicationContext;
+    private static volatile JdbcProcedureExecutor executor;
     private static final CountDownLatch latch = new CountDownLatch(1);
 
     @Override
@@ -27,15 +27,15 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         latch.countDown();
     }
 
-    public static JdbcProcedureExecutorCaller getCaller(){
-        if(caller==null){
+    public static JdbcProcedureExecutor getExecutor(){
+        if(executor==null){
             synchronized (latch){
-                if(caller==null) {
-                    caller = applicationContext.getBean(DefaultJdbcProcedureExecutorCaller.class);
+                if(executor==null) {
+                    executor = applicationContext.getBean(JdbcProcedureExecutor.class);
                 }
             }
         }
-        return caller;
+        return executor;
     }
 
     public static <T> T invoke(String procedureId,Map<String,Object> params){
@@ -44,7 +44,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         } catch (Exception e) {
 
         }
-        return caller.invoke(procedureId, params);
+        return executor.invoke(procedureId, params);
     }
 
     public static void call(String procedureId, Map<String, Object> params) {
@@ -53,6 +53,24 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         } catch (Exception e) {
 
         }
-        getCaller().call(procedureId, params);
+        getExecutor().call(procedureId, params);
+    }
+
+    public static void call(String procedureId, Object ... args) {
+        try {
+            latch.await();
+        } catch (Exception e) {
+
+        }
+        getExecutor().call(procedureId, args);
+    }
+
+    public static void call(String procedureId, List<Object> args) {
+        try {
+            latch.await();
+        } catch (Exception e) {
+
+        }
+        getExecutor().call(procedureId, args);
     }
 }

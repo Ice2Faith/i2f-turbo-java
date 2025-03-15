@@ -8,7 +8,6 @@ import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -81,7 +80,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
         if (children == null || children.isEmpty()) {
             return;
@@ -176,12 +175,12 @@ public class SqlEtlNode extends AbstractExecutorNode {
         }
 
 
-        Map<String, Connection> bakConn = context.paramsComputeIfAbsent(ParamsConsts.CONNECTIONS, (key -> new HashMap<>()));
-        context.paramsSet(ParamsConsts.CONNECTIONS, new HashMap<>());
+        Map<String, Connection> bakConn = (Map<String,Connection>)context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key -> new HashMap<>()));
+        executor.visitSet(context,ParamsConsts.CONNECTIONS, new HashMap<>());
         try {
-            executor.sqlTransNone(extraDatasource, context.getParams());
-            executor.sqlTransBegin(loadDatasource, Connection.TRANSACTION_READ_COMMITTED, context.getParams());
-            Connection loadConn = executor.getConnection(loadDatasource, context.getParams());
+            executor.sqlTransNone(extraDatasource, context);
+            executor.sqlTransBegin(loadDatasource, Connection.TRANSACTION_READ_COMMITTED, context);
+            Connection loadConn = executor.getConnection(loadDatasource, context);
 
             if (beforeNode != null) {
                 executor.execAsProcedure(beforeNode, context, false, false);
@@ -197,13 +196,13 @@ public class SqlEtlNode extends AbstractExecutorNode {
             String loadSql = "";
 
             if(bql==null) {
-                bql = executor.sqlScript(extraDatasource, dialectScriptList, context.getParams());
+                bql = executor.sqlScript(extraDatasource, dialectScriptList, context);
             }
 
             int pageIndex = 0;
             int commitCount = 0;
             while (true) {
-                List<?> list = executor.sqlQueryPage(extraDatasource, bql, context.getParams(), resultType, pageIndex, readBatchSize);
+                List<?> list = executor.sqlQueryPage(extraDatasource, bql, context, resultType, pageIndex, readBatchSize);
                 if (list.isEmpty()) {
                     break;
                 }
@@ -350,7 +349,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 JdbcResolver.batchByListableValues(loadConn, loadSql, loadArgs.iterator(), writeBatchSize);
 
                 if (commitCount >= commitSize) {
-                    executor.sqlTransCommit(loadDatasource, context.getParams());
+                    executor.sqlTransCommit(loadDatasource, context);
                     commitCount = 0;
                 }
 
@@ -361,30 +360,31 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 pageIndex++;
             }
 
-            executor.sqlTransCommit(loadDatasource, context.getParams());
+            executor.sqlTransCommit(loadDatasource, context);
 
             if (afterNode != null) {
                 executor.execAsProcedure(afterNode, context, false, false);
             }
 
-            executor.sqlTransCommit(loadDatasource, context.getParams());
+            executor.sqlTransCommit(loadDatasource, context);
         } catch (SQLException e) {
-            executor.sqlTransRollback(loadDatasource, context.getParams());
+            executor.sqlTransRollback(loadDatasource, context);
             throw new ThrowSignalException(e.getMessage(), e);
         } finally {
-            Map<String, Connection> conns = context.paramsGet(ParamsConsts.CONNECTIONS);
+            Map<String, Connection> conns = (Map<String, Connection>)context.get(ParamsConsts.CONNECTIONS);
             for (Map.Entry<String, Connection> entry : conns.entrySet()) {
                 Connection conn = entry.getValue();
                 if (conn != null) {
                     try {
                         conn.close();
                     } catch (SQLException e) {
+                        executor.warnLog(()->e.getMessage(),e);
                         e.printStackTrace();
                     }
                 }
             }
 
-            context.paramsSet(ParamsConsts.CONNECTIONS, bakConn);
+            executor.visitSet(context,ParamsConsts.CONNECTIONS, bakConn);
         }
 
     }

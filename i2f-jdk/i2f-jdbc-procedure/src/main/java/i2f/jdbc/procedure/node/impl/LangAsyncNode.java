@@ -2,13 +2,13 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.NodeTime;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +28,7 @@ public class LangAsyncNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         Boolean await = (Boolean) executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context);
         Long delay = (Long) executor.attrValue(AttrConsts.DELAY, FeatureConsts.LONG, node, context);
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
@@ -36,7 +36,7 @@ public class LangAsyncNode extends AbstractExecutorNode {
         CountDownLatch latch = new CountDownLatch(1);
         Thread thread = new Thread(() -> {
             try {
-                if (delay != null) {
+                if (delay != null&& delay>=0) {
                     try {
                         Thread.sleep(delayUnit.toMillis(delay));
                     } catch (Exception e) {
@@ -44,6 +44,7 @@ public class LangAsyncNode extends AbstractExecutorNode {
                 }
                 executor.execAsProcedure(node, context, false, false);
             } catch (Throwable e) {
+                executor.warnLog(()->e.getMessage(),e);
                 e.printStackTrace();
             } finally {
                 latch.countDown();

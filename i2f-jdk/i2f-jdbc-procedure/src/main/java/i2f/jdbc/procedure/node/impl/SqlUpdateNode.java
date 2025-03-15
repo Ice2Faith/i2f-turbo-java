@@ -3,7 +3,6 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -29,7 +28,7 @@ public class SqlUpdateNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node, context, executor);
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
         Object scriptObj = executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, node, context);
@@ -48,12 +47,12 @@ public class SqlUpdateNode extends AbstractExecutorNode {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
         if(bql==null) {
-            bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
+            bql = executor.sqlScript(datasource, dialectScriptList, context);
         }
-        int row = executor.sqlUpdate(datasource, bql, context.getParams());
+        int row = executor.sqlUpdate(datasource, bql, context);
         if (result != null && !result.isEmpty()) {
             Object val = executor.resultValue(row, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-            executor.setParamsObject(context.getParams(), result, val);
+            executor.visitSet(context, result, val);
         }
     }
 

@@ -1,6 +1,6 @@
-package i2f.springboot.jdbc.bql.procedure;
+package i2f.springboot.jdbc.bql.procedure.impl;
 
-import i2f.jdbc.procedure.caller.impl.AbstractJdbcProcedureNodeMapCacheSupplier;
+import i2f.jdbc.procedure.provider.types.xml.impl.AbstractJdbcProcedureXmlNodeMetaCacheProvider;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import lombok.Data;
@@ -21,12 +21,12 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Data
 @NoArgsConstructor
 @Slf4j
-public class SpringJdbcProcedureNodeMapCacheSupplier extends AbstractJdbcProcedureNodeMapCacheSupplier {
+public class SpringJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider {
 
     protected final CopyOnWriteArraySet<String> xmlLocations = new CopyOnWriteArraySet<>();
     protected final PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-    public SpringJdbcProcedureNodeMapCacheSupplier(List<String> xmlLocations) {
+    public SpringJdbcProcedureXmlNodeMetaCacheProvider(List<String> xmlLocations) {
         if (xmlLocations == null) {
             return;
         }

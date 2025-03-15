@@ -2,7 +2,6 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -37,7 +36,7 @@ public class LangForiNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String beginExpr = node.getTagAttrMap().get(AttrConsts.BEGIN);
         String endExpr = node.getTagAttrMap().get(AttrConsts.END);
         String incrExpr = node.getTagAttrMap().get(AttrConsts.INCR);
@@ -55,9 +54,9 @@ public class LangForiNode extends AbstractExecutorNode {
         }
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
-        bakParams.put(itemName, context.getParams().get(itemName));
-        bakParams.put(firstName, context.getParams().get(firstName));
-        bakParams.put(indexName, context.getParams().get(indexName));
+        bakParams.put(itemName, executor.visit(itemName,context));
+        bakParams.put(firstName, executor.visit(firstName,context));
+        bakParams.put(indexName, executor.visit(indexName,context));
 
         int begin = 0;
         if (beginExpr != null && !beginExpr.isEmpty()) {
@@ -76,9 +75,9 @@ public class LangForiNode extends AbstractExecutorNode {
             Object val = j;
             val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
             // 覆盖堆栈
-            context.getParams().put(itemName, val);
-            context.getParams().put(firstName, isFirst);
-            context.getParams().put(indexName, index);
+            executor.visitSet(context,itemName, val);
+            executor.visitSet(context,firstName, isFirst);
+            executor.visitSet(context,indexName, index);
             isFirst = false;
             index++;
             try {
@@ -91,9 +90,9 @@ public class LangForiNode extends AbstractExecutorNode {
         }
 
         // 还原堆栈
-        context.getParams().put(itemName, bakParams.get(itemName));
-        context.getParams().put(firstName, bakParams.get(firstName));
-        context.getParams().put(indexName, bakParams.get(indexName));
+        executor.visitSet(context,itemName, bakParams.get(itemName));
+        executor.visitSet(context,firstName, bakParams.get(firstName));
+        executor.visitSet(context,indexName, bakParams.get(indexName));
     }
 
 }

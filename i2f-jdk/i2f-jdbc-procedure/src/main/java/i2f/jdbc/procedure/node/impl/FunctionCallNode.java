@@ -4,7 +4,6 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -39,7 +38,7 @@ public class FunctionCallNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);
 
 
@@ -71,11 +70,8 @@ public class FunctionCallNode extends AbstractExecutorNode {
         }
 
 
-        ExecuteContext callContext = new ExecuteContext();
-        callContext.setNodeMap(context.getNodeMap());
-        callContext.setParams(callParams);
         try {
-            callParams = executor.exec(refid, callContext);
+            callParams = executor.exec(refid, callParams);
         } catch (ControlSignalException e) {
 
         } catch (Throwable e) {
@@ -88,8 +84,8 @@ public class FunctionCallNode extends AbstractExecutorNode {
 
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if(result!=null){
-            Object ret = callContext.paramsGet(ParamsConsts.RETURN);
-            context.paramsSet(result,ret);
+            Object ret = executor.visit(ParamsConsts.RETURN,callParams);
+            executor.visitSet(context,result,ret);
         }
     }
 

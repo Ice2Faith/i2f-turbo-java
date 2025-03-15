@@ -1,29 +1,63 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.bindsql.BindSql;
+import i2f.bindsql.count.ICountWrapper;
+import i2f.bindsql.data.PageBindSql;
+import i2f.bindsql.page.IPageWrapper;
+import i2f.check.Predicates;
 import i2f.clock.SystemClock;
+import i2f.clock.std.IClock;
 import i2f.compiler.MemoryCompiler;
+import i2f.container.builder.map.MapBuilder;
 import i2f.convert.obj.ObjectConvertor;
+import i2f.database.type.DatabaseType;
+import i2f.extension.antlr4.script.tiny.impl.TinyScript;
+import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptException;
+import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakException;
+import i2f.extension.groovy.GroovyScript;
+import i2f.extension.ognl.OgnlUtil;
+import i2f.extension.velocity.VelocityGenerator;
 import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.procedure.annotations.JdbcProcedure;
-import i2f.jdbc.procedure.caller.JdbcProcedureExecutorCaller;
-import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
+import i2f.jdbc.procedure.context.JdbcProcedureContext;
+import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.impl.BasicJdbcProcedureExecutor;
+import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
+import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.provider.JdbcProcedureMetaProvider;
+import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
+import i2f.jdbc.procedure.provider.types.class4j.impl.ListableJdbcProcedureJavaCallerMetaProvider;
+import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
+import i2f.jdbc.procedure.provider.types.xml.impl.AbstractJdbcProcedureXmlNodeMetaCacheProvider;
+import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
+import i2f.jdbc.procedure.registry.impl.ListableJdbcProcedureMetaProviderRegistry;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.signal.SignalException;
+import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.lru.LruMap;
 import i2f.match.regex.RegexUtil;
+import i2f.match.regex.data.RegexFindPartMeta;
+import i2f.page.Page;
+import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
+import i2f.script.ScriptProvider;
+import i2f.text.StringUtils;
+import i2f.typeof.TypeOf;
+import i2f.typeof.token.TypeToken;
+import i2f.typeof.token.data.TypeNode;
+import i2f.uid.SnowflakeLongUid;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,6 +70,16 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-eval-java";
     public static final String CLASS_NAME_HOLDER = "$#$##$###";
     public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s*");
+
+    public static void main(String[] args){
+        /*language=java*/
+        String script= "(int)params.get(\"a\")+(double)params.get(\"b\")";
+        Map<String,Object> context=new HashMap<>();
+        context.put("a",1);
+        context.put("b",2.5);
+        Object obj = evalJava(context,null,script);
+        System.out.println(obj);
+    }
 
     @Override
     public boolean support(XmlNode node) {
@@ -84,14 +128,14 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
         Map.Entry<String, String> codeEntry = getFullJavaSourceCode(importSegment, memberSegment, bodySegment);
 
         try {
-            MemoryCompiler.findCompileClass(codeEntry.getValue(),codeEntry.getKey()+".java",codeEntry.getKey());
+            MemoryCompiler.findCompileClass(codeEntry.getValue(), codeEntry.getKey() + ".java", codeEntry.getKey());
         } catch (Exception e) {
-            throw new IllegalArgumentException(e.getMessage()+"\n\tcompile source code:\n"+codeEntry.getValue(),e);
+            throw new IllegalArgumentException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         List<XmlNode> children = node.getChildren();
         XmlNode importNode = null;
@@ -132,7 +176,7 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
 
         if (result != null && !result.isEmpty()) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-            executor.setParamsObject(context.getParams(), result, obj);
+            executor.visitSet(context, result, obj);
         }
 
     }
@@ -150,18 +194,61 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
 
     public static final String EVAL_JAVA_IMPORTS = new StringBuilder()
             .append("import ").append(castAsImportPackageName(JdbcProcedure.class.getName())).append(";").append("\n")
-            .append("import ").append(castAsImportPackageName(ExecuteContext.class.getName())).append(";").append("\n")
-            .append("import ").append(castAsImportPackageName(XmlNode.class.getName())).append(";").append("\n")
-            .append("import ").append(castAsImportPackageName(JdbcProcedureExecutor.class.getName())).append(";").append("\n")
-            .append("import ").append(castAsImportPackageName(JdbcProcedureExecutorCaller.class.getName())).append(";").append("\n")
-            .append("import ").append(castAsImportPackageName(DefaultJdbcProcedureExecutorCaller.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(FeatureConsts.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(DefaultJdbcProcedureContext.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureContext.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(BasicJdbcProcedureExecutor.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureExecutor.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(SqlDialect.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(AbstractExecutorNode.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(LangEvalJavaNode.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ExecutorNode.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(XmlNode.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureParser.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ListableJdbcProcedureJavaCallerMetaProvider.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureJavaCallerMetaProvider.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(AbstractJdbcProcedureXmlNodeMetaCacheProvider.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureXmlNodeMetaProvider.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureMetaProvider.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ListableJdbcProcedureMetaProviderRegistry.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureMetaProviderRegistry.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(GrammarReporter.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(BreakSignalException.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(SignalException.class.getName())).append(";").append("\n")
+            ///////////////////////////////////////////////////////////////////////////////////////////////
             .append("import ").append(castAsImportPackageName(JdbcResolver.class.getName())).append(";").append("\n")
-            .append("import ").append(castAsImportPackageName(RegexUtil.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(QueryColumn.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(DatabaseType.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(BindSql.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(IPageWrapper.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(PageBindSql.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ICountWrapper.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(MemoryCompiler.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ScriptProvider.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(ReflectResolver.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(Visitor.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(ObjectConvertor.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(MapBuilder.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(Predicates.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(RegexUtil.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(RegexFindPartMeta.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(Page.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(Reference.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(StringUtils.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(TypeOf.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(TypeToken.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(TypeNode.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(SnowflakeLongUid.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(IClock.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(SystemClock.class.getName())).append(";").append("\n")
+            ///////////////////////////////////////////////////////////////////////////////////////////////
+            .append("import ").append(castAsImportPackageName(TinyScript.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(TinyScriptException.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(TinyScriptBreakException.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(GroovyScript.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(OgnlUtil.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(VelocityGenerator.class.getName())).append(";").append("\n")
+            ///////////////////////////////////////////////////////////////////////////////////////////////
             .append("import ").append("java.util.*").append(";").append("\n")
             .append("import ").append("java.math.*").append(";").append("\n")
             .append("import ").append("java.time.*").append(";").append("\n")
@@ -181,27 +268,31 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
             .append("import ").append("java.time.zone.*").append(";").append("\n")
             .toString();
 
-    public static final LruMap<String,Map.Entry<String,String>> FULL_JAVA_SOURCE_MAP=new LruMap<>(2048);
+    public static final LruMap<String, Map.Entry<String, String>> FULL_JAVA_SOURCE_MAP = new LruMap<>(2048);
 
-    public static Object evalJava(ExecuteContext context, JdbcProcedureExecutor executor, String importSegment, String memberSegment, String bodySegment) {
+    public static Object evalJava(Map<String, Object> context, JdbcProcedureExecutor executor, String bodySegment) {
+        return evalJava(context,executor,"","",bodySegment);
+    }
+
+    public static Object evalJava(Map<String, Object> context, JdbcProcedureExecutor executor, String importSegment, String memberSegment, String bodySegment) {
         Map.Entry<String, String> codeEntry = getFullJavaSourceCode(importSegment, memberSegment, bodySegment);
-        String className= codeEntry.getKey();
-        String javaSourceCode=codeEntry.getValue();
+        String className = codeEntry.getKey();
+        String javaSourceCode = codeEntry.getValue();
         Object obj = null;
         try {
             obj = MemoryCompiler.compileCall(javaSourceCode,
                     className + ".java",
                     className,
                     "exec",
-                    context, executor, context.getParams()
+                     executor, context
             );
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage()+"\n\tcompile source code:\n"+codeEntry.getValue(), e);
+            throw new IllegalStateException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
         }
         return obj;
     }
 
-    public static Map.Entry<String,String> getFullJavaSourceCode(String importSegment, String memberSegment, String bodySegment){
+    public static Map.Entry<String, String> getFullJavaSourceCode(String importSegment, String memberSegment, String bodySegment) {
         if (importSegment == null) {
             importSegment = "";
         }
@@ -211,10 +302,10 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
         if (bodySegment == null) {
             bodySegment = "";
         }
-        String cacheKey=importSegment+"###"+memberSegment+"###"+bodySegment+"###";
-        Map.Entry<String,String> ret = FULL_JAVA_SOURCE_MAP.get(cacheKey);
-        if(ret!=null){
-            return new AbstractMap.SimpleEntry<>(ret.getKey(),ret.getValue());
+        String cacheKey = importSegment + "###" + memberSegment + "###" + bodySegment + "###";
+        Map.Entry<String, String> ret = FULL_JAVA_SOURCE_MAP.get(cacheKey);
+        if (ret != null) {
+            return new AbstractMap.SimpleEntry<>(ret.getKey(), ret.getValue());
         }
 
         bodySegment = bodySegment.trim();
@@ -225,20 +316,20 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
         builder.append(importSegment).append("\n");
         builder.append("public class ").append(CLASS_NAME_HOLDER).append("{").append("\n");
         builder.append(memberSegment).append("\n");
-        builder.append("public Object exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable {").append("\n");
+        builder.append("public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable {").append("\n");
         if (!matcher.find()) {
             String[] lines = bodySegment.split("\n");
             for (int i = 0; i < lines.length; i++) {
                 String line = lines[i];
                 if (i == lines.length - 1) {
                     String str = line.trim();
-                    if(!str.isEmpty() && !"}".equals(str)) {
+                    if (!str.isEmpty() && !"}".equals(str)) {
                         builder.append(" return ");
                         builder.append(line);
                         if (!str.endsWith(";")) {
                             builder.append(";");
                         }
-                    }else{
+                    } else {
                         builder.append(line);
                     }
                     builder.append("\n");
@@ -252,6 +343,7 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
                 builder.append(";");
             }
         }
+        builder.append("\n");
         builder.append("}").append("\n");
         builder.append("}").append("\n");
 
@@ -270,10 +362,10 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
         String className = "RC" + hexBuilder;
         javaSourceCode = javaSourceCode.replace(CLASS_NAME_HOLDER, className);
 
-        Map.Entry<String,String> val= new AbstractMap.SimpleEntry<>(className,javaSourceCode);
-        try{
-            FULL_JAVA_SOURCE_MAP.put(cacheKey,new AbstractMap.SimpleEntry<>(val.getKey(),val.getValue()));
-        }catch(Exception e){
+        Map.Entry<String, String> val = new AbstractMap.SimpleEntry<>(className, javaSourceCode);
+        try {
+            FULL_JAVA_SOURCE_MAP.put(cacheKey, new AbstractMap.SimpleEntry<>(val.getKey(), val.getValue()));
+        } catch (Exception e) {
 
         }
         return val;

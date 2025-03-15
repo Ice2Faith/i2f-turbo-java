@@ -1,8 +1,8 @@
-package i2f.jdbc.procedure.caller.impl;
+package i2f.jdbc.procedure.provider.types.class4j.impl;
 
 import i2f.jdbc.procedure.annotations.JdbcProcedure;
-import i2f.jdbc.procedure.caller.JdbcProcedureJavaCallerMapSupplier;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
+import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
 import i2f.reflect.ReflectResolver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,16 +20,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Data
 @NoArgsConstructor
-public class ListableJdbcProcedureJavaCallerMapSupplier implements JdbcProcedureJavaCallerMapSupplier {
+public class ListableJdbcProcedureJavaCallerMetaProvider implements JdbcProcedureJavaCallerMetaProvider {
     protected final ConcurrentHashMap<String, JdbcProcedureJavaCaller> javaMap = new ConcurrentHashMap<>();
 
-    public ListableJdbcProcedureJavaCallerMapSupplier(Map<String, JdbcProcedureJavaCaller> map) {
+    public ListableJdbcProcedureJavaCallerMetaProvider(Map<String, JdbcProcedureJavaCaller> map) {
         if (map != null) {
             javaMap.putAll(map);
         }
     }
 
-    public ListableJdbcProcedureJavaCallerMapSupplier(Collection<JdbcProcedureJavaCaller> javaCallers) {
+    public ListableJdbcProcedureJavaCallerMetaProvider(Collection<JdbcProcedureJavaCaller> javaCallers) {
         addJavaCaller(javaCallers);
     }
 

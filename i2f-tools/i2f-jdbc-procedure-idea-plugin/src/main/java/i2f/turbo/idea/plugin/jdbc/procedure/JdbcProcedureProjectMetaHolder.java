@@ -73,20 +73,13 @@ public class JdbcProcedureProjectMetaHolder {
     );
 
     static {
-        startRefreshXmlFilesThread();
-        startCollectionProcedureMetaThread();
+        startRefreshThread();
     }
 
-    public static void startRefreshXmlFilesThread(){
+    public static void startRefreshThread(){
         Thread thread = new Thread(() -> {
             do {
-                log.warn("xml-search-refreshing");
-
-                try {
-                    refreshXmlFiles();
-                } catch (Throwable e) {
-                    log.warn("xml-search-error", e);
-                }
+                refreshThreadTask();
                 try {
                     Thread.sleep(15 * 1000);
                 } catch (Throwable e) {
@@ -98,26 +91,21 @@ public class JdbcProcedureProjectMetaHolder {
         thread.start();
     }
 
-    public static void startCollectionProcedureMetaThread(){
-        Thread thread = new Thread(() -> {
-            do {
-                log.warn("xml-procedure-meta-refreshing");
+    public static void refreshThreadTask(){
+        log.warn("xml-search-refreshing");
 
-                try {
-                    collectProcedureMeta();
-                } catch (Throwable e) {
-                    log.warn("xml-procedure-meta-error", e);
-                }
-                try {
-                    Thread.sleep(15 * 1000);
-                } catch (Throwable e) {
-
-                }
-            } while (true);
-        });
-        thread.setDaemon(true);
-        thread.start();
+        try {
+            refreshXmlFiles();
+        } catch (Throwable e) {
+            log.warn("xml-search-refresh-xml-file-error", e);
+        }
+        try {
+            collectProcedureMeta();
+        } catch (Throwable e) {
+            log.warn("xml-search-refresh-procedure-meta-error", e);
+        }
     }
+
 
     public static void collectProcedureMeta(){
         for (Map.Entry<String, VirtualFile> entry : XML_FILE_MAP.entrySet()) {

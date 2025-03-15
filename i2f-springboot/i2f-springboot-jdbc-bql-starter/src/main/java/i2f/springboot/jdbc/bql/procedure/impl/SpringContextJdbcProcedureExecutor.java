@@ -1,7 +1,8 @@
-package i2f.springboot.jdbc.bql.procedure;
+package i2f.springboot.jdbc.bql.procedure.impl;
 
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import lombok.Data;
@@ -29,12 +30,14 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     protected static final Logger log = LoggerFactory.getLogger(SpringContextJdbcProcedureExecutor.class);
     protected static final AtomicBoolean hasApplyNodes = new AtomicBoolean(false);
 
-    public SpringContextJdbcProcedureExecutor(ApplicationContext applicationContext) {
+
+    public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context,ApplicationContext applicationContext) {
+        super(context);
         this.applicationContext = applicationContext;
         this.environment = applicationContext.getEnvironment();
     }
 
-    public SpringContextJdbcProcedureExecutor(ApplicationContext applicationContext, Environment environment) {
+    public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context,ApplicationContext applicationContext, Environment environment) {
         this.applicationContext = applicationContext;
         this.environment = environment;
     }
@@ -158,6 +161,24 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     }
 
     @Override
+    public void infoLog(Supplier<Object> supplier, Throwable e) {
+        if (e != null) {
+            log.info(String.valueOf(supplier.get()), e);
+        } else {
+            log.info(String.valueOf(supplier.get()));
+        }
+    }
+
+    @Override
+    public void warnLog(Supplier<Object> supplier, Throwable e) {
+        if (e != null) {
+            log.warn(String.valueOf(supplier.get()), e);
+        } else {
+            log.warn(String.valueOf(supplier.get()));
+        }
+    }
+
+    @Override
     public void errorLog(Supplier<Object> supplier, Throwable e) {
         if (e != null) {
             log.error(String.valueOf(supplier.get()), e);
@@ -165,4 +186,6 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
             log.error(String.valueOf(supplier.get()));
         }
     }
+
+
 }

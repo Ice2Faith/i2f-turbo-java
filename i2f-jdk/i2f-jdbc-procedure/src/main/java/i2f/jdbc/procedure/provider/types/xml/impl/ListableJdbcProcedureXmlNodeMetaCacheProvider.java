@@ -1,4 +1,4 @@
-package i2f.jdbc.procedure.caller.impl;
+package i2f.jdbc.procedure.provider.types.xml.impl;
 
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -13,10 +13,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @date 2025/2/18 22:35
  * @desc
  */
-public class ListableJdbcProcedureNodeMapCacheSupplier extends AbstractJdbcProcedureNodeMapCacheSupplier {
+public class ListableJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider {
     protected CopyOnWriteArraySet<URL> resourceList = new CopyOnWriteArraySet<>();
 
-    public ListableJdbcProcedureNodeMapCacheSupplier(CopyOnWriteArraySet<URL> resourceList) {
+    public ListableJdbcProcedureXmlNodeMetaCacheProvider(CopyOnWriteArraySet<URL> resourceList) {
         this.resourceList = resourceList;
     }
 

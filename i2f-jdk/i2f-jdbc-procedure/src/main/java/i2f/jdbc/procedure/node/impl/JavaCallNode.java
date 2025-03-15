@@ -3,7 +3,6 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -39,9 +38,9 @@ public class JavaCallNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String targetExpression = node.getTagAttrMap().get(AttrConsts.TARGET);
-        Map<String,Object> beanMap = context.paramsComputeIfAbsent(ParamsConsts.BEANS,(key)->new HashMap<>());
+        Map<String,Object> beanMap = (Map<String,Object>)context.computeIfAbsent(ParamsConsts.BEANS,(key)->new HashMap<>());
         Object target=beanMap.get(targetExpression);
         if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
             target=executor.attrValue(AttrConsts.TARGET, FeatureConsts.VISIT,node,context);
@@ -78,11 +77,11 @@ public class JavaCallNode extends AbstractExecutorNode {
         }
         try {
             JdbcProcedureJavaCaller caller=(JdbcProcedureJavaCaller)target;
-            Object val = caller.exec(context, executor, context.getParams());
+            Object val = caller.exec(executor, context);
             String result = node.getTagAttrMap().get(AttrConsts.RESULT);
             if (result != null && !result.isEmpty()) {
                 Object res = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-                executor.setParamsObject(context.getParams(), result, res);
+                executor.visitSet(context, result, res);
             }
         } catch (Throwable e) {
             throw new ThrowSignalException(e.getMessage(),e);

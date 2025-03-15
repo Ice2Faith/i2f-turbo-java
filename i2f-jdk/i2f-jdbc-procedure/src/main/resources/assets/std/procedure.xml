@@ -40,6 +40,10 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
         实现：groovy.lang.GroovyShell
         用途：用于支持习惯使用Groovy作为脚本语言的用户实现脚本嵌入
         使用官网：https://www.groovy-lang.org/syntax.html
+    TinyScript 是一个为了适配此方案而诞生的轻量级脚本引擎
+        实现：TinyScript.script
+        用户：用于适配这种场景的一种偏向函数式过程语言
+        原理；是基于antlr4技术实现的脚本语言
 
 ======================================================
 
@@ -126,7 +130,7 @@ ognl将会以上下文的Map对象为根对象
 eval-java是使用jdk的内存编译技术实现的
 原理是封装为一个临时的类，执行固定方法实现
 函数原型如下：
-public Object exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable {
+public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable {
 }
 或者参见：JdbcProcedureJavaCaller接口定义
 因此，你要做的就是补全函数体内部的内容
@@ -139,6 +143,19 @@ eval-js使用java中的js引擎进行处理
 以局部作用域的方式运行，局部变量中和java一样，传递了三个参数context,executor,params
 你可以添加自己的逻辑
 js引擎执行完毕之后，会返回之后一次执行的结果
+
+eval-groovy使用groovy引擎进行处理
+原理是封装为一个函数进行执行
+函数原型如下：
+def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable {
+    // 这里就是下面的脚本内容
+}
+或者参见：JdbcProcedureJavaCaller接口定义
+因此，你要做的就是补全函数体内部的内容
+
+eval-ts使用TinyScript引擎进行处理
+只注入params进行执行，但是由于params.executor也注入了executor变量
+因此也可以直接使用executor进行访问到
  -->
 <procedure id="">
     <!--
@@ -572,8 +589,8 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     实际上，eval-java的body内容
     会放到JdbcProcedureJavaCaller的实现类函数中执行
     也就是在这样的函数环境中执行
-    public Object exec(ExecuteContext context, JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable {
-        ...
+    public Object exec(JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable {
+        // 这里就是下面的脚本
     }
     因此，常规来说，需要满足Java函数段的语法规则
     也就是具有return语句，以及分号
@@ -599,7 +616,6 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     动态执行javascript脚本
     环境中具有以下变量，所有的变量都存储在params中
     因此，取值和保存值都通过操作params实现
-    ExecuteContext context
     JdbcProcedureExecutor executor
     Map<String,Object> params
      -->
@@ -626,9 +642,11 @@ js引擎执行完毕之后，会返回之后一次执行的结果
     动态执行groovy脚本
     环境中具有以下变量，所有的变量都存储在params中
     因此，取值和保存值都通过操作params实现
-    ExecuteContext context
-    JdbcProcedureExecutor executor
-    Map<String,Object> params
+    实际上是将脚本置于函数中执行
+    def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable {
+        // 这里就是下面的脚本内容
+    }
+     exec(executor,params);
      -->
     <lang-eval-groovy result="">
 

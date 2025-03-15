@@ -1,8 +1,8 @@
-package i2f.jdbc.procedure.caller.impl;
+package i2f.jdbc.procedure.provider.types.xml.impl;
 
-import i2f.jdbc.procedure.caller.JdbcProcedureNodeMapSupplier;
-import i2f.jdbc.procedure.context.CacheObjectRefresherSupplier;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.context.CacheObjectRefresherSupplier;
+import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -15,14 +15,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @date 2025/2/8 10:15
  */
 @Data
-public abstract class AbstractJdbcProcedureNodeMapCacheSupplier
+public abstract class AbstractJdbcProcedureXmlNodeMetaCacheProvider
         extends CacheObjectRefresherSupplier<Map<String, XmlNode>, ConcurrentHashMap<String, XmlNode>>
-        implements JdbcProcedureNodeMapSupplier {
+        implements JdbcProcedureXmlNodeMetaProvider {
 
     protected volatile Thread refreshThread = null;
     protected AtomicBoolean refreshing = new AtomicBoolean(false);
 
-    public AbstractJdbcProcedureNodeMapCacheSupplier() {
+    public AbstractJdbcProcedureXmlNodeMetaCacheProvider() {
         super(new ConcurrentHashMap<>(), "xproc4j-node-map-refresher");
     }
 

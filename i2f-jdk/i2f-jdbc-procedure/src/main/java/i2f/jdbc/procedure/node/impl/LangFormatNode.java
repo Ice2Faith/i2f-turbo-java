@@ -2,11 +2,11 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -37,14 +37,14 @@ public class LangFormatNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         Object value = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
         String pattern = (String) executor.attrValue(AttrConsts.PATTERN, FeatureConsts.STRING, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         value = String.format(pattern, value);
         if (result != null && !result.isEmpty()) {
             value = executor.resultValue(value, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-            executor.setParamsObject(context.getParams(), result, value);
+            executor.visitSet(context, result, value);
         }
     }
 

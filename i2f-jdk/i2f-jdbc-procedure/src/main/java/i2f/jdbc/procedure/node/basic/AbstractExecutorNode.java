@@ -1,6 +1,5 @@
 package i2f.jdbc.procedure.node.basic;
 
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -8,13 +7,15 @@ import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
+import java.util.Map;
+
 /**
  * @author Ice2Faith
  * @date 2025/2/28 8:44
  */
 public abstract class AbstractExecutorNode implements ExecutorNode {
     @Override
-    public void exec(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void exec(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         try {
             execInner(node, context, executor);
         } catch (Throwable e) {
@@ -31,5 +32,5 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         }
     }
 
-    public abstract void execInner(XmlNode node,ExecuteContext context,JdbcProcedureExecutor executor);
+    public abstract void execInner(XmlNode node,Map<String,Object> context,JdbcProcedureExecutor executor);
 }

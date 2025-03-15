@@ -1,4 +1,4 @@
-package i2f.jdbc.procedure.caller.impl;
+package i2f.jdbc.procedure.provider.types.xml.impl;
 
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import lombok.NoArgsConstructor;
@@ -12,10 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @desc
  */
 @NoArgsConstructor
-public class StaticJdbcProcedureNodeMapCacheSupplier extends AbstractJdbcProcedureNodeMapCacheSupplier {
+public class StaticJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider {
     protected Map<String, XmlNode> staticMap = new ConcurrentHashMap<>();
 
-    public StaticJdbcProcedureNodeMapCacheSupplier(Map<String, XmlNode> staticMap) {
+    public StaticJdbcProcedureXmlNodeMetaCacheProvider(Map<String, XmlNode> staticMap) {
         if (staticMap == null) {
             return;
         }
