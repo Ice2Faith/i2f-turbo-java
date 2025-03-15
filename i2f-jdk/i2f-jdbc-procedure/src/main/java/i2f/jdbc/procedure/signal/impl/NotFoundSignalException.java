@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.signal.impl;
 
+import i2f.jdbc.procedure.signal.SignalException;
+
 /**
  * @author Ice2Faith
  * @date 2025/1/24 8:52

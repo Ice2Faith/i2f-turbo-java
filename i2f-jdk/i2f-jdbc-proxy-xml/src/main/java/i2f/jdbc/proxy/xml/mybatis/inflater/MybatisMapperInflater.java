@@ -29,7 +29,7 @@ public class MybatisMapperInflater {
         return this;
     }
 
-    public boolean testExpression(String expression, Map<String, Object> params) {
+    public boolean testExpression(String expression, Object params) {
         try {
             expression = expression.replaceAll("\\s+and\\s+", " && ");
             expression = expression.replaceAll("\\s+or\\s+", " || ");
@@ -56,7 +56,7 @@ public class MybatisMapperInflater {
         return false;
     }
 
-    public Object evalExpression(String expression, Map<String, Object> params) {
+    public Object evalExpression(String expression, Object params) {
         return Visitor.visit(expression, params).get();
     }
 

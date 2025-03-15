@@ -1,50 +1,27 @@
 package i2f.jdbc.procedure.context;
 
-import i2f.jdbc.procedure.caller.JdbcProcedureJavaCallerMapSupplier;
-import i2f.jdbc.procedure.caller.JdbcProcedureNodeMapSupplier;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import lombok.Data;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
- * @date 2025/3/5 20:50
- * @desc
+ * @date 2025/3/14 19:33
  */
-@Data
-public class JdbcProcedureContext extends CacheObjectRefresherSupplier<Map<String, ProcedureMeta>, ConcurrentHashMap<String, ProcedureMeta>> {
-    protected final CopyOnWriteArrayList<Consumer<JdbcProcedureContext>> refreshListeners = new CopyOnWriteArrayList<>();
-    protected volatile JdbcProcedureNodeMapSupplier nodeSupplier;
-    protected volatile JdbcProcedureJavaCallerMapSupplier javaCallerSupplier;
+public interface JdbcProcedureContext {
 
-    public JdbcProcedureContext() {
-        super(new ConcurrentHashMap<>(), "procedure-context-refresher");
-    }
+    void listener(JdbcProcedureContextRefreshListener listener);
 
-    public JdbcProcedureContext(Map<String, ProcedureMeta> map) {
-        this();
-        registry(map);
-    }
+    Map<String, ProcedureMeta> getMetaMap();
 
-    public JdbcProcedureContext(JdbcProcedureNodeMapSupplier nodeSupplier, JdbcProcedureJavaCallerMapSupplier javaCallerSupplier) {
-        this();
-        this.nodeSupplier = nodeSupplier;
-        this.javaCallerSupplier = javaCallerSupplier;
-    }
+    void registry(String name, ProcedureMeta meta);
 
-    public void listener(Consumer<JdbcProcedureContext> listener) {
-        this.refreshListeners.add(listener);
-    }
+    void remove(String name);
 
-    public void registry(Map<String, ProcedureMeta> map) {
+    default void registry(Map<String, ProcedureMeta> map) {
         if (map == null) {
             return;
         }
@@ -53,7 +30,7 @@ public class JdbcProcedureContext extends CacheObjectRefresherSupplier<Map<Strin
         }
     }
 
-    public void registry(Collection<ProcedureMeta> list) {
+    default void registry(Collection<ProcedureMeta> list) {
         if (list == null) {
             return;
         }
@@ -62,86 +39,21 @@ public class JdbcProcedureContext extends CacheObjectRefresherSupplier<Map<Strin
         }
     }
 
-    public void registry(ProcedureMeta... args) {
+    default void registry(ProcedureMeta... args) {
         registry(Arrays.asList(args));
     }
 
-    public void registry(ProcedureMeta meta) {
+    default void registry(ProcedureMeta meta) {
         registry(null, meta);
     }
 
-    public void registry(String name, ProcedureMeta meta) {
-        if (meta == null) {
-            return;
-        }
-        if (name == null) {
-            name = meta.getName();
-        }
-        if (name == null || name.isEmpty()) {
-            return;
-        }
-        cache.put(name, meta);
-    }
-
-    public void registry(String key, XmlNode value) {
+    default void registry(String key, XmlNode value) {
         ProcedureMeta meta = ProcedureMeta.ofMeta(key, value);
         registry(meta);
     }
 
-    public void registry(String key, JdbcProcedureJavaCaller value) {
+    default void registry(String key, JdbcProcedureJavaCaller value) {
         ProcedureMeta meta = ProcedureMeta.ofMeta(key, value);
         registry(meta);
     }
-
-    @Override
-    public boolean isMissingCache() {
-        return cache == null || cache.isEmpty();
-    }
-
-    @Override
-    public Map<String, ProcedureMeta> wrapGet(ConcurrentHashMap<String, ProcedureMeta> ret) {
-        return new HashMap<>(getCache());
-    }
-
-
-    @Override
-    public void refresh() {
-        Map<String, ProcedureMeta> metaMap = new HashMap<>();
-        if (nodeSupplier != null) {
-            Map<String, XmlNode> nodeMap = nodeSupplier.getNodeMap();
-            if (nodeMap != null) {
-                for (Map.Entry<String, XmlNode> entry : nodeMap.entrySet()) {
-                    String key = entry.getKey();
-                    XmlNode value = entry.getValue();
-                    ProcedureMeta meta = ProcedureMeta.ofMeta(key, value);
-                    if (meta != null) {
-                        metaMap.put(meta.getName(), meta);
-                    }
-                }
-            }
-        }
-        if (javaCallerSupplier != null) {
-            Map<String, JdbcProcedureJavaCaller> javaCallerMap = javaCallerSupplier.getJavaCallerMap();
-            if (javaCallerMap != null) {
-                for (Map.Entry<String, JdbcProcedureJavaCaller> entry : javaCallerMap.entrySet()) {
-                    String key = entry.getKey();
-                    JdbcProcedureJavaCaller value = entry.getValue();
-                    ProcedureMeta meta = ProcedureMeta.ofMeta(key, value);
-                    if (meta != null) {
-                        metaMap.put(meta.getName(), meta);
-                    }
-                }
-            }
-        }
-
-        cache.putAll(metaMap);
-
-        for (Consumer<JdbcProcedureContext> listener : refreshListeners) {
-            if (listener == null) {
-                continue;
-            }
-            listener.accept(this);
-        }
-    }
-
 }

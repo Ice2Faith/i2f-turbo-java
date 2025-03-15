@@ -31,33 +31,13 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     public static final ConcurrentHashMap<String, Language> LANG_JAVA_ENUM_MAP = new ConcurrentHashMap<>();
 
     static {
+        startRefreshThread();
+    }
+
+    public static void startRefreshThread(){
         Thread thread = new Thread(() -> {
             do {
-                Collection<Language> langs = Language.getRegisteredLanguages();
-                for (Language lang : langs) {
-                    String id = lang.getID();
-                    if (id == null || id.isEmpty()) {
-                        continue;
-                    }
-                    if (!id.matches("[a-zA-Z0-9\\-\\_ ]+")) {
-                        continue;
-                    }
-                    id = id.replaceAll(" ", "_");
-                    id = id.replaceAll("-", "_");
-                    LANG_JAVA_ENUM_MAP.put(id, lang);
-                }
-                StringBuilder builder = new StringBuilder();
-                builder.append("public static enum ").append(LANG_JAVA_ENUM_CLASS_NAME).append(" {");
-                boolean isFirst = true;
-                for (Map.Entry<String, Language> entry : LANG_JAVA_ENUM_MAP.entrySet()) {
-                    if (!isFirst) {
-                        builder.append(",");
-                    }
-                    builder.append(entry.getKey());
-                    isFirst = false;
-                }
-                builder.append("}");
-                LANG_JAVA_ENUM = builder.toString();
+                refreshLangTask();
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -67,6 +47,34 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         });
         thread.setDaemon(true);
         thread.start();
+    }
+
+    public static void refreshLangTask(){
+        Collection<Language> langs = Language.getRegisteredLanguages();
+        for (Language lang : langs) {
+            String id = lang.getID();
+            if (id == null || id.isEmpty()) {
+                continue;
+            }
+            if (!id.matches("[a-zA-Z0-9\\-\\_ ]+")) {
+                continue;
+            }
+            id = id.replaceAll(" ", "_");
+            id = id.replaceAll("-", "_");
+            LANG_JAVA_ENUM_MAP.put(id, lang);
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("public static enum ").append(LANG_JAVA_ENUM_CLASS_NAME).append(" {");
+        boolean isFirst = true;
+        for (Map.Entry<String, Language> entry : LANG_JAVA_ENUM_MAP.entrySet()) {
+            if (!isFirst) {
+                builder.append(",");
+            }
+            builder.append(entry.getKey());
+            isFirst = false;
+        }
+        builder.append("}");
+        LANG_JAVA_ENUM = builder.toString();
     }
 
     public static final String[] JAVA_LANG_TAGS = {
@@ -88,18 +96,59 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     };
 
     public static final String EVAL_JAVA_IMPORTS = "\n" +
-            "import i2f.context.*;\n" +
-            "import i2f.jdbc.procedure.parser.data.*;\n" +
-            "import i2f.jdbc.procedure.executor.*;\n" +
-            "import i2f.jdbc.procedure.caller.*;\n" +
-            "import i2f.jdbc.procedure.caller.impl.*;\n" +
+            "import i2f.jdbc.procedure.annotations.*;\n" +
             "import i2f.jdbc.procedure.consts.*;\n" +
+            "import i2f.jdbc.procedure.context.impl.*;\n" +
+            "import i2f.jdbc.procedure.context.*;\n" +
+            "import i2f.jdbc.procedure.executor.impl.*;\n" +
+            "import i2f.jdbc.procedure.executor.*;\n" +
+            "import i2f.jdbc.procedure.node.base.*;\n" +
+            "import i2f.jdbc.procedure.node.basic.*;\n" +
+            "import i2f.jdbc.procedure.node.impl.*;\n" +
+            "import i2f.jdbc.procedure.node.*;\n" +
+            "import i2f.jdbc.procedure.parser.data.*;\n" +
+            "import i2f.jdbc.procedure.parser.*;\n" +
+            "import i2f.jdbc.procedure.provider.types.class4j.impl.*;\n" +
+            "import i2f.jdbc.procedure.provider.types.class4j.*;\n" +
+            "import i2f.jdbc.procedure.provider.types.xml.impl.*;\n" +
+            "import i2f.jdbc.procedure.provider.types.xml.*;\n" +
+            "import i2f.jdbc.procedure.provider.*;\n" +
+            "import i2f.jdbc.procedure.registry.impl.*;\n" +
+            "import i2f.jdbc.procedure.registry.*;\n" +
+            "import i2f.jdbc.procedure.reportor.*;\n" +
+            "import i2f.jdbc.procedure.signal.impl.*;\n" +
+            "import i2f.jdbc.procedure.signal.*;\n" +
             "import i2f.jdbc.*;\n" +
-            "import i2f.match.regex.*;\n" +
+            "import i2f.jdbc.data.*;\n" +
+            "import i2f.database.type.*;\n" +
+            "import i2f.bindsql.*;\n" +
+            "import i2f.bindsql.page.*;\n" +
+            "import i2f.bindsql.data.*;\n" +
+            "import i2f.bindsql.count.*;\n" +
+            "import i2f.compiler.*;\n" +
+            "import i2f.script.*;\n" +
             "import i2f.reflect.*;\n" +
             "import i2f.reflect.vistor.*;\n" +
             "import i2f.convert.obj.*;\n" +
+            "import i2f.container.builder.map.*;\n" +
+            "import i2f.check.*;\n" +
+            "import i2f.match.regex.*;\n" +
+            "import i2f.match.regex.data.*;\n" +
+            "import i2f.page.*;\n" +
+            "import i2f.reference.*;\n" +
+            "import i2f.text.*;\n" +
+            "import i2f.typeof.*;\n" +
+            "import i2f.typeof.token.*;\n" +
+            "import i2f.typeof.token.data.*;\n" +
+            "import i2f.uid.*;\n" +
+            "import i2f.clock.std.*;\n" +
             "import i2f.clock.*;\n" +
+            "import i2f.extension.antlr4.script.tiny.impl.*;\n" +
+            "import i2f.extension.antlr4.script.tiny.impl.exception.*;\n" +
+            "import i2f.extension.antlr4.script.tiny.impl.exception.impl.*;\n" +
+            "import i2f.extension.groovy.*;\n" +
+            "import i2f.extension.ognl.*;\n" +
+            "import i2f.extension.velocity.*;\n" +
 
             "import java.util.*;\n" +
             "import java.math.*;\n" +
@@ -690,9 +739,9 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     || "lang-eval-java".equals(tagName)) {
                 registrar.startInjecting(targetLang)
                         .addPlace(EVAL_JAVA_IMPORTS + "\n"
-                                        + "public class MyJavaProcedure { "
-                                        + "public Object exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { ",
-                                "} }",
+                                        + "public class MyJavaProcedure { \n"
+                                        + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
+                                "\n} \n}",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
@@ -707,8 +756,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         } else if (Arrays.asList("javascript", "js").contains(targetLang.getID().toLowerCase())) {
             registrar.startInjecting(targetLang)
-                    .addPlace("var context={};\n" +
-                                    "var executor={};\n" +
+                    .addPlace(
+                            "var executor={};\n" +
                                     "var params={};\n",
                             "",
                             (PsiLanguageInjectionHost) xmlText,
@@ -719,9 +768,9 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             if ("lang-eval-groovy".equals(tagName)) {
                 registrar.startInjecting(targetLang)
                         .addPlace(EVAL_JAVA_IMPORTS + "\n"
-                                        + "class MyGroovyProcedure { "
-                                        + "def exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) { ",
-                                "} }",
+                                        + "class MyGroovyProcedure { \n"
+                                        + "def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable { \n",
+                                "\n} \n}",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
@@ -787,9 +836,9 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 if (lang != null) {
                     registrar.startInjecting(lang)
                             .addPlace(EVAL_JAVA_IMPORTS + "\n"
-                                            + "public class MyJavaProcedure { "
-                                            + "public Object exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { ",
-                                    "} }",
+                                            + "public class MyJavaProcedure { \n"
+                                            + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
+                                    "\n} \n}",
                                     (PsiLanguageInjectionHost) attrValueElement,
                                     new TextRange(0, attrValueElement.getTextRange().getLength()))
                             .doneInjecting();
@@ -937,9 +986,9 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             if (lang != null) {
                 registrar.startInjecting(lang)
                         .addPlace(EVAL_JAVA_IMPORTS + "\n"
-                                        + "public class MyJavaProcedure { "
-                                        + "public Object exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { ",
-                                "} }",
+                                        + "public class MyJavaProcedure { \n"
+                                        + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
+                                "\n} \n}",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))
                         .doneInjecting();
@@ -951,8 +1000,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             Language lang = findPossibleLanguage("javascript");
             if (lang != null) {
                 registrar.startInjecting(lang)
-                        .addPlace("var context={};\n" +
-                                        "var executor={};\n" +
+                        .addPlace(
+                                "var executor={};\n" +
                                         "var params={};\n",
                                 "",
                                 (PsiLanguageInjectionHost) attrValueElement,
@@ -981,9 +1030,9 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             if (lang != null) {
                 registrar.startInjecting(lang)
                         .addPlace(EVAL_JAVA_IMPORTS + "\n"
-                                        + "class MyGroovyProcedure { "
-                                        + "def exec(ExecuteContext context, JdbcProcedureExecutor executor,Map<String,Object> params) { ",
-                                "} }",
+                                        + "class MyGroovyProcedure { \n"
+                                        + "def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable { \n",
+                                "\n} \n}",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))
                         .doneInjecting();

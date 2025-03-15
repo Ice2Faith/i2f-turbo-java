@@ -2,7 +2,6 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -40,10 +39,10 @@ public class SqlScopeNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String datasources = node.getTagAttrMap().get(AttrConsts.DATASOURCES);
         String[] arr = datasources.split(",");
-        Map<String, DataSource> datasourceMap = context.paramsComputeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
+        Map<String, DataSource> datasourceMap = (Map<String, DataSource>)context.computeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
         Set<String> targets = new HashSet<>();
         for (String item : arr) {
             if ("all".equals(item)) {
@@ -53,7 +52,7 @@ public class SqlScopeNode extends AbstractExecutorNode {
                 targets.add(item);
             }
         }
-        HashMap<Object, Connection> originConnMap = context.paramsComputeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
+        Map<String, Connection> originConnMap = (Map<String, Connection>)context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
         Map<String, Connection> bakConnMap = new HashMap<>();
         for (String name : targets) {
             Connection conn = originConnMap.get(name);
@@ -72,6 +71,7 @@ public class SqlScopeNode extends AbstractExecutorNode {
                     try {
                         conn.close();
                     } catch (SQLException e) {
+                        executor.warnLog(()->e.getMessage(),e);
                         e.printStackTrace();
                     }
                 }

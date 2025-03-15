@@ -3,10 +3,11 @@ package i2f.jdbc.procedure.executor.impl;
 import i2f.bindsql.BindSql;
 import i2f.extension.ognl.OgnlUtil;
 import i2f.extension.velocity.VelocityGenerator;
+import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
-import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.inflater.impl.OgnlMybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
+import i2f.reflect.ReflectResolver;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,8 +18,15 @@ import java.util.Map;
  * @date 2025/1/22 10:06
  */
 public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
+    public DefaultJdbcProcedureExecutor() {
+    }
+
+    public DefaultJdbcProcedureExecutor(JdbcProcedureContext context) {
+        super(context);
+    }
+
     @Override
-    public boolean innerTest(String test, Map<String, Object> params) {
+    public boolean innerTest(String test, Object params) {
         try {
             Object obj = OgnlUtil.evaluateExpression(test, params);
             return toBoolean(obj);
@@ -28,7 +36,7 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
     }
 
     @Override
-    public Object innerEval(String script, Map<String, Object> params) {
+    public Object innerEval(String script, Object params) {
         try {
             return OgnlUtil.evaluateExpression(script, params);
         } catch (Exception e) {
@@ -37,7 +45,7 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
     }
 
     @Override
-    public Object innerVisit(String script, Map<String, Object> params) {
+    public Object innerVisit(String script, Object params) {
         try {
             return OgnlUtil.evaluateExpression(script, params);
         } catch (Exception e) {
@@ -46,9 +54,15 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
     }
 
     @Override
-    public String innerRender(String script, Map<String, Object> params) {
+    public String innerRender(String script, Object params) {
         try {
-            return VelocityGenerator.render(script, params);
+            Map<String,Object> renderMap=null;
+            if(params instanceof Map){
+                renderMap=(Map<String,Object>)params;
+            }else{
+                renderMap = ReflectResolver.beanVirtual2map(params, new HashMap<>());
+            }
+            return VelocityGenerator.render(script, renderMap);
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }

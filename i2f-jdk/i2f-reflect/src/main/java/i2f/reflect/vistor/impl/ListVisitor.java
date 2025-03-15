@@ -32,4 +32,9 @@ public class ListVisitor implements Visitor {
     public Object parent() {
         return this.list;
     }
+
+    @Override
+    public void delete() {
+        list.remove(index);
+    }
 }

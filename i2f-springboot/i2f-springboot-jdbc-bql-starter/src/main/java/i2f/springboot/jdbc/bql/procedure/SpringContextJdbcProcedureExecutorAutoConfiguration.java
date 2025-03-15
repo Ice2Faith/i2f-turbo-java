@@ -1,9 +1,17 @@
 package i2f.springboot.jdbc.bql.procedure;
 
-import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
+import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
+import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
+import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
+import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
+import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContextRefreshListener;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
+import i2f.jdbc.procedure.context.JdbcProcedureContextRefreshListener;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.springboot.jdbc.bql.procedure.impl.SpringContextJdbcProcedureExecutor;
+import i2f.springboot.jdbc.bql.procedure.impl.SpringJdbcProcedureJavaCallerMetaCacheProvider;
+import i2f.springboot.jdbc.bql.procedure.impl.SpringJdbcProcedureMetaProviderRegistry;
+import i2f.springboot.jdbc.bql.procedure.impl.SpringJdbcProcedureXmlNodeMetaCacheProvider;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -17,12 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Ice2Faith
@@ -43,10 +45,6 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @Autowired
     private SpringJdbcProcedureProperties jdbcProcedureProperties;
 
-    private final ExecutorService reportPool= new ThreadPoolExecutor(1, 3,
-                                      0L,TimeUnit.MILLISECONDS,
-                                      new LinkedBlockingQueue<>(),
-                                        new ThreadPoolExecutor.DiscardOldestPolicy());
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -54,17 +52,12 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         log.info("xproc4j config ...");
     }
 
-    @ConditionalOnMissingBean(JdbcProcedureExecutor.class)
-    @Bean
-    public JdbcProcedureExecutor jdbcProcedureExecutor() {
-        log.info("xproc4j config JdbcProcedureExecutor ...");
-        return new SpringContextJdbcProcedureExecutor(applicationContext);
-    }
 
+    @ConditionalOnMissingBean(JdbcProcedureXmlNodeMetaProvider.class)
     @Bean
-    public SpringJdbcProcedureNodeMapCacheSupplier springJdbcProcedureNodeMapCacheSupplier() {
+    public JdbcProcedureXmlNodeMetaProvider jdbcProcedureNodeMapSupplier() {
         log.info("xproc4j config SpringJdbcProcedureNodeMapCacheSupplier ...");
-        SpringJdbcProcedureNodeMapCacheSupplier ret = new SpringJdbcProcedureNodeMapCacheSupplier();
+        SpringJdbcProcedureXmlNodeMetaCacheProvider ret = new SpringJdbcProcedureXmlNodeMetaCacheProvider();
         String xmlLocations = jdbcProcedureProperties.getXmlLocations();
         if (xmlLocations == null) {
             xmlLocations = SpringJdbcProcedureProperties.DEFAULT_XML_LOCATIONS;
@@ -75,39 +68,46 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
+    @ConditionalOnMissingBean(JdbcProcedureJavaCallerMetaProvider.class)
     @Bean
-    public SpringJdbcProcedureJavaCallerMapCacheSupplier springJdbcProcedureJavaCallerMapCacheSupplier() {
+    public JdbcProcedureJavaCallerMetaProvider springJdbcProcedureJavaCallerMapCacheSupplier() {
         log.info("xproc4j config SpringJdbcProcedureJavaCallerMapCacheSupplier ...");
-        SpringJdbcProcedureJavaCallerMapCacheSupplier ret = new SpringJdbcProcedureJavaCallerMapCacheSupplier(applicationContext);
+        SpringJdbcProcedureJavaCallerMetaCacheProvider ret = new SpringJdbcProcedureJavaCallerMetaCacheProvider(applicationContext);
         ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
         return ret;
     }
 
-
+    @ConditionalOnMissingBean(JdbcProcedureMetaProviderRegistry.class)
     @Bean
-    public JdbcProcedureContext procedureContext(SpringJdbcProcedureNodeMapCacheSupplier nodeMapCacheSupplier,
-                                                 SpringJdbcProcedureJavaCallerMapCacheSupplier javaCallerMapCacheSupplier,
-                                                 JdbcProcedureExecutor executor) {
+    public JdbcProcedureMetaProviderRegistry jdbcProcedureMetaProviderRegistry(){
+        log.info("xproc4j config SpringJdbcProcedureMetaProviderRegistry ...");
+        return new SpringJdbcProcedureMetaProviderRegistry(applicationContext);
+    }
+
+    @ConditionalOnMissingBean(JdbcProcedureContext.class)
+    @Bean
+    public JdbcProcedureContext procedureContext(JdbcProcedureMetaProviderRegistry registry) {
         log.info("xproc4j config JdbcProcedureContext ...");
-        JdbcProcedureContext ret = new JdbcProcedureContext(nodeMapCacheSupplier, javaCallerMapCacheSupplier);
-        AtomicBoolean isInit=new AtomicBoolean(true);
-        ret.listener((ctx)->{
-            if(isInit.getAndSet(false)){
-                GrammarReporter.reportGrammar(executor, new HashMap<>(ctx.getCache()), (msg) -> log.warn(msg));
-            }else {
-                reportPool.submit(() -> {
-                    GrammarReporter.reportGrammar(executor, new HashMap<>(ctx.getCache()), (msg) -> log.warn(msg));
-                });
-            }
-        });
+        DefaultJdbcProcedureContext ret = new DefaultJdbcProcedureContext(registry);
         ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
         return ret;
     }
 
+    @ConditionalOnMissingBean(JdbcProcedureExecutor.class)
     @Bean
-    public DefaultJdbcProcedureExecutorCaller defaultJdbcProcedureExecutorCaller(JdbcProcedureExecutor executor,
-                                                                                 JdbcProcedureContext procedureContext) {
-        log.info("xproc4j config DefaultJdbcProcedureExecutorCaller ...");
-        return new DefaultJdbcProcedureExecutorCaller(executor, procedureContext);
+    public JdbcProcedureExecutor jdbcProcedureExecutor(JdbcProcedureContext context) {
+        log.info("xproc4j config JdbcProcedureExecutor ...");
+        return new SpringContextJdbcProcedureExecutor(context,applicationContext);
     }
+
+    @ConditionalOnMissingBean(JdbcProcedureContextRefreshListener.class)
+    @Bean
+    public JdbcProcedureContextRefreshListener  jdbcProcedureContextRefreshListener(JdbcProcedureExecutor executor,
+                                                                                    JdbcProcedureContext context){
+        log.info("xproc4j config JdbcProcedureContextRefreshListener ...");
+        DefaultJdbcProcedureContextRefreshListener listener = new DefaultJdbcProcedureContextRefreshListener(executor);
+        context.listener(listener);
+        return listener;
+    }
+
 }

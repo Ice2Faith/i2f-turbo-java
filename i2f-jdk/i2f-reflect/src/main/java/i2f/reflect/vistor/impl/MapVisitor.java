@@ -32,4 +32,9 @@ public class MapVisitor implements Visitor {
     public Object parent() {
         return this.map;
     }
+
+    @Override
+    public void delete() {
+        map.remove(key);
+    }
 }

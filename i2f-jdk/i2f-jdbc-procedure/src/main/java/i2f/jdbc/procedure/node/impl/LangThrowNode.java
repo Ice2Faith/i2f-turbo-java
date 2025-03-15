@@ -2,13 +2,13 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.lang.reflect.Constructor;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -35,11 +35,11 @@ public class LangThrowNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String message = (String) executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
         String exceptionType = node.getTagAttrMap().get(AttrConsts.TYPE);
         String cause = node.getTagAttrMap().get(AttrConsts.CAUSE);
-        Throwable ex = (Throwable) executor.visit(cause, context.getParams());
+        Throwable ex = (Throwable) executor.visit(cause, context);
         Class<?> clazz = executor.loadClass(exceptionType);
 
         try {

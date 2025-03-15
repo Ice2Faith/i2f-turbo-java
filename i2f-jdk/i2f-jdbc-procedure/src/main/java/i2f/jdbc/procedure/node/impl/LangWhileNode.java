@@ -2,7 +2,6 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -45,7 +44,7 @@ public class LangWhileNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String script = node.getTagAttrMap().get(AttrConsts.TEST);
         String firstName = node.getTagAttrMap().get(AttrConsts.FIRST);
         String indexName = node.getTagAttrMap().get(AttrConsts.INDEX);
@@ -57,14 +56,14 @@ public class LangWhileNode extends AbstractExecutorNode {
         }
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
-        bakParams.put(firstName, context.getParams().get(firstName));
-        bakParams.put(indexName, context.getParams().get(indexName));
+        bakParams.put(firstName, executor.visit(firstName,context));
+        bakParams.put(indexName, executor.visit(indexName,context));
 
         boolean isFirst = true;
         int index = 0;
         while ((boolean) executor.attrValue(AttrConsts.TEST, AttrConsts.TEST, node, context)) {
-            context.getParams().put(firstName, isFirst);
-            context.getParams().put(indexName, index);
+            executor.visitSet(context,firstName, isFirst);
+            executor.visitSet(context,indexName, index);
             isFirst = false;
             index++;
             try {
@@ -76,8 +75,8 @@ public class LangWhileNode extends AbstractExecutorNode {
             }
         }
         // 还原堆栈
-        context.getParams().put(firstName, bakParams.get(firstName));
-        context.getParams().put(indexName, bakParams.get(indexName));
+        executor.visitSet(context,firstName, bakParams.get(firstName));
+        executor.visitSet(context,indexName, bakParams.get(indexName));
     }
 
 }

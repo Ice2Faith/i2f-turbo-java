@@ -2,11 +2,7 @@ package i2f.jdbc.procedure.test;
 
 import i2f.jdbc.datasource.impl.DirectConnectionDatasource;
 import i2f.jdbc.meta.JdbcMeta;
-import i2f.jdbc.procedure.caller.JdbcProcedureExecutorCaller;
-import i2f.jdbc.procedure.caller.impl.DefaultJdbcProcedureExecutorCaller;
 import i2f.jdbc.procedure.consts.ParamsConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
-import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.impl.BasicJdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
@@ -31,14 +27,13 @@ public class TestProcedureExecutor {
     }
 
     public static void testProcedure() throws Exception {
-        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test/test-procedure.xml");
+        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test/test-basic.xml");
         XmlNode node = JdbcProcedureParser.parse(file);
 
         BasicJdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
         executor.getDebug().set(true);
 
         Map<String, Object> params = executor.createParams();
-        ExecuteContext context = new ExecuteContext(params);
 
         Map<String, DataSource> datasourceMap = (Map<String, DataSource>) params.get(ParamsConsts.DATASOURCES);
 
@@ -75,7 +70,7 @@ public class TestProcedureExecutor {
         );
 
 
-        executor.exec(node, context, false, true);
+        executor.exec(node, params, false, true);
     }
 
     public static void testBasic() throws Exception {
@@ -88,31 +83,28 @@ public class TestProcedureExecutor {
         executor.getDebug().set(true);
 
         Map<String, Object> params = executor.createParams();
-        ExecuteContext context = new ExecuteContext(params);
 
-        context.getParams().put("list", new ArrayList<>(Arrays.asList(9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        params.put("list", new ArrayList<>(Arrays.asList(9, 8, 7, 6, 5, 4, 3, 2, 1)));
 
         ProcedureMeta nodeMeta = ProcedureMeta.ofMeta(node);
-        context.getNodeMap().put(nodeMeta.getName(), nodeMeta);
+        executor.getContext().registry(nodeMeta.getName(), nodeMeta);
 
         TestSimpleJavaCaller caller = new TestSimpleJavaCaller();
         ProcedureMeta javaMeta = ProcedureMeta.ofMeta(caller);
-        context.getNodeMap().put("SIMPLE", javaMeta);
+        executor.getContext().registry("SIMPLE", javaMeta);
 
-        context.getNodeMap().put(javaMeta.getName(), javaMeta);
+        executor.getContext().registry(javaMeta.getName(), javaMeta);
 
-        executor.exec(node, context, false, true);
+        executor.exec(node, params, false, true);
 
-        executor.exec(javaMeta.getName(), context);
+        executor.exec(javaMeta.getName(), params);
 
-        executor.exec("SIMPLE",context);
+        executor.exec("SIMPLE",params);
 
         System.out.println("===========================================");
-        JdbcProcedureExecutorCaller executorCaller = new DefaultJdbcProcedureExecutorCaller(executor,
-                new JdbcProcedureContext(context.getNodeMap()));
 
-        executorCaller.call("SIMPLE", context.getParams());
+        executor.call("SIMPLE", params);
 
-        executorCaller.call("BASIC", context.getParams());
+        executor.call("BASIC", params);
     }
 }

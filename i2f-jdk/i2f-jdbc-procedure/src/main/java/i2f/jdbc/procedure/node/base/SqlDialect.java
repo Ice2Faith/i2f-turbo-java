@@ -2,7 +2,6 @@ package i2f.jdbc.procedure.node.base;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
@@ -18,7 +17,7 @@ import java.util.Map;
 public class SqlDialect {
     public static final String TAG_NAME = "sql-dialect";
 
-    public static List<Map.Entry<String, String>> getSqlDialectList(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public static List<Map.Entry<String, String>> getSqlDialectList(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         List<Map.Entry<String, String>> dialectScriptList = new ArrayList<>();
         List<XmlNode> children = node.getChildren();
         if (children != null) {

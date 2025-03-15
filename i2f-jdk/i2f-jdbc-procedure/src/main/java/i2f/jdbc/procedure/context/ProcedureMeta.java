@@ -45,7 +45,7 @@ public class ProcedureMeta {
             return null;
         }
         ProcedureMeta meta = new ProcedureMeta();
-        meta.setType(ProcedureMeta.Type.XML);
+        meta.setType(Type.XML);
         meta.setName(key);
         meta.setTarget(value);
         meta.setArguments(new ArrayList<>());
@@ -82,7 +82,7 @@ public class ProcedureMeta {
             return null;
         }
         ProcedureMeta meta = new ProcedureMeta();
-        meta.setType(ProcedureMeta.Type.JAVA);
+        meta.setType(Type.JAVA);
         meta.setName(key);
         meta.setTarget(value);
         meta.setArguments(new ArrayList<>());

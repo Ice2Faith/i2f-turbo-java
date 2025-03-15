@@ -3,7 +3,6 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -60,7 +59,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
         if (children == null || children.isEmpty()) {
             return;
@@ -111,7 +110,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
         }
 
         if(bql==null) {
-            bql = executor.sqlScript(datasource, dialectScriptList, context.getParams());
+            bql = executor.sqlScript(datasource, dialectScriptList, context);
         }
 
         int pageIndex = 0;
@@ -119,16 +118,16 @@ public class SqlCursorNode extends AbstractExecutorNode {
             batchSize = 2000;
         }
         Map<String, Object> bakParams = new LinkedHashMap<>();
-        bakParams.put(item, executor.visit(item, context.getParams()));
+        bakParams.put(item, executor.visit(item, context));
         while (true) {
-            List<?> list = executor.sqlQueryPage(datasource, bql, context.getParams(), resultType, pageIndex, batchSize);
+            List<?> list = executor.sqlQueryPage(datasource, bql, context, resultType, pageIndex, batchSize);
             if (list.isEmpty()) {
                 break;
             }
 
             if (acceptBatch) {
                 try {
-                    executor.setParamsObject(context.getParams(), item, list);
+                    executor.visitSet(context, item, list);
                     executor.execAsProcedure(bodyNode, context, false, false);
                 } catch (ContinueSignalException e) {
                     continue;
@@ -141,7 +140,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
                 for (Object obj : list) {
                     count++;
                     try {
-                        executor.setParamsObject(context.getParams(), item, obj);
+                        executor.visitSet(context, item, obj);
                         executor.execAsProcedure(bodyNode, context, false, false);
                     } catch (ContinueSignalException e) {
                         continue;
@@ -164,7 +163,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
         }
 
         for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
-            executor.setParamsObject(context.getParams(), entry.getKey(), entry.getValue());
+            executor.visitSet(context, entry.getKey(), entry.getValue());
         }
     }
 }

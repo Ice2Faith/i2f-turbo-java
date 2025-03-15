@@ -1,7 +1,7 @@
-package i2f.springboot.jdbc.bql.procedure;
+package i2f.springboot.jdbc.bql.procedure.impl;
 
-import i2f.jdbc.procedure.caller.JdbcProcedureJavaCallerMapSupplier;
-import i2f.jdbc.procedure.caller.impl.ListableJdbcProcedureJavaCallerMapSupplier;
+import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
+import i2f.jdbc.procedure.provider.types.class4j.impl.ListableJdbcProcedureJavaCallerMetaProvider;
 import i2f.jdbc.procedure.context.CacheObjectRefresherSupplier;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import lombok.Data;
@@ -20,12 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 @NoArgsConstructor
 @Slf4j
-public class SpringJdbcProcedureJavaCallerMapCacheSupplier
+public class SpringJdbcProcedureJavaCallerMetaCacheProvider
         extends CacheObjectRefresherSupplier<Map<String, JdbcProcedureJavaCaller>, ConcurrentHashMap<String, JdbcProcedureJavaCaller>>
-        implements JdbcProcedureJavaCallerMapSupplier {
+        implements JdbcProcedureJavaCallerMetaProvider {
     protected ApplicationContext applicationContext;
 
-    public SpringJdbcProcedureJavaCallerMapCacheSupplier(ApplicationContext applicationContext) {
+    public SpringJdbcProcedureJavaCallerMetaCacheProvider(ApplicationContext applicationContext) {
         super(new ConcurrentHashMap<>(), "xproc4j-java-caller-refresher");
         this.applicationContext = applicationContext;
     }
@@ -53,7 +53,7 @@ public class SpringJdbcProcedureJavaCallerMapCacheSupplier
         }
         Map<String, JdbcProcedureJavaCaller> beanMap = applicationContext.getBeansOfType(JdbcProcedureJavaCaller.class);
         for (Map.Entry<String, JdbcProcedureJavaCaller> entry : beanMap.entrySet()) {
-            ListableJdbcProcedureJavaCallerMapSupplier.addCaller(entry.getValue(), ret);
+            ListableJdbcProcedureJavaCallerMetaProvider.addCaller(entry.getValue(), ret);
         }
         cache.putAll(ret);
     }

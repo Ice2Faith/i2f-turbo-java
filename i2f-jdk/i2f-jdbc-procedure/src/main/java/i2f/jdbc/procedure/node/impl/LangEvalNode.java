@@ -2,12 +2,15 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.impl.BasicJdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -16,7 +19,15 @@ import java.util.function.Consumer;
  */
 public class LangEvalNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-eval";
-
+    public static void main(String[] args){
+        /*language=scala*/
+        String script= "a+b";
+        Map<String,Object> context=new HashMap<>();
+        context.put("a",1);
+        context.put("b",2.5);
+        Object obj = new DefaultJdbcProcedureExecutor().eval(script,context);
+        System.out.println(obj);
+    }
     @Override
     public boolean support(XmlNode node) {
         if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
@@ -53,17 +64,17 @@ public class LangEvalNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
         String script = node.getTextBody();
         if (value != null && !value.isEmpty()) {
             script = (String) executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
         }
-        Object val = executor.eval(script, context.getParams());
+        Object val = executor.eval(script, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null && !result.isEmpty()) {
             val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-            executor.setParamsObject(context.getParams(), result, val);
+            executor.visitSet(context, result, val);
         }
     }
 

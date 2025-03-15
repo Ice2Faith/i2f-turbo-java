@@ -1,13 +1,12 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.extension.groovy.GroovyScript;
 import i2f.jdbc.procedure.consts.AttrConsts;
-import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.context.ExecuteContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +18,16 @@ import java.util.function.Consumer;
  */
 public class LangEvalGroovyNode extends AbstractExecutorNode {
     public static final String TAG_NAME = "lang-eval-groovy";
+
+    public static void main(String[] args){
+        /*language=groovy*/
+        String script="params.a+params[\"b\"]";
+        Map<String,Object> context=new HashMap<>();
+        context.put("a",1);
+        context.put("b",2.5);
+        Object obj = evalGroovyScript(script, context, null);
+        System.out.println(obj);
+    }
 
     @Override
     public boolean support(XmlNode node) {
@@ -37,31 +46,40 @@ public class LangEvalGroovyNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         String script = node.getTextBody();
         Object obj = evalGroovyScript(script, context, executor);
 
         if (result != null && !result.isEmpty()) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-            executor.setParamsObject(context.getParams(), result, obj);
+            executor.visitSet(context, result, obj);
         }
 
     }
 
-    public static Object evalGroovyScript(String script, ExecuteContext context, JdbcProcedureExecutor executor) {
+    public static Object evalGroovyScript(String script, Map<String,Object> context, JdbcProcedureExecutor executor) {
         Map<String, Object> bindings = new HashMap<>();
-        bindings.put("context", context);
         bindings.put("executor", executor);
-        bindings.put("params", context.getParams());
+        bindings.put("params", context);
+
+        String sourceCode=new StringBuilder()
+                .append(LangEvalJavaNode.EVAL_JAVA_IMPORTS).append("\n")
+                .append("def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable {").append("\n")
+                .append(script).append("\n")
+                .append("}").append("\n")
+                .append("exec(executor,params);").append("\n")
+                .toString();
 
         Object obj = null;
 
         try {
-            obj = GroovyScript.eval(script, bindings);
+            obj = GroovyScript.eval(sourceCode, bindings);
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage()+"\n\t source code:\n"+sourceCode, e);
         }
         return obj;
     }
+
+
 }
