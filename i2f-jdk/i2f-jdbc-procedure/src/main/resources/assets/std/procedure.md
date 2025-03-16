@@ -59,10 +59,10 @@
 - 先看下原来的定义
 ```sql
 PROCEDURE SP_PREDICATE_COND(IN_CITY_CODE      NUMBER,
-                           IN_SUM_MONTH      NUMBER,
-                            IN_COND_ID          NUMBER,
-                           O_MSG          OUT VARCHAR2,
-                           O_CODE            OUT NUMBER)
+IN_SUM_MONTH      NUMBER,
+IN_COND_ID          NUMBER,
+O_MSG          OUT VARCHAR2,
+O_CODE            OUT NUMBER)
 ```
 - 再看一下转换后的定义
 - 转换方式1
@@ -87,11 +87,11 @@ resources/procedure/SP_PREDICATE_COND.xml
 - 这是一个约定
 ```xml
 <procedure id="SP_PREDICATE_COND"
-                IN_CITY_CODE.int=""
-                IN_SUM_MONTH.int=""
-                IN_COND_ID.int=""
-                O_MSG.string.out=""
-                O_CODE.int.out="">
+           IN_CITY_CODE.int=""
+           IN_SUM_MONTH.int=""
+           IN_COND_ID.int=""
+           O_MSG.string.out=""
+           O_CODE.int.out="">
 
 </procedure>
 ```
@@ -124,7 +124,7 @@ public class SpPredicateCondJavaCaller implements JdbcProcedureJavaCaller {
     @Override
     public Object exec(JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable {
         String inCityCode = executor.visitAs("IN_CITY_CODE",params);
-        
+
         return null;
     }
 }
@@ -146,10 +146,10 @@ FUNCTION F_IS_TEST(IN_CITY_CODE      NUMBER,
 - 其他的和存储过程时一致的
 ```xml
 <procedure id="F_IS_TEST"
-        IN_CITY_CODE.int=""
-        IN_SUM_MONTH.int=""
-        IN_LOG_ID.int=""
-        return.int="">
+           IN_CITY_CODE.int=""
+           IN_SUM_MONTH.int=""
+           IN_LOG_ID.int=""
+           return.int="">
 
 </procedure>
 ```
@@ -168,17 +168,17 @@ FUNCTION F_IS_TEST(IN_CITY_CODE      NUMBER,
 @JdbcProcedure(
         value="F_IS_TEST",
         arguments = {
-                "IN_CITY_CODE.int=",
-                "IN_SUM_MONTH.int=",
-                "IN_LOG_ID.int=",
-                "return.int="
+                "IN_CITY_CODE.int",
+                "IN_SUM_MONTH.int",
+                "IN_LOG_ID.int",
+                "return.int"
         }
 )
 public class FuncIsTestJavaCaller implements JdbcProcedureJavaCaller {
     @Override
     public Object exec(JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable {
         String inCityCode = executor.visitAs("IN_CITY_CODE",params);
-        
+
         return 1;
     }
 }
@@ -215,7 +215,7 @@ V_CITY_CODE  VARCHAR2(64) := '101010';
 <lang-eval-java>
     params.put("V_BEGIN_TIME",null);
     params.put("V_CITY_CODE","101010");
-    return null; 
+    return null;
     // 因为Java脚本实际上会被编译为一个Class运行，这一段会作为函数体
     // 因此需要使用return语句进行返回
 </lang-eval-java>
@@ -251,13 +251,13 @@ V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里
 ```xml
 <lang-set result="V_BEGIN_TIME" value.date-now=""/>
 <lang-set result="V_CITY_CODE" value.render="${IN_CITY_CODE}00"/>
-<!-- 这里字符串拼接，使用render修饰符进行字符串模板渲染 -->
+        <!-- 这里字符串拼接，使用render修饰符进行字符串模板渲染 -->
 ```
 - 转换方式2
 - 使用TinyScript进行转换
 ```xml
 <lang-eval-ts>
-    V_BEGIN_TIME=new Date(); 
+    V_BEGIN_TIME=new Date();
     V_CITY_CODE=${IN_CITY_CODE}+'00'; // 字符串拼接可以直接使用+号连接，取变量则使用${}包裹
     // V_CITY_CODE=R"${IN_CITY_CODE}00"; // 或者也可以使用模板字符串语法
 </lang-eval-ts>
@@ -294,11 +294,11 @@ end if;
 - 对于like的处理，和OGNL的表达一样，直接使用java的方法进行表示
 ```xml
 <lang-eval-ts>
-    if(${V_LINK_OPER} == 'OR' 
-        and ${v_cond_type}==0 
-        and ${v_role_key} in ['admin','logger'] 
-        and ${v_ogran_key}.startsWith("sys")){
-        O_MSG='OK';
+    if(${V_LINK_OPER} == 'OR'
+    and ${v_cond_type}==0
+    and ${v_role_key} in ['admin','logger']
+    and ${v_ogran_key}.startsWith("sys")){
+    O_MSG='OK';
     };
 </lang-eval-ts>
 ```
@@ -351,13 +351,13 @@ end if;
 ```xml
 <lang-eval-ts>
     if(${v_score} >= 90){
-        v_grade='A';
+    v_grade='A';
     }else if(${v_score} >= 80){
-        v_grade='B';
+    v_grade='B';
     }else if(${v_score} >= 60){
-        v_grade='C';
+    v_grade='C';
     }else{
-        v_grade='D';
+    v_grade='D';
     };
 </lang-eval-ts>
 ```
@@ -384,7 +384,7 @@ v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 <lang-invoke result="tmp_str" method="replace" target="COND.CONTENT" arg0.string=";" arg1.string=""/>
 <lang-invoke result="tmp_str_len" method="length" target="tmp_str" />
 <lang-eval result="V_F_CNT">
-    tmp_len-tmp_str_len+1
+tmp_len-tmp_str_len+1
 </lang-eval>
 ```
 - 转换方式2
@@ -395,24 +395,24 @@ v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 </sql-query-object>
 
 <sql-query-object result="COND.CONTENT" result-type="string">
-    select replace(#{COND.CONTENT},'1=1','1 = 1 ') as v1 from dual
+select replace(#{COND.CONTENT},'1=1','1 = 1 ') as v1 from dual
 </sql-query-object>
 
 <sql-query-object result="V_F_CNT" result-type="int">
-    select LENGTH(#{COND.CONTENT}) - LENGTH(REPLACE(#{COND.CONTENT}, ';', ''))+1 as v1 from dual
+select LENGTH(#{COND.CONTENT}) - LENGTH(REPLACE(#{COND.CONTENT}, ';', ''))+1 as v1 from dual
 </sql-query-object>
 ```
 - 转换方式3
 - 使用Java进行转换
 ```xml
  <lang-eval-java>
-        String content = executor.visitAs("COND.CONTENT", params);
-        content=ContextFunctions.trim(content);
-        content=content.replace("1=1","1 = 1 ");
-        executor.visitSet(params,"COND.CONTENT",content);
-        int len=content.length()-content.replace(";","").length()+1;
-        executor.visitSet(params,"V_F_CNT",len);
-        return null;
+    String content = executor.visitAs("COND.CONTENT", params);
+    content=ContextFunctions.trim(content);
+    content=content.replace("1=1","1 = 1 ");
+    executor.visitSet(params,"COND.CONTENT",content);
+    int len=content.length()-content.replace(";","").length()+1;
+    executor.visitSet(params,"V_F_CNT",len);
+    return null;
 </lang-eval-java>
 ```
 - 转换方式4
@@ -442,10 +442,10 @@ FUNCTION F_IS_TEST(IN_CITY_CODE      NUMBER,
 - 以及返回值的类型
 ```xml
 <procedure id="F_IS_TEST"
-        IN_CITY_CODE.int=""
-        IN_SUM_MONTH.int=""
-        IN_LOG_ID.int=""
-        return.int="">
+           IN_CITY_CODE.int=""
+           IN_SUM_MONTH.int=""
+           IN_LOG_ID.int=""
+           return.int="">
 
 </procedure>
 ```
@@ -465,37 +465,37 @@ execute immediate v_sql into V_IS_TASK_TEST;
 - 即属性名为形参，属性值为实参
 ```xml
 <function-call refid="F_IS_TEST"
-           result="V_IS_TEST"
-           IN_CITY_CODE.int="101010"
-           IN_SUM_MONTH="V_SUM_MONTH"
-           IN_LOG_ID="V_LOG_ID"/>
+               result="V_IS_TEST"
+               IN_CITY_CODE.int="101010"
+               IN_SUM_MONTH="V_SUM_MONTH"
+               IN_LOG_ID="V_LOG_ID"/>
 ```
 - 转换方式2
 - 还是使用XML标签，但是使用存储过程的方式，自行提取返回值
 ```xml
 <procedure-call refid="F_IS_TEST"
-               result="callParams"
-               IN_CITY_CODE.int="101010"
-               IN_SUM_MONTH="V_SUM_MONTH"
-               IN_LOG_ID="V_LOG_ID"/>
+                result="callParams"
+                IN_CITY_CODE.int="101010"
+                IN_SUM_MONTH="V_SUM_MONTH"
+                IN_LOG_ID="V_LOG_ID"/>
 <lang-set result="V_IS_TEST" value="callParams.return"/>
-<!-- 如果是使用procedure-call调用函数，那么在result这个Map中的return键存的就是返回值，所以先提取出来，方便后续处理 -->
+        <!-- 如果是使用procedure-call调用函数，那么在result这个Map中的return键存的就是返回值，所以先提取出来，方便后续处理 -->
 ```
 - 转换方式3
 - 使用Java代码调用
 ```xml
 <lang-eval-java>
-        int V_SUM_MONTH = executor.visitAs("V_SUM_MONTH", params);
-        int IN_LOG_ID = executor.visitAs("IN_LOG_ID", params);
+    int V_SUM_MONTH = executor.visitAs("V_SUM_MONTH", params);
+    int IN_LOG_ID = executor.visitAs("IN_LOG_ID", params);
 
-        int ret=executor.invoke("F_IS_TEST", executor.mapBuilder()
-                .put("IN_CITY_CODE", 101010)
-                .put("IN_SUM_MONTH", V_SUM_MONTH)
-                .put("IN_LOG_ID", IN_LOG_ID)
-                .get()
-        );
-        executor.visitSet(params,"V_IS_TEST",ret);
-        return null;
+    int ret=executor.invoke("F_IS_TEST", executor.mapBuilder()
+    .put("IN_CITY_CODE", 101010)
+    .put("IN_SUM_MONTH", V_SUM_MONTH)
+    .put("IN_LOG_ID", IN_LOG_ID)
+    .get()
+    );
+    executor.visitSet(params,"V_IS_TEST",ret);
+    return null;
 </lang-eval-java>
 ```
 - 转换方式4
@@ -503,12 +503,12 @@ execute immediate v_sql into V_IS_TASK_TEST;
 - 因此，也可以配合使用
 ```xml
 <lang-eval-java result="V_IS_TEST">
-        return executor.invoke("F_IS_TEST", executor.mapBuilder()
-                .put("IN_CITY_CODE", 101010)
-                .put("IN_SUM_MONTH", executor.visit("V_SUM_MONTH", params))
-                .put("IN_LOG_ID", executor.visit("IN_LOG_ID", params))
-                .get()
-        );
+    return executor.invoke("F_IS_TEST", executor.mapBuilder()
+    .put("IN_CITY_CODE", 101010)
+    .put("IN_SUM_MONTH", executor.visit("V_SUM_MONTH", params))
+    .put("IN_LOG_ID", executor.visit("IN_LOG_ID", params))
+    .get()
+    );
 </lang-eval-java>
 ```
 - 转换方式5
@@ -516,10 +516,10 @@ execute immediate v_sql into V_IS_TASK_TEST;
 ```xml
 <lang-eval-ts>
     V_IS_TEST=F_IS_TEST(
-        IN_CITY_CODE:101010,
-        IN_SUM_MONTH:${V_SUM_MONTH},
-        IN_LOG_ID:${V_LOG_ID}
-        );
+    IN_CITY_CODE:101010,
+    IN_SUM_MONTH:${V_SUM_MONTH},
+    IN_LOG_ID:${V_LOG_ID}
+    );
 </lang-eval-ts>
 ```
 - 转换方式6
@@ -537,19 +537,19 @@ execute immediate v_sql into V_IS_TASK_TEST;
 - 下面来看一下这个存储过程的定义
 ```sql
 PROCEDURE SP_PREDICATE_COND(IN_CITY_CODE      NUMBER,
-                           IN_SUM_MONTH      NUMBER,
-                            IN_COND_ID          NUMBER,
-                           O_MSG          OUT VARCHAR2,
-                           O_CODE            OUT NUMBER)
+IN_SUM_MONTH      NUMBER,
+IN_COND_ID          NUMBER,
+O_MSG          OUT VARCHAR2,
+O_CODE            OUT NUMBER)
 ```
 - 再看一下转换后的定义
 ```xml
 <procedure id="SP_PREDICATE_COND"
-                IN_CITY_CODE.int=""
-                IN_SUM_MONTH.int=""
-                IN_COND_ID.int=""
-                O_MSG.string.out=""
-                O_CODE.int.out="">
+           IN_CITY_CODE.int=""
+           IN_SUM_MONTH.int=""
+           IN_COND_ID.int=""
+           O_MSG.string.out=""
+           O_CODE.int.out="">
 
 </procedure>
 ```
@@ -588,10 +588,10 @@ execute immediate v_sql
 ```xml
 <lang-eval-java>
     Map ret=executor.call("SP_PREDICATE_COND",executor.mapBuilder()
-            .put("IN_CITY_CODE",executor.visit("V_CITY_CODE",params))
-            .put("IN_SUM_MONTH",executor.visit("V_SUM_MONTH",params))
-            .put("IN_COND_ID",executor.visit("V_COND_ID",params))
-            .get()
+    .put("IN_CITY_CODE",executor.visit("V_CITY_CODE",params))
+    .put("IN_SUM_MONTH",executor.visit("V_SUM_MONTH",params))
+    .put("IN_COND_ID",executor.visit("V_COND_ID",params))
+    .get()
     );
     executor.visitSet(params,"V_MSG",executor.visit("O_MSG",ret));
     executor.visitSet(params,"V_CODE",executor.visit("O_CODE",ret));
@@ -603,10 +603,10 @@ execute immediate v_sql
 ```xml
 <lang-eval-groovy>
     def  ret=executor.call("SP_PREDICATE_COND",[
-            IN_CITY_CODE:params.V_CITY_CODE,
-            IN_SUM_MONTH:params.V_SUM_MONTH,
-            IN_COND_ID:params.V_COND_ID
-        ]
+    IN_CITY_CODE:params.V_CITY_CODE,
+    IN_SUM_MONTH:params.V_SUM_MONTH,
+    IN_COND_ID:params.V_COND_ID
+    ]
     );
     params.V_MSG=ret.O_MSG;
     params.V_CODE=ret.O_CODE;
@@ -617,9 +617,9 @@ execute immediate v_sql
 ```xml
 <lang-eval-ts>
     callParams=SP_PREDICATE_COND(
-        IN_CITY_CODE:${V_CITY_CODE},
-        IN_SUM_MONTH:${V_SUM_MONTH},
-        IN_COND_ID:${V_COND_ID}
+    IN_CITY_CODE:${V_CITY_CODE},
+    IN_SUM_MONTH:${V_SUM_MONTH},
+    IN_COND_ID:${V_COND_ID}
     );
     V_MSG=${callParams.O_MSG};
     V_CODE=${callParams.O_CODE};
@@ -641,10 +641,10 @@ FETCH cur_obj INTO v_user_name,v_nick_name ; -- 将游标的结果保存到变�
             EXIT WHEN cur_obj%NOTFOUND; -- 循环游标，直到没有数据为止
 
             -- 游标执行的操作
-            update sys_user
-            set role_id=V_ROLE_ID
-            where USER_NAME=v_user_name
-            ;
+update sys_user
+set role_id=V_ROLE_ID
+where USER_NAME=v_user_name
+;
 
 END LOOP;
 ```
@@ -655,8 +655,8 @@ END LOOP;
     <sql-query-list> <!-- 游标指定的语句 -->
         select a.USER_NAME,a.nick_name
         from ${V_SCHEMA_PREFIX}SYS_USER a
-       where a.STATUS=#{V_USER_SATUS}
-         and a.DEL_FLAG=#{V_DEL_FLAG}
+        where a.STATUS=#{V_USER_SATUS}
+        and a.DEL_FLAG=#{V_DEL_FLAG}
     </sql-query-list>
     <lang-body>
         <!-- 将游标的变量提取出来，后续则可以不用变更变量名 -->
@@ -682,9 +682,9 @@ END LOOP;
 ```sql
 FOR c_dict IN (SELECT * FROM SYS_DICT t WHERE DICT_KEY=V_USER_GROUP_KEY   And T.STATUS  =1  )
 LOOP
-      
-    delete from SYS_USER
-    where USER_GOUP=c_dict.DICT_VALUE;
+
+delete from SYS_USER
+where USER_GOUP=c_dict.DICT_VALUE;
 
 END LOOP;
 ```
@@ -693,8 +693,8 @@ END LOOP;
 <sql-cursor item="c_dict"> <!-- 因为语句返回的就是一个对象，所以直接使用原来的名称 -->
     <sql-query-list> <!-- for的语句 -->
         SELECT * FROM SYS_DICT t
-        WHERE DICT_KEY=#{V_USER_GROUP_KEY}   
-          And T.STATUS  =1
+        WHERE DICT_KEY=#{V_USER_GROUP_KEY}
+        And T.STATUS  =1
     </sql-query-list>
     <lang-body>
 
