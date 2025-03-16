@@ -51,6 +51,139 @@
 - 比如，在Oracle中，不区分大小写，但是Oracle都喜欢使用大写来命名
 - 因此，可以考虑将所有变量名都大写进行处理
 
+## 转换对照介绍
+
+### 存储过程定义
+- 本框架的目的就是进行过程的转换操作
+- 因此这也是必要的一部分
+- 先看下原来的定义
+```sql
+PROCEDURE SP_PREDICATE_COND(IN_CITY_CODE      NUMBER,
+                           IN_SUM_MONTH      NUMBER,
+                            IN_COND_ID          NUMBER,
+                           O_MSG          OUT VARCHAR2,
+                           O_CODE            OUT NUMBER)
+```
+- 再看一下转换后的定义
+- 转换方式1
+- 使用XML进行转换，这也是本框架核心的部分
+- 编写一个文件
+- 下面是文件名和文件路径
+- 文件路径是默认的扫描路径
+- 文件名则推荐和要转换的过程名称一致
+```shell
+resources/procedure/SP_PREDICATE_COND.xml
+```
+- 下面就是定义的文件内容部分
+- 注意几个点
+- 根节点名为procedure，使用id属性指定过程的名称
+- 这个id需要在项目中是唯一的，因为在发生调用时，使用的就是这个id
+- 另外，为了方便他人调用时明确的直到过程需要使用哪些参数
+- 以及参数的类型要求，则使用其他属性指定形参名称，使用.来标注类型
+- 特别的，建议使用.out来标注出参，这样调用方才能知道有哪些是出参
+- 当然，也可以使用.in来标注为入参，但是一般不用，默认认为都是入参
+- 因此，调用方需要指定这些属性名的参数进行调用
+- 同时，调用完毕之后，可以取到标有.out名称属性的输出参数
+- 这是一个约定
+```xml
+<procedure id="SP_PREDICATE_COND"
+                IN_CITY_CODE.int=""
+                IN_SUM_MONTH.int=""
+                IN_COND_ID.int=""
+                O_MSG.string.out=""
+                O_CODE.int.out="">
+
+</procedure>
+```
+- 另外，某些情况下，转换更适合使用Java代码来编写
+- 使用XML来编写反而更加麻烦
+- 这种情况下，也可以选择使用java-bean的方式来进行转换
+- 下面是转换的内容
+- 使用@Component注册为一个spring-bean对象
+- 使用@JdbcProcedure注解指定过程名称value,使用arguments指定需要的参数及其类型
+- 写法和XML类似
+- 但是，因为是存储过程，因此一般返回值都为null
+- 框架将会将入参params作为结果返回给调用者
+- 同时，由于是java类，返回值也会被设置到结果的params的return键上
+- 这一点和函数的转换上，是一个区别点，需要注意
+- 可以使用executor.call调用，得到返回的结果params
+- 实际上返回的就是入参的params对象
+```java
+@Component
+@JdbcProcedure(
+        value="SP_PREDICATE_COND",
+        arguments = {
+                "IN_CITY_CODE.int",
+                "IN_SUM_MONTH.int",
+                "IN_COND_ID.int",
+                "O_MSG.string.out",
+                "O_CODE.int.out
+        }
+)
+public class SpPredicateCondJavaCaller implements JdbcProcedureJavaCaller {
+    @Override
+    public Object exec(JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable {
+        String inCityCode = executor.visitAs("IN_CITY_CODE",params);
+        
+        return null;
+    }
+}
+```
+
+### 函数定义
+- 函数其实上，在本框架中，是一个特例
+- 本质上也看做一种过程，只不过有一些特点
+- 先来看一下原来的定义
+```sql
+FUNCTION F_IS_TEST(IN_CITY_CODE      NUMBER,
+                          IN_SUM_MONTH      NUMBER,
+                          IN_LOG_ID        NUMBER) RETURN NUMBER
+```
+- 再来看一下转换后的XML定义
+- 和存储过程的定义是基本一样的
+- 只不过，区别在于返回值的描述
+- 这个是固定的约定，约定return名称的属性就是对返回值的描述
+- 其他的和存储过程时一致的
+```xml
+<procedure id="F_IS_TEST"
+        IN_CITY_CODE.int=""
+        IN_SUM_MONTH.int=""
+        IN_LOG_ID.int=""
+        return.int="">
+
+</procedure>
+```
+- 当然，也可以使用java类来实现
+- 下面就是java定义
+- 需要注意几个点
+- 和存储过程基本一致
+- 但是，区别点是返回值，会被当做结果params的return属性
+- 也就是说，return值是有意义的
+- 如果在代码中设置了return属性，也将会被代码的return值覆盖
+- 这点在存储过程的转换也是一样的
+- 可以使用executor.invoke进行调用，得到返回值
+- 当然，也可以使用executor.call调用得到结果params，然后自行从params中取出return键的值即为return的值
+```java
+@Component
+@JdbcProcedure(
+        value="F_IS_TEST",
+        arguments = {
+                "IN_CITY_CODE.int=",
+                "IN_SUM_MONTH.int=",
+                "IN_LOG_ID.int=",
+                "return.int="
+        }
+)
+public class FuncIsTestJavaCaller implements JdbcProcedureJavaCaller {
+    @Override
+    public Object exec(JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable {
+        String inCityCode = executor.visitAs("IN_CITY_CODE",params);
+        
+        return 1;
+    }
+}
+```
+
 ### 变量定义
 - 在存储过程中通常会在一开头定义要使用到的变量
 - 但是，因为转换后使用的是Map保存变量，所以只要变量不需要有初始值
@@ -62,13 +195,13 @@ V_CITY_CODE  VARCHAR2(64) := '101010';
 ```
 - 转换方式1
 - 直接使用XML标签进行赋值
-```shell
+```xml
 <lang-set result="V_BEGIN_TIME" value.null=""/>
 <lang-set result="V_CITY_CODE" value.string="101010"/>
 ```
 - 转换方式2
 - 使用TinyScript进行转换
-```shell
+```xml
 <lang-eval-ts>
     V_BEGIN_TIME=null; // 此句实际上没什么意义
     V_CITY_CODE='101010';
@@ -78,7 +211,7 @@ V_CITY_CODE  VARCHAR2(64) := '101010';
 ```
 - 转换方式3
 - 使用Java进行转换
-```shell
+```xml
 <lang-eval-java>
     params.put("V_BEGIN_TIME",null);
     params.put("V_CITY_CODE","101010");
@@ -89,7 +222,7 @@ V_CITY_CODE  VARCHAR2(64) := '101010';
 ```
 - 转换方式4
 - 使用groovy进行转换
-```shell
+```xml
 <lang-eval-groovy>
     params.V_BEGIN_TIME=null;
     params.V_CITY_CODE="101010";
@@ -98,7 +231,7 @@ V_CITY_CODE  VARCHAR2(64) := '101010';
 ```
 - 转换方式5
 - 使用JavaScript进行转换，需要注意的是，JavaScript调用Java也需要像Java一样进行访问
-```shell
+```xml
 <lang-eval-javascript>
     params.put('V_BEGIN_TIME',null);
     params.put("V_CITY_CODE",'101010');
@@ -122,13 +255,114 @@ V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里
 ```
 - 转换方式2
 - 使用TinyScript进行转换
-```shell
+```xml
 <lang-eval-ts>
     V_BEGIN_TIME=new Date(); 
     V_CITY_CODE=${IN_CITY_CODE}+'00'; // 字符串拼接可以直接使用+号连接，取变量则使用${}包裹
     // V_CITY_CODE=R"${IN_CITY_CODE}00"; // 或者也可以使用模板字符串语法
 </lang-eval-ts>
 ```
+
+### 单分支条件语句-if
+- if语句的情况，在转换时比较复杂
+- 因此分作两种情况讨论，第一种是只有一个if分支的
+- 也就是本节讨论的内容
+- 另一种是多个分支的，也就是if-else的情况
+- 现在先来看一下原来的语句
+```sql
+if V_LINK_OPER = 'OR' and v_cond_type=0 and v_role_key in ('admin','logger') and v_ogran_key like 'sys%' then
+   O_MSG:='OK';
+end if;
+```
+- 现在来看下对应的转换方式
+- 第一种，使用XML进行转换
+- 需要注意，SQL中的等于判定使用一个等号，而XML中的判定使用双等号
+- 其次，XML中使用的是OGNL表达式，因此，字符串使用双引号
+- in操作符在OGNL中是使用{}花括号表示的
+- 针对like这种场景，则使用java的方法进行转换，startsWith,endsWith,contains进行表达
+```xml
+<lang-if test='V_LINK_OPER == "OR" and v_cond_type==0 and v_role_key in {"admin","logger"} and v_ogran_key.startsWith("sys")'>
+    <lang-set result="O_MSG" value.string="OK"/>
+</lang-if>
+```
+- 另外针对这种条件内部处理比较简单的
+- 也可以考虑使用TinyScript进行转换
+- 需要注意，TinyScript的表达式中，和OGNL中接近，但有区别
+- 第一个就是变量引用得使用${}进行包裹
+- 第二个就是字符串不区分单双引号，都认为是字符串
+- in操作符，是和JSON一样的表达，使用[]中括号进行表示的
+- 对于like的处理，和OGNL的表达一样，直接使用java的方法进行表示
+```xml
+<lang-eval-ts>
+    if(${V_LINK_OPER} == 'OR' 
+        and ${v_cond_type}==0 
+        and ${v_role_key} in ['admin','logger'] 
+        and ${v_ogran_key}.startsWith("sys")){
+        O_MSG='OK';
+    };
+</lang-eval-ts>
+```
+
+### 多分支条件语句if-else
+- 针对多分支语句时，XML中则需要额外的标签来处理
+- 但是总体和Mybatis中对多分支的处理一致
+- 直接来看例子吧
+- 原来的语句如下
+```sql
+if v_score >= 90 then
+   v_grade:='A';
+elseif v_score >=80 then
+    v_grade:='B';
+elseif v_score >= 60 then
+    v_grade:='C';
+else
+    v_grade:='D';
+end if;
+```
+- 先来看使用XML方式转换吧
+- 需要注意，因为是在XML中编写
+- 因此，需要注意一些符号的转义的问题
+- 例如如下符号
+```shell
+< &lt;
+> &gt;
+& &amp;
+```
+- 直接来看转换的XML结果
+```xml
+<lang-choose>
+    <lang-when test="v_score >= 90">
+        <lang-set result="v_grade" value.string="A"/>
+    </lang-when>
+    <lang-when test="v_score >= 80">
+        <lang-set result="v_grade" value.string="B"/>
+    </lang-when>
+    <lang-when test="v_score >= 60">
+        <lang-set result="v_grade" value.string="C"/>
+    </lang-when>
+    <lang-otherwise>
+        <lang-set result="v_grade" value.string="D"/>
+    </lang-otherwise>
+</lang-choose>
+```
+- 这种情况，其实使用TinyScript就比较合适
+- 不用那么繁琐了
+- 需要注意的是if语句最后的分号记得加
+```xml
+<lang-eval-ts>
+    if(${v_score} >= 90){
+        v_grade='A';
+    }else if(${v_score} >= 80){
+        v_grade='B';
+    }else if(${v_score} >= 60){
+        v_grade='C';
+    }else{
+        v_grade='D';
+    };
+</lang-eval-ts>
+```
+- 当然使用其他脚本语言也可以
+- 比如使用groovy，JavaScript，java都是可以的
 
 ### 函数调用
 - 在存储过程中，很多地方都可能使用了数据库内建的函数，例如rtrim/replace等
@@ -143,7 +377,7 @@ v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 - 转换方式1
 - 使用XML标签进行转换，这种函数的大量大量或者拼接
 - 不适合使用XML标签进行描述
-```shell
+```xml
 <lang-invoke result="COND.CONTENT" method="rtrim" target="COND.CONTENT" arg0.string=";"/>
 <lang-invoke result="COND.CONTENT" method="replace" target="COND.CONTENT" arg0.string="1=1" arg1.string="1 = 1 "/>
 <lang-invoke result="tmp_len" method="length" target="COND.CONTENT" />
@@ -155,7 +389,7 @@ v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 ```
 - 转换方式2
 - 使用数据库自己的函数，通过查询的方式进行转换
-```shell
+```xml
 <sql-query-object result="COND.CONTENT" result-type="string">
     select rtrim(#{COND.CONTENT},';') as v1 from dual
 </sql-query-object>
@@ -170,7 +404,7 @@ v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 ```
 - 转换方式3
 - 使用Java进行转换
-```shell
+```xml
  <lang-eval-java>
         String content = executor.visitAs("COND.CONTENT", params);
         content=ContextFunctions.trim(content);
@@ -183,7 +417,7 @@ v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 ```
 - 转换方式4
 - 使用TinyScript进行转换
-```shell
+```xml
 <lang-eval-ts>
     COND.CONTENT=rtrim(${COND.CONTENT},';');
     COND.CONTENT=replace(${COND.CONTENT},'1=1','1 = 1 ');
@@ -229,7 +463,7 @@ execute immediate v_sql into V_IS_TASK_TEST;
 - 转换方式1
 - 使用XML标签进行调用，则属性名就是目标的参数名，属性值就是传递的值
 - 即属性名为形参，属性值为实参
-```shell
+```xml
 <function-call refid="F_IS_TEST"
            result="V_IS_TEST"
            IN_CITY_CODE.int="101010"
@@ -249,7 +483,7 @@ execute immediate v_sql into V_IS_TASK_TEST;
 ```
 - 转换方式3
 - 使用Java代码调用
-```shell
+```xml
 <lang-eval-java>
         int V_SUM_MONTH = executor.visitAs("V_SUM_MONTH", params);
         int IN_LOG_ID = executor.visitAs("IN_LOG_ID", params);
@@ -267,7 +501,7 @@ execute immediate v_sql into V_IS_TASK_TEST;
 - 转换方式4
 - 和上面一样，但是因为lang-eval-java支持result属性来指定返回值
 - 因此，也可以配合使用
-```shell
+```xml
 <lang-eval-java result="V_IS_TEST">
         return executor.invoke("F_IS_TEST", executor.mapBuilder()
                 .put("IN_CITY_CODE", 101010)
@@ -279,7 +513,7 @@ execute immediate v_sql into V_IS_TASK_TEST;
 ```
 - 转换方式5
 - 使用TinyScript具名参数调用,这样就不用考虑参数顺序问题，只考虑参数名对应就行
-```shell
+```xml
 <lang-eval-ts>
     V_IS_TEST=F_IS_TEST(
         IN_CITY_CODE:101010,
@@ -290,7 +524,7 @@ execute immediate v_sql into V_IS_TASK_TEST;
 ```
 - 转换方式6
 - 使用TinyScript参数顺序调用，这就要求顺序和XML中属性的顺序一致
-```shell
+```xml
 <lang-eval-ts>
     V_IS_TEST=F_IS_TEST(101010,${V_SUM_MONTH},${V_LOG_ID});
 </lang-eval-ts>
@@ -320,7 +554,7 @@ PROCEDURE SP_PREDICATE_COND(IN_CITY_CODE      NUMBER,
 </procedure>
 ```
 - 看一下原来怎么调用的
-```shell
+```sql
 v_sql := ' begin SP_PREDICATE_COND(:1,:2,:3,:4,:5) ; end ; ';
 execute immediate v_sql
     using in V_CITY_CODE, in V_SUM_MONTH, in V_COND_ID, out V_MSG, out  V_CODE;
@@ -351,7 +585,7 @@ execute immediate v_sql
 ```
 - 转换方式2
 - 使用Java代码转换
-```shell
+```xml
 <lang-eval-java>
     Map ret=executor.call("SP_PREDICATE_COND",executor.mapBuilder()
             .put("IN_CITY_CODE",executor.visit("V_CITY_CODE",params))
@@ -366,7 +600,7 @@ execute immediate v_sql
 ```
 - 转换方式3
 - 使用groovy代码转换
-```shell
+```xml
 <lang-eval-groovy>
     def  ret=executor.call("SP_PREDICATE_COND",[
             IN_CITY_CODE:params.V_CITY_CODE,
@@ -380,7 +614,7 @@ execute immediate v_sql
 ```
 - 转换方式4
 - 使用TinyScript脚本转换
-```shell
+```xml
 <lang-eval-ts>
     callParams=SP_PREDICATE_COND(
         IN_CITY_CODE:${V_CITY_CODE},
@@ -416,7 +650,7 @@ END LOOP;
 ```
 - 针对这种情况，目前提供的转换方式是使用XML
 - 这样对于SQL语句的编辑更方便
-```shell
+```xml
 <sql-cursor item="tmpRowMap"> <!-- 游标返回的必定是Map对象，指定Map对象存放的键 -->
     <sql-query-list> <!-- 游标指定的语句 -->
         select a.USER_NAME,a.nick_name
@@ -455,7 +689,7 @@ LOOP
 END LOOP;
 ```
 - 直接使用XML转换即可
-```shell
+```xml
 <sql-cursor item="c_dict"> <!-- 因为语句返回的就是一个对象，所以直接使用原来的名称 -->
     <sql-query-list> <!-- for的语句 -->
         SELECT * FROM SYS_DICT t
