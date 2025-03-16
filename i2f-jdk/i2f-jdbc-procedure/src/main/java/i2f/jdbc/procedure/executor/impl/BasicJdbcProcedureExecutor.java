@@ -236,44 +236,44 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public Map<String, Object> prepareParams(Map<String, Object> context) {
+    public Map<String, Object> prepareParams(Map<String, Object> params) {
         Map<String, Object> execParams = createParams();
         for (Map.Entry<String, Object> entry : execParams.entrySet()) {
-            context.putIfAbsent(entry.getKey(), entry.getValue());
+            params.putIfAbsent(entry.getKey(), entry.getValue());
         }
-        return context;
+        return params;
     }
 
     @Override
-    public Map<String, Object> exec(XmlNode node, Map<String,Object> context, boolean beforeNewConnection, boolean afterCloseConnection) {
+    public Map<String, Object> exec(XmlNode node, Map<String,Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
             for (ExecutorNode item : getNodes()) {
                 if (item.support(node)) {
-                    prepareParams(context);
+                    prepareParams(params);
                     debugLog(() -> "exec " + node.getTagName() + " by " + item.getClass().getSimpleName());
-                    Map<String, Connection> bakConnection = (Map<String, Connection>)context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
+                    Map<String, Connection> bakConnection = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
                     if (beforeNewConnection) {
-                        visitSet(context,ParamsConsts.CONNECTIONS, new HashMap<>());
+                        visitSet(params,ParamsConsts.CONNECTIONS, new HashMap<>());
                     }
                     try {
-                        item.exec(node,  context,this);
+                        item.exec(node, params,this);
                     } finally {
                         if (beforeNewConnection) {
-                            closeConnections(context);
-                            visitSet(context,ParamsConsts.CONNECTIONS, bakConnection);
+                            closeConnections(params);
+                            visitSet(params,ParamsConsts.CONNECTIONS, bakConnection);
                         }
                         if (afterCloseConnection) {
-                            closeConnections(context);
+                            closeConnections(params);
                         }
                     }
-                    return context;
+                    return params;
                 }
             }
             debugLog(() -> "waring! tag " + node.getTagName() + " not found any executor!");
         } catch (ReturnSignalException e) {
             debugLog(() -> "return signal");
         }
-        return context;
+        return params;
     }
 
     public void closeConnections(Map<String, Object> params) {
@@ -297,9 +297,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
 
     @Override
-    public Map<String, Object> execAsProcedure(XmlNode node, Map<String,Object> context, boolean beforeNewConnection, boolean afterCloseConnection) {
+    public Map<String, Object> execAsProcedure(XmlNode node, Map<String,Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
-            prepareParams(context);
+            prepareParams(params);
             ProcedureNode execNode = null;
             for (ExecutorNode item : getNodes()) {
                 if (item instanceof ProcedureNode) {
@@ -312,29 +312,29 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             }
             debugLog(() -> "exec as procedure " + node.getTagName());
 
-            Map<String, Connection> bakConnection = (Map<String, Connection>)context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
+            Map<String, Connection> bakConnection = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
             if (beforeNewConnection) {
-                visitSet(context,ParamsConsts.CONNECTIONS, new HashMap<>());
+                visitSet(params,ParamsConsts.CONNECTIONS, new HashMap<>());
             }
             try {
-                execNode.exec(node, context, this);
+                execNode.exec(node, params, this);
             } finally {
                 if (beforeNewConnection) {
-                    closeConnections(context);
-                    visitSet(context,ParamsConsts.CONNECTIONS, bakConnection);
+                    closeConnections(params);
+                    visitSet(params,ParamsConsts.CONNECTIONS, bakConnection);
                 }
                 if (afterCloseConnection) {
-                    closeConnections(context);
+                    closeConnections(params);
                 }
             }
         } catch (ReturnSignalException e) {
             debugLog(() -> "return signal");
         }
-        return context;
+        return params;
     }
 
     @Override
-    public Object attrValue(String attr, String action, XmlNode node, Map<String,Object> context) {
+    public Object attrValue(String attr, String action, XmlNode node, Map<String,Object> params) {
         String attrScript = node.getTagAttrMap().get(attr);
         if (attrScript == null) {
             return null;
@@ -344,7 +344,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         String radixText = node.getTagAttrMap().get(AttrConsts.RADIX);
         if (radixText != null && !radixText.isEmpty()) {
             try {
-                Object radixObj = attrValue(AttrConsts.RADIX, FeatureConsts.VISIT, node, context);
+                Object radixObj = attrValue(AttrConsts.RADIX, FeatureConsts.VISIT, node, params);
                 if (radixObj != null) {
                     radixObj = ObjectConvertor.tryConvertAsType(radixObj, Integer.class);
                     if (radixObj instanceof Integer) {
@@ -362,17 +362,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 if (feature == null || feature.isEmpty()) {
                     continue;
                 }
-                value = resolveFeature(value, feature, node, context);
+                value = resolveFeature(value, feature, node, params);
             }
         } else {
-            value = resolveFeature(attrScript, action, node, context);
+            value = resolveFeature(attrScript, action, node, params);
         }
 
         return value;
     }
 
     @Override
-    public Object resultValue(Object value, List<String> features, XmlNode node, Map<String,Object> context) {
+    public Object resultValue(Object value, List<String> features, XmlNode node, Map<String,Object> params) {
         if (features == null || features.isEmpty()) {
             return value;
         }
@@ -380,7 +380,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if (feature == null || feature.isEmpty()) {
                 continue;
             }
-            value = resolveFeature(value, feature, node, context);
+            value = resolveFeature(value, feature, node, params);
         }
         return value;
     }
@@ -415,18 +415,18 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public Map<String, Object> newParams(Map<String,Object> context) {
+    public Map<String, Object> newParams(Map<String,Object> params) {
         Map<String, Object> ret = new LinkedHashMap<>();
-        if (context == null) {
+        if (params == null) {
             return createParams();
         }
-        ret.put(ParamsConsts.CONTEXT, context.get(ParamsConsts.CONTEXT));
-        ret.put(ParamsConsts.ENVIRONMENT, context.get(ParamsConsts.ENVIRONMENT));
-        ret.put(ParamsConsts.BEANS, context.get(ParamsConsts.BEANS));
+        ret.put(ParamsConsts.CONTEXT, params.get(ParamsConsts.CONTEXT));
+        ret.put(ParamsConsts.ENVIRONMENT, params.get(ParamsConsts.ENVIRONMENT));
+        ret.put(ParamsConsts.BEANS, params.get(ParamsConsts.BEANS));
 
-        ret.put(ParamsConsts.DATASOURCES, context.get(ParamsConsts.DATASOURCES));
+        ret.put(ParamsConsts.DATASOURCES, params.get(ParamsConsts.DATASOURCES));
 
-        ret.put(ParamsConsts.GLOBAL, context.get(ParamsConsts.GLOBAL));
+        ret.put(ParamsConsts.GLOBAL, params.get(ParamsConsts.GLOBAL));
 
         ret.put(ParamsConsts.EXECUTOR, this);
         return ret;

@@ -14,6 +14,9 @@ import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlText;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,9 +32,40 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             "JAVA,SQL,VTL" +
             "};";
     public static final ConcurrentHashMap<String, Language> LANG_JAVA_ENUM_MAP = new ConcurrentHashMap<>();
+    public static volatile String JS_INJECT_PREFIX="let executor={};let params={};";
 
     static {
+        initInjectPrefix();
         startRefreshThread();
+    }
+
+    public static void initInjectPrefix(){
+        URL url = null;
+        if(url==null){
+            try{
+                url=JdbcProcedureXmlLangInjectInjector.class.getResource("/assets/JsInject.js");
+            }catch (Exception e){
+                log.warn(e.getMessage(),e);
+            }
+        }
+        if(url==null){
+            try{
+                url=Thread.currentThread().getContextClassLoader().getResource("/assets/JsInject.js");
+            }catch (Exception e){
+                log.warn(e.getMessage(),e);
+            }
+        }
+        try(BufferedReader reader=new BufferedReader(new InputStreamReader(url.openStream()))){
+            StringBuilder builder=new StringBuilder();
+            String line=null;
+            while((line=reader.readLine())!=null){
+                builder.append(line).append("\n");
+            }
+            JS_INJECT_PREFIX=builder.toString();
+        }catch (Exception e){
+            log.warn(e.getMessage(),e);
+        }
+
     }
 
     public static void startRefreshThread(){
@@ -96,6 +130,60 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     };
 
     public static final String EVAL_JAVA_IMPORTS = "\n" +
+            "import com.newland.bi3.jdbc.procedure.annotations.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.consts.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.context.impl.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.context.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.executor.impl.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.executor.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.node.base.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.node.basic.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.node.impl.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.node.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.parser.data.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.parser.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.provider.types.class4j.impl.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.provider.types.class4j.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.provider.types.xml.impl.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.provider.types.xml.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.provider.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.registry.impl.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.registry.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.reportor.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.signal.impl.*;\n" +
+            "import com.newland.bi3.jdbc.procedure.signal.*;\n" +
+            "import com.newland.bi3.jdbc.*;\n" +
+            "import com.newland.bi3.jdbc.data.*;\n" +
+            "import com.newland.bi3.database.type.*;\n" +
+            "import com.newland.bi3.bindsql.*;\n" +
+            "import com.newland.bi3.bindsql.page.*;\n" +
+            "import com.newland.bi3.bindsql.data.*;\n" +
+            "import com.newland.bi3.bindsql.count.*;\n" +
+            "import com.newland.bi3.compiler.*;\n" +
+            "import com.newland.bi3.script.*;\n" +
+            "import com.newland.bi3.reflect.*;\n" +
+            "import com.newland.bi3.reflect.vistor.*;\n" +
+            "import com.newland.bi3.convert.obj.*;\n" +
+            "import com.newland.bi3.container.builder.map.*;\n" +
+            "import com.newland.bi3.check.*;\n" +
+            "import com.newland.bi3.match.regex.*;\n" +
+            "import com.newland.bi3.match.regex.data.*;\n" +
+            "import com.newland.bi3.page.*;\n" +
+            "import com.newland.bi3.reference.*;\n" +
+            "import com.newland.bi3.text.*;\n" +
+            "import com.newland.bi3.typeof.*;\n" +
+            "import com.newland.bi3.typeof.token.*;\n" +
+            "import com.newland.bi3.typeof.token.data.*;\n" +
+            "import com.newland.bi3.uid.*;\n" +
+            "import com.newland.bi3.clock.std.*;\n" +
+            "import com.newland.bi3.clock.*;\n" +
+            "import com.newland.bi3.extension.antlr4.script.tiny.impl.*;\n" +
+            "import com.newland.bi3.extension.antlr4.script.tiny.impl.exception.*;\n" +
+            "import com.newland.bi3.extension.antlr4.script.tiny.impl.exception.impl.*;\n" +
+            "import com.newland.bi3.extension.groovy.*;\n" +
+            "import com.newland.bi3.extension.ognl.*;\n" +
+            "import com.newland.bi3.extension.velocity.*;\n" +
+
             "import i2f.jdbc.procedure.annotations.*;\n" +
             "import i2f.jdbc.procedure.consts.*;\n" +
             "import i2f.jdbc.procedure.context.impl.*;\n" +
@@ -757,8 +845,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         } else if (Arrays.asList("javascript", "js").contains(targetLang.getID().toLowerCase())) {
             registrar.startInjecting(targetLang)
                     .addPlace(
-                            "var executor={};\n" +
-                                    "var params={};\n",
+                            JS_INJECT_PREFIX+"\n",
                             "",
                             (PsiLanguageInjectionHost) xmlText,
                             new TextRange(0, xmlText.getTextRange().getLength()))
@@ -1001,8 +1088,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             if (lang != null) {
                 registrar.startInjecting(lang)
                         .addPlace(
-                                "var executor={};\n" +
-                                        "var params={};\n",
+                                JS_INJECT_PREFIX+"\n",
                                 "",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))
