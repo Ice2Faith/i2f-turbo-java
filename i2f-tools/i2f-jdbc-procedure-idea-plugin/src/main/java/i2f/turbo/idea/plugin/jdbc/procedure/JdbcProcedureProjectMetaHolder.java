@@ -51,6 +51,7 @@ public class JdbcProcedureProjectMetaHolder {
             "eval-java",
             "eval-js",
             "eval-tinyscript",
+            "eval-ts",
             "eval-groovy",
             "class",
             "not",
