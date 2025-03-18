@@ -1010,8 +1010,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             ParseTree namingNode = ctx.getChild(0);
             ParseTree equalNode = ctx.getChild(1);
             ParseTree expressNode = ctx.getChild(2);
-            if (!(namingNode instanceof TerminalNode)) {
-                throw new IllegalArgumentException("invalid equal value, expect naming node, but found " + namingNode.getClass() + "!");
+            if (!(namingNode instanceof TerminalNode)
+                    && !(namingNode instanceof TinyScriptParser.ExtractExpressContext)) {
+                throw new IllegalArgumentException("invalid equal value, expect naming/extract node, but found " + namingNode.getClass() + "!");
             }
             if (!(equalNode instanceof TerminalNode)) {
                 throw new IllegalArgumentException("invalid equal value, expect equal node, but found " + namingNode.getClass() + "!");
@@ -1019,25 +1020,209 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
                 throw new IllegalArgumentException("invalid equal value, expect express node, but found " + namingNode.getClass() + "!");
             }
-            TerminalNode namingCtx = (TerminalNode) namingNode;
+
             TerminalNode equalCtx = (TerminalNode) equalNode;
             TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
-            String naming = (String) visitTerminal(namingCtx);
             String equal = (String) visitTerminal(equalCtx);
             if (!"=".equals(equal)) {
                 throw new IllegalArgumentException("invalid equal value, expect '=', but found '" + equal + "'!");
             }
-            if (naming == null || naming.isEmpty()) {
-                throw new IllegalArgumentException("invalid equal value, expect naming, but found '" + naming + "'!");
-            }
             Object value = visitExpress(expressCtx);
-            resolver.setValue(context, naming, value);
+
+            if (namingNode instanceof TerminalNode) {
+                TerminalNode namingCtx = (TerminalNode) namingNode;
+                String naming = (String) visitTerminal(namingCtx);
+                if (naming == null || naming.isEmpty()) {
+                    throw new IllegalArgumentException("invalid equal value, expect naming, but found '" + naming + "'!");
+                }
+
+                resolver.setValue(context, naming, value);
+            } else if (namingNode instanceof TinyScriptParser.ExtractExpressContext) {
+                TinyScriptParser.ExtractExpressContext extractCtx = (TinyScriptParser.ExtractExpressContext) namingNode;
+                Map<String, String> extractMapping = (Map<String, String>) visitExtractExpress(extractCtx);
+                for (Map.Entry<String, String> entry : extractMapping.entrySet()) {
+                    String naming = entry.getKey();
+                    String express = entry.getValue();
+                    Object val = resolver.getValue(context, express);
+                    resolver.setValue(context, naming, val);
+                }
+            }
             return value;
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
             throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Object visitExtractExpress(TinyScriptParser.ExtractExpressContext ctx) {
+        try {
+            debugNode(ctx);
+            Map<String, String> ret = new LinkedHashMap<>();
+            int count = ctx.getChildCount();
+            if (count != 3 && count != 4) {
+                throw new IllegalArgumentException("missing json map value!");
+            }
+            ParseTree startNode = ctx.getChild(0);
+            ParseTree leftNode = ctx.getChild(1);
+            ParseTree pairsNode = null;
+            ParseTree rightNode = null;
+            if (count == 3) {
+                rightNode = ctx.getChild(2);
+            } else {
+                pairsNode = ctx.getChild(2);
+                rightNode = ctx.getChild(3);
+            }
+            if (!(startNode instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid extract express value left node, expect '#', but found type: " + startNode.getClass());
+            }
+            if (!(leftNode instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid extract express value left node, expect '{', but found type: " + leftNode.getClass());
+            }
+            if (!(rightNode instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid extract express value right node, expect '}', but found type: " + rightNode.getClass());
+            }
+            if (pairsNode != null) {
+                if (!(pairsNode instanceof TinyScriptParser.ExtractPairsContext)) {
+                    throw new IllegalArgumentException("invalid extract express value middle node, expect extract pairs node, but found type: " + pairsNode.getClass());
+                }
+            }
+            TerminalNode startCtx = (TerminalNode) startNode;
+            TerminalNode leftCtx = (TerminalNode) leftNode;
+            TinyScriptParser.ExtractPairsContext pairsCtx = null;
+            TerminalNode rightCtx = (TerminalNode) rightNode;
+            if (pairsNode != null) {
+                pairsCtx = (TinyScriptParser.ExtractPairsContext) pairsNode;
+            }
+            String start = (String) visitTerminal(startCtx);
+            String left = (String) visitTerminal(leftCtx);
+            String right = (String) visitTerminal(rightCtx);
+            if (!"#".equals(start)) {
+                throw new IllegalArgumentException("invalid extract express value left node, expect '#', but found : " + start);
+            }
+            if (!"{".equals(left)) {
+                throw new IllegalArgumentException("invalid extract express value left node, expect '{', but found : " + left);
+            }
+            if (!"}".equals(right)) {
+                throw new IllegalArgumentException("invalid extract express value right right node, expect '}', but found : " + right);
+            }
+            if (pairsCtx != null) {
+                return visitExtractPairs(new ExtractPairsContextImpl(pairsCtx, ret));
+            }
+            return ret;
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
+        }
+    }
+
+    public static class ExtractPairsContextImpl extends TinyScriptParser.ExtractPairsContext {
+        public TinyScriptParser.ExtractPairsContext target;
+        public Object value;
+
+        public ExtractPairsContextImpl(TinyScriptParser.ExtractPairsContext target, Object value) {
+            super(null, 0);
+            this.target = target;
+            this.value = value;
+        }
+    }
+
+    @Override
+    public Object visitExtractPairs(TinyScriptParser.ExtractPairsContext ctx) {
+        try {
+            debugNode(ctx);
+            Map<String, String> ret = new LinkedHashMap<>();
+            if (ctx instanceof ExtractPairsContextImpl) {
+                ExtractPairsContextImpl impl = (ExtractPairsContextImpl) ctx;
+                ctx = impl.target;
+                ret = (Map<String, String>) impl.value;
+            }
+            int count = ctx.getChildCount();
+            for (int i = 0; i < count; i++) {
+                ParseTree item = ctx.getChild(i);
+                if (item instanceof TerminalNode) {
+                    TerminalNode nextTerm = (TerminalNode) item;
+                    String term = (String) visitTerminal(nextTerm);
+                    if (!",".equals(term)) {
+                        throw new IllegalArgumentException("invalid extract pairs separator, expect ',' buf found '" + term + "'!");
+                    }
+                } else if (item instanceof TinyScriptParser.ExtractPairContext) {
+                    TinyScriptParser.ExtractPairContext nextCtx = (TinyScriptParser.ExtractPairContext) item;
+                    Map.Entry<String, String> value = (Map.Entry<String, String>) visitExtractPair(nextCtx);
+                    ret.put(value.getKey(), value.getValue());
+                } else {
+                    throw new IllegalArgumentException("invalid extract pairs node type: " + item.getClass());
+                }
+            }
+            return ret;
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Object visitExtractPair(TinyScriptParser.ExtractPairContext ctx) {
+        try {
+            debugNode(ctx);
+            int count = ctx.getChildCount();
+            if (count != 1 && count != 3) {
+                throw new IllegalArgumentException("missing extract pair!");
+            }
+            ParseTree keyNode = ctx.getChild(0);
+            if (!(keyNode instanceof TerminalNode) && !(keyNode instanceof TinyScriptParser.ConstStringContext)) {
+                throw new IllegalArgumentException("invalid extract pair key node, expect naming/string, but found type: " + keyNode.getClass());
+            }
+            String key = null;
+            if (keyNode instanceof TerminalNode) {
+                TerminalNode termCtx = (TerminalNode) keyNode;
+                key = (String) visitTerminal(termCtx);
+            } else {
+                TinyScriptParser.ConstStringContext nextCtx = (TinyScriptParser.ConstStringContext) keyNode;
+                key = (String) visitConstString(nextCtx);
+            }
+
+            if (count == 1) {
+                return new AbstractMap.SimpleEntry<>(key, key);
+            } else {
+                ParseTree separatorNode = ctx.getChild(1);
+                ParseTree valueNode = ctx.getChild(2);
+                if (!(separatorNode instanceof TerminalNode)) {
+                    throw new IllegalArgumentException("invalid extract pair separator node, expect ':', but found type: " + separatorNode.getClass());
+                }
+                if (!(valueNode instanceof TerminalNode) && !(valueNode instanceof TinyScriptParser.ConstStringContext)) {
+                    throw new IllegalArgumentException("invalid extract pair value node, expect naming/string node, but found type: " + valueNode.getClass());
+                }
+
+                TerminalNode sepCtx = (TerminalNode) separatorNode;
+                String sep = (String) visitTerminal(sepCtx);
+                if (!":".equals(sep)) {
+                    throw new IllegalArgumentException("invalid json pair separator node, expect ':', but found : " + sep);
+                }
+
+                String value = null;
+                if (valueNode instanceof TerminalNode) {
+                    TerminalNode termCtx = (TerminalNode) valueNode;
+                    value = (String) visitTerminal(termCtx);
+                } else {
+                    TinyScriptParser.ConstStringContext nextCtx = (TinyScriptParser.ConstStringContext) valueNode;
+                    value = (String) visitConstString(nextCtx);
+                }
+
+                return new AbstractMap.SimpleEntry<>(value, value);
+            }
+
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1260,34 +1445,55 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
             debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count != 3) {
-                throw new IllegalArgumentException("missing script block, expect 3 parts, but found " + count + "!");
+            if (count != 3 && count != 2) {
+                throw new IllegalArgumentException("missing script block, expect 3/2 parts, but found " + count + "!");
             }
             ParseTree leftNode = ctx.getChild(0);
-            ParseTree scriptNode = ctx.getChild(1);
-            ParseTree rightNode = ctx.getChild(2);
-            if (!(leftNode instanceof TerminalNode)) {
-                throw new IllegalArgumentException("invalid script block left node, expect '{', but found type: " + leftNode.getClass());
+            if (count == 2) {
+                ParseTree rightNode = ctx.getChild(1);
+                if (!(leftNode instanceof TerminalNode)) {
+                    throw new IllegalArgumentException("invalid script block left node, expect '{', but found type: " + leftNode.getClass());
+                }
+                if (!(rightNode instanceof TerminalNode)) {
+                    throw new IllegalArgumentException("invalid script block right node, expect '}', but found type: " + rightNode.getClass());
+                }
+                TerminalNode leftCtx = (TerminalNode) leftNode;
+                TerminalNode rightCtx = (TerminalNode) rightNode;
+                String left = (String) visitTerminal(leftCtx);
+                String right = (String) visitTerminal(rightCtx);
+                if (!"{".equals(left)) {
+                    throw new IllegalArgumentException("invalid script block left node, expect '(', but found : " + left);
+                }
+                if (!"}".equals(right)) {
+                    throw new IllegalArgumentException("invalid script block right node, expect '(', but found : " + right);
+                }
+                return null;
+            } else {
+                ParseTree scriptNode = ctx.getChild(1);
+                ParseTree rightNode = ctx.getChild(2);
+                if (!(leftNode instanceof TerminalNode)) {
+                    throw new IllegalArgumentException("invalid script block left node, expect '{', but found type: " + leftNode.getClass());
+                }
+                if (!(scriptNode instanceof TinyScriptParser.ScriptContext)) {
+                    throw new IllegalArgumentException("invalid script block right node, expect express, but found type: " + scriptNode.getClass());
+                }
+                if (!(rightNode instanceof TerminalNode)) {
+                    throw new IllegalArgumentException("invalid script block right node, expect '}', but found type: " + rightNode.getClass());
+                }
+                TerminalNode leftCtx = (TerminalNode) leftNode;
+                TinyScriptParser.ScriptContext scriptCtx = (TinyScriptParser.ScriptContext) scriptNode;
+                TerminalNode rightCtx = (TerminalNode) rightNode;
+                String left = (String) visitTerminal(leftCtx);
+                String right = (String) visitTerminal(rightCtx);
+                if (!"{".equals(left)) {
+                    throw new IllegalArgumentException("invalid script block left node, expect '(', but found : " + left);
+                }
+                if (!"}".equals(right)) {
+                    throw new IllegalArgumentException("invalid script block right node, expect '(', but found : " + right);
+                }
+                Object value = visitScript(scriptCtx);
+                return value;
             }
-            if (!(scriptNode instanceof TinyScriptParser.ScriptContext)) {
-                throw new IllegalArgumentException("invalid script block right node, expect express, but found type: " + scriptNode.getClass());
-            }
-            if (!(rightNode instanceof TerminalNode)) {
-                throw new IllegalArgumentException("invalid script block right node, expect '}', but found type: " + rightNode.getClass());
-            }
-            TerminalNode leftCtx = (TerminalNode) leftNode;
-            TinyScriptParser.ScriptContext scriptCtx = (TinyScriptParser.ScriptContext) scriptNode;
-            TerminalNode rightCtx = (TerminalNode) rightNode;
-            String left = (String) visitTerminal(leftCtx);
-            String right = (String) visitTerminal(rightCtx);
-            if (!"{".equals(left)) {
-                throw new IllegalArgumentException("invalid script block left node, expect '(', but found : " + left);
-            }
-            if (!"}".equals(right)) {
-                throw new IllegalArgumentException("invalid script block right node, expect '(', but found : " + right);
-            }
-            Object value = visitScript(scriptCtx);
-            return value;
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
@@ -1568,150 +1774,6 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             }
             throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
         }
-    }
-
-    @Override
-    public Object visit(ParseTree tree) {
-        try {
-            debugNode(tree);
-            if (tree instanceof TinyScriptParser.ScriptContext) {
-                TinyScriptParser.ScriptContext nextCtx = (TinyScriptParser.ScriptContext) tree;
-                return visitScript(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ExpressContext) {
-                TinyScriptParser.ExpressContext nextCtx = (TinyScriptParser.ExpressContext) tree;
-                return visitExpress(nextCtx);
-            } else if (tree instanceof TinyScriptParser.EqualValueContext) {
-                TinyScriptParser.EqualValueContext nextCtx = (TinyScriptParser.EqualValueContext) tree;
-                return visitEqualValue(nextCtx);
-            } else if (tree instanceof TinyScriptParser.NewInstanceContext) {
-                TinyScriptParser.NewInstanceContext nextCtx = (TinyScriptParser.NewInstanceContext) tree;
-                return visitNewInstance(nextCtx);
-            } else if (tree instanceof TinyScriptParser.InvokeFunctionContext) {
-                TinyScriptParser.InvokeFunctionContext nextCtx = (TinyScriptParser.InvokeFunctionContext) tree;
-                return visitInvokeFunction(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ConstValueContext) {
-                TinyScriptParser.ConstValueContext nextCtx = (TinyScriptParser.ConstValueContext) tree;
-                return visitConstValue(nextCtx);
-            } else if (tree instanceof TinyScriptParser.RefValueContext) {
-                TinyScriptParser.RefValueContext nextCtx = (TinyScriptParser.RefValueContext) tree;
-                return visitRefValue(nextCtx);
-            } else if (tree instanceof TinyScriptParser.RefCallContext) {
-                TinyScriptParser.RefCallContext nextCtx = (TinyScriptParser.RefCallContext) tree;
-                return visitRefCall(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ArgumentListContext) {
-                TinyScriptParser.ArgumentListContext nextCtx = (TinyScriptParser.ArgumentListContext) tree;
-                return visitArgumentList(nextCtx);
-            } else if (tree instanceof TinyScriptParser.FunctionCallContext) {
-                TinyScriptParser.FunctionCallContext nextCtx = (TinyScriptParser.FunctionCallContext) tree;
-                return visitFunctionCall(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ArgumentContext) {
-                TinyScriptParser.ArgumentContext nextCtx = (TinyScriptParser.ArgumentContext) tree;
-                return visitArgument(nextCtx);
-            } else if (tree instanceof TinyScriptParser.DecNumberContext) {
-                TinyScriptParser.DecNumberContext nextCtx = (TinyScriptParser.DecNumberContext) tree;
-                return visitDecNumber(nextCtx);
-            } else if (tree instanceof TinyScriptParser.HexNumberContext) {
-                TinyScriptParser.HexNumberContext nextCtx = (TinyScriptParser.HexNumberContext) tree;
-                return visitHexNumber(nextCtx);
-            } else if (tree instanceof TinyScriptParser.OtcNumberContext) {
-                TinyScriptParser.OtcNumberContext nextCtx = (TinyScriptParser.OtcNumberContext) tree;
-                return visitOtcNumber(nextCtx);
-            } else if (tree instanceof TinyScriptParser.BinNumberContext) {
-                TinyScriptParser.BinNumberContext nextCtx = (TinyScriptParser.BinNumberContext) tree;
-                return visitBinNumber(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ConstNullContext) {
-                TinyScriptParser.ConstNullContext nextCtx = (TinyScriptParser.ConstNullContext) tree;
-                return visitConstNull(nextCtx);
-            } else if (tree instanceof TinyScriptParser.JsonValueContext) {
-                TinyScriptParser.JsonValueContext nextCtx = (TinyScriptParser.JsonValueContext) tree;
-                return visitJsonValue(nextCtx);
-            } else if (tree instanceof TinyScriptParser.JsonArrayValueContext) {
-                TinyScriptParser.JsonArrayValueContext nextCtx = (TinyScriptParser.JsonArrayValueContext) tree;
-                return visitJsonArrayValue(nextCtx);
-            } else if (tree instanceof TinyScriptParser.JsonMapValueContext) {
-                TinyScriptParser.JsonMapValueContext nextCtx = (TinyScriptParser.JsonMapValueContext) tree;
-                return visitJsonMapValue(nextCtx);
-            } else if (tree instanceof TinyScriptParser.JsonPairsContext) {
-                TinyScriptParser.JsonPairsContext nextCtx = (TinyScriptParser.JsonPairsContext) tree;
-                return visitJsonPairs(nextCtx);
-            } else if (tree instanceof TinyScriptParser.JsonPairContext) {
-                TinyScriptParser.JsonPairContext nextCtx = (TinyScriptParser.JsonPairContext) tree;
-                return visitJsonPair(nextCtx);
-            } else if (tree instanceof TinyScriptParser.JsonItemListContext) {
-                TinyScriptParser.JsonItemListContext nextCtx = (TinyScriptParser.JsonItemListContext) tree;
-                return visitJsonItemList(nextCtx);
-            } else if (tree instanceof TinyScriptParser.IfSegmentContext) {
-                TinyScriptParser.IfSegmentContext nextCtx = (TinyScriptParser.IfSegmentContext) tree;
-                return visitIfSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ConditionBlockContext) {
-                TinyScriptParser.ConditionBlockContext nextCtx = (TinyScriptParser.ConditionBlockContext) tree;
-                return visitConditionBlock(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ScriptBlockContext) {
-                TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) tree;
-                return visitScriptBlock(nextCtx);
-            } else if (tree instanceof TinyScriptParser.NamingBlockContext) {
-                TinyScriptParser.NamingBlockContext nextCtx = (TinyScriptParser.NamingBlockContext) tree;
-                return visitNamingBlock(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ForeachSegmentContext) {
-                TinyScriptParser.ForeachSegmentContext nextCtx = (TinyScriptParser.ForeachSegmentContext) tree;
-                return visitForeachSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ForSegmentContext) {
-                TinyScriptParser.ForSegmentContext nextCtx = (TinyScriptParser.ForSegmentContext) tree;
-                return visitForSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.WhileSegmentContext) {
-                TinyScriptParser.WhileSegmentContext nextCtx = (TinyScriptParser.WhileSegmentContext) tree;
-                return visitWhileSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ControlSegmentContext) {
-                TinyScriptParser.ControlSegmentContext nextCtx = (TinyScriptParser.ControlSegmentContext) tree;
-                return visitControlSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ParenSegmentContext) {
-                TinyScriptParser.ParenSegmentContext nextCtx = (TinyScriptParser.ParenSegmentContext) tree;
-                return visitParenSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.PrefixOperatorSegmentContext) {
-                TinyScriptParser.PrefixOperatorSegmentContext nextCtx = (TinyScriptParser.PrefixOperatorSegmentContext) tree;
-                return visitPrefixOperatorSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.TrySegmentContext) {
-                TinyScriptParser.TrySegmentContext nextCtx = (TinyScriptParser.TrySegmentContext) tree;
-                return visitTrySegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.TryBodyBlockContext) {
-                TinyScriptParser.TryBodyBlockContext nextCtx = (TinyScriptParser.TryBodyBlockContext) tree;
-                return visitTryBodyBlock(nextCtx);
-            } else if (tree instanceof TinyScriptParser.CatchBodyBlockContext) {
-                TinyScriptParser.CatchBodyBlockContext nextCtx = (TinyScriptParser.CatchBodyBlockContext) tree;
-                return visitCatchBodyBlock(nextCtx);
-            } else if (tree instanceof TinyScriptParser.FinallyBodyBlockContext) {
-                TinyScriptParser.FinallyBodyBlockContext nextCtx = (TinyScriptParser.FinallyBodyBlockContext) tree;
-                return visitFinallyBodyBlock(nextCtx);
-            } else if (tree instanceof TinyScriptParser.DebuggerSegmentContext) {
-                TinyScriptParser.DebuggerSegmentContext nextCtx = (TinyScriptParser.DebuggerSegmentContext) tree;
-                return visitDebuggerSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ConstClassContext) {
-                TinyScriptParser.ConstClassContext nextCtx = (TinyScriptParser.ConstClassContext) tree;
-                return visitConstClass(nextCtx);
-            } else if (tree instanceof TinyScriptParser.ThrowSegmentContext) {
-                TinyScriptParser.ThrowSegmentContext nextCtx = (TinyScriptParser.ThrowSegmentContext) tree;
-                return visitThrowSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.NegtiveSegmentContext) {
-                TinyScriptParser.NegtiveSegmentContext nextCtx = (TinyScriptParser.NegtiveSegmentContext) tree;
-                return visitNegtiveSegment(nextCtx);
-            }
-        } catch (TinyScriptBreakException e) {
-
-        } catch (TinyScriptContinueException e) {
-
-        } catch (TinyScriptReturnException e) {
-            if (e.isHasRetValue()) {
-                return e.getRetValue();
-            } else {
-                return null;
-            }
-        } catch (Throwable e) {
-            if (e instanceof TinyScriptException) {
-                throw (TinyScriptException) e;
-            }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", tree," ") + "cause by: "+e.getMessage(), e);
-        }
-        throw new IllegalArgumentException("un-support visit type: " + tree.getClass().getSimpleName());
     }
 
     @Override
@@ -2250,6 +2312,161 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             this.value = value;
         }
     }
+
+
+    @Override
+    public Object visit(ParseTree tree) {
+        try {
+            debugNode(tree);
+            if (tree instanceof TinyScriptParser.ScriptContext) {
+                TinyScriptParser.ScriptContext nextCtx = (TinyScriptParser.ScriptContext) tree;
+                return visitScript(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ExpressContext) {
+                TinyScriptParser.ExpressContext nextCtx = (TinyScriptParser.ExpressContext) tree;
+                return visitExpress(nextCtx);
+            } else if (tree instanceof TinyScriptParser.EqualValueContext) {
+                TinyScriptParser.EqualValueContext nextCtx = (TinyScriptParser.EqualValueContext) tree;
+                return visitEqualValue(nextCtx);
+            } else if (tree instanceof TinyScriptParser.NewInstanceContext) {
+                TinyScriptParser.NewInstanceContext nextCtx = (TinyScriptParser.NewInstanceContext) tree;
+                return visitNewInstance(nextCtx);
+            } else if (tree instanceof TinyScriptParser.InvokeFunctionContext) {
+                TinyScriptParser.InvokeFunctionContext nextCtx = (TinyScriptParser.InvokeFunctionContext) tree;
+                return visitInvokeFunction(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ConstValueContext) {
+                TinyScriptParser.ConstValueContext nextCtx = (TinyScriptParser.ConstValueContext) tree;
+                return visitConstValue(nextCtx);
+            } else if (tree instanceof TinyScriptParser.RefValueContext) {
+                TinyScriptParser.RefValueContext nextCtx = (TinyScriptParser.RefValueContext) tree;
+                return visitRefValue(nextCtx);
+            } else if (tree instanceof TinyScriptParser.RefCallContext) {
+                TinyScriptParser.RefCallContext nextCtx = (TinyScriptParser.RefCallContext) tree;
+                return visitRefCall(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ArgumentListContext) {
+                TinyScriptParser.ArgumentListContext nextCtx = (TinyScriptParser.ArgumentListContext) tree;
+                return visitArgumentList(nextCtx);
+            } else if (tree instanceof TinyScriptParser.FunctionCallContext) {
+                TinyScriptParser.FunctionCallContext nextCtx = (TinyScriptParser.FunctionCallContext) tree;
+                return visitFunctionCall(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ArgumentContext) {
+                TinyScriptParser.ArgumentContext nextCtx = (TinyScriptParser.ArgumentContext) tree;
+                return visitArgument(nextCtx);
+            } else if (tree instanceof TinyScriptParser.DecNumberContext) {
+                TinyScriptParser.DecNumberContext nextCtx = (TinyScriptParser.DecNumberContext) tree;
+                return visitDecNumber(nextCtx);
+            } else if (tree instanceof TinyScriptParser.HexNumberContext) {
+                TinyScriptParser.HexNumberContext nextCtx = (TinyScriptParser.HexNumberContext) tree;
+                return visitHexNumber(nextCtx);
+            } else if (tree instanceof TinyScriptParser.OtcNumberContext) {
+                TinyScriptParser.OtcNumberContext nextCtx = (TinyScriptParser.OtcNumberContext) tree;
+                return visitOtcNumber(nextCtx);
+            } else if (tree instanceof TinyScriptParser.BinNumberContext) {
+                TinyScriptParser.BinNumberContext nextCtx = (TinyScriptParser.BinNumberContext) tree;
+                return visitBinNumber(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ConstNullContext) {
+                TinyScriptParser.ConstNullContext nextCtx = (TinyScriptParser.ConstNullContext) tree;
+                return visitConstNull(nextCtx);
+            } else if (tree instanceof TinyScriptParser.JsonValueContext) {
+                TinyScriptParser.JsonValueContext nextCtx = (TinyScriptParser.JsonValueContext) tree;
+                return visitJsonValue(nextCtx);
+            } else if (tree instanceof TinyScriptParser.JsonArrayValueContext) {
+                TinyScriptParser.JsonArrayValueContext nextCtx = (TinyScriptParser.JsonArrayValueContext) tree;
+                return visitJsonArrayValue(nextCtx);
+            } else if (tree instanceof TinyScriptParser.JsonMapValueContext) {
+                TinyScriptParser.JsonMapValueContext nextCtx = (TinyScriptParser.JsonMapValueContext) tree;
+                return visitJsonMapValue(nextCtx);
+            } else if (tree instanceof TinyScriptParser.JsonPairsContext) {
+                TinyScriptParser.JsonPairsContext nextCtx = (TinyScriptParser.JsonPairsContext) tree;
+                return visitJsonPairs(nextCtx);
+            } else if (tree instanceof TinyScriptParser.JsonPairContext) {
+                TinyScriptParser.JsonPairContext nextCtx = (TinyScriptParser.JsonPairContext) tree;
+                return visitJsonPair(nextCtx);
+            } else if (tree instanceof TinyScriptParser.JsonItemListContext) {
+                TinyScriptParser.JsonItemListContext nextCtx = (TinyScriptParser.JsonItemListContext) tree;
+                return visitJsonItemList(nextCtx);
+            } else if (tree instanceof TinyScriptParser.IfSegmentContext) {
+                TinyScriptParser.IfSegmentContext nextCtx = (TinyScriptParser.IfSegmentContext) tree;
+                return visitIfSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ConditionBlockContext) {
+                TinyScriptParser.ConditionBlockContext nextCtx = (TinyScriptParser.ConditionBlockContext) tree;
+                return visitConditionBlock(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ScriptBlockContext) {
+                TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) tree;
+                return visitScriptBlock(nextCtx);
+            } else if (tree instanceof TinyScriptParser.NamingBlockContext) {
+                TinyScriptParser.NamingBlockContext nextCtx = (TinyScriptParser.NamingBlockContext) tree;
+                return visitNamingBlock(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ForeachSegmentContext) {
+                TinyScriptParser.ForeachSegmentContext nextCtx = (TinyScriptParser.ForeachSegmentContext) tree;
+                return visitForeachSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ForSegmentContext) {
+                TinyScriptParser.ForSegmentContext nextCtx = (TinyScriptParser.ForSegmentContext) tree;
+                return visitForSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.WhileSegmentContext) {
+                TinyScriptParser.WhileSegmentContext nextCtx = (TinyScriptParser.WhileSegmentContext) tree;
+                return visitWhileSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ControlSegmentContext) {
+                TinyScriptParser.ControlSegmentContext nextCtx = (TinyScriptParser.ControlSegmentContext) tree;
+                return visitControlSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ParenSegmentContext) {
+                TinyScriptParser.ParenSegmentContext nextCtx = (TinyScriptParser.ParenSegmentContext) tree;
+                return visitParenSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.PrefixOperatorSegmentContext) {
+                TinyScriptParser.PrefixOperatorSegmentContext nextCtx = (TinyScriptParser.PrefixOperatorSegmentContext) tree;
+                return visitPrefixOperatorSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.TrySegmentContext) {
+                TinyScriptParser.TrySegmentContext nextCtx = (TinyScriptParser.TrySegmentContext) tree;
+                return visitTrySegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.TryBodyBlockContext) {
+                TinyScriptParser.TryBodyBlockContext nextCtx = (TinyScriptParser.TryBodyBlockContext) tree;
+                return visitTryBodyBlock(nextCtx);
+            } else if (tree instanceof TinyScriptParser.CatchBodyBlockContext) {
+                TinyScriptParser.CatchBodyBlockContext nextCtx = (TinyScriptParser.CatchBodyBlockContext) tree;
+                return visitCatchBodyBlock(nextCtx);
+            } else if (tree instanceof TinyScriptParser.FinallyBodyBlockContext) {
+                TinyScriptParser.FinallyBodyBlockContext nextCtx = (TinyScriptParser.FinallyBodyBlockContext) tree;
+                return visitFinallyBodyBlock(nextCtx);
+            } else if (tree instanceof TinyScriptParser.DebuggerSegmentContext) {
+                TinyScriptParser.DebuggerSegmentContext nextCtx = (TinyScriptParser.DebuggerSegmentContext) tree;
+                return visitDebuggerSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ConstClassContext) {
+                TinyScriptParser.ConstClassContext nextCtx = (TinyScriptParser.ConstClassContext) tree;
+                return visitConstClass(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ThrowSegmentContext) {
+                TinyScriptParser.ThrowSegmentContext nextCtx = (TinyScriptParser.ThrowSegmentContext) tree;
+                return visitThrowSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.NegtiveSegmentContext) {
+                TinyScriptParser.NegtiveSegmentContext nextCtx = (TinyScriptParser.NegtiveSegmentContext) tree;
+                return visitNegtiveSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ExtractExpressContext) {
+                TinyScriptParser.ExtractExpressContext nextCtx = (TinyScriptParser.ExtractExpressContext) tree;
+                return visitExtractExpress(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ExtractPairsContext) {
+                TinyScriptParser.ExtractPairsContext nextCtx = (TinyScriptParser.ExtractPairsContext) tree;
+                return visitExtractPairs(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ExtractPairContext) {
+                TinyScriptParser.ExtractPairContext nextCtx = (TinyScriptParser.ExtractPairContext) tree;
+                return visitExtractPair(nextCtx);
+            }
+        } catch (TinyScriptBreakException e) {
+
+        } catch (TinyScriptContinueException e) {
+
+        } catch (TinyScriptReturnException e) {
+            if (e.isHasRetValue()) {
+                return e.getRetValue();
+            } else {
+                return null;
+            }
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", tree, " ") + "cause by: " + e.getMessage(), e);
+        }
+        throw new IllegalArgumentException("un-support visit type: " + tree.getClass().getSimpleName());
+    }
+
 
     @Override
     public Object visitChildren(RuleNode node) {
