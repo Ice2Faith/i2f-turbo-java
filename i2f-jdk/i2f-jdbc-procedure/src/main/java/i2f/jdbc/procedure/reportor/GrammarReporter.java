@@ -1,26 +1,22 @@
 package i2f.jdbc.procedure.reportor;
 
+import groovy.lang.GroovyShell;
 import i2f.compiler.MemoryCompiler;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.ognl.OgnlUtil;
-import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.LangEvalJavaNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import groovy.lang.GroovyShell;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.codehaus.groovy.control.CompilationFailedException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -107,7 +103,7 @@ public class GrammarReporter {
         if(test==null){
             return;
         }
-        List<String> features = node.getAttrFeatureMap().get(AttrConsts.TEST);
+        List<String> features = node.getAttrFeatureMap().get(test);
         if(features!=null && !features.isEmpty()){
             for (String feature : features) {
                 reportExprFeatureGrammar(test,feature,node,"attribute "+attr,warnPoster);
