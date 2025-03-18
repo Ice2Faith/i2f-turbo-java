@@ -5,18 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface TinyScriptEqualValue extends PsiElement {
-
-  @NotNull
-  TinyScriptExpress getExpress();
+public interface TinyScriptExtractExpress extends PsiElement {
 
   @Nullable
-  TinyScriptExtractExpress getExtractExpress();
-
-  @Nullable
-  PsiElement getNaming();
-
-  @Nullable
-  PsiElement getRouteNaming();
+  TinyScriptExtractPairs getExtractPairs();
 
 }
