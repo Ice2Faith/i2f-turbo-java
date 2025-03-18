@@ -242,6 +242,51 @@ status= ${config.user.defaultStatus};
 user.roles[1].name="logger";
 ```
 
+### 解包语句
+
+- 用于对对象进行解包
+- 属于赋值语句的一种特例
+- 在返回值为一个复杂数据结构时，有时候为了方便，需要再次从这个复杂对象中提取值出来计算
+- 解包语句就将赋值和解包同时结合
+- 定义
+
+```shell
+#{解包键值对}= 变量值
+```
+
+- 举例
+
+```shell
+#{name:userName,age:userInfo.age,status}=getUserInfo();
+```
+
+- 举例中，已经完全表达了解包语法
+- 等号左边为解包语句
+- 等号右边为目标值
+- 那么这个例子的等价写法如下
+
+```shell
+tmp=getUserInfo();
+name=${tmp.userName};
+age=${tmp.userInfo.age};
+status=${tmp.status};
+```
+
+- 可以看到，使用解包语法之后
+- 可以将多个赋值语句给整合到一起
+- 但是也有缺点，如果不提前保存原始返回对象的话
+- 就丢失了原始对象
+- 如果同时要保留原始对象
+- 则，需要两个语句来实现
+- 如下
+
+```shell
+tmp=getUserInfo();
+#{name:userName,age:userInfo.age,status}=tmp;
+```
+
+- 这样就可以实现同时保存变量了
+
 ### 括号表达式
 - 定义
 

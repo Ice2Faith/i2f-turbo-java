@@ -1,4 +1,4 @@
-// Generated from D:/IDEA_ROOT/DevCenter/i2f-turbo/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -139,6 +139,29 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitEqualValue(TinyScriptParser.EqualValueContext ctx);
 	/**
+     * Visit a parse tree produced by {@link TinyScriptParser#extractExpress}.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitExtractExpress(TinyScriptParser.ExtractExpressContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#extractPairs}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitExtractPairs(TinyScriptParser.ExtractPairsContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#extractPair}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitExtractPair(TinyScriptParser.ExtractPairContext ctx);
+
+    /**
 	 * Visit a parse tree produced by {@link TinyScriptParser#newInstance}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
