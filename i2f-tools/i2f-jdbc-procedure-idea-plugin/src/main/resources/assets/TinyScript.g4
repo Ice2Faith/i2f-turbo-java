@@ -230,12 +230,24 @@ conditionBlock:
     ;
 
 scriptBlock:
-    TERM_CURLY_L script TERM_CURLY_R
+    TERM_CURLY_L script? TERM_CURLY_R
     ;
 
 
 equalValue:
-    (ROUTE_NAMING|NAMING) ('=') express
+    (ROUTE_NAMING|NAMING|extractExpress) ('=') express
+    ;
+
+extractExpress:
+    '#' TERM_CURLY_L extractPairs? TERM_CURLY_R
+    ;
+
+extractPairs:
+    extractPair (TERM_COMMA extractPair)*
+    ;
+
+extractPair:
+    (NAMING|ROUTE_NAMING|constString) (TERM_COLON (NAMING|ROUTE_NAMING|constString))?
     ;
 
 newInstance:

@@ -88,6 +88,7 @@
     TERM_BRACKET_SQUARE_R=']';
 
     TERM_QUESTION='?';
+    TERM_SHARP='#';
 
     OP_MUL='*';
     OP_DIV='/';
@@ -289,7 +290,19 @@ scriptBlock::=
 
 
 equalValue::=
-    (ROUTE_NAMING|NAMING) (OP_ASSIGN) express
+    (ROUTE_NAMING|NAMING|extractExpress) (OP_ASSIGN) express
+    ;
+
+extractExpress::=
+    TERM_SHARP TERM_CURLY_L extractPairs? TERM_CURLY_R
+    ;
+
+extractPairs::=
+    extractPair (TERM_COMMA extractPair)*
+    ;
+
+extractPair::=
+    (NAMING|ROUTE_NAMING|constString) (TERM_COLON (NAMING|ROUTE_NAMING|constString))?
     ;
 
 newInstance::=

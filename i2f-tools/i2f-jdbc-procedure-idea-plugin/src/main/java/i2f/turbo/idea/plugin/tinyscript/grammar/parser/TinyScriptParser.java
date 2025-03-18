@@ -399,10 +399,9 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (ROUTE_NAMING|NAMING) (OP_ASSIGN) express
+  // (ROUTE_NAMING|NAMING|extractExpress) (OP_ASSIGN) express
   public static boolean equalValue(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "equalValue")) return false;
-    if (!nextTokenIs(b, "<equal value>", NAMING, ROUTE_NAMING)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, EQUAL_VALUE, "<equal value>");
     r = equalValue_0(b, l + 1);
@@ -412,12 +411,13 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ROUTE_NAMING|NAMING
+  // ROUTE_NAMING|NAMING|extractExpress
   private static boolean equalValue_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "equalValue_0")) return false;
     boolean r;
     r = consumeToken(b, ROUTE_NAMING);
     if (!r) r = consumeToken(b, NAMING);
+    if (!r) r = extractExpress(b, l + 1);
     return r;
   }
 
@@ -494,6 +494,111 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     if (!r) r = jsonValue(b, l + 1);
     if (!r) r = negtiveSegment(b, l + 1);
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // TERM_SHARP TERM_CURLY_L extractPairs? TERM_CURLY_R
+  public static boolean extractExpress(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractExpress")) return false;
+    if (!nextTokenIs(b, TERM_SHARP)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, TERM_SHARP, TERM_CURLY_L);
+    r = r && extractExpress_2(b, l + 1);
+    r = r && consumeToken(b, TERM_CURLY_R);
+    exit_section_(b, m, EXTRACT_EXPRESS, r);
+    return r;
+  }
+
+  // extractPairs?
+  private static boolean extractExpress_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractExpress_2")) return false;
+    extractPairs(b, l + 1);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // (NAMING|ROUTE_NAMING|constString) (TERM_COLON (NAMING|ROUTE_NAMING|constString))?
+  public static boolean extractPair(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractPair")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, EXTRACT_PAIR, "<extract pair>");
+    r = extractPair_0(b, l + 1);
+    r = r && extractPair_1(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // NAMING|ROUTE_NAMING|constString
+  private static boolean extractPair_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractPair_0")) return false;
+    boolean r;
+    r = consumeToken(b, NAMING);
+    if (!r) r = consumeToken(b, ROUTE_NAMING);
+    if (!r) r = constString(b, l + 1);
+    return r;
+  }
+
+  // (TERM_COLON (NAMING|ROUTE_NAMING|constString))?
+  private static boolean extractPair_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractPair_1")) return false;
+    extractPair_1_0(b, l + 1);
+    return true;
+  }
+
+  // TERM_COLON (NAMING|ROUTE_NAMING|constString)
+  private static boolean extractPair_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractPair_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, TERM_COLON);
+    r = r && extractPair_1_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // NAMING|ROUTE_NAMING|constString
+  private static boolean extractPair_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractPair_1_0_1")) return false;
+    boolean r;
+    r = consumeToken(b, NAMING);
+    if (!r) r = consumeToken(b, ROUTE_NAMING);
+    if (!r) r = constString(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // extractPair (TERM_COMMA extractPair)*
+  public static boolean extractPairs(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractPairs")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, EXTRACT_PAIRS, "<extract pairs>");
+    r = extractPair(b, l + 1);
+    r = r && extractPairs_1(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // (TERM_COMMA extractPair)*
+  private static boolean extractPairs_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractPairs_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!extractPairs_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "extractPairs_1", c)) break;
+    }
+    return true;
+  }
+
+  // TERM_COMMA extractPair
+  private static boolean extractPairs_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extractPairs_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, TERM_COMMA);
+    r = r && extractPair(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 

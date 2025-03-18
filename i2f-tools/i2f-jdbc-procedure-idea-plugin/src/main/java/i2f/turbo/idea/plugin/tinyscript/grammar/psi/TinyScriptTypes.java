@@ -31,6 +31,9 @@ public interface TinyScriptTypes {
   IElementType EQUAL_VALUE = new TinyScriptElementType("EQUAL_VALUE");
   IElementType EXPRESS = new TinyScriptElementType("EXPRESS");
   IElementType EXPRESS_SEGMENT = new TinyScriptElementType("EXPRESS_SEGMENT");
+  IElementType EXTRACT_EXPRESS = new TinyScriptElementType("EXTRACT_EXPRESS");
+  IElementType EXTRACT_PAIR = new TinyScriptElementType("EXTRACT_PAIR");
+  IElementType EXTRACT_PAIRS = new TinyScriptElementType("EXTRACT_PAIRS");
   IElementType FINALLY_BODY_BLOCK = new TinyScriptElementType("FINALLY_BODY_BLOCK");
   IElementType FOREACH_SEGMENT = new TinyScriptElementType("FOREACH_SEGMENT");
   IElementType FOR_SEGMENT = new TinyScriptElementType("FOR_SEGMENT");
@@ -147,6 +150,7 @@ public interface TinyScriptTypes {
   IElementType TERM_PAREN_R = new TinyScriptTokenType(")");
   IElementType TERM_QUESTION = new TinyScriptTokenType("?");
   IElementType TERM_SEMICOLON = new TinyScriptTokenType(";");
+  IElementType TERM_SHARP = new TinyScriptTokenType("#");
   IElementType WORD = new TinyScriptTokenType("WORD");
 
   class Factory {
@@ -214,6 +218,15 @@ public interface TinyScriptTypes {
       }
       else if (type == EXPRESS_SEGMENT) {
         return new TinyScriptExpressSegmentImpl(node);
+      }
+      else if (type == EXTRACT_EXPRESS) {
+        return new TinyScriptExtractExpressImpl(node);
+      }
+      else if (type == EXTRACT_PAIR) {
+        return new TinyScriptExtractPairImpl(node);
+      }
+      else if (type == EXTRACT_PAIRS) {
+        return new TinyScriptExtractPairsImpl(node);
       }
       else if (type == FINALLY_BODY_BLOCK) {
         return new TinyScriptFinallyBodyBlockImpl(node);

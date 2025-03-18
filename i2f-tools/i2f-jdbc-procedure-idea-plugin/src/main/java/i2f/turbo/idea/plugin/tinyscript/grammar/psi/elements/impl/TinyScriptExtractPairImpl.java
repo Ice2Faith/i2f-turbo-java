@@ -12,14 +12,14 @@ import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptPsiElement;
 import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.*;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.impl.TinyScriptPsiImplUtil;
 
-public class TinyScriptEqualValueImpl extends TinyScriptPsiElement implements TinyScriptEqualValue {
+public class TinyScriptExtractPairImpl extends TinyScriptPsiElement implements TinyScriptExtractPair {
 
-  public TinyScriptEqualValueImpl(@NotNull ASTNode node) {
+  public TinyScriptExtractPairImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull TinyScriptVisitor visitor) {
-    visitor.visitEqualValue(this);
+    visitor.visitExtractPair(this);
   }
 
   @Override
@@ -30,26 +30,8 @@ public class TinyScriptEqualValueImpl extends TinyScriptPsiElement implements Ti
 
   @Override
   @NotNull
-  public TinyScriptExpress getExpress() {
-    return findNotNullChildByClass(TinyScriptExpress.class);
-  }
-
-  @Override
-  @Nullable
-  public TinyScriptExtractExpress getExtractExpress() {
-    return findChildByClass(TinyScriptExtractExpress.class);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getNaming() {
-    return findChildByType(NAMING);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getRouteNaming() {
-    return findChildByType(ROUTE_NAMING);
+  public List<TinyScriptConstString> getConstStringList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, TinyScriptConstString.class);
   }
 
 }

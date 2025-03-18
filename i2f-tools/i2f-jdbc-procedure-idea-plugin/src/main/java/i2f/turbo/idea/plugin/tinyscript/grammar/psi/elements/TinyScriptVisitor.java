@@ -91,6 +91,18 @@ public class TinyScriptVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitExtractExpress(@NotNull TinyScriptExtractExpress o) {
+    visitPsiElement(o);
+  }
+
+  public void visitExtractPair(@NotNull TinyScriptExtractPair o) {
+    visitPsiElement(o);
+  }
+
+  public void visitExtractPairs(@NotNull TinyScriptExtractPairs o) {
+    visitPsiElement(o);
+  }
+
   public void visitFinallyBodyBlock(@NotNull TinyScriptFinallyBodyBlock o) {
     visitPsiElement(o);
   }
