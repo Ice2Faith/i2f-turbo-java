@@ -5,14 +5,15 @@ import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.database.type.DatabaseType;
+import i2f.invokable.method.IMethod;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
-import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
+import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
@@ -30,7 +31,6 @@ import i2f.uid.SnowflakeLongUid;
 import lombok.Data;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -577,12 +577,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             return SnowflakeLongUid.getId();
         } else {
             try {
-                Method method = ContextHolder.CONVERT_METHOD_MAP.get(feature);
+                IMethod method = ContextHolder.CONVERT_METHOD_MAP.get(feature);
                 if (method != null) {
                     return method.invoke(null, value);
                 }
-            } catch (Exception e) {
-
+            } catch (Throwable e) {
+                warnLog(() -> e.getMessage(), e);
             }
             try {
                 Function function = ContextHolder.CONVERT_FUNC_MAP.get(feature);
@@ -590,7 +590,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     return function.apply(value);
                 }
             } catch (Exception e) {
-
+                warnLog(() -> e.getMessage(), e);
             }
         }
         return value;

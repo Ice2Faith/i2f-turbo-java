@@ -1,6 +1,7 @@
 package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.invokable.method.IMethod;
 import i2f.match.regex.RegexUtil;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
@@ -8,7 +9,6 @@ import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -401,10 +401,10 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return ReflectResolver.loadClass(className);
     }
 
-    public Method findMethod(String naming, List<Object> args) {
-        CopyOnWriteArrayList<Method> list = TinyScript.BUILTIN_METHOD.get(naming);
+    public IMethod findMethod(String naming, List<Object> args) {
+        CopyOnWriteArrayList<IMethod> list = TinyScript.BUILTIN_METHOD.get(naming);
         if (list != null && !list.isEmpty()) {
-            return ReflectResolver.matchExecutable(list, args);
+            return ReflectResolver.matchExecMethod(list, args);
         }
         return null;
     }
@@ -462,7 +462,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         } else {
             String methodName = naming;
 
-            Method method = findMethod(naming, args);
+            IMethod method = findMethod(naming, args);
             if (method != null) {
                 Object ret = ReflectResolver.execMethod(target, method, args);
                 return ret;

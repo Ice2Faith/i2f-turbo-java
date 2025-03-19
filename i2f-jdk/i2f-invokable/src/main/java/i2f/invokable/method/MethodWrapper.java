@@ -1,31 +1,15 @@
-package i2f.invokable.method.impl.jdk;
-
-import i2f.invokable.method.IMethod;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
-import java.lang.reflect.Method;
+package i2f.invokable.method;
 
 /**
  * @author Ice2Faith
- * @date 2025/3/19 21:14
+ * @date 2025/3/19 22:05
  * @desc
  */
-@Getter
-@Setter
-@EqualsAndHashCode
-@ToString
-public class JdkMethod implements IMethod {
-    protected Method method;
+public class MethodWrapper implements IMethod {
+    protected IMethod method;
 
-    public JdkMethod(Method method) {
+    public MethodWrapper(IMethod method) {
         this.method = method;
-    }
-
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -64,7 +48,7 @@ public class JdkMethod implements IMethod {
     }
 
     @Override
-    public Object invoke(Object obj, Object[] args) throws Throwable {
-        return method.invoke(obj, args);
+    public Object invoke(Object ivkObj, Object... args) throws Throwable {
+        return method.invoke(ivkObj, args);
     }
 }

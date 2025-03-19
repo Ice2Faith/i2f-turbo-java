@@ -2,6 +2,9 @@ package i2f.reflect;
 
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.invokable.method.IMethod;
+import i2f.invokable.method.impl.jdk.JdkExecutable;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.lru.LruMap;
 import i2f.reflect.virtual.VirtualField;
 import i2f.reflect.virtual.VirtualGetterField;
@@ -927,8 +930,11 @@ public class ReflectResolver {
 
         return execMethod(target, method, args);
     }
-
     public static Object execMethod(Object target,Method method, List<Object> args ) {
+        return execMethod(target, new JdkMethod(method), args);
+    }
+
+    public static Object execMethod(Object target, IMethod method, List<Object> args) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Object[] invokeArgs = convertAsExecutableArgs(parameterTypes, args);
 
@@ -941,7 +947,7 @@ public class ReflectResolver {
             }
             Object ret = method.invoke(target, invokeArgs);
             return ret;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new IllegalStateException(e);
         }
     }
@@ -987,7 +993,7 @@ public class ReflectResolver {
         return invokeArgs;
     }
 
-    public static<T extends Executable> T matchExecutable(List<T> executables, List<Object> args) {
+    public static <T extends Executable> T matchExecutable(Iterable<T> executables, List<Object> args) {
         T ret = matchExecutable(executables, args, false);
         if (ret != null) {
             return ret;
@@ -996,7 +1002,42 @@ public class ReflectResolver {
         return ret;
     }
 
-    public static<T extends Executable> T matchExecutable(List<T> executables, List<Object> args, boolean supportConvert) {
+    public static <T extends Executable> T matchExecutable(Iterable<T> executables, List<Object> args, boolean supportConvert) {
+        JdkExecutable executable = matchExecMethod(new Iterable<JdkExecutable>() {
+            @Override
+            public Iterator<JdkExecutable> iterator() {
+                return new Iterator<JdkExecutable>() {
+                    private Iterator<T> iterator = executables.iterator();
+
+                    @Override
+                    public boolean hasNext() {
+                        return iterator.hasNext();
+                    }
+
+                    @Override
+                    public JdkExecutable next() {
+                        T item = iterator.next();
+                        return new JdkExecutable(item);
+                    }
+                };
+            }
+        }, args, supportConvert);
+        if (executable == null) {
+            return null;
+        }
+        return (T) executable.getExecutable();
+    }
+
+    public static <T extends IMethod> T matchExecMethod(Iterable<T> executables, List<Object> args) {
+        T ret = matchExecMethod(executables, args, false);
+        if (ret != null) {
+            return ret;
+        }
+        ret = matchExecMethod(executables, args, true);
+        return ret;
+    }
+
+    public static <T extends IMethod> T matchExecMethod(Iterable<T> executables, List<Object> args, boolean supportConvert) {
         T exec = null;
         T execArgs = null;
         T execMatched = null;
