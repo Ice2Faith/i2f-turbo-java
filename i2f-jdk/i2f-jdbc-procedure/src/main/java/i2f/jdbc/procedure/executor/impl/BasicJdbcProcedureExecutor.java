@@ -39,6 +39,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -48,6 +49,7 @@ import java.util.function.Supplier;
  */
 @Data
 public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
+    protected transient final AtomicReference<ProcedureNode> procedureNodeHolder=new AtomicReference<>();
     protected volatile JdbcProcedureContext context=new DefaultJdbcProcedureContext();
     protected final CopyOnWriteArrayList<ExecutorNode> nodes = new CopyOnWriteArrayList<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
@@ -295,21 +297,27 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         visitSet(params,ParamsConsts.CONNECTIONS, new HashMap<>());
     }
 
+    public ProcedureNode getProcedureNode(){
+        return procedureNodeHolder.updateAndGet((node)->{
+            if(node!=null){
+                return node;
+            }
+            for (ExecutorNode item : getNodes()) {
+                if (item instanceof ProcedureNode) {
+                    return (ProcedureNode) item;
+                }
+            }
+            return ProcedureNode.INSTANCE;
+        });
+    }
+
 
     @Override
     public Map<String, Object> execAsProcedure(XmlNode node, Map<String,Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
             prepareParams(params);
-            ProcedureNode execNode = null;
-            for (ExecutorNode item : getNodes()) {
-                if (item instanceof ProcedureNode) {
-                    execNode = (ProcedureNode) item;
-                    break;
-                }
-            }
-            if (execNode == null) {
-                execNode = ProcedureNode.INSTANCE;
-            }
+            ProcedureNode execNode = getProcedureNode();
+
             debugLog(() -> "exec as procedure " + node.getTagName());
 
             Map<String, Connection> bakConnection = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());

@@ -128,7 +128,11 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
                 Map<String, Object> callParams = castArgumentListAsNamingMap(argList);
                 Map<String, Object> ret = executor.exec(naming, callParams);
                 if (ret.containsKey(ParamsConsts.RETURN)) {
-                    return Reference.of(ret.get(ParamsConsts.RETURN));
+                    Object val = ret.get(ParamsConsts.RETURN);
+                    if(val instanceof Reference){
+                        return (Reference<Object>) val;
+                    }
+                    return Reference.of(val);
                 }
                 return Reference.of(ret);
             } catch (NotFoundSignalException e) {

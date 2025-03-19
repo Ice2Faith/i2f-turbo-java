@@ -12,6 +12,7 @@ import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.reference.Reference;
 
 import java.sql.Connection;
 import java.util.Arrays;
@@ -26,6 +27,18 @@ import java.util.function.Supplier;
  * @date 2025/1/20 10:38
  */
 public interface JdbcProcedureExecutor {
+    default Reference<?> nop(){
+        return Reference.nop();
+    }
+
+    default boolean isNop(Object obj){
+        if(obj instanceof Reference){
+            Reference<?> ref = (Reference<?>) obj;
+            return !ref.isValue();
+        }
+        return false;
+    }
+
     JdbcProcedureContext getContext();
 
     default Map<String,ProcedureMeta> getMetaMap(){
@@ -90,7 +103,18 @@ public interface JdbcProcedureExecutor {
             JdbcProcedureJavaCaller javaCaller = (JdbcProcedureJavaCaller) target;
             try {
                 Object ret = javaCaller.exec(this, params);
-                visitSet(params,ParamsConsts.RETURN, ret);
+                boolean hasValue=true;
+                if(ret instanceof Reference){
+                    Reference<?> ref = (Reference<?>) ret;
+                    if(ref.isValue()){
+                        ret=ref.get();
+                    }else{
+                        hasValue=false;
+                    }
+                }
+                if(hasValue) {
+                    visitSet(params, ParamsConsts.RETURN, ret);
+                }
             } catch (ControlSignalException e) {
 
             } catch (Throwable e) {
@@ -127,7 +151,18 @@ public interface JdbcProcedureExecutor {
             JdbcProcedureJavaCaller javaCaller = (JdbcProcedureJavaCaller) target;
             try {
                 Object ret = javaCaller.exec(this,params);
-                visitSet(params,ParamsConsts.RETURN, ret);
+                boolean hasValue=true;
+                if(ret instanceof Reference){
+                    Reference<?> ref = (Reference<?>) ret;
+                    if(ref.isValue()){
+                        ret=ref.get();
+                    }else{
+                        hasValue=false;
+                    }
+                }
+                if(hasValue) {
+                    visitSet(params, ParamsConsts.RETURN, ret);
+                }
             } catch (ControlSignalException e) {
 
             } catch (Throwable e) {
