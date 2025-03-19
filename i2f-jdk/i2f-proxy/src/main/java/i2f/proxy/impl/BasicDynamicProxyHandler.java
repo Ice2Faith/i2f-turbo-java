@@ -1,6 +1,7 @@
 package i2f.proxy.impl;
 
-import i2f.proxy.IInvokable;
+import i2f.invokable.IInvokable;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 
 import java.lang.reflect.Method;
 
@@ -17,8 +18,8 @@ public abstract class BasicDynamicProxyHandler extends BasicProxyHandler {
 
     @Override
     public Object before(Object context, Object ivkObj, IInvokable invokable, Object... args) {
-        MethodInvoker invoker = (MethodInvoker) invokable;
-        Method method = invoker.method();
+        JdkMethod invoker = (JdkMethod) invokable;
+        Method method = invoker.getMethod();
         return resolve(context, ivkObj, method, args);
     }
 

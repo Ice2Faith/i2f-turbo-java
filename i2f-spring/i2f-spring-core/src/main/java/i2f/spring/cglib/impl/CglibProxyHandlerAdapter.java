@@ -1,8 +1,8 @@
 package i2f.spring.cglib.impl;
 
-import i2f.proxy.IInvokable;
+import i2f.invokable.IInvokable;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.proxy.IProxyHandler;
-import i2f.proxy.impl.MethodInvoker;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 
@@ -22,7 +22,7 @@ public class CglibProxyHandlerAdapter implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-        IInvokable invokable = new MethodInvoker(method);
+        IInvokable invokable = new JdkMethod(method);
         Object context = handler.initContext();
         Object stopVal = handler.before(context, obj, invokable, args);
         if (stopVal != null) {

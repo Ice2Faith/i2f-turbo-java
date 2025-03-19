@@ -2,7 +2,7 @@ package i2f.extension.aspectj.core;
 
 
 import i2f.extension.aspectj.impl.AspectjInvoker;
-import i2f.proxy.IInvokable;
+import i2f.invokable.IInvokable;
 import i2f.proxy.IProxyHandler;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;

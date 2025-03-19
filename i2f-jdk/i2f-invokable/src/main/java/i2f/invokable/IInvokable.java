@@ -1,4 +1,4 @@
-package i2f.proxy;
+package i2f.invokable;
 
 
 /**
