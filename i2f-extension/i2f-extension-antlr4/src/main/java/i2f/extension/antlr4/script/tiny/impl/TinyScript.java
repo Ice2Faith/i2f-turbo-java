@@ -4,6 +4,9 @@ import i2f.extension.antlr4.script.tiny.TinyScriptLexer;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
 import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
+import i2f.invokable.method.IMethod;
+import i2f.invokable.method.impl.jdk.JdkInstanceStaticMethod;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.lru.LruMap;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -21,32 +24,32 @@ import java.util.function.Predicate;
  * @date 2025/1/10 22:07
  */
 public class TinyScript {
-    public static final ConcurrentHashMap<String, CopyOnWriteArrayList<Method>> BUILTIN_METHOD=new ConcurrentHashMap<>();
-    public static final LruMap<String,TinyScriptParser.ScriptContext> TREE_MAP=new LruMap<>(4096);
+    public static final ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> BUILTIN_METHOD = new ConcurrentHashMap<>();
+    public static final LruMap<String, TinyScriptParser.ScriptContext> TREE_MAP = new LruMap<>(4096);
 
-    public static final CopyOnWriteArrayList<ANTLRErrorListener> ERROR_LISTENER=new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<ANTLRErrorListener> ERROR_LISTENER = new CopyOnWriteArrayList<>();
 
     static {
-        registryBuiltMethodByStaticMethod(String.class,(method)->{
+        registryBuiltMethodByStaticMethod(String.class, (method) -> {
             return Arrays.asList("join", "format").contains(method.getName());
         });
-        registryBuiltMethodByStaticMethod(Integer.class,(method)->{
+        registryBuiltMethodByStaticMethod(Integer.class, (method) -> {
             String name = method.getName();
             return name.startsWith("to") || name.startsWith("parse");
         });
-        registryBuiltMethodByStaticMethod(Long.class,(method)->{
+        registryBuiltMethodByStaticMethod(Long.class, (method) -> {
             String name = method.getName();
             return name.startsWith("to") || name.startsWith("parse");
         });
-        registryBuiltMethodByStaticMethod(Double.class,(method)->{
+        registryBuiltMethodByStaticMethod(Double.class, (method) -> {
             String name = method.getName();
             return name.startsWith("to") || name.startsWith("parse");
         });
-        registryBuiltMethodByStaticMethod(Float.class,(method)->{
+        registryBuiltMethodByStaticMethod(Float.class, (method) -> {
             String name = method.getName();
             return name.startsWith("to") || name.startsWith("parse");
         });
-        registryBuiltMethodByStaticMethod(Boolean.class,(method)->{
+        registryBuiltMethodByStaticMethod(Boolean.class, (method) -> {
             String name = method.getName();
             return name.startsWith("to") || name.startsWith("parse");
         });
@@ -62,6 +65,21 @@ public class TinyScript {
         });
         registryBuiltMethodByStaticMethod(System.class);
         registryBuiltMethodByStaticMethod(TinyScriptFunctions.class);
+        registryBuiltMethodByInstanceMethod(System.out, (method) -> {
+            String name = method.getName();
+            return name.startsWith("print");
+        });
+        registryBuiltMethodByInstanceMethod(Runtime.getRuntime(), (method) -> {
+            String name = method.getName();
+            return name.startsWith("exec")
+                    || name.startsWith("load")
+                    || name.startsWith("gc")
+                    || name.startsWith("halt")
+                    || name.startsWith("exit")
+                    || name.startsWith("available")
+                    || name.contains("Memory")
+                    || name.contains("Hook");
+        });
 
         ERROR_LISTENER.add(DefaultAntlrErrorListener.INSTANCE);
     }
@@ -88,7 +106,7 @@ public class TinyScript {
     public static TinyScriptParser.ScriptContext parse(String formula) {
         try {
             TinyScriptParser.ScriptContext ret = TREE_MAP.get(formula);
-            if(ret!=null){
+            if (ret != null) {
                 return ret;
             }
         } catch (Exception e) {
@@ -97,14 +115,14 @@ public class TinyScript {
         CommonTokenStream tokens = parseTokens(formula);
         TinyScriptParser parser = new TinyScriptParser(tokens);
         for (ANTLRErrorListener item : ERROR_LISTENER) {
-            if(item==null){
+            if (item == null) {
                 continue;
             }
             parser.addErrorListener(item);
         }
         TinyScriptParser.ScriptContext tree = parser.script();
         try {
-            TREE_MAP.put(formula,tree);
+            TREE_MAP.put(formula, tree);
         } catch (Exception e) {
 
         }
@@ -115,7 +133,7 @@ public class TinyScript {
         ANTLRInputStream input = new ANTLRInputStream(formula);
         TinyScriptLexer lexer = new TinyScriptLexer(input);
         for (ANTLRErrorListener item : ERROR_LISTENER) {
-            if(item==null){
+            if (item == null) {
                 continue;
             }
             lexer.addErrorListener(item);
@@ -124,30 +142,63 @@ public class TinyScript {
         return tokens;
     }
 
-    public static void registryBuiltinMethod(Method method){
-        CopyOnWriteArrayList<Method> list = BUILTIN_METHOD.computeIfAbsent(method.getName(), (key) -> new CopyOnWriteArrayList<>());
+    public static void registryBuiltinMethod(Method method) {
+        registryBuiltinMethod(new JdkMethod(method));
+    }
+
+    public static void registryBuiltinMethod(IMethod method) {
+        CopyOnWriteArrayList<IMethod> list = BUILTIN_METHOD.computeIfAbsent(method.getName(), (key) -> new CopyOnWriteArrayList<>());
         list.add(method);
     }
 
-    public static void registryBuiltMethodByStaticMethod(Class<?> clazz){
-        registryBuiltMethodByStaticMethod(clazz,null);
+    public static void registryBuiltMethodByStaticMethod(Class<?> clazz) {
+        registryBuiltMethodByStaticMethod(clazz, null);
     }
 
-    public static void registryBuiltMethodByStaticMethod(Class<?> clazz, Predicate<Method> filter){
+
+    public static void registryBuiltMethodByStaticMethod(Class<?> clazz, Predicate<Method> filter) {
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
             int mod = method.getModifiers();
-            if(!Modifier.isPublic(mod)){
+            if (!Modifier.isPublic(mod)) {
                 continue;
             }
-            if(!Modifier.isStatic(mod)){
+            if (!Modifier.isStatic(mod)) {
                 continue;
             }
-            if(Modifier.isAbstract(mod)){
+            if (Modifier.isAbstract(mod)) {
                 continue;
             }
-            if(filter==null || filter.test(method)){
+            if (filter == null || filter.test(method)) {
                 registryBuiltinMethod(method);
+            }
+        }
+    }
+
+    public static void registryBuiltMethodByInstanceMethod(Object object) {
+        registryBuiltMethodByInstanceMethod(object, null);
+    }
+
+    public static void registryBuiltMethodByInstanceMethod(Object object, Predicate<Method> filter) {
+        if (object == null) {
+            return;
+        }
+        Class<?> clazz = object.getClass();
+        Method[] methods = clazz.getMethods();
+        for (Method method : methods) {
+            int mod = method.getModifiers();
+            if (!Modifier.isPublic(mod)) {
+                continue;
+            }
+            if (Modifier.isAbstract(mod)) {
+                continue;
+            }
+            if (filter == null || filter.test(method)) {
+                if (Modifier.isStatic(mod)) {
+                    registryBuiltinMethod(method);
+                } else {
+                    registryBuiltinMethod(new JdkInstanceStaticMethod(object, method));
+                }
             }
         }
     }

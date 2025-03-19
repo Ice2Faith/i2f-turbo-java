@@ -3,13 +3,13 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.extension.antlr4.script.tiny.impl.DefaultTinyScriptResolver;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.antlr4.script.tiny.impl.TinyScriptResolver;
+import i2f.invokable.method.IMethod;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
@@ -17,7 +17,6 @@ import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -141,10 +140,10 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
         }
 
         @Override
-        public Method findMethod(String naming, List<Object> args) {
-            List<Method> list = ContextHolder.INVOKE_METHOD_MAP.get(naming);
+        public IMethod findMethod(String naming, List<Object> args) {
+            List<IMethod> list = ContextHolder.INVOKE_METHOD_MAP.get(naming);
             if (list != null && !list.isEmpty()) {
-                Method method = ReflectResolver.matchExecutable(list, args);
+                IMethod method = ReflectResolver.matchExecMethod(list, args);
                 if (method != null) {
                     return method;
                 }

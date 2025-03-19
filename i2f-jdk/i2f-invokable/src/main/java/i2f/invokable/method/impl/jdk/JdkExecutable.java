@@ -1,6 +1,10 @@
 package i2f.invokable.method.impl.jdk;
 
 import i2f.invokable.method.IMethod;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -11,6 +15,10 @@ import java.lang.reflect.Method;
  * @date 2025/3/19 21:17
  * @desc
  */
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
 public class JdkExecutable implements IMethod {
     protected Executable executable;
 
@@ -20,6 +28,11 @@ public class JdkExecutable implements IMethod {
 
     public Executable getExecutable() {
         return executable;
+    }
+
+    @Override
+    public void setAccessible(boolean accessible) {
+        executable.setAccessible(accessible);
     }
 
     @Override

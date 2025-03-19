@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.invokable.method.IMethod;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
@@ -119,11 +121,11 @@ public class LangInvokeNode extends AbstractExecutorNode {
             if (className != null && !className.isEmpty()) {
                 clazz = executor.loadClass(className);
             }
-            Method method = null;
+            IMethod method = null;
             if (targetScript == null || targetScript.isEmpty()) {
-                List<Method> list= ContextHolder.INVOKE_METHOD_MAP.get(methodName);
+                List<IMethod> list = ContextHolder.INVOKE_METHOD_MAP.get(methodName);
                 if(list!=null && !list.isEmpty()) {
-                    method = ReflectResolver.matchExecutable(list, callArgs);
+                    method = ReflectResolver.matchExecMethod(list, callArgs);
                     if (clazz == null) {
                         clazz = method.getDeclaringClass();
                     }
@@ -135,7 +137,10 @@ public class LangInvokeNode extends AbstractExecutorNode {
             }
 
             if(method==null){
-                method= ReflectResolver.matchExecMethod(clazz,methodName,callArgs);
+                Method md = ReflectResolver.matchExecMethod(clazz, methodName, callArgs);
+                if (md != null) {
+                    method = new JdkMethod(md);
+                }
             }
 
             if (method == null) {

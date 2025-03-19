@@ -21,10 +21,6 @@ public class TinyScriptFunctions {
         System.out.println(builder.toString());
     }
 
-    public static void printf(String format, Object... obj) {
-        System.out.printf(format, obj);
-    }
-
     public static void exec(String command) {
         try {
             Runtime.getRuntime().exec(command);

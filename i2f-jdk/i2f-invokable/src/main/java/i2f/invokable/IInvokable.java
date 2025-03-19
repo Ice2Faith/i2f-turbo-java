@@ -9,4 +9,8 @@ package i2f.invokable;
 public interface IInvokable {
     Object invoke(Object ivkObj,
                   Object... args) throws Throwable;
+
+    default void setAccessible(boolean accessible) {
+
+    }
 }

@@ -1,5 +1,8 @@
 package i2f.jdbc.procedure.context;
 
+import i2f.invokable.method.IMethod;
+import i2f.invokable.method.impl.jdk.JdkMethod;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -14,10 +17,10 @@ import java.util.function.Function;
  */
 public class ContextHolder {
     // 用于静态直接根据方法名在这个集合类中查找同名的方法，使用于LangInvokeNode中，方法需要为public的，不限制是否为static的方法
-    public static final ConcurrentHashMap<String, List<Method>> INVOKE_METHOD_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, List<IMethod>> INVOKE_METHOD_MAP = new ConcurrentHashMap<>();
 
     // 用于静态直接根据方法名在这个集合类中查找同名的方法，使用于BasicJdbcProcedureExecutor的Feature中，方法需要为public static的，且一个入参，具有返回值
-    public static final ConcurrentHashMap<String, Method> CONVERT_METHOD_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, IMethod> CONVERT_METHOD_MAP = new ConcurrentHashMap<>();
 
     // 使用于BasicJdbcProcedureExecutor的Feature中
     public static final ConcurrentHashMap<String, Function> CONVERT_FUNC_MAP = new ConcurrentHashMap<>();
@@ -73,8 +76,8 @@ public class ContextHolder {
                 continue;
             }
             String name = method.getName();
-            List<Method> list = INVOKE_METHOD_MAP.computeIfAbsent(name, (key) -> new CopyOnWriteArrayList<>());
-            list.add(method);
+            List<IMethod> list = INVOKE_METHOD_MAP.computeIfAbsent(name, (key) -> new CopyOnWriteArrayList<>());
+            list.add(new JdkMethod(method));
         }
     }
 
@@ -120,7 +123,7 @@ public class ContextHolder {
             if (method.getParameterCount() != 1) {
                 continue;
             }
-            CONVERT_METHOD_MAP.put(name, method);
+            CONVERT_METHOD_MAP.put(name, new JdkMethod(method));
         }
     }
 
