@@ -9,12 +9,13 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-proxy</artifactId>
+    <artifactId>i2f-invokable</artifactId>
+
 
     <dependencies>
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-invokable</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
     </dependencies>
 
@@ -26,4 +27,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

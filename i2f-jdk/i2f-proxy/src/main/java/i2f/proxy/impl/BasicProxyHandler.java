@@ -1,6 +1,6 @@
 package i2f.proxy.impl;
 
-import i2f.proxy.IInvokable;
+import i2f.invokable.IInvokable;
 import i2f.proxy.IProxyHandler;
 
 /**

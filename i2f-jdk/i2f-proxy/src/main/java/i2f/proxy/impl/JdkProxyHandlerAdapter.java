@@ -1,6 +1,7 @@
 package i2f.proxy.impl;
 
-import i2f.proxy.IInvokable;
+import i2f.invokable.IInvokable;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.proxy.IProxyHandler;
 
 import java.lang.reflect.InvocationHandler;
@@ -22,7 +23,7 @@ public class JdkProxyHandlerAdapter<T> implements InvocationHandler {
 
     @Override
     final public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        IInvokable invokable = new MethodInvoker(method);
+        IInvokable invokable = new JdkMethod(method);
         Object context = handler.initContext();
         Object stopObj = handler.before(context, instance, invokable, args);
         if (stopObj != null) {

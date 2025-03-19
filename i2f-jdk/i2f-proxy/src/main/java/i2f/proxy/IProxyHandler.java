@@ -1,6 +1,8 @@
 package i2f.proxy;
 
 
+import i2f.invokable.IInvokable;
+
 /**
  * @author Ice2Faith
  * @date 2022/3/25 20:29

@@ -1,6 +1,6 @@
 package i2f.extension.aspectj.impl;
 
-import i2f.proxy.impl.IMethodAccessInvokable;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 
@@ -11,14 +11,13 @@ import java.lang.reflect.Method;
  * @date 2022/3/26 19:27
  * @desc
  */
-public class AspectjInvoker implements IMethodAccessInvokable {
+public class AspectjInvoker extends JdkMethod {
     protected ProceedingJoinPoint pjp;
     protected Method method;
 
     public AspectjInvoker(ProceedingJoinPoint pjp) {
+        super(((MethodSignature) pjp.getSignature()).getMethod());
         this.pjp = pjp;
-        MethodSignature ms = (MethodSignature) pjp.getSignature();
-        method = ms.getMethod();
     }
 
     @Override
@@ -26,8 +25,4 @@ public class AspectjInvoker implements IMethodAccessInvokable {
         return pjp.proceed(args);
     }
 
-    @Override
-    public Method method() {
-        return method;
-    }
 }
