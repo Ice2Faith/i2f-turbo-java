@@ -70,5 +70,27 @@
         <!-- 定义颜色配置页 -->
         <colorSettingsPage
                 implementation="i2f.turbo.idea.plugin.tinyscript.lang.highlighter.TinyScriptColorSettingsPage"/>
+
+        <!-- 定义引用跳转定义 -->
+        <psi.referenceContributor language="XML"
+                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlPsiReferenceContributor"/>
+
+        <!-- 定义查找引用 -->
+        <lang.findUsagesProvider language="XML"
+                                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlFindUsagesProvider"/>
     </extensions>
+
+
+    <actions>
+        <!-- Add your actions here -->
+        <!-- 定义右键菜单 -->
+        <action
+                id="EditorBasics.EditorIllustrationAction"
+                class="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlProcedureJumpSourceFileAction"
+                text="XProc4J Jump Source"
+                description="Jump to source xml file."
+                icon="/assets/action.svg">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        </action>
+    </actions>
 </idea-plugin>
