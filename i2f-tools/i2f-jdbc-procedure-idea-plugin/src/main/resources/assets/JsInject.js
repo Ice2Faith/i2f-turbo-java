@@ -316,6 +316,21 @@ function JdbcProcedureJavaCaller(){
 }
 
 /**
+ * @return {Reference<?>}
+ */
+JdbcProcedureJavaCaller.prototype.nop=function(){
+
+}
+
+/**
+ * @param obj {Object}
+ * @return {boolean}
+ */
+JdbcProcedureJavaCaller.prototype.isNop=function(obj){
+
+}
+
+/**
  *
  * @param executor {JdbcProcedureExecutor}
  * @param params {JavaMap<String,Object>}

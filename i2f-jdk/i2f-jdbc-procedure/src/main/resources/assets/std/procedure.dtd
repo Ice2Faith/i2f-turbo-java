@@ -62,6 +62,8 @@
         <!ATTLIST debugger test CDATA #IMPLIED>
         <!ATTLIST debugger tag CDATA #IMPLIED>
 
+        <!ATTLIST debugger test.eval-ts CDATA #IMPLIED>
+
         <!ELEMENT lang-println (ANY|EMPTY)>
         <!ATTLIST lang-println tag CDATA #IMPLIED>
         <!ATTLIST lang-println tag.string CDATA #IMPLIED>
@@ -473,6 +475,8 @@
         <!ATTLIST lang-if test.boolean CDATA #IMPLIED>
         <!ATTLIST lang-if test.dialect CDATA #IMPLIED>
 
+        <!ATTLIST lang-if test.eval-ts CDATA #IMPLIED>
+
         <!ELEMENT lang-choose (lang-when*|lang-otherwise?)>
 
         <!ELEMENT lang-when (ANY|EMPTY)>
@@ -480,6 +484,8 @@
         <!ATTLIST lang-when datasource CDATA #IMPLIED>
         <!ATTLIST lang-when test.boolean CDATA #IMPLIED>
         <!ATTLIST lang-when test.dialect CDATA #IMPLIED>
+
+        <!ATTLIST lang-when test.eval-ts CDATA #IMPLIED>
 
         <!ELEMENT lang-otherwise (ANY|EMPTY)>
 
@@ -508,6 +514,8 @@
         <!ATTLIST lang-while datasource CDATA #IMPLIED>
         <!ATTLIST lang-while test.boolean CDATA #IMPLIED>
         <!ATTLIST lang-while test.dialect CDATA #IMPLIED>
+
+        <!ATTLIST lang-while test.eval-ts CDATA #IMPLIED>
 
         <!ELEMENT lang-continue (EMPTY)>
 
