@@ -124,7 +124,20 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
                 if (meta == null) {
                     return Reference.nop();
                 }
+
                 Map<String, Object> callParams = castArgumentListAsNamingMap(argList);
+                if(callParams.isEmpty()){
+                    List<String> arguments = meta.getArguments();
+                    for (int i = 0; i < argList.size(); i++) {
+                        if(i>=arguments.size()){
+                            break;
+                        }
+                        String name = arguments.get(i);
+                        Object val = argList.get(i);
+                        callParams.put(name,val);
+                    }
+                }
+
                 Map<String, Object> ret = executor.exec(naming, callParams);
                 if (ret.containsKey(ParamsConsts.RETURN)) {
                     Object val = ret.get(ParamsConsts.RETURN);
