@@ -4,10 +4,7 @@ import i2f.bindsql.BindSql;
 import i2f.bindsql.BindSqlWrappers;
 import i2f.bindsql.data.PageBindSql;
 import i2f.convert.obj.ObjectConvertor;
-import i2f.jdbc.data.NamingOutputParameter;
-import i2f.jdbc.data.QueryColumn;
-import i2f.jdbc.data.QueryResult;
-import i2f.jdbc.data.TypedArgument;
+import i2f.jdbc.data.*;
 import i2f.jdbc.meta.JdbcMeta;
 import i2f.jdbc.std.func.SQLBiFunction;
 import i2f.jdbc.std.func.SQLFunction;
@@ -978,13 +975,25 @@ public class JdbcResolver {
             return;
         }
         Class<?> clazz = obj.getClass();
+        SQLType jdbcType=null;
         if (obj instanceof TypedArgument) {
             TypedArgument typedArgument = (TypedArgument) obj;
-            clazz = typedArgument.getType();
-            if (clazz == null) {
-                clazz = obj.getClass();
-            }
             obj = typedArgument.getValue();
+
+            ArgumentTypeHandler handler = typedArgument.getHandler();
+            if(handler!=null){
+                handler.handle(stat,index,obj);
+                return;
+            }
+
+            Class<?> javaType= typedArgument.getJavaType();
+            if(javaType!=null){
+                clazz=javaType;
+                obj=ObjectConvertor.tryConvertAsType(obj,javaType);
+            }
+
+            jdbcType = typedArgument.getJdbcType();
+
         }
         if (obj instanceof Integer) {
             stat.setInt(index, (Integer) obj);
@@ -1014,12 +1023,12 @@ public class JdbcResolver {
             stat.setDate(index, (java.sql.Date) obj);
             return;
         }
-        if (obj instanceof java.sql.Timestamp) {
-            stat.setTimestamp(index, (java.sql.Timestamp) obj);
+        if (obj instanceof Timestamp) {
+            stat.setTimestamp(index, (Timestamp) obj);
             return;
         }
-        if (obj instanceof java.sql.Time) {
-            stat.setTime(index, (java.sql.Time) obj);
+        if (obj instanceof Time) {
+            stat.setTime(index, (Time) obj);
             return;
         }
         if (obj instanceof java.util.Date) {
@@ -1059,7 +1068,7 @@ public class JdbcResolver {
             return;
         }
         if (obj instanceof LocalTime) {
-            stat.setTime(index, (java.sql.Time) ObjectConvertor.tryConvertAsType(obj, java.sql.Time.class));
+            stat.setTime(index, (Time) ObjectConvertor.tryConvertAsType(obj, Time.class));
             return;
         }
         if (obj instanceof Instant) {
@@ -1102,15 +1111,22 @@ public class JdbcResolver {
             setStatementObject(stat, index, ((ThreadLocal<?>) obj).get());
             return;
         }
-
-        if (obj == null) {
-            setStatementNullWithType(stat, index, clazz);
+        if(jdbcType!=null){
+            stat.setObject(index,obj,jdbcType);
             return;
         }
+        if (obj == null) {
+            setStatementNullWithType(stat, index, clazz,jdbcType);
+            return;
+        }
+
         stat.setObject(index, obj);
     }
 
-    public static void setStatementNullWithType(PreparedStatement stat, int index, Class<?> clazz) throws SQLException {
+    public static void setStatementNullWithType(PreparedStatement stat, int index, Class<?> clazz,SQLType jdbcType) throws SQLException {
+        if(jdbcType!=null){
+            stat.setObject(index,null,jdbcType);
+        }
         if (clazz == null) {
             stat.setObject(index, null);
             return;
