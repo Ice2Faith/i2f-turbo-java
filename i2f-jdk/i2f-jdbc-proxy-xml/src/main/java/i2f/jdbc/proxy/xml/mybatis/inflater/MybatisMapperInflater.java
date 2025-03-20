@@ -3,13 +3,18 @@ package i2f.jdbc.proxy.xml.mybatis.inflater;
 import i2f.bindsql.BindSql;
 import i2f.compiler.MemoryCompiler;
 import i2f.database.type.DatabaseType;
+import i2f.jdbc.data.ArgumentTypeHandler;
+import i2f.jdbc.data.TypedArgument;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.match.regex.RegexUtil;
+import i2f.match.regex.data.RegexFindPartMeta;
+import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import org.w3c.dom.Node;
 
 import java.lang.reflect.Array;
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -411,6 +416,56 @@ public class MybatisMapperInflater {
         return new BindSql(builder.toString(), args);
     }
 
+    public static void main(String[] args) {
+        String expression = " user.name.replace(\"a,b,c\",\"cba\"), jdbcType = VARCHAR, handler= java.util.DateHandler ";
+
+        System.out.println("ok");
+    }
+
+    public static final String EXPRESS_KEY = "$expression";
+    public static final String JDBC_TYPE_KEY = "jdbcType";
+    public static final String JAVA_TYPE_KEY = "javaType";
+    public static final String HANDLER_KEY = "handler";
+
+    /**
+     * expression:
+     * user.name.replace("a,b,c","cba"), jdbcType = VARCHAR, handler= java.util.DateHandler
+     * return:
+     * {
+     * EXPRESS_KEY: user.name.replace("a,b,c","cba"),
+     * jdbcType: VARCHAR,
+     * handler: java.util.DateHandler
+     * }
+     *
+     * @param expression
+     * @return
+     */
+    public static Map<String, String> resolvePlaceHolderExpressionParts(String expression) {
+        List<RegexFindPartMeta> parts = RegexUtil.regexFindParts(expression, "\\s*,\\s*[a-zA-Z0-9_]+\\s*=\\s*");
+
+        Map<String, String> parameters = new LinkedHashMap<>();
+        String key = null;
+        for (RegexFindPartMeta item : parts) {
+            if (item.isMatch()) {
+                key = item.getPart().trim();
+                key = key.substring(1, key.length() - 1).trim();
+            } else {
+                if (!parameters.containsKey(EXPRESS_KEY)) {
+                    String expr = item.getPart().trim();
+                    parameters.put(EXPRESS_KEY, expr);
+                    key = null;
+                } else {
+                    if (key != null) {
+                        String value = item.getPart().trim();
+                        parameters.put(key, value);
+                    }
+                }
+                key = null;
+            }
+        }
+        return parameters;
+    }
+
     public BindSql replaceParameters(String sql, Map<String, Object> workParam) {
         List<Object> args = new ArrayList<>();
         String str = RegexUtil.regexFindAndReplace(sql, "[\\$|#]\\{\\s*[^}]+\\s*\\}", (patten) -> {
@@ -419,18 +474,82 @@ public class MybatisMapperInflater {
             String expression = patten.trim();
             if (isDolar) {
                 Object obj = evalExpression(expression, workParam);
-                if(obj instanceof BindSql){
+                if (obj instanceof BindSql) {
                     BindSql bql = (BindSql) obj;
                     args.addAll(bql.getArgs());
                     return bql.getSql();
                 }
                 return obj == null ? "" : String.valueOf(obj);
             } else {
-                String[] arr = expression.split(",");
-                expression = arr[0];
-                // TODO resolve jdbcType=,handler=,...
-                Object obj = evalExpression(expression, workParam);
-                if(obj instanceof BindSql){
+                Object obj = null;
+                if (expression.contains("=")) {
+                    // TODO resolve jdbcType=,handler=,javaType=
+                    Map<String, String> parameters = resolvePlaceHolderExpressionParts(expression);
+                    String expr = parameters.get(EXPRESS_KEY);
+                    obj = evalExpression(expr, workParam);
+                    if (obj instanceof BindSql) {
+                        BindSql bql = (BindSql) obj;
+                        args.addAll(bql.getArgs());
+                        return bql.getSql();
+                    }
+                    String handlerName = parameters.get(HANDLER_KEY);
+                    String javaTypeName = parameters.get(JAVA_TYPE_KEY);
+                    String jdbcTypeName = parameters.get(JDBC_TYPE_KEY);
+
+                    if (handlerName != null && !handlerName.isEmpty()) {
+                        try {
+                            Class<?> handlerClass = ReflectResolver.loadClass(handlerName);
+                            if (handlerClass != null) {
+                                ArgumentTypeHandler handler = (ArgumentTypeHandler) ReflectResolver.getInstance(handlerClass);
+                                if (handler != null) {
+                                    obj = new TypedArgument(obj, handler);
+                                    args.add(obj);
+                                    return "?";
+                                }
+                            }
+                        } catch (Throwable e) {
+
+                        }
+                    }
+
+
+                    if (javaTypeName != null && !javaTypeName.isEmpty()) {
+                        try {
+                            Class<?> javaType = ReflectResolver.loadClass(handlerName);
+                            if (javaType != null) {
+                                obj = new TypedArgument(javaType, obj);
+                                args.add(obj);
+                                return "?";
+                            }
+                        } catch (Throwable e) {
+
+                        }
+                    }
+
+                    if (jdbcTypeName != null && !jdbcTypeName.isEmpty()) {
+                        try {
+                            JDBCType jdbcType = null;
+                            JDBCType[] values = JDBCType.values();
+                            for (JDBCType item : values) {
+                                if (jdbcTypeName.equalsIgnoreCase(item.name())) {
+                                    jdbcType = item;
+                                    break;
+                                }
+                            }
+                            if (jdbcType != null) {
+                                obj = new TypedArgument(jdbcType, obj);
+                                args.add(obj);
+                                return "?";
+                            }
+                        } catch (Throwable e) {
+
+                        }
+                    }
+
+                } else {
+                    obj = evalExpression(expression, workParam);
+                }
+                if (obj instanceof BindSql) {
                     BindSql bql = (BindSql) obj;
                     args.addAll(bql.getArgs());
                     return bql.getSql();
