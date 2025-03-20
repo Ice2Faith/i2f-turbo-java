@@ -1,7 +1,7 @@
 package i2f.bindsql.data;
 
 import i2f.bindsql.BindSql;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 public class PageBindSql {
     private BindSql countSql;
     private BindSql pageSql;
-    private ApiPage page;
+    private ApiOffsetSize page;
 }

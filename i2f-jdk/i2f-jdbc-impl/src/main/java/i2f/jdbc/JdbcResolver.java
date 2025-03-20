@@ -9,7 +9,7 @@ import i2f.jdbc.meta.JdbcMeta;
 import i2f.jdbc.std.func.SQLBiFunction;
 import i2f.jdbc.std.func.SQLFunction;
 import i2f.match.regex.RegexUtil;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 import i2f.page.Page;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
@@ -254,19 +254,19 @@ public class JdbcResolver {
     }
 
 
-    public static Page<Map<String, Object>> page(Connection conn, BindSql sql, ApiPage page) throws SQLException {
+    public static Page<Map<String, Object>> page(Connection conn, BindSql sql, ApiOffsetSize page) throws SQLException {
         return page(conn, sql.getSql(), sql.getArgs(), page, null);
     }
 
-    public static Page<Map<String, Object>> page(Connection conn, BindSql sql, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public static Page<Map<String, Object>> page(Connection conn, BindSql sql, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         return page(conn, sql.getSql(), sql.getArgs(), page, columnNameMapper);
     }
 
-    public static Page<Map<String, Object>> page(Connection conn, String sql, List<Object> args, ApiPage page) throws SQLException {
+    public static Page<Map<String, Object>> page(Connection conn, String sql, List<Object> args, ApiOffsetSize page) throws SQLException {
         return page(conn, sql, args, page, null);
     }
 
-    public static Page<Map<String, Object>> page(Connection conn, String sql, List<Object> args, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public static Page<Map<String, Object>> page(Connection conn, String sql, List<Object> args, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         PageBindSql pageBindSql = BindSqlWrappers.page(conn, new BindSql(sql, args), page);
         return page(conn, pageBindSql, columnNameMapper);
     }
@@ -352,22 +352,22 @@ public class JdbcResolver {
         return query(conn, sql, args, (rs) -> parseResultSetAsBeanList(rs, clazz, maxCount, columnNameMapper));
     }
 
-    public static <T> Page<T> page(Connection conn, BindSql sql, Class<T> clazz, ApiPage page) throws SQLException {
+    public static <T> Page<T> page(Connection conn, BindSql sql, Class<T> clazz, ApiOffsetSize page) throws SQLException {
         PageBindSql pageBindSql = BindSqlWrappers.page(conn, sql, page);
         return page(conn, pageBindSql, clazz, null);
     }
 
-    public static <T> Page<T> page(Connection conn, BindSql sql, Class<T> clazz, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public static <T> Page<T> page(Connection conn, BindSql sql, Class<T> clazz, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         PageBindSql pageBindSql = BindSqlWrappers.page(conn, sql, page);
         return page(conn, pageBindSql, clazz, columnNameMapper);
     }
 
-    public static <T> Page<T> page(Connection conn, String sql, List<Object> args, Class<T> clazz, ApiPage page) throws SQLException {
+    public static <T> Page<T> page(Connection conn, String sql, List<Object> args, Class<T> clazz, ApiOffsetSize page) throws SQLException {
         PageBindSql pageBindSql = BindSqlWrappers.page(conn, new BindSql(sql, args), page);
         return page(conn, pageBindSql, clazz, null);
     }
 
-    public static <T> Page<T> page(Connection conn, String sql, List<Object> args, Class<T> clazz, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public static <T> Page<T> page(Connection conn, String sql, List<Object> args, Class<T> clazz, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         PageBindSql pageBindSql = BindSqlWrappers.page(conn, new BindSql(sql, args), page);
         return page(conn, pageBindSql, clazz, columnNameMapper);
     }

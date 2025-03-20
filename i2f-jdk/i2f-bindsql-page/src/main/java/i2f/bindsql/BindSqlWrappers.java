@@ -6,7 +6,7 @@ import i2f.bindsql.data.PageBindSql;
 import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
 import i2f.database.type.DatabaseType;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,15 +18,15 @@ import java.sql.SQLException;
  */
 public class BindSqlWrappers {
 
-    public static PageBindSql page(Connection conn, BindSql sql, ApiPage page) throws SQLException {
+    public static PageBindSql page(Connection conn, BindSql sql, ApiOffsetSize page) throws SQLException {
         return page(DatabaseType.typeOfConnection(conn), sql, page);
     }
 
-    public static PageBindSql page(String jdbcUrl, BindSql sql, ApiPage page) {
+    public static PageBindSql page(String jdbcUrl, BindSql sql, ApiOffsetSize page) {
         return page(DatabaseType.typeOfJdbcUrl(jdbcUrl), sql, page);
     }
 
-    public static PageBindSql page(DatabaseType type, BindSql sql, ApiPage page) {
+    public static PageBindSql page(DatabaseType type, BindSql sql, ApiOffsetSize page) {
         PageBindSql ret = new PageBindSql();
         IPageWrapper pageWrapper = PageWrappers.wrapper(type);
         BindSql pageSql = pageWrapper.apply(sql, page);

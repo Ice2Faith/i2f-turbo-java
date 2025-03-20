@@ -1,6 +1,8 @@
 package i2f.jdbc.procedure.executor.impl;
 
 import i2f.bindsql.BindSql;
+import i2f.bindsql.count.CountWrappers;
+import i2f.bindsql.count.ICountWrapper;
 import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
 import i2f.convert.obj.ObjectConvertor;
@@ -23,7 +25,7 @@ import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
@@ -901,7 +903,41 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params) {
+    public BindSql sqlWrapPage(String datasource, BindSql bql, ApiOffsetSize page, Map<String, Object> params) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            if (page != null && (page.getOffset() != null || page.getSize() != null)) {
+                IPageWrapper wrapper = PageWrappers.wrapper(conn);
+                bql = wrapper.apply(bql, page);
+            }
+            BindSql pageSql = bql;
+            debugLog(() -> "sqlWrapPage:datasource=" + datasource + ", databaseType=" + databaseType + " \n\tbql:\n" + pageSql);
+            return pageSql;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BindSql sqlWrapCount(String datasource, BindSql bql, Map<String, Object> params) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            ICountWrapper wrapper = CountWrappers.wrapper();
+            bql = wrapper.apply(bql);
+            BindSql pageSql = bql;
+            debugLog(() -> "sqlWrapCount:datasource=" + datasource + ", databaseType=" + databaseType + " \n\tbql:\n" + pageSql);
+            return pageSql;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page) {
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
@@ -909,21 +945,29 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             String script = entry.getValue();
             BindSql bql = resolveSqlScript(script, params);
-            debugLog(() -> "sqlScript:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + bql);
-            return bql;
+            if (page != null && (page.getOffset() != null || page.getSize() != null)) {
+                IPageWrapper wrapper = PageWrappers.wrapper(conn);
+                bql = wrapper.apply(bql, page);
+            }
+            BindSql pageSql = bql;
+            debugLog(() -> "sqlScript:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + pageSql);
+            return pageSql;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
     @Override
-    public List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize) {
+    public List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, ApiOffsetSize page) {
         try {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            IPageWrapper wrapper = PageWrappers.wrapper(conn);
-            BindSql pageBql = wrapper.apply(bql, ApiPage.of(pageIndex, pageSize));
+            if (page != null && (page.getOffset() != null || page.getSize() != null)) {
+                IPageWrapper wrapper = PageWrappers.wrapper(conn);
+                bql = wrapper.apply(bql, page);
+            }
+            BindSql pageBql = bql;
             debugLog(() -> "sqlQueryPage:datasource=" + datasource + " \n\tbql:\n" + pageBql);
             List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
             return list;

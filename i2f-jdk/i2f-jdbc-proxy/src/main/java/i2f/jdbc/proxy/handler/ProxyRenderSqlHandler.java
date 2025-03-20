@@ -10,7 +10,7 @@ import i2f.jdbc.proxy.annotations.IgnorePage;
 import i2f.jdbc.proxy.provider.ProxyRenderSqlProvider;
 import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 import i2f.lru.LruMap;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 import i2f.page.Page;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
@@ -70,13 +70,13 @@ public class ProxyRenderSqlHandler implements InvocationHandler {
             }
         }
 
-        ApiPage page = null;
+        ApiOffsetSize page = null;
         Map<String, Object> params = new LinkedHashMap<>();
         for (int i = 0; i < names.length; i++) {
             String name = names[i];
             Object arg = args[i];
-            if (arg instanceof ApiPage) {
-                page = (ApiPage) arg;
+            if (arg instanceof ApiOffsetSize) {
+                page = (ApiOffsetSize) arg;
             }
             params.put(name, arg);
         }

@@ -6,7 +6,7 @@ import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 import i2f.jdbc.std.func.SQLFunction;
 import i2f.jdbc.template.JdbcTemplate;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 import i2f.page.Page;
 
 import java.io.Serializable;
@@ -144,7 +144,7 @@ public class BqlTemplate extends JdbcTemplate {
         return list(Bql.$bean().$beanQuery(condition), (Class<T>) condition.getClass());
     }
 
-    public <T> Page<T> page(T condition, ApiPage page) throws SQLException {
+    public <T> Page<T> page(T condition, ApiOffsetSize page) throws SQLException {
         return page(Bql.$bean().$beanQuery(condition), (Class<T>) condition.getClass(), page);
     }
 
@@ -164,11 +164,11 @@ public class BqlTemplate extends JdbcTemplate {
     }
 
 
-    public <T> Page<T> page(Bql<?> bql, Class<T> clazz, ApiPage page) throws SQLException {
+    public <T> Page<T> page(Bql<?> bql, Class<T> clazz, ApiOffsetSize page) throws SQLException {
         return page(bql, clazz, page, null);
     }
 
-    public <T> Page<T> page(Bql<?> bql, Class<T> clazz, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public <T> Page<T> page(Bql<?> bql, Class<T> clazz, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         return contextActionDelegate(bql.$$(), (conn, sql) -> {
             Page<T> ret = JdbcResolver.page(conn, sql, clazz, page, columnNameMapper);
             return ret;
@@ -213,11 +213,11 @@ public class BqlTemplate extends JdbcTemplate {
         });
     }
 
-    public Page<Map<String, Object>> page(Bql<?> bql, ApiPage page) throws SQLException {
+    public Page<Map<String, Object>> page(Bql<?> bql, ApiOffsetSize page) throws SQLException {
         return page(bql, page, null);
     }
 
-    public Page<Map<String, Object>> page(Bql<?> bql, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public Page<Map<String, Object>> page(Bql<?> bql, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         return contextActionDelegate(bql.$$(), (conn, sql) -> {
             Page<Map<String, Object>> ret = JdbcResolver.page(conn, sql, page, columnNameMapper);
             return ret;

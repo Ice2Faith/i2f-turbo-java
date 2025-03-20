@@ -740,6 +740,7 @@
         <!ATTLIST sql-query-row script CDATA #IMPLIED>
         <!ATTLIST sql-query-row result CDATA #IMPLIED>
         <!ATTLIST sql-query-row result-type CDATA #IMPLIED>
+        <!ATTLIST sql-query-row limited CDATA #IMPLIED>
 
         <!ELEMENT sql-query-list (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
@@ -748,6 +749,8 @@
         <!ATTLIST sql-query-list script CDATA #IMPLIED>
         <!ATTLIST sql-query-list result CDATA #IMPLIED>
         <!ATTLIST sql-query-list result-type CDATA #IMPLIED>
+        <!ATTLIST sql-query-list offset CDATA #IMPLIED>
+        <!ATTLIST sql-query-list limit CDATA #IMPLIED>
 
         <!ELEMENT sql-query-object (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
@@ -756,6 +759,7 @@
         <!ATTLIST sql-query-object script CDATA #IMPLIED>
         <!ATTLIST sql-query-object result CDATA #IMPLIED>
         <!ATTLIST sql-query-object result-type CDATA #IMPLIED>
+        <!ATTLIST sql-query-object limited CDATA #IMPLIED>
 
         <!ELEMENT sql-update (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*

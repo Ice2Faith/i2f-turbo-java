@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
+import i2f.page.ApiPage;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
@@ -120,7 +121,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
         Map<String, Object> bakParams = new LinkedHashMap<>();
         bakParams.put(item, executor.visit(item, context));
         while (true) {
-            List<?> list = executor.sqlQueryPage(datasource, bql, context, resultType, pageIndex, batchSize);
+            List<?> list = executor.sqlQueryPage(datasource, bql, context, resultType, new ApiPage(pageIndex, batchSize));
             if (list.isEmpty()) {
                 break;
             }

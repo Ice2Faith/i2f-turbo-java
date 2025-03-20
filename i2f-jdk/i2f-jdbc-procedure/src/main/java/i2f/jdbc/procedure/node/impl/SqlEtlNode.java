@@ -13,6 +13,7 @@ import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.page.ApiPage;
 import i2f.reflect.vistor.Visitor;
 
 import java.sql.Connection;
@@ -202,7 +203,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
             int pageIndex = 0;
             int commitCount = 0;
             while (true) {
-                List<?> list = executor.sqlQueryPage(extraDatasource, bql, context, resultType, pageIndex, readBatchSize);
+                List<?> list = executor.sqlQueryPage(extraDatasource, bql, context, resultType, new ApiPage(pageIndex, readBatchSize));
                 if (list.isEmpty()) {
                     break;
                 }

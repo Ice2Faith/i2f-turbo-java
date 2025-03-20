@@ -142,6 +142,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-bindsql-stringify</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-bql</artifactId>
                 <version>${i2f.version}</version>
             </dependency>

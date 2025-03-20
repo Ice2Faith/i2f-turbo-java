@@ -18,12 +18,26 @@ public class Page<T> extends ApiPage {
     //数据列表
     private List<T> list;
 
+    public Page(ApiPage page) {
+        super(page);
+    }
+
+    public Page(ApiOffsetSize page) {
+        super(page);
+    }
+
     public Page(Integer index, Integer size) {
         super(index, size);
     }
 
     public static <T> Page<T> of(ApiPage page, Long total, List<T> list) {
-        Page<T> ret = new Page<>(page.getIndex(), page.getSize());
+        Page<T> ret = new Page<>(page);
+        ret.data(total, list);
+        return ret;
+    }
+
+    public static <T> Page<T> of(ApiOffsetSize page, Long total, List<T> list) {
+        Page<T> ret = new Page<>(page);
         ret.data(total, list);
         return ret;
     }
