@@ -61,6 +61,10 @@ public interface AttrConsts {
     String DATASOURCE = "datasource";
     String RESULT_TYPE = "result-type";
 
+    String OFFSET = "offset";
+    String LIMIT = "limit";
+    String LIMITED = "limited";
+
     String ISOLATION = "isolation";
 
     String DATASOURCES = "datasources";

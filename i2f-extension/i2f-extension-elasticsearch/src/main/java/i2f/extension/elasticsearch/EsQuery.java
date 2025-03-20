@@ -1,5 +1,6 @@
 package i2f.extension.elasticsearch;
 
+import i2f.page.ApiOffsetSize;
 import i2f.page.ApiPage;
 import i2f.page.Page;
 import org.elasticsearch.action.search.SearchResponse;
@@ -32,9 +33,7 @@ public class EsQuery {
     protected String indexName;
     protected List<String> includesCols = new ArrayList<>();
     protected List<String> excludesCols = new ArrayList<>();
-    protected Integer index;
-    protected Integer size;
-    protected Integer offset;
+    protected ApiOffsetSize page;
     protected LinkedHashMap<String, Boolean> orders = new LinkedHashMap<>();
 
     protected BoolQueryBuilder boolQueryBuilder;
@@ -100,14 +99,12 @@ public class EsQuery {
 
     //////////////////////////////////////////////////
     public EsQuery page(Integer index, Integer size) {
-        this.index = index;
-        this.size = size;
+        this.page = new ApiPage(index, size);
         return this;
     }
 
-    public EsQuery page(ApiPage page) {
-        this.index = page.getIndex();
-        this.size = page.getSize();
+    public EsQuery page(ApiOffsetSize page) {
+        this.page = page;
         return this;
     }
 
@@ -251,15 +248,14 @@ public class EsQuery {
 
     /////////////////////////////////////////////
     protected EsQuery applyPage() {
-        if (index == null && size == null) {
-            return this;
-        }
-        if (index == null) {
-            index = 0;
-        }
-        if (index != null && size != null) {
-            offset = index * size;
-            builder.from(offset).size(size);
+        if (page != null) {
+            page.prepare();
+            if (page.getOffset() != null) {
+                builder.from(page.getOffset());
+            }
+            if (page.getSize() != null) {
+                builder.size(page.getSize());
+            }
         }
         return this;
     }
@@ -322,14 +318,14 @@ public class EsQuery {
 
     public Page<Map<String, Object>> searchAsMap() throws IOException {
         Page<Map<String, Object>> ret = manager.searchAsMap(indexName, done());
-        ret.page(index, size);
+        ret.page(page);
         ret.prepare();
         return ret;
     }
 
     public <T> Page<T> searchAsBean(Class<T> beanClass) throws IOException {
         Page<T> ret = beanManager.search(beanClass, done());
-        ret.page(index, size);
+        ret.page(page);
         ret.prepare();
         return ret;
     }

@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.page.ApiOffsetSize;
 
 import java.util.AbstractMap;
 import java.util.List;
@@ -32,6 +33,7 @@ public class SqlQueryObjectNode extends AbstractExecutorNode {
         List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node, context, executor);
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
         Object scriptObj =  executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, node, context);
+        Boolean limited = (Boolean) executor.attrValue(AttrConsts.LIMITED, FeatureConsts.BOOLEAN, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         Class<?> resultType = (Class<?>) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.CLASS, node, context);
         if (resultType == null) {
@@ -52,6 +54,13 @@ public class SqlQueryObjectNode extends AbstractExecutorNode {
         }
         if(bql==null) {
             bql = executor.sqlScript(datasource, dialectScriptList, context);
+        }
+        ApiOffsetSize page = null;
+        if (limited != null && limited) {
+            page = new ApiOffsetSize(null, 1);
+        }
+        if (page != null) {
+            bql = executor.sqlWrapPage(datasource, bql, page, context);
         }
         Object obj = executor.sqlQueryObject(datasource, bql, context, resultType);
         if (result != null && !result.isEmpty()) {

@@ -7,7 +7,7 @@ import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 import i2f.jdbc.std.func.SQLBiFunction;
 import i2f.jdbc.std.func.SQLFunction;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 import i2f.page.Page;
 import lombok.Data;
 
@@ -249,19 +249,19 @@ public class JdbcTemplate {
         });
     }
 
-    public <T> Page<T> page(String sql, List<?> args, Class<T> clazz, ApiPage page) throws SQLException {
+    public <T> Page<T> page(String sql, List<?> args, Class<T> clazz, ApiOffsetSize page) throws SQLException {
         return page(new BindSql(sql, new ArrayList<>(args)), clazz, page, null);
     }
 
-    public <T> Page<T> page(String sql, List<?> args, Class<T> clazz, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public <T> Page<T> page(String sql, List<?> args, Class<T> clazz, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         return page(new BindSql(sql, new ArrayList<>(args)), clazz, page, columnNameMapper);
     }
 
-    public <T> Page<T> page(BindSql bql, Class<T> clazz, ApiPage page) throws SQLException {
+    public <T> Page<T> page(BindSql bql, Class<T> clazz, ApiOffsetSize page) throws SQLException {
         return page(bql, clazz, page, null);
     }
 
-    public <T> Page<T> page(BindSql bql, Class<T> clazz, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public <T> Page<T> page(BindSql bql, Class<T> clazz, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         return contextActionDelegate(bql, (conn, sql) -> {
             Page<T> ret = JdbcResolver.page(conn, sql, clazz, page, columnNameMapper);
             return ret;
@@ -314,19 +314,19 @@ public class JdbcTemplate {
         });
     }
 
-    public Page<Map<String, Object>> page(String sql, List<?> args, ApiPage page) throws SQLException {
+    public Page<Map<String, Object>> page(String sql, List<?> args, ApiOffsetSize page) throws SQLException {
         return page(new BindSql(sql, new ArrayList<>(args)), page, null);
     }
 
-    public Page<Map<String, Object>> page(String sql, List<?> args, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public Page<Map<String, Object>> page(String sql, List<?> args, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         return page(new BindSql(sql, new ArrayList<>(args)), page, columnNameMapper);
     }
 
-    public Page<Map<String, Object>> page(BindSql bql, ApiPage page) throws SQLException {
+    public Page<Map<String, Object>> page(BindSql bql, ApiOffsetSize page) throws SQLException {
         return page(bql, page, null);
     }
 
-    public Page<Map<String, Object>> page(BindSql bql, ApiPage page, Function<String, String> columnNameMapper) throws SQLException {
+    public Page<Map<String, Object>> page(BindSql bql, ApiOffsetSize page, Function<String, String> columnNameMapper) throws SQLException {
         return contextActionDelegate(bql, (conn, sql) -> {
             Page<Map<String, Object>> ret = JdbcResolver.page(conn, sql, page, columnNameMapper);
             return ret;

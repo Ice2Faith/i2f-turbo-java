@@ -12,6 +12,7 @@ import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
 
 import java.sql.Connection;
@@ -250,9 +251,17 @@ public interface JdbcProcedureExecutor {
 
     int sqlUpdate(String datasource, BindSql bql, Map<String, Object> params);
 
-    BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params);
+    BindSql sqlWrapPage(String datasource, BindSql bql, ApiOffsetSize page, Map<String, Object> params);
 
-    List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, int pageIndex, int pageSize);
+    BindSql sqlWrapCount(String datasource, BindSql bql, Map<String, Object> params);
+
+    default BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params) {
+        return sqlScript(datasource, dialectScriptList, params, null);
+    }
+
+    BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page);
+
+    List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, ApiOffsetSize page);
 
     void sqlTransBegin(String datasource, int isolation, Map<String, Object> params);
 

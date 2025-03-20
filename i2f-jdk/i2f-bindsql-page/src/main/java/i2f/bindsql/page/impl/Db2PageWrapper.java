@@ -2,7 +2,7 @@ package i2f.bindsql.page.impl;
 
 import i2f.bindsql.BindSql;
 import i2f.bindsql.page.IPageWrapper;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,10 @@ import java.util.ArrayList;
  */
 public class Db2PageWrapper implements IPageWrapper {
     @Override
-    public BindSql apply(BindSql bql, ApiPage page) {
+    public BindSql apply(BindSql bql, ApiOffsetSize page) {
+        if (page == null) {
+            return bql;
+        }
         page.prepare();
 
         BindSql pageSql = new BindSql();
@@ -21,27 +24,35 @@ public class Db2PageWrapper implements IPageWrapper {
         pageSql.setArgs(new ArrayList<>(bql.getArgs()));
 
         StringBuilder builder = new StringBuilder();
-        if (page.getIndex() != null && page.getSize() != null) {
+        if (page.getOffset() != null && page.getSize() != null) {
 
             builder.append(" SELECT * FROM ( ")
                     .append(" SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( ")
                     .append(bql.getSql())
                     .append(" ) AS TMP_PAGE ")
                     .append(" ) TMP_PAGE ")
-                    .append(" WHERE ROW_ID BETWEEN ? AND ? ");
+                    .append(" WHERE ROW_ID >= ? AND ROW_ID < ? ");
 
-            pageSql.getArgs().add(page.getOffset());
-            pageSql.getArgs().add(page.getEnd());
+            pageSql.getArgs().add(page.getOffset() + 1);
+            pageSql.getArgs().add(page.getEnd() + 1);
+        } else if (page.getOffset() != null) {
+            builder.append(" SELECT * FROM ( ")
+                    .append(" SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( ")
+                    .append(bql.getSql())
+                    .append(" ) AS TMP_PAGE ")
+                    .append(" ) TMP_PAGE ")
+                    .append(" WHERE ROW_ID >= ? ");
+
+            pageSql.getArgs().add(page.getOffset() + 1);
         } else if (page.getSize() != null) {
             builder.append(" SELECT * FROM ( ")
                     .append(" SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( ")
                     .append(bql.getSql())
                     .append(" ) AS TMP_PAGE ")
                     .append(" ) TMP_PAGE ")
-                    .append(" WHERE ROW_ID BETWEEN ? AND ? ");
+                    .append(" WHERE ROW_ID < ? ");
 
-            pageSql.getArgs().add(0);
-            pageSql.getArgs().add(page.getSize());
+            pageSql.getArgs().add(page.getSize() + 1);
         }
 
         pageSql.setSql(builder.toString());

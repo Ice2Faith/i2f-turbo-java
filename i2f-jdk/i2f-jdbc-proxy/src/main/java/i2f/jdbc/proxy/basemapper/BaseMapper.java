@@ -2,7 +2,7 @@ package i2f.jdbc.proxy.basemapper;
 
 import i2f.bindsql.BindSql;
 import i2f.jdbc.data.QueryResult;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 import i2f.page.Page;
 
 import java.util.Collection;
@@ -48,13 +48,13 @@ public interface BaseMapper<T> {
 
     long count(T bean);
 
-    Page<Map<String, Object>> pageMap(String table, Collection<String> cols, Map<String, Object> whereMap, ApiPage page);
+    Page<Map<String, Object>> pageMap(String table, Collection<String> cols, Map<String, Object> whereMap, ApiOffsetSize page);
 
-    Page<Map<String, Object>> pageMap(T bean, ApiPage page);
+    Page<Map<String, Object>> pageMap(T bean, ApiOffsetSize page);
 
-    Page<T> page(String table, Collection<String> cols, Map<String, Object> whereMap, ApiPage page);
+    Page<T> page(String table, Collection<String> cols, Map<String, Object> whereMap, ApiOffsetSize page);
 
-    Page<T> page(T bean, ApiPage page);
+    Page<T> page(T bean, ApiOffsetSize page);
 
     boolean call(BindSql sql);
 

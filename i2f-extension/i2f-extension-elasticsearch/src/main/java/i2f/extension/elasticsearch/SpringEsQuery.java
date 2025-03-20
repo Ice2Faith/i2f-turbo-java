@@ -1,5 +1,6 @@
 package i2f.extension.elasticsearch;
 
+import i2f.page.ApiPage;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -28,8 +29,9 @@ public class SpringEsQuery {
     public SpringEsQuery inflate() {
         this.builder = new NativeSearchQueryBuilder()
                 .withQuery(esQuery.boolQueryBuilder);
-        if (esQuery.index != null && esQuery.size != null) {
-            Pageable pageable = PageRequest.of(esQuery.index, esQuery.size);
+        if (esQuery.page != null) {
+            ApiPage page = new ApiPage(esQuery.page);
+            Pageable pageable = PageRequest.of(page.getIndex(), page.getSize());
             this.builder.withPageable(pageable);
         }
         for (Map.Entry<String, Boolean> item : esQuery.orders.entrySet()) {
@@ -66,7 +68,8 @@ public class SpringEsQuery {
 
             }
         } else {
-            ret.page(this.esQuery.index, this.esQuery.size);
+
+            ret.page(this.esQuery.page);
         }
         ret.data(page.getTotalElements(), page.getContent());
         return ret;

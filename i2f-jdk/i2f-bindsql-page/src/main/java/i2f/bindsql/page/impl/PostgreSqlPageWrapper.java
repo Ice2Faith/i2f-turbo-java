@@ -2,7 +2,7 @@ package i2f.bindsql.page.impl;
 
 import i2f.bindsql.BindSql;
 import i2f.bindsql.page.IPageWrapper;
-import i2f.page.ApiPage;
+import i2f.page.ApiOffsetSize;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,10 @@ import java.util.ArrayList;
  */
 public class PostgreSqlPageWrapper implements IPageWrapper {
     @Override
-    public BindSql apply(BindSql bql, ApiPage page) {
+    public BindSql apply(BindSql bql, ApiOffsetSize page) {
+        if (page == null) {
+            return bql;
+        }
         page.prepare();
 
         BindSql pageSql = new BindSql();
@@ -21,13 +24,19 @@ public class PostgreSqlPageWrapper implements IPageWrapper {
         pageSql.setArgs(new ArrayList<>(bql.getArgs()));
 
         StringBuilder builder = new StringBuilder();
-        if (page.getIndex() != null && page.getSize() != null) {
+        if (page.getOffset() != null && page.getSize() != null) {
 
             builder.append(bql.getSql())
                     .append(" limit ? ")
                     .append(" offset ? ");
 
             pageSql.getArgs().add(page.getSize());
+            pageSql.getArgs().add(page.getOffset());
+        } else if (page.getOffset() != null) {
+
+            builder.append(bql.getSql())
+                    .append(" offset ? ");
+
             pageSql.getArgs().add(page.getOffset());
         } else if (page.getSize() != null) {
 

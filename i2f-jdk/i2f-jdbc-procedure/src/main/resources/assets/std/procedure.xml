@@ -429,11 +429,21 @@ eval-ts使用TinyScript引擎进行处理
     datasource默认以string访问，等价于 datasource.string
     script默认以visit访问，等价于 script.visit
     result-type默认以class访问，等价于 result-type.class
+    query-row支持limited属性，要求值为boolean类型
+    则使用分页包装的方式只取第一条数据，语句将会被包装为分页数据
      -->
     <sql-query-row datasource="" script="" result="" result-type="">
 
     </sql-query-row>
-    <!-- 表示一个查询语句，预期为多行数据，执行结果放到result指定的变量名中 -->
+    <!--
+    表示一个查询语句，预期为多行数据，执行结果放到result指定的变量名中
+    query-list支持offset和limit属性用来支持分页数据获取，数据类型需要为Integer
+    offset起始值为0，为数据序号
+    limit是取的数据个数
+    对应例如mysql数据库中的limit ${offset},${limit}语句
+    其他数据库也一样，只不过根据不同的数据库类型实现相同的分页包装
+    内部语句会被包装为分页语句进行执行
+     -->
     <sql-query-list result="">
         <trim prefix="select" prefixOverrides="," suffixOverrides=",">
             id,
@@ -464,7 +474,11 @@ eval-ts使用TinyScript引擎进行处理
             <include refid="permsCondition"/>
         </where>
     </sql-query-list>
-    <!-- 表示一个查询语句，预期为单个值，仅一行一列的值，执行结果放到result指定的变量中 -->
+    <!--
+    表示一个查询语句，预期为单个值，仅一行一列的值，执行结果放到result指定的变量中
+    query-object支持limited属性，要求值为boolean类型
+    则使用分页包装的方式只取第一条数据，语句将会被包装为分页数据
+     -->
     <sql-query-object result="">
 
     </sql-query-object>

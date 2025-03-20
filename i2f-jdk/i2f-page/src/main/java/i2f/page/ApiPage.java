@@ -10,15 +10,17 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ApiPage {
+public class ApiPage extends ApiOffsetSize {
     //从0开始，表示页索引
     protected Integer index;
-    //页大小
-    protected Integer size;
-    //取数据的下标
-    protected Integer offset;
-    //取数据的结束下标
-    protected Integer end;
+
+    public ApiPage(ApiOffsetSize page) {
+        page(page);
+    }
+
+    public ApiPage(ApiPage page) {
+        page(page);
+    }
 
     public ApiPage(Integer index, Integer size) {
         page(index, size);
@@ -26,6 +28,30 @@ public class ApiPage {
 
     public static ApiPage of(Integer index, Integer size) {
         return new ApiPage(index, size);
+    }
+
+    public static ApiPage ofPageNumSize(Integer pageNum, Integer pageSize) {
+        return of(pageNum == null ? null : pageNum - 1, pageSize);
+    }
+
+    public static ApiPage of(ApiOffsetSize page) {
+        return new ApiPage(page);
+    }
+
+    public ApiPage page(ApiOffsetSize page) {
+        super.pageOffset(page);
+        if (offset != null && size != null) {
+            index = offset / size;
+        }
+        return this;
+    }
+
+    public ApiPage page(ApiPage page) {
+        super.pageOffset(page);
+        if (page != null) {
+            this.index = page.index;
+        }
+        return this;
     }
 
     public ApiPage page(Integer index, Integer size) {
