@@ -146,6 +146,7 @@
         <module>i2f-image-std</module>
         <module>i2f-jdbc-procedure</module>
         <module>i2f-invokable</module>
+        <module>i2f-bindsql-stringify</module>
 
 
     </modules>
