@@ -128,11 +128,17 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
                 Map<String, Object> callParams = castArgumentListAsNamingMap(argList);
                 if(callParams.isEmpty()){
                     List<String> arguments = meta.getArguments();
-                    for (int i = 0; i < argList.size(); i++) {
-                        if(i>=arguments.size()){
+                    for (int i = 0,j=0; i < argList.size(); i++) {
+                        if(j>=arguments.size()){
                             break;
                         }
-                        String name = arguments.get(i);
+                        String name = arguments.get(j++);
+                        if(ParamsConsts.RETURN.equals(name)){
+                            if(j>=arguments.size()){
+                                break;
+                            }
+                            name=arguments.get(j++);
+                        }
                         Object val = argList.get(i);
                         callParams.put(name,val);
                     }
