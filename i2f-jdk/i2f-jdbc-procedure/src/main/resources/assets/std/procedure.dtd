@@ -87,7 +87,8 @@
         <!ATTLIST script-segment id CDATA #REQUIRED>
 
         <!ELEMENT script-include (ANY|EMPTY)>
-        <!ATTLIST script-include refid CDATA #REQUIRED>
+        <!ATTLIST script-include refid CDATA #IMPLIED>
+        <!ATTLIST script-include refid.visit CDATA #IMPLIED>
 
         <!ELEMENT lang-set (ANY|EMPTY)>
         <!ATTLIST lang-set value CDATA #IMPLIED>
@@ -398,13 +399,19 @@
 
         <!ELEMENT procedure-call (ANY|EMPTY)>
         <!ATTLIST procedure-call params CDATA #IMPLIED>
-        <!ATTLIST procedure-call refid CDATA #REQUIRED>
+        <!ATTLIST procedure-call refid CDATA #IMPLIED>
         <!ATTLIST procedure-call result CDATA #IMPLIED>
+        <!ATTLIST procedure-call params_share CDATA #IMPLIED>
+
+        <!ATTLIST procedure-call refid.visit CDATA #IMPLIED>
 
         <!ELEMENT function-call (ANY|EMPTY)>
         <!ATTLIST function-call params CDATA #IMPLIED>
-        <!ATTLIST function-call refid CDATA #REQUIRED>
+        <!ATTLIST function-call refid CDATA #IMPLIED>
         <!ATTLIST function-call result CDATA #IMPLIED>
+        <!ATTLIST function-call params_share CDATA #IMPLIED>
+
+        <!ATTLIST function-call refid.visit CDATA #IMPLIED>
 
         <!ELEMENT java-call (ANY|EMPTY)>
         <!ATTLIST java-call target CDATA #IMPLIED>

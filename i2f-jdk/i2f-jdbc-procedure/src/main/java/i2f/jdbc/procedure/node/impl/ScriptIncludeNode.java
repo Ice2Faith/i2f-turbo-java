@@ -36,7 +36,7 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        String refid = node.getTagAttrMap().get(AttrConsts.REFID);
+        String refid = (String)executor.attrValue(AttrConsts.REFID,FeatureConsts.STRING,node,context);
         ProcedureMeta meta = executor.getMeta(refid);
         if (meta == null) {
             return;
