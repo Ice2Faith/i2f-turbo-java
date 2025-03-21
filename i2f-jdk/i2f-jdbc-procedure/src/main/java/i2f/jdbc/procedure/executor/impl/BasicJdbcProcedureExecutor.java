@@ -248,13 +248,20 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return params;
     }
 
+    public String getNodeLocation(XmlNode node){
+        if(node==null){
+            return "null node";
+        }
+        return "tag:"+node.getTagName()+", "+node.getLocationFile()+":"+node.getLocationLineNumber();
+    }
+
     @Override
     public Map<String, Object> exec(XmlNode node, Map<String,Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
             for (ExecutorNode item : getNodes()) {
                 if (item.support(node)) {
                     prepareParams(params);
-                    debugLog(() -> "exec " + node.getTagName() + " by " + item.getClass().getSimpleName());
+                    debugLog(() -> "exec " + node.getTagName() + " by " + item.getClass().getSimpleName()+", at "+getNodeLocation(node));
                     Map<String, Connection> bakConnection = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
                     if (beforeNewConnection) {
                         visitSet(params,ParamsConsts.CONNECTIONS, new HashMap<>());
@@ -273,7 +280,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     return params;
                 }
             }
-            debugLog(() -> "waring! tag " + node.getTagName() + " not found any executor!");
+            debugLog(() -> "waring! tag " + node.getTagName() + " not found any executor!"+" at "+getNodeLocation(node));
         } catch (ReturnSignalException e) {
             debugLog(() -> "return signal");
         }
@@ -320,7 +327,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             prepareParams(params);
             ProcedureNode execNode = getProcedureNode();
 
-            debugLog(() -> "exec as procedure " + node.getTagName());
+            debugLog(() -> "exec as procedure " + node.getTagName()+", at "+getNodeLocation(node));
 
             Map<String, Connection> bakConnection = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
             if (beforeNewConnection) {
