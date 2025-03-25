@@ -1,6 +1,7 @@
 package i2f.match.regex;
 
 
+import i2f.lru.LruMap;
 import i2f.match.regex.data.RegexFindPartMeta;
 import i2f.match.regex.data.RegexMatchItem;
 
@@ -26,9 +27,17 @@ import java.util.regex.Pattern;
  * @desc
  */
 public class RegexUtil {
+    public static final LruMap<String, Pattern> PATTERN_MAP = new LruMap<>(2048);
+
+    public static Pattern getPattern(String regex) {
+        if (regex == null) {
+            return null;
+        }
+        return PATTERN_MAP.computeIfAbsent(regex, (key) -> Pattern.compile(regex));
+    }
     public static List<RegexMatchItem> regexFinds(String str, String regex) {
         List<RegexMatchItem> ret = new ArrayList<>();
-        Pattern patten = Pattern.compile(regex);
+        Pattern patten = getPattern(regex);
         Matcher matcher = patten.matcher(str);
         while (matcher.find()) {
             MatchResult result = matcher.toMatchResult();
@@ -55,7 +64,7 @@ public class RegexUtil {
      */
     public static List<RegexFindPartMeta> regexFindParts(String str, String regex) {
         List<RegexFindPartMeta> ret = new ArrayList<>(64);
-        Pattern patten = Pattern.compile(regex);
+        Pattern patten = getPattern(regex);
         Matcher matcher = patten.matcher(str);
         int lidx = 0;
         while (matcher.find()) {
@@ -309,7 +318,7 @@ public class RegexUtil {
             return str;
         }
         StringBuilder builder = new StringBuilder();
-        Pattern patten = Pattern.compile(regex);
+        Pattern patten = getPattern(regex);
         Matcher matcher = patten.matcher(str);
         int cnt = 0;
         int lidx = 0;
