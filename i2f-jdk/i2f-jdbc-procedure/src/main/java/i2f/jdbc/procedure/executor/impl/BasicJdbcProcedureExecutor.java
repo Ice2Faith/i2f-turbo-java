@@ -449,6 +449,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.put(ParamsConsts.BEANS, new HashMap<>());
 
         ret.put(ParamsConsts.DATASOURCES, new HashMap<>());
+        ret.put(ParamsConsts.DATASOURCES_MAPPING,new HashMap<>());
 
         ret.put(ParamsConsts.CONNECTIONS, new HashMap<>());
 
@@ -471,6 +472,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.put(ParamsConsts.BEANS, params.get(ParamsConsts.BEANS));
 
         ret.put(ParamsConsts.DATASOURCES, params.get(ParamsConsts.DATASOURCES));
+        ret.put(ParamsConsts.DATASOURCES_MAPPING,params.get(ParamsConsts.DATASOURCES_MAPPING));
 
         ret.put(ParamsConsts.GLOBAL, params.get(ParamsConsts.GLOBAL));
 
@@ -788,6 +790,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         if (datasource == null || datasource.isEmpty()) {
             datasource = ParamsConsts.DEFAULT_DATASOURCE;
         }
+        Map<String,String> datasourcesMapping = (Map<String,String>)params.get(ParamsConsts.DATASOURCES_MAPPING);
+        if(datasourcesMapping!=null){
+            String mapping = datasourcesMapping.get(datasource);
+            if(mapping!=null &&!mapping.isEmpty()){
+                datasource=mapping;
+            }
+        }
+
         Map<String, Connection> connectionMap = (Map<String, Connection>) params.get(ParamsConsts.CONNECTIONS);
         if (connectionMap == null) {
             connectionMap = new LinkedHashMap<>();

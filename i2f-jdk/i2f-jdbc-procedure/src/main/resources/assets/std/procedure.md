@@ -1207,6 +1207,86 @@ end;
 </lang-render>
 ```
 
+## 问题解答
+
+### 怎么将主数据切换为其他数据源来执行过程？
+- 默认情况下，框架自动检测primary,master,main,default,leader这些数据源作为主数据源primary
+- 在多数据源场景中，就是按照这个顺序进行检测的，检测到为止，则不再继续检测
+- 要运行过程，如果过程中都没有明确指定数据源
+- 则需要具有primary这样一个数据源
+- 但是，有的情况下，代码是写在一起，但是实际上却需要再不同的数据源中进行执行
+- 例如，某一类存过要在ods层的数据库执行，另一类存过要在ads层的数据库执行
+- 这样的情况下，程序如果默认的primary是ods层的数据库
+- 则旧导致ads层的存过调用起来比较费劲个，需要手动调整ads作为主数据源primary
+- 因此，内部进行了设计上的调整，添加了datasourcesMapping数据源映射的特性
+- 定义如下
+```java
+datasourcesMapping=new HashMap<String,String>();
+```
+- 键为映射的名称，值为被映射的名称
+- 默认情况下，这个映射是空的，也就是不进行任何映射
+- 下面直接来看这种场景怎么调用
+```java
+Map<String, Object> ret = JdbcProcedureHelper.call("SP_ODS_MAIN", (map) -> {
+    map.put("O_CODE", "")
+            .put("O_MSG", "")
+            .put("IN_SUM_MON", "202501")
+            .put(ParamsConsts.DATASOURCES_MAPPING, // 添加datasourcesMapping数据源映射
+                    new MapBuilder<>(new HashMap<>(),String.class,String.class)
+                            .put(ParamsConsts.DEFAULT_DATASOURCE,"ods") // 将默认数据卷primary指向ods数据源
+                            .get()
+            );
+});
+```
+- 也就是在调用参数上加上datasourcesMapping这个映射Map
+- 并且指定了默认数据源指向ods数据源
+- 这样，在调用这个存过时，默认数据源就是ods数据源
+- 而不再是程序配置中默认的主数据源
+- 需要注意的是，这种操作只建议在入口的地方进行设置映射
+- 不建议在过程内部也调整映射
+- 因为在内部调整之后，可能在子过程或者内部过程调用时，发生事务控制混乱以及主数据源混乱的情况
+
+### 上下文中有哪些固定的参数？
+- 内置了一些固定的运行常量
+- 这些常量可以根据需要进行使用和调整值
+- 这些固定的参数，基本上在发生内部嵌套调用时，保持了这些参数的共享性
+- 这些参数始终都进行共享
+- 在使用上，应该避免对这些值进行赋值
+- 比如，常用的global,trace,executor参数
+- 更多详细的固定变量，可以在如下的函数中进行查看
+- 未来可能会发生一些变化
+```shell
+BasicJdbcProcedureExecutor.createParams()
+```
+- 下面简单介绍一下这些固定变量的设计初衷和目的
+- context 上下文，主要用于能够结合其他框架的上下文，以使用一些其他框架特有的能力，默认对接springboot中时为ApplicationContext对象
+- env 环境变量，主要用于提供一些环境变量的配置，以便能够进行环境变量的读取操作，默认对接springboot中时为Environment对象
+- beans 类型Map<String,Object>用于提供一些具名的对象实例，主要是配合固定的框架使用，能够读取到框架中的bean对象，进行调用bean方法，默认对接springboot中定义的所有bean对象
+- datasources 类型Map<String,DataSource>,用于提供可用的数据源，不管是否是什么框架，只要执行SQL都应该具有数据源，至少一个primary数据源，默认对接springboot中时自动读取配置的所有数据源
+- datasourcesMapping 类型Map<String,String>,用于提供数据源名称映射功能，在需要使用key的数据源时，替换为使用对应的value指向的数据源，默认是空配置，不做映射
+- connections 类型Map<String,Connection>,用于保存过程执行期间的所使用的每个数据源的实际连接，只有在发生对应数据源的SQL执行操作时，即使发生了内部过程嵌套调用，也是用的是同一个连接，除非手动指定使用新连接，才会初始化连接到其中，默认是空的
+- global 类型Map<String,Object>,用于保存全局变量，在发生过程内部嵌套调用时，依旧能够保持全局变量的共享和传递，默认是空的
+- trace 类型Map<String,Object>,用户保存运行时的跟踪信息，方便进行日志跟踪或者源码位置溯源等操作，配合调试等功能，一般对于用户来说只读即可
+- executor 类型JdbcProcedureExecutor,用于提供executor的操作能力，方便在一些场景中，能够获取executor的操作能力
+- 关于这些参数是如何在发生内部调用时进行传递的，请看下一节
+
+### 发生内部嵌套调用时上下文是怎么传递的？
+- 针对固定参数是使用直接引用赋值的方式进行传递的
+- 始终保持引用不变
+- 具体可参看如下代码
+```java
+BasicJdbcProcedureExecutor.newParams()
+```
+
+### 是怎么注入了上下文的固定参数的？
+- 用户调用古城，一般只需要传递过程声明的形式参数
+- 但是固定参数，用户一般都不需要显式的进行设置
+- 那这是在什么时候添加的固定参数？
+- 具体可查看如下代码
+```java
+BasicJdbcProcedureExecutor.prepareParams()
+```
+
 ## 拓展自己的TinyScript自定义函数
 - 一些函数是TinyScript内建的函数
 - 能够提供基本和数据库内建函数一样的能力
