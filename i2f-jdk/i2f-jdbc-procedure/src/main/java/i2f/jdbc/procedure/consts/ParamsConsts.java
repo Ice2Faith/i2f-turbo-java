@@ -12,6 +12,7 @@ public interface ParamsConsts {
     String BEANS = "beans";
 
     String DATASOURCES = "datasources";
+    String DATASOURCES_MAPPING="datasourcesMapping";
 
     String GLOBAL = "global";
 

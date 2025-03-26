@@ -38,10 +38,14 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             executor.visitSet(context,ParamsConsts.TRACE_ERRMSG,traceErrMsg);
             ContextHolder.TRACE_ERRMSG.set(traceErrMsg);
 
-            executor.errorLog(() -> errorMsg, e);
             if(e instanceof SignalException){
+                Throwable cause = e.getCause();
+                if(cause==null){
+                    executor.errorLog(() -> errorMsg, e);
+                }
                 throw (SignalException)e;
             } else {
+                executor.errorLog(() -> errorMsg, e);
                 throw new ThrowSignalException(errorMsg, e);
             }
         }

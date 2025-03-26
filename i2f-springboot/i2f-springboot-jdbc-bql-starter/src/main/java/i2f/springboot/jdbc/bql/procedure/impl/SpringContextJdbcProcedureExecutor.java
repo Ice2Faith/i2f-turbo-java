@@ -73,7 +73,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
             beanMap.put(name, bean);
         }
         Map<String,Object> retBeanMap =(Map<String,Object>) ret.computeIfAbsent(ParamsConsts.BEANS, (key) -> new HashMap<>());
-        retBeanMap.putAll(retBeanMap);
+        retBeanMap.putAll(beanMap);
 
         Map<String, DataSource> datasourceMap = getDatasourceMap();
         Map<String,Object> retDatasourceMap =(Map<String,Object>) ret.computeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
