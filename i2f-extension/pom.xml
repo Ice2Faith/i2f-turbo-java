@@ -75,6 +75,7 @@
         <module>i2f-extension-groovy</module>
         <module>i2f-extension-tokenlization-jcseg</module>
         <module>i2f-extension-tokenlization-ansj</module>
+        <module>i2f-extension-tokenlization-jieba</module>
     </modules>
 
 
