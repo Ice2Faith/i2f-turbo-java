@@ -49,7 +49,11 @@ public class SqlUpdateNode extends AbstractExecutorNode {
         if(bql==null) {
             bql = executor.sqlScript(datasource, dialectScriptList, context);
         }
+        if(executor.isDebug()){
+            bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+        }
         int row = executor.sqlUpdate(datasource, bql, context);
+        executor.debugLog(()->"found data is : "+row+"! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
         if (result != null && !result.isEmpty()) {
             Object val = executor.resultValue(row, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, val);

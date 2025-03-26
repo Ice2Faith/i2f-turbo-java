@@ -476,7 +476,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitClassNameBlock(TinyScriptParser.ClassNameBlockContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 1) {
                 throw new IllegalArgumentException("missing class name block!");
@@ -979,7 +979,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitNamingBlock(TinyScriptParser.NamingBlockContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 1) {
                 throw new IllegalArgumentException("missing naming block!");
@@ -1627,7 +1627,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitRefValue(TinyScriptParser.RefValueContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 0) {
                 throw new IllegalArgumentException("missing ref value!");
@@ -1657,7 +1657,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitConstClass(TinyScriptParser.ConstClassContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 0) {
                 throw new IllegalArgumentException("missing const class!");
@@ -1688,7 +1688,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitConstBool(TinyScriptParser.ConstBoolContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 0) {
                 throw new IllegalArgumentException("missing const boolean!");
@@ -1720,7 +1720,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitConstNull(TinyScriptParser.ConstNullContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 0) {
                 throw new IllegalArgumentException("missing const null!");
@@ -1750,7 +1750,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitConstString(TinyScriptParser.ConstStringContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 0) {
                 throw new IllegalArgumentException("missing const string!");
@@ -1865,7 +1865,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitDecNumber(TinyScriptParser.DecNumberContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 0) {
                 throw new IllegalArgumentException("missing dec number!");
@@ -1908,7 +1908,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitHexNumber(TinyScriptParser.HexNumberContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 0) {
                 throw new IllegalArgumentException("missing hex number!");
@@ -1944,7 +1944,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitOtcNumber(TinyScriptParser.OtcNumberContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 0) {
                 throw new IllegalArgumentException("missing otc number!");
@@ -1980,7 +1980,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     @Override
     public Object visitBinNumber(TinyScriptParser.BinNumberContext ctx) {
         try {
-            debugNode(ctx);
+//            debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 0) {
                 throw new IllegalArgumentException("missing bin number!");
@@ -2470,14 +2470,14 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitChildren(RuleNode node) {
-        debugNode(node);
+//        debugNode(node);
         return null;
     }
 
     @Override
     public Object visitTerminal(TerminalNode node) {
         try {
-            debugNode(node);
+//            debugNode(node);
             return node.getText();
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
@@ -2489,7 +2489,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     @Override
     public Object visitErrorNode(ErrorNode node) {
-        debugNode(node);
+//        debugNode(node);
         return null;
     }
 

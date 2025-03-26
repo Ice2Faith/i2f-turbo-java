@@ -27,6 +27,7 @@ public class LangRenderNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String script = node.getTextBody();
         String val = executor.render(script, context);
+        executor.debugLog(()->"at "+node.getLocationFile()+":"+node.getLocationLineNumber()+" render string: "+val);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null && !result.isEmpty()) {
             Object res = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);

@@ -1,9 +1,14 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.SignalException;
+import i2f.jdbc.procedure.signal.impl.ControlSignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -79,6 +84,28 @@ public class LangTryNode extends AbstractExecutorNode {
         try {
             executor.execAsProcedure(bodyNode, context, false, false);
         } catch (Throwable e) {
+            if(e instanceof ControlSignalException){
+                throw (ControlSignalException)e;
+            }
+            if(e instanceof ThrowSignalException){
+                ThrowSignalException ex = (ThrowSignalException) e;
+                Throwable cause = ex.getCause();
+                if(cause!=null){
+                    e=cause;
+                }
+            }
+            if(e instanceof SignalException){
+                SignalException ex = (SignalException) e;
+                Throwable cause = ex.getCause();
+                if(cause!=null){
+                    e=cause;
+                }
+            }
+
+            String traceErrMsg=e.getClass().getName()+": "+e.getMessage();
+            executor.visitSet(context, ParamsConsts.TRACE_ERRMSG,traceErrMsg);
+            ContextHolder.TRACE_ERRMSG.set(traceErrMsg);
+
             boolean handled = false;
             for (XmlNode catchNode : catchNodes) {
                 String type = catchNode.getTagAttrMap().get(AttrConsts.TYPE);
@@ -93,6 +120,8 @@ public class LangTryNode extends AbstractExecutorNode {
                 // 备份堆栈
                 Map<String, Object> bakParams = new LinkedHashMap<>();
                 bakParams.put(exName, context.get(exName));
+
+                executor.visitSet(context,exName,e);
 
                 String[] arr = type.split("\\|");
                 for (String item : arr) {
@@ -116,7 +145,11 @@ public class LangTryNode extends AbstractExecutorNode {
                 executor.visitSet(context,exName, bakParams.get(exName));
             }
             if (!handled) {
-                throw e;
+                if(e instanceof RuntimeException){
+                    throw (RuntimeException)e;
+                }else {
+                    throw new ThrowSignalException(e.getMessage(),e);
+                }
             }
         } finally {
             if (finallyNode != null) {

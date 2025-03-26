@@ -1,6 +1,5 @@
 package i2f.jdbc.procedure.reportor;
 
-import groovy.lang.GroovyShell;
 import i2f.compiler.MemoryCompiler;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.ognl.OgnlUtil;
@@ -10,6 +9,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.LangEvalJavaNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import groovy.lang.GroovyShell;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
@@ -29,14 +29,19 @@ public class GrammarReporter {
         if(map==null){
             return;
         }
+        warnPoster.accept("xproc4j report grammar running ...");
         long bts=System.currentTimeMillis();
         AtomicInteger allReportCount = new AtomicInteger(0);
         AtomicInteger allNodeCount = new AtomicInteger(0);
         try {
+            int mapSize = map.size();
+            AtomicInteger reportSize=new AtomicInteger(0);
             for (Map.Entry<String, ProcedureMeta> entry : map.entrySet()) {
+                reportSize.incrementAndGet();
                 ProcedureMeta meta = entry.getValue();
                 if (meta.getType() == ProcedureMeta.Type.XML) {
                     XmlNode node = (XmlNode) meta.getTarget();
+                    executor.debugLog(()->"xproc4j grammar report rate "+String.format("%6.02f%%",reportSize.get()*100.0/mapSize)+", on node: "+node.getTagName()+", at "+node.getLocationFile()+":"+node.getLocationLineNumber());
                     AtomicInteger reportCount = new AtomicInteger(0);
                     AtomicInteger nodeCount = new AtomicInteger(0);
                     reportGrammar(node, executor, warnPoster, reportCount, nodeCount);

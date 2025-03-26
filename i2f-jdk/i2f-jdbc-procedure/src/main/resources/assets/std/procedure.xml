@@ -168,17 +168,34 @@ eval-ts使用TinyScript引擎进行处理
     或者在 DebuggerNode 节点上添加断点也可实现
     -->
     <debugger tag="" test=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <debugger tag="execSql"/>
+        <debugger tag="getUserInfo" test="user==null"/>
+    </script-segment>
+
     <!--
     使用系统输出行，以tag开头，其余变量附加在其他属性上即可
     tag默认以字符串方式解析，等价于 tag.string
      -->
     <lang-println tag="" aaa=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-printf tag="userInfo" userName="user.name" age="user.age" now.date-now=""/>
+    </script-segment>
 
     <!--
     使用value指定的模版进行渲染输出,同样支持tag属性标签
     tag默认以字符串方式解析，等价于 tag.string
      -->
     <lang-printf tag="" value.body-xml.trim=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-printf tag="userInfo" value="username:${user.name}"/>
+        <lang-printf tag="userInfo" value.body-text.trim="">
+            username: ${user.name}
+        </lang-printf>
+    </script-segment>
 
     <!-- 语句段，可使用script-include进行引用，id唯一即可，root表示语句段使用了哪些变量，可以作为变量声明 -->
     <script-segment id="" root="">
@@ -188,6 +205,11 @@ eval-ts使用TinyScript引擎进行处理
     </script-segment>
     <!-- 引用语句段，可使用script-segment定义的语句段，refid表示引用的语句段，其他属性表示传递给语句段的根变量 -->
     <script-include refid="" root="" aaa=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <script-include refid="demo"/>
+        <script-include refid="demo" IN_LOCATION="V_PROCEDURE_NAME"/>
+    </script-segment>
 
     <!--
     从value指定的值赋值到result指定的值中，
@@ -199,6 +221,27 @@ eval-ts使用TinyScript引擎进行处理
     pattern默认以string访问，等价于 pattern.string
      -->
     <lang-set value.int="" radix="" pattern="" result=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-set result="v_val" value.int="1"/>
+        <lang-set result="v_val" value.boolean="true"/>
+        <lang-set result.trim="v_val" value.render="welcome ${userName}! "/>
+        <lang-set result="v_i" value.eval="v_i+1"/>
+        <lang-set result="v_now" value.date-now=""/>
+        <lang-set result="v_null" value.null=""/>
+        <lang-set result="user.nickName" value="user.userName"/>
+        <lang-set result="v_now" value.eval-java="new Date()"/>
+        <lang-set result="v_now" value.eval-ts="new Date()"/>
+        <lang-set result="v_year" value.date="2025-01-02" pattern="yyyy-MM-dd"/>
+        <lang-set result="v_hex" value.string="6fd" radix="16"/>
+        <lang-set result.body-text.trim="">
+            text
+        </lang-set>
+        <lang-set result.body-text.trim.render="">
+            hello ${user.nickName}!
+        </lang-set>
+    </script-segment>
+
 
     <!--
     格式化日期
@@ -206,12 +249,24 @@ eval-ts使用TinyScript引擎进行处理
     pattern默认以string访问，等价于 pattern.string
      -->
     <lang-format-date value="" pattern="" result=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-format-date result="v_str" value.eval-ts="new Date()" pattern="yyyy-MM-dd"/>
+        <lang-format-date result="v_str" value="v_begin_time" pattern="yyyyMMdd"/>
+    </script-segment>
+
     <!--
     格式化字符串
     value默认以visit访问，等价于 value.visit
     pattern默认以string访问，等价于 pattern.string
      -->
     <lang-format value="" pattern="" result=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-format result="v_str" value="12.125" pattern="%.2f"/>
+        <lang-format result="v_str" value="v_money" pattern="your account has %.2f$"/>
+        <lang-format result="v_str" value.date-now="" pattern="yyyy-MM-dd"/>
+    </script-segment>
 
     <!--
     字符串拼接
@@ -219,6 +274,11 @@ eval-ts使用TinyScript引擎进行处理
     其他argx以visit访问，等价于 argx.visit
      -->
     <lang-string-join separator="" result="" arg0="" arg1=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-string-join result="v_vals" separator="," arg0.string="a.username" arg1.int="2" arg2="v_now"/>
+        <lang-string-join result="v_str" arg0.string="[" arg1.int="0" arg2.string="]"/>
+    </script-segment>
 
     <!--
     创建一个新的参数，用于为内部调用其他过程提供干净的上下文参数，避免参数污染
@@ -226,6 +286,11 @@ eval-ts使用TinyScript引擎进行处理
     传入参数默认以visit访问，等价于 aaa.visit
     -->
     <lang-new-params result="" aaa="" bbb=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-new-params result="callParams" IN_SUM_MONTH="V_SUM_MONTH" IN_CITY_CODE.int="10010"/>
+        <lang-new-params result="callParams"/>
+    </script-segment>
 
     <!--
     调用其他存储过程，id表示目标的id,
@@ -233,12 +298,39 @@ eval-ts使用TinyScript引擎进行处理
     直接使用目标变量age名来传递值
     params默认以visit访问，等价于 params.visit
     result为保存调用的参数，可用于从中获取调用的结果，如果同时指定的params，则result可以不用指定，因为result里面的值，实际上就是params里面的值
+    params_share默认以boolean访问，等价于params_share.boolean
     其他传入参数默认以visit访问，等价于 age.visit
     refid的值，不仅仅只有procedure标签上的ID才算，其他的XML标签上的ID也算
     同时，在bean中，如果是JdbcProcedureJavaCaller的实现类，同时类上具有@JdbcProcedure注解指定过程名称
     如果被加入到beans中的话，注解指定的名称也可以使用，这样就实现了JAVA类实现与XML脚本实现的统一调用
+    如果params_share指定为true，则直接使用本过程使用的上下文作为调用上下文，不会产生新的上下文，主要用于一些特殊场景中使用
      -->
-    <procedure-call refid="" params="" age="" result=""/>
+    <procedure-call refid="" params="" age="" result="" params_share=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <!-- 调用函数 -->
+        <procedure-call refid="F_TEST" result="callParams" IN_SUM_MONTH="V_SUM_MONTH"/>
+        <!-- 因为是函数，所以返回值就叫return，直接取值即可 -->
+        <lang-set result="V_IS_TEST" value="callParams.return"/>
+
+        <!-- 调用过程 -->
+        <procedure-call refid="SP_TEST" result="callParams" IN_SUM_MONTH.int="202501"/>
+        <!-- 因为调用的是存储过程，存在多个输出参数，因此需要根据定义的输出参数获取值，比如这里定义的输出参数O_FLAG和O_MSG -->
+        <lang-set result="V_FLAG" value="callParams.O_FLAG"/>
+        <lang-set result="V_MSG" value="callParams.O_MSG"/>
+
+        <!-- 使用预定义参数 -->
+        <lang-new-params result="callParams" IN_SUM_MONTH="V_SUM_MONTH"/>
+        <procedure-call refid="SP_MAIN" params="callParams"/>
+
+        <!-- 共享过程上下文参数 -->
+        <procedure-call refid="SP_MAIN" params_share="true"/>
+
+        <!-- 动态执行过程名称 -->
+        <lang-set result="V_SP_NAME" value.string="SP_MAIN"/>
+        <procedure-call refid.visit="V_SP_NAME" params_share="true"/>
+    </script-segment>
+
 
     <!--
     参数使用和procedure-call一致
@@ -249,7 +341,12 @@ eval-ts使用TinyScript引擎进行处理
     内部实际上是通过子过程的params对象Map绑定的
     这个result就是绑定到ParamsConsts.RETURN绑定的键上
     -->
-    <function-call refid="" params="" age="" result=""/>
+    <function-call refid="" params="" age="" result="" params_share=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <!-- result 就是函数的返回值,其他参数的用法和procedure-call一致 -->
+        <function-call refid="F_TEST" result="V_IS_TEST" IN_SUM_MONTH.int="202501"/>
+    </script-segment>
 
     <!--
     调用java指定的回调方法
@@ -263,6 +360,11 @@ eval-ts使用TinyScript引擎进行处理
     否则不进行调用
     -->
     <java-call target="" result=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <java-call target="funcTestCaller" result="V_IS_TEST"/>
+        <java-call target="com.test.caller.FuncTestCaller" result="V_IS_TEST"/>
+    </script-segment>
 
     <!--
     返回，结束此过程
@@ -274,6 +376,12 @@ eval-ts使用TinyScript引擎进行处理
     还需要从这个Map中取名为ParamsConsts.RETURN的键的值，才是这里返回的value值
     -->
     <lang-return value=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-return/>
+        <lang-return value.int="0"/>
+        <lang-return value="V_IS_OK"/>
+    </script-segment>
 
     <!--
     抛出异常，value指定为message内容，type指定为异常类型，cause可选为造成异常的异常对象
@@ -282,6 +390,19 @@ eval-ts使用TinyScript引擎进行处理
     cause以visit访问，不支持修饰符
      -->
     <lang-throw value="" type="" cause=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-throw type="RuntimeException" value="bad parameter"/>
+
+        <lang-try>
+            <lang-body>
+
+            </lang-body>
+            <lang-catch e="e">
+                <lang-throw type="RuntimeException" value="bad parameter" cause="e"/>
+            </lang-catch>
+        </lang-try>
+    </script-segment>
 
     <!--
     用于指定一小段脚本，来设置一个变量值到result指定的变量名中
@@ -290,6 +411,17 @@ eval-ts使用TinyScript引擎进行处理
     <lang-eval value="" result="">
         11
     </lang-eval>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-eval result="v_ok" value="v_cnt > 0"/>
+
+        <lang-eval result="v_len" value="v_str.length()"/>
+
+        <lang-eval result="v_i">
+            v_i+1
+        </lang-eval>
+    </script-segment>
+
     <!--
     用于指定一段字符串到result指定的变量名中
     对于lang-string/lang-render可以添加_lang属性，
@@ -302,10 +434,32 @@ eval-ts使用TinyScript引擎进行处理
     <lang-string result="" _lang="java">
 
     </lang-string>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-string result.trim="v_str">
+            123
+                456
+        </lang-string>
+        <lang-string result.trim.align="v_str">
+            | 123
+            |456
+        </lang-string>
+    </script-segment>
+
+
     <!-- 用于使用模版引擎进行渲染一段字符串到result指定的变量名中 -->
     <lang-render result="" _lang="sql">
 
     </lang-render>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-render result="v_sql" _lang="sql">
+            select * from ${tableName}
+                     where ${colName} = ${colEqValue}
+        </lang-render>
+
+    </script-segment>
+
     <!--
     lang-开头的表示语言的基本语句，这个就是对应if语句，test表示判定条件语句
     test默认以test访问，等价于 test.test
@@ -313,6 +467,32 @@ eval-ts使用TinyScript引擎进行处理
     <lang-if test="">
 
     </lang-if>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-if test="v_cnt==0">
+            <lang-set result="O_FLAG" value.int="-1"/>
+            <lang-return/>
+        </lang-if>
+
+        <lang-if test="v_grade in {'A','B','C'}">
+            <sql-update>
+                update sys_user set score =score+10 where grade=#{v_grade}
+            </sql-update>
+        </lang-if>
+
+        <lang-if test.visit="v_fail">
+            <lang-return/>
+        </lang-if>
+
+        <lang-if test='v_str.startsWith("DIM")'>
+            <lang-return value.int="-1"/>
+        </lang-if>
+
+        <lang-if test='v_str.contains("VAR")'>
+            <lang-return value.int="-1"/>
+        </lang-if>
+    </script-segment>
+
     <!-- 对应的就是if-else-if这种语句或者Switch这种分支语句 -->
     <lang-choose>
         <!--
@@ -327,6 +507,21 @@ eval-ts使用TinyScript引擎进行处理
 
         </lang-otherwise>
     </lang-choose>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-choose>
+            <lang-when test="v_grade in {1,2,3}">
+                <lang-set result="v_grade_color" value.string="blue"/>
+            </lang-when>
+            <lang-when test="v_grade==0">
+                <lang-set result="v_grade_color" value.string="skyblue"/>
+            </lang-when>
+            <lang-otherwise>
+                <lang-set result="v_grade_color" value.string="red"/>
+            </lang-otherwise>
+        </lang-choose>
+    </script-segment>
+
     <!--
     对应一个foreach循环，对一个集合进行迭代，collection表示被迭代的集合，item表示迭代变量的名称
     item默认值为item，可缺省
@@ -340,6 +535,16 @@ eval-ts使用TinyScript引擎进行处理
     <lang-foreach collection="" item="" first="" index="">
 
     </lang-foreach>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-foreach collection="v_user_list" item="item" first="isFirst" index="i">
+            <lang-if test="!isFirst">
+                <lang-set result="v_str" value.render="${v_str},"/>
+            </lang-if>
+            <lang-set result="v_str" value.render="${v_str}${i}:${item.userName}"/>
+        </lang-foreach>
+    </script-segment>
+
     <!--
     对应一个计数型循环，表示从begin数开始每次增加incr的步长直到end结束，item表示迭代变量的名称
     begin默认值为0，可缺省
@@ -357,6 +562,24 @@ eval-ts使用TinyScript引擎进行处理
     <lang-fori begin="" end="" incr="" item="" first="" index="">
 
     </lang-fori>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-fori begin.int="2" end.int="100" incr.int="3">
+            <lang-set result="v_count" value.eval="v_count+1"/>
+        </lang-fori>
+
+        <lang-fori begin="v_index" end.int="100" >
+            <lang-set result="v_count" value.eval="v_count+1"/>
+            <lang-if test="v_index>= v_str.length()">
+                <lang-break/>
+            </lang-if>
+        </lang-fori>
+
+        <lang-fori end.int="100" >
+            <lang-set result="v_count" value.eval="v_count+1"/>
+        </lang-fori>
+    </script-segment>
+
     <!--
     对应一个while语句，test表示循环条件的判断语句
     first默认值为first，可缺省
@@ -371,6 +594,19 @@ eval-ts使用TinyScript引擎进行处理
         <!-- 对应break -->
         <lang-break/>
     </lang-while>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-while test="v_i>0">
+            <lang-if test="v_i==10">
+                <lang-continue/>
+            </lang-if>
+            <lang-if test="v_i &lt; v_cnt">
+                <lang-break/>
+            </lang-if>
+            <lang-set result="v_i" value.eval="v_i-1"/>
+        </lang-while>
+    </script-segment>
+
     <!--
     调用函数，在target指定的对象上调用method方法，并传入argx参数
     当指定target时，method不用指定类名
@@ -384,6 +620,14 @@ eval-ts使用TinyScript引擎进行处理
     target默认以visit访问，等价于 target.visit
      -->
     <lang-invoke method="" target="" arg0="" arg1="" result=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-invoke result="v_str" target="v_str" method="replaceAll" arg0.string="\s+" arg1.string=""/>
+
+        <lang-invoke result="v_num" method="parseInteger" arg0.string="11"/>
+
+    </script-segment>
+
     <!-- 对应一个异常处理块try-catch-finally -->
     <lang-try>
         <!-- 表示异常处理的内容，对应try的内容块 -->
@@ -403,6 +647,44 @@ eval-ts使用TinyScript引擎进行处理
 
         </lang-finally>
     </lang-try>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-try>
+            <lang-body>
+                <sql-update script="v_sql"/>
+            </lang-body>
+            <lang-catch type="ArithmeticException|java.sql.SQLException" e="e">
+                <lang-println tag="execError" SQL="v_sql" EXCEPTION="e"/>
+            </lang-catch>
+            <lang-catch type="RuntimeException" e="e">
+                <lang-println tag="runError" SQL="v_sql" EXCEPTION="e"/>
+            </lang-catch>
+        </lang-try>
+
+        <lang-try>
+            <lang-body>
+                <sql-update script="v_sql"/>
+            </lang-body>
+            <lang-catch e="e">
+                <lang-println tag="execError" SQL="v_sql" EXCEPTION="e"/>
+            </lang-catch>
+        </lang-try>
+
+        <lang-try>
+            <lang-body>
+                <sql-update script="v_sql"/>
+            </lang-body>
+            <lang-finally>
+                <sql-update script="v_log_sql"/>
+            </lang-finally>
+        </lang-try>
+
+        <lang-try>
+            <lang-body>
+                <sql-update script="v_sql"/>
+            </lang-body>
+        </lang-try>
+    </script-segment>
 
     <!--
     对应synchronized关键字,允许指定target，不指定则对当前节点的上下文context同步
@@ -411,6 +693,12 @@ eval-ts使用TinyScript引擎进行处理
     <lang-synchronized target="">
 
     </lang-synchronized>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-synchronized target="global">
+            <sql-update script="v_sql"/>
+        </lang-synchronized>
+    </script-segment>
 
     <!--
     用法类似lang-render
@@ -421,6 +709,18 @@ eval-ts使用TinyScript引擎进行处理
     <sql-script result="">
 
     </sql-script>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-script result="v_sql">
+            select *
+            from ${tableName}
+            <where>
+                <if test="status!=null">
+                    and status=#{status}
+                </if>
+            </where>
+        </sql-script>
+    </script-segment>
 
     <!--
     表示一个查询语句，预期为一行数据，执行结果放到result指定的变量名中；
@@ -435,6 +735,35 @@ eval-ts使用TinyScript引擎进行处理
     <sql-query-row datasource="" script="" result="" result-type="">
 
     </sql-query-row>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-query-row result="tmpRowMap" result-type="Map">
+            select * from sys_user
+            where id=#{id}
+        </sql-query-row>
+
+        <sql-query-row datasource="slave" result="tmpRowMap">
+            select * from sys_user
+            where id=#{id}
+        </sql-query-row>
+
+        <sql-query-row result="anyRow" limited="true">
+            select * from sys_user
+            where status=#{status}
+        </sql-query-row>
+
+        <sql-query-row result="v_user" script="v_sql"/>
+
+        <sql-query-row result="tmpUser" limited="true">
+            <sql-dialect databases="oracle,dm,ob">
+                SELECT * FROM SYS_USER WHERE STATUS=#{status}
+            </sql-dialect>
+            <sql-dialect databases="mysql,gbase,mariadb">
+                select * from sys_user where status=#{status}
+            </sql-dialect>
+        </sql-query-row>
+    </script-segment>
+
     <!--
     表示一个查询语句，预期为多行数据，执行结果放到result指定的变量名中
     query-list支持offset和limit属性用来支持分页数据获取，数据类型需要为Integer
@@ -474,6 +803,17 @@ eval-ts使用TinyScript引擎进行处理
             <include refid="permsCondition"/>
         </where>
     </sql-query-list>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-query-list result="userList">
+            select * from sys_user where del_flag=1
+        </sql-query-list>
+
+        <sql-query-list result="userList" script="v_sql"/>
+
+        <sql-query-list script="v_sql" offset="100" limit="15"/>
+    </script-segment>
+
     <!--
     表示一个查询语句，预期为单个值，仅一行一列的值，执行结果放到result指定的变量中
     query-object支持limited属性，要求值为boolean类型
@@ -482,6 +822,19 @@ eval-ts使用TinyScript引擎进行处理
     <sql-query-object result="">
 
     </sql-query-object>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-query-object result="v_cnt" result-type="long">
+            select count(1) from sys_user where del_flag=1
+        </sql-query-object>
+
+        <sql-query-object result="v_code" result-type="string">
+            select dict_code form sys_dict where dict_type=#{dictType} and dict_value=#{dictValue}
+        </sql-query-object>
+
+        <sql-query-object result="v_cnt" script="v_sql" result-type="long"/>
+    </script-segment>
+
     <!-- 表示一个更新语句，预期为JDBC执行update的返回值，执行结果放到result指定的变量中 -->
     <sql-update result="">
         <!--
@@ -528,6 +881,18 @@ eval-ts使用TinyScript引擎进行处理
 
         </sql-dialect>
     </sql-update>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-update>
+            delete from sys_user where del_flag=#{delFlag}
+        </sql-update>
+
+        <sql-update result="effectRows">
+            update sys_user set status=1 where create_time > #{activeDate}
+        </sql-update>
+
+        <sql-update script="v_sql"/>
+    </script-segment>
 
     <!--
     表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务
@@ -537,6 +902,20 @@ eval-ts使用TinyScript引擎进行处理
     <sql-trans-commit/>
     <sql-trans-rollback/>
     <sql-trans-none/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-try>
+            <lang-body>
+                <sql-trans-begin/>
+                <sql-update script="v_sql"/>
+                <sql-trans-commit/>
+            </lang-body>
+            <lang-catch>
+                <sql-trans-rollback/>
+            </lang-catch>
+        </lang-try>
+        <sql-trans-none/>
+    </script-segment>
 
     <!--
     异步执行，await表示是否需要等待执行结束，delay表示延迟多长时间再开始执行
@@ -547,11 +926,32 @@ eval-ts使用TinyScript引擎进行处理
     <lang-async await.boolean="" delay="" time-unit="">
 
     </lang-async>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-async>
+            <sql-update script="v_sql"/>
+        </lang-async>
+
+        <lang-async await="true">
+            <sql-query-object result="v_cnt" script="v_sql" result-type="long"/>
+        </lang-async>
+        <lang-if test="v_cnt==0">
+            <lang-return/>
+        </lang-if>
+    </script-segment>
+
     <!--
     java 中的count-down-latch
     count默认以eval访问，等价于 count.eval ，因为使用latch的场景大多数和集合等有关，所以选用默认eval类方便获取集合的大小
      -->
     <lang-latch count="" result=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-latch result="v_latch" count.int="3"/>
+
+        <lang-latch result="v_latch" count="userList.size()"/>
+    </script-segment>
+
     <!--
     多个任务并行
     await默认以boolean访问，等价于 await.boolean
@@ -566,6 +966,26 @@ eval-ts使用TinyScript引擎进行处理
             <lang-latch-down name=""/>
         </lang-async>
     </lang-async-all>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-async-all await="true">
+            <lang-async>
+                <sql-query-object result="v_cnt" script="v_user_count_sql" result-type="long"/>
+            </lang-async>
+            <lang-async>
+                <sql-query-object result="roleKey" script="v_default_role_sql" result-type="string"/>
+            </lang-async>
+        </lang-async-all>
+        <lang-if test="v_cnt==0">
+            <lang-return/>
+        </lang-if>
+        <sql-update>
+            update sys_user
+            set role_key=#{roleKey}
+            where role_key is null
+        </sql-update>
+    </script-segment>
+
     <!--
     等待名为name的latch对象
     name默认以visit访问，等价于 name.visit 目的是取到对应的latch对象
@@ -573,6 +993,40 @@ eval-ts使用TinyScript引擎进行处理
     time-unit以string访问，不支持修饰符，为TimeUnit的枚举字符串值，不区分大小写
      -->
     <lang-latch-await name="" timeout="" time-unit=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-latch-await name="v_latch"/>
+        <lang-latch-await name="v_latch" time-unit="SECONDS" timeout="30"/>
+
+        <lang-latch result="v_latch" count="userList.size()"/>
+        <lang-foreach collection="userList" item="item">
+            <lang-async>
+
+                <lang-try>
+                    <lang-body>
+
+                        <sql-update>
+                            update sys_user
+                            set user_name=trim(user_name)
+                            where user_name=#{item.userName}
+                        </sql-update>
+
+                    </lang-body>
+                    <lang-catch type="Throwable">
+
+                    </lang-catch>
+                    <lang-finally>
+
+                        <lang-latch-down name="v_latch"/>
+
+                    </lang-finally>
+                </lang-try>
+
+            </lang-async>
+        </lang-foreach>
+        <lang-latch-await name="v_latch"/>
+
+    </script-segment>
 
 
     <!--
@@ -594,6 +1048,32 @@ eval-ts使用TinyScript引擎进行处理
         <lang-body>
         </lang-body>
     </sql-cursor>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-cursor item="cur_item">
+            <sql-query-list>
+                select * from sys_user
+            </sql-query-list>
+            <lang-body>
+                <sql-update>
+                    update sys_user
+                    set user_name=trim(user_name)
+                    where id=#{cur_item.id}
+                </sql-update>
+            </lang-body>
+        </sql-cursor>
+
+        <sql-cursor item="v_cur">
+            <sql-query-list script="v_sql"/>
+            <lang-body>
+                <sql-update>
+                    update sys_user
+                    set user_name=trim(user_name)
+                    where id=#{v_cur.id}
+                </sql-update>
+            </lang-body>
+        </sql-cursor>
+    </script-segment>
 
     <!--
     动态编译为java类进行执行
@@ -625,6 +1105,28 @@ eval-ts使用TinyScript引擎进行处理
 
         </lang-java-body>
     </lang-eval-java>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-eval-java result="v_now">
+            return new Date();
+        </lang-eval-java>
+
+        <lang-eval-java>
+            executor.visitSet(params,"v_now",new Date());
+            return null;
+        </lang-eval-java>
+
+        <lang-eval-java>
+            <lang-java-member>
+                public Object nvl(Object a,Object b){
+                    return a==null?b:a;
+                }
+            </lang-java-member>
+            <lang-java-body>
+                return nvl(executor.visit("v_sql",params),"");
+            </lang-java-body>
+        </lang-eval-java>
+    </script-segment>
 
     <!--
     动态执行javascript脚本
@@ -636,16 +1138,37 @@ eval-ts使用TinyScript引擎进行处理
     <lang-eval-javascript result="">
 
     </lang-eval-javascript>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-eval-javascript result="v_size">
+            params.get("v_i")+params.get("v_cnt")
+        </lang-eval-javascript>
+
+        <lang-eval-js result="v_now">
+            new Date()
+        </lang-eval-js>
+    </script-segment>
 
     <!-- 动态执行javascript脚本,实际上是一个别名 -->
     <lang-eval-js result="">
 
     </lang-eval-js>
 
+
     <!-- 动态执行tiny-script脚本 -->
     <lang-eval-tinyscript result="">
 
     </lang-eval-tinyscript>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-eval-tinyscript>
+            v_i=${v_i}+1;
+        </lang-eval-tinyscript>
+
+        <lang-eval-ts result="v_i">
+            ${v_i}+1
+        </lang-eval-ts>
+    </script-segment>
 
     <!-- 动态执行tiny-script脚本,实际上是一个别名 -->
     <lang-eval-ts result="">
@@ -665,6 +1188,16 @@ eval-ts使用TinyScript引擎进行处理
     <lang-eval-groovy result="">
 
     </lang-eval-groovy>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-eval-groovy result="v_now">
+            new Date()
+        </lang-eval-groovy>
+
+        <lang-eval-groovy result="v_cnt">
+            params.v_cnt+1
+        </lang-eval-groovy>
+    </script-segment>
 
     <!--
      创建一个数据库连接范围，对datasources中指定的这些数据源
@@ -676,9 +1209,22 @@ eval-ts使用TinyScript引擎进行处理
     <sql-scope datasources="">
 
     </sql-scope>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-scope datasources="primary">
+            <sql-update>
+                insert into sys_log(location,create_time,content)
+                values (#{location},sysdate,#{content})
+            </sql-update>
+        </sql-scope>
+    </script-segment>
 
     <!-- 对当前线程进行休眠 -->
     <lang-sleep timeout="" time-unit=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-sleep timeout="30" time-unit="MILLISECONDS"/>
+    </script-segment>
 
     <!--
     进行数据库表ETL对拷，注意，此过程全程使用的是新链接
@@ -724,6 +1270,25 @@ eval-ts使用TinyScript引擎进行处理
 
         </etl-after>
     </sql-etl>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-etl>
+            <etl-extra datasource="oracle" table="COMM.SYS_DICT"/>
+            <etl-load datasource="primary" table="DIM_SYS_DICT"/>
+        </sql-etl>
+
+        <sql-etl>
+            <sql-query-list datasource="oracle">
+                select * from COMM.SYS_DICT where status=1
+            </sql-query-list>
+            <etl-load datasource="primary" table="DIM_SYS_DICT"/>
+            <etl-before>
+                <sql-update datasource="primary">
+                    truncate table DIM_SYS_DICT
+                </sql-update>
+            </etl-before>
+        </sql-etl>
+    </script-segment>
 
     <!--
     添加指定的包名前缀，或使用类名所在的包名前缀，
@@ -741,6 +1306,11 @@ eval-ts使用TinyScript引擎进行处理
     实际，作用于ContextHolder.LOAD_PACKAGE_SET中
      -->
     <context-load-package package="" class=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <context-load-package package="com.test.utils"/>
+        <context-load-package class="com.test.utils.StringUtils"/>
+    </script-segment>
 
     <!--
     添加class中的所有public方法，
@@ -751,6 +1321,10 @@ eval-ts使用TinyScript引擎进行处理
     实际，作用于ContextHolder.INVOKE_METHOD_MAP中
     -->
     <context-invoke-method-class class=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <context-invoke-method-class class="com.test.util.StringUtils"/>
+    </script-segment>
 
     <!--
     添加class中的所有public static方法，
@@ -763,5 +1337,9 @@ eval-ts使用TinyScript引擎进行处理
     实际，作用于ContextHolder.CONVERT_METHOD_MAP中
     -->
     <context-convert-method-class class=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <context-convert-method-class class="com.test.util.ConvertUtils"/>
+    </script-segment>
 
 </procedure>

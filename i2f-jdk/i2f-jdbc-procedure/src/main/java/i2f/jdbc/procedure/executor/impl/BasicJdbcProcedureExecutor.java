@@ -20,8 +20,8 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
-import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
@@ -159,6 +159,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
+    public boolean isDebug() {
+        return this.debug.get();
+    }
+
+    @Override
     public void debugLog(Supplier<Object> supplier) {
         if (debug.get()) {
             System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), String.valueOf(supplier.get())));
@@ -192,7 +197,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public void openDebugger(String tag, Object context, String conditionExpression) {
         if (debug.get()) {
-            System.out.println("debugger [" + tag + "] [" + conditionExpression + "] wait for input line to continue.");
+            String location=null;
+            try{
+                Object loc = visit(ParamsConsts.TRACE_LOCATION, context);
+                Object line = visit(ParamsConsts.TRACE_LINE, context);
+                location=loc+":"+line;
+            }catch(Exception e){
+
+            }
+            System.out.println("debugger [" + tag + "] [" + conditionExpression + "] wait for input line to continue, trace near : "+location);
             System.out.println("continue.");
         }
     }
@@ -281,8 +294,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 }
             }
             debugLog(() -> "waring! tag " + node.getTagName() + " not found any executor!"+" at "+getNodeLocation(node));
-        } catch (ReturnSignalException e) {
-            debugLog(() -> "return signal");
+        } catch (ControlSignalException e) {
+            if (Arrays.asList(ProcedureNode.TAG_NAME,
+                    ProcedureCallNode.TAG_NAME,
+                    FunctionCallNode.TAG_NAME
+            ).contains(node.getTagName())) {
+                debugLog(() -> "control signal:"+e.getClass().getSimpleName());
+            }else{
+                throw e;
+            }
         }
         return params;
     }
@@ -344,8 +364,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     closeConnections(params);
                 }
             }
-        } catch (ReturnSignalException e) {
-            debugLog(() -> "return signal");
+        } catch (ControlSignalException e) {
+            if (Arrays.asList(ProcedureNode.TAG_NAME,
+                    ProcedureCallNode.TAG_NAME,
+                    FunctionCallNode.TAG_NAME
+            ).contains(node.getTagName())) {
+                debugLog(() -> "control signal:"+e.getClass().getSimpleName());
+            }else{
+                throw e;
+            }
         }
         return params;
     }
@@ -427,6 +454,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         ret.put(ParamsConsts.GLOBAL, new HashMap<>());
 
+        ret.put(ParamsConsts.TRACE,new HashMap<>());
+
         ret.put(ParamsConsts.EXECUTOR, this);
         return ret;
     }
@@ -444,6 +473,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.put(ParamsConsts.DATASOURCES, params.get(ParamsConsts.DATASOURCES));
 
         ret.put(ParamsConsts.GLOBAL, params.get(ParamsConsts.GLOBAL));
+
+        ret.put(ParamsConsts.TRACE, params.get(ParamsConsts.TRACE));
 
         ret.put(ParamsConsts.EXECUTOR, this);
         return ret;

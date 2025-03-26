@@ -954,8 +954,8 @@ public class ReflectResolver {
 
     public static Method matchExecMethod(Class<?> clazz, String methodName, List<Object> args) {
         List<Executable> executables = new ArrayList<>();
-        executables.addAll(Arrays.stream(clazz.getMethods()).filter(e -> e.getName().equals(methodName)).collect(Collectors.toList()));
-        executables.addAll(Arrays.stream(clazz.getDeclaredMethods()).filter(e -> e.getName().equals(methodName)).collect(Collectors.toList()));
+        Map<Method, Class<?>> methods = getMethods(clazz);
+        executables.addAll(methods.keySet().stream().filter(e->e.getName().equals(methodName)).collect(Collectors.toList()));
         Executable executable = matchExecutable(executables, args);
         Method method = (Method) executable;
         return method;
@@ -2127,6 +2127,9 @@ public class ReflectResolver {
     }
 
     public static boolean isArray(Object obj) {
+        if(obj==null){
+            return false;
+        }
         if (obj instanceof Class) {
             return ((Class<?>) obj).isArray();
         }

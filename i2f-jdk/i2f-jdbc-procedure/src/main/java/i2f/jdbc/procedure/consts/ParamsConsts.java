@@ -15,6 +15,17 @@ public interface ParamsConsts {
 
     String GLOBAL = "global";
 
+    String TRACE="trace";
+    String LOCATION="location";
+    String LINE="line";
+    String ERRMSG ="errmsg";
+    String NODE="node";
+
+    String TRACE_LOCATION=TRACE+"."+LOCATION;
+    String TRACE_LINE=TRACE+"."+LINE;
+    String TRACE_ERRMSG =TRACE+"."+ ERRMSG;
+    String TRACE_NODE=TRACE+"."+NODE;
+
     // 局部工具部分
     String EXECUTOR="executor";
 

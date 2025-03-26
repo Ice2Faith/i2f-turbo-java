@@ -41,6 +41,9 @@ public class SqlScriptNode extends AbstractExecutorNode {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
         BindSql bql = executor.sqlScript(datasource, dialectScriptList, context);
+        if(executor.isDebug()){
+            bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+        }
         if (result != null && !result.isEmpty()) {
             executor.visitSet(context, result, bql);
         }

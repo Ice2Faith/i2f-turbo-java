@@ -196,7 +196,7 @@ public class XmlUtil {
         return ret;
     }
 
-    public static List<Node> getNodesByTagName(Document document, List<String> tagNameList) {
+    public static List<Node> getNodesByTagName(Document document, Collection<String> tagNameList) {
         List<Node> ret = new ArrayList<>();
         for (String item : tagNameList) {
             NodeList list = document.getElementsByTagName(item);
@@ -209,7 +209,7 @@ public class XmlUtil {
         return ret;
     }
 
-    public static List<Node> getChildNodes(Node node, List<String> tagNames) {
+    public static List<Node> getChildNodes(Node node, Collection<String> tagNames) {
         List<Node> ret = new ArrayList<>();
         NodeList list = node.getChildNodes();
         int len = list.getLength();

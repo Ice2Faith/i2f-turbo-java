@@ -31,13 +31,13 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     protected static final AtomicBoolean hasApplyNodes = new AtomicBoolean(false);
 
 
-    public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context,ApplicationContext applicationContext) {
+    public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context, ApplicationContext applicationContext) {
         super(context);
         this.applicationContext = applicationContext;
         this.environment = applicationContext.getEnvironment();
     }
 
-    public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context,ApplicationContext applicationContext, Environment environment) {
+    public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context, ApplicationContext applicationContext, Environment environment) {
         this.applicationContext = applicationContext;
         this.environment = environment;
     }
@@ -62,7 +62,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
 
     @Override
     public Map<String, Object> createParams() {
-        Map<String, Object> ret = new LinkedHashMap<>();
+        Map<String, Object> ret = super.createParams();
         ret.put(ParamsConsts.CONTEXT, applicationContext);
         ret.put(ParamsConsts.ENVIRONMENT, environment);
 
@@ -72,13 +72,12 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
             Object bean = applicationContext.getBean(name);
             beanMap.put(name, bean);
         }
-        ret.put(ParamsConsts.BEANS, beanMap);
+        Map<String,Object> retBeanMap =(Map<String,Object>) ret.computeIfAbsent(ParamsConsts.BEANS, (key) -> new HashMap<>());
+        retBeanMap.putAll(retBeanMap);
 
-        ret.put(ParamsConsts.DATASOURCES, getDatasourceMap());
-
-        ret.put(ParamsConsts.CONNECTIONS, new HashMap<>());
-
-        ret.put(ParamsConsts.GLOBAL, new HashMap<>());
+        Map<String, DataSource> datasourceMap = getDatasourceMap();
+        Map<String,Object> retDatasourceMap =(Map<String,Object>) ret.computeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
+        retDatasourceMap.putAll(datasourceMap);
 
         return ret;
     }

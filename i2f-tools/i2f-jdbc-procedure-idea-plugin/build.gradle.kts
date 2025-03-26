@@ -21,7 +21,7 @@ intellij {
 //    version.set("2023.2.5")
 //    type.set("IC") // Target IDE Platform
      // TODO 不使用下载，直接使用本地安装目录
-    localPath.set("C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.1")
+    localPath.set("D:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.2.1")
 
     plugins.set(listOf(/* Plugin Dependencies */
         "com.intellij.java",

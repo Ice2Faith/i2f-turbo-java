@@ -199,6 +199,8 @@ public interface JdbcProcedureExecutor {
 
     void debug(boolean enable);
 
+    boolean isDebug();
+
     void debugLog(Supplier<Object> supplier);
 
     default void infoLog(Supplier<Object> supplier) {
