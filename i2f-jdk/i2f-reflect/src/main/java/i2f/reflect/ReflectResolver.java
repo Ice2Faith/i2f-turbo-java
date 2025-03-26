@@ -452,6 +452,16 @@ public class ReflectResolver {
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_FIELDS : null), clazz, (k) -> getFields(k, null, field -> !isIgnoreSerializeFields(field), false), LinkedHashMap::new);
     }
 
+    private static LruMap<String, Map<Field, Class<?>>> CACHE_GET_FIELDS_BY_NAME = new LruMap<>(8192);
+
+    public static Map<Field, Class<?>> getFieldsByName(Class<?> clazz, String fieldName) {
+        return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_FIELDS_BY_NAME : null), clazz + "###" + fieldName, (k) -> getFieldsByName0(clazz, fieldName), LinkedHashMap::new);
+    }
+
+    public static Map<Field, Class<?>> getFieldsByName0(Class<?> clazz, String fieldName) {
+        return getFields(clazz, field -> !isIgnoreSerializeFields(field) && field.getName().equals(fieldName));
+    }
+
     private static LruMap<Class<?>, Map<Field, Class<?>>> CACHE_GET_FORCE_FIELDS = new LruMap<>(8192);
 
     public static Map<Field, Class<?>> getForceFields(Class<?> clazz) {
@@ -549,6 +559,18 @@ public class ReflectResolver {
         return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_METHODS : null), clazz, (k) -> {
             return getMethods(k, null, null, false);
         }, LinkedHashMap::new);
+    }
+
+    private static LruMap<String, Map<Method, Class<?>>> CACHE_GET_METHODS_BY_NAME = new LruMap<>(8192);
+
+    public static Map<Method, Class<?>> getMethodsByName(Class<?> clazz, String methodName) {
+        return cacheDelegate((ENABLE_CACHE.get() ? CACHE_GET_METHODS_BY_NAME : null), clazz + "###" + methodName, (k) -> {
+            return getMethodsByName0(clazz, methodName);
+        }, LinkedHashMap::new);
+    }
+
+    public static Map<Method, Class<?>> getMethodsByName0(Class<?> clazz, String methodName) {
+        return getMethods(clazz, (e) -> e.getName().equals(methodName));
     }
 
     public static Map<Method, Class<?>> getMethodsWithAnyAnnotations(Class<?> clazz, Class<? extends Annotation>... anns) {
