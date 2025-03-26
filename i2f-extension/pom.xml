@@ -73,6 +73,8 @@
         <module>i2f-extension-image-metadata</module>
         <module>i2f-extension-fastexcel</module>
         <module>i2f-extension-groovy</module>
+        <module>i2f-extension-tokenlization-jcseg</module>
+        <module>i2f-extension-tokenlization-ansj</module>
     </modules>
 
 
