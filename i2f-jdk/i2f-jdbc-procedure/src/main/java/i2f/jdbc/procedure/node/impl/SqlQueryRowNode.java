@@ -62,7 +62,12 @@ public class SqlQueryRowNode extends AbstractExecutorNode {
         if (page != null) {
             bql = executor.sqlWrapPage(datasource, bql, page, context);
         }
+        if(executor.isDebug()){
+            bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+        }
         Object row = executor.sqlQueryRow(datasource, bql, context, resultType);
+        boolean isEmpty=(row==null);
+        executor.debugLog(()->"found data is null: "+isEmpty+"! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
         if (result != null && !result.isEmpty()) {
             executor.visitSet(context, result, row);
         }

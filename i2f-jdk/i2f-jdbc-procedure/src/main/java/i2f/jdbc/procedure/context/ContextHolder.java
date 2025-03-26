@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.context;
 
 import i2f.invokable.method.IMethod;
 import i2f.invokable.method.impl.jdk.JdkMethod;
+import i2f.jdbc.procedure.parser.data.XmlNode;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -27,6 +28,11 @@ public class ContextHolder {
 
     // 使用于JdbcProcedureExecutor的loadClass方法中，用于简写的类名，允许查找哪些包，值例如：java.util.
     public static final CopyOnWriteArraySet<String> LOAD_PACKAGE_SET = new CopyOnWriteArraySet<>();
+
+    public static final ThreadLocal<String> TRACE_LOCATION =new ThreadLocal<>();
+    public static final ThreadLocal<Integer> TRACE_LINE=new ThreadLocal<>();
+    public static final ThreadLocal<String> TRACE_ERRMSG=new ThreadLocal<>();
+    public static final ThreadLocal<XmlNode> TRACE_NODE=new ThreadLocal<>();
 
     static {
         registryAllInvokeMethods(ContextFunctions.class);

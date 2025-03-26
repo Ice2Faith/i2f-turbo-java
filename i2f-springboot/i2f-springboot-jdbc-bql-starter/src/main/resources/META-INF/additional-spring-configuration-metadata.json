@@ -53,6 +53,20 @@
       "defaultValue": true
     },
     {
+      "name": "jdbc.xml.procedure.debug",
+      "type": "java.lang.Boolean",
+      "description": "whether enable debug log for jdbc procedure.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "jdbc.xml.procedure.report-on-boot",
+      "type": "java.lang.Boolean",
+      "description": "whether enable report grammar issue on boot for jdbc procedure.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "defaultValue": true
+    },
+    {
       "name": "i2f.jdbc.procedure.xml-locations",
       "type": "java.lang.String",
       "description": "whether enable auto-configuration for jdbc procedure xml locations.",

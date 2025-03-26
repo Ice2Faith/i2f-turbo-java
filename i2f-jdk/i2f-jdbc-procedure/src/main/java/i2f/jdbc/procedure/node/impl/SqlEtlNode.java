@@ -200,13 +200,20 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 bql = executor.sqlScript(extraDatasource, dialectScriptList, context);
             }
 
+            if(executor.isDebug()){
+                bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+            }
+
             int pageIndex = 0;
             int commitCount = 0;
             while (true) {
                 List<?> list = executor.sqlQueryPage(extraDatasource, bql, context, resultType, new ApiPage(pageIndex, readBatchSize));
                 if (list.isEmpty()) {
+                    executor.debugLog(()->"no data found! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
                     break;
                 }
+
+                executor.debugLog(()->"found batch data! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
 
                 if (pageIndex == 0) {
 

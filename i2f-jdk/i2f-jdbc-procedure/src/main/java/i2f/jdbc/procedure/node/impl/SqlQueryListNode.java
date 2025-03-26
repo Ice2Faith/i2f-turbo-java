@@ -56,6 +56,7 @@ public class SqlQueryListNode extends AbstractExecutorNode {
         if(bql==null) {
             bql = executor.sqlScript(datasource, dialectScriptList, context);
         }
+
         ApiOffsetSize page = null;
         if (offset != null || limit != null) {
             page = new ApiOffsetSize(offset, limit);
@@ -63,7 +64,11 @@ public class SqlQueryListNode extends AbstractExecutorNode {
         if (page != null) {
             bql = executor.sqlWrapPage(datasource, bql, page, context);
         }
+        if(executor.isDebug()){
+            bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+        }
         List<?> row = executor.sqlQueryList(datasource, bql, context, resultType);
+        executor.debugLog(()->"found data is empty: "+row.isEmpty()+"! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
         if (result != null && !result.isEmpty()) {
             executor.visitSet(context, result, row);
         }

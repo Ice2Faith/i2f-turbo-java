@@ -1,6 +1,8 @@
 package i2f.jdbc.proxy.xml.mybatis.parser;
 
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
+import i2f.match.regex.RegexUtil;
+import i2f.match.regex.data.RegexFindPartMeta;
 import i2f.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -15,6 +17,11 @@ import java.util.*;
  * @date 2024/10/9 9:31
  */
 public class MybatisMapperParser {
+    public static final String[] XML_ELEMENT_TAG_NAME = {
+            "resultMap", "sql", "select", "update", "insert", "delete",
+            "dialect", "dialect-choose", "dialect-when", "dialect-otherwise"
+    };
+    public static final Set<String> XML_ELEMENT_TAG_NAME_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(XML_ELEMENT_TAG_NAME)));
 
     public static Map<String, MybatisMapperNode> parseXmlUrlMappers(List<URL> urls, Map<String, MybatisMapperNode> ret) {
         if (ret == null) {
@@ -67,10 +74,7 @@ public class MybatisMapperParser {
         Node rootNode = XmlUtil.getRootNode(document);
         String namespace = Optional.ofNullable(XmlUtil.getAttribute(rootNode, "namespace")).orElse("");
 
-        List<Node> rootNodes = XmlUtil.getChildNodes(rootNode, Arrays.asList(
-                "resultMap", "sql", "select", "update", "insert", "delete",
-                "dialect", "dialect-choose", "dialect-when", "dialect-otherwise"
-        ));
+        List<Node> rootNodes = XmlUtil.getChildNodes(rootNode, XML_ELEMENT_TAG_NAME_SET);
         for (Node node : rootNodes) {
             MybatisMapperNode sqlNode = parseSqlNode(node);
             sqlNode.setNamespace(namespace);
@@ -100,12 +104,101 @@ public class MybatisMapperParser {
         return ret;
     }
 
-    public static MybatisMapperNode parseScriptNode(String script) throws Exception {
+    public static String resolveEscapeXml(String script) {
+        if (script == null) {
+            return null;
+        }
+        boolean isEscapeChar = false;
+        int len = script.length();
+        for (int i = 0; i < len; i++) {
+            char ch = script.charAt(i);
+            if (ch == '<' || ch == '&') {
+                isEscapeChar = true;
+                break;
+            }
+        }
+        if (!isEscapeChar) {
+            return script;
+        }
         StringBuilder builder = new StringBuilder();
-        builder.append("<script>");
-        builder.append(script);
-        builder.append("</script>");
-        Document document = XmlUtil.parseXml(builder.toString());
+        List<RegexFindPartMeta> parts = RegexUtil.regexFindParts(script, "<(/)?[a-zA-Z0-9\\-_]+.|<[^a-zA-Z0-9\\-_]|&#[0-9]+.|&[a-zA-Z0-9]+.|&[^a-zA-Z0-9]");
+        for (RegexFindPartMeta item : parts) {
+            String part = item.getPart();
+            if (item.isMatch()) {
+                if (part.startsWith("<")) {
+                    if (part.length() == 2) {
+                        builder.append("&lt;").append(part.substring(1));
+                    } else {
+                        if (part.startsWith("</")) {
+                            if (!part.endsWith(">")) {
+                                builder.append("&lt;").append(part.substring(1));
+                            } else {
+                                String tagName = part.substring(1, part.length() - 1);
+                                if (!XML_ELEMENT_TAG_NAME_SET.contains(tagName)) {
+                                    builder.append("&lt;").append(part.substring(1));
+                                } else {
+                                    builder.append(part);
+                                }
+                            }
+                        } else {
+                            char endCh = part.charAt(part.length() - 1);
+                            boolean isLegalTag = false;
+                            if (endCh == '>' || endCh == ' ' || endCh == '\t' || endCh == '\r' || endCh == '\n') {
+                                isLegalTag = true;
+                            }
+                            if (isLegalTag) {
+                                String tagName = part.substring(1, part.length() - 1);
+                                if (!XML_ELEMENT_TAG_NAME_SET.contains(tagName)) {
+                                    builder.append("&lt;").append(part.substring(1));
+                                } else {
+                                    builder.append(part);
+                                }
+                            } else {
+                                builder.append("&lt;").append(part.substring(1));
+                            }
+                        }
+                    }
+                } else if (part.startsWith("&")) {
+                    if (part.length() == 2) {
+                        builder.append("&amp;").append(part.substring(1));
+                    } else {
+                        if (part.startsWith("&#")) {
+                            if (!part.endsWith(";")) {
+                                builder.append("&amp;").append(part.substring(1));
+                            } else {
+                                builder.append(part);
+                            }
+                        } else {
+                            if (!part.endsWith(";")) {
+                                builder.append("&amp;").append(part.substring(1));
+                            } else {
+                                builder.append(part);
+                            }
+                        }
+                    }
+                }
+            } else {
+                builder.append(part);
+            }
+        }
+        return builder.toString();
+    }
+
+    public static MybatisMapperNode parseScriptNode(String script) throws Exception {
+        Document document =null;
+        try{
+            StringBuilder builder = new StringBuilder();
+            builder.append("<script>");
+            builder.append(resolveEscapeXml(script));
+            builder.append("</script>");
+            document= XmlUtil.parseXml(builder.toString());
+        }catch (Throwable e){
+            StringBuilder builder = new StringBuilder();
+            builder.append("<script>");
+            builder.append(script);
+            builder.append("</script>");
+            document= XmlUtil.parseXml(builder.toString());
+        }
         Node node = XmlUtil.getRootNode(document);
         return parseSqlNode(node);
     }

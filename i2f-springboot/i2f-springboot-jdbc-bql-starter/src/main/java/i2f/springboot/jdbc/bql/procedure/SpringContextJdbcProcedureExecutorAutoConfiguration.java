@@ -1,13 +1,13 @@
 package i2f.springboot.jdbc.bql.procedure;
 
-import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
-import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
-import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
-import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
-import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContextRefreshListener;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.JdbcProcedureContextRefreshListener;
+import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
+import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContextRefreshListener;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
+import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
+import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.springboot.jdbc.bql.procedure.impl.SpringContextJdbcProcedureExecutor;
 import i2f.springboot.jdbc.bql.procedure.impl.SpringJdbcProcedureJavaCallerMetaCacheProvider;
 import i2f.springboot.jdbc.bql.procedure.impl.SpringJdbcProcedureMetaProviderRegistry;
@@ -106,6 +106,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
                                                                                     JdbcProcedureContext context){
         log.info("xproc4j config JdbcProcedureContextRefreshListener ...");
         DefaultJdbcProcedureContextRefreshListener listener = new DefaultJdbcProcedureContextRefreshListener(executor);
+        listener.getReportOnBoot().set(jdbcProcedureProperties.isReportOnBoot());
         context.listener(listener);
         return listener;
     }

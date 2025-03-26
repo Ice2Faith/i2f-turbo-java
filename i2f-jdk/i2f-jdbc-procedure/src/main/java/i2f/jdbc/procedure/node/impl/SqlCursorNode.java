@@ -86,7 +86,10 @@ public class SqlCursorNode extends AbstractExecutorNode {
 
         Integer batchSize = (Integer) executor.attrValue(AttrConsts.BATCH_SIZE, FeatureConsts.INT, node, context);
         String item = node.getTagAttrMap().get(AttrConsts.ITEM);
-        boolean acceptBatch = (boolean) executor.attrValue(AttrConsts.ACCEPT_BATCH, FeatureConsts.BOOLEAN, node, context);
+        Boolean acceptBatch = (Boolean) executor.attrValue(AttrConsts.ACCEPT_BATCH, FeatureConsts.BOOLEAN, node, context);
+        if(acceptBatch==null){
+            acceptBatch=false;
+        }
         if (item == null || item.isEmpty()) {
             item = AttrConsts.ITEM;
         }
@@ -114,57 +117,72 @@ public class SqlCursorNode extends AbstractExecutorNode {
             bql = executor.sqlScript(datasource, dialectScriptList, context);
         }
 
+        if(executor.isDebug()){
+            bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+        }
+
         int pageIndex = 0;
         if (batchSize == null || batchSize <= 0) {
             batchSize = 2000;
         }
         Map<String, Object> bakParams = new LinkedHashMap<>();
         bakParams.put(item, executor.visit(item, context));
-        while (true) {
-            List<?> list = executor.sqlQueryPage(datasource, bql, context, resultType, new ApiPage(pageIndex, batchSize));
-            if (list.isEmpty()) {
-                break;
-            }
-
-            if (acceptBatch) {
-                try {
-                    executor.visitSet(context, item, list);
-                    executor.execAsProcedure(bodyNode, context, false, false);
-                } catch (ContinueSignalException e) {
-                    continue;
-                } catch (BreakSignalException e) {
+        try {
+            while (true) {
+                List<?> list = executor.sqlQueryPage(datasource, bql, context, resultType, new ApiPage(pageIndex, batchSize));
+                if (list.isEmpty()) {
+                    executor.debugLog(()->"no data found! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
                     break;
                 }
-            } else {
-                boolean breakSignal = false;
-                int count = 0;
-                for (Object obj : list) {
-                    count++;
+
+                executor.debugLog(()->"found batch data! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
+
+                if (acceptBatch) {
                     try {
-                        executor.visitSet(context, item, obj);
+                        executor.visitSet(context, item, list);
                         executor.execAsProcedure(bodyNode, context, false, false);
                     } catch (ContinueSignalException e) {
                         continue;
                     } catch (BreakSignalException e) {
-                        breakSignal = true;
+                        break;
+                    }
+                } else {
+                    boolean breakSignal = false;
+                    int count = 0;
+                    for (Object obj : list) {
+                        count++;
+                        try {
+                            executor.visitSet(context, item, obj);
+                            executor.execAsProcedure(bodyNode, context, false, false);
+                        } catch (ContinueSignalException e) {
+                            continue;
+                        } catch (BreakSignalException e) {
+                            breakSignal = true;
+                            break;
+                        }
+                    }
+
+                    if (breakSignal) {
+                        break;
+                    }
+
+                    if (count < batchSize) {
                         break;
                     }
                 }
 
-                if (breakSignal) {
-                    break;
-                }
-
-                if (count < batchSize) {
-                    break;
-                }
+                pageIndex++;
             }
-
-            pageIndex++;
+        }finally {
+            if(acceptBatch){
+                executor.visitDelete(context,item);
+            }
+            executor.visitDelete(context,item);
+            for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
+                executor.visitSet(context, entry.getKey(), entry.getValue());
+            }
         }
 
-        for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
-            executor.visitSet(context, entry.getKey(), entry.getValue());
-        }
+
     }
 }

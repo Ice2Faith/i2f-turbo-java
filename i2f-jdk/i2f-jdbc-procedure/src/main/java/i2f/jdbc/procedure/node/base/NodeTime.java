@@ -10,7 +10,7 @@ public class NodeTime {
     public static TimeUnit getTimeUnit(String timeUnit, TimeUnit defVal) {
         TimeUnit unit = defVal;
         if ("SECONDS".equalsIgnoreCase(timeUnit)) {
-            unit = TimeUnit.MILLISECONDS;
+            unit = TimeUnit.SECONDS;
         } else if ("MILLISECONDS".equalsIgnoreCase(timeUnit)) {
             unit = TimeUnit.MILLISECONDS;
         } else if ("NANOSECONDS".equalsIgnoreCase(timeUnit)) {
