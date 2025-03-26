@@ -78,6 +78,10 @@
         <!-- 定义查找引用 -->
         <lang.findUsagesProvider language="XML"
                                  implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlFindUsagesProvider"/>
+
+        <!-- 定义语句模版 -->
+        <defaultLiveTemplatesProvider order="first"
+                implementation="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jLiveTemplatesProvider"/>
     </extensions>
 
 
