@@ -30,6 +30,9 @@ public interface ParamsConsts {
     // 局部工具部分
     String EXECUTOR="executor";
 
+    // LruMap对象
+    String LRU ="lru";
+
 
     // 连接部分
     String CONNECTIONS = "connections";

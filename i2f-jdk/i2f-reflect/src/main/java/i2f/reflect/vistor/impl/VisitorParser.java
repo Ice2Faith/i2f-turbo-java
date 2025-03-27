@@ -3,6 +3,7 @@ package i2f.reflect.vistor.impl;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -232,14 +233,18 @@ public class VisitorParser {
                     ret = new ConstVisitor(Long.parseLong(token.substring(4), 2));
                 } else if (currRet instanceof Map) {
                     ret = new MapVisitor((Map) currRet, token);
+                } else if (ReflectResolver.isArray(currRet)
+                        && "length".equals(token)) {
+                    int len= Array.getLength(currRet);
+                    return new ConstVisitor(len);
                 } else if (ReflectResolver.isArray(currRet)) {
                     Integer idx = Integer.valueOf(token);
                     return new ArrayVisitor(currRet, idx);
                 } else if (currRet instanceof List) {
                     Integer idx = Integer.valueOf(token);
                     return new ListVisitor((List) currRet, idx);
-                } else if (currRet instanceof Collection) {
-                    Collection col = (Collection) ret;
+                } else if (currRet instanceof Iterable) {
+                    Iterable col = (Iterable) ret;
                     Iterator iterator = col.iterator();
                     Integer idx = Integer.valueOf(token);
                     int i = 0;

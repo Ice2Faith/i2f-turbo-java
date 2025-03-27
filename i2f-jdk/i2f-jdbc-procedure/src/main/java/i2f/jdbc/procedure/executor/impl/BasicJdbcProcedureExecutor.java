@@ -29,6 +29,7 @@ import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
+import i2f.lru.LruMap;
 import i2f.page.ApiOffsetSize;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
@@ -76,7 +77,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         this.context=context;
     }
 
-    public BasicJdbcProcedureExecutor(JdbcProcedureContext context,IEnvironment environment,INamingContext namingContext){
+    public BasicJdbcProcedureExecutor(JdbcProcedureContext context, IEnvironment environment, INamingContext namingContext){
         this.context=context;
         this.environment=environment;
         this.namingContext=namingContext;
@@ -470,6 +471,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.put(ParamsConsts.TRACE,new HashMap<>());
 
         ret.put(ParamsConsts.EXECUTOR, this);
+
+        ret.put(ParamsConsts.LRU,new LruMap<>(4096));
         return ret;
     }
 
@@ -491,6 +494,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.put(ParamsConsts.TRACE, params.get(ParamsConsts.TRACE));
 
         ret.put(ParamsConsts.EXECUTOR, this);
+
+        ret.put(ParamsConsts.LRU,params.get(ParamsConsts.LRU));
         return ret;
     }
 
