@@ -955,9 +955,25 @@ eval-ts使用TinyScript引擎进行处理
     <!--
     多个任务并行
     await默认以boolean访问，等价于 await.boolean
+    内部子标签（第一层）都会视作一个子任务进行异步运行
+    只会视为一般节点运行，不会管节点的类型
+    因此，一样情况下内部使用lang-body,lang-async等不需要管标签属性的子节点
+    例如，使用lang-if，lang-when,sql-update,sql-query-xx这种功能性节点，test,script,datasource等一切属性会被忽略，直接视为lang-body执行
+    特殊的，如果子标签是lang-async标签
+    则会以lang-async支持的属性来运行
+    但是需要注意，如果lang-async的await不为true，则这个子任务会被二次异步执行，
+    也就是说lang-async-all外层有一个thread,因为lang-async又不await，
+    导致lang-async内部又是一个thread,就会导致提前结束子节点，不能够正确获取到异步的值
+    除非你确定需要这么干
      -->
     <lang-async-all await="">
-        <!-- 每个任务仅有delay延时可用 -->
+        <!-- 一般使用lang-body作为子节点即可 -->
+        <lang-body>
+
+        </lang-body>
+        <!--
+        也可以使用每个任务仅有delay延时可用
+         -->
         <lang-async delay="" time-unit="">
             <!--
             对name对应的latch对象进行count-down操作
@@ -968,6 +984,15 @@ eval-ts使用TinyScript引擎进行处理
     </lang-async-all>
     <!-- 举例 -->
     <script-segment id="demo">
+        <lang-async-all>
+            <lang-body>
+                <sql-query-object result="v_cnt" script="v_user_count_sql" result-type="long"/>
+            </lang-body>
+            <lang-body>
+                <sql-query-object result="roleKey" script="v_default_role_sql" result-type="string"/>
+            </lang-body>
+        </lang-async-all>
+
         <lang-async-all await="true">
             <lang-async>
                 <sql-query-object result="v_cnt" script="v_user_count_sql" result-type="long"/>
@@ -1041,8 +1066,8 @@ eval-ts使用TinyScript引擎进行处理
     item以string访问，不支持修饰符
     accept-batch默认以boolean访问，等价于 accept-batch.boolean
      -->
-    <sql-cursor batch-size="300" item="" accept-batch="false">
-        <sql-query-list datasource="" script="" result-type="">
+    <sql-cursor item="item" batch-size="300" accept-batch="false">
+        <sql-query-list datasource="" script="" result-type="" offset="" limit="">
 
         </sql-query-list>
         <lang-body>

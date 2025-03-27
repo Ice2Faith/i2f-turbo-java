@@ -846,7 +846,7 @@
         <!ATTLIST lang-latch count CDATA #IMPLIED>
         <!ATTLIST lang-latch result CDATA #REQUIRED>
 
-        <!ELEMENT lang-async-all (lang-async*)>
+        <!ELEMENT lang-async-all (ANY|EMPTY)>
         <!ATTLIST lang-async-all await CDATA #IMPLIED>
 
         <!ATTLIST lang-async-all await.boolean CDATA #IMPLIED>

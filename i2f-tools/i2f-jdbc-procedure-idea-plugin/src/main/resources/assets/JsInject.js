@@ -538,6 +538,125 @@ MapBuilder.prototype.put=function(key,value){
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ *
+ * @constructor {IEnvironment}
+ * @type {IEnvironment}
+ * @return {IEnvironment}
+ */
+function IEnvironment(){
+
+}
+
+/**
+ *
+ * @param name {string}
+ * @param defVal {string}
+ * @return {string}
+ */
+IEnvironment.prototype.getProperty=function(name,defVal){
+
+}
+
+/**
+ * @return {JavaMap<String,String>}
+ */
+IEnvironment.prototype.getAllProperties=function(){
+
+}
+
+/**
+ *
+ * @param name {string}
+ * @param defVal {Integer}
+ */
+IEnvironment.prototype.getInteger=function(name,defVal){
+
+}
+
+/**
+ *
+ * @param name {string}
+ * @param defVal {Long}
+ */
+IEnvironment.prototype.getLong=function(name,defVal){
+
+}
+
+/**
+ *
+ * @param name {string}
+ * @param defVal {Boolean}
+ */
+IEnvironment.prototype.getBoolean=function(name,defVal){
+
+}
+
+/**
+ *
+ * @param name {string}
+ * @param defVal {Double}
+ */
+IEnvironment.prototype.getDouble=function(name,defVal){
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ *
+ * @constructor {INamingContext}
+ * @type {INamingContext}
+ * @return {INamingContext}
+ */
+function INamingContext(){
+
+}
+
+/**
+ *
+ * @param name {string|Class<?>}
+ * @return {Object}
+ */
+INamingContext.prototype.getBean=function(name){
+
+}
+
+/**
+ *
+ * @param clazz {Class<?>}
+ * @return {Array<Object>}
+ */
+INamingContext.prototype.getBeans=function(clazz){
+
+}
+
+/**
+ * @return {Array<Object>}
+ */
+INamingContext.prototype.getAllBeans=function(){
+
+}
+
+/**
+ *
+ * @param clazz {Class<?>}
+ * @return {JavaMap<String,Object>}
+ */
+INamingContext.prototype.getBeansMap=function(clazz){
+
+}
+
+/**
+ * @return {JavaMap<String,Object>}
+ */
+INamingContext.prototype.getAllBeansMap=function(){
+
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  *
@@ -549,6 +668,22 @@ function JdbcProcedureExecutor(){
 
 }
 
+
+/**
+ * @return {Reference<?>}
+ */
+JdbcProcedureExecutor.prototype.nop=function(){
+
+}
+
+/**
+ *
+ * @param obj {Object}
+ * @return {boolean}
+ */
+JdbcProcedureExecutor.prototype.isNop=function(obj){
+
+}
 
 /**
  * @return {JdbcProcedureContext}
@@ -577,6 +712,69 @@ JdbcProcedureExecutor.prototype.getMeta=function(procedureId){
  * @return {ExecutorNode}
  */
 JdbcProcedureExecutor.prototype.getNodes=function(){
+
+}
+
+/**
+ * @return {IEnvironment}
+ */
+JdbcProcedureExecutor.prototype.getEnvironment=function(){
+
+}
+
+/**
+ *
+ * @param environment {IEnvironment}
+ * @retrn {void}
+ */
+JdbcProcedureExecutor.prototype.setEnvironment=function(environment){
+
+}
+
+/**
+ *
+ * @param property {string}
+ * @param defVal {string}
+ * @return {string}
+ */
+JdbcProcedureExecutor.prototype.env=function(property,defVal){
+
+}
+
+/**
+ *
+ * @param property {string}
+ * @param targetType {Class<?>}
+ * @param defVal {Object}
+ * @return {Object}
+ */
+JdbcProcedureExecutor.prototype.envAs=function(property,targetType,defVal){
+
+}
+
+/**
+ * @return {INamingContext}
+ */
+JdbcProcedureExecutor.prototype.getNamingContext=function(){
+
+}
+
+/**
+ *
+ * @param context {INamingContext}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.setNamingContext=function(context){
+
+}
+
+
+/**
+ *
+ * @param name {String|Class<?>}
+ * @return {Object}
+ */
+JdbcProcedureExecutor.prototype.getBean=function(name){
 
 }
 
@@ -819,6 +1017,13 @@ JdbcProcedureExecutor.prototype.debug=function(enable){
 }
 
 /**
+ * @return {boolean}
+ */
+JdbcProcedureExecutor.prototype.isDebug=function(){
+
+}
+
+/**
  *
  * @param tag {string}
  * @param context {Object}
@@ -928,7 +1133,7 @@ JdbcProcedureExecutor.prototype.sqlQueryList=function(datasource,bql,params,resu
  * @param resultType {Class<?>}
  * @return {Object}
  */
-JdbcProcedureExecutor.sqlQueryObject=function(datasource,bql,params,resultType){
+JdbcProcedureExecutor.prototype.sqlQueryObject=function(datasource,bql,params,resultType){
 
 }
 
@@ -940,7 +1145,7 @@ JdbcProcedureExecutor.sqlQueryObject=function(datasource,bql,params,resultType){
  * @param resultType {Class<?>}
  * @return {Object}
  */
-JdbcProcedureExecutor.sqlQueryRow=function(datasource,bql,params,resultType){
+JdbcProcedureExecutor.prototype.sqlQueryRow=function(datasource,bql,params,resultType){
 
 }
 
@@ -951,18 +1156,43 @@ JdbcProcedureExecutor.sqlQueryRow=function(datasource,bql,params,resultType){
  * @param params {JavaMap<String,Object>}
  * @return {int}
  */
-JdbcProcedureExecutor.sqlUpdate=function(datasource,bql,params){
+JdbcProcedureExecutor.prototype.sqlUpdate=function(datasource,bql,params){
 
 }
 
 /**
  *
  * @param datasource {string}
+ * @param bql {BindSql}
+ * @param page {ApiOffsetSize}
+ * @param params {JavaMap<String,Object>}
+ * @reutrn {BindSql}
+ */
+JdbcProcedureExecutor.prototype.sqlWrapPage=function(datasource,bql,page,params){
+
+}
+
+/**
+ *
+ * @param datasource {string}
+ * @param bql {BindSql}
+ * @param params {JavaMap<String,Object>}
+ * @reutrn {BindSql}
+ */
+JdbcProcedureExecutor.prototype.sqlWrapCount=function(datasource,bql,params){
+
+}
+
+
+/**
+ *
+ * @param datasource {string}
  * @param dialectScriptList {Array<Entry<String,String>>}
  * @param params {JavaMap<String,Object>}
+ * @param page {ApiOffsetSize}
  * @return {int}
  */
-JdbcProcedureExecutor.sqlScript=function(datasource,dialectScriptList,params){
+JdbcProcedureExecutor.prototype.sqlScript=function(datasource,dialectScriptList,params,page){
 
 }
 
@@ -987,7 +1217,7 @@ JdbcProcedureExecutor.prototype.sqlQueryPage=function(datasource,bql,params,resu
  * @param params {JavaMap<String,Object>}
  * @return {void}
  */
-JdbcProcedureExecutor.sqlTransBegin=function(datasource,isolation,params){
+JdbcProcedureExecutor.prototype.sqlTransBegin=function(datasource,isolation,params){
 
 }
 
@@ -997,7 +1227,7 @@ JdbcProcedureExecutor.sqlTransBegin=function(datasource,isolation,params){
  * @param params {JavaMap<String,Object>}
  * @return {void}
  */
-JdbcProcedureExecutor.sqlTransCommit=function(datasource,params){
+JdbcProcedureExecutor.prototype.sqlTransCommit=function(datasource,params){
 
 }
 
@@ -1007,7 +1237,7 @@ JdbcProcedureExecutor.sqlTransCommit=function(datasource,params){
  * @param params {JavaMap<String,Object>}
  * @return {void}
  */
-JdbcProcedureExecutor.sqlTransRollback=function(datasource,params){
+JdbcProcedureExecutor.prototype.sqlTransRollback=function(datasource,params){
 
 }
 
@@ -1017,7 +1247,7 @@ JdbcProcedureExecutor.sqlTransRollback=function(datasource,params){
  * @param params {JavaMap<String,Object>}
  * @return {void}
  */
-JdbcProcedureExecutor.sqlTransNone=function(datasource,params){
+JdbcProcedureExecutor.prototype.sqlTransNone=function(datasource,params){
 
 }
 
