@@ -14,8 +14,9 @@ public class XProc4jLiveTemplatesProvider implements DefaultLiveTemplatesProvide
         return new String[]{"assets/liveTemplates/XProc4j.xml"};
     }
 
+    @Nullable
     @Override
-    public String @Nullable [] getHiddenLiveTemplateFiles() {
+    public String[] getHiddenLiveTemplateFiles() {
         return new String[0];
     }
 }
