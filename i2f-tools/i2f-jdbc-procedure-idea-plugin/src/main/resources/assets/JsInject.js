@@ -887,10 +887,58 @@ JdbcProcedureExecutor.prototype.exec=function(procedureId,params){
 
 /**
  *
+ * @param procedureId {string}
+ * @param params {JavaMap<String,Object>}
+ * @param beforeNewConnection {boolean}
+ * @param afterCloseConnection {boolean}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.exec = function (procedureId, params, beforeNewConnection, afterCloseConnection) {
+
+}
+
+/**
+ *
+ * @param meta {ProcedureMeta}
  * @param params {JavaMap<String,Object>}
  * @return {JavaMap<String,Object>}
  */
-JdbcProcedureExecutor.prototype.prepareParams=function(params){
+JdbcProcedureExecutor.prototype.exec = function (meta, params) {
+
+}
+
+/**
+ *
+ * @param meta {ProcedureMeta}
+ * @param params {JavaMap<String,Object>}
+ * @param beforeNewConnection {boolean}
+ * @param afterCloseConnection {boolean}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.exec = function (meta, params, beforeNewConnection, afterCloseConnection) {
+
+}
+
+
+/**
+ *
+ * @param caller {JdbcProcedureJavaCaller}
+ * @param params {JavaMap<String,Object>}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.exec = function (caller, params) {
+
+}
+
+/**
+ *
+ * @param caller {JdbcProcedureJavaCaller}
+ * @param params {JavaMap<String,Object>}
+ * @param beforeNewConnection {boolean}
+ * @param afterCloseConnection {boolean}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.exec = function (caller, params, beforeNewConnection, afterCloseConnection) {
 
 }
 
@@ -916,6 +964,7 @@ JdbcProcedureExecutor.prototype.exec=function(node,params,beforeNewConnection,af
 
 }
 
+
 /**
  *
  * @param procedureId {string}
@@ -923,6 +972,63 @@ JdbcProcedureExecutor.prototype.exec=function(node,params,beforeNewConnection,af
  * @return {JavaMap<String,Object>}
  */
 JdbcProcedureExecutor.prototype.execAsProcedure=function(procedureId,params){
+
+}
+
+/**
+ *
+ * @param procedureId {string}
+ * @param params {JavaMap<String,Object>}
+ * @param beforeNewConnection {boolean}
+ * @param afterCloseConnection {boolean}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.execAsProcedure = function (procedureId, params, beforeNewConnection, afterCloseConnection) {
+
+}
+
+/**
+ *
+ * @param meta {ProcedureMeta}
+ * @param params {JavaMap<String,Object>}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.execAsProcedure = function (meta, params) {
+
+}
+
+/**
+ *
+ * @param meta {ProcedureMeta}
+ * @param params {JavaMap<String,Object>}
+ * @param beforeNewConnection {boolean}
+ * @param afterCloseConnection {boolean}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.execAsProcedure = function (meta, params, beforeNewConnection, afterCloseConnection) {
+
+}
+
+
+/**
+ *
+ * @param caller {JdbcProcedureJavaCaller}
+ * @param params {JavaMap<String,Object>}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.execAsProcedure = function (caller, params) {
+
+}
+
+/**
+ *
+ * @param caller {JdbcProcedureJavaCaller}
+ * @param params {JavaMap<String,Object>}
+ * @param beforeNewConnection {boolean}
+ * @param afterCloseConnection {boolean}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.execAsProcedure = function (caller, params, beforeNewConnection, afterCloseConnection) {
 
 }
 
@@ -949,6 +1055,32 @@ JdbcProcedureExecutor.prototype.execAsProcedure=function(node,params,beforeNewCo
 }
 
 /**
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.createParams = function () {
+
+}
+
+/**
+ *
+ * @param params {JavaMap<String,Object>}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.prepareParams = function (params) {
+
+}
+
+/**
+ *
+ * @param params {JavaMap<String,Object>}
+ * @return {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.newParams = function (params) {
+
+}
+
+
+/**
  *
  * @param attr {string}
  * @param action {string}
@@ -969,41 +1101,6 @@ JdbcProcedureExecutor.prototype.attrValue=function (attr,action,node,params){
  * @return {Object}
  */
 JdbcProcedureExecutor.prototype.resultValue=function(value,features,node,params){
-
-}
-
-/**
- *
- * @param params {JavaMap<String,Object>}
- * @param result {string}
- * @param value {Object}
- */
-JdbcProcedureExecutor.prototype.visitSet=function(params,result,value){
-
-}
-
-/**
- *
- * @param params {JavaMap<String,Object>}
- * @param result {string}
- */
-JdbcProcedureExecutor.prototype.visitDelete=function(params,result){
-
-}
-
-/**
- * @return {JavaMap<String,Object>}
- */
-JdbcProcedureExecutor.prototype.createParams=function(){
-
-}
-
-/**
- *
- * @param params {JavaMap<String,Object>}
- * @return {JavaMap<String,Object>}
- */
-JdbcProcedureExecutor.prototype.newParams=function(params){
 
 }
 
@@ -1034,6 +1131,73 @@ JdbcProcedureExecutor.prototype.openDebugger=function(tag,context,conditionExpre
 
 }
 
+
+/**
+ *
+ * @param obj {Object}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.logDebug = function (obj) {
+
+}
+
+/**
+ *
+ * @param obj {Object}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.logInfo = function (obj) {
+
+}
+
+/**
+ *
+ * @param obj {Object}
+ * @param e {Throwable}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.logInfo = function (obj, e) {
+
+}
+
+/**
+ *
+ * @param obj {Object}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.logWarn = function (obj) {
+
+}
+
+/**
+ *
+ * @param obj {Object}
+ * @param e {Throwable}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.logWarn = function (obj, e) {
+
+}
+
+/**
+ *
+ * @param obj {Object}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.logError = function (obj) {
+
+}
+
+/**
+ *
+ * @param obj {Object}
+ * @param e {Throwable}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.logError = function (obj, e) {
+
+}
+
 /**
  *
  * @param className {string}
@@ -1042,6 +1206,7 @@ JdbcProcedureExecutor.prototype.openDebugger=function(tag,context,conditionExpre
 JdbcProcedureExecutor.prototype.loadClass=function(className){
 
 }
+
 
 /**
  *
@@ -1070,6 +1235,25 @@ JdbcProcedureExecutor.prototype.evalAs=function(script,params){
  * @return {Object}
  */
 JdbcProcedureExecutor.prototype.eval=function(script,params){
+
+}
+
+/**
+ *
+ * @param params {JavaMap<String,Object>}
+ * @param result {string}
+ * @param value {Object}
+ */
+JdbcProcedureExecutor.prototype.visitSet = function (params, result, value) {
+
+}
+
+/**
+ *
+ * @param params {JavaMap<String,Object>}
+ * @param result {string}
+ */
+JdbcProcedureExecutor.prototype.visitDelete = function (params, result) {
 
 }
 

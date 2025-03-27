@@ -21,16 +21,20 @@ import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
 import i2f.lru.LruMap;
 import i2f.page.ApiOffsetSize;
+import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
@@ -166,63 +170,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return nodes;
     }
 
-    @Override
-    public void debug(boolean enable) {
-        this.debug.set(enable);
-    }
-
-    @Override
-    public boolean isDebug() {
-        return this.debug.get();
-    }
-
-    @Override
-    public void debugLog(Supplier<Object> supplier) {
-        if (debug.get()) {
-            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), String.valueOf(supplier.get())));
-        }
-    }
-
-    @Override
-    public void infoLog(Supplier<Object> supplier, Throwable e) {
-        System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
-        if (e != null) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void warnLog(Supplier<Object> supplier, Throwable e) {
-        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
-        if (e != null) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void errorLog(Supplier<Object> supplier, Throwable e) {
-        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
-        if (e != null) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void openDebugger(String tag, Object context, String conditionExpression) {
-        if (debug.get()) {
-            String location=null;
-            try{
-                Object loc = visit(ParamsConsts.TRACE_LOCATION, context);
-                Object line = visit(ParamsConsts.TRACE_LINE, context);
-                location=loc+":"+line;
-            }catch(Exception e){
-
-            }
-            System.out.println("debugger [" + tag + "] [" + conditionExpression + "] wait for input line to continue, trace near : "+location);
-            System.out.println("continue.");
-        }
-    }
-
 
     @Override
     public <T> T invoke(String procedureId, Map<String, Object> params) {
@@ -233,31 +180,32 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public <T> T invoke(String procedureId, List<Object> args) {
         Map<String, Object> params = castArgListAsProcedureMap(procedureId, args);
-        return invoke(procedureId,params);
+        return invoke(procedureId, params);
     }
+
 
     @Override
     public Map<String, Object> call(String procedureId, List<Object> args) {
         Map<String, Object> params = castArgListAsProcedureMap(procedureId, args);
-        return call(procedureId,params);
+        return call(procedureId, params);
     }
 
-    public Map<String,Object> castArgListAsProcedureMap(String procedureId,List<Object> args){
-        Map<String,Object> ret=new LinkedHashMap<>();
+    public Map<String, Object> castArgListAsProcedureMap(String procedureId, List<Object> args) {
+        Map<String, Object> ret = new LinkedHashMap<>();
         Map<String, ProcedureMeta> nodeMap = getMetaMap();
         ProcedureMeta node = nodeMap.get(procedureId);
-        if(node!=null){
+        if (node != null) {
             List<String> arguments = node.getArguments();
-            int i=0;
+            int i = 0;
             for (String name : arguments) {
-                if(AttrConsts.ID.equals(name)){
+                if (AttrConsts.ID.equals(name)) {
                     continue;
                 }
-                if(ParamsConsts.RETURN.equals(name)){
+                if (ParamsConsts.RETURN.equals(name)) {
                     continue;
                 }
-                Object value=i<args.size()?args.get(i):null;
-                ret.put(name,value);
+                Object value = i < args.size() ? args.get(i) : null;
+                ret.put(name, value);
                 i++;
             }
             return ret;
@@ -265,59 +213,76 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         throw new NotFoundSignalException("not found node: " + procedureId);
     }
 
-    @Override
-    public Map<String, Object> prepareParams(Map<String, Object> params) {
-        Map<String, Object> execParams = createParams();
-        for (Map.Entry<String, Object> entry : execParams.entrySet()) {
-            params.putIfAbsent(entry.getKey(), entry.getValue());
-        }
-        return params;
-    }
-
-    public String getNodeLocation(XmlNode node){
-        if(node==null){
+    public String getNodeLocation(XmlNode node) {
+        if (node == null) {
             return "null node";
         }
-        return "tag:"+node.getTagName()+", "+node.getLocationFile()+":"+node.getLocationLineNumber();
+        return "tag:" + node.getTagName() + ", " + node.getLocationFile() + ":" + node.getLocationLineNumber();
     }
 
-    @Override
-    public Map<String, Object> exec(XmlNode node, Map<String,Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
+    @FunctionalInterface
+    public interface ExecXmlNodeDelegateTask {
+        void exec(XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) throws Throwable;
+    }
+
+    public void execXmlNodeDelegate(ExecXmlNodeDelegateTask task, XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
-            for (ExecutorNode item : getNodes()) {
-                if (item.support(node)) {
-                    prepareParams(params);
-                    debugLog(() -> "exec " + node.getTagName() + " by " + item.getClass().getSimpleName()+", at "+getNodeLocation(node));
-                    Map<String, Connection> bakConnection = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
-                    if (beforeNewConnection) {
-                        visitSet(params,ParamsConsts.CONNECTIONS, new HashMap<>());
-                    }
-                    try {
-                        item.exec(node, params,this);
-                    } finally {
-                        if (beforeNewConnection) {
-                            closeConnections(params);
-                            visitSet(params,ParamsConsts.CONNECTIONS, bakConnection);
-                        }
-                        if (afterCloseConnection) {
-                            closeConnections(params);
-                        }
-                    }
-                    return params;
-                }
-            }
-            debugLog(() -> "waring! tag " + node.getTagName() + " not found any executor!"+" at "+getNodeLocation(node));
+            task.exec(node, params, beforeNewConnection, afterCloseConnection);
         } catch (ControlSignalException e) {
             if (Arrays.asList(ProcedureNode.TAG_NAME,
                     ProcedureCallNode.TAG_NAME,
                     FunctionCallNode.TAG_NAME
             ).contains(node.getTagName())) {
-                debugLog(() -> "control signal:"+e.getClass().getSimpleName());
-            }else{
+                logDebug(() -> "control signal:" + e.getClass().getSimpleName());
+            } else {
                 throw e;
             }
+        } catch (Throwable e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
+    }
+
+    @Override
+    public Map<String, Object> exec(XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
+        execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
+            for (ExecutorNode execNode : getNodes()) {
+                if (execNode.support(vNode)) {
+                    execXmlNodeByExecutorNode(execNode, vNode, vParams, vBeforeNewConnection, vAfterCloseConnection);
+                    return;
+                }
+            }
+            logDebug(() -> "waring! tag " + vNode.getTagName() + " not found any executor!" + " at " + getNodeLocation(vNode));
+
+        }, node, params, beforeNewConnection, afterCloseConnection);
         return params;
+    }
+
+    @FunctionalInterface
+    public interface ExecJavaCallerDelegateTask {
+        void exec(JdbcProcedureJavaCaller caller, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) throws Throwable;
+    }
+
+    public void execJavaCallerDelegate(ExecJavaCallerDelegateTask task, JdbcProcedureJavaCaller caller, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
+        try {
+            task.exec(caller, params, beforeNewConnection, afterCloseConnection);
+        } catch (ControlSignalException e) {
+
+        } catch (Throwable e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
+        }
+    }
+
+    @FunctionalInterface
+    public interface ExecDelegateTask {
+        void exec(Map<String, Object> params, Object... args) throws Throwable;
     }
 
     public void closeConnections(Map<String, Object> params) {
@@ -329,19 +294,82 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Connection conn = entry.getValue();
             if (conn != null) {
                 try {
-                    debugLog(() -> "close connection : " + entry.getKey());
+                    logDebug(() -> "close connection : " + entry.getKey());
                     conn.close();
                 } catch (SQLException e) {
-                    warnLog(()->e.getMessage(),e);
+                    logWarn(() -> e.getMessage(), e);
                 }
             }
         }
-        visitSet(params,ParamsConsts.CONNECTIONS, new HashMap<>());
+        visitSet(params, ParamsConsts.CONNECTIONS, new HashMap<>());
     }
 
-    public ProcedureNode getProcedureNode(){
-        return procedureNodeHolder.updateAndGet((node)->{
-            if(node!=null){
+    public void execDelegate(ExecDelegateTask task,
+                             Map<String, Object> params,
+                             boolean beforeNewConnection,
+                             boolean afterCloseConnection,
+                             Object... args) throws Throwable {
+        prepareParams(params);
+
+        Map<String, Connection> bakConnection = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
+        if (beforeNewConnection) {
+            visitSet(params, ParamsConsts.CONNECTIONS, new HashMap<>());
+        }
+        try {
+            task.exec(params, args);
+        } finally {
+            if (beforeNewConnection) {
+                closeConnections(params);
+                visitSet(params, ParamsConsts.CONNECTIONS, bakConnection);
+            }
+            if (afterCloseConnection) {
+                closeConnections(params);
+            }
+        }
+    }
+
+    public void execJavaCaller(JdbcProcedureJavaCaller caller, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) throws Throwable {
+        execDelegate((vParams, vArgs) -> {
+            JdbcProcedureJavaCaller vCaller = (JdbcProcedureJavaCaller) vArgs[0];
+            logDebug(() -> "exec " + vCaller.getClass());
+
+            Object ret = vCaller.exec(this, vParams);
+            boolean hasValue = true;
+            if (ret instanceof Reference) {
+                Reference<?> ref = (Reference<?>) ret;
+                if (ref.isValue()) {
+                    ret = ref.get();
+                } else {
+                    hasValue = false;
+                }
+            }
+            if (hasValue) {
+                visitSet(vParams, ParamsConsts.RETURN, ret);
+            }
+        }, params, beforeNewConnection, afterCloseConnection, caller);
+    }
+
+    public void execXmlNodeByExecutorNode(ExecutorNode execNode, XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) throws Throwable {
+        execDelegate((vParams, vArgs) -> {
+            ExecutorNode vExecNode = (ExecutorNode) vArgs[0];
+            XmlNode vNode = (XmlNode) vArgs[1];
+            logDebug(() -> "exec " + vNode.getTagName() + " by " + vExecNode.getClass().getSimpleName() + ", at " + getNodeLocation(vNode));
+
+            vExecNode.exec(vNode, vParams, this);
+        }, params, beforeNewConnection, afterCloseConnection, execNode, node);
+    }
+
+    @Override
+    public Map<String, Object> exec(JdbcProcedureJavaCaller caller, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
+        execJavaCallerDelegate((vCaller, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
+            execJavaCaller(vCaller, vParams, vBeforeNewConnection, vAfterCloseConnection);
+        }, caller, params, beforeNewConnection, afterCloseConnection);
+        return params;
+    }
+
+    public ProcedureNode getProcedureNode() {
+        return procedureNodeHolder.updateAndGet((node) -> {
+            if (node != null) {
                 return node;
             }
             for (ExecutorNode item : getNodes()) {
@@ -353,45 +381,71 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         });
     }
 
+    @Override
+    public Map<String, Object> execAsProcedure(XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
+        execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
+            ProcedureNode execNode = getProcedureNode();
+            execXmlNodeByExecutorNode(execNode, vNode, vParams, vBeforeNewConnection, vAfterCloseConnection);
+        }, node, params, beforeNewConnection, afterCloseConnection);
+        return params;
+    }
 
     @Override
-    public Map<String, Object> execAsProcedure(XmlNode node, Map<String,Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
-        try {
-            prepareParams(params);
-            ProcedureNode execNode = getProcedureNode();
+    public Map<String, Object> createParams() {
+        Map<String, Object> ret = new LinkedHashMap<>();
+        ret.put(ParamsConsts.CONTEXT, namingContext);
+        ret.put(ParamsConsts.ENVIRONMENT, environment);
+        ret.put(ParamsConsts.BEANS, new HashMap<>());
 
-            debugLog(() -> "exec as procedure " + node.getTagName()+", at "+getNodeLocation(node));
+        ret.put(ParamsConsts.DATASOURCES, new HashMap<>());
+        ret.put(ParamsConsts.DATASOURCES_MAPPING, new HashMap<>());
 
-            Map<String, Connection> bakConnection = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
-            if (beforeNewConnection) {
-                visitSet(params,ParamsConsts.CONNECTIONS, new HashMap<>());
-            }
-            try {
-                execNode.exec(node, params, this);
-            } finally {
-                if (beforeNewConnection) {
-                    closeConnections(params);
-                    visitSet(params,ParamsConsts.CONNECTIONS, bakConnection);
-                }
-                if (afterCloseConnection) {
-                    closeConnections(params);
-                }
-            }
-        } catch (ControlSignalException e) {
-            if (Arrays.asList(ProcedureNode.TAG_NAME,
-                    ProcedureCallNode.TAG_NAME,
-                    FunctionCallNode.TAG_NAME
-            ).contains(node.getTagName())) {
-                debugLog(() -> "control signal:"+e.getClass().getSimpleName());
-            }else{
-                throw e;
-            }
+        ret.put(ParamsConsts.CONNECTIONS, new HashMap<>());
+
+        ret.put(ParamsConsts.GLOBAL, new HashMap<>());
+
+        ret.put(ParamsConsts.TRACE, new HashMap<>());
+
+        ret.put(ParamsConsts.EXECUTOR, this);
+
+        ret.put(ParamsConsts.LRU, new LruMap<>(4096));
+        return ret;
+    }
+
+    @Override
+    public Map<String, Object> prepareParams(Map<String, Object> params) {
+        Map<String, Object> execParams = createParams();
+        for (Map.Entry<String, Object> entry : execParams.entrySet()) {
+            params.putIfAbsent(entry.getKey(), entry.getValue());
         }
         return params;
     }
 
     @Override
-    public Object attrValue(String attr, String action, XmlNode node, Map<String,Object> params) {
+    public Map<String, Object> newParams(Map<String, Object> params) {
+        Map<String, Object> ret = new LinkedHashMap<>();
+        if (params == null) {
+            return createParams();
+        }
+        ret.put(ParamsConsts.CONTEXT, params.get(ParamsConsts.CONTEXT));
+        ret.put(ParamsConsts.ENVIRONMENT, params.get(ParamsConsts.ENVIRONMENT));
+        ret.put(ParamsConsts.BEANS, params.get(ParamsConsts.BEANS));
+
+        ret.put(ParamsConsts.DATASOURCES, params.get(ParamsConsts.DATASOURCES));
+        ret.put(ParamsConsts.DATASOURCES_MAPPING, params.get(ParamsConsts.DATASOURCES_MAPPING));
+
+        ret.put(ParamsConsts.GLOBAL, params.get(ParamsConsts.GLOBAL));
+
+        ret.put(ParamsConsts.TRACE, params.get(ParamsConsts.TRACE));
+
+        ret.put(ParamsConsts.EXECUTOR, this);
+
+        ret.put(ParamsConsts.LRU, params.get(ParamsConsts.LRU));
+        return ret;
+    }
+
+    @Override
+    public Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params) {
         String attrScript = node.getTagAttrMap().get(attr);
         if (attrScript == null) {
             return null;
@@ -429,7 +483,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public Object resultValue(Object value, List<String> features, XmlNode node, Map<String,Object> params) {
+    public Object resultValue(Object value, List<String> features, XmlNode node, Map<String, Object> params) {
         if (features == null || features.isEmpty()) {
             return value;
         }
@@ -442,64 +496,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return value;
     }
 
-    @Override
-    public void visitSet(Map<String, Object> params, String result, Object value) {
-        Visitor visitor = Visitor.visit(result, params);
-        visitor.set(value);
-    }
-
-    @Override
-    public void visitDelete(Map<String, Object> params, String result) {
-        Visitor visitor = Visitor.visit(result, params);
-        visitor.delete();
-    }
-
-    @Override
-    public Map<String, Object> createParams() {
-        Map<String, Object> ret = new LinkedHashMap<>();
-        ret.put(ParamsConsts.CONTEXT, namingContext);
-        ret.put(ParamsConsts.ENVIRONMENT, environment);
-        ret.put(ParamsConsts.BEANS, new HashMap<>());
-
-        ret.put(ParamsConsts.DATASOURCES, new HashMap<>());
-        ret.put(ParamsConsts.DATASOURCES_MAPPING,new HashMap<>());
-
-        ret.put(ParamsConsts.CONNECTIONS, new HashMap<>());
-
-        ret.put(ParamsConsts.GLOBAL, new HashMap<>());
-
-        ret.put(ParamsConsts.TRACE,new HashMap<>());
-
-        ret.put(ParamsConsts.EXECUTOR, this);
-
-        ret.put(ParamsConsts.LRU,new LruMap<>(4096));
-        return ret;
-    }
-
-    @Override
-    public Map<String, Object> newParams(Map<String,Object> params) {
-        Map<String, Object> ret = new LinkedHashMap<>();
-        if (params == null) {
-            return createParams();
-        }
-        ret.put(ParamsConsts.CONTEXT, params.get(ParamsConsts.CONTEXT));
-        ret.put(ParamsConsts.ENVIRONMENT, params.get(ParamsConsts.ENVIRONMENT));
-        ret.put(ParamsConsts.BEANS, params.get(ParamsConsts.BEANS));
-
-        ret.put(ParamsConsts.DATASOURCES, params.get(ParamsConsts.DATASOURCES));
-        ret.put(ParamsConsts.DATASOURCES_MAPPING,params.get(ParamsConsts.DATASOURCES_MAPPING));
-
-        ret.put(ParamsConsts.GLOBAL, params.get(ParamsConsts.GLOBAL));
-
-        ret.put(ParamsConsts.TRACE, params.get(ParamsConsts.TRACE));
-
-        ret.put(ParamsConsts.EXECUTOR, this);
-
-        ret.put(ParamsConsts.LRU,params.get(ParamsConsts.LRU));
-        return ret;
-    }
-
-    public Object resolveFeature(Object value, String feature, XmlNode node, Map<String,Object> context) {
+    public Object resolveFeature(Object value, String feature, XmlNode node, Map<String, Object> context) {
         if (feature == null || feature.isEmpty()) {
             return value;
         }
@@ -615,7 +612,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 boolean ok = supportDatabaseDialect(datasource, databases, context);
                 return ok;
             } catch (Exception e) {
-                warnLog(()->e.getMessage(),e);
+                logWarn(() -> e.getMessage(), e);
             }
             return false;
         } else if (FeatureConsts.IS_NULL.equals(feature)) {
@@ -641,7 +638,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     return method.invoke(null, value);
                 }
             } catch (Throwable e) {
-                warnLog(() -> e.getMessage(), e);
+                logWarn(() -> e.getMessage(), e);
             }
             try {
                 Function function = ContextHolder.CONVERT_FUNC_MAP.get(feature);
@@ -649,16 +646,102 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     return function.apply(value);
                 }
             } catch (Exception e) {
-                warnLog(() -> e.getMessage(), e);
+                logWarn(() -> e.getMessage(), e);
             }
         }
         return value;
+    }
+
+    public boolean supportDatabaseDialect(String datasource, String databases, Map<String, Object> params) throws Exception {
+        if (databases == null) {
+            return false;
+        }
+        Connection conn = getConnection(datasource, params);
+        List<String> databaseNames = detectDatabaseType(conn);
+        String[] arr = databases.split(",");
+        for (String item : arr) {
+            for (String databaseName : databaseNames) {
+                if (item.equalsIgnoreCase(databaseName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public List<String> detectDatabaseType(Connection conn) throws Exception {
+        List<String> ret = new ArrayList<>();
+        DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+        if (databaseType == null) {
+            return ret;
+        }
+        String name = databaseType.db();
+        String enumName = databaseType.name();
+        ret.add(name.toLowerCase());
+        ret.add(enumName.toLowerCase());
+        return ret;
     }
 
     public boolean toBoolean(Object obj) {
         return ObjectConvertor.toBoolean(obj);
     }
 
+    @Override
+    public void debug(boolean enable) {
+        this.debug.set(enable);
+    }
+
+    @Override
+    public boolean isDebug() {
+        return this.debug.get();
+    }
+
+    @Override
+    public void openDebugger(String tag, Object context, String conditionExpression) {
+        if (debug.get()) {
+            String location = null;
+            try {
+                Object loc = visit(ParamsConsts.TRACE_LOCATION, context);
+                Object line = visit(ParamsConsts.TRACE_LINE, context);
+                location = loc + ":" + line;
+            } catch (Exception e) {
+
+            }
+            System.out.println("debugger [" + tag + "] [" + conditionExpression + "] wait for input line to continue, trace near : " + location);
+            System.out.println("continue.");
+        }
+    }
+
+    @Override
+    public void logDebug(Supplier<Object> supplier) {
+        if (debug.get()) {
+            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        }
+    }
+
+    @Override
+    public void logInfo(Supplier<Object> supplier, Throwable e) {
+        System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        if (e != null) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void logWarn(Supplier<Object> supplier, Throwable e) {
+        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        if (e != null) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void logError(Supplier<Object> supplier, Throwable e) {
+        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        if (e != null) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public Class<?> loadClass(String className) {
@@ -693,6 +776,21 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return null;
     }
 
+    @Override
+    public boolean test(String script, Object params) {
+        String test = unescapeTestScript(script);
+        logDebug(() -> "test:" + test);
+        try {
+            Boolean ok = ObjectConvertor.tryParseBoolean(test);
+            if (ok != null) {
+                return ok;
+            }
+        } catch (Exception e) {
+
+        }
+        return innerTest(test, params);
+    }
+
     public String unescapeTestScript(String script) {
         if (script == null) {
             return script;
@@ -719,28 +817,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return script;
     }
 
-    @Override
-    public boolean test(String script, Object params) {
-        String test = unescapeTestScript(script);
-        debugLog(() -> "test:" + test);
-        try {
-            Boolean ok = ObjectConvertor.tryParseBoolean(test);
-            if (ok != null) {
-                return ok;
-            }
-        } catch (Exception e) {
-
-        }
-        return innerTest(test, params);
-    }
-
     public boolean innerTest(String test, Object params) {
         return MybatisMapperInflater.INSTANCE.testExpression(test, params);
     }
 
     @Override
     public Object eval(String script, Object params) {
-        debugLog(() -> "eval:" + script);
+        logDebug(() -> "eval:" + script);
         try {
             return Integer.parseInt(script);
         } catch (Exception e) {
@@ -772,11 +855,23 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
+    public void visitSet(Map<String, Object> params, String result, Object value) {
+        Visitor visitor = Visitor.visit(result, params);
+        visitor.set(value);
+    }
+
+    @Override
+    public void visitDelete(Map<String, Object> params, String result) {
+        Visitor visitor = Visitor.visit(result, params);
+        visitor.delete();
+    }
+
+    @Override
     public Object visit(String script, Object params) {
-        debugLog(() -> "visit:" + script);
-        if(params instanceof Map){
+        logDebug(() -> "visit:" + script);
+        if (params instanceof Map) {
             Map<?, ?> map = (Map<?, ?>) params;
-            if(map.containsKey(script)){
+            if (map.containsKey(script)) {
                 return map.get(script);
             }
         }
@@ -793,7 +888,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public String render(String script, Object params) {
-        debugLog(() -> "render:" + script);
+        logDebug(() -> "render:" + script);
         return innerRender(script, params);
     }
 
@@ -801,17 +896,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return script;
     }
 
-
     @Override
     public Connection getConnection(String datasource, Map<String, Object> params) {
         if (datasource == null || datasource.isEmpty()) {
             datasource = ParamsConsts.DEFAULT_DATASOURCE;
         }
-        Map<String,String> datasourcesMapping = (Map<String,String>)params.get(ParamsConsts.DATASOURCES_MAPPING);
-        if(datasourcesMapping!=null){
+        Map<String, String> datasourcesMapping = (Map<String, String>) params.get(ParamsConsts.DATASOURCES_MAPPING);
+        if (datasourcesMapping != null) {
             String mapping = datasourcesMapping.get(datasource);
-            if(mapping!=null &&!mapping.isEmpty()){
-                datasource=mapping;
+            if (mapping != null && !mapping.isEmpty()) {
+                datasource = mapping;
             }
         }
 
@@ -843,40 +937,122 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return conn;
     }
 
+
+    @Override
+    public List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            logDebug(() -> "sqlQueryList:datasource=" + datasource + " \n\tbql:\n" + bql);
+            List<?> list = JdbcResolver.list(conn, bql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
+            return list;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            logDebug(() -> "sqlQueryObject:datasource=" + datasource + " \n\tbql:\n" + bql);
+            Object obj = JdbcResolver.get(conn, bql, resultType);
+            return obj;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Object sqlQueryRow(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            logDebug(() -> "sqlQueryRow:datasource=" + datasource + " \n\tbql:\n" + bql);
+            Object row = JdbcResolver.find(conn, bql, resultType, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
+            return row;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public int sqlUpdate(String datasource, BindSql bql, Map<String, Object> params) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            logDebug(() -> "sqlUpdate:datasource=" + datasource + " \n\tbql:\n" + bql);
+            int num = JdbcResolver.update(conn, bql);
+            return num;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BindSql sqlWrapPage(String datasource, BindSql bql, ApiOffsetSize page, Map<String, Object> params) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            if (page != null && (page.getOffset() != null || page.getSize() != null)) {
+                IPageWrapper wrapper = PageWrappers.wrapper(conn);
+                bql = wrapper.apply(bql, page);
+            }
+            BindSql pageSql = bql;
+            logDebug(() -> "sqlWrapPage:datasource=" + datasource + ", databaseType=" + databaseType + " \n\tbql:\n" + pageSql);
+            return pageSql;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BindSql sqlWrapCount(String datasource, BindSql bql, Map<String, Object> params) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            ICountWrapper wrapper = CountWrappers.wrapper();
+            bql = wrapper.apply(bql);
+            BindSql pageSql = bql;
+            logDebug(() -> "sqlWrapCount:datasource=" + datasource + ", databaseType=" + databaseType + " \n\tbql:\n" + pageSql);
+            return pageSql;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page) {
+        try {
+            Connection conn = getConnection(datasource, params);
+            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+            String script = entry.getValue();
+            BindSql bql = resolveSqlScript(script, params);
+            if (page != null && (page.getOffset() != null || page.getSize() != null)) {
+                IPageWrapper wrapper = PageWrappers.wrapper(conn);
+                bql = wrapper.apply(bql, page);
+            }
+            BindSql pageSql = bql;
+            logDebug(() -> "sqlScript:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + pageSql);
+            return pageSql;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
     public BindSql resolveSqlScript(String script, Map<String, Object> params) throws Exception {
         MybatisMapperNode mapperNode = MybatisMapperParser.parseScriptNode(script);
         BindSql bql = MybatisMapperInflater.INSTANCE.inflateSqlNode(mapperNode, params, new HashMap<>());
         return bql;
-    }
-
-    public boolean supportDatabaseDialect(String datasource, String databases, Map<String, Object> params) throws Exception {
-        if (databases == null) {
-            return false;
-        }
-        Connection conn = getConnection(datasource, params);
-        List<String> databaseNames = detectDatabaseType(conn);
-        String[] arr = databases.split(",");
-        for (String item : arr) {
-            for (String databaseName : databaseNames) {
-                if (item.equalsIgnoreCase(databaseName)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public List<String> detectDatabaseType(Connection conn) throws Exception {
-        List<String> ret = new ArrayList<>();
-        DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-        if (databaseType == null) {
-            return ret;
-        }
-        String name = databaseType.db();
-        String enumName = databaseType.name();
-        ret.add(name.toLowerCase());
-        ret.add(enumName.toLowerCase());
-        return ret;
     }
 
     public Map.Entry<String, String> getDialectSqlScript(List<Map.Entry<String, String>> dialectScriptList, Connection conn) throws Exception {
@@ -911,118 +1087,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
-        try {
-            Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            debugLog(() -> "sqlQueryList:datasource=" + datasource + " \n\tbql:\n" + bql);
-            List<?> list = JdbcResolver.list(conn, bql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
-            return list;
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
-
-    @Override
-    public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
-        try {
-            Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            debugLog(() -> "sqlQueryObject:datasource=" + datasource + " \n\tbql:\n" + bql);
-            Object obj = JdbcResolver.get(conn, bql, resultType);
-            return obj;
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Object sqlQueryRow(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
-        try {
-            Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            debugLog(() -> "sqlQueryRow:datasource=" + datasource + " \n\tbql:\n" + bql);
-            Object row = JdbcResolver.find(conn, bql, resultType, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
-            return row;
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public int sqlUpdate(String datasource, BindSql bql, Map<String, Object> params) {
-        try {
-            Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            debugLog(() -> "sqlUpdate:datasource=" + datasource + " \n\tbql:\n" + bql);
-            int num = JdbcResolver.update(conn, bql);
-            return num;
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public BindSql sqlWrapPage(String datasource, BindSql bql, ApiOffsetSize page, Map<String, Object> params) {
-        try {
-            Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            if (page != null && (page.getOffset() != null || page.getSize() != null)) {
-                IPageWrapper wrapper = PageWrappers.wrapper(conn);
-                bql = wrapper.apply(bql, page);
-            }
-            BindSql pageSql = bql;
-            debugLog(() -> "sqlWrapPage:datasource=" + datasource + ", databaseType=" + databaseType + " \n\tbql:\n" + pageSql);
-            return pageSql;
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public BindSql sqlWrapCount(String datasource, BindSql bql, Map<String, Object> params) {
-        try {
-            Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            ICountWrapper wrapper = CountWrappers.wrapper();
-            bql = wrapper.apply(bql);
-            BindSql pageSql = bql;
-            debugLog(() -> "sqlWrapCount:datasource=" + datasource + ", databaseType=" + databaseType + " \n\tbql:\n" + pageSql);
-            return pageSql;
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page) {
-        try {
-            Connection conn = getConnection(datasource, params);
-            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-            visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            String script = entry.getValue();
-            BindSql bql = resolveSqlScript(script, params);
-            if (page != null && (page.getOffset() != null || page.getSize() != null)) {
-                IPageWrapper wrapper = PageWrappers.wrapper(conn);
-                bql = wrapper.apply(bql, page);
-            }
-            BindSql pageSql = bql;
-            debugLog(() -> "sqlScript:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + pageSql);
-            return pageSql;
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
-    @Override
     public List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, ApiOffsetSize page) {
         try {
             Connection conn = getConnection(datasource, params);
@@ -1033,7 +1097,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 bql = wrapper.apply(bql, page);
             }
             BindSql pageBql = bql;
-            debugLog(() -> "sqlQueryPage:datasource=" + datasource + " \n\tbql:\n" + pageBql);
+            logDebug(() -> "sqlQueryPage:datasource=" + datasource + " \n\tbql:\n" + pageBql);
             List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, TypeOf.typeOf(resultType, Map.class) ? (String::toUpperCase) : null);
             return list;
         } catch (Exception e) {
@@ -1043,7 +1107,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransBegin(String datasource, int isolation, Map<String, Object> params) {
-        debugLog(() -> "sqlTransBegin:" + datasource);
+        logDebug(() -> "sqlTransBegin:" + datasource);
         try {
             if (isolation < 0) {
                 isolation = Connection.TRANSACTION_READ_COMMITTED;
@@ -1058,7 +1122,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransCommit(String datasource, Map<String, Object> params) {
-        debugLog(() -> "sqlTransCommit:" + datasource);
+        logDebug(() -> "sqlTransCommit:" + datasource);
         try {
             Connection conn = getConnection(datasource, params);
             conn.commit();
@@ -1069,7 +1133,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransRollback(String datasource, Map<String, Object> params) {
-        debugLog(() -> "sqlTransRollback:" + datasource);
+        logDebug(() -> "sqlTransRollback:" + datasource);
         try {
             Connection conn = getConnection(datasource, params);
             conn.rollback();
@@ -1080,7 +1144,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransNone(String datasource, Map<String, Object> params) {
-        debugLog(() -> "sqlTransNone:" + datasource);
+        logDebug(() -> "sqlTransNone:" + datasource);
         try {
             Connection conn = getConnection(datasource, params);
             conn.setAutoCommit(true);
@@ -1088,6 +1152,5 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
-
 
 }

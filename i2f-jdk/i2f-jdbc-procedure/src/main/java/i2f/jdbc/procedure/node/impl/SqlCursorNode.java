@@ -131,11 +131,11 @@ public class SqlCursorNode extends AbstractExecutorNode {
             while (true) {
                 List<?> list = executor.sqlQueryPage(datasource, bql, context, resultType, new ApiPage(pageIndex, batchSize));
                 if (list.isEmpty()) {
-                    executor.debugLog(()->"no data found! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
+                    executor.logDebug(() -> "no data found! at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
                     break;
                 }
 
-                executor.debugLog(()->"found batch data! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
+                executor.logDebug(() -> "found batch data! at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
 
                 if (acceptBatch) {
                     try {

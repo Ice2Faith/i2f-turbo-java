@@ -76,7 +76,7 @@ public class ProcedureCallNode extends AbstractExecutorNode {
 
 
         try {
-            callParams = executor.exec(refid, callParams);
+            callParams = executor.exec(refid, callParams, false, false);
         } catch (ControlSignalException e) {
 
         } catch (Throwable e) {

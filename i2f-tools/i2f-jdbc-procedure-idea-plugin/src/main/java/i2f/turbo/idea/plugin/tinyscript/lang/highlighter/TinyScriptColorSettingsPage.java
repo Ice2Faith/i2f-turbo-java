@@ -17,8 +17,11 @@ public class TinyScriptColorSettingsPage implements ColorSettingsPage {
     @SuppressWarnings("DialogTitleCapitalization")
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
             new AttributesDescriptor("Keywords", TinyScriptSyntaxHighlighter.KEYWORD),
-            new AttributesDescriptor("Value", TinyScriptSyntaxHighlighter.NUMBER),
             new AttributesDescriptor("String", TinyScriptSyntaxHighlighter.STRING),
+            new AttributesDescriptor("Value", TinyScriptSyntaxHighlighter.NUMBER),
+            new AttributesDescriptor("Comment", TinyScriptSyntaxHighlighter.COMMENT),
+            new AttributesDescriptor("Class", TinyScriptSyntaxHighlighter.CLASS_REFERENCE),
+            new AttributesDescriptor("Paren", TinyScriptSyntaxHighlighter.PAREN),
             new AttributesDescriptor("Bad value", TinyScriptSyntaxHighlighter.BAD_CHARACTER)
     };
     @Nullable

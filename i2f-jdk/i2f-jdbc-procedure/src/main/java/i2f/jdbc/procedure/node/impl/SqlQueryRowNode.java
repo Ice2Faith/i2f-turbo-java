@@ -67,7 +67,7 @@ public class SqlQueryRowNode extends AbstractExecutorNode {
         }
         Object row = executor.sqlQueryRow(datasource, bql, context, resultType);
         boolean isEmpty=(row==null);
-        executor.debugLog(()->"found data is null: "+isEmpty+"! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
+        executor.logDebug(() -> "found data is null: " + isEmpty + "! at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
         if (result != null && !result.isEmpty()) {
             executor.visitSet(context, result, row);
         }

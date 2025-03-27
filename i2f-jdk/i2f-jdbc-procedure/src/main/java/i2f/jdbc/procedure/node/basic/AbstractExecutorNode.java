@@ -19,7 +19,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String location=node.getLocationFile()+":"+node.getLocationLineNumber();
-        executor.debugLog(()->"exec node on tag:"+node.getTagName()+" , at "+location);
+        executor.logDebug(() -> "exec node on tag:" + node.getTagName() + " , at " + location);
         try {
             executor.visitSet(context, ParamsConsts.TRACE_LOCATION,node.getLocationFile());
             executor.visitSet(context,ParamsConsts.TRACE_LINE,node.getLocationLineNumber());
@@ -41,11 +41,11 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             if(e instanceof SignalException){
                 Throwable cause = e.getCause();
                 if(cause==null){
-                    executor.errorLog(() -> errorMsg, e);
+                    executor.logError(() -> errorMsg, e);
                 }
                 throw (SignalException)e;
             } else {
-                executor.errorLog(() -> errorMsg, e);
+                executor.logError(() -> errorMsg, e);
                 throw new ThrowSignalException(errorMsg, e);
             }
         }
