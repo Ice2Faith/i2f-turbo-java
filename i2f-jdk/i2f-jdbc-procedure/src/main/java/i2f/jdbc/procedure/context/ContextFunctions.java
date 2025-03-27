@@ -15,42 +15,46 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * @author Ice2Faith
  * @date 2025/2/17 16:09
  */
 public class ContextFunctions {
-    public static final String[][] ORACLE_REGEX_REPLACE_MAPPING={
-            {"[:alpha:]","a-zA-Z"},
-            {"[:alnum:]","a-zA-Z0-9"},
-            {"[:alphanum:]","a-zA-Z0-9"},
-            {"[:punct:]","\\!-\\&\\(-/:-@\\[-`\\{-\\~'"},
-            {"[:digit:]","0-9"},
-            {"[:lower:]","a-z"},
-            {"[:upper:]","A-Z"},
-            {"[:blank:]","\\s"},
-            {"[:grah:]","\\S"},
+    public static final String[][] ORACLE_REGEX_REPLACE_MAPPING = {
+            {"[:alpha:]", "a-zA-Z"},
+            {"[:alnum:]", "a-zA-Z0-9"},
+            {"[:alphanum:]", "a-zA-Z0-9"},
+            {"[:punct:]", "\\!-\\&\\(-/:-@\\[-`\\{-\\~'"},
+            {"[:digit:]", "0-9"},
+            {"[:lower:]", "a-z"},
+            {"[:upper:]", "A-Z"},
+            {"[:blank:]", "\\s"},
+            {"[:grah:]", "\\S"},
 
     };
-    public static String convertOracleRegexExpression(String regex){
-        if(regex==null){
+
+    public static String convertOracleRegexExpression(String regex) {
+        if (regex == null) {
             return null;
         }
         for (String[] arr : ORACLE_REGEX_REPLACE_MAPPING) {
-            regex=regex.replace(arr[0],arr[1]);
+            regex = regex.replace(arr[0], arr[1]);
         }
         return regex;
     }
-    public static String convertOracleRegexReplacement(String replacement){
-        if(replacement==null){
+
+    public static String convertOracleRegexReplacement(String replacement) {
+        if (replacement == null) {
             return null;
         }
-        replacement=RegexUtil.regexFindAndReplace(replacement,"\\\\d+",(str)->{
-            return "$"+str.substring(1);
+        replacement = RegexUtil.regexFindAndReplace(replacement, "\\\\d+", (str) -> {
+            return "$" + str.substring(1);
         });
         return replacement;
     }
+
     public static String replace(String str, String target, String replacement) {
         if (str == null) {
             return str;
@@ -62,9 +66,9 @@ public class ContextFunctions {
         if (str == null) {
             return str;
         }
-        regex=convertOracleRegexExpression(regex);
-        replacement=convertOracleRegexReplacement(replacement);
-        return str.replaceAll(regex,replacement);
+        regex = convertOracleRegexExpression(regex);
+        replacement = convertOracleRegexReplacement(replacement);
+        return str.replaceAll(regex, replacement);
     }
 
     public static String regex_replace(String str, String regex, String replacement) {
@@ -79,14 +83,14 @@ public class ContextFunctions {
         if (str == null) {
             return str;
         }
-        return regexReplace(str,"(?i)"+regex,replacement);
+        return regexReplace(str, "(?i)" + regex, replacement);
     }
 
     public static boolean regexLike(String str, String regex) {
         if (str == null) {
             return false;
         }
-        regex=convertOracleRegexExpression(regex);
+        regex = convertOracleRegexExpression(regex);
         return str.matches(regex);
     }
 
@@ -103,7 +107,7 @@ public class ContextFunctions {
         if (str == null) {
             return false;
         }
-        return regexLike(str,"(?i)"+regex);
+        return regexLike(str, "(?i)" + regex);
     }
 
     public static String trim(String str) {
@@ -196,24 +200,24 @@ public class ContextFunctions {
         return nvl(v1, v2);
     }
 
-    public static Object nvl2(Object cond,Object trueVal,Object falseVal){
-        if(cond instanceof Boolean){
+    public static Object nvl2(Object cond, Object trueVal, Object falseVal) {
+        if (cond instanceof Boolean) {
             Boolean ok = (Boolean) cond;
-            if(ok){
+            if (ok) {
                 return trueVal;
-            }else{
+            } else {
                 return falseVal;
             }
         }
-        if(cond!=null){
+        if (cond != null) {
             return trueVal;
-        }else{
+        } else {
             return falseVal;
         }
     }
 
-    public static Object if2(Object cond,Object trueVal,Object falseVal){
-        return nvl2(cond,trueVal,falseVal);
+    public static Object if2(Object cond, Object trueVal, Object falseVal) {
+        return nvl2(cond, trueVal, falseVal);
     }
 
     public static Object decode(Object target, Object... args) {
@@ -403,11 +407,11 @@ public class ContextFunctions {
                 || "mills".equalsIgnoreCase(format)
                 | "ms".equalsIgnoreCase(format)) {
             obj = obj.withNano(obj.getNano() / 1000_000 * 1000_000);
-        } else if("week".equalsIgnoreCase(format)
-        ||"iw".equalsIgnoreCase(format)){
+        } else if ("week".equalsIgnoreCase(format)
+                || "iw".equalsIgnoreCase(format)) {
             DayOfWeek week = obj.getDayOfWeek();
             int day = week.getValue();
-            obj=obj.plusDays(day-1);
+            obj = obj.plusDays(day - 1);
         } else {
             throw new IllegalArgumentException("un-support date trunc format :" + format);
         }
@@ -525,7 +529,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(time, date.getClass());
     }
 
-    public static int extract(String fmt,Object date){
+    public static int extract(String fmt, Object date) {
         if (date == null) {
             return -1;
         }
@@ -534,50 +538,68 @@ public class ContextFunctions {
             throw new IllegalArgumentException("date cannot cast as date type, of type :" + date.getClass());
         }
         LocalDateTime time = (LocalDateTime) obj;
-        if("year".equalsIgnoreCase(fmt)){
+        if ("year".equalsIgnoreCase(fmt)) {
             return time.getYear();
-        }else if("month".equalsIgnoreCase(fmt)){
+        } else if ("month".equalsIgnoreCase(fmt)) {
             return time.getMonth().getValue();
-        }else if("day".equalsIgnoreCase(fmt)){
+        } else if ("day".equalsIgnoreCase(fmt)) {
             return time.getDayOfMonth();
-        }else if("hour".equalsIgnoreCase(fmt)){
+        } else if ("hour".equalsIgnoreCase(fmt)) {
             return time.getHour();
-        }else if("minute".equalsIgnoreCase(fmt)){
+        } else if ("minute".equalsIgnoreCase(fmt)) {
             return time.getMinute();
-        }else if("second".equalsIgnoreCase(fmt)){
+        } else if ("second".equalsIgnoreCase(fmt)) {
             return time.getSecond();
         }
         return -1;
     }
 
-    public static Double to_number(Object obj){
-        if(obj==null){
+    public static Double to_number(Object obj) {
+        if (obj == null) {
             return null;
         }
         return Double.parseDouble(String.valueOf(obj));
     }
 
-    public static void sleep(long seconds){
-        if(seconds>=0){
+    public static void sleep(long seconds) {
+        if (seconds >= 0) {
             try {
-                Thread.sleep(seconds*1000);
+                Thread.sleep(seconds * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public static int instr(String str,String sstr){
-        if(str==null || sstr==null){
+    public static int instr(String str, String sstr) {
+        if (str == null || sstr == null) {
             return -1;
         }
         return str.indexOf(sstr);
     }
 
-    public static String substr(String str,int index,int len){
-        if(str==null){
+    public static String substr(String str, int index, int len) {
+        if (str == null) {
             return str;
         }
         return str.substring(index, index + len);
+    }
+
+    public static String[] splitRegex(String str, String regex) {
+        return splitRegex(str, regex, -1);
+    }
+
+    public static String[] splitRegex(String str, String regex, int limit) {
+        String[] arr = Pattern.compile(regex).split(str, limit);
+        return arr;
+    }
+
+    public static String[] splitLiteral(String str, String regex) {
+        return splitLiteral(str, regex, -1);
+    }
+
+    public static String[] splitLiteral(String str, String regex, int limit) {
+        String[] arr = Pattern.compile(regex, Pattern.LITERAL).split(str, limit);
+        return arr;
     }
 }

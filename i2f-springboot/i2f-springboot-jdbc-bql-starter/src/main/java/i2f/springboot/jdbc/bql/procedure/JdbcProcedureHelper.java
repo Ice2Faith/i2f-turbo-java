@@ -53,7 +53,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         } catch (Exception e) {
 
         }
-        return executor.invoke(procedureId, params);
+        return getExecutor().invoke(procedureId, params);
     }
 
     public static <T> T invoke(String procedureId,Object ... args){
@@ -62,7 +62,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         } catch (Exception e) {
 
         }
-        return executor.invoke(procedureId, args);
+        return getExecutor().invoke(procedureId, args);
     }
 
     public static <T> T invoke(String procedureId,List<Object> args){
@@ -71,7 +71,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         } catch (Exception e) {
 
         }
-        return executor.invoke(procedureId, args);
+        return getExecutor().invoke(procedureId, args);
     }
 
     public static Map<String,Object> call(String procedureId, Consumer<MapBuilder<String, Object, ? extends Map<String, Object>>> consumer) {
