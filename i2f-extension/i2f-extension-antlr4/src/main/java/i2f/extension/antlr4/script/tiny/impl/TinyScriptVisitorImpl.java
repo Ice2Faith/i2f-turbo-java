@@ -1024,8 +1024,8 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             TerminalNode equalCtx = (TerminalNode) equalNode;
             TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
             String equal = (String) visitTerminal(equalCtx);
-            if (!"=".equals(equal)) {
-                throw new IllegalArgumentException("invalid equal value, expect '=', but found '" + equal + "'!");
+            if (!Arrays.asList("=", "?=", ".=", "+=", "-=", "*=", "/=", "%=").contains(equal)) {
+                throw new IllegalArgumentException("invalid equal value, expect '=,?=,.=,+=,-=,*=,/=,%=', but found '" + equal + "'!");
             }
             Object value = visitExpress(expressCtx);
 
@@ -1035,8 +1035,35 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 if (naming == null || naming.isEmpty()) {
                     throw new IllegalArgumentException("invalid equal value, expect naming, but found '" + naming + "'!");
                 }
-
-                resolver.setValue(context, naming, value);
+                if (!"=".equals(equal)) {
+                    Object oldVal = resolver.getValue(context, naming);
+                    if ("?=".equals(equal)) {
+                        if (oldVal == null) {
+                            resolver.setValue(context, naming, value);
+                        }
+                    } else if (".=".equals(equal)) {
+                        if (oldVal != null) {
+                            resolver.setValue(context, naming, value);
+                        }
+                    } else if ("+=".equals(equal)) {
+                        value = resolver.resolveDoubleOperator(oldVal, "+", value);
+                        resolver.setValue(context, naming, value);
+                    } else if ("-=".equals(equal)) {
+                        value = resolver.resolveDoubleOperator(oldVal, "-", value);
+                        resolver.setValue(context, naming, value);
+                    } else if ("*=".equals(equal)) {
+                        value = resolver.resolveDoubleOperator(oldVal, "*", value);
+                        resolver.setValue(context, naming, value);
+                    } else if ("/=".equals(equal)) {
+                        value = resolver.resolveDoubleOperator(oldVal, "/", value);
+                        resolver.setValue(context, naming, value);
+                    } else if ("%=".equals(equal)) {
+                        value = resolver.resolveDoubleOperator(oldVal, "%", value);
+                        resolver.setValue(context, naming, value);
+                    }
+                } else {
+                    resolver.setValue(context, naming, value);
+                }
             } else if (namingNode instanceof TinyScriptParser.ExtractExpressContext) {
                 TinyScriptParser.ExtractExpressContext extractCtx = (TinyScriptParser.ExtractExpressContext) namingNode;
                 Map<String, String> extractMapping = (Map<String, String>) visitExtractExpress(extractCtx);

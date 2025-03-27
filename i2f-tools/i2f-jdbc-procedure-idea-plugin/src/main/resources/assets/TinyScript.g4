@@ -149,12 +149,12 @@ express:
     | constValue
     | refValue
     | jsonValue
+    | express ('%')
     | express ( 'as' | 'cast'  | 'is' | 'instanceof' | 'typeof') express
     | express ('*' | '/' | '%') express
     | express ('+' | '-') express
     | express ('in' | 'notin' | '>=' | 'gte' | '<=' | 'lte' | '!=' | 'ne' | '<>' | 'neq' | '==' | 'eq' | '>' | 'gt' | '<' | 'lt') express
     | express ('&&' | 'and' | '||' | 'or') express
-    | express '%'
     | negtiveSegment
     | express '?' express ':' express
     ;
@@ -235,7 +235,7 @@ scriptBlock:
 
 
 equalValue:
-    (ROUTE_NAMING|NAMING|extractExpress) ('=') express
+    (ROUTE_NAMING|NAMING|extractExpress) ('='|'?='|'.='|'+='|'-='|'*='|'/='|'%=') express
     ;
 
 extractExpress:
