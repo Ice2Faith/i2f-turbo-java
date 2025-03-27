@@ -2,7 +2,6 @@ package i2f.jdbc.procedure.executor;
 
 import i2f.bindsql.BindSql;
 import i2f.container.builder.map.MapBuilder;
-import i2f.context.std.IContext;
 import i2f.context.std.INamingContext;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.environment.std.IEnvironment;
@@ -68,11 +67,11 @@ public interface JdbcProcedureExecutor {
         return getEnvironment().getProperty(property,defVal);
     }
 
-    default<T> T env(String property,Class<T> targetType){
-        return env(property,targetType,null);
+    default<T> T envAs(String property,Class<T> targetType){
+        return envAs(property,targetType,null);
     }
 
-    default<T> T env(String property,Class<T> targetType,T defVal){
+    default<T> T envAs(String property,Class<T> targetType,T defVal){
         String ret = getEnvironment().getProperty(property);
         if(ret==null){
             return null;
