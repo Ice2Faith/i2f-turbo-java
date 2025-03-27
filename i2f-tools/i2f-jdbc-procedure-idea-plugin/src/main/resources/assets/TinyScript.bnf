@@ -124,6 +124,11 @@
     OP_NOT='not';
 
     OP_ASSIGN='=';
+    OP_ASSIGN_ADD="+=";
+    OP_ASSIGN_SUB="-=";
+    OP_ASSIGN_MUL="*=";
+    OP_ASSIGN_DIV="/=";
+    OP_ASSIGN_MOD="%=";
     OP_VERTICAL_BAR='|';
 
     KEY_CLASS='class';
@@ -290,7 +295,7 @@ scriptBlock::=
 
 
 equalValue::=
-    (ROUTE_NAMING|NAMING|extractExpress) (OP_ASSIGN) express
+    (ROUTE_NAMING|NAMING|extractExpress) (OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN) express
     ;
 
 extractExpress::=
