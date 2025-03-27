@@ -41,7 +41,7 @@ public class GrammarReporter {
                 ProcedureMeta meta = entry.getValue();
                 if (meta.getType() == ProcedureMeta.Type.XML) {
                     XmlNode node = (XmlNode) meta.getTarget();
-                    executor.debugLog(()->"xproc4j grammar report rate "+String.format("%6.02f%%",reportSize.get()*100.0/mapSize)+", on node: "+node.getTagName()+", at "+node.getLocationFile()+":"+node.getLocationLineNumber());
+                    executor.logDebug(() -> "xproc4j grammar report rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
                     AtomicInteger reportCount = new AtomicInteger(0);
                     AtomicInteger nodeCount = new AtomicInteger(0);
                     reportGrammar(node, executor, warnPoster, reportCount, nodeCount);

@@ -1,4 +1,4 @@
-package i2f.turbo.idea.plugin.tinyscript.grammar;
+package i2f.turbo.idea.plugin.tinyscript.grammar.parser;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
@@ -102,6 +102,11 @@ WS=[ \t\r\n]+
   "!"                                       { return OP_EXCLAM; }
   "not"                                     { return OP_NOT; }
   "="                                       { return OP_ASSIGN; }
+  "+="                                      { return OP_ASSIGN_ADD; }
+  "-="                                      { return OP_ASSIGN_SUB; }
+  "*="                                      { return OP_ASSIGN_MUL; }
+  "/="                                      { return OP_ASSIGN_DIV; }
+  "%="                                      { return OP_ASSIGN_MOD; }
   "|"                                       { return OP_VERTICAL_BAR; }
   "class"                                   { return KEY_CLASS; }
   "debugger"                                { return KEY_DEBUGGER; }

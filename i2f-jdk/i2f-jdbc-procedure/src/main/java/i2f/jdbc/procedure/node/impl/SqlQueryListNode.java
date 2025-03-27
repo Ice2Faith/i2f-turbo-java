@@ -68,7 +68,7 @@ public class SqlQueryListNode extends AbstractExecutorNode {
             bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
         }
         List<?> row = executor.sqlQueryList(datasource, bql, context, resultType);
-        executor.debugLog(()->"found data is empty: "+row.isEmpty()+"! at "+node.getLocationFile()+":"+node.getLocationLineNumber());
+        executor.logDebug(() -> "found data is empty: " + row.isEmpty() + "! at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
         if (result != null && !result.isEmpty()) {
             executor.visitSet(context, result, row);
         }

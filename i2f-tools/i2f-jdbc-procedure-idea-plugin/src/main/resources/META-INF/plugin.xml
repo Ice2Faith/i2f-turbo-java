@@ -72,12 +72,12 @@
                 implementation="i2f.turbo.idea.plugin.tinyscript.lang.highlighter.TinyScriptColorSettingsPage"/>
 
         <!-- 定义引用跳转定义 -->
-        <psi.referenceContributor language="XML"
-                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlPsiReferenceContributor"/>
+        <!--        <psi.referenceContributor language="XML"-->
+        <!--                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlPsiReferenceContributor"/>-->
 
         <!-- 定义查找引用 -->
-        <lang.findUsagesProvider language="XML"
-                                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlFindUsagesProvider"/>
+        <!--        <lang.findUsagesProvider language="XML"-->
+        <!--                                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlFindUsagesProvider"/>-->
 
         <!-- 定义语句模版 -->
         <defaultLiveTemplatesProvider order="first"

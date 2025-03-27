@@ -399,13 +399,13 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (ROUTE_NAMING|NAMING|extractExpress) (OP_ASSIGN) express
+  // (ROUTE_NAMING|NAMING|extractExpress) (OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN) express
   public static boolean equalValue(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "equalValue")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, EQUAL_VALUE, "<equal value>");
     r = equalValue_0(b, l + 1);
-    r = r && consumeToken(b, OP_ASSIGN);
+    r = r && equalValue_1(b, l + 1);
     r = r && express(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
@@ -418,6 +418,19 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, ROUTE_NAMING);
     if (!r) r = consumeToken(b, NAMING);
     if (!r) r = extractExpress(b, l + 1);
+    return r;
+  }
+
+  // OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN
+  private static boolean equalValue_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "equalValue_1")) return false;
+    boolean r;
+    r = consumeToken(b, OP_ASSIGN_ADD);
+    if (!r) r = consumeToken(b, OP_ASSIGN_SUB);
+    if (!r) r = consumeToken(b, OP_ASSIGN_MUL);
+    if (!r) r = consumeToken(b, OP_ASSIGN_DIV);
+    if (!r) r = consumeToken(b, OP_ASSIGN_MOD);
+    if (!r) r = consumeToken(b, OP_ASSIGN);
     return r;
   }
 

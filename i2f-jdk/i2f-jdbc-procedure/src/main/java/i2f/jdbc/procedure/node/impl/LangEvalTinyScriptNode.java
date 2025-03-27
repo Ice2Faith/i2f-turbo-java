@@ -94,7 +94,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
 
         @Override
         public void debugLog(Supplier<Object> supplier) {
-            executor.debugLog(()->"tiny-script:"+supplier.get()+" , at "+ContextHolder.TRACE_LOCATION.get()+":"+ContextHolder.TRACE_LINE.get());
+            executor.logDebug(() -> "tiny-script:" + supplier.get() + " , at " + ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get());
         }
 
         @Override
@@ -144,7 +144,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
                     }
                 }
 
-                Map<String, Object> ret = executor.exec(naming, callParams);
+                Map<String, Object> ret = executor.exec(naming, callParams, false, false);
                 if (ret.containsKey(ParamsConsts.RETURN)) {
                     Object val = ret.get(ParamsConsts.RETURN);
                     if(val instanceof Reference){

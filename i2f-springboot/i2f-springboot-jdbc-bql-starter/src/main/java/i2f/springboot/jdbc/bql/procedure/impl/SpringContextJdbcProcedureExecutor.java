@@ -144,14 +144,14 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
 
 
     @Override
-    public void debugLog(Supplier<Object> supplier) {
+    public void logDebug(Supplier<Object> supplier) {
         if (debug.get()) {
             log.debug(String.valueOf(supplier.get()));
         }
     }
 
     @Override
-    public void infoLog(Supplier<Object> supplier, Throwable e) {
+    public void logInfo(Supplier<Object> supplier, Throwable e) {
         if (e != null) {
             log.info(String.valueOf(supplier.get()), e);
         } else {
@@ -160,7 +160,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     }
 
     @Override
-    public void warnLog(Supplier<Object> supplier, Throwable e) {
+    public void logWarn(Supplier<Object> supplier, Throwable e) {
         if (e != null) {
             log.warn(String.valueOf(supplier.get()), e);
         } else {
@@ -169,7 +169,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     }
 
     @Override
-    public void errorLog(Supplier<Object> supplier, Throwable e) {
+    public void logError(Supplier<Object> supplier, Throwable e) {
         if (e != null) {
             log.error(String.valueOf(supplier.get()), e);
         } else {

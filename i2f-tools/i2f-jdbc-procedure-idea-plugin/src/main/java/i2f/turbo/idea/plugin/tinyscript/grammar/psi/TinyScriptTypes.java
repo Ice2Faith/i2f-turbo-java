@@ -87,6 +87,11 @@ public interface TinyScriptTypes {
   IElementType OP_AND_STR = new TinyScriptTokenType("and");
   IElementType OP_AS = new TinyScriptTokenType("as");
   IElementType OP_ASSIGN = new TinyScriptTokenType("=");
+  IElementType OP_ASSIGN_ADD = new TinyScriptTokenType("+=");
+  IElementType OP_ASSIGN_DIV = new TinyScriptTokenType("/=");
+  IElementType OP_ASSIGN_MOD = new TinyScriptTokenType("%=");
+  IElementType OP_ASSIGN_MUL = new TinyScriptTokenType("*=");
+  IElementType OP_ASSIGN_SUB = new TinyScriptTokenType("-=");
   IElementType OP_CAST = new TinyScriptTokenType("cast");
   IElementType OP_DIV = new TinyScriptTokenType("/");
   IElementType OP_EQ = new TinyScriptTokenType("==");

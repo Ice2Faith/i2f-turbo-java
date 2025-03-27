@@ -71,7 +71,7 @@ public class SqlScopeNode extends AbstractExecutorNode {
                     try {
                         conn.close();
                     } catch (SQLException e) {
-                        executor.warnLog(()->e.getMessage(),e);
+                        executor.logWarn(() -> e.getMessage(), e);
                         e.printStackTrace();
                     }
                 }
