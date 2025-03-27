@@ -2,7 +2,10 @@ package i2f.jdbc.procedure.executor;
 
 import i2f.bindsql.BindSql;
 import i2f.container.builder.map.MapBuilder;
+import i2f.context.std.IContext;
+import i2f.context.std.INamingContext;
 import i2f.convert.obj.ObjectConvertor;
+import i2f.environment.std.IEnvironment;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
@@ -14,6 +17,7 @@ import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
+import i2f.typeof.TypeOf;
 
 import java.sql.Connection;
 import java.util.Arrays;
@@ -51,6 +55,49 @@ public interface JdbcProcedureExecutor {
     }
 
     List<ExecutorNode> getNodes();
+
+    IEnvironment getEnvironment();
+
+    void setEnvironment(IEnvironment environment);
+
+    default String env(String property){
+        return getEnvironment().getProperty(property);
+    }
+
+    default String env(String property,String defVal){
+        return getEnvironment().getProperty(property,defVal);
+    }
+
+    default<T> T env(String property,Class<T> targetType){
+        return env(property,targetType,null);
+    }
+
+    default<T> T env(String property,Class<T> targetType,T defVal){
+        String ret = getEnvironment().getProperty(property);
+        if(ret==null){
+            return null;
+        }
+        if(targetType==null){
+            return (T)ret;
+        }
+        Object obj = convertAs(ret, targetType);
+        if(TypeOf.instanceOf(obj,targetType)){
+            return (T)obj;
+        }
+        return defVal;
+    }
+
+    INamingContext getNamingContext();
+
+    void setNamingContext(INamingContext context);
+
+    default <T>  T getBean(Class<T> clazz){
+        return getNamingContext().getBean(clazz);
+    }
+
+    default<T> T getBean(String name){
+        return getNamingContext().getBean(name);
+    }
 
     default <T> T convertAs(Object obj,Class<?> type){
         return (T)ObjectConvertor.tryConvertAsType(obj,type);

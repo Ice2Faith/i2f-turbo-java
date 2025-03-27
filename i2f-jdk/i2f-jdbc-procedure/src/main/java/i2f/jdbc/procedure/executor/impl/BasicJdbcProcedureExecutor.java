@@ -5,8 +5,12 @@ import i2f.bindsql.count.CountWrappers;
 import i2f.bindsql.count.ICountWrapper;
 import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
+import i2f.context.impl.ListableNamingContext;
+import i2f.context.std.INamingContext;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.database.type.DatabaseType;
+import i2f.environment.impl.ListableDelegateEnvironment;
+import i2f.environment.std.IEnvironment;
 import i2f.invokable.method.IMethod;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.procedure.consts.AttrConsts;
@@ -53,6 +57,8 @@ import java.util.function.Supplier;
 public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     protected transient final AtomicReference<ProcedureNode> procedureNodeHolder=new AtomicReference<>();
     protected volatile JdbcProcedureContext context=new DefaultJdbcProcedureContext();
+    protected volatile IEnvironment environment=new ListableDelegateEnvironment();
+    protected volatile INamingContext namingContext=new ListableNamingContext();
     protected final CopyOnWriteArrayList<ExecutorNode> nodes = new CopyOnWriteArrayList<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
@@ -68,6 +74,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     public BasicJdbcProcedureExecutor(JdbcProcedureContext context){
         this.context=context;
+    }
+
+    public BasicJdbcProcedureExecutor(JdbcProcedureContext context,IEnvironment environment,INamingContext namingContext){
+        this.context=context;
+        this.environment=environment;
+        this.namingContext=namingContext;
     }
 
 
@@ -444,8 +456,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public Map<String, Object> createParams() {
         Map<String, Object> ret = new LinkedHashMap<>();
-        ret.put(ParamsConsts.CONTEXT, new HashMap<>());
-        ret.put(ParamsConsts.ENVIRONMENT, new HashMap<>());
+        ret.put(ParamsConsts.CONTEXT, namingContext);
+        ret.put(ParamsConsts.ENVIRONMENT, environment);
         ret.put(ParamsConsts.BEANS, new HashMap<>());
 
         ret.put(ParamsConsts.DATASOURCES, new HashMap<>());

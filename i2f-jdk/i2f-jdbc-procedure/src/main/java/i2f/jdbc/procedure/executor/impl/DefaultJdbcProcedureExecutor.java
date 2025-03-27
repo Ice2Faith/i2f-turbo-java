@@ -1,6 +1,8 @@
 package i2f.jdbc.procedure.executor.impl;
 
 import i2f.bindsql.BindSql;
+import i2f.context.std.INamingContext;
+import i2f.environment.std.IEnvironment;
 import i2f.extension.ognl.OgnlUtil;
 import i2f.extension.velocity.VelocityGenerator;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
@@ -23,6 +25,10 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
 
     public DefaultJdbcProcedureExecutor(JdbcProcedureContext context) {
         super(context);
+    }
+
+    public DefaultJdbcProcedureExecutor(JdbcProcedureContext context, IEnvironment environment, INamingContext namingContext) {
+        super(context, environment, namingContext);
     }
 
     @Override

@@ -5,6 +5,8 @@ import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.spring.core.SpringContext;
+import i2f.spring.enviroment.SpringEnvironment;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
@@ -25,27 +27,21 @@ import java.util.function.Supplier;
 @Data
 @NoArgsConstructor
 public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExecutor {
-    protected ApplicationContext applicationContext;
-    protected Environment environment;
     protected static final Logger log = LoggerFactory.getLogger(SpringContextJdbcProcedureExecutor.class);
     protected static final AtomicBoolean hasApplyNodes = new AtomicBoolean(false);
 
 
     public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context, ApplicationContext applicationContext) {
-        super(context);
-        this.applicationContext = applicationContext;
-        this.environment = applicationContext.getEnvironment();
+        super(context,new SpringEnvironment(applicationContext.getEnvironment()),new SpringContext(applicationContext));
     }
 
     public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context, ApplicationContext applicationContext, Environment environment) {
-        this.applicationContext = applicationContext;
-        this.environment = environment;
+        super(context,new SpringEnvironment(environment),new SpringContext(applicationContext));
     }
 
     public void applyNodeExecutorComponents(){
-        String[] names = applicationContext.getBeanDefinitionNames();
-        for (String name : names) {
-            Object bean = applicationContext.getBean(name);
+        List<Object> beansList = getNamingContext().getAllBeans();
+        for (Object bean : beansList) {
             if(bean instanceof ExecutorNode){
                 this.nodes.add(0,(ExecutorNode) bean);
             }
@@ -63,15 +59,10 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     @Override
     public Map<String, Object> createParams() {
         Map<String, Object> ret = super.createParams();
-        ret.put(ParamsConsts.CONTEXT, applicationContext);
-        ret.put(ParamsConsts.ENVIRONMENT, environment);
+        ret.put(ParamsConsts.CONTEXT, getNamingContext());
+        ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
 
-        String[] names = applicationContext.getBeanDefinitionNames();
-        Map<String, Object> beanMap = new TreeMap<>();
-        for (String name : names) {
-            Object bean = applicationContext.getBean(name);
-            beanMap.put(name, bean);
-        }
+        Map<String, Object> beanMap = getNamingContext().getAllBeansMap();
         Map<String,Object> retBeanMap =(Map<String,Object>) ret.computeIfAbsent(ParamsConsts.BEANS, (key) -> new HashMap<>());
         retBeanMap.putAll(beanMap);
 
@@ -84,7 +75,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
 
     public Map<String, DataSource> getDatasourceMap() {
         try {
-            AbstractRoutingDataSource bean = applicationContext.getBean(AbstractRoutingDataSource.class);
+            AbstractRoutingDataSource bean = getNamingContext().getBean(AbstractRoutingDataSource.class);
             if (bean != null) {
                 Map<String, DataSource> ret = new HashMap<>();
                 Map<Object, DataSource> dataSources = bean.getResolvedDataSources();
@@ -101,7 +92,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
         } catch (Exception e) {
         }
         try {
-            DynamicRoutingDataSource bean = applicationContext.getBean(DynamicRoutingDataSource.class);
+            DynamicRoutingDataSource bean = getNamingContext().getBean(DynamicRoutingDataSource.class);
             Map<String, DataSource> ret = bean.getDataSources();
             detectPrimaryDatasource(ret);
             return ret;
@@ -109,7 +100,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
         }
         try{
             Map<String, DataSource> ret = new HashMap<>();
-            Map<String, DataSource> dataSources = applicationContext.getBeansOfType(DataSource.class);
+            Map<String, DataSource> dataSources = getNamingContext().getBeansMap(DataSource.class);
             for (Map.Entry<String, DataSource> entry : dataSources.entrySet()) {
                 String name = entry.getKey();
                 if(name.toLowerCase().endsWith("datasource")){
