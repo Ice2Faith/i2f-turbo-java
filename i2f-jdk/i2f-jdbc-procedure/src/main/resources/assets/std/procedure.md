@@ -1259,8 +1259,8 @@ Map<String, Object> ret = JdbcProcedureHelper.call("SP_ODS_MAIN", (map) -> {
 BasicJdbcProcedureExecutor.createParams()
 ```
 - 下面简单介绍一下这些固定变量的设计初衷和目的
-- context 上下文，主要用于能够结合其他框架的上下文，以使用一些其他框架特有的能力，默认对接springboot中时为ApplicationContext对象
-- env 环境变量，主要用于提供一些环境变量的配置，以便能够进行环境变量的读取操作，默认对接springboot中时为Environment对象
+- context 类型INamingContext,具名上下文/应用上下文，主要用于能够结合其他框架的上下文，以使用一些其他框架特有的能力，默认对接springboot中时为ApplicationContext对象
+- env 类型IEnvironment,环境变量，主要用于提供一些环境变量的配置，以便能够进行环境变量的读取操作，默认对接springboot中时为Environment对象
 - beans 类型Map<String,Object>用于提供一些具名的对象实例，主要是配合固定的框架使用，能够读取到框架中的bean对象，进行调用bean方法，默认对接springboot中定义的所有bean对象
 - datasources 类型Map<String,DataSource>,用于提供可用的数据源，不管是否是什么框架，只要执行SQL都应该具有数据源，至少一个primary数据源，默认对接springboot中时自动读取配置的所有数据源
 - datasourcesMapping 类型Map<String,String>,用于提供数据源名称映射功能，在需要使用key的数据源时，替换为使用对应的value指向的数据源，默认是空配置，不做映射
