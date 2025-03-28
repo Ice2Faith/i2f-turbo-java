@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.impl.LangEvalJavaNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import groovy.lang.GroovyShell;
@@ -41,7 +42,7 @@ public class GrammarReporter {
                 ProcedureMeta meta = entry.getValue();
                 if (meta.getType() == ProcedureMeta.Type.XML) {
                     XmlNode node = (XmlNode) meta.getTarget();
-                    executor.logDebug(() -> "xproc4j grammar report rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
+                    executor.logDebug(() -> "xproc4j grammar report rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + AbstractExecutorNode.getNodeLocation(node));
                     AtomicInteger reportCount = new AtomicInteger(0);
                     AtomicInteger nodeCount = new AtomicInteger(0);
                     reportGrammar(node, executor, warnPoster, reportCount, nodeCount);
@@ -79,13 +80,13 @@ public class GrammarReporter {
                         if (reportCount != null) {
                             reportCount.incrementAndGet();
                         }
-                        warnPoster.accept("xproc4j report xml grammar, at " + node.getLocationFile() + ":" + node.getLocationLineNumber() + " error: " + msg);
+                        warnPoster.accept("xproc4j report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: " + msg);
                     });
                 } catch (Throwable e) {
                     if (reportCount != null) {
                         reportCount.incrementAndGet();
                     }
-                    warnPoster.accept("xproc4j report xml grammar, at " + node.getLocationFile() + ":" + node.getLocationLineNumber() + " error: " + e.getMessage());
+                    warnPoster.accept("xproc4j report xml grammar, at " +AbstractExecutorNode.getNodeLocation(node) + " error: " + e.getMessage());
                 }
                 break;
             }
@@ -141,7 +142,7 @@ public class GrammarReporter {
                     @Override
                     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
                         String errorMsg = "line " + line + ":" + charPositionInLine + " " + msg;
-                        warnPoster.accept("xproc4j report xml grammar, at " + node.getLocationFile() + ":" + node.getLocationLineNumber() + " error: " + errorMsg);
+                        warnPoster.accept("xproc4j report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: " + errorMsg);
                     }
                 };
                 TinyScript.ERROR_LISTENER.add(listener);
@@ -152,7 +153,7 @@ public class GrammarReporter {
                 }
             }
         } catch (Throwable e) {
-            warnPoster.accept("xproc4j report xml grammar, check tag ["+node.getTagName()+"] on "+location+", at " + node.getLocationFile() + ":" + node.getLocationLineNumber()+" for expr: "+ expr + " error: " + e.getMessage());
+            warnPoster.accept("xproc4j report xml grammar, check tag ["+node.getTagName()+"] on "+location+", at " + AbstractExecutorNode.getNodeLocation(node)+" for expr: "+ expr + " error: " + e.getMessage());
         }
     }
 }

@@ -31,7 +31,12 @@ public interface ParamsConsts {
     String EXECUTOR="executor";
 
     // LruMap对象
+    // 回话级别LRU对象
     String LRU ="lru";
+    // 执行器实例级别LRU对象
+    String EXECUTOR_LRU ="executorLru";
+    // 静态变量级别LRU对象
+    String STATIC_LRU="staticLru";
 
 
     // 连接部分

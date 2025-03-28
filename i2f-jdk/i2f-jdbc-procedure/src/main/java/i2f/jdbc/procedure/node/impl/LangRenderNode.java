@@ -26,8 +26,15 @@ public class LangRenderNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String script = node.getTextBody();
-        String val = executor.render(script, context);
-        executor.logDebug(() -> "at " + node.getLocationFile() + ":" + node.getLocationLineNumber() + " render string: " + val);
+        String rs = executor.render(script, context);
+        if(executor.isDebug()){
+            String lang = node.getTagAttrMap().get("_lang");
+            if("sql".equalsIgnoreCase(lang)){
+                rs=rs+getTrackingComment(node);
+            }
+        }
+        String val=rs;
+        executor.logDebug(() -> "at " + getNodeLocation(node) + " render string: " + val);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null && !result.isEmpty()) {
             Object res = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);

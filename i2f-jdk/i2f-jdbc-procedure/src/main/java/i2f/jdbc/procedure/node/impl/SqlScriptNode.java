@@ -42,7 +42,7 @@ public class SqlScriptNode extends AbstractExecutorNode {
         }
         BindSql bql = executor.sqlScript(datasource, dialectScriptList, context);
         if(executor.isDebug()){
-            bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+            bql=bql.concat(getTrackingComment(node));
         }
         if (result != null && !result.isEmpty()) {
             executor.visitSet(context, result, bql);

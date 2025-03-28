@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.context;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.match.regex.RegexUtil;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -13,7 +14,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -162,6 +165,27 @@ public class ContextFunctions {
             }
             return str;
         }
+    }
+
+    public static int length(Object obj){
+        if(obj ==null){
+            return -1;
+        }
+        if(obj instanceof CharSequence
+        ||obj instanceof String
+        ||obj instanceof Appendable){
+            return String.valueOf(obj).length();
+        }
+        if(obj instanceof Collection){
+            return ((Collection<?>) obj).size();
+        }
+        if(obj instanceof Map){
+            return ((Map<?, ?>) obj).size();
+        }
+        if(obj.getClass().isArray()){
+            return Array.getLength(obj);
+        }
+        throw new IllegalArgumentException("length(obj) function cannot support type:"+obj.getClass());
     }
 
     public static String ltrim(String str, String substr) {

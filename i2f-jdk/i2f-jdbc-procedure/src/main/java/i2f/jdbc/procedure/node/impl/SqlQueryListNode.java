@@ -65,10 +65,10 @@ public class SqlQueryListNode extends AbstractExecutorNode {
             bql = executor.sqlWrapPage(datasource, bql, page, context);
         }
         if(executor.isDebug()){
-            bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+            bql=bql.concat(getTrackingComment(node));
         }
         List<?> row = executor.sqlQueryList(datasource, bql, context, resultType);
-        executor.logDebug(() -> "found data is empty: " + row.isEmpty() + "! at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
+        executor.logDebug(() -> "found data is empty: " + row.isEmpty() + "! at " + getNodeLocation(node));
         if (result != null && !result.isEmpty()) {
             executor.visitSet(context, result, row);
         }

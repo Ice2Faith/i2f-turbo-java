@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.SelectionModel;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
@@ -48,6 +49,15 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
 //        PsiElement element = event.getData(CommonDataKeys.PSI_ELEMENT);
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
 
+        SelectionModel selectionModel = editor.getSelectionModel();
+        if(selectionModel!=null){
+            String selectedText = selectionModel.getSelectedText();
+            VirtualFile file = getProcedureFileByProcedureId(selectedText);
+            if(file!=null){
+                return file;
+            }
+        }
+
         int offset = editor.getCaretModel().getOffset();
         Document document = editor.getDocument();
 //        log.warn("xml-jump-source document:"+document);
@@ -69,12 +79,22 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         String name = xmlAttribute.getName();
 //        log.warn("xml-jump-source attr-name: " + name);
         if (!"refid".equals(name)
-        &&!"id".equals(name)) {
+                &&!"id".equals(name)) {
             return null;
         }
         XmlAttributeValue xmlAttributeValue = (XmlAttributeValue) element;
         String value = xmlAttributeValue.getValue();
-//        log.warn("xml-jump-source attr-value: " + value);
+        return getProcedureFileByProcedureId(value);
+    }
+
+    public VirtualFile getProcedureFileByProcedureId(String value){
+        if(value==null){
+            return null;
+        }
+        if(value.endsWith(".xml")){
+            value=value.substring(0,value.length()-".xml".length());
+        }
+        //        log.warn("xml-jump-source attr-value: " + value);
         ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(value);
 //        log.warn("xml-jump-source attr-meta: " + meta);
         if (meta == null) {
