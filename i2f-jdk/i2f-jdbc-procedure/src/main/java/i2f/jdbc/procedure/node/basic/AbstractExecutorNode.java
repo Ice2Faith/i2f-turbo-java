@@ -18,7 +18,7 @@ import java.util.Map;
 public abstract class AbstractExecutorNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        String location=node.getLocationFile()+":"+node.getLocationLineNumber();
+        String location=getNodeLocation(node);
         executor.logDebug(() -> "exec node on tag:" + node.getTagName() + " , at " + location);
         try {
             executor.visitSet(context, ParamsConsts.TRACE_LOCATION,node.getLocationFile());
@@ -33,7 +33,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 throw (ControlSignalException)e;
             }
 
-            String errorMsg="exec node error, at node:"+node.getTagName()+", file:" + node.getLocationFile() + ":" + node.getLocationLineNumber() +", attrs:"+node.getTagAttrMap()+ ", message: " + e.getMessage();
+            String errorMsg="exec node error, at node:"+node.getTagName()+", file:" + location +", attrs:"+node.getTagAttrMap()+ ", message: " + e.getMessage();
             String traceErrMsg=e.getClass().getName()+": "+errorMsg;
             executor.visitSet(context,ParamsConsts.TRACE_ERRMSG,traceErrMsg);
             ContextHolder.TRACE_ERRMSG.set(traceErrMsg);
@@ -43,12 +43,28 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 if(cause==null){
                     executor.logError(() -> errorMsg, e);
                 }
-                throw (SignalException)e;
+                SignalException se = (SignalException) e;
+                se.setMessage(errorMsg);
+                throw se;
             } else {
                 executor.logError(() -> errorMsg, e);
                 throw new ThrowSignalException(errorMsg, e);
             }
         }
+    }
+
+    public static String getNodeLocation(XmlNode node){
+        if(node==null){
+            return "";
+        }
+        return ""+node.getLocationFile()+":"+node.getLocationLineNumber()+"";
+    }
+
+    public static String getTrackingComment(XmlNode node){
+        if(node==null){
+            return " ";
+        }
+        return " /* tracking at "+getNodeLocation(node)+" */ ";
     }
 
     public abstract void execInner(XmlNode node,Map<String,Object> context,JdbcProcedureExecutor executor);

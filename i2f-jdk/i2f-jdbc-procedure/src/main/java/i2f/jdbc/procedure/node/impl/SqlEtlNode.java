@@ -201,7 +201,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
             }
 
             if(executor.isDebug()){
-                bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+                bql=bql.concat(getTrackingComment(node));
             }
 
             int pageIndex = 0;
@@ -209,11 +209,11 @@ public class SqlEtlNode extends AbstractExecutorNode {
             while (true) {
                 List<?> list = executor.sqlQueryPage(extraDatasource, bql, context, resultType, new ApiPage(pageIndex, readBatchSize));
                 if (list.isEmpty()) {
-                    executor.logDebug(() -> "no data found! at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
+                    executor.logDebug(() -> "no data found! at " + getNodeLocation(node));
                     break;
                 }
 
-                executor.logDebug(() -> "found batch data! at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
+                executor.logDebug(() -> "found batch data! at " + getNodeLocation(node));
 
                 if (pageIndex == 0) {
 

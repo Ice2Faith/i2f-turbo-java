@@ -24,7 +24,14 @@ public class LangStringNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        String text = node.getTextBody();
+        String rs = node.getTextBody();
+        if(executor.isDebug()){
+            String lang = node.getTagAttrMap().get("_lang");
+            if("sql".equalsIgnoreCase(lang)){
+                rs=rs+getTrackingComment(node);
+            }
+        }
+        String text=rs;
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null && !result.isEmpty()) {
             Object res = executor.resultValue(text, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);

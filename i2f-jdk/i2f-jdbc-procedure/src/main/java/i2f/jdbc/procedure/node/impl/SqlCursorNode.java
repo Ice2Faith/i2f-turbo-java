@@ -109,6 +109,9 @@ public class SqlCursorNode extends AbstractExecutorNode {
         }else{
             script=String.valueOf(scriptObj==null?"":scriptObj);
         }
+        if (script == null || script.isEmpty()) {
+            script = queryNode.getTagBody();
+        }
         if (dialectScriptList.isEmpty()) {
             dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
         }
@@ -118,7 +121,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
         }
 
         if(executor.isDebug()){
-            bql=bql.concat(" /* "+node.getLocationFile()+":"+node.getLocationLineNumber()+" */ ");
+            bql=bql.concat(getTrackingComment(node));
         }
 
         int pageIndex = 0;
@@ -131,11 +134,11 @@ public class SqlCursorNode extends AbstractExecutorNode {
             while (true) {
                 List<?> list = executor.sqlQueryPage(datasource, bql, context, resultType, new ApiPage(pageIndex, batchSize));
                 if (list.isEmpty()) {
-                    executor.logDebug(() -> "no data found! at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
+                    executor.logDebug(() -> "no data found! at " + getNodeLocation(node));
                     break;
                 }
 
-                executor.logDebug(() -> "found batch data! at " + node.getLocationFile() + ":" + node.getLocationLineNumber());
+                executor.logDebug(() -> "found batch data! at " + getNodeLocation(node));
 
                 if (acceptBatch) {
                     try {

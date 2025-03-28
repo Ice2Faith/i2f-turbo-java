@@ -23,6 +23,7 @@ import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.SignalException;
@@ -61,6 +62,8 @@ import java.util.function.Supplier;
 @Data
 public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     protected transient final AtomicReference<ProcedureNode> procedureNodeHolder=new AtomicReference<>();
+    protected transient final LruMap<String,Object> executorLru=new LruMap<>(4096);
+    public static transient final LruMap<String,Object> staticLru=new LruMap<>(4096);
     protected volatile JdbcProcedureContext context=new DefaultJdbcProcedureContext();
     protected volatile IEnvironment environment=new ListableDelegateEnvironment();
     protected volatile INamingContext namingContext=new ListableNamingContext();
@@ -217,7 +220,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         if (node == null) {
             return "null node";
         }
-        return "tag:" + node.getTagName() + ", " + node.getLocationFile() + ":" + node.getLocationLineNumber();
+        return "tag:" + node.getTagName() + ", " + AbstractExecutorNode.getNodeLocation(node);
     }
 
     @FunctionalInterface
@@ -409,6 +412,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.put(ParamsConsts.EXECUTOR, this);
 
         ret.put(ParamsConsts.LRU, new LruMap<>(4096));
+        ret.put(ParamsConsts.EXECUTOR_LRU,executorLru);
+        ret.put(ParamsConsts.STATIC_LRU,staticLru);
         return ret;
     }
 
@@ -441,6 +446,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.put(ParamsConsts.EXECUTOR, this);
 
         ret.put(ParamsConsts.LRU, params.get(ParamsConsts.LRU));
+        ret.put(ParamsConsts.EXECUTOR_LRU, params.get(ParamsConsts.EXECUTOR_LRU));
+        ret.put(ParamsConsts.STATIC_LRU, params.get(ParamsConsts.STATIC_LRU));
         return ret;
     }
 

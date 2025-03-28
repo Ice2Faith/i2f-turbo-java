@@ -17,8 +17,8 @@ import java.util.function.Function;
  * @desc
  */
 public class LruMap<K, V> extends LinkedHashMap<K, V> {
-    protected AtomicInteger maxSize = new AtomicInteger(4096);
-    protected ReadWriteLock lock = new ReentrantReadWriteLock();
+    protected final AtomicInteger maxSize = new AtomicInteger(4096);
+    protected final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public LruMap() {
     }
@@ -49,6 +49,28 @@ public class LruMap<K, V> extends LinkedHashMap<K, V> {
 
     public void setMaxSize(int maxSize) {
         this.maxSize.set(maxSize);
+        if(size()>maxSize){
+            shrink();
+        }
+    }
+
+    protected void shrink(){
+        lock.writeLock().lock();
+        try {
+            Map<K,V> map=new LinkedHashMap<>(this);
+            clear();
+            int max=maxSize.get();
+            for (Map.Entry<K, V> entry : map.entrySet()) {
+                if(max>=0){
+                    put(entry.getKey(),entry.getValue());
+                }else{
+                    break;
+                }
+                max--;
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
 
