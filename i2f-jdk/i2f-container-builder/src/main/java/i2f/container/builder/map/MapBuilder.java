@@ -1,10 +1,9 @@
 package i2f.container.builder.map;
 
+
 import i2f.typeof.token.TypeToken;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -25,6 +24,38 @@ public class MapBuilder<K, V, M extends Map<K, V>> implements Supplier<M> {
 
     public MapBuilder(M map, TypeToken<K> keyType, TypeToken<V> valueType) {
         this.map = map;
+    }
+
+    public static <K,V,M extends Map<K,V>> MapBuilder<K, V, M> of(M map){
+        return new MapBuilder<>(map);
+    }
+
+    public static <K,V,M extends Map<K,V>> MapBuilder<K, V, M> of(M map, Class<K> keyType, Class<V> valueType){
+        return new MapBuilder<>(map,keyType,valueType);
+    }
+
+    public static <K,V,M extends Map<K,V>> MapBuilder<K, V, M> of(M map, TypeToken<K> keyType, TypeToken<V> valueType){
+        return new MapBuilder<>(map,keyType,valueType);
+    }
+
+    public static<K,V> MapBuilder<K,V,Map<K,V>> ofHashMap(Class<K> keyType,Class<V> valueType){
+        return new MapBuilder<>(new HashMap<>(),keyType,valueType);
+    }
+
+    public static<K,V> MapBuilder<K,V,Map<K,V>> ofLinkedHashMap(Class<K> keyType,Class<V> valueType){
+        return new MapBuilder<>(new LinkedHashMap<>(),keyType,valueType);
+    }
+
+    public static<K,V> MapBuilder<K,V,Map<K,V>> ofTreeMap(Class<K> keyType,Class<V> valueType){
+        return new MapBuilder<>(new TreeMap<>(),keyType,valueType);
+    }
+
+    public static MapBuilder<String,Object,Map<String,Object>> ofObjectMap(Map<String,Object> map){
+        return new MapBuilder<>(map);
+    }
+
+    public static MapBuilder<String,Object,Map<String,Object>> ofObjectMap(){
+        return new MapBuilder<>(new LinkedHashMap<>(),String.class,Object.class);
     }
 
     @Override

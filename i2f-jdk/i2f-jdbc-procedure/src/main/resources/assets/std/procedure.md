@@ -106,12 +106,15 @@ resources/procedure/SP_PREDICATE_COND.xml
 - 使用@Component注册为一个spring-bean对象
 - 使用@JdbcProcedure注解指定过程名称value,使用arguments指定需要的参数及其类型
 - 写法和XML类似
-- 但是，因为是存储过程，因此一般返回值都为null
+- 但是，因为是存储过程，因此一般返回值都为 executor.nop();
+- 如果不是 return executor.nop(); 将会认为这个返回值是有效的返回值，即使是 return null;
+- 也会认为null值是有效值，在框架中会被视作函数的返回值
 - 框架将会将入参params作为结果返回给调用者
 - 同时，由于是java类，返回值也会被设置到结果的params的return键上
 - 这一点和函数的转换上，是一个区别点，需要注意
 - 可以使用executor.call调用，得到返回的结果params
 - 实际上返回的就是入参的params对象
+- 
 ```java
 @Component
 @JdbcProcedure(
@@ -129,7 +132,7 @@ public class SpPredicateCondJavaCaller implements JdbcProcedureJavaCaller {
     public Object exec(JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable {
         String inCityCode = executor.visitAs("IN_CITY_CODE",params);
         
-        return null;
+        return executor.nop();
     }
 }
 ```
@@ -164,6 +167,8 @@ FUNCTION F_IS_TEST(IN_CITY_CODE      NUMBER,
 - 但是，区别点是返回值，会被当做结果params的return属性
 - 也就是说，return值是有意义的
 - 如果在代码中设置了return属性，也将会被代码的return值覆盖
+- 如果代码中已经设置了return属性，不想要被返回值覆盖，则返回语句请使用 executor.nop(); 
+- 表示无返回值，这个需要进行说明，无返回值不表示返回值是null，而是表示void无返回值
 - 这点在存储过程的转换也是一样的
 - 可以使用executor.invoke进行调用，得到返回值
 - 当然，也可以使用executor.call调用得到结果params，然后自行从params中取出return键的值即为return的值
@@ -432,7 +437,7 @@ v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 - 都比原来的语句复杂的多
 - 因为TinyScript设计就是为了解决这个问题的，所以更偏向于使用TinyScript进行转换
 
-### UDF自定义函数调用
+### UDF自定义函数调用(内部之间调用)
 - UDF用户自定义函数常常也会出现在存储过程中
 - 现在，这种情况比较复杂，我们以一个例子来说明
 - 先看原来函数的定义
@@ -487,19 +492,23 @@ execute immediate v_sql into V_IS_TASK_TEST;
 ```
 - 转换方式3
 - 使用Java代码调用
+- 注意，java内部调用，请先使用 executor.newParams(params) 来获得基础的属性，以继承全局变量，连接等信息
+- 如果直接使用空的Map对象，则不会继承这些共有的属性，全局变量，连接这些将会被重新分配
 ```xml
 <lang-eval-java>
         int V_SUM_MONTH = executor.visitAs("V_SUM_MONTH", params);
         int IN_LOG_ID = executor.visitAs("IN_LOG_ID", params);
 
-        int ret=executor.invoke("F_IS_TEST", executor.mapBuilder()
+        int ret=executor.invoke("F_IS_TEST", executor.mapBuilder(executor.newParams(params)) // 注意，内部之间调用，需要使用newParams来继承全局变量
                 .put("IN_CITY_CODE", 101010)
                 .put("IN_SUM_MONTH", V_SUM_MONTH)
                 .put("IN_LOG_ID", IN_LOG_ID)
                 .get()
         );
         executor.visitSet(params,"V_IS_TEST",ret);
-        return null;
+        return null; 
+        // return executor.nop(); 
+        // 这里，因为xml标签没有使用result属性指定返回值，因此return null的值，也是没有关系的
 </lang-eval-java>
 ```
 - 转换方式4
@@ -507,11 +516,11 @@ execute immediate v_sql into V_IS_TASK_TEST;
 - 因此，也可以配合使用
 ```xml
 <lang-eval-java result="V_IS_TEST">
-        return executor.invoke("F_IS_TEST", executor.mapBuilder()
-                .put("IN_CITY_CODE", 101010)
-                .put("IN_SUM_MONTH", executor.visit("V_SUM_MONTH", params))
-                .put("IN_LOG_ID", executor.visit("IN_LOG_ID", params))
-                .get()
+        return executor.invoke("F_IS_TEST", executor.mapBuilder(executor.newParams(params)) // 注意，内部之间调用，需要使用newParams来继承全局变量
+            .put("IN_CITY_CODE", 101010)
+            .put("IN_SUM_MONTH", executor.visit("V_SUM_MONTH", params))
+            .put("IN_LOG_ID", executor.visit("IN_LOG_ID", params))
+            .get()
         );
 </lang-eval-java>
 ```
@@ -535,7 +544,7 @@ execute immediate v_sql into V_IS_TASK_TEST;
 ```
 - 上面这几种方式中，使用TinyScript是最好最方便快捷的
 
-### Proc存储过程调用
+### Proc存储过程调用(内部之间调用)
 - 其实函数掉调用时从存储过程的调用简化来的
 - 因此，很多部分和存储过程时基本一样的
 - 下面来看一下这个存储过程的定义
@@ -591,7 +600,7 @@ execute immediate v_sql
 - 使用Java代码转换
 ```xml
 <lang-eval-java>
-    Map ret=executor.call("SP_PREDICATE_COND",executor.mapBuilder()
+    Map ret=executor.call("SP_PREDICATE_COND",executor.mapBuilder(executor.newParams(params)) // 注意，内部之间调用，需要使用newParams来继承全局变量
             .put("IN_CITY_CODE",executor.visit("V_CITY_CODE",params))
             .put("IN_SUM_MONTH",executor.visit("V_SUM_MONTH",params))
             .put("IN_COND_ID",executor.visit("V_COND_ID",params))
@@ -606,11 +615,13 @@ execute immediate v_sql
 - 使用groovy代码转换
 ```xml
 <lang-eval-groovy>
-    def  ret=executor.call("SP_PREDICATE_COND",[
+    def  ret=executor.call("SP_PREDICATE_COND",executor.mapBuilder(executor.newParams(params)) // 注意，内部之间调用，需要使用newParams来继承全局变量
+        .putAll([
             IN_CITY_CODE:params.V_CITY_CODE,
             IN_SUM_MONTH:params.V_SUM_MONTH,
             IN_COND_ID:params.V_COND_ID
-        ]
+        ])
+        .get()
     );
     params.V_MSG=ret.O_MSG;
     params.V_CODE=ret.O_CODE;
@@ -630,7 +641,7 @@ execute immediate v_sql
 </lang-eval-ts>
 ```
 
-### Java程序调用XML过程
+### Java程序调用XML过程(外部入口调用)
 - 这部分，直接使用上面内部调用的例子进行演示
 - Java程序调用，也就是在Java程序中调用XML的过程的方式
 - 也就是程序如何运行，程序的运行入口

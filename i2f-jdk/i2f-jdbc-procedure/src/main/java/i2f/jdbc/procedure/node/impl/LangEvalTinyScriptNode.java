@@ -98,7 +98,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
         }
 
         @Override
-        public void openDebugger(String tag, Object context, String conditionExpression) {
+        public void openDebugger(Object context,String tag,  String conditionExpression) {
             executor.openDebugger("tiny-script:"+tag, context, conditionExpression);
         }
 
@@ -113,20 +113,22 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
         }
 
         @Override
-        public Class<?> loadClass(String className) {
+        public Class<?> loadClass(Object context,String className) {
             return executor.loadClass(className);
         }
 
         @Override
-        public Reference<Object> beforeFunctionCall(Object target, boolean isNew, String naming, List<Object> argList) {
+        public Reference<Object> beforeFunctionCall(Object context,Object target, boolean isNew, String naming, List<Object> argList) {
             try {
                 ProcedureMeta meta = executor.getMeta(naming);
                 if (meta == null) {
                     return Reference.nop();
                 }
 
-                Map<String, Object> callParams = castArgumentListAsNamingMap(argList);
-                if(callParams.isEmpty()){
+                Map<String, Object> callParams= executor.newParams((Map<String,Object>)context);
+
+                 Map<String,Object> argsMap= castArgumentListAsNamingMap(context,argList);
+                if(argsMap.isEmpty()){
                     List<String> arguments = meta.getArguments();
                     for (int i = 0,j=0; i < argList.size(); i++) {
                         if(j>=arguments.size()){
@@ -140,9 +142,11 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
                             name=arguments.get(j++);
                         }
                         Object val = argList.get(i);
-                        callParams.put(name,val);
+                        argsMap.put(name,val);
                     }
                 }
+
+                callParams.putAll(argsMap);
 
                 Map<String, Object> ret = executor.exec(naming, callParams, false, false);
                 if (ret.containsKey(ParamsConsts.RETURN)) {
@@ -159,7 +163,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
         }
 
         @Override
-        public IMethod findMethod(String naming, List<Object> args) {
+        public IMethod findMethod(Object context,String naming, List<Object> args) {
             List<IMethod> list = ContextHolder.INVOKE_METHOD_MAP.get(naming);
             if (list != null && !list.isEmpty()) {
                 IMethod method = ReflectResolver.matchExecMethod(list, args);
@@ -168,11 +172,11 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
                 }
             }
 
-            return super.findMethod(naming, args);
+            return super.findMethod(context,naming, args);
         }
 
         @Override
-        public String renderString(String text, Object context) {
+        public String renderString(Object context,String text) {
             return executor.render(text, (Map<String, Object>) context);
         }
     }
