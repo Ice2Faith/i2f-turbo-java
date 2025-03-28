@@ -139,7 +139,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode operatorCtx = (TerminalNode) operatorNode;
                     Object left =  visitExpress(leftCtx);
                     String operator = (String) visitTerminal(operatorCtx);
-                    return resolver.resolveSuffixOperator(left, operator);
+                    return resolver.resolveSuffixOperator(context,left, operator);
                 }else if (count == 3) {
                     ParseTree leftNode = item;
                     ParseTree operatorNode = ctx.getChild(1);
@@ -159,7 +159,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     Supplier<Object> leftSupplier = () -> visitExpress(leftCtx);
                     Supplier<Object> rightSupplier = () -> visitExpress(rightCtx);
                     String operator = (String) visitTerminal(operatorCtx);
-                    return resolver.resolveDoubleOperator(leftSupplier, operator, rightSupplier);
+                    return resolver.resolveDoubleOperator(context,leftSupplier, operator, rightSupplier);
                 }else if(count==5){
                     ParseTree condNode = item;
                     ParseTree questionNode = ctx.getChild(1);
@@ -196,7 +196,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                         throw new IllegalArgumentException("invalid  ternary-operator operator, expect ':' buf found '" + elseSep + "'!");
                     }
                     Object obj = visitExpress(condCtx);
-                    boolean ok = resolver.toBoolean(obj);
+                    boolean ok = resolver.toBoolean(context,obj);
                     if(ok){
                         return visitExpress(trueCtx);
                     }else{
@@ -271,7 +271,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             }
             TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) objectNode;
             Object obj = visitExpress(expressCtx);
-            return resolver.resolvePrefixOperator(term, obj);
+            return resolver.resolvePrefixOperator(context,term, obj);
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
@@ -338,7 +338,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     boolean matched = false;
                     for (TinyScriptParser.ClassNameBlockContext clsCtx : ctxList) {
                         String clsName = (String) visitClassNameBlock(clsCtx);
-                        Class<?> clazz = resolver.loadClass(clsName);
+                        Class<?> clazz = resolver.loadClass(context,clsName);
                         if (clazz != null) {
                             if (TypeOf.instanceOf(e, clazz)) {
                                 matched = true;
@@ -558,7 +558,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 }
                 TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
                 Object value = visitExpress(expressCtx);
-                return resolver.resolvePrefixOperator(prefixOperator, value);
+                return resolver.resolvePrefixOperator(context,prefixOperator, value);
             }
 
             throw new IllegalArgumentException("un-support parent segment found : " + ctx.getText());
@@ -607,7 +607,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 ok = (Boolean) visitConditionBlock(condCtx);
             }
             if (ok) {
-                resolver.openDebugger(tag, context, (condCtx == null ? null : condCtx.getText()));
+                resolver.openDebugger(context,tag, (condCtx == null ? null : condCtx.getText()));
             }
             return null;
         } catch (Throwable e) {
@@ -967,7 +967,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             }
             TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) item;
             Object ret = visitExpress(expressCtx);
-            return resolver.toBoolean(ret);
+            return resolver.toBoolean(context,ret);
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
@@ -1027,7 +1027,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (!Arrays.asList("=", "?=", ".=", "+=", "-=", "*=", "/=", "%=").contains(equal)) {
                 throw new IllegalArgumentException("invalid equal value, expect '=,?=,.=,+=,-=,*=,/=,%=', but found '" + equal + "'!");
             }
-            Object value = visitExpress(expressCtx);
+            Object value = null;
+            if(!Arrays.asList("?=", ".=").contains(equal)){
+                value=visitExpress(expressCtx);
+            }
 
             if (namingNode instanceof TerminalNode) {
                 TerminalNode namingCtx = (TerminalNode) namingNode;
@@ -1039,26 +1042,28 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     Object oldVal = resolver.getValue(context, naming);
                     if ("?=".equals(equal)) {
                         if (oldVal == null) {
+                            value=visitExpress(expressCtx);
                             resolver.setValue(context, naming, value);
                         }
                     } else if (".=".equals(equal)) {
                         if (oldVal != null) {
+                            value=visitExpress(expressCtx);
                             resolver.setValue(context, naming, value);
                         }
                     } else if ("+=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(oldVal, "+", value);
+                        value = resolver.resolveDoubleOperator(context,oldVal, "+", value);
                         resolver.setValue(context, naming, value);
                     } else if ("-=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(oldVal, "-", value);
+                        value = resolver.resolveDoubleOperator(context,oldVal, "-", value);
                         resolver.setValue(context, naming, value);
                     } else if ("*=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(oldVal, "*", value);
+                        value = resolver.resolveDoubleOperator(context,oldVal, "*", value);
                         resolver.setValue(context, naming, value);
                     } else if ("/=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(oldVal, "/", value);
+                        value = resolver.resolveDoubleOperator(context,oldVal, "/", value);
                         resolver.setValue(context, naming, value);
                     } else if ("%=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(oldVal, "%", value);
+                        value = resolver.resolveDoubleOperator(context,oldVal, "%", value);
                         resolver.setValue(context, naming, value);
                     }
                 } else {
@@ -1389,7 +1394,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 args = new ArrayList<>();
             }
 
-            return resolver.resolveFunctionCall(value, isNew, naming, args);
+            return resolver.resolveFunctionCall(context,value, isNew, naming, args);
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
@@ -1700,7 +1705,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 if (term.endsWith(".class")) {
                     term = term.substring(0, term.length() - ".class".length());
                 }
-                return resolver.loadClass(term);
+                return resolver.loadClass(context,term);
             }
             throw new IllegalArgumentException("un-support const class found : " + ctx.getText());
         } catch (Throwable e) {
@@ -1847,7 +1852,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     }
                     featuresList.add(feature);
                 }
-                term = resolver.multilineString(builder.toString(), featuresList, context);
+                term = resolver.multilineString(context,builder.toString(), featuresList);
                 return term;
             }
             throw new IllegalArgumentException("un-support const multiline string found : " + ctx.getText());
@@ -1877,7 +1882,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 term = term.trim();
                 term = term.substring("r\"".length(), term.length() - "\"".length());
                 term = unescapeString(term);
-                term = resolver.renderString(term, context);
+                term = resolver.renderString(context,term);
                 return term;
             }
             throw new IllegalArgumentException("un-support const render string found : " + ctx.getText());

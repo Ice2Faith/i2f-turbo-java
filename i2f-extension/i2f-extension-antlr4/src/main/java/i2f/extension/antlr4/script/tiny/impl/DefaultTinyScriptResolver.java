@@ -52,7 +52,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
-    public void openDebugger(String tag, Object context, String conditionExpression) {
+    public void openDebugger(Object context, String tag, String conditionExpression) {
         if (debug.get()) {
             System.out.println("debugger [" + tag + "] [" + conditionExpression + "] wait for input line to continue.");
             System.out.println("continue.");
@@ -72,12 +72,12 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
-    public boolean toBoolean(Object ret) {
+    public boolean toBoolean(Object context, Object ret) {
         return ObjectConvertor.toBoolean(ret);
     }
 
     @Override
-    public Object resolveDoubleOperator(Supplier<Object> left, String operator, Supplier<Object> right) {
+    public Object resolveDoubleOperator(Object context, Supplier<Object> left, String operator, Supplier<Object> right) {
         if ("&&".equals(operator) || "and".equals(operator)) {
             boolean bl = ObjectConvertor.toBoolean(left);
             if (!bl) {
@@ -93,12 +93,12 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             boolean br = ObjectConvertor.toBoolean(right);
             return br;
         } else {
-            return resolveDoubleOperator(left.get(), operator, right.get());
+            return resolveDoubleOperator(context,left.get(), operator, right.get());
         }
     }
 
     @Override
-    public Object resolveDoubleOperator(Object left, String operator, Object right) {
+    public Object resolveDoubleOperator(Object context, Object left, String operator, Object right) {
         if ("as".equals(operator) || "cast".equals(operator)) {
             if (right == null) {
                 throw new ClassCastException("target type is null");
@@ -274,7 +274,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
-    public Object resolvePrefixOperator(String operator, Object value) {
+    public Object resolvePrefixOperator(Object context, String operator, Object value) {
         if ("!".equals(operator) || "not".equals(operator)) {
             boolean bv = ObjectConvertor.toBoolean(value);
             return !bv;
@@ -292,7 +292,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
-    public Object resolveSuffixOperator(Object value, String operator) {
+    public Object resolveSuffixOperator(Object context, Object value, String operator) {
         if("%".equals(operator)){
             if (value != null) {
                 if (ObjectConvertor.isNumericType(value.getClass())) {
@@ -397,11 +397,11 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
-    public Class<?> loadClass(String className) {
+    public Class<?> loadClass(Object context, String className) {
         return ReflectResolver.loadClass(className);
     }
 
-    public IMethod findMethod(String naming, List<Object> args) {
+    public IMethod findMethod(Object context, String naming, List<Object> args) {
         CopyOnWriteArrayList<IMethod> list = TinyScript.BUILTIN_METHOD.get(naming);
         if (list != null && !list.isEmpty()) {
             return ReflectResolver.matchExecMethod(list, args);
@@ -409,11 +409,11 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return null;
     }
 
-    public Reference<Object> beforeFunctionCall(Object target, boolean isNew, String naming, List<Object> argList) {
+    public Reference<Object> beforeFunctionCall(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
         return Reference.nop();
     }
 
-    public Map<String, Object> castArgumentListAsNamingMap(List<Object> argList) {
+    public Map<String, Object> castArgumentListAsNamingMap(Object context, List<Object> argList) {
         Map<String, Object> map = new HashMap<>();
         for (Object arg : argList) {
             if (arg instanceof TinyScriptVisitorImpl.NamingBindArgument) {
@@ -425,8 +425,20 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
-    public Object resolveFunctionCall(Object target, boolean isNew, String naming, List<Object> argList) {
-        Reference<Object> ref = beforeFunctionCall(target, isNew, naming, argList);
+    public Object resolveFunctionCall(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
+        if(!isNew){
+            // 处理内建函数 Object eval(String|Appendable|CharSequence|StringBuilder|StringBuffer script)
+            if("eval".equals(naming)){
+                if(argList.size()==1){
+                    Object arg = argList.get(0);
+                    if(arg==null||arg instanceof CharSequence || arg instanceof Appendable){
+                        String script=String.valueOf(arg);
+                        return TinyScript.script(script, context, this);
+                    }
+                }
+            }
+        }
+        Reference<Object> ref = beforeFunctionCall(context,target, isNew, naming, argList);
         if (ref != null) {
             if (ref.isValue()) {
                 return ref.get();
@@ -443,14 +455,14 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         }
         Class<?> clazz = null;
         if (isNew) {
-            clazz = loadClass(naming);
+            clazz = loadClass(context,naming);
         } else {
             if (target == null) {
                 int idx = naming.lastIndexOf(".");
                 if (idx > 0) {
                     String className = naming.substring(0, idx);
                     naming = naming.substring(idx + 1);
-                    clazz = loadClass(className);
+                    clazz = loadClass(context,className);
                 }
             } else {
                 clazz = target.getClass();
@@ -462,7 +474,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         } else {
             String methodName = naming;
 
-            IMethod method = findMethod(naming, args);
+            IMethod method = findMethod(context,naming, args);
             if (method != null) {
                 Object ret = ReflectResolver.execMethod(target, method, args);
                 return ret;
@@ -474,7 +486,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
-    public String renderString(String text, Object context) {
+    public String renderString(Object context, String text) {
         return RegexUtil.regexFindAndReplace(text, "[\\\\]*\\$\\{[^}]+\\}", (str) -> {
             str = str.substring("${".length(), str.length() - "}".length());
             str = str.trim();
@@ -484,7 +496,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
-    public String multilineString(String text, List<String> features, Object context) {
+    public String multilineString(Object context, String text, List<String> features) {
         for (String feature : features) {
             if ("trim".equals(feature)) {
                 text = text.trim();
@@ -502,7 +514,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 }
                 text = builder.toString();
             } else if ("render".equals(feature)) {
-                text = renderString(text, context);
+                text = renderString(context,text);
             }
         }
         return text;

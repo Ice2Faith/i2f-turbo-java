@@ -759,6 +759,59 @@ params.put("replacement","true");
 - 使用Reference.of()方法正确的返回值，如果处理不了
 - 则使用Reference.nop()表示无法处理
 
+### 内建函数
+- 内建函数，也就是自带的函数
+- eval函数
+- 用于将内部的字符看做TinyScript脚本进行运行
+- 运行时共享内部的上下文
+- 定义
+- 函数名：eval
+- 返回值：Object
+- 参数：String|Appendable|CharSequence|StringBuilder|StringBuffer 总之就是字符串兼容类型
+```shell
+Object eval(String|Appendable|CharSequence|StringBuilder|StringBuffer script)
+```
+- 其他内建函数
+- 详情查阅源码类的静态构造代码块
+```java
+public class TinyScript{
+    static{
+        // 此处的内建函数
+    }
+}
+```
+- 你也可以参照此方式注册内建函数
+
+## 拓展点
+
+### 自定义处理器 TinyScriptResolver
+- 如果想要修改一些默认的行为，包括调用一些特殊场景的函数，结合其他框架使用
+- 都可以实现自己的 TinyScriptResolver 
+- 但是，一般来说，你只需要继承 DefaultTinyScriptResolver 默认实现类
+- 修改你的特定逻辑即可
+- 然后使用你自己的 resolver 进行脚本解析执行即可
+- 举个例子来说
+- 比如，你想要和Spring框架结合
+- 使用一些Spring框架提供的能力
+- 那么，你可以实现一个自己的 resolver
+- 比如：SpringApplicationContextTinyScriptResolver
+- 然后，根据自己的实现，使用这个resolver即可
+- 下面是示例调用代码
+```java
+public static Object evalTinyScript(String script, Object context,ApplicationContext applicationContext) {
+
+  Object obj = null;
+
+  try {
+    TinyScriptResolver resolver = new SpringApplicationContextTinyScriptResolver(applicationContext);
+    obj = TinyScript.script(script, context, resolver);
+  } catch (Exception e) {
+    throw new IllegalStateException(e.getMessage(), e);
+  }
+  return obj;
+}
+```
+
 ## 特别注意
 
 - 本脚本不支持自然意义上的数学运算优先级

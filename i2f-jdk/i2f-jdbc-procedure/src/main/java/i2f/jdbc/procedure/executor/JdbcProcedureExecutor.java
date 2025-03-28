@@ -107,6 +107,10 @@ public interface JdbcProcedureExecutor {
         return new MapBuilder<>(new HashMap<>(), String.class, Object.class);
     }
 
+    default MapBuilder<String, Object, ? extends Map<String, Object>> mapBuilder(Map<String,Object> map) {
+        return new MapBuilder<>(map, String.class, Object.class);
+    }
+
     default <T> T invoke(String procedureId, Consumer<MapBuilder<String, Object, ? extends Map<String, Object>>> consumer) {
         MapBuilder<String, Object, HashMap<String, Object>> builder = new MapBuilder<>(new HashMap<String, Object>());
         consumer.accept(builder);
