@@ -1,8 +1,8 @@
 package i2f.springboot.jdbc.bql.procedure.impl;
 
-import i2f.jdbc.procedure.provider.types.xml.impl.AbstractJdbcProcedureXmlNodeMetaCacheProvider;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.provider.types.xml.impl.AbstractJdbcProcedureXmlNodeMetaCacheProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Ice2Faith
@@ -33,9 +34,11 @@ public class SpringJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcPro
         this.xmlLocations.addAll(xmlLocations);
     }
 
+    private final ExecutorService pool= new ForkJoinPool(Runtime.getRuntime().availableProcessors()*2);
+
     @Override
     public Map<String, XmlNode> parseResources() {
-        Map<String, XmlNode> ret = new HashMap<>();
+        Map<String, XmlNode> ret = new ConcurrentHashMap<>();
         if (xmlLocations == null || xmlLocations.isEmpty()) {
             return ret;
         }
@@ -57,55 +60,65 @@ public class SpringJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcPro
             }
         }
         int resoucesCnt= resources.size();
-        int successCnt=0;
-        int nodeCnt=0;
-        int failureCnt=0;
+        AtomicInteger successCnt=new AtomicInteger(0);
+        AtomicInteger nodeCnt=new AtomicInteger(0);
+        AtomicInteger failureCnt=new AtomicInteger(0);
         log.info("procedure resource found "+resoucesCnt+".");
         log.info("procedure resource parsing ...");
 
+        CountDownLatch latch=new CountDownLatch(resoucesCnt);
         for (Resource resource : resources) {
-            try (InputStream is = resource.getInputStream()) {
-                XmlNode node = JdbcProcedureParser.parse(resource.getFilename(), is);
-                String id = node.getTagAttrMap().get("id");
-                String filename = resource.getFilename();
-                String fileNameId=filename;
-                if (filename != null) {
-                    int idx = filename.lastIndexOf(".");
-                    if (idx >= 0) {
-                        fileNameId = filename.substring(0, idx);
-                    }
-                }
-                if(id!=null && fileNameId!=null){
-                    if(!id.equals(fileNameId)){
-                        log.warn("resource filename not equal id, filename="+filename+", id="+id);
-                    }
-                }
-                if (id == null) {
+            pool.submit(()->{
+                try (InputStream is = resource.getInputStream()) {
+                    XmlNode node = JdbcProcedureParser.parse(resource.getFilename(), is);
+                    String id = node.getTagAttrMap().get("id");
+                    String filename = resource.getFilename();
+                    String fileNameId=filename;
                     if (filename != null) {
-                        id = fileNameId;
-                    }
-                }
-                if (id != null) {
-                    ret.put(id, node);
-                    successCnt++;
-                    nodeCnt++;
-                    log.debug("load procedure resource: id="+id+", filename="+filename);
-
-                    Map<String, XmlNode> next = new HashMap<>();
-                    JdbcProcedureParser.resolveEmbedIdNode(node, next);
-                    for (Map.Entry<String, XmlNode> entry : next.entrySet()) {
-                        if(!entry.getKey().equals(id)){
-                            nodeCnt++;
-                            String childId = id + "." + entry.getKey();
-                            log.debug("load procedure child node resource: id="+childId+", filename="+filename);
-                            ret.put(childId, entry.getValue());
+                        int idx = filename.lastIndexOf(".");
+                        if (idx >= 0) {
+                            fileNameId = filename.substring(0, idx);
                         }
                     }
+                    if(id!=null && fileNameId!=null){
+                        if(!id.equals(fileNameId)){
+                            log.warn("resource filename not equal id, filename="+filename+", id="+id);
+                        }
+                    }
+                    if (id == null) {
+                        if (filename != null) {
+                            id = fileNameId;
+                        }
+                    }
+                    if (id != null) {
+                        ret.put(id, node);
+                        successCnt.incrementAndGet();
+                        nodeCnt.incrementAndGet();
+                        log.debug("load procedure resource: id="+id+", filename="+filename);
+
+                        Map<String, XmlNode> next = new HashMap<>();
+                        JdbcProcedureParser.resolveEmbedIdNode(node, next);
+                        for (Map.Entry<String, XmlNode> entry : next.entrySet()) {
+                            if(!entry.getKey().equals(id)){
+                                nodeCnt.incrementAndGet();
+                                String childId = id + "." + entry.getKey();
+                                log.debug("load procedure child node resource: id="+childId+", filename="+filename);
+                                ret.put(childId, entry.getValue());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    failureCnt.incrementAndGet();
+                    log.warn(resource.getFilename() + " parse error: " + e.getMessage(), e);
+                }finally {
+                    latch.countDown();
                 }
-            } catch (Exception e) {
-                failureCnt++;
-                log.warn(resource.getFilename() + " parse error: " + e.getMessage(), e);
-            }
+            });
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+
         }
         long useTs=System.currentTimeMillis()-beginTs;
         log.info("procedure resource parsed"

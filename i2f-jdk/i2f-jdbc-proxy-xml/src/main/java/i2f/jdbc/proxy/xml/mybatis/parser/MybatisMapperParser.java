@@ -18,10 +18,17 @@ import java.util.*;
  */
 public class MybatisMapperParser {
     public static final String[] XML_ELEMENT_TAG_NAME = {
-            "resultMap", "sql", "select", "update", "insert", "delete",
-            "dialect", "dialect-choose", "dialect-when", "dialect-otherwise"
+            "resultMap", "sql", "select", "update", "insert", "delete"
     };
     public static final Set<String> XML_ELEMENT_TAG_NAME_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(XML_ELEMENT_TAG_NAME)));
+
+    public static final String[] SCRIPT_ELEMENT_TAG_NAME={
+        "if","dialect","choose","when","otherwise",
+            "dialect-choose","dialect-when","dialect-otherwise",
+            "foreach","trim","set","where","include"
+    };
+    public static final Set<String> SCRIPT_ELEMENT_TAG_NAME_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(SCRIPT_ELEMENT_TAG_NAME)));
+
 
     public static Map<String, MybatisMapperNode> parseXmlUrlMappers(List<URL> urls, Map<String, MybatisMapperNode> ret) {
         if (ret == null) {
@@ -133,8 +140,8 @@ public class MybatisMapperParser {
                             if (!part.endsWith(">")) {
                                 builder.append("&lt;").append(part.substring(1));
                             } else {
-                                String tagName = part.substring(1, part.length() - 1);
-                                if (!XML_ELEMENT_TAG_NAME_SET.contains(tagName)) {
+                                String tagName = part.substring(2, part.length() - 1);
+                                if (!SCRIPT_ELEMENT_TAG_NAME_SET.contains(tagName)) {
                                     builder.append("&lt;").append(part.substring(1));
                                 } else {
                                     builder.append(part);
@@ -148,7 +155,7 @@ public class MybatisMapperParser {
                             }
                             if (isLegalTag) {
                                 String tagName = part.substring(1, part.length() - 1);
-                                if (!XML_ELEMENT_TAG_NAME_SET.contains(tagName)) {
+                                if (!SCRIPT_ELEMENT_TAG_NAME_SET.contains(tagName)) {
                                     builder.append("&lt;").append(part.substring(1));
                                 } else {
                                     builder.append(part);
