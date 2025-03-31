@@ -17,11 +17,13 @@ import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -129,18 +131,15 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
 
                  Map<String,Object> argsMap= castArgumentListAsNamingMap(context,argList);
                 if(argsMap.isEmpty()){
-                    List<String> arguments = meta.getArguments();
-                    for (int i = 0,j=0; i < argList.size(); i++) {
-                        if(j>=arguments.size()){
+                    List<String> arguments = meta.getArguments().stream().filter(e->!Arrays.asList(
+                            AttrConsts.ID,AttrConsts.REFID,
+                            AttrConsts.RESULT,ParamsConsts.RETURN
+                    ).contains(e)).collect(Collectors.toList());
+                    for (int i = 0; i < argList.size(); i++) {
+                        if(i>=arguments.size()){
                             break;
                         }
-                        String name = arguments.get(j++);
-                        if(ParamsConsts.RETURN.equals(name)){
-                            if(j>=arguments.size()){
-                                break;
-                            }
-                            name=arguments.get(j++);
-                        }
+                        String name = arguments.get(i);
                         Object val = argList.get(i);
                         argsMap.put(name,val);
                     }

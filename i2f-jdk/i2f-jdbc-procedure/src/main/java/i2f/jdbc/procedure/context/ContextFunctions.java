@@ -58,11 +58,19 @@ public class ContextFunctions {
         return replacement;
     }
 
+    public static String replace(String str, String target) {
+        return replace(str, target, "");
+    }
+
     public static String replace(String str, String target, String replacement) {
         if (str == null) {
             return str;
         }
         return str.replace(target, replacement);
+    }
+
+    public static String regexReplace(String str, String regex) {
+        return regexReplace(str, regex, "");
     }
 
     public static String regexReplace(String str, String regex, String replacement) {
@@ -74,12 +82,24 @@ public class ContextFunctions {
         return str.replaceAll(regex, replacement);
     }
 
+    public static String regex_replace(String str, String regex) {
+        return regex_replace(str, regex, "");
+    }
+
     public static String regex_replace(String str, String regex, String replacement) {
         return regexReplace(str, regex, replacement);
     }
 
+    public static String regexp_replace(String str, String regex) {
+        return regexp_replace(str, regex, "");
+    }
+
     public static String regexp_replace(String str, String regex, String replacement) {
         return regexReplace(str, regex, replacement);
+    }
+
+    public static String regexReplaceIgnoreCase(String str, String regex) {
+        return regexReplaceIgnoreCase(str, regex, "");
     }
 
     public static String regexReplaceIgnoreCase(String str, String regex, String replacement) {
@@ -139,6 +159,10 @@ public class ContextFunctions {
         return "" + ch;
     }
 
+    public static String rtrim(String str) {
+        return rtrim(str, null);
+    }
+
     public static String rtrim(String str, String substr) {
         if (str == null) {
             return str;
@@ -167,25 +191,29 @@ public class ContextFunctions {
         }
     }
 
-    public static int length(Object obj){
-        if(obj ==null){
+    public static int length(Object obj) {
+        if (obj == null) {
             return -1;
         }
-        if(obj instanceof CharSequence
-        ||obj instanceof String
-        ||obj instanceof Appendable){
+        if (obj instanceof CharSequence
+                || obj instanceof String
+                || obj instanceof Appendable) {
             return String.valueOf(obj).length();
         }
-        if(obj instanceof Collection){
+        if (obj instanceof Collection) {
             return ((Collection<?>) obj).size();
         }
-        if(obj instanceof Map){
+        if (obj instanceof Map) {
             return ((Map<?, ?>) obj).size();
         }
-        if(obj.getClass().isArray()){
+        if (obj.getClass().isArray()) {
             return Array.getLength(obj);
         }
-        throw new IllegalArgumentException("length(obj) function cannot support type:"+obj.getClass());
+        throw new IllegalArgumentException("length(obj) function cannot support type:" + obj.getClass());
+    }
+
+    public static String ltrim(String str) {
+        return ltrim(str, null);
     }
 
     public static String ltrim(String str, String substr) {
