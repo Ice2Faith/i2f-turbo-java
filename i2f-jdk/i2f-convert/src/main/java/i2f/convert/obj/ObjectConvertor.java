@@ -4,7 +4,7 @@ import i2f.typeof.TypeOf;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
-import java.io.File;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -13,7 +13,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.sql.Clob;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -262,12 +264,51 @@ public class ObjectConvertor {
         return false;
     }
 
+    public static String stringifyReader(Reader reader,String nullAs) throws IOException {
+        if (reader == null) {
+            return nullAs;
+        }
+        try{
+            StringBuilder builder=new StringBuilder();
+            char[] buff=new char[4096];
+            int len=0;
+            while((len=reader.read(buff))>0){
+                builder.append(buff,0,len);
+            }
+            return builder.toString();
+        }finally {
+            reader.close();
+        }
+    }
+
     public static String stringify(Object obj, String nullAs) {
         if (obj == null) {
             return nullAs;
         }
         Class<?> clazz = obj.getClass();
-        if (clazz.isArray()) {
+        if(TypeOf.typeOf(clazz, Clob.class)){
+            Clob clob = (Clob) obj;
+            try(Reader reader = clob.getCharacterStream()) {
+                return stringifyReader(reader, nullAs);
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(),e);
+            }
+        }else if(TypeOf.typeOf(clazz, Reader.class)){
+            Reader reader = (Reader) obj;
+            try{
+                return stringifyReader(reader,nullAs);
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(),e);
+            }
+        }else if(TypeOf.typeOf(clazz, InputStream.class)){
+            InputStream is=(InputStream)obj;
+            Reader reader = new InputStreamReader(is);
+            try{
+                return stringifyReader(reader,nullAs);
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(),e);
+            }
+        }else if (clazz.isArray()) {
             StringBuilder builder = new StringBuilder();
             int len = Array.getLength(obj);
             builder.append("[");
@@ -299,9 +340,43 @@ public class ObjectConvertor {
             return val;
         }
         // 目标类型为 String ，都能转
-        if (TypeOf.typeOf(targetType, String.class)) {
-            return stringify(val, null);
+        if (TypeOf.typeOfAny(targetType, String.class,CharSequence.class,Appendable.class,char[].class)) {
+            String str= stringify(val, null);
+            if(str==null){
+                return null;
+            }
+            if(TypeOf.typeOf(targetType,char[].class)){
+              return str.toCharArray();
+            } else if(TypeOf.typeOf(targetType,Appendable.class)){
+                if(TypeOf.typeOf(targetType,StringBuilder.class)){
+                    StringBuilder builder=new StringBuilder(str);
+                    return builder;
+                }else if(TypeOf.typeOf(targetType,StringBuffer.class)){
+                    StringBuffer buffer=new StringBuffer(str);
+                    return buffer;
+                }
+            }else{
+                return str;
+            }
         }
+
+        // 源类型为String，目标类型为可转类型
+        if(TypeOf.typeOfAny(sourceType,String.class, CharSequence.class,Appendable.class,char[].class)){
+            String str=null;
+            if(TypeOf.typeOf(sourceType,char[].class)){
+                str=new String((char[])val);
+            }else{
+                str=String.valueOf(val);
+            }
+            if(TypeOf.typeOf(targetType,byte[].class)){
+                return str.getBytes(StandardCharsets.UTF_8);
+            }else if(TypeOf.typeOf(targetType,InputStream.class)){
+                return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
+            }else if(TypeOf.typeOf(targetType,Reader.class)){
+                return new StringReader(str);
+            }
+        }
+
 
         // 原始和目标都是 Number
         Class<?>[] numericTypes = bigDecimalTypeConverterMap.keySet().toArray(new Class<?>[0]);
@@ -741,9 +816,9 @@ public class ObjectConvertor {
         if (obj instanceof Boolean) {
             return (Boolean) obj;
         }
-        if(obj instanceof Number){
-            BigDecimal num=new BigDecimal(String.valueOf(obj));
-            return num.compareTo(BigDecimal.ZERO)!=0;
+        if (obj instanceof Number) {
+            BigDecimal num = new BigDecimal(String.valueOf(obj));
+            return num.compareTo(BigDecimal.ZERO) != 0;
         }
         if (obj instanceof String) {
             if (!"".equals(obj)) {
@@ -756,9 +831,9 @@ public class ObjectConvertor {
                 return true;
             }
         }
-        if(obj instanceof Map){
+        if (obj instanceof Map) {
             Map<?, ?> map = (Map<?, ?>) obj;
-            if(!map.isEmpty()){
+            if (!map.isEmpty()) {
                 return true;
             }
         }

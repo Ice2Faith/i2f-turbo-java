@@ -15,6 +15,10 @@ import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
@@ -1059,6 +1063,10 @@ public class JdbcResolver {
             stat.setString(index, (String) obj);
             return;
         }
+        if (obj instanceof CharSequence) {
+            stat.setString(index, String.valueOf(obj));
+            return;
+        }
         if (obj instanceof Boolean) {
             stat.setBoolean(index, (Boolean) obj);
             return;
@@ -1109,6 +1117,30 @@ public class JdbcResolver {
         }
         if (obj instanceof ThreadLocal) {
             setStatementObject(stat, index, ((ThreadLocal<?>) obj).get());
+            return;
+        }
+        if(obj instanceof char[]){
+            stat.setCharacterStream(index,new StringReader(new String((char[])obj)));
+            return;
+        }
+        if(obj instanceof Reader){
+            stat.setCharacterStream(index,(Reader)obj);
+            return;
+        }
+        if(obj instanceof byte[]){
+            stat.setBlob(index,new ByteArrayInputStream((byte[])obj));
+            return;
+        }
+        if(obj instanceof InputStream){
+            stat.setBlob(index,(InputStream) obj);
+            return;
+        }
+        if(obj instanceof Clob){
+            stat.setClob(index,(Clob) obj);
+            return;
+        }
+        if(obj instanceof Blob){
+            stat.setBlob(index,(Blob) obj);
             return;
         }
         if(jdbcType!=null){
@@ -1188,6 +1220,9 @@ public class JdbcResolver {
                 for (int i = 0; i < columnCount; i++) {
                     QueryColumn col = columns.get(i);
                     Object val = rs.getObject(i + 1);
+                    if(val instanceof Clob){
+                        val=ObjectConvertor.tryConvertAsType(val,String.class);
+                    }
                     map.put(col.getName(), val);
                 }
                 rows.add(map);
@@ -1231,6 +1266,7 @@ public class JdbcResolver {
                 columnNames.add(colName);
             }
 
+            boolean isDefaultMapType=(beanClass == null || TypeOf.typeOf(beanClass, Map.class));
             int currCount = 0;
             while (rs.next()) {
                 if (maxCount >= 0 && currCount >= maxCount) {
@@ -1240,11 +1276,16 @@ public class JdbcResolver {
                 Map<String, Object> map = new LinkedHashMap<>();
                 for (int i = 0; i < columnCount; i++) {
                     Object val = rs.getObject(i + 1);
+                    if(!isDefaultMapType){
+                        if(val instanceof Clob){
+                            val=ObjectConvertor.tryConvertAsType(val,String.class);
+                        }
+                    }
                     map.put(columnNames.get(i), val);
                 }
 
                 Object item = map;
-                if (beanClass == null || !TypeOf.typeOf(beanClass, Map.class)) {
+                if (!isDefaultMapType) {
                     try {
                         T bean = ReflectResolver.getInstance(beanClass);
                         ReflectResolver.map2bean(map, bean);
