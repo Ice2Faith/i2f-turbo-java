@@ -9,7 +9,9 @@ import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -50,6 +52,20 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 executor.logError(() -> errorMsg, e);
                 throw new ThrowSignalException(errorMsg, e);
             }
+        }
+    }
+
+    public static void walkTree(XmlNode node, Consumer<XmlNode> consumer){
+        if(node==null){
+            return;
+        }
+        consumer.accept(node);
+        List<XmlNode> children = node.getChildren();
+        if(children==null || children.isEmpty()){
+            return;
+        }
+        for (XmlNode item : children) {
+            walkTree(item,consumer);
         }
     }
 
