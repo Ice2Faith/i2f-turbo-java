@@ -16,7 +16,7 @@ public class RegexPattens {
      * -60
      * 0
      */
-    public static final String INTEGER_NUMBER_REGEX /*language=regexp*/= "[+|-]?(0|[1-9][0-9]*)";
+    public static final String INTEGER_NUMBER_REGEX = "[+|-]?(0|[1-9][0-9]*)";
 
     /**
      * match for :
@@ -26,7 +26,7 @@ public class RegexPattens {
      * -1.5
      * 0.3
      */
-    public static final String DOUBLE_NUMBER_REGEX /*language=regexp*/= INTEGER_NUMBER_REGEX + "(\\.[0-9]+)?";
+    public static final String DOUBLE_NUMBER_REGEX = INTEGER_NUMBER_REGEX + "(\\.[0-9]+)?";
 
     /**
      * match for :
@@ -39,7 +39,7 @@ public class RegexPattens {
      * a52
      * a_52
      */
-    public static final String DECLARE_NAME_REGEX /*language=regexp*/= "[a-zA-Z_][a-zA-Z0-9_]*";
+    public static final String DECLARE_NAME_REGEX = "[a-zA-Z_][a-zA-Z0-9_]*";
 
     /**
      * match for :
@@ -49,7 +49,7 @@ public class RegexPattens {
      * a.b
      * a.b.c
      */
-    public static final String DECLARE_FULL_NAME_REGEX /*language=regexp*/= DECLARE_NAME_REGEX + "(" + DECLARE_NAME_REGEX + ")*";
+    public static final String DECLARE_FULL_NAME_REGEX = DECLARE_NAME_REGEX + "(" + DECLARE_NAME_REGEX + ")*";
 
     /**
      * match for :
@@ -59,7 +59,7 @@ public class RegexPattens {
      * "a\"b"
      * "a\'b "
      */
-    public static final String QUOTE_STRING_REGEX /*language=regexp*/= "\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"";
+    public static final String QUOTE_STRING_REGEX = "\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"";
 
     /**
      * match for :
@@ -69,21 +69,21 @@ public class RegexPattens {
      * 'a\'b'
      * 'a\"b '
      */
-    public static final String SINGLE_QUOTE_STRING_REGEX /*language=regexp*/= "\'([^\'\\\\]*(\\\\.[^\'\\\\]*)*)\'";
+    public static final String SINGLE_QUOTE_STRING_REGEX = "\'([^\'\\\\]*(\\\\.[^\'\\\\]*)*)\'";
 
     /**
      * match for :
      * standard single line comment block, such as
      * // xxx
      */
-    public static final String SINGLE_LINE_COMMENT_REGEX /*language=regexp*/= "\\/\\/[^\\n]*";
+    public static final String SINGLE_LINE_COMMENT_REGEX = "\\/\\/[^\\n]*(\n|$)";
 
     /**
      * match for :
      * standard multi line comment block, such as
      * \/* xxx *\/
      */
-    public static final String MULTI_LINE_COMMENT_REGEX /*language=regexp*/= "\\/\\*([^*]|(\\*+([^*/])))*\\*+\\/";
+    public static final String MULTI_LINE_COMMENT_REGEX = "\\/\\*([^*]|(\\*+([^*/])))*\\*+\\/";
 
 
     /**
@@ -92,28 +92,28 @@ public class RegexPattens {
      * // xxx
      * \/* xxx *\/
      */
-    public static final String COMMON_COMMENT_REGEX /*language=regexp*/= SINGLE_LINE_COMMENT_REGEX + "|" + MULTI_LINE_COMMENT_REGEX;
+    public static final String COMMON_COMMENT_REGEX = SINGLE_LINE_COMMENT_REGEX + "|" + MULTI_LINE_COMMENT_REGEX;
 
     /**
      * match for :
      * sharp style single line comment block, such as
      * # xxx
      */
-    public static final String SINGLE_LINE_COMMENT_SHARP_REGEX /*language=regexp*/= "#[^\\n]*";
+    public static final String SINGLE_LINE_COMMENT_SHARP_REGEX = "#[^\\n]*(\n|$)";
 
     /**
      * match for :
      * sql style single line comment block, such as
      * -- xxx
      */
-    public static final String SINGLE_LINE_COMMENT_SQL_REGEX /*language=regexp*/= "--[ |\\t]+[^\\n]*";
+    public static final String SINGLE_LINE_COMMENT_SQL_REGEX = "--[^\\n]*(\n|$)";
 
     /**
      * match for :
      * xml style multi line comment block, such as
      * <!-- xxx -->
      */
-    public static final String XML_COMMENT_REGEX /*language=regexp*/= "\\<\\!\\-\\-[^\\-\\-\\>]*\\-\\-\\>";
+    public static final String XML_COMMENT_REGEX = "\\<\\!\\-\\-[^\\-\\-\\>]*\\-\\-\\>";
 
 
     /**
@@ -122,7 +122,7 @@ public class RegexPattens {
      * "user"
      * "user say \"a's name is b\" "
      */
-    public static final String SIMPLE_DOUBLE_QUOTE_STRING_REGEX /*language=regexp*/= "\"((\\\\\")+|[^\"])*\"";
+    public static final String SIMPLE_DOUBLE_QUOTE_STRING_REGEX = "\"((\\\\\")+|[^\"])*\"";
 
     /**
      * match for:
@@ -130,48 +130,28 @@ public class RegexPattens {
      * 'user'
      * 'user say \'a "s" name is b\' '
      */
-    public static final String SIMPLE_SINGLE_QUOTE_STRING_REGEX /*language=regexp*/= "'((\\\\')+|[^'])*'";
+    public static final String SIMPLE_SINGLE_QUOTE_STRING_REGEX = "'((\\\\')+|[^'])*'";
 
     /**
      * match for :
      * {} bracket, such as
      * {a+b\}-c}
      */
-    public static final String BIG_BRACKET_REGEX /*language=regexp*/= "\\{((\\\\})+|[^}])*\\}";
+    public static final String BIG_BRACKET_REGEX = "\\{((\\\\})+|[^}])*\\}";
 
     /**
      * match for :
      * [] bracket, such as
      * [a+b\]-c]
      */
-    public static final String MID_BRACKET_REGEX /*language=regexp*/= "\\[((\\\\])+|[^\\]])*\\]";
+    public static final String MID_BRACKET_REGEX = "\\[((\\\\])+|[^\\]])*\\]";
 
     /**
      * match for :
      * [] bracket, such as
      * [a+b\]-c]
      */
-    public static final String LIT_BRACKET_REGEX /*language=regexp*/= "\\(((\\\\\\))+|[^\\)])*\\)";
-
-    /*
-    * match for :
-    * multiline text, such as
-    * ```trim.render
-    * abc 456 "789" \` \`` \```
-    *      sadaf
-    * ```
-    */
-    public static final String MULTILINE_TEXT_REGEX /*language=regexp*/="```"+DECLARE_FULL_NAME_REGEX+"?[ \\t\\r]*\\n((?:[^\\\\]|(?:\\\\.))*?)```";
-
-    /*
-     * match for :
-     * multiline text, such as
-     * """trim.render
-     * abc 456 "789" \" \"" \"""
-     *      sadaf
-     * """
-     */
-    public static final String MULTILINE_TEXT_QUOTE_REGEX /*language=regexp*/="\"\"\""+DECLARE_FULL_NAME_REGEX+"?[ \\t\\r]*\\n((?:[^\\\\]|(?:\\\\.))*?)\"\"\"";
+    public static final String LIT_BRACKET_REGEX = "\\(((\\\\\\))+|[^\\)])*\\)";
 
     /**
      * match for :
@@ -185,6 +165,6 @@ public class RegexPattens {
      * { 4 :%02d}
      * { 5 t:yyyy-MM-dd HH:mm:ss}
      */
-    public static final String INDEXED_FORMAT_PLACEHOLDER_REGEX /*language=regexp*/= "([^\\\\]|^)\\{(\\s*[+|-]?\\d+\\s*)?(\\s*[a-zA-Z]?:(((\\\\}|\\{)+|[^}])+)?)?\\}";
+    public static final String INDEXED_FORMAT_PLACEHOLDER_REGEX = "([^\\\\]|^)\\{(\\s*[+|-]?\\d+\\s*)?(\\s*[a-zA-Z]?:(((\\\\}|\\{)+|[^}])+)?)?\\}";
 
 }
