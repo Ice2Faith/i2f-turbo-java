@@ -104,6 +104,9 @@ public class TinyScript {
     }
 
     public static TinyScriptParser.ScriptContext parse(String formula) {
+        if(formula!=null){
+            formula=formula.trim();
+        }
         try {
             TinyScriptParser.ScriptContext ret = TREE_MAP.get(formula);
             if (ret != null) {

@@ -293,6 +293,15 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
     }
 
     public static Map.Entry<String, String> getFullJavaSourceCode(String importSegment, String memberSegment, String bodySegment) {
+        if(importSegment!=null){
+            importSegment=importSegment.trim();
+        }
+        if(memberSegment!=null){
+            memberSegment=memberSegment.trim();
+        }
+        if(bodySegment!=null){
+            bodySegment=bodySegment.trim();
+        }
         if (importSegment == null) {
             importSegment = "";
         }
