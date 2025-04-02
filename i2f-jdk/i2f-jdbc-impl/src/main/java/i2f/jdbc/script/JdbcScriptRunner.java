@@ -23,7 +23,7 @@ public class JdbcScriptRunner {
     protected boolean throwWarning = false;
     protected boolean autoCommit = false;
     protected boolean sendFullScript = false;
-    protected boolean removeCRs = false;
+    protected boolean removeCrChar = false;
     protected boolean escapeProcessing = true;
     protected String delimiter = DEFAULT_DELIMITER;
     protected boolean fullLineDelimiter=false;
@@ -217,7 +217,7 @@ public class JdbcScriptRunner {
             statement = this.connection.createStatement();
             statement.setEscapeProcessing(this.escapeProcessing);
             String sql = command;
-            if (this.removeCRs) {
+            if (this.removeCrChar) {
                 sql = sql.replace("\r\n", "\n");
             }
 
