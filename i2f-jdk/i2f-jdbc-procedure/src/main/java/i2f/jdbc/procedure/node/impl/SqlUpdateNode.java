@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -17,7 +18,7 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class SqlUpdateNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "sql-update";
+    public static final String TAG_NAME = TagConsts.SQL_UPDATE;
 
     @Override
     public boolean support(XmlNode node) {

@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -14,7 +15,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class ContextConvertMethodClassNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "context-convert-method-class";
+    public static final String TAG_NAME = TagConsts.CONTEXT_CONVERT_METHOD_CLASS;
 
     @Override
     public boolean support(XmlNode node) {

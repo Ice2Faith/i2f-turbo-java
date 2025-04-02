@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -16,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
  * @date 2025/1/20 14:07
  */
 public class LangAsyncAllNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-async-all";
+    public static final String TAG_NAME = TagConsts.LANG_ASYNC_ALL;
 
     @Override
     public boolean support(XmlNode node) {
@@ -39,10 +40,10 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
             final XmlNode itemNode=item;
             new Thread(() -> {
                 try {
-                    if(LangAsyncNode.TAG_NAME.equals(node.getTagName())){
-                        Map<String, Object> map = executor.exec(item, context, false, false);
+                    if(TagConsts.LANG_ASYNC.equals(node.getTagName())){
+                        Map<String, Object> map = executor.exec(itemNode, context, false, false);
                     }else{
-                        Map<String, Object> map = executor.execAsProcedure(item, context, false, false);
+                        Map<String, Object> map = executor.execAsProcedure(itemNode, context, false, false);
                     }
                 } catch (Throwable e) {
                     e.printStackTrace();

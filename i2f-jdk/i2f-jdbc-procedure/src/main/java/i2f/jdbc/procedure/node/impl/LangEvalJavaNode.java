@@ -22,6 +22,7 @@ import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.procedure.annotations.JdbcProcedure;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
@@ -67,7 +68,7 @@ import java.util.regex.Pattern;
  * @date 2025/1/20 14:07
  */
 public class LangEvalJavaNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-eval-java";
+    public static final String TAG_NAME = TagConsts.LANG_EVAL_JAVA;
     public static final String CLASS_NAME_HOLDER = "$#$##$###";
     public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s*");
 
@@ -97,13 +98,13 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
         XmlNode bodyNode = null;
         if (children != null && !children.isEmpty()) {
             for (XmlNode item : children) {
-                if ("lang-java-import".equals(item.getTagName())) {
+                if (TagConsts.LANG_JAVA_IMPORT.equals(item.getTagName())) {
                     importNode = item;
                 }
-                if ("lang-java-member".equals(item.getTagName())) {
+                if (TagConsts.LANG_JAVA_MEMBE.equals(item.getTagName())) {
                     memberNode = item;
                 }
-                if ("lang-java-body".equals(item.getTagName())) {
+                if (TagConsts.LANG_JAVA_BODY.equals(item.getTagName())) {
                     bodyNode = node;
                 }
             }
@@ -143,13 +144,13 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
         XmlNode bodyNode = null;
         if (children != null && !children.isEmpty()) {
             for (XmlNode item : children) {
-                if ("lang-java-import".equals(item.getTagName())) {
+                if (TagConsts.LANG_JAVA_IMPORT.equals(item.getTagName())) {
                     importNode = item;
                 }
-                if ("lang-java-member".equals(item.getTagName())) {
+                if (TagConsts.LANG_JAVA_MEMBE.equals(item.getTagName())) {
                     memberNode = item;
                 }
-                if ("lang-java-body".equals(item.getTagName())) {
+                if (TagConsts.LANG_JAVA_BODY.equals(item.getTagName())) {
                     bodyNode = node;
                 }
             }

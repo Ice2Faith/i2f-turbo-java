@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -16,8 +17,8 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangEvalJavascriptNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-eval-javascript";
-    public static final String ALIAS_TAG_NAME="lang-eval-js";
+    public static final String TAG_NAME = TagConsts.LANG_EVAL_JAVASCRIPT;
+    public static final String ALIAS_TAG_NAME=TagConsts.LANG_EVAL_JS;
     public static void main(String[] args){
         /*language=javascript*/
         String script= "params.get(\"a\")+params.get(\"b\")";

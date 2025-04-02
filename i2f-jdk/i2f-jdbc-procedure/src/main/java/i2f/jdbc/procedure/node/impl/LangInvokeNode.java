@@ -4,6 +4,7 @@ import i2f.invokable.method.IMethod;
 import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -20,7 +21,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class LangInvokeNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-invoke";
+    public static final String TAG_NAME = TagConsts.LANG_INVOKE;
 
     @Override
     public boolean support(XmlNode node) {

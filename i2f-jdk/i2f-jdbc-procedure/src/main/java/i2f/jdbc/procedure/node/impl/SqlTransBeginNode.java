@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.JdbcTrans;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -13,7 +14,7 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class SqlTransBeginNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "sql-trans-begin";
+    public static final String TAG_NAME = TagConsts.SQL_TRANS_BEGIN;
 
     @Override
     public boolean support(XmlNode node) {

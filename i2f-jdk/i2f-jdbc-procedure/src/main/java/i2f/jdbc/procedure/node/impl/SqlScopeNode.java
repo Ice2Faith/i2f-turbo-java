@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -20,7 +21,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class SqlScopeNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "sql-scope";
+    public static final String TAG_NAME = TagConsts.SQL_SCOPE;
 
     @Override
     public boolean support(XmlNode node) {

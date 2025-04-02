@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.NodeTime;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2025/1/20 14:07
  */
 public class LangAsyncNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-async";
+    public static final String TAG_NAME = TagConsts.LANG_ASYNC;
 
     @Override
     public boolean support(XmlNode node) {
