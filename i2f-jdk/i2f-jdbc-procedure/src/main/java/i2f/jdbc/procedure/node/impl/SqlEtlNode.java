@@ -8,6 +8,7 @@ import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -27,7 +28,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class SqlEtlNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "sql-etl";
+    public static final String TAG_NAME = TagConsts.SQL_ETL;
 
     @Override
     public boolean support(XmlNode node) {
@@ -51,22 +52,22 @@ public class SqlEtlNode extends AbstractExecutorNode {
         XmlNode beforeNode = null;
         XmlNode afterNode = null;
         for (XmlNode item : children) {
-            if (SqlQueryListNode.TAG_NAME.equals(item.getTagName())) {
+            if (TagConsts.SQL_QUERY_LIST.equals(item.getTagName())) {
                 queryNode = item;
             }
-            if ("etl-extra".equals(item.getTagName())) {
+            if (TagConsts.ETL_EXTRA.equals(item.getTagName())) {
                 extraNode = item;
             }
-            if ("etl-transform".equals(item.getTagName())) {
+            if (TagConsts.ETL_TRANSFORM.equals(item.getTagName())) {
                 transformNodeList.add(item);
             }
-            if ("etl-load".equals(item.getTagName())) {
+            if (TagConsts.ETL_LOAD.equals(item.getTagName())) {
                 loadNode = item;
             }
-            if ("etl-before".equals(item.getTagName())) {
+            if (TagConsts.ETL_BEFORE.equals(item.getTagName())) {
                 beforeNode = item;
             }
-            if ("etl-after".equals(item.getTagName())) {
+            if (TagConsts.ETL_AFTER.equals(item.getTagName())) {
                 afterNode = item;
             }
         }
@@ -93,22 +94,22 @@ public class SqlEtlNode extends AbstractExecutorNode {
         XmlNode beforeNode = null;
         XmlNode afterNode = null;
         for (XmlNode item : children) {
-            if (SqlQueryListNode.TAG_NAME.equals(item.getTagName())) {
+            if (TagConsts.SQL_QUERY_LIST.equals(item.getTagName())) {
                 queryNode = item;
             }
-            if ("etl-extra".equals(item.getTagName())) {
+            if (TagConsts.ETL_EXTRA.equals(item.getTagName())) {
                 extraNode = item;
             }
-            if ("etl-transform".equals(item.getTagName())) {
+            if (TagConsts.ETL_TRANSFORM.equals(item.getTagName())) {
                 transformNodeList.add(item);
             }
-            if ("etl-load".equals(item.getTagName())) {
+            if (TagConsts.ETL_LOAD.equals(item.getTagName())) {
                 loadNode = item;
             }
-            if ("etl-before".equals(item.getTagName())) {
+            if (TagConsts.ETL_BEFORE.equals(item.getTagName())) {
                 beforeNode = item;
             }
-            if ("etl-after".equals(item.getTagName())) {
+            if (TagConsts.ETL_AFTER.equals(item.getTagName())) {
                 afterNode = item;
             }
         }

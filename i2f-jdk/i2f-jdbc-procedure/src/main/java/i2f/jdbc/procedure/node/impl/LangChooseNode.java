@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class LangChooseNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-choose";
+    public static final String TAG_NAME = TagConsts.LANG_CHOOSE;
 
     @Override
     public boolean support(XmlNode node) {
@@ -37,7 +38,7 @@ public class LangChooseNode extends AbstractExecutorNode {
             if (!XmlNode.NODE_ELEMENT.equals(type)) {
                 continue;
             }
-            if ("lang-when".equals(itemNode.getTagName())) {
+            if (TagConsts.LANG_WHEN.equals(itemNode.getTagName())) {
                 String test=itemNode.getTagAttrMap().get(AttrConsts.TEST);
                 if(test!=null && !test.isEmpty()) {
                     try {
@@ -63,14 +64,14 @@ public class LangChooseNode extends AbstractExecutorNode {
             if (!XmlNode.NODE_ELEMENT.equals(type)) {
                 continue;
             }
-            if ("lang-when".equals(itemNode.getTagName())) {
+            if (TagConsts.LANG_WHEN.equals(itemNode.getTagName())) {
                 if (testNode == null) {
                     boolean ok = (boolean) executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, itemNode, context);
                     if (ok) {
                         testNode = itemNode;
                     }
                 }
-            } else if ("lang-otherwise".equals(itemNode.getTagName())) {
+            } else if (TagConsts.LANG_OTHERWISE.equals(itemNode.getTagName())) {
                 otherNode = itemNode;
             }
         }

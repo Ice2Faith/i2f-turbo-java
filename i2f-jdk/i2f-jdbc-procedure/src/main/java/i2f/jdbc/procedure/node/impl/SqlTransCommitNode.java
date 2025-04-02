@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -12,7 +13,7 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class SqlTransCommitNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "sql-trans-commit";
+    public static final String TAG_NAME = TagConsts.SQL_TRANS_COMMIT;
 
     @Override
     public boolean support(XmlNode node) {

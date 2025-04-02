@@ -6,8 +6,8 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.consts.TagConsts;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class DebuggerNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "debugger";
+    public static final String TAG_NAME = TagConsts.DEBUGGER;
 
     @Override
     public boolean support(XmlNode node) {

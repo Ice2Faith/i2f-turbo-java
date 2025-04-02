@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -17,7 +18,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class LangEvalNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-eval";
+    public static final String TAG_NAME = TagConsts.LANG_EVAL;
     public static void main(String[] args){
         /*language=scala*/
         String script= "a+b";
@@ -46,7 +47,7 @@ public class LangEvalNode extends AbstractExecutorNode {
         }
         if(value!=null && !value.isEmpty()){
             try{
-                GrammarReporter.reportExprFeatureGrammar(value, FeatureConsts.EVAL,node,"attribute "+AttrConsts.VALUE,warnPoster);
+                GrammarReporter.reportExprFeatureGrammar(value,FeatureConsts.EVAL,node,"attribute "+AttrConsts.VALUE,warnPoster);
             }catch(Exception e){
                 String errorMsg="attribute "+AttrConsts.VALUE+" expression error: "+e.getMessage();
                 warnPoster.accept("xproc4j report xml grammar, at "+getNodeLocation(node)+" error: "+errorMsg);

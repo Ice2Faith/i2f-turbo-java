@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class ScriptIncludeNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "script-include";
+    public static final String TAG_NAME = TagConsts.SCRIPT_INCLUDE;
 
     @Override
     public boolean support(XmlNode node) {

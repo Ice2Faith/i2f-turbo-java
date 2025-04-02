@@ -2,12 +2,12 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class LangWhenNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-when";
+    public static final String TAG_NAME = TagConsts.LANG_WHEN;
 
     @Override
     public boolean support(XmlNode node) {

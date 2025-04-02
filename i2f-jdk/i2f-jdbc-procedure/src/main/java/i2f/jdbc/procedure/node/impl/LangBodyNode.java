@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -12,7 +13,7 @@ import java.util.Map;
  * @date 2025/1/20 14:07
  */
 public class LangBodyNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-body";
+    public static final String TAG_NAME = TagConsts.LANG_BODY;
 
     @Override
     public boolean support(XmlNode node) {

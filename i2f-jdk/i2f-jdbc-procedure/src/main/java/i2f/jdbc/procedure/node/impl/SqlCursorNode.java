@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -22,7 +23,7 @@ import java.util.function.Consumer;
  * @date 2025/1/20 14:07
  */
 public class SqlCursorNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "sql-cursor";
+    public static final String TAG_NAME = TagConsts.SQL_CURSOR;
 
     @Override
     public boolean support(XmlNode node) {
@@ -42,10 +43,10 @@ public class SqlCursorNode extends AbstractExecutorNode {
         XmlNode queryNode = null;
         XmlNode bodyNode = null;
         for (XmlNode item : children) {
-            if (SqlQueryListNode.TAG_NAME.equals(item.getTagName())) {
+            if (TagConsts.SQL_QUERY_LIST.equals(item.getTagName())) {
                 queryNode = item;
             }
-            if (LangBodyNode.TAG_NAME.equals(item.getTagName())) {
+            if (TagConsts.LANG_BODY.equals(item.getTagName())) {
                 bodyNode = item;
             }
         }
@@ -68,10 +69,10 @@ public class SqlCursorNode extends AbstractExecutorNode {
         XmlNode queryNode = null;
         XmlNode bodyNode = null;
         for (XmlNode item : children) {
-            if (SqlQueryListNode.TAG_NAME.equals(item.getTagName())) {
+            if (TagConsts.SQL_QUERY_LIST.equals(item.getTagName())) {
                 queryNode = item;
             }
-            if ("lang-body".equals(item.getTagName())) {
+            if (TagConsts.LANG_BODY.equals(item.getTagName())) {
                 bodyNode = item;
             }
         }

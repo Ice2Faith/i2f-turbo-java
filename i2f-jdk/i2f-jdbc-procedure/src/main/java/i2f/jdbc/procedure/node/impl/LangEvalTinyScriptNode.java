@@ -7,6 +7,7 @@ import i2f.invokable.method.IMethod;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
@@ -30,8 +31,8 @@ import java.util.stream.Collectors;
  * @date 2025/1/20 14:07
  */
 public class LangEvalTinyScriptNode extends AbstractExecutorNode {
-    public static final String TAG_NAME = "lang-eval-tinyscript";
-    public static final String ALIAS_TAG_NAME = "lang-eval-ts";
+    public static final String TAG_NAME = TagConsts.LANG_EVAL_TINYSCRIPT;
+    public static final String ALIAS_TAG_NAME = TagConsts.LANG_EVAL_TS;
     public static void main(String[] args){
         /*language=tinyscript*/
         String script= "${a}+${b}";
