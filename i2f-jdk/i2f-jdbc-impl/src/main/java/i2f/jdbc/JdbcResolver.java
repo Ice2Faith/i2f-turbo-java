@@ -44,6 +44,21 @@ public class JdbcResolver {
     public static final CopyOnWriteArrayList<StatementParameterSetHandler> STATEMENT_PARAMETER_HANDLERS=new CopyOnWriteArrayList<>();
     public static final CopyOnWriteArrayList<ResultSetObjectConvertHandler> RESULT_SET_OBJECT_CONVERT_HANDLERS=new CopyOnWriteArrayList<>();
 
+    static{
+        ServiceLoader<StatementParameterSetHandler> parameterSetHandlers = ServiceLoader.load(StatementParameterSetHandler.class);
+        if(parameterSetHandlers!=null) {
+            for (StatementParameterSetHandler item : parameterSetHandlers) {
+                STATEMENT_PARAMETER_HANDLERS.add(item);
+            }
+        }
+        ServiceLoader<ResultSetObjectConvertHandler> objectConvertHandlers = ServiceLoader.load(ResultSetObjectConvertHandler.class);
+        if(objectConvertHandlers!=null){
+            for (ResultSetObjectConvertHandler item : objectConvertHandlers) {
+                RESULT_SET_OBJECT_CONVERT_HANDLERS.add(item);
+            }
+        }
+    }
+
     public static Connection getConnection(String driver,
                                            String url) throws SQLException {
         loadDriver(driver);
