@@ -922,8 +922,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             params.put(ParamsConsts.CONNECTIONS, connectionMap);
         }
         Connection conn = connectionMap.get(datasource);
-        if (conn != null) {
-            return conn;
+        if (conn != null ) {
+            try{
+                if(!conn.isClosed() && conn.isValid(300)){
+                    return conn;
+                }
+            }catch(Exception e){
+                logWarn(()->"connection closed or are invalided:"+e.getMessage(),e);
+            }
         }
 
         Map<String, DataSource> datasourceMap = (Map<String, DataSource>) params.get(ParamsConsts.DATASOURCES);

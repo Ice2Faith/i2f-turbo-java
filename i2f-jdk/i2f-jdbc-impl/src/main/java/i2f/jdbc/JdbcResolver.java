@@ -5,6 +5,8 @@ import i2f.bindsql.BindSqlWrappers;
 import i2f.bindsql.data.PageBindSql;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.data.*;
+import i2f.jdbc.handler.ResultSetObjectConvertHandler;
+import i2f.jdbc.handler.StatementParameterSetHandler;
 import i2f.jdbc.meta.JdbcMeta;
 import i2f.jdbc.std.func.SQLBiFunction;
 import i2f.jdbc.std.func.SQLFunction;
@@ -24,6 +26,7 @@ import java.math.BigInteger;
 import java.sql.*;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -37,6 +40,10 @@ import java.util.function.Predicate;
  * @desc
  */
 public class JdbcResolver {
+
+    public static final CopyOnWriteArrayList<StatementParameterSetHandler> STATEMENT_PARAMETER_HANDLERS=new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<ResultSetObjectConvertHandler> RESULT_SET_OBJECT_CONVERT_HANDLERS=new CopyOnWriteArrayList<>();
+
     public static Connection getConnection(String driver,
                                            String url) throws SQLException {
         loadDriver(driver);
@@ -974,11 +981,7 @@ public class JdbcResolver {
     }
 
     public static void setStatementObject(PreparedStatement stat, int index, Object obj) throws SQLException {
-        if (obj == null) {
-            stat.setObject(index, obj);
-            return;
-        }
-        Class<?> clazz = obj.getClass();
+        Class<?> clazz = (obj==null?null:obj.getClass());
         SQLType jdbcType=null;
         if (obj instanceof TypedArgument) {
             TypedArgument typedArgument = (TypedArgument) obj;
@@ -998,6 +1001,18 @@ public class JdbcResolver {
 
             jdbcType = typedArgument.getJdbcType();
 
+        }
+        for (StatementParameterSetHandler handler : STATEMENT_PARAMETER_HANDLERS) {
+            if(handler.set(stat,index,obj,jdbcType,clazz)){
+                return;
+            }
+        }
+        if (obj == null) {
+            stat.setObject(index, obj);
+            return;
+        }
+        if(clazz==null) {
+            clazz = obj.getClass();
         }
         if (obj instanceof Integer) {
             stat.setInt(index, (Integer) obj);
@@ -1220,6 +1235,12 @@ public class JdbcResolver {
                 for (int i = 0; i < columnCount; i++) {
                     QueryColumn col = columns.get(i);
                     Object val = rs.getObject(i + 1);
+                    for (ResultSetObjectConvertHandler handler : RESULT_SET_OBJECT_CONVERT_HANDLERS) {
+                        if(handler.support(val)){
+                            val=handler.convert(val);
+                            break;
+                        }
+                    }
                     if(val instanceof Clob){
                         val=ObjectConvertor.tryConvertAsType(val,String.class);
                     }
@@ -1276,6 +1297,12 @@ public class JdbcResolver {
                 Map<String, Object> map = new LinkedHashMap<>();
                 for (int i = 0; i < columnCount; i++) {
                     Object val = rs.getObject(i + 1);
+                    for (ResultSetObjectConvertHandler handler : RESULT_SET_OBJECT_CONVERT_HANDLERS) {
+                        if(handler.support(val)){
+                            val=handler.convert(val);
+                            break;
+                        }
+                    }
                     if(!isDefaultMapType){
                         if(val instanceof Clob){
                             val=ObjectConvertor.tryConvertAsType(val,String.class);
