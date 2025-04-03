@@ -143,37 +143,24 @@ public class SqlEtlNode extends AbstractExecutorNode {
         String loadDatasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, loadNode, context);
         String loadTable = (String) executor.attrValue(AttrConsts.TABLE, FeatureConsts.STRING, loadNode, context);
 
-        List<Map.Entry<String, String>> dialectScriptList = new ArrayList<>();
 
         Class<?> resultType = Map.class;
         String extraDatasource = null;
         BindSql bql=null;
         if (queryNode != null) {
-            dialectScriptList = SqlDialect.getSqlDialectList(queryNode, context, executor);
             extraDatasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, queryNode, context);
-            Object scriptObj = executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, queryNode, context);
+            bql = SqlDialect.getSqlDialectList(extraDatasource, queryNode, context, executor);
             String resultTypeName = (String) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.STRING, queryNode, context);
             resultType = executor.loadClass(resultTypeName);
             if (resultType == null) {
                 resultType = Map.class;
             }
-            String script="";
-            if(scriptObj instanceof BindSql){
-                bql=(BindSql) scriptObj;
-            }else{
-                script=String.valueOf(scriptObj==null?"":scriptObj);
-            }
-            if (script == null || script.isEmpty()) {
-                script = queryNode.getTagBody();
-            }
-            if (dialectScriptList.isEmpty()) {
-                dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
-            }
+
         } else if (extraNode != null) {
             extraDatasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, extraNode, context);
             String extraTable = (String) executor.attrValue(AttrConsts.TABLE, FeatureConsts.STRING, extraNode, context);
             String script = "select * from " + extraTable + " ";
-            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
+            bql = new BindSql(script);
         }
 
 
@@ -197,9 +184,6 @@ public class SqlEtlNode extends AbstractExecutorNode {
             Map<String, Class<?>> targetTypeMap = new LinkedHashMap<>();
             String loadSql = "";
 
-            if(bql==null) {
-                bql = executor.sqlScript(extraDatasource, dialectScriptList, context);
-            }
 
             if(executor.isDebug()){
                 bql=bql.concat(getTrackingComment(node));

@@ -16,12 +16,10 @@ import i2f.reference.Reference;
 import i2f.typeof.TypeOf;
 
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -331,11 +329,27 @@ public interface JdbcProcedureExecutor {
 
     BindSql sqlWrapCount(String datasource, BindSql bql, Map<String, Object> params);
 
-    default BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params) {
+    default BindSql sqlScriptString(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params) {
+        List<Map.Entry<String, Object>> list = dialectScriptList
+                .stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), (Object) e.getValue()))
+                .collect(Collectors.toList());
+        return sqlScript(datasource, list, params, null);
+    }
+
+    default BindSql sqlScriptBindSql(String datasource, List<Map.Entry<String, BindSql>> dialectScriptList, Map<String, Object> params) {
+        List<Map.Entry<String, Object>> list = dialectScriptList
+                .stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), (Object) e.getValue()))
+                .collect(Collectors.toList());
+        return sqlScript(datasource, list, params, null);
+    }
+
+    default BindSql sqlScript(String datasource, List<Map.Entry<String, Object>> dialectScriptList, Map<String, Object> params) {
         return sqlScript(datasource, dialectScriptList, params, null);
     }
 
-    BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page);
+    BindSql sqlScript(String datasource, List<Map.Entry<String, Object>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page);
 
     List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, ApiOffsetSize page);
 
