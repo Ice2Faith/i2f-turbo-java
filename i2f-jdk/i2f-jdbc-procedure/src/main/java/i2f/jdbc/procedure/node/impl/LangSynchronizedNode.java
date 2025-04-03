@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -18,7 +19,7 @@ public class LangSynchronizedNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.Type.NODE_ELEMENT!=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -28,7 +29,7 @@ public class LangSynchronizedNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         Object target = executor.attrValue(AttrConsts.TARGET, FeatureConsts.VISIT, node, context);
         if (target == null) {
-            target = context;
+            target = executor.visit(ParamsConsts.GLOBAL,context);
         }
         synchronized (target) {
             executor.execAsProcedure(node, context, false, false);

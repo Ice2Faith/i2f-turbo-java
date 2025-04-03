@@ -21,11 +21,13 @@ public interface ParamsConsts {
     String LINE="line";
     String ERRMSG ="errmsg";
     String NODE="node";
+    String STACK="stack";
 
     String TRACE_LOCATION=TRACE+"."+LOCATION;
     String TRACE_LINE=TRACE+"."+LINE;
     String TRACE_ERRMSG =TRACE+"."+ ERRMSG;
     String TRACE_NODE=TRACE+"."+NODE;
+    String TRACE_STACK=TRACE+"."+STACK;
 
     // 局部工具部分
     String EXECUTOR="executor";
