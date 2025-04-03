@@ -14,9 +14,9 @@ import java.util.Map;
 public class TextNode extends AbstractExecutorNode {
     @Override
     public boolean support(XmlNode node) {
-        String type = node.getNodeType();
-        return XmlNode.NODE_TEXT.equals(type)
-                || XmlNode.NODE_CDATA.equals(type)
+        XmlNode.Type type = node.getNodeType();
+        return XmlNode.Type.NODE_TEXT==type
+                || XmlNode.Type.NODE_CDATA==type
                 ;
     }
 

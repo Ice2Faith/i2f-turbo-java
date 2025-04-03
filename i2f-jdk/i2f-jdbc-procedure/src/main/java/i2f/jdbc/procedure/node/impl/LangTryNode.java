@@ -26,7 +26,7 @@ public class LangTryNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
+        if (XmlNode.Type.NODE_ELEMENT!=node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -41,7 +41,7 @@ public class LangTryNode extends AbstractExecutorNode {
         }
         XmlNode bodyNode = null;
         for (XmlNode item : nodes) {
-            if (!XmlNode.NODE_ELEMENT.equals(item.getNodeType())) {
+            if (XmlNode.Type.NODE_ELEMENT!=item.getNodeType()) {
                 continue;
             }
             if (TagConsts.LANG_BODY.equals(item.getTagName())) {
@@ -64,7 +64,7 @@ public class LangTryNode extends AbstractExecutorNode {
         List<XmlNode> catchNodes = new ArrayList<>();
         XmlNode finallyNode = null;
         for (XmlNode item : nodes) {
-            if (!XmlNode.NODE_ELEMENT.equals(item.getNodeType())) {
+            if (XmlNode.Type.NODE_ELEMENT!=item.getNodeType()) {
                 continue;
             }
             if (TagConsts.LANG_BODY.equals(item.getTagName())) {

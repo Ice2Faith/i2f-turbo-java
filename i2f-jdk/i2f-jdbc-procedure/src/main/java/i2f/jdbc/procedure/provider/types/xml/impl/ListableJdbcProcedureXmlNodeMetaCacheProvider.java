@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.provider.types.xml.impl;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
@@ -26,7 +27,7 @@ public class ListableJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcP
         for (URL resource : resourceList) {
             try {
                 XmlNode node = JdbcProcedureParser.parse(resource);
-                String id = node.getTagAttrMap().get("id");
+                String id = node.getTagAttrMap().get(AttrConsts.ID);
                 if (id != null) {
                     ret.put(id, node);
 

@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
+import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -30,7 +31,7 @@ public class LangEvalNode extends AbstractExecutorNode {
     }
     @Override
     public boolean support(XmlNode node) {
-        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
+        if (XmlNode.Type.NODE_ELEMENT!=node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -42,7 +43,7 @@ public class LangEvalNode extends AbstractExecutorNode {
         String script = node.getTextBody();
         if((value==null || value.isEmpty()) && (script==null || script.isEmpty())){
             String errorMsg="missing value attribute or element body";
-            warnPoster.accept("xproc4j report xml grammar, at "+getNodeLocation(node)+" error: "+errorMsg);
+            warnPoster.accept(XProc4jConsts.NAME+" report xml grammar, at "+getNodeLocation(node)+" error: "+errorMsg);
             return;
         }
         if(value!=null && !value.isEmpty()){
@@ -50,7 +51,7 @@ public class LangEvalNode extends AbstractExecutorNode {
                 GrammarReporter.reportExprFeatureGrammar(value,FeatureConsts.EVAL,node,"attribute "+AttrConsts.VALUE,warnPoster);
             }catch(Exception e){
                 String errorMsg="attribute "+AttrConsts.VALUE+" expression error: "+e.getMessage();
-                warnPoster.accept("xproc4j report xml grammar, at "+getNodeLocation(node)+" error: "+errorMsg);
+                warnPoster.accept(XProc4jConsts.NAME+" report xml grammar, at "+getNodeLocation(node)+" error: "+errorMsg);
             }
         }
         if(script!=null && !script.isEmpty()){
@@ -58,7 +59,7 @@ public class LangEvalNode extends AbstractExecutorNode {
                 GrammarReporter.reportExprFeatureGrammar(script,FeatureConsts.EVAL,node,"element body",warnPoster);
             }catch(Exception e){
                 String errorMsg="element body expression error: "+e.getMessage();
-                warnPoster.accept("xproc4j report xml grammar, at "+getNodeLocation(node)+" error: "+errorMsg);
+                warnPoster.accept(XProc4jConsts.NAME+" report xml grammar, at "+getNodeLocation(node)+" error: "+errorMsg);
             }
         }
     }
