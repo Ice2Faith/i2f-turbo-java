@@ -16,6 +16,7 @@ import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
@@ -407,7 +408,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         ret.put(ParamsConsts.GLOBAL, new HashMap<>());
 
-        ret.put(ParamsConsts.TRACE, new HashMap<>());
+        HashMap<Object, Object> trace = new HashMap<>();
+        trace.put(ParamsConsts.STACK,new Stack<>());
+        ret.put(ParamsConsts.TRACE, trace);
 
         ret.put(ParamsConsts.EXECUTOR, this);
 
@@ -438,6 +441,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         ret.put(ParamsConsts.DATASOURCES, params.get(ParamsConsts.DATASOURCES));
         ret.put(ParamsConsts.DATASOURCES_MAPPING, params.get(ParamsConsts.DATASOURCES_MAPPING));
+
+        ret.put(ParamsConsts.CONNECTIONS,params.get(ParamsConsts.CONNECTIONS));
 
         ret.put(ParamsConsts.GLOBAL, params.get(ParamsConsts.GLOBAL));
 
@@ -705,7 +710,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void openDebugger(String tag, Object context, String conditionExpression) {
-        if (debug.get()) {
+        if (isDebug()) {
             String location = null;
             try {
                 Object loc = visit(ParamsConsts.TRACE_LOCATION, context);
@@ -721,14 +726,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void logDebug(Supplier<Object> supplier) {
-        if (debug.get()) {
-            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        if (isDebug()) {
+            String location=traceLocation();
+            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), "near "+location+", msg: "+supplier.get()));
         }
     }
 
     @Override
     public void logInfo(Supplier<Object> supplier, Throwable e) {
-        System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        String location=traceLocation();
+        System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near "+location+", msg: "+supplier.get()));
         if (e != null) {
             e.printStackTrace();
         }
@@ -736,7 +743,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void logWarn(Supplier<Object> supplier, Throwable e) {
-        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        String location=traceLocation();
+        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near "+location+", msg: "+supplier.get()));
         if (e != null) {
             e.printStackTrace();
         }
@@ -744,10 +752,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void logError(Supplier<Object> supplier, Throwable e) {
-        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), String.valueOf(supplier.get())));
+        String location=traceLocation();
+        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near "+location+", msg: "+supplier.get()));
         if (e != null) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public String traceLocation() {
+        XmlNode node = ContextHolder.TRACE_NODE.get();
+        return ContextHolder.TRACE_LOCATION.get()+":"+ContextHolder.TRACE_LINE.get()+":"+(node==null?"":node.getTagName());
     }
 
     @Override
@@ -942,6 +957,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             }
         }
 
+        String newConnDs=datasource;
+        logDebug(()-> XProc4jConsts.NAME+" new-connection for datasource:"+newConnDs);
 
         if (conn != null) {
             connectionMap.put(datasource, conn);

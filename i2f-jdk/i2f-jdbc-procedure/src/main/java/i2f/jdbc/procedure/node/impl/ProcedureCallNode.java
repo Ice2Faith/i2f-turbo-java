@@ -23,7 +23,7 @@ public class ProcedureCallNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.Type.NODE_ELEMENT!=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -42,6 +42,7 @@ public class ProcedureCallNode extends AbstractExecutorNode {
         String refid = (String)executor.attrValue(AttrConsts.REFID,FeatureConsts.STRING,node,context);
         Boolean paramsShare=(Boolean) executor.attrValue(AttrConsts.PARAMS_SHARE,FeatureConsts.BOOLEAN,node,context);
 
+        boolean needPrepareParams=true;
         Map<String, Object> callParams = null;
         String paramsText = node.getTagAttrMap().get(AttrConsts.PARAMS);
         if (paramsText != null && !paramsText.isEmpty()) {
@@ -52,9 +53,11 @@ public class ProcedureCallNode extends AbstractExecutorNode {
         }
         if(paramsShare!=null && paramsShare){
             callParams=context;
+            needPrepareParams=false;
         }
         if (callParams == null) {
             callParams = executor.newParams(context);
+            needPrepareParams=false;
         }
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
             String name = entry.getKey();
@@ -75,6 +78,9 @@ public class ProcedureCallNode extends AbstractExecutorNode {
             callParams.put(name, val);
         }
 
+        if(needPrepareParams) {
+            executor.prepareParams(callParams);
+        }
 
         try {
             callParams = executor.exec(refid, callParams, false, false);

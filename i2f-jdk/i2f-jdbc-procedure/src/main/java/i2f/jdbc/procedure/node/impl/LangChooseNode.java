@@ -21,7 +21,7 @@ public class LangChooseNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.Type.NODE_ELEMENT!=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -34,8 +34,8 @@ public class LangChooseNode extends AbstractExecutorNode {
             return;
         }
         for (XmlNode itemNode : list) {
-            XmlNode.Type type = itemNode.getNodeType();
-            if (XmlNode.Type.NODE_ELEMENT!=type) {
+            XmlNode.NodeType type = itemNode.getNodeType();
+            if (XmlNode.NodeType.ELEMENT !=type) {
                 continue;
             }
             if (TagConsts.LANG_WHEN.equals(itemNode.getTagName())) {
@@ -60,8 +60,8 @@ public class LangChooseNode extends AbstractExecutorNode {
         XmlNode testNode = null;
         XmlNode otherNode = null;
         for (XmlNode itemNode : list) {
-            XmlNode.Type type = itemNode.getNodeType();
-            if (XmlNode.Type.NODE_ELEMENT!=type) {
+            XmlNode.NodeType type = itemNode.getNodeType();
+            if (XmlNode.NodeType.ELEMENT !=type) {
                 continue;
             }
             if (TagConsts.LANG_WHEN.equals(itemNode.getTagName())) {

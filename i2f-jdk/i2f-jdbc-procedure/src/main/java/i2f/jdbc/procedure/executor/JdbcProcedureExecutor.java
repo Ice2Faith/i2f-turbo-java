@@ -293,6 +293,8 @@ public interface JdbcProcedureExecutor {
 
     void logError(Supplier<Object> supplier, Throwable e);
 
+    String traceLocation();
+
     Class<?> loadClass(String className);
 
     boolean test(String test, Object params);

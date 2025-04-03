@@ -20,7 +20,7 @@ public class LangWhenNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.Type.NODE_ELEMENT!=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());

@@ -32,7 +32,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.Type.NODE_ELEMENT!=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -235,7 +235,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                                         XmlNode xmlNode = new XmlNode();
                                         xmlNode.setTagName("etl-transform");
-                                        xmlNode.setNodeType(XmlNode.Type.NODE_ELEMENT);
+                                        xmlNode.setNodeType(XmlNode.NodeType.ELEMENT);
                                         xmlNode.setChildren(new ArrayList<>());
                                         xmlNode.setTagAttrMap(new HashMap<>());
                                         xmlNode.getTagAttrMap().put(AttrConsts.SOURCE, extraName);

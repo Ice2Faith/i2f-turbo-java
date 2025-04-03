@@ -16,7 +16,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -145,35 +148,39 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
 
     @Override
     public void logDebug(Supplier<Object> supplier) {
-        if (debug.get()) {
-            log.debug(String.valueOf(supplier.get()));
+        if (isDebug()) {
+            String location=traceLocation();
+            log.debug("near "+location+", msg: "+supplier.get());
         }
     }
 
     @Override
     public void logInfo(Supplier<Object> supplier, Throwable e) {
+        String location=traceLocation();
         if (e != null) {
-            log.info(String.valueOf(supplier.get()), e);
+            log.info("near "+location+", msg: "+supplier.get(), e);
         } else {
-            log.info(String.valueOf(supplier.get()));
+            log.info("near "+location+", msg: "+supplier.get());
         }
     }
 
     @Override
     public void logWarn(Supplier<Object> supplier, Throwable e) {
+        String location=traceLocation();
         if (e != null) {
-            log.warn(String.valueOf(supplier.get()), e);
+            log.warn("near "+location+", msg: "+supplier.get(), e);
         } else {
-            log.warn(String.valueOf(supplier.get()));
+            log.warn("near "+location+", msg: "+supplier.get());
         }
     }
 
     @Override
     public void logError(Supplier<Object> supplier, Throwable e) {
+        String location=traceLocation();
         if (e != null) {
-            log.error(String.valueOf(supplier.get()), e);
+            log.error("near "+location+", msg: "+supplier.get(), e);
         } else {
-            log.error(String.valueOf(supplier.get()));
+            log.error("near "+location+", msg: "+supplier.get());
         }
     }
 
