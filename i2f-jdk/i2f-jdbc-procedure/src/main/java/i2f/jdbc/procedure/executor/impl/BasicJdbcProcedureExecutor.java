@@ -1059,20 +1059,19 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     @Override
-    public BindSql sqlScript(String datasource, List<Map.Entry<String, String>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page) {
+    public BindSql sqlScript(String datasource, List<Map.Entry<String, Object>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page) {
         try {
             Connection conn = getConnection(datasource, params);
-            Map.Entry<String, String> entry = getDialectSqlScript(dialectScriptList, conn);
+            Map.Entry<String, BindSql> entry = getDialectSqlScript(dialectScriptList, conn, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            String script = entry.getValue();
-            BindSql bql = resolveSqlScript(script, params);
+            BindSql bql = entry.getValue();
             if (page != null && (page.getOffset() != null || page.getSize() != null)) {
                 IPageWrapper wrapper = PageWrappers.wrapper(conn);
                 bql = wrapper.apply(bql, page);
             }
             BindSql pageSql = bql;
-            logDebug(() -> "sqlScript:datasource=" + datasource + ", dialect=" + entry.getKey() + ", script=" + script + " \n\tbql:\n" + pageSql);
+            logDebug(() -> "sqlScript:datasource=" + datasource + ", dialect=" + entry.getKey() + " \n\tbql:\n" + pageSql);
             return pageSql;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -1085,18 +1084,30 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return bql;
     }
 
-    public Map.Entry<String, String> getDialectSqlScript(List<Map.Entry<String, String>> dialectScriptList, Connection conn) throws Exception {
+    public Map.Entry<String, BindSql> getDialectSqlScript(List<Map.Entry<String, Object>> dialectScriptList,
+                                                          Connection conn,
+                                                          Map<String, Object> params) throws Exception {
         List<String> databaseNames = detectDatabaseType(conn);
-        Map.Entry<String, String> firstScript = null;
-        Map.Entry<String, String> nullScript = null;
-        for (Map.Entry<String, String> entry : dialectScriptList) {
+        Map.Entry<String, BindSql> firstScript = null;
+        Map.Entry<String, BindSql> nullScript = null;
+        for (Map.Entry<String, Object> entry : dialectScriptList) {
+            Map.Entry<String, BindSql> val = new AbstractMap.SimpleEntry<>(entry.getKey(), null);
+            Object scriptObj = entry.getValue();
+            if (scriptObj instanceof BindSql) {
+                BindSql bql = (BindSql) scriptObj;
+                val.setValue(bql);
+            } else {
+                String str = String.valueOf(scriptObj);
+                BindSql bql = resolveSqlScript(str, params);
+                val.setValue(bql);
+            }
             if (firstScript == null) {
-                firstScript = entry;
+                firstScript = val;
             }
             String key = entry.getKey();
             if (key == null || key.isEmpty()) {
                 if (nullScript == null) {
-                    nullScript = entry;
+                    nullScript = val;
                 }
             }
             if (key != null) {
@@ -1104,7 +1115,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 for (String item : arr) {
                     for (String databaseName : databaseNames) {
                         if (item.equalsIgnoreCase(databaseName)) {
-                            return entry;
+                            return val;
                         }
                     }
                 }

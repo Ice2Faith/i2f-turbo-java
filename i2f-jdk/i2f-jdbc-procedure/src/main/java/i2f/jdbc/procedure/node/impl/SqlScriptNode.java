@@ -2,14 +2,13 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.bindsql.BindSql;
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
-import java.util.AbstractMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,19 +28,10 @@ public class SqlScriptNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node, context, executor);
-        String datasource = node.getTagAttrMap().get(AttrConsts.DATASOURCE);
-        String script = node.getTagAttrMap().get(AttrConsts.SCRIPT);
+        String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
+        BindSql bql = SqlDialect.getSqlDialectList(datasource, node, context, executor);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        if (script != null && !script.isEmpty()) {
-            script = (String) executor.visit(script, context);
-        } else {
-            script = node.getTagBody();
-        }
-        if (dialectScriptList.isEmpty()) {
-            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
-        }
-        BindSql bql = executor.sqlScript(datasource, dialectScriptList, context);
+
         if(executor.isDebug()){
             bql=bql.concat(getTrackingComment(node));
         }

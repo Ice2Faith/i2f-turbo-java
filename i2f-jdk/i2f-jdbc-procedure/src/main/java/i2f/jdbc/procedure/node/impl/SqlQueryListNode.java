@@ -10,7 +10,6 @@ import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.page.ApiOffsetSize;
 
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,31 +30,14 @@ public class SqlQueryListNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(node, context, executor);
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
-        Object scriptObj = executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, node, context);
+        BindSql bql = SqlDialect.getSqlDialectList(datasource, node, context, executor);
         Integer offset = (Integer) executor.attrValue(AttrConsts.OFFSET, FeatureConsts.INT, node, context);
         Integer limit = (Integer) executor.attrValue(AttrConsts.LIMIT, FeatureConsts.INT, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         Class<?> resultType = (Class<?>) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.CLASS, node, context);
         if (resultType == null) {
             resultType = Map.class;
-        }
-        String script="";
-        BindSql bql=null;
-        if(scriptObj instanceof BindSql){
-            bql=(BindSql) scriptObj;
-        }else{
-            script=String.valueOf(scriptObj==null?"":scriptObj);
-        }
-        if (script == null || script.isEmpty()) {
-            script = node.getTagBody();
-        }
-        if (dialectScriptList.isEmpty()) {
-            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
-        }
-        if(bql==null) {
-            bql = executor.sqlScript(datasource, dialectScriptList, context);
         }
 
         ApiOffsetSize page = null;

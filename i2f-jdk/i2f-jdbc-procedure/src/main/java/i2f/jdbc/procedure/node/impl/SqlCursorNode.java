@@ -12,7 +12,6 @@ import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 import i2f.page.ApiPage;
 
-import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,31 +94,14 @@ public class SqlCursorNode extends AbstractExecutorNode {
             item = AttrConsts.ITEM;
         }
 
-        List<Map.Entry<String, String>> dialectScriptList = SqlDialect.getSqlDialectList(queryNode, context, executor);
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, queryNode, context);
-        Object scriptObj = executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, queryNode, context);
+        BindSql bql = SqlDialect.getSqlDialectList(datasource, queryNode, context, executor);
         String resultTypeName = (String) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.STRING, queryNode, context);
         Class<?> resultType = executor.loadClass(resultTypeName);
         if (resultType == null) {
             resultType = Map.class;
         }
-        String script="";
-        BindSql bql=null;
-        if(scriptObj instanceof BindSql){
-            bql=(BindSql) scriptObj;
-        }else{
-            script=String.valueOf(scriptObj==null?"":scriptObj);
-        }
-        if (script == null || script.isEmpty()) {
-            script = queryNode.getTagBody();
-        }
-        if (dialectScriptList.isEmpty()) {
-            dialectScriptList.add(new AbstractMap.SimpleEntry<>(null, script));
-        }
 
-        if(bql==null) {
-            bql = executor.sqlScript(datasource, dialectScriptList, context);
-        }
 
         if(executor.isDebug()){
             bql=bql.concat(getTrackingComment(node));
