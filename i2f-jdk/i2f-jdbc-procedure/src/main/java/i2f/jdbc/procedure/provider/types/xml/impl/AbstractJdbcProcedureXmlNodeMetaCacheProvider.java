@@ -1,7 +1,8 @@
 package i2f.jdbc.procedure.provider.types.xml.impl;
 
-import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.context.CacheObjectRefresherSupplier;
+import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
 import lombok.Data;
 
@@ -23,7 +24,7 @@ public abstract class AbstractJdbcProcedureXmlNodeMetaCacheProvider
     protected AtomicBoolean refreshing = new AtomicBoolean(false);
 
     public AbstractJdbcProcedureXmlNodeMetaCacheProvider() {
-        super(new ConcurrentHashMap<>(), "xproc4j-node-map-refresher");
+        super(new ConcurrentHashMap<>(), XProc4jConsts.NAME+"-node-map-refresher");
     }
 
     @Override

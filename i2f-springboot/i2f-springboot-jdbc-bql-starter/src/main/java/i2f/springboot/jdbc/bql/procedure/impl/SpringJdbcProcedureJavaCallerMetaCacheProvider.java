@@ -1,9 +1,10 @@
 package i2f.springboot.jdbc.bql.procedure.impl;
 
-import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
-import i2f.jdbc.procedure.provider.types.class4j.impl.ListableJdbcProcedureJavaCallerMetaProvider;
+import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.context.CacheObjectRefresherSupplier;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
+import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
+import i2f.jdbc.procedure.provider.types.class4j.impl.ListableJdbcProcedureJavaCallerMetaProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class SpringJdbcProcedureJavaCallerMetaCacheProvider
     protected ApplicationContext applicationContext;
 
     public SpringJdbcProcedureJavaCallerMetaCacheProvider(ApplicationContext applicationContext) {
-        super(new ConcurrentHashMap<>(), "xproc4j-java-caller-refresher");
+        super(new ConcurrentHashMap<>(), XProc4jConsts.NAME+"-java-caller-refresher");
         this.applicationContext = applicationContext;
     }
 

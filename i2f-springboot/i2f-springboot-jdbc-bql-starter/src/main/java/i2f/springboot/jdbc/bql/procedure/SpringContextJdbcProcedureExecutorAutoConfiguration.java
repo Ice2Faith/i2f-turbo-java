@@ -1,5 +1,6 @@
 package i2f.springboot.jdbc.bql.procedure;
 
+import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.JdbcProcedureContextRefreshListener;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
@@ -49,14 +50,14 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-        log.info("xproc4j config ...");
+        log.info(XProc4jConsts.NAME+" config ...");
     }
 
 
     @ConditionalOnMissingBean(JdbcProcedureXmlNodeMetaProvider.class)
     @Bean
     public JdbcProcedureXmlNodeMetaProvider jdbcProcedureNodeMapSupplier() {
-        log.info("xproc4j config SpringJdbcProcedureNodeMapCacheSupplier ...");
+        log.info(XProc4jConsts.NAME+" config "+SpringJdbcProcedureXmlNodeMetaCacheProvider.class.getSimpleName()+" ...");
         SpringJdbcProcedureXmlNodeMetaCacheProvider ret = new SpringJdbcProcedureXmlNodeMetaCacheProvider();
         String xmlLocations = jdbcProcedureProperties.getXmlLocations();
         if (xmlLocations == null) {
@@ -71,7 +72,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @ConditionalOnMissingBean(JdbcProcedureJavaCallerMetaProvider.class)
     @Bean
     public JdbcProcedureJavaCallerMetaProvider springJdbcProcedureJavaCallerMapCacheSupplier() {
-        log.info("xproc4j config SpringJdbcProcedureJavaCallerMapCacheSupplier ...");
+        log.info(XProc4jConsts.NAME+" config "+SpringJdbcProcedureJavaCallerMetaCacheProvider.class.getSimpleName()+" ...");
         SpringJdbcProcedureJavaCallerMetaCacheProvider ret = new SpringJdbcProcedureJavaCallerMetaCacheProvider(applicationContext);
         ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
         return ret;
@@ -80,14 +81,14 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @ConditionalOnMissingBean(JdbcProcedureMetaProviderRegistry.class)
     @Bean
     public JdbcProcedureMetaProviderRegistry jdbcProcedureMetaProviderRegistry(){
-        log.info("xproc4j config SpringJdbcProcedureMetaProviderRegistry ...");
+        log.info(XProc4jConsts.NAME+" config "+SpringJdbcProcedureMetaProviderRegistry.class.getSimpleName()+" ...");
         return new SpringJdbcProcedureMetaProviderRegistry(applicationContext);
     }
 
     @ConditionalOnMissingBean(JdbcProcedureContext.class)
     @Bean
     public JdbcProcedureContext procedureContext(JdbcProcedureMetaProviderRegistry registry) {
-        log.info("xproc4j config JdbcProcedureContext ...");
+        log.info(XProc4jConsts.NAME+" config "+DefaultJdbcProcedureContext.class.getSimpleName()+" ...");
         DefaultJdbcProcedureContext ret = new DefaultJdbcProcedureContext(registry);
         ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
         return ret;
@@ -96,7 +97,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @ConditionalOnMissingBean(JdbcProcedureExecutor.class)
     @Bean
     public JdbcProcedureExecutor jdbcProcedureExecutor(JdbcProcedureContext context) {
-        log.info("xproc4j config JdbcProcedureExecutor ...");
+        log.info(XProc4jConsts.NAME+" config "+SpringContextJdbcProcedureExecutor.class.getSimpleName()+" ...");
         return new SpringContextJdbcProcedureExecutor(context,applicationContext);
     }
 
@@ -104,7 +105,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @Bean
     public JdbcProcedureContextRefreshListener  jdbcProcedureContextRefreshListener(JdbcProcedureExecutor executor,
                                                                                     JdbcProcedureContext context){
-        log.info("xproc4j config JdbcProcedureContextRefreshListener ...");
+        log.info(XProc4jConsts.NAME+" config "+DefaultJdbcProcedureContextRefreshListener.class.getSimpleName()+" ...");
         DefaultJdbcProcedureContextRefreshListener listener = new DefaultJdbcProcedureContextRefreshListener(executor);
         listener.getReportOnBoot().set(jdbcProcedureProperties.isReportOnBoot());
         context.listener(listener);

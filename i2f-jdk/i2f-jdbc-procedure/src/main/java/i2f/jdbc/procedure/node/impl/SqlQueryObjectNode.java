@@ -23,7 +23,7 @@ public class SqlQueryObjectNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (!XmlNode.NODE_ELEMENT.equals(node.getNodeType())) {
+        if (XmlNode.Type.NODE_ELEMENT!=node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());

@@ -13,12 +13,13 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class XmlNode {
-    public static final String NODE_ELEMENT = "element";
-    public static final String NODE_TEXT = "text";
-    public static final String NODE_CDATA = "cdata";
+    public static enum Type{
+        NODE_ELEMENT,
+        NODE_TEXT,
+        NODE_CDATA
+    }
 
-
-    protected String nodeType;
+    protected Type nodeType;
     protected String tagName;
     protected Map<String, String> tagAttrMap;
     protected Map<String, List<String>> attrFeatureMap;

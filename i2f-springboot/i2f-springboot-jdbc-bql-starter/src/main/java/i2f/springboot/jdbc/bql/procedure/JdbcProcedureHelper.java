@@ -1,6 +1,7 @@
 package i2f.springboot.jdbc.bql.procedure;
 
 import i2f.container.builder.map.MapBuilder;
+import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -25,7 +26,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        log.info("xproc4j config JdbcProcedureHelper ...");
+        log.info(XProc4jConsts.NAME+" config "+this.getClass().getSimpleName()+" ...");
         JdbcProcedureHelper.applicationContext = applicationContext;
         latch.countDown();
     }

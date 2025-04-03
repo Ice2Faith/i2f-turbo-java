@@ -115,7 +115,7 @@ public class JdbcProcedureParser {
         Xml.Type nodeType = node.getType();
         if (nodeType == Xml.Type.TEXT) {
             XmlNode ret = new XmlNode();
-            ret.setNodeType(XmlNode.NODE_TEXT);
+            ret.setNodeType(XmlNode.Type.NODE_TEXT);
             ret.setTagName(null);
             ret.setTagAttrMap(new LinkedHashMap<>());
             ret.setAttrFeatureMap(new LinkedHashMap<>());
@@ -127,7 +127,7 @@ public class JdbcProcedureParser {
             ret.setLocationLineNumber(node.getLocationLineNumber());
         } else if (nodeType == Xml.Type.CDATA) {
             XmlNode ret = new XmlNode();
-            ret.setNodeType(XmlNode.NODE_CDATA);
+            ret.setNodeType(XmlNode.Type.NODE_CDATA);
             ret.setTagName(null);
             ret.setTagAttrMap(new LinkedHashMap<>());
             ret.setAttrFeatureMap(new LinkedHashMap<>());
@@ -139,7 +139,7 @@ public class JdbcProcedureParser {
             ret.setLocationLineNumber(node.getLocationLineNumber());
         } else if (nodeType == Xml.Type.ELEMENT) {
             XmlNode ret = new XmlNode();
-            ret.setNodeType(XmlNode.NODE_ELEMENT);
+            ret.setNodeType(XmlNode.Type.NODE_ELEMENT);
             ret.setTagName(node.getName());
             ret.setTagAttrMap(new LinkedHashMap<>());
             ret.setAttrFeatureMap(new LinkedHashMap<>());
