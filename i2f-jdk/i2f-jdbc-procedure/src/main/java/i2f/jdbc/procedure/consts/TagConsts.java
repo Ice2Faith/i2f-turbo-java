@@ -103,6 +103,8 @@ public interface TagConsts {
     String SQL_TRANS_NONE = "sql-trans-none";
     String SQL_TRANS_ROLLBACK = "sql-trans-rollback";
 
+    String SQL_TRANSACTIONAL = "sql-transactional";
+
     String CONTEXT_CONVERT_METHOD_CLASS = "context-convert-method-class";
     String CONTEXT_INVOKE_METHOD_CLASS = "context-invoke-method-class";
     String CONTEXT_LOAD_PACKAGE = "context-load-package";

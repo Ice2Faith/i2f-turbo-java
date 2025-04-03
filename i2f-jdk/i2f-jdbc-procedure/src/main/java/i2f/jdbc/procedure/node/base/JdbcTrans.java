@@ -8,6 +8,26 @@ import java.util.Arrays;
  * @date 2025/1/23 11:30
  */
 public class JdbcTrans {
+    public static Propagation getJdbcTransPropagation(String propagation) {
+        Propagation ret = Propagation.REQUIRED;
+        int val = -1;
+        try {
+            val = Integer.parseInt(propagation);
+        } catch (Exception e) {
+        }
+        for (Propagation item : Propagation.values()) {
+            if (item.value() == val) {
+                ret = item;
+                break;
+            }
+            if (item.name().equalsIgnoreCase(propagation)) {
+                ret = item;
+                break;
+            }
+        }
+        return ret;
+    }
+
     public static int getJdbcTransIsolation(String isolation) {
         int val = Connection.TRANSACTION_READ_COMMITTED;
         try {

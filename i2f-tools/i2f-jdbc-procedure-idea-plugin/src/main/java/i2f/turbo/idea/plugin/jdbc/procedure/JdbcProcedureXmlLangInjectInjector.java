@@ -32,43 +32,43 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             "JAVA,SQL,VTL" +
             "};";
     public static final ConcurrentHashMap<String, Language> LANG_JAVA_ENUM_MAP = new ConcurrentHashMap<>();
-    public static volatile String JS_INJECT_PREFIX="let executor={};let params={};";
+    public static volatile String JS_INJECT_PREFIX = "let executor={};let params={};";
 
     static {
         initInjectPrefix();
         startRefreshThread();
     }
 
-    public static void initInjectPrefix(){
+    public static void initInjectPrefix() {
         URL url = null;
-        if(url==null){
-            try{
-                url=JdbcProcedureXmlLangInjectInjector.class.getResource("/assets/JsInject.js");
-            }catch (Exception e){
-                log.warn(e.getMessage(),e);
+        if (url == null) {
+            try {
+                url = JdbcProcedureXmlLangInjectInjector.class.getResource("/assets/JsInject.js");
+            } catch (Exception e) {
+                log.warn(e.getMessage(), e);
             }
         }
-        if(url==null){
-            try{
-                url=Thread.currentThread().getContextClassLoader().getResource("/assets/JsInject.js");
-            }catch (Exception e){
-                log.warn(e.getMessage(),e);
+        if (url == null) {
+            try {
+                url = Thread.currentThread().getContextClassLoader().getResource("/assets/JsInject.js");
+            } catch (Exception e) {
+                log.warn(e.getMessage(), e);
             }
         }
-        try(BufferedReader reader=new BufferedReader(new InputStreamReader(url.openStream()))){
-            StringBuilder builder=new StringBuilder();
-            String line=null;
-            while((line=reader.readLine())!=null){
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+            StringBuilder builder = new StringBuilder();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
                 builder.append(line).append("\n");
             }
-            JS_INJECT_PREFIX=builder.toString();
-        }catch (Exception e){
-            log.warn(e.getMessage(),e);
+            JS_INJECT_PREFIX = builder.toString();
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
         }
 
     }
 
-    public static void startRefreshThread(){
+    public static void startRefreshThread() {
         Thread thread = new Thread(() -> {
             do {
                 refreshLangTask();
@@ -83,7 +83,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         thread.start();
     }
 
-    public static void refreshLangTask(){
+    public static void refreshLangTask() {
         Collection<Language> langs = Language.getRegisteredLanguages();
         for (Language lang : langs) {
             String id = lang.getID();
@@ -586,7 +586,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         return ret;
     }
 
-    public Language getPossibleTinyScriptLanguage(){
+    public Language getPossibleTinyScriptLanguage() {
         Language lang = Language.findLanguageByID("TinyScript");
         if (lang != null) {
             return lang;
@@ -603,7 +603,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         return lang;
     }
 
-    public Language getPossibleEvalLanguage(){
+    public Language getPossibleEvalLanguage() {
         Language lang = Language.findLanguageByID("Spring EL");
         if (lang != null) {
             return lang;
@@ -792,7 +792,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         } else if (Arrays.asList("javascript", "js").contains(targetLang.getID().toLowerCase())) {
             registrar.startInjecting(targetLang)
                     .addPlace(
-                            JS_INJECT_PREFIX+"\n",
+                            JS_INJECT_PREFIX + "\n",
                             "",
                             (PsiLanguageInjectionHost) xmlText,
                             new TextRange(0, xmlText.getTextRange().getLength()))
@@ -830,7 +830,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
 
     public void injectXmlAttribute(MultiHostRegistrar registrar, XmlAttribute attr) {
         XmlAttributeValue attrValueElement = attr.getValueElement();
-        if(attrValueElement==null){
+        if (attrValueElement == null) {
             return;
         }
         XmlTag tag = attr.getParent();
@@ -922,7 +922,13 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 }
             } else if ("delay".equalsIgnoreCase(attrName)
                     || "timeout".equalsIgnoreCase(attrName)
-                    || "await".equalsIgnoreCase(attrName)) {
+                    || "await".equalsIgnoreCase(attrName)
+                    || "read-only".equalsIgnoreCase(attrName)
+                    || "params_share".equalsIgnoreCase(attrName)
+                    || "limited".equalsIgnoreCase(attrName)
+                    || "accept-batch".equalsIgnoreCase(attrName)
+                    || "before-truncate".equalsIgnoreCase(attrName)
+            ) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -934,18 +940,37 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("isolation".equalsIgnoreCase(attrName)) {
+        } else if ("propagation".equalsIgnoreCase(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
-                        .addPlace("class MyDsl { public int v=java.sql.Connection.",
+                        .addPlace(" enum Propagation { REQUIRED,SUPPORTS,MANDATORY,REQUIRES_NEW,NOT_SUPPORTED,NEVER,NESTED; }" +
+                                        " class MyDsl { public Propagation v=Propagation.",
                                 ";}",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))
                         .doneInjecting();
                 return;
             }
-        } else if ("class".equalsIgnoreCase(attrName)) {
+        } else if ("isolation".equalsIgnoreCase(attrName)) {
+            Language lang = findPossibleLanguage("java");
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace(" enum Connection {TRANSACTION_NONE ,TRANSACTION_READ_UNCOMMITTED ,TRANSACTION_READ_COMMITTED ,TRANSACTION_REPEATABLE_READ ,TRANSACTION_SERIALIZABLE; }" +
+                                        " class MyDsl { public int v=java.sql.Connection.",
+                                ";}",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
+            }
+        } else if (
+                "class".equalsIgnoreCase(attrName)
+                        || "type".equalsIgnoreCase(attrName)
+                        || "result-type".equalsIgnoreCase(attrName)
+                        || "rollback-for".equalsIgnoreCase(attrName)
+                        || "no-rollback-for".equalsIgnoreCase(attrName)
+        ) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1035,7 +1060,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             if (lang != null) {
                 registrar.startInjecting(lang)
                         .addPlace(
-                                JS_INJECT_PREFIX+"\n",
+                                JS_INJECT_PREFIX + "\n",
                                 "",
                                 (PsiLanguageInjectionHost) attrValueElement,
                                 new TextRange(0, attrValueElement.getTextRange().getLength()))

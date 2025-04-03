@@ -153,6 +153,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new SqlQueryRowNode());
         ret.add(new SqlScopeNode());
         ret.add(new SqlScriptNode());
+        ret.add(new SqlTransactionalNode());
         ret.add(new SqlTransBeginNode());
         ret.add(new SqlTransCommitNode());
         ret.add(new SqlTransNoneNode());

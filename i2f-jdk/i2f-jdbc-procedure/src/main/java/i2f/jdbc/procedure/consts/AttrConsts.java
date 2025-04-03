@@ -66,7 +66,11 @@ public interface AttrConsts {
     String LIMIT = "limit";
     String LIMITED = "limited";
 
+    String PROPAGATION = "propagation";
     String ISOLATION = "isolation";
+    String READ_ONLY = "read-only";
+    String ROLLBACK_FOR = "rollback-for";
+    String NO_ROLLBACK_FOR = "no-rollback-for";
 
     String DATASOURCES = "datasources";
 

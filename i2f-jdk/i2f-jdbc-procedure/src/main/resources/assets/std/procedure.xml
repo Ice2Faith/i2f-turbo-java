@@ -898,7 +898,7 @@ eval-ts使用TinyScript引擎进行处理
     表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务
     isolation以string访问，支持Connection.TRANSACTION_xxx的数字值，或者xxx的字符值，不区分大小写
      -->
-    <sql-trans-begin isolation="Conne"/>
+    <sql-trans-begin isolation="TRANSACTION_READ_COMMITTED"/>
     <sql-trans-commit/>
     <sql-trans-rollback/>
     <sql-trans-none/>
@@ -915,6 +915,50 @@ eval-ts使用TinyScript引擎进行处理
             </lang-catch>
         </lang-try>
         <sql-trans-none/>
+    </script-segment>
+
+    <!--
+    表示JDBC的事务控制，用法和Spring的@Transactional用法类似
+    用于对datasources指定的系列数据源进行事务控制
+    需要注意，使用此标签之后，datasources所指定的所有数据源，都会立即进行连接的建立
+    因此，一般只建议指明使用到的数据源，而不建议使用all来指定所有数据源
+    datasources数据源默认以string访问，默认为primary,多个数据源可使用,逗号分割
+    propagation传播级别默认以string访问，默认值为REQUIRED，可用的值参见Propagation枚举类的枚举名称
+    isolation隔离级别默认以string访问，默认值为TRANSACTION_READ_COMMITTED，可用的值和sql-trans-begin表示的一致，即Connection.TRANSACTION_xxx的数字值，或者xxx的字符值，不区分大小写
+    read-only只读默认以boolean访问，默认值为false，是指定是否以只读的方式进行访问
+    rollback-for回滚的异常类型默认以string访问，默认值为RuntimeException,多个用|分割，表示回滚的异常类名
+    no-rollback-for不回滚的异常类型默认以string访问，无默认值，多个用|分割，表示不回滚的异常类名
+    -->
+    <sql-transactional datasources=""
+                       propagation="REQUIRED"
+                       isolation="TRANSACTION_READ_COMMITTED"
+                       read-only="false"
+                       rollback-for="RuntimeException"
+                       no-rollback-for="ReflectiveOperationException">
+
+    </sql-transactional>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-transactional>
+            <sql-update>
+                delete
+                from xxx
+                where
+            </sql-update>
+        </sql-transactional>
+
+        <sql-transactional datasources=""
+                           propagation="REQUIRED"
+                           isolation="TRANSACTION_READ_COMMITTED"
+                           read-only="false"
+                           rollback-for="RuntimeException"
+                           no-rollback-for="ReflectiveOperationException">
+            <sql-update>
+                delete
+                from xxx
+                where
+            </sql-update>
+        </sql-transactional>
     </script-segment>
 
     <!--

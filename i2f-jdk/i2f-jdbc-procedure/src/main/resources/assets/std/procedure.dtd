@@ -34,6 +34,7 @@
                 |sql-trans-commit*
                 |sql-trans-rollback*
                 |sql-trans-none*
+                |sql-transactional*
                 |lang-async*
                 |lang-latch*
                 |lang-async-all*
@@ -833,6 +834,14 @@
 
         <!ELEMENT sql-trans-none (EMPTY)>
         <!ATTLIST sql-trans-none datasource CDATA #IMPLIED>
+
+        <!ELEMENT sql-transactional (EMPTY|ANY)>
+        <!ATTLIST sql-transactional datasources CDATA #IMPLIED>
+        <!ATTLIST sql-transactional propagation CDATA #IMPLIED>
+        <!ATTLIST sql-transactional isolation CDATA #IMPLIED>
+        <!ATTLIST sql-transactional read-only CDATA #IMPLIED>
+        <!ATTLIST sql-transactional rollback-for CDATA #IMPLIED>
+        <!ATTLIST sql-transactional no-rollback-for CDATA #IMPLIED>
 
         <!ELEMENT lang-async (ANY|EMPTY)>
         <!ATTLIST lang-async await CDATA #IMPLIED>
