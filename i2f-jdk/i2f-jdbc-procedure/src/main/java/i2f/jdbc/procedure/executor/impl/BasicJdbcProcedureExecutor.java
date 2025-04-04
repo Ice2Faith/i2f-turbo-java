@@ -400,33 +400,43 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         Map<String, Object> ret = new LinkedHashMap<>();
         ret.put(ParamsConsts.CONTEXT, namingContext);
         ret.put(ParamsConsts.ENVIRONMENT, environment);
-        ret.put(ParamsConsts.BEANS, new HashMap<>());
-
-        ret.put(ParamsConsts.DATASOURCES, new HashMap<>());
-        ret.put(ParamsConsts.DATASOURCES_MAPPING, new HashMap<>());
-
-        ret.put(ParamsConsts.CONNECTIONS, new HashMap<>());
-
-        ret.put(ParamsConsts.GLOBAL, new HashMap<>());
 
         HashMap<Object, Object> trace = new HashMap<>();
         trace.put(ParamsConsts.STACK,new Stack<>());
         ret.put(ParamsConsts.TRACE, trace);
 
-        ret.put(ParamsConsts.EXECUTOR, this);
 
         ret.put(ParamsConsts.LRU, new LruMap<>(4096));
         ret.put(ParamsConsts.EXECUTOR_LRU,executorLru);
         ret.put(ParamsConsts.STATIC_LRU,staticLru);
+
+        for (String key : ParamsConsts.KEEP_NAMES) {
+            Object val = ret.get(key);
+            if(val==null){
+                ret.put(key,new HashMap<>());
+            }
+        }
+
+        ret.put(ParamsConsts.EXECUTOR, this);
+
         return ret;
     }
 
     @Override
     public Map<String, Object> prepareParams(Map<String, Object> params) {
-        Map<String, Object> execParams = createParams();
-        for (Map.Entry<String, Object> entry : execParams.entrySet()) {
-            params.putIfAbsent(entry.getKey(), entry.getValue());
+        Map<String, Object> execParams = null;
+        for (String key : ParamsConsts.KEEP_NAMES) {
+            Object val = params.get(key);
+            if(val==null){
+                if(execParams==null){
+                    execParams=createParams();
+                }
+                params.put(key,execParams.get(key));
+            }
         }
+
+        params.put(ParamsConsts.EXECUTOR, this);
+
         return params;
     }
 
@@ -436,24 +446,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         if (params == null) {
             return createParams();
         }
-        ret.put(ParamsConsts.CONTEXT, params.get(ParamsConsts.CONTEXT));
-        ret.put(ParamsConsts.ENVIRONMENT, params.get(ParamsConsts.ENVIRONMENT));
-        ret.put(ParamsConsts.BEANS, params.get(ParamsConsts.BEANS));
 
-        ret.put(ParamsConsts.DATASOURCES, params.get(ParamsConsts.DATASOURCES));
-        ret.put(ParamsConsts.DATASOURCES_MAPPING, params.get(ParamsConsts.DATASOURCES_MAPPING));
-
-        ret.put(ParamsConsts.CONNECTIONS,params.get(ParamsConsts.CONNECTIONS));
-
-        ret.put(ParamsConsts.GLOBAL, params.get(ParamsConsts.GLOBAL));
-
-        ret.put(ParamsConsts.TRACE, params.get(ParamsConsts.TRACE));
+        for (String key : ParamsConsts.KEEP_NAMES) {
+            ret.put(key, params.get(key));
+        }
 
         ret.put(ParamsConsts.EXECUTOR, this);
 
-        ret.put(ParamsConsts.LRU, params.get(ParamsConsts.LRU));
-        ret.put(ParamsConsts.EXECUTOR_LRU, params.get(ParamsConsts.EXECUTOR_LRU));
-        ret.put(ParamsConsts.STATIC_LRU, params.get(ParamsConsts.STATIC_LRU));
+        prepareParams(ret);
+
         return ret;
     }
 
