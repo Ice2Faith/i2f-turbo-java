@@ -387,6 +387,10 @@ public class ContextFunctions {
         return date_add(date, ChronoUnit.MONTHS.name(), interval);
     }
 
+    public static Object add_days(Object date, long interval) {
+        return date_add(date, ChronoUnit.DAYS.name(), interval);
+    }
+
     public static Object trunc(Object obj) {
         if (obj == null) {
             return null;
@@ -653,5 +657,43 @@ public class ContextFunctions {
     public static String[] splitLiteral(String str, String regex, int limit) {
         String[] arr = Pattern.compile(regex, Pattern.LITERAL).split(str, limit);
         return arr;
+    }
+
+    public static boolean like(Object obj,String substr){
+        if(obj==null || substr==null){
+            return false;
+        }
+        if(substr.isEmpty()){
+            return true;
+        }
+        String str = (String) ObjectConvertor.tryConvertAsType(obj, String.class);
+        return str.contains(substr);
+    }
+
+    public static boolean llike(Object obj,String substr){
+        return likel(obj,substr);
+    }
+    public static boolean likel(Object obj,String substr){
+        if(obj==null || substr==null){
+            return false;
+        }
+        if(substr.isEmpty()){
+            return true;
+        }
+        String str = (String) ObjectConvertor.tryConvertAsType(obj, String.class);
+        return str.startsWith(substr);
+    }
+    public static boolean rlike(Object obj,String substr){
+        return liker(obj,substr);
+    }
+    public static boolean liker(Object obj,String substr){
+        if(obj==null || substr==null){
+            return false;
+        }
+        if(substr.isEmpty()){
+            return true;
+        }
+        String str = (String) ObjectConvertor.tryConvertAsType(obj, String.class);
+        return str.endsWith(substr);
     }
 }

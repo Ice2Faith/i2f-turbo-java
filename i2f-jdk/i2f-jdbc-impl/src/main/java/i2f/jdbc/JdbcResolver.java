@@ -1249,16 +1249,7 @@ public class JdbcResolver {
                 Map<String, Object> map = new LinkedHashMap<>();
                 for (int i = 0; i < columnCount; i++) {
                     QueryColumn col = columns.get(i);
-                    Object val = rs.getObject(i + 1);
-                    for (ResultSetObjectConvertHandler handler : RESULT_SET_OBJECT_CONVERT_HANDLERS) {
-                        if(handler.support(val)){
-                            val=handler.convert(val);
-                            break;
-                        }
-                    }
-                    if(val instanceof Clob){
-                        val=ObjectConvertor.tryConvertAsType(val,String.class);
-                    }
+                    Object val = getResultObject(rs,i + 1,col.getType());
                     map.put(col.getName(), val);
                 }
                 rows.add(map);
@@ -1277,6 +1268,74 @@ public class JdbcResolver {
         }
     }
 
+    public static Object getResultObject(ResultSet rs,int columnIndex,int sqlType) throws SQLException {
+        Object val=null;
+        if(Arrays.asList(Types.VARCHAR,Types.LONGVARCHAR,Types.CHAR).contains(sqlType)){
+            val=rs.getString(columnIndex);
+        }else if(Arrays.asList(Types.NVARCHAR,Types.NCHAR,Types.LONGNVARCHAR).contains(sqlType)){
+            val=rs.getString(columnIndex);
+        }else if(Types.INTEGER==sqlType){
+            val=rs.getInt(columnIndex);
+        }else if(Types.BIGINT==sqlType){
+            val=rs.getLong(columnIndex);
+        }else if(Types.FLOAT==sqlType){
+            val=rs.getFloat(columnIndex);
+        }else if(Types.REAL==sqlType){
+            val=rs.getBigDecimal(columnIndex);
+        }else if(Types.DOUBLE==sqlType){
+            val=rs.getDouble(columnIndex);
+        }else if(Types.NUMERIC==sqlType){
+            val=rs.getBigDecimal(columnIndex);
+        }else if(Types.DATE==sqlType){
+            val=rs.getDate(columnIndex);
+        }else if(Types.TIME==sqlType){
+            val=rs.getTime(columnIndex);
+        }else if(Types.TIMESTAMP==sqlType){
+            val=rs.getTimestamp(columnIndex);
+        }else if(Arrays.asList(Types.TINYINT,Types.SMALLINT).contains(sqlType)){
+            val=rs.getShort(columnIndex);
+        }else if(Types.NULL==sqlType){
+            val=null;
+        }else if(Types.BLOB==sqlType){
+            val=rs.getBlob(columnIndex);
+        }else if(Types.CLOB==sqlType){
+            val=rs.getClob(columnIndex);
+        }else if(Types.NCLOB==sqlType){
+            val=rs.getNClob(columnIndex);
+        }else if(Types.BOOLEAN==sqlType){
+            val=rs.getBoolean(columnIndex);
+        }else if(Types.BIT==sqlType){
+            val=rs.getInt(columnIndex);
+        }else if(Arrays.asList(Types.BINARY,Types.VARBINARY,Types.LONGVARBINARY).contains(sqlType)){
+            val=rs.getBytes(columnIndex);
+        }else if(Types.ARRAY==sqlType){
+            val=rs.getArray(columnIndex);
+        }else if(Types.SQLXML==sqlType){
+            val=rs.getSQLXML(columnIndex);
+        }else if(Types.TIME_WITH_TIMEZONE==sqlType){
+            val=rs.getTime(columnIndex);
+        }else if(Types.TIMESTAMP_WITH_TIMEZONE==sqlType){
+            val=rs.getTimestamp(columnIndex);
+        }else {
+            val = rs.getObject(columnIndex);
+        }
+        boolean hasHandle=false;
+        for (ResultSetObjectConvertHandler handler : RESULT_SET_OBJECT_CONVERT_HANDLERS) {
+            if(handler.support(val)){
+                val=handler.convert(val);
+                hasHandle=true;
+                break;
+            }
+        }
+        if(!hasHandle){
+            if(val instanceof Clob){
+                val=ObjectConvertor.tryConvertAsType(val,String.class);
+            }
+        }
+
+        return val;
+    }
+
 
     public static <T> List<T> parseResultSetAsBeanList(ResultSet rs, Class<T> beanClass) throws SQLException {
         return parseResultSetAsBeanList(rs, beanClass, -1, null);
@@ -1293,14 +1352,7 @@ public class JdbcResolver {
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
 
-            List<String> columnNames = new ArrayList<>();
-            for (int i = 0; i < columnCount; i++) {
-                String colName = metaData.getColumnLabel(i + 1);
-                if (columnNameMapper != null) {
-                    colName = columnNameMapper.apply(colName);
-                }
-                columnNames.add(colName);
-            }
+            List<QueryColumn> columns = parseResultSetColumns(metaData, columnNameMapper);
 
             boolean isDefaultMapType=(beanClass == null || TypeOf.typeOf(beanClass, Map.class));
             int currCount = 0;
@@ -1311,19 +1363,9 @@ public class JdbcResolver {
 
                 Map<String, Object> map = new LinkedHashMap<>();
                 for (int i = 0; i < columnCount; i++) {
-                    Object val = rs.getObject(i + 1);
-                    for (ResultSetObjectConvertHandler handler : RESULT_SET_OBJECT_CONVERT_HANDLERS) {
-                        if(handler.support(val)){
-                            val=handler.convert(val);
-                            break;
-                        }
-                    }
-                    if(!isDefaultMapType){
-                        if(val instanceof Clob){
-                            val=ObjectConvertor.tryConvertAsType(val,String.class);
-                        }
-                    }
-                    map.put(columnNames.get(i), val);
+                    QueryColumn col = columns.get(i);
+                    Object val = getResultObject(rs,i + 1,col.getType());
+                    map.put(col.getName(), val);
                 }
 
                 Object item = map;
