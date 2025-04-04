@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.basic;
 
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
@@ -56,6 +57,41 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             ContextHolder.TRACE_LOCATION.set(node.getLocationFile());
             ContextHolder.TRACE_LINE.set(node.getLocationLineNumber());
             ContextHolder.TRACE_NODE.set(node);
+            if(isDebugMode){
+                String tagName = node.getTagName();
+                if(tagName!=null) {
+                    if(tagName.contains("-call") || tagName.contains("-include")) {
+                        String refid = node.getTagAttrMap().get(AttrConsts.REFID);
+                        if(refid!=null && !refid.isEmpty()) {
+                            StringBuilder builder=new StringBuilder();
+                            builder.append("call "+refid).append("\n");
+                            for (Map.Entry<String, Object> entry : context.entrySet()) {
+                                if(ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())){
+                                    continue;
+                                }
+                                Object value = entry.getValue();
+                                builder.append("\targ:").append(entry.getKey()).append("==> ").append("(").append(value==null?"null":value.getClass().getName()).append(") :").append(value).append("\n");
+                            }
+                            builder.append("\n");
+
+                            int stackSize = traceStack.size();
+                            int printStackSize=50;
+                            ListIterator<String> iterator = traceStack.listIterator(stackSize);
+                            for (int i = 0; i < printStackSize; i++) {
+                                if(!iterator.hasPrevious()){
+                                    break;
+                                }
+                                builder.append("\tat node ").append(iterator.previous()).append("\n");
+                            }
+                            if(iterator.hasPrevious()){
+                                builder.append("\t... ").append(stackSize-printStackSize).append(" common frames omitted\n");
+                            }
+
+                            executor.logDebug("call-params:\n===================> "+builder);
+                        }
+                    }
+                }
+            }
             execInner(node, context, executor);
             if(isDebugMode){
                 if(TagConsts.PROCEDURE.equals(node.getTagName())){

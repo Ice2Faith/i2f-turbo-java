@@ -1,5 +1,10 @@
 package i2f.jdbc.procedure.consts;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Ice2Faith
  * @date 2025/1/23 10:09
@@ -47,4 +52,28 @@ public interface ParamsConsts {
 
     // 返回值
     String RETURN="return";
+
+    // 这些值，将会始终保存在上下文中，也就是每个params中都应该存在这些键值
+    String[] KEEP_NAMES={
+            CONTEXT,
+            ENVIRONMENT,
+            BEANS,
+
+            DATASOURCES,
+            DATASOURCES_MAPPING,
+
+            CONNECTIONS,
+
+            GLOBAL,
+
+            TRACE,
+
+            EXECUTOR,
+
+            LRU,
+            EXECUTOR_LRU,
+            STATIC_LRU,
+    };
+
+    Set<String> KEEP_NAME_SET= Collections.unmodifiableSet(new HashSet<>(Arrays.asList(KEEP_NAMES)));
 }
