@@ -60,11 +60,11 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             if(isDebugMode){
                 String tagName = node.getTagName();
                 if(tagName!=null) {
-                    if(tagName.contains("-call") || tagName.contains("-include")) {
-                        String refid = node.getTagAttrMap().get(AttrConsts.REFID);
-                        if(refid!=null && !refid.isEmpty()) {
+                    if(TagConsts.PROCEDURE.equals(tagName)) {
+                        String id = node.getTagAttrMap().get(AttrConsts.ID);
+                        if(id!=null && !id.isEmpty()) {
                             StringBuilder builder=new StringBuilder();
-                            builder.append("call "+refid).append("\n");
+                            builder.append("call "+id).append("\n");
                             for (Map.Entry<String, Object> entry : context.entrySet()) {
                                 if(ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())){
                                     continue;
