@@ -29,7 +29,7 @@ import java.util.function.Supplier;
  */
 public class DefaultTinyScriptResolver implements TinyScriptResolver {
     public static final MathContext MATH_CONTEXT = new MathContext(20, RoundingMode.HALF_UP);
-    public static final BigDecimal NUM_100=new BigDecimal("100");
+    public static final BigDecimal NUM_100 = new BigDecimal("100");
 
     public static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
     protected final AtomicBoolean debug = new AtomicBoolean(true);
@@ -93,7 +93,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             boolean br = ObjectConvertor.toBoolean(right);
             return br;
         } else {
-            return resolveDoubleOperator(context,left.get(), operator, right.get());
+            return resolveDoubleOperator(context, left.get(), operator, right.get());
         }
     }
 
@@ -236,6 +236,18 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.add(rv, MATH_CONTEXT);
                 return convertNumberType(ret, (Number) left, (Number) right);
+            } else if (ObjectConvertor.isDateType(left.getClass())
+                    && ObjectConvertor.isNumericType(right.getClass())) {
+                LocalDateTime lv = (LocalDateTime) ObjectConvertor.tryConvertAsType(left, LocalDateTime.class);
+                BigDecimal rv = new BigDecimal(String.valueOf(right));
+                LocalDateTime ret = lv.plusDays(rv.longValue());
+                return ObjectConvertor.tryConvertAsType(ret, left.getClass());
+            } else if (ObjectConvertor.isNumericType(left.getClass())
+                    && ObjectConvertor.isDateType(right.getClass())) {
+                BigDecimal lv = new BigDecimal(String.valueOf(right));
+                LocalDateTime rv = (LocalDateTime) ObjectConvertor.tryConvertAsType(left, LocalDateTime.class);
+                LocalDateTime ret = rv.plusDays(lv.longValue());
+                return ObjectConvertor.tryConvertAsType(ret, left.getClass());
             }
         } else if ("-".equals(operator)) {
             if (ObjectConvertor.isNumericType(left.getClass())
@@ -244,6 +256,18 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 BigDecimal rv = new BigDecimal(String.valueOf(right));
                 BigDecimal ret = lv.subtract(rv, MATH_CONTEXT);
                 return convertNumberType(ret, (Number) left, (Number) right);
+            } else if (ObjectConvertor.isDateType(left.getClass())
+                    && ObjectConvertor.isNumericType(right.getClass())) {
+                LocalDateTime lv = (LocalDateTime) ObjectConvertor.tryConvertAsType(left, LocalDateTime.class);
+                BigDecimal rv = new BigDecimal(String.valueOf(right));
+                LocalDateTime ret = lv.plusDays(0 - rv.longValue());
+                return ObjectConvertor.tryConvertAsType(ret, left.getClass());
+            } else if (ObjectConvertor.isNumericType(left.getClass())
+                    && ObjectConvertor.isDateType(right.getClass())) {
+                BigDecimal lv = new BigDecimal(String.valueOf(right));
+                LocalDateTime rv = (LocalDateTime) ObjectConvertor.tryConvertAsType(left, LocalDateTime.class);
+                LocalDateTime ret = rv.plusDays(0 - lv.longValue());
+                return ObjectConvertor.tryConvertAsType(ret, left.getClass());
             }
         } else if ("*".equals(operator)) {
             if (ObjectConvertor.isNumericType(left.getClass())
@@ -270,7 +294,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 return num;
             }
         }
-        throw new IllegalArgumentException("un-support operator :" + operator);
+        throw new IllegalArgumentException("un-support operator :" + operator + " for left type(" + (left == null ? "null" : left.getClass()) + ")" + " and right type(" + (right == null ? "null" : right.getClass()) + ")");
     }
 
     @Override
@@ -279,7 +303,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             boolean bv = ObjectConvertor.toBoolean(value);
             return !bv;
         }
-        if("-".equals(operator)){
+        if ("-".equals(operator)) {
             if (value != null) {
                 if (ObjectConvertor.isNumericType(value.getClass())) {
                     BigDecimal lv = new BigDecimal(String.valueOf(value));
@@ -288,21 +312,21 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 }
             }
         }
-        throw new IllegalArgumentException("un-support prefix operator :" + operator);
+        throw new IllegalArgumentException("un-support prefix operator :" + operator + " for type(" + (value == null ? "null" : value.getClass()) + ")");
     }
 
     @Override
     public Object resolveSuffixOperator(Object context, Object value, String operator) {
-        if("%".equals(operator)){
+        if ("%".equals(operator)) {
             if (value != null) {
                 if (ObjectConvertor.isNumericType(value.getClass())) {
                     BigDecimal lv = new BigDecimal(String.valueOf(value));
-                    BigDecimal ret = lv.divide(NUM_100,MATH_CONTEXT);
+                    BigDecimal ret = lv.divide(NUM_100, MATH_CONTEXT);
                     return convertNumberType(ret, (Number) ret, (Number) ret);
                 }
             }
         }
-        throw new IllegalArgumentException("un-support prefix operator :" + operator);
+        throw new IllegalArgumentException("un-support prefix operator :" + operator + " for type(" + (value == null ? "null" : value.getClass()) + ")");
     }
 
     public Object convertNumberType(BigDecimal num, Number left, Number right) {
@@ -426,19 +450,19 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
 
     @Override
     public Object resolveFunctionCall(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
-        if(!isNew){
+        if (!isNew) {
             // 处理内建函数 Object eval(String|Appendable|CharSequence|StringBuilder|StringBuffer script)
-            if("eval".equals(naming)){
-                if(argList.size()==1){
+            if ("eval".equals(naming)) {
+                if (argList.size() == 1) {
                     Object arg = argList.get(0);
-                    if(arg==null||arg instanceof CharSequence || arg instanceof Appendable){
-                        String script=String.valueOf(arg);
+                    if (arg == null || arg instanceof CharSequence || arg instanceof Appendable) {
+                        String script = String.valueOf(arg);
                         return TinyScript.script(script, context, this);
                     }
                 }
             }
         }
-        Reference<Object> ref = beforeFunctionCall(context,target, isNew, naming, argList);
+        Reference<Object> ref = beforeFunctionCall(context, target, isNew, naming, argList);
         if (ref != null) {
             if (ref.isValue()) {
                 return ref.get();
@@ -455,14 +479,14 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         }
         Class<?> clazz = null;
         if (isNew) {
-            clazz = loadClass(context,naming);
+            clazz = loadClass(context, naming);
         } else {
             if (target == null) {
                 int idx = naming.lastIndexOf(".");
                 if (idx > 0) {
                     String className = naming.substring(0, idx);
                     naming = naming.substring(idx + 1);
-                    clazz = loadClass(context,className);
+                    clazz = loadClass(context, className);
                 }
             } else {
                 clazz = target.getClass();
@@ -474,7 +498,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         } else {
             String methodName = naming;
 
-            IMethod method = findMethod(context,naming, args);
+            IMethod method = findMethod(context, naming, args);
             if (method != null) {
                 Object ret = ReflectResolver.execMethod(target, method, args);
                 return ret;
@@ -514,7 +538,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 }
                 text = builder.toString();
             } else if ("render".equals(feature)) {
-                text = renderString(context,text);
+                text = renderString(context, text);
             }
         }
         return text;

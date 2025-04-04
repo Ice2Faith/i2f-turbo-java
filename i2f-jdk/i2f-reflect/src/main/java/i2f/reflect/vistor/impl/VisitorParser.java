@@ -138,6 +138,9 @@ public class VisitorParser {
     }
 
     private static Visitor visit(String expression, Object rootObj, Object nodeObj, Object paramObj) {
+        if(expression!=null){
+            expression=expression.trim();
+        }
         Visitor ret = new ReadonlyVisitor(nodeObj, nodeObj);
         List<String> tokens = splitTokens(expression);
 

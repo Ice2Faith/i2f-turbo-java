@@ -238,7 +238,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     ProcedureCallNode.TAG_NAME,
                     FunctionCallNode.TAG_NAME
             ).contains(node.getTagName())) {
-                logDebug(() -> "control signal:" + e.getClass().getSimpleName());
+//                logDebug(() -> "control signal:" + e.getClass().getSimpleName());
             } else {
                 throw e;
             }
@@ -898,9 +898,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 return map.get(script);
             }
         }
-        Visitor visitor = Visitor.visit(script, params);
-        if (visitor != null) {
-            return visitor.get();
+        try {
+            Visitor visitor = Visitor.visit(script, params);
+            if (visitor != null) {
+                return visitor.get();
+            }
+        } catch (Exception e) {
+            logWarn(()->"visitor access error, will fallback to inner visit, visitor error message:"+e.getMessage(),e);
         }
         return innerVisit(script, params);
     }
