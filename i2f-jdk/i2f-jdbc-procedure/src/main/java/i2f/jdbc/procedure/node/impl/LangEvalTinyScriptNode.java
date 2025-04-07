@@ -4,16 +4,14 @@ import i2f.extension.antlr4.script.tiny.impl.DefaultTinyScriptResolver;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.antlr4.script.tiny.impl.TinyScriptResolver;
 import i2f.invokable.method.IMethod;
-import i2f.jdbc.procedure.consts.AttrConsts;
-import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.consts.ParamsConsts;
-import i2f.jdbc.procedure.consts.TagConsts;
+import i2f.jdbc.procedure.consts.*;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
@@ -30,7 +28,7 @@ import java.util.stream.Collectors;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangEvalTinyScriptNode extends AbstractExecutorNode {
+public class LangEvalTinyScriptNode extends AbstractExecutorNode implements EvalScriptProvider {
     public static final String TAG_NAME = TagConsts.LANG_EVAL_TINYSCRIPT;
     public static final String ALIAS_TAG_NAME = TagConsts.LANG_EVAL_TS;
     public static void main(String[] args){
@@ -70,6 +68,17 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode {
             executor.visitSet(context, result, obj);
         }
 
+    }
+
+    @Override
+    public boolean support(String lang) {
+        return Arrays.asList(LangConsts.TINYSCRIPT,LangConsts.TS).contains(lang);
+    }
+
+    @Override
+    public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
+        Object obj=evalTinyScript(script,params,executor);
+        return obj;
     }
 
     public static Object evalTinyScript(String script, Object context, JdbcProcedureExecutor executor) {

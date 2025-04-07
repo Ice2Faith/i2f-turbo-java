@@ -50,7 +50,7 @@ public interface AttrConsts {
 
     String REFID = "refid";
     String PARAMS = "params";
-    String PARAMS_SHARE="params_share";
+    String PARAMS_SHARE="params-share";
 
     String BATCH_SIZE = "batch-size";
     String ACCEPT_BATCH = "accept-batch";

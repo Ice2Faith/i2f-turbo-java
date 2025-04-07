@@ -3,9 +3,7 @@ package i2f.jdbc.procedure.reportor;
 import i2f.compiler.MemoryCompiler;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.ognl.OgnlUtil;
-import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.consts.TagConsts;
-import i2f.jdbc.procedure.consts.XProc4jConsts;
+import i2f.jdbc.procedure.consts.*;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -37,8 +35,8 @@ public class GrammarReporter {
     protected static ExecutorService pool = new ForkJoinPool(Math.min(16, Runtime.getRuntime().availableProcessors()) * 2);
     protected static ExecutorService exprPool = new ForkJoinPool(Math.min(32, Runtime.getRuntime().availableProcessors()) * 2);
 
-    public static void reportGrammar(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> map, Consumer<String> warnPoster) {
-        if (map == null) {
+    public static void reportGrammar(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
+        if (metaMap == null) {
             return;
         }
         warnPoster.accept(XProc4jConsts.NAME+" report grammar running ...");
@@ -46,10 +44,10 @@ public class GrammarReporter {
         AtomicInteger allReportCount = new AtomicInteger(0);
         AtomicInteger allNodeCount = new AtomicInteger(0);
         try {
-            int mapSize = map.size();
+            int mapSize = metaMap.size();
             CountDownLatch latch = new CountDownLatch(mapSize);
             AtomicInteger reportSize = new AtomicInteger(0);
-            for (Map.Entry<String, ProcedureMeta> entry : map.entrySet()) {
+            for (Map.Entry<String, ProcedureMeta> entry : metaMap.entrySet()) {
                 pool.submit(() -> {
                     try {
                         reportSize.incrementAndGet();
@@ -59,7 +57,7 @@ public class GrammarReporter {
                             executor.logDebug(() -> XProc4jConsts.NAME+" grammar report rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + AbstractExecutorNode.getNodeLocation(node));
                             AtomicInteger reportCount = new AtomicInteger(0);
                             AtomicInteger nodeCount = new AtomicInteger(0);
-                            reportGrammar(node, executor, warnPoster, reportCount, nodeCount);
+                            reportGrammar(node,metaMap, executor, warnPoster, reportCount, nodeCount);
                             allReportCount.addAndGet(reportCount.get());
                             allNodeCount.addAndGet(nodeCount.get());
                             if (reportCount.get() > 0) {
@@ -84,6 +82,7 @@ public class GrammarReporter {
     }
 
     public static void reportGrammar(XmlNode node,
+                                     Map<String,ProcedureMeta> metaMap,
                                      JdbcProcedureExecutor executor,
                                      Consumer<String> warnPoster,
                                      AtomicInteger reportCount,
@@ -137,10 +136,16 @@ public class GrammarReporter {
                 body=body.replaceAll(RegexPattens.MULTI_LINE_COMMENT_REGEX,"");
                 String tstr=body.trim();
                 if(tstr.endsWith(";")){
+                    if (reportCount != null) {
+                        reportCount.incrementAndGet();
+                    }
                     warnPoster.accept(XProc4jConsts.NAME+" report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: sql maybe end with ';'");
                 }
                 for (String sstr : INVALID_STR_ARR) {
                     if(body.contains(sstr)){
+                        if (reportCount != null) {
+                            reportCount.incrementAndGet();
+                        }
                         warnPoster.accept(XProc4jConsts.NAME+" report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: sql maybe end with \""+sstr+"\"");
                     }
                 }
@@ -148,6 +153,63 @@ public class GrammarReporter {
             }
 
             reportEnclosedCharString(body,node,warnPoster);
+        }
+
+        if(Arrays.asList(
+                TagConsts.PROCEDURE_CALL,
+                TagConsts.FUNCTION_CALL
+        ).contains(node.getTagName())){
+            Map<String, String> attrMap = node.getTagAttrMap();
+            String refid = attrMap.get(AttrConsts.REFID);
+            if(refid==null || refid.trim().isEmpty()){
+                if (reportCount != null) {
+                    reportCount.incrementAndGet();
+                }
+                warnPoster.accept(XProc4jConsts.NAME+" report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node missing or blank attribute ["+AttrConsts.REFID+"]");
+            }
+            String result = attrMap.get(AttrConsts.RESULT);
+            if(result==null || result.trim().isEmpty()){
+                String paramsShare = attrMap.get(AttrConsts.PARAMS_SHARE);
+                String params = attrMap.get(AttrConsts.PARAMS);
+                boolean reportFlag=true;
+                if(paramsShare!=null && !paramsShare.isEmpty()){
+                    reportFlag=false;
+                }
+                if(params!=null && !params.isEmpty()){
+                    reportFlag=false;
+                }
+                if(reportFlag) {
+                    if (reportCount != null) {
+                        reportCount.incrementAndGet();
+                    }
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node refid [" + refid + "] missing or blank attribute [" + AttrConsts.RESULT + "]");
+                }
+            }
+            ProcedureMeta meta = metaMap.get(refid);
+            if(meta!=null){
+                List<String> arguments = meta.getArguments();
+                for (String argument : arguments) {
+                    if(Arrays.asList(
+                            AttrConsts.ID,
+                            AttrConsts.REFID,
+                            AttrConsts.RESULT,
+                            ParamsConsts.RETURN
+                    ).contains(argument)){
+                        continue;
+                    }
+                    if(!attrMap.containsKey(argument)){
+                        if (reportCount != null) {
+                            reportCount.incrementAndGet();
+                        }
+                        warnPoster.accept(XProc4jConsts.NAME+" report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node refid ["+refid+"] missing argument ["+argument+"]");
+                    }
+                }
+            }else if(refid!=null && !refid.isEmpty()){
+                if (reportCount != null) {
+                    reportCount.incrementAndGet();
+                }
+                warnPoster.accept(XProc4jConsts.NAME+" report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node missing target refid ["+refid+"]");
+            }
         }
 
         int latchSize = node.getTagAttrMap().size();
@@ -170,7 +232,7 @@ public class GrammarReporter {
         List<XmlNode> children = node.getChildren();
         if (children != null) {
             for (XmlNode item : children) {
-                reportGrammar(item, executor, warnPoster, reportCount, nodeCount);
+                reportGrammar(item,metaMap, executor, warnPoster, reportCount, nodeCount);
             }
         }
 
@@ -252,8 +314,37 @@ public class GrammarReporter {
         if (test == null) {
             return;
         }
+        if(test.trim().isEmpty()){
+            if(!TagConsts.PROCEDURE.equals(node.getTagName())){
+                List<String> features = node.getAttrFeatureMap().get(attr);
+                boolean reportFlag=true;
+                if(features!=null && !features.isEmpty()){
+                    String feature = features.get(0);
+                    if(Arrays.asList(
+                           FeatureConsts.NULL,
+                           FeatureConsts.BODY_TEXT,
+                           FeatureConsts.BODY_XML,
+                           FeatureConsts.CURRENT_TIME_MILLIS,
+                           FeatureConsts.DATE_NOW,
+                           FeatureConsts.SNOW_UID,
+                           FeatureConsts.UUID
+                    ).contains(feature)){
+                        reportFlag=false;
+                    }
+                }
+                if(reportFlag) {
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] " + ", at " + AbstractExecutorNode.getNodeLocation(node) + " for attribute: [" + attr + "]" + node.getAttrFeatureMap().get(attr) + " maybe wrong blank value [" + test + "]");
+                }
+            }
+        }
+
         reportEnclosedCharString(test,node,warnPoster);
         List<String> features = node.getAttrFeatureMap().get(attr);
+        if(features==null || features.isEmpty()){
+            if(!test.matches("[a-zA-Z0-9_$\\.]+")){
+                warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] " + ", at " + AbstractExecutorNode.getNodeLocation(node) + " for attribute: [" + attr + "]" + node.getAttrFeatureMap().get(attr) + " maybe wrong visit expression [" + test + "]");
+            }
+        }
         if (features != null && !features.isEmpty()) {
             for (String feature : features) {
                 reportExprFeatureGrammar(test, feature, node, "attribute " + attr, warnPoster);

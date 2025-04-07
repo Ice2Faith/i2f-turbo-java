@@ -3,11 +3,13 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.extension.groovy.GroovyScript;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.LangConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.script.EvalScriptProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,7 @@ import java.util.function.Consumer;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangEvalGroovyNode extends AbstractExecutorNode {
+public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScriptProvider {
     public static final String TAG_NAME = TagConsts.LANG_EVAL_GROOVY;
 
     public static void main(String[] args){
@@ -57,6 +59,17 @@ public class LangEvalGroovyNode extends AbstractExecutorNode {
             executor.visitSet(context, result, obj);
         }
 
+    }
+
+    @Override
+    public boolean support(String lang) {
+        return LangConsts.GROOVY.equals(lang);
+    }
+
+    @Override
+    public Object eval(String script, Map<String,Object> params,JdbcProcedureExecutor executor) {
+        Object obj = evalGroovyScript(script, params, executor);
+        return obj;
     }
 
     public static Object evalGroovyScript(String script, Map<String,Object> context, JdbcProcedureExecutor executor) {

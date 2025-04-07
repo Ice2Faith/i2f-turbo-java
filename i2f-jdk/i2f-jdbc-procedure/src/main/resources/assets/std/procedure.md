@@ -57,6 +57,79 @@
 - 可以使用哪些XML节点，节点应该怎么使用?
 - 查看procedure.xml中的节点注释描述
 
+#### 修饰符 feature
+- 为了在XML中进行数据类型标注或者转换工作
+- 因此引入属性修饰符来进行控制
+- 属性修饰符实际上是一个Function转换，即对给定的参数进行一些列转换之后得到另一个值
+- 也就是说，对应了这样的函数定义
+```shell
+Object feature(Object obj);
+```
+- 这些修饰符，提供了不同的能力
+- 比如，提供数据类型装换的
+```shell
+.int 整型
+.double 浮点型
+.float 短浮点型
+.string 字符串
+.long 长整型
+.short 短整型
+.char 字符型
+.byte 字节型
+.boolean 布尔型
+```
+- 比如，要定义一个值
+```xml
+<lang-set result="v_int" value.int="1"/>
+<lang-set result="v_str" value.string="abc"/>
+<lang-set result="v_ok" value.boolean="true"/>
+```
+- 就比如上述的例子中，因为lang-set的语法定义中，对于value值的访问策略默认是visit进行访问
+- 也就是将value属性的值视作变量名
+- 因此，如果这样写，就是访问名为abc的变量，而不是将字符串"abc"进行赋值
+```xml
+<lang-set result="v_str" value="abc"/>
+```
+- 因此，就需要和你的使用修饰符进行设置对应的值
+- 同时，修饰符是支持顺序连接的
+- 直接来看例子
+```xml
+<lang-set result="v_ok" value.visit.string.null.is-null="v_obj"/>
+```
+- 这个例子就属于是复杂的应用了
+- 下面，就对这个进行解析
+- 直接来看伪代码
+```shell
+tmp=visit(v_obj); // 访问v_obj对象
+tmp=string(tmp); // 然后转换为string类型
+tmp=null; // 然后转换为null类型，到这里，值就直接变成了null
+tmp=isNull(tmp); // 然后判断是否为空
+```
+- 通过这个解析，就可以得到结果v_ok的值为true
+- 但是，如果这样写
+```xml
+<lang-set result="v_ok" value.string.null.is-null="v_obj"/>
+```
+- 那么等价的伪代码就变了
+```shell
+tmp="v_obj"; // 看做字符串字面值
+tmp=null; // 然后转换为null类型，到这里，值就直接变成了null
+tmp=isNull(tmp); // 然后判断是否为空
+```
+- 看出区别了吧，因为第一个修饰符是string，直接将属性值看做字符串
+- 而不是默认的visit，这就改变了默认的节点行为
+- 如果要保留原来的默认行为，就需要像之前写的一样，先使用visit进行访问对象
+- 到这里，就已经说明了feature属性修饰符的用法和作用
+- 当然，要注意例如null这种修饰符，会丢弃之前的值，直接进行赋值
+- 不过，需要注意的是
+- 修饰符，按照顺序进行解析执行，如果遇到不支持的修饰符，也就是未定义的修饰符
+- 将会跳过，继续执行，因此需要注意拼写
+- 同时，这也为你提供了自定义一些标记的能力
+- 因为这些标记会被跳过不会被执行
+- 所以，常用的标记可以是：in,out,inout等用来表示形参是入参还是出参
+- 最后，每个节点属性对于修饰符的默认性质是不一样的，需要根据节点定义的描述来决定
+- 更多的修饰符，参见：procedure.xml中对【属性修饰符】的说明
+
 ### 存储过程定义
 - 本框架的目的就是进行过程的转换操作
 - 因此这也是必要的一部分
@@ -1420,6 +1493,43 @@ public class ContextHolder {
     }
 }
 ```
+
+## 拓展自己的属性修饰符feature
+- 之前已经介绍过属性修饰符了
+- 因为其直接作用在属性上，方便了一些场景的处理
+- 因此，你也可能有需要拓展自己属性修饰符的场景
+- 因为属性修饰符实际上是一个转换操作
+- 所以，你只需要定义自己的转换操作函数，将他注册到环境中即可
+- 注册保存位置
+```java
+public class ContextHolder {
+    // 用于静态直接根据方法名在这个集合类中查找同名的方法，使用于BasicJdbcProcedureExecutor的Feature中，方法需要为public static的，且一个入参，具有返回值
+    public static final ConcurrentHashMap<String, IMethod> CONVERT_METHOD_MAP = new ConcurrentHashMap<>();
+
+    // 使用于BasicJdbcProcedureExecutor的Feature中
+    public static final ConcurrentHashMap<String, Function> CONVERT_FUNC_MAP = new ConcurrentHashMap<>();
+
+}
+```
+- 可以直接将方法或者类中的方法进行静态注册
+```java
+public class ContextHolder {
+    public static void registryAllConvertMethods(Class<?>... classes) {
+        ...
+    }
+    public static void registryAllConvertMethods(Method... methods) {
+        ...
+    }
+}
+```
+- 这些函数需要满足以下定义
+```java
+public static R convert(T obj);
+```
+- 也就是说，需要时公开的、静态函数
+- 并且需要具有一个形参和返回值
+- 至于形参和返回值的类型不做要求
+
 
 ## 拓展自己的XML节点
 - 目前内置的节点主要分为两类lang-(逻辑控制类)和sql-(数据库操作类)两类

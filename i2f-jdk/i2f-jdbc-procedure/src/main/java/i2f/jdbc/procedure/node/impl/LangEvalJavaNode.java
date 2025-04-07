@@ -22,6 +22,7 @@ import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.procedure.annotations.JdbcProcedure;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.LangConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
@@ -40,6 +41,7 @@ import i2f.jdbc.procedure.provider.types.xml.impl.AbstractJdbcProcedureXmlNodeMe
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ListableJdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.lru.LruMap;
@@ -67,7 +69,7 @@ import java.util.regex.Pattern;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangEvalJavaNode extends AbstractExecutorNode {
+public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScriptProvider {
     public static final String TAG_NAME = TagConsts.LANG_EVAL_JAVA;
     public static final String CLASS_NAME_HOLDER = "$#$##$###";
     public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s*");
@@ -180,6 +182,17 @@ public class LangEvalJavaNode extends AbstractExecutorNode {
             executor.visitSet(context, result, obj);
         }
 
+    }
+
+    @Override
+    public boolean support(String lang) {
+        return LangConsts.JAVA.equals(lang);
+    }
+
+    @Override
+    public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
+        Object obj = evalJava(params, executor, "", "", script);
+        return obj;
     }
 
     public static String castAsImportPackageName(String className) {
