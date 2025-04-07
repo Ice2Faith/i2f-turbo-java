@@ -1,14 +1,12 @@
 package i2f.jdbc.procedure.node.impl;
 
-import i2f.jdbc.procedure.consts.AttrConsts;
-import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.consts.TagConsts;
-import i2f.jdbc.procedure.consts.XProc4jConsts;
+import i2f.jdbc.procedure.consts.*;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.script.EvalScriptProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +16,7 @@ import java.util.function.Consumer;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangEvalNode extends AbstractExecutorNode {
+public class LangEvalNode extends AbstractExecutorNode implements EvalScriptProvider {
     public static final String TAG_NAME = TagConsts.LANG_EVAL;
     public static void main(String[] args){
         /*language=scala*/
@@ -79,4 +77,14 @@ public class LangEvalNode extends AbstractExecutorNode {
         }
     }
 
+    @Override
+    public boolean support(String lang) {
+        return LangConsts.OGNL.equals(lang);
+    }
+
+    @Override
+    public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
+        Object val = executor.eval(script, params);
+        return val;
+    }
 }

@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.page.ApiOffsetSize;
@@ -41,6 +42,12 @@ public interface JdbcProcedureExecutor {
         }
         return false;
     }
+
+    void registryExecutorNode(ExecutorNode node);
+
+    void registryEvalScriptProvider(EvalScriptProvider provider);
+
+    List<EvalScriptProvider> getEvalScriptProviders();
 
     JdbcProcedureContext getContext();
 
@@ -302,6 +309,8 @@ public interface JdbcProcedureExecutor {
     }
 
     Object eval(String script, Object params);
+
+    Object evalScript(String lang,String script,Map<String,Object> params);
 
     void visitSet(Map<String, Object> params, String result, Object value);
 

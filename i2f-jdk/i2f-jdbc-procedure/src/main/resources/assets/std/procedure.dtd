@@ -402,7 +402,7 @@
         <!ATTLIST procedure-call params CDATA #IMPLIED>
         <!ATTLIST procedure-call refid CDATA #IMPLIED>
         <!ATTLIST procedure-call result CDATA #IMPLIED>
-        <!ATTLIST procedure-call params_share CDATA #IMPLIED>
+        <!ATTLIST procedure-call params-share CDATA #IMPLIED>
 
         <!ATTLIST procedure-call refid.visit CDATA #IMPLIED>
 
@@ -410,7 +410,7 @@
         <!ATTLIST function-call params CDATA #IMPLIED>
         <!ATTLIST function-call refid CDATA #IMPLIED>
         <!ATTLIST function-call result CDATA #IMPLIED>
-        <!ATTLIST function-call params_share CDATA #IMPLIED>
+        <!ATTLIST function-call params-share CDATA #IMPLIED>
 
         <!ATTLIST function-call refid.visit CDATA #IMPLIED>
 

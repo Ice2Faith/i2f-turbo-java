@@ -27,6 +27,7 @@ import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
@@ -69,12 +70,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     protected volatile IEnvironment environment=new ListableDelegateEnvironment();
     protected volatile INamingContext namingContext=new ListableNamingContext();
     protected final CopyOnWriteArrayList<ExecutorNode> nodes = new CopyOnWriteArrayList<>();
+    protected final CopyOnWriteArrayList<EvalScriptProvider> evalScriptProviders=new CopyOnWriteArrayList<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
 
     {
-        addNodes();
-        this.nodes.addAll(defaultExecutorNodes());
+        List<ExecutorNode> list = defaultExecutorNodes();
+        for (ExecutorNode node : list) {
+            registryExecutorNode(node);
+        }
     }
 
     public BasicJdbcProcedureExecutor(){
@@ -91,10 +95,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         this.namingContext=namingContext;
     }
 
-
-    protected void addNodes(){
-
-    }
 
     public static List<ExecutorNode> defaultExecutorNodes() {
         List<ExecutorNode> ret = new ArrayList<>();
@@ -163,6 +163,30 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
 
         return ret;
+    }
+
+    public void registryExecutorNode(ExecutorNode node){
+        if(node==null){
+            return;
+        }
+        this.nodes.add(node);
+        if(node instanceof EvalScriptProvider){
+            EvalScriptProvider provider = (EvalScriptProvider) node;
+            this.evalScriptProviders.add(provider);
+        }
+    }
+
+    @Override
+    public void registryEvalScriptProvider(EvalScriptProvider provider) {
+        if(provider==null){
+            return;
+        }
+        this.evalScriptProviders.add(provider);
+    }
+
+    @Override
+    public List<EvalScriptProvider> getEvalScriptProviders(){
+        return this.evalScriptProviders;
     }
 
     @Override
@@ -876,6 +900,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     public Object innerEval(String script, Object params) {
         return MybatisMapperInflater.INSTANCE.evalExpression(script, params);
+    }
+
+    @Override
+    public Object evalScript(String lang, String script, Map<String,Object> params) {
+        EvalScriptProvider provider = null;
+        for (EvalScriptProvider item : evalScriptProviders) {
+            if(item.support(lang)){
+                provider=item;
+                break;
+            }
+        }
+        if(provider==null){
+            throw new ThrowSignalException("eval script provider not found for lang="+lang);
+        }
+        prepareParams(params);
+        return provider.eval(script, params,this);
     }
 
     @Override

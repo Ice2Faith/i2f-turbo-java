@@ -298,14 +298,14 @@ eval-ts使用TinyScript引擎进行处理
     直接使用目标变量age名来传递值
     params默认以visit访问，等价于 params.visit
     result为保存调用的参数，可用于从中获取调用的结果，如果同时指定的params，则result可以不用指定，因为result里面的值，实际上就是params里面的值
-    params_share默认以boolean访问，等价于params_share.boolean
+    params-share默认以boolean访问，等价于params-share.boolean
     其他传入参数默认以visit访问，等价于 age.visit
     refid的值，不仅仅只有procedure标签上的ID才算，其他的XML标签上的ID也算
     同时，在bean中，如果是JdbcProcedureJavaCaller的实现类，同时类上具有@JdbcProcedure注解指定过程名称
     如果被加入到beans中的话，注解指定的名称也可以使用，这样就实现了JAVA类实现与XML脚本实现的统一调用
-    如果params_share指定为true，则直接使用本过程使用的上下文作为调用上下文，不会产生新的上下文，主要用于一些特殊场景中使用
+    如果params-share指定为true，则直接使用本过程使用的上下文作为调用上下文，不会产生新的上下文，主要用于一些特殊场景中使用
      -->
-    <procedure-call refid="" params="" age="" result="" params_share=""/>
+    <procedure-call refid="" params="" age="" result="" params-share=""/>
     <!-- 举例 -->
     <script-segment id="demo">
         <!-- 调用函数 -->
@@ -324,11 +324,11 @@ eval-ts使用TinyScript引擎进行处理
         <procedure-call refid="SP_MAIN" params="callParams"/>
 
         <!-- 共享过程上下文参数 -->
-        <procedure-call refid="SP_MAIN" params_share="true"/>
+        <procedure-call refid="SP_MAIN" params-share="true"/>
 
         <!-- 动态执行过程名称 -->
         <lang-set result="V_SP_NAME" value.string="SP_MAIN"/>
-        <procedure-call refid.visit="V_SP_NAME" params_share="true"/>
+        <procedure-call refid.visit="V_SP_NAME" params-share="true"/>
     </script-segment>
 
 
@@ -341,7 +341,7 @@ eval-ts使用TinyScript引擎进行处理
     内部实际上是通过子过程的params对象Map绑定的
     这个result就是绑定到ParamsConsts.RETURN绑定的键上
     -->
-    <function-call refid="" params="" age="" result="" params_share=""/>
+    <function-call refid="" params="" age="" result="" params-share=""/>
     <!-- 举例 -->
     <script-segment id="demo">
         <!-- result 就是函数的返回值,其他参数的用法和procedure-call一致 -->

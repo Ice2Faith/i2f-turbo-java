@@ -1,14 +1,17 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.LangConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.script.ScriptProvider;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +19,7 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangEvalJavascriptNode extends AbstractExecutorNode {
+public class LangEvalJavascriptNode extends AbstractExecutorNode implements EvalScriptProvider {
     public static final String TAG_NAME = TagConsts.LANG_EVAL_JAVASCRIPT;
     public static final String ALIAS_TAG_NAME=TagConsts.LANG_EVAL_JS;
     public static void main(String[] args){
@@ -48,6 +51,16 @@ public class LangEvalJavascriptNode extends AbstractExecutorNode {
             executor.visitSet(context, result, obj);
         }
 
+    }
+
+    @Override
+    public boolean support(String lang) {
+        return Arrays.asList(LangConsts.JAVASCRIPT,LangConsts.JS).contains(lang);
+    }
+
+    @Override
+    public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
+        return evalJavascript(script,params,executor);
     }
 
     public static Object evalJavascript(String script, Object context, JdbcProcedureExecutor executor) {
