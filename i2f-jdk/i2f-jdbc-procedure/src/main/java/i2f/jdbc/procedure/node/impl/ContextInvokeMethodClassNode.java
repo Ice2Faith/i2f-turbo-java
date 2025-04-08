@@ -36,7 +36,7 @@ public class ContextInvokeMethodClassNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String clazz = node.getTagAttrMap().get(AttrConsts.CLASS);
-        if (clazz != null && !"".equals(clazz)) {
+        if (clazz != null && !clazz.isEmpty()) {
             Class<?> cls = executor.loadClass(clazz);
             if (cls != null) {
                 ContextHolder.registryAllInvokeMethods(cls);

@@ -60,13 +60,13 @@ public class LangForiNode extends AbstractExecutorNode {
         bakParams.put(indexName, executor.visit(indexName,context));
 
         int begin = 0;
-        if (beginExpr != null && !beginExpr.isEmpty()) {
-            begin = (int) executor.attrValue(AttrConsts.BEGIN, FeatureConsts.INT, node, context);
+        if (beginExpr != null) {
+            begin = executor.convertAs(executor.attrValue(AttrConsts.BEGIN, FeatureConsts.INT, node, context),Integer.class);
         }
-        int end = (int) executor.attrValue(AttrConsts.END, FeatureConsts.INT, node, context);
+        int end = executor.convertAs(executor.attrValue(AttrConsts.END, FeatureConsts.INT, node, context),Integer.class);
         int incr = 1;
-        if (incrExpr != null && !incrExpr.isEmpty()) {
-            incr = (int) executor.attrValue(AttrConsts.INCR, FeatureConsts.INT, node, context);
+        if (incrExpr != null) {
+            incr = executor.convertAs(executor.attrValue(AttrConsts.INCR, FeatureConsts.INT, node, context),Integer.class);
         }
 
         boolean loop = begin < end;

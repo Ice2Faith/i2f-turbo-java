@@ -468,9 +468,18 @@ public class MybatisMapperInflater {
 
     public BindSql replaceParameters(String sql, Map<String, Object> workParam) {
         List<Object> args = new ArrayList<>();
-        String str = RegexUtil.regexFindAndReplace(sql, "[\\$|#]\\{\\s*[^}]+\\s*\\}", (patten) -> {
+        // ${aaa} #{bbb} $!{aaa} #!{bbb}
+        // !的含义，如果取到的值为null,则替换为''空字符串
+        // 一般只使用在${}中，避免拼接null
+        // 一般不在#{}中使用，因为这样使用的占位符没什么意义，除非实在需要这样做
+        String str = RegexUtil.regexFindAndReplace(sql, "[\\$|#](\\!)?\\{\\s*[^}]+\\s*\\}", (patten) -> {
             boolean isDolar = patten.startsWith("$");
             patten = patten.substring(2, patten.length() - 1);
+            boolean emptyFlag=false;
+            if(patten.startsWith("{")){
+                patten=patten.substring(1);
+                emptyFlag=true;
+            }
             String expression = patten.trim();
             if (isDolar) {
                 Object obj = evalExpression(expression, workParam);
@@ -479,6 +488,11 @@ public class MybatisMapperInflater {
                     args.addAll(bql.getArgs());
                     return bql.getSql();
                 }
+               if(obj==null){
+                   if(emptyFlag){
+                       obj="";
+                   }
+               }
                 return obj == null ? "" : String.valueOf(obj);
             } else {
                 Object obj = null;
@@ -491,6 +505,11 @@ public class MybatisMapperInflater {
                         BindSql bql = (BindSql) obj;
                         args.addAll(bql.getArgs());
                         return bql.getSql();
+                    }
+                    if(obj==null){
+                        if(emptyFlag){
+                            obj="";
+                        }
                     }
                     String handlerName = parameters.get(HANDLER_KEY);
                     String javaTypeName = parameters.get(JAVA_TYPE_KEY);
@@ -553,6 +572,11 @@ public class MybatisMapperInflater {
                     BindSql bql = (BindSql) obj;
                     args.addAll(bql.getArgs());
                     return bql.getSql();
+                }
+                if(obj==null){
+                    if(emptyFlag){
+                        obj="";
+                    }
                 }
                 args.add(obj);
                 return "?";

@@ -103,7 +103,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
             try {
                 Object res = ReflectResolver.execConstructor(constructor,callArgs);
 
-                if (result != null && !result.isEmpty()) {
+                if (result != null) {
                     res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
                     executor.visitSet(context, result, res);
                 }
@@ -152,7 +152,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
 
                 Object res = ReflectResolver.execMethod(invokeObject,method,callArgs);
 
-                if (result != null && !result.isEmpty()) {
+                if (result != null) {
                     res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
                     executor.visitSet(context, result, res);
                 }

@@ -42,7 +42,7 @@ public class LangLatchAwaitNode extends AbstractExecutorNode {
         long timeout = -1;
         String ttl = node.getTagAttrMap().get(AttrConsts.TIMEOUT);
         if(ttl!=null && !ttl.isEmpty()){
-            timeout=(long) executor.attrValue(AttrConsts.TIMEOUT, FeatureConsts.LONG, node, context);
+            timeout=executor.convertAs(executor.attrValue(AttrConsts.TIMEOUT, FeatureConsts.LONG, node, context),Long.class);
         }
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
         CountDownLatch latch = (CountDownLatch) executor.attrValue(AttrConsts.NAME, FeatureConsts.VISIT, node, context);

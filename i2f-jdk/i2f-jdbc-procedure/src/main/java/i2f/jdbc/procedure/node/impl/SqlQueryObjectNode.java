@@ -31,7 +31,7 @@ public class SqlQueryObjectNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
         BindSql bql = SqlDialect.getSqlDialectList(datasource, node, context, executor);
-        Boolean limited = (Boolean) executor.attrValue(AttrConsts.LIMITED, FeatureConsts.BOOLEAN, node, context);
+        boolean limited = executor.toBoolean(executor.attrValue(AttrConsts.LIMITED, FeatureConsts.BOOLEAN, node, context));
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         Class<?> resultType = (Class<?>) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.CLASS, node, context);
         if (resultType == null) {
@@ -39,7 +39,7 @@ public class SqlQueryObjectNode extends AbstractExecutorNode {
         }
 
         ApiOffsetSize page = null;
-        if (limited != null && limited) {
+        if (limited) {
             page = new ApiOffsetSize(null, 1);
         }
         if (page != null) {
@@ -51,7 +51,7 @@ public class SqlQueryObjectNode extends AbstractExecutorNode {
         Object obj = executor.sqlQueryObject(datasource, bql, context, resultType);
         boolean isEmpty=(obj==null);
         executor.logDebug(() -> "found data is null: " + isEmpty + "! at " + getNodeLocation(node));
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, obj);
         }

@@ -177,7 +177,7 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
 
         Object obj = evalJava(context, executor, importSegment, memberSegment, bodySegment);
 
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, obj);
         }

@@ -29,7 +29,7 @@ public class LangReturnNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
-        if(value!=null && !value.isEmpty()){
+        if(value!=null){
             Object val = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
             executor.visitSet(context,ParamsConsts.RETURN,val);
         }

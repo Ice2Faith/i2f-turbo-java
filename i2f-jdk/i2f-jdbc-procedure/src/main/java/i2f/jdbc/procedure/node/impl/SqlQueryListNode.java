@@ -32,8 +32,8 @@ public class SqlQueryListNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
         BindSql bql = SqlDialect.getSqlDialectList(datasource, node, context, executor);
-        Integer offset = (Integer) executor.attrValue(AttrConsts.OFFSET, FeatureConsts.INT, node, context);
-        Integer limit = (Integer) executor.attrValue(AttrConsts.LIMIT, FeatureConsts.INT, node, context);
+        Integer offset = executor.convertAs( executor.attrValue(AttrConsts.OFFSET, FeatureConsts.INT, node, context),Integer.class);
+        Integer limit = executor.convertAs( executor.attrValue(AttrConsts.LIMIT, FeatureConsts.INT, node, context),Integer.class);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         Class<?> resultType = (Class<?>) executor.attrValue(AttrConsts.RESULT_TYPE, FeatureConsts.CLASS, node, context);
         if (resultType == null) {
@@ -52,7 +52,7 @@ public class SqlQueryListNode extends AbstractExecutorNode {
         }
         List<?> row = executor.sqlQueryList(datasource, bql, context, resultType);
         executor.logDebug(() -> "found data is empty: " + row.isEmpty() + "! at " + getNodeLocation(node));
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             executor.visitSet(context, result, row);
         }
     }

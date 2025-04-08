@@ -35,7 +35,7 @@ public class SqlScriptNode extends AbstractExecutorNode {
         if(executor.isDebug()){
             bql=bql.concat(getTrackingComment(node));
         }
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             executor.visitSet(context, result, bql);
         }
     }

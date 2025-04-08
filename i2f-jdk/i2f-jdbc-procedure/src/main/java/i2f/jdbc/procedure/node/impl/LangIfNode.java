@@ -43,7 +43,7 @@ public class LangIfNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        boolean ok = (boolean) executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, node, context);
+        boolean ok = executor.toBoolean(executor.toBoolean(executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, node, context)));
         if (ok) {
             executor.execAsProcedure(node, context, false, false);
         }

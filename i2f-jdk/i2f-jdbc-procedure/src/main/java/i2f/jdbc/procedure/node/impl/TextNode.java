@@ -24,7 +24,7 @@ public class TextNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         String text = node.getTextBody();
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             Object obj = executor.resultValue(text, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, obj);
         }

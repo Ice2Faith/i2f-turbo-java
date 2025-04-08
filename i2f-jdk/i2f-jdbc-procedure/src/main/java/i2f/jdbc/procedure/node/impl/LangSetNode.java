@@ -28,7 +28,7 @@ public class LangSetNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         Object value = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             value = executor.resultValue(value, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, value);
         }

@@ -123,19 +123,17 @@ public class SqlEtlNode extends AbstractExecutorNode {
         }
 
 
-        Integer readBatchSize = (Integer) executor.attrValue(AttrConsts.READ_BATCH_SIZE, FeatureConsts.INT, node, context);
-        Integer writeBatchSize = (Integer) executor.attrValue(AttrConsts.WRITE_BATCH_SIZE, FeatureConsts.INT, node, context);
-        Boolean beforeTruncate = (Boolean) executor.attrValue(AttrConsts.BEFORE_TRUNCATE, FeatureConsts.BOOLEAN, node, context);
-        Integer commitSize = (Integer) executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context);
+        Integer readBatchSize = executor.convertAs(executor.attrValue(AttrConsts.READ_BATCH_SIZE, FeatureConsts.INT, node, context),Integer.class);
+        Integer writeBatchSize = executor.convertAs(executor.attrValue(AttrConsts.WRITE_BATCH_SIZE, FeatureConsts.INT, node, context),Integer.class);
+        boolean beforeTruncate = executor.toBoolean( executor.attrValue(AttrConsts.BEFORE_TRUNCATE, FeatureConsts.BOOLEAN, node, context));
+        Integer commitSize = executor.convertAs(executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context),Integer.class);
         if (readBatchSize == null) {
             readBatchSize = 2000;
         }
         if (writeBatchSize == null) {
             writeBatchSize = 500;
         }
-        if (beforeTruncate == null) {
-            beforeTruncate = false;
-        }
+
         if (commitSize == null) {
             commitSize = writeBatchSize;
         }

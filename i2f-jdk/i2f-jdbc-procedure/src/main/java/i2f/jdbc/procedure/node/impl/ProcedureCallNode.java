@@ -40,7 +40,7 @@ public class ProcedureCallNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String refid = (String)executor.attrValue(AttrConsts.REFID,FeatureConsts.STRING,node,context);
-        Boolean paramsShare=(Boolean) executor.attrValue(AttrConsts.PARAMS_SHARE,FeatureConsts.BOOLEAN,node,context);
+        boolean paramsShare=executor.toBoolean(executor.attrValue(AttrConsts.PARAMS_SHARE,FeatureConsts.BOOLEAN,node,context));
 
         boolean needPrepareParams=true;
         Map<String, Object> callParams = null;
@@ -51,7 +51,7 @@ public class ProcedureCallNode extends AbstractExecutorNode {
                 callParams = (Map<String, Object>) value;
             }
         }
-        if(paramsShare!=null && paramsShare){
+        if(paramsShare){
             callParams=context;
             needPrepareParams=false;
         }
@@ -95,7 +95,7 @@ public class ProcedureCallNode extends AbstractExecutorNode {
         }
 
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        if(result!=null && !result.isEmpty()){
+        if(result!=null){
             executor.visitSet(context,result,callParams);
         }
     }

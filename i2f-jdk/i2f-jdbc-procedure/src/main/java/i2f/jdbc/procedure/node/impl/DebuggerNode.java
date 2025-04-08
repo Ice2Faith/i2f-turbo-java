@@ -43,8 +43,8 @@ public class DebuggerNode extends AbstractExecutorNode {
         boolean ok=true;
         String tag=node.getTagAttrMap().get(AttrConsts.TAG);
         String expr = node.getTagAttrMap().get(AttrConsts.TEST);
-        if(expr!=null && !expr.isEmpty()){
-            ok = (boolean) executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, node, context);
+        if(expr!=null){
+            ok = executor.toBoolean(executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, node, context));
         }
         if (ok) {
             executor.openDebugger(tag,context,expr);

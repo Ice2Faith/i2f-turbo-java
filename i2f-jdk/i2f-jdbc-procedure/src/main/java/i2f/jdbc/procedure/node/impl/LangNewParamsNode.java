@@ -36,7 +36,7 @@ public class LangNewParamsNode extends AbstractExecutorNode {
             Object value = executor.attrValue(key, FeatureConsts.VISIT, node, context);
             executor.visitSet(newParams, key, value);
         }
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             Object res = executor.resultValue(newParams, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, res);
         }

@@ -43,7 +43,7 @@ public class LangFormatNode extends AbstractExecutorNode {
         String pattern = (String) executor.attrValue(AttrConsts.PATTERN, FeatureConsts.STRING, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         value = String.format(pattern, value);
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             value = executor.resultValue(value, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, value);
         }
