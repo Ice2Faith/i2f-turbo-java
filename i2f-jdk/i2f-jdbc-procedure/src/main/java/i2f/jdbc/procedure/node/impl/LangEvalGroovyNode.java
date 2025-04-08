@@ -54,7 +54,7 @@ public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScri
         String script = node.getTextBody();
         Object obj = evalGroovyScript(script, context, executor);
 
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, obj);
         }

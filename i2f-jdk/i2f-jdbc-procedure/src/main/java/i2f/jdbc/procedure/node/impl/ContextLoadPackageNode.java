@@ -37,7 +37,7 @@ public class ContextLoadPackageNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String pkg = node.getTagAttrMap().get(AttrConsts.PACKAGE);
-        if (pkg != null && !"".equals(pkg)) {
+        if (pkg != null && !pkg.isEmpty()) {
             if (!pkg.endsWith(".")) {
                 pkg = pkg + ".";
             }
@@ -45,7 +45,7 @@ public class ContextLoadPackageNode extends AbstractExecutorNode {
         }
 
         String clazz = node.getTagAttrMap().get(AttrConsts.CLASS);
-        if (clazz != null && !"".equals(clazz)) {
+        if (clazz != null && !clazz.isEmpty()) {
             int idx = clazz.lastIndexOf(".");
             if (idx > 0) {
                 pkg = clazz.substring(0, idx + 1);

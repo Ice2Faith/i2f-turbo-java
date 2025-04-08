@@ -66,12 +66,12 @@ public class LangEvalNode extends AbstractExecutorNode implements EvalScriptProv
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
         String script = node.getTextBody();
-        if (value != null && !value.isEmpty()) {
+        if (value != null) {
             script = (String) executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
         }
         Object val = executor.eval(script, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, val);
         }

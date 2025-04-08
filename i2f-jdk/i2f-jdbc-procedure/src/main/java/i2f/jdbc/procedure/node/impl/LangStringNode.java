@@ -34,7 +34,7 @@ public class LangStringNode extends AbstractExecutorNode {
         }
         String text=rs;
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             Object res = executor.resultValue(text, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, res);
         }

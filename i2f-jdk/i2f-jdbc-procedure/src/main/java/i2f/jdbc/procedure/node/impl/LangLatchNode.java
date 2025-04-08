@@ -36,9 +36,9 @@ public class LangLatchNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        int count = (int) executor.attrValue(AttrConsts.COUNT, FeatureConsts.EVAL, node, context);
+        int count = executor.convertAs(executor.attrValue(AttrConsts.COUNT, FeatureConsts.EVAL, node, context),Integer.class);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             CountDownLatch latch = new CountDownLatch(count);
             executor.visitSet(context, result, latch);
         }

@@ -84,12 +84,9 @@ public class SqlCursorNode extends AbstractExecutorNode {
             throw new IllegalStateException("missing cursor body node!");
         }
 
-        Integer batchSize = (Integer) executor.attrValue(AttrConsts.BATCH_SIZE, FeatureConsts.INT, node, context);
+        Integer batchSize = executor.convertAs(executor.attrValue(AttrConsts.BATCH_SIZE, FeatureConsts.INT, node, context),Integer.class);
         String item = node.getTagAttrMap().get(AttrConsts.ITEM);
-        Boolean acceptBatch = (Boolean) executor.attrValue(AttrConsts.ACCEPT_BATCH, FeatureConsts.BOOLEAN, node, context);
-        if(acceptBatch==null){
-            acceptBatch=false;
-        }
+        boolean acceptBatch = executor.toBoolean(executor.attrValue(AttrConsts.ACCEPT_BATCH, FeatureConsts.BOOLEAN, node, context));
         if (item == null || item.isEmpty()) {
             item = AttrConsts.ITEM;
         }

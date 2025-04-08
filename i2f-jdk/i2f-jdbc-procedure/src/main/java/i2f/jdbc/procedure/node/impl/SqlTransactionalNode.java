@@ -38,15 +38,13 @@ public class SqlTransactionalNode extends AbstractExecutorNode {
         String datasources = (String) executor.attrValue(AttrConsts.DATASOURCES, FeatureConsts.STRING, node, context);
         String propagationStr = (String) executor.attrValue(AttrConsts.PROPAGATION, FeatureConsts.STRING, node, context);
         String isolationStr = (String) executor.attrValue(AttrConsts.ISOLATION, FeatureConsts.STRING, node, context);
-        Boolean readOnly = (Boolean) executor.attrValue(AttrConsts.READ_ONLY, FeatureConsts.BOOLEAN, node, context);
+        boolean readOnly = executor.toBoolean(executor.attrValue(AttrConsts.READ_ONLY, FeatureConsts.BOOLEAN, node, context));
         String rollbackFor = (String) executor.attrValue(AttrConsts.ROLLBACK_FOR, FeatureConsts.STRING, node, context);
         String noRollbackFor = (String) executor.attrValue(AttrConsts.NO_ROLLBACK_FOR, FeatureConsts.STRING, node, context);
 
         Propagation propagation = JdbcTrans.getJdbcTransPropagation(propagationStr);
         int isolation = JdbcTrans.getJdbcTransIsolation(isolationStr);
-        if (readOnly == null) {
-            readOnly = false;
-        }
+
         if (datasources == null) {
             datasources = "";
         }

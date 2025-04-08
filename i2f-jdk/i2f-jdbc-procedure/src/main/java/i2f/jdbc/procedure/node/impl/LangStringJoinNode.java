@@ -58,7 +58,7 @@ public class LangStringJoinNode extends AbstractExecutorNode {
         }
 
         Object value = builder.toString();
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             value = executor.resultValue(value, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, value);
         }

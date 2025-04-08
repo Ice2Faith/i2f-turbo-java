@@ -46,7 +46,7 @@ public class FunctionCallNode extends AbstractExecutorNode {
         boolean needPrepareParams=true;
         Map<String, Object> callParams = null;
         String paramsText = node.getTagAttrMap().get(AttrConsts.PARAMS);
-        if (paramsText != null && !paramsText.isEmpty()) {
+        if (paramsText != null) {
             Object value = executor.attrValue(AttrConsts.PARAMS, FeatureConsts.VISIT, node, context);
             if (value instanceof Map) {
                 callParams = (Map<String, Object>) value;

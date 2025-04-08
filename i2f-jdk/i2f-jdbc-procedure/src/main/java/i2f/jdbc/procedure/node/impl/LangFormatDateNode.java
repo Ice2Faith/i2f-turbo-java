@@ -53,7 +53,7 @@ public class LangFormatDateNode extends AbstractExecutorNode {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
             value = formatter.format((Temporal) value);
         }
-        if (result != null && !result.isEmpty()) {
+        if (result != null) {
             value = executor.resultValue(value, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, value);
         }

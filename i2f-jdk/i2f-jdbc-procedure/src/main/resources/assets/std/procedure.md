@@ -44,12 +44,64 @@
 - 其他SQL语言的可以进行参考转换
 
 ## 转换注意事项
+
+### 变量名大小写统一
 - 由于大部分数据库对于变量时忽略大小写的
 - 但是在Java环境中，变量是区分大小写的
 - 因此，转换时应该根据自身数据库是否忽略大小写
 - 决定对变量如何处理
 - 比如，在Oracle中，不区分大小写，但是Oracle都喜欢使用大写来命名
 - 因此，可以考虑将所有变量名都大写进行处理
+
+### SQL拼接过程中null值处理
+- 在一些常见的数据库中，将变量拼接到字符串中时
+- 如果变量的值为null,拼接的结果将会把null视为''空字符串
+- 因此，在进行字符串拼接是需要注意，如果拼接的目标是SQL语句的一部分
+- 需要考虑原始数据库对null的处理结果
+- 下面以Oracle为例
+- 在Oracle中，这样的语句的结果就是空字符串
+```sql
+select null||'abc' from dual
+-- 结果为 'abc'
+select concat(null,'abc') from dual
+-- 结果为 'abc'
+```
+- 但是在MySQL中，结果可能就不一样
+```sql
+select concat(null,'abc') from dual
+-- 结果为 null
+```
+- 因此，你需要根据自己的目标数据库的实际执行结果
+- 结合原来的数据库特性，进行相应的调整
+- 比如，如果目标数据库时Oracle
+- 则在使用render/sql语句中使用${}占位符时
+- 请使用$!{}代替
+- 这个!语法是velocity模板引擎提供的一种语法
+- 含义为，如果目标值为null,则渲染的结果为''空字符串
+- 同时，为了书写的体验与统一，在兼容mybatis的xml语句段中
+- 依旧允许使用$!{}语法，#!{}语法也是，含义和velocity中的一致
+- 使用案例
+```xml
+<lang-render result="v_sql">
+    select * from $!{tableName}
+</lang-render>
+
+<lang-set result="v_str" value.render="from $!{tableName} a"/>
+
+<sql-query-row result="v_user">
+    select *
+    from ${tableName} a
+    <where>
+        id=#{id}
+    </where>
+</sql-query-row>
+```
+- 在案例中，lang-render使用的是velocity引擎进行模板渲染
+- lang-set中因为使用了render修饰符，因此也是使用velocity引擎进行模板渲染
+- 而在sql-query-row中则使用的是兼容mybatis-xml的语法
+- 这两者，都支持了$!{}写法
+- 虽然，兼容mybatis-xml中也支持使用#!{}语法，但是需要你确认确实需要这样干
+- 一般情况下，我认为是不需要这么干的
 
 ## 转换对照介绍
 

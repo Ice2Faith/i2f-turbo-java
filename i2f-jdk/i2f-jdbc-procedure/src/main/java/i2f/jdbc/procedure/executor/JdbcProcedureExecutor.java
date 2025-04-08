@@ -244,6 +244,8 @@ public interface JdbcProcedureExecutor {
 
     Object resultValue(Object value, List<String> features, XmlNode node, Map<String, Object> params);
 
+    boolean toBoolean(Object obj);
+    
     void debug(boolean enable);
 
     boolean isDebug();

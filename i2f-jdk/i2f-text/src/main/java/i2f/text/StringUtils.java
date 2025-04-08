@@ -152,6 +152,20 @@ public class StringUtils {
         return str.substring(0, 1).toLowerCase() + str.substring(1);
     }
 
+    public static String toUpper(String str){
+        if(str==null){
+            return null;
+        }
+        return str.toUpperCase();
+    }
+
+    public static String toLower(String str){
+        if(str==null){
+            return null;
+        }
+        return str.toLowerCase();
+    }
+
     public static String toPascal(String str) {
         if (isEmpty(str)) {
             return str;

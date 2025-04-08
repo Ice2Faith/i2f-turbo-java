@@ -29,7 +29,7 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        Boolean await = (Boolean) executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context);
+        boolean await = executor.toBoolean(executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context));
 
         List<XmlNode> children = node.getChildren();
         if(children==null || children.isEmpty()){
@@ -52,7 +52,7 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
                 }
             }).start();
         }
-        if (await != null && await) {
+        if (await) {
             try {
                 latch.await();
             } catch (InterruptedException e) {

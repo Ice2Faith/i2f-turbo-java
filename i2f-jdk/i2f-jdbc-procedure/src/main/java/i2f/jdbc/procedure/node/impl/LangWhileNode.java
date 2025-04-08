@@ -62,7 +62,7 @@ public class LangWhileNode extends AbstractExecutorNode {
 
         boolean isFirst = true;
         int index = 0;
-        while ((boolean) executor.attrValue(AttrConsts.TEST, AttrConsts.TEST, node, context)) {
+        while (executor.toBoolean(executor.attrValue(AttrConsts.TEST, AttrConsts.TEST, node, context))) {
             executor.visitSet(context,firstName, isFirst);
             executor.visitSet(context,indexName, index);
             isFirst = false;
