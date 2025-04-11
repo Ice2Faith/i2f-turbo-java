@@ -51,7 +51,7 @@
 
     TERM_CONST_TYPE_CLASS= "regexp:(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)\\.class"
 
-    REF_EXPRESS= "regexp:\$\{[^}]*}"
+    REF_EXPRESS= "regexp:\$(\!)?\{[^}]*}"
 
     TERM_CONST_NUMBER_SCIEN_2="regexp:[0-9]+[0-9_]*\.[0-9]+[0-9_]*[eE][-]?[0-9]+[0-9_]*[fF]?"
 
