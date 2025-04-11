@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
@@ -69,25 +70,34 @@ public class ContextFunctions {
         return str.replace(target, replacement);
     }
 
-    public static String regexReplace(String str, String regex) {
-        return regexReplace(str, regex, "");
-    }
-
-    public static String regexReplace(String str, String regex, String replacement) {
-        if (str == null) {
-            return str;
-        }
-        regex = convertOracleRegexExpression(regex);
-        replacement = convertOracleRegexReplacement(replacement);
-        return str.replaceAll(regex, replacement);
-    }
-
     public static String regex_replace(String str, String regex) {
         return regex_replace(str, regex, "");
     }
 
     public static String regex_replace(String str, String regex, String replacement) {
-        return regexReplace(str, regex, replacement);
+        return regex_replace(str, regex, replacement, -1);
+    }
+
+    public static String regex_replace(String str, String regex, String replacement, int occurrence) {
+        if (str == null) {
+            return str;
+        }
+        regex = convertOracleRegexExpression(regex);
+        replacement = convertOracleRegexReplacement(replacement);
+        if (occurrence <= 0) {
+            return str.replaceAll(regex, replacement);
+        } else {
+            AtomicInteger count = new AtomicInteger(0);
+            final String reg = regex;
+            final String rep = replacement;
+            return RegexUtil.regexFindAndReplace(str, regex, (s) -> {
+                count.incrementAndGet();
+                if (count.get() == occurrence) {
+                    return s.replaceFirst(reg, rep);
+                }
+                return s;
+            });
+        }
     }
 
     public static String regexp_replace(String str, String regex) {
@@ -95,21 +105,14 @@ public class ContextFunctions {
     }
 
     public static String regexp_replace(String str, String regex, String replacement) {
-        return regexReplace(str, regex, replacement);
+        return regex_replace(str, regex, replacement);
     }
 
-    public static String regexReplaceIgnoreCase(String str, String regex) {
-        return regexReplaceIgnoreCase(str, regex, "");
+    public static String regexp_replace(String str, String regex, String replacement, int occurrence) {
+        return regex_replace(str, regex, replacement, occurrence);
     }
 
-    public static String regexReplaceIgnoreCase(String str, String regex, String replacement) {
-        if (str == null) {
-            return str;
-        }
-        return regexReplace(str, "(?i)" + regex, replacement);
-    }
-
-    public static boolean regexLike(String str, String regex) {
+    public static boolean regex_like(String str, String regex) {
         if (str == null) {
             return false;
         }
@@ -117,20 +120,8 @@ public class ContextFunctions {
         return str.matches(regex);
     }
 
-    public static boolean regex_like(String str, String regex) {
-        return regexLike(str, regex);
-    }
-
     public static boolean regexp_like(String str, String regex) {
-        return regexLike(str, regex);
-    }
-
-
-    public static boolean regexLikeIgnoreCase(String str, String regex) {
-        if (str == null) {
-            return false;
-        }
-        return regexLike(str, "(?i)" + regex);
+        return regex_like(str, regex);
     }
 
     public static String trim(String str) {
@@ -300,21 +291,88 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(val, clazz);
     }
 
+    public static final String[][] CHRONO_UNIT_MAPPING = {
+            {"day", "DAYS"},
+            {"dd", "DAYS"},
+            {"month", "MONTHS"},
+            {"mon", "MONTHS"},
+            {"mm", "MONTHS"},
+            {"year", "YEARS"},
+            {"yyyy", "YEARS"},
+            {"minute", "MINUTES"},
+            {"min", "MINUTES"},
+            {"mi", "MINUTES"},
+            {"second", "SECONDS"},
+            {"sec", "SECONDS"},
+            {"ss", "SECONDS"},
+            {"hour", "HOURS"},
+            {"hh", "HOURS"},
+            {"mill", "MILLIS"},
+            {"ms", "MILLIS"},
+            {"sss", "MILLIS"},
+            {"week", "WEEKS"},
+            {"ww", "WEEKS"},
+            {"micro", "MICROS"},
+            {"nano", "NANOS"},
+            {"ns", "NANOS"},
+
+    };
+
+    public static ChronoUnit chrono_unit(String unit) {
+        if (unit == null || unit.isEmpty()) {
+            return ChronoUnit.DAYS;
+        }
+        unit = unit.trim();
+        try {
+            ChronoUnit ret = ChronoUnit.valueOf(unit.toUpperCase());
+            if (ret != null) {
+                return ret;
+            }
+        } catch (IllegalArgumentException e) {
+
+        }
+
+        for (String[] arr : CHRONO_UNIT_MAPPING) {
+            if (arr[0].equalsIgnoreCase(unit)) {
+                try {
+                    ChronoUnit ret = ChronoUnit.valueOf(unit.toUpperCase());
+                    if (ret != null) {
+                        return ret;
+                    }
+                } catch (IllegalArgumentException e) {
+
+                }
+            }
+        }
+        return ChronoUnit.DAYS;
+    }
+
+    public static Object date_sub(Object date, String unit, long interval) {
+        return date_add(date, unit, -interval);
+    }
+
     public static Object date_add(Object date, String unit, long interval) {
         if (date == null) {
             return null;
         }
-        if (unit == null || unit.isEmpty()) {
-            unit = ChronoUnit.DAYS.toString();
-        }
-        ChronoUnit chronoUnit = ChronoUnit.valueOf(unit.trim().toUpperCase());
+        ChronoUnit chronoUnit = chrono_unit(unit);
         LocalDateTime v = (LocalDateTime) ObjectConvertor.tryConvertAsType(date, LocalDateTime.class);
         LocalDateTime rv = v.plus(interval, chronoUnit);
         Class<?> rawType = date.getClass();
         return ObjectConvertor.tryConvertAsType(rv, rawType);
     }
 
-    public static Date to_date(String str, String pattern) {
+    public static Date to_date(Object obj, String pattern) {
+        String str = null;
+        if (obj == null) {
+            str = null;
+        } else if (obj instanceof CharSequence
+                || obj instanceof Appendable
+                || obj instanceof String) {
+            str = String.valueOf(obj);
+        } else {
+            str = String.valueOf(obj);
+        }
         if (str == null || str.isEmpty()) {
             return null;
         }
@@ -634,11 +692,19 @@ public class ContextFunctions {
         return str.indexOf(sstr);
     }
 
+    public static String substr(String str, int index) {
+        return substr(str, index, -1);
+    }
+
     public static String substr(String str, int index, int len) {
         if (str == null) {
             return str;
         }
-        return str.substring(index, index + len);
+        if (len >= 0) {
+            return str.substring(index, index + len);
+        } else {
+            return str.substring(index);
+        }
     }
 
     public static String[] splitRegex(String str, String regex) {
@@ -659,41 +725,83 @@ public class ContextFunctions {
         return arr;
     }
 
-    public static boolean like(Object obj,String substr){
-        if(obj==null || substr==null){
+    public static boolean contains(Object obj, Object substr) {
+        if (obj == null || substr == null) {
             return false;
         }
-        if(substr.isEmpty()){
+        String sstr = (String) ObjectConvertor.tryConvertAsType(substr, String.class);
+        if (sstr == null || sstr.isEmpty()) {
             return true;
         }
         String str = (String) ObjectConvertor.tryConvertAsType(obj, String.class);
-        return str.contains(substr);
+        if (str == null) {
+            return false;
+        }
+        return str.contains(sstr);
     }
 
-    public static boolean llike(Object obj,String substr){
-        return likel(obj,substr);
+    public static boolean like(Object obj, Object substr) {
+        return contains(obj, substr);
     }
-    public static boolean likel(Object obj,String substr){
-        if(obj==null || substr==null){
+
+    public static boolean llike(Object obj, Object substr) {
+        return likel(obj, substr);
+    }
+
+    public static boolean likel(Object obj, Object substr) {
+        return startsWith(obj, substr);
+    }
+
+    public static boolean startsWith(Object obj, Object substr) {
+        if (obj == null || substr == null) {
             return false;
         }
-        if(substr.isEmpty()){
+        String sstr = (String) ObjectConvertor.tryConvertAsType(substr, String.class);
+        if (sstr == null || sstr.isEmpty()) {
             return true;
         }
         String str = (String) ObjectConvertor.tryConvertAsType(obj, String.class);
-        return str.startsWith(substr);
-    }
-    public static boolean rlike(Object obj,String substr){
-        return liker(obj,substr);
-    }
-    public static boolean liker(Object obj,String substr){
-        if(obj==null || substr==null){
+        if (str == null) {
             return false;
         }
-        if(substr.isEmpty()){
+        return str.startsWith(sstr);
+    }
+
+    public static boolean rlike(Object obj, String substr) {
+        return liker(obj, substr);
+    }
+
+    public static boolean liker(Object obj, Object substr) {
+        return endsWith(obj, substr);
+    }
+
+    public static boolean endsWith(Object obj, Object substr) {
+        if (obj == null || substr == null) {
+            return false;
+        }
+        String sstr = (String) ObjectConvertor.tryConvertAsType(substr, String.class);
+        if (sstr == null || sstr.isEmpty()) {
             return true;
         }
         String str = (String) ObjectConvertor.tryConvertAsType(obj, String.class);
-        return str.endsWith(substr);
+        if (str == null) {
+            return false;
+        }
+        return str.endsWith(sstr);
+    }
+
+    public static Object abs(Object number) {
+        if (number == null) {
+            return null;
+        }
+        Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+        if (!(num instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
+        }
+
+        BigDecimal obj = (BigDecimal) num;
+        obj = obj.abs(MATH_CONTEXT);
+
+        return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
 }

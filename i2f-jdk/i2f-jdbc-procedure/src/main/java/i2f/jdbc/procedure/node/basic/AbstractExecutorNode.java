@@ -10,10 +10,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.*;
 
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -28,12 +25,20 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         boolean isDebugMode=executor.isDebug();
         Map<String,Object> trace=(Map<String,Object>)executor.visit(ParamsConsts.TRACE,context);
         Stack<String> traceStack =null;
+        List<Map.Entry<String,String>> traceCallRecords=null;
         if(isDebugMode){
             synchronized (trace) {
                 traceStack = (Stack<String>) executor.visit(ParamsConsts.TRACE_STACK, context);
                 if (traceStack == null) {
                     traceStack = new Stack<>();
                     executor.visitSet(context, ParamsConsts.TRACE_STACK, traceStack);
+                }
+            }
+            synchronized (trace){
+                traceCallRecords = (List<Map.Entry<String,String>>) executor.visit("trace.call_records", context);
+                if (traceCallRecords == null) {
+                    traceCallRecords = new ArrayList<>();
+                    executor.visitSet(context, "trace.call_records", traceCallRecords);
                 }
             }
         }
@@ -50,6 +55,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 }
             }
         }
+        String snapshotTraceId=UUID.randomUUID().toString().replaceAll("-","").toLowerCase();
+
         try {
             executor.visitSet(context, ParamsConsts.TRACE_LOCATION,node.getLocationFile());
             executor.visitSet(context,ParamsConsts.TRACE_LINE,node.getLocationLineNumber());
@@ -63,36 +70,29 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                     if(TagConsts.PROCEDURE.equals(tagName)) {
                         String id = node.getTagAttrMap().get(AttrConsts.ID);
                         if(id!=null && !id.isEmpty()) {
-                            StringBuilder builder=new StringBuilder();
-                            builder.append("call "+id).append("\n");
-                            for (Map.Entry<String, Object> entry : context.entrySet()) {
-                                if(ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())){
-                                    continue;
-                                }
-                                Object value = entry.getValue();
-                                builder.append("\targ:").append(entry.getKey()).append("==> ").append("(").append(value==null?"null":value.getClass().getName()).append(") :").append(value).append("\n");
-                            }
-                            builder.append("\n");
-
-                            int stackSize = traceStack.size();
-                            int printStackSize=50;
-                            ListIterator<String> iterator = traceStack.listIterator(stackSize);
-                            for (int i = 0; i < printStackSize; i++) {
-                                if(!iterator.hasPrevious()){
-                                    break;
-                                }
-                                builder.append("\tat node ").append(iterator.previous()).append("\n");
-                            }
-                            if(iterator.hasPrevious()){
-                                builder.append("\t... ").append(stackSize-printStackSize).append(" common frames omitted\n");
-                            }
-
-                            executor.logDebug("call-params:\n===================> "+builder);
+                            String callSnapshot = getCallSnapshot(node,context,executor);
+                            callSnapshot="BEFORE:"+snapshotTraceId+"\n"+callSnapshot;
+                            traceCallRecords.add(new AbstractMap.SimpleEntry<>(id,callSnapshot));
+                            executor.logDebug("call-params:\n===================> "+callSnapshot);
                         }
                     }
                 }
             }
             execInner(node, context, executor);
+            if(isDebugMode){
+                String tagName = node.getTagName();
+                if(tagName!=null) {
+                    if(TagConsts.PROCEDURE.equals(tagName)) {
+                        String id = node.getTagAttrMap().get(AttrConsts.ID);
+                        if(id!=null && !id.isEmpty()) {
+                            String callSnapshot = getCallSnapshot(node,context,executor);
+                            callSnapshot="AFTER:"+snapshotTraceId+"\n"+callSnapshot;
+                            traceCallRecords.add(new AbstractMap.SimpleEntry<>(id,callSnapshot));
+                            executor.logDebug("call-params:\n===================> "+callSnapshot);
+                        }
+                    }
+                }
+            }
             if(isDebugMode){
                 if(TagConsts.PROCEDURE.equals(node.getTagName())){
                     synchronized (trace){
@@ -107,6 +107,20 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             if(e instanceof ControlSignalException){
                 if(isDebugMode){
                     if(e instanceof ReturnSignalException){
+                        if(isDebugMode){
+                            String tagName = node.getTagName();
+                            if(tagName!=null) {
+                                if(TagConsts.PROCEDURE.equals(tagName)) {
+                                    String id = node.getTagAttrMap().get(AttrConsts.ID);
+                                    if(id!=null && !id.isEmpty()) {
+                                        String callSnapshot = getCallSnapshot(node,context,executor);
+                                        callSnapshot="AFTER:"+snapshotTraceId+"\n"+callSnapshot;
+                                        traceCallRecords.add(new AbstractMap.SimpleEntry<>(id,callSnapshot));
+                                        executor.logDebug("call-params:\n===================> "+callSnapshot);
+                                    }
+                                }
+                            }
+                        }
                         if(TagConsts.LANG_RETURN.equals(node.getTagName())){
                             synchronized (trace){
                                 String pop = traceStack.peek();
@@ -152,6 +166,35 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 throw new ThrowSignalException(errorMsg, e);
             }
         }
+    }
+
+    public static String getCallSnapshot(XmlNode node,Map<String, Object> context, JdbcProcedureExecutor executor) {
+        Stack<String> traceStack=executor.visitAs(ParamsConsts.TRACE_STACK,context);
+        String id = node.getTagAttrMap().get(AttrConsts.ID);
+        StringBuilder builder=new StringBuilder();
+        builder.append("call "+ id).append("\n");
+        for (Map.Entry<String, Object> entry : context.entrySet()) {
+            if(ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())){
+                continue;
+            }
+            Object value = entry.getValue();
+            builder.append("\targ:").append(entry.getKey()).append("==> ").append("(").append(value==null?"null":value.getClass().getName()).append(") :").append(value).append("\n");
+        }
+        builder.append("\n");
+
+        int stackSize = traceStack.size();
+        int printStackSize=50;
+        ListIterator<String> iterator = traceStack.listIterator(stackSize);
+        for (int i = 0; i < printStackSize; i++) {
+            if(!iterator.hasPrevious()){
+                break;
+            }
+            builder.append("\tat node ").append(iterator.previous()).append("\n");
+        }
+        if(iterator.hasPrevious()){
+            builder.append("\t... ").append(stackSize-printStackSize).append(" common frames omitted\n");
+        }
+        return builder.toString();
     }
 
     public static void walkTree(XmlNode node, Consumer<XmlNode> consumer){

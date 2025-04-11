@@ -141,6 +141,9 @@ public class VisitorParser {
         if(expression!=null){
             expression=expression.trim();
         }
+        if(expression==null || expression.isEmpty()){
+            return new ConstVisitor(null);
+        }
         Visitor ret = new ReadonlyVisitor(nodeObj, nodeObj);
         List<String> tokens = splitTokens(expression);
 
@@ -204,11 +207,11 @@ public class VisitorParser {
                 String nextExpression = token.substring(2, token.length() - 1);
                 ret = visit(nextExpression, rootObj, paramObj, paramObj);
             } else {
-                if ("$root".equals(token)) {
+                if ("$root".equals(token) || "__root".equals(token)) {
                     ret = new ConstVisitor(rootObj);
-                } else if ("$param".equals(token)) {
+                } else if ("$param".equals(token) || "__param".equals(token)) {
                     ret = new ConstVisitor(paramObj);
-                } else if ("$node".equals(token)) {
+                } else if ("$node".equals(token) || "__node".equals(token)) {
                     ret = new ConstVisitor(nodeObj);
                 } else if ("$true".equals(token)) {
                     ret = new ConstVisitor(true);

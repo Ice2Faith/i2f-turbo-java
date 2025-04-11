@@ -79,18 +79,18 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     @Override
     public Object resolveDoubleOperator(Object context, Supplier<Object> left, String operator, Supplier<Object> right) {
         if ("&&".equals(operator) || "and".equals(operator)) {
-            boolean bl = ObjectConvertor.toBoolean(left);
+            boolean bl = ObjectConvertor.toBoolean(left.get());
             if (!bl) {
                 return bl;
             }
-            boolean br = ObjectConvertor.toBoolean(right);
+            boolean br = ObjectConvertor.toBoolean(right.get());
             return br;
         } else if ("||".equals(operator) || "or".equals(operator)) {
-            boolean bl = ObjectConvertor.toBoolean(left);
+            boolean bl = ObjectConvertor.toBoolean(left.get());
             if (bl) {
                 return bl;
             }
-            boolean br = ObjectConvertor.toBoolean(right);
+            boolean br = ObjectConvertor.toBoolean(right.get());
             return br;
         } else {
             return resolveDoubleOperator(context, left.get(), operator, right.get());
