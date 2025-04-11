@@ -1,6 +1,5 @@
 package i2f.xml;
 
-
 import i2f.xml.data.Xml;
 import org.w3c.dom.*;
 
@@ -97,6 +96,7 @@ public class XmlUtil {
 
     public static Document parseXml(String fileName, InputStream is) throws Exception {
         DocumentBuilder builder = getDocumentBuilder();
+
         Document document = builder.parse(is);
         is.close();
         return document;
@@ -107,7 +107,6 @@ public class XmlUtil {
         DocumentBuilder builder = factory.newDocumentBuilder();
         return builder;
     }
-
 
     public static Node getRootNode(Document document) {
         NodeList list = document.getChildNodes();
@@ -149,7 +148,7 @@ public class XmlUtil {
         return ret;
     }
 
-    public static List<Node> getNodesByTagName(Document document, List<String> tagNameList) {
+    public static List<Node> getNodesByTagName(Document document, Collection<String> tagNameList) {
         List<Node> ret = new ArrayList<>();
         for (String item : tagNameList) {
             NodeList list = document.getElementsByTagName(item);
@@ -162,7 +161,7 @@ public class XmlUtil {
         return ret;
     }
 
-    public static List<Node> getChildNodes(Node node, List<String> tagNames) {
+    public static List<Node> getChildNodes(Node node, Collection<String> tagNames) {
         List<Node> ret = new ArrayList<>();
         NodeList list = node.getChildNodes();
         int len = list.getLength();

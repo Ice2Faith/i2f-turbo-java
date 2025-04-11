@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -73,11 +74,15 @@ public class JdbcProcedureProjectMetaHolder {
 
     );
 
+    public static final AtomicBoolean initRefreshThread=new AtomicBoolean(false);
     static {
         startRefreshThread();
     }
 
     public static void startRefreshThread(){
+        if(initRefreshThread.getAndSet(true)){
+           return;
+        }
         Thread thread = new Thread(() -> {
             do {
                 refreshThreadTask();

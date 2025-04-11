@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Ice2Faith
@@ -34,6 +35,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     public static final ConcurrentHashMap<String, Language> LANG_JAVA_ENUM_MAP = new ConcurrentHashMap<>();
     public static volatile String JS_INJECT_PREFIX = "let executor={};let params={};";
 
+    public static final AtomicBoolean initRefreshThread=new AtomicBoolean(false);
     static {
         initInjectPrefix();
         startRefreshThread();
@@ -69,11 +71,14 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     }
 
     public static void startRefreshThread() {
+        if(initRefreshThread.getAndSet(true)){
+            return;
+        }
         Thread thread = new Thread(() -> {
             do {
                 refreshLangTask();
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(15000);
                 } catch (InterruptedException e) {
 
                 }
