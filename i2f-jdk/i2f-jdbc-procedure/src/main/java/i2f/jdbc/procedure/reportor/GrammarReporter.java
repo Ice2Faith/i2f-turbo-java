@@ -152,6 +152,15 @@ public class GrammarReporter {
 
             }
 
+            if(TagConsts.LANG_STRING.equals(node.getTagName())){
+                if(body.contains("${")
+                ||body.contains("#{")
+                ||body.contains("$!{")
+                ||body.contains("#!{")){
+                    warnPoster.accept(XProc4jConsts.NAME+" report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: string maybe change to render mode");
+                }
+            }
+
             reportEnclosedCharString(body,node,warnPoster);
         }
 
@@ -183,6 +192,16 @@ public class GrammarReporter {
                         reportCount.incrementAndGet();
                     }
                     warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node refid [" + refid + "] missing or blank attribute [" + AttrConsts.RESULT + "]");
+                }
+            }else {
+                if(TagConsts.PROCEDURE_CALL.equals(node.getTagName())){
+                    if(result.startsWith("V_")){
+                        if (reportCount != null) {
+                            reportCount.incrementAndGet();
+                        }
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node refid [" + refid + "] maybe result wrong variable [" + result + "]");
+
+                    }
                 }
             }
             ProcedureMeta meta = metaMap.get(refid);
@@ -341,7 +360,28 @@ public class GrammarReporter {
         reportEnclosedCharString(test,node,warnPoster);
         List<String> features = node.getAttrFeatureMap().get(attr);
         if(features==null || features.isEmpty()){
-            if(!test.matches("[a-zA-Z0-9_$\\.]+")){
+            boolean reportFlag=false;
+            if(Arrays.asList(
+                    AttrConsts.PATTERN,
+                    AttrConsts.SEPARATOR
+            ).contains(attr)){
+                // do nothing
+                reportFlag=false;
+            } else if(Arrays.asList(
+                    AttrConsts.TYPE,
+                    AttrConsts.RESULT_TYPE,
+                    AttrConsts.CLASS,
+                    AttrConsts.PACKAGE
+            ).contains(attr)){
+                if(!test.matches("((\\s*\\|\\s*)?[a-zA-Z_\\$]+(\\.[a-zA-Z0-9_\\$]+)*)+")){
+                    reportFlag=true;
+                }
+            }else if(!AttrConsts.TEST.equals(attr)) {
+                if (!test.matches("((\\s*\\(\\s*)*(\\s*,\\s*)?(\\.)?((\\$)?(@)?[a-zA-Z0-9_]+|(\\$|#)\\{\\s*[a-zA-Z0-9_\\.]+\\s*\\}|\\[\\s*[0-9]+\\s*\\])(\\s*\\)\\s*)*(\\(\\s*\\))?)+")) {
+                    reportFlag=true;
+                }
+            }
+            if(reportFlag){
                 warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] " + ", at " + AbstractExecutorNode.getNodeLocation(node) + " for attribute: [" + attr + "]" + node.getAttrFeatureMap().get(attr) + " maybe wrong visit expression [" + test + "]");
             }
         }
@@ -385,6 +425,13 @@ public class GrammarReporter {
                     TinyScript.parse(expr);
                 } finally {
                     TinyScript.ERROR_LISTENER.remove(listener);
+                }
+            }else if(FeatureConsts.STRING.equals(feature)){
+                if(expr.contains("${")
+                ||expr.contains("#{")
+                ||expr.contains("$!{")
+                ||expr.contains("#!{")){
+                    throw new IllegalArgumentException("string maybe change to render mode");
                 }
             }
         } catch (Throwable e) {

@@ -867,30 +867,34 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         Object val=obj;
         if(obj != null){
             Class<?> clazz = obj.getClass();
-            boolean keep=false;
             if(TypeOf.isBaseType(clazz)){
-                keep=true;
-            }
-            if(!keep){
-                if( TypeOf.typeOfAny(clazz,
+                val=obj;
+            }else if( TypeOf.typeOfAny(clazz,
                         CharSequence.class,Appendable.class,
                         AtomicInteger.class, AtomicLong.class,AtomicBoolean.class,
                         Date.class, LocalDateTime.class, LocalDate.class, LocalTime.class,
                         Calendar.class)){
-                    keep=true;
-                }
-            }
-            if(!keep){
-                if(clazz.isEnum() || clazz.isAnnotation()){
-                    keep=true;
-                }
-            }
-            if(keep){
+                 val=obj;
+            }else if(clazz.isEnum() || clazz.isAnnotation()){
+                 val=obj;
+            }else if(obj instanceof Map){
+                    Map<?,?> map=(Map<?,?>)obj;
+                    boolean isContextParam=true;
+                    for (String keepName : ParamsConsts.KEEP_NAMES) {
+                        if(!map.containsKey(keepName)){
+                            isContextParam=false;
+                        }
+                    }
+                    if(isContextParam){
+                        val="ContextMap{size="+map.size()+"}";
+                    }
+
+            }else if(TypeOf.typeOf(clazz,XmlNode.class)){
+                val=getNodeLocation((XmlNode) obj);
+            } else {
                 val=String.valueOf(obj);
             }
-            if(TypeOf.typeOf(clazz,XmlNode.class)){
-                val=getNodeLocation((XmlNode) obj);
-            }
+
         }
         String s=String.valueOf(val);
         if(s.length()>1000){
@@ -987,9 +991,29 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return ret;
     }
 
+    public boolean isVisitKeepValue(String script){
+        if(script==null){
+            return false;
+        }
+        script=script.trim();
+        for (String keepName : ParamsConsts.KEEP_NAMES) {
+            if(script.equals(keepName)){
+                return true;
+            }
+            if(script.startsWith(keepName+".")){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void visitSet(Map<String, Object> params, String result, Object value) {
-        logDebug(()->"visit set ["+result+"] near ["+traceLocation()+"] is: "+stringifyWithType(value));
+        if(isDebug()){
+            if(!isVisitKeepValue(result)){
+                logDebug(()->"visit set ["+result+"] near ["+traceLocation()+"] is: "+stringifyWithType(value));
+            }
+        }
         Visitor visitor = Visitor.visit(result, params);
         visitor.set(value);
     }
@@ -1008,7 +1032,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Map<?, ?> map = (Map<?, ?>) params;
             if (map.containsKey(script)) {
                 Object ret= map.get(script);
-                logDebug(() -> "visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+                if(isDebug()) {
+                    if (!isVisitKeepValue(script)) {
+                        logDebug(() -> "visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+                    }
+                }
                 return ret;
             }
         }
@@ -1016,14 +1044,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Visitor visitor = Visitor.visit(script, params);
             if (visitor != null) {
                 Object ret= visitor.get();
-                logDebug(() -> "visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+                if(isDebug()) {
+                    if (!isVisitKeepValue(script)) {
+                        logDebug(() -> "visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+                    }
+                }
                 return ret;
             }
         } catch (Exception e) {
             logWarn(()->"visitor access error, will fallback to inner visit, visitor error message:"+e.getMessage(),e);
         }
         Object ret= innerVisit(script, params);
-        logDebug(() -> "visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+        if(isDebug()) {
+            if (!isVisitKeepValue(script)) {
+                logDebug(() -> "visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+            }
+        }
         return ret;
     }
 

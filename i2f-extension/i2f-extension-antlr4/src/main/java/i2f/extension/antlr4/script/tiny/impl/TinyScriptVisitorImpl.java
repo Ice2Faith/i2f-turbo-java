@@ -8,6 +8,7 @@ import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakExcep
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptContinueException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptReturnException;
 import i2f.typeof.TypeOf;
+import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -734,8 +735,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 ParseTree item = ctx.getChild(i);
                 if (item instanceof TinyScriptParser.ConditionBlockContext) {
                     contitionCtx = (TinyScriptParser.ConditionBlockContext) item;
-                }
-                if (item instanceof TinyScriptParser.ScriptBlockContext) {
+                }else if (item instanceof TinyScriptParser.ScriptBlockContext) {
                     scriptCtx = (TinyScriptParser.ScriptBlockContext) item;
                 } else {
                     if (!(item instanceof TerminalNode)) {
@@ -1672,9 +1672,19 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     throw new IllegalArgumentException("missing ref value!");
                 }
                 term = term.trim();
-                term = term.substring("${".length(), term.length() - "}".length());
+                char modifier = term.charAt(1);
+                if(modifier=='{') {
+                    term = term.substring("${".length(), term.length() - "}".length());
+                }else{
+                    term = term.substring("$!{".length(), term.length() - "}".length());
+                }
                 term = term.trim();
                 Object value = resolver.getValue(context, term);
+                if(modifier=='!'){
+                    if(value==null){
+                        value="";
+                    }
+                }
                 return value;
             }
             throw new IllegalArgumentException("un-support ref value found : " + ctx.getText());
