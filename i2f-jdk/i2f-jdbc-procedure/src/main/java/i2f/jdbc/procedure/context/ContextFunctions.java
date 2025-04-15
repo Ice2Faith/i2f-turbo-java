@@ -1,12 +1,19 @@
 package i2f.jdbc.procedure.context;
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.io.stream.StreamUtil;
 import i2f.match.regex.RegexUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
@@ -14,10 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -614,7 +618,30 @@ public class ContextFunctions {
         return builder.toString();
     }
 
+    public static String concat(Iterable<?> args) {
+        StringBuilder builder = new StringBuilder();
+        for (Object item : args) {
+            builder.append(item);
+        }
+        return builder.toString();
+    }
+
     public static String join(Object separator, Object... args) {
+        StringBuilder builder = new StringBuilder();
+        boolean isFirst = true;
+        for (Object item : args) {
+            if (!isFirst) {
+                if (separator != null) {
+                    builder.append(separator);
+                }
+            }
+            builder.append(item);
+            isFirst = false;
+        }
+        return builder.toString();
+    }
+
+    public static String join(Object separator, Iterable<?> args) {
         StringBuilder builder = new StringBuilder();
         boolean isFirst = true;
         for (Object item : args) {
@@ -707,22 +734,22 @@ public class ContextFunctions {
         }
     }
 
-    public static String[] splitRegex(String str, String regex) {
+    public static ArrayList<String> splitRegex(String str, String regex) {
         return splitRegex(str, regex, -1);
     }
 
-    public static String[] splitRegex(String str, String regex, int limit) {
+    public static ArrayList<String> splitRegex(String str, String regex, int limit) {
         String[] arr = Pattern.compile(regex).split(str, limit);
-        return arr;
+        return new ArrayList<>(Arrays.asList(arr));
     }
 
-    public static String[] splitLiteral(String str, String regex) {
+    public static ArrayList<String> splitLiteral(String str, String regex) {
         return splitLiteral(str, regex, -1);
     }
 
-    public static String[] splitLiteral(String str, String regex, int limit) {
+    public static ArrayList<String> splitLiteral(String str, String regex, int limit) {
         String[] arr = Pattern.compile(regex, Pattern.LITERAL).split(str, limit);
-        return arr;
+        return new ArrayList<>(Arrays.asList(arr));
     }
 
     public static boolean contains(Object obj, Object substr) {
@@ -803,5 +830,89 @@ public class ContextFunctions {
         obj = obj.abs(MATH_CONTEXT);
 
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+    }
+
+    public static String md5(Object data){
+        return mds("MD5",data,"hex",null);
+    }
+
+    public static String sha1(Object data){
+        return mds("SHA-1",data,"hex",null);
+    }
+
+    public static String sha256(Object data){
+        return mds("SHA-256",data,"hex",null);
+    }
+
+    public static String sha384(Object data){
+        return mds("SHA-384",data,"hex",null);
+    }
+
+    public static String sha512(Object data){
+        return mds("SHA-512",data,"hex",null);
+    }
+
+    public static String mds(String algorithm,Object data){
+        return mds(algorithm,data,"hex",null);
+    }
+
+    public static String mds(String algorithm,Object data,String format){
+        return mds(algorithm,data,format,null);
+    }
+
+    public static String mds(String algorithm,Object data,String format,String provider){
+        if(data==null){
+            return null;
+        }
+        if(provider!=null){
+            provider=provider.trim();
+        }
+        MessageDigest md = null;
+        if(provider!=null && !provider.isEmpty()){
+            try{
+                md=MessageDigest.getInstance(algorithm, provider);
+            }catch(Exception e){
+
+            }
+        }
+        if(md==null){
+            try {
+                MessageDigest.getInstance(algorithm);
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalArgumentException("cannot find message digest algorithm:"+algorithm+" , with error: "+e.getMessage(),e);
+            }
+        }
+        byte[] bytes=null;
+        try {
+            if(data instanceof byte[]){
+                bytes=(byte[])data;
+            }else if(data instanceof InputStream){
+                InputStream is = (InputStream) data;
+                bytes = StreamUtil.readBytes(is, true);
+            } else if(data instanceof Reader){
+                Reader reader = (Reader) data;
+                bytes = StreamUtil.readString(reader, true).getBytes(StandardCharsets.UTF_8);
+            }else if(data instanceof String
+            || data instanceof CharSequence
+            || data instanceof Appendable){
+                String str=String.valueOf(data);
+                bytes=str.getBytes(StandardCharsets.UTF_8);
+            }else{
+                String str = (String)ObjectConvertor.tryConvertAsType(data, String.class);
+                bytes=str.getBytes(StandardCharsets.UTF_8);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("message digest convert data to byte[] error :"+e.getMessage(),e);
+        }
+        byte[] hex = md.digest(bytes);
+        if("base64".equalsIgnoreCase(format)){
+            return Base64.getEncoder().encodeToString(hex);
+        }else{
+            StringBuilder builder=new StringBuilder();
+            for (int i = 0; i < hex.length; i++) {
+                builder.append(String.format("%02x",(0x0ff)&hex[i]));
+            }
+            return builder.toString();
+        }
     }
 }
