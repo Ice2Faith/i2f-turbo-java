@@ -907,8 +907,37 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     }
 
                 }
-            }
-            if (iter instanceof Map) {
+            }else if (iter instanceof Iterator) {
+                Iterator<?> iterator = (Iterator<?>) iter;
+
+                while(iterator.hasNext()) {
+                    Object item=iterator.next();
+                    try {
+                        resolver.setValue(context, naming, item);
+                        lastValue = visitScriptBlock(scriptCtx);
+                    } catch (TinyScriptBreakException e) {
+                        break;
+                    } catch (TinyScriptContinueException e) {
+                        continue;
+                    }
+
+                }
+            }else if (iter instanceof Enumeration) {
+                Enumeration<?> enumeration = (Enumeration<?>) iter;
+
+                while(enumeration.hasMoreElements()) {
+                    Object item=enumeration.nextElement();
+                    try {
+                        resolver.setValue(context, naming, item);
+                        lastValue = visitScriptBlock(scriptCtx);
+                    } catch (TinyScriptBreakException e) {
+                        break;
+                    } catch (TinyScriptContinueException e) {
+                        continue;
+                    }
+
+                }
+            }else if (iter instanceof Map) {
                 Map<?, ?> map = (Map<?, ?>) iter;
                 for (Object item : map.keySet()) {
                     try {

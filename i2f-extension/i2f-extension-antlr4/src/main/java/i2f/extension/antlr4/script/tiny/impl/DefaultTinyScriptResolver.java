@@ -9,6 +9,7 @@ import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -498,7 +499,14 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         } else {
             String methodName = naming;
 
-            IMethod method = findMethod(context, naming, args);
+            if(clazz!=null){
+                Method method = ReflectResolver.matchExecMethod(clazz, methodName, args);
+                if(method!=null){
+                    return ReflectResolver.execMethod(target, clazz, methodName, args);
+                }
+            }
+
+            IMethod method = findMethod(context, methodName, args);
             if (method != null) {
                 Object ret = ReflectResolver.execMethod(target, method, args);
                 return ret;
