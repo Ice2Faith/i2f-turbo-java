@@ -1,10 +1,9 @@
 package i2f.image;
 
-import sun.font.FontManager;
-import sun.font.FontManagerFactory;
 
 import java.awt.*;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +29,11 @@ public class FontUtil {
     private static final AtomicBoolean loaded = new AtomicBoolean(false);
 
     static {
-        registryDefaultFonts();
+        try {
+            registryDefaultFonts();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void registryDefaultFonts() {
@@ -118,12 +121,19 @@ public class FontUtil {
         if (fonts == null) {
             return;
         }
-        FontManager fm = FontManagerFactory.getInstance();
-        for (Font font : fonts) {
-            if (font == null) {
-                continue;
+        try {
+            Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass("sun.font.FontManagerFactory");
+            Method getInstanceMethod = clazz.getMethod("getInstance");
+            Object manager = getInstanceMethod.invoke(null);
+            Method registryMethod = manager.getClass().getMethod("registerFont", Font.class);
+            for (Font font : fonts) {
+                if (font == null) {
+                    continue;
+                }
+                registryMethod.invoke(manager, font);
             }
-            fm.registerFont(font);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
