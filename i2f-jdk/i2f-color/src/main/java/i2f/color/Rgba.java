@@ -8,10 +8,29 @@ import lombok.NoArgsConstructor;
  * @author Ice2Faith
  * @date 2022/6/17 23:13
  * @desc 定义RGBA色彩
+ * 0-255
  */
 @Data
 @NoArgsConstructor
 public class Rgba {
+    public static enum Channel {
+        R(0x01),
+        G(0x02),
+        B(0x04),
+        A(0x08),
+        RGB(0x01 | 0x02 | 0x04),
+        RGBA(0x01 | 0x02 | 0x04 | 0x08),
+        ;
+        private final int mask;
+
+        private Channel(int mask) {
+            this.mask = mask;
+        }
+
+        public int mask() {
+            return this.mask;
+        }
+    }
     public int r;
     public int g;
     public int b;
