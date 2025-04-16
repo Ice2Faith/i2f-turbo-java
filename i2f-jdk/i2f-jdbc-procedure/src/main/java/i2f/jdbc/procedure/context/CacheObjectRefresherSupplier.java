@@ -16,7 +16,7 @@ public abstract class CacheObjectRefresherSupplier<R, T> {
     protected volatile Thread refreshThread = null;
     protected AtomicBoolean refreshing = new AtomicBoolean(false);
 
-    protected String threadName = DEFAULT_THREAD_NAME;
+    protected String threadName = getClass().getSimpleName();
 
     public CacheObjectRefresherSupplier(T cache) {
         this.cache = cache;

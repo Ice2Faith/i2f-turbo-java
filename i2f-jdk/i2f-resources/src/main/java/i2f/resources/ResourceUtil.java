@@ -1,18 +1,15 @@
 package i2f.resources;
 
 import i2f.io.stream.StreamUtil;
-import i2f.match.IMatcher;
-import i2f.match.impl.AntMatcher;
 
 import java.io.*;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -22,13 +19,16 @@ import java.util.jar.JarInputStream;
 public class ResourceUtil {
 
     public static void main(String[] args) throws IOException {
-        Map<URL, String> res = resources("classpath:langs", "lang*.properties", new AntMatcher());
+        Map<URL, String> res = matchResources("classpath:langs", (str) -> {
+            return str.matches("lang*\\.properties");
+        });
         for (Object item : res.entrySet()) {
             System.out.println(item);
         }
     }
 
     public static final String CLASSPATH_PREFIX = "classpath:";
+    public static final String CLASSPATH_MUL_PREFIX = "classpath*:";
 
     public static ClassLoader getLoader() {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -63,8 +63,15 @@ public class ResourceUtil {
             return new URL[0];
         }
         String lloc = location.toLowerCase();
+        boolean isClassPath = false;
         if (lloc.startsWith(CLASSPATH_PREFIX)) {
             lloc = location.substring(CLASSPATH_PREFIX.length());
+            isClassPath = true;
+        } else if (lloc.startsWith(CLASSPATH_MUL_PREFIX)) {
+            lloc = location.substring(CLASSPATH_MUL_PREFIX.length());
+            isClassPath = true;
+        }
+        if (isClassPath) {
             if (lloc.startsWith("/")) {
                 lloc = lloc.substring(1);
             }
@@ -75,6 +82,14 @@ public class ResourceUtil {
             }
             return set.toArray(new URL[0]);
         } else {
+            try {
+                URL url = new URL(location);
+                if (url != null) {
+                    return new URL[]{url};
+                }
+            } catch (Exception e) {
+
+            }
             File file = new File(location);
             URL url = file.toURI().toURL();
             return new URL[]{url};
@@ -107,22 +122,6 @@ public class ResourceUtil {
 
     public static String getClasspathResourceAsString(String location, String charset) throws IOException {
         return StreamUtil.readString(getClasspathResourceAsStream(location), charset, true);
-    }
-
-    /**
-     * 获取所有在指定path下的用matcher匹配上patten的资源
-     * 返回值：key就是资源URL，value就是匹配上的项的名称
-     *
-     * @param path    路径，支持classpath前缀写法
-     * @param patten  匹配表达式
-     * @param matcher 匹配器
-     * @return
-     * @throws IOException
-     */
-    public static Map<URL, String> resources(String path, String patten, IMatcher matcher) throws IOException {
-        return matchResources(path, matcher == null ? null : (fname) -> {
-            return matcher.matched(matcher.match(fname, patten));
-        });
     }
 
     public static Map<URL, String> matchResources(String path, Predicate<String> itemFilter) throws IOException {
@@ -186,6 +185,107 @@ public class ResourceUtil {
             }
         }
 
+        return ret;
+    }
+
+    public static Set<File> getResourcesFiles(Collection<String> locations){
+        Set<File> ret = new LinkedHashSet<>();
+        if (locations == null) {
+            return ret;
+        }
+        for (String location : locations) {
+            try {
+                Set<File> files = getResourceFiles(location);
+                ret.addAll(files);
+            } catch (Exception e) {
+
+            }
+        }
+        return ret;
+    }
+
+    public static Set<File> getResourceFiles(String location)  {
+        Set<File> ret = new LinkedHashSet<>();
+        if (location == null) {
+            return ret;
+        }
+
+        Set<String> rootClassPathsDirs = new LinkedHashSet<>();
+        try{
+            rootClassPathsDirs=ResourceUtil.getAllRootClassPaths().stream().filter(e -> e.isDirectory()).map(e -> e.getAbsolutePath()).collect(Collectors.toSet());
+        }catch(Exception e){
+
+        }
+
+
+        boolean isClassPath = false;
+        String path = location;
+        if (location.startsWith(CLASSPATH_PREFIX)) {
+            path = location.substring(CLASSPATH_PREFIX.length());
+            isClassPath = true;
+        } else if (location.startsWith(CLASSPATH_MUL_PREFIX)) {
+            path = location.substring(CLASSPATH_MUL_PREFIX.length());
+            isClassPath = true;
+        } else if (location.startsWith("file:")) {
+            try {
+                URL url = new URL(location);
+                String protocol = url.getProtocol();
+                if ("file".equalsIgnoreCase(protocol)) {
+                    path = url.getFile();
+                }
+            } catch (Exception e) {
+                path = location.substring("file:".length());
+            }
+        } else {
+            path = location;
+        }
+        if (isClassPath) {
+            for (String dir : rootClassPathsDirs) {
+                try {
+                    File file = new File(dir, path);
+                    ret.add(file);
+                } catch (Exception e) {
+
+                }
+            }
+        } else {
+            try {
+                File file = new File(path);
+                ret.add(new File(file.getAbsolutePath()));
+            } catch (Exception e) {
+
+            }
+        }
+        return ret;
+    }
+
+    public static Set<File> getAllRootClassPaths() throws IOException {
+        Set<File> ret = new LinkedHashSet<>();
+        String[] classPaths = ManagementFactory.getRuntimeMXBean().getClassPath().split(";");
+        URL[] resources = ResourceUtil.getClasspathResources("");
+        for (String path : classPaths) {
+            try {
+                File file = new File(path);
+                if (file.exists()) {
+                    ret.add(file);
+                }
+            } catch (Exception e) {
+
+            }
+        }
+        for (URL resource : resources) {
+            try {
+                String protocol = resource.getProtocol();
+                if ("file".equalsIgnoreCase(protocol)) {
+                    File file = new File(resource.getFile());
+                    if (file.exists()) {
+                        ret.add(file);
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+        }
         return ret;
     }
 }

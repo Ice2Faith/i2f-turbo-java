@@ -24,9 +24,7 @@ public class ListableJdbcProcedureJavaCallerMetaProvider implements JdbcProcedur
     protected final ConcurrentHashMap<String, JdbcProcedureJavaCaller> javaMap = new ConcurrentHashMap<>();
 
     public ListableJdbcProcedureJavaCallerMetaProvider(Map<String, JdbcProcedureJavaCaller> map) {
-        if (map != null) {
-            javaMap.putAll(map);
-        }
+        addAll(map);
     }
 
     public ListableJdbcProcedureJavaCallerMetaProvider(Collection<JdbcProcedureJavaCaller> javaCallers) {
@@ -50,6 +48,9 @@ public class ListableJdbcProcedureJavaCallerMetaProvider implements JdbcProcedur
 
     public void addJavaCaller(Collection<JdbcProcedureJavaCaller> javaCallers) {
         for (JdbcProcedureJavaCaller item : javaCallers) {
+            if(item==null){
+                continue;
+            }
             addCaller(item, javaMap);
         }
     }

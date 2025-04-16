@@ -285,6 +285,11 @@ public class ObjectConvertor {
         if (obj == null) {
             return nullAs;
         }
+        if(obj instanceof byte[]){
+            obj=new ByteArrayInputStream((byte[])obj);
+        }else if(obj instanceof char[]){
+            obj=new CharArrayReader((char[])obj);
+        }
         Class<?> clazz = obj.getClass();
         if(TypeOf.typeOf(clazz, Clob.class)){
             Clob clob = (Clob) obj;
@@ -340,13 +345,13 @@ public class ObjectConvertor {
             return val;
         }
         // 目标类型为 String ，都能转
-        if (TypeOf.typeOfAny(targetType, String.class,CharSequence.class,Appendable.class,char[].class)) {
+        if (TypeOf.typeOfAny(targetType, String.class,CharSequence.class,Appendable.class,char[].class,Reader.class,InputStream.class,byte[].class)) {
             String str= stringify(val, null);
             if(str==null){
                 return null;
             }
             if(TypeOf.typeOf(targetType,char[].class)){
-              return str.toCharArray();
+                return str.toCharArray();
             } else if(TypeOf.typeOf(targetType,Appendable.class)){
                 if(TypeOf.typeOf(targetType,StringBuilder.class)){
                     StringBuilder builder=new StringBuilder(str);
@@ -355,25 +360,37 @@ public class ObjectConvertor {
                     StringBuffer buffer=new StringBuffer(str);
                     return buffer;
                 }
+            } else if(TypeOf.typeOfAny(targetType,Reader.class)){
+                return new StringReader(str);
+            } else if(TypeOf.typeOfAny(targetType,InputStream.class)){
+                return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
+            } else if(TypeOf.typeOfAny(targetType,byte[].class)){
+                return str.getBytes(StandardCharsets.UTF_8);
             }else{
                 return str;
             }
         }
 
         // 源类型为String，目标类型为可转类型
-        if(TypeOf.typeOfAny(sourceType,String.class, CharSequence.class,Appendable.class,char[].class)){
-            String str=null;
-            if(TypeOf.typeOf(sourceType,char[].class)){
-                str=new String((char[])val);
-            }else{
-                str=String.valueOf(val);
-            }
-            if(TypeOf.typeOf(targetType,byte[].class)){
-                return str.getBytes(StandardCharsets.UTF_8);
-            }else if(TypeOf.typeOf(targetType,InputStream.class)){
-                return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
-            }else if(TypeOf.typeOf(targetType,Reader.class)){
+        if(TypeOf.typeOfAny(sourceType,String.class, CharSequence.class,Appendable.class,char[].class,Reader.class,InputStream.class,byte[].class)){
+            String str=stringify(val, null);
+
+            if(TypeOf.typeOf(targetType,char[].class)){
+                return str.toCharArray();
+            } else if(TypeOf.typeOf(targetType,Appendable.class)){
+                if(TypeOf.typeOf(targetType,StringBuilder.class)){
+                    StringBuilder builder=new StringBuilder(str);
+                    return builder;
+                }else if(TypeOf.typeOf(targetType,StringBuffer.class)){
+                    StringBuffer buffer=new StringBuffer(str);
+                    return buffer;
+                }
+            } else if(TypeOf.typeOfAny(targetType,Reader.class)){
                 return new StringReader(str);
+            } else if(TypeOf.typeOfAny(targetType,InputStream.class)){
+                return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
+            } else if(TypeOf.typeOfAny(targetType,byte[].class)){
+                return str.getBytes(StandardCharsets.UTF_8);
             }
         }
 
@@ -447,7 +464,7 @@ public class ObjectConvertor {
         }
 
         // 字符串字面值处理
-        String valStr = String.valueOf(val);
+        String valStr = stringify(val,null);
         if (TypeOf.typeOfAny(targetType, numericTypes)) {
             BigDecimal decimal = null;
             if (valStr.matches("(\\+|\\-)?([1-9]([0-9]+)?|0)")) {
