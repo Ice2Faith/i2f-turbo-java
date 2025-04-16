@@ -207,6 +207,19 @@ public class ContextFunctions {
         throw new IllegalArgumentException("length(obj) function cannot support type:" + obj.getClass());
     }
 
+    public static int lengthb(Object obj){
+        if (obj == null) {
+            return -1;
+        }
+        if (obj instanceof CharSequence
+                || obj instanceof String
+                || obj instanceof Appendable) {
+            String str=String.valueOf(obj);
+            return str.getBytes(StandardCharsets.UTF_8).length;
+        }
+        return length(obj);
+    }
+
     public static String ltrim(String str) {
         return ltrim(str, null);
     }
@@ -719,19 +732,68 @@ public class ContextFunctions {
         return str.indexOf(sstr);
     }
 
-    public static String substr(String str, int index) {
-        return substr(str, index, -1);
+    public static String substr(Object obj, int index) {
+        return substr(obj, index, -1);
     }
 
-    public static String substr(String str, int index, int len) {
+    public static String substr(Object obj, int index, int len) {
+        String str=null;
+        if(obj!=null){
+            if (obj instanceof CharSequence
+                    || obj instanceof String
+                    || obj instanceof Appendable){
+                str=String.valueOf(obj);
+            }else{
+                throw new IllegalArgumentException("substr(obj) cannot support type:"+obj.getClass());
+            }
+        }
         if (str == null) {
             return str;
         }
+        if(index>=str.length()){
+            return "";
+        }
         if (len >= 0) {
+            int endIndex=index+len;
+            if(endIndex>=str.length()){
+                return str.substring(index);
+            }
             return str.substring(index, index + len);
         } else {
             return str.substring(index);
         }
+    }
+    public static String substrb(Object str,int index){
+        return substrb(str,index,-1);
+    }
+    public static String substrb(Object str,int index,int len){
+        String ret = substr(str, index, len);
+        if(ret==null || ret.isEmpty()){
+            return ret;
+        }
+        if(len<0){
+            return ret;
+        }
+        byte[] bytes = ret.getBytes(StandardCharsets.UTF_8);
+        if(bytes.length<=len){
+            return ret;
+        }
+        char[] arr = ret.toCharArray();
+        int count=0;
+        StringBuilder builder=new StringBuilder();
+        for (char ch : arr) {
+            if(ch>=0 && ch<=127){
+                count+=1;
+            }else {
+                String s = ch + "";
+                count += s.getBytes(StandardCharsets.UTF_8).length;
+            }
+            if (count >= len) {
+                break;
+            }
+            builder.append(ch);
+        }
+        return builder.toString();
     }
 
     public static ArrayList<String> splitRegex(String str, String regex) {

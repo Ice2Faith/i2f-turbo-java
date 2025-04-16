@@ -17,7 +17,6 @@ import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -41,18 +40,18 @@ import java.util.function.Predicate;
  */
 public class JdbcResolver {
 
-    public static final CopyOnWriteArrayList<StatementParameterSetHandler> STATEMENT_PARAMETER_HANDLERS=new CopyOnWriteArrayList<>();
-    public static final CopyOnWriteArrayList<ResultSetObjectConvertHandler> RESULT_SET_OBJECT_CONVERT_HANDLERS=new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<StatementParameterSetHandler> STATEMENT_PARAMETER_HANDLERS = new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<ResultSetObjectConvertHandler> RESULT_SET_OBJECT_CONVERT_HANDLERS = new CopyOnWriteArrayList<>();
 
-    static{
+    static {
         ServiceLoader<StatementParameterSetHandler> parameterSetHandlers = ServiceLoader.load(StatementParameterSetHandler.class);
-        if(parameterSetHandlers!=null) {
+        if (parameterSetHandlers != null) {
             for (StatementParameterSetHandler item : parameterSetHandlers) {
                 STATEMENT_PARAMETER_HANDLERS.add(item);
             }
         }
         ServiceLoader<ResultSetObjectConvertHandler> objectConvertHandlers = ServiceLoader.load(ResultSetObjectConvertHandler.class);
-        if(objectConvertHandlers!=null){
+        if (objectConvertHandlers != null) {
             for (ResultSetObjectConvertHandler item : objectConvertHandlers) {
                 RESULT_SET_OBJECT_CONVERT_HANDLERS.add(item);
             }
@@ -996,37 +995,44 @@ public class JdbcResolver {
     }
 
     public static void setStatementObject(PreparedStatement stat, int index, Object obj) throws SQLException {
-        Class<?> clazz = (obj==null?null:obj.getClass());
-        SQLType jdbcType=null;
+        Class<?> clazz = (obj == null ? null : obj.getClass());
+        SQLType jdbcType = null;
         if (obj instanceof TypedArgument) {
             TypedArgument typedArgument = (TypedArgument) obj;
             obj = typedArgument.getValue();
 
             ArgumentTypeHandler handler = typedArgument.getHandler();
-            if(handler!=null){
-                handler.handle(stat,index,obj);
+            if (handler != null) {
+                handler.handle(stat, index, obj);
                 return;
             }
 
-            Class<?> javaType= typedArgument.getJavaType();
-            if(javaType!=null){
-                clazz=javaType;
-                obj=ObjectConvertor.tryConvertAsType(obj,javaType);
+            Class<?> javaType = typedArgument.getJavaType();
+            if (javaType != null) {
+                clazz = javaType;
+                obj = ObjectConvertor.tryConvertAsType(obj, javaType);
             }
 
             jdbcType = typedArgument.getJdbcType();
 
         }
         for (StatementParameterSetHandler handler : STATEMENT_PARAMETER_HANDLERS) {
-            if(handler.set(stat,index,obj,jdbcType,clazz)){
+            if (handler.set(stat, index, obj, jdbcType, clazz)) {
                 return;
             }
         }
-        if (obj == null) {
-            stat.setObject(index, obj);
+        if (jdbcType != null) {
+            boolean handled = setStatementObjectWithJdbcType(stat, index, obj, jdbcType);
+            if (handled) {
+                return;
+            }
             return;
         }
-        if(clazz==null) {
+        if (obj == null) {
+            setStatementNullWithType(stat, index, clazz, jdbcType);
+            return;
+        }
+        if (clazz == null) {
             clazz = obj.getClass();
         }
         if (obj instanceof Integer) {
@@ -1149,51 +1155,417 @@ public class JdbcResolver {
             setStatementObject(stat, index, ((ThreadLocal<?>) obj).get());
             return;
         }
-        if(obj instanceof char[]){
-            stat.setCharacterStream(index,new StringReader(new String((char[])obj)));
+        if (obj instanceof char[]) {
+            stat.setCharacterStream(index, new StringReader(new String((char[]) obj)));
             return;
         }
-        if(obj instanceof Reader){
-            stat.setCharacterStream(index,(Reader)obj);
+        if (obj instanceof Reader) {
+            stat.setCharacterStream(index, (Reader) obj);
             return;
         }
-        if(obj instanceof byte[]){
-            stat.setBlob(index,new ByteArrayInputStream((byte[])obj));
+        if (obj instanceof InputStream) {
+            stat.setBlob(index, (InputStream) obj);
             return;
         }
-        if(obj instanceof InputStream){
-            stat.setBlob(index,(InputStream) obj);
+        if (obj instanceof NClob) {
+            stat.setNClob(index, (NClob) obj);
             return;
         }
-        if(obj instanceof Clob){
-            stat.setClob(index,(Clob) obj);
+        if (obj instanceof Clob) {
+            stat.setClob(index, (Clob) obj);
             return;
         }
-        if(obj instanceof Blob){
-            stat.setBlob(index,(Blob) obj);
+        if (obj instanceof Blob) {
+            stat.setBlob(index, (Blob) obj);
             return;
         }
-        if(jdbcType!=null){
-            stat.setObject(index,obj,jdbcType);
-            return;
-        }
-        if (obj == null) {
-            setStatementNullWithType(stat, index, clazz,jdbcType);
-            return;
-        }
+
 
         stat.setObject(index, obj);
     }
 
-    public static void setStatementNullWithType(PreparedStatement stat, int index, Class<?> clazz,SQLType jdbcType) throws SQLException {
-        if(jdbcType!=null){
-            stat.setObject(index,null,jdbcType);
+    public static boolean setStatementObjectWithJdbcType(PreparedStatement stat, int index, Object obj, SQLType jdbcType) throws SQLException {
+        if (jdbcType == null) {
+            return false;
+        }
+        if (!(jdbcType instanceof JDBCType)) {
+            return false;
+        }
+        JDBCType type = (JDBCType) jdbcType;
+        if (type == JDBCType.TINYINT) {
+            if (obj == null) {
+                stat.setNull(index, Types.TINYINT);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Integer.class);
+                if (val instanceof Integer) {
+                    stat.setInt(index, (Integer) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.SMALLINT) {
+            if (obj == null) {
+                stat.setNull(index, Types.SMALLINT);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Integer.class);
+                if (val instanceof Integer) {
+                    stat.setInt(index, (Integer) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.INTEGER) {
+            if (obj == null) {
+                stat.setNull(index, Types.INTEGER);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Integer.class);
+                if (val instanceof Integer) {
+                    stat.setInt(index, (Integer) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.BIGINT) {
+            if (obj == null) {
+                stat.setNull(index, Types.BIGINT);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Long.class);
+                if (val instanceof Long) {
+                    stat.setLong(index, (Long) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.FLOAT) {
+            if (obj == null) {
+                stat.setNull(index, Types.FLOAT);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Float.class);
+                if (val instanceof Float) {
+                    stat.setFloat(index, (Float) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.REAL) {
+            if (obj == null) {
+                stat.setNull(index, Types.REAL);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, BigDecimal.class);
+                if (val instanceof BigDecimal) {
+                    stat.setBigDecimal(index, (BigDecimal) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.DECIMAL) {
+            if (obj == null) {
+                stat.setNull(index, Types.DECIMAL);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, BigDecimal.class);
+                if (val instanceof BigDecimal) {
+                    stat.setBigDecimal(index, (BigDecimal) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.DOUBLE) {
+            if (obj == null) {
+                stat.setNull(index, Types.DOUBLE);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Double.class);
+                if (val instanceof Double) {
+                    stat.setDouble(index, (Double) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.NUMERIC) {
+            if (obj == null) {
+                stat.setNull(index, Types.NUMERIC);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Double.class);
+                if (val instanceof Double) {
+                    stat.setDouble(index, (Double) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.VARCHAR) {
+            if (obj == null) {
+                stat.setNull(index, Types.VARCHAR);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
+                if (val instanceof String) {
+                    stat.setString(index, (String) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.CHAR) {
+            if (obj == null) {
+                stat.setNull(index, Types.CHAR);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
+                if (val instanceof String) {
+                    stat.setString(index, (String) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.NVARCHAR) {
+            if (obj == null) {
+                stat.setNull(index, Types.NVARCHAR);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
+                if (val instanceof String) {
+                    stat.setNString(index, (String) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.NCHAR) {
+            if (obj == null) {
+                stat.setNull(index, Types.NCHAR);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
+                if (val instanceof String) {
+                    stat.setNString(index, (String) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.DATE) {
+            if (obj == null) {
+                stat.setNull(index, Types.DATE);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, java.sql.Date.class);
+                if (val instanceof java.sql.Date) {
+                    stat.setDate(index, (java.sql.Date) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.TIME) {
+            if (obj == null) {
+                stat.setNull(index, Types.TIME);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Time.class);
+                if (val instanceof Time) {
+                    stat.setTime(index, (Time) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.TIME_WITH_TIMEZONE) {
+            if (obj == null) {
+                stat.setNull(index, Types.TIME_WITH_TIMEZONE);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Time.class);
+                if (val instanceof Time) {
+                    stat.setTime(index, (Time) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.TIMESTAMP) {
+            if (obj == null) {
+                stat.setNull(index, Types.TIMESTAMP);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Timestamp.class);
+                if (val instanceof Timestamp) {
+                    stat.setTimestamp(index, (Timestamp) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.TIMESTAMP_WITH_TIMEZONE) {
+            if (obj == null) {
+                stat.setNull(index, Types.TIMESTAMP_WITH_TIMEZONE);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, Timestamp.class);
+                if (val instanceof Timestamp) {
+                    stat.setTimestamp(index, (Timestamp) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.NULL) {
+            stat.setNull(index, Types.NULL);
+            return true;
+        }
+        if (type == JDBCType.BLOB) {
+            if (obj == null) {
+                stat.setNull(index, Types.BLOB);
+                return true;
+            } else {
+                if(obj instanceof Blob){
+                    stat.setBlob(index, (Blob)obj);
+                    return true;
+                }
+                Object val = ObjectConvertor.tryConvertAsType(obj, InputStream.class);
+                if (val instanceof InputStream) {
+                    stat.setBlob(index, (InputStream) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.CLOB) {
+            if (obj == null) {
+                stat.setNull(index, Types.CLOB);
+                return true;
+            } else {
+                if(obj instanceof Clob){
+                    stat.setClob(index, (Clob)obj);
+                    return true;
+                }
+                Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
+                if (val instanceof String) {
+                    stat.setClob(index, new StringReader((String)val));
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.NCLOB) {
+            if (obj == null) {
+                stat.setNull(index, Types.NCLOB);
+                return true;
+            } else {
+                if(obj instanceof NClob){
+                    stat.setNClob(index, (NClob)obj);
+                    return true;
+                }
+                Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
+                if (val instanceof String) {
+                    stat.setNClob(index, new StringReader((String) val));
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.LONGVARCHAR) {
+            if (obj == null) {
+                stat.setNull(index, Types.LONGVARCHAR);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
+                if (val instanceof String) {
+                    stat.setCharacterStream(index, new StringReader((String) val));
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.LONGNVARCHAR) {
+            if (obj == null) {
+                stat.setNull(index, Types.LONGNVARCHAR);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
+                if (val instanceof String) {
+                    stat.setNCharacterStream(index, new StringReader((String) val));
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.BINARY) {
+            if (obj == null) {
+                stat.setNull(index, Types.BINARY);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, byte[].class);
+                if (val instanceof byte[]) {
+                    stat.setBytes(index, (byte[]) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.VARBINARY) {
+            if (obj == null) {
+                stat.setNull(index, Types.VARBINARY);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, byte[].class);
+                if (val instanceof byte[]) {
+                    stat.setBytes(index, (byte[]) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type == JDBCType.LONGVARBINARY) {
+            if (obj == null) {
+                stat.setNull(index, Types.LONGVARBINARY);
+                return true;
+            } else {
+                Object val = ObjectConvertor.tryConvertAsType(obj, InputStream.class);
+                if (val instanceof InputStream) {
+                    stat.setBinaryStream(index, (InputStream) val);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return false;
+    }
+
+    public static void setStatementNullWithType(PreparedStatement stat, int index, Class<?> clazz, SQLType jdbcType) throws SQLException {
+        if (jdbcType != null) {
+            boolean handled = setStatementObjectWithJdbcType(stat, index, null, jdbcType);
+            if (handled) {
+                return;
+            }
         }
         if (clazz == null) {
-            stat.setObject(index, null);
+            if(jdbcType!=null){
+                stat.setObject(index,null,jdbcType);
+            }else {
+                stat.setObject(index, null);
+            }
             return;
         }
-        if (TypeOf.typeOfAny(clazz, int.class, Integer.class, AtomicInteger.class)) {
+        if (TypeOf.typeOfAny(clazz,short.class,Short.class, int.class, Integer.class, AtomicInteger.class)) {
             stat.setNull(index, Types.INTEGER);
             return;
         }
@@ -1201,7 +1573,7 @@ public class JdbcResolver {
             stat.setNull(index, Types.BIGINT);
             return;
         }
-        if (TypeOf.typeOfAny(clazz, String.class)) {
+        if (TypeOf.typeOfAny(clazz, String.class,CharSequence.class,Appendable.class,char[].class)) {
             stat.setNull(index, Types.VARCHAR);
             return;
         }
@@ -1249,7 +1621,7 @@ public class JdbcResolver {
                 Map<String, Object> map = new LinkedHashMap<>();
                 for (int i = 0; i < columnCount; i++) {
                     QueryColumn col = columns.get(i);
-                    Object val = getResultObject(rs,i + 1,col.getType());
+                    Object val = getResultObject(rs, i + 1, col.getType());
                     map.put(col.getName(), val);
                 }
                 rows.add(map);
@@ -1268,68 +1640,68 @@ public class JdbcResolver {
         }
     }
 
-    public static Object getResultObject(ResultSet rs,int columnIndex,int sqlType) throws SQLException {
-        Object val=null;
-        if(Arrays.asList(Types.VARCHAR,Types.LONGVARCHAR,Types.CHAR).contains(sqlType)){
-            val=rs.getString(columnIndex);
-        }else if(Arrays.asList(Types.NVARCHAR,Types.NCHAR,Types.LONGNVARCHAR).contains(sqlType)){
-            val=rs.getString(columnIndex);
-        }else if(Types.INTEGER==sqlType){
-            val=rs.getInt(columnIndex);
-        }else if(Types.BIGINT==sqlType){
-            val=rs.getLong(columnIndex);
-        }else if(Types.FLOAT==sqlType){
-            val=rs.getFloat(columnIndex);
-        }else if(Types.REAL==sqlType){
-            val=rs.getBigDecimal(columnIndex);
-        }else if(Types.DOUBLE==sqlType){
-            val=rs.getDouble(columnIndex);
-        }else if(Types.NUMERIC==sqlType){
-            val=rs.getBigDecimal(columnIndex);
-        }else if(Types.DATE==sqlType){
-            val=rs.getDate(columnIndex);
-        }else if(Types.TIME==sqlType){
-            val=rs.getTime(columnIndex);
-        }else if(Types.TIMESTAMP==sqlType){
-            val=rs.getTimestamp(columnIndex);
-        }else if(Arrays.asList(Types.TINYINT,Types.SMALLINT).contains(sqlType)){
-            val=rs.getShort(columnIndex);
-        }else if(Types.NULL==sqlType){
-            val=null;
-        }else if(Types.BLOB==sqlType){
-            val=rs.getBlob(columnIndex);
-        }else if(Types.CLOB==sqlType){
-            val=rs.getClob(columnIndex);
-        }else if(Types.NCLOB==sqlType){
-            val=rs.getNClob(columnIndex);
-        }else if(Types.BOOLEAN==sqlType){
-            val=rs.getBoolean(columnIndex);
-        }else if(Types.BIT==sqlType){
-            val=rs.getInt(columnIndex);
-        }else if(Arrays.asList(Types.BINARY,Types.VARBINARY,Types.LONGVARBINARY).contains(sqlType)){
-            val=rs.getBytes(columnIndex);
-        }else if(Types.ARRAY==sqlType){
-            val=rs.getArray(columnIndex);
-        }else if(Types.SQLXML==sqlType){
-            val=rs.getSQLXML(columnIndex);
-        }else if(Types.TIME_WITH_TIMEZONE==sqlType){
-            val=rs.getTime(columnIndex);
-        }else if(Types.TIMESTAMP_WITH_TIMEZONE==sqlType){
-            val=rs.getTimestamp(columnIndex);
-        }else {
+    public static Object getResultObject(ResultSet rs, int columnIndex, int sqlType) throws SQLException {
+        Object val = null;
+        if (Arrays.asList(Types.VARCHAR, Types.LONGVARCHAR, Types.CHAR).contains(sqlType)) {
+            val = rs.getString(columnIndex);
+        } else if (Arrays.asList(Types.NVARCHAR, Types.NCHAR, Types.LONGNVARCHAR).contains(sqlType)) {
+            val = rs.getString(columnIndex);
+        } else if (Types.INTEGER == sqlType) {
+            val = rs.getInt(columnIndex);
+        } else if (Types.BIGINT == sqlType) {
+            val = rs.getLong(columnIndex);
+        } else if (Types.FLOAT == sqlType) {
+            val = rs.getFloat(columnIndex);
+        } else if (Types.REAL == sqlType) {
+            val = rs.getBigDecimal(columnIndex);
+        } else if (Types.DOUBLE == sqlType) {
+            val = rs.getDouble(columnIndex);
+        } else if (Types.NUMERIC == sqlType) {
+            val = rs.getBigDecimal(columnIndex);
+        } else if (Types.DATE == sqlType) {
+            val = rs.getDate(columnIndex);
+        } else if (Types.TIME == sqlType) {
+            val = rs.getTime(columnIndex);
+        } else if (Types.TIMESTAMP == sqlType) {
+            val = rs.getTimestamp(columnIndex);
+        } else if (Arrays.asList(Types.TINYINT, Types.SMALLINT).contains(sqlType)) {
+            val = rs.getShort(columnIndex);
+        } else if (Types.NULL == sqlType) {
+            val = null;
+        } else if (Types.BLOB == sqlType) {
+            val = rs.getBlob(columnIndex);
+        } else if (Types.CLOB == sqlType) {
+            val = rs.getClob(columnIndex);
+        } else if (Types.NCLOB == sqlType) {
+            val = rs.getNClob(columnIndex);
+        } else if (Types.BOOLEAN == sqlType) {
+            val = rs.getBoolean(columnIndex);
+        } else if (Types.BIT == sqlType) {
+            val = rs.getInt(columnIndex);
+        } else if (Arrays.asList(Types.BINARY, Types.VARBINARY, Types.LONGVARBINARY).contains(sqlType)) {
+            val = rs.getBytes(columnIndex);
+        } else if (Types.ARRAY == sqlType) {
+            val = rs.getArray(columnIndex);
+        } else if (Types.SQLXML == sqlType) {
+            val = rs.getSQLXML(columnIndex);
+        } else if (Types.TIME_WITH_TIMEZONE == sqlType) {
+            val = rs.getTime(columnIndex);
+        } else if (Types.TIMESTAMP_WITH_TIMEZONE == sqlType) {
+            val = rs.getTimestamp(columnIndex);
+        } else {
             val = rs.getObject(columnIndex);
         }
-        boolean hasHandle=false;
+        boolean hasHandle = false;
         for (ResultSetObjectConvertHandler handler : RESULT_SET_OBJECT_CONVERT_HANDLERS) {
-            if(handler.support(val)){
-                val=handler.convert(val);
-                hasHandle=true;
+            if (handler.support(val)) {
+                val = handler.convert(val);
+                hasHandle = true;
                 break;
             }
         }
-        if(!hasHandle){
-            if(val instanceof Clob){
-                val=ObjectConvertor.tryConvertAsType(val,String.class);
+        if (!hasHandle) {
+            if (val instanceof Clob) {
+                val = ObjectConvertor.tryConvertAsType(val, String.class);
             }
         }
 
@@ -1354,7 +1726,7 @@ public class JdbcResolver {
 
             List<QueryColumn> columns = parseResultSetColumns(metaData, columnNameMapper);
 
-            boolean isDefaultMapType=(beanClass == null || TypeOf.typeOf(beanClass, Map.class));
+            boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
             int currCount = 0;
             while (rs.next()) {
                 if (maxCount >= 0 && currCount >= maxCount) {
@@ -1364,7 +1736,7 @@ public class JdbcResolver {
                 Map<String, Object> map = new LinkedHashMap<>();
                 for (int i = 0; i < columnCount; i++) {
                     QueryColumn col = columns.get(i);
-                    Object val = getResultObject(rs,i + 1,col.getType());
+                    Object val = getResultObject(rs, i + 1, col.getType());
                     map.put(col.getName(), val);
                 }
 

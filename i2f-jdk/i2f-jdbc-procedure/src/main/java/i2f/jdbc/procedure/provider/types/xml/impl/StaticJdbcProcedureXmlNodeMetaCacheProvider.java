@@ -13,13 +13,22 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @NoArgsConstructor
 public class StaticJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider {
-    protected Map<String, XmlNode> staticMap = new ConcurrentHashMap<>();
+    protected ConcurrentHashMap<String, XmlNode> staticMap = new ConcurrentHashMap<>();
 
     public StaticJdbcProcedureXmlNodeMetaCacheProvider(Map<String, XmlNode> staticMap) {
         if (staticMap == null) {
             return;
         }
-        this.staticMap = staticMap;
+        putAll(staticMap);
+    }
+
+    public void putAll(Map<String,XmlNode> staticMap){
+        for (Map.Entry<String, XmlNode> entry : staticMap.entrySet()) {
+            if(entry.getKey()==null || entry.getValue()==null){
+                continue;
+            }
+            staticMap.put(entry.getKey(),entry.getValue());
+        }
     }
 
     @Override
