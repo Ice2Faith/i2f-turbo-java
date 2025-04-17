@@ -74,6 +74,13 @@ public class JdbcProcedureProjectMetaHolder {
 
     );
 
+    public static final List<String> FEATURES_CAUSE = Arrays.asList(
+            "cause-first",
+            "cause-last",
+            "cause-raw",
+            "cause-root"
+    );
+
     public static final AtomicBoolean initRefreshThread=new AtomicBoolean(false);
     static {
         startRefreshThread();

@@ -80,6 +80,13 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 //                log.warn("xml-attr completion tag-attr:" + name);
                 if (name != null && name.endsWith(".")) {
                     List<String> completions = JdbcProcedureProjectMetaHolder.FEATURES;
+                    if(name.startsWith("type")
+                    ||name.startsWith("rollback-for")
+                    ||name.startsWith("no-rollback-for")){
+                        completions=new ArrayList<>();
+                        completions.addAll(JdbcProcedureProjectMetaHolder.FEATURES_CAUSE);
+                        completions.addAll(JdbcProcedureProjectMetaHolder.FEATURES);
+                    }
                     if (completions != null) {
                         for (String attr : completions) {
                             result.addElement(LookupElementBuilder.create(name + attr));

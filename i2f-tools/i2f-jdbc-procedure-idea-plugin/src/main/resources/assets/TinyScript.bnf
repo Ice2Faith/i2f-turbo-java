@@ -89,6 +89,7 @@
 
     TERM_QUESTION='?';
     TERM_SHARP='#';
+    TERM_AT='@';
 
     OP_MUL='*';
     OP_DIV='/';
@@ -213,6 +214,7 @@ expressSegment::=
         | equalValue
         | newInstance
         | invokeFunction
+        | staticEnumValue
         | constValue
         | refValue
         | jsonValue
@@ -295,7 +297,7 @@ scriptBlock::=
 
 
 equalValue::=
-    (ROUTE_NAMING|NAMING|extractExpress) (OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN) express
+    (ROUTE_NAMING|NAMING|extractExpress|staticEnumValue) (OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN) express
     ;
 
 extractExpress::=
@@ -308,6 +310,11 @@ extractPairs::=
 
 extractPair::=
     (NAMING|ROUTE_NAMING|constString) (TERM_COLON (NAMING|ROUTE_NAMING|constString))?
+    ;
+
+staticEnumValue::=
+     TERM_AT NAMING
+    | NAMING TERM_AT NAMING
     ;
 
 newInstance::=

@@ -103,6 +103,8 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(TinyScriptTypes.OP_OR_STR)
                 || tokenType.equals(TinyScriptTypes.OP_SUB)
                 || tokenType.equals(TinyScriptTypes.OP_TYPE_OF)
+                || tokenType.equals(TinyScriptTypes.TERM_SHARP)
+                || tokenType.equals(TinyScriptTypes.TERM_AT)
         ) {
             return KEYWORD_KEYS;
         }
@@ -154,7 +156,6 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
                 ||tokenType.equals(TinyScriptTypes.TERM_PAREN_R)
                 ||tokenType.equals(TinyScriptTypes.TERM_QUESTION)
                 ||tokenType.equals(TinyScriptTypes.TERM_SEMICOLON)
-                ||tokenType.equals(TinyScriptTypes.TERM_SHARP)
         ){
             return PAREN_KEYS;
         }

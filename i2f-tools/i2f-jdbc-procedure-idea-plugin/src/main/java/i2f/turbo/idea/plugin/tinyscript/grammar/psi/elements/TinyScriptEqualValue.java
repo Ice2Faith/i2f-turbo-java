@@ -14,6 +14,9 @@ public interface TinyScriptEqualValue extends PsiElement {
   TinyScriptExtractExpress getExtractExpress();
 
   @Nullable
+  TinyScriptStaticEnumValue getStaticEnumValue();
+
+  @Nullable
   PsiElement getNaming();
 
   @Nullable

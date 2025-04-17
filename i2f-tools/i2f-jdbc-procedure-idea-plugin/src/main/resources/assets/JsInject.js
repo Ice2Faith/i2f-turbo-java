@@ -686,6 +686,56 @@ JdbcProcedureExecutor.prototype.isNop=function(obj){
 }
 
 /**
+ *
+ * @param node {ExecutorNode}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.registryExecutorNode=function(node){
+
+}
+
+/**
+ *
+ * @param provider {EvalScriptProvider}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.registryEvalScriptProvider=function(provider){
+
+}
+
+/**
+ * @return {Array<EvalScriptProvider>}
+ */
+JdbcProcedureExecutor.prototype.getEvalScriptProviders=function(){
+
+}
+
+/**
+ * @return {XProc4jEventHandler}
+ */
+JdbcProcedureExecutor.prototype.getEventHandler=function(){
+
+}
+
+/**
+ *
+ * @param event {XProc4jEvent}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.sendEvent=function(event){
+
+}
+
+/**
+ *
+ * @param event {XProc4jEvent}
+ * @return {void}
+ */
+JdbcProcedureExecutor.prototype.publishEvent=function(event){
+
+}
+
+/**
  * @return {JdbcProcedureContext}
  */
 JdbcProcedureExecutor.prototype.getContext=function(){
@@ -1106,6 +1156,15 @@ JdbcProcedureExecutor.prototype.resultValue=function(value,features,node,params)
 
 /**
  *
+ * @param obj {Object}
+ * @return {boolean}
+ */
+JdbcProcedureExecutor.prototype.toBoolean=function(obj){
+
+}
+
+/**
+ *
  * @param enable {boolean}
  * @return {void}
  */
@@ -1199,6 +1258,13 @@ JdbcProcedureExecutor.prototype.logError = function (obj, e) {
 }
 
 /**
+ * @return {String}
+ */
+JdbcProcedureExecutor.prototype.traceLocation=function(){
+
+}
+
+/**
  *
  * @param className {string}
  * @return {Class<?>}
@@ -1235,6 +1301,16 @@ JdbcProcedureExecutor.prototype.evalAs=function(script,params){
  * @return {Object}
  */
 JdbcProcedureExecutor.prototype.eval=function(script,params){
+
+}
+
+/**
+ *
+ * @param lang {String}
+ * @param script {String}
+ * @param params {JavaMap<String,Object>}
+ */
+JdbcProcedureExecutor.prototype.evalScript=function(lang,script,params){
 
 }
 
@@ -1367,6 +1443,38 @@ JdbcProcedureExecutor.prototype.sqlWrapCount=function(datasource,bql,params){
 
 }
 
+/**
+ *
+ * @param datasource {string}
+ * @param dialectScriptList {Array<Entry<String,String>>}
+ * @param params {JavaMap<String,Object>}
+ * @return {BindSql}
+ */
+JdbcProcedureExecutor.prototype.sqlScriptString=function(datasource,dialectScriptList,params){
+
+}
+
+/**
+ *
+ * @param datasource {string}
+ * @param dialectScriptList {Array<Entry<String,BindSql>>}
+ * @param params {JavaMap<String,Object>}
+ * @return {BindSql}
+ */
+JdbcProcedureExecutor.prototype.sqlScriptBindSql=function(datasource,dialectScriptList,params){
+
+}
+
+/**
+ *
+ * @param datasource {string}
+ * @param dialectScriptList {Array<Entry<String,String>>}
+ * @param params {JavaMap<String,Object>}
+ * @return {int}
+ */
+JdbcProcedureExecutor.prototype.sqlScript=function(datasource,dialectScriptList,params){
+
+}
 
 /**
  *
