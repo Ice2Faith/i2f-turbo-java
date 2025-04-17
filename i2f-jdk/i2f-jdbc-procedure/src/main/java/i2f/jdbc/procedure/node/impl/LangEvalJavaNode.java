@@ -133,7 +133,11 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
         try {
             MemoryCompiler.findCompileClass(codeEntry.getValue(), codeEntry.getKey() + ".java", codeEntry.getKey());
         } catch (Exception e) {
-            throw new IllegalArgumentException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new IllegalArgumentException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
+            }
         }
     }
 
@@ -301,7 +305,11 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
                      executor, context
             );
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new IllegalStateException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
+            }
         }
         return obj;
     }

@@ -6,6 +6,7 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.event.XmlNodeExecEvent;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
@@ -24,30 +25,14 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     public void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String location = getNodeLocation(node);
         executor.logDebug(() -> "exec node on tag:" + node.getTagName() + " , at " + location);
-        boolean isDebugMode = executor.isDebug();
-        Map<String, Object> trace = (Map<String, Object>) executor.visit(ParamsConsts.TRACE, context);
+
+        Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
         Stack<String> traceStack = null;
-        LinkedList<Map.Entry<String, String>> traceCallRecords = null;
         synchronized (trace) {
-            traceStack = (Stack<String>) executor.visit(ParamsConsts.TRACE_STACK, context);
+            traceStack = executor.visitAs(ParamsConsts.TRACE_STACK, context);
             if (traceStack == null) {
                 traceStack = new Stack<>();
                 executor.visitSet(context, ParamsConsts.TRACE_STACK, traceStack);
-            }
-        }
-        if (isDebugMode) {
-
-            synchronized (trace) {
-                traceCallRecords = (LinkedList<Map.Entry<String, String>>) executor.visit("trace.call_records", context);
-                if (traceCallRecords == null) {
-                    traceCallRecords = new LinkedList<>();
-                    executor.visitSet(context, "trace.call_records", traceCallRecords);
-                }
-                int size=traceCallRecords.size();
-                while(size>1000){
-                    traceCallRecords.removeFirst();
-                    size--;
-                }
             }
         }
 
@@ -63,7 +48,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
         }
 
-        String snapshotTraceId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
+        Map<String, Object> pointContext = new HashMap<>();
+
 
         try {
             executor.visitSet(context, ParamsConsts.TRACE_LOCATION, node.getLocationFile());
@@ -72,38 +58,19 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             ContextHolder.TRACE_LOCATION.set(node.getLocationFile());
             ContextHolder.TRACE_LINE.set(node.getLocationLineNumber());
             ContextHolder.TRACE_NODE.set(node);
-            if(true) {
-                String tagName = node.getTagName();
-                if (tagName != null) {
-                    if (TagConsts.PROCEDURE.equals(tagName)) {
-                        String id = node.getTagAttrMap().get(AttrConsts.ID);
-                        if (id != null && !id.isEmpty()) {
-                            executor.logInfo("exec node:" + id + " at " + location);
-                            if (isDebugMode) {
-                                String callSnapshot = getCallSnapshot(node, context, executor);
-                                callSnapshot = "BEFORE:" + snapshotTraceId + "\n" + callSnapshot;
-                                traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
-                                executor.logDebug("call-params:\n===================> " + callSnapshot);
-                            }
-                        }
-                    }
-                }
+
+            try {
+                onBefore(pointContext, node, context, executor);
+            } catch (Exception e) {
+                executor.logWarn(()->e.getMessage(),e);
             }
 
             execInner(node, context, executor);
-            if (isDebugMode) {
-                String tagName = node.getTagName();
-                if (tagName != null) {
-                    if (TagConsts.PROCEDURE.equals(tagName)) {
-                        String id = node.getTagAttrMap().get(AttrConsts.ID);
-                        if (id != null && !id.isEmpty()) {
-                            String callSnapshot = getCallSnapshot(node, context, executor);
-                            callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
-                            traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
-                            executor.logDebug("call-params:\n===================> " + callSnapshot);
-                        }
-                    }
-                }
+
+            try {
+                onAfter(pointContext,node,context,executor);
+            } catch (Exception e) {
+                executor.logWarn(()->e.getMessage(),e);
             }
 
             if (TagConsts.PROCEDURE.equals(node.getTagName())) {
@@ -116,8 +83,16 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
 
         } catch (Throwable e) {
+            if(e instanceof ControlSignalException){
+                try {
+                    onThrowing(e,pointContext,node,context,executor);
+                } catch (Throwable ex) {
+                    executor.logWarn(()->ex.getMessage(),e);
+                }
+            }
+
             if (e instanceof ControlSignalException) {
-                if(e instanceof ReturnSignalException){
+                if (e instanceof ReturnSignalException) {
                     if (TagConsts.LANG_RETURN.equals(node.getTagName())) {
                         synchronized (trace) {
                             String pop = traceStack.peek();
@@ -127,26 +102,9 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                         }
                     }
                 }
-                if (isDebugMode) {
-                    if (e instanceof ReturnSignalException) {
-                        if (isDebugMode) {
-                            String tagName = node.getTagName();
-                            if (tagName != null) {
-                                if (TagConsts.PROCEDURE.equals(tagName)) {
-                                    String id = node.getTagAttrMap().get(AttrConsts.ID);
-                                    if (id != null && !id.isEmpty()) {
-                                        String callSnapshot = getCallSnapshot(node, context, executor);
-                                        callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
-                                        traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
-                                        executor.logDebug("call-params:\n===================> " + callSnapshot);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
                 throw (ControlSignalException) e;
             }
+
             StringBuilder builder = new StringBuilder();
 
             int stackSize = traceStack.size();
@@ -174,28 +132,185 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 }
                 SignalException se = (SignalException) e;
                 se.setMessage(errorMsg);
+                try {
+                    onThrowing(se,pointContext,node,context,executor);
+                } catch (Throwable ex) {
+                    executor.logWarn(()->ex.getMessage(),e);
+                }
                 throw se;
-            } else {
+            }  else {
                 executor.logError(() -> errorMsg + "\n node trace:\n" + builder, e);
-                throw new ThrowSignalException(errorMsg, e);
+                ThrowSignalException se= new ThrowSignalException(errorMsg, e);
+                try {
+                    onThrowing(e,pointContext,node,context,executor);
+                } catch (Throwable ex) {
+                    executor.logWarn(()->ex.getMessage(),e);
+                }
+                throw se;
+            }
+        }finally {
+            try {
+                onFinally(pointContext,node,context,executor);
+            } catch (Throwable e) {
+                executor.logWarn(()->e.getMessage(),e);
             }
         }
     }
 
-    public static Object trimContextKeepAttribute(Object value){
-        if(value==null){
+    public void onBefore(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        XmlNodeExecEvent event=new XmlNodeExecEvent();
+        event.setExecutorNode(this);
+        event.setType(XmlNodeExecEvent.Type.BEFORE);
+        event.setPointContext(pointContext);
+        event.setNode(node);
+        event.setContext(context);
+        event.setExecutor(executor);
+        executor.sendEvent(event);
+
+
+        String location = getNodeLocation(node);
+
+        boolean isDebugMode = executor.isDebug();
+        Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
+        LinkedList<Map.Entry<String, String>> traceCallRecords = null;
+        if (isDebugMode) {
+
+            synchronized (trace) {
+                traceCallRecords = (LinkedList<Map.Entry<String, String>>) executor.visit("trace.call_records", context);
+                if (traceCallRecords == null) {
+                    traceCallRecords = new LinkedList<>();
+                    executor.visitSet(context, "trace.call_records", traceCallRecords);
+                }
+                int size = traceCallRecords.size();
+                while (size > 1000) {
+                    traceCallRecords.removeFirst();
+                    size--;
+                }
+            }
+        }
+
+        String snapshotTraceId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
+
+        String tagName = node.getTagName();
+        if (tagName != null) {
+            if (TagConsts.PROCEDURE.equals(tagName)) {
+                String id = node.getTagAttrMap().get(AttrConsts.ID);
+                if (id != null && !id.isEmpty()) {
+                    executor.logInfo("exec node:" + id + " at " + location);
+                    if (isDebugMode) {
+                        String callSnapshot = getCallSnapshot(node, context, executor);
+                        callSnapshot = "BEFORE:" + snapshotTraceId + "\n" + callSnapshot;
+                        traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                        executor.logDebug("call-params:\n===================> " + callSnapshot);
+                    }
+                }
+            }
+        }
+
+
+        pointContext.put("isDebugMode", isDebugMode);
+        pointContext.put("trace", trace);
+        pointContext.put("traceCallRecords", traceCallRecords);
+        pointContext.put("snapshotTraceId",snapshotTraceId);
+    }
+
+    public void onAfter(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        XmlNodeExecEvent event=new XmlNodeExecEvent();
+        event.setExecutorNode(this);
+        event.setType(XmlNodeExecEvent.Type.AFTER);
+        event.setPointContext(pointContext);
+        event.setNode(node);
+        event.setContext(context);
+        event.setExecutor(executor);
+        executor.sendEvent(event);
+
+        boolean isDebugMode=executor.visitAs("isDebugMode",pointContext);
+        String snapshotTraceId=executor.visitAs("snapshotTraceId",pointContext);
+        LinkedList<Map.Entry<String, String>> traceCallRecords=executor.visitAs("traceCallRecords",pointContext);
+
+        if (isDebugMode) {
+            String tagName = node.getTagName();
+            if (tagName != null) {
+                if (TagConsts.PROCEDURE.equals(tagName)) {
+                    String id = node.getTagAttrMap().get(AttrConsts.ID);
+                    if (id != null && !id.isEmpty()) {
+                        String callSnapshot = getCallSnapshot(node, context, executor);
+                        callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
+                        traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                        executor.logDebug("call-params:\n===================> " + callSnapshot);
+                    }
+                }
+            }
+        }
+
+    }
+
+    public void onThrowing(Throwable e, Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        XmlNodeExecEvent event=new XmlNodeExecEvent();
+        event.setExecutorNode(this);
+        event.setType(XmlNodeExecEvent.Type.THROWING);
+        event.setThrowable(e);
+        event.setPointContext(pointContext);
+        event.setNode(node);
+        event.setContext(context);
+        event.setExecutor(executor);
+        executor.sendEvent(event);
+
+        boolean isDebugMode=executor.visitAs("isDebugMode",pointContext);
+        String snapshotTraceId=executor.visitAs("snapshotTraceId",pointContext);
+        LinkedList<Map.Entry<String, String>> traceCallRecords=executor.visitAs("traceCallRecords",pointContext);
+
+        if (isDebugMode) {
+            if(e instanceof ControlSignalException){
+                // do nothing
+                if (e instanceof ReturnSignalException) {
+                    if (isDebugMode) {
+                        String tagName = node.getTagName();
+                        if (tagName != null) {
+                            if (TagConsts.PROCEDURE.equals(tagName)) {
+                                String id = node.getTagAttrMap().get(AttrConsts.ID);
+                                if (id != null && !id.isEmpty()) {
+                                    String callSnapshot = getCallSnapshot(node, context, executor);
+                                    callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
+                                    traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                                    executor.logDebug("call-params:\n===================> " + callSnapshot);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else{
+                System.out.println("exception pointcut!");
+            }
+        }
+    }
+
+    public void onFinally(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        XmlNodeExecEvent event=new XmlNodeExecEvent();
+        event.setExecutorNode(this);
+        event.setType(XmlNodeExecEvent.Type.FINALLY);
+        event.setPointContext(pointContext);
+        event.setNode(node);
+        event.setContext(context);
+        event.setExecutor(executor);
+        executor.sendEvent(event);
+//        System.out.println("finally pointcut!");
+    }
+
+    public static Object trimContextKeepAttribute(Object value) {
+        if (value == null) {
             return null;
         }
-        if(!(value instanceof Map)){
+        if (!(value instanceof Map)) {
             return value;
         }
-        Map<Object,Object> ret=new HashMap<>();
+        Map<Object, Object> ret = new HashMap<>();
         Map<?, ?> map = (Map<?, ?>) value;
         for (Map.Entry<?, ?> entry : map.entrySet()) {
             if (ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
                 continue;
             }
-            ret.put(entry.getKey(),trimContextKeepAttribute(entry.getValue()));
+            ret.put(entry.getKey(), trimContextKeepAttribute(entry.getValue()));
         }
         return ret;
     }
@@ -210,7 +325,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 continue;
             }
             Object value = entry.getValue();
-            value=trimContextKeepAttribute(value);
+            value = trimContextKeepAttribute(value);
             builder.append("\targ:").append(entry.getKey()).append("==> ").append("(").append(value == null ? "null" : value.getClass().getName()).append(") :").append(value).append("\n");
         }
         builder.append("\n");

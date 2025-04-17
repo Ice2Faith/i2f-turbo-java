@@ -59,4 +59,9 @@ public interface FeatureConsts {
     String CURRENT_TIME_MILLIS = "current-time-millis";
     String SNOW_UID = "snow-uid";
 
+    // 异常的处理
+    String CAUSE_FIRST="cause-first";
+    String CAUSE_LAST="cause-last";
+    String CAUSE_RAW="cause-raw";
+    String CAUSE_ROOT="cause-root";
 }

@@ -12,25 +12,25 @@ public class SignalException extends RuntimeException {
     {
         location= ContextHolder.TRACE_LOCATION.get()+":"+ContextHolder.TRACE_LINE.get();
     }
-    public SignalException() {
+    protected SignalException() {
     }
 
-    public SignalException(String message) {
+    protected SignalException(String message) {
         super(message);
         this.message=message;
     }
 
-    public SignalException(String message, Throwable cause) {
+    protected SignalException(String message, Throwable cause) {
         super(message, cause);
         this.message=message+" with cause by "+cause.getClass()+" : "+cause.getMessage();
     }
 
-    public SignalException(Throwable cause) {
+    protected SignalException(Throwable cause) {
         super(cause);
         this.message="cause by "+cause.getClass()+" : "+cause.getMessage();
     }
 
-    public SignalException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected SignalException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.message=message+" with cause by "+cause.getClass()+" : "+cause.getMessage();
     }

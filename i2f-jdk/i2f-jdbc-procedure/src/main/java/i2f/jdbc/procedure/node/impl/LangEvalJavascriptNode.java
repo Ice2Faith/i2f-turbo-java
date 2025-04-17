@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.script.ScriptProvider;
 
 import javax.script.Bindings;
@@ -74,7 +75,7 @@ public class LangEvalJavascriptNode extends AbstractExecutorNode implements Eval
         try {
             obj = provider.eval(script, bindings);
         } catch (ScriptException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
         return obj;
     }

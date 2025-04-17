@@ -1,13 +1,14 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.node.base.MatchException;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
@@ -88,20 +89,6 @@ public class LangTryNode extends AbstractExecutorNode {
             if(e instanceof ControlSignalException){
                 throw (ControlSignalException)e;
             }
-            if(e instanceof ThrowSignalException){
-                ThrowSignalException ex = (ThrowSignalException) e;
-                Throwable cause = ex.getCause();
-                if(cause!=null){
-                    e=cause;
-                }
-            }
-            if(e instanceof SignalException){
-                SignalException ex = (SignalException) e;
-                Throwable cause = ex.getCause();
-                if(cause!=null){
-                    e=cause;
-                }
-            }
 
             String traceErrMsg=e.getClass().getName()+": "+e.getMessage();
             executor.visitSet(context, ParamsConsts.TRACE_ERRMSG,traceErrMsg);
@@ -110,40 +97,60 @@ public class LangTryNode extends AbstractExecutorNode {
             boolean handled = false;
             for (XmlNode catchNode : catchNodes) {
                 String type = catchNode.getTagAttrMap().get(AttrConsts.TYPE);
+
                 String exName = catchNode.getTagAttrMap().get(AttrConsts.E);
                 if (type == null || type.isEmpty()) {
                     type = "java.lang.Throwable";
                 }
-                type=type.trim();
+                List<Class<?>> catchClasses = new ArrayList<>();
+                if (type != null) {
+                    type=type.trim();
+                    String[] arr = type.split("[,;\\|]");
+                    for (String item : arr) {
+                        item = item.trim();
+                        try {
+                            Class<?> clazz = executor.loadClass(item);
+                            if (clazz != null) {
+                                catchClasses.add(clazz);
+                            }
+                        } catch (Throwable ex) {
+
+                        }
+                    }
+                }
+                Map.Entry<Throwable,Boolean> matched= MatchException.matchException(e,catchNode.getAttrFeatureMap().get(AttrConsts.TYPE),catchClasses);
+
                 if (exName == null || exName.isEmpty()) {
                     exName = AttrConsts.E;
                 }
-                // 备份堆栈
-                Map<String, Object> bakParams = new LinkedHashMap<>();
-                bakParams.put(exName, context.get(exName));
 
-                executor.visitSet(context,exName,e);
 
-                String[] arr = type.split("\\|");
-                for (String item : arr) {
-                    String clsName=item.trim();
-                    if(clsName.isEmpty()){
-                        continue;
+                if (matched.getValue()) {
+
+                    // 备份堆栈
+                    Map<String, Object> bakParams = new LinkedHashMap<>();
+                    bakParams.put(exName, context.get(exName));
+
+                    // 设置堆栈变量
+                    executor.visitSet(context,exName,matched.getKey());
+
+                    boolean pass=true;
+                    String test = catchNode.getTagAttrMap().get(AttrConsts.TEST);
+                    if(test!=null){
+                        pass=executor.toBoolean(executor.attrValue(AttrConsts.TEST,FeatureConsts.TEST,catchNode,context));
                     }
-                    Class<?> clazz = executor.loadClass(item);
-                    if (clazz == null) {
-                        throw new IllegalStateException("missing catch exception type of : " + item);
-                    }
-                    if (clazz.isAssignableFrom(e.getClass())) {
+                    if(pass) {
                         executor.execAsProcedure(catchNode, context, false, false);
                         handled = true;
-                        break;
                     }
+
+                    // 还原堆栈
+                    executor.visitSet(context,exName, bakParams.get(exName));
                 }
 
-
-                // 还原堆栈
-                executor.visitSet(context,exName, bakParams.get(exName));
+                if(handled){
+                    break;
+                }
             }
             if (!handled) {
                 if(e instanceof RuntimeException){

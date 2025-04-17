@@ -6,13 +6,12 @@ import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.JdbcTrans;
+import i2f.jdbc.procedure.node.base.MatchException;
 import i2f.jdbc.procedure.node.base.Propagation;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
-import i2f.typeof.TypeOf;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -58,7 +57,7 @@ public class SqlTransactionalNode extends AbstractExecutorNode {
         rollbackFor = rollbackFor.trim();
         List<Class<?>> rollbackClasses = new ArrayList<>();
         if (rollbackFor != null) {
-            String[] arr = rollbackFor.split(",|;");
+            String[] arr = rollbackFor.split("[,;\\|]");
             for (String item : arr) {
                 item = item.trim();
                 try {
@@ -77,7 +76,7 @@ public class SqlTransactionalNode extends AbstractExecutorNode {
         noRollbackFor = noRollbackFor.trim();
         List<Class<?>> noRollbackClasses = new ArrayList<>();
         if (noRollbackFor != null) {
-            String[] arr = noRollbackFor.split(",|;");
+            String[] arr = noRollbackFor.split("[,;\\|]");
             for (String item : arr) {
                 item = item.trim();
                 try {
@@ -207,44 +206,37 @@ public class SqlTransactionalNode extends AbstractExecutorNode {
                 }
                 return;
             }
-            Class<?> clazz = e.getClass();
-            if (e instanceof SignalException) {
-                Throwable cause = e.getCause();
-                if (cause != null) {
-                    clazz = cause.getClass();
-                }
-            }
-            for (Class<?> item : noRollbackClasses) {
-                if (TypeOf.typeOf(clazz, item)) {
-                    for (Map.Entry<String, Connection> work : workConnectMap.entrySet()) {
-                        String key = work.getKey();
-                        Connection conn = work.getValue();
-                        try {
-                            if (!conn.getAutoCommit()) {
-                                conn.commit();
-                            }
-                        } catch (SQLException ex) {
 
-                        }
-                    }
-                    return;
-                }
-            }
-            for (Class<?> item : rollbackClasses) {
-                if (TypeOf.typeOf(clazz, item)) {
-                    for (Map.Entry<String, Connection> work : workConnectMap.entrySet()) {
-                        String key = work.getKey();
-                        Connection conn = work.getValue();
-                        try {
-                            if (!conn.getAutoCommit()) {
-                                conn.rollback();
-                            }
-                        } catch (SQLException ex) {
 
+            Map.Entry<Throwable, Boolean> noRollBackMatched = MatchException.matchException(e, node.getAttrFeatureMap().get(AttrConsts.NO_ROLLBACK_FOR), noRollbackClasses);
+            if (noRollBackMatched.getValue()) {
+                for (Map.Entry<String, Connection> work : workConnectMap.entrySet()) {
+                    String key = work.getKey();
+                    Connection conn = work.getValue();
+                    try {
+                        if (!conn.getAutoCommit()) {
+                            conn.commit();
                         }
+                    } catch (SQLException ex) {
+
                     }
-                    return;
                 }
+                return;
+            }
+            Map.Entry<Throwable, Boolean> rollBackMatched = MatchException.matchException(e, node.getAttrFeatureMap().get(AttrConsts.ROLLBACK_FOR), rollbackClasses);
+            if (rollBackMatched.getValue()) {
+                for (Map.Entry<String, Connection> work : workConnectMap.entrySet()) {
+                    String key = work.getKey();
+                    Connection conn = work.getValue();
+                    try {
+                        if (!conn.getAutoCommit()) {
+                            conn.rollback();
+                        }
+                    } catch (SQLException ex) {
+
+                    }
+                }
+                return;
             }
         } finally {
             for (Map.Entry<String, Connection> work : workConnectMap.entrySet()) {

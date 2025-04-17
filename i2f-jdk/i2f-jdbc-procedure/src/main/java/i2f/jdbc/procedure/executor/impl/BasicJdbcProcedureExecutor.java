@@ -21,6 +21,7 @@ import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
+import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -80,6 +81,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     protected final CopyOnWriteArrayList<EvalScriptProvider> evalScriptProviders=new CopyOnWriteArrayList<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
+    protected volatile XProc4jEventHandler eventHandler=new XProc4jEventHandler(()->namingContext);
 
     {
         List<ExecutorNode> list = defaultExecutorNodes();
@@ -281,7 +283,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         } catch (Throwable e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
-            } else {
+            }else {
                 throw new ThrowSignalException(e.getMessage(), e);
             }
         }
@@ -1114,7 +1116,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             try {
                 conn = ds.getConnection();
             } catch (SQLException e) {
-                throw new IllegalStateException(e.getMessage(), e);
+                throw new ThrowSignalException(e.getMessage(), e);
             }
         }
 
@@ -1143,7 +1145,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             logDebug(() -> "sql-query-list:datasource=" + datasource  +" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql+"\nresult: is-empty:"+list.isEmpty());
             return list;
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -1158,7 +1164,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             logDebug(() -> "sql-query-object:datasource=" + datasource + " near ["+traceLocation()+"] "+ " \n\tbql:\n" + bql+"\nresult: "+stringifyWithType(obj));
             return obj;
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -1173,7 +1183,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             logDebug(() -> "sql-query-row:datasource=" + datasource+" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql+"\nresult:"+stringifyWithType(row));
             return row;
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -1188,7 +1202,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             logDebug(() -> "sql-update:datasource=" + datasource+" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql+"\nresult:"+num);
             return num;
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -1206,7 +1224,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             logDebug(() -> "sql-wrap-page:datasource=" + datasource + ", databaseType=" + databaseType+" near ["+traceLocation()+"] " + " \n\tbql:\n" + pageSql);
             return pageSql;
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -1222,7 +1244,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             logDebug(() -> "sql-wrap-count:datasource=" + datasource + ", databaseType=" + databaseType+" near ["+traceLocation()+"] " + " \n\tbql:\n" + pageSql);
             return pageSql;
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -1242,7 +1268,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             logDebug(() -> "sql-script:datasource=" + datasource + ", dialect=" + entry.getKey() +" near ["+traceLocation()+"] "+ " \n\tbql:\n" + pageSql);
             return pageSql;
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -1311,7 +1341,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             logDebug(() -> "sql-query-page:datasource=" + datasource +" near ["+traceLocation()+"] "+ " \n\tbql:\n" + pageBql+"\nresult: is-empty:"+list.isEmpty());
             return list;
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -1326,7 +1360,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(isolation);
         } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 
@@ -1337,7 +1371,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Connection conn = getConnection(datasource, params);
             conn.commit();
         } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 
@@ -1348,7 +1382,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Connection conn = getConnection(datasource, params);
             conn.rollback();
         } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 
@@ -1359,7 +1393,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Connection conn = getConnection(datasource, params);
             conn.setAutoCommit(true);
         } catch (SQLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 

@@ -6,12 +6,13 @@ import i2f.environment.std.IEnvironment;
 import i2f.extension.ognl.OgnlUtil;
 import i2f.extension.velocity.VelocityGenerator;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
+import i2f.jdbc.procedure.signal.SignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.impl.OgnlMybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
 import i2f.reflect.ReflectResolver;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +38,11 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
             Object obj = OgnlUtil.evaluateExpression(test, params);
             return toBoolean(obj);
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -46,7 +51,11 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
         try {
             return OgnlUtil.evaluateExpression(script, params);
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -55,7 +64,11 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
         try {
             return OgnlUtil.evaluateExpression(script, params);
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
@@ -69,8 +82,12 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
                 renderMap = ReflectResolver.beanVirtual2map(params, new HashMap<>());
             }
             return VelocityGenerator.render(script, renderMap);
-        } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
     }
 
