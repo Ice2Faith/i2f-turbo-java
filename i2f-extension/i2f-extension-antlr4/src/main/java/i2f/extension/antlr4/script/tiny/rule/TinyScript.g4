@@ -146,6 +146,7 @@ express:
     | equalValue
     | newInstance
     | invokeFunction
+    | staticEnumValue
     | constValue
     | refValue
     | jsonValue
@@ -235,7 +236,7 @@ scriptBlock:
 
 
 equalValue:
-    (ROUTE_NAMING|NAMING|extractExpress) ('='|'?='|'.='|'+='|'-='|'*='|'/='|'%=') express
+    (ROUTE_NAMING|NAMING|extractExpress|staticEnumValue) ('='|'?='|'.='|'+='|'-='|'*='|'/='|'%=') express
     ;
 
 extractExpress:
@@ -248,6 +249,11 @@ extractPairs:
 
 extractPair:
     (NAMING|ROUTE_NAMING|constString) (TERM_COLON (NAMING|ROUTE_NAMING|constString))?
+    ;
+
+staticEnumValue:
+     '@' NAMING
+    | NAMING '@' NAMING
     ;
 
 newInstance:

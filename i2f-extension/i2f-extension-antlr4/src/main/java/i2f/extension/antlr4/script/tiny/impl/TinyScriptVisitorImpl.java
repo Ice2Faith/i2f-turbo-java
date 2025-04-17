@@ -7,8 +7,8 @@ import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptContinueException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptReturnException;
+import i2f.reflect.ReflectResolver;
 import i2f.typeof.TypeOf;
-import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -17,6 +17,8 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Supplier;
@@ -79,7 +81,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
                     if (!";".equals(term)) {
-                        throw new IllegalArgumentException("invalid grammar separator, expect ';' buf found '" + term + "'!");
+                        throw new IllegalArgumentException("invalid grammar separator, expect ';' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.ExpressContext) {
                     TinyScriptParser.ExpressContext nextCtx = (TinyScriptParser.ExpressContext) item;
@@ -190,11 +192,11 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
                     String question=(String) visitTerminal(questionCtx);
                     if(!"?".equals(question)){
-                        throw new IllegalArgumentException("invalid  ternary-operator operator, expect '?' buf found '" + question + "'!");
+                        throw new IllegalArgumentException("invalid  ternary-operator operator, expect '?' but found '" + question + "'!");
                     }
                     String elseSep=(String)visitTerminal(elseCtx);
                     if(!":".equals(elseSep)){
-                        throw new IllegalArgumentException("invalid  ternary-operator operator, expect ':' buf found '" + elseSep + "'!");
+                        throw new IllegalArgumentException("invalid  ternary-operator operator, expect ':' but found '" + elseSep + "'!");
                     }
                     Object obj = visitExpress(condCtx);
                     boolean ok = resolver.toBoolean(context,obj);
@@ -239,6 +241,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.NegtiveSegmentContext) {
                 TinyScriptParser.NegtiveSegmentContext nextCtx = (TinyScriptParser.NegtiveSegmentContext) item;
                 return visitNegtiveSegment(nextCtx);
+            } else if (item instanceof TinyScriptParser.StaticEnumValueContext) {
+                TinyScriptParser.StaticEnumValueContext nextCtx = (TinyScriptParser.StaticEnumValueContext) item;
+                return visitStaticEnumValue(nextCtx);
             }
             throw new IllegalArgumentException("un-support express found : " + ctx.getText());
         } catch (Throwable e) {
@@ -268,7 +273,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             TerminalNode termCtx = (TerminalNode) termNode;
             String term=(String)visitTerminal(termCtx);
             if(!"-".equals(term)){
-                throw new IllegalArgumentException("invalid negtive operator, expect '-' buf found '" + term + "'!");
+                throw new IllegalArgumentException("invalid negtive operator, expect '-' but found '" + term + "'!");
             }
             TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) objectNode;
             Object obj = visitExpress(expressCtx);
@@ -305,7 +310,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
                     if (!Arrays.asList("try", "catch", "(", "|", ")", "finally").contains(term)) {
-                        throw new IllegalArgumentException("invalid grammar separator, expect 'try/catch/(/|/)/finally' buf found '" + term + "'!");
+                        throw new IllegalArgumentException("invalid grammar separator, expect 'try/catch/(/|/)/finally' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.TryBodyBlockContext) {
                     TinyScriptParser.TryBodyBlockContext nextCtx = (TinyScriptParser.TryBodyBlockContext) item;
@@ -391,7 +396,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             TerminalNode termCtx = (TerminalNode) termNode;
             String term=(String)visitTerminal(termCtx);
             if(!"throw".equals(term)){
-                throw new IllegalArgumentException("invalid keyword, expect 'throw' buf found '" + term + "'!");
+                throw new IllegalArgumentException("invalid keyword, expect 'throw' but found '" + term + "'!");
             }
             TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) objectNode;
             Object obj = visitExpress(expressCtx);
@@ -587,7 +592,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
                     if (!Arrays.asList("debugger", "(", ")").contains(term)) {
-                        throw new IllegalArgumentException("invalid grammar separator, expect 'debugger/(/)' buf found '" + term + "'!");
+                        throw new IllegalArgumentException("invalid grammar separator, expect 'debugger/(/)' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.ConditionBlockContext) {
                     TinyScriptParser.ConditionBlockContext nextCtx = (TinyScriptParser.ConditionBlockContext) item;
@@ -636,7 +641,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
                     if (!Arrays.asList("if", "(", ")", "else","elif").contains(term)) {
-                        throw new IllegalArgumentException("invalid if segment separator, expect 'if/(/)/else/elif' buf found '" + term + "'!");
+                        throw new IllegalArgumentException("invalid if segment separator, expect 'if/(/)/else/elif' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.ConditionBlockContext) {
                     TinyScriptParser.ConditionBlockContext nextCtx = (TinyScriptParser.ConditionBlockContext) item;
@@ -1040,8 +1045,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             ParseTree equalNode = ctx.getChild(1);
             ParseTree expressNode = ctx.getChild(2);
             if (!(namingNode instanceof TerminalNode)
-                    && !(namingNode instanceof TinyScriptParser.ExtractExpressContext)) {
-                throw new IllegalArgumentException("invalid equal value, expect naming/extract node, but found " + namingNode.getClass() + "!");
+                    && !(namingNode instanceof TinyScriptParser.ExtractExpressContext)
+                    && !(namingNode instanceof TinyScriptParser.StaticEnumValueContext)
+            ) {
+                throw new IllegalArgumentException("invalid equal value, expect naming/extract/static-enum node, but found " + namingNode.getClass() + "!");
             }
             if (!(equalNode instanceof TerminalNode)) {
                 throw new IllegalArgumentException("invalid equal value, expect equal node, but found " + namingNode.getClass() + "!");
@@ -1104,8 +1111,57 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 for (Map.Entry<String, String> entry : extractMapping.entrySet()) {
                     String naming = entry.getKey();
                     String express = entry.getValue();
-                    Object val = resolver.getValue(context, express);
+                    Object val = resolver.getValue(value, express);
                     resolver.setValue(context, naming, val);
+                }
+            } else if (namingNode instanceof TinyScriptParser.StaticEnumValueContext) {
+                TinyScriptParser.StaticEnumValueContext staticCtx = (TinyScriptParser.StaticEnumValueContext) namingNode;
+                Map.Entry<Class<?>, Object> entry = getStaticEnumValue(staticCtx);
+                Object ctxValue = entry.getValue();
+                if (ctxValue instanceof Field) {
+                    Field field = (Field) ctxValue;
+                    int modifiers = field.getModifiers();
+                    if (!Modifier.isStatic(modifiers)) {
+                        throw new IllegalArgumentException("un-support static field : " + field);
+                    }
+                    if (Modifier.isFinal(modifiers)) {
+                        throw new IllegalArgumentException("un-support set static final field : " + field);
+                    }
+                    field.setAccessible(true);
+
+                    if (!"=".equals(equal)) {
+                        Object oldVal = field.get(null);
+                        if ("?=".equals(equal)) {
+                            if (oldVal == null) {
+                                value = visitExpress(expressCtx);
+                                field.set(null, value);
+                            }
+                        } else if (".=".equals(equal)) {
+                            if (oldVal != null) {
+                                value = visitExpress(expressCtx);
+                                field.set(null, value);
+                            }
+                        } else if ("+=".equals(equal)) {
+                            value = resolver.resolveDoubleOperator(context, oldVal, "+", value);
+                            field.set(null, value);
+                        } else if ("-=".equals(equal)) {
+                            value = resolver.resolveDoubleOperator(context, oldVal, "-", value);
+                            field.set(null, value);
+                        } else if ("*=".equals(equal)) {
+                            value = resolver.resolveDoubleOperator(context, oldVal, "*", value);
+                            field.set(null, value);
+                        } else if ("/=".equals(equal)) {
+                            value = resolver.resolveDoubleOperator(context, oldVal, "/", value);
+                            field.set(null, value);
+                        } else if ("%=".equals(equal)) {
+                            value = resolver.resolveDoubleOperator(context, oldVal, "%", value);
+                            field.set(null, value);
+                        }
+                    } else {
+                        field.set(null, value);
+                    }
+                } else {
+                    return value;
                 }
             }
             return value;
@@ -1209,7 +1265,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
                     if (!",".equals(term)) {
-                        throw new IllegalArgumentException("invalid extract pairs separator, expect ',' buf found '" + term + "'!");
+                        throw new IllegalArgumentException("invalid extract pairs separator, expect ',' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.ExtractPairContext) {
                     TinyScriptParser.ExtractPairContext nextCtx = (TinyScriptParser.ExtractPairContext) item;
@@ -1341,7 +1397,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
                     if (!".".equals(term)) {
-                        throw new IllegalArgumentException("invalid invoke function separator, expect '.' buf found '" + term + "'!");
+                        throw new IllegalArgumentException("invalid invoke function separator, expect '.' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.RefCallContext) {
                     TinyScriptParser.RefCallContext nextCtx = (TinyScriptParser.RefCallContext) item;
@@ -1482,7 +1538,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
                     if (!",".equals(term)) {
-                        throw new IllegalArgumentException("invalid argument separator, expect ',' buf found '" + term + "'!");
+                        throw new IllegalArgumentException("invalid argument separator, expect ',' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.ArgumentContext) {
                     TinyScriptParser.ArgumentContext nextCtx = (TinyScriptParser.ArgumentContext) item;
@@ -1568,7 +1624,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
             debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing argument!");
             }
             if (count == 3) {
@@ -1626,7 +1682,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
             debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing argument value!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1643,11 +1699,113 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         }
     }
 
+    public Map.Entry<Class<?>, String> getStaticEnumValueParts(TinyScriptParser.StaticEnumValueContext ctx) {
+        int count = ctx.getChildCount();
+        if (count <= 0) {
+            throw new IllegalArgumentException("missing static/enum value!");
+        }
+        String className = null;
+        String valueName = null;
+        if (count == 2) {
+            ParseTree termNode = ctx.getChild(0);
+            ParseTree namingNode = ctx.getChild(1);
+            TerminalNode termCtx = (TerminalNode) termNode;
+            TerminalNode namingCtx = (TerminalNode) namingNode;
+            String term = (String) visitTerminal(termCtx);
+            String naming = (String) visitTerminal(namingCtx);
+            if (!"@".equals(term)) {
+                throw new IllegalArgumentException("invalid grammar term, expect '@' but found '" + term + "'!");
+            }
+            int idx = naming.lastIndexOf(".");
+            if (idx <= 0) {
+                throw new IllegalArgumentException("invalid grammar fullNaming, expect 'ClassName.ValueName' but found '" + naming + "'!");
+            }
+            className = naming.substring(0, idx);
+            valueName = naming.substring(idx + 1);
+        } else if (count == 3) {
+            ParseTree classNameNode = ctx.getChild(0);
+            ParseTree termNode = ctx.getChild(1);
+            ParseTree namingNode = ctx.getChild(2);
+            TerminalNode classNameCtx = (TerminalNode) classNameNode;
+            TerminalNode termCtx = (TerminalNode) termNode;
+            TerminalNode namingCtx = (TerminalNode) namingNode;
+            String cls = (String) visitTerminal(classNameCtx);
+            String term = (String) visitTerminal(termCtx);
+            String naming = (String) visitTerminal(namingCtx);
+            if (!"@".equals(term)) {
+                throw new IllegalArgumentException("invalid grammar term, expect '@' but found '" + term + "'!");
+            }
+            if (naming.contains(".")) {
+                throw new IllegalArgumentException("invalid grammar valueName, expect 'ID' not contains '.' but found '" + naming + "'!");
+            }
+            className = cls;
+            valueName = naming;
+        } else {
+            throw new IllegalArgumentException("un-support static/enum value, expect 2/3 child but found : " + ctx.getText());
+        }
+        if (className == null || className.isEmpty()
+                || valueName == null || valueName.isEmpty()) {
+            throw new IllegalArgumentException("un-support static/enum value, expect className.valueName child but found : " + className + "." + valueName);
+        }
+        Class<?> clazz = resolver.loadClass(context, className);
+        return new AbstractMap.SimpleEntry<>(clazz, valueName);
+    }
+
+    public Map.Entry<Class<?>, Object> getStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx) {
+        Map.Entry<Class<?>, String> entry = getStaticEnumValueParts(ctx);
+        Class<?> clazz = entry.getKey();
+        String valueName = entry.getValue();
+        if (clazz.isEnum()) {
+            Object[] enums = clazz.getEnumConstants();
+            for (Object item : enums) {
+                Enum em = (Enum) item;
+                if (em.name().equals(valueName)) {
+                    return new AbstractMap.SimpleEntry<>(clazz, em);
+                }
+                if (String.valueOf(em).equals(valueName)) {
+                    return new AbstractMap.SimpleEntry<>(clazz, em);
+                }
+            }
+            throw new IllegalArgumentException("not found enum value : " + valueName + " in " + clazz);
+        } else {
+            Field field = ReflectResolver.getField(clazz, valueName);
+            if (field == null) {
+                throw new IllegalArgumentException("not found static field : " + valueName + " in " + clazz);
+            }
+            return new AbstractMap.SimpleEntry<>(clazz, field);
+        }
+    }
+
+    @Override
+    public Object visitStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx) {
+        try {
+            debugNode(ctx);
+            Map.Entry<Class<?>, Object> entry = getStaticEnumValue(ctx);
+            Object value = entry.getValue();
+            if (value instanceof Field) {
+                Field field = (Field) value;
+                int modifiers = field.getModifiers();
+                if (!Modifier.isStatic(modifiers)) {
+                    throw new IllegalArgumentException("un-support static field : " + field);
+                }
+                field.setAccessible(true);
+                return field.get(null);
+            } else {
+                return value;
+            }
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
+        }
+    }
+
     @Override
     public Object visitConstValue(TinyScriptParser.ConstValueContext ctx) {
         try {
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing const value!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1690,7 +1848,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
 //            debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing ref value!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1730,7 +1888,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
 //            debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing const class!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1761,7 +1919,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
 //            debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing const boolean!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1793,7 +1951,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
 //            debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing const null!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1823,7 +1981,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
 //            debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing const string!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1852,7 +2010,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
             debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing const multiline string!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1908,7 +2066,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
             debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing const render string!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1938,7 +2096,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
 //            debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing dec number!");
             }
             ParseTree item = ctx.getChild(0);
@@ -1981,7 +2139,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
 //            debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing hex number!");
             }
             ParseTree item = ctx.getChild(0);
@@ -2017,7 +2175,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
 //            debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing otc number!");
             }
             ParseTree item = ctx.getChild(0);
@@ -2053,7 +2211,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
 //            debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing bin number!");
             }
             ParseTree item = ctx.getChild(0);
@@ -2089,7 +2247,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         try {
             debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count < 0) {
+            if (count <= 0) {
                 throw new IllegalArgumentException("missing json value!");
             }
             ParseTree item = ctx.getChild(0);
@@ -2201,7 +2359,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
                     if (!",".equals(term)) {
-                        throw new IllegalArgumentException("invalid json pairs separator, expect ',' buf found '" + term + "'!");
+                        throw new IllegalArgumentException("invalid json pairs separator, expect ',' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.JsonPairContext) {
                     TinyScriptParser.JsonPairContext nextCtx = (TinyScriptParser.JsonPairContext) item;
@@ -2351,7 +2509,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
                     if (!",".equals(term)) {
-                        throw new IllegalArgumentException("invalid json item list separator, expect ',' buf found '" + term + "'!");
+                        throw new IllegalArgumentException("invalid json item list separator, expect ',' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.ExpressContext) {
                     TinyScriptParser.ExpressContext nextCtx = (TinyScriptParser.ExpressContext) item;
@@ -2518,6 +2676,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.ExtractPairContext) {
                 TinyScriptParser.ExtractPairContext nextCtx = (TinyScriptParser.ExtractPairContext) tree;
                 return visitExtractPair(nextCtx);
+            } else if (tree instanceof TinyScriptParser.StaticEnumValueContext) {
+                TinyScriptParser.StaticEnumValueContext nextCtx = (TinyScriptParser.StaticEnumValueContext) tree;
+                return visitStaticEnumValue(nextCtx);
             }
         } catch (TinyScriptBreakException e) {
 
