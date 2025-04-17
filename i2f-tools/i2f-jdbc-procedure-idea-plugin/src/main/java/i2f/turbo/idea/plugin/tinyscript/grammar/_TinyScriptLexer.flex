@@ -69,6 +69,7 @@ WS=[ \t\r\n]+
   "]"                                       { return TERM_BRACKET_SQUARE_R; }
   "?"                                       { return TERM_QUESTION; }
   "#"                                       { return TERM_SHARP; }
+  "@"                                       { return TERM_AT; }
   "*"                                       { return OP_MUL; }
   "/"                                       { return OP_DIV; }
   "%"                                       { return OP_MOD; }

@@ -203,6 +203,10 @@ public class TinyScriptVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitStaticEnumValue(@NotNull TinyScriptStaticEnumValue o) {
+    visitPsiElement(o);
+  }
+
   public void visitThrowSegment(@NotNull TinyScriptThrowSegment o) {
     visitPsiElement(o);
   }

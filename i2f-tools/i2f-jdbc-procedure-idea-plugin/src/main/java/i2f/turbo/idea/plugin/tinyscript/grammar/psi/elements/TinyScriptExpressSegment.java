@@ -50,6 +50,9 @@ public interface TinyScriptExpressSegment extends PsiElement {
   TinyScriptRefValue getRefValue();
 
   @Nullable
+  TinyScriptStaticEnumValue getStaticEnumValue();
+
+  @Nullable
   TinyScriptThrowSegment getThrowSegment();
 
   @Nullable

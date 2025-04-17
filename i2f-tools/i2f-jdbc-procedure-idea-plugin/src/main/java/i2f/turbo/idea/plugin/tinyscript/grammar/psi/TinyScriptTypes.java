@@ -59,6 +59,7 @@ public interface TinyScriptTypes {
   IElementType SCRIPT = new TinyScriptElementType("SCRIPT");
   IElementType SCRIPT_BLOCK = new TinyScriptElementType("SCRIPT_BLOCK");
   IElementType SEGMENT = new TinyScriptElementType("SEGMENT");
+  IElementType STATIC_ENUM_VALUE = new TinyScriptElementType("STATIC_ENUM_VALUE");
   IElementType THROW_SEGMENT = new TinyScriptElementType("THROW_SEGMENT");
   IElementType TRY_BODY_BLOCK = new TinyScriptElementType("TRY_BODY_BLOCK");
   IElementType TRY_SEGMENT = new TinyScriptElementType("TRY_SEGMENT");
@@ -123,6 +124,7 @@ public interface TinyScriptTypes {
   IElementType OP_VERTICAL_BAR = new TinyScriptTokenType("|");
   IElementType REF_EXPRESS = new TinyScriptTokenType("REF_EXPRESS");
   IElementType ROUTE_NAMING = new TinyScriptTokenType("ROUTE_NAMING");
+  IElementType TERM_AT = new TinyScriptTokenType("@");
   IElementType TERM_BRACKET_SQUARE_L = new TinyScriptTokenType("[");
   IElementType TERM_BRACKET_SQUARE_R = new TinyScriptTokenType("]");
   IElementType TERM_COLON = new TinyScriptTokenType(":");
@@ -307,6 +309,9 @@ public interface TinyScriptTypes {
       }
       else if (type == SEGMENT) {
         return new TinyScriptSegmentImpl(node);
+      }
+      else if (type == STATIC_ENUM_VALUE) {
+        return new TinyScriptStaticEnumValueImpl(node);
       }
       else if (type == THROW_SEGMENT) {
         return new TinyScriptThrowSegmentImpl(node);

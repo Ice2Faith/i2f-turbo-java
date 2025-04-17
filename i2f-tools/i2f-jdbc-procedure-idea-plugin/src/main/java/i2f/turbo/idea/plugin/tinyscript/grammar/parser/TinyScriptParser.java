@@ -399,7 +399,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (ROUTE_NAMING|NAMING|extractExpress) (OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN) express
+  // (ROUTE_NAMING|NAMING|extractExpress|staticEnumValue) (OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN) express
   public static boolean equalValue(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "equalValue")) return false;
     boolean r;
@@ -411,13 +411,14 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ROUTE_NAMING|NAMING|extractExpress
+  // ROUTE_NAMING|NAMING|extractExpress|staticEnumValue
   private static boolean equalValue_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "equalValue_0")) return false;
     boolean r;
     r = consumeToken(b, ROUTE_NAMING);
     if (!r) r = consumeToken(b, NAMING);
     if (!r) r = extractExpress(b, l + 1);
+    if (!r) r = staticEnumValue(b, l + 1);
     return r;
   }
 
@@ -481,6 +482,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   //         | equalValue
   //         | newInstance
   //         | invokeFunction
+  //         | staticEnumValue
   //         | constValue
   //         | refValue
   //         | jsonValue
@@ -502,6 +504,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     if (!r) r = equalValue(b, l + 1);
     if (!r) r = newInstance(b, l + 1);
     if (!r) r = invokeFunction(b, l + 1);
+    if (!r) r = staticEnumValue(b, l + 1);
     if (!r) r = constValue(b, l + 1);
     if (!r) r = refValue(b, l + 1);
     if (!r) r = jsonValue(b, l + 1);
@@ -1354,6 +1357,20 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     r = express(b, l + 1);
     r = r && consumeToken(b, TERM_SEMICOLON);
     exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // TERM_AT NAMING
+  //     | NAMING TERM_AT NAMING
+  public static boolean staticEnumValue(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "staticEnumValue")) return false;
+    if (!nextTokenIs(b, "<static enum value>", NAMING, TERM_AT)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, STATIC_ENUM_VALUE, "<static enum value>");
+    r = parseTokens(b, 0, TERM_AT, NAMING);
+    if (!r) r = parseTokens(b, 0, NAMING, TERM_AT, NAMING);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
