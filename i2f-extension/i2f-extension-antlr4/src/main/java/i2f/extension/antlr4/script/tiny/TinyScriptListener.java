@@ -1,4 +1,4 @@
-// Generated from /rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -250,6 +250,19 @@ public interface TinyScriptListener extends ParseTreeListener {
 	 */
 	void exitExtractPair(TinyScriptParser.ExtractPairContext ctx);
 	/**
+     * Enter a parse tree produced by {@link TinyScriptParser#staticEnumValue}.
+     * @param ctx the parse tree
+     */
+    void enterStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link TinyScriptParser#staticEnumValue}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx);
+
+    /**
 	 * Enter a parse tree produced by {@link TinyScriptParser#newInstance}.
 	 * @param ctx the parse tree
 	 */

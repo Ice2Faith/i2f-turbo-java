@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.sql.JDBCType;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,12 +19,27 @@ import java.util.Map;
  */
 public class TestTinyScript {
 
+    public static JDBCType type = JDBCType.INTEGER;
 
     public static void main(String[] args) throws Exception {
 
         TinyScript.registryBuiltMethodByStaticMethod(TestTinyScript.class, (method) -> {
             return method.getName().startsWith("regex");
         });
+
+        Map<String, Object> ctx = new HashMap<>();
+        String className = TestTinyScript.class.getName();
+        TinyScript.script("jdbcType1=@java.sql.JDBCType.VARCHAR;" +
+                "jdbcType2=java.sql.JDBCType@VARCHAR;" +
+                "type1=@java.sql.Types.VARCHAR;" +
+                "type2=java.sql.Types@VARCHAR;" +
+                "static1=@" + className + ".type;" +
+                "static2=" + className + "@type;" +
+                "@" + className + ".type=java.sql.JDBCType@VARCHAR;" +
+                "static3=@" + className + ".type;" +
+                "" + className + "@type=java.sql.JDBCType@BIGINT;" +
+                "static4=@" + className + ".type;" +
+                "", ctx);
 
         File file = new File("i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/test/test.ts.txt");
         StringBuilder builder = new StringBuilder();

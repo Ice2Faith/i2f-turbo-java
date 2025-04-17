@@ -511,6 +511,30 @@ typeof 用法和is一样，是is的别名
 "xxx"+1;
 ```
 
+### 静态变量/枚举值访问与赋值
+
+- 定义
+
+```shell
+@类名.变量名
+类名@变量名
+```
+
+- 举例
+
+```shell
+// 访问静态变量
+@java.sql.Types.VARCHAR;
+java.sql.Types@VARCHAR;
+// 访问枚举值
+@java.sql.JDBCType.VARCHAR;
+java.sql.JDBCType@VARCHAR;
+// 赋值静态变量
+// 虽然语法上不限制对枚举值进行复制，但是这样的操作实际上是不可行的
+// 因为枚举值不能够被赋值
+@DatabaseTypeHolder.TYPE=@DatabaseType.MYSQL;
+```
+
 ### if-else条件语句
 - 定义
 
