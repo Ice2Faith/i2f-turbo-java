@@ -12,6 +12,7 @@ import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
+import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
@@ -92,7 +93,11 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
             }
             obj = TinyScript.script(script, context, resolver);
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
         }
         return obj;
     }

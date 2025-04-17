@@ -9,6 +9,8 @@ import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.SignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.reflect.ReflectResolver;
 
 import java.lang.reflect.Constructor;
@@ -108,7 +110,11 @@ public class LangInvokeNode extends AbstractExecutorNode {
                     executor.visitSet(context, result, res);
                 }
             } catch (Exception e) {
-                throw new IllegalStateException(e.getMessage(), e);
+                if (e instanceof SignalException) {
+                    throw (SignalException) e;
+                }else {
+                    throw new ThrowSignalException(e.getMessage(), e);
+                }
             }
         } else {
             Class<?> clazz = null;
@@ -157,7 +163,11 @@ public class LangInvokeNode extends AbstractExecutorNode {
                     executor.visitSet(context, result, res);
                 }
             } catch (Exception e) {
-                throw new IllegalStateException(e.getMessage(), e);
+                if (e instanceof SignalException) {
+                    throw (SignalException) e;
+                }else {
+                    throw new ThrowSignalException(e.getMessage(), e);
+                }
             }
         }
 

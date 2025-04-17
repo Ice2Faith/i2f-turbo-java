@@ -10,6 +10,7 @@ import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
+import i2f.jdbc.procedure.signal.SignalException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,7 +91,11 @@ public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScri
         try {
             obj = GroovyScript.eval(sourceCode, bindings);
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage()+"\n\t source code:\n"+sourceCode, e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new IllegalStateException(e.getMessage() + "\n\t source code:\n" + sourceCode, e);
+            }
         }
         return obj;
     }

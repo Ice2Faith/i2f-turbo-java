@@ -85,15 +85,46 @@ sql-开头的用于提供JDBC操作能力，实现上考虑使用mybatis的xml�
     "mysql,oracle"就表示兼容的数据库类型
     这个示例中，表示需要判断datasource为primary的数据库类型在mysql,oracle中任意一个满足即可
 
-is-null 判断是否为null
-is-not-null 判断是否不为null
-is-empty 判断是否为空，适用于string类型
-is-not-empty 判断是否不为空，适用于string类型
+.is-null 判断是否为null
+.is-not-null 判断是否不为null
+.is-empty 判断是否为空，适用于string类型
+.is-not-empty 判断是否不为空，适用于string类型
 
-date-now 当前时间，也就是值 new Date()
-uuid 随机的UUID，也就是值 UUID.randomUUID().toString()
-current-time-millis 当前的毫秒值，也就是值 System.currentTimeMillis()
-snow-uid 雪花ID，也就是值 SnowflakeLongUid.getId()
+.date-now 当前时间，也就是值 new Date()
+.uuid 随机的UUID，也就是值 UUID.randomUUID().toString()
+.current-time-millis 当前的毫秒值，也就是值 System.currentTimeMillis()
+.snow-uid 雪花ID，也就是值 SnowflakeLongUid.getId()
+
+.cause-first 在cause链中取第一个匹配的异常
+.cause-last 在cause链中取最后一个匹配的异常
+.cause-raw 取框架层面得到的原始异常
+.cause-root 在cause链中取最后一个根异常
+    这部分主要是用在异常类型的捕获或者判定的场景
+    主要是在lang-catch的type属性上进行修饰
+    由于框架内部的异常之间会进行一些re-throw重新抛出
+    就会导致最原始的异常类型丢失，到catch的时候异常类型匹配不上的情况
+    因此，就需要配合一些修饰符，对异常进行cause链的获取
+    作为异常进行判定，才能满足实际的使用需要
+    举例：
+        框架层面捕获到异常的cause链如下
+            ThrowSignalException -> IllegalStateException -> SQLException -> SQLDataException -> IllegalArgumentException
+        那么在默认情况下，会去除SingalException及其子类，保留最原始的异常类型
+        因此，默认情况下使用的就是第一个找到的非SignalException异常
+            IllegalStateException -> SQLException -> SQLDataException -> IllegalArgumentException
+        也就是IllegalStateException进行判定
+        但是，如果你的catch的type=SQLException则不会被匹配上
+        也就是说catch条件分支不满足
+        这种情况下，你就需要使用.cause-first修饰符进行cause链路查找找到第一个SQLException
+            SQLException -> SQLDataException -> IllegalArgumentException
+        但是，如果你需要找到的不是第一个SQLException,而是最后一个SQLDataException的话
+            SQLDataException -> IllegalArgumentException
+        就需要使用.cause-last修饰符进行获取
+        如果，你想要获取最终的异常，最根本造成的异常IllegalArgumentException
+            IllegalArgumentException
+        也就是最后一个异常，那就需要使用.cause-root修饰符
+        但是，有些情况下，你可能需要处理框架层面的异常，也就是处理最原始的异常，不经过任何cause过滤的
+        也就是得到ThrowSignalException，则需要使用.cause-raw修饰符获取
+            ThrowSignalException -> IllegalStateException -> SQLException -> SQLDataException -> IllegalArgumentException
 
 ======================================================
 注意，未标明的修饰符
@@ -636,10 +667,11 @@ eval-ts使用TinyScript引擎进行处理
         </lang-body>
         <!--
         表示一个异常catch块，type指定要捕获的异常类型，var表示异常的变量名
-        type以string访问，不支持修饰符
+        type以string访问，支持.cause-系列的修饰符，详情框修饰符部分
         e以string访问，不支持修饰符
+        test以test访问，默认为true，含义为，当type指定的类型匹配时，再进行test表达式判定，当test也通过之后，才认为此catch分支有效，否则进入下一个catch分支
          -->
-        <lang-catch type="" e="">
+        <lang-catch type="" e="" test="">
 
         </lang-catch>
         <!-- 对应finally语句块 -->
@@ -653,8 +685,25 @@ eval-ts使用TinyScript引擎进行处理
             <lang-body>
                 <sql-update script="v_sql"/>
             </lang-body>
-            <lang-catch type="ArithmeticException|java.sql.SQLException" e="e">
+            <!-- 发生ArithmeticException异常或者IllegalArgumentException异常才进入 -->
+            <lang-catch type="ArithmeticException|IllegalArgumentException" e="e">
                 <lang-println tag="execError" SQL="v_sql" EXCEPTION="e"/>
+            </lang-catch>
+            <!--
+            要求是SQLException，并且判断SQLState的值为22012,也就是发生了DIVIDE_ZERO异常，那么此catch分支才进入
+            如果不满足，则进行下一个catch块判定
+            当type测试通过之后，会将e指定的异常对象注入到上下文中，因此在test执行时
+            就已经具有了指定的异常e名称的异常对象了
+             -->
+            <lang-catch type="java.sql.SQLException" e="e" test='e.getSQLState()=="22012"'>
+
+            </lang-catch>
+            <!--
+            和上面的一样，但是判断的SQLState不一样
+            这样就为虽然异常类型相同，但是提供了不同的分支的能力
+            -->
+            <lang-catch type="java.sql.SQLException" e="e" test.eval-ts="${e}.getSQLState()=='22011'">
+
             </lang-catch>
             <lang-catch type="RuntimeException" e="e">
                 <lang-println tag="runError" SQL="v_sql" EXCEPTION="e"/>

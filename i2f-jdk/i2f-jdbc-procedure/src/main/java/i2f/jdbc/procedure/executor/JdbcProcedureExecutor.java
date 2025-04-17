@@ -7,6 +7,8 @@ import i2f.convert.obj.ObjectConvertor;
 import i2f.environment.std.IEnvironment;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
+import i2f.jdbc.procedure.event.XProc4jEvent;
+import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
@@ -48,6 +50,16 @@ public interface JdbcProcedureExecutor {
     void registryEvalScriptProvider(EvalScriptProvider provider);
 
     List<EvalScriptProvider> getEvalScriptProviders();
+
+    XProc4jEventHandler getEventHandler();
+
+    default void sendEvent(XProc4jEvent event) {
+        getEventHandler().send(event);
+    }
+
+    default void publishEvent(XProc4jEvent event) {
+        getEventHandler().publish(event);
+    }
 
     JdbcProcedureContext getContext();
 

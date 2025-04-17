@@ -6,6 +6,7 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.lang.reflect.Constructor;
@@ -73,7 +74,11 @@ public class LangThrowNode extends AbstractExecutorNode {
             } catch (ReflectiveOperationException e) {
             }
         } catch (Throwable e) {
-            throw new ThrowSignalException(e.getMessage(), e);
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            }else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
         }
 
     }

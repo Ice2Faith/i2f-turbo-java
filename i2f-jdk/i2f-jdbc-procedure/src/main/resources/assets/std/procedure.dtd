@@ -480,9 +480,9 @@
         <!ELEMENT lang-if (ANY|EMPTY)>
         <!ATTLIST lang-if test CDATA #IMPLIED>
         <!ATTLIST lang-if datasource CDATA #IMPLIED>
+
         <!ATTLIST lang-if test.boolean CDATA #IMPLIED>
         <!ATTLIST lang-if test.dialect CDATA #IMPLIED>
-
         <!ATTLIST lang-if test.eval-ts CDATA #IMPLIED>
 
         <!ELEMENT lang-choose (lang-when*|lang-otherwise?)>
@@ -490,9 +490,9 @@
         <!ELEMENT lang-when (ANY|EMPTY)>
         <!ATTLIST lang-when test CDATA #IMPLIED>
         <!ATTLIST lang-when datasource CDATA #IMPLIED>
+
         <!ATTLIST lang-when test.boolean CDATA #IMPLIED>
         <!ATTLIST lang-when test.dialect CDATA #IMPLIED>
-
         <!ATTLIST lang-when test.eval-ts CDATA #IMPLIED>
 
         <!ELEMENT lang-otherwise (ANY|EMPTY)>
@@ -520,9 +520,9 @@
         <!ATTLIST lang-while index CDATA #IMPLIED>
         <!ATTLIST lang-while test CDATA #IMPLIED>
         <!ATTLIST lang-while datasource CDATA #IMPLIED>
+
         <!ATTLIST lang-while test.boolean CDATA #IMPLIED>
         <!ATTLIST lang-while test.dialect CDATA #IMPLIED>
-
         <!ATTLIST lang-while test.eval-ts CDATA #IMPLIED>
 
         <!ELEMENT lang-continue (EMPTY)>
@@ -735,6 +735,16 @@
         <!ELEMENT lang-catch (ANY|EMPTY)>
         <!ATTLIST lang-catch type CDATA #IMPLIED>
         <!ATTLIST lang-catch e CDATA #IMPLIED>
+        <!ATTLIST lang-catch test CDATA #IMPLIED>
+
+        <!ATTLIST lang-catch type.cause-first CDATA #IMPLIED>
+        <!ATTLIST lang-catch type.cause-last CDATA #IMPLIED>
+        <!ATTLIST lang-catch type.cause-raw CDATA #IMPLIED>
+        <!ATTLIST lang-catch type.cause-root CDATA #IMPLIED>
+
+        <!ATTLIST lang-catch test.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-catch test.dialect CDATA #IMPLIED>
+        <!ATTLIST lang-catch test.eval-ts CDATA #IMPLIED>
 
         <!ELEMENT lang-finally (ANY|EMPTY)>
 
@@ -842,6 +852,16 @@
         <!ATTLIST sql-transactional read-only CDATA #IMPLIED>
         <!ATTLIST sql-transactional rollback-for CDATA #IMPLIED>
         <!ATTLIST sql-transactional no-rollback-for CDATA #IMPLIED>
+
+        <!ATTLIST sql-transactional rollback-for.cause-first CDATA #IMPLIED>
+        <!ATTLIST sql-transactional rollback-for.cause-last CDATA #IMPLIED>
+        <!ATTLIST sql-transactional rollback-for.cause-raw CDATA #IMPLIED>
+        <!ATTLIST sql-transactional rollback-for.cause-root CDATA #IMPLIED>
+
+        <!ATTLIST sql-transactional no-rollback-for.cause-first CDATA #IMPLIED>
+        <!ATTLIST sql-transactional no-rollback-for.cause-last CDATA #IMPLIED>
+        <!ATTLIST sql-transactional no-rollback-for.cause-raw CDATA #IMPLIED>
+        <!ATTLIST sql-transactional no-rollback-for.cause-root CDATA #IMPLIED>
 
         <!ELEMENT lang-async (ANY|EMPTY)>
         <!ATTLIST lang-async await CDATA #IMPLIED>
