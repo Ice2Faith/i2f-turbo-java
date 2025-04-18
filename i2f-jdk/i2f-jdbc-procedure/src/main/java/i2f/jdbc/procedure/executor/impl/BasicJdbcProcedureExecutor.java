@@ -178,7 +178,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         if(node==null){
             return;
         }
-        logDebug(()->"registry executor node:"+node.getClass());
+        if(isDebug()) {
+            logDebug("registry executor node:" + node.getClass());
+        }
         this.nodes.add(node);
         if(node instanceof EvalScriptProvider){
             EvalScriptProvider provider = (EvalScriptProvider) node;
@@ -191,7 +193,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         if(provider==null){
             return;
         }
-        logDebug(()->"registry eval script provider:"+provider.getClass());
+        if(isDebug()) {
+            logDebug("registry eval script provider:" + provider.getClass());
+        }
         this.evalScriptProviders.add(provider);
     }
 
@@ -213,14 +217,18 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public <T> T invoke(String procedureId, Map<String, Object> params) {
-        logDebug(()->"invoke ["+procedureId+"] use Map ... ");
+        if(isDebug()) {
+            logDebug("invoke [" + procedureId + "] use Map ... ");
+        }
         Map<String, Object> ret = call(procedureId, params);
         return visitAs(ParamsConsts.RETURN, ret);
     }
 
     @Override
     public <T> T invoke(String procedureId, List<Object> args) {
-        logDebug(()->"invoke ["+procedureId+"] use List ... ");
+        if(isDebug()) {
+            logDebug("invoke [" + procedureId + "] use List ... ");
+        }
         Map<String, Object> params = castArgListAsProcedureMap(procedureId, args);
         return invoke(procedureId, params);
     }
@@ -228,7 +236,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public Map<String, Object> call(String procedureId, List<Object> args) {
-        logDebug(()->"call ["+procedureId+"] use Map ... ");
+        if(isDebug()) {
+            logDebug("call [" + procedureId + "] use Map ... ");
+        }
         Map<String, Object> params = castArgListAsProcedureMap(procedureId, args);
         return call(procedureId, params);
     }
@@ -276,7 +286,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     ProcedureCallNode.TAG_NAME,
                     FunctionCallNode.TAG_NAME
             ).contains(node.getTagName())) {
-//                logDebug(() -> "control signal:" + e.getClass().getSimpleName());
+//                if(isDebug()) {
+//                    logDebug(() -> "control signal:" + e.getClass().getSimpleName());
+//                }
             } else {
                 throw e;
             }
@@ -291,7 +303,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public Map<String, Object> exec(XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
-        logDebug(()->"exec XmlNode ["+AbstractExecutorNode.getNodeLocation(node)+"] use Map ... ");
+//        if(isDebug()) {
+//            logDebug( "exec XmlNode [" + AbstractExecutorNode.getNodeLocation(node) + "] use Map ... ");
+//        }
         execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
             for (ExecutorNode execNode : getNodes()) {
                 if (execNode.support(vNode)) {
@@ -299,7 +313,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     return;
                 }
             }
-            logDebug(() -> "waring! tag " + vNode.getTagName() + " not found any executor!" + " at " + getNodeLocation(vNode));
+            if(isDebug()) {
+                logDebug("waring! tag " + vNode.getTagName() + " not found any executor!" + " at " + getNodeLocation(vNode));
+            }
 
         }, node, params, beforeNewConnection, afterCloseConnection);
         return params;
@@ -338,10 +354,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Connection conn = entry.getValue();
             if (conn != null) {
                 try {
-                    logDebug(() -> "close connection : " + entry.getKey());
+                    if(isDebug()) {
+                        logDebug("close connection : " + entry.getKey());
+                    }
                     conn.close();
                 } catch (SQLException e) {
-                    logWarn(() -> e.getMessage(), e);
+                    logWarn(e.getMessage(), e);
                 }
             }
         }
@@ -375,7 +393,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     public void execJavaCaller(JdbcProcedureJavaCaller caller, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) throws Throwable {
         execDelegate((vParams, vArgs) -> {
             JdbcProcedureJavaCaller vCaller = (JdbcProcedureJavaCaller) vArgs[0];
-            logDebug(() -> "exec " + vCaller.getClass());
+//            if(isDebug()) {
+//                logDebug("exec " + vCaller.getClass());
+//            }
 
             Object ret = vCaller.exec(this, vParams);
             boolean hasValue = true;
@@ -397,7 +417,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         execDelegate((vParams, vArgs) -> {
             ExecutorNode vExecNode = (ExecutorNode) vArgs[0];
             XmlNode vNode = (XmlNode) vArgs[1];
-            logDebug(() -> "exec " + vNode.getTagName() + " by " + vExecNode.getClass().getSimpleName() + ", at " + getNodeLocation(vNode));
+//            if(isDebug()) {
+//                logDebug("exec " + vNode.getTagName() + " by " + vExecNode.getClass().getSimpleName() + ", at " + getNodeLocation(vNode));
+//            }
 
             vExecNode.exec(vNode, vParams, this);
         }, params, beforeNewConnection, afterCloseConnection, execNode, node);
@@ -405,7 +427,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public Map<String, Object> exec(JdbcProcedureJavaCaller caller, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
-        logDebug(()->"exec JavaCaller ["+caller.getClass()+"] use Map ... ");
+        if(isDebug()) {
+            logDebug( "exec JavaCaller [" + caller.getClass() + "] use Map ... ");
+        }
         execJavaCallerDelegate((vCaller, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
             execJavaCaller(vCaller, vParams, vBeforeNewConnection, vAfterCloseConnection);
         }, caller, params, beforeNewConnection, afterCloseConnection);
@@ -428,7 +452,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public Map<String, Object> execAsProcedure(XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
-        logDebug(()->"exec XmlNode as procedure ["+AbstractExecutorNode.getNodeLocation(node)+"] use Map ... ");
+//        if(isDebug()) {
+//            logDebug("exec XmlNode as procedure [" + AbstractExecutorNode.getNodeLocation(node) + "] use Map ... ");
+//        }
         execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
             ProcedureNode execNode = getProcedureNode();
             execXmlNodeByExecutorNode(execNode, vNode, vParams, vBeforeNewConnection, vAfterCloseConnection);
@@ -501,10 +527,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params) {
-        logDebug(()->"attr value ["+attr+"] at ["+AbstractExecutorNode.getNodeLocation(node)+"] ... ");
+//        if(isDebug()) {
+//            logDebug( "attr value [" + attr + "] at [" + AbstractExecutorNode.getNodeLocation(node) + "] ... ");
+//        }
         String attrScript = node.getTagAttrMap().get(attr);
         if (attrScript == null) {
-            logDebug(()->"attr value ["+attr+"] at ["+AbstractExecutorNode.getNodeLocation(node)+"] is: null");
+            if(isDebug()) {
+                logDebug("attr value [" + attr + "] at [" + AbstractExecutorNode.getNodeLocation(node) + "] is: null");
+            }
             return null;
         }
         Object value = attrScript;
@@ -537,7 +567,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         }
 
         Object logObj=value;
-        logDebug(()->"attr value ["+attr+"] at ["+AbstractExecutorNode.getNodeLocation(node)+"] is: "+stringifyWithType(logObj));
+//        if(isDebug()) {
+//            logDebug("attr value [" + attr + "] at [" + AbstractExecutorNode.getNodeLocation(node) + "] is: " + stringifyWithType(logObj));
+//        }
         return value;
     }
 
@@ -697,7 +729,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     return method.invoke(null, value);
                 }
             } catch (Throwable e) {
-                logWarn(() -> e.getMessage(), e);
+                logWarn(e.getMessage(), e);
             }
             try {
                 Function function = ContextHolder.CONVERT_FUNC_MAP.get(feature);
@@ -705,7 +737,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                     return function.apply(value);
                 }
             } catch (Exception e) {
-                logWarn(() -> e.getMessage(), e);
+                logWarn(e.getMessage(), e);
             }
         }
         return value;
@@ -775,8 +807,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public void logDebug(Supplier<Object> supplier) {
         if (isDebug()) {
-            String location=traceLocation();
-            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), "near "+location+", msg: "+supplier.get()));
+            logDebug(supplier.get());
+        }
+    }
+
+    @Override
+    public void logDebug(Object obj) {
+        if(isDebug()) {
+            String location = traceLocation();
+            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), "near " + location + ", msg: " + obj));
         }
     }
 
@@ -848,20 +887,28 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public boolean test(String script, Object params) {
-        logDebug(()->"test ["+script+"] near ["+traceLocation()+"] ... ");
+//        if(isDebug()) {
+//            logDebug("test [" + script + "] near [" + traceLocation() + "] ... ");
+//        }
         String test = unescapeTestScript(script);
-        logDebug(() -> "test:" + test);
+//        if(isDebug()) {
+//            logDebug("test:" + test);
+//        }
         try {
             Boolean ok = ObjectConvertor.tryParseBoolean(test);
             if (ok != null) {
-                logDebug(()->"test ["+script+"] near ["+traceLocation()+"] is: "+stringifyWithType(ok));
+//                if(isDebug()) {
+//                    logDebug( "test [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ok));
+//                }
                 return ok;
             }
         } catch (Exception e) {
 
         }
         boolean ret= innerTest(test, params);
-        logDebug(()->"test ["+script+"] near ["+traceLocation()+"] is: "+stringifyWithType(ret));
+//        if(isDebug()) {
+//            logDebug("test [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+//        }
         return ret;
     }
 
@@ -937,23 +984,31 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public Object eval(String script, Object params) {
-        logDebug(()->"eval ["+script+"] near ["+traceLocation()+"] ... ");
+//        if(isDebug()) {
+//            logDebug("eval [" + script + "] near [" + traceLocation() + "] ... ");
+//        }
         try {
             int v= Integer.parseInt(script);
-            logDebug(()->"eval ["+script+"] near ["+traceLocation()+"] is: "+stringifyWithType(v));
+//            if(isDebug()) {
+//                logDebug("eval [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(v));
+//            }
         } catch (Exception e) {
 
         }
         try {
             long v= Long.parseLong(script);
-            logDebug(()->"eval ["+script+"] near ["+traceLocation()+"] is: "+stringifyWithType(v));
+//            if(isDebug()) {
+//                logDebug("eval [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(v));
+//            }
         } catch (Exception e) {
 
         }
         try {
             Boolean ok = ObjectConvertor.tryParseBoolean(script);
             if (ok != null) {
-                logDebug(()->"eval ["+script+"] near ["+traceLocation()+"] is: "+stringifyWithType(ok));
+//                if(isDebug()) {
+//                    logDebug("eval [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ok));
+//                }
                 return ok;
             }
         } catch (Exception e) {
@@ -961,12 +1016,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         }
         try {
             double v= Double.parseDouble(script);
-            logDebug(()->"eval ["+script+"] near ["+traceLocation()+"] is: "+stringifyWithType(v));
+//            if(isDebug()) {
+//                logDebug("eval [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(v));
+//            }
         } catch (Exception e) {
 
         }
         Object ret= innerEval(script, params);
-        logDebug(()->"eval ["+script+"] near ["+traceLocation()+"] is: "+stringifyWithType(ret));
+//        if(isDebug()) {
+//            logDebug("eval [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+//        }
         return ret;
     }
 
@@ -976,7 +1035,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public Object evalScript(String lang, String script, Map<String,Object> params) {
-        logDebug(()->"eval script ["+script+"] on lang ["+lang+"] near ["+traceLocation()+"] ... ");
+//        if(isDebug()) {
+//            logDebug("eval script [" + script + "] on lang [" + lang + "] near [" + traceLocation() + "] ... ");
+//        }
         EvalScriptProvider provider = null;
         for (EvalScriptProvider item : evalScriptProviders) {
             if(item.support(lang)){
@@ -989,7 +1050,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         }
         prepareParams(params);
         Object ret= provider.eval(script, params,this);
-        logDebug(()->"eval script ["+script+"] on lang ["+lang+"] near ["+traceLocation()+"] is: "+stringifyWithType(ret));
+//        if(isDebug()) {
+//            logDebug("eval script [" + script + "] on lang [" + lang + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+//        }
         return ret;
     }
 
@@ -1011,34 +1074,42 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void visitSet(Map<String, Object> params, String result, Object value) {
-        if(isDebug()){
-            if(!isVisitKeepValue(result)){
-                logDebug(()->"visit set ["+result+"] near ["+traceLocation()+"] is: "+stringifyWithType(value));
-            }
-        }
+//        if(isDebug()){
+//            if(!isVisitKeepValue(result)){
+//                if(isDebug()) {
+//                    logDebug("visit set [" + result + "] near [" + traceLocation() + "] is: " + stringifyWithType(value));
+//                }
+//            }
+//        }
         Visitor visitor = Visitor.visit(result, params);
         visitor.set(value);
     }
 
     @Override
     public void visitDelete(Map<String, Object> params, String result) {
-        logDebug(()->"visit delete ["+result+"] near ["+traceLocation()+"] ");
+//        if(isDebug()) {
+//            logDebug("visit delete [" + result + "] near [" + traceLocation() + "] ");
+//        }
         Visitor visitor = Visitor.visit(result, params);
         visitor.delete();
     }
 
     @Override
     public Object visit(String script, Object params) {
-        logDebug(()->"visit ["+script+"] near ["+traceLocation()+"] ... ");
+//        if(isDebug()) {
+//            logDebug("visit [" + script + "] near [" + traceLocation() + "] ... ");
+//        }
         if (params instanceof Map) {
             Map<?, ?> map = (Map<?, ?>) params;
             if (map.containsKey(script)) {
                 Object ret= map.get(script);
-                if(isDebug()) {
-                    if (!isVisitKeepValue(script)) {
-                        logDebug(() -> "visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
-                    }
-                }
+//                if(isDebug()) {
+//                    if (!isVisitKeepValue(script)) {
+//                        if(isDebug()) {
+//                            logDebug("visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+//                        }
+//                    }
+//                }
                 return ret;
             }
         }
@@ -1046,22 +1117,26 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Visitor visitor = Visitor.visit(script, params);
             if (visitor != null) {
                 Object ret= visitor.get();
-                if(isDebug()) {
-                    if (!isVisitKeepValue(script)) {
-                        logDebug(() -> "visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
-                    }
-                }
+//                if(isDebug()) {
+//                    if (!isVisitKeepValue(script)) {
+//                        if(isDebug()) {
+//                            logDebug("visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+//                        }
+//                    }
+//                }
                 return ret;
             }
         } catch (Exception e) {
             logWarn(()->"visitor access error, will fallback to inner visit, visitor error message:"+e.getMessage(),e);
         }
         Object ret= innerVisit(script, params);
-        if(isDebug()) {
-            if (!isVisitKeepValue(script)) {
-                logDebug(() -> "visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
-            }
-        }
+//        if(isDebug()) {
+//            if (!isVisitKeepValue(script)) {
+//                if(isDebug()) {
+//                    logDebug("visit [" + script + "] near [" + traceLocation() + "] is: " + stringifyWithType(ret));
+//                }
+//            }
+//        }
         return ret;
     }
 
@@ -1071,9 +1146,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public String render(String script, Object params) {
-        logDebug(()->"render near ["+traceLocation()+"] script: "+stringifyWithType(script));
+//        if(isDebug()) {
+//            logDebug("render near [" + traceLocation() + "] script: " + stringifyWithType(script));
+//        }
         String ret= innerRender(script, params);
-        logDebug(()->"render near ["+traceLocation()+"] \nscript: \n"+stringifyWithType(script)+"\nresult: \n"+stringifyWithType(ret));
+//        if(isDebug()) {
+//            logDebug("render near [" + traceLocation() + "] \nscript: \n" + stringifyWithType(script) + "\nresult: \n" + stringifyWithType(ret));
+//        }
         return ret;
     }
 
@@ -1121,8 +1200,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         }
 
         String newConnDs=datasource;
-        logDebug(()-> XProc4jConsts.NAME+" new-connection for datasource:"+newConnDs+" near ["+traceLocation()+"] ");
-
+        if(isDebug()) {
+            logDebug(XProc4jConsts.NAME + " new-connection for datasource:" + newConnDs + " near [" + traceLocation() + "] ");
+        }
         if (conn != null) {
             connectionMap.put(datasource, conn);
         }
@@ -1140,9 +1220,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            logDebug(() -> "sql-query-list:datasource=" + datasource +" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql);
+            if(isDebug()) {
+                logDebug("sql-query-list:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
+            }
             List<?> list = JdbcResolver.list(conn, bql, resultType, -1, getColumnNameMapper(resultType));
-            logDebug(() -> "sql-query-list:datasource=" + datasource  +" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql+"\nresult: is-empty:"+list.isEmpty());
+            if(isDebug()) {
+                logDebug("sql-query-list:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
+            }
             return list;
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -1159,9 +1243,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            logDebug(() -> "sql-query-object:datasource=" + datasource +" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql);
+            if(isDebug()) {
+                logDebug("sql-query-object:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
+            }
             Object obj = JdbcResolver.get(conn, bql, resultType);
-            logDebug(() -> "sql-query-object:datasource=" + datasource + " near ["+traceLocation()+"] "+ " \n\tbql:\n" + bql+"\nresult: "+stringifyWithType(obj));
+            if(isDebug()) {
+                logDebug("sql-query-object:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: " + stringifyWithType(obj));
+            }
             return obj;
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -1178,9 +1266,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            logDebug(() -> "sql-query-row:datasource=" + datasource+" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql);
+            if(isDebug()) {
+                logDebug("sql-query-row:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
+            }
             Object row = JdbcResolver.find(conn, bql, resultType, getColumnNameMapper(resultType));
-            logDebug(() -> "sql-query-row:datasource=" + datasource+" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql+"\nresult:"+stringifyWithType(row));
+            if(isDebug()) {
+                logDebug("sql-query-row:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + stringifyWithType(row));
+            }
             return row;
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -1197,9 +1289,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            logDebug(() -> "sql-update:datasource=" + datasource+" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql);
+            if(isDebug()) {
+                logDebug( "sql-update:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
+            }
             int num = JdbcResolver.update(conn, bql);
-            logDebug(() -> "sql-update:datasource=" + datasource+" near ["+traceLocation()+"] " + " \n\tbql:\n" + bql+"\nresult:"+num);
+            if(isDebug()) {
+                logDebug( "sql-update:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + num);
+            }
             return num;
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -1221,7 +1317,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 bql = wrapper.apply(bql, page);
             }
             BindSql pageSql = bql;
-            logDebug(() -> "sql-wrap-page:datasource=" + datasource + ", databaseType=" + databaseType+" near ["+traceLocation()+"] " + " \n\tbql:\n" + pageSql);
+            if(isDebug()) {
+                logDebug("sql-wrap-page:datasource=" + datasource + ", databaseType=" + databaseType + " near [" + traceLocation() + "] " + " \n\tbql:\n" + pageSql);
+            }
             return pageSql;
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -1241,7 +1339,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             ICountWrapper wrapper = CountWrappers.wrapper();
             bql = wrapper.apply(bql);
             BindSql pageSql = bql;
-            logDebug(() -> "sql-wrap-count:datasource=" + datasource + ", databaseType=" + databaseType+" near ["+traceLocation()+"] " + " \n\tbql:\n" + pageSql);
+            if(isDebug()) {
+                logDebug("sql-wrap-count:datasource=" + datasource + ", databaseType=" + databaseType + " near [" + traceLocation() + "] " + " \n\tbql:\n" + pageSql);
+            }
             return pageSql;
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -1265,7 +1365,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 bql = wrapper.apply(bql, page);
             }
             BindSql pageSql = bql;
-            logDebug(() -> "sql-script:datasource=" + datasource + ", dialect=" + entry.getKey() +" near ["+traceLocation()+"] "+ " \n\tbql:\n" + pageSql);
+            if(isDebug()) {
+                logDebug("sql-script:datasource=" + datasource + ", dialect=" + entry.getKey() + " near [" + traceLocation() + "] " + " \n\tbql:\n" + pageSql);
+            }
             return pageSql;
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -1336,9 +1438,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
                 bql = wrapper.apply(bql, page);
             }
             BindSql pageBql = bql;
-            logDebug(() -> "sql-query-page:datasource=" + datasource +" near ["+traceLocation()+"] "+ " \n\tbql:\n" + pageBql);
+            if(isDebug()) {
+                logDebug("sql-query-page:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + pageBql);
+            }
             List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, getColumnNameMapper(resultType));
-            logDebug(() -> "sql-query-page:datasource=" + datasource +" near ["+traceLocation()+"] "+ " \n\tbql:\n" + pageBql+"\nresult: is-empty:"+list.isEmpty());
+            if(isDebug()) {
+                logDebug("sql-query-page:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + pageBql + "\nresult: is-empty:" + list.isEmpty());
+            }
             return list;
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -1351,7 +1457,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransBegin(String datasource, int isolation, Map<String, Object> params) {
-        logDebug(() -> "sql-trans-begin:datasource=" + datasource+" near ["+traceLocation()+"] ");
+        if(isDebug()) {
+            logDebug("sql-trans-begin:datasource=" + datasource + " near [" + traceLocation() + "] ");
+        }
         try {
             if (isolation < 0) {
                 isolation = Connection.TRANSACTION_READ_COMMITTED;
@@ -1366,7 +1474,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransCommit(String datasource, Map<String, Object> params) {
-        logDebug(() -> "sql-trans-commit:datasource=" + datasource+" near ["+traceLocation()+"] ");
+        if(isDebug()) {
+            logDebug("sql-trans-commit:datasource=" + datasource + " near [" + traceLocation() + "] ");
+        }
         try {
             Connection conn = getConnection(datasource, params);
             conn.commit();
@@ -1377,7 +1487,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransRollback(String datasource, Map<String, Object> params) {
-        logDebug(() -> "sql-trans-rollback:datasource=" + datasource+" near ["+traceLocation()+"] ");
+        if(isDebug()) {
+            logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + traceLocation() + "] ");
+        }
         try {
             Connection conn = getConnection(datasource, params);
             conn.rollback();
@@ -1388,7 +1500,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public void sqlTransNone(String datasource, Map<String, Object> params) {
-        logDebug(() -> "sql-trans-none:datasource=" + datasource+" near ["+traceLocation()+"] ");
+        if(isDebug()) {
+            logDebug("sql-trans-none:datasource=" + datasource + " near [" + traceLocation() + "] ");
+        }
         try {
             Connection conn = getConnection(datasource, params);
             conn.setAutoCommit(true);

@@ -24,7 +24,10 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     @Override
     public void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String location = getNodeLocation(node);
-        executor.logDebug(() -> "exec node on tag:" + node.getTagName() + " , at " + location);
+        boolean isDebugMode = executor.isDebug();
+//        if (isDebugMode) {
+//            executor.logDebug("exec node on tag:" + node.getTagName() + " , at " + location);
+//        }
 
         Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
         Stack<String> traceStack = null;
@@ -62,15 +65,15 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             try {
                 onBefore(pointContext, node, context, executor);
             } catch (Exception e) {
-                executor.logWarn(()->e.getMessage(),e);
+                executor.logWarn(() -> e.getMessage(), e);
             }
 
             execInner(node, context, executor);
 
             try {
-                onAfter(pointContext,node,context,executor);
+                onAfter(pointContext, node, context, executor);
             } catch (Exception e) {
-                executor.logWarn(()->e.getMessage(),e);
+                executor.logWarn(() -> e.getMessage(), e);
             }
 
             if (TagConsts.PROCEDURE.equals(node.getTagName())) {
@@ -83,11 +86,11 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
 
         } catch (Throwable e) {
-            if(e instanceof ControlSignalException){
+            if (e instanceof ControlSignalException) {
                 try {
-                    onThrowing(e,pointContext,node,context,executor);
+                    onThrowing(e, pointContext, node, context, executor);
                 } catch (Throwable ex) {
-                    executor.logWarn(()->ex.getMessage(),e);
+                    executor.logWarn(() -> ex.getMessage(), e);
                 }
             }
 
@@ -133,32 +136,32 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 SignalException se = (SignalException) e;
                 se.setMessage(errorMsg);
                 try {
-                    onThrowing(se,pointContext,node,context,executor);
+                    onThrowing(se, pointContext, node, context, executor);
                 } catch (Throwable ex) {
-                    executor.logWarn(()->ex.getMessage(),e);
+                    executor.logWarn(() -> ex.getMessage(), e);
                 }
                 throw se;
-            }  else {
+            } else {
                 executor.logError(() -> errorMsg + "\n node trace:\n" + builder, e);
-                ThrowSignalException se= new ThrowSignalException(errorMsg, e);
+                ThrowSignalException se = new ThrowSignalException(errorMsg, e);
                 try {
-                    onThrowing(e,pointContext,node,context,executor);
+                    onThrowing(e, pointContext, node, context, executor);
                 } catch (Throwable ex) {
-                    executor.logWarn(()->ex.getMessage(),e);
+                    executor.logWarn(() -> ex.getMessage(), e);
                 }
                 throw se;
             }
-        }finally {
+        } finally {
             try {
-                onFinally(pointContext,node,context,executor);
+                onFinally(pointContext, node, context, executor);
             } catch (Throwable e) {
-                executor.logWarn(()->e.getMessage(),e);
+                executor.logWarn(() -> e.getMessage(), e);
             }
         }
     }
 
     public void onBefore(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        XmlNodeExecEvent event=new XmlNodeExecEvent();
+        XmlNodeExecEvent event = new XmlNodeExecEvent();
         event.setExecutorNode(this);
         event.setType(XmlNodeExecEvent.Type.BEFORE);
         event.setPointContext(pointContext);
@@ -211,11 +214,11 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         pointContext.put("isDebugMode", isDebugMode);
         pointContext.put("trace", trace);
         pointContext.put("traceCallRecords", traceCallRecords);
-        pointContext.put("snapshotTraceId",snapshotTraceId);
+        pointContext.put("snapshotTraceId", snapshotTraceId);
     }
 
     public void onAfter(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        XmlNodeExecEvent event=new XmlNodeExecEvent();
+        XmlNodeExecEvent event = new XmlNodeExecEvent();
         event.setExecutorNode(this);
         event.setType(XmlNodeExecEvent.Type.AFTER);
         event.setPointContext(pointContext);
@@ -224,9 +227,9 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         event.setExecutor(executor);
         executor.sendEvent(event);
 
-        boolean isDebugMode=executor.visitAs("isDebugMode",pointContext);
-        String snapshotTraceId=executor.visitAs("snapshotTraceId",pointContext);
-        LinkedList<Map.Entry<String, String>> traceCallRecords=executor.visitAs("traceCallRecords",pointContext);
+        boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
+        String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
+        LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs("traceCallRecords", pointContext);
 
         if (isDebugMode) {
             String tagName = node.getTagName();
@@ -246,7 +249,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     }
 
     public void onThrowing(Throwable e, Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        XmlNodeExecEvent event=new XmlNodeExecEvent();
+        XmlNodeExecEvent event = new XmlNodeExecEvent();
         event.setExecutorNode(this);
         event.setType(XmlNodeExecEvent.Type.THROWING);
         event.setThrowable(e);
@@ -256,37 +259,36 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         event.setExecutor(executor);
         executor.sendEvent(event);
 
-        boolean isDebugMode=executor.visitAs("isDebugMode",pointContext);
-        String snapshotTraceId=executor.visitAs("snapshotTraceId",pointContext);
-        LinkedList<Map.Entry<String, String>> traceCallRecords=executor.visitAs("traceCallRecords",pointContext);
+        boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
+        String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
+        LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs("traceCallRecords", pointContext);
 
         if (isDebugMode) {
-            if(e instanceof ControlSignalException){
+            if (e instanceof ControlSignalException) {
                 // do nothing
                 if (e instanceof ReturnSignalException) {
-                    if (isDebugMode) {
-                        String tagName = node.getTagName();
-                        if (tagName != null) {
-                            if (TagConsts.PROCEDURE.equals(tagName)) {
-                                String id = node.getTagAttrMap().get(AttrConsts.ID);
-                                if (id != null && !id.isEmpty()) {
-                                    String callSnapshot = getCallSnapshot(node, context, executor);
-                                    callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
-                                    traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
-                                    executor.logDebug("call-params:\n===================> " + callSnapshot);
-                                }
+                    String tagName = node.getTagName();
+                    if (tagName != null) {
+                        if (TagConsts.PROCEDURE.equals(tagName)) {
+                            String id = node.getTagAttrMap().get(AttrConsts.ID);
+                            if (id != null && !id.isEmpty()) {
+                                String callSnapshot = getCallSnapshot(node, context, executor);
+                                callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
+                                traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                                executor.logDebug("call-params:\n===================> " + callSnapshot);
                             }
                         }
                     }
+
                 }
-            } else{
+            } else {
                 System.out.println("exception pointcut!");
             }
         }
     }
 
     public void onFinally(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        XmlNodeExecEvent event=new XmlNodeExecEvent();
+        XmlNodeExecEvent event = new XmlNodeExecEvent();
         event.setExecutorNode(this);
         event.setType(XmlNodeExecEvent.Type.FINALLY);
         event.setPointContext(pointContext);

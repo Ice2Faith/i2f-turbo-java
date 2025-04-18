@@ -111,7 +111,9 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
 
         @Override
         public void debugLog(Supplier<Object> supplier) {
-//            executor.logDebug(() -> "tiny-script:" + supplier.get() + " , at " + ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get());
+//            if(executor.isDebug()) {
+//                executor.logDebug(() -> "tiny-script:" + supplier.get() + " , at " + ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get());
+//            }
         }
 
         @Override
