@@ -35,10 +35,10 @@ public class DefaultJdbcProcedureContextRefreshListener implements JdbcProcedure
     public void accept(JdbcProcedureContext context) {
 
         if(reportOnBoot.getAndSet(false)){
-            GrammarReporter.reportGrammar(executor, new HashMap<>(context.getMetaMap()), (msg) -> executor.logWarn(() -> msg));
+            GrammarReporter.reportGrammar(executor, new HashMap<>(context.getMetaMap()), (msg) -> executor.logWarn( msg));
         }else {
             reportPool.submit(() -> {
-                GrammarReporter.reportGrammar(executor, new HashMap<>(context.getMetaMap()), (msg) -> executor.logWarn(() -> msg));
+                GrammarReporter.reportGrammar(executor, new HashMap<>(context.getMetaMap()), (msg) -> executor.logWarn(msg));
             });
         }
     }

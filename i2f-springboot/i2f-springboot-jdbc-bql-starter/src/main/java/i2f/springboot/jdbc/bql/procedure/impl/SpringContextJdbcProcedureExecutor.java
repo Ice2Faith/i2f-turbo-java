@@ -149,8 +149,15 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     @Override
     public void logDebug(Supplier<Object> supplier) {
         if (isDebug()) {
+            logDebug(supplier.get());
+        }
+    }
+
+    @Override
+    public void logDebug(Object obj) {
+        if(isDebug()){
             String location=traceLocation();
-            log.debug("near "+location+", msg: "+supplier.get());
+            log.debug("near "+location+", msg: "+obj);
         }
     }
 

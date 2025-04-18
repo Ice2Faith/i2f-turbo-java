@@ -192,11 +192,15 @@ public class SqlEtlNode extends AbstractExecutorNode {
             while (true) {
                 List<?> list = executor.sqlQueryPage(extraDatasource, bql, context, resultType, new ApiPage(pageIndex, readBatchSize));
                 if (list.isEmpty()) {
-                    executor.logDebug(() -> "no data found! at " + getNodeLocation(node));
+                    if(executor.isDebug()) {
+                        executor.logDebug("no data found! at " + getNodeLocation(node));
+                    }
                     break;
                 }
 
-                executor.logDebug(() -> "found batch data! at " + getNodeLocation(node));
+                if(executor.isDebug()) {
+                    executor.logDebug("found batch data! at " + getNodeLocation(node));
+                }
 
                 if (pageIndex == 0) {
 

@@ -50,7 +50,9 @@ public class SqlQueryObjectNode extends AbstractExecutorNode {
         }
         Object obj = executor.sqlQueryObject(datasource, bql, context, resultType);
         boolean isEmpty=(obj==null);
-        executor.logDebug(() -> "found data is null: " + isEmpty + "! at " + getNodeLocation(node));
+        if(executor.isDebug()) {
+            executor.logDebug("found data is null: " + isEmpty + "! at " + getNodeLocation(node));
+        }
         if (result != null) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, obj);
