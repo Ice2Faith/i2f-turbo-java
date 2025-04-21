@@ -69,10 +69,9 @@ public class LangForiNode extends AbstractExecutorNode {
             incr = executor.convertAs(executor.attrValue(AttrConsts.INCR, FeatureConsts.INT, node, context),Integer.class);
         }
 
-        boolean loop = begin < end;
         boolean isFirst = true;
         int index = 0;
-        for (int j = begin; loop == (j < end); j += incr) {
+        for (int j = begin; j < end; j += incr) {
             Object val = j;
             val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
             // 覆盖堆栈

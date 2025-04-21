@@ -118,6 +118,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             if (!TypeOf.instanceOf(ret, type)) {
                 throw new ClassCastException("Cannot cast " + (left == null ? null : left.getClass()) + " to " + type);
             }
+            return ret;
         } else if ("is".equals(operator) || "instanceof".equals(operator) || "typeof".equals(operator)) {
             if (left == null) {
                 return false;
