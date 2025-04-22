@@ -57,7 +57,7 @@ public class ContextFunctions {
         if (replacement == null) {
             return null;
         }
-        replacement = RegexUtil.regexFindAndReplace(replacement, "\\\\d+", (str) -> {
+        replacement = RegexUtil.regexFindAndReplace(replacement, "[\\\\]\\d+", (str) -> {
             return "$" + str.substring(1);
         });
         return replacement;

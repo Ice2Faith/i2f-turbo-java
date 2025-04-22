@@ -5,6 +5,7 @@ import i2f.bindsql.count.CountWrappers;
 import i2f.bindsql.count.ICountWrapper;
 import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
+import i2f.clock.SystemClock;
 import i2f.context.impl.ListableNamingContext;
 import i2f.context.std.INamingContext;
 import i2f.convert.obj.ObjectConvertor;
@@ -24,6 +25,7 @@ import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
+import i2f.jdbc.procedure.executor.event.SlowSqlEvent;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
@@ -56,6 +58,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -82,6 +85,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
     protected volatile XProc4jEventHandler eventHandler=new XProc4jEventHandler(()->namingContext);
+    protected volatile long slowSqlMinMillsSeconds= TimeUnit.SECONDS.toMillis(1);
 
     {
         List<ExecutorNode> list = defaultExecutorNodes();
@@ -1214,8 +1218,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return TypeOf.typeOf(resultType, Map.class) ? (mapTypeColumnNameMapper) : otherTypeColumnNameMapper;
     }
 
+    public void reportSlowSql(long useMillsSeconds,BindSql bql){
+        if(useMillsSeconds>=slowSqlMinMillsSeconds){
+            logWarn("slow sql, use "+useMillsSeconds+"(ms) : "+bql);
+            SlowSqlEvent event=new SlowSqlEvent();
+            event.setExecutor(this);
+            event.setUseMillsSeconds(useMillsSeconds);
+            event.setBql(bql);
+            event.setLocation(traceLocation());
+            publishEvent(event);
+        }
+    }
+
     @Override
     public List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
+        long bts= SystemClock.currentTimeMillis();
+        BindSql execBql=null;
         try {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
@@ -1223,6 +1241,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if(isDebug()) {
                 logDebug("sql-query-list:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
+            execBql=bql;
             List<?> list = JdbcResolver.list(conn, bql, resultType, -1, getColumnNameMapper(resultType));
             if(isDebug()) {
                 logDebug("sql-query-list:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
@@ -1232,13 +1251,19 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             }else {
-                throw new ThrowSignalException(e.getMessage(), e);
+                throw new ThrowSignalException(execBql!=null?(e.getMessage()+"\n"+execBql):e.getMessage(), e);
             }
+        }finally {
+            long ets=SystemClock.currentTimeMillis();
+            long useTs=ets-bts;
+            reportSlowSql(useTs,execBql);
         }
     }
 
     @Override
     public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
+        long bts= SystemClock.currentTimeMillis();
+        BindSql execBql=null;
         try {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
@@ -1246,6 +1271,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if(isDebug()) {
                 logDebug("sql-query-object:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
+            execBql=bql;
             Object obj = JdbcResolver.get(conn, bql, resultType);
             if(isDebug()) {
                 logDebug("sql-query-object:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: " + stringifyWithType(obj));
@@ -1255,13 +1281,19 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             }else {
-                throw new ThrowSignalException(e.getMessage(), e);
+                throw new ThrowSignalException(execBql!=null?(e.getMessage()+"\n"+execBql):e.getMessage(), e);
             }
+        }finally {
+            long ets=SystemClock.currentTimeMillis();
+            long useTs=ets-bts;
+            reportSlowSql(useTs,execBql);
         }
     }
 
     @Override
     public Object sqlQueryRow(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
+        long bts= SystemClock.currentTimeMillis();
+        BindSql execBql=null;
         try {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
@@ -1269,6 +1301,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if(isDebug()) {
                 logDebug("sql-query-row:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
+            execBql=bql;
             Object row = JdbcResolver.find(conn, bql, resultType, getColumnNameMapper(resultType));
             if(isDebug()) {
                 logDebug("sql-query-row:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + stringifyWithType(row));
@@ -1278,13 +1311,19 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             }else {
-                throw new ThrowSignalException(e.getMessage(), e);
+                throw new ThrowSignalException(execBql!=null?(e.getMessage()+"\n"+execBql):e.getMessage(), e);
             }
+        }finally {
+            long ets=SystemClock.currentTimeMillis();
+            long useTs=ets-bts;
+            reportSlowSql(useTs,execBql);
         }
     }
 
     @Override
     public int sqlUpdate(String datasource, BindSql bql, Map<String, Object> params) {
+        long bts= SystemClock.currentTimeMillis();
+        BindSql execBql=null;
         try {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
@@ -1292,6 +1331,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if(isDebug()) {
                 logDebug( "sql-update:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
+            execBql=bql;
             int num = JdbcResolver.update(conn, bql);
             if(isDebug()) {
                 logDebug( "sql-update:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + num);
@@ -1301,8 +1341,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             }else {
-                throw new ThrowSignalException(e.getMessage(), e);
+                throw new ThrowSignalException(execBql!=null?(e.getMessage()+"\n"+execBql):e.getMessage(), e);
             }
+        }finally {
+            long ets=SystemClock.currentTimeMillis();
+            long useTs=ets-bts;
+            reportSlowSql(useTs,execBql);
         }
     }
 
@@ -1429,6 +1473,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
     @Override
     public List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, ApiOffsetSize page) {
+        long bts= SystemClock.currentTimeMillis();
+        BindSql execBql=null;
         try {
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
@@ -1441,6 +1487,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if(isDebug()) {
                 logDebug("sql-query-page:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + pageBql);
             }
+            execBql=pageBql;
             List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, getColumnNameMapper(resultType));
             if(isDebug()) {
                 logDebug("sql-query-page:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + pageBql + "\nresult: is-empty:" + list.isEmpty());
@@ -1450,8 +1497,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             }else {
-                throw new ThrowSignalException(e.getMessage(), e);
+                throw new ThrowSignalException(execBql!=null?(e.getMessage()+"\n"+execBql):e.getMessage(), e);
             }
+        }finally {
+            long ets=SystemClock.currentTimeMillis();
+            long useTs=ets-bts;
+            reportSlowSql(useTs,execBql);
         }
     }
 
