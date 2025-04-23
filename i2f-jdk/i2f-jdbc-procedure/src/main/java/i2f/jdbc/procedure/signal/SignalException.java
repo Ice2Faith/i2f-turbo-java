@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.context.ContextHolder;
 public class SignalException extends RuntimeException {
     protected String message;
     protected String location;
+    protected boolean hasLogout=false;
     {
         location= ContextHolder.TRACE_LOCATION.get()+":"+ContextHolder.TRACE_LINE.get();
     }
@@ -43,4 +44,13 @@ public class SignalException extends RuntimeException {
     public String getMessage() {
         return (message==null?super.getMessage():message)+" , location at "+location;
     }
+
+    public boolean hasLogout(){
+        return this.hasLogout;
+    }
+
+    public void setHasLogout(boolean hasLogout){
+        this.hasLogout=hasLogout;
+    }
+
 }
