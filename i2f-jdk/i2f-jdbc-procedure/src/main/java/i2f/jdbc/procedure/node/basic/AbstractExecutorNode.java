@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.basic;
 
+import i2f.clock.SystemClock;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
@@ -14,6 +15,7 @@ import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -21,6 +23,8 @@ import java.util.function.Consumer;
  * @date 2025/2/28 8:44
  */
 public abstract class AbstractExecutorNode implements ExecutorNode {
+    protected volatile long slowProcedureMillsSeconds=TimeUnit.SECONDS.toMillis(45);
+    protected volatile long slowNodeMillsSeconds=TimeUnit.SECONDS.toMillis(15);
     @Override
     public void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String location = getNodeLocation(node);
@@ -53,7 +57,13 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
         Map<String, Object> pointContext = new HashMap<>();
 
+        String snapshotTraceId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
 
+        long bts= SystemClock.currentTimeMillis();
+        pointContext.put("location",location);
+        pointContext.put("beginTs",bts);
+        pointContext.put("isDebugMode",isDebugMode);
+        pointContext.put("snapshotTraceId", snapshotTraceId);
         try {
             executor.visitSet(context, ParamsConsts.TRACE_LOCATION, node.getLocationFile());
             executor.visitSet(context, ParamsConsts.TRACE_LINE, node.getLocationLineNumber());
@@ -129,11 +139,11 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             ContextHolder.TRACE_ERRMSG.set(traceErrMsg);
 
             if (e instanceof SignalException) {
-                Throwable cause = e.getCause();
-                if (cause == null) {
-                    executor.logError(() -> errorMsg + "\n node trace:\n" + builder, e);
-                }
                 SignalException se = (SignalException) e;
+                if (se.getCause() == null || !se.hasLogout()) {
+                    executor.logError(() -> errorMsg + "\n node trace:\n" + builder, e);
+                    se.setHasLogout(true);
+                }
                 se.setMessage(errorMsg);
                 try {
                     onThrowing(se, pointContext, node, context, executor);
@@ -142,8 +152,11 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 }
                 throw se;
             } else {
-                executor.logError(() -> errorMsg + "\n node trace:\n" + builder, e);
                 ThrowSignalException se = new ThrowSignalException(errorMsg, e);
+                if (se.getCause() == null || !se.hasLogout()) {
+                    executor.logError(() -> errorMsg + "\n node trace:\n" + builder, e);
+                    se.setHasLogout(true);
+                }
                 try {
                     onThrowing(e, pointContext, node, context, executor);
                 } catch (Throwable ex) {
@@ -152,6 +165,23 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 throw se;
             }
         } finally {
+            long ets=SystemClock.currentTimeMillis();
+            long useTs=ets-bts;
+            pointContext.put("endTs",ets);
+            pointContext.put("useTs",useTs);
+
+            if (TagConsts.PROCEDURE.equals(node.getTagName())) {
+                if(useTs> slowProcedureMillsSeconds){
+                    executor.logWarn(()->"slow procedure, use "+useTs+"(ms) : "+node.getTagAttrMap().get(AttrConsts.ID));
+                }
+            }else{
+                if(!Arrays.asList(TagConsts.PROCEDURE_CALL,
+                        TagConsts.FUNCTION_CALL).contains(node.getTagName())) {
+                    if (useTs > slowNodeMillsSeconds) {
+                        executor.logWarn(() -> "slow node, use " + useTs + "(ms) : " + location);
+                    }
+                }
+            }
             try {
                 onFinally(pointContext, node, context, executor);
             } catch (Throwable e) {
@@ -171,7 +201,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         executor.sendEvent(event);
 
 
-        String location = getNodeLocation(node);
+        String location = (String)pointContext.get("location");
+        String snapshotTraceId=(String)pointContext.get("snapshotTraceId");
 
         boolean isDebugMode = executor.isDebug();
         Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
@@ -192,7 +223,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
         }
 
-        String snapshotTraceId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
+
 
         String tagName = node.getTagName();
         if (tagName != null) {
@@ -211,10 +242,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         }
 
 
-        pointContext.put("isDebugMode", isDebugMode);
         pointContext.put("trace", trace);
         pointContext.put("traceCallRecords", traceCallRecords);
-        pointContext.put("snapshotTraceId", snapshotTraceId);
     }
 
     public void onAfter(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
