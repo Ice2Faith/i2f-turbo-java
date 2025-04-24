@@ -27,12 +27,16 @@ public interface ParamsConsts {
     String ERRMSG ="errmsg";
     String NODE="node";
     String STACK="stack";
+    String CALLS="calls";
+    String ERRORS="errors";
 
     String TRACE_LOCATION=TRACE+"."+LOCATION;
     String TRACE_LINE=TRACE+"."+LINE;
     String TRACE_ERRMSG =TRACE+"."+ ERRMSG;
     String TRACE_NODE=TRACE+"."+NODE;
     String TRACE_STACK=TRACE+"."+STACK;
+    String TRACE_CALLS=TRACE+"."+CALLS;
+    String TRACE_ERRORS=TRACE+"."+ERRORS;
 
     // 局部工具部分
     String EXECUTOR="executor";

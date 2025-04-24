@@ -25,6 +25,7 @@ import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
+import i2f.jdbc.procedure.executor.event.PreparedParamsEvent;
 import i2f.jdbc.procedure.executor.event.SlowSqlEvent;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -467,6 +468,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         return params;
     }
 
+    public void reportPreparedParamsEvent(Map<String,Object> params){
+        PreparedParamsEvent event=new PreparedParamsEvent();
+        event.setExecutor(this);
+        event.setContext(params);
+        sendEvent(event);
+    }
+
     @Override
     public Map<String, Object> createParams() {
         Map<String, Object> ret = new LinkedHashMap<>();
@@ -475,6 +483,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         HashMap<Object, Object> trace = new HashMap<>();
         trace.put(ParamsConsts.STACK,new Stack<>());
+        trace.put(ParamsConsts.CALLS,new LinkedList<>());
+        trace.put(ParamsConsts.ERRORS,new LinkedList<>());
         ret.put(ParamsConsts.TRACE, trace);
 
 
@@ -491,6 +501,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         ret.put(ParamsConsts.EXECUTOR, this);
 
+        reportPreparedParamsEvent(ret);
         return ret;
     }
 
@@ -509,6 +520,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
 
         params.put(ParamsConsts.EXECUTOR, this);
 
+        reportPreparedParamsEvent(params);
         return params;
     }
 
