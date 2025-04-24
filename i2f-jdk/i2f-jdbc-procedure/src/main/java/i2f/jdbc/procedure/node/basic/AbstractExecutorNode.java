@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.event.XmlNodeExecEvent;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.SignalException;
@@ -35,11 +36,35 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
         Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
         Stack<String> traceStack = null;
+        LinkedList<Map.Entry<String, String>> traceCalls = null;
+        LinkedList<Throwable>  traceErrors=null;
         synchronized (trace) {
             traceStack = executor.visitAs(ParamsConsts.TRACE_STACK, context);
             if (traceStack == null) {
                 traceStack = new Stack<>();
                 executor.visitSet(context, ParamsConsts.TRACE_STACK, traceStack);
+            }
+
+            traceCalls =executor.visitAs(ParamsConsts.TRACE_CALLS, context);
+            if (traceCalls == null) {
+                traceCalls = new LinkedList<>();
+                executor.visitSet(context, ParamsConsts.TRACE_CALLS, traceCalls);
+            }
+
+            traceErrors =executor.visitAs(ParamsConsts.TRACE_ERRORS, context);
+            if (traceErrors == null) {
+                traceErrors = new LinkedList<>();
+                executor.visitSet(context, ParamsConsts.TRACE_ERRORS, traceErrors);
+            }
+        }
+
+        if (isDebugMode) {
+            synchronized (trace) {
+                int size = traceCalls.size();
+                while (size > 1000) {
+                    traceCalls.removeFirst();
+                    size--;
+                }
             }
         }
 
@@ -52,6 +77,14 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                     traceStack.pop();
                 }
                 traceStack.push(location);
+            }
+        }
+
+        synchronized (trace){
+            int size = traceErrors.size();
+            while (size > 10) {
+                traceErrors.removeFirst();
+                size--;
             }
         }
 
@@ -138,6 +171,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             executor.visitSet(context, ParamsConsts.TRACE_ERRMSG, traceErrMsg);
             ContextHolder.TRACE_ERRMSG.set(traceErrMsg);
 
+            RuntimeException re=null;
             if (e instanceof SignalException) {
                 SignalException se = (SignalException) e;
                 if (se.getCause() == null || !se.hasLogout()) {
@@ -150,7 +184,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 } catch (Throwable ex) {
                     executor.logWarn(() -> ex.getMessage(), e);
                 }
-                throw se;
+                re= se;
             } else {
                 ThrowSignalException se = new ThrowSignalException(errorMsg, e);
                 if (se.getCause() == null || !se.hasLogout()) {
@@ -162,8 +196,14 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 } catch (Throwable ex) {
                     executor.logWarn(() -> ex.getMessage(), e);
                 }
-                throw se;
+                re= se;
             }
+            synchronized (trace) {
+                if (!traceErrors.contains(re)) {
+                    traceErrors.add(re);
+                }
+            }
+            throw re;
         } finally {
             long ets=SystemClock.currentTimeMillis();
             long useTs=ets-bts;
@@ -182,6 +222,17 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                     }
                 }
             }
+
+            XmlExecUseTimeEvent event = new XmlExecUseTimeEvent();
+            event.setExecutorNode(this);
+            event.setPointContext(pointContext);
+            event.setNode(node);
+            event.setContext(context);
+            event.setExecutor(executor);
+            executor.sendEvent(event);
+            event.setUseTs(useTs);
+            executor.publishEvent(event);
+
             try {
                 onFinally(pointContext, node, context, executor);
             } catch (Throwable e) {
@@ -206,18 +257,12 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
         boolean isDebugMode = executor.isDebug();
         Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
-        LinkedList<Map.Entry<String, String>> traceCallRecords = null;
+        LinkedList<Map.Entry<String, String>> traceCalls = executor.visitAs(ParamsConsts.TRACE_CALLS,context);
         if (isDebugMode) {
-
             synchronized (trace) {
-                traceCallRecords = (LinkedList<Map.Entry<String, String>>) executor.visit("trace.call_records", context);
-                if (traceCallRecords == null) {
-                    traceCallRecords = new LinkedList<>();
-                    executor.visitSet(context, "trace.call_records", traceCallRecords);
-                }
-                int size = traceCallRecords.size();
+                int size = traceCalls.size();
                 while (size > 1000) {
-                    traceCallRecords.removeFirst();
+                    traceCalls.removeFirst();
                     size--;
                 }
             }
@@ -234,7 +279,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                     if (isDebugMode) {
                         String callSnapshot = getCallSnapshot(node, context, executor);
                         callSnapshot = "BEFORE:" + snapshotTraceId + "\n" + callSnapshot;
-                        traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                        traceCalls.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
                         executor.logDebug("call-params:\n===================> " + callSnapshot);
                     }
                 }
@@ -242,8 +287,6 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         }
 
 
-        pointContext.put("trace", trace);
-        pointContext.put("traceCallRecords", traceCallRecords);
     }
 
     public void onAfter(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
@@ -258,7 +301,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
         boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
         String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
-        LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs("traceCallRecords", pointContext);
+        LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
 
         if (isDebugMode) {
             String tagName = node.getTagName();
@@ -290,7 +333,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
         boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
         String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
-        LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs("traceCallRecords", pointContext);
+        LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
 
         if (isDebugMode) {
             if (e instanceof ControlSignalException) {
