@@ -45,6 +45,18 @@ public class OsUtil {
         return builder.toString();
     }
 
+    public static String startCmd(String cmd) {
+        return runCmd(cmd, getCmdCharset());
+    }
+
+    public static String startCmd(String cmd, String charset) {
+        return startCmd(cmd, null, null, charset);
+    }
+
+    public static String startCmd(String cmd, String[] envp, File dir, String charset) {
+        return execCmd(false,-1, cmd,envp,dir,charset);
+    }
+
     public static String runCmd(String cmd) {
         return runCmd(cmd, getCmdCharset());
     }
@@ -54,10 +66,17 @@ public class OsUtil {
     }
 
     public static String runCmd(String cmd, String[] envp, File dir, String charset) {
+        return execCmd(true,TimeUnit.MINUTES.toMillis(3), cmd,envp,dir,charset);
+    }
+
+    public static String execCmd(boolean requireOutput,long waitForMillsSeconds,String cmd, String[] envp, File dir, String charset) {
         try {
             Runtime runtime = Runtime.getRuntime();
 
             Process process = runtime.exec(cmd, envp, dir);
+            if(!requireOutput){
+                return null;
+            }
             InputStream is = process.getInputStream();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             byte[] buf = new byte[4096];
@@ -73,7 +92,11 @@ public class OsUtil {
             }
             bos.flush();
 
-            process.waitFor(3, TimeUnit.MINUTES);
+            if(waitForMillsSeconds>=0) {
+                process.waitFor(waitForMillsSeconds, TimeUnit.MILLISECONDS);
+            }else{
+                process.waitFor();
+            }
             if (charset == null || charset.isEmpty()) {
                 charset = "UTF-8";
             }

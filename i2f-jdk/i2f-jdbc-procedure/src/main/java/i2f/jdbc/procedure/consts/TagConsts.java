@@ -23,6 +23,8 @@ public interface TagConsts {
 
     String LANG_INVOKE = "lang-invoke";
 
+    String LANG_SHELL="lang-shell";
+
     String LANG_BODY = "lang-body";
 
     String LANG_EVAL = "lang-eval";

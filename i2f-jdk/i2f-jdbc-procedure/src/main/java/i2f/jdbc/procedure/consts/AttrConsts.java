@@ -84,4 +84,8 @@ public interface AttrConsts {
 
     String PACKAGE = "package";
     String CLASS = "class";
+
+    String RUN_AS_FILE="run-as-file";
+    String WORKDIR="workdir";
+    String ENVP="envp";
 }

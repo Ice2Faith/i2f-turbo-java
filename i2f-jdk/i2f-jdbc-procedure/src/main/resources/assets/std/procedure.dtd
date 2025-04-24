@@ -23,6 +23,7 @@
                 |lang-fori*
                 |lang-while*
                 |lang-invoke*
+                |lang-shell*
                 |lang-try*
                 |lang-synchronized*
                 |sql-query-row*
@@ -727,6 +728,27 @@
         <!ATTLIST lang-invoke arg9.uuid CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg9.current-time-millis CDATA #IMPLIED>
         <!ATTLIST lang-invoke arg9.snow-uid CDATA #IMPLIED>
+
+        <!ELEMENT lang-shell (ANY|EMPTY)>
+        <!ATTLIST lang-shell result CDATA #IMPLIED>
+        <!ATTLIST lang-shell await CDATA #IMPLIED>
+        <!ATTLIST lang-shell timeout CDATA #IMPLIED>
+        <!ATTLIST lang-shell time-unit CDATA #IMPLIED>
+        <!ATTLIST lang-shell script CDATA #IMPLIED>
+        <!ATTLIST lang-shell run-as-file CDATA #IMPLIED>
+        <!ATTLIST lang-shell workdir CDATA #IMPLIED>
+        <!ATTLIST lang-shell envp CDATA #IMPLIED>
+
+        <!ATTLIST lang-shell result CDATA #IMPLIED>
+        <!ATTLIST lang-shell result.int CDATA #IMPLIED>
+        <!ATTLIST lang-shell result.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-shell result trim #IMPLIED>
+        <!ATTLIST lang-shell script.string CDATA #IMPLIED>
+        <!ATTLIST lang-shell await.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-shell run-as-file.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-shell script.body-text CDATA #IMPLIED>
+        <!ATTLIST lang-shell script.body-text.render CDATA #IMPLIED>
+        <!ATTLIST lang-shell script.body-text.render.trim CDATA #IMPLIED>
 
         <!ELEMENT lang-try (lang-body|lang-catch*|lang-finally?)>
 

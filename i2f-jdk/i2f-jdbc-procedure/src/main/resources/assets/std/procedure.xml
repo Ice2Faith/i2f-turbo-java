@@ -659,6 +659,42 @@ eval-ts使用TinyScript引擎进行处理
 
     </script-segment>
 
+    <!--
+    运行CMD命令
+    以workdir为工作路径，envp为环境变量，运行script指定的命令（或标签内部文本）并接受命令执行的标准输出到result变量中保存
+    其中使用await指定是否要等待执行结果，timeout/time-unit用于指定最长等待执行结果的时长，当timeout小于0时，表示无限期等待
+    await默认以boolean访问，默认值为true,当值为false时，result得到的值始终为null
+    timeout默认以long访问，默认值为-1
+    time-unit默认以string访问，是TimeUnit类枚举的字面值，默认为MILLISECONDS
+    script默认以visit访问，无默认值，当script有值时，优先以script执行的为运行的内容，否则是标签内部文本
+    workdir默认以string访问，默认就是程序运行路径
+    envp默认以string访问，默认不设置此参数，多个环境变量用;分隔
+    -->
+    <lang-shell result=""
+                await="true"
+                timeout="" time-unit=""
+                script="" run-as-file=""
+                workdir="" envp="">
+
+    </lang-shell>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-shell result="v_ping" script.string="ping www.baidu.com"/>
+
+        <lang-shell result="v_dir" script.string="dir" workdir="../"/>
+
+        <lang-shell result="v_log">
+            cd ..
+            dir
+            echo done.
+        </lang-shell>
+
+        <lang-shell result="v_log" script.body-text.render.trim="">
+            cd ${path}
+            nohup java -jar ${jarName} ${jarParams} &amp;
+        </lang-shell>
+    </script-segment>
+
     <!-- 对应一个异常处理块try-catch-finally -->
     <lang-try>
         <!-- 表示异常处理的内容，对应try的内容块 -->
