@@ -13,9 +13,9 @@ import java.util.function.Consumer;
 public interface ExecutorNode {
     boolean support(XmlNode node);
 
-    default void reportGrammar(XmlNode node, Consumer<String> warnPoster){
+    default void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
 
     }
 
-    void exec(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor);
+    void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor);
 }

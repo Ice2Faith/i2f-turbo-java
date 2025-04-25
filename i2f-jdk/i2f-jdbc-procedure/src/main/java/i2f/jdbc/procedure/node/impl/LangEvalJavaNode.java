@@ -73,143 +73,6 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
     public static final String TAG_NAME = TagConsts.LANG_EVAL_JAVA;
     public static final String CLASS_NAME_HOLDER = "$#$##$###";
     public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s*");
-
-    public static void main(String[] args){
-        /*language=java*/
-        String script= "(int)params.get(\"a\")+(double)params.get(\"b\")";
-        Map<String,Object> context=new HashMap<>();
-        context.put("a",1);
-        context.put("b",2.5);
-        Object obj = evalJava(context,null,script);
-        System.out.println(obj);
-    }
-
-    @Override
-    public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
-            return false;
-        }
-        return TAG_NAME.equals(node.getTagName());
-    }
-
-    @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
-        List<XmlNode> children = node.getChildren();
-        XmlNode importNode = null;
-        XmlNode memberNode = null;
-        XmlNode bodyNode = null;
-        if (children != null && !children.isEmpty()) {
-            for (XmlNode item : children) {
-                if (TagConsts.LANG_JAVA_IMPORT.equals(item.getTagName())) {
-                    importNode = item;
-                }
-                if (TagConsts.LANG_JAVA_MEMBE.equals(item.getTagName())) {
-                    memberNode = item;
-                }
-                if (TagConsts.LANG_JAVA_BODY.equals(item.getTagName())) {
-                    bodyNode = node;
-                }
-            }
-        }
-
-        if (bodyNode == null) {
-            bodyNode = node;
-        }
-
-        String importSegment = "";
-        String memberSegment = "";
-        String bodySegment = "";
-        if (importNode != null) {
-            importSegment = importNode.getTextBody();
-        }
-        if (memberNode != null) {
-            memberSegment = memberNode.getTextBody();
-        }
-        if (bodyNode != null) {
-            bodySegment = bodyNode.getTextBody();
-        }
-        Map.Entry<String, String> codeEntry = getFullJavaSourceCode(importSegment, memberSegment, bodySegment);
-
-        try {
-            MemoryCompiler.findCompileClass(codeEntry.getValue(), codeEntry.getKey() + ".java", codeEntry.getKey());
-        } catch (Exception e) {
-            if (e instanceof SignalException) {
-                throw (SignalException) e;
-            }else {
-                throw new IllegalArgumentException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
-            }
-        }
-    }
-
-    @Override
-    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        List<XmlNode> children = node.getChildren();
-        XmlNode importNode = null;
-        XmlNode memberNode = null;
-        XmlNode bodyNode = null;
-        if (children != null && !children.isEmpty()) {
-            for (XmlNode item : children) {
-                if (TagConsts.LANG_JAVA_IMPORT.equals(item.getTagName())) {
-                    importNode = item;
-                }
-                if (TagConsts.LANG_JAVA_MEMBE.equals(item.getTagName())) {
-                    memberNode = item;
-                }
-                if (TagConsts.LANG_JAVA_BODY.equals(item.getTagName())) {
-                    bodyNode = node;
-                }
-            }
-        }
-
-        if (bodyNode == null) {
-            bodyNode = node;
-        }
-
-        String importSegment = "";
-        String memberSegment = "";
-        String bodySegment = "";
-        if (importNode != null) {
-            importSegment = importNode.getTextBody();
-        }
-        if (memberNode != null) {
-            memberSegment = memberNode.getTextBody();
-        }
-        if (bodyNode != null) {
-            bodySegment = bodyNode.getTextBody();
-        }
-
-        Object obj = evalJava(context, executor, importSegment, memberSegment, bodySegment);
-
-        if (result != null) {
-            obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
-            executor.visitSet(context, result, obj);
-        }
-
-    }
-
-    @Override
-    public boolean support(String lang) {
-        return LangConsts.JAVA.equals(lang);
-    }
-
-    @Override
-    public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
-        Object obj = evalJava(params, executor, "", "", script);
-        return obj;
-    }
-
-    public static String castAsImportPackageName(String className) {
-        if (className == null || className.isEmpty()) {
-            return null;
-        }
-        int idx = className.lastIndexOf(".");
-        if (idx <= 0) {
-            return className;
-        }
-        return className.substring(0, idx + 1) + "*";
-    }
-
     public static final String EVAL_JAVA_IMPORTS = new StringBuilder()
             .append("import ").append(castAsImportPackageName(JdbcProcedure.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(FeatureConsts.class.getName())).append(";").append("\n")
@@ -285,11 +148,31 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
             .append("import ").append("java.time.temporal.*").append(";").append("\n")
             .append("import ").append("java.time.zone.*").append(";").append("\n")
             .toString();
-
     public static final LruMap<String, Map.Entry<String, String>> FULL_JAVA_SOURCE_MAP = new LruMap<>(2048);
 
+    public static void main(String[] args) {
+        /*language=java*/
+        String script = "(int)params.get(\"a\")+(double)params.get(\"b\")";
+        Map<String, Object> context = new HashMap<>();
+        context.put("a", 1);
+        context.put("b", 2.5);
+        Object obj = evalJava(context, null, script);
+        System.out.println(obj);
+    }
+
+    public static String castAsImportPackageName(String className) {
+        if (className == null || className.isEmpty()) {
+            return null;
+        }
+        int idx = className.lastIndexOf(".");
+        if (idx <= 0) {
+            return className;
+        }
+        return className.substring(0, idx + 1) + "*";
+    }
+
     public static Object evalJava(Map<String, Object> context, JdbcProcedureExecutor executor, String bodySegment) {
-        return evalJava(context,executor,"","",bodySegment);
+        return evalJava(context, executor, "", "", bodySegment);
     }
 
     public static Object evalJava(Map<String, Object> context, JdbcProcedureExecutor executor, String importSegment, String memberSegment, String bodySegment) {
@@ -302,12 +185,12 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
                     className + ".java",
                     className,
                     "exec",
-                     executor, context
+                    executor, context
             );
         } catch (Exception e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
-            }else {
+            } else {
                 throw new IllegalStateException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
             }
         }
@@ -315,14 +198,14 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
     }
 
     public static Map.Entry<String, String> getFullJavaSourceCode(String importSegment, String memberSegment, String bodySegment) {
-        if(importSegment!=null){
-            importSegment=importSegment.trim();
+        if (importSegment != null) {
+            importSegment = importSegment.trim();
         }
-        if(memberSegment!=null){
-            memberSegment=memberSegment.trim();
+        if (memberSegment != null) {
+            memberSegment = memberSegment.trim();
         }
-        if(bodySegment!=null){
-            bodySegment=bodySegment.trim();
+        if (bodySegment != null) {
+            bodySegment = bodySegment.trim();
         }
         if (importSegment == null) {
             importSegment = "";
@@ -400,5 +283,120 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
 
         }
         return val;
+    }
+
+    @Override
+    public boolean support(XmlNode node) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
+            return false;
+        }
+        return TAG_NAME.equals(node.getTagName());
+    }
+
+    @Override
+    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+        List<XmlNode> children = node.getChildren();
+        XmlNode importNode = null;
+        XmlNode memberNode = null;
+        XmlNode bodyNode = null;
+        if (children != null && !children.isEmpty()) {
+            for (XmlNode item : children) {
+                if (TagConsts.LANG_JAVA_IMPORT.equals(item.getTagName())) {
+                    importNode = item;
+                }
+                if (TagConsts.LANG_JAVA_MEMBE.equals(item.getTagName())) {
+                    memberNode = item;
+                }
+                if (TagConsts.LANG_JAVA_BODY.equals(item.getTagName())) {
+                    bodyNode = node;
+                }
+            }
+        }
+
+        if (bodyNode == null) {
+            bodyNode = node;
+        }
+
+        String importSegment = "";
+        String memberSegment = "";
+        String bodySegment = "";
+        if (importNode != null) {
+            importSegment = importNode.getTextBody();
+        }
+        if (memberNode != null) {
+            memberSegment = memberNode.getTextBody();
+        }
+        if (bodyNode != null) {
+            bodySegment = bodyNode.getTextBody();
+        }
+        Map.Entry<String, String> codeEntry = getFullJavaSourceCode(importSegment, memberSegment, bodySegment);
+
+        try {
+            MemoryCompiler.findCompileClass(codeEntry.getValue(), codeEntry.getKey() + ".java", codeEntry.getKey());
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new IllegalArgumentException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
+            }
+        }
+    }
+
+    @Override
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        String result = node.getTagAttrMap().get(AttrConsts.RESULT);
+        List<XmlNode> children = node.getChildren();
+        XmlNode importNode = null;
+        XmlNode memberNode = null;
+        XmlNode bodyNode = null;
+        if (children != null && !children.isEmpty()) {
+            for (XmlNode item : children) {
+                if (TagConsts.LANG_JAVA_IMPORT.equals(item.getTagName())) {
+                    importNode = item;
+                }
+                if (TagConsts.LANG_JAVA_MEMBE.equals(item.getTagName())) {
+                    memberNode = item;
+                }
+                if (TagConsts.LANG_JAVA_BODY.equals(item.getTagName())) {
+                    bodyNode = node;
+                }
+            }
+        }
+
+        if (bodyNode == null) {
+            bodyNode = node;
+        }
+
+        String importSegment = "";
+        String memberSegment = "";
+        String bodySegment = "";
+        if (importNode != null) {
+            importSegment = importNode.getTextBody();
+        }
+        if (memberNode != null) {
+            memberSegment = memberNode.getTextBody();
+        }
+        if (bodyNode != null) {
+            bodySegment = bodyNode.getTextBody();
+        }
+
+        Object obj = evalJava(context, executor, importSegment, memberSegment, bodySegment);
+
+        if (result != null) {
+            obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
+            executor.visitSet(context, result, obj);
+        }
+
+    }
+
+    @Override
+    public boolean support(String lang) {
+        return LangConsts.JAVA.equals(lang);
+    }
+
+    @Override
+    public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
+        Object obj = evalJava(params, executor, "", "", script);
+        return obj;
     }
 }

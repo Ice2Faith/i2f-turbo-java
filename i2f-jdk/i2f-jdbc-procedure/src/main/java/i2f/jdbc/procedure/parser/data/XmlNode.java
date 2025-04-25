@@ -13,12 +13,6 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class XmlNode {
-    public static enum NodeType {
-        ELEMENT,
-        TEXT,
-        CDATA
-    }
-
     protected NodeType nodeType;
     protected String tagName;
     protected Map<String, String> tagAttrMap;
@@ -26,7 +20,12 @@ public class XmlNode {
     protected String tagBody;
     protected String textBody;
     protected List<XmlNode> children;
-
     protected String locationFile;
     protected int locationLineNumber = -1;
+
+    public static enum NodeType {
+        ELEMENT,
+        TEXT,
+        CDATA
+    }
 }

@@ -23,7 +23,7 @@ public class LangFormatDateNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -32,17 +32,17 @@ public class LangFormatDateNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
-        if(value==null || value.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.VALUE);
+        if (value == null || value.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.VALUE);
         }
         String pattern = node.getTagAttrMap().get(AttrConsts.PATTERN);
-        if(pattern==null || pattern.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.PATTERN);
+        if (pattern == null || pattern.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.PATTERN);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object value = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
         String pattern = (String) executor.attrValue(AttrConsts.PATTERN, FeatureConsts.STRING, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);

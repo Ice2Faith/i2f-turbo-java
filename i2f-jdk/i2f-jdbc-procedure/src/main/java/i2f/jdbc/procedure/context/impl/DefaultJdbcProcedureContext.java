@@ -2,16 +2,18 @@ package i2f.jdbc.procedure.context.impl;
 
 import i2f.jdbc.procedure.context.CacheObjectRefresherSupplier;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
-import i2f.jdbc.procedure.context.JdbcProcedureContextRefreshListener;
 import i2f.jdbc.procedure.context.ProcedureMeta;
+import i2f.jdbc.procedure.context.event.JdbcProcedureMetaMapRefreshedEvent;
+import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.provider.JdbcProcedureMetaProvider;
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ListableJdbcProcedureMetaProviderRegistry;
 import lombok.Data;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author Ice2Faith
@@ -22,8 +24,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class DefaultJdbcProcedureContext
         extends CacheObjectRefresherSupplier<Map<String, ProcedureMeta>, ConcurrentHashMap<String, ProcedureMeta>>
         implements JdbcProcedureContext {
-    protected final CopyOnWriteArrayList<JdbcProcedureContextRefreshListener> refreshListeners = new CopyOnWriteArrayList<>();
-    protected volatile JdbcProcedureMetaProviderRegistry registry=new ListableJdbcProcedureMetaProviderRegistry();
+    protected volatile JdbcProcedureMetaProviderRegistry registry = new ListableJdbcProcedureMetaProviderRegistry();
+    protected XProc4jEventHandler eventHandler = new XProc4jEventHandler();
 
     public DefaultJdbcProcedureContext() {
         super(new ConcurrentHashMap<>(), "procedure-context-refresher");
@@ -36,13 +38,7 @@ public class DefaultJdbcProcedureContext
 
     public DefaultJdbcProcedureContext(JdbcProcedureMetaProviderRegistry registry) {
         this();
-        this.registry=registry;
-    }
-
-
-    @Override
-    public void listener(JdbcProcedureContextRefreshListener listener) {
-        this.refreshListeners.add(listener);
+        this.registry = registry;
     }
 
     @Override
@@ -61,7 +57,7 @@ public class DefaultJdbcProcedureContext
 
     @Override
     public void remove(String name) {
-        if(name==null){
+        if (name == null) {
             return;
         }
         cache.remove(name);
@@ -87,28 +83,27 @@ public class DefaultJdbcProcedureContext
     @Override
     public void refresh() {
         Map<String, ProcedureMeta> metaMap = new HashMap<>();
-        if(registry==null){
+        if (registry == null) {
             return;
         }
         Collection<JdbcProcedureMetaProvider> metaProviders = registry.getProviders();
-        if(metaProviders==null || metaProviders.isEmpty()){
+        if (metaProviders == null || metaProviders.isEmpty()) {
             return;
         }
         for (JdbcProcedureMetaProvider provider : metaProviders) {
             Map<String, ProcedureMeta> map = provider.getMetaMap();
-            if(map!=null){
+            if (map != null) {
                 metaMap.putAll(map);
             }
         }
 
         cache.putAll(metaMap);
 
-        for (JdbcProcedureContextRefreshListener listener : refreshListeners) {
-            if (listener == null) {
-                continue;
-            }
-            listener.accept(this);
-        }
+        JdbcProcedureMetaMapRefreshedEvent event = new JdbcProcedureMetaMapRefreshedEvent();
+        event.setContext(this);
+        event.setMetaMap(metaMap);
+        eventHandler.publish(event);
+
     }
 
 }

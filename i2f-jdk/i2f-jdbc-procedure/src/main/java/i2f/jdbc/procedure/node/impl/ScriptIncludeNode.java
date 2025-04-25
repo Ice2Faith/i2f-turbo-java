@@ -21,7 +21,7 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -30,14 +30,14 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);
-        if(refid==null || refid.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.REFID);
+        if (refid == null || refid.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.REFID);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        String refid = (String)executor.attrValue(AttrConsts.REFID,FeatureConsts.STRING,node,context);
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        String refid = (String) executor.attrValue(AttrConsts.REFID, FeatureConsts.STRING, node, context);
         ProcedureMeta meta = executor.getMeta(refid);
         if (meta == null) {
             return;
@@ -55,16 +55,16 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
             }
             String script = entry.getValue();
             // 备份堆栈
-            bakParams.put(name, executor.visit(script,context));
+            bakParams.put(name, executor.visit(script, context));
             Object val = executor.attrValue(name, FeatureConsts.VISIT, node, context);
-            executor.visitSet(context,name, val);
+            executor.visitSet(context, name, val);
         }
 
         executor.execAsProcedure(nextNode, context, false, false);
 
         // 恢复堆栈
         for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
-            executor.visitSet(context,entry.getKey(),entry.getValue());
+            executor.visitSet(context, entry.getKey(), entry.getValue());
         }
     }
 

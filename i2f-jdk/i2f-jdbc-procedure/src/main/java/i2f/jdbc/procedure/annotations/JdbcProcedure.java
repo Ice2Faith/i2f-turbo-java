@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * 指定对应的过程的名称
+ *
  * @author Ice2Faith
  * @date 2025/2/11 8:47
  */
@@ -21,6 +22,7 @@ public @interface JdbcProcedure {
      * 指定对应的过程的名称
      */
     String value();
+
     // 指定对应的参数，写法和XML中对于procedure的参数定义一致
     // 例如：{"IN_SUM_MONTH.int","O_FLAG.int.out"}
     String[] arguments() default {};

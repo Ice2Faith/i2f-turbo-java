@@ -19,17 +19,17 @@ public class LangSynchronizedNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object target = executor.attrValue(AttrConsts.TARGET, FeatureConsts.VISIT, node, context);
         if (target == null) {
-            target = executor.visit(ParamsConsts.GLOBAL,context);
+            target = executor.visit(ParamsConsts.GLOBAL, context);
         }
         synchronized (target) {
             executor.execAsProcedure(node, context, false, false);

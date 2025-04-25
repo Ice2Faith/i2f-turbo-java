@@ -27,7 +27,7 @@ public class LangTryNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -37,12 +37,12 @@ public class LangTryNode extends AbstractExecutorNode {
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         List<XmlNode> nodes = node.getChildren();
         if (nodes == null) {
-            warnPoster.accept(TAG_NAME+" missing child element");
+            warnPoster.accept(TAG_NAME + " missing child element");
             return;
         }
         XmlNode bodyNode = null;
         for (XmlNode item : nodes) {
-            if (XmlNode.NodeType.ELEMENT !=item.getNodeType()) {
+            if (XmlNode.NodeType.ELEMENT != item.getNodeType()) {
                 continue;
             }
             if (TagConsts.LANG_BODY.equals(item.getTagName())) {
@@ -51,12 +51,12 @@ public class LangTryNode extends AbstractExecutorNode {
         }
 
         if (bodyNode == null) {
-            warnPoster.accept(TAG_NAME+" missing try segment body lang-body element!");
+            warnPoster.accept(TAG_NAME + " missing try segment body lang-body element!");
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         List<XmlNode> nodes = node.getChildren();
         if (nodes == null) {
             return;
@@ -65,7 +65,7 @@ public class LangTryNode extends AbstractExecutorNode {
         List<XmlNode> catchNodes = new ArrayList<>();
         XmlNode finallyNode = null;
         for (XmlNode item : nodes) {
-            if (XmlNode.NodeType.ELEMENT !=item.getNodeType()) {
+            if (XmlNode.NodeType.ELEMENT != item.getNodeType()) {
                 continue;
             }
             if (TagConsts.LANG_BODY.equals(item.getTagName())) {
@@ -86,12 +86,12 @@ public class LangTryNode extends AbstractExecutorNode {
         try {
             executor.execAsProcedure(bodyNode, context, false, false);
         } catch (Throwable e) {
-            if(e instanceof ControlSignalException){
-                throw (ControlSignalException)e;
+            if (e instanceof ControlSignalException) {
+                throw (ControlSignalException) e;
             }
 
-            String traceErrMsg=e.getClass().getName()+": "+e.getMessage();
-            executor.visitSet(context, ParamsConsts.TRACE_ERRMSG,traceErrMsg);
+            String traceErrMsg = e.getClass().getName() + ": " + e.getMessage();
+            executor.visitSet(context, ParamsConsts.TRACE_ERRMSG, traceErrMsg);
             ContextHolder.TRACE_ERRMSG.set(traceErrMsg);
 
             boolean handled = false;
@@ -104,7 +104,7 @@ public class LangTryNode extends AbstractExecutorNode {
                 }
                 List<Class<?>> catchClasses = new ArrayList<>();
                 if (type != null) {
-                    type=type.trim();
+                    type = type.trim();
                     String[] arr = type.split("[,;\\|]");
                     for (String item : arr) {
                         item = item.trim();
@@ -118,7 +118,7 @@ public class LangTryNode extends AbstractExecutorNode {
                         }
                     }
                 }
-                Map.Entry<Throwable,Boolean> matched= MatchException.matchException(e,catchNode.getAttrFeatureMap().get(AttrConsts.TYPE),catchClasses);
+                Map.Entry<Throwable, Boolean> matched = MatchException.matchException(e, catchNode.getAttrFeatureMap().get(AttrConsts.TYPE), catchClasses);
 
                 if (exName == null || exName.isEmpty()) {
                     exName = AttrConsts.E;
@@ -132,31 +132,31 @@ public class LangTryNode extends AbstractExecutorNode {
                     bakParams.put(exName, context.get(exName));
 
                     // 设置堆栈变量
-                    executor.visitSet(context,exName,matched.getKey());
+                    executor.visitSet(context, exName, matched.getKey());
 
-                    boolean pass=true;
+                    boolean pass = true;
                     String test = catchNode.getTagAttrMap().get(AttrConsts.TEST);
-                    if(test!=null){
-                        pass=executor.toBoolean(executor.attrValue(AttrConsts.TEST,FeatureConsts.TEST,catchNode,context));
+                    if (test != null) {
+                        pass = executor.toBoolean(executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, catchNode, context));
                     }
-                    if(pass) {
+                    if (pass) {
                         executor.execAsProcedure(catchNode, context, false, false);
                         handled = true;
                     }
 
                     // 还原堆栈
-                    executor.visitSet(context,exName, bakParams.get(exName));
+                    executor.visitSet(context, exName, bakParams.get(exName));
                 }
 
-                if(handled){
+                if (handled) {
                     break;
                 }
             }
             if (!handled) {
-                if(e instanceof RuntimeException){
-                    throw (RuntimeException)e;
-                }else {
-                    throw new ThrowSignalException(e.getMessage(),e);
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                } else {
+                    throw new ThrowSignalException(e.getMessage(), e);
                 }
             }
         } finally {

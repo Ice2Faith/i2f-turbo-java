@@ -23,19 +23,46 @@ import java.util.function.Consumer;
 public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScriptProvider {
     public static final String TAG_NAME = TagConsts.LANG_EVAL_GROOVY;
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         /*language=groovy*/
-        String script="params.a+params[\"b\"]";
-        Map<String,Object> context=new HashMap<>();
-        context.put("a",1);
-        context.put("b",2.5);
+        String script = "params.a+params[\"b\"]";
+        Map<String, Object> context = new HashMap<>();
+        context.put("a", 1);
+        context.put("b", 2.5);
         Object obj = evalGroovyScript(script, context, null);
         System.out.println(obj);
     }
 
+    public static Object evalGroovyScript(String script, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        Map<String, Object> bindings = new HashMap<>();
+        bindings.put("executor", executor);
+        bindings.put("params", context);
+
+        String sourceCode = new StringBuilder()
+                .append(LangEvalJavaNode.EVAL_JAVA_IMPORTS).append("\n")
+                .append("def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable {").append("\n")
+                .append(script).append("\n")
+                .append("}").append("\n")
+                .append("exec(executor,params);").append("\n")
+                .toString();
+
+        Object obj = null;
+
+        try {
+            obj = GroovyScript.eval(sourceCode, bindings);
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new IllegalStateException(e.getMessage() + "\n\t source code:\n" + sourceCode, e);
+            }
+        }
+        return obj;
+    }
+
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -44,13 +71,13 @@ public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScri
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String script = node.getTextBody();
-        if(script!=null && !script.isEmpty()) {
+        if (script != null && !script.isEmpty()) {
             GrammarReporter.reportExprFeatureGrammar(script, FeatureConsts.EVAL_GROOVY, node, "element body ", warnPoster);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         String script = node.getTextBody();
         Object obj = evalGroovyScript(script, context, executor);
@@ -68,35 +95,8 @@ public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScri
     }
 
     @Override
-    public Object eval(String script, Map<String,Object> params,JdbcProcedureExecutor executor) {
+    public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
         Object obj = evalGroovyScript(script, params, executor);
-        return obj;
-    }
-
-    public static Object evalGroovyScript(String script, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        Map<String, Object> bindings = new HashMap<>();
-        bindings.put("executor", executor);
-        bindings.put("params", context);
-
-        String sourceCode=new StringBuilder()
-                .append(LangEvalJavaNode.EVAL_JAVA_IMPORTS).append("\n")
-                .append("def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable {").append("\n")
-                .append(script).append("\n")
-                .append("}").append("\n")
-                .append("exec(executor,params);").append("\n")
-                .toString();
-
-        Object obj = null;
-
-        try {
-            obj = GroovyScript.eval(sourceCode, bindings);
-        } catch (Exception e) {
-            if (e instanceof SignalException) {
-                throw (SignalException) e;
-            }else {
-                throw new IllegalStateException(e.getMessage() + "\n\t source code:\n" + sourceCode, e);
-            }
-        }
         return obj;
     }
 

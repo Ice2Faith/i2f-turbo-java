@@ -99,7 +99,7 @@ public class TestProcedureExecutor {
 
         executor.exec(javaMeta.getName(), params);
 
-        executor.exec("SIMPLE",params);
+        executor.exec("SIMPLE", params);
 
         System.out.println("===========================================");
 

@@ -20,23 +20,23 @@ public class SqlUpdateNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
         BindSql bql = SqlDialect.getSqlDialectList(datasource, node, context, executor);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
 
-        if(executor.isDebug()){
-            bql=bql.concat(getTrackingComment(node));
+        if (executor.isDebug()) {
+            bql = bql.concat(getTrackingComment(node));
         }
         int row = executor.sqlUpdate(datasource, bql, context);
-        if(executor.isDebug()) {
+        if (executor.isDebug()) {
             executor.logDebug("found data is : " + row + "! at " + getNodeLocation(node));
         }
         if (result != null) {

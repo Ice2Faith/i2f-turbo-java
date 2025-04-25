@@ -27,7 +27,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -36,13 +36,13 @@ public class LangInvokeNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String method = node.getTagAttrMap().get(AttrConsts.METHOD);
-        if(method==null || method.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.METHOD);
+        if (method == null || method.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.METHOD);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String fullMethodName = node.getTagAttrMap().get(AttrConsts.METHOD);
         String targetScript = node.getTagAttrMap().get(AttrConsts.TARGET);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
@@ -96,14 +96,14 @@ public class LangInvokeNode extends AbstractExecutorNode {
                 className = HashSet.class.getName();
             }
             Class<?> clazz = executor.loadClass(className);
-            Constructor<?> constructor = ReflectResolver.matchExecConstructor(clazz,callArgs);
+            Constructor<?> constructor = ReflectResolver.matchExecConstructor(clazz, callArgs);
 
             if (constructor == null) {
                 throw new IllegalArgumentException("not found constructor : " + fullMethodName + " with args count " + args.size());
             }
 
             try {
-                Object res = ReflectResolver.execConstructor(constructor,callArgs);
+                Object res = ReflectResolver.execConstructor(constructor, callArgs);
 
                 if (result != null) {
                     res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
@@ -112,7 +112,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
             } catch (Exception e) {
                 if (e instanceof SignalException) {
                     throw (SignalException) e;
-                }else {
+                } else {
                     throw new ThrowSignalException(e.getMessage(), e);
                 }
             }
@@ -131,7 +131,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
             IMethod method = null;
             if (targetScript == null || targetScript.isEmpty()) {
                 List<IMethod> list = ContextHolder.INVOKE_METHOD_MAP.get(methodName);
-                if(list!=null && !list.isEmpty()) {
+                if (list != null && !list.isEmpty()) {
                     method = ReflectResolver.matchExecMethod(list, callArgs);
                     if (clazz == null) {
                         clazz = method.getDeclaringClass();
@@ -143,7 +143,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
                 throw new IllegalArgumentException("cannot found class by method : " + fullMethodName);
             }
 
-            if(method==null){
+            if (method == null) {
                 Method md = ReflectResolver.matchExecMethod(clazz, methodName, callArgs);
                 if (md != null) {
                     method = new JdkMethod(md);
@@ -156,7 +156,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
 
             try {
 
-                Object res = ReflectResolver.execMethod(invokeObject,method,callArgs);
+                Object res = ReflectResolver.execMethod(invokeObject, method, callArgs);
 
                 if (result != null) {
                     res = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
@@ -165,7 +165,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
             } catch (Exception e) {
                 if (e instanceof SignalException) {
                     throw (SignalException) e;
-                }else {
+                } else {
                     throw new ThrowSignalException(e.getMessage(), e);
                 }
             }

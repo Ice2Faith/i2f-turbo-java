@@ -21,14 +21,14 @@ public class SqlQueryObjectNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
         BindSql bql = SqlDialect.getSqlDialectList(datasource, node, context, executor);
         boolean limited = executor.toBoolean(executor.attrValue(AttrConsts.LIMITED, FeatureConsts.BOOLEAN, node, context));
@@ -45,12 +45,12 @@ public class SqlQueryObjectNode extends AbstractExecutorNode {
         if (page != null) {
             bql = executor.sqlWrapPage(datasource, bql, page, context);
         }
-        if(executor.isDebug()){
-            bql=bql.concat(getTrackingComment(node));
+        if (executor.isDebug()) {
+            bql = bql.concat(getTrackingComment(node));
         }
         Object obj = executor.sqlQueryObject(datasource, bql, context, resultType);
-        boolean isEmpty=(obj==null);
-        if(executor.isDebug()) {
+        boolean isEmpty = (obj == null);
+        if (executor.isDebug()) {
             executor.logDebug("found data is null: " + isEmpty + "! at " + getNodeLocation(node));
         }
         if (result != null) {

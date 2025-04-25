@@ -23,22 +23,16 @@ import java.util.*;
  */
 public class MetaDependencyResolver {
 
-    public static class DependencyNode {
-        public String naming;
-        public Set<String> dependencies = new LinkedHashSet<>();
-        public Set<String> usages = new LinkedHashSet<>();
-    }
-
     public static StringBuilder printDependencyGraph(Map<String, DependencyNode> dependencyGraph, StringBuilder builder) {
         return printDependencyGraphNext(null, dependencyGraph, builder, 0, new LinkedHashSet<>());
     }
 
     public static StringBuilder printDependencyGraph(String naming, Map<String, DependencyNode> dependencyGraph, StringBuilder builder) {
         DependencyNode node = dependencyGraph.get(naming);
-        if(node==null){
+        if (node == null) {
             return builder;
         }
-        return printDependencyGraphNext(node,dependencyGraph,builder,0,new LinkedHashSet<>());
+        return printDependencyGraphNext(node, dependencyGraph, builder, 0, new LinkedHashSet<>());
     }
 
     public static StringBuilder printDependencyGraphNext(DependencyNode node, Map<String, DependencyNode> dependencyGraph, StringBuilder builder, int level, Set<String> printed) {
@@ -61,9 +55,9 @@ public class MetaDependencyResolver {
         for (DependencyNode item : nodes) {
 
             for (int i = 0; i < level; i++) {
-                if(i==level-1) {
+                if (i == level - 1) {
                     builder.append("|- ");
-                }else{
+                } else {
                     builder.append("| ");
                 }
             }
@@ -144,17 +138,17 @@ public class MetaDependencyResolver {
             if (value.getType() == ProcedureMeta.Type.XML) {
                 XmlNode node = (XmlNode) value.getTarget();
                 getDependencyMapNext(node, ret.get(name));
-            }else if(value.getType()==ProcedureMeta.Type.JAVA){
-                JdbcProcedureJavaCaller caller=(JdbcProcedureJavaCaller)value.getTarget();
-                getDependencyMapNext(caller,ret.get(name));
+            } else if (value.getType() == ProcedureMeta.Type.JAVA) {
+                JdbcProcedureJavaCaller caller = (JdbcProcedureJavaCaller) value.getTarget();
+                getDependencyMapNext(caller, ret.get(name));
             }
         }
         return ret;
     }
 
-    public static void getDependencyMapNext(JdbcProcedureJavaCaller caller,Set<String> dependencies){
-        String fileName=caller.getClass().getName().replace(".","/")+".class";
-        try(InputStream is= Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
+    public static void getDependencyMapNext(JdbcProcedureJavaCaller caller, Set<String> dependencies) {
+        String fileName = caller.getClass().getName().replace(".", "/") + ".class";
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
             byte[] bytes = StreamUtil.readBytes(is, true);
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < bytes.length; i++) {
@@ -173,7 +167,7 @@ public class MetaDependencyResolver {
                     dependencies.add(naming);
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
@@ -342,5 +336,11 @@ public class MetaDependencyResolver {
                 || naming.startsWith("FN_")
                 || naming.startsWith("PROC_")
                 ;
+    }
+
+    public static class DependencyNode {
+        public String naming;
+        public Set<String> dependencies = new LinkedHashSet<>();
+        public Set<String> usages = new LinkedHashSet<>();
     }
 }

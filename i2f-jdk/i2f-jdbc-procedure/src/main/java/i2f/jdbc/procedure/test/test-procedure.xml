@@ -12,25 +12,28 @@
     <lang-println now1="now1"/>
 
     <lang-set value.body-xml.trim.eval-java="" result="now2">
-        Date d=new Date();
-        SimpleDateFormat fmt=new SimpleDateFormat("yyyyMMdd-HHmmss-SSS");
-        fmt.format(d)
+            Date d = new Date();
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS");
+            fmt.format(d)
     </lang-set>
     <lang-println now2="now2"/>
 
     <sql-query-object result="userCount" result-type="Long">
         <sql-dialect databases="oracle">
-            select count(1) from sys_user
+            select count(1)
+            from sys_user
         </sql-dialect>
     </sql-query-object>
     <lang-println userCount="userCount"/>
 
     <sql-query-object datasource="local" result="organCount" result-type="Long">
         <sql-dialect databases="oracle">
-            select count(1) from ext_organ
+            select count(1)
+            from ext_organ
         </sql-dialect>
         <sql-dialect databases="gbase">
-            select count(1) from sys_organ
+            select count(1)
+            from sys_organ
         </sql-dialect>
     </sql-query-object>
     <lang-println organCount="organCount"/>
@@ -54,7 +57,8 @@
     <lang-println diffCount="diffCount"/>
 
     <sql-query-row datasource="gbase" result="organ">
-        select * from sys_organ limit 1
+        select *
+        from sys_organ limit 1
     </sql-query-row>
 
     <lang-println organ="organ"/>
@@ -62,7 +66,8 @@
     <lang-set value.eval-java="new Date()" result="now"/>
     <sql-etl before-truncate="true">
         <sql-query-list datasource="gbase">
-            select * from sys_organ
+            select *
+            from sys_organ
         </sql-query-list>
         <etl-transform source="id" target="ID"/>
         <etl-transform source="name" target="NAME"/>

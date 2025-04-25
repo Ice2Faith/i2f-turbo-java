@@ -15,13 +15,13 @@ public class TextNode extends AbstractExecutorNode {
     @Override
     public boolean support(XmlNode node) {
         XmlNode.NodeType type = node.getNodeType();
-        return XmlNode.NodeType.TEXT ==type
-                || XmlNode.NodeType.CDATA ==type
+        return XmlNode.NodeType.TEXT == type
+                || XmlNode.NodeType.CDATA == type
                 ;
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         String text = node.getTextBody();
         if (result != null) {

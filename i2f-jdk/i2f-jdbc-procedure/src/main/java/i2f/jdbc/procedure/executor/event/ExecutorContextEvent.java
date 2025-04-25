@@ -14,6 +14,6 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class ExecutorContextEvent implements XProc4jEvent {
-    protected Map<String,Object> context;
+    protected Map<String, Object> context;
     protected JdbcProcedureExecutor executor;
 }

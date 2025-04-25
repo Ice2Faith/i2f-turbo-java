@@ -23,7 +23,7 @@ public interface TagConsts {
 
     String LANG_INVOKE = "lang-invoke";
 
-    String LANG_SHELL="lang-shell";
+    String LANG_SHELL = "lang-shell";
 
     String LANG_BODY = "lang-body";
 
@@ -96,7 +96,7 @@ public interface TagConsts {
     String SQL_QUERY_ROW = "sql-query-row";
     String SQL_UPDATE = "sql-update";
 
-    String SQL_DIALECT="sql-dialect";
+    String SQL_DIALECT = "sql-dialect";
     String SQL_SCOPE = "sql-scope";
     String SQL_SCRIPT = "sql-script";
 

@@ -12,7 +12,7 @@ import java.util.Map;
 public interface JdbcProcedureMetaProvider {
     Map<String, ProcedureMeta> getMetaMap();
 
-    default ProcedureMeta getProcedure(String procedureId){
+    default ProcedureMeta getProcedure(String procedureId) {
         return getMetaMap().get(procedureId);
     }
 }

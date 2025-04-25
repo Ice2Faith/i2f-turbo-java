@@ -23,7 +23,7 @@ public class LangWhileNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -32,20 +32,20 @@ public class LangWhileNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String test = node.getTagAttrMap().get(AttrConsts.TEST);
-        if(test==null || test.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.TEST);
+        if (test == null || test.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.TEST);
         }
-        if(test!=null && !test.isEmpty()) {
+        if (test != null && !test.isEmpty()) {
             try {
-                GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST,node,FeatureConsts.EVAL,warnPoster);
+                GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST, node, FeatureConsts.EVAL, warnPoster);
             } catch (Exception e) {
-                warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST+"["+test+"]"+" expression maybe wrong!");
+                warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST + "[" + test + "]" + " expression maybe wrong!");
             }
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String script = node.getTagAttrMap().get(AttrConsts.TEST);
         String firstName = node.getTagAttrMap().get(AttrConsts.FIRST);
         String indexName = node.getTagAttrMap().get(AttrConsts.INDEX);
@@ -57,14 +57,14 @@ public class LangWhileNode extends AbstractExecutorNode {
         }
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
-        bakParams.put(firstName, executor.visit(firstName,context));
-        bakParams.put(indexName, executor.visit(indexName,context));
+        bakParams.put(firstName, executor.visit(firstName, context));
+        bakParams.put(indexName, executor.visit(indexName, context));
 
         boolean isFirst = true;
         int index = 0;
         while (executor.toBoolean(executor.attrValue(AttrConsts.TEST, AttrConsts.TEST, node, context))) {
-            executor.visitSet(context,firstName, isFirst);
-            executor.visitSet(context,indexName, index);
+            executor.visitSet(context, firstName, isFirst);
+            executor.visitSet(context, indexName, index);
             isFirst = false;
             index++;
             try {
@@ -76,8 +76,8 @@ public class LangWhileNode extends AbstractExecutorNode {
             }
         }
         // 还原堆栈
-        executor.visitSet(context,firstName, bakParams.get(firstName));
-        executor.visitSet(context,indexName, bakParams.get(indexName));
+        executor.visitSet(context, firstName, bakParams.get(firstName));
+        executor.visitSet(context, indexName, bakParams.get(indexName));
     }
 
 }

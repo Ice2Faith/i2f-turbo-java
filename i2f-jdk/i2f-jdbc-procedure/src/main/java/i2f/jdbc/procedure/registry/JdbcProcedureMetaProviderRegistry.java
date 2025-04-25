@@ -11,5 +11,5 @@ import java.util.Collection;
  */
 @FunctionalInterface
 public interface JdbcProcedureMetaProviderRegistry {
-   Collection<JdbcProcedureMetaProvider> getProviders();
+    Collection<JdbcProcedureMetaProvider> getProviders();
 }

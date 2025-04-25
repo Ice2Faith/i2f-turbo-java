@@ -19,7 +19,7 @@ public class ContextLoadPackageNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -29,13 +29,13 @@ public class ContextLoadPackageNode extends AbstractExecutorNode {
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String pkg = node.getTagAttrMap().get(AttrConsts.PACKAGE);
         String clazz = node.getTagAttrMap().get(AttrConsts.CLASS);
-        if((pkg==null || pkg.isEmpty()) && (clazz==null || clazz.isEmpty())){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.PACKAGE+"/"+AttrConsts.CLASS);
+        if ((pkg == null || pkg.isEmpty()) && (clazz == null || clazz.isEmpty())) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.PACKAGE + "/" + AttrConsts.CLASS);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String pkg = node.getTagAttrMap().get(AttrConsts.PACKAGE);
         if (pkg != null && !pkg.isEmpty()) {
             if (!pkg.endsWith(".")) {

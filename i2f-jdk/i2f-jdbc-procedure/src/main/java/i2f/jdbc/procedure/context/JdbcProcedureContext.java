@@ -13,8 +13,6 @@ import java.util.Map;
  */
 public interface JdbcProcedureContext {
 
-    void listener(JdbcProcedureContextRefreshListener listener);
-
     Map<String, ProcedureMeta> getMetaMap();
 
     void registry(String name, ProcedureMeta meta);

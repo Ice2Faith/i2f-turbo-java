@@ -1,10 +1,14 @@
 package i2f.jdbc.procedure.provider.types.xml.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -14,11 +18,16 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @date 2025/2/18 22:35
  * @desc
  */
+@Data
+@NoArgsConstructor
 public class ListableJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider {
-    protected CopyOnWriteArraySet<URL> resourceList = new CopyOnWriteArraySet<>();
+    protected final CopyOnWriteArraySet<URL> resourceList = new CopyOnWriteArraySet<>();
+    protected volatile XProc4jEventHandler eventHandler = new XProc4jEventHandler();
 
-    public ListableJdbcProcedureXmlNodeMetaCacheProvider(CopyOnWriteArraySet<URL> resourceList) {
-        this.resourceList = resourceList;
+    public ListableJdbcProcedureXmlNodeMetaCacheProvider(Collection<URL> resourceList) {
+        if (resourceList != null) {
+            this.resourceList.addAll(resourceList);
+        }
     }
 
     @Override

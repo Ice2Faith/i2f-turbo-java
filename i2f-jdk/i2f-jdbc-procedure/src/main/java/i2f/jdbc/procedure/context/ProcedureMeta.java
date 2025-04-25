@@ -18,17 +18,11 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 public class ProcedureMeta {
-    public static enum Type {
-        XML,
-        JAVA
-    }
-
     protected Type type;
     protected String name;
     protected Object target;
     protected List<String> arguments = new ArrayList<>();
     protected Map<String, List<String>> argumentFeatures = new LinkedHashMap<>();
-
 
     public static ProcedureMeta ofMeta(XmlNode value) {
         return ofMeta(null, value);
@@ -51,11 +45,11 @@ public class ProcedureMeta {
         meta.setArguments(new ArrayList<>());
         meta.setArgumentFeatures(new HashMap<>());
         for (String attr : value.getTagAttrMap().keySet()) {
-            if(AttrConsts.ID.equals(attr)){
+            if (AttrConsts.ID.equals(attr)) {
                 continue;
             }
             meta.getArguments().add(attr);
-            meta.getArgumentFeatures().put(attr,new ArrayList<>(value.getAttrFeatureMap().get(attr)));
+            meta.getArgumentFeatures().put(attr, new ArrayList<>(value.getAttrFeatureMap().get(attr)));
         }
         meta.setArguments(new ArrayList<>(value.getTagAttrMap().keySet()));
         meta.setArgumentFeatures(value.getAttrFeatureMap());
@@ -96,6 +90,11 @@ public class ProcedureMeta {
             meta.getArgumentFeatures().put(name, attrFeatures.getValue());
         }
         return meta;
+    }
+
+    public static enum Type {
+        XML,
+        JAVA
     }
 
 }

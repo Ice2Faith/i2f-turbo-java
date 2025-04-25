@@ -22,7 +22,7 @@ public class LangThrowNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -31,13 +31,13 @@ public class LangThrowNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String type = node.getTagAttrMap().get(AttrConsts.TYPE);
-        if(type==null || type.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.TYPE);
+        if (type == null || type.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.TYPE);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String message = (String) executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
         String exceptionType = node.getTagAttrMap().get(AttrConsts.TYPE);
         String cause = node.getTagAttrMap().get(AttrConsts.CAUSE);
@@ -76,7 +76,7 @@ public class LangThrowNode extends AbstractExecutorNode {
         } catch (Throwable e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
-            }else {
+            } else {
                 throw new ThrowSignalException(e.getMessage(), e);
             }
         }

@@ -12,11 +12,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "jdbc.xml.procedure")
 public class SpringJdbcProcedureProperties {
     public static final String DEFAULT_XML_LOCATIONS = "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml";
-    private boolean enable=true;
+    private boolean enable = true;
 
-    private boolean debug=false;
+    private boolean debug = false;
 
-    private boolean reportOnBoot=true;
+    private boolean reportOnBoot = true;
 
     private String xmlLocations = DEFAULT_XML_LOCATIONS;
 

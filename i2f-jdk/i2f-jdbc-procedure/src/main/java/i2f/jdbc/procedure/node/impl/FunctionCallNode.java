@@ -24,7 +24,7 @@ public class FunctionCallNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -33,17 +33,17 @@ public class FunctionCallNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);
-        if(refid==null || refid.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.REFID);
+        if (refid == null || refid.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.REFID);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        String refid = (String)executor.attrValue(AttrConsts.REFID,FeatureConsts.STRING,node,context);
-        Boolean paramsShare=(Boolean) executor.attrValue(AttrConsts.PARAMS_SHARE,FeatureConsts.BOOLEAN,node,context);
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        String refid = (String) executor.attrValue(AttrConsts.REFID, FeatureConsts.STRING, node, context);
+        Boolean paramsShare = (Boolean) executor.attrValue(AttrConsts.PARAMS_SHARE, FeatureConsts.BOOLEAN, node, context);
 
-        boolean needPrepareParams=true;
+        boolean needPrepareParams = true;
         Map<String, Object> callParams = null;
         String paramsText = node.getTagAttrMap().get(AttrConsts.PARAMS);
         if (paramsText != null) {
@@ -52,13 +52,13 @@ public class FunctionCallNode extends AbstractExecutorNode {
                 callParams = (Map<String, Object>) value;
             }
         }
-        if(paramsShare!=null && paramsShare){
-            callParams=context;
-            needPrepareParams=false;
+        if (paramsShare != null && paramsShare) {
+            callParams = context;
+            needPrepareParams = false;
         }
         if (callParams == null) {
             callParams = executor.newParams(context);
-            needPrepareParams=false;
+            needPrepareParams = false;
         }
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
             String name = entry.getKey();
@@ -68,7 +68,7 @@ public class FunctionCallNode extends AbstractExecutorNode {
             if (AttrConsts.PARAMS.equals(name)) {
                 continue;
             }
-            if(AttrConsts.PARAMS_SHARE.equals(name)){
+            if (AttrConsts.PARAMS_SHARE.equals(name)) {
                 continue;
             }
             if (AttrConsts.RESULT.equals(name)) {
@@ -79,7 +79,7 @@ public class FunctionCallNode extends AbstractExecutorNode {
             callParams.put(name, val);
         }
 
-        if(needPrepareParams) {
+        if (needPrepareParams) {
             executor.prepareParams(callParams);
         }
 
@@ -96,9 +96,9 @@ public class FunctionCallNode extends AbstractExecutorNode {
         }
 
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        if(result!=null){
-            Object ret = executor.visit(ParamsConsts.RETURN,callParams);
-            executor.visitSet(context,result,ret);
+        if (result != null) {
+            Object ret = executor.visit(ParamsConsts.RETURN, callParams);
+            executor.visitSet(context, result, ret);
         }
     }
 

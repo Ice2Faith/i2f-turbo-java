@@ -18,25 +18,25 @@ public class LangRenderNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String script = node.getTextBody();
         String rs = executor.render(script, context);
-        if(executor.isDebug()){
+        if (executor.isDebug()) {
             String lang = node.getTagAttrMap().get("_lang");
-            if("sql".equalsIgnoreCase(lang)){
-                rs=rs+getTrackingComment(node);
+            if ("sql".equalsIgnoreCase(lang)) {
+                rs = rs + getTrackingComment(node);
             }
         }
-        String val=rs;
-        if(executor.isDebug()) {
-            executor.logDebug( "at " + getNodeLocation(node) + " render string: " + val);
+        String val = rs;
+        if (executor.isDebug()) {
+            executor.logDebug("at " + getNodeLocation(node) + " render string: " + val);
         }
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {

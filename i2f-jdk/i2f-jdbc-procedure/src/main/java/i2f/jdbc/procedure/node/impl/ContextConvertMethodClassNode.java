@@ -19,7 +19,7 @@ public class ContextConvertMethodClassNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -28,13 +28,13 @@ public class ContextConvertMethodClassNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String clazz = node.getTagAttrMap().get(AttrConsts.CLASS);
-        if(clazz==null || clazz.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.CLASS);
+        if (clazz == null || clazz.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.CLASS);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String clazz = node.getTagAttrMap().get(AttrConsts.CLASS);
         if (clazz != null && !clazz.isEmpty()) {
             Class<?> cls = executor.loadClass(clazz);

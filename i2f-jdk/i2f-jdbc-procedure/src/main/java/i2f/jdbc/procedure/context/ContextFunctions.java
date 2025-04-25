@@ -42,6 +42,34 @@ public class ContextFunctions {
             {"[:grah:]", "\\S"},
 
     };
+    public static final String[][] CHRONO_UNIT_MAPPING = {
+            {"day", "DAYS"},
+            {"dd", "DAYS"},
+            {"month", "MONTHS"},
+            {"mon", "MONTHS"},
+            {"mm", "MONTHS"},
+            {"year", "YEARS"},
+            {"yyyy", "YEARS"},
+            {"minute", "MINUTES"},
+            {"min", "MINUTES"},
+            {"mi", "MINUTES"},
+            {"second", "SECONDS"},
+            {"sec", "SECONDS"},
+            {"ss", "SECONDS"},
+            {"hour", "HOURS"},
+            {"hh", "HOURS"},
+            {"mill", "MILLIS"},
+            {"ms", "MILLIS"},
+            {"sss", "MILLIS"},
+            {"week", "WEEKS"},
+            {"ww", "WEEKS"},
+            {"micro", "MICROS"},
+            {"nano", "NANOS"},
+            {"ns", "NANOS"},
+
+    };
+    public static final MathContext MATH_CONTEXT = new MathContext(20, RoundingMode.HALF_UP);
+    public static final BigDecimal NUM_0_5 = new BigDecimal("0.5");
 
     public static String convertOracleRegexExpression(String regex) {
         if (regex == null) {
@@ -207,14 +235,14 @@ public class ContextFunctions {
         throw new IllegalArgumentException("length(obj) function cannot support type:" + obj.getClass());
     }
 
-    public static int lengthb(Object obj){
+    public static int lengthb(Object obj) {
         if (obj == null) {
             return -1;
         }
         if (obj instanceof CharSequence
                 || obj instanceof String
                 || obj instanceof Appendable) {
-            String str=String.valueOf(obj);
+            String str = String.valueOf(obj);
             return str.getBytes(StandardCharsets.UTF_8).length;
         }
         return length(obj);
@@ -307,33 +335,6 @@ public class ContextFunctions {
         }
         return ObjectConvertor.tryConvertAsType(val, clazz);
     }
-
-    public static final String[][] CHRONO_UNIT_MAPPING = {
-            {"day", "DAYS"},
-            {"dd", "DAYS"},
-            {"month", "MONTHS"},
-            {"mon", "MONTHS"},
-            {"mm", "MONTHS"},
-            {"year", "YEARS"},
-            {"yyyy", "YEARS"},
-            {"minute", "MINUTES"},
-            {"min", "MINUTES"},
-            {"mi", "MINUTES"},
-            {"second", "SECONDS"},
-            {"sec", "SECONDS"},
-            {"ss", "SECONDS"},
-            {"hour", "HOURS"},
-            {"hh", "HOURS"},
-            {"mill", "MILLIS"},
-            {"ms", "MILLIS"},
-            {"sss", "MILLIS"},
-            {"week", "WEEKS"},
-            {"ww", "WEEKS"},
-            {"micro", "MICROS"},
-            {"nano", "NANOS"},
-            {"ns", "NANOS"},
-
-    };
 
     public static ChronoUnit chrono_unit(String unit) {
         if (unit == null || unit.isEmpty()) {
@@ -550,9 +551,6 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(obj, date.getClass());
     }
 
-    public static final MathContext MATH_CONTEXT = new MathContext(20, RoundingMode.HALF_UP);
-    public static final BigDecimal NUM_0_5 = new BigDecimal("0.5");
-
     public static Object trunc(Object number, Integer precision) {
         if (number == null) {
             return null;
@@ -737,25 +735,25 @@ public class ContextFunctions {
     }
 
     public static String substr(Object obj, int index, int len) {
-        String str=null;
-        if(obj!=null){
+        String str = null;
+        if (obj != null) {
             if (obj instanceof CharSequence
                     || obj instanceof String
-                    || obj instanceof Appendable){
-                str=String.valueOf(obj);
-            }else{
-                throw new IllegalArgumentException("substr(obj) cannot support type:"+obj.getClass());
+                    || obj instanceof Appendable) {
+                str = String.valueOf(obj);
+            } else {
+                throw new IllegalArgumentException("substr(obj) cannot support type:" + obj.getClass());
             }
         }
         if (str == null) {
             return str;
         }
-        if(index>=str.length()){
+        if (index >= str.length()) {
             return "";
         }
         if (len >= 0) {
-            int endIndex=index+len;
-            if(endIndex>=str.length()){
+            int endIndex = index + len;
+            if (endIndex >= str.length()) {
                 return str.substring(index);
             }
             return str.substring(index, index + len);
@@ -763,28 +761,30 @@ public class ContextFunctions {
             return str.substring(index);
         }
     }
-    public static String substrb(Object str,int index){
-        return substrb(str,index,-1);
+
+    public static String substrb(Object str, int index) {
+        return substrb(str, index, -1);
     }
-    public static String substrb(Object str,int index,int len){
+
+    public static String substrb(Object str, int index, int len) {
         String ret = substr(str, index, len);
-        if(ret==null || ret.isEmpty()){
+        if (ret == null || ret.isEmpty()) {
             return ret;
         }
-        if(len<0){
+        if (len < 0) {
             return ret;
         }
         byte[] bytes = ret.getBytes(StandardCharsets.UTF_8);
-        if(bytes.length<=len){
+        if (bytes.length <= len) {
             return ret;
         }
         char[] arr = ret.toCharArray();
-        int count=0;
-        StringBuilder builder=new StringBuilder();
+        int count = 0;
+        StringBuilder builder = new StringBuilder();
         for (char ch : arr) {
-            if(ch>=0 && ch<=127){
-                count+=1;
-            }else {
+            if (ch >= 0 && ch <= 127) {
+                count += 1;
+            } else {
                 String s = ch + "";
                 count += s.getBytes(StandardCharsets.UTF_8).length;
             }
@@ -894,85 +894,85 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
 
-    public static String md5(Object data){
-        return mds("MD5",data,"hex",null);
+    public static String md5(Object data) {
+        return mds("MD5", data, "hex", null);
     }
 
-    public static String sha1(Object data){
-        return mds("SHA-1",data,"hex",null);
+    public static String sha1(Object data) {
+        return mds("SHA-1", data, "hex", null);
     }
 
-    public static String sha256(Object data){
-        return mds("SHA-256",data,"hex",null);
+    public static String sha256(Object data) {
+        return mds("SHA-256", data, "hex", null);
     }
 
-    public static String sha384(Object data){
-        return mds("SHA-384",data,"hex",null);
+    public static String sha384(Object data) {
+        return mds("SHA-384", data, "hex", null);
     }
 
-    public static String sha512(Object data){
-        return mds("SHA-512",data,"hex",null);
+    public static String sha512(Object data) {
+        return mds("SHA-512", data, "hex", null);
     }
 
-    public static String mds(String algorithm,Object data){
-        return mds(algorithm,data,"hex",null);
+    public static String mds(String algorithm, Object data) {
+        return mds(algorithm, data, "hex", null);
     }
 
-    public static String mds(String algorithm,Object data,String format){
-        return mds(algorithm,data,format,null);
+    public static String mds(String algorithm, Object data, String format) {
+        return mds(algorithm, data, format, null);
     }
 
-    public static String mds(String algorithm,Object data,String format,String provider){
-        if(data==null){
+    public static String mds(String algorithm, Object data, String format, String provider) {
+        if (data == null) {
             return null;
         }
-        if(provider!=null){
-            provider=provider.trim();
+        if (provider != null) {
+            provider = provider.trim();
         }
         MessageDigest md = null;
-        if(provider!=null && !provider.isEmpty()){
-            try{
-                md=MessageDigest.getInstance(algorithm, provider);
-            }catch(Exception e){
+        if (provider != null && !provider.isEmpty()) {
+            try {
+                md = MessageDigest.getInstance(algorithm, provider);
+            } catch (Exception e) {
 
             }
         }
-        if(md==null){
+        if (md == null) {
             try {
                 MessageDigest.getInstance(algorithm);
             } catch (NoSuchAlgorithmException e) {
-                throw new IllegalArgumentException("cannot find message digest algorithm:"+algorithm+" , with error: "+e.getMessage(),e);
+                throw new IllegalArgumentException("cannot find message digest algorithm:" + algorithm + " , with error: " + e.getMessage(), e);
             }
         }
-        byte[] bytes=null;
+        byte[] bytes = null;
         try {
-            if(data instanceof byte[]){
-                bytes=(byte[])data;
-            }else if(data instanceof InputStream){
+            if (data instanceof byte[]) {
+                bytes = (byte[]) data;
+            } else if (data instanceof InputStream) {
                 InputStream is = (InputStream) data;
                 bytes = StreamUtil.readBytes(is, true);
-            } else if(data instanceof Reader){
+            } else if (data instanceof Reader) {
                 Reader reader = (Reader) data;
                 bytes = StreamUtil.readString(reader, true).getBytes(StandardCharsets.UTF_8);
-            }else if(data instanceof String
-            || data instanceof CharSequence
-            || data instanceof Appendable){
-                String str=String.valueOf(data);
-                bytes=str.getBytes(StandardCharsets.UTF_8);
-            }else{
-                String str = (String)ObjectConvertor.tryConvertAsType(data, String.class);
-                bytes=str.getBytes(StandardCharsets.UTF_8);
+            } else if (data instanceof String
+                    || data instanceof CharSequence
+                    || data instanceof Appendable) {
+                String str = String.valueOf(data);
+                bytes = str.getBytes(StandardCharsets.UTF_8);
+            } else {
+                String str = (String) ObjectConvertor.tryConvertAsType(data, String.class);
+                bytes = str.getBytes(StandardCharsets.UTF_8);
             }
         } catch (IOException e) {
-            throw new IllegalStateException("message digest convert data to byte[] error :"+e.getMessage(),e);
+            throw new IllegalStateException("message digest convert data to byte[] error :" + e.getMessage(), e);
         }
         byte[] hex = md.digest(bytes);
-        if("base64".equalsIgnoreCase(format)){
+        if ("base64".equalsIgnoreCase(format)) {
             return Base64.getEncoder().encodeToString(hex);
-        }else{
-            StringBuilder builder=new StringBuilder();
+        } else {
+            StringBuilder builder = new StringBuilder();
             for (int i = 0; i < hex.length; i++) {
-                builder.append(String.format("%02x",(0x0ff)&hex[i]));
+                builder.append(String.format("%02x", (0x0ff) & hex[i]));
             }
             return builder.toString();
         }

@@ -20,21 +20,14 @@ import java.util.function.Consumer;
  */
 @Slf4j
 public class JdbcProcedureHelper implements ApplicationContextAware {
+    private static final CountDownLatch latch = new CountDownLatch(1);
     public static volatile ApplicationContext applicationContext;
     private static volatile JdbcProcedureExecutor executor;
-    private static final CountDownLatch latch = new CountDownLatch(1);
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        log.info(XProc4jConsts.NAME+" config "+this.getClass().getSimpleName()+" ...");
-        JdbcProcedureHelper.applicationContext = applicationContext;
-        latch.countDown();
-    }
-
-    public static JdbcProcedureExecutor getExecutor(){
-        if(executor==null){
-            synchronized (latch){
-                if(executor==null) {
+    public static JdbcProcedureExecutor getExecutor() {
+        if (executor == null) {
+            synchronized (latch) {
+                if (executor == null) {
                     executor = applicationContext.getBean(JdbcProcedureExecutor.class);
                 }
             }
@@ -48,7 +41,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         return invoke(procedureId, builder.get());
     }
 
-    public static <T> T invoke(String procedureId,Map<String,Object> params){
+    public static <T> T invoke(String procedureId, Map<String, Object> params) {
         try {
             latch.await();
         } catch (Exception e) {
@@ -57,7 +50,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         return getExecutor().invoke(procedureId, params);
     }
 
-    public static <T> T invoke(String procedureId,Object ... args){
+    public static <T> T invoke(String procedureId, Object... args) {
         try {
             latch.await();
         } catch (Exception e) {
@@ -66,7 +59,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         return getExecutor().invoke(procedureId, args);
     }
 
-    public static <T> T invoke(String procedureId,List<Object> args){
+    public static <T> T invoke(String procedureId, List<Object> args) {
         try {
             latch.await();
         } catch (Exception e) {
@@ -75,13 +68,13 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         return getExecutor().invoke(procedureId, args);
     }
 
-    public static Map<String,Object> call(String procedureId, Consumer<MapBuilder<String, Object, ? extends Map<String, Object>>> consumer) {
+    public static Map<String, Object> call(String procedureId, Consumer<MapBuilder<String, Object, ? extends Map<String, Object>>> consumer) {
         MapBuilder<String, Object, HashMap<String, Object>> builder = new MapBuilder<>(new HashMap<String, Object>());
         consumer.accept(builder);
         return call(procedureId, builder.get());
     }
 
-    public static Map<String,Object> call(String procedureId, Map<String, Object> params) {
+    public static Map<String, Object> call(String procedureId, Map<String, Object> params) {
         try {
             latch.await();
         } catch (Exception e) {
@@ -90,7 +83,7 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         return getExecutor().call(procedureId, params);
     }
 
-    public static Map<String,Object> call(String procedureId, Object ... args) {
+    public static Map<String, Object> call(String procedureId, Object... args) {
         try {
             latch.await();
         } catch (Exception e) {
@@ -99,12 +92,19 @@ public class JdbcProcedureHelper implements ApplicationContextAware {
         return getExecutor().call(procedureId, args);
     }
 
-    public static Map<String,Object> call(String procedureId, List<Object> args) {
+    public static Map<String, Object> call(String procedureId, List<Object> args) {
         try {
             latch.await();
         } catch (Exception e) {
 
         }
         return getExecutor().call(procedureId, args);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        log.info(XProc4jConsts.NAME + " config " + this.getClass().getSimpleName() + " ...");
+        JdbcProcedureHelper.applicationContext = applicationContext;
+        latch.countDown();
     }
 }

@@ -24,8 +24,85 @@ import java.util.function.Consumer;
  * @date 2025/2/28 8:44
  */
 public abstract class AbstractExecutorNode implements ExecutorNode {
-    protected volatile long slowProcedureMillsSeconds=TimeUnit.SECONDS.toMillis(45);
-    protected volatile long slowNodeMillsSeconds=TimeUnit.SECONDS.toMillis(15);
+    protected volatile long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(45);
+    protected volatile long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
+
+    public static Object trimContextKeepAttribute(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (!(value instanceof Map)) {
+            return value;
+        }
+        Map<Object, Object> ret = new HashMap<>();
+        Map<?, ?> map = (Map<?, ?>) value;
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            if (ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
+                continue;
+            }
+            ret.put(entry.getKey(), trimContextKeepAttribute(entry.getValue()));
+        }
+        return ret;
+    }
+
+    public static String getCallSnapshot(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        Stack<String> traceStack = executor.visitAs(ParamsConsts.TRACE_STACK, context);
+        String id = node.getTagAttrMap().get(AttrConsts.ID);
+        StringBuilder builder = new StringBuilder();
+        builder.append("call " + id).append("\n");
+        for (Map.Entry<String, Object> entry : context.entrySet()) {
+            if (ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
+                continue;
+            }
+            Object value = entry.getValue();
+            value = trimContextKeepAttribute(value);
+            builder.append("\targ:").append(entry.getKey()).append("==> ").append("(").append(value == null ? "null" : value.getClass().getName()).append(") :").append(value).append("\n");
+        }
+        builder.append("\n");
+
+        int stackSize = traceStack.size();
+        int printStackSize = 50;
+        ListIterator<String> iterator = traceStack.listIterator(stackSize);
+        for (int i = 0; i < printStackSize; i++) {
+            if (!iterator.hasPrevious()) {
+                break;
+            }
+            builder.append("\tat node ").append(iterator.previous()).append("\n");
+        }
+        if (iterator.hasPrevious()) {
+            builder.append("\t... ").append(stackSize - printStackSize).append(" common frames omitted\n");
+        }
+        return builder.toString();
+    }
+
+    public static void walkTree(XmlNode node, Consumer<XmlNode> consumer) {
+        if (node == null) {
+            return;
+        }
+        consumer.accept(node);
+        List<XmlNode> children = node.getChildren();
+        if (children == null || children.isEmpty()) {
+            return;
+        }
+        for (XmlNode item : children) {
+            walkTree(item, consumer);
+        }
+    }
+
+    public static String getNodeLocation(XmlNode node) {
+        if (node == null) {
+            return "";
+        }
+        return "" + node.getLocationFile() + ":" + node.getLocationLineNumber() + ":" + node.getTagName() + "";
+    }
+
+    public static String getTrackingComment(XmlNode node) {
+        if (node == null) {
+            return " ";
+        }
+        return " /* tracking at " + getNodeLocation(node) + " */ ";
+    }
+
     @Override
     public void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String location = getNodeLocation(node);
@@ -37,7 +114,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
         Stack<String> traceStack = null;
         LinkedList<Map.Entry<String, String>> traceCalls = null;
-        LinkedList<Throwable>  traceErrors=null;
+        LinkedList<Throwable> traceErrors = null;
         synchronized (trace) {
             traceStack = executor.visitAs(ParamsConsts.TRACE_STACK, context);
             if (traceStack == null) {
@@ -45,13 +122,13 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 executor.visitSet(context, ParamsConsts.TRACE_STACK, traceStack);
             }
 
-            traceCalls =executor.visitAs(ParamsConsts.TRACE_CALLS, context);
+            traceCalls = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
             if (traceCalls == null) {
                 traceCalls = new LinkedList<>();
                 executor.visitSet(context, ParamsConsts.TRACE_CALLS, traceCalls);
             }
 
-            traceErrors =executor.visitAs(ParamsConsts.TRACE_ERRORS, context);
+            traceErrors = executor.visitAs(ParamsConsts.TRACE_ERRORS, context);
             if (traceErrors == null) {
                 traceErrors = new LinkedList<>();
                 executor.visitSet(context, ParamsConsts.TRACE_ERRORS, traceErrors);
@@ -80,7 +157,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
         }
 
-        synchronized (trace){
+        synchronized (trace) {
             int size = traceErrors.size();
             while (size > 10) {
                 traceErrors.removeFirst();
@@ -92,10 +169,10 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
         String snapshotTraceId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
 
-        long bts= SystemClock.currentTimeMillis();
-        pointContext.put("location",location);
-        pointContext.put("beginTs",bts);
-        pointContext.put("isDebugMode",isDebugMode);
+        long bts = SystemClock.currentTimeMillis();
+        pointContext.put("location", location);
+        pointContext.put("beginTs", bts);
+        pointContext.put("isDebugMode", isDebugMode);
         pointContext.put("snapshotTraceId", snapshotTraceId);
         try {
             executor.visitSet(context, ParamsConsts.TRACE_LOCATION, node.getLocationFile());
@@ -171,7 +248,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             executor.visitSet(context, ParamsConsts.TRACE_ERRMSG, traceErrMsg);
             ContextHolder.TRACE_ERRMSG.set(traceErrMsg);
 
-            RuntimeException re=null;
+            RuntimeException re = null;
             if (e instanceof SignalException) {
                 SignalException se = (SignalException) e;
                 if (se.getCause() == null || !se.hasLogout()) {
@@ -184,7 +261,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 } catch (Throwable ex) {
                     executor.logWarn(() -> ex.getMessage(), e);
                 }
-                re= se;
+                re = se;
             } else {
                 ThrowSignalException se = new ThrowSignalException(errorMsg, e);
                 if (se.getCause() == null || !se.hasLogout()) {
@@ -196,7 +273,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 } catch (Throwable ex) {
                     executor.logWarn(() -> ex.getMessage(), e);
                 }
-                re= se;
+                re = se;
             }
             synchronized (trace) {
                 if (!traceErrors.contains(re)) {
@@ -205,17 +282,17 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
             throw re;
         } finally {
-            long ets=SystemClock.currentTimeMillis();
-            long useTs=ets-bts;
-            pointContext.put("endTs",ets);
-            pointContext.put("useTs",useTs);
+            long ets = SystemClock.currentTimeMillis();
+            long useTs = ets - bts;
+            pointContext.put("endTs", ets);
+            pointContext.put("useTs", useTs);
 
             if (TagConsts.PROCEDURE.equals(node.getTagName())) {
-                if(useTs> slowProcedureMillsSeconds){
-                    executor.logWarn(()->"slow procedure, use "+useTs+"(ms) : "+node.getTagAttrMap().get(AttrConsts.ID));
+                if (useTs > slowProcedureMillsSeconds) {
+                    executor.logWarn(() -> "slow procedure, use " + useTs + "(ms) : " + node.getTagAttrMap().get(AttrConsts.ID));
                 }
-            }else{
-                if(!Arrays.asList(TagConsts.PROCEDURE_CALL,
+            } else {
+                if (!Arrays.asList(TagConsts.PROCEDURE_CALL,
                         TagConsts.FUNCTION_CALL).contains(node.getTagName())) {
                     if (useTs > slowNodeMillsSeconds) {
                         executor.logWarn(() -> "slow node, use " + useTs + "(ms) : " + location);
@@ -252,12 +329,12 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         executor.sendEvent(event);
 
 
-        String location = (String)pointContext.get("location");
-        String snapshotTraceId=(String)pointContext.get("snapshotTraceId");
+        String location = (String) pointContext.get("location");
+        String snapshotTraceId = (String) pointContext.get("snapshotTraceId");
 
-        boolean isDebugMode = executor.isDebug();
+        boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
         Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
-        LinkedList<Map.Entry<String, String>> traceCalls = executor.visitAs(ParamsConsts.TRACE_CALLS,context);
+        LinkedList<Map.Entry<String, String>> traceCalls = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
         if (isDebugMode) {
             synchronized (trace) {
                 int size = traceCalls.size();
@@ -267,7 +344,6 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 }
             }
         }
-
 
 
         String tagName = node.getTagName();
@@ -369,82 +445,6 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         event.setExecutor(executor);
         executor.sendEvent(event);
 //        System.out.println("finally pointcut!");
-    }
-
-    public static Object trimContextKeepAttribute(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (!(value instanceof Map)) {
-            return value;
-        }
-        Map<Object, Object> ret = new HashMap<>();
-        Map<?, ?> map = (Map<?, ?>) value;
-        for (Map.Entry<?, ?> entry : map.entrySet()) {
-            if (ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
-                continue;
-            }
-            ret.put(entry.getKey(), trimContextKeepAttribute(entry.getValue()));
-        }
-        return ret;
-    }
-
-    public static String getCallSnapshot(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        Stack<String> traceStack = executor.visitAs(ParamsConsts.TRACE_STACK, context);
-        String id = node.getTagAttrMap().get(AttrConsts.ID);
-        StringBuilder builder = new StringBuilder();
-        builder.append("call " + id).append("\n");
-        for (Map.Entry<String, Object> entry : context.entrySet()) {
-            if (ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
-                continue;
-            }
-            Object value = entry.getValue();
-            value = trimContextKeepAttribute(value);
-            builder.append("\targ:").append(entry.getKey()).append("==> ").append("(").append(value == null ? "null" : value.getClass().getName()).append(") :").append(value).append("\n");
-        }
-        builder.append("\n");
-
-        int stackSize = traceStack.size();
-        int printStackSize = 50;
-        ListIterator<String> iterator = traceStack.listIterator(stackSize);
-        for (int i = 0; i < printStackSize; i++) {
-            if (!iterator.hasPrevious()) {
-                break;
-            }
-            builder.append("\tat node ").append(iterator.previous()).append("\n");
-        }
-        if (iterator.hasPrevious()) {
-            builder.append("\t... ").append(stackSize - printStackSize).append(" common frames omitted\n");
-        }
-        return builder.toString();
-    }
-
-    public static void walkTree(XmlNode node, Consumer<XmlNode> consumer) {
-        if (node == null) {
-            return;
-        }
-        consumer.accept(node);
-        List<XmlNode> children = node.getChildren();
-        if (children == null || children.isEmpty()) {
-            return;
-        }
-        for (XmlNode item : children) {
-            walkTree(item, consumer);
-        }
-    }
-
-    public static String getNodeLocation(XmlNode node) {
-        if (node == null) {
-            return "";
-        }
-        return "" + node.getLocationFile() + ":" + node.getLocationLineNumber() + ":" + node.getTagName() + "";
-    }
-
-    public static String getTrackingComment(XmlNode node) {
-        if (node == null) {
-            return " ";
-        }
-        return " /* tracking at " + getNodeLocation(node) + " */ ";
     }
 
     public abstract void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor);

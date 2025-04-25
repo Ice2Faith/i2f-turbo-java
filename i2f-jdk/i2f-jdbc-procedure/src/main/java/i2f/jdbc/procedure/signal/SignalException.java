@@ -9,48 +9,50 @@ import i2f.jdbc.procedure.context.ContextHolder;
 public class SignalException extends RuntimeException {
     protected String message;
     protected String location;
-    protected boolean hasLogout=false;
+    protected boolean hasLogout = false;
+
     {
-        location= ContextHolder.TRACE_LOCATION.get()+":"+ContextHolder.TRACE_LINE.get();
+        location = ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get();
     }
+
     protected SignalException() {
     }
 
     protected SignalException(String message) {
         super(message);
-        this.message=message;
+        this.message = message;
     }
 
     protected SignalException(String message, Throwable cause) {
         super(message, cause);
-        this.message=message+" with cause by "+cause.getClass()+" : "+cause.getMessage();
+        this.message = message + " with cause by " + cause.getClass() + " : " + cause.getMessage();
     }
 
     protected SignalException(Throwable cause) {
         super(cause);
-        this.message="cause by "+cause.getClass()+" : "+cause.getMessage();
+        this.message = "cause by " + cause.getClass() + " : " + cause.getMessage();
     }
 
     protected SignalException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.message=message+" with cause by "+cause.getClass()+" : "+cause.getMessage();
-    }
-
-    public void setMessage(String message){
-        this.message=message;
+        this.message = message + " with cause by " + cause.getClass() + " : " + cause.getMessage();
     }
 
     @Override
     public String getMessage() {
-        return (message==null?super.getMessage():message)+" , location at "+location;
+        return (message == null ? super.getMessage() : message) + " , location at " + location;
     }
 
-    public boolean hasLogout(){
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public boolean hasLogout() {
         return this.hasLogout;
     }
 
-    public void setHasLogout(boolean hasLogout){
-        this.hasLogout=hasLogout;
+    public void setHasLogout(boolean hasLogout) {
+        this.hasLogout = hasLogout;
     }
 
 }

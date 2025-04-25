@@ -20,7 +20,7 @@ public class ScriptSegmentNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -29,13 +29,13 @@ public class ScriptSegmentNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String id = node.getTagAttrMap().get(AttrConsts.ID);
-        if(id==null || id.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.ID);
+        if (id == null || id.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.ID);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String id = node.getTagAttrMap().get(AttrConsts.ID);
         if (id != null && !id.isEmpty()) {
             executor.getContext().registry(id, ProcedureMeta.ofMeta(node));
