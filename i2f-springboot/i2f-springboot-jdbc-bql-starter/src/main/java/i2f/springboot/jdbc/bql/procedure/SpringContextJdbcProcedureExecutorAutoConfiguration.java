@@ -35,7 +35,7 @@ import java.util.Arrays;
  */
 @Slf4j
 @Data
-@ConditionalOnExpression("${jdbc.xml.procedure.enable:true}")
+@ConditionalOnExpression("${xproc4j.enable:true}")
 @Import({
         JdbcProcedureHelper.class
 })
@@ -48,14 +48,13 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @Autowired
     private SpringJdbcProcedureProperties jdbcProcedureProperties;
 
-
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
         log.info(XProc4jConsts.NAME + " config ...");
     }
 
-    @ConditionalOnExpression("${jdbc.xml.procedure.naming-context.enbale:true}")
+    @ConditionalOnExpression("${xproc4j.naming-context.enable:true}")
     @ConditionalOnMissingBean(INamingContext.class)
     @Bean
     public INamingContext namingContext() {
@@ -64,7 +63,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
-    @ConditionalOnExpression("${jdbc.xml.procedure.event-handler.enbale:true}")
+    @ConditionalOnExpression("${xproc4j.event-handler.enable:true}")
     @ConditionalOnMissingBean(XProc4jEventHandler.class)
     @Bean
     public XProc4jEventHandler xProc4jEventHandler(INamingContext namingContext) {
@@ -73,7 +72,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
-    @ConditionalOnExpression("${jdbc.xml.procedure.provider.xml-node.scan.enbale:true}")
+    @ConditionalOnExpression("${xproc4j.provider.xml-node.scan.enable:true}")
     @ConditionalOnMissingBean(JdbcProcedureXmlNodeMetaProvider.class)
     @Bean
     public JdbcProcedureXmlNodeMetaProvider jdbcProcedureNodeMapSupplier(
@@ -94,7 +93,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
-    @ConditionalOnExpression("${jdbc.xml.procedure.provider.java-caller.enbale:true}")
+    @ConditionalOnExpression("${xproc4j.provider.java-caller.enable:true}")
     @ConditionalOnMissingBean(JdbcProcedureJavaCallerMetaProvider.class)
     @Bean
     public JdbcProcedureJavaCallerMetaProvider jdbcProcedureJavaCallerMetaProvider(
@@ -110,7 +109,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
-    @ConditionalOnExpression("${jdbc.xml.procedure.provider.registry.enbale:true}")
+    @ConditionalOnExpression("${xproc4j.provider.registry.enable:true}")
     @ConditionalOnMissingBean(JdbcProcedureMetaProviderRegistry.class)
     @Bean
     public JdbcProcedureMetaProviderRegistry jdbcProcedureMetaProviderRegistry(
@@ -125,7 +124,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
-    @ConditionalOnExpression("${jdbc.xml.procedure.context.enbale:true}")
+    @ConditionalOnExpression("${xproc4j.context.enable:true}")
     @ConditionalOnMissingBean(JdbcProcedureContext.class)
     @Bean
     public JdbcProcedureContext procedureContext(JdbcProcedureMetaProviderRegistry registry,
@@ -140,7 +139,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
-    @ConditionalOnExpression("${jdbc.xml.procedure.executor.enbale:true}")
+    @ConditionalOnExpression("${xproc4j.executor.enable:true}")
     @ConditionalOnMissingBean(JdbcProcedureExecutor.class)
     @Bean
     public JdbcProcedureExecutor jdbcProcedureExecutor(JdbcProcedureContext context,
@@ -155,7 +154,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
-    @ConditionalOnExpression("${jdbc.xml.procedure.procedure-meta.grammar-reporter.enbale:true}")
+    @ConditionalOnExpression("${xproc4j.procedure-meta.grammar-reporter.enable:true}")
     @ConditionalOnMissingBean(ProcedureMetaMapGrammarReporterListener.class)
     @Bean
     public ProcedureMetaMapGrammarReporterListener procedureMetaMapGrammarReporterListener(JdbcProcedureExecutor executor) {

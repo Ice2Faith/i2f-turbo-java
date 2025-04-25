@@ -11,7 +11,7 @@
       "sourceType": "i2f.springboot.jdbc.bql.properties.JdbcProxyProperties"
     },
     {
-      "name": "i2f.jdbc.procedure",
+      "name": "xproc4j",
       "type": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
       "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties"
     }
@@ -67,18 +67,95 @@
       "defaultValue": true
     },
     {
-      "name": "i2f.jdbc.procedure.xml-locations",
+      "name": "xproc4j.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable auto-configuration for jdbc procedure.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.debug",
+      "type": "java.lang.Boolean",
+      "description": "whether enable debug log for jdbc procedure.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "xproc4j.report-on-boot",
+      "type": "java.lang.Boolean",
+      "description": "whether enable report grammar issue on boot for jdbc procedure.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.xml-locations",
       "type": "java.lang.String",
       "description": "whether enable auto-configuration for jdbc procedure xml locations.",
       "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
       "defaultValue": "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml"
     },
     {
-      "name": "i2f.jdbc.procedure.refresh-xml-interval-seconds",
+      "name": "xproc4j.refresh-xml-interval-seconds",
       "type": "java.lang.Long",
       "description": "whether enable auto-configuration for jdbc procedure refresh xml interval seconds.",
       "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
       "defaultValue": -1
+    },
+    {
+      "name": "xproc4j.naming-context.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean INamingContext.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.event-handler.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean XProc4jEventHandler.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.provider.xml-node.scan.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean JdbcProcedureXmlNodeMetaProvider.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.provider.java-caller.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean JdbcProcedureJavaCallerMetaProvider.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.provider.registry.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean JdbcProcedureMetaProviderRegistry.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.context.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean JdbcProcedureContext.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.executor.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean JdbcProcedureExecutor.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.procedure-meta.grammar-reporter.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean ProcedureMetaMapGrammarReporterListener.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
     }
   ],
   "hints": [
