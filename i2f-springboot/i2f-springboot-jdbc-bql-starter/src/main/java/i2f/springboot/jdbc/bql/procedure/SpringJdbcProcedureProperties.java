@@ -21,4 +21,6 @@ public class SpringJdbcProcedureProperties {
     private String xmlLocations = DEFAULT_XML_LOCATIONS;
 
     private long refreshXmlIntervalSeconds = -1;
+
+    private long slowSqlMinMillsSeconds=5000;
 }

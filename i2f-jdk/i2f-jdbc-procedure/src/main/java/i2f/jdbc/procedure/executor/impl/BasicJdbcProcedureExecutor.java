@@ -27,6 +27,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.executor.event.PreparedParamsEvent;
 import i2f.jdbc.procedure.executor.event.SlowSqlEvent;
+import i2f.jdbc.procedure.executor.event.SqlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
@@ -87,7 +88,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     protected volatile IEnvironment environment = new ListableDelegateEnvironment();
     protected volatile INamingContext namingContext = new ListableNamingContext();
     protected volatile XProc4jEventHandler eventHandler = new XProc4jEventHandler(() -> namingContext);
-    protected volatile long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(1);
+    protected volatile long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(5);
 
     {
         List<ExecutorNode> list = defaultExecutorNodes();
@@ -1234,6 +1235,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     }
 
     public void reportSlowSql(long useMillsSeconds, BindSql bql) {
+        if(true){
+            SqlExecUseTimeEvent event = new SqlExecUseTimeEvent();
+            event.setExecutor(this);
+            event.setUseMillsSeconds(useMillsSeconds);
+            event.setBql(bql);
+            event.setLocation(traceLocation());
+            publishEvent(event);
+        }
         if (useMillsSeconds >= slowSqlMinMillsSeconds) {
             logWarn("slow sql, use " + useMillsSeconds + "(ms) : " + bql);
             SlowSqlEvent event = new SlowSqlEvent();
