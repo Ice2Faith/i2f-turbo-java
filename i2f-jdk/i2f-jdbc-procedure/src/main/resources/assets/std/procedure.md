@@ -2257,6 +2257,203 @@ public class PreparedParamsEventListener implements XProc4jEventListener {
 - 具体通过查看源码，已确定是否是同步事件
 - 另外，事件的发送，会根据实际需要，慢慢迭代添加一些事件
 
+## IDEA(Jetbrains 系列IDE)插件支持
+- jdbc-procedure-plugin(或 xproc4j-plugin) 是针对 xproc4j 框架开发的一款适用于 Jetbrains 系列IDE的插件
+- 能够提供语法高亮和部分语法的自动补全提示
+- 插件设计的初衷
+  - 由于 xproc4j 框架是基于 XML 文件进行的语法拓展的脚本式解释执行框架
+  - 但是，由于默认是XML结果，导致在没有插件的情况下，仅依靠DTD对XML标签进行规范描述的情况下
+  - 不能对内嵌的SQL语句、脚本语言提供语法高亮和自动补全的能力
+  - 导致对于开发人员来说并不友好
+  - 对于编写和检查都带来一定的困扰
+  - 插件的主要目的就是为了解决这种情况而设计的
+  - 虽然，插件能够提供一部分能力，但是目前的插件并不能做到完全覆盖的场景
+  - 只针对大多数的情况予以支持
+  - 提供尽可能完善的语法高亮和补全能力
+- 插件的安装
+- 插件以jar包的形式提供
+```shell
+jdbc-procedure-plugin-1.0.jar
+```
+- 或者改为其他名字
+```shell
+xproc4j-plugin-1.0.jar
+```
+- 因为插件是基于Jetbrains系列的IDE框架进行开发的
+- 因此，使用于大部分的Jetbrains系列的IDE
+- 包括但不限于：IDEA(Java),WebStrom(Web),CLion(C/C++),DataGrip(Database)
+- 安装步骤
+- Menus -> Settings -> Plugin -> Setting(Icon) -> Install From Local Disk ... -> Choice this jar file
+- 菜单 -》设置 -》 插件 -》 设置（图标） -》 从本地磁盘安装。。。 -》 选择此jar包文件
+- 暗转完成后，在已安装的插件中搜索(procedure或xproc4j)看到插件即可
+- 在项目中新建一个XML文件
+```shell
+test.xml
+```
+- 文件内容为
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+
+<procedure id="test">
+    <lang-eval-java>
+      Date now=new Date();
+      return now;
+    </lang-eval-java>
+    <sql-query-object>
+      select sysdate from dual
+    </sql-query-object>
+    <lang-eval-ts>
+      v_cnt=0;
+      v_cnt=${v_cnt}+1;
+    </lang-eval-ts>
+</procedure>
+```
+- 能够看到语法正常高亮即可
+- 也就是关键字的语法高亮正常即可
+
+## 调试XML过程
+- 由于是对XML过程进行解析执行
+- IDE自带的调试功能是对Java代码进行调试的
+- 这带来了一定的麻烦和困扰
+- 但是，也并不是说调试非常困难和麻烦
+- 以上面的插件中的过程 test.xml 为例进行调试
+- 因为 test.xml 中的 procedure 根节点的 id 为 test
+- 所以过程的名称就是 test
+- 首先，在Java代码中调用此过程
+
+```java
+import i2f.springboot.jdbc.bql.procedure.JdbcProcedureHelper;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+public class TestDemo implements ApplicationRunner {
+
+  @Override
+  public void run(ApplicationArguments args) throws Exception {
+    Map<String, Object> ret = JdbcProcedureHelper.call("test", new HashMap<>());
+    System.out.println("ok");
+  }
+}
+```
+- 以上就是调试的入口代码
+- 这里借用 springboot 框架的 ApplicationRunner 来达到在项目启动时执行的目的
+- 这样在项目启动时，就会执行到代码
+- 执行的代码只有一句 JdbcProcedureHelper.call()
+- 这是在于 springboot 框架集成之后提供的静态方法调用
+- 当然也可以通过 @Autowired 注入 JdbcProcedureExecutor 对象，调用 call 方法
+- 这是一样的
+- 那么，就可以进行运行了
+- 为了更好地观测运行是的历史情况
+- 建议开启以下配置
+```yaml
+xproc4j:
+  debug: true
+```
+- 这样，将会打印一些日志，辅助调试
+- 但是，调试的目的是为了观测运行过程中的运行堆栈和变量值
+- 已确定运行状态是否正常
+- 因此，断点调试是一个常用的手段
+- 但是 XML 文件不支持打断点（以后插件更新，可能提供直接在XML中进行打断点的功能）
+- 所以，就需要结合Java的断点调试功能来实现
+- 一般情况下，只需要看运行到代码对应XML的行数即可
+- 也就是，如何知道目前运行到XML的哪一行了
+- 这有两种方式
+- 第一种，直接对源码的 AbstractExecutorNode.exec 方法进行断点即可
+- 此方法内部，具有一个location变量
+- 记录了当前即将运行的XML文件名和行号
+- 当然，也可以通过入参的 XmlNode 参数获取文件名和行号
+- 第二种，通过同步事件监听器，监听 XmlNodeExecEvent 事件
+- 这样，也能够得到当前即将运行的位置
+- 条件断点，这是一个比较常用的技巧
+- 因为，一般过程都比较长，嵌套调用更是比较常见
+- 那么就可以基于上述两种方法，进行在断点上添加条件
+- 下面举例一个条件
+```java
+location.startsWith("test.xml:5")
+```
+- 这样就能够得到条件在执行到 test.xml 的第5行的时候进行断点
+- 这里第5行，也就是 sql-query-object 标签执行的时候进行断点
+- 需要注意的是，行号并不是任意一行都行
+- 可行的行号是XML开始标签所在的行才行
+- 举个例子进行说明
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+
+<procedure id="test"> <!-- 可断点 -->
+    <lang-eval-java> <!-- 可断点 -->
+      Date now=new Date();
+      return now;
+    </lang-eval-java>
+    <sql-query-object> <!-- 可断点 -->
+      select sysdate from dual
+    </sql-query-object>
+    <lang-eval-ts> <!-- 可断点 -->
+      v_cnt=0;
+      v_cnt=${v_cnt}+1;
+    </lang-eval-ts>
+</procedure>
+```
+- 还有一种情况，想要从某一行开始往下继续运行的条件
+- 条件断点可以这样写
+```java
+location.startsWith("test.xml") && && node.getLocationLineNumber()>=5
+```
+- 这样，便可以从第5行之后的节点执行都会进行断点
+- 结合变量值断点
+- 因为框架运行时，都是以一个Map对象保存所有变量的
+- 因此，变量都保存在 context 这个Map里面
+- 所以，可以这样写条件断点
+```java
+location.startsWith("test.xml:5") && context.get("v_cnt")==null
+```
+- 当然，因为执行提供了 executor 对象，可以使用 executor 的一些方法辅助
+- 举个例子说明
+```java
+location.startsWith("test.xml:5") && (Integer) executor.visit("user.status",context)==1
+```
+- 还有一些情况，那就是接下来执行的节点可能是一段脚本
+- 比如，例子中的
+```xml
+<lang-eval-ts>
+  v_cnt=0;
+  v_cnt=${v_cnt}+1;
+</lang-eval-ts>
+```
+- 这种情况，因为内部是脚本，无法断点
+- 但是可能脚本比较长
+- 因此，可以使用 executor 进行辅助断点
+- 举个例子说明
+```java
+location.startsWith("test.xml:5") && (Integer) executor.evalScript("ts","v_cnt=0;v_cnt=${v_cnt}+1;",context)==1
+```
+- 当然，结合IDE提供的 Evaluate Expression 能力，在合适的断点上，提前运算判断下脚本运行的结果
+- 辅助判断运行情况，是更加的调试运行方式
+- 到这里，你已经会调试运行框架和自己的过程XML文件了
+- 最后，合理使用合适的 EventListener 监听器监听事件，可能更好地进行调试运行
+- 一些比较细节的情况上，你一般需要源码调试 BasicJdbcProcedureExecutor 类
+- 另外，针对一些指定类型XML节点的断点，可以直接对源码中 ExecutorNode 的实现类进行断点调试
+- 针对一些低级的语法错误，请打开以下配置
+- 以在项目启动后进行基础语法检查，请注意期间的 Warn 日志
+- 根据 Warn 日志调试XML过程
+```yaml
+xproc4j:
+  report-on-boot: true
+  procedure-meta:
+    grammar-reporter:
+      enable: true
+```
+- 注意，由于 debug 模式对性能的影响较大，因此只建议在调试时开启
+- 或者在开发/测试环境下使用
+- 启动检查，也只建议在开发/测试环境使用
+- 因为，会导致启动时间较长
+- 当然，这个根据你的中的过程数量来决定的
+- 特别是大型项目，启动时间就会更长，浪费在语法检查上
+
 ## 和其他框架集成
 
 - 默认情况下，是和springboot框架进行了继承
