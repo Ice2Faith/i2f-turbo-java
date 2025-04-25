@@ -24,7 +24,7 @@ public abstract class AbstractJdbcProcedureXmlNodeMetaCacheProvider
     protected AtomicBoolean refreshing = new AtomicBoolean(false);
 
     public AbstractJdbcProcedureXmlNodeMetaCacheProvider() {
-        super(new ConcurrentHashMap<>(), XProc4jConsts.NAME+"-node-map-refresher");
+        super(new ConcurrentHashMap<>(), XProc4jConsts.NAME + "-node-map-refresher");
     }
 
     @Override

@@ -17,37 +17,37 @@ public interface ParamsConsts {
     String BEANS = "beans";
 
     String DATASOURCES = "datasources";
-    String DATASOURCES_MAPPING="datasourcesMapping";
+    String DATASOURCES_MAPPING = "datasourcesMapping";
 
     String GLOBAL = "global";
 
-    String TRACE="trace";
-    String LOCATION="location";
-    String LINE="line";
-    String ERRMSG ="errmsg";
-    String NODE="node";
-    String STACK="stack";
-    String CALLS="calls";
-    String ERRORS="errors";
+    String TRACE = "trace";
+    String LOCATION = "location";
+    String LINE = "line";
+    String ERRMSG = "errmsg";
+    String NODE = "node";
+    String STACK = "stack";
+    String CALLS = "calls";
+    String ERRORS = "errors";
 
-    String TRACE_LOCATION=TRACE+"."+LOCATION;
-    String TRACE_LINE=TRACE+"."+LINE;
-    String TRACE_ERRMSG =TRACE+"."+ ERRMSG;
-    String TRACE_NODE=TRACE+"."+NODE;
-    String TRACE_STACK=TRACE+"."+STACK;
-    String TRACE_CALLS=TRACE+"."+CALLS;
-    String TRACE_ERRORS=TRACE+"."+ERRORS;
+    String TRACE_LOCATION = TRACE + "." + LOCATION;
+    String TRACE_LINE = TRACE + "." + LINE;
+    String TRACE_ERRMSG = TRACE + "." + ERRMSG;
+    String TRACE_NODE = TRACE + "." + NODE;
+    String TRACE_STACK = TRACE + "." + STACK;
+    String TRACE_CALLS = TRACE + "." + CALLS;
+    String TRACE_ERRORS = TRACE + "." + ERRORS;
 
     // 局部工具部分
-    String EXECUTOR="executor";
+    String EXECUTOR = "executor";
 
     // LruMap对象
     // 回话级别LRU对象
-    String LRU ="lru";
+    String LRU = "lru";
     // 执行器实例级别LRU对象
-    String EXECUTOR_LRU ="executorLru";
+    String EXECUTOR_LRU = "executorLru";
     // 静态变量级别LRU对象
-    String STATIC_LRU="staticLru";
+    String STATIC_LRU = "staticLru";
 
 
     // 连接部分
@@ -55,10 +55,10 @@ public interface ParamsConsts {
     String DEFAULT_DATASOURCE = "primary";
 
     // 返回值
-    String RETURN="return";
+    String RETURN = "return";
 
     // 这些值，将会始终保存在上下文中，也就是每个params中都应该存在这些键值
-    String[] KEEP_NAMES={
+    String[] KEEP_NAMES = {
             CONTEXT,
             ENVIRONMENT,
             BEANS,
@@ -79,5 +79,5 @@ public interface ParamsConsts {
             STATIC_LRU,
     };
 
-    Set<String> KEEP_NAME_SET= Collections.unmodifiableSet(new HashSet<>(Arrays.asList(KEEP_NAMES)));
+    Set<String> KEEP_NAME_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(KEEP_NAMES)));
 }

@@ -4,7 +4,6 @@ import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.spring.core.SpringContext;
 import i2f.spring.enviroment.SpringEnvironment;
 import lombok.Data;
@@ -20,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -31,46 +29,47 @@ import java.util.function.Supplier;
 @NoArgsConstructor
 public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExecutor {
     protected static final Logger log = LoggerFactory.getLogger(SpringContextJdbcProcedureExecutor.class);
-    protected static final AtomicBoolean hasApplyNodes = new AtomicBoolean(false);
-
 
     public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context, ApplicationContext applicationContext) {
-        super(context,new SpringEnvironment(applicationContext.getEnvironment()),new SpringContext(applicationContext));
+        super(context, new SpringEnvironment(applicationContext.getEnvironment()), new SpringContext(applicationContext));
     }
 
     public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context, ApplicationContext applicationContext, Environment environment) {
-        super(context,new SpringEnvironment(environment),new SpringContext(applicationContext));
+        super(context, new SpringEnvironment(environment), new SpringContext(applicationContext));
     }
 
-    public void applyNodeExecutorComponents(){
-        List<Object> beansList = getNamingContext().getAllBeans();
-        for (Object bean : beansList) {
-            if(bean instanceof ExecutorNode){
-                this.nodes.add(0,(ExecutorNode) bean);
+    public static void detectPrimaryDatasource(Map<String, DataSource> ret) {
+        if (ret.isEmpty()) {
+            return;
+        }
+        DataSource primary = ret.get(ParamsConsts.DEFAULT_DATASOURCE);
+        if (primary == null) {
+            List<String> defaultNames = Arrays.asList("primary", "master", "main", "default", "leader");
+            for (Map.Entry<String, DataSource> entry : ret.entrySet()) {
+                String name = entry.getKey();
+                if (defaultNames.contains(name)) {
+                    ret.put(ParamsConsts.DEFAULT_DATASOURCE, entry.getValue());
+                    return;
+                }
+                name = name.toLowerCase();
+                if (defaultNames.contains(name)) {
+                    ret.put(ParamsConsts.DEFAULT_DATASOURCE, entry.getValue());
+                    return;
+                }
+            }
+            if (ret.size() == 1) {
+                ret.put(ParamsConsts.DEFAULT_DATASOURCE, ret.get(ret.keySet().iterator().next()));
+                return;
             }
         }
     }
 
     @Override
-    public List<ExecutorNode> getNodes() {
-        if (!hasApplyNodes.getAndSet(true)) {
-            applyNodeExecutorComponents();
-        }
-        return super.getNodes();
-    }
-
-    @Override
     public Map<String, Object> createParams() {
         Map<String, Object> ret = super.createParams();
-        ret.put(ParamsConsts.CONTEXT, getNamingContext());
-        ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
-
-        Map<String, Object> beanMap = getNamingContext().getAllBeansMap();
-        Map<String,Object> retBeanMap =(Map<String,Object>) ret.computeIfAbsent(ParamsConsts.BEANS, (key) -> new HashMap<>());
-        retBeanMap.putAll(beanMap);
 
         Map<String, DataSource> datasourceMap = getDatasourceMap();
-        Map<String,Object> retDatasourceMap =(Map<String,Object>) ret.computeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
+        Map<String, Object> retDatasourceMap = (Map<String, Object>) ret.computeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
         retDatasourceMap.putAll(datasourceMap);
 
         return ret;
@@ -84,8 +83,8 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
                 Map<Object, DataSource> dataSources = bean.getResolvedDataSources();
                 for (Map.Entry<Object, DataSource> entry : dataSources.entrySet()) {
                     String name = String.valueOf(entry.getKey());
-                    if(name.toLowerCase().endsWith("datasource")){
-                        name=name.substring(0,name.length()-"datasource".length());
+                    if (name.toLowerCase().endsWith("datasource")) {
+                        name = name.substring(0, name.length() - "datasource".length());
                     }
                     ret.put(name, entry.getValue());
                 }
@@ -101,50 +100,23 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
             return ret;
         } catch (Exception e) {
         }
-        try{
+        try {
             Map<String, DataSource> ret = new HashMap<>();
             Map<String, DataSource> dataSources = getNamingContext().getBeansMap(DataSource.class);
             for (Map.Entry<String, DataSource> entry : dataSources.entrySet()) {
                 String name = entry.getKey();
-                if(name.toLowerCase().endsWith("datasource")){
-                    name=name.substring(0,name.length()-"datasource".length());
+                if (name.toLowerCase().endsWith("datasource")) {
+                    name = name.substring(0, name.length() - "datasource".length());
                 }
                 ret.put(name, entry.getValue());
             }
             detectPrimaryDatasource(ret);
             return ret;
-        }catch(Exception e){
+        } catch (Exception e) {
 
         }
         return new HashMap<>();
     }
-
-    public static void detectPrimaryDatasource(Map<String, DataSource> ret) {
-        if(ret.isEmpty()){
-            return;
-        }
-        DataSource primary = ret.get(ParamsConsts.DEFAULT_DATASOURCE);
-        if(primary==null){
-            List<String> defaultNames=Arrays.asList("primary","master","main","default","leader");
-            for (Map.Entry<String, DataSource> entry : ret.entrySet()) {
-                String name = entry.getKey();
-                if(defaultNames.contains(name)){
-                    ret.put(ParamsConsts.DEFAULT_DATASOURCE,entry.getValue());
-                    return;
-                }
-                name=name.toLowerCase();
-                if(defaultNames.contains(name)){
-                    ret.put(ParamsConsts.DEFAULT_DATASOURCE,entry.getValue());
-                    return;
-                }
-            }
-            if(ret.size()==1){
-                ret.put(ParamsConsts.DEFAULT_DATASOURCE,ret.get(ret.keySet().iterator().next()));
-                return;
-            }
-        }
-    }
-
 
     @Override
     public void logDebug(Supplier<Object> supplier) {
@@ -155,39 +127,39 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
 
     @Override
     public void logDebug(Object obj) {
-        if(isDebug()){
-            String location=traceLocation();
-            log.debug("near "+location+", msg: "+obj);
+        if (isDebug()) {
+            String location = traceLocation();
+            log.debug("near " + location + ", msg: " + obj);
         }
     }
 
     @Override
     public void logInfo(Supplier<Object> supplier, Throwable e) {
-        String location=traceLocation();
+        String location = traceLocation();
         if (e != null) {
-            log.info("near "+location+", msg: "+supplier.get(), e);
+            log.info("near " + location + ", msg: " + supplier.get(), e);
         } else {
-            log.info("near "+location+", msg: "+supplier.get());
+            log.info("near " + location + ", msg: " + supplier.get());
         }
     }
 
     @Override
     public void logWarn(Supplier<Object> supplier, Throwable e) {
-        String location=traceLocation();
+        String location = traceLocation();
         if (e != null) {
-            log.warn("near "+location+", msg: "+supplier.get(), e);
+            log.warn("near " + location + ", msg: " + supplier.get(), e);
         } else {
-            log.warn("near "+location+", msg: "+supplier.get());
+            log.warn("near " + location + ", msg: " + supplier.get());
         }
     }
 
     @Override
     public void logError(Supplier<Object> supplier, Throwable e) {
-        String location=traceLocation();
+        String location = traceLocation();
         if (e != null) {
-            log.error("near "+location+", msg: "+supplier.get(), e);
+            log.error("near " + location + ", msg: " + supplier.get(), e);
         } else {
-            log.error("near "+location+", msg: "+supplier.get());
+            log.error("near " + location + ", msg: " + supplier.get());
         }
     }
 

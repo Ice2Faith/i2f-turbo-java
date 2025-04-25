@@ -21,28 +21,28 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         boolean await = executor.toBoolean(executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context));
 
         List<XmlNode> children = node.getChildren();
-        if(children==null || children.isEmpty()){
+        if (children == null || children.isEmpty()) {
             return;
         }
         CountDownLatch latch = new CountDownLatch(children.size());
         for (XmlNode item : children) {
-            final XmlNode itemNode=item;
+            final XmlNode itemNode = item;
             new Thread(() -> {
                 try {
-                    if(TagConsts.LANG_ASYNC.equals(node.getTagName())){
+                    if (TagConsts.LANG_ASYNC.equals(node.getTagName())) {
                         Map<String, Object> map = executor.exec(itemNode, context, false, false);
-                    }else{
+                    } else {
                         Map<String, Object> map = executor.execAsProcedure(itemNode, context, false, false);
                     }
                 } catch (Throwable e) {

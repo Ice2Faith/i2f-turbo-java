@@ -18,7 +18,7 @@ public interface JdbcProcedureXmlNodeMetaProvider extends JdbcProcedureMetaProvi
 
     @Override
     default Map<String, ProcedureMeta> getMetaMap() {
-        Map<String,ProcedureMeta> metaMap=new LinkedHashMap<>();
+        Map<String, ProcedureMeta> metaMap = new LinkedHashMap<>();
         Map<String, XmlNode> nodeMap = getNodeMap();
         if (nodeMap != null) {
             for (Map.Entry<String, XmlNode> entry : nodeMap.entrySet()) {

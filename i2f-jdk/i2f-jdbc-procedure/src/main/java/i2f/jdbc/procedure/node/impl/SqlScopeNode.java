@@ -25,7 +25,7 @@ public class SqlScopeNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -34,16 +34,16 @@ public class SqlScopeNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String datasources = node.getTagAttrMap().get(AttrConsts.DATASOURCES);
-        if(datasources==null || datasources.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.DATASOURCES);
+        if (datasources == null || datasources.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.DATASOURCES);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String datasources = node.getTagAttrMap().get(AttrConsts.DATASOURCES);
         String[] arr = datasources.split(",");
-        Map<String, DataSource> datasourceMap = (Map<String, DataSource>)context.computeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
+        Map<String, DataSource> datasourceMap = (Map<String, DataSource>) context.computeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
         Set<String> targets = new HashSet<>();
         for (String item : arr) {
             if ("all".equals(item)) {
@@ -53,7 +53,7 @@ public class SqlScopeNode extends AbstractExecutorNode {
                 targets.add(item);
             }
         }
-        Map<String, Connection> originConnMap = (Map<String, Connection>)context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
+        Map<String, Connection> originConnMap = (Map<String, Connection>) context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
         Map<String, Connection> bakConnMap = new HashMap<>();
         for (String name : targets) {
             Connection conn = originConnMap.get(name);

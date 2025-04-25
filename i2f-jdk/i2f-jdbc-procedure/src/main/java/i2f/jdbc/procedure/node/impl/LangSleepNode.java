@@ -21,7 +21,7 @@ public class LangSleepNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -30,14 +30,14 @@ public class LangSleepNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String timeout = node.getTagAttrMap().get(AttrConsts.TIMEOUT);
-        if(timeout==null || timeout.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.TIMEOUT);
+        if (timeout == null || timeout.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.TIMEOUT);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        long timeout = executor.convertAs(executor.attrValue(AttrConsts.TIMEOUT, FeatureConsts.LONG, node, context),Long.class);
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        long timeout = executor.convertAs(executor.attrValue(AttrConsts.TIMEOUT, FeatureConsts.LONG, node, context), Long.class);
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
         try {
             if (timeout >= 0) {

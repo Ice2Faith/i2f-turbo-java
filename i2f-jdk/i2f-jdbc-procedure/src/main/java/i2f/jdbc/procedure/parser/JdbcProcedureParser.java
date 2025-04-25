@@ -98,14 +98,14 @@ public class JdbcProcedureParser {
         }
     }
 
-    public static Map.Entry<String,List<String>> parseAttrFeatures(String key){
+    public static Map.Entry<String, List<String>> parseAttrFeatures(String key) {
         String[] arr = key.split("\\.");
-        String name=arr[0];
-        List<String> features=new ArrayList<>();
+        String name = arr[0];
+        List<String> features = new ArrayList<>();
         for (int i = 1; i < arr.length; i++) {
             features.add(arr[i]);
         }
-        return new AbstractMap.SimpleEntry<>(name,features);
+        return new AbstractMap.SimpleEntry<>(name, features);
     }
 
     public static XmlNode parseNode(Xml node) throws Exception {

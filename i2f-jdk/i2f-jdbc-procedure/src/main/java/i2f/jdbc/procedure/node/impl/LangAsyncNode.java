@@ -22,14 +22,14 @@ public class LangAsyncNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         boolean await = executor.toBoolean(executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context));
         Long delay = (Long) executor.attrValue(AttrConsts.DELAY, FeatureConsts.LONG, node, context);
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
@@ -37,7 +37,7 @@ public class LangAsyncNode extends AbstractExecutorNode {
         CountDownLatch latch = new CountDownLatch(1);
         Thread thread = new Thread(() -> {
             try {
-                if (delay != null&& delay>=0) {
+                if (delay != null && delay >= 0) {
                     try {
                         Thread.sleep(delayUnit.toMillis(delay));
                     } catch (Exception e) {

@@ -32,7 +32,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -42,7 +42,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         List<XmlNode> children = node.getChildren();
         if (children == null || children.isEmpty()) {
-            warnPoster.accept(TAG_NAME+" missing child element");
+            warnPoster.accept(TAG_NAME + " missing child element");
             return;
         }
         XmlNode queryNode = null;
@@ -73,16 +73,16 @@ public class SqlEtlNode extends AbstractExecutorNode {
         }
 
         if (queryNode == null && extraNode == null) {
-            warnPoster.accept(TAG_NAME+" missing elt query node "+SqlQueryListNode.TAG_NAME+"/etl-extra child element");
+            warnPoster.accept(TAG_NAME + " missing elt query node " + SqlQueryListNode.TAG_NAME + "/etl-extra child element");
         }
 
         if (loadNode == null) {
-            warnPoster.accept(TAG_NAME+" missing etl load node etl-load child element");
+            warnPoster.accept(TAG_NAME + " missing etl load node etl-load child element");
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
         if (children == null || children.isEmpty()) {
             return;
@@ -123,10 +123,10 @@ public class SqlEtlNode extends AbstractExecutorNode {
         }
 
 
-        Integer readBatchSize = executor.convertAs(executor.attrValue(AttrConsts.READ_BATCH_SIZE, FeatureConsts.INT, node, context),Integer.class);
-        Integer writeBatchSize = executor.convertAs(executor.attrValue(AttrConsts.WRITE_BATCH_SIZE, FeatureConsts.INT, node, context),Integer.class);
-        boolean beforeTruncate = executor.toBoolean( executor.attrValue(AttrConsts.BEFORE_TRUNCATE, FeatureConsts.BOOLEAN, node, context));
-        Integer commitSize = executor.convertAs(executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context),Integer.class);
+        Integer readBatchSize = executor.convertAs(executor.attrValue(AttrConsts.READ_BATCH_SIZE, FeatureConsts.INT, node, context), Integer.class);
+        Integer writeBatchSize = executor.convertAs(executor.attrValue(AttrConsts.WRITE_BATCH_SIZE, FeatureConsts.INT, node, context), Integer.class);
+        boolean beforeTruncate = executor.toBoolean(executor.attrValue(AttrConsts.BEFORE_TRUNCATE, FeatureConsts.BOOLEAN, node, context));
+        Integer commitSize = executor.convertAs(executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context), Integer.class);
         if (readBatchSize == null) {
             readBatchSize = 2000;
         }
@@ -144,7 +144,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
         Class<?> resultType = Map.class;
         String extraDatasource = null;
-        BindSql bql=null;
+        BindSql bql = null;
         if (queryNode != null) {
             extraDatasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, queryNode, context);
             bql = SqlDialect.getSqlDialectList(extraDatasource, queryNode, context, executor);
@@ -162,8 +162,8 @@ public class SqlEtlNode extends AbstractExecutorNode {
         }
 
 
-        Map<String, Connection> bakConn = (Map<String,Connection>)context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key -> new HashMap<>()));
-        executor.visitSet(context,ParamsConsts.CONNECTIONS, new HashMap<>());
+        Map<String, Connection> bakConn = (Map<String, Connection>) context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key -> new HashMap<>()));
+        executor.visitSet(context, ParamsConsts.CONNECTIONS, new HashMap<>());
         try {
             executor.sqlTransNone(extraDatasource, context);
             executor.sqlTransBegin(loadDatasource, Connection.TRANSACTION_READ_COMMITTED, context);
@@ -183,8 +183,8 @@ public class SqlEtlNode extends AbstractExecutorNode {
             String loadSql = "";
 
 
-            if(executor.isDebug()){
-                bql=bql.concat(getTrackingComment(node));
+            if (executor.isDebug()) {
+                bql = bql.concat(getTrackingComment(node));
             }
 
             int pageIndex = 0;
@@ -192,13 +192,13 @@ public class SqlEtlNode extends AbstractExecutorNode {
             while (true) {
                 List<?> list = executor.sqlQueryPage(extraDatasource, bql, context, resultType, new ApiPage(pageIndex, readBatchSize));
                 if (list.isEmpty()) {
-                    if(executor.isDebug()) {
+                    if (executor.isDebug()) {
                         executor.logDebug("no data found! at " + getNodeLocation(node));
                     }
                     break;
                 }
 
-                if(executor.isDebug()) {
+                if (executor.isDebug()) {
                     executor.logDebug("found batch data! at " + getNodeLocation(node));
                 }
 
@@ -366,7 +366,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
             executor.sqlTransRollback(loadDatasource, context);
             throw new ThrowSignalException(e.getMessage(), e);
         } finally {
-            Map<String, Connection> conns = (Map<String, Connection>)context.get(ParamsConsts.CONNECTIONS);
+            Map<String, Connection> conns = (Map<String, Connection>) context.get(ParamsConsts.CONNECTIONS);
             for (Map.Entry<String, Connection> entry : conns.entrySet()) {
                 Connection conn = entry.getValue();
                 if (conn != null) {
@@ -379,7 +379,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 }
             }
 
-            executor.visitSet(context,ParamsConsts.CONNECTIONS, bakConn);
+            executor.visitSet(context, ParamsConsts.CONNECTIONS, bakConn);
         }
 
     }

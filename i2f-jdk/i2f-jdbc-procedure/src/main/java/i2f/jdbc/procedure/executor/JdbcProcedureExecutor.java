@@ -124,7 +124,7 @@ public interface JdbcProcedureExecutor {
         return new MapBuilder<>(new HashMap<>(), String.class, Object.class);
     }
 
-    default MapBuilder<String, Object, ? extends Map<String, Object>> mapBuilder(Map<String,Object> map) {
+    default MapBuilder<String, Object, ? extends Map<String, Object>> mapBuilder(Map<String, Object> map) {
         return new MapBuilder<>(map, String.class, Object.class);
     }
 
@@ -257,7 +257,7 @@ public interface JdbcProcedureExecutor {
     Object resultValue(Object value, List<String> features, XmlNode node, Map<String, Object> params);
 
     boolean toBoolean(Object obj);
-    
+
     void debug(boolean enable);
 
     boolean isDebug();
@@ -324,7 +324,7 @@ public interface JdbcProcedureExecutor {
 
     Object eval(String script, Object params);
 
-    Object evalScript(String lang,String script,Map<String,Object> params);
+    Object evalScript(String lang, String script, Map<String, Object> params);
 
     void visitSet(Map<String, Object> params, String result, Object value);
 

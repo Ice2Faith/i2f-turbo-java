@@ -20,18 +20,18 @@ public class LangReturnNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
-        if(value!=null){
+        if (value != null) {
             Object val = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
-            executor.visitSet(context,ParamsConsts.RETURN,val);
+            executor.visitSet(context, ParamsConsts.RETURN, val);
         }
         throw new ReturnSignalException();
     }

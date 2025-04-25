@@ -21,7 +21,7 @@ public class LangChooseNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -30,21 +30,21 @@ public class LangChooseNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         List<XmlNode> list = node.getChildren();
-        if(list==null ||list.isEmpty()){
+        if (list == null || list.isEmpty()) {
             return;
         }
         for (XmlNode itemNode : list) {
             XmlNode.NodeType type = itemNode.getNodeType();
-            if (XmlNode.NodeType.ELEMENT !=type) {
+            if (XmlNode.NodeType.ELEMENT != type) {
                 continue;
             }
             if (TagConsts.LANG_WHEN.equals(itemNode.getTagName())) {
-                String test=itemNode.getTagAttrMap().get(AttrConsts.TEST);
-                if(test!=null && !test.isEmpty()) {
+                String test = itemNode.getTagAttrMap().get(AttrConsts.TEST);
+                if (test != null && !test.isEmpty()) {
                     try {
-                        GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST,node,FeatureConsts.EVAL,warnPoster);
+                        GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST, node, FeatureConsts.EVAL, warnPoster);
                     } catch (Exception e) {
-                        warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST+"["+test+"]"+" expression maybe wrong!");
+                        warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST + "[" + test + "]" + " expression maybe wrong!");
                     }
                 }
             }
@@ -52,16 +52,16 @@ public class LangChooseNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         List<XmlNode> list = node.getChildren();
-        if(list==null ||list.isEmpty()){
+        if (list == null || list.isEmpty()) {
             return;
         }
         XmlNode testNode = null;
         XmlNode otherNode = null;
         for (XmlNode itemNode : list) {
             XmlNode.NodeType type = itemNode.getNodeType();
-            if (XmlNode.NodeType.ELEMENT !=type) {
+            if (XmlNode.NodeType.ELEMENT != type) {
                 continue;
             }
             if (TagConsts.LANG_WHEN.equals(itemNode.getTagName())) {

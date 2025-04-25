@@ -15,16 +15,19 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class XmlNodeExecEvent extends ExecutorContextEvent {
-    public static enum Type{
+    protected Type type;
+
+    ;
+    protected ExecutorNode executorNode;
+    protected Map<String, Object> pointContext;
+    protected XmlNode node;
+    protected Throwable throwable;
+
+    public static enum Type {
         BEFORE,
         AFTER,
         THROWING,
         FINALLY
-    };
-    protected Type type;
-    protected ExecutorNode executorNode;
-    protected Map<String,Object> pointContext;
-    protected XmlNode node;
-    protected Throwable throwable;
+    }
 
 }

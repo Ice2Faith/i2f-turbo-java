@@ -20,7 +20,7 @@ public class LangLatchNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -29,14 +29,14 @@ public class LangLatchNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String count = node.getTagAttrMap().get(AttrConsts.COUNT);
-        if(count==null || count.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.COUNT);
+        if (count == null || count.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.COUNT);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
-        int count = executor.convertAs(executor.attrValue(AttrConsts.COUNT, FeatureConsts.EVAL, node, context),Integer.class);
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        int count = executor.convertAs(executor.attrValue(AttrConsts.COUNT, FeatureConsts.EVAL, node, context), Integer.class);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {
             CountDownLatch latch = new CountDownLatch(count);

@@ -9,5 +9,5 @@ import java.util.Map;
 @FunctionalInterface
 public interface JdbcProcedureJavaCaller {
 
-    Object exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable;
+    Object exec(JdbcProcedureExecutor executor, Map<String, Object> params) throws Throwable;
 }

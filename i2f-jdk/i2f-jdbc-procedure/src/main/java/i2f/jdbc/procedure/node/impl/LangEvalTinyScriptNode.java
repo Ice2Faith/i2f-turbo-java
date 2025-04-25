@@ -32,18 +32,40 @@ import java.util.stream.Collectors;
 public class LangEvalTinyScriptNode extends AbstractExecutorNode implements EvalScriptProvider {
     public static final String TAG_NAME = TagConsts.LANG_EVAL_TINYSCRIPT;
     public static final String ALIAS_TAG_NAME = TagConsts.LANG_EVAL_TS;
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
         /*language=tinyscript*/
-        String script= "${a}+${b}";
-        Map<String,Object> context=new HashMap<>();
-        context.put("a",1);
-        context.put("b",2.5);
-        Object obj =evalTinyScript(script,context,null);
+        String script = "${a}+${b}";
+        Map<String, Object> context = new HashMap<>();
+        context.put("a", 1);
+        context.put("b", 2.5);
+        Object obj = evalTinyScript(script, context, null);
         System.out.println(obj);
     }
+
+    public static Object evalTinyScript(String script, Object context, JdbcProcedureExecutor executor) {
+
+        Object obj = null;
+
+        try {
+            TinyScriptResolver resolver = null;
+            if (executor != null) {
+                resolver = new ProcedureTinyScriptResolver(executor);
+            }
+            obj = TinyScript.script(script, context, resolver);
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        }
+        return obj;
+    }
+
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName())
@@ -53,13 +75,13 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String script = node.getTextBody();
-        if(script!=null && !script.isEmpty()) {
+        if (script != null && !script.isEmpty()) {
             GrammarReporter.reportExprFeatureGrammar(script, FeatureConsts.EVAL_TINYSCRIPT, node, "element body ", warnPoster);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         String script = node.getTextBody();
         Object obj = evalTinyScript(script, context, executor);
@@ -73,32 +95,12 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
 
     @Override
     public boolean support(String lang) {
-        return Arrays.asList(LangConsts.TINYSCRIPT,LangConsts.TS).contains(lang);
+        return Arrays.asList(LangConsts.TINYSCRIPT, LangConsts.TS).contains(lang);
     }
 
     @Override
     public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
-        Object obj=evalTinyScript(script,params,executor);
-        return obj;
-    }
-
-    public static Object evalTinyScript(String script, Object context, JdbcProcedureExecutor executor) {
-
-        Object obj = null;
-
-        try {
-            TinyScriptResolver resolver = null;
-            if(executor!=null){
-                resolver=new ProcedureTinyScriptResolver(executor);
-            }
-            obj = TinyScript.script(script, context, resolver);
-        } catch (Exception e) {
-            if (e instanceof SignalException) {
-                throw (SignalException) e;
-            }else {
-                throw new IllegalStateException(e.getMessage(), e);
-            }
-        }
+        Object obj = evalTinyScript(script, params, executor);
         return obj;
     }
 
@@ -117,8 +119,8 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         }
 
         @Override
-        public void openDebugger(Object context,String tag,  String conditionExpression) {
-            executor.openDebugger("tiny-script:"+tag, context, conditionExpression);
+        public void openDebugger(Object context, String tag, String conditionExpression) {
+            executor.openDebugger("tiny-script:" + tag, context, conditionExpression);
         }
 
         @Override
@@ -132,33 +134,33 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         }
 
         @Override
-        public Class<?> loadClass(Object context,String className) {
+        public Class<?> loadClass(Object context, String className) {
             return executor.loadClass(className);
         }
 
         @Override
-        public Reference<Object> beforeFunctionCall(Object context,Object target, boolean isNew, String naming, List<Object> argList) {
+        public Reference<Object> beforeFunctionCall(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
             try {
                 ProcedureMeta meta = executor.getMeta(naming);
                 if (meta == null) {
                     return Reference.nop();
                 }
 
-                Map<String, Object> callParams= executor.newParams((Map<String,Object>)context);
+                Map<String, Object> callParams = executor.newParams((Map<String, Object>) context);
 
-                 Map<String,Object> argsMap= castArgumentListAsNamingMap(context,argList);
-                if(argsMap.isEmpty()){
-                    List<String> arguments = meta.getArguments().stream().filter(e->!Arrays.asList(
-                            AttrConsts.ID,AttrConsts.REFID,
-                            AttrConsts.RESULT,ParamsConsts.RETURN
+                Map<String, Object> argsMap = castArgumentListAsNamingMap(context, argList);
+                if (argsMap.isEmpty()) {
+                    List<String> arguments = meta.getArguments().stream().filter(e -> !Arrays.asList(
+                            AttrConsts.ID, AttrConsts.REFID,
+                            AttrConsts.RESULT, ParamsConsts.RETURN
                     ).contains(e)).collect(Collectors.toList());
                     for (int i = 0; i < argList.size(); i++) {
-                        if(i>=arguments.size()){
+                        if (i >= arguments.size()) {
                             break;
                         }
                         String name = arguments.get(i);
                         Object val = argList.get(i);
-                        argsMap.put(name,val);
+                        argsMap.put(name, val);
                     }
                 }
 
@@ -167,7 +169,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 Map<String, Object> ret = executor.exec(naming, callParams, false, false);
                 if (ret.containsKey(ParamsConsts.RETURN)) {
                     Object val = ret.get(ParamsConsts.RETURN);
-                    if(val instanceof Reference){
+                    if (val instanceof Reference) {
                         return (Reference<Object>) val;
                     }
                     return Reference.of(val);
@@ -179,7 +181,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         }
 
         @Override
-        public IMethod findMethod(Object context,String naming, List<Object> args) {
+        public IMethod findMethod(Object context, String naming, List<Object> args) {
             List<IMethod> list = ContextHolder.INVOKE_METHOD_MAP.get(naming);
             if (list != null && !list.isEmpty()) {
                 IMethod method = ReflectResolver.matchExecMethod(list, args);
@@ -188,11 +190,11 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 }
             }
 
-            return super.findMethod(context,naming, args);
+            return super.findMethod(context, naming, args);
         }
 
         @Override
-        public String renderString(Object context,String text) {
+        public String renderString(Object context, String text) {
             return executor.render(text, (Map<String, Object>) context);
         }
     }

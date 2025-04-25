@@ -21,10 +21,10 @@ import java.util.function.Supplier;
 @Data
 @NoArgsConstructor
 public class XProc4jEventHandler {
-    protected volatile Supplier<INamingContext> namingContextSupplier;
-    protected final AtomicBoolean initialWithContext=new AtomicBoolean(false);
+    protected final AtomicBoolean initialWithContext = new AtomicBoolean(false);
     protected final CopyOnWriteArrayList<XProc4jEventListener> listeners = new CopyOnWriteArrayList<>();
     protected final Deque<XProc4jEvent> queue = new LinkedBlockingDeque<>();
+    protected volatile Supplier<INamingContext> namingContextSupplier;
 
     {
         Thread thread = new Thread(() -> {
@@ -35,17 +35,17 @@ public class XProc4jEventHandler {
         thread.start();
     }
 
-    public XProc4jEventHandler(Supplier<INamingContext> namingContextSupplier,XProc4jEventListener ... listeners) {
+    public XProc4jEventHandler(Supplier<INamingContext> namingContextSupplier, XProc4jEventListener... listeners) {
         this.namingContextSupplier = namingContextSupplier;
         for (XProc4jEventListener listener : listeners) {
             listen(listener);
         }
     }
 
-    public List<XProc4jEventListener> getListeners(){
-        if(namingContextSupplier!=null) {
+    public List<XProc4jEventListener> getListeners() {
+        if (namingContextSupplier != null) {
             INamingContext namingContext = namingContextSupplier.get();
-            if(namingContext!=null) {
+            if (namingContext != null) {
                 if (!initialWithContext.getAndSet(true)) {
                     Map<String, XProc4jEventListener> beans = namingContext.getBeansMap(XProc4jEventListener.class);
                     for (Map.Entry<String, XProc4jEventListener> entry : beans.entrySet()) {
@@ -57,8 +57,8 @@ public class XProc4jEventHandler {
         return this.listeners;
     }
 
-    public void listen(XProc4jEventListener listener){
-        listen(listener,-1);
+    public void listen(XProc4jEventListener listener) {
+        listen(listener, -1);
     }
 
     public synchronized void listen(XProc4jEventListener listener, int index) {
@@ -98,7 +98,7 @@ public class XProc4jEventHandler {
                 XProc4jEvent event = queue.poll();
                 if (event != null) {
                     dispatch(event);
-                }else{
+                } else {
                     Thread.sleep(1);
                 }
             } catch (Throwable e) {

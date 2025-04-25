@@ -40,7 +40,7 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
         } catch (Exception e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
-            }else {
+            } else {
                 throw new ThrowSignalException(e.getMessage(), e);
             }
         }
@@ -53,7 +53,7 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
         } catch (Exception e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
-            }else {
+            } else {
                 throw new ThrowSignalException(e.getMessage(), e);
             }
         }
@@ -66,7 +66,7 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
         } catch (Exception e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
-            }else {
+            } else {
                 throw new ThrowSignalException(e.getMessage(), e);
             }
         }
@@ -75,17 +75,17 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
     @Override
     public String innerRender(String script, Object params) {
         try {
-            Map<String,Object> renderMap=null;
-            if(params instanceof Map){
-                renderMap=(Map<String,Object>)params;
-            }else{
+            Map<String, Object> renderMap = null;
+            if (params instanceof Map) {
+                renderMap = (Map<String, Object>) params;
+            } else {
                 renderMap = ReflectResolver.beanVirtual2map(params, new HashMap<>());
             }
             return VelocityGenerator.render(script, renderMap);
         } catch (Exception e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
-            }else {
+            } else {
                 throw new ThrowSignalException(e.getMessage(), e);
             }
         }

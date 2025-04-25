@@ -16,7 +16,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class XmlExecUseTimeEvent extends ExecutorContextEvent {
     protected ExecutorNode executorNode;
-    protected Map<String,Object> pointContext;
+    protected Map<String, Object> pointContext;
     protected XmlNode node;
     protected long useTs;
 }

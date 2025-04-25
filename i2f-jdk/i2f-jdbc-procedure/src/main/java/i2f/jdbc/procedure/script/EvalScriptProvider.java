@@ -10,5 +10,6 @@ import java.util.Map;
  */
 public interface EvalScriptProvider {
     boolean support(String lang);
-    Object eval(String script, Map<String,Object> params, JdbcProcedureExecutor executor);
+
+    Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor);
 }

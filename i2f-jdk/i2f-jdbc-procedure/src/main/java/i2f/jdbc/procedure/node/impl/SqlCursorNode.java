@@ -26,7 +26,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -36,7 +36,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         List<XmlNode> children = node.getChildren();
         if (children == null || children.isEmpty()) {
-            warnPoster.accept(TAG_NAME+" missing child element");
+            warnPoster.accept(TAG_NAME + " missing child element");
             return;
         }
         XmlNode queryNode = null;
@@ -51,16 +51,16 @@ public class SqlCursorNode extends AbstractExecutorNode {
         }
 
         if (queryNode == null) {
-            warnPoster.accept(TAG_NAME+ "missing cursor query node "+SqlQueryListNode.TAG_NAME+" child element");
+            warnPoster.accept(TAG_NAME + "missing cursor query node " + SqlQueryListNode.TAG_NAME + " child element");
         }
 
         if (bodyNode == null) {
-            warnPoster.accept(TAG_NAME+ "missing cursor body node "+LangBodyNode.TAG_NAME+" child element");
+            warnPoster.accept(TAG_NAME + "missing cursor body node " + LangBodyNode.TAG_NAME + " child element");
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         List<XmlNode> children = node.getChildren();
         if (children == null || children.isEmpty()) {
             return;
@@ -84,7 +84,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
             throw new IllegalStateException("missing cursor body node!");
         }
 
-        Integer batchSize = executor.convertAs(executor.attrValue(AttrConsts.BATCH_SIZE, FeatureConsts.INT, node, context),Integer.class);
+        Integer batchSize = executor.convertAs(executor.attrValue(AttrConsts.BATCH_SIZE, FeatureConsts.INT, node, context), Integer.class);
         String item = node.getTagAttrMap().get(AttrConsts.ITEM);
         boolean acceptBatch = executor.toBoolean(executor.attrValue(AttrConsts.ACCEPT_BATCH, FeatureConsts.BOOLEAN, node, context));
         if (item == null || item.isEmpty()) {
@@ -100,8 +100,8 @@ public class SqlCursorNode extends AbstractExecutorNode {
         }
 
 
-        if(executor.isDebug()){
-            bql=bql.concat(getTrackingComment(node));
+        if (executor.isDebug()) {
+            bql = bql.concat(getTrackingComment(node));
         }
 
         int pageIndex = 0;
@@ -114,13 +114,13 @@ public class SqlCursorNode extends AbstractExecutorNode {
             while (true) {
                 List<?> list = executor.sqlQueryPage(datasource, bql, context, resultType, new ApiPage(pageIndex, batchSize));
                 if (list.isEmpty()) {
-                    if(executor.isDebug()) {
+                    if (executor.isDebug()) {
                         executor.logDebug("no data found! at " + getNodeLocation(node));
                     }
                     break;
                 }
 
-                if(executor.isDebug()) {
+                if (executor.isDebug()) {
                     executor.logDebug("found batch data! at " + getNodeLocation(node));
                 }
 
@@ -160,11 +160,11 @@ public class SqlCursorNode extends AbstractExecutorNode {
 
                 pageIndex++;
             }
-        }finally {
-            if(acceptBatch){
-                executor.visitDelete(context,item);
+        } finally {
+            if (acceptBatch) {
+                executor.visitDelete(context, item);
             }
-            executor.visitDelete(context,item);
+            executor.visitDelete(context, item);
             for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
                 executor.visitSet(context, entry.getKey(), entry.getValue());
             }

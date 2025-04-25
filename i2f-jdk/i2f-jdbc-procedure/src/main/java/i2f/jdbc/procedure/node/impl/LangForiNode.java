@@ -22,7 +22,7 @@ public class LangForiNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -31,13 +31,13 @@ public class LangForiNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String end = node.getTagAttrMap().get(AttrConsts.END);
-        if(end==null || end.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.END);
+        if (end == null || end.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.END);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String beginExpr = node.getTagAttrMap().get(AttrConsts.BEGIN);
         String endExpr = node.getTagAttrMap().get(AttrConsts.END);
         String incrExpr = node.getTagAttrMap().get(AttrConsts.INCR);
@@ -55,18 +55,18 @@ public class LangForiNode extends AbstractExecutorNode {
         }
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
-        bakParams.put(itemName, executor.visit(itemName,context));
-        bakParams.put(firstName, executor.visit(firstName,context));
-        bakParams.put(indexName, executor.visit(indexName,context));
+        bakParams.put(itemName, executor.visit(itemName, context));
+        bakParams.put(firstName, executor.visit(firstName, context));
+        bakParams.put(indexName, executor.visit(indexName, context));
 
         int begin = 0;
         if (beginExpr != null) {
-            begin = executor.convertAs(executor.attrValue(AttrConsts.BEGIN, FeatureConsts.INT, node, context),Integer.class);
+            begin = executor.convertAs(executor.attrValue(AttrConsts.BEGIN, FeatureConsts.INT, node, context), Integer.class);
         }
-        int end = executor.convertAs(executor.attrValue(AttrConsts.END, FeatureConsts.INT, node, context),Integer.class);
+        int end = executor.convertAs(executor.attrValue(AttrConsts.END, FeatureConsts.INT, node, context), Integer.class);
         int incr = 1;
         if (incrExpr != null) {
-            incr = executor.convertAs(executor.attrValue(AttrConsts.INCR, FeatureConsts.INT, node, context),Integer.class);
+            incr = executor.convertAs(executor.attrValue(AttrConsts.INCR, FeatureConsts.INT, node, context), Integer.class);
         }
 
         boolean isFirst = true;
@@ -75,9 +75,9 @@ public class LangForiNode extends AbstractExecutorNode {
             Object val = j;
             val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
             // 覆盖堆栈
-            executor.visitSet(context,itemName, val);
-            executor.visitSet(context,firstName, isFirst);
-            executor.visitSet(context,indexName, index);
+            executor.visitSet(context, itemName, val);
+            executor.visitSet(context, firstName, isFirst);
+            executor.visitSet(context, indexName, index);
             isFirst = false;
             index++;
             try {
@@ -90,9 +90,9 @@ public class LangForiNode extends AbstractExecutorNode {
         }
 
         // 还原堆栈
-        executor.visitSet(context,itemName, bakParams.get(itemName));
-        executor.visitSet(context,firstName, bakParams.get(firstName));
-        executor.visitSet(context,indexName, bakParams.get(indexName));
+        executor.visitSet(context, itemName, bakParams.get(itemName));
+        executor.visitSet(context, firstName, bakParams.get(firstName));
+        executor.visitSet(context, indexName, bakParams.get(indexName));
     }
 
 }

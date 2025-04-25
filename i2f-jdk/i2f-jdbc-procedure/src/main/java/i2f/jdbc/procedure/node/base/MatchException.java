@@ -15,14 +15,14 @@ import java.util.Map;
  */
 public class MatchException {
     public static Map.Entry<Throwable, Boolean> matchException(Throwable e, Collection<String> features, Collection<Class<?>> catchClasses) {
-        if(e==null){
-            return new AbstractMap.SimpleEntry<>(e,false);
+        if (e == null) {
+            return new AbstractMap.SimpleEntry<>(e, false);
         }
-        if(features==null){
-            features= Collections.emptyList();
+        if (features == null) {
+            features = Collections.emptyList();
         }
-        if(catchClasses==null){
-            catchClasses= Collections.singletonList(Throwable.class);
+        if (catchClasses == null) {
+            catchClasses = Collections.singletonList(Throwable.class);
         }
         if (features.contains(FeatureConsts.CAUSE_RAW)) {
             for (Class<?> catchClass : catchClasses) {
@@ -85,7 +85,7 @@ public class MatchException {
                 return new AbstractMap.SimpleEntry<>(s, true);
             }
         } else {
-            Throwable t=extractException(e);
+            Throwable t = extractException(e);
             for (Class<?> catchClass : catchClasses) {
                 if (TypeOf.instanceOf(t, catchClass)) {
                     return new AbstractMap.SimpleEntry<>(t, true);
@@ -96,7 +96,7 @@ public class MatchException {
         return new AbstractMap.SimpleEntry<>(e, false);
     }
 
-    public static Throwable extractException(Throwable e){
+    public static Throwable extractException(Throwable e) {
         Throwable t = e;
         while (t instanceof SignalException) {
             SignalException ex = (SignalException) t;

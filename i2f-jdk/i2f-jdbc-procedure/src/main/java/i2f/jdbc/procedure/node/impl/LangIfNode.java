@@ -20,7 +20,7 @@ public class LangIfNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -29,20 +29,20 @@ public class LangIfNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String test = node.getTagAttrMap().get(AttrConsts.TEST);
-        if(test==null || test.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.TEST);
+        if (test == null || test.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.TEST);
         }
-        if(test!=null && !test.isEmpty()) {
+        if (test != null && !test.isEmpty()) {
             try {
-                GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST,node,FeatureConsts.EVAL,warnPoster);
+                GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST, node, FeatureConsts.EVAL, warnPoster);
             } catch (Exception e) {
-                warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST+"["+test+"]"+" expression maybe wrong!");
+                warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST + "[" + test + "]" + " expression maybe wrong!");
             }
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         boolean ok = executor.toBoolean(executor.toBoolean(executor.attrValue(AttrConsts.TEST, FeatureConsts.TEST, node, context)));
         if (ok) {
             executor.execAsProcedure(node, context, false, false);

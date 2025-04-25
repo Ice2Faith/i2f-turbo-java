@@ -25,7 +25,7 @@ public class JavaCallNode extends AbstractExecutorNode {
 
     @Override
     public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT !=node.getNodeType()) {
+        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
             return false;
         }
         return TAG_NAME.equals(node.getTagName());
@@ -34,51 +34,51 @@ public class JavaCallNode extends AbstractExecutorNode {
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String target = node.getTagAttrMap().get(AttrConsts.TARGET);
-        if(target==null || target.isEmpty()){
-            warnPoster.accept(TAG_NAME+" missing attribute "+AttrConsts.TARGET);
+        if (target == null || target.isEmpty()) {
+            warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.TARGET);
         }
     }
 
     @Override
-    public void execInner(XmlNode node, Map<String,Object> context, JdbcProcedureExecutor executor) {
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String targetExpression = node.getTagAttrMap().get(AttrConsts.TARGET);
-        Map<String,Object> beanMap = (Map<String,Object>)context.computeIfAbsent(ParamsConsts.BEANS,(key)->new HashMap<>());
-        Object target=beanMap.get(targetExpression);
-        if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
-            target=executor.attrValue(AttrConsts.TARGET, FeatureConsts.VISIT,node,context);
+        Map<String, Object> beanMap = (Map<String, Object>) context.computeIfAbsent(ParamsConsts.BEANS, (key) -> new HashMap<>());
+        Object target = beanMap.get(targetExpression);
+        if (target == null || (!(target instanceof JdbcProcedureJavaCaller))) {
+            target = executor.attrValue(AttrConsts.TARGET, FeatureConsts.VISIT, node, context);
         }
-        if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
+        if (target == null || (!(target instanceof JdbcProcedureJavaCaller))) {
             for (Map.Entry<String, Object> entry : beanMap.entrySet()) {
                 Object bean = entry.getValue();
-                if(bean instanceof JdbcProcedureJavaCaller){
+                if (bean instanceof JdbcProcedureJavaCaller) {
                     String fullName = bean.getClass().getName();
-                    if(fullName.equals(targetExpression)){
-                        target=bean;
+                    if (fullName.equals(targetExpression)) {
+                        target = bean;
                         break;
                     }
                     String simpleName = bean.getClass().getSimpleName();
-                    if(simpleName.equals(targetExpression)){
-                        target=bean;
+                    if (simpleName.equals(targetExpression)) {
+                        target = bean;
                         break;
                     }
                 }
             }
         }
-        if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
+        if (target == null || (!(target instanceof JdbcProcedureJavaCaller))) {
             try {
                 Class<?> clazz = executor.loadClass(targetExpression);
-                if(clazz!=null){
-                    target= ReflectResolver.getInstance(clazz);
+                if (clazz != null) {
+                    target = ReflectResolver.getInstance(clazz);
                 }
             } catch (IllegalAccessException e) {
 
             }
         }
-        if(target==null || (!(target instanceof JdbcProcedureJavaCaller))){
+        if (target == null || (!(target instanceof JdbcProcedureJavaCaller))) {
             return;
         }
         try {
-            JdbcProcedureJavaCaller caller=(JdbcProcedureJavaCaller)target;
+            JdbcProcedureJavaCaller caller = (JdbcProcedureJavaCaller) target;
             Object val = caller.exec(executor, context);
             String result = node.getTagAttrMap().get(AttrConsts.RESULT);
             if (result != null) {
@@ -88,7 +88,7 @@ public class JavaCallNode extends AbstractExecutorNode {
         } catch (Throwable e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
-            }else {
+            } else {
                 throw new ThrowSignalException(e.getMessage(), e);
             }
         }
