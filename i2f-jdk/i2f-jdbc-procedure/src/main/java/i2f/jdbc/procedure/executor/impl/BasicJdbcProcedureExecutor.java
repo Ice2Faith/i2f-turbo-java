@@ -135,6 +135,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         ret.add(new LangEvalJavascriptNode());
         ret.add(new LangEvalNode());
         ret.add(new LangEvalTinyScriptNode());
+        ret.add(new LangFileDeleteNode());
+        ret.add(new LangFileExistsNode());
+        ret.add(new LangFileListNode());
+        ret.add(new LangFileMkdirsNode());
+        ret.add(new LangFileReadTextNode());
+        ret.add(new LangFileTreeNode());
+        ret.add(new LangFileWriteTextNode());
         ret.add(new LangForeachNode());
         ret.add(new LangForiNode());
         ret.add(new LangFormatDateNode());
