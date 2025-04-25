@@ -102,6 +102,13 @@
       "defaultValue": -1
     },
     {
+      "name": "xproc4j.slow-sql-min-mills-seconds",
+      "type": "java.lang.Long",
+      "description": "setting executor slow sql min mills-seconds.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "defaultValue": 5000
+    },
+    {
       "name": "xproc4j.naming-context.enable",
       "type": "java.lang.Boolean",
       "description": "whether enable bean INamingContext.",
