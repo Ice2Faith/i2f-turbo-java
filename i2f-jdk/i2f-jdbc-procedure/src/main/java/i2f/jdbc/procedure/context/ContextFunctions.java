@@ -91,6 +91,57 @@ public class ContextFunctions {
         return replacement;
     }
 
+    public static boolean isnull(Object obj){
+        return obj==null;
+    }
+
+    public static boolean is_empty(Object obj){
+        if(obj==null){
+            return true;
+        }
+        if(obj instanceof String
+        ||obj instanceof CharSequence
+        || obj instanceof Appendable){
+            return String.valueOf(obj).isEmpty();
+        }
+        if(obj instanceof Map){
+            return ((Map)obj).isEmpty();
+        }
+        if(obj instanceof Collection){
+            return ((Collection)obj).isEmpty();
+        }
+        if(obj.getClass().isArray()){
+            return Array.getLength(obj)==0;
+        }
+        if(obj instanceof Iterator){
+            return !((Iterator)obj).hasNext();
+        }
+        if(obj instanceof Enumeration){
+            return !((Enumeration)obj).hasMoreElements();
+        }
+        return false;
+    }
+
+    public static boolean is_blank(Object obj){
+        if(obj==null){
+            return true;
+        }
+        if(obj instanceof String
+                ||obj instanceof CharSequence
+                || obj instanceof Appendable){
+            String str=String.valueOf(obj);
+            char[] arr = str.toCharArray();
+            for (int i = 0; i < arr.length; i++) {
+                char ch=arr[i];
+                if(!Character.isWhitespace(ch)){
+                    return false;
+                }
+            }
+            return true;
+        }
+        return is_empty(obj);
+    }
+
     public static String replace(String str, String target) {
         return replace(str, target, "");
     }
