@@ -24,6 +24,13 @@
                 |lang-while*
                 |lang-invoke*
                 |lang-shell*
+                |lang-file-exists*
+                |lang-file-mkdirs*
+                |lang-file-delete*
+                |lang-file-list*
+                |lang-file-tree*
+                |lang-file-read-text*
+                |lang-file-write-text*
                 |lang-try*
                 |lang-synchronized*
                 |sql-query-row*
@@ -749,6 +756,48 @@
         <!ATTLIST lang-shell script.body-text CDATA #IMPLIED>
         <!ATTLIST lang-shell script.body-text.render CDATA #IMPLIED>
         <!ATTLIST lang-shell script.body-text.render.trim CDATA #IMPLIED>
+
+
+        <!ELEMENT lang-file-exists (ANY|EMPTY)>
+        <!ATTLIST lang-file-exists result CDATA #IMPLIED>
+        <!ATTLIST lang-file-exists file CDATA #IMPLIED>
+        <!ATTLIST lang-file-exists file.string CDATA #IMPLIED>
+
+        <!ELEMENT lang-file-mkdirs (ANY|EMPTY)>
+        <!ATTLIST lang-file-mkdirs file CDATA #IMPLIED>
+        <!ATTLIST lang-file-mkdirs file.string CDATA #IMPLIED>
+
+        <!ELEMENT lang-file-delete (ANY|EMPTY)>
+        <!ATTLIST lang-file-delete file CDATA #IMPLIED>
+        <!ATTLIST lang-file-delete file.string CDATA #IMPLIED>
+
+        <!ELEMENT lang-file-list (ANY|EMPTY)>
+        <!ATTLIST lang-file-list result CDATA #IMPLIED>
+        <!ATTLIST lang-file-list file CDATA #IMPLIED>
+        <!ATTLIST lang-file-list file.string CDATA #IMPLIED>
+
+        <!ELEMENT lang-file-tree (ANY|EMPTY)>
+        <!ATTLIST lang-file-tree result CDATA #IMPLIED>
+        <!ATTLIST lang-file-tree file CDATA #IMPLIED>
+        <!ATTLIST lang-file-tree file.string CDATA #IMPLIED>
+
+        <!ELEMENT lang-file-read-text (ANY|EMPTY)>
+        <!ATTLIST lang-file-read-text result CDATA #IMPLIED>
+        <!ATTLIST lang-file-read-text file CDATA #IMPLIED>
+        <!ATTLIST lang-file-read-text file.string CDATA #IMPLIED>
+        <!ATTLIST lang-file-read-text charset CDATA #IMPLIED>
+
+        <!ELEMENT lang-file-write-text (ANY|EMPTY)>
+        <!ATTLIST lang-file-write-text content CDATA #IMPLIED>
+        <!ATTLIST lang-file-write-text file CDATA #IMPLIED>
+        <!ATTLIST lang-file-write-text file.string CDATA #IMPLIED>
+        <!ATTLIST lang-file-write-text charset CDATA #IMPLIED>
+
+        <!ATTLIST lang-file-write-text content.string CDATA #IMPLIED>
+        <!ATTLIST lang-file-write-text content.render CDATA #IMPLIED>
+        <!ATTLIST lang-file-write-text content.text-body CDATA #IMPLIED>
+        <!ATTLIST lang-file-write-text content.text-body.render CDATA #IMPLIED>
+        <!ATTLIST lang-file-write-text content.text-body.render.trim CDATA #IMPLIED>
 
         <!ELEMENT lang-try (lang-body|lang-catch*|lang-finally?)>
 

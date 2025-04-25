@@ -695,6 +695,124 @@ eval-ts使用TinyScript引擎进行处理
         </lang-shell>
     </script-segment>
 
+    <!--
+    判断文件是否存在
+    file默认以visit访问，支持String/File类型
+    result为boolean结果
+    -->
+    <lang-file-exists result="" file=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-file-exists result="v_ext" file.string="./config.txt"/>
+
+        <lang-set result="v_file" value.string="./resources/config.txt"/>
+        <lang-file-exists result="v_ext" file="v_file"/>
+    </script-segment>
+
+    <!--
+    创建目录
+    file默认以visit访问，支持String/File类型
+    不存在则创建
+    -->
+    <lang-file-mkdirs file=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-file-mkdirs file.string="./config"/>
+
+        <lang-set result="v_file" value.string="./resources/config"/>
+        <lang-file-mkdirs file="v_file"/>
+    </script-segment>
+
+    <!--
+    删除文件
+    file默认以visit访问，支持String/File类型
+    如果是文件夹，将会递归删除
+    -->
+    <lang-file-delete file=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-file-delete file.string="./config.txt"/>
+
+        <lang-set result="v_file" value.string="./resources/config"/>
+        <lang-file-delete file="v_file"/>
+    </script-segment>
+
+    <!--
+    列出子文件列表
+    file默认以visit访问，支持String/File类型
+    result为ArrayList<File>结果
+    -->
+    <lang-file-list result="" file=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-file-list result="v_list" file.string="./config"/>
+
+        <lang-set result="v_file" value.string="./resources/config"/>
+        <lang-file-list result="v_list" file="v_file"/>
+    </script-segment>
+
+    <!--
+    列出子文件树列表
+    file默认以visit访问，支持String/File类型
+    result为ArrayList<File>结果
+    如果不存在或者是文件，不是目录，将会抛出异常
+    -->
+    <lang-file-tree result="" file=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-file-tree result="v_list" file.string="./config"/>
+
+        <lang-set result="v_file" value.string="./resources/config"/>
+        <lang-file-tree result="v_list" file="v_file"/>
+    </script-segment>
+
+
+    <!--
+    读取文本文件内容
+    file默认以visit访问，支持String/File类型,
+    特别的，
+    支持URL类型，或者是符合URL规范的，支持http/https/jar/file/classpath/classpath*协议
+    charset默认以string访问，默认值为UTF-8
+    result为String结果
+    如果不存在或者是文件，不是文件，将会抛出异常
+    -->
+    <lang-file-read-text result="" file="" charset=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-file-read-text result="v_text" file.string="./config.txt" charset="UTF-8"/>
+
+        <lang-set result="v_file" value.string="./resources/config.txt"/>
+        <lang-file-read-text result="v_text" file="v_file"/>
+    </script-segment>
+
+    <!--
+    写入文本文件内容
+    file默认以visit访问，支持String/File类型
+    charset默认以string访问，默认值为UTF-8
+    content默认以visit访问，如果为空，则使用XML内部文本内容进行写入
+    如果不存在将会创建目录及文件，如果已经存在，将会覆盖内容
+    -->
+    <lang-file-write-text content="" file="" charset="">
+
+    </lang-file-write-text>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-file-write-text content.string="123456" file.string="./config.txt"/>
+
+        <lang-file-write-text file.string="./config.txt">
+            123
+            456
+        </lang-file-write-text>
+
+
+        <lang-render result="v_text">
+            username: ${username}
+        </lang-render>
+        <lang-set result="v_file" value.string="./resources/config"/>
+        <lang-file-write-text content="v_text" file="v_file"/>
+    </script-segment>
+
+
     <!-- 对应一个异常处理块try-catch-finally -->
     <lang-try>
         <!-- 表示异常处理的内容，对应try的内容块 -->

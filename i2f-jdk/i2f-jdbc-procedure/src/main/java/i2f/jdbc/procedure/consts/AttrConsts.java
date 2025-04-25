@@ -88,4 +88,8 @@ public interface AttrConsts {
     String RUN_AS_FILE = "run-as-file";
     String WORKDIR = "workdir";
     String ENVP = "envp";
+
+    String FILE="file";
+    String CHARSET="charset";
+    String CONTENT="content";
 }
