@@ -396,8 +396,8 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             BigDecimal br = new BigDecimal(String.valueOf(right));
             return bl.compareTo(br);
         }
-        if (TypeOf.instanceOf(left, CharSequence.class)
-                || TypeOf.instanceOf(right, CharSequence.class)) {
+        if (TypeOf.typeOfAny(left.getClass(), String.class,CharSequence.class,Appendable.class)
+                || TypeOf.typeOfAny(right.getClass(), String.class,CharSequence.class,Appendable.class)) {
             String sl = String.valueOf(left);
             String sr = String.valueOf(right);
             return sl.compareTo(sr);
