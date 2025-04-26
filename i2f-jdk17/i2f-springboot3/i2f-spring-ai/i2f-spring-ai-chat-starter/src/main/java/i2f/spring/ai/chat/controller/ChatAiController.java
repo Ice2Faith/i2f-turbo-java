@@ -83,7 +83,7 @@ public class ChatAiController {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @GetMapping(value = "/chat", produces = "application/json; charset=utf-8")
+    @GetMapping(value = "/api/chat", produces = "application/json; charset=utf-8")
     public String getJsonChat(HttpServletRequest request, HttpServletResponse response,
                               @RequestParam(value = "message") String message,
                               @RequestParam(value = "sessionId", required = false) String sessionId) {
@@ -92,7 +92,7 @@ public class ChatAiController {
                 .content();
     }
 
-    @GetMapping(value = "/stream", produces = "application/json; charset=utf-8")
+    @GetMapping(value = "/api/stream", produces = "application/json; charset=utf-8")
     public Flux<String> getJsonStream(HttpServletRequest request, HttpServletResponse response,
                                       @RequestParam(value = "message") String message,
                                       @RequestParam(value = "sessionId", required = false) String sessionId) {
@@ -102,7 +102,7 @@ public class ChatAiController {
                 .content();
     }
 
-    @PostMapping(value = "/chat", produces = "application/json; charset=utf-8")
+    @PostMapping(value = "/api/chat", produces = "application/json; charset=utf-8")
     public String postJsonChat(HttpServletRequest request, HttpServletResponse response,
                                @RequestBody String message,
                                @RequestParam(value = "sessionId", required = false) String sessionId) {
@@ -111,7 +111,7 @@ public class ChatAiController {
                 .content();
     }
 
-    @PostMapping(value = "/stream", produces = "application/json; charset=utf-8")
+    @PostMapping(value = "/api/stream", produces = "application/json; charset=utf-8")
     public Flux<String> postJsonStream(HttpServletRequest request, HttpServletResponse response,
                                        @RequestBody String message,
                                        @RequestParam(value = "sessionId", required = false) String sessionId) {

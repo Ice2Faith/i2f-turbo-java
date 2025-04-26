@@ -64,6 +64,20 @@
       "defaultValue": true
     },
     {
+      "name": "i2f.ai.chat.support-tools",
+      "type": "java.lang.Boolean",
+      "description": "ai enable support tools.",
+      "sourceType": "i2f.spring.ai.chat.properties.ChatAiProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.ai.chat.tool-classes",
+      "type": "java.util.List",
+      "description": "ai tools classes name list.",
+      "sourceType": "i2f.spring.ai.chat.properties.ChatAiProperties",
+      "defaultValue": null
+    },
+    {
       "name": "i2f.ai.chat.allow-cookie-session-id",
       "type": "java.lang.Boolean",
       "description": "ai enable allow get sessionId from cookie.",

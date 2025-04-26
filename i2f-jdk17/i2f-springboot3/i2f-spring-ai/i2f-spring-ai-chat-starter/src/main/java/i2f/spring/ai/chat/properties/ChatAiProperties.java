@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
+
 /**
  * @author Ice2Faith
  * @date 2025/4/26 15:22
@@ -17,4 +19,6 @@ public class ChatAiProperties {
     protected String defaultSystemResource;
     protected boolean allowAutoCreateSessionId = true;
     protected boolean allowCookieSessionId = false;
+    protected boolean supportTools = false;
+    protected List<String> toolClasses;
 }
