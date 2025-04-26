@@ -5,6 +5,7 @@ import i2f.spring.ai.chat.auth.impl.CookieChatAiAuthProvider;
 import i2f.spring.ai.chat.properties.ChatAiProperties;
 import i2f.spring.ai.chat.session.ChatAiSessionRepository;
 import i2f.spring.ai.chat.session.impl.InMemoryChatAiSessionRepository;
+import i2f.spring.ai.chat.tools.DateTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -23,6 +24,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -87,6 +90,31 @@ public class ChatAiAutoConfiguration {
                 .defaultAdvisors(new SimpleLoggerAdvisor(),
                         new MessageChatMemoryAdvisor(chatMemory)
                 );
+
+        if (chatProperties.isSupportTools()) {
+            List<Object> toolsList = new ArrayList<>();
+            toolsList.add(new DateTools());
+
+            List<String> toolClasses = chatProperties.getToolClasses();
+            if (toolClasses != null) {
+                ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                for (String item : toolClasses) {
+                    try {
+                        Class<?> clazz = loader.loadClass(item);
+                        if (clazz != null) {
+                            Object obj = clazz.newInstance();
+                            if (obj != null) {
+                                toolsList.add(obj);
+                            }
+                        }
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+
+            builder.defaultTools(toolsList.toArray());
+        }
 
         if (system != null && !system.isEmpty()) {
             builder.defaultSystem(system);
