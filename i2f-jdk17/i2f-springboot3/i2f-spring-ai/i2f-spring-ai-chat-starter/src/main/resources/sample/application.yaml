@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: spring-ai-chat
+  ai:
+    model:
+      chat: ollama
+    ollama:
+      chat:
+        enabled: true
+      base-url: http://localhost:11434
+      options:
+        model: deepseek-r1:1.5b
+        format: json
+        keep_alive: 5m
+        temperature: 0.7
+      init:
+        pull-model-strategy: never
+        timeout: 5m
+        max-retries: 0
+        chat:
+          include: true

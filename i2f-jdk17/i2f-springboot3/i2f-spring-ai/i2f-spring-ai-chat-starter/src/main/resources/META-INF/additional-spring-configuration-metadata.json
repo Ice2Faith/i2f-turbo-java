@@ -1,0 +1,84 @@
+{
+  "groups": [
+    {
+      "name": "i2f.ai.chat",
+      "type": "i2f.spring.ai.chat.properties.ChatAiProperties",
+      "sourceType": "i2f.spring.ai.chat.properties.ChatAiProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.ai.chat.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.chat-client.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.default-system",
+      "type": "java.lang.String",
+      "description": "ai default system prompt text.",
+      "sourceType": "i2f.spring.ai.chat.properties.ChatAiProperties",
+      "defaultValue": ""
+    },
+    {
+      "name": "i2f.ai.chat.default-system-resource",
+      "type": "java.lang.String",
+      "description": "ai default system prompt resource file(file:/xxx,classpath:xxx,etc.).",
+      "sourceType": "i2f.spring.ai.chat.properties.ChatAiProperties",
+      "defaultValue": ""
+    },
+    {
+      "name": "i2f.ai.chat.chat-memory.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiMissingBeanAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.session-repository.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiMissingBeanAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.auth-provider.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiMissingBeanAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
