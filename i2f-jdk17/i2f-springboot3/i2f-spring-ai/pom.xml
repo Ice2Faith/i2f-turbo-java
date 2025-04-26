@@ -5,22 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>i2f.turbo</groupId>
-        <artifactId>i2f-jdk17</artifactId>
+        <artifactId>i2f-springboot3</artifactId>
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-springboot3</artifactId>
+    <artifactId>i2f-spring-ai</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>i2f-springboot3-http-proxy-starter</module>
-        <module>i2f-springboot3-swl-starter</module>
-        <module>i2f-springboot3-spring-starter</module>
-        <module>i2f-spring-ai</module>
+        <module>i2f-spring-ai-chat-starter</module>
     </modules>
 
     <properties>
-        <spring.version>6.0.13</spring.version>
-        <spring-boot.version>3.1.5</spring-boot.version>
+        <spring-boot.version>3.4.2</spring-boot.version>
+        <spring-ai.version>1.0.0-M7</spring-ai.version>
     </properties>
 
     <dependencyManagement>
@@ -33,6 +30,13 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
