@@ -30,8 +30,8 @@ public class ChatAiSessionController {
     private ChatAiAuthProvider chatAiAuthProvider;
 
     @PostMapping(value = "/create")
-    public String create(HttpServletRequest request) {
-        String userId = chatAiAuthProvider.getUserId(request);
+    public String create(HttpServletRequest request, HttpServletResponse response) {
+        String userId = chatAiAuthProvider.getUserId(request, response);
         String sessionId = chatAiSessionRepository.create(userId);
         return sessionId;
     }
