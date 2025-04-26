@@ -8,7 +8,6 @@ import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Data
 @NoArgsConstructor
-@Slf4j
 public class ContextJdbcProcedureJavaCallerMetaCacheProvider
         extends CacheObjectRefresherSupplier<Map<String, JdbcProcedureJavaCaller>, ConcurrentHashMap<String, JdbcProcedureJavaCaller>>
         implements JdbcProcedureJavaCallerMetaProvider {
