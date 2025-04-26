@@ -22,6 +22,27 @@
       "defaultValue": true
     },
     {
+      "name": "i2f.ai.chat.chat-memory.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.session-repository.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.auth-provider.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiAutoConfiguration",
+      "defaultValue": true
+    },
+    {
       "name": "i2f.ai.chat.default-system",
       "type": "java.lang.String",
       "description": "ai default system prompt text.",
@@ -36,24 +57,38 @@
       "defaultValue": ""
     },
     {
-      "name": "i2f.ai.chat.chat-memory.enable",
+      "name": "i2f.ai.chat.allow-auto-create-session-id",
       "type": "java.lang.Boolean",
-      "description": "enable chat-ai.",
-      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiMissingBeanAutoConfiguration",
+      "description": "ai enable auto create sessionId while no sessionId on chat api call.",
+      "sourceType": "i2f.spring.ai.chat.properties.ChatAiProperties",
       "defaultValue": true
     },
     {
-      "name": "i2f.ai.chat.session-repository.enable",
+      "name": "i2f.ai.chat.allow-cookie-session-id",
       "type": "java.lang.Boolean",
-      "description": "enable chat-ai.",
-      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiMissingBeanAutoConfiguration",
+      "description": "ai enable allow get sessionId from cookie.",
+      "sourceType": "i2f.spring.ai.chat.properties.ChatAiProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.ai.chat.api.chat.enable",
+      "type": "java.lang.Boolean",
+      "description": "ai enable chat api.",
+      "sourceType": "i2f.spring.ai.chat.controller.ChatAiController",
       "defaultValue": true
     },
     {
-      "name": "i2f.ai.chat.auth-provider.enable",
+      "name": "i2f.ai.chat.api.history.enable",
       "type": "java.lang.Boolean",
-      "description": "enable chat-ai.",
-      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiMissingBeanAutoConfiguration",
+      "description": "ai enable history api.",
+      "sourceType": "i2f.spring.ai.chat.controller.ChatAiHistoryController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.api.session.enable",
+      "type": "java.lang.Boolean",
+      "description": "ai enable session api.",
+      "sourceType": "i2f.spring.ai.chat.controller.ChatAiSessionController",
       "defaultValue": true
     }
   ],
