@@ -18,15 +18,17 @@ public class CookieChatAiAuthProvider implements ChatAiAuthProvider {
 
     @Override
     public String getUserId(HttpServletRequest request, HttpServletResponse response) {
-        Cookie[] cookies = request.getCookies();
         String userId = null;
-        for (Cookie cookie : cookies) {
-            String name = cookie.getName();
-            if (COOKIE_CHAT_AI_USER_ID_KEY.equals(name)) {
-                String value = cookie.getValue();
-                if (value != null && !value.isEmpty()) {
-                    userId = value;
-                    break;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                String name = cookie.getName();
+                if (COOKIE_CHAT_AI_USER_ID_KEY.equals(name)) {
+                    String value = cookie.getValue();
+                    if (value != null && !value.isEmpty()) {
+                        userId = value;
+                        break;
+                    }
                 }
             }
         }

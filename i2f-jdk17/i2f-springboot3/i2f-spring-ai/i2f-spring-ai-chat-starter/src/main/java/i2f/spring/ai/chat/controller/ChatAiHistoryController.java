@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
  * @date 2025/4/26 15:30
  * @desc
  */
+@ConditionalOnExpression("${i2f.ai.chat.api.history.enable:true}")
 @Data
 @NoArgsConstructor
 @RestController

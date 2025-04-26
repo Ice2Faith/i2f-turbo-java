@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
  * @date 2025/4/26 15:30
  * @desc
  */
+@ConditionalOnExpression("${i2f.ai.chat.api.session.enable:true}")
 @Data
 @NoArgsConstructor
 @RestController

@@ -15,4 +15,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ChatAiProperties {
     protected String defaultSystem;
     protected String defaultSystemResource;
+    protected boolean allowAutoCreateSessionId = true;
+    protected boolean allowCookieSessionId = false;
 }

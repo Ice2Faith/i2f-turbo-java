@@ -1,15 +1,17 @@
 package i2f.spring.ai.chat.configuration;
 
-import i2f.spring.ai.chat.controller.ChatAiController;
-import i2f.spring.ai.chat.controller.ChatAiHistoryController;
+import i2f.spring.ai.chat.auth.ChatAiAuthProvider;
+import i2f.spring.ai.chat.auth.impl.CookieChatAiAuthProvider;
 import i2f.spring.ai.chat.properties.ChatAiProperties;
 import i2f.spring.ai.chat.session.ChatAiSessionRepository;
+import i2f.spring.ai.chat.session.impl.InMemoryChatAiSessionRepository;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -17,7 +19,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
@@ -35,18 +36,33 @@ import java.nio.charset.StandardCharsets;
 @EnableConfigurationProperties({
         ChatAiProperties.class
 })
-@Import({
-        ChatAiMissingBeanAutoConfiguration.class,
-        ChatAiController.class,
-        ChatAiHistoryController.class,
-        ChatAiSessionRepository.class
-})
 public class ChatAiAutoConfiguration {
     @Autowired
     private ChatAiProperties chatProperties;
 
     @Autowired
     private ResourceLoader resourceLoader;
+
+    @ConditionalOnExpression("${i2f.ai.chat.chat-memory.enable:true}")
+    @ConditionalOnMissingBean(ChatMemory.class)
+    @Bean
+    public ChatMemory chatMemory() {
+        return new InMemoryChatMemory();
+    }
+
+    @ConditionalOnExpression("${i2f.ai.chat.session-repository.enable:true}")
+    @ConditionalOnMissingBean(ChatAiSessionRepository.class)
+    @Bean
+    public ChatAiSessionRepository chatAiSessionRepository() {
+        return new InMemoryChatAiSessionRepository();
+    }
+
+    @ConditionalOnExpression("${i2f.ai.chat.auth-provider.enable:true}")
+    @ConditionalOnMissingBean(ChatAiAuthProvider.class)
+    @Bean
+    public ChatAiAuthProvider chatAiAuthProvider() {
+        return new CookieChatAiAuthProvider();
+    }
 
     @ConditionalOnExpression("${i2f.ai.chat.chat-client.enable:true}")
     @ConditionalOnMissingBean(ChatClient.class)
