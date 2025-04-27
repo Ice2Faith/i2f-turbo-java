@@ -19,7 +19,9 @@ public class InMemoryChatAiSessionRepository implements ChatAiSessionRepository 
 
     @Override
     public String create(String userId) {
-        return UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
+        String sessionId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
+        save(userId, sessionId);
+        return sessionId;
     }
 
     @Override
