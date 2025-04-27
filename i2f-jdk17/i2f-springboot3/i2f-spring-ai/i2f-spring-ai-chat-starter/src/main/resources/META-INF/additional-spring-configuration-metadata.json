@@ -104,6 +104,20 @@
       "description": "ai enable session api.",
       "sourceType": "i2f.spring.ai.chat.controller.ChatAiSessionController",
       "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.cors.enable",
+      "type": "java.lang.Boolean",
+      "description": "ai enable cors access api.",
+      "sourceType": "i2f.spring.ai.chat.configuration.CorsWebConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.web-ui.enable",
+      "type": "java.lang.Boolean",
+      "description": "ai enable web-ui access api.",
+      "sourceType": "i2f.spring.ai.chat.configuration.WebUiConfiguration",
+      "defaultValue": true
     }
   ],
   "hints": [

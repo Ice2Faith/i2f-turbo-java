@@ -1,6 +1,7 @@
 package i2f.spring.ai.chat.controller;
 
 import i2f.spring.ai.chat.auth.ChatAiAuthProvider;
+import i2f.spring.ai.chat.data.dto.ChatRequestVo;
 import i2f.spring.ai.chat.properties.ChatAiProperties;
 import i2f.spring.ai.chat.session.ChatAiSessionRepository;
 import jakarta.servlet.http.Cookie;
@@ -64,26 +65,26 @@ public class ChatAiController {
 
     @PostMapping(value = "/chat", produces = "text/html; charset=utf-8")
     public String postChat(HttpServletRequest request, HttpServletResponse response,
-                           @RequestBody String message,
+                           @RequestBody ChatRequestVo requestVo,
                            @RequestParam(value = "sessionId", required = false) String sessionId) {
-        return exec(request, response, message, sessionId)
+        return exec(request, response, requestVo.getMessage(), sessionId)
                 .call()
                 .content();
     }
 
     @PostMapping(value = "/stream", produces = "text/html; charset=utf-8")
     public Flux<String> postStream(HttpServletRequest request, HttpServletResponse response,
-                                   @RequestBody String message,
+                                   @RequestBody ChatRequestVo requestVo,
                                    @RequestParam(value = "sessionId", required = false) String sessionId) {
 
-        return exec(request, response, message, sessionId)
+        return exec(request, response, requestVo.getMessage(), sessionId)
                 .stream()
                 .content();
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @GetMapping(value = "/api/chat", produces = "application/json; charset=utf-8")
+    @GetMapping(value = "/api/chat", produces = "text/event-stream; charset=utf-8")
     public String getJsonChat(HttpServletRequest request, HttpServletResponse response,
                               @RequestParam(value = "message") String message,
                               @RequestParam(value = "sessionId", required = false) String sessionId) {
@@ -92,7 +93,7 @@ public class ChatAiController {
                 .content();
     }
 
-    @GetMapping(value = "/api/stream", produces = "application/json; charset=utf-8")
+    @GetMapping(value = "/api/stream", produces = "text/event-stream; charset=utf-8")
     public Flux<String> getJsonStream(HttpServletRequest request, HttpServletResponse response,
                                       @RequestParam(value = "message") String message,
                                       @RequestParam(value = "sessionId", required = false) String sessionId) {
@@ -102,21 +103,21 @@ public class ChatAiController {
                 .content();
     }
 
-    @PostMapping(value = "/api/chat", produces = "application/json; charset=utf-8")
+    @PostMapping(value = "/api/chat", produces = "text/event-stream; charset=utf-8")
     public String postJsonChat(HttpServletRequest request, HttpServletResponse response,
-                               @RequestBody String message,
+                               @RequestBody ChatRequestVo requestVo,
                                @RequestParam(value = "sessionId", required = false) String sessionId) {
-        return exec(request, response, message, sessionId)
+        return exec(request, response, requestVo.getMessage(), sessionId)
                 .call()
                 .content();
     }
 
-    @PostMapping(value = "/api/stream", produces = "application/json; charset=utf-8")
+    @PostMapping(value = "/api/stream", produces = "text/event-stream; charset=utf-8")
     public Flux<String> postJsonStream(HttpServletRequest request, HttpServletResponse response,
-                                       @RequestBody String message,
+                                       @RequestBody ChatRequestVo requestVo,
                                        @RequestParam(value = "sessionId", required = false) String sessionId) {
 
-        return exec(request, response, message, sessionId)
+        return exec(request, response, requestVo.getMessage(), sessionId)
                 .stream()
                 .content();
     }
