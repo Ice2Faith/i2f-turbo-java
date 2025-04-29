@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.JdbcTrans;
@@ -26,7 +27,7 @@ public class SqlTransBeginNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        String datasource = node.getTagAttrMap().get(AttrConsts.DATASOURCE);
+        String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
         String isolation = node.getTagAttrMap().get(AttrConsts.ISOLATION);
         int val = JdbcTrans.getJdbcTransIsolation(isolation);
         executor.sqlTransBegin(datasource, val, context);

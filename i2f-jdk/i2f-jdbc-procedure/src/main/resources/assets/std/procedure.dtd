@@ -493,6 +493,9 @@
         <!ATTLIST lang-if test.dialect CDATA #IMPLIED>
         <!ATTLIST lang-if test.eval-ts CDATA #IMPLIED>
 
+        <!ATTLIST lang-if datasource.visit CDATA #IMPLIED>
+        <!ATTLIST lang-if datasource.visit.string CDATA #IMPLIED>
+
         <!ELEMENT lang-choose (lang-when*|lang-otherwise?)>
 
         <!ELEMENT lang-when (ANY|EMPTY)>
@@ -502,6 +505,9 @@
         <!ATTLIST lang-when test.boolean CDATA #IMPLIED>
         <!ATTLIST lang-when test.dialect CDATA #IMPLIED>
         <!ATTLIST lang-when test.eval-ts CDATA #IMPLIED>
+
+        <!ATTLIST lang-when datasource.visit CDATA #IMPLIED>
+        <!ATTLIST lang-when datasource.visit.string CDATA #IMPLIED>
 
         <!ELEMENT lang-otherwise (ANY|EMPTY)>
 
@@ -532,6 +538,9 @@
         <!ATTLIST lang-while test.boolean CDATA #IMPLIED>
         <!ATTLIST lang-while test.dialect CDATA #IMPLIED>
         <!ATTLIST lang-while test.eval-ts CDATA #IMPLIED>
+
+        <!ATTLIST lang-while datasource.visit CDATA #IMPLIED>
+        <!ATTLIST lang-while datasource.visit.string CDATA #IMPLIED>
 
         <!ELEMENT lang-continue (EMPTY)>
 
@@ -831,6 +840,9 @@
         <!ATTLIST sql-query-row result-type CDATA #IMPLIED>
         <!ATTLIST sql-query-row limited CDATA #IMPLIED>
 
+        <!ATTLIST sql-query-row datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-query-row datasource.visit.string CDATA #IMPLIED>
+
         <!ELEMENT sql-query-list (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
                 )>
@@ -841,6 +853,9 @@
         <!ATTLIST sql-query-list offset CDATA #IMPLIED>
         <!ATTLIST sql-query-list limit CDATA #IMPLIED>
 
+        <!ATTLIST sql-query-list datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-query-list datasource.visit.string CDATA #IMPLIED>
+
         <!ELEMENT sql-query-object (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
                 )>
@@ -850,6 +865,9 @@
         <!ATTLIST sql-query-object result-type CDATA #IMPLIED>
         <!ATTLIST sql-query-object limited CDATA #IMPLIED>
 
+        <!ATTLIST sql-query-object datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-query-object datasource.visit.string CDATA #IMPLIED>
+
         <!ELEMENT sql-update (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
                 )>
@@ -858,11 +876,17 @@
         <!ATTLIST sql-update result CDATA #IMPLIED>
         <!ATTLIST sql-update result-type CDATA #IMPLIED>
 
+        <!ATTLIST sql-update datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-update datasource.visit.string CDATA #IMPLIED>
+
         <!ELEMENT sql-script (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
                 )>
         <!ATTLIST sql-script datasource CDATA #IMPLIED>
         <!ATTLIST sql-script result CDATA #IMPLIED>
+
+        <!ATTLIST sql-script datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-script datasource.visit.string CDATA #IMPLIED>
 
         <!ELEMENT sql-dialect (EMPTY
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
@@ -907,14 +931,26 @@
         <!ATTLIST sql-trans-begin datasource CDATA #IMPLIED>
         <!ATTLIST sql-trans-begin isolation CDATA #IMPLIED>
 
+        <!ATTLIST sql-trans-begin datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-trans-begin datasource.visit.string CDATA #IMPLIED>
+
         <!ELEMENT sql-trans-commit (EMPTY)>
         <!ATTLIST sql-trans-commit datasource CDATA #IMPLIED>
+
+        <!ATTLIST sql-trans-commit datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-trans-commit datasource.visit.string CDATA #IMPLIED>
 
         <!ELEMENT sql-trans-rollback (EMPTY)>
         <!ATTLIST sql-trans-rollback datasource CDATA #IMPLIED>
 
+        <!ATTLIST sql-trans-rollback datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-trans-rollback datasource.visit.string CDATA #IMPLIED>
+
         <!ELEMENT sql-trans-none (EMPTY)>
         <!ATTLIST sql-trans-none datasource CDATA #IMPLIED>
+
+        <!ATTLIST sql-trans-none datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-trans-none datasource.visit.string CDATA #IMPLIED>
 
         <!ELEMENT sql-transactional (EMPTY|ANY)>
         <!ATTLIST sql-transactional datasources CDATA #IMPLIED>
@@ -1006,6 +1042,9 @@
         <!ATTLIST etl-extra datasource CDATA #IMPLIED>
         <!ATTLIST etl-extra table CDATA #IMPLIED>
 
+        <!ATTLIST etl-extra datasource.visit CDATA #IMPLIED>
+        <!ATTLIST etl-extra datasource.visit.string CDATA #IMPLIED>
+
         <!ELEMENT etl-transform (EMPTY)>
         <!ATTLIST etl-transform source CDATA #IMPLIED>
         <!ATTLIST etl-transform target CDATA #IMPLIED>
@@ -1019,6 +1058,9 @@
         <!ELEMENT etl-load (EMPTY)>
         <!ATTLIST etl-load datasource CDATA #IMPLIED>
         <!ATTLIST etl-load table CDATA #IMPLIED>
+
+        <!ATTLIST etl-load datasource.visit CDATA #IMPLIED>
+        <!ATTLIST etl-load datasource.visit.string CDATA #IMPLIED>
 
         <!ELEMENT etl-before (ANY)>
 
