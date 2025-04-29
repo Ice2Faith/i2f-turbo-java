@@ -726,7 +726,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         } else if (FeatureConsts.DIALECT.equals(feature)) {
             try {
                 String databases = value == null ? null : String.valueOf(value);
-                String datasource = node.getTagAttrMap().get(AttrConsts.DATASOURCE);
+                String datasource = (String) attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
                 boolean ok = supportDatabaseDialect(datasource, databases, context);
                 return ok;
             } catch (Exception e) {
