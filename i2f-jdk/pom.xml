@@ -147,6 +147,7 @@
         <module>i2f-jdbc-procedure</module>
         <module>i2f-invokable</module>
         <module>i2f-bindsql-stringify</module>
+        <module>i2f-form</module>
 
 
     </modules>
