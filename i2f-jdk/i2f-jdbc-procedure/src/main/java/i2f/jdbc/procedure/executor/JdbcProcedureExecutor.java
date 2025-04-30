@@ -5,6 +5,7 @@ import i2f.container.builder.map.MapBuilder;
 import i2f.context.std.INamingContext;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.environment.std.IEnvironment;
+import i2f.form.dialog.DialogBoxes;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.event.XProc4jEvent;
@@ -325,6 +326,10 @@ public interface JdbcProcedureExecutor {
     Object eval(String script, Object params);
 
     Object evalScript(String lang, String script, Map<String, Object> params);
+
+    default Object evalScriptUiInput(String lang,Map<String,Object> params){
+        return evalScript(lang, DialogBoxes.input("脚本输入框","请输入["+lang+"]脚本",""),params);
+    }
 
     void visitSet(Map<String, Object> params, String result, Object value);
 

@@ -150,7 +150,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 traceStack.push(location);
             } else {
                 String top = traceStack.peek();
-                if (top.startsWith(node.getLocationFile())) {
+                if (top.startsWith(String.valueOf(node.getLocationFile()))) {
                     traceStack.pop();
                 }
                 traceStack.push(location);

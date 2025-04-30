@@ -14,10 +14,7 @@ import i2f.environment.impl.ListableDelegateEnvironment;
 import i2f.environment.std.IEnvironment;
 import i2f.invokable.method.IMethod;
 import i2f.jdbc.JdbcResolver;
-import i2f.jdbc.procedure.consts.AttrConsts;
-import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.consts.ParamsConsts;
-import i2f.jdbc.procedure.consts.XProc4jConsts;
+import i2f.jdbc.procedure.consts.*;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
@@ -31,6 +28,7 @@ import i2f.jdbc.procedure.executor.event.SqlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
+import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
@@ -73,7 +71,7 @@ import java.util.function.Supplier;
  * @date 2025/1/20 14:40
  */
 @Data
-public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
+public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScriptProvider {
     public static transient final LruMap<String, Object> staticLru = new LruMap<>(4096);
     protected static final AtomicBoolean hasApplyNodes = new AtomicBoolean(false);
     protected transient final AtomicReference<ProcedureNode> procedureNodeHolder = new AtomicReference<>();
@@ -95,6 +93,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
         for (ExecutorNode node : list) {
             registryExecutorNode(node);
         }
+        registryEvalScriptProvider(this);
     }
 
     public BasicJdbcProcedureExecutor() {
@@ -217,6 +216,35 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor {
     @Override
     public List<EvalScriptProvider> getEvalScriptProviders() {
         return this.evalScriptProviders;
+    }
+
+    @Override
+    public boolean support(String lang) {
+        return LangConsts.XPROC4J.equals(lang);
+    }
+
+    @Override
+    public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
+        XmlNode node = null;
+        try{
+            node=JdbcProcedureParser.parse(script);
+        }catch(Exception e){
+
+        }
+        if(node==null){
+            try {
+                script="<procedure>\n" +
+                        script+"\n"+
+                        "</procedure>\n";
+                node=JdbcProcedureParser.parse(script);
+            } catch (Exception e) {
+
+            }
+        }
+        if(node==null){
+            throw new IllegalArgumentException(LangConsts.XPROC4J+" lang accept xml format script, script format maybe wrong!");
+        }
+        return executor.exec(node,params,false,false);
     }
 
     @Override
