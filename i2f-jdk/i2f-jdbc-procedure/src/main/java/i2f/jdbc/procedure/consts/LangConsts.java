@@ -12,4 +12,6 @@ public interface LangConsts {
     String TINYSCRIPT = "tinyscript";
     String TS = "ts";
     String GROOVY = "groovy";
+
+    String XPROC4J="xproc4j";
 }

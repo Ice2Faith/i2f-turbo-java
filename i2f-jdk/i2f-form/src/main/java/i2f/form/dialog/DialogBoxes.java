@@ -1,9 +1,7 @@
 package i2f.form.dialog;
 
-/**
- * @author Ice2Faith
- * @date 2025/4/30 10:11
- */
+
+import i2f.jvm.JvmUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,7 +15,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * @author Ice2Faith
+ * @date 2025/4/30 10:11
+ */
 public class DialogBoxes {
+    static {
+        if(JvmUtil.isDebug()) {
+            System.setProperty("java.awt.headless", "false");
+        }
+    }
     // 示例用法
     public static void main(String[] args) throws Throwable {
         String title = "输入对话框";
