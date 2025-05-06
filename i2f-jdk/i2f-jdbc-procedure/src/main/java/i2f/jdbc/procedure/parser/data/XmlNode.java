@@ -22,10 +22,24 @@ public class XmlNode {
     protected List<XmlNode> children;
     protected String locationFile;
     protected int locationLineNumber = -1;
+    protected String nodeLocation;
 
     public static enum NodeType {
         ELEMENT,
         TEXT,
         CDATA
+    }
+
+    public static String getNodeLocation(XmlNode node) {
+        if (node == null) {
+            return "";
+        }
+        String ret = node.getNodeLocation();
+        if(ret!=null){
+            return ret;
+        }
+        ret= "" + node.getLocationFile() + ":" + node.getLocationLineNumber() + ":" + node.getTagName() + "";
+        node.setNodeLocation(ret);
+        return ret;
     }
 }

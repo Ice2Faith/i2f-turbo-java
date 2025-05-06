@@ -90,10 +90,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     }
 
     public static String getNodeLocation(XmlNode node) {
-        if (node == null) {
-            return "";
-        }
-        return "" + node.getLocationFile() + ":" + node.getLocationLineNumber() + ":" + node.getTagName() + "";
+        return XmlNode.getNodeLocation(node);
     }
 
     public static String getTrackingComment(XmlNode node) {
