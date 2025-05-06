@@ -20,6 +20,7 @@ import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.executor.event.PreparedParamsEvent;
@@ -85,7 +86,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     protected volatile JdbcProcedureContext context = new DefaultJdbcProcedureContext();
     protected volatile IEnvironment environment = new ListableDelegateEnvironment();
     protected volatile INamingContext namingContext = new ListableNamingContext();
-    protected volatile XProc4jEventHandler eventHandler = new XProc4jEventHandler(() -> namingContext);
+    protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler(() -> namingContext);
     protected volatile long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(5);
 
     {

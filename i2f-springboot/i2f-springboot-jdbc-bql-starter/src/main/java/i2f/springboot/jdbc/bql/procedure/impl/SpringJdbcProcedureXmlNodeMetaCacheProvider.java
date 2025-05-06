@@ -1,6 +1,7 @@
 package i2f.springboot.jdbc.bql.procedure.impl;
 
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.types.xml.impl.AbstractJdbcProcedureXmlNodeMetaCacheProvider;
@@ -28,7 +29,7 @@ public class SpringJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcPro
     protected final CopyOnWriteArraySet<String> xmlLocations = new CopyOnWriteArraySet<>();
     protected final PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     private final ExecutorService pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() * 2);
-    protected volatile XProc4jEventHandler eventHandler = new XProc4jEventHandler();
+    protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
 
     public SpringJdbcProcedureXmlNodeMetaCacheProvider(List<String> xmlLocations) {
         if (xmlLocations == null) {

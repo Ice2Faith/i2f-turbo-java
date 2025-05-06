@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.provider.types.xml.impl;
 
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.event.ProcedureMetaProviderNotifyEvent;
 import lombok.Data;
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @NoArgsConstructor
 public class StaticJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider {
     protected ConcurrentHashMap<String, XmlNode> staticMap = new ConcurrentHashMap<>();
-    protected volatile XProc4jEventHandler eventHandler = new XProc4jEventHandler();
+    protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
 
     public StaticJdbcProcedureXmlNodeMetaCacheProvider(Map<String, XmlNode> map) {
         if (map == null) {

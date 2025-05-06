@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.provider.types.xml.impl;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.event.ProcedureMetaProviderNotifyEvent;
@@ -29,7 +30,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
     protected final CopyOnWriteArraySet<File> dirs = new CopyOnWriteArraySet<>();
     protected final ConcurrentHashMap<String, XmlNode> nodeMap = new ConcurrentHashMap<>();
     protected volatile WatchService watcher;
-    protected volatile XProc4jEventHandler eventHandler = new XProc4jEventHandler();
+    protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
 
     public DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider(List<String> locations) {
         if (locations == null) {
