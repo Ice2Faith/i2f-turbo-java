@@ -27,7 +27,6 @@ import i2f.jdbc.procedure.executor.event.PreparedParamsEvent;
 import i2f.jdbc.procedure.executor.event.SlowSqlEvent;
 import i2f.jdbc.procedure.executor.event.SqlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.ExecutorNode;
-import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -322,13 +321,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         throw new NotFoundSignalException("not found node: " + procedureId);
     }
 
-    public String getNodeLocation(XmlNode node) {
-        if (node == null) {
-            return "null node";
-        }
-        return "tag:" + node.getTagName() + ", " + AbstractExecutorNode.getNodeLocation(node);
-    }
-
     public void execXmlNodeDelegate(ExecXmlNodeDelegateTask task, XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
         try {
             task.exec(node, params, beforeNewConnection, afterCloseConnection);
@@ -355,7 +347,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     @Override
     public Map<String, Object> exec(XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
 //        if(isDebug()) {
-//            logDebug( "exec XmlNode [" + AbstractExecutorNode.getNodeLocation(node) + "] use Map ... ");
+//            logDebug( "exec XmlNode [" + XmlNode.getNodeLocation(node) + "] use Map ... ");
 //        }
         execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
             for (ExecutorNode execNode : getNodes()) {
@@ -365,7 +357,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
                 }
             }
             if (isDebug()) {
-                logDebug("waring! tag " + vNode.getTagName() + " not found any executor!" + " at " + getNodeLocation(vNode));
+                logDebug("waring! tag " + vNode.getTagName() + " not found any executor!" + " at " + XmlNode.getNodeLocation(vNode));
             }
 
         }, node, params, beforeNewConnection, afterCloseConnection);
@@ -494,7 +486,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     @Override
     public Map<String, Object> execAsProcedure(XmlNode node, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
 //        if(isDebug()) {
-//            logDebug("exec XmlNode as procedure [" + AbstractExecutorNode.getNodeLocation(node) + "] use Map ... ");
+//            logDebug("exec XmlNode as procedure [" + XmlNode.getNodeLocation(node) + "] use Map ... ");
 //        }
         execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
             ProcedureNode execNode = getProcedureNode();
@@ -584,12 +576,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     @Override
     public Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params) {
 //        if(isDebug()) {
-//            logDebug( "attr value [" + attr + "] at [" + AbstractExecutorNode.getNodeLocation(node) + "] ... ");
+//            logDebug( "attr value [" + attr + "] at [" + XmlNode.getNodeLocation(node) + "] ... ");
 //        }
         String attrScript = node.getTagAttrMap().get(attr);
         if (attrScript == null) {
             if (isDebug()) {
-                logDebug("attr value [" + attr + "] at [" + AbstractExecutorNode.getNodeLocation(node) + "] is: null");
+                logDebug("attr value [" + attr + "] at [" + XmlNode.getNodeLocation(node) + "] is: null");
             }
             return null;
         }
@@ -624,7 +616,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
 
         Object logObj = value;
 //        if(isDebug()) {
-//            logDebug("attr value [" + attr + "] at [" + AbstractExecutorNode.getNodeLocation(node) + "] is: " + stringifyWithType(logObj));
+//            logDebug("attr value [" + attr + "] at [" + XmlNode.getNodeLocation(node) + "] is: " + stringifyWithType(logObj));
 //        }
         return value;
     }
@@ -995,7 +987,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
                 }
 
             } else if (TypeOf.typeOf(clazz, XmlNode.class)) {
-                val = getNodeLocation((XmlNode) obj);
+                val = XmlNode.getNodeLocation((XmlNode) obj);
             } else {
                 val = String.valueOf(obj);
             }

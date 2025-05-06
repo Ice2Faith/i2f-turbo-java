@@ -7,7 +7,6 @@ import i2f.jdbc.procedure.consts.*;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
-import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.impl.LangEvalJavaNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.match.regex.RegexPattens;
@@ -55,7 +54,7 @@ public class GrammarReporter {
                         if (meta.getType() == ProcedureMeta.Type.XML) {
                             XmlNode node = (XmlNode) meta.getTarget();
                             if (executor.isDebug()) {
-                                executor.logDebug(XProc4jConsts.NAME + " grammar report rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + AbstractExecutorNode.getNodeLocation(node));
+                                executor.logDebug(XProc4jConsts.NAME + " grammar report rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + XmlNode.getNodeLocation(node));
                             }
                             AtomicInteger reportCount = new AtomicInteger(0);
                             AtomicInteger nodeCount = new AtomicInteger(0);
@@ -103,13 +102,13 @@ public class GrammarReporter {
                         if (reportCount != null) {
                             reportCount.incrementAndGet();
                         }
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: " + msg);
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + msg);
                     });
                 } catch (Throwable e) {
                     if (reportCount != null) {
                         reportCount.incrementAndGet();
                     }
-                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: " + e.getMessage());
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + e.getMessage());
                 }
                 break;
             }
@@ -141,14 +140,14 @@ public class GrammarReporter {
                     if (reportCount != null) {
                         reportCount.incrementAndGet();
                     }
-                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: sql maybe end with ';'");
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: sql maybe end with ';'");
                 }
                 for (String sstr : INVALID_STR_ARR) {
                     if (body.contains(sstr)) {
                         if (reportCount != null) {
                             reportCount.incrementAndGet();
                         }
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: sql maybe end with \"" + sstr + "\"");
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: sql maybe end with \"" + sstr + "\"");
                     }
                 }
 
@@ -159,7 +158,7 @@ public class GrammarReporter {
                         || body.contains("#{")
                         || body.contains("$!{")
                         || body.contains("#!{")) {
-                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: string maybe change to render mode");
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: string maybe change to render mode");
                 }
             }
 
@@ -176,7 +175,7 @@ public class GrammarReporter {
                 if (reportCount != null) {
                     reportCount.incrementAndGet();
                 }
-                warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node missing or blank attribute [" + AttrConsts.REFID + "]");
+                warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: call node missing or blank attribute [" + AttrConsts.REFID + "]");
             }
             String result = attrMap.get(AttrConsts.RESULT);
             if (result == null || result.trim().isEmpty()) {
@@ -193,7 +192,7 @@ public class GrammarReporter {
                     if (reportCount != null) {
                         reportCount.incrementAndGet();
                     }
-                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node refid [" + refid + "] missing or blank attribute [" + AttrConsts.RESULT + "]");
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: call node refid [" + refid + "] missing or blank attribute [" + AttrConsts.RESULT + "]");
                 }
             } else {
                 if (TagConsts.PROCEDURE_CALL.equals(node.getTagName())) {
@@ -201,7 +200,7 @@ public class GrammarReporter {
                         if (reportCount != null) {
                             reportCount.incrementAndGet();
                         }
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node refid [" + refid + "] maybe result wrong variable [" + result + "]");
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: call node refid [" + refid + "] maybe result wrong variable [" + result + "]");
 
                     }
                 }
@@ -222,14 +221,14 @@ public class GrammarReporter {
                         if (reportCount != null) {
                             reportCount.incrementAndGet();
                         }
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node refid [" + refid + "] missing argument [" + argument + "]");
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: call node refid [" + refid + "] missing argument [" + argument + "]");
                     }
                 }
             } else if (refid != null && !refid.isEmpty()) {
                 if (reportCount != null) {
                     reportCount.incrementAndGet();
                 }
-                warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: call node missing target refid [" + refid + "]");
+                warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: call node missing target refid [" + refid + "]");
             }
         }
 
@@ -273,35 +272,35 @@ public class GrammarReporter {
                 parenStack.push(ch);
             } else if (ch == '}') {
                 if (parenStack.isEmpty()) {
-                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe missing left '" + ch + "' , right is: " + body.substring(i));
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe missing left '" + ch + "' , right is: " + body.substring(i));
                 } else {
                     char pop = parenStack.peek();
                     if (pop == '{') {
                         parenStack.pop();
                     } else {
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not paired on '" + ch + "', expect '" + pop + "' right match , right is: " + body.substring(i));
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not paired on '" + ch + "', expect '" + pop + "' right match , right is: " + body.substring(i));
                     }
                 }
             } else if (ch == ']') {
                 if (parenStack.isEmpty()) {
-                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe missing left '" + ch + "' , right is: " + body.substring(i));
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe missing left '" + ch + "' , right is: " + body.substring(i));
                 } else {
                     char pop = parenStack.peek();
                     if (pop == '[') {
                         parenStack.pop();
                     } else {
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not paired on '" + ch + "', expect '" + pop + "' right match , right is: " + body.substring(i));
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not paired on '" + ch + "', expect '" + pop + "' right match , right is: " + body.substring(i));
                     }
                 }
             } else if (ch == ')') {
                 if (parenStack.isEmpty()) {
-                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe missing left '" + ch + "' , right is: " + body.substring(i));
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe missing left '" + ch + "' , right is: " + body.substring(i));
                 } else {
                     char pop = parenStack.peek();
                     if (pop == '(') {
                         parenStack.pop();
                     } else {
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not paired on '" + ch + "', expect '" + pop + "' right match , right is: " + body.substring(i));
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not paired on '" + ch + "', expect '" + pop + "' right match , right is: " + body.substring(i));
                     }
                 }
             } else if (ch == '\'') {
@@ -312,7 +311,7 @@ public class GrammarReporter {
                     if (pop == '\'') {
                         strStack.pop();
                     } else {
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not enclosed on [" + ch + "], expect [" + pop + "] right match , right is: " + body.substring(i));
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not enclosed on [" + ch + "], expect [" + pop + "] right match , right is: " + body.substring(i));
                     }
                 }
             } else if (ch == '"') {
@@ -323,7 +322,7 @@ public class GrammarReporter {
                     if (pop == '"') {
                         strStack.pop();
                     } else {
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not enclosed on [" + ch + "], expect [" + pop + "] right match , right is: " + body.substring(i));
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + i + " error: sql maybe not enclosed on [" + ch + "], expect [" + pop + "] right match , right is: " + body.substring(i));
                     }
                 }
             }
@@ -354,7 +353,7 @@ public class GrammarReporter {
                     }
                 }
                 if (reportFlag) {
-                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] " + ", at " + AbstractExecutorNode.getNodeLocation(node) + " for attribute: [" + attr + "]" + node.getAttrFeatureMap().get(attr) + " maybe wrong blank value [" + test + "]");
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] " + ", at " + XmlNode.getNodeLocation(node) + " for attribute: [" + attr + "]" + node.getAttrFeatureMap().get(attr) + " maybe wrong blank value [" + test + "]");
                 }
             }
         }
@@ -384,7 +383,7 @@ public class GrammarReporter {
                 }
             }
             if (reportFlag) {
-                warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] " + ", at " + AbstractExecutorNode.getNodeLocation(node) + " for attribute: [" + attr + "]" + node.getAttrFeatureMap().get(attr) + " maybe wrong visit expression [" + test + "]");
+                warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] " + ", at " + XmlNode.getNodeLocation(node) + " for attribute: [" + attr + "]" + node.getAttrFeatureMap().get(attr) + " maybe wrong visit expression [" + test + "]");
             }
         }
         if (features != null && !features.isEmpty()) {
@@ -419,7 +418,7 @@ public class GrammarReporter {
                     @Override
                     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
                         String errorMsg = "line " + line + ":" + charPositionInLine + " " + msg;
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + AbstractExecutorNode.getNodeLocation(node) + " error: " + errorMsg);
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + errorMsg);
                     }
                 };
                 TinyScript.ERROR_LISTENER.add(listener);
@@ -437,7 +436,7 @@ public class GrammarReporter {
                 }
             }
         } catch (Throwable e) {
-            warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] on " + location + ", at " + AbstractExecutorNode.getNodeLocation(node) + " for expr: " + expr + " error: " + e.getMessage());
+            warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] on " + location + ", at " + XmlNode.getNodeLocation(node) + " for expr: " + expr + " error: " + e.getMessage());
         }
     }
 }

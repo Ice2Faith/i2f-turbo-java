@@ -112,9 +112,10 @@ public class JdbcProcedureParser {
         if (node == null) {
             return null;
         }
+        XmlNode ret=null;
         Xml.Type nodeType = node.getType();
         if (nodeType == Xml.Type.TEXT) {
-            XmlNode ret = new XmlNode();
+            ret = new XmlNode();
             ret.setNodeType(XmlNode.NodeType.TEXT);
             ret.setTagName(null);
             ret.setTagAttrMap(new LinkedHashMap<>());
@@ -126,7 +127,7 @@ public class JdbcProcedureParser {
             ret.setLocationFile(node.getLocationName());
             ret.setLocationLineNumber(node.getLocationLineNumber());
         } else if (nodeType == Xml.Type.CDATA) {
-            XmlNode ret = new XmlNode();
+            ret = new XmlNode();
             ret.setNodeType(XmlNode.NodeType.CDATA);
             ret.setTagName(null);
             ret.setTagAttrMap(new LinkedHashMap<>());
@@ -138,7 +139,7 @@ public class JdbcProcedureParser {
             ret.setLocationFile(node.getLocationName());
             ret.setLocationLineNumber(node.getLocationLineNumber());
         } else if (nodeType == Xml.Type.ELEMENT) {
-            XmlNode ret = new XmlNode();
+            ret = new XmlNode();
             ret.setNodeType(XmlNode.NodeType.ELEMENT);
             ret.setTagName(node.getName());
             ret.setTagAttrMap(new LinkedHashMap<>());
@@ -193,8 +194,13 @@ public class JdbcProcedureParser {
                 }
             }
             ret.setChildren(children);
-            return ret;
         }
-        return null;
+        if(ret!=null){
+            String nodeLocation = XmlNode.getNodeLocation(ret);
+            ret.setNodeLocation(nodeLocation);
+        }
+        return ret;
     }
+
+
 }
