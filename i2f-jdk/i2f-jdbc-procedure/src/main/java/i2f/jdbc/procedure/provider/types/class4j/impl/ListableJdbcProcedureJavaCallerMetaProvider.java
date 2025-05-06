@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.provider.types.class4j.impl;
 
 import i2f.jdbc.procedure.annotations.JdbcProcedure;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
 import i2f.reflect.ReflectResolver;
@@ -23,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @NoArgsConstructor
 public class ListableJdbcProcedureJavaCallerMetaProvider implements JdbcProcedureJavaCallerMetaProvider {
     protected final ConcurrentHashMap<String, JdbcProcedureJavaCaller> javaMap = new ConcurrentHashMap<>();
-    protected volatile XProc4jEventHandler eventHandler = new XProc4jEventHandler();
+    protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
 
     public ListableJdbcProcedureJavaCallerMetaProvider(Map<String, JdbcProcedureJavaCaller> map) {
         addAll(map);

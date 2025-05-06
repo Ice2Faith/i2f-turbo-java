@@ -5,6 +5,7 @@ import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.context.event.JdbcProcedureMetaMapRefreshedEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.provider.JdbcProcedureMetaProvider;
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ListableJdbcProcedureMetaProviderRegistry;
@@ -25,7 +26,7 @@ public class DefaultJdbcProcedureContext
         extends CacheObjectRefresherSupplier<Map<String, ProcedureMeta>, ConcurrentHashMap<String, ProcedureMeta>>
         implements JdbcProcedureContext {
     protected volatile JdbcProcedureMetaProviderRegistry registry = new ListableJdbcProcedureMetaProviderRegistry();
-    protected XProc4jEventHandler eventHandler = new XProc4jEventHandler();
+    protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
 
     public DefaultJdbcProcedureContext() {
         super(new ConcurrentHashMap<>(), "procedure-context-refresher");

@@ -6,6 +6,7 @@ import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.context.impl.ProcedureMetaMapGrammarReporterListener;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
 import i2f.jdbc.procedure.provider.types.class4j.impl.ContextJdbcProcedureJavaCallerMetaCacheProvider;
@@ -67,8 +68,8 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @ConditionalOnMissingBean(XProc4jEventHandler.class)
     @Bean
     public XProc4jEventHandler xProc4jEventHandler(INamingContext namingContext) {
-        log.info(XProc4jConsts.NAME + " config " + XProc4jEventHandler.class.getSimpleName() + " ...");
-        XProc4jEventHandler ret = new XProc4jEventHandler(() -> namingContext);
+        log.info(XProc4jConsts.NAME + " config " + DefaultXProc4jEventHandler.class.getSimpleName() + " ...");
+        DefaultXProc4jEventHandler ret = new DefaultXProc4jEventHandler(() -> namingContext);
         return ret;
     }
 

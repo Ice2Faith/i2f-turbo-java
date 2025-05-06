@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.registry.impl;
 
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.provider.JdbcProcedureMetaProvider;
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import lombok.Data;
@@ -18,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @NoArgsConstructor
 public class ListableJdbcProcedureMetaProviderRegistry implements JdbcProcedureMetaProviderRegistry {
     protected final CopyOnWriteArrayList<JdbcProcedureMetaProvider> providers = new CopyOnWriteArrayList<>();
-    protected volatile XProc4jEventHandler eventHandler = new XProc4jEventHandler();
+    protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
 
     public ListableJdbcProcedureMetaProviderRegistry(JdbcProcedureMetaProvider... providers) {
         addProvider(providers);

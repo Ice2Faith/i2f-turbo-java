@@ -4,10 +4,12 @@ import i2f.context.std.IContext;
 import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.context.CacheObjectRefresherSupplier;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,11 +22,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Data
 @NoArgsConstructor
+@Slf4j
 public class ContextJdbcProcedureJavaCallerMetaCacheProvider
         extends CacheObjectRefresherSupplier<Map<String, JdbcProcedureJavaCaller>, ConcurrentHashMap<String, JdbcProcedureJavaCaller>>
         implements JdbcProcedureJavaCallerMetaProvider {
     protected volatile IContext applicationContext;
-    protected volatile XProc4jEventHandler eventHandler = new XProc4jEventHandler();
+    protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
 
     public ContextJdbcProcedureJavaCallerMetaCacheProvider(IContext applicationContext) {
         super(new ConcurrentHashMap<>(), XProc4jConsts.NAME + "-java-caller-refresher");
