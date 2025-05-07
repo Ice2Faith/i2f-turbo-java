@@ -8,6 +8,7 @@ import i2f.jdbc.procedure.context.impl.ProcedureMetaMapGrammarReporterListener;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.node.event.XmlNodeExecInvokeLogListener;
 import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
 import i2f.jdbc.procedure.provider.types.class4j.impl.ContextJdbcProcedureJavaCallerMetaCacheProvider;
 import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
@@ -71,6 +72,12 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         log.info(XProc4jConsts.NAME + " config " + DefaultXProc4jEventHandler.class.getSimpleName() + " ...");
         DefaultXProc4jEventHandler ret = new DefaultXProc4jEventHandler(() -> namingContext);
         return ret;
+    }
+
+    @ConditionalOnExpression("${xproc4j.listeners.xml-node-exec-invoke-log-listener.enable:true}")
+    @Bean
+    public XmlNodeExecInvokeLogListener xmlNodeExecInvokeLogListener(){
+        return new XmlNodeExecInvokeLogListener();
     }
 
     @ConditionalOnExpression("${xproc4j.provider.xml-node.scan.enable:true}")

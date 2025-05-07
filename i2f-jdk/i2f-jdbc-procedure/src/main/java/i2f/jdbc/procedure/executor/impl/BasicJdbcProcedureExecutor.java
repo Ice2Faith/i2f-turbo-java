@@ -1576,38 +1576,55 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     }
 
     @Override
-    public void sqlTransCommit(String datasource, Map<String, Object> params) {
+    public void sqlTransCommit(String datasource, Map<String, Object> params,boolean checked) {
         if (isDebug()) {
             logDebug("sql-trans-commit:datasource=" + datasource + " near [" + traceLocation() + "] ");
         }
         try {
             Connection conn = getConnection(datasource, params);
-            conn.commit();
+            if(checked){
+                if(!conn.getAutoCommit()){
+                    conn.commit();
+                }
+            }else {
+                conn.commit();
+            }
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 
     @Override
-    public void sqlTransRollback(String datasource, Map<String, Object> params) {
+    public void sqlTransRollback(String datasource, Map<String, Object> params,boolean checked) {
         if (isDebug()) {
             logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + traceLocation() + "] ");
         }
         try {
             Connection conn = getConnection(datasource, params);
-            conn.rollback();
+            if(checked){
+                if(!conn.getAutoCommit()){
+                    conn.rollback();
+                }
+            }else {
+                conn.rollback();
+            }
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 
     @Override
-    public void sqlTransNone(String datasource, Map<String, Object> params) {
+    public void sqlTransNone(String datasource, Map<String, Object> params,boolean checked) {
         if (isDebug()) {
             logDebug("sql-trans-none:datasource=" + datasource + " near [" + traceLocation() + "] ");
         }
         try {
             Connection conn = getConnection(datasource, params);
+            if(checked){
+                if(!conn.getAutoCommit()){
+                    conn.commit();
+                }
+            }
             conn.setAutoCommit(true);
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);

@@ -123,6 +123,13 @@
       "defaultValue": true
     },
     {
+      "name": "xproc4j.listeners.xml-node-exec-invoke-log-listener.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean XmlNodeExecInvokeLogListener.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
       "name": "xproc4j.provider.xml-node.scan.enable",
       "type": "java.lang.Boolean",
       "description": "whether enable bean JdbcProcedureXmlNodeMetaProvider.",

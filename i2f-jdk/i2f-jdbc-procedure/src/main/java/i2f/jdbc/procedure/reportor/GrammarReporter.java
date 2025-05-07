@@ -38,7 +38,7 @@ public class GrammarReporter {
         if (metaMap == null) {
             return;
         }
-        warnPoster.accept(XProc4jConsts.NAME + " report grammar running ...");
+        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar running ...");
         long bts = System.currentTimeMillis();
         AtomicInteger allReportCount = new AtomicInteger(0);
         AtomicInteger allNodeCount = new AtomicInteger(0);
@@ -54,7 +54,7 @@ public class GrammarReporter {
                         if (meta.getType() == ProcedureMeta.Type.XML) {
                             XmlNode node = (XmlNode) meta.getTarget();
                             if (executor.isDebug()) {
-                                executor.logDebug(XProc4jConsts.NAME + " grammar report rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + XmlNode.getNodeLocation(node));
+                                executor.logDebug(XProc4jConsts.NAME + " report xml grammar rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + XmlNode.getNodeLocation(node));
                             }
                             AtomicInteger reportCount = new AtomicInteger(0);
                             AtomicInteger nodeCount = new AtomicInteger(0);
@@ -66,7 +66,7 @@ public class GrammarReporter {
                             }
                         }
                     } catch (Exception e) {
-                        warnPoster.accept(XProc4jConsts.NAME + " reporter run error:" + e.getMessage());
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar run error:" + e.getMessage());
                         e.printStackTrace();
                     } finally {
                         latch.countDown();
@@ -75,11 +75,11 @@ public class GrammarReporter {
             }
             latch.await();
         } catch (Throwable e) {
-            warnPoster.accept(XProc4jConsts.NAME + " reporter run error:" + e.getMessage());
+            warnPoster.accept(XProc4jConsts.NAME + " report xml grammar run error:" + e.getMessage());
             e.printStackTrace();
         }
         long ets = System.currentTimeMillis();
-        warnPoster.accept(XProc4jConsts.NAME + " report grammar final statistic, issue:" + allReportCount.get() + ", nodes:" + allNodeCount.get() + ", use seconds:" + ((ets - bts) / 1000));
+        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar final statistic, issue:" + allReportCount.get() + ", nodes:" + allNodeCount.get() + ", use seconds:" + ((ets - bts) / 1000));
     }
 
     public static void reportGrammar(XmlNode node,
@@ -147,7 +147,7 @@ public class GrammarReporter {
                         if (reportCount != null) {
                             reportCount.incrementAndGet();
                         }
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: sql maybe end with \"" + sstr + "\"");
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: sql maybe contains \"" + sstr + "\"");
                     }
                 }
 
@@ -159,6 +159,13 @@ public class GrammarReporter {
                         || body.contains("$!{")
                         || body.contains("#!{")) {
                     warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: string maybe change to render mode");
+                }
+            }
+
+            if (TagConsts.LANG_RENDER.equals(node.getTagName())) {
+                if (body.contains("#{")
+                        || body.contains("#!{")) {
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: render maybe contains illegal placeholder: #{/#!{");
                 }
             }
 
@@ -232,22 +239,24 @@ public class GrammarReporter {
             }
         }
 
-        int latchSize = node.getTagAttrMap().size();
-        CountDownLatch latch = new CountDownLatch(latchSize);
-        for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
-            String key = entry.getKey();
-            exprPool.submit(() -> {
-                try {
-                    reportAttributeFeatureGrammar(key, node, FeatureConsts.STRING, warnPoster);
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if(!TagConsts.SCRIPT_SEGMENT.equals(node.getTagName())) {
+            int latchSize = node.getTagAttrMap().size();
+            CountDownLatch latch = new CountDownLatch(latchSize);
+            for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
+                String key = entry.getKey();
+                exprPool.submit(() -> {
+                    try {
+                        reportAttributeFeatureGrammar(key, node, FeatureConsts.STRING, warnPoster);
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         List<XmlNode> children = node.getChildren();
         if (children != null) {
@@ -326,6 +335,14 @@ public class GrammarReporter {
                     }
                 }
             }
+        }
+        while(!parenStack.isEmpty()){
+            char pop = parenStack.pop();
+            warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + (-1) + " error: sql maybe missing right parent , left is: " + pop);
+        }
+        while(!strStack.isEmpty()){
+            char pop = strStack.pop();
+            warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + (-1) + " error: sql maybe missing right str enclosed , left is: " + pop);
         }
     }
 
@@ -433,6 +450,11 @@ public class GrammarReporter {
                         || expr.contains("$!{")
                         || expr.contains("#!{")) {
                     throw new IllegalArgumentException("string maybe change to render mode");
+                }
+            } else if (FeatureConsts.RENDER.equals(feature)) {
+                if (expr.contains("#{")
+                        || expr.contains("#!{")) {
+                    throw new IllegalArgumentException("render maybe contains illegal placeholder: #{/#!{");
                 }
             }
         } catch (Throwable e) {

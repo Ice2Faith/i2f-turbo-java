@@ -33,6 +33,7 @@ public interface JdbcProcedureExecutor {
 
     boolean DEFAULT_BEFORE_NEW_CONNECTION = false;
     boolean DEFAULT_AFTER_CLOSE_CONNECTION = true;
+    boolean DEFAULT_CHECKED_TRANSACTION=true;
 
     default Reference<?> nop() {
         return Reference.nop();
@@ -383,10 +384,22 @@ public interface JdbcProcedureExecutor {
 
     void sqlTransBegin(String datasource, int isolation, Map<String, Object> params);
 
-    void sqlTransCommit(String datasource, Map<String, Object> params);
+    void sqlTransCommit(String datasource, Map<String, Object> params,boolean checked);
 
-    void sqlTransRollback(String datasource, Map<String, Object> params);
+    default void sqlTransCommit(String datasource, Map<String, Object> params){
+        sqlTransCommit(datasource,params,DEFAULT_CHECKED_TRANSACTION);
+    }
 
-    void sqlTransNone(String datasource, Map<String, Object> params);
+    void sqlTransRollback(String datasource, Map<String, Object> params,boolean checked);
+
+    default void sqlTransRollback(String datasource, Map<String, Object> params){
+        sqlTransRollback(datasource,params,DEFAULT_CHECKED_TRANSACTION);
+    }
+
+    void sqlTransNone(String datasource, Map<String, Object> params,boolean checked);
+
+    default void sqlTransNone(String datasource, Map<String, Object> params){
+        sqlTransNone(datasource,params,DEFAULT_CHECKED_TRANSACTION);
+    }
 
 }
