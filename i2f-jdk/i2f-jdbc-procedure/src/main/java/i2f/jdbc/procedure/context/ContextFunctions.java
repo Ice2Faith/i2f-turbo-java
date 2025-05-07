@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.context;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.io.stream.StreamUtil;
 import i2f.match.regex.RegexUtil;
+import i2f.reflect.ReflectResolver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -383,8 +384,21 @@ public class ContextFunctions {
         Class<?> clazz = type.getClass();
         if (type instanceof Class) {
             clazz = (Class<?>) type;
+        }else if(type instanceof CharSequence){
+            try {
+                Class<?> clz = ReflectResolver.loadClass(String.valueOf(type));
+                if(clz!=null){
+                    clazz=clz;
+                }
+            } catch (Exception e) {
+
+            }
         }
         return ObjectConvertor.tryConvertAsType(val, clazz);
+    }
+
+    public static Object convert(Object val,Object type){
+        return cast(val,type);
     }
 
     public static ChronoUnit chrono_unit(String unit) {
@@ -757,11 +771,40 @@ public class ContextFunctions {
         return -1;
     }
 
-    public static Double to_number(Object obj) {
+    public static BigDecimal to_number(Object obj) {
         if (obj == null) {
             return null;
         }
-        return Double.parseDouble(String.valueOf(obj));
+        if(obj instanceof BigDecimal){
+            return (BigDecimal) obj;
+        }
+        return (BigDecimal)ObjectConvertor.tryConvertAsType(obj,BigDecimal.class);
+    }
+
+    public static Integer to_int(Object obj){
+        if(obj==null){
+            return null;
+        }
+        if(obj instanceof Integer){
+            return (int)obj;
+        }
+        if(obj instanceof Number){
+            return ((Number)obj).intValue();
+        }
+        return (Integer) ObjectConvertor.tryConvertAsType(obj,Integer.class);
+    }
+
+    public static Long to_long(Object obj){
+        if(obj==null){
+            return null;
+        }
+        if(obj instanceof Long){
+            return (long)obj;
+        }
+        if(obj instanceof Number){
+            return ((Number)obj).longValue();
+        }
+        return (Long)ObjectConvertor.tryConvertAsType(obj,Long.class);
     }
 
     public static void sleep(long seconds) {

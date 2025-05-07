@@ -253,11 +253,6 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                     se.setHasLogout(true);
                 }
                 se.setMessage(errorMsg);
-                try {
-                    onThrowing(se, pointContext, node, context, executor);
-                } catch (Throwable ex) {
-                    executor.logWarn(() -> ex.getMessage(), e);
-                }
                 re = se;
             } else {
                 ThrowSignalException se = new ThrowSignalException(errorMsg, e);
@@ -265,17 +260,17 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                     executor.logError(() -> errorMsg + "\n node trace:\n" + builder, e);
                     se.setHasLogout(true);
                 }
-                try {
-                    onThrowing(e, pointContext, node, context, executor);
-                } catch (Throwable ex) {
-                    executor.logWarn(() -> ex.getMessage(), e);
-                }
                 re = se;
             }
             synchronized (trace) {
                 if (!traceErrors.contains(re)) {
                     traceErrors.add(re);
                 }
+            }
+            try {
+                onThrowing(e, pointContext, node, context, executor);
+            } catch (Throwable ex) {
+                executor.logWarn(() -> ex.getMessage(), e);
             }
             throw re;
         } finally {
@@ -325,41 +320,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         event.setExecutor(executor);
         executor.sendEvent(event);
 
-
-        String location = (String) pointContext.get("location");
-        String snapshotTraceId = (String) pointContext.get("snapshotTraceId");
-
-        boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
-        Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
-        LinkedList<Map.Entry<String, String>> traceCalls = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
-        if (isDebugMode) {
-            synchronized (trace) {
-                int size = traceCalls.size();
-                while (size > 1000) {
-                    traceCalls.removeFirst();
-                    size--;
-                }
-            }
-        }
-
-
-        String tagName = node.getTagName();
-        if (tagName != null) {
-            if (TagConsts.PROCEDURE.equals(tagName)) {
-                String id = node.getTagAttrMap().get(AttrConsts.ID);
-                if (id != null && !id.isEmpty()) {
-                    executor.logInfo("exec node:" + id + " at " + location);
-                    if (isDebugMode) {
-                        String callSnapshot = getCallSnapshot(node, context, executor);
-                        callSnapshot = "BEFORE:" + snapshotTraceId + "\n" + callSnapshot;
-                        traceCalls.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
-                        executor.logDebug("call-params:\n===================> " + callSnapshot);
-                    }
-                }
-            }
-        }
-
-
+//        System.out.println("before pointcut!");
     }
 
     public void onAfter(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
@@ -372,25 +333,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         event.setExecutor(executor);
         executor.sendEvent(event);
 
-        boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
-        String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
-        LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
-
-        if (isDebugMode) {
-            String tagName = node.getTagName();
-            if (tagName != null) {
-                if (TagConsts.PROCEDURE.equals(tagName)) {
-                    String id = node.getTagAttrMap().get(AttrConsts.ID);
-                    if (id != null && !id.isEmpty()) {
-                        String callSnapshot = getCallSnapshot(node, context, executor);
-                        callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
-                        traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
-                        executor.logDebug("call-params:\n===================> " + callSnapshot);
-                    }
-                }
-            }
-        }
-
+//        System.out.println("after pointcut!");
     }
 
     public void onThrowing(Throwable e, Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
@@ -404,32 +347,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         event.setExecutor(executor);
         executor.sendEvent(event);
 
-        boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
-        String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
-        LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
-
-        if (isDebugMode) {
-            if (e instanceof ControlSignalException) {
-                // do nothing
-                if (e instanceof ReturnSignalException) {
-                    String tagName = node.getTagName();
-                    if (tagName != null) {
-                        if (TagConsts.PROCEDURE.equals(tagName)) {
-                            String id = node.getTagAttrMap().get(AttrConsts.ID);
-                            if (id != null && !id.isEmpty()) {
-                                String callSnapshot = getCallSnapshot(node, context, executor);
-                                callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
-                                traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
-                                executor.logDebug("call-params:\n===================> " + callSnapshot);
-                            }
-                        }
-                    }
-
-                }
-            } else {
-                System.out.println("exception pointcut!");
-            }
-        }
+//        System.out.println("throwing pointcut!");
     }
 
     public void onFinally(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
@@ -441,6 +359,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         event.setContext(context);
         event.setExecutor(executor);
         executor.sendEvent(event);
+
 //        System.out.println("finally pointcut!");
     }
 
