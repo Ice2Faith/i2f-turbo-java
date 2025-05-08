@@ -12,7 +12,7 @@
 - 另外，由于实际处理中，还存在从不同的数据源之间进行交叉操作的情况，因此也可以使用datasource指定数据源进行执行语句
 - 因此，在同一个过程中，是允许不同的数据源之间进行操作的，比如ETL操作
 
-## 重要概念
+## 一、重要概念
 
 - 将每个存储过程视为一个XML文件
 - 按照XML格式的顺序进行执行语句
@@ -22,7 +22,7 @@
 - 即使在发生过程内部调用其他过程时，也是同一个连接
 - 除非显式指定了使用新的连接
 
-## 技术实现
+## 二、技术实现
 
 - 技术上，以解析XML文件为主，为了保持XML文件中的属性顺序和报错日志定位，内部使用SAX解析
 - 参考Mybatis(成熟的ORM框架)的XML语法特点，进行顺序化的语句调用的XML定义过程
@@ -43,14 +43,14 @@
 - test: 表示计算表达式的布尔逻辑值，当表达式的结果不是boolean类型时，会隐式转换为boolean类型，默认使用OGNL引擎进行表达式运算
 - render: 表示进行字符串渲染，使用Velocity模板引擎实现
 
-## 存储过程转换案例讲解
+## 三、存储过程转换案例讲解
 
 - 下面以Oracle语法的存储过程转换对照进行说明
 - 其他SQL语言的可以进行参考转换
 
-## 转换注意事项
+## 四、转换注意事项
 
-### 变量名大小写统一
+### 4.1 变量名大小写统一
 
 - 由于大部分数据库对于变量时忽略大小写的
 - 但是在Java环境中，变量是区分大小写的
@@ -59,7 +59,7 @@
 - 比如，在Oracle中，不区分大小写，但是Oracle都喜欢使用大写来命名
 - 因此，可以考虑将所有变量名都大写进行处理
 
-### SQL拼接过程中null值处理
+### 4.2 SQL拼接过程中null值处理
 
 - 在一些常见的数据库中，将变量拼接到字符串中时
 - 如果变量的值为null,拼接的结果将会把null视为''空字符串
@@ -120,14 +120,14 @@ from ${tableName} a
 - 虽然，兼容mybatis-xml中也支持使用#!{}语法，但是需要你确认确实需要这样干
 - 一般情况下，我认为是不需要这么干的
 
-## 转换对照介绍
+## 五、转换对照介绍
 
-### 前置知识
+### 5.1 前置知识
 
 - 可以使用哪些XML节点，节点应该怎么使用?
 - 查看procedure.xml中的节点注释描述
 
-#### 修饰符 feature
+### 5.2 修饰符 feature
 
 - 为了在XML中进行数据类型标注或者转换工作
 - 因此引入属性修饰符来进行控制
@@ -221,28 +221,19 @@ tmp=isNull(tmp); // 然后判断是否为空
 - 最后，每个节点属性对于修饰符的默认性质是不一样的，需要根据节点定义的描述来决定
 - 更多的修饰符，参见：procedure.xml中对【属性修饰符】的说明
 
-### 存储过程定义
+### 5.3 存储过程定义
 
 - 本框架的目的就是进行过程的转换操作
 - 因此这也是必要的一部分
 - 先看下原来的定义
 
 ```sql
-PROCEDURE
-SP_PREDICATE_COND
-(
-IN_CITY_CODE
-NUMBER,
-IN_SUM_MONTH
-NUMBER,
-IN_COND_ID
-NUMBER,
-O_MSG
-OUT
-VARCHAR2,
-O_CODE
-OUT
-NUMBER
+PROCEDURE SP_PREDICATE_COND ( 
+IN_CITY_CODE NUMBER, 
+IN_SUM_MONTH NUMBER, 
+IN_COND_ID NUMBER, 
+O_MSG OUT VARCHAR2, 
+O_CODE OUT NUMBER 
 )
 ```
 
@@ -322,17 +313,16 @@ public class SpPredicateCondJavaCaller implements JdbcProcedureJavaCaller {
 }
 ```
 
-### 函数定义
+### 5.4 函数定义
 
 - 函数其实上，在本框架中，是一个特例
 - 本质上也看做一种过程，只不过有一些特点
 - 先来看一下原来的定义
 
 ```sql
-FUNCTION
-F_IS_TEST(IN_CITY_CODE      NUMBER,
-                          IN_SUM_MONTH      NUMBER,
-                          IN_LOG_ID        NUMBER) RETURN NUMBER
+FUNCTION F_IS_TEST(IN_CITY_CODE      NUMBER,
+                    IN_SUM_MONTH      NUMBER,
+                    IN_LOG_ID        NUMBER) RETURN NUMBER
 ```
 
 - 再来看一下转换后的XML定义
@@ -387,7 +377,7 @@ public class FuncIsTestJavaCaller implements JdbcProcedureJavaCaller {
 }
 ```
 
-### 变量定义
+### 5.5 变量定义
 
 - 在存储过程中通常会在一开头定义要使用到的变量
 - 但是，因为转换后使用的是Map保存变量，所以只要变量不需要有初始值
@@ -395,10 +385,8 @@ public class FuncIsTestJavaCaller implements JdbcProcedureJavaCaller {
 - 原始语句
 
 ```sql
-v_begin_time
-DATE;
-V_CITY_CODE
-VARCHAR2(64) := '101010';
+v_begin_time DATE;
+V_CITY_CODE VARCHAR2(64) := '101010';
 ```
 
 - 转换方式1
@@ -462,16 +450,14 @@ VARCHAR2(64) := '101010';
 
 - 当出现大量的赋值语句的时候，我更偏向于使用TinyScript进行转换
 
-### 变量赋值
+### 5.6 变量赋值
 
 - 其实在变量赋值是，转换方式和变量定义差不多
 - 这里就少写几种转换方式了
 
 ```sql
-v_begin_time
-:=sysdate;
-V_CITY_CODE
-:=IN_CITY_CODE||'00'; -- 这里
+v_begin_time:=sysdate;
+V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里
 ```
 
 - 转换方式1
@@ -496,7 +482,7 @@ V_CITY_CODE
 </lang-eval-ts>
 ```
 
-### 单分支条件语句-if
+### 5.7 单分支条件语句-if
 
 - if语句的情况，在转换时比较复杂
 - 因此分作两种情况讨论，第一种是只有一个if分支的
@@ -505,8 +491,7 @@ V_CITY_CODE
 - 现在先来看一下原来的语句
 
 ```sql
-if
-V_LINK_OPER = 'OR' and v_cond_type=0 and v_role_key in ('admin','logger') and v_ogran_key like 'sys%' then
+if V_LINK_OPER = 'OR' and v_cond_type=0 and v_role_key in ('admin','logger') and v_ogran_key like 'sys%' then
    O_MSG:='OK';
 end if;
 ```
@@ -520,8 +505,7 @@ end if;
 
 ```xml
 
-<lang-if
-        test='V_LINK_OPER == "OR" and v_cond_type==0 and v_role_key in {"admin","logger"} and v_ogran_key.startsWith("sys")'>
+<lang-if test='V_LINK_OPER == "OR" and v_cond_type==0 and v_role_key in {"admin","logger"} and v_ogran_key.startsWith("sys")'>
     <lang-set result="O_MSG" value.string="OK"/>
 </lang-if>
 ```
@@ -546,7 +530,7 @@ end if;
 </lang-eval-ts>
 ```
 
-### 多分支条件语句if-else
+### 5.8 多分支条件语句if-else
 
 - 针对多分支语句时，XML中则需要额外的标签来处理
 - 但是总体和Mybatis中对多分支的处理一致
@@ -554,14 +538,11 @@ end if;
 - 原来的语句如下
 
 ```sql
-if
-v_score >= 90 then
+if v_score >= 90 then
    v_grade:='A';
-elseif
-v_score >=80 then
+elseif v_score >=80 then
     v_grade:='B';
-elseif
-v_score >= 60 then
+elseif v_score >= 60 then
     v_grade:='C';
 else
     v_grade:='D';
@@ -574,9 +555,9 @@ end if;
 - 例如如下符号
 
 ```shell
-< &lt;
-> &gt;
-& &amp;
+< <
+> >
+& &
 ```
 
 - 直接来看转换的XML结果
@@ -607,13 +588,13 @@ end if;
 
 <lang-eval-ts>
     if(${v_score} >= 90){
-    v_grade='A';
+        v_grade='A';
     }else if(${v_score} >= 80){
-    v_grade='B';
+        v_grade='B';
     }else if(${v_score} >= 60){
-    v_grade='C';
+        v_grade='C';
     }else{
-    v_grade='D';
+        v_grade='D';
     };
 </lang-eval-ts>
 ```
@@ -621,7 +602,7 @@ end if;
 - 当然使用其他脚本语言也可以
 - 比如使用groovy，JavaScript，java都是可以的
 
-### 函数调用
+### 5.9 函数调用
 
 - 在存储过程中，很多地方都可能使用了数据库内建的函数，例如rtrim/replace等
 - 也会使用自定义的UDF函数
@@ -629,14 +610,9 @@ end if;
 - 第二种是使用SQL查询实现，这种方式的局限性就是数据库要兼容
 
 ```sql
-COND
-.
-CONTENT
-:=rtrim(COND.CONTENT,';');
-COND.CONTENT
-:=replace(COND.CONTENT,'1=1','1 = 1 ');
-v_f_cnt
-:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
+COND.CONTENT:=rtrim(COND.CONTENT,';');
+COND.CONTENT:=replace(COND.CONTENT,'1=1','1 = 1 ');
+v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 ```
 
 - 转换方式1
@@ -651,7 +627,7 @@ v_f_cnt
 <lang-invoke result="tmp_str" method="replace" target="COND.CONTENT" arg0.string=";" arg1.string=""/>
 <lang-invoke result="tmp_str_len" method="length" target="tmp_str"/>
 <lang-eval result="V_F_CNT">
-tmp_len-tmp_str_len+1
+    tmp_len-tmp_str_len+1
 </lang-eval>
 ```
 
@@ -665,11 +641,11 @@ tmp_len-tmp_str_len+1
 </sql-query-object>
 
 <sql-query-object result="COND.CONTENT" result-type="string">
-select replace(#{COND.CONTENT},'1=1','1 = 1 ') as v1 from dual
+    select replace(#{COND.CONTENT},'1=1','1 = 1 ') as v1 from dual
 </sql-query-object>
 
 <sql-query-object result="V_F_CNT" result-type="int">
-select LENGTH(#{COND.CONTENT}) - LENGTH(REPLACE(#{COND.CONTENT}, ';', ''))+1 as v1 from dual
+    select LENGTH(#{COND.CONTENT}) - LENGTH(REPLACE(#{COND.CONTENT}, ';', ''))+1 as v1 from dual
 </sql-query-object>
 ```
 
@@ -705,17 +681,16 @@ select LENGTH(#{COND.CONTENT}) - LENGTH(REPLACE(#{COND.CONTENT}, ';', ''))+1 as 
 - 都比原来的语句复杂的多
 - 因为TinyScript设计就是为了解决这个问题的，所以更偏向于使用TinyScript进行转换
 
-### UDF自定义函数调用(内部之间调用)
+### 5.10 UDF自定义函数调用(内部之间调用)
 
 - UDF用户自定义函数常常也会出现在存储过程中
 - 现在，这种情况比较复杂，我们以一个例子来说明
 - 先看原来函数的定义
 
 ```sql
-FUNCTION
-F_IS_TEST(IN_CITY_CODE      NUMBER,
-                          IN_SUM_MONTH      NUMBER,
-                          IN_LOG_ID        NUMBER) RETURN NUMBER
+FUNCTION F_IS_TEST(IN_CITY_CODE      NUMBER,
+                  IN_SUM_MONTH      NUMBER,
+                  IN_LOG_ID        NUMBER) RETURN NUMBER
 ```
 
 - 那么如果这个函数转换为XML来写应该是这样的
@@ -736,15 +711,13 @@ F_IS_TEST(IN_CITY_CODE      NUMBER,
 - 那再来看一下原来是怎么调用的
 
 ```sql
-V_IS_TEST
-:=F_IS_TEST(101010,V_SUM_MONTH,V_LOG_ID);
+V_IS_TEST:=F_IS_TEST(101010,V_SUM_MONTH,V_LOG_ID);
 ```
 
 - 也或者是这样的调用
 
 ```sql
-v_sql
-:='select F_IS_TEST('||101010||','||V_SUM_MONTH||','||V_LOG_ID||') from dual';
+v_sql:='select F_IS_TEST('||101010||','||V_SUM_MONTH||','||V_LOG_ID||') from dual';
 
 execute immediate v_sql into V_IS_TASK_TEST;
 ```
@@ -774,7 +747,7 @@ execute immediate v_sql into V_IS_TASK_TEST;
                 IN_SUM_MONTH="V_SUM_MONTH"
                 IN_LOG_ID="V_LOG_ID"/>
 <lang-set result="V_IS_TEST" value="callParams.return"/>
-        <!-- 如果是使用procedure-call调用函数，那么在result这个Map中的return键存的就是返回值，所以先提取出来，方便后续处理 -->
+<!-- 如果是使用procedure-call调用函数，那么在result这个Map中的return键存的就是返回值，所以先提取出来，方便后续处理 -->
 ```
 
 - 转换方式3
@@ -788,12 +761,11 @@ execute immediate v_sql into V_IS_TASK_TEST;
     int V_SUM_MONTH = executor.visitAs("V_SUM_MONTH", params);
     int IN_LOG_ID = executor.visitAs("IN_LOG_ID", params);
 
-    int ret=executor.invoke("F_IS_TEST", executor.mapBuilder(executor.newParams(params)) //
-    注意，内部之间调用，需要使用newParams来继承全局变量
-    .put("IN_CITY_CODE", 101010)
-    .put("IN_SUM_MONTH", V_SUM_MONTH)
-    .put("IN_LOG_ID", IN_LOG_ID)
-    .get()
+    int ret=executor.invoke("F_IS_TEST", executor.mapBuilder(executor.newParams(params)) // 注意，内部之间调用，需要使用newParams来继承全局变量
+      .put("IN_CITY_CODE", 101010)
+      .put("IN_SUM_MONTH", V_SUM_MONTH)
+      .put("IN_LOG_ID", IN_LOG_ID)
+      .get()
     );
     executor.visitSet(params,"V_IS_TEST",ret);
     return null;
@@ -809,12 +781,11 @@ execute immediate v_sql into V_IS_TASK_TEST;
 ```xml
 
 <lang-eval-java result="V_IS_TEST">
-    return executor.invoke("F_IS_TEST", executor.mapBuilder(executor.newParams(params)) //
-    注意，内部之间调用，需要使用newParams来继承全局变量
-    .put("IN_CITY_CODE", 101010)
-    .put("IN_SUM_MONTH", executor.visit("V_SUM_MONTH", params))
-    .put("IN_LOG_ID", executor.visit("IN_LOG_ID", params))
-    .get()
+    return executor.invoke("F_IS_TEST", executor.mapBuilder(executor.newParams(params)) // 注意，内部之间调用，需要使用newParams来继承全局变量
+      .put("IN_CITY_CODE", 101010)
+      .put("IN_SUM_MONTH", executor.visit("V_SUM_MONTH", params))
+      .put("IN_LOG_ID", executor.visit("IN_LOG_ID", params))
+      .get()
     );
 </lang-eval-java>
 ```
@@ -826,9 +797,9 @@ execute immediate v_sql into V_IS_TASK_TEST;
 
 <lang-eval-ts>
     V_IS_TEST=F_IS_TEST(
-    IN_CITY_CODE:101010,
-    IN_SUM_MONTH:${V_SUM_MONTH},
-    IN_LOG_ID:${V_LOG_ID}
+      IN_CITY_CODE:101010,
+      IN_SUM_MONTH:${V_SUM_MONTH},
+      IN_LOG_ID:${V_LOG_ID}
     );
 </lang-eval-ts>
 ```
@@ -845,28 +816,19 @@ execute immediate v_sql into V_IS_TASK_TEST;
 
 - 上面这几种方式中，使用TinyScript是最好最方便快捷的
 
-### Proc存储过程调用(内部之间调用)
+### 5.11 Proc存储过程调用(内部之间调用)
 
 - 其实函数掉调用时从存储过程的调用简化来的
 - 因此，很多部分和存储过程时基本一样的
 - 下面来看一下这个存储过程的定义
 
 ```sql
-PROCEDURE
-SP_PREDICATE_COND
-(
-IN_CITY_CODE
-NUMBER,
-IN_SUM_MONTH
-NUMBER,
-IN_COND_ID
-NUMBER,
-O_MSG
-OUT
-VARCHAR2,
-O_CODE
-OUT
-NUMBER
+PROCEDURE SP_PREDICATE_COND ( 
+IN_CITY_CODE NUMBER, 
+IN_SUM_MONTH NUMBER, 
+IN_COND_ID NUMBER, 
+O_MSG OUT VARCHAR2, 
+O_CODE OUT NUMBER
 )
 ```
 
@@ -887,8 +849,7 @@ NUMBER
 - 看一下原来怎么调用的
 
 ```sql
-v_sql
-:= ' begin SP_PREDICATE_COND(:1,:2,:3,:4,:5) ; end ; ';
+v_sql := ' begin SP_PREDICATE_COND(:1,:2,:3,:4,:5) ; end ; ';
 execute immediate v_sql using in V_CITY_CODE, in V_SUM_MONTH, in V_COND_ID, out V_MSG, out  V_CODE;
 ```
 
@@ -928,12 +889,11 @@ execute immediate v_sql using in V_CITY_CODE, in V_SUM_MONTH, in V_COND_ID, out 
 ```xml
 
 <lang-eval-java>
-    Map ret=executor.call("SP_PREDICATE_COND",executor.mapBuilder(executor.newParams(params)) //
-    注意，内部之间调用，需要使用newParams来继承全局变量
-    .put("IN_CITY_CODE",executor.visit("V_CITY_CODE",params))
-    .put("IN_SUM_MONTH",executor.visit("V_SUM_MONTH",params))
-    .put("IN_COND_ID",executor.visit("V_COND_ID",params))
-    .get()
+    Map ret=executor.call("SP_PREDICATE_COND",executor.mapBuilder(executor.newParams(params)) // 注意，内部之间调用，需要使用newParams来继承全局变量
+      .put("IN_CITY_CODE",executor.visit("V_CITY_CODE",params))
+      .put("IN_SUM_MONTH",executor.visit("V_SUM_MONTH",params))
+      .put("IN_COND_ID",executor.visit("V_COND_ID",params))
+      .get()
     );
     executor.visitSet(params,"V_MSG",executor.visit("O_MSG",ret));
     executor.visitSet(params,"V_CODE",executor.visit("O_CODE",ret));
@@ -947,14 +907,13 @@ execute immediate v_sql using in V_CITY_CODE, in V_SUM_MONTH, in V_COND_ID, out 
 ```xml
 
 <lang-eval-groovy>
-    def ret=executor.call("SP_PREDICATE_COND",executor.mapBuilder(executor.newParams(params)) //
-    注意，内部之间调用，需要使用newParams来继承全局变量
-    .putAll([
-    IN_CITY_CODE:params.V_CITY_CODE,
-    IN_SUM_MONTH:params.V_SUM_MONTH,
-    IN_COND_ID:params.V_COND_ID
-    ])
-    .get()
+    def ret=executor.call("SP_PREDICATE_COND",executor.mapBuilder(executor.newParams(params)) // 注意，内部之间调用，需要使用newParams来继承全局变量
+      .putAll([
+        IN_CITY_CODE:params.V_CITY_CODE,
+        IN_SUM_MONTH:params.V_SUM_MONTH,
+        IN_COND_ID:params.V_COND_ID
+      ])
+      .get()
     );
     params.V_MSG=ret.O_MSG;
     params.V_CODE=ret.O_CODE;
@@ -968,16 +927,16 @@ execute immediate v_sql using in V_CITY_CODE, in V_SUM_MONTH, in V_COND_ID, out 
 
 <lang-eval-ts>
     callParams=SP_PREDICATE_COND(
-    IN_CITY_CODE:${V_CITY_CODE},
-    IN_SUM_MONTH:${V_SUM_MONTH},
-    IN_COND_ID:${V_COND_ID}
+      IN_CITY_CODE:${V_CITY_CODE},
+      IN_SUM_MONTH:${V_SUM_MONTH},
+      IN_COND_ID:${V_COND_ID}
     );
     V_MSG=${callParams.O_MSG};
     V_CODE=${callParams.O_CODE};
 </lang-eval-ts>
 ```
 
-### Java程序调用XML过程(外部入口调用)
+### 5.12 Java程序调用XML过程(外部入口调用)
 
 - 这部分，直接使用上面内部调用的例子进行演示
 - Java程序调用，也就是在Java程序中调用XML的过程的方式
@@ -992,9 +951,9 @@ execute immediate v_sql using in V_CITY_CODE, in V_SUM_MONTH, in V_COND_ID, out 
 
 ```java
 int vIsTest = JdbcProcedureHelper.invoke("F_IS_TEST", (map) ->
-        map.put("IN_CITY_CODE", 101010)
-                .put("IN_SUM_MONTH", 202501)
-                .put("IN_LOG_ID", 1)
+            map.put("IN_CITY_CODE", 101010)
+            .put("IN_SUM_MONTH", 202501)
+            .put("IN_LOG_ID", 1)
 );
 ```
 
@@ -1003,9 +962,9 @@ int vIsTest = JdbcProcedureHelper.invoke("F_IS_TEST", (map) ->
 ```java
 Map<String, Object> ret = JdbcProcedureHelper.call("SP_PREDICATE_COND", (map) ->
         map.put("IN_CITY_CODE", 101010)
-                .put("IN_SUM_MONTH", 202501)
-                .put("IN_COND_ID", 6666)
-                .get()
+          .put("IN_SUM_MONTH", 202501)
+          .put("IN_COND_ID", 6666)
+          .get()
 );
 String oMsg = (String) ret.get("O_MSG");
 Integer oCode = (Integer) ret.get("O_CODE");
@@ -1053,24 +1012,21 @@ String oMsg = executor.visitAs(ret, "O_MSG");
 Integer oCode = executor.visitAs(ret, "O_CODE");
 ```
 
-### 游标转换
+### 5.13 游标转换
 
 - 游标cursor也是一个比较常见的现象
 - 现在看一下原来的语句
 - 这个语句比较简单，只是一个实例，没有实际的意义
 
 ```sql
-cur_obj
-sys_refcursor; -- 声明游标
+cur_obj sys_refcursor; -- 声明游标
 -- 游标的语句
-v_sql
-:='select a.USER_NAME,a.nick_name from '||V_SCHEMA_PREFIX||'SYS_USER a where a.STATUS='||V_USER_SATUS||' and a.DEL_FLAG='||V_DEL_FLAG;
+v_sql :='select a.USER_NAME,a.nick_name from '||V_SCHEMA_PREFIX||'SYS_USER a where a.STATUS='||V_USER_SATUS||' and a.DEL_FLAG='||V_DEL_FLAG;
 OPEN cur_obj FOR v_sql; -- 打开游标
 
 LOOP
 FETCH cur_obj INTO v_user_name,v_nick_name ; -- 将游标的结果保存到变量中
-            EXIT
-WHEN cur_obj%NOTFOUND; -- 循环游标，直到没有数据为止
+            EXIT WHEN cur_obj%NOTFOUND; -- 循环游标，直到没有数据为止
 
             -- 游标执行的操作
 update sys_user
@@ -1108,7 +1064,7 @@ END LOOP;
 </sql-cursor>
 ```
 
-### for循环转换
+### 5.14 for循环转换
 
 - 有时候，也会存在for春环变量的使用
 - 也就是for...in的语法
@@ -1147,15 +1103,14 @@ END LOOP;
 </sql-cursor>
 ```
 
-### for-i型循环
+### 5.15 for-i型循环
 
 - 这种其实就是for-i语句
 - 直接进行转换即可
 - 原始语句
 
 ```sql
-v_size
-:=0;
+v_size :=0;
 for v_i in 2..v_count loop
     v_size:=v_size+v_i;
 end loop;
@@ -1171,7 +1126,7 @@ end loop;
 
 <lang-set result="v_size" value.int="0"/>
 <lang-fori item="v_i" begin.int="2" end="v_count" incr.int="1">
-<lang-set result="v_size" value.eval="v_size+v_i"/>
+    <lang-set result="v_size" value.eval="v_size+v_i"/>
 </lang-fori>
 ```
 
@@ -1182,28 +1137,24 @@ end loop;
 ```shell
 <lang-eval-ts>
     v_size=0;
-    for(v_i=2;${v_i} &lt; ${v_count}; v_i=${v_i}+1){
+    for(v_i=2;${v_i} < ${v_count}; v_i=${v_i}+1){
         v_size=${v_size}+${v_i};
     };
 </lang-eval-ts>
 ```
 
-### while型循环
+### 5.16 while型循环
 
 - 这种语句其实也比较常见
 - 直接转换即可
 - 原始语句
 
 ```sql
-v_size
-:=0;
-v_i
-:=0;
-while
-v_i < v_count loop
+v_size :=0;
+v_i :=0;
+while v_i < v_count loop
       v_size:=v_size+v_i;
-      v_i
-=v_i+1;
+      v_i =v_i+1;
 end loop;
 ```
 
@@ -1213,9 +1164,9 @@ end loop;
 
 <lang-set result="v_size" value.int="0"/>
 <lang-set result="v_i" value.int="0"/>
-<lang-while test="v_i &lt; v_count">
-<lang-set result="v_size" value.eval="v_size+v_i"/>
-<lang-set result="v_i" value.eval="v_i+1"/>
+<lang-while test="v_i < v_count">
+  <lang-set result="v_size" value.eval="v_size+v_i"/>
+  <lang-set result="v_i" value.eval="v_i+1"/>
 </lang-while>
 ```
 
@@ -1227,41 +1178,36 @@ end loop;
 <lang-eval-ts>
     v_size=0;
     v_i=0;
-    while (${v_i} &lt; ${v_count} ) {
-    v_size=${v_size}+${v_i};
-    v_i=${v_i}+1;
+    while (${v_i} < ${v_count} ) {
+      v_size=${v_size}+${v_i};
+      v_i=${v_i}+1;
     };
 </lang-eval-ts>
 ```
 
-### SQL语句拼接与执行
+### 5.17 SQL语句拼接与执行
 
 - SQL语句拼接是一个比较常见的场景
 - 下面将介绍进行语句拼接，并执行拼接之后的语句的场景
 - 先来看源语句
 
 ```sql
-v_sql
-:='insert into sys_user (name,age';
-if
-v_all = 1 then
+v_sql :='insert into sys_user (name,age';
+if v_all = 1 then
    v_sql:=v_sql||',status,del_flag)';
 else 
     v_sql:=v_sql||')';
 end if;
 
-if
-v_thrid=1 then
+if v_thrid=1 then
    v_sql:=v_sql||' select user_name,user_age from o_sys_user ';
 else
     v_sql:=v_sql||' select username,age from syn_user ';
 end if;
 
-v_sql
-:=v_sql||' where 1=1 ';
-     
-if
-v_inc_date is not null then
+v_sql :=v_sql||' where 1=1 ';
+   
+if v_inc_date is not null then
    v_sql:=v_sql||' and modify_time > '||v_inc_date;
 end if;
 
@@ -1281,36 +1227,36 @@ execute immediate v_sql;
 <lang-set result="v_sql" value.string="insert into sys_user (name,age"/>
 
 <lang-choose>
-<lang-when test="v_all == 1">
-    <lang-render result="v_sql" _lang="sql">
-        ${v_sql},status,del_flag)
-    </lang-render>
-</lang-when>
-<lang-otherwise>
-    <lang-render result="v_sql" _lang="sql">
-        ${v_sql})
-    </lang-render>
-</lang-otherwise>
+  <lang-when test="v_all == 1">
+      <lang-render result="v_sql" _lang="sql">
+          ${v_sql},status,del_flag)
+      </lang-render>
+  </lang-when>
+  <lang-otherwise>
+      <lang-render result="v_sql" _lang="sql">
+          ${v_sql})
+      </lang-render>
+  </lang-otherwise>
 </lang-choose>
 
 <lang-choose>
-<lang-when test="v_thrid == 1">
-    <lang-render result="v_sql" _lang="sql">
-        ${v_sql} select user_name,user_age from o_sys_user
-    </lang-render>
-</lang-when>
-<lang-otherwise>
-    <lang-render result="v_sql" _lang="sql">
-        ${v_sql} select username,age from syn_user
-    </lang-render>
-</lang-otherwise>
+  <lang-when test="v_thrid == 1">
+      <lang-render result="v_sql" _lang="sql">
+          ${v_sql} select user_name,user_age from o_sys_user
+      </lang-render>
+  </lang-when>
+  <lang-otherwise>
+      <lang-render result="v_sql" _lang="sql">
+          ${v_sql} select username,age from syn_user
+      </lang-render>
+  </lang-otherwise>
 </lang-choose>
 
 <lang-set result="v_sql" value.render="${v_sql} where 1=1 "/>
 
 <lang-eval-ts>
 if (${v_inc_date}!= null) {
-v_sql=${v_sql}+' and modify_time > '+v_inc_date;
+    v_sql=${v_sql}+' and modify_time > '+v_inc_date;
 };
 </lang-eval-ts>
 
@@ -1359,21 +1305,21 @@ v_sql=${v_sql}+' and modify_time > '+v_inc_date;
 <lang-eval-ts>
     v_sql='insert into sys_user (name,age';
     if (${v_all} == 1 ){
-    v_sql=${v_sql}+',status,del_flag)';
+        v_sql=${v_sql}+',status,del_flag)';
     }else{
-    v_sql=${v_sql}+')';
+        v_sql=${v_sql}+')';
     };
 
     if (${v_thrid}==1 ){
-    v_sql=${v_sql}+' select user_name,user_age from o_sys_user ';
+        v_sql=${v_sql}+' select user_name,user_age from o_sys_user ';
     }else{
-    v_sql=${v_sql}+' select username,age from syn_user ';
+        v_sql=${v_sql}+' select username,age from syn_user ';
     };
 
     v_sql=${v_sql}+' where 1=1 ';
 
     if( ${v_inc_date} != null ){
-    v_sql=${v_sql}+' and modify_time > '+${v_inc_date};
+        v_sql=${v_sql}+' and modify_time > '+${v_inc_date};
     };
 
 </lang-eval-ts>
@@ -1384,7 +1330,7 @@ v_sql=${v_sql}+' and modify_time > '+v_inc_date;
 - 当然执行SQL，不一定非要用sql-update标签
 - 根据实际场景，选择合适的sql-标签进行使用
 
-### 异常处理的转换
+### 5.18 异常处理的转换
 
 - 异常处理的转换比较复杂
 - 同时有一部分异常，因为是基于JDBC的，并不能得到和原始的写法一样的异常类型
@@ -1394,7 +1340,7 @@ v_sql=${v_sql}+' and modify_time > '+v_inc_date;
 - 因此，本节将只会介绍一些能够进行区分的异常类型的转换过程
 - 未提及的，需要根据实际情况决定如何转换
 
-#### 普通一般性异常（exception when others then）
+#### 5.18.1 普通一般性异常（exception when others then）
 
 - 这种异常在不同的数据库中可能表达方式不一样
 - 主要的含义就是处理一切发生的异常
@@ -1404,38 +1350,26 @@ v_sql=${v_sql}+' and modify_time > '+v_inc_date;
 - 下面是原始语句
 
 ```sql
-PROCEDURE
-SP_TEST
-(
-O_CODE
-OUT
-NUMBER,
-O_MSG
-OUT
-VARCHAR2,
-IN_SUM_DATE
-IN
-NUMBER
+PROCEDURE SP_TEST ( 
+O_CODE OUT NUMBER, 
+O_MSG OUT VARCHAR2, 
+IN_SUM_DATE IN NUMBER
 )
 AS
     v_sql varchar2(4000);
 BEGIN
-    v_sql
-:='delete from xxx where '; -- 错误的语句
+    v_sql:='delete from xxx where '; -- 错误的语句
 execute immediate v_sql;
 
 -- 执行成功设置正常执行返回值
-O_CODE
-:=0;
-    O_MSG
-:='ok';
+    O_CODE :=0;
+    O_MSG :='ok';
 
 EXCEPTION
   WHEN OTHERS THEN -- 发生其他异常
     -- 执行失败设置错误执行返回值
     O_CODE:=-1;
-    O_MSG
-:='error: code='||SQLCODE||', msg='||SQLERRM;
+    O_MSG:='error: code='||SQLCODE||', msg='||SQLERRM;
 end SP_TEST;
 ```
 
@@ -1477,25 +1411,16 @@ end SP_TEST;
 - 直接看原始语句
 
 ```sql
-PROCEDURE
-SP_TEST
-(
-O_CODE
-OUT
-NUMBER,
-O_MSG
-OUT
-VARCHAR2,
-IN_SUM_DATE
-IN
-NUMBER
+PROCEDURE SP_TEST ( 
+O_CODE OUT NUMBER, 
+O_MSG OUT VARCHAR2, 
+IN_SUM_DATE IN NUMBER
 )
 AS
     v_sql varchar2(4000);
 BEGIN
-    v_sql
-:='delete from xxx where '; -- 错误的语句
-         
+    v_sql :='delete from xxx where '; -- 错误的语句
+       
     -- 内部语句块
 begin
 execute immediate v_sql;
@@ -1505,15 +1430,13 @@ EXCEPTION
         -- 在此处打印日志
         SP_LOG('SP_TEST',IN_SUM_DATE,'execute delete error: code='||SQLCODE||', msg='||SQLERRM);
 end;
-    
+  
     -- 执行其他后续处理
-    
-    
+  
+  
     -- 执行成功设置正常执行返回值
-    O_CODE
-:=0;
-    O_MSG
-:='ok';
+    O_CODE :=0;
+    O_MSG :='ok';
 
 end SP_TEST;
 ```
@@ -1557,7 +1480,7 @@ end SP_TEST;
 </procedure>
 ```
 
-#### 无数据返回异常(exception when NO_DATA_FOUND then)
+#### 5.18.2 无数据返回异常(exception when NO_DATA_FOUND then)
 
 - 这种异常发生在进行查询时
 - 查询没有数据，一般来说，这是一种正常情况
@@ -1570,13 +1493,11 @@ end SP_TEST;
 - 查询不到返回NULL
 
 ```sql
-v_sql
-:='select * from sys_user where id='||v_user_id;
+v_sql:='select * from sys_user where id='||v_user_id;
 
 begin
 execute immediate v_sql into v_user;
-O_USER
-:=V_USER;
+O_USER:=V_USER;
 exception 
     when NO_DATA_FOUND then
     O_USER:=null;
@@ -1595,20 +1516,863 @@ end;
 <sql-query-row script="v_sql" result="v_user" result-type="Map"/>
 
 <lang-choose>
-<lang-when test="v_user==null">
-    <lang-set result="O_USER" value.null=""/>
-</lang-when>
-<lang-otherwise>
-    <lang-set result="O_USER" value="v_user"/>
-</lang-otherwise>
+  <lang-when test="v_user==null">
+      <lang-set result="O_USER" value.null=""/>
+  </lang-when>
+  <lang-otherwise>
+      <lang-set result="O_USER" value="v_user"/>
+  </lang-otherwise>
 </lang-choose>
 ```
 
-## 内建变量
+## 六、完整转换案例
+
+- 经过上面的简单讲解之后
+- 相信已经对转换有了一定的理解
+- 现在，使用一些贴近真实情况的案例
+- 进行完整的对照讲解
+- 以加强理解
+- 由于一些原因，案例中涉及到的表名。列名等名称标识符会被变更
+- 因此，可能在你看来是没有任何业务价值的
+- 甚至毫无逻辑可言
+- 但是，请注意，此处说明的是语法的转换
+- 而不是其他的内容
+- 因此，请忽略这些业务上的逻辑
+- 只关注域语法的转换即可
+
+### 6.1 迁移转换纲领
+
+- 为了方便迁移转换之后与就代码进行对照
+- 以及在调试过程中发现问题时，能够方便的与旧代码对照
+- 以排查可能得问题
+- 因此，有以下几点建议
+  - 原来的注释，也保留
+  - 原来的空行，也尽量保留
+  - 原来的参数申明，可以保留，也可以不保留
+    - 因为在XML中，在Map环境下，声明一个值为null的变量
+    - 和不声明这个变量，在访问这个变量时，没有本质的区别
+  - 原来的参数声明并赋值，这样的声明必须保留，否则将会导致缺失默认值
+  - 原来的参数声明的是复杂类型，这时候可以保留，也可以不保留
+  - 原来的形参声明，保留，以方便调用方知道需要传递的参数
+  - 类型对照关系
+    - 原来的number,一般情况下可用int,long表示即可，除非确认为小数类型，就是用double即可
+    - 原来的varchar,clob等字符类型，直接使用string表示即可
+  - 变量大小写问题，统一为大写或者小写
+    - 大部分数据库都不区分变量名称的大小写
+    - 因此需要根据自身旧代码的情况，统一为大小或者小写
+    - 比如Oracle的统一为大写风格，MySQL的统一为小写风格
+
+### 6.2 简单函数 F_GET_PARAM_NAME
+
+- 这个是函数，比较简单，就是根据ID获取名称
+- 简单的一条查询语句
+- 原始代码
+
+```sql
+FUNCTION  F_GET_PARAM_NAME( IN_PARAM_ID NUMBER) RETURN VARCHAR2  AS
+  /**************************************************************
+  *  获取参数名称
+  **************************************************************/
+      v_sql     varchar2(4000);
+      v_result  varchar2(4000);
+  BEGIN
+      IF IN_PARAM_ID IS NULL THEN
+          RETURN NULL;
+      END IF;
+    
+      v_sql := 'select param_name from sys_dict_param where param_id='||IN_PARAM_ID;
+      execute immediate v_sql into v_result ;
+
+      return v_result;
+  EXCEPTION WHEN NO_DATA_FOUND THEN
+      return null ;
+  WHEN OTHERS THEN
+      RETURN -1;
+  END F_GET_PARAM_NAME;
+```
+
+- 转换后XML
+
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+<procedure id="F_GET_PARAM_NAME"
+           IN_PARAM_ID.int=""
+           return.string="">
+    <!--
+    /**************************************************************
+    *  获取参数名称
+    **************************************************************/
+    -->
+    <!-- 原来有捕获异常，因此使用try语句块 -->
+    <lang-try>
+        <lang-body>
+
+            <!-- 原来进行了判空，直接返回null值 -->
+            <lang-if test="IN_PARAM_ID==null">
+                <lang-return value.null=""/> <!-- 原来直接返回null值，这里也使用.null修饰符直接返回null -->
+            </lang-if>
+        
+            <!--
+            原来先拼接SQL，再执行SQL
+            没有复杂的拼接场景
+            转换后可以直接使用占位符直接拼接并执行
+            原来的IN_PARAM_ID参数为number类型，因此是一个参数，使用绑定变量#{}占位符
+            如果是一个varchar类型的，则需要考虑是否是绑定变量，是则使用#{}占位符
+            如果不是绑定变量，如果是SQL语句的一部分，则使用模板渲染${}占位符
+            同时可能需要考虑对单引号的转义问题
+            原来语句的执行结果保存到V_RESULT中，类型为varchar
+            因此结果result也保存到V_RESULT中，类型result-type对应为string
+            同时原来执行是直接保存到变量，
+            因此结果集为一行数据，就可选sql-query-row读取一行
+            语句中结果集只有一列，也就是只返回一个值，则选用sql-query-object更好
+            -->
+        
+            <sql-query-object result="V_RESULT" result-type="string">
+                select param_name from sys_dict_param where param_id=#{IN_PARAM_ID}
+            </sql-query-object>
+
+            <!-- 
+            将结果进行返回
+            需要注意，lang-return返回的值是通过value属性指定的
+            不是标签内部的内容
+             -->
+            <lang-return value="V_RESULT"/>
+        </lang-body>
+        <lang-catch> <!-- 原来的异常捕获了others异常，也就是所有异常，因此可以不用指明type -->
+            <lang-return value.string="-1"/>
+        </lang-catch>
+    </lang-try>
+</procedure>
+```
+
+- 转换后XML，变体，分步骤绑定变量执行
+
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+<procedure id="F_GET_PARAM_NAME"
+           IN_PARAM_ID.int=""
+           return.string="">
+    <!--
+    /**************************************************************
+    *  获取参数名称
+    **************************************************************/
+    -->
+    <!-- 原来有捕获异常，因此使用try语句块 -->
+    <lang-try>
+        <lang-body>
+
+            <!-- 原来进行了判空，直接返回null值 -->
+            <lang-if test="IN_PARAM_ID==null">
+                <lang-return value.null=""/> <!-- 原来直接返回null值，这里也使用.null修饰符直接返回null -->
+            </lang-if>
+        
+            <!--
+            原来先拼接SQL，再执行SQL
+            严格按照原来的逻辑来
+            -->
+        
+            <!-- 
+            先拼接SQL，这里为了使用绑定变量，避免SQL注入
+            使用sql-script进行获取BindSql对象
+            这样可以使用#{}进行参数绑定，而不是使用${}进行模板渲染
+            -->
+            <sql-script result="V_SQL">
+              select param_name from sys_dict_param where param_id=#{IN_PARAM_ID}
+            </sql-script>
+        
+            <!--
+            直接将V_SQL中的BindSql对象作为要执行的SQL传递给script作为sql-query-object执行的SQL语句
+            其他的返回值和返回值类型也一样即可
+            -->
+            <sql-query-object result="V_RESULT" script="V_SQL" result-type="string"/>
+
+            <!-- 将结果进行返回 -->
+            <lang-return value="V_RESULT"/>
+        </lang-body>
+        <lang-catch> <!-- 原来的异常捕获了others异常，也就是所有异常，因此可以不用指明type -->
+            <lang-return value.string="-1"/>
+        </lang-catch>
+    </lang-try>
+</procedure>
+```
+
+- 转换后XML，变体，分步骤模板渲染执行
+
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+<procedure id="F_GET_PARAM_NAME"
+           IN_PARAM_ID.int=""
+           return.string="">
+    <!--
+    /**************************************************************
+    *  获取参数名称
+    **************************************************************/
+    -->
+    <!-- 原来有捕获异常，因此使用try语句块 -->
+    <lang-try>
+        <lang-body>
+
+            <!-- 原来进行了判空，直接返回null值 -->
+            <lang-if test="IN_PARAM_ID==null">
+                <lang-return value.null=""/> <!-- 原来直接返回null值，这里也使用.null修饰符直接返回null -->
+            </lang-if>
+        
+            <!--
+            原来先拼接SQL，再执行SQL
+            严格按照原来的逻辑来
+            -->
+        
+            <!-- 
+            先拼接SQL，这里直接进行字符串渲染，因为IN_PARAM_ID是number类型
+            就刷直接拼接也没什么问题，因此可以使用lang-render来完成
+            在使用lang-render/lang-string时，可以使用_lang属性指定内部的语言类型
+            这里指定为sql,这样可以借助IDE插件的高亮能力，提供该语言的语法高亮等特性
+            因为，使用velocity进行模板渲染，因此，如果IN_PARAM_ID的值为null时
+            velocity的默认行为是保留原样，这里希望是替换为空字符串
+            因此使用$!{}进行渲染
+            -->
+            <lang-render result="V_SQL" _lang="sql">
+              select param_name from sys_dict_param where param_id=$!{IN_PARAM_ID}
+            </lang-render>
+        
+            <!--
+            直接将V_SQL中的string对象作为要执行的SQL传递给script作为sql-query-object执行的SQL语句
+            其他的返回值和返回值类型也一样即可
+            -->
+            <sql-query-object result="V_RESULT" script="V_SQL" result-type="string"/>
+
+            <!-- 将结果进行返回 -->
+            <lang-return value="V_RESULT"/>
+        </lang-body>
+        <lang-catch> <!-- 原来的异常捕获了others异常，也就是所有异常，因此可以不用指明type -->
+            <lang-return value.string="-1"/>
+        </lang-catch>
+    </lang-try>
+</procedure>
+```
+
+### 6.3 简单函数 F_GET_TABLE_COLUMNS
+
+- 这个是函数，比较简单，就是获取指定表的所有列名拼接并返回
+- 原始代码
+
+```sql
+FUNCTION F_GET_TABLE_COLUMNS(IN_SEL_TABLE IN VARCHAR2,IN_SEL_OWNER IN VARCHAR2) RETURN VARCHAR2
+        IS
+  /**************************************************************
+  * 功能：根据表明获取对应的所有表字段
+  *   返回值为： 表字段的字符串
+  * @IN_SEL_TABLE              查询的表
+  * @IN_FROM_TABLE                查询的表
+  **************************************************************/
+        v_columns VARCHAR2(4000);
+        v_sql LONG ;
+    BEGIN
+        FOR i IN ( SELECT DISTINCT A.COLUMN_NAME FROM all_tab_columns a WHERE upper(A.TABLE_NAME)=UPPER(IN_SEL_TABLE) AND upper(A.OWNER)=UPPER(IN_SEL_OWNER) )LOOP
+                v_columns:=v_columns||I.COLUMN_NAME||' ,';
+            END LOOP ;
+        v_columns:= rtrim(v_columns,',');
+        RETURN v_columns;
+    END ;
+```
+
+- 转换XML，直接复刻逻辑使用cursor
+
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+<procedure id="F_GET_TABLE_COLUMNS"
+           IN_SEL_TABLE.string=""
+           IN_SEL_OWNER.string=""
+           return.string="">
+    <!--
+    /**************************************************************
+
+      * 功能：根据表明获取对应的所有表字段
+      *   返回值为： 表字段的字符串
+      * @IN_SEL_TABLE              查询的表
+      * @IN_FROM_TABLE                查询的表
+      **************************************************************/
+    -->
+  
+    <!-- 因为目标是拼接字符串，因此先赋值一个空字符串 -->
+    <lang-set result="V_COLUMNS" value.string=""/>
+  
+    <!-- 
+    原来是一个for循环语句，对查询结果进行循环
+    因此，这里使用游标循环方式sql-cursor
+    原来的循环迭代变量为I，这里也设置循环迭代行为 item="I"
+     -->
+    <sql-cursor item="I">
+        <!-- 
+        游标固定使用sql-query-list来指定查询的语句
+        这里直接照搬原来的语句下来
+        但是，逻辑进行调整一下，可以不传库名
+        -->
+        <sql-query-list>
+            SELECT DISTINCT A.COLUMN_NAME FROM all_tab_columns a WHERE upper(A.TABLE_NAME)=UPPER(#{IN_SEL_TABLE})
+            <if test="IN_SEL_OWNER!=null and IN_SEL_OWNER!=''">
+                AND upper(A.OWNER)=UPPER(#{IN_SEL_OWNER})
+            </if>
+        </sql-query-list>
+        <!-- 
+        游标固定使用lang-body进行行迭代
+        -->
+        <lang-body>
+            <!-- 
+            原来进行了语句的拼接，现在也进行语句的拼接
+            不过这里使用了.render修饰符进行模板渲染拼接
+            默认情况下查询出来的列名会强制转换为大写，因此这里是 I.COLUMN_NAME
+            -->
+            <lang-set result="V_COLUMNS" value.render="$!{V_COLUMNS}$!{I.COLUMN_NAME},"/>
+        </lang-body>
+    </sql-cursor>
+
+    <!--
+    原来游标结束之后，进行了rtrim
+    这里适应TinyScript也进行rtrim
+    -->
+    <lang-eval-ts>
+        V_COLUMNS=rtrim(${V_COLUMNS},',');
+    </lang-eval-ts>
+
+    <!-- 最后返回结果 -->
+    <lang-return value="V_COLUMNS"/>
+</procedure>
+```
+
+- 转换XML，使用TinyScript进行简化
+
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+<procedure id="F_GET_TABLE_COLUMNS"
+           IN_SEL_TABLE.string=""
+           IN_SEL_OWNER.string=""
+           return.string="">
+    <!--
+    /**************************************************************
+
+      * 功能：根据表明获取对应的所有表字段
+      *   返回值为： 表字段的字符串
+      * @IN_SEL_TABLE              查询的表
+      * @IN_FROM_TABLE                查询的表
+      **************************************************************/
+    -->
+
+  <!--
+  直接查询出所有的结果集，保存到 rowList 中
+  这时候，rowList 实际是 List 对象，内部都是 Map 元素
+  -->
+  <sql-query-list result="rowList">
+    SELECT DISTINCT A.COLUMN_NAME FROM all_tab_columns a WHERE upper(A.TABLE_NAME)=UPPER(#{IN_SEL_TABLE})
+    <if test="IN_SEL_OWNER!=null and IN_SEL_OWNER!=''">
+      AND upper(A.OWNER)=UPPER(#{IN_SEL_OWNER})
+    </if>
+  </sql-query-list>
+  
+  <lang-eval-ts>
+    // 初始化空字符串
+    V_COLUMNS='';
+    // 对 rowList 进行迭代，迭代对象为 row，因此 row 就是一行数据，就是一个 Map 对象
+    foreach(row : ${rowList}){
+        // 进行字符串拼接
+        V_COLUMNS=$!{V_COLUMNS}+$!{row.COLUMN_NAME}+',';
+    };
+    // 进行 rtrim
+    V_COLUMNS=rtrim(${V_COLUMNS},',');
+  </lang-eval-ts>
+
+    <!-- 最后返回结果 -->
+    <lang-return value="V_COLUMNS"/>
+</procedure>
+```
+
+- 转换XML，使用Java进行简化
+
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+<procedure id="F_GET_TABLE_COLUMNS"
+           IN_SEL_TABLE.string=""
+           IN_SEL_OWNER.string=""
+           return.string="">
+    <!--
+    /**************************************************************
+
+      * 功能：根据表明获取对应的所有表字段
+      *   返回值为： 表字段的字符串
+      * @IN_SEL_TABLE              查询的表
+      * @IN_FROM_TABLE                查询的表
+      **************************************************************/
+    -->
+
+  <!--
+  直接查询出所有的结果集，保存到 rowList 中
+  这时候，rowList 实际是 List 对象，内部都是 Map 元素
+  -->
+  <sql-query-list result="rowList">
+    SELECT DISTINCT A.COLUMN_NAME FROM all_tab_columns a WHERE upper(A.TABLE_NAME)=UPPER(#{IN_SEL_TABLE})
+    <if test="IN_SEL_OWNER!=null and IN_SEL_OWNER!=''">
+      AND upper(A.OWNER)=UPPER(#{IN_SEL_OWNER})
+    </if>
+  </sql-query-list>
+
+  <!--
+  因为这里使用到了泛型，
+  因此内部使用CDATA进行包裹
+  避免符号转义
+  最后使用return null返回，这是必须的，eval-java必须要返回一个值
+  但是这里已经设置了值，就不需要返回值了，所以直接放回null即可
+  -->
+  <lang-eval-java>
+    <![CDATA[
+            List<Map<String,Object>> list = executor.visitAs("rowList", params);
+            String columns = list.stream()
+                    .map(e -> e.get("COLUMN_NAME"))
+                    .map(String::valueOf)
+                    .collect(java.util.stream.Collectors.joining(","));
+            executor.visitSet(params,"V_COLUMNS",columns);
+            return null;
+        ]]>
+  </lang-eval-java>
+
+    <!-- 最后返回结果 -->
+    <lang-return value="V_COLUMNS"/>
+</procedure>
+```
+
+- 转换XML，使用Groovy进行简化
+
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+<procedure id="F_GET_TABLE_COLUMNS"
+           IN_SEL_TABLE.string=""
+           IN_SEL_OWNER.string=""
+           return.string="">
+    <!--
+    /**************************************************************
+
+      * 功能：根据表明获取对应的所有表字段
+      *   返回值为： 表字段的字符串
+      * @IN_SEL_TABLE              查询的表
+      * @IN_FROM_TABLE                查询的表
+      **************************************************************/
+    -->
+
+  <!--
+  直接查询出所有的结果集，保存到 rowList 中
+  这时候，rowList 实际是 List 对象，内部都是 Map 元素
+  -->
+  <sql-query-list result="rowList">
+    SELECT DISTINCT A.COLUMN_NAME FROM all_tab_columns a WHERE upper(A.TABLE_NAME)=UPPER(#{IN_SEL_TABLE})
+    <if test="IN_SEL_OWNER!=null and IN_SEL_OWNER!=''">
+      AND upper(A.OWNER)=UPPER(#{IN_SEL_OWNER})
+    </if>
+  </sql-query-list>
+  
+  <!--
+  因为这里使用到了泛型，
+  因此内部使用CDATA进行包裹
+  避免符号转义
+  groovy默认将最后一条语句作为返回值，
+  因此不需要显式的使用return语句
+  -->
+  <lang-eval-groovy>
+    <![CDATA[
+            params.V_COLUMNS = ((List<Map<String,Object>>) params.rowList).stream()
+                    .map(e -> e.COLUMN_NAME)
+                    .collect(java.util.stream.Collectors.joining(","))
+        ]]>
+  </lang-eval-groovy>
+
+    <!-- 最后返回结果 -->
+    <lang-return value="V_COLUMNS"/>
+</procedure>
+```
+
+### 6.4 简单存储过程 SP_GET_PARAM_VALUE
+
+- 这个是存储过程，并且是在包里面的过程
+- 所以有些变量是在包里面定义与初始化的
+- 也就是对应迁移后的 global. 中的变量
+- 并且过程属于包 PKG_PARAM 
+- 内部也调用了同一个包下的其他过程或者函数
+- 迁移之后，包的概念就不存在了
+- 因此没有了包的概念，变为了全局变量维持
+
+- 原始代码
+
+```sql
+
+PROCEDURE SP_GET_PARAM_VALUE(IN_CITY_CODE        NUMBER,
+                                          IN_SUM_MONTH      NUMBER,
+                                          IN_DICT_TYPE_ID VARCHAR2,
+                                          IN_FORMULA_ID     NUMBER,
+                                          IN_TASK_ID        NUMBER,
+                                          IN_INSTANCE_ID    NUMBER,
+                                          IN_PARAM_ID       NUMBER,
+                                          IN_PARTITION_ID   NUMBER,
+                                          O_PARAM_VALUE     OUT VARCHAR2,
+                                          O_FLAG            OUT NUMBER)    AS
+        /**************************************************************
+        *  获取规则配置
+        **************************************************************/
+        V_CITY_CODE      NUMBER(4);
+        V_SUM_MONTH      NUMBER(6);
+        V_DICT_TYPE_ID VARCHAR2(12);
+        V_TASK_ID        NUMBER(12);
+        V_SQL            LONG;
+        V_PARTITION_ID NUMBER(2);
+        V_PARAMS  varchar(32767);
+        V_PARAM_NAME     VARCHAR2(128);
+        V_PARAM_DESC     VARCHAR2(1024);
+        v_param_id number(12);
+        v_GET_TAB_ALIAS varchar2(128);
+        v_GET_column varchar2(512);
+        V_PARAM_TYPE number(6);
+        v_instance_id number(12);
+        v_c VARCHAR2(4000);
+        V_IS_DICT_CODE             NUMBER(2);
+        V_FORMULA_ID    SYS_DICT_FORMULA.FORMULA_ID%TYPE;
+        v_ERROR_INFO            VARCHAR2(4000);
+        V_FLAG number(10);
+BEGIN
+
+    --============================================ 变量初始化=============================================--
+
+    V_CITY_CODE      := IN_CITY_CODE;
+    V_SUM_MONTH      := IN_SUM_MONTH;
+    V_DICT_TYPE_ID := IN_DICT_TYPE_ID;
+    V_TASK_ID        := IN_TASK_ID;
+    V_FORMULA_ID     := IN_FORMULA_ID;
+    v_instance_id :=IN_instance_id   ;
+    v_param_id    :=IN_param_id      ;
+    v_PARTITION_ID:=IN_PARTITION_ID  ;
+
+    v_ERROR_INFO :='FORMULA_ID='||V_FORMULA_ID||',instance_id='||v_instance_id||',param_id='||v_param_id||',PARTITION_ID='||v_PARTITION_ID||' ';
+    --============================================ 开始酬金规则有效性判断=============================================--
+
+
+    V_PARAMS    :='';
+
+    v_ERROR_DETAIL:='获取SYS_DICT_PARAM信息 步骤';
+
+    v_sql:='select  t2.param_name,t2.param_desc
+                from   '||V_SCHEMA||'.PKG_PARAM.SYS_DICT_PARAM t2
+                where  T2.param_id = '||v_param_id||'    ';
+
+    execute immediate v_sql into V_PARAM_NAME,V_PARAM_DESC  ;
+
+
+    v_sql:=
+            'select '||V_SCHEMA||'.PKG_PARAM.F_GET_TAB_ALIAS('||v_param_id||','||v_PARTITION_ID||')
+         from dual';
+    v_ERROR_DETAIL:='FORMULA_ID='||V_FORMULA_ID||' param_id='||v_param_id||' PARTITION_ID='||v_PARTITION_ID||'  在 SP_GET_PARAM_VALUE   中F_GET_TAB_ALIAS 步骤';
+
+    execute immediate v_sql into v_GET_TAB_ALIAS;
+    -- 参数类型 时间类型时转换格式
+    v_sql:=
+            'select '||V_SCHEMA||'.PKG_PARAM.F_GET_PARAM_TYPE('||v_param_id||')
+          from dual';
+    v_ERROR_DETAIL:=' F_GET_PARAM_TYPE 步骤';
+
+    execute immediate v_sql into V_PARAM_TYPE;
+
+    if V_PARAM_TYPE =3 THEN
+
+
+        v_GET_column:= 'decode('||v_GET_TAB_ALIAS||'.'||V_PARAM_NAME||',null,'' 空'',to_char('||v_GET_TAB_ALIAS||'.'||V_PARAM_NAME||',''yyyy-mm-dd hh24:mi:ss''))';
+    ELSE
+
+
+        v_sql:='select count(1) from '||V_SCHEMA||'.PKG_PARAM.SYS_DICT_PARAM  where  param_id='||v_param_id||'
+                          AND is_code = 1
+                          AND UPPER(code_sql) NOT LIKE ''%SUM_MONTH%''
+                          AND UPPER(code_sql) NOT LIKE ''%SUM_DATE%''
+                          AND UPPER(code_sql) NOT LIKE ''%EX_MONTH%''
+                          AND UPPER(code_sql) NOT LIKE ''%EX_DATE%''
+                          AND CODE_SQL IS NOT NULL ';
+        v_ERROR_DETAIL:='获取PARAM_NAME步骤';
+
+        execute immediate v_sql into V_IS_DICT_CODE;
+        IF V_IS_DICT_CODE >0 THEN
+            V_PARAM_NAME:=V_PARAM_NAME||'_DESC';
+        END IF ;
+
+        IF V_IS_DICT_CODE=0 AND V_PARAM_TYPE =1 AND (V_PARAM_DESC  LIKE '%(元)%'OR  V_PARAM_DESC LIKE '%金额%' ) THEN
+            V_PARAM_NAME:='trim(to_char('||v_GET_TAB_ALIAS||'.'||V_PARAM_NAME||',''9999999999990.99''))';
+        ELSE --加上表别名 下面处理就可以不要加了
+            V_PARAM_NAME:=v_GET_TAB_ALIAS||'.'||V_PARAM_NAME;
+        END IF ;
+
+        v_GET_column:= 'decode('||V_PARAM_NAME||',null,'' 空'', '||V_PARAM_NAME||')';
+    END IF;
+
+    V_PARAMS :='''['||V_PARAM_DESC||'='||chr(39)||'||'
+        ||v_GET_column||'||'||chr(39)||']''';
+
+    O_PARAM_VALUE :=V_PARAMS ;
+    O_FLAG:=0;
+exception when others then
+    O_FLAG := -1;
+    --记录错误日志
+    v_ERROR_DETAIL:=v_ERROR_INFO||v_ERROR_DETAIL;
+    SP_TASK_LOG(V_SUM_MONTH,V_CITY_CODE,V_TASK_ID,V_DICT_TYPE_ID,v_sql,2,v_begin_time,sysdate,-1,SQLERRM,
+                                          '获取规则配置。传入参数：'||V_CITY_CODE||','||V_SUM_MONTH||','||V_DICT_TYPE_ID||','||V_FORMULA_ID||','||V_TASK_ID||','||v_instance_id||','||v_param_id||','||v_PARTITION_ID||' 具体失败为： '||v_ERROR_DETAIL,V_FLAG);
+
+
+
+END  SP_GET_PARAM_VALUE;
+```
+
+- 转换后XML
+
+```xml
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+<procedure id="SP_GET_PARAM_VALUE"
+           IN_CITY_CODE.int=""
+           IN_SUM_MONTH.int=""
+           IN_DICT_TYPE_ID.string=""
+           IN_FORMULA_ID.int=""
+           IN_TASK_ID.int=""
+           IN_INSTANCE_ID.int=""
+           IN_PARAM_ID.int=""
+           IN_PARTITION_ID.int=""
+           O_PARAM_VALUE.string=""
+           O_FLAG.int.out=""
+>
+    <!--
+    /**************************************************************
+    *  获取规则配置
+    **************************************************************/
+    -->
+
+    <!--
+    变量都是只有什么，因此不做初始化了
+    如果变量存在声明并赋值的情况
+    就需要额外初始化变量
+    -->
+
+    <!--
+    这个过程有进行异常捕获
+    因此也进行try-catch处理
+    -->
+    <lang-try>
+        <lang-body>
+            <!--
+            因为过程在包里面
+            因此就将包变量的初始化放到单独的过程中进行
+            这个过程的作用就是，检查包变量是否进行初始化了
+            如果没有就进行初始化，如果已经初始化，则不进行任何处理
+            因此，内部实现伪代码大体如此：
+            if(global.PKG_PARAM==true){
+                // 已经处理，直接返回
+                return;
+            }
+            global.PKG_PARAM=true;
+            // 进行初始化
+            也就是借助一个标志位判断是否已经初始化
+            同时，这里设置了 params-share="true"
+            也就是将本过程的上下文直接透传过去初始化，共享上下文
+            这样在内部调用改变参数，也就实现了包变量的初始化
+            -->
+            <procedure-call refid="PKG_PARAM" params-share="true"/>
+
+            <!-- ============================================ 变量初始化============================================= -->
+
+            <!--
+            简单赋值，使用 TinyScript 进行转换最快捷
+            -->
+            <lang-eval-ts>
+                V_CITY_CODE = ${IN_CITY_CODE};
+                V_SUM_MONTH = ${IN_SUM_MONTH};
+                V_DICT_TYPE_ID = ${IN_DICT_TYPE_ID};
+                V_TASK_ID = ${IN_TASK_ID};
+                V_FORMULA_ID = ${IN_FORMULA_ID};
+                V_INSTANCE_ID =${IN_INSTANCE_ID} ;
+                V_PARAM_ID =${IN_PARAM_ID} ;
+                V_PARTITION_ID=${IN_PARTITION_ID} ;
+            </lang-eval-ts>
+
+            <!--
+            字符串拼接，直接进行render
+            又因为这是错误信息，用于记录日志使用
+            所以，可以放心的进行trim
+            -->
+            <lang-render result.trim="V_ERROR_INFO">
+                FORMULA_ID=$!{V_FORMULA_ID},instance_id=$!{V_INSTANCE_ID},param_id=$!{V_PARAM_ID},PARTITION_ID=$!{V_PARTITION_ID}
+            </lang-render>
+
+            <!-- ============================================ 开始规则判断============================================= -->
+
+
+            <lang-set result="V_PARAMS" value.string=""/>
+
+            <lang-string result.trim="V_ERROR_DETAIL">
+                获取SYS_DICT_PARAM信息 步骤
+            </lang-string>
+
+            <!--
+            这里的V_SCHEMA实际就是包变量定义的
+            包变量变为全局变量之后，就变成了从全局变量获取
+            -->
+            <sql-query-row result="tmpRowMap">
+                select t2.param_name,t2.param_desc
+                from $!{global.V_SCHEMA}SYS_DICT_PARAM t2
+                where T2.param_id = #{V_PARAM_ID}
+            </sql-query-row>
+
+            <!--
+            原来的语句时直接查询到多个变量中
+            为了和原来的语句兼容
+            因此，将变量从Map中提取出来
+            和原来保持一致，方便对照调试
+            -->
+            <lang-set result="V_PARAM_NAME" value="tmpRowMap.PARAM_NAME"/>
+            <lang-set result="V_PARAM_DESC" value="tmpRowMap.PARAM_DESC"/>
+
+
+            <lang-render result.trim="V_ERROR_DETAIL">
+                FORMULA_ID=$!{V_FORMULA_ID} param_id=$!{V_PARAM_ID} PARTITION_ID=$!{V_PARTITION_ID} 在
+                SP_GET_PARAM_VALUE 中F_GET_TAB_ALIAS 步骤
+            </lang-render>
+
+            <!--
+            进程函数调用，形参和入参进行对应
+            例如：形参="入参"
+            也就是：IN_PARAM_ID="V_PARAM_ID"
+            最后因为是function-call函数调用
+            因此就会有函数返回值接受
+            使用result属性指定接受的变量名
+            result="V_GET_TAB_ALIAS"
+            这样，这个函数调用的结果就保存到V_GET_TAB_ALIAS变量中了
+            -->
+            <function-call refid="F_GET_TAB_ALIAS"
+                           IN_PARAM_ID="V_PARAM_ID"
+                           IN_PARTITION_ID="V_PARTITION_ID"
+                           result="V_GET_TAB_ALIAS"/>
+
+            <!-- 参数类型 时间类型时转换格式 -->
+            <lang-string result.trim="V_ERROR_DETAIL">
+                F_GET_PARAM_TYPE 步骤
+            </lang-string>
+
+            <function-call refid="F_GET_PARAM_TYPE"
+                           IN_PARAM_ID="V_PARAM_ID"
+                           IN_V_SCHEMA="global.V_SCHEMA"
+                           result="V_PARAM_TYPE"/>
+
+            <lang-choose>
+                <lang-when test="V_PARAM_TYPE ==3">
+                    <lang-render result="V_GET_COLUMN" _lang="sql">
+                        decode($!{V_GET_TAB_ALIAS}.$!{V_PARAM_NAME},null,'空',to_char($!{V_GET_TAB_ALIAS}.$!{V_PARAM_NAME},'yyyy-mm-dd hh24:mi:ss'))
+                    </lang-render>
+                </lang-when>
+                <lang-otherwise>
+
+
+                    <lang-string result.trim="V_ERROR_DETAIL">
+                        获取PARAM_NAME步骤
+                    </lang-string>
+
+                    <sql-query-object result="V_IS_DICT_CODE" result-type="long">
+                        select count(1) from $!{global.V_SCHEMA}SYS_DICT_PARAM where param_id=#{V_PARAM_ID}
+                        AND is_code = 1
+                        AND UPPER(code_sql) NOT LIKE '%SUM_MONTH%'
+                        AND UPPER(code_sql) NOT LIKE '%SUM_DATE%'
+                        AND UPPER(code_sql) NOT LIKE '%EX_MONTH%'
+                        AND UPPER(code_sql) NOT LIKE '%EX_DATE%'
+                        AND CODE_SQL IS NOT NULL
+                    </sql-query-object>
+                    <lang-if test="V_IS_DICT_CODE >0">
+                        <lang-set result="V_PARAM_NAME" value.render="$!{V_PARAM_NAME}_DESC"/>
+                    </lang-if>
+
+                    <lang-choose>
+                        <!--
+                        这里这个条件比较复杂，使用OGNL来写不太好写
+                        直接使用 TinyScript 进行判断
+                        -->
+                        <lang-when
+                                test.eval-ts='${V_IS_DICT_CODE}==0 and ${V_PARAM_TYPE} ==1 and (like(${V_PARAM_DESC},"元") or  like(${V_PARAM_DESC},"金额")  )'>
+                            <lang-set result="V_PARAM_NAME"
+                                      value.render="trim(to_char(${V_GET_TAB_ALIAS}.${V_PARAM_NAME},'9999999999990.99'))"/>
+                        </lang-when>
+                        <lang-otherwise> <!-- 加上表别名 下面处理就可以不要加了 -->
+                            <lang-set result="V_PARAM_NAME" value.render="$!{V_GET_TAB_ALIAS}.$!{V_PARAM_NAME}"/>
+                        </lang-otherwise>
+                    </lang-choose>
+
+                    <lang-set result="V_GET_COLUMN" value.render="decode($!{V_PARAM_NAME},null,' 空', $!{V_PARAM_NAME})"/>
+                </lang-otherwise>
+            </lang-choose>
+
+            <lang-set result="V_PARAMS" value.render="'[$!{V_PARAM_DESC}='||$!{V_GET_COLUMN}||']'"/>
+
+            <lang-set result="O_PARAM_VALUE" value="V_PARAMS"/>
+            <lang-set result="O_FLAG" value.int="0"/>
+
+        </lang-body>
+        <lang-catch>
+            <lang-set result="O_FLAG" value.int="-1"/>
+            <!-- 记录错误日志 -->
+            <lang-render result.trim="V_ERROR_DETAIL">
+                $!{V_ERROR_INFO}$!{V_ERROR_DETAIL}
+            </lang-render>
+            <!--
+            这里进行过程调用
+            其中入参有几个比较特别的
+            IN_EXEC_STATUS.int="2"
+            使用了int修饰符，也就是说属性值"2"要经过int修饰符转换，所以得到的就是int类型的2
+            IN_END_TIME.date-now=""
+            使用的date-now修饰符，也就是说属性值""要经过date-now转换，所以得到的就是 new Date()
+            这个修饰符就比较特殊了，因为date-now不需要考虑输入，也就是属性值是什么，而是直接返回
+            此类修饰符还有如 null 等
+            IN_ERROR_DETAIL.body-text.trim.render=""
+            这里有三个属性修饰符
+            所以属性值""要分别经过这三个修饰符
+            首先属性值""经过body-text之后，因为该修饰符将内部文本作为返回值，所以此时的值变为了内部的文本
+            然后此时的内部文本经过trim修饰符，进行了trim
+            然后此时的文本经过render修饰符进行了模版渲染
+            最后此时的值就是最终的值
+            因此，这里的作用就是将内部的文本进行trim后进行render之后最为入参传递
+            O_FLAG.null=""
+            这里，这个其实是出参,所以他不需要入参，直接给null修饰符，或者不写就行
+            但是建议是写上给null
+            -->
+            <procedure-call refid="SP_TASK_LOG"
+                            result="callParams"
+                            IN_SUM_MONTH="V_SUM_MONTH"
+                            IN_CITY_CODE="V_CITY_CODE"
+                            IN_TASK_ID="V_TASK_ID"
+                            IN_DICT_TYPE_ID="V_DICT_TYPE_ID"
+                            IN_CONTENT="V_SQL"
+                            IN_EXEC_STATUS.int="2"
+                            IN_BEGIN_TIME="V_BEGIN_TIME"
+                            IN_END_TIME.date-now=""
+                            IN_ERROR_CODE.int="-1"
+                            IN_ERROR_DESC="V_ERROR_DETAIL"
+                            IN_ERROR_DETAIL.body-text.trim.render=""
+                            O_FLAG.null=""
+            >
+                获取规则配置失败。
+                传入参数：$!{V_CITY_CODE},$!{V_SUM_MONTH},$!{V_DICT_TYPE_ID},$!{V_FORMULA_ID},$!{V_TASK_ID},$!{V_INSTANCE_ID},$!{V_PARAM_ID},${V_PARTITION_ID}
+                具体失败为： $!{V_ERROR_DETAIL}
+            </procedure-call>
+            <!--
+            按照原来的逻辑，保存了调用的出参到V_FLAG
+            使用procedure-call时，内部的出参保存在result指定的Map对象中
+            因此，如果后续要使用，最好将变量提取出来，和原来的逻辑能够尽量兼容
+            -->
+            <lang-set result="V_FLAG" value="callParams.O_FLAG"/>
+        </lang-catch>
+    </lang-try>
+</procedure>
+```
+
+## 七、内建变量
 
 - 这部分主要提供一些调试跟踪的手段或者变量
 
-### XML文件名 trace.location
+### 7.1 XML文件名 trace.location
 
 - 最后一次访问的XML节点所在文件名
 - 这个变量将会在节点执行前进行赋值
@@ -1622,7 +2386,7 @@ end;
 </lang-render>
 ```
 
-### XML标签行号 trace.line
+### 7.2 XML标签行号 trace.line
 
 - 最后一次访问的XML节点所在的行号
 - 这个变量将会在节点执行前进行赋值
@@ -1636,7 +2400,7 @@ end;
 </lang-render>
 ```
 
-### 最后一次异常的错误信息 trace.errmsg
+### 7.3 最后一次异常的错误信息 trace.errmsg
 
 - 能够获取最后一次执行异常时的错误信息
 - 一般可用于catch语句块中直接获取错误信息
@@ -1657,7 +2421,7 @@ end;
 </lang-try>
 ```
 
-### 获取当前节点元数据 trace.node
+### 7.4 获取当前节点元数据 trace.node
 
 - 能够获取最后一次执行的XML节点的元数据信息，返回的是XmlNode对象
 - 需要注意，请不要轻易的修改对象的值
@@ -1673,9 +2437,9 @@ end;
 </lang-render>
 ```
 
-## 问题解答
+## 八、问题解答
 
-### 怎么将主数据切换为其他数据源来执行过程？
+### 8.1 怎么将主数据切换为其他数据源来执行过程？
 
 - 默认情况下，框架自动检测primary,master,main,default,leader这些数据源作为主数据源primary
 - 在多数据源场景中，就是按照这个顺序进行检测的，检测到为止，则不再继续检测
@@ -1717,7 +2481,7 @@ Map<String, Object> ret = JdbcProcedureHelper.call("SP_ODS_MAIN", (map) -> {
 - 不建议在过程内部也调整映射
 - 因为在内部调整之后，可能在子过程或者内部过程调用时，发生事务控制混乱以及主数据源混乱的情况
 
-### 上下文中有哪些固定的参数？
+### 8.2 上下文中有哪些固定的参数？
 
 - 内置了一些固定的运行常量
 - 这些常量可以根据需要进行使用和调整值
@@ -1746,7 +2510,7 @@ BasicJdbcProcedureExecutor.createParams()
 - executor 类型JdbcProcedureExecutor,用于提供executor的操作能力，方便在一些场景中，能够获取executor的操作能力
 - 关于这些参数是如何在发生内部调用时进行传递的，请看下一节
 
-### 发生内部嵌套调用时上下文是怎么传递的？
+### 8.3 发生内部嵌套调用时上下文是怎么传递的？
 
 - 针对固定参数是使用直接引用赋值的方式进行传递的
 - 始终保持引用不变
@@ -1756,7 +2520,7 @@ BasicJdbcProcedureExecutor.createParams()
 BasicJdbcProcedureExecutor.newParams()
 ```
 
-### 是怎么注入了上下文的固定参数的？
+### 8.4 是怎么注入了上下文的固定参数的？
 
 - 用户调用古城，一般只需要传递过程声明的形式参数
 - 但是固定参数，用户一般都不需要显式的进行设置
@@ -1767,7 +2531,54 @@ BasicJdbcProcedureExecutor.newParams()
 BasicJdbcProcedureExecutor.prepareParams()
 ```
 
-## 拓展自己的TinyScript自定义函数
+### 8.5 怎么添加自己的全局自定义参数？
+
+- 比较常见的就是，希望在每个过程运行的时候
+- 都能够注入自己的全局参数
+- 或者是对运行的上下文进行修改调整等情况
+- 这时候就可以选择事件系统，通过监听准备上下文事件
+- 实现对上下文的变更
+- 事件 PreparedParamsEvent 是在框架准备完框架的参数之后进行同步调用的
+- 因此就可以达到在正式执行之前自定义自己的上下文
+- 例如如下代码
+
+```java
+@Component
+public class PreparedParamsEventListener implements XProc4jEventListener {
+
+    @Autowired
+    private TaskProperties config;
+
+    @Override
+    public boolean support(XProc4jEvent event) {
+        return event instanceof PreparedParamsEvent;
+    }
+
+    @Override
+    public boolean handle(XProc4jEvent event) {
+        PreparedParamsEvent evt = (PreparedParamsEvent) event;
+        JdbcProcedureExecutor executor = evt.getExecutor();
+        Map<String, Object> context = evt.getContext();
+        // 注入全局变量 props 
+        executor.visitSet(context, "global.props", config);
+        
+        // 如果不存在线程的traceId则生成一个并保存
+        String traceId = executor.visitAs("trace.traceId", context);
+        if(traceId==null){
+            traceId= UUID.randomUUID().toString().replaceAll("-","").toLowerCase();
+            executor.visitSet(context,"trace.traceId",traceId);
+            
+            // 同时设置到Slf4j的MDC上下文中
+            MDC.put("traceId",traceId);
+        }
+        return false;
+    }
+}
+```
+
+## 九、拓展和其他
+
+### 9.1 拓展自己的TinyScript自定义函数
 
 - 一些函数是TinyScript内建的函数
 - 能够提供基本和数据库内建函数一样的能力
@@ -1781,7 +2592,7 @@ BasicJdbcProcedureExecutor.prepareParams()
 - 直接使用方法名的方式调用
 - 那么就需要注册内建函数
 
-### 内建函数的保存
+#### 9.1.1 内建函数的保存
 
 - 内建函数是通过静态变量实现的
 - 变量位置如下
@@ -1865,7 +2676,7 @@ TinyScript.registryBuiltMethodByStaticMethod(MySqlFunctions .class);
 </lang-eval-ts>
 ```
 
-### TinyScript默认内建函数
+#### 9.1.2 TinyScript默认内建函数
 
 - 除此之外，TinyScript默认就将一部分Java类函数注册为内建函数了
 - 具体可以查看如下的位置
@@ -1879,7 +2690,7 @@ public class TinyScript {
 }
 ```
 
-### Jdbc-Procedure集成内建函数
+#### 9.1.3 Jdbc-Procedure集成内建函数
 
 - 当然，因为TInyScript被Jdbc-Procedure集成了
 - 因此也可以使用集成的方式
@@ -1911,7 +2722,7 @@ public class ContextHolder {
 }
 ```
 
-## 拓展自己的属性修饰符feature
+### 9.2 拓展自己的属性修饰符feature
 
 - 之前已经介绍过属性修饰符了
 - 因为其直接作用在属性上，方便了一些场景的处理
@@ -1955,13 +2766,13 @@ public static R convert(T obj);
 - 并且需要具有一个形参和返回值
 - 至于形参和返回值的类型不做要求
 
-## 拓展自己的XML节点
+### 9.3 拓展自己的XML节点
 
 - 目前内置的节点主要分为两类lang-(逻辑控制类)和sql-(数据库操作类)两类
 - 如果有需求增加其他的控制，也可以编写自己的xml-node节点来处理
 - 比如，想要实现命令执行的节点
 
-### 定义节点规则（非必要）
+#### 9.3.1 定义节点规则（非必要）
 
 - 定义如下
 
@@ -1980,7 +2791,7 @@ await指定是否需要等待命令执行结束
 
 - 好了，节点的规范定义好了
 
-### 定义节点DTD语法约束（非必要）
+#### 9.3.2 定义节点DTD语法约束（非必要）
 
 - 那么，就可以添加对应节点定义的DTD约束了
 
@@ -2005,7 +2816,7 @@ await指定是否需要等待命令执行结束
 
 - 这样dtd文件规则就编写好了
 
-### 定义节点处理逻辑（必要）
+#### 9.3.3 定义节点处理逻辑（必要）
 
 - 接下来，就需要实现自己的节点处理逻辑了
 - 首先需要实现ExecutorNode接口
@@ -2185,7 +2996,8 @@ com.test.xpro4j.node.HttpRequestNode
 
 - 这样即可
 
-## 事件系统（event）
+### 9.4 事件系统（event）
+
 - 在一些情况下，我们可能需要再框架的基础上，增加一些自己的处理逻辑
 - 比如
 - 怎么在参数Map中添加自己的固定全局参数？
@@ -2196,7 +3008,7 @@ com.test.xpro4j.node.HttpRequestNode
 - 这一些列的问题，都可以通过事件系统来解决
 - 事件系统介绍
 - 事件系统主要为：
-  - XProc4jEventHandler 事件处理器 
+  - XProc4jEventHandler 事件处理器
   - XProc4jEventListener 事件监听器
   - XProc4jEvent 接口类
 - 在默认的配置情况下，所有的已配置组件都公用一个 EventHandler 事件处理器
@@ -2219,6 +3031,7 @@ com.test.xpro4j.node.HttpRequestNode
 - 因为是在spring环境中，因此，监听器只需要注册为spring的bean即可
 - 也就是通过@Component注解标识类即可
 - 一般监听器就是这样写的
+
 ```java
 @Component
 public class PreparedParamsEventListener implements XProc4jEventListener {
@@ -2236,6 +3049,7 @@ public class PreparedParamsEventListener implements XProc4jEventListener {
     }
 }
 ```
+
 - 怎么在参数Map中添加自己的固定全局参数？
   - 可以添加监听器监听 PreparedParamsEvent
 - 怎么监控监控慢SQL执行？
@@ -2257,7 +3071,8 @@ public class PreparedParamsEventListener implements XProc4jEventListener {
 - 具体通过查看源码，已确定是否是同步事件
 - 另外，事件的发送，会根据实际需要，慢慢迭代添加一些事件
 
-## IDEA(Jetbrains 系列IDE)插件支持
+### 9.5 IDEA(Jetbrains 系列IDE)插件支持
+
 - jdbc-procedure-plugin(或 xproc4j-plugin) 是针对 xproc4j 框架开发的一款适用于 Jetbrains 系列IDE的插件
 - 能够提供语法高亮和部分语法的自动补全提示
 - 插件设计的初衷
@@ -2272,13 +3087,17 @@ public class PreparedParamsEventListener implements XProc4jEventListener {
   - 提供尽可能完善的语法高亮和补全能力
 - 插件的安装
 - 插件以jar包的形式提供
+
 ```shell
 jdbc-procedure-plugin-1.0.jar
 ```
+
 - 或者改为其他名字
+
 ```shell
 xproc4j-plugin-1.0.jar
 ```
+
 - 因为插件是基于Jetbrains系列的IDE框架进行开发的
 - 因此，使用于大部分的Jetbrains系列的IDE
 - 包括但不限于：IDEA(Java),WebStrom(Web),CLion(C/C++),DataGrip(Database)
@@ -2287,10 +3106,13 @@ xproc4j-plugin-1.0.jar
 - 菜单 -》设置 -》 插件 -》 设置（图标） -》 从本地磁盘安装。。。 -》 选择此jar包文件
 - 暗转完成后，在已安装的插件中搜索(procedure或xproc4j)看到插件即可
 - 在项目中新建一个XML文件
+
 ```shell
 test.xml
 ```
+
 - 文件内容为
+
 ```xml
 <!DOCTYPE procedure SYSTEM "procedure.dtd">
 
@@ -2308,10 +3130,12 @@ test.xml
     </lang-eval-ts>
 </procedure>
 ```
+
 - 能够看到语法正常高亮即可
 - 也就是关键字的语法高亮正常即可
 
-## 调试XML过程
+### 9.6 调试XML过程
+
 - 由于是对XML过程进行解析执行
 - IDE自带的调试功能是对Java代码进行调试的
 - 这带来了一定的麻烦和困扰
@@ -2340,6 +3164,7 @@ public class TestDemo implements ApplicationRunner {
   }
 }
 ```
+
 - 以上就是调试的入口代码
 - 这里借用 springboot 框架的 ApplicationRunner 来达到在项目启动时执行的目的
 - 这样在项目启动时，就会执行到代码
@@ -2350,10 +3175,12 @@ public class TestDemo implements ApplicationRunner {
 - 那么，就可以进行运行了
 - 为了更好地观测运行是的历史情况
 - 建议开启以下配置
+
 ```yaml
 xproc4j:
   debug: true
 ```
+
 - 这样，将会打印一些日志，辅助调试
 - 但是，调试的目的是为了观测运行过程中的运行堆栈和变量值
 - 已确定运行状态是否正常
@@ -2373,14 +3200,17 @@ xproc4j:
 - 因为，一般过程都比较长，嵌套调用更是比较常见
 - 那么就可以基于上述两种方法，进行在断点上添加条件
 - 下面举例一个条件
+
 ```java
 location.startsWith("test.xml:5")
 ```
+
 - 这样就能够得到条件在执行到 test.xml 的第5行的时候进行断点
 - 这里第5行，也就是 sql-query-object 标签执行的时候进行断点
 - 需要注意的是，行号并不是任意一行都行
 - 可行的行号是XML开始标签所在的行才行
 - 举个例子进行说明
+
 ```xml
 <!DOCTYPE procedure SYSTEM "procedure.dtd">
 
@@ -2398,39 +3228,50 @@ location.startsWith("test.xml:5")
     </lang-eval-ts>
 </procedure>
 ```
+
 - 还有一种情况，想要从某一行开始往下继续运行的条件
 - 条件断点可以这样写
+
 ```java
 location.startsWith("test.xml") && && node.getLocationLineNumber()>=5
 ```
+
 - 这样，便可以从第5行之后的节点执行都会进行断点
 - 结合变量值断点
 - 因为框架运行时，都是以一个Map对象保存所有变量的
 - 因此，变量都保存在 context 这个Map里面
 - 所以，可以这样写条件断点
+
 ```java
 location.startsWith("test.xml:5") && context.get("v_cnt")==null
 ```
+
 - 当然，因为执行提供了 executor 对象，可以使用 executor 的一些方法辅助
 - 举个例子说明
+
 ```java
 location.startsWith("test.xml:5") && (Integer) executor.visit("user.status",context)==1
 ```
+
 - 还有一些情况，那就是接下来执行的节点可能是一段脚本
 - 比如，例子中的
+
 ```xml
 <lang-eval-ts>
   v_cnt=0;
   v_cnt=${v_cnt}+1;
 </lang-eval-ts>
 ```
+
 - 这种情况，因为内部是脚本，无法断点
 - 但是可能脚本比较长
 - 因此，可以使用 executor 进行辅助断点
 - 举个例子说明
+
 ```java
 location.startsWith("test.xml:5") && (Integer) executor.evalScript("ts","v_cnt=0;v_cnt=${v_cnt}+1;",context)==1
 ```
+
 - 当然，结合IDE提供的 Evaluate Expression 能力，在合适的断点上，提前运算判断下脚本运行的结果
 - 辅助判断运行情况，是更加的调试运行方式
 - 到这里，你已经会调试运行框架和自己的过程XML文件了
@@ -2440,6 +3281,7 @@ location.startsWith("test.xml:5") && (Integer) executor.evalScript("ts","v_cnt=0
 - 针对一些低级的语法错误，请打开以下配置
 - 以在项目启动后进行基础语法检查，请注意期间的 Warn 日志
 - 根据 Warn 日志调试XML过程
+
 ```yaml
 xproc4j:
   report-on-boot: true
@@ -2447,6 +3289,7 @@ xproc4j:
     grammar-reporter:
       enable: true
 ```
+
 - 注意，由于 debug 模式对性能的影响较大，因此只建议在调试时开启
 - 或者在开发/测试环境下使用
 - 启动检查，也只建议在开发/测试环境使用
@@ -2454,7 +3297,7 @@ xproc4j:
 - 当然，这个根据你的中的过程数量来决定的
 - 特别是大型项目，启动时间就会更长，浪费在语法检查上
 
-## 和其他框架集成
+### 9.7 和其他框架集成
 
 - 默认情况下，是和springboot框架进行了继承
 - 如果需要和其他框架进行继承
@@ -2463,7 +3306,7 @@ xproc4j:
 - 以及SpringContextJdbcProcedureExecutorAutoConfiguration类的实现组合原理
 - 这部分比较简单，不再进行展开讲解，根据源码进行查看即可
 
-## 直接独立使用，不与springboot集成
+### 9.8 直接独立使用，不与springboot集成
 
 - 这部分，请参考TestProcedureExecutor类以及所在包的测试代码
 - 结合SpringContextJdbcProcedureExecutorAutoConfiguration配置
