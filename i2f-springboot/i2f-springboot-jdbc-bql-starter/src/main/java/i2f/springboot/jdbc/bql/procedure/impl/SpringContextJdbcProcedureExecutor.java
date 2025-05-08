@@ -4,6 +4,7 @@ import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
+import i2f.jdbc.procedure.util.JdbcProcedureUtil;
 import i2f.spring.core.SpringContext;
 import i2f.spring.enviroment.SpringEnvironment;
 import lombok.Data;
@@ -137,6 +138,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     public void logInfo(Supplier<Object> supplier, Throwable e) {
         String location = traceLocation();
         if (e != null) {
+            JdbcProcedureUtil.purifyStackTrace(e,true);
             log.info("near " + location + ", msg: " + supplier.get(), e);
         } else {
             log.info("near " + location + ", msg: " + supplier.get());
@@ -147,6 +149,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     public void logWarn(Supplier<Object> supplier, Throwable e) {
         String location = traceLocation();
         if (e != null) {
+            JdbcProcedureUtil.purifyStackTrace(e,true);
             log.warn("near " + location + ", msg: " + supplier.get(), e);
         } else {
             log.warn("near " + location + ", msg: " + supplier.get());
@@ -157,6 +160,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     public void logError(Supplier<Object> supplier, Throwable e) {
         String location = traceLocation();
         if (e != null) {
+            JdbcProcedureUtil.purifyStackTrace(e,true);
             log.error("near " + location + ", msg: " + supplier.get(), e);
         } else {
             log.error("near " + location + ", msg: " + supplier.get());

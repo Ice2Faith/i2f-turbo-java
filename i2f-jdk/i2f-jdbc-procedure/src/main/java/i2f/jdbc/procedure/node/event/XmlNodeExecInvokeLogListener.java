@@ -6,14 +6,11 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventListener;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
 
-import java.util.AbstractMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -60,7 +57,7 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
                     if (id != null && !id.isEmpty()) {
                         executor.logInfo("exec node:" + id + " at " + location);
                         if (isDebugMode) {
-                            String callSnapshot = AbstractExecutorNode.getCallSnapshot(node, context, executor);
+                            String callSnapshot = getCallSnapshot(node, context, executor);
                             callSnapshot = "BEFORE:" + snapshotTraceId + "\n" + callSnapshot;
                             traceCalls.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
                             executor.logDebug("call-params:\n===================> " + callSnapshot);
@@ -80,7 +77,7 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
                     if (TagConsts.PROCEDURE.equals(tagName)) {
                         String id = node.getTagAttrMap().get(AttrConsts.ID);
                         if (id != null && !id.isEmpty()) {
-                            String callSnapshot = AbstractExecutorNode.getCallSnapshot(node, context, executor);
+                            String callSnapshot = getCallSnapshot(node, context, executor);
                             callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
                             traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
                             executor.logDebug("call-params:\n===================> " + callSnapshot);
@@ -103,7 +100,7 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
                             if (TagConsts.PROCEDURE.equals(tagName)) {
                                 String id = node.getTagAttrMap().get(AttrConsts.ID);
                                 if (id != null && !id.isEmpty()) {
-                                    String callSnapshot = AbstractExecutorNode.getCallSnapshot(node, context, executor);
+                                    String callSnapshot = getCallSnapshot(node, context, executor);
                                     callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
                                     traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
                                     executor.logDebug("call-params:\n===================> " + callSnapshot);
@@ -118,5 +115,54 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
             }
         }
         return false;
+    }
+
+
+    public static String getCallSnapshot(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        Stack<String> traceStack = executor.visitAs(ParamsConsts.TRACE_STACK, context);
+        String id = node.getTagAttrMap().get(AttrConsts.ID);
+        StringBuilder builder = new StringBuilder();
+        builder.append("call " + id).append("\n");
+        for (Map.Entry<String, Object> entry : context.entrySet()) {
+            if (ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
+                continue;
+            }
+            Object value = entry.getValue();
+            value = trimContextKeepAttribute(value);
+            builder.append("\targ:").append(entry.getKey()).append("==> ").append("(").append(value == null ? "null" : value.getClass().getName()).append(") :").append(value).append("\n");
+        }
+        builder.append("\n");
+
+        int stackSize = traceStack.size();
+        int printStackSize = 50;
+        ListIterator<String> iterator = traceStack.listIterator(stackSize);
+        for (int i = 0; i < printStackSize; i++) {
+            if (!iterator.hasPrevious()) {
+                break;
+            }
+            builder.append("\tat node ").append(iterator.previous()).append("\n");
+        }
+        if (iterator.hasPrevious()) {
+            builder.append("\t... ").append(stackSize - printStackSize).append(" common frames omitted\n");
+        }
+        return builder.toString();
+    }
+
+    public static Object trimContextKeepAttribute(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (!(value instanceof Map)) {
+            return value;
+        }
+        Map<Object, Object> ret = new HashMap<>();
+        Map<?, ?> map = (Map<?, ?>) value;
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            if (ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
+                continue;
+            }
+            ret.put(entry.getKey(), trimContextKeepAttribute(entry.getValue()));
+        }
+        return ret;
     }
 }
