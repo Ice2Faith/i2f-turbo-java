@@ -35,6 +35,7 @@ import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.jdbc.procedure.util.JdbcProcedureUtil;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
@@ -872,6 +873,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         String location = traceLocation();
         System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
         if (e != null) {
+            JdbcProcedureUtil.purifyStackTrace(e,true);
             e.printStackTrace();
         }
     }
@@ -881,6 +883,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         String location = traceLocation();
         System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
         if (e != null) {
+            JdbcProcedureUtil.purifyStackTrace(e,true);
             e.printStackTrace();
         }
     }
@@ -890,6 +893,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         String location = traceLocation();
         System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
         if (e != null) {
+            JdbcProcedureUtil.purifyStackTrace(e,true);
             e.printStackTrace();
         }
     }

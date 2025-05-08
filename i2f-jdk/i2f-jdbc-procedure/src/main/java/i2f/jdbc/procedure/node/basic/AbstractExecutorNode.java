@@ -27,53 +27,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     protected volatile long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(45);
     protected volatile long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
 
-    public static Object trimContextKeepAttribute(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (!(value instanceof Map)) {
-            return value;
-        }
-        Map<Object, Object> ret = new HashMap<>();
-        Map<?, ?> map = (Map<?, ?>) value;
-        for (Map.Entry<?, ?> entry : map.entrySet()) {
-            if (ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
-                continue;
-            }
-            ret.put(entry.getKey(), trimContextKeepAttribute(entry.getValue()));
-        }
-        return ret;
-    }
+    public static final String EXCEPTION_MESSAGE_PREFIX = "exec node error, at ";
 
-    public static String getCallSnapshot(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        Stack<String> traceStack = executor.visitAs(ParamsConsts.TRACE_STACK, context);
-        String id = node.getTagAttrMap().get(AttrConsts.ID);
-        StringBuilder builder = new StringBuilder();
-        builder.append("call " + id).append("\n");
-        for (Map.Entry<String, Object> entry : context.entrySet()) {
-            if (ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
-                continue;
-            }
-            Object value = entry.getValue();
-            value = trimContextKeepAttribute(value);
-            builder.append("\targ:").append(entry.getKey()).append("==> ").append("(").append(value == null ? "null" : value.getClass().getName()).append(") :").append(value).append("\n");
-        }
-        builder.append("\n");
-
-        int stackSize = traceStack.size();
-        int printStackSize = 50;
-        ListIterator<String> iterator = traceStack.listIterator(stackSize);
-        for (int i = 0; i < printStackSize; i++) {
-            if (!iterator.hasPrevious()) {
-                break;
-            }
-            builder.append("\tat node ").append(iterator.previous()).append("\n");
-        }
-        if (iterator.hasPrevious()) {
-            builder.append("\t... ").append(stackSize - printStackSize).append(" common frames omitted\n");
-        }
-        return builder.toString();
-    }
 
     public static void walkTree(XmlNode node, Consumer<XmlNode> consumer) {
         if (node == null) {
@@ -181,7 +136,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
             try {
                 onBefore(pointContext, node, context, executor);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 executor.logWarn(() -> e.getMessage(), e);
             }
 
@@ -189,7 +144,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
             try {
                 onAfter(pointContext, node, context, executor);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 executor.logWarn(() -> e.getMessage(), e);
             }
 
@@ -225,22 +180,27 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 throw (ControlSignalException) e;
             }
 
-            StringBuilder builder = new StringBuilder();
+            String errorMsg = e.getMessage();
+            if (!errorMsg.startsWith(EXCEPTION_MESSAGE_PREFIX)) {
+                errorMsg = EXCEPTION_MESSAGE_PREFIX + location + ", attrs:" + node.getTagAttrMap() + ", message: " + e.getMessage();
+                StringBuilder builder = new StringBuilder();
 
-            int stackSize = traceStack.size();
-            int printStackSize = 50;
-            ListIterator<String> iterator = traceStack.listIterator(stackSize);
-            for (int i = 0; i < printStackSize; i++) {
-                if (!iterator.hasPrevious()) {
-                    break;
+                int stackSize = traceStack.size();
+                int printStackSize = 50;
+                ListIterator<String> iterator = traceStack.listIterator(stackSize);
+                for (int i = 0; i < printStackSize; i++) {
+                    if (!iterator.hasPrevious()) {
+                        break;
+                    }
+                    builder.append("\tat node ").append(iterator.previous()).append("\n");
                 }
-                builder.append("\tat node ").append(iterator.previous()).append("\n");
-            }
-            if (iterator.hasPrevious()) {
-                builder.append("\t... ").append(stackSize - printStackSize).append(" common frames omitted\n");
+                if (iterator.hasPrevious()) {
+                    builder.append("\t... ").append(stackSize - printStackSize).append(" common frames omitted\n");
+                }
+
+                errorMsg = errorMsg + "\n node trace:\n" + builder;
             }
 
-            String errorMsg = "exec node error, at node:" + node.getTagName() + ", file:" + location + ", attrs:" + node.getTagAttrMap() + ", message: " + e.getMessage();
             String traceErrMsg = e.getClass().getName() + ": " + errorMsg;
             executor.visitSet(context, ParamsConsts.TRACE_ERRMSG, traceErrMsg);
             ContextHolder.TRACE_ERRMSG.set(traceErrMsg);
@@ -248,30 +208,34 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             RuntimeException re = null;
             if (e instanceof SignalException) {
                 SignalException se = (SignalException) e;
-                if (se.getCause() == null || !se.hasLogout()) {
-                    executor.logError(() -> errorMsg + "\n node trace:\n" + builder, e);
-                    se.setHasLogout(true);
-                }
                 se.setMessage(errorMsg);
                 re = se;
             } else {
                 ThrowSignalException se = new ThrowSignalException(errorMsg, e);
-                if (se.getCause() == null || !se.hasLogout()) {
-                    executor.logError(() -> errorMsg + "\n node trace:\n" + builder, e);
-                    se.setHasLogout(true);
-                }
                 re = se;
             }
+
+            if (re instanceof SignalException) {
+                SignalException se = (SignalException) re;
+
+                if (se.getCause() == null || !se.hasLogout()) {
+                    executor.logError(() -> se.getMessage(), se);
+                    se.setHasLogout(true);
+                }
+            }
+
             synchronized (trace) {
                 if (!traceErrors.contains(re)) {
                     traceErrors.add(re);
                 }
             }
+
             try {
                 onThrowing(e, pointContext, node, context, executor);
             } catch (Throwable ex) {
-                executor.logWarn(() -> ex.getMessage(), e);
+                executor.logWarn(() -> ex.getMessage(), ex);
             }
+
             throw re;
         } finally {
             long ets = SystemClock.currentTimeMillis();
