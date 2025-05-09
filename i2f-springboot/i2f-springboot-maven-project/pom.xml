@@ -293,6 +293,8 @@
                         <exclude>static/**</exclude>
                         <exclude>public/**</exclude>
 
+                        <exclude>assets/**</exclude>
+
                         <exclude>i18n/**</exclude>
                         <exclude>META-INF/**</exclude>
 
@@ -313,6 +315,7 @@
                         <exclude>*.j2</exclude>
                         <exclude>*.config</exclude>
                         <exclude>*.txt</exclude>
+                        <exclude>*.xml</exclude>
                     </excludes>
                 </configuration>
             </plugin>

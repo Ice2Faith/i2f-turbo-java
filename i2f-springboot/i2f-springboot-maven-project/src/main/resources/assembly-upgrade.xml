@@ -87,6 +87,8 @@
                 <include>static/**</include>
                 <include>public/**</include>
 
+                <include>assets/**</include>
+
                 <include>i18n/**</include>
                 <include>META-INF/**</include>
 
@@ -104,6 +106,7 @@
                 <include>*.j2</include>
                 <include>*.config</include>
                 <include>*.txt</include>
+                <include>*.xml</include>
             </includes>
         </fileSet>
 
