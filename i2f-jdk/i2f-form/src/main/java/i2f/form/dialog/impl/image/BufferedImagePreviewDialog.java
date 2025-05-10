@@ -9,7 +9,8 @@ import java.awt.image.BufferedImage;
  * @date 2025/5/10 12:52
  */
 public class BufferedImagePreviewDialog implements IPreviewDialog {
-    public static final BufferedImagePreviewDialog INSTANCE=new BufferedImagePreviewDialog();
+    public static final BufferedImagePreviewDialog INSTANCE = new BufferedImagePreviewDialog();
+
     @Override
     public boolean support(Object obj) {
         return obj instanceof BufferedImage;

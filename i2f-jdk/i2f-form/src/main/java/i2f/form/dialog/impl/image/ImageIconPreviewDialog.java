@@ -9,7 +9,8 @@ import javax.swing.*;
  * @date 2025/5/10 12:57
  */
 public class ImageIconPreviewDialog implements IPreviewDialog {
-    public static final ImageIconPreviewDialog INSTANCE=new ImageIconPreviewDialog();
+    public static final ImageIconPreviewDialog INSTANCE = new ImageIconPreviewDialog();
+
     @Override
     public boolean support(Object obj) {
         return obj instanceof ImageIcon;
