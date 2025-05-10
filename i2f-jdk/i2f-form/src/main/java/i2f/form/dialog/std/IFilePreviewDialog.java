@@ -23,7 +23,7 @@ public interface IFilePreviewDialog extends IPreviewDialog {
         return null;
     }
 
-    default String getFileSuffix(File file){
+    default String getFileSuffix(File file) {
         String name = file.getName();
         int idx = name.lastIndexOf(".");
         if (idx < 0) {

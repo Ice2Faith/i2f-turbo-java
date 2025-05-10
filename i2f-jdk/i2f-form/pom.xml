@@ -27,6 +27,27 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-io-stream</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>jdk</groupId>
+            <artifactId>javafx</artifactId>
+            <version>1.8</version>
+            <scope>system</scope>
+            <systemPath>C:/Java/jre1.8.0_201/lib/ext/jfxrt.jar</systemPath>
+        </dependency>
+
+        <!-- jdk11及以上，需要添加对应版本的依赖 -->
+<!--        <dependency>-->
+<!--            <groupId>org.openjfx</groupId>-->
+<!--            <artifactId>javafx-controls</artifactId>-->
+<!--            <version>11.0.2</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.openjfx</groupId>-->
+<!--            <artifactId>javafx-fxml</artifactId>-->
+<!--            <version>11.0.2</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>

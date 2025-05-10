@@ -8,7 +8,8 @@ import javafx.scene.media.Media;
  * @date 2025/5/10 13:01
  */
 public class MediaPreviewDialog implements IPreviewDialog {
-    public static final MediaPreviewDialog INSTANCE=new MediaPreviewDialog();
+    public static final MediaPreviewDialog INSTANCE = new MediaPreviewDialog();
+
     @Override
     public boolean support(Object obj) {
         return obj instanceof Media;

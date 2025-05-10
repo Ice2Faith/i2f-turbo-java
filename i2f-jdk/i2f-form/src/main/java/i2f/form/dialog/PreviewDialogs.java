@@ -2,9 +2,7 @@ package i2f.form.dialog;
 
 import i2f.form.dialog.impl.image.*;
 import i2f.form.dialog.impl.media.*;
-import i2f.form.dialog.impl.text.StringPreviewDialog;
-import i2f.form.dialog.impl.text.TextFilePreviewDialog;
-import i2f.form.dialog.impl.text.TextUrlPreviewDialog;
+import i2f.form.dialog.impl.text.*;
 import i2f.form.dialog.impl.web.WebUrlPreviewDialog;
 
 import java.util.ServiceLoader;

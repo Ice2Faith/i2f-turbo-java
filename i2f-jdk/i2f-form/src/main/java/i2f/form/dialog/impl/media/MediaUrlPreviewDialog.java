@@ -1,11 +1,7 @@
 package i2f.form.dialog.impl.media;
 
-import i2f.form.dialog.IPreviewDialog;
-import i2f.form.dialog.std.IFilePreviewDialog;
 import i2f.form.dialog.std.IUrlPreviewDialog;
 
-import java.io.File;
-import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 

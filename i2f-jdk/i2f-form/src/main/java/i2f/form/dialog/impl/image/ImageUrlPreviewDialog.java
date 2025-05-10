@@ -13,11 +13,12 @@ import java.util.Arrays;
  * @date 2025/5/10 13:14
  */
 public class ImageUrlPreviewDialog implements IUrlPreviewDialog {
-    public static final ImageUrlPreviewDialog INSTANCE=new ImageUrlPreviewDialog();
+    public static final ImageUrlPreviewDialog INSTANCE = new ImageUrlPreviewDialog();
+
     @Override
     public boolean support(Object obj) {
         URL url = castAsUrl(obj);
-        if(url==null){
+        if (url == null) {
             return false;
         }
         String suffix = getUrlFileSuffix(url);
@@ -36,7 +37,7 @@ public class ImageUrlPreviewDialog implements IUrlPreviewDialog {
             BufferedImage img = ImageIO.read(url);
             ImageDialogs.previewImage(img);
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
