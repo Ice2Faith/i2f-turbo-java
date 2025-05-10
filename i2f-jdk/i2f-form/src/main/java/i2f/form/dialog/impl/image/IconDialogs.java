@@ -12,13 +12,28 @@ import java.io.IOException;
  * @date 2025/5/9 17:47
  */
 public class IconDialogs {
+    public static void previewGif(File imgFile) throws IOException {
+        previewGif(imgFile, null, null);
+    }
+
+    public static void previewGif(File imgFile, String title) throws IOException {
+        previewGif(imgFile, title, null);
+    }
 
     public static void previewGif(File imgFile, String title, Color bgColor) throws IOException {
         ImageIcon icon = new ImageIcon(imgFile.getAbsolutePath());
         previewIcon(icon, title == null ? imgFile.getName() : title, bgColor);
     }
 
-    public static void previewIcon(ImageIcon icon, String title, Color bgColor) throws IOException {
+    public static void previewIcon(ImageIcon icon) {
+        previewIcon(icon, null, null);
+    }
+
+    public static void previewIcon(ImageIcon icon, String title) {
+        previewIcon(icon, title, null);
+    }
+
+    public static void previewIcon(ImageIcon icon, String title, Color bgColor) {
         // 如果标题为空，使用默认值
         if (title == null || title.isEmpty()) {
             title = "预览图标";

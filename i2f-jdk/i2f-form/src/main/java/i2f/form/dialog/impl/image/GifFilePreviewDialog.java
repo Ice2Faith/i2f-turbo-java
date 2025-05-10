@@ -1,6 +1,6 @@
 package i2f.form.dialog.impl.image;
 
-import i2f.form.dialog.IFilePreviewDialog;
+import i2f.form.dialog.std.IFilePreviewDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,12 +19,7 @@ public class GifFilePreviewDialog implements IFilePreviewDialog {
         if (file == null) {
             return false;
         }
-        String name = file.getName();
-        int idx = name.lastIndexOf(".");
-        if (idx < 0) {
-            return false;
-        }
-        String suffix = name.substring(idx).toLowerCase();
+        String suffix = getFileSuffix(file);
         if (Arrays.asList(
                 ".gif"
         ).contains(suffix)) {

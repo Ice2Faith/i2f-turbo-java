@@ -26,7 +26,13 @@ import java.net.URL;
  * @date 2025/5/9 17:49
  */
 public class MediaDialogs {
+    public static void previewMedia(URL url) {
+        previewMedia(url, null, null);
+    }
 
+    public static void previewMedia(URL url, String title) {
+        previewMedia(url, title, null);
+    }
 
     public static void previewMedia(URL url, String title, Color bgColor) {
         URI uri = null;
@@ -39,14 +45,38 @@ public class MediaDialogs {
         previewMedia(media, title == null ? url.toString() : title, bgColor);
     }
 
+    public static void previewMedia(URI uri) {
+        previewMedia(uri, null, null);
+    }
+
+    public static void previewMedia(URI uri, String title) {
+        previewMedia(uri, title, null);
+    }
+
     public static void previewMedia(URI uri, String title, Color bgColor) {
         Media media = new Media(uri.toString());
         previewMedia(media, title == null ? uri.toString() : title, bgColor);
     }
 
+    public static void previewMedia(File file) {
+        previewMedia(file, null, null);
+    }
+
+    public static void previewMedia(File file, String title) {
+        previewMedia(file, title, null);
+    }
+
     public static void previewMedia(File file, String title, Color bgColor) {
         Media media = new Media(file.toURI().toString());
         previewMedia(media, title == null ? file.getName() : title, bgColor);
+    }
+
+    public static void previewMedia(Media media) {
+        previewMedia(media, null, null);
+    }
+
+    public static void previewMedia(Media media, String title) {
+        previewMedia(media, title, null);
     }
 
     public static void previewMedia(Media media, String title, Color bgColor) {

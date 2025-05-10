@@ -20,27 +20,6 @@ public class DialogBoxes {
         }
     }
 
-    // 示例用法
-    public static void main(String[] args) throws Throwable {
-//        String title = "输入对话框";
-//        String defaultValue = "这是默认值";
-//        String userInput = input(title, defaultValue);
-//        System.out.println("用户输入：" + userInput);
-//
-//        confirm("同意");
-//
-//        message("已经同意");
-//
-//        previewImage(new File("./test.gif"));
-
-//        previewGif(new File("./test.gif"),null,null);
-
-//        previewMedia(new File("./test.mp4"), null, null);
-
-//        previewMedia(new File("./test.mp3"), null, null);
-
-//        previewUrl("https://www.baidu.com/", null, null);
-    }
 
     public static enum ActionButton {
         OK(1),
