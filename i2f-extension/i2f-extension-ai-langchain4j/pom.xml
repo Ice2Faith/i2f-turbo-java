@@ -9,7 +9,17 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-extension-antlr4</artifactId>
+    <artifactId>i2f-extension-ai-langchain4j</artifactId>
+
+    <properties>
+        <java.version>17</java.version>
+        <java.source.version>17</java.source.version>
+        <java.target.version>17</java.target.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+
+        <langchain4j.version>1.0.0-rc1</langchain4j.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -18,38 +28,22 @@
         </dependency>
 
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-reflect</artifactId>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>${langchain4j.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-convert</artifactId>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai</artifactId>
+            <version>${langchain4j.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-typeof</artifactId>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-ollama</artifactId>
+            <version>1.0.0-beta4</version>
         </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-match</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-invokable</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>4.13.2</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
     </dependencies>
 
     <build>
