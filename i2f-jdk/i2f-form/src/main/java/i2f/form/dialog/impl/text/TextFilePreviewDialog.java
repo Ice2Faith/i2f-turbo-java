@@ -1,6 +1,9 @@
-package i2f.form.dialog.impl.image;
+package i2f.form.dialog.impl.text;
 
+import i2f.form.dialog.DialogBoxes;
+import i2f.form.dialog.impl.image.ImageDialogs;
 import i2f.form.dialog.std.IFilePreviewDialog;
+import i2f.io.stream.StreamUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -12,8 +15,8 @@ import java.util.Arrays;
  * @author Ice2Faith
  * @date 2025/5/9 17:33
  */
-public class ImageFilePreviewDialog implements IFilePreviewDialog {
-    public static final ImageFilePreviewDialog INSTANCE = new ImageFilePreviewDialog();
+public class TextFilePreviewDialog implements IFilePreviewDialog {
+    public static final TextFilePreviewDialog INSTANCE = new TextFilePreviewDialog();
 
     @Override
     public boolean support(Object obj) {
@@ -23,7 +26,12 @@ public class ImageFilePreviewDialog implements IFilePreviewDialog {
         }
         String suffix = getFileSuffix(file);
         if (Arrays.asList(
-                ".jpg", ".png", ".jpeg", ".webp", ".bmp", ".tiff"
+                ".txt", ".text", ".html", ".md",
+                ".log",
+                ".html","htm",".css",".js",".sass",".less",".ts",
+                ".json",".xml",".yml",".yaml",
+                ".properties",".conf",
+                ".sql",".java",".py",".c",".cpp",".h",".hpp"
         ).contains(suffix)) {
             return true;
         }
@@ -34,8 +42,8 @@ public class ImageFilePreviewDialog implements IFilePreviewDialog {
     public void preview(Object obj) {
         File file = tryConvertAsFile(obj);
         try {
-            BufferedImage img = ImageIO.read(file);
-            ImageDialogs.previewImage(img);
+            String str = StreamUtil.readString(file);
+            DialogBoxes.message(str);
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }

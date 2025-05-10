@@ -1,4 +1,6 @@
-package i2f.form.dialog;
+package i2f.form.dialog.std;
+
+import i2f.form.dialog.IPreviewDialog;
 
 import java.io.File;
 
@@ -19,6 +21,16 @@ public interface IFilePreviewDialog extends IPreviewDialog {
             }
         }
         return null;
+    }
+
+    default String getFileSuffix(File file){
+        String name = file.getName();
+        int idx = name.lastIndexOf(".");
+        if (idx < 0) {
+            return "";
+        }
+        String suffix = name.substring(idx).toLowerCase();
+        return suffix;
     }
 
     @Override

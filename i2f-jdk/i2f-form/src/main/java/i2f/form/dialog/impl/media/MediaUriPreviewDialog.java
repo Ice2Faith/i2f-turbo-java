@@ -1,24 +1,26 @@
 package i2f.form.dialog.impl.media;
 
-import i2f.form.dialog.std.IFilePreviewDialog;
+import i2f.form.dialog.std.IUriPreviewDialog;
+import i2f.form.dialog.std.IUrlPreviewDialog;
 
-import java.io.File;
+import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 
 /**
  * @author Ice2Faith
  * @date 2025/5/9 17:33
  */
-public class MediaFilePreviewDialog implements IFilePreviewDialog {
-    public static final MediaFilePreviewDialog INSTANCE = new MediaFilePreviewDialog();
+public class MediaUriPreviewDialog implements IUriPreviewDialog {
+    public static final MediaUriPreviewDialog INSTANCE = new MediaUriPreviewDialog();
 
     @Override
     public boolean support(Object obj) {
-        File file = tryConvertAsFile(obj);
-        if (file == null) {
+        URI uri = castAsUri(obj);
+        if (uri == null) {
             return false;
         }
-        String suffix = getFileSuffix(file);
+        String suffix = getUriFileSuffix(uri);
         if (Arrays.asList(
                 ".mp3", ".aac", ".ogg",
                 ".mp4", ".avi", ".wmv", ".mpeg", ".flv", ".mkv", ".rmvb"
@@ -30,7 +32,7 @@ public class MediaFilePreviewDialog implements IFilePreviewDialog {
 
     @Override
     public void preview(Object obj) {
-        File file = tryConvertAsFile(obj);
-        MediaDialogs.previewMedia(file);
+        URI uri = castAsUri(obj);
+        MediaDialogs.previewMedia(uri);
     }
 }
