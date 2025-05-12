@@ -826,13 +826,21 @@ public class JdbcResolver {
      */
     public static Map<Integer, Object> call(Connection conn, String sql, List<?> args, Map<Integer, SQLType> outParams) throws SQLException {
         try (CallableStatement stat = callStatement(conn, sql, args, outParams)) {
+            int rsIdx=-1;
             boolean ok = stat.execute();
             Map<Integer, Object> ret = new LinkedHashMap<>();
-            ret.put(-1, ok);
+            ret.put(rsIdx, ok);
             if (outParams != null) {
                 for (Map.Entry<Integer, SQLType> entry : outParams.entrySet()) {
                     Object val = stat.getObject(entry.getKey() + 1);
                     ret.put(entry.getKey(), val);
+                }
+            }
+            while(stat.getMoreResults()){
+                rsIdx--;
+                try(ResultSet rs = stat.getResultSet()) {
+                    QueryResult result = parseResultSet(rs);
+                    ret.put(rsIdx, result);
                 }
             }
             stat.close();
@@ -935,12 +943,20 @@ public class JdbcResolver {
         Map<Integer, NamingOutputParameter> namingMap = new LinkedHashMap<>();
 
         try (CallableStatement stat = namingCallableStatement(conn, sql, args, namingMap)) {
+            int rsIdx=-1;
             boolean ok = stat.execute();
             Map<String, Object> ret = new LinkedHashMap<>();
-            ret.put("-1", ok);
+            ret.put(String.valueOf(rsIdx), ok);
             for (Map.Entry<Integer, NamingOutputParameter> entry : namingMap.entrySet()) {
                 Object val = stat.getObject(entry.getKey());
                 ret.put(entry.getValue().getName(), val);
+            }
+            while(stat.getMoreResults()){
+                rsIdx--;
+                try(ResultSet rs = stat.getResultSet()) {
+                    QueryResult result = parseResultSet(rs);
+                    ret.put(String.valueOf(rsIdx), result);
+                }
             }
             stat.close();
 
