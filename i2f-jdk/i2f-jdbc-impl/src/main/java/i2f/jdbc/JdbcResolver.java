@@ -17,6 +17,7 @@ import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -1156,7 +1157,8 @@ public class JdbcResolver {
             return;
         }
         if (obj instanceof char[]) {
-            stat.setCharacterStream(index, new StringReader(new String((char[]) obj)));
+            char[] arr = (char[]) obj;
+            stat.setCharacterStream(index, new StringReader(new String(arr)),arr.length);
             return;
         }
         if (obj instanceof Reader) {
@@ -1164,7 +1166,12 @@ public class JdbcResolver {
             return;
         }
         if (obj instanceof InputStream) {
-            stat.setBlob(index, (InputStream) obj);
+            if(obj instanceof ByteArrayInputStream){
+                ByteArrayInputStream bis = (ByteArrayInputStream) obj;
+                stat.setBlob(index,bis,bis.available());
+            }else {
+                stat.setBlob(index, (InputStream) obj);
+            }
             return;
         }
         if (obj instanceof NClob) {
@@ -1441,7 +1448,12 @@ public class JdbcResolver {
                 }
                 Object val = ObjectConvertor.tryConvertAsType(obj, InputStream.class);
                 if (val instanceof InputStream) {
-                    stat.setBlob(index, (InputStream) val);
+                    if(val instanceof ByteArrayInputStream){
+                        ByteArrayInputStream bis=(ByteArrayInputStream) val;
+                        stat.setBlob(index,bis,bis.available());
+                    }else {
+                        stat.setBlob(index, (InputStream) val);
+                    }
                     return true;
                 }
             }
@@ -1458,7 +1470,8 @@ public class JdbcResolver {
                 }
                 Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
                 if (val instanceof String) {
-                    stat.setClob(index, new StringReader((String)val));
+                    String str = (String) val;
+                    stat.setClob(index, new StringReader(str),str.length());
                     return true;
                 }
             }
@@ -1475,7 +1488,8 @@ public class JdbcResolver {
                 }
                 Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
                 if (val instanceof String) {
-                    stat.setNClob(index, new StringReader((String) val));
+                    String str = (String) val;
+                    stat.setNClob(index, new StringReader(str),str.length());
                     return true;
                 }
             }
@@ -1488,7 +1502,8 @@ public class JdbcResolver {
             } else {
                 Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
                 if (val instanceof String) {
-                    stat.setCharacterStream(index, new StringReader((String) val));
+                    String str = (String) val;
+                    stat.setCharacterStream(index, new StringReader(str),str.length());
                     return true;
                 }
             }
@@ -1501,7 +1516,8 @@ public class JdbcResolver {
             } else {
                 Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
                 if (val instanceof String) {
-                    stat.setNCharacterStream(index, new StringReader((String) val));
+                    String str = (String) val;
+                    stat.setNCharacterStream(index, new StringReader(str),str.length());
                     return true;
                 }
             }
@@ -1540,7 +1556,12 @@ public class JdbcResolver {
             } else {
                 Object val = ObjectConvertor.tryConvertAsType(obj, InputStream.class);
                 if (val instanceof InputStream) {
-                    stat.setBinaryStream(index, (InputStream) val);
+                    if(val instanceof ByteArrayInputStream) {
+                        ByteArrayInputStream bis = (ByteArrayInputStream) val;
+                        stat.setBinaryStream(index, bis,bis.available());
+                    }else {
+                        stat.setBinaryStream(index, (InputStream) val);
+                    }
                     return true;
                 }
             }
