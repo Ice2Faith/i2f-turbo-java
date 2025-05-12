@@ -1,5 +1,6 @@
 package i2f.reflect.vistor.impl;
 
+import i2f.lru.LruMap;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 
@@ -129,6 +130,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * ret= 3.14159...
  */
 public class VisitorParser {
+    protected static final LruMap<String, List<String>> CACHE_SPLIT_TOKENS = new LruMap<>(4096);
+    protected static final LruMap<String, List<String>> CACHE_SPLIT_PARAMETERS = new LruMap<>(4096);
+
     public static Visitor visit(String expression, Object rootObj) {
         return visit(expression, rootObj, rootObj, rootObj);
     }
@@ -277,6 +281,14 @@ public class VisitorParser {
     }
 
     public static List<String> splitParameters(String expression) {
+        if (expression == null) {
+            return null;
+        }
+        List<String> ret = CACHE_SPLIT_PARAMETERS.computeIfAbsent(expression, VisitorParser::splitParameters0);
+        return new ArrayList<>(ret);
+    }
+
+    public static List<String> splitParameters0(String expression) {
         AtomicInteger index = new AtomicInteger(0);
         Stack<Character> stack = new Stack<>();
         List<String> tokens = new ArrayList<>();
@@ -308,8 +320,16 @@ public class VisitorParser {
     }
 
     public static List<String> splitTokens(String expression) {
-        AtomicInteger index = new AtomicInteger(0);
+        if (expression == null) {
+            return null;
+        }
+        List<String> ret = CACHE_SPLIT_TOKENS.computeIfAbsent(expression, VisitorParser::splitTokens0);
+        return new ArrayList<>(ret);
+    }
+
+    public static List<String> splitTokens0(String expression) {
         List<String> tokens = new ArrayList<>();
+        AtomicInteger index = new AtomicInteger(0);
         String curr = "";
         while (index.get() < expression.length()) {
             char ch = expression.charAt(index.get());
