@@ -142,18 +142,54 @@ public class VisitorParser {
     }
 
     private static Visitor visit(String expression, Object rootObj, Object nodeObj, Object paramObj) {
-        if(expression!=null){
-            expression=expression.trim();
+        if (expression != null) {
+            expression = expression.trim();
         }
-        if(expression==null || expression.isEmpty()){
+        if (expression == null || expression.isEmpty()) {
             return new ConstVisitor(null);
         }
         Visitor ret = new ReadonlyVisitor(nodeObj, nodeObj);
         List<String> tokens = splitTokens(expression);
 
         for (String token : tokens) {
-            Object currRet = ret.get();
-            if (token.startsWith("[")) {
+            if ("$root".equals(token) || "__root".equals(token)) {
+                ret = new ConstVisitor(rootObj);
+            } else if ("$param".equals(token) || "__param".equals(token)) {
+                ret = new ConstVisitor(paramObj);
+            } else if ("$node".equals(token) || "__node".equals(token)) {
+                ret = new ConstVisitor(nodeObj);
+            } else if ("$true".equals(token)) {
+                ret = new ConstVisitor(true);
+            } else if ("$false".equals(token)) {
+                ret = new ConstVisitor(false);
+            } else if (token.matches("\\$\\d+\\.\\d+")) {
+                ret = new ConstVisitor(Double.parseDouble(token.substring(1)));
+            } else if (token.matches("\\$f\\d+\\.\\d+")) {
+                ret = new ConstVisitor(Float.parseFloat(token.substring(2)));
+            } else if (token.matches("\\$[1-9]([0-9]+)?")) {
+                ret = new ConstVisitor(Integer.parseInt(token.substring(1), 10));
+            } else if (token.matches("\\$(0x|0X)[a-fA-F0-9]+")) {
+                ret = new ConstVisitor(Integer.parseInt(token.substring(3), 16));
+            } else if (token.matches("\\$0([0-9]+)?")) {
+                ret = new ConstVisitor(Integer.parseInt(token.substring(2), 8));
+            } else if (token.matches("\\$(0b|0B)[0-1]+")) {
+                ret = new ConstVisitor(Integer.parseInt(token.substring(3), 2));
+            } else if (token.matches("\\$l[1-9]([0-9]+)?")) {
+                ret = new ConstVisitor(Long.parseLong(token.substring(2), 10));
+            } else if (token.matches("\\$l(0x|0X)[a-fA-F0-9]+")) {
+                ret = new ConstVisitor(Long.parseLong(token.substring(4), 16));
+            } else if (token.matches("\\$l0([0-9]+)?")) {
+                ret = new ConstVisitor(Long.parseLong(token.substring(3), 8));
+            } else if (token.matches("\\$l(0b|0B)[0-1]+")) {
+                ret = new ConstVisitor(Long.parseLong(token.substring(4), 2));
+            } else if (token.startsWith("#")) {
+                String nextExpression = token.substring(2, token.length() - 1);
+                ret = visit(nextExpression, rootObj, paramObj, paramObj);
+            } else if (token.startsWith("[")) {
+                Object currRet = ret.get();
+                if (currRet == null) {
+                    return null;
+                }
                 String nextExpression = token.substring(1, token.length() - 1);
                 ret = visit(nextExpression, rootObj, currRet, paramObj);
             } else if (token.startsWith("@")) {
@@ -178,13 +214,22 @@ public class VisitorParser {
                         if (parameter.startsWith("#{")) {
                             args[i] = visit(parameter, rootObj, paramObj, paramObj).get();
                         } else {
+                            Object currRet = ret.get();
+                            if (currRet == null) {
+                                return null;
+                            }
                             args[i] = visit(parameter, rootObj, currRet, paramObj).get();
                         }
                         i++;
                     }
 
                     if (staticClass == null) {
+                        Object currRet = ret.get();
+                        if (currRet == null) {
+                            return null;
+                        }
                         try {
+
                             Object val = ReflectResolver.invokeMethod(currRet, methodName, args);
                             ret = new ReadonlyVisitor(val, currRet);
                         } catch (Throwable e) {
@@ -200,52 +245,26 @@ public class VisitorParser {
                     }
                 } else {
                     if (staticClass == null) {
+                        Object currRet = ret.get();
+                        if (currRet == null) {
+                            return null;
+                        }
                         ret = new FieldVisitor(currRet, methodName);
                     } else {
                         ret = new StaticFieldVisitor(staticClass, methodName);
                     }
                 }
 
-
-            } else if (token.startsWith("#")) {
-                String nextExpression = token.substring(2, token.length() - 1);
-                ret = visit(nextExpression, rootObj, paramObj, paramObj);
             } else {
-                if ("$root".equals(token) || "__root".equals(token)) {
-                    ret = new ConstVisitor(rootObj);
-                } else if ("$param".equals(token) || "__param".equals(token)) {
-                    ret = new ConstVisitor(paramObj);
-                } else if ("$node".equals(token) || "__node".equals(token)) {
-                    ret = new ConstVisitor(nodeObj);
-                } else if ("$true".equals(token)) {
-                    ret = new ConstVisitor(true);
-                } else if ("$false".equals(token)) {
-                    ret = new ConstVisitor(false);
-                } else if (token.matches("\\$\\d+\\.\\d+")) {
-                    ret = new ConstVisitor(Double.parseDouble(token.substring(1)));
-                } else if (token.matches("\\$f\\d+\\.\\d+")) {
-                    ret = new ConstVisitor(Float.parseFloat(token.substring(2)));
-                } else if (token.matches("\\$[1-9]([0-9]+)?")) {
-                    ret = new ConstVisitor(Integer.parseInt(token.substring(1), 10));
-                } else if (token.matches("\\$(0x|0X)[a-fA-F0-9]+")) {
-                    ret = new ConstVisitor(Integer.parseInt(token.substring(3), 16));
-                } else if (token.matches("\\$0([0-9]+)?")) {
-                    ret = new ConstVisitor(Integer.parseInt(token.substring(2), 8));
-                } else if (token.matches("\\$(0b|0B)[0-1]+")) {
-                    ret = new ConstVisitor(Integer.parseInt(token.substring(3), 2));
-                } else if (token.matches("\\$l[1-9]([0-9]+)?")) {
-                    ret = new ConstVisitor(Long.parseLong(token.substring(2), 10));
-                } else if (token.matches("\\$l(0x|0X)[a-fA-F0-9]+")) {
-                    ret = new ConstVisitor(Long.parseLong(token.substring(4), 16));
-                } else if (token.matches("\\$l0([0-9]+)?")) {
-                    ret = new ConstVisitor(Long.parseLong(token.substring(3), 8));
-                } else if (token.matches("\\$l(0b|0B)[0-1]+")) {
-                    ret = new ConstVisitor(Long.parseLong(token.substring(4), 2));
-                } else if (currRet instanceof Map) {
+                Object currRet = ret.get();
+                if (currRet == null) {
+                    return null;
+                }
+                if (currRet instanceof Map) {
                     ret = new MapVisitor((Map) currRet, token);
                 } else if (ReflectResolver.isArray(currRet)
                         && "length".equals(token)) {
-                    int len= Array.getLength(currRet);
+                    int len = Array.getLength(currRet);
                     return new ConstVisitor(len);
                 } else if (ReflectResolver.isArray(currRet)) {
                     Integer idx = Integer.valueOf(token);
@@ -275,6 +294,7 @@ public class VisitorParser {
                     }
                 }
             }
+
         }
 
         return ret;

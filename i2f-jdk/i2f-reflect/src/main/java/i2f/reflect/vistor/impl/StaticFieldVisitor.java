@@ -3,6 +3,8 @@ package i2f.reflect.vistor.impl;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 
+import java.util.Objects;
+
 /**
  * @author Ice2Faith
  * @date 2024/3/1 19:04
@@ -20,6 +22,16 @@ public class StaticFieldVisitor implements Visitor {
     @Override
     public Object get() {
         try {
+            if (clazz != null) {
+                if (clazz.isEnum()) {
+                    Object[] arr = clazz.getEnumConstants();
+                    for (Object item : arr) {
+                        if (Objects.equals(fieldName, String.valueOf(item))) {
+                            return item;
+                        }
+                    }
+                }
+            }
             return ReflectResolver.valueGetStatic(clazz, fieldName);
         } catch (Exception e) {
             throw new IllegalStateException("get static field [" + this.fieldName + "] value error in class [" + clazz.getName() + "]", e);
