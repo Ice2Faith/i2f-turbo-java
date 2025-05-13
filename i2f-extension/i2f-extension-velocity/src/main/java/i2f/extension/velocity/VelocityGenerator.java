@@ -136,7 +136,23 @@ public class VelocityGenerator {
         return renderAsString(engine, templateName, params);
     }
 
-    public static String renderByStringResource(Properties config, String template, Map<String, Object> params) {
+    protected static volatile VelocityEngine DEFAULT_STRING_ENGINE=null;
+
+    public static VelocityEngine getDefaultStringEngine(Properties config){
+        if(config==null || config.isEmpty()){
+            if(DEFAULT_STRING_ENGINE==null){
+                synchronized (VelocityGenerator.class){
+                    if(DEFAULT_STRING_ENGINE==null) {
+                        DEFAULT_STRING_ENGINE = getDefaultStringEngine0(config);
+                    }
+                }
+            }
+            return DEFAULT_STRING_ENGINE;
+        }else{
+            return getDefaultStringEngine0(config);
+        }
+    }
+    public static VelocityEngine getDefaultStringEngine0(Properties config){
         //初始化引擎，默认从classpath加载模板文件
         VelocityEngine engine = new VelocityEngine();
 
@@ -150,9 +166,29 @@ public class VelocityGenerator {
 
         initEngine(config, engine);
 
+        return engine;
+    }
+
+    public static String renderByStringResource(Properties config, String template, Map<String, Object> params) {
+        VelocityEngine engine=getDefaultStringEngine(config);
+
         String templateName = useStringResource(engine, template);
 
-        return renderAsString(engine, templateName, params);
+        try {
+            return renderAsString(engine, templateName, params);
+        }finally {
+            removeStringResource(engine,templateName);
+        }
+    }
+
+    public static void removeStringResource(VelocityEngine engine, String templateName) {
+        // 创建并配置字符串资源仓库
+        StringResourceRepository repo = (StringResourceRepository) engine.getApplicationAttribute("stringRepo");
+        if (repo == null) {
+            repo = StringResourceLoader.getRepository();
+            engine.setApplicationAttribute("stringRepo", repo);
+        }
+        repo.removeStringResource(templateName);
     }
 
     public static String useStringResource(VelocityEngine engine, String template) {

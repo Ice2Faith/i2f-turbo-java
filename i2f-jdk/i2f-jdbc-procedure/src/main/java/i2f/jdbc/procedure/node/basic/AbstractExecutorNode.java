@@ -59,63 +59,23 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     public void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String location = getNodeLocation(node);
         boolean isDebugMode = executor.isDebug();
-//        if (isDebugMode) {
-//            executor.logDebug("exec node on tag:" + node.getTagName() + " , at " + location);
-//        }
 
-        Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
-        Stack<String> traceStack = null;
-        LinkedList<Map.Entry<String, String>> traceCalls = null;
-        LinkedList<Throwable> traceErrors = null;
-        synchronized (trace) {
-            traceStack = executor.visitAs(ParamsConsts.TRACE_STACK, context);
-            if (traceStack == null) {
-                traceStack = new Stack<>();
-                executor.visitSet(context, ParamsConsts.TRACE_STACK, traceStack);
-            }
-
-            traceCalls = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
-            if (traceCalls == null) {
-                traceCalls = new LinkedList<>();
-                executor.visitSet(context, ParamsConsts.TRACE_CALLS, traceCalls);
-            }
-
-            traceErrors = executor.visitAs(ParamsConsts.TRACE_ERRORS, context);
-            if (traceErrors == null) {
-                traceErrors = new LinkedList<>();
-                executor.visitSet(context, ParamsConsts.TRACE_ERRORS, traceErrors);
-            }
+        Stack<String> traceStack = executor.visitAs(ParamsConsts.TRACE_STACK, context);
+        if (traceStack == null) {
+            traceStack = new Stack<>();
+            executor.visitSet(context, ParamsConsts.TRACE_STACK, traceStack);
         }
 
-        if (isDebugMode) {
-            synchronized (trace) {
-                int size = traceCalls.size();
-                while (size > 1000) {
-                    traceCalls.removeFirst();
-                    size--;
-                }
+        if (traceStack.isEmpty()) {
+            traceStack.push(location);
+        } else {
+            String top = traceStack.peek();
+            if (top.startsWith(String.valueOf(node.getLocationFile()))) {
+                traceStack.pop();
             }
+            traceStack.push(location);
         }
 
-        synchronized (trace) {
-            if (traceStack.isEmpty()) {
-                traceStack.push(location);
-            } else {
-                String top = traceStack.peek();
-                if (top.startsWith(String.valueOf(node.getLocationFile()))) {
-                    traceStack.pop();
-                }
-                traceStack.push(location);
-            }
-        }
-
-        synchronized (trace) {
-            int size = traceErrors.size();
-            while (size > 10) {
-                traceErrors.removeFirst();
-                size--;
-            }
-        }
 
         Map<String, Object> pointContext = new HashMap<>();
 
@@ -149,11 +109,9 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
 
             if (TagConsts.PROCEDURE.equals(node.getTagName())) {
-                synchronized (trace) {
-                    String pop = traceStack.peek();
-                    if (pop.startsWith(node.getLocationFile())) {
-                        traceStack.pop();
-                    }
+                String pop = traceStack.peek();
+                if (pop.startsWith(node.getLocationFile())) {
+                    traceStack.pop();
                 }
             }
 
@@ -169,12 +127,11 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             if (e instanceof ControlSignalException) {
                 if (e instanceof ReturnSignalException) {
                     if (TagConsts.LANG_RETURN.equals(node.getTagName())) {
-                        synchronized (trace) {
-                            String pop = traceStack.peek();
-                            if (pop.endsWith(TagConsts.LANG_RETURN)) {
-                                traceStack.pop();
-                            }
+                        String pop = traceStack.peek();
+                        if (pop.endsWith(TagConsts.LANG_RETURN)) {
+                            traceStack.pop();
                         }
+
                     }
                 }
                 throw (ControlSignalException) e;
@@ -224,11 +181,25 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 }
             }
 
-            synchronized (trace) {
+            LinkedList<Throwable> traceErrors = executor.visitAs(ParamsConsts.TRACE_ERRORS, context);
+            if (traceErrors == null) {
+                traceErrors = new LinkedList<>();
+                executor.visitSet(context, ParamsConsts.TRACE_ERRORS, traceErrors);
+            }
+
+            if (traceErrors.isEmpty()) {
+                traceErrors.add(re);
+            } else {
                 if (!traceErrors.contains(re)) {
                     traceErrors.add(re);
                 }
+                int size = traceErrors.size();
+                while (size > 10) {
+                    traceErrors.removeFirst();
+                    size--;
+                }
             }
+
 
             try {
                 onThrowing(e, pointContext, node, context, executor);
@@ -243,18 +214,17 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             pointContext.put("endTs", ets);
             pointContext.put("useTs", useTs);
 
-            if (TagConsts.PROCEDURE.equals(node.getTagName())) {
-                if (useTs > slowProcedureMillsSeconds) {
-                    executor.logWarn(() -> "slow procedure, use " + useTs + "(ms) : " + node.getTagAttrMap().get(AttrConsts.ID));
-                }
-            } else {
-                if (!Arrays.asList(TagConsts.PROCEDURE_CALL,
-                        TagConsts.FUNCTION_CALL).contains(node.getTagName())) {
-                    if (useTs > slowNodeMillsSeconds) {
-                        executor.logWarn(() -> "slow node, use " + useTs + "(ms) : " + location);
-                    }
-                }
+
+            if (useTs > slowProcedureMillsSeconds
+                    && TagConsts.PROCEDURE.equals(node.getTagName())) {
+                executor.logWarn(() -> "slow procedure, use " + useTs + "(ms) : " + node.getTagAttrMap().get(AttrConsts.ID));
+            } else if (useTs > slowNodeMillsSeconds
+                    && !Arrays.asList(TagConsts.PROCEDURE_CALL,
+                    TagConsts.FUNCTION_CALL).contains(node.getTagName())) {
+                executor.logWarn(() -> "slow node, use " + useTs + "(ms) : " + location);
+
             }
+
 
             XmlExecUseTimeEvent event = new XmlExecUseTimeEvent();
             event.setExecutorNode(this);
