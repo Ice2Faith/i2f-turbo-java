@@ -41,45 +41,20 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
         XmlNode node = evt.getNode();
         JdbcProcedureExecutor executor = evt.getExecutor();
         Throwable e = evt.getThrowable();
-        if(type== XmlNodeExecEvent.Type.BEFORE){
+
+        LinkedList<Map.Entry<String, String>> traceCalls = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
+        if (traceCalls == null) {
+            traceCalls = new LinkedList<>();
+            executor.visitSet(context, ParamsConsts.TRACE_CALLS, traceCalls);
+        }
+
+
+        if (type == XmlNodeExecEvent.Type.BEFORE) {
 
             String location = (String) pointContext.get("location");
             String snapshotTraceId = (String) pointContext.get("snapshotTraceId");
 
             boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
-            Map<String, Object> trace = executor.visitAs(ParamsConsts.TRACE, context);
-            LinkedList<Map.Entry<String, String>> traceCalls = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
-            if (isDebugMode) {
-                synchronized (trace) {
-                    int size = traceCalls.size();
-                    while (size > 1000) {
-                        traceCalls.removeFirst();
-                        size--;
-                    }
-                }
-            }
-
-
-            String tagName = node.getTagName();
-            if (tagName != null) {
-                if (TagConsts.PROCEDURE.equals(tagName)) {
-                    String id = node.getTagAttrMap().get(AttrConsts.ID);
-                    if (id != null && !id.isEmpty()) {
-                        executor.logInfo("exec node:" + id + " at " + location);
-                        if (isDebugMode) {
-                            String callSnapshot = getCallSnapshot(node, context, executor);
-                            callSnapshot = "BEFORE:" + snapshotTraceId + "\n" + callSnapshot;
-                            traceCalls.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
-                            executor.logDebug("call-params:\n===================> " + callSnapshot);
-                        }
-                    }
-                }
-            }
-        } else if(type== XmlNodeExecEvent.Type.AFTER){
-
-            boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
-            String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
-            LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
 
             if (isDebugMode) {
                 String tagName = node.getTagName();
@@ -87,21 +62,49 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
                     if (TagConsts.PROCEDURE.equals(tagName)) {
                         String id = node.getTagAttrMap().get(AttrConsts.ID);
                         if (id != null && !id.isEmpty()) {
+
                             String callSnapshot = getCallSnapshot(node, context, executor);
-                            callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
-                            traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                            callSnapshot = "BEFORE:" + snapshotTraceId + "\n" + callSnapshot;
+                            traceCalls.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                            int size = traceCalls.size();
+                            while (size > 1000) {
+                                traceCalls.removeFirst();
+                                size--;
+                            }
                             executor.logDebug("call-params:\n===================> " + callSnapshot);
                         }
                     }
                 }
             }
-        } else if(type== XmlNodeExecEvent.Type.THROWING){
+        } else if (type == XmlNodeExecEvent.Type.AFTER) {
+            boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
+            if (isDebugMode) {
+                String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
+
+                String tagName = node.getTagName();
+                if (tagName != null) {
+                    if (TagConsts.PROCEDURE.equals(tagName)) {
+                        String id = node.getTagAttrMap().get(AttrConsts.ID);
+                        if (id != null && !id.isEmpty()) {
+                            String callSnapshot = getCallSnapshot(node, context, executor);
+                            callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
+                            traceCalls.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                            int size = traceCalls.size();
+                            while (size > 1000) {
+                                traceCalls.removeFirst();
+                                size--;
+                            }
+                            executor.logDebug("call-params:\n===================> " + callSnapshot);
+                        }
+                    }
+                }
+            }
+        } else if (type == XmlNodeExecEvent.Type.THROWING) {
 
             boolean isDebugMode = executor.visitAs("isDebugMode", pointContext);
-            String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
-            LinkedList<Map.Entry<String, String>> traceCallRecords = executor.visitAs(ParamsConsts.TRACE_CALLS, context);
-
             if (isDebugMode) {
+                String snapshotTraceId = executor.visitAs("snapshotTraceId", pointContext);
+
                 if (e instanceof ControlSignalException) {
                     // do nothing
                     if (e instanceof ReturnSignalException) {
@@ -112,7 +115,12 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
                                 if (id != null && !id.isEmpty()) {
                                     String callSnapshot = getCallSnapshot(node, context, executor);
                                     callSnapshot = "AFTER:" + snapshotTraceId + "\n" + callSnapshot;
-                                    traceCallRecords.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                                    traceCalls.add(new AbstractMap.SimpleEntry<>(id, callSnapshot));
+                                    int size = traceCalls.size();
+                                    while (size > 1000) {
+                                        traceCalls.removeFirst();
+                                        size--;
+                                    }
                                     executor.logDebug("call-params:\n===================> " + callSnapshot);
                                 }
                             }

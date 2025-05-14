@@ -22,6 +22,7 @@ import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
+import i2f.jdbc.procedure.executor.FeatureFunction;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.executor.event.PreparedParamsEvent;
@@ -41,6 +42,7 @@ import i2f.jdbc.procedure.util.JdbcProcedureUtil;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
+import i2f.lru.LruList;
 import i2f.lru.LruMap;
 import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
@@ -60,7 +62,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,13 +76,14 @@ import java.util.function.Supplier;
  * @date 2025/1/20 14:40
  */
 @Data
-public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScriptProvider {
+public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalScriptProvider {
     public static transient final LruMap<String, Object> staticLru = new LruMap<>(4096);
     protected static final AtomicBoolean hasApplyNodes = new AtomicBoolean(false);
     protected transient final AtomicReference<ProcedureNode> procedureNodeHolder = new AtomicReference<>();
     protected transient final LruMap<String, Object> executorLru = new LruMap<>(4096);
-    protected final CopyOnWriteArrayList<ExecutorNode> nodes = new CopyOnWriteArrayList<>();
-    protected final CopyOnWriteArrayList<EvalScriptProvider> evalScriptProviders = new CopyOnWriteArrayList<>();
+    protected final LruList<ExecutorNode> nodes = new LruList<>();
+    protected final ConcurrentHashMap<String, FeatureFunction> featuresMap = new ConcurrentHashMap<>();
+    protected final LruList<EvalScriptProvider> evalScriptProviders = new LruList<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
     public volatile Function<String, String> mapTypeColumnNameMapper = StringUtils::toUpper;
@@ -100,6 +103,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
             registryExecutorNode(node);
         }
         registryEvalScriptProvider(this);
+        initFeatureMap();
     }
 
     public BasicJdbcProcedureExecutor() {
@@ -268,25 +272,25 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     @Override
     public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
         XmlNode node = null;
-        try{
-            node=JdbcProcedureParser.parse(script);
-        }catch(Exception e){
+        try {
+            node = JdbcProcedureParser.parse(script);
+        } catch (Exception e) {
 
         }
-        if(node==null){
+        if (node == null) {
             try {
-                script="<procedure>\n" +
-                        script+"\n"+
+                script = "<procedure>\n" +
+                        script + "\n" +
                         "</procedure>\n";
-                node=JdbcProcedureParser.parse(script);
+                node = JdbcProcedureParser.parse(script);
             } catch (Exception e) {
 
             }
         }
-        if(node==null){
-            throw new IllegalArgumentException(LangConsts.XPROC4J+" lang accept xml format script, script format maybe wrong!");
+        if (node == null) {
+            throw new IllegalArgumentException(LangConsts.XPROC4J + " lang accept xml format script, script format maybe wrong!");
         }
-        return executor.exec(node,params,false,false);
+        return executor.exec(node, params, false, false);
     }
 
     @Override
@@ -346,6 +350,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         ProcedureMeta node = nodeMap.get(procedureId);
         if (node != null) {
             List<String> arguments = node.getArguments();
+            Iterator<Object> argIter = args.iterator();
             int i = 0;
             for (String name : arguments) {
                 if (AttrConsts.ID.equals(name)) {
@@ -354,7 +359,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
                 if (ParamsConsts.RETURN.equals(name)) {
                     continue;
                 }
-                Object value = i < args.size() ? args.get(i) : null;
+                Object value = argIter.hasNext() ? argIter.next() : null;
                 ret.put(name, value);
                 i++;
             }
@@ -392,8 +397,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
 //            logDebug( "exec XmlNode [" + XmlNode.getNodeLocation(node) + "] use Map ... ");
 //        }
         execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
-            for (ExecutorNode execNode : getNodes()) {
+            List<ExecutorNode> nodeList = getNodes();
+            for (ExecutorNode execNode : nodeList) {
                 if (execNode.support(vNode)) {
+                    if (nodeList instanceof LruList) {
+                        LruList<ExecutorNode> lruList = (LruList<ExecutorNode>) nodeList;
+                        lruList.touch(execNode);
+                    }
                     execXmlNodeByExecutorNode(execNode, vNode, vParams, vBeforeNewConnection, vAfterCloseConnection);
                     return;
                 }
@@ -516,8 +526,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
             if (node != null) {
                 return node;
             }
-            for (ExecutorNode item : getNodes()) {
+            List<ExecutorNode> nodeList = getNodes();
+            for (ExecutorNode item : nodeList) {
                 if (item instanceof ProcedureNode) {
+                    if (nodeList instanceof LruList) {
+                        LruList<ExecutorNode> lruList = (LruList<ExecutorNode>) nodeList;
+                        lruList.touch(item);
+                    }
                     return (ProcedureNode) item;
                 }
             }
@@ -550,12 +565,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         ret.put(ParamsConsts.CONTEXT, getNamingContext());
         ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
 
-        HashMap<Object, Object> trace = new HashMap<>();
+
+        Map<String, Object> trace = new HashMap<>();
         trace.put(ParamsConsts.STACK, new Stack<>());
         trace.put(ParamsConsts.CALLS, new LinkedList<>());
         trace.put(ParamsConsts.ERRORS, new LinkedList<>());
         ret.put(ParamsConsts.TRACE, trace);
-
 
         ret.put(ParamsConsts.LRU, new LruMap<>(4096));
         ret.put(ParamsConsts.EXECUTOR_LRU, executorLru);
@@ -587,7 +602,20 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
                 if (execParams == null) {
                     execParams = createParams();
                 }
-                params.put(key, execParams.get(key));
+                val = execParams.get(key);
+                params.put(key, val);
+            }
+            if (ParamsConsts.TRACE.equals(key)) {
+                Map<String, Object> trace = (Map<String, Object>) val;
+                if (!trace.containsKey(ParamsConsts.STACK)) {
+                    trace.put(ParamsConsts.STACK, new Stack<>());
+                }
+                if (!trace.containsKey(ParamsConsts.CALLS)) {
+                    trace.put(ParamsConsts.CALLS, new LinkedList<>());
+                }
+                if (!trace.containsKey(ParamsConsts.ERRORS)) {
+                    trace.put(ParamsConsts.ERRORS, new LinkedList<>());
+                }
             }
         }
 
@@ -677,43 +705,54 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         return value;
     }
 
-    public Object resolveFeature(Object value, String feature, XmlNode node, Map<String, Object> context) {
-        if (feature == null || feature.isEmpty()) {
-            return value;
-        }
-        if (FeatureConsts.INT.equals(feature)) {
+    protected void initFeatureMap() {
+        featuresMap.put(FeatureConsts.INT, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Integer.class);
-        } else if (FeatureConsts.DOUBLE.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.DOUBLE, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Double.class);
-        } else if (FeatureConsts.FLOAT.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.FLOAT, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Float.class);
-        } else if (FeatureConsts.STRING.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.STRING, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, String.class);
-        } else if (FeatureConsts.LONG.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.LONG, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Long.class);
-        } else if (FeatureConsts.SHORT.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.SHORT, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Short.class);
-        } else if (FeatureConsts.CHAR.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.CHAR, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Character.class);
-        } else if (FeatureConsts.BYTE.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.BYTE, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Byte.class);
-        } else if (FeatureConsts.BOOLEAN.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.BOOLEAN, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Boolean.class);
-        } else if (FeatureConsts.RENDER.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.RENDER, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return render(text, context);
-        } else if (FeatureConsts.VISIT.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.VISIT, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return visit(text, context);
-        } else if (FeatureConsts.EVAL.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.EVAL, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return eval(text, context);
-        } else if (FeatureConsts.TEST.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.TEST, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return test(text, context);
-        } else if (FeatureConsts.NULL.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.NULL, (value, node, context) -> {
             return null;
-        } else if (FeatureConsts.DATE.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.DATE, (value, node, context) -> {
             String text = String.valueOf(value);
             String patternText = node.getTagAttrMap().get(AttrConsts.PATTERN);
             boolean processed = false;
@@ -732,12 +771,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
                 value = ObjectConvertor.tryParseDate(text);
             }
             return value;
-        } else if (FeatureConsts.TRIM.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.TRIM, (value, node, context) -> {
             if (value == null) {
                 return null;
             }
             return String.valueOf(value).trim();
-        } else if (FeatureConsts.ALIGN.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.ALIGN, (value, node, context) -> {
             if (value == null) {
                 return null;
             }
@@ -754,39 +795,52 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
                 builder.append("\n");
             }
             return builder.toString();
-        } else if (FeatureConsts.BODY_TEXT.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.BODY_TEXT, (value, node, context) -> {
             return node.getTextBody();
-        } else if (FeatureConsts.BODY_XML.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.BODY_XML, (value, node, context) -> {
             return node.getTagBody();
-        } else if (FeatureConsts.SPACING_LEFT.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.SPACING_LEFT, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return " " + text;
-        } else if (FeatureConsts.SPACING_RIGHT.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.SPACING_RIGHT, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return text + " ";
-        } else if (FeatureConsts.SPACING.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.SPACING, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return " " + text + " ";
-        } else if (FeatureConsts.EVAL_JAVA.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.EVAL_JAVA, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalJavaNode.evalJava(context, this, "", "", text);
-        } else if (FeatureConsts.EVAL_JS.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.EVAL_JS, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalJavascriptNode.evalJavascript(text, context, this);
-        } else if (FeatureConsts.EVAL_TINYSCRIPT.equals(feature)
-                || FeatureConsts.EVAL_TS.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.EVAL_TINYSCRIPT, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalTinyScriptNode.evalTinyScript(text, context, this);
-        } else if (FeatureConsts.EVAL_GROOVY.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.EVAL_TS, featuresMap.get(FeatureConsts.EVAL_TINYSCRIPT));
+
+        featuresMap.put(FeatureConsts.EVAL_GROOVY, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalGroovyNode.evalGroovyScript(text, context, this);
-        } else if (FeatureConsts.CLASS.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.CLASS, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return loadClass(text);
-        } else if (FeatureConsts.NOT.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.NOT, (value, node, context) -> {
             boolean ok = toBoolean(value);
             return !ok;
-        } else if (FeatureConsts.DIALECT.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.DIALECT, (value, node, context) -> {
             try {
                 String databases = value == null ? null : String.valueOf(value);
                 String datasource = (String) attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
@@ -796,22 +850,40 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
                 logWarn(() -> e.getMessage(), e);
             }
             return false;
-        } else if (FeatureConsts.IS_NULL.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.IS_NULL, (value, node, context) -> {
             return value == null;
-        } else if (FeatureConsts.IS_NOT_NULL.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.IS_NOT_NULL, (value, node, context) -> {
             return value != null;
-        } else if (FeatureConsts.IS_EMPTY.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.IS_EMPTY, (value, node, context) -> {
             return value == null || "".equals(value);
-        } else if (FeatureConsts.IS_NOT_EMPTY.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.IS_NOT_EMPTY, (value, node, context) -> {
             return value != null && !"".equals(value);
-        } else if (FeatureConsts.DATE_NOW.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.DATE_NOW, (value, node, context) -> {
             return new Date();
-        } else if (FeatureConsts.UUID.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.UUID, (value, node, context) -> {
             return UUID.randomUUID().toString();
-        } else if (FeatureConsts.CURRENT_TIME_MILLIS.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.CURRENT_TIME_MILLIS, (value, node, context) -> {
             return System.currentTimeMillis();
-        } else if (FeatureConsts.SNOW_UID.equals(feature)) {
+        });
+        featuresMap.put(FeatureConsts.SNOW_UID, (value, node, context) -> {
             return SnowflakeLongUid.getId();
+        });
+    }
+
+    public Object resolveFeature(Object value, String feature, XmlNode node, Map<String, Object> context) {
+        if (feature == null || feature.isEmpty()) {
+            return value;
+        }
+        FeatureFunction featureFunction = featuresMap.get(feature);
+        if(featureFunction!=null){
+            return featureFunction.feature(value, node, context);
         } else {
             try {
                 IMethod method = ContextHolder.CONVERT_METHOD_MAP.get(feature);
@@ -914,7 +986,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         String location = traceLocation();
         System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
         if (e != null) {
-            JdbcProcedureUtil.purifyStackTrace(e,true);
+            JdbcProcedureUtil.purifyStackTrace(e, true);
             e.printStackTrace();
         }
     }
@@ -924,7 +996,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         String location = traceLocation();
         System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
         if (e != null) {
-            JdbcProcedureUtil.purifyStackTrace(e,true);
+            JdbcProcedureUtil.purifyStackTrace(e, true);
             e.printStackTrace();
         }
     }
@@ -934,7 +1006,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         String location = traceLocation();
         System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
         if (e != null) {
-            JdbcProcedureUtil.purifyStackTrace(e,true);
+            JdbcProcedureUtil.purifyStackTrace(e, true);
             e.printStackTrace();
         }
     }
@@ -945,8 +1017,27 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         return ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get() + ":" + (node == null ? "" : node.getTagName());
     }
 
+    protected LruMap<String, Class<?>> cacheLoadClass = new LruMap<>(512);
+
     @Override
     public Class<?> loadClass(String className) {
+        if (className == null) {
+            return null;
+        }
+        synchronized (this) {
+            Class<?> ret = cacheLoadClass.get(className);
+            if (ret != null) {
+                return ret;
+            }
+            ret = loadClass0(className);
+            if (ret != null) {
+                cacheLoadClass.put(className, ret);
+            }
+            return ret;
+        }
+    }
+
+    public Class<?> loadClass0(String className) {
         Class<?> ret = ReflectResolver.loadClass(className);
         if (ret != null) {
             return ret;
@@ -959,7 +1050,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         Class<?> clazz = null;
         for (String prefix : prefixes) {
             try {
-                clazz = ReflectResolver.loadClass0(prefix + className);
+                clazz = ReflectResolver.loadClass(prefix + className);
                 if (clazz != null) {
                     return clazz;
                 }
@@ -1134,6 +1225,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         EvalScriptProvider provider = null;
         for (EvalScriptProvider item : evalScriptProviders) {
             if (item.support(lang)) {
+                evalScriptProviders.touch(item);
                 provider = item;
                 break;
             }
@@ -1308,7 +1400,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     }
 
     public void reportSlowSql(long useMillsSeconds, BindSql bql) {
-        if(true){
+        if (true) {
             SqlExecUseTimeEvent event = new SqlExecUseTimeEvent();
             event.setExecutor(this);
             event.setUseMillsSeconds(useMillsSeconds);
@@ -1621,17 +1713,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     }
 
     @Override
-    public void sqlTransCommit(String datasource, Map<String, Object> params,boolean checked) {
+    public void sqlTransCommit(String datasource, Map<String, Object> params, boolean checked) {
         if (isDebug()) {
             logDebug("sql-trans-commit:datasource=" + datasource + " near [" + traceLocation() + "] ");
         }
         try {
             Connection conn = getConnection(datasource, params);
-            if(checked){
-                if(!conn.getAutoCommit()){
+            if (checked) {
+                if (!conn.getAutoCommit()) {
                     conn.commit();
                 }
-            }else {
+            } else {
                 conn.commit();
             }
         } catch (SQLException e) {
@@ -1640,17 +1732,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     }
 
     @Override
-    public void sqlTransRollback(String datasource, Map<String, Object> params,boolean checked) {
+    public void sqlTransRollback(String datasource, Map<String, Object> params, boolean checked) {
         if (isDebug()) {
             logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + traceLocation() + "] ");
         }
         try {
             Connection conn = getConnection(datasource, params);
-            if(checked){
-                if(!conn.getAutoCommit()){
+            if (checked) {
+                if (!conn.getAutoCommit()) {
                     conn.rollback();
                 }
-            }else {
+            } else {
                 conn.rollback();
             }
         } catch (SQLException e) {
@@ -1659,14 +1751,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     }
 
     @Override
-    public void sqlTransNone(String datasource, Map<String, Object> params,boolean checked) {
+    public void sqlTransNone(String datasource, Map<String, Object> params, boolean checked) {
         if (isDebug()) {
             logDebug("sql-trans-none:datasource=" + datasource + " near [" + traceLocation() + "] ");
         }
         try {
             Connection conn = getConnection(datasource, params);
-            if(checked){
-                if(!conn.getAutoCommit()){
+            if (checked) {
+                if (!conn.getAutoCommit()) {
                     conn.commit();
                 }
             }
