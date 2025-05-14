@@ -271,8 +271,16 @@ public class ReflectResolver {
         return ret;
     }
 
+    protected static final LruMap<String,Class<?>> CACHE_LOAD_CLASS=new LruMap<>(2048);
 
     public static Class<?> loadClass(String className) {
+            if(className==null){
+                return null;
+            }
+            return cacheDelegate(CACHE_LOAD_CLASS,className,ReflectResolver::loadClass1,e->e);
+    }
+
+    public static Class<?> loadClass1(String className) {
         if ("long".equals(className)) {
             return Long.class;
         }
