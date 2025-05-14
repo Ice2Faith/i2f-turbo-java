@@ -19,6 +19,7 @@ import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
+import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
@@ -27,6 +28,7 @@ import i2f.jdbc.procedure.executor.event.PreparedParamsEvent;
 import i2f.jdbc.procedure.executor.event.SlowSqlEvent;
 import i2f.jdbc.procedure.executor.event.SqlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -88,6 +90,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
     protected volatile INamingContext namingContext = new ListableNamingContext();
     protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler(() -> namingContext);
     protected volatile long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(5);
+    protected volatile long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(30);
+    protected volatile long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
+
 
     {
         List<ExecutorNode> list = defaultExecutorNodes();
@@ -200,6 +205,42 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor,EvalScr
         if (node instanceof EvalScriptProvider) {
             EvalScriptProvider provider = (EvalScriptProvider) node;
             registryEvalScriptProvider(provider);
+        }
+    }
+
+    @Override
+    public void sendEvent(XProc4jEvent event) {
+        XProc4jEventHandler handler = getEventHandler();
+        if (handler != null) {
+            handler.send(event);
+        }
+    }
+
+    @Override
+    public void publishEvent(XProc4jEvent event) {
+        if (event instanceof XmlExecUseTimeEvent) {
+            XmlExecUseTimeEvent evt = (XmlExecUseTimeEvent) event;
+            XmlNode node = evt.getNode();
+            long useTs = evt.getUseTs();
+            String location = XmlNode.getNodeLocation(node);
+
+            if (TagConsts.PROCEDURE.equals(node.getTagName())) {
+                if (useTs > slowProcedureMillsSeconds) {
+                    logWarn(() -> "slow procedure, use " + useTs + "(ms) : " + node.getTagAttrMap().get(AttrConsts.ID));
+                }
+            } else {
+                if (!Arrays.asList(TagConsts.PROCEDURE_CALL,
+                        TagConsts.FUNCTION_CALL).contains(node.getTagName())) {
+                    if (useTs > slowNodeMillsSeconds) {
+                        logWarn(() -> "slow node, use " + useTs + "(ms) : " + location);
+                    }
+                }
+            }
+        }
+
+        XProc4jEventHandler handler = getEventHandler();
+        if (handler != null) {
+            handler.publish(event);
         }
     }
 

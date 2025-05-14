@@ -1,7 +1,6 @@
 package i2f.jdbc.procedure.node.basic;
 
 import i2f.clock.SystemClock;
-import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
@@ -16,7 +15,6 @@ import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -24,11 +22,8 @@ import java.util.function.Consumer;
  * @date 2025/2/28 8:44
  */
 public abstract class AbstractExecutorNode implements ExecutorNode {
-    protected volatile long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(45);
-    protected volatile long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
 
     public static final String EXCEPTION_MESSAGE_PREFIX = "exec node error, at ";
-
 
     public static void walkTree(XmlNode node, Consumer<XmlNode> consumer) {
         if (node == null) {
@@ -57,6 +52,11 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        XmlNode.NodeType nodeType = node.getNodeType();
+        if (nodeType == XmlNode.NodeType.TEXT
+                || nodeType == XmlNode.NodeType.CDATA) {
+            return;
+        }
         String location = getNodeLocation(node);
         boolean isDebugMode = executor.isDebug();
 //        if (isDebugMode) {
@@ -242,19 +242,6 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             long useTs = ets - bts;
             pointContext.put("endTs", ets);
             pointContext.put("useTs", useTs);
-
-            if (TagConsts.PROCEDURE.equals(node.getTagName())) {
-                if (useTs > slowProcedureMillsSeconds) {
-                    executor.logWarn(() -> "slow procedure, use " + useTs + "(ms) : " + node.getTagAttrMap().get(AttrConsts.ID));
-                }
-            } else {
-                if (!Arrays.asList(TagConsts.PROCEDURE_CALL,
-                        TagConsts.FUNCTION_CALL).contains(node.getTagName())) {
-                    if (useTs > slowNodeMillsSeconds) {
-                        executor.logWarn(() -> "slow node, use " + useTs + "(ms) : " + location);
-                    }
-                }
-            }
 
             XmlExecUseTimeEvent event = new XmlExecUseTimeEvent();
             event.setExecutorNode(this);

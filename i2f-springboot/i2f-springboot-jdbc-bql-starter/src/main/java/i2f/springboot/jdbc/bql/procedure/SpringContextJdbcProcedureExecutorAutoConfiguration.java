@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.event.XmlNodeExecInvokeLogListener;
+import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
 import i2f.jdbc.procedure.provider.types.class4j.impl.ContextJdbcProcedureJavaCallerMetaCacheProvider;
 import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -77,7 +79,22 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @ConditionalOnExpression("${xproc4j.listeners.xml-node-exec-invoke-log-listener.enable:true}")
     @Bean
     public XmlNodeExecInvokeLogListener xmlNodeExecInvokeLogListener(){
-        return new XmlNodeExecInvokeLogListener();
+        XmlNodeExecInvokeLogListener ret = new XmlNodeExecInvokeLogListener();
+        ret.setPrintFilter((evt) -> {
+            XmlNode node = evt.getNode();
+            String location = XmlNode.getNodeLocation(node);
+            List<String> regexes = jdbcProcedureProperties.getInvokeLogPredicateRegexes();
+            if (regexes == null || regexes.isEmpty()) {
+                return true;
+            }
+            for (String item : regexes) {
+                if (location.matches(item)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        return ret;
     }
 
     @ConditionalOnExpression("${xproc4j.provider.xml-node.scan.enable:true}")
@@ -159,6 +176,8 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
             ret.setEventHandler(eventHandler);
         }
         ret.setSlowSqlMinMillsSeconds(jdbcProcedureProperties.getSlowSqlMinMillsSeconds());
+        ret.setSlowNodeMillsSeconds(jdbcProcedureProperties.getSlowNodeMillsSeconds());
+        ret.setSlowProcedureMillsSeconds(jdbcProcedureProperties.getSlowProcedureMillsSeconds());
         ret.debug(jdbcProcedureProperties.isDebug());
         return ret;
     }

@@ -9,14 +9,21 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
  * @date 2025/5/7 11:18
  */
+@Data
+@NoArgsConstructor
 public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
+    protected volatile Predicate<XmlNodeExecEvent> printFilter;
+
     @Override
     public boolean support(XProc4jEvent event) {
         return event instanceof XmlNodeExecEvent;
@@ -25,6 +32,9 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
     @Override
     public boolean handle(XProc4jEvent event) {
         XmlNodeExecEvent evt = (XmlNodeExecEvent) event;
+        if (printFilter != null && !printFilter.test(evt)) {
+            return false;
+        }
         Map<String, Object> pointContext = evt.getPointContext();
         Map<String, Object> context = evt.getContext();
         XmlNodeExecEvent.Type type = evt.getType();
