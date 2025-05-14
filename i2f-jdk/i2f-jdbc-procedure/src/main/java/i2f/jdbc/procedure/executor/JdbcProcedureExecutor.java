@@ -55,11 +55,11 @@ public interface JdbcProcedureExecutor {
 
     XProc4jEventHandler getEventHandler();
 
-    default void sendEvent(XProc4jEvent event) {
+    void sendEvent(XProc4jEvent event) {
         getEventHandler().send(event);
     }
 
-    default void publishEvent(XProc4jEvent event) {
+    void publishEvent(XProc4jEvent event) {
         getEventHandler().publish(event);
     }
 

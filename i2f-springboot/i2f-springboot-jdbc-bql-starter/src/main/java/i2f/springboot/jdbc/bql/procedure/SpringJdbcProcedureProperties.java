@@ -3,6 +3,10 @@ package i2f.springboot.jdbc.bql.procedure;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author Ice2Faith
  * @date 2024/4/24 16:34
@@ -22,5 +26,11 @@ public class SpringJdbcProcedureProperties {
 
     private long refreshXmlIntervalSeconds = -1;
 
-    private long slowSqlMinMillsSeconds=5000;
+    private long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(5);
+
+    protected long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(30);
+
+    protected long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
+
+    protected List<String> invokeLogPredicateRegexes = new ArrayList<>();
 }

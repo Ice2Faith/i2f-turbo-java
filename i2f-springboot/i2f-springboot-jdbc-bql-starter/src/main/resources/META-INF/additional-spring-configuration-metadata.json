@@ -109,6 +109,20 @@
       "defaultValue": 5000
     },
     {
+      "name": "xproc4j.slow-procedure-mills-seconds",
+      "type": "java.lang.Long",
+      "description": "setting executor slow procedure min mills-seconds.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "defaultValue": 30000
+    },
+    {
+      "name": "xproc4j.slow-node-mills-seconds",
+      "type": "java.lang.Long",
+      "description": "setting executor slow node min mills-seconds.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "defaultValue": 15000
+    },
+    {
       "name": "xproc4j.naming-context.enable",
       "type": "java.lang.Boolean",
       "description": "whether enable bean INamingContext.",
@@ -128,6 +142,12 @@
       "description": "whether enable bean XmlNodeExecInvokeLogListener.",
       "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
       "defaultValue": true
+    },
+    {
+      "name": "xproc4j.invoke-log-predicate-regexes",
+      "type": "java.util.ArrayList",
+      "description": "setting xml node exec invoke log predicate regex list.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties"
     },
     {
       "name": "xproc4j.provider.xml-node.scan.enable",
