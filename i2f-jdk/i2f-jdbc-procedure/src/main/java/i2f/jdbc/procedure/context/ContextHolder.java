@@ -32,6 +32,7 @@ public class ContextHolder {
     public static final ThreadLocal<String> TRACE_LOCATION = new ThreadLocal<>();
     public static final ThreadLocal<Integer> TRACE_LINE = new ThreadLocal<>();
     public static final ThreadLocal<String> TRACE_ERRMSG = new ThreadLocal<>();
+    public static final ThreadLocal<Throwable> TRACE_ERROR = new ThreadLocal<>();
     public static final ThreadLocal<XmlNode> TRACE_NODE = new ThreadLocal<>();
 
     static {

@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.context;
 
+import i2f.clock.SystemClock;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.io.stream.StreamUtil;
 import i2f.match.regex.RegexUtil;
@@ -25,6 +26,7 @@ import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -92,55 +94,97 @@ public class ContextFunctions {
         return replacement;
     }
 
-    public static boolean isnull(Object obj){
-        return obj==null;
+    public static boolean isnull(Object obj) {
+        return obj == null;
     }
 
-    public static boolean is_empty(Object obj){
-        if(obj==null){
+    public static boolean is_empty(Object obj) {
+        if (obj == null) {
             return true;
         }
-        if(obj instanceof String
-        ||obj instanceof CharSequence
-        || obj instanceof Appendable){
+        if (obj instanceof String
+                || obj instanceof CharSequence
+                || obj instanceof Appendable) {
             return String.valueOf(obj).isEmpty();
         }
-        if(obj instanceof Map){
-            return ((Map)obj).isEmpty();
+        if (obj instanceof Map) {
+            return ((Map) obj).isEmpty();
         }
-        if(obj instanceof Collection){
-            return ((Collection)obj).isEmpty();
+        if (obj instanceof Collection) {
+            return ((Collection) obj).isEmpty();
         }
-        if(obj.getClass().isArray()){
-            return Array.getLength(obj)==0;
+        if (obj.getClass().isArray()) {
+            return Array.getLength(obj) == 0;
         }
-        if(obj instanceof Iterator){
-            return !((Iterator)obj).hasNext();
+        if (obj instanceof Iterator) {
+            return !((Iterator) obj).hasNext();
         }
-        if(obj instanceof Enumeration){
-            return !((Enumeration)obj).hasMoreElements();
+        if (obj instanceof Enumeration) {
+            return !((Enumeration) obj).hasMoreElements();
         }
         return false;
     }
 
-    public static boolean is_blank(Object obj){
-        if(obj==null){
+    public static boolean is_blank(Object obj) {
+        if (obj == null) {
             return true;
         }
-        if(obj instanceof String
-                ||obj instanceof CharSequence
-                || obj instanceof Appendable){
-            String str=String.valueOf(obj);
+        if (obj instanceof String
+                || obj instanceof CharSequence
+                || obj instanceof Appendable) {
+            String str = String.valueOf(obj);
             char[] arr = str.toCharArray();
             for (int i = 0; i < arr.length; i++) {
-                char ch=arr[i];
-                if(!Character.isWhitespace(ch)){
+                char ch = arr[i];
+                if (!Character.isWhitespace(ch)) {
                     return false;
                 }
             }
             return true;
         }
         return is_empty(obj);
+    }
+
+    public static List<Object> list_of(Object... arr) {
+        return new ArrayList<>(Arrays.asList(arr));
+    }
+
+    public static Map<Object, Object> map_of(Object... arr) {
+        Map<Object, Object> ret = new LinkedHashMap<>();
+        for (int i = 0; i < arr.length; i += 2) {
+            if (i + 1 < arr.length) {
+                ret.put(arr[i], arr[i + 1]);
+            } else {
+                ret.put(arr[i], null);
+            }
+        }
+        return ret;
+    }
+
+    public static int index_of(String str, String sstr) {
+        if (str == null) {
+            return -1;
+        }
+        if (sstr == null) {
+            return -1;
+        }
+        if (sstr.isEmpty()) {
+            return 0;
+        }
+        return str.indexOf(sstr);
+    }
+
+    public static int last_index_of(String str, String sstr) {
+        if (str == null) {
+            return -1;
+        }
+        if (sstr == null) {
+            return -1;
+        }
+        if (sstr.isEmpty()) {
+            return 0;
+        }
+        return str.lastIndexOf(sstr);
     }
 
     public static String replace(String str, String target) {
@@ -151,11 +195,11 @@ public class ContextFunctions {
         if (str == null) {
             return str;
         }
-        if(target==null){
+        if (target == null) {
             return str;
         }
-        if(replacement==null){
-            replacement="";
+        if (replacement == null) {
+            replacement = "";
         }
         return str.replace(target, replacement);
     }
@@ -172,11 +216,11 @@ public class ContextFunctions {
         if (str == null) {
             return str;
         }
-        if(regex==null){
+        if (regex == null) {
             return str;
         }
-        if(replacement==null){
-            replacement="";
+        if (replacement == null) {
+            replacement = "";
         }
         regex = convertOracleRegexExpression(regex);
         replacement = convertOracleRegexReplacement(replacement);
@@ -212,7 +256,7 @@ public class ContextFunctions {
         if (str == null) {
             return false;
         }
-        if(regex==null){
+        if (regex == null) {
             return false;
         }
         regex = convertOracleRegexExpression(regex);
@@ -221,6 +265,171 @@ public class ContextFunctions {
 
     public static boolean regexp_like(String str, String regex) {
         return regex_like(str, regex);
+    }
+
+    public static List<String> regex_find(String str, String regex) {
+        if (str == null) {
+            return null;
+        }
+        if (regex == null) {
+            return new ArrayList<>();
+        }
+        return RegexUtil.regexFinds(str, regex)
+                .stream()
+                .map(e -> e.getMatchStr())
+                .collect(Collectors.toList());
+    }
+
+    public static String regex_find_join(String str, String regex) {
+        return regex_find_join(str, regex, ",");
+    }
+
+    public static String regex_find_join(String str, String regex, Object separator) {
+        List<String> list = regex_find(str, regex);
+        return join(list, separator);
+    }
+
+    public static String join(Object obj) {
+        return join(obj, ",", false, false);
+    }
+
+    public static String join(Object obj, Object separator) {
+        return join(obj, separator, false, false);
+    }
+
+    public static String join(Object obj, Object separator, boolean ignoreNull) {
+        return join(obj, separator, ignoreNull, false);
+    }
+
+    public static String join(Object obj, Object separator, boolean ignoreNull, boolean ignoreEmpty) {
+        if (obj == null) {
+            if (ignoreNull) {
+                return "";
+            }
+            return String.valueOf(obj);
+        }
+        Class<?> clazz = obj.getClass();
+        if (clazz.isArray()) {
+            StringBuilder builder = new StringBuilder();
+            int len = Array.getLength(obj);
+            boolean isFirst = true;
+            for (int i = 0; i < len; i++) {
+                Object item = Array.get(obj, i);
+                if (item == null) {
+                    if (ignoreNull) {
+                        continue;
+                    }
+                }
+                String str = String.valueOf(item);
+                if (str.isEmpty() && ignoreEmpty) {
+                    continue;
+                }
+                if (!isFirst) {
+                    if (separator != null) {
+                        builder.append(separator);
+                    }
+                }
+                builder.append(str);
+                isFirst = false;
+            }
+            return builder.toString();
+        } else if (obj instanceof Map) {
+            Map<?, ?> iterable = (Map<?, ?>) obj;
+            StringBuilder builder = new StringBuilder();
+            boolean isFirst = true;
+            for (Map.Entry<?, ?> item : iterable.entrySet()) {
+                if (item == null) {
+                    if (ignoreNull) {
+                        continue;
+                    }
+                }
+                String str = String.valueOf(item);
+                if (str.isEmpty() && ignoreEmpty) {
+                    continue;
+                }
+                if (!isFirst) {
+                    if (separator != null) {
+                        builder.append(separator);
+                    }
+                }
+                builder.append(str);
+                isFirst = false;
+            }
+            return builder.toString();
+        } else if (obj instanceof Iterable) {
+            Iterable<?> iterable = (Iterable<?>) obj;
+            StringBuilder builder = new StringBuilder();
+            boolean isFirst = true;
+            for (Object item : iterable) {
+                if (item == null) {
+                    if (ignoreNull) {
+                        continue;
+                    }
+                }
+                String str = String.valueOf(item);
+                if (str.isEmpty() && ignoreEmpty) {
+                    continue;
+                }
+                if (!isFirst) {
+                    if (separator != null) {
+                        builder.append(separator);
+                    }
+                }
+                builder.append(str);
+                isFirst = false;
+            }
+            return builder.toString();
+        } else if (obj instanceof Iterator) {
+            Iterator<?> iterator = (Iterator<?>) obj;
+            StringBuilder builder = new StringBuilder();
+            boolean isFirst = true;
+            while (iterator.hasNext()) {
+                Object item = iterator.next();
+                if (item == null) {
+                    if (ignoreNull) {
+                        continue;
+                    }
+                }
+                String str = String.valueOf(item);
+                if (str.isEmpty() && ignoreEmpty) {
+                    continue;
+                }
+                if (!isFirst) {
+                    if (separator != null) {
+                        builder.append(separator);
+                    }
+                }
+                builder.append(str);
+                isFirst = false;
+            }
+            return builder.toString();
+        } else if (obj instanceof Enumeration) {
+            Enumeration<?> enumeration = (Enumeration<?>) obj;
+            StringBuilder builder = new StringBuilder();
+            boolean isFirst = true;
+            while (enumeration.hasMoreElements()) {
+                Object item = enumeration.nextElement();
+                if (item == null) {
+                    if (ignoreNull) {
+                        continue;
+                    }
+                }
+                String str = String.valueOf(item);
+                if (str.isEmpty() && ignoreEmpty) {
+                    continue;
+                }
+                if (!isFirst) {
+                    if (separator != null) {
+                        builder.append(separator);
+                    }
+                }
+                builder.append(str);
+                isFirst = false;
+            }
+            return builder.toString();
+        }
+        String str = String.valueOf(obj);
+        return str;
     }
 
     public static String trim(String str) {
@@ -399,11 +608,11 @@ public class ContextFunctions {
         Class<?> clazz = type.getClass();
         if (type instanceof Class) {
             clazz = (Class<?>) type;
-        }else if(type instanceof CharSequence){
+        } else if (type instanceof CharSequence) {
             try {
                 Class<?> clz = ReflectResolver.loadClass(String.valueOf(type));
-                if(clz!=null){
-                    clazz=clz;
+                if (clz != null) {
+                    clazz = clz;
                 }
             } catch (Exception e) {
 
@@ -412,8 +621,8 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(val, clazz);
     }
 
-    public static Object convert(Object val,Object type){
-        return cast(val,type);
+    public static Object convert(Object val, Object type) {
+        return cast(val, type);
     }
 
     public static ChronoUnit chrono_unit(String unit) {
@@ -460,6 +669,13 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(rv, rawType);
     }
 
+    public static Date to_date(Object obj) {
+        if (obj instanceof Date) {
+            return (Date) obj;
+        }
+        return ObjectConvertor.tryParseDate(String.valueOf(obj));
+    }
+
     public static Date to_date(Object obj, String pattern) {
         String str = null;
         if (obj == null) {
@@ -480,6 +696,10 @@ public class ContextFunctions {
         try {
             return new SimpleDateFormat(pattern).parse(str);
         } catch (ParseException e) {
+            Object ret = ObjectConvertor.tryConvertAsType(str, Date.class);
+            if (ret instanceof Date) {
+                return (Date) ret;
+            }
             throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
@@ -532,11 +752,11 @@ public class ContextFunctions {
     }
 
     public static Date sysdate() {
-        return new Date();
+        return new Date(SystemClock.currentTimeMillis());
     }
 
     public static Date now() {
-        return new Date();
+        return new Date(SystemClock.currentTimeMillis());
     }
 
     public static Object add_months(Object date, long interval) {
@@ -790,36 +1010,40 @@ public class ContextFunctions {
         if (obj == null) {
             return null;
         }
-        if(obj instanceof BigDecimal){
+        if (obj instanceof BigDecimal) {
             return (BigDecimal) obj;
         }
-        return (BigDecimal)ObjectConvertor.tryConvertAsType(obj,BigDecimal.class);
+        return (BigDecimal) ObjectConvertor.tryConvertAsType(obj, BigDecimal.class);
     }
 
-    public static Integer to_int(Object obj){
-        if(obj==null){
+    public static Integer to_int(Object obj) {
+        if (obj == null) {
             return null;
         }
-        if(obj instanceof Integer){
-            return (int)obj;
+        if (obj instanceof Integer) {
+            return (int) obj;
         }
-        if(obj instanceof Number){
-            return ((Number)obj).intValue();
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
         }
-        return (Integer) ObjectConvertor.tryConvertAsType(obj,Integer.class);
+        return (Integer) ObjectConvertor.tryConvertAsType(obj, Integer.class);
     }
 
-    public static Long to_long(Object obj){
-        if(obj==null){
+    public static Long to_long(Object obj) {
+        if (obj == null) {
             return null;
         }
-        if(obj instanceof Long){
-            return (long)obj;
+        if (obj instanceof Long) {
+            return (long) obj;
         }
-        if(obj instanceof Number){
-            return ((Number)obj).longValue();
+        if (obj instanceof Number) {
+            return ((Number) obj).longValue();
         }
-        return (Long)ObjectConvertor.tryConvertAsType(obj,Long.class);
+        return (Long) ObjectConvertor.tryConvertAsType(obj, Long.class);
+    }
+
+    public static boolean to_boolean(Object obj) {
+        return ObjectConvertor.toBoolean(obj);
     }
 
     public static void sleep(long seconds) {
@@ -910,10 +1134,10 @@ public class ContextFunctions {
     }
 
     public static ArrayList<String> splitRegex(String str, String regex, int limit) {
-        if(str==null){
+        if (str == null) {
             return new ArrayList<>();
         }
-        if(regex==null){
+        if (regex == null) {
             return new ArrayList<>(Collections.singletonList(str));
         }
         String[] arr = Pattern.compile(regex).split(str, limit);
@@ -925,10 +1149,10 @@ public class ContextFunctions {
     }
 
     public static ArrayList<String> splitLiteral(String str, String regex, int limit) {
-        if(str==null){
+        if (str == null) {
             return new ArrayList<>();
         }
-        if(regex==null){
+        if (regex == null) {
             return new ArrayList<>(Collections.singletonList(str));
         }
         String[] arr = Pattern.compile(regex, Pattern.LITERAL).split(str, limit);
@@ -954,7 +1178,6 @@ public class ContextFunctions {
         return contains(obj, substr);
     }
 
-
     public static boolean ends(Object obj, Object substr) {
         return ends_with(obj, substr);
     }
@@ -973,7 +1196,6 @@ public class ContextFunctions {
         }
         return str.startsWith(sstr);
     }
-
 
     public static boolean starts(Object obj, String substr) {
         return starts_with(obj, substr);

@@ -29,6 +29,7 @@ public interface ParamsConsts {
     String STACK = "stack";
     String CALLS = "calls";
     String ERRORS = "errors";
+    String ERROR = "error";
 
     String TRACE_LOCATION = TRACE + "." + LOCATION;
     String TRACE_LINE = TRACE + "." + LINE;
@@ -37,6 +38,7 @@ public interface ParamsConsts {
     String TRACE_STACK = TRACE + "." + STACK;
     String TRACE_CALLS = TRACE + "." + CALLS;
     String TRACE_ERRORS = TRACE + "." + ERRORS;
+    String TRACE_ERROR = TRACE + "." + ERROR;
 
     // 局部工具部分
     String EXECUTOR = "executor";

@@ -200,9 +200,11 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 }
             }
 
+            executor.visitSet(context, ParamsConsts.TRACE_ERROR, re);
+            ContextHolder.TRACE_ERROR.set(re);
 
             try {
-                onThrowing(e, pointContext, node, context, executor);
+                onThrowing(re, pointContext, node, context, executor);
             } catch (Throwable ex) {
                 executor.logWarn(() -> ex.getMessage(), ex);
             }
