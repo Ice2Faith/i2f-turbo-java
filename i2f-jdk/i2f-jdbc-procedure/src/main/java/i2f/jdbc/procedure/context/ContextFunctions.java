@@ -151,6 +151,12 @@ public class ContextFunctions {
         if (str == null) {
             return str;
         }
+        if(target==null){
+            return str;
+        }
+        if(replacement==null){
+            replacement="";
+        }
         return str.replace(target, replacement);
     }
 
@@ -165,6 +171,12 @@ public class ContextFunctions {
     public static String regex_replace(String str, String regex, String replacement, int occurrence) {
         if (str == null) {
             return str;
+        }
+        if(regex==null){
+            return str;
+        }
+        if(replacement==null){
+            replacement="";
         }
         regex = convertOracleRegexExpression(regex);
         replacement = convertOracleRegexReplacement(replacement);
@@ -198,6 +210,9 @@ public class ContextFunctions {
 
     public static boolean regex_like(String str, String regex) {
         if (str == null) {
+            return false;
+        }
+        if(regex==null){
             return false;
         }
         regex = convertOracleRegexExpression(regex);
@@ -895,6 +910,12 @@ public class ContextFunctions {
     }
 
     public static ArrayList<String> splitRegex(String str, String regex, int limit) {
+        if(str==null){
+            return new ArrayList<>();
+        }
+        if(regex==null){
+            return new ArrayList<>(Collections.singletonList(str));
+        }
         String[] arr = Pattern.compile(regex).split(str, limit);
         return new ArrayList<>(Arrays.asList(arr));
     }
@@ -904,6 +925,12 @@ public class ContextFunctions {
     }
 
     public static ArrayList<String> splitLiteral(String str, String regex, int limit) {
+        if(str==null){
+            return new ArrayList<>();
+        }
+        if(regex==null){
+            return new ArrayList<>(Collections.singletonList(str));
+        }
         String[] arr = Pattern.compile(regex, Pattern.LITERAL).split(str, limit);
         return new ArrayList<>(Arrays.asList(arr));
     }
