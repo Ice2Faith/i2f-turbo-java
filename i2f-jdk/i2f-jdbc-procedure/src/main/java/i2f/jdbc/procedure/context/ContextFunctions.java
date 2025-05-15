@@ -954,15 +954,12 @@ public class ContextFunctions {
         return contains(obj, substr);
     }
 
-    public static boolean llike(Object obj, Object substr) {
-        return likel(obj, substr);
+
+    public static boolean ends(Object obj, Object substr) {
+        return ends_with(obj, substr);
     }
 
-    public static boolean likel(Object obj, Object substr) {
-        return startsWith(obj, substr);
-    }
-
-    public static boolean startsWith(Object obj, Object substr) {
+    public static boolean starts_with(Object obj, Object substr) {
         if (obj == null || substr == null) {
             return false;
         }
@@ -977,15 +974,12 @@ public class ContextFunctions {
         return str.startsWith(sstr);
     }
 
-    public static boolean rlike(Object obj, String substr) {
-        return liker(obj, substr);
+
+    public static boolean starts(Object obj, String substr) {
+        return starts_with(obj, substr);
     }
 
-    public static boolean liker(Object obj, Object substr) {
-        return endsWith(obj, substr);
-    }
-
-    public static boolean endsWith(Object obj, Object substr) {
+    public static boolean ends_with(Object obj, Object substr) {
         if (obj == null || substr == null) {
             return false;
         }
