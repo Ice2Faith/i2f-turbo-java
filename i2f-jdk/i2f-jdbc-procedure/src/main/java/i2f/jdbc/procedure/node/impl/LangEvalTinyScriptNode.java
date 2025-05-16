@@ -22,6 +22,7 @@ import i2f.reflect.ReflectResolver;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -119,8 +120,8 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         protected JdbcProcedureExecutor executor;
 
         private final ExecutorMethodProvider methodProvider = new ExecutorMethodProvider();
-        private final CopyOnWriteArrayList<IMethod> executorMethods = new CopyOnWriteArrayList<>();
-        private final CopyOnWriteArrayList<Method> execContextMethods = new CopyOnWriteArrayList<>();
+        private final ConcurrentHashMap<String,CopyOnWriteArrayList<IMethod>> executorMethods = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<String,CopyOnWriteArrayList<Method>> execContextMethods = new ConcurrentHashMap<>();
 
         public class ExecutorMethodProvider {
             public Class<?> load_class(String className) {
@@ -311,28 +312,30 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
             }
         }
 
-        public List<IMethod> getExecutorMethods() {
+        public List<IMethod> getExecutorMethods(String naming) {
             if (executorMethods.isEmpty()) {
                 synchronized (executorMethods) {
                     Method[] list = ExecutorMethodProvider.class.getMethods();
                     for (Method item : list) {
-                        executorMethods.add(new JdkInstanceStaticMethod(methodProvider, item));
+                        executorMethods.computeIfAbsent(item.getName(),(k)->new CopyOnWriteArrayList<>())
+                                .add(new JdkInstanceStaticMethod(methodProvider, item));
                     }
                 }
             }
-            return executorMethods;
+            return executorMethods.get(naming);
         }
 
-        public List<Method> getExecContextMethods() {
+        public List<Method> getExecContextMethods(String naming) {
             if (execContextMethods.isEmpty()) {
                 synchronized (execContextMethods) {
                     Method[] list = ExecContextMethodProvider.class.getMethods();
                     for (Method item : list) {
-                        execContextMethods.add(item);
+                        execContextMethods.computeIfAbsent(item.getName(),(k)->new CopyOnWriteArrayList<>())
+                                .add(item);
                     }
                 }
             }
-            return execContextMethods;
+            return execContextMethods.get(naming);
         }
 
         public ProcedureTinyScriptResolver(JdbcProcedureExecutor executor) {
@@ -419,7 +422,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 }
             }
 
-            list = getExecutorMethods();
+            list = getExecutorMethods(naming);
             if (list != null && !list.isEmpty()) {
                 IMethod method = ReflectResolver.matchExecMethod(list, args);
                 if (method != null) {
@@ -427,7 +430,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 }
             }
 
-            list = getExecContextMethods().stream()
+            list = getExecContextMethods(naming).stream()
                     .map(e -> new JdkInstanceStaticMethod(new ExecContextMethodProvider(executor, context), e))
                     .collect(Collectors.toList());
             if (list != null && !list.isEmpty()) {
