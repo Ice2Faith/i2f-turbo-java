@@ -87,12 +87,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         pointContext.put("isDebugMode", isDebugMode);
         pointContext.put("snapshotTraceId", snapshotTraceId);
         try {
-            executor.visitSet(context, ParamsConsts.TRACE_LOCATION, node.getLocationFile());
-            executor.visitSet(context, ParamsConsts.TRACE_LINE, node.getLocationLineNumber());
-            executor.visitSet(context, ParamsConsts.TRACE_NODE, node);
-            ContextHolder.TRACE_LOCATION.set(node.getLocationFile());
-            ContextHolder.TRACE_LINE.set(node.getLocationLineNumber());
-            ContextHolder.TRACE_NODE.set(node);
+            updateTraceInfo(node, context, executor);
 
             try {
                 onBefore(pointContext, node, context, executor);
@@ -101,6 +96,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
 
             execInner(node, context, executor);
+
+            updateTraceInfo(node, context, executor);
 
             try {
                 onAfter(pointContext, node, context, executor);
@@ -116,6 +113,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
 
         } catch (Throwable e) {
+            updateTraceInfo(node, context, executor);
+
             if (e instanceof ControlSignalException) {
                 try {
                     onThrowing(e, pointContext, node, context, executor);
@@ -211,6 +210,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
             throw re;
         } finally {
+            updateTraceInfo(node,context,executor);
+
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
             pointContext.put("endTs", ets);
@@ -232,6 +233,15 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 executor.logWarn(() -> e.getMessage(), e);
             }
         }
+    }
+
+    public static void updateTraceInfo(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        executor.visitSet(context, ParamsConsts.TRACE_LOCATION, node.getLocationFile());
+        executor.visitSet(context, ParamsConsts.TRACE_LINE, node.getLocationLineNumber());
+        executor.visitSet(context, ParamsConsts.TRACE_NODE, node);
+        ContextHolder.TRACE_LOCATION.set(node.getLocationFile());
+        ContextHolder.TRACE_LINE.set(node.getLocationLineNumber());
+        ContextHolder.TRACE_NODE.set(node);
     }
 
     public void onBefore(Map<String, Object> pointContext, XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
