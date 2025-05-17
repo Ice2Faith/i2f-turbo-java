@@ -24,6 +24,12 @@ import java.util.function.Consumer;
 public abstract class AbstractExecutorNode implements ExecutorNode {
 
     public static final String EXCEPTION_MESSAGE_PREFIX = "exec node error, at ";
+    public static final String POINT_KEY_LOCATION = "location";
+    public static final String POINT_KEY_BEGIN_TS = "beginTs";
+    public static final String POINT_KEY_IS_DEBUG_MODE = "isDebugMode";
+    public static final String POINT_KEY_SNAPSHOT_TRACE_ID = "snapshotTraceId";
+    public static final String POINT_KEY_END_TS = "endTs";
+    public static final String POINT_KEY_USE_TS = "useTs";
 
     public static void walkTree(XmlNode node, Consumer<XmlNode> consumer) {
         if (node == null) {
@@ -82,10 +88,10 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         String snapshotTraceId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
 
         long bts = SystemClock.currentTimeMillis();
-        pointContext.put("location", location);
-        pointContext.put("beginTs", bts);
-        pointContext.put("isDebugMode", isDebugMode);
-        pointContext.put("snapshotTraceId", snapshotTraceId);
+        pointContext.put(POINT_KEY_LOCATION, location);
+        pointContext.put(POINT_KEY_BEGIN_TS, bts);
+        pointContext.put(POINT_KEY_IS_DEBUG_MODE, isDebugMode);
+        pointContext.put(POINT_KEY_SNAPSHOT_TRACE_ID, snapshotTraceId);
         try {
             updateTraceInfo(node, context, executor);
 
@@ -214,8 +220,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            pointContext.put("endTs", ets);
-            pointContext.put("useTs", useTs);
+            pointContext.put(POINT_KEY_END_TS, ets);
+            pointContext.put(POINT_KEY_USE_TS, useTs);
 
             XmlExecUseTimeEvent event = new XmlExecUseTimeEvent();
             event.setExecutorNode(this);
