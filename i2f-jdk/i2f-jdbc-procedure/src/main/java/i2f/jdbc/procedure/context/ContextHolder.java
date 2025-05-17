@@ -3,12 +3,12 @@ package i2f.jdbc.procedure.context;
 import i2f.invokable.method.IMethod;
 import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.lru.LruList;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 
@@ -83,7 +83,7 @@ public class ContextHolder {
                 continue;
             }
             String name = method.getName();
-            List<IMethod> list = INVOKE_METHOD_MAP.computeIfAbsent(name, (key) -> new CopyOnWriteArrayList<>());
+            List<IMethod> list = INVOKE_METHOD_MAP.computeIfAbsent(name, (key) -> new LruList<>());
             list.add(new JdkMethod(method));
         }
     }

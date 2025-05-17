@@ -16,6 +16,7 @@ import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
+import i2f.lru.LruList;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 
@@ -23,7 +24,6 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -120,8 +120,8 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         protected JdbcProcedureExecutor executor;
 
         private final ExecutorMethodProvider methodProvider = new ExecutorMethodProvider();
-        private final ConcurrentHashMap<String,CopyOnWriteArrayList<IMethod>> executorMethods = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap<String,CopyOnWriteArrayList<Method>> execContextMethods = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<String, LruList<IMethod>> executorMethods = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<String,LruList<Method>> execContextMethods = new ConcurrentHashMap<>();
 
         public class ExecutorMethodProvider {
             public Class<?> load_class(String className) {
@@ -317,7 +317,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 synchronized (executorMethods) {
                     Method[] list = ExecutorMethodProvider.class.getMethods();
                     for (Method item : list) {
-                        executorMethods.computeIfAbsent(item.getName(),(k)->new CopyOnWriteArrayList<>())
+                        executorMethods.computeIfAbsent(item.getName(),(k)->new LruList<>())
                                 .add(new JdkInstanceStaticMethod(methodProvider, item));
                     }
                 }
@@ -330,7 +330,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 synchronized (execContextMethods) {
                     Method[] list = ExecContextMethodProvider.class.getMethods();
                     for (Method item : list) {
-                        execContextMethods.computeIfAbsent(item.getName(),(k)->new CopyOnWriteArrayList<>())
+                        execContextMethods.computeIfAbsent(item.getName(),(k)->new LruList<>())
                                 .add(item);
                     }
                 }
