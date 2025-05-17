@@ -16,6 +16,24 @@ import java.util.*;
  * @date 2025/1/20 9:24
  */
 public class JdbcProcedureParser {
+    public static final String MACRO_FILE_NAME = "__FILE__";
+    public static final String MACRO_LINE_NUMBER = "__LINE__";
+
+    public static String replaceMacro(String fileName, String str) {
+        if (str == null) {
+            return str;
+        }
+        if (fileName == null) {
+            fileName = "";
+        }
+        str = str.replace(MACRO_FILE_NAME, fileName);
+        String[] arr = str.split("\n");
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < arr.length; i++) {
+            builder.append(arr[i].replace(MACRO_LINE_NUMBER, String.valueOf(i + 1))).append("\n");
+        }
+        return builder.toString();
+    }
 
     public static String removeProcedureDtd(String str) {
         if (str == null) {
@@ -69,6 +87,7 @@ public class JdbcProcedureParser {
         StreamUtil.streamCopy(is, bos);
         String str = new String(bos.toByteArray(), "UTF-8");
         str = removeProcedureDtd(str);
+        str = replaceMacro(fileName, str);
         ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes("UTF-8"));
         Xml document = XmlUtil.parseXmlSax(fileName, bis);
         bis.close();
@@ -112,7 +131,7 @@ public class JdbcProcedureParser {
         if (node == null) {
             return null;
         }
-        XmlNode ret=null;
+        XmlNode ret = null;
         Xml.Type nodeType = node.getType();
         if (nodeType == Xml.Type.TEXT) {
             ret = new XmlNode();
@@ -195,7 +214,7 @@ public class JdbcProcedureParser {
             }
             ret.setChildren(children);
         }
-        if(ret!=null){
+        if (ret != null) {
             String nodeLocation = XmlNode.getNodeLocation(ret);
             ret.setNodeLocation(nodeLocation);
         }
