@@ -2,6 +2,7 @@ package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.convert.obj.ObjectConvertor;
 import i2f.invokable.method.IMethod;
+import i2f.lru.LruList;
 import i2f.match.regex.RegexUtil;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -35,72 +36,15 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     public static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
     protected final AtomicBoolean debug = new AtomicBoolean(true);
 
-    @Override
-    public void debug(boolean enable) {
-        this.debug.set(enable);
+    @FunctionalInterface
+    protected static interface DoubleOperatorFunction {
+        Object resolve(Object context, Object left, String operator, Object right);
     }
 
-    @Override
-    public void debugLog(Supplier<Object> supplier) {
-        if (debug.get()) {
-            System.out.println(String.format("%s [%5s] [%15s] : %s",
-                    LOG_TIME_FORMATTER.format(LocalDateTime.now()),
-                    "DEBUG",
-                    "tiny-script",
-                    String.valueOf(supplier.get())
-            ));
-        }
-    }
+    protected static final ConcurrentHashMap<String, DoubleOperatorFunction> DOUBLE_OPERATOR_MAP = new ConcurrentHashMap<>();
 
-    @Override
-    public void openDebugger(Object context, String tag, String conditionExpression) {
-        if (debug.get()) {
-            System.out.println("debugger [" + tag + "] [" + conditionExpression + "] wait for input line to continue.");
-            System.out.println("continue.");
-        }
-    }
-
-    @Override
-    public void setValue(Object context, String name, Object value) {
-        Visitor visitor = Visitor.visit(name, context);
-        visitor.set(value);
-    }
-
-    @Override
-    public Object getValue(Object context, String name) {
-        Visitor visitor = Visitor.visit(name, context);
-        return visitor.get();
-    }
-
-    @Override
-    public boolean toBoolean(Object context, Object ret) {
-        return ObjectConvertor.toBoolean(ret);
-    }
-
-    @Override
-    public Object resolveDoubleOperator(Object context, Supplier<Object> left, String operator, Supplier<Object> right) {
-        if ("&&".equals(operator) || "and".equals(operator)) {
-            boolean bl = ObjectConvertor.toBoolean(left.get());
-            if (!bl) {
-                return bl;
-            }
-            boolean br = ObjectConvertor.toBoolean(right.get());
-            return br;
-        } else if ("||".equals(operator) || "or".equals(operator)) {
-            boolean bl = ObjectConvertor.toBoolean(left.get());
-            if (bl) {
-                return bl;
-            }
-            boolean br = ObjectConvertor.toBoolean(right.get());
-            return br;
-        } else {
-            return resolveDoubleOperator(context, left.get(), operator, right.get());
-        }
-    }
-
-    @Override
-    public Object resolveDoubleOperator(Object context, Object left, String operator, Object right) {
-        if ("as".equals(operator) || "cast".equals(operator)) {
+    static {
+        DOUBLE_OPERATOR_MAP.put("as", (context, left, operator, right) -> {
             if (right == null) {
                 throw new ClassCastException("target type is null");
             }
@@ -119,7 +63,10 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 throw new ClassCastException("Cannot cast " + (left == null ? null : left.getClass()) + " to " + type);
             }
             return ret;
-        } else if ("is".equals(operator) || "instanceof".equals(operator) || "typeof".equals(operator)) {
+        });
+        DOUBLE_OPERATOR_MAP.put("cast", DOUBLE_OPERATOR_MAP.get("as"));
+
+        DOUBLE_OPERATOR_MAP.put("is", (context, left, operator, right) -> {
             if (left == null) {
                 return false;
             }
@@ -135,7 +82,11 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 clsRight = (Class<?>) right;
             }
             return TypeOf.typeOf(clsLeft, clsRight);
-        } else if ("in".equals(operator) || "notin".equals(operator)) {
+        });
+        DOUBLE_OPERATOR_MAP.put("instanceof", DOUBLE_OPERATOR_MAP.get("is"));
+        DOUBLE_OPERATOR_MAP.put("typeof", DOUBLE_OPERATOR_MAP.get("is"));
+
+        DOUBLE_OPERATOR_MAP.put("in", (context, left, operator, right) -> {
             if (right == null) {
                 return false;
             }
@@ -204,26 +155,48 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 }
             }
             return false;
-        } else if (">=".equals(operator) || "gte".equals(operator)) {
+        });
+        DOUBLE_OPERATOR_MAP.put("notin", DOUBLE_OPERATOR_MAP.get("in"));
+
+        DOUBLE_OPERATOR_MAP.put(">=", (context, left, operator, right) -> {
             int num = compare(left, right);
             return num >= 0;
-        } else if ("<=".equals(operator) || "lte".equals(operator)) {
+        });
+        DOUBLE_OPERATOR_MAP.put("gte", DOUBLE_OPERATOR_MAP.get(">="));
+
+        DOUBLE_OPERATOR_MAP.put("<=", (context, left, operator, right) -> {
             int num = compare(left, right);
             return num <= 0;
-        } else if ("<>".equals(operator) || "neq".equals(operator)
-                || "!=".equals(operator) || "ne".equals(operator)) {
+        });
+        DOUBLE_OPERATOR_MAP.put("lte", DOUBLE_OPERATOR_MAP.get("<="));
+
+        DOUBLE_OPERATOR_MAP.put("<>", (context, left, operator, right) -> {
             int num = compare(left, right);
             return num != 0;
-        } else if (">".equals(operator) || "gt".equals(operator)) {
+        });
+        DOUBLE_OPERATOR_MAP.put("neq", DOUBLE_OPERATOR_MAP.get("<>"));
+        DOUBLE_OPERATOR_MAP.put("!=", DOUBLE_OPERATOR_MAP.get("<>"));
+        DOUBLE_OPERATOR_MAP.put("ne", DOUBLE_OPERATOR_MAP.get("<>"));
+
+        DOUBLE_OPERATOR_MAP.put(">", (context, left, operator, right) -> {
             int num = compare(left, right);
             return num > 0;
-        } else if ("<".equals(operator) || "lt".equals(operator)) {
+        });
+        DOUBLE_OPERATOR_MAP.put("gt", DOUBLE_OPERATOR_MAP.get(">"));
+
+        DOUBLE_OPERATOR_MAP.put("<", (context, left, operator, right) -> {
             int num = compare(left, right);
             return num < 0;
-        } else if ("==".equals(operator) || "eq".equals(operator)) {
+        });
+        DOUBLE_OPERATOR_MAP.put("lt", DOUBLE_OPERATOR_MAP.get("<"));
+
+        DOUBLE_OPERATOR_MAP.put("==", (context, left, operator, right) -> {
             int num = compare(left, right);
             return num == 0;
-        } else if ("+".equals(operator)) {
+        });
+        DOUBLE_OPERATOR_MAP.put("eq", DOUBLE_OPERATOR_MAP.get("=="));
+
+        DOUBLE_OPERATOR_MAP.put("+", (context, left, operator, right) -> {
             if (left instanceof CharSequence) {
                 return left + "" + right;
             } else if (left instanceof Appendable) {
@@ -251,7 +224,10 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 LocalDateTime ret = rv.plusDays(lv.longValue());
                 return ObjectConvertor.tryConvertAsType(ret, left.getClass());
             }
-        } else if ("-".equals(operator)) {
+            throw new IllegalArgumentException("un-support operator :" + operator + " for left type(" + (left == null ? "null" : left.getClass()) + ")" + " and right type(" + (right == null ? "null" : right.getClass()) + ")");
+        });
+
+        DOUBLE_OPERATOR_MAP.put("-", (context, left, operator, right) -> {
             if (ObjectConvertor.isNumericType(left.getClass())
                     && ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
@@ -271,7 +247,10 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 LocalDateTime ret = rv.plusDays(0 - lv.longValue());
                 return ObjectConvertor.tryConvertAsType(ret, left.getClass());
             }
-        } else if ("*".equals(operator)) {
+            throw new IllegalArgumentException("un-support operator :" + operator + " for left type(" + (left == null ? "null" : left.getClass()) + ")" + " and right type(" + (right == null ? "null" : right.getClass()) + ")");
+        });
+
+        DOUBLE_OPERATOR_MAP.put("*", (context, left, operator, right) -> {
             if (ObjectConvertor.isNumericType(left.getClass())
                     && ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
@@ -279,7 +258,10 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 BigDecimal ret = lv.multiply(rv, MATH_CONTEXT);
                 return convertNumberType(ret, (Number) left, (Number) right);
             }
-        } else if ("/".equals(operator)) {
+            throw new IllegalArgumentException("un-support operator :" + operator + " for left type(" + (left == null ? "null" : left.getClass()) + ")" + " and right type(" + (right == null ? "null" : right.getClass()) + ")");
+        });
+
+        DOUBLE_OPERATOR_MAP.put("/", (context, left, operator, right) -> {
             if (ObjectConvertor.isNumericType(left.getClass())
                     && ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
@@ -287,7 +269,10 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 BigDecimal ret = lv.divide(rv, MATH_CONTEXT);
                 return convertNumberType(ret, (Number) left, (Number) right);
             }
-        } else if ("%".equals(operator)) {
+            throw new IllegalArgumentException("un-support operator :" + operator + " for left type(" + (left == null ? "null" : left.getClass()) + ")" + " and right type(" + (right == null ? "null" : right.getClass()) + ")");
+        });
+
+        DOUBLE_OPERATOR_MAP.put("%", (context, left, operator, right) -> {
             if (ObjectConvertor.isNumericType(left.getClass())
                     && ObjectConvertor.isNumericType(right.getClass())) {
                 BigDecimal lv = new BigDecimal(String.valueOf(left));
@@ -295,8 +280,82 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                 long num = lv.longValue() % rv.longValue();
                 return num;
             }
+            throw new IllegalArgumentException("un-support operator :" + operator + " for left type(" + (left == null ? "null" : left.getClass()) + ")" + " and right type(" + (right == null ? "null" : right.getClass()) + ")");
+        });
+
+
+    }
+
+    @Override
+    public void debug(boolean enable) {
+        this.debug.set(enable);
+    }
+
+    @Override
+    public void debugLog(Supplier<Object> supplier) {
+        if (debug.get()) {
+            System.out.println(String.format("%s [%5s] [%15s] : %s",
+                    LOG_TIME_FORMATTER.format(LocalDateTime.now()),
+                    "DEBUG",
+                    "tiny-script",
+                    String.valueOf(supplier.get())
+            ));
         }
-        throw new IllegalArgumentException("un-support operator :" + operator + " for left type(" + (left == null ? "null" : left.getClass()) + ")" + " and right type(" + (right == null ? "null" : right.getClass()) + ")");
+    }
+
+    @Override
+    public void openDebugger(Object context, String tag, String conditionExpression) {
+        if (debug.get()) {
+            System.out.println("debugger [" + tag + "] [" + conditionExpression + "] wait for input line to continue.");
+            System.out.println("continue.");
+        }
+    }
+
+    @Override
+    public void setValue(Object context, String name, Object value) {
+        Visitor visitor = Visitor.visit(name, context);
+        visitor.set(value);
+    }
+
+    @Override
+    public Object getValue(Object context, String name) {
+        Visitor visitor = Visitor.visit(name, context);
+        return visitor.get();
+    }
+
+    @Override
+    public boolean toBoolean(Object context, Object ret) {
+        return ObjectConvertor.toBoolean(ret);
+    }
+
+    @Override
+    public Object resolveDoubleOperator(Object context, Supplier<Object> left, String operator, Supplier<Object> right) {
+        if ("&&".equals(operator) || "and".equals(operator)) {
+            boolean bl = ObjectConvertor.toBoolean(left.get());
+            if (!bl) {
+                return bl;
+            }
+            boolean br = ObjectConvertor.toBoolean(right.get());
+            return br;
+        } else if ("||".equals(operator) || "or".equals(operator)) {
+            boolean bl = ObjectConvertor.toBoolean(left.get());
+            if (bl) {
+                return bl;
+            }
+            boolean br = ObjectConvertor.toBoolean(right.get());
+            return br;
+        } else {
+            return resolveDoubleOperator(context, left.get(), operator, right.get());
+        }
+    }
+
+    @Override
+    public Object resolveDoubleOperator(Object context, Object left, String operator, Object right) {
+        DoubleOperatorFunction func = DOUBLE_OPERATOR_MAP.get(operator);
+        if (func == null) {
+            throw new IllegalArgumentException("un-support operator :" + operator + " for left type(" + (left == null ? "null" : left.getClass()) + ")" + " and right type(" + (right == null ? "null" : right.getClass()) + ")");
+        }
+        return func.resolve(context, left, operator, right);
     }
 
     @Override
@@ -331,7 +390,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         throw new IllegalArgumentException("un-support prefix operator :" + operator + " for type(" + (value == null ? "null" : value.getClass()) + ")");
     }
 
-    public Object convertNumberType(BigDecimal num, Number left, Number right) {
+    public static Object convertNumberType(BigDecimal num, Number left, Number right) {
         if (TypeOf.instanceOf(left, BigDecimal.class)
                 || TypeOf.instanceOf(right, BigDecimal.class)) {
             return num;
@@ -355,7 +414,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return num.intValue();
     }
 
-    public int compare(Object left, Object right) {
+    public static int compare(Object left, Object right) {
         if (left == right) {
             return 0;
         }
@@ -396,8 +455,8 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             BigDecimal br = new BigDecimal(String.valueOf(right));
             return bl.compareTo(br);
         }
-        if (TypeOf.typeOfAny(left.getClass(), String.class,CharSequence.class,Appendable.class)
-                || TypeOf.typeOfAny(right.getClass(), String.class,CharSequence.class,Appendable.class)) {
+        if (TypeOf.typeOfAny(left.getClass(), String.class, CharSequence.class, Appendable.class)
+                || TypeOf.typeOfAny(right.getClass(), String.class, CharSequence.class, Appendable.class)) {
             String sl = String.valueOf(left);
             String sr = String.valueOf(right);
             return sl.compareTo(sr);
@@ -428,7 +487,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     public IMethod findMethod(Object context, String naming, List<Object> args) {
-        CopyOnWriteArrayList<IMethod> list = TinyScript.BUILTIN_METHOD.get(naming);
+        LruList<IMethod> list = TinyScript.BUILTIN_METHOD.get(naming);
         if (list != null && !list.isEmpty()) {
             return ReflectResolver.matchExecMethod(list, args);
         }
@@ -500,9 +559,9 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         } else {
             String methodName = naming;
 
-            if(clazz!=null){
+            if (clazz != null) {
                 Method method = ReflectResolver.matchExecMethod(clazz, methodName, args);
-                if(method!=null){
+                if (method != null) {
                     return ReflectResolver.execMethod(target, clazz, methodName, args);
                 }
             }

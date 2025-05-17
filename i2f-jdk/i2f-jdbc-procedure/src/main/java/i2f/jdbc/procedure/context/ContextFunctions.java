@@ -9,10 +9,13 @@ import i2f.reflect.ReflectResolver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -557,14 +560,30 @@ public class ContextFunctions {
     }
 
     public static Object nvl(Object v1, Object v2) {
-        return v1 != null ? v1 : v2;
+        return ifnull(v1, v2);
     }
 
     public static Object ifnull(Object v1, Object v2) {
-        return nvl(v1, v2);
+        return v1 != null ? v1 : v2;
     }
 
-    public static Object nvl2(Object cond, Object trueVal, Object falseVal) {
+    public static Object if_empty(Object v1,Object v2){
+        return is_empty(v1)?v2:v1;
+    }
+
+    public static Object evl(Object v1,Object v2){
+        return if_empty(v1,v2);
+    }
+
+    public static Object if_blank(Object v1,Object v2){
+        return is_blank(v1)?v2:v1;
+    }
+
+    public static Object bvl(Object v1,Object v2){
+        return if_blank(v1,v2);
+    }
+
+    public static Object if2(Object cond, Object trueVal, Object falseVal) {
         if (cond instanceof Boolean) {
             Boolean ok = (Boolean) cond;
             if (ok) {
@@ -573,15 +592,15 @@ public class ContextFunctions {
                 return falseVal;
             }
         }
-        if (cond != null) {
+        if (to_boolean(cond)) {
             return trueVal;
         } else {
             return falseVal;
         }
     }
 
-    public static Object if2(Object cond, Object trueVal, Object falseVal) {
-        return nvl2(cond, trueVal, falseVal);
+    public static Object nvl2(Object cond, Object trueVal, Object falseVal) {
+        return if2(cond, trueVal, falseVal);
     }
 
     public static Object decode(Object target, Object... args) {
@@ -1229,6 +1248,42 @@ public class ContextFunctions {
         obj = obj.abs(MATH_CONTEXT);
 
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+    }
+
+    public static String encode_url(Object obj){
+        try {
+            String str = String.valueOf(obj);
+            return URLEncoder.encode(str,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException(e.getMessage(),e);
+        }
+    }
+
+    public static String decode_url(Object obj){
+        try {
+            String str = String.valueOf(obj);
+            return URLDecoder.decode(str,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException(e.getMessage(),e);
+        }
+    }
+
+    public static String encode_base64(Object obj){
+        try {
+            String str = String.valueOf(obj);
+            return Base64.getEncoder().encodeToString(str.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException(e.getMessage(),e);
+        }
+    }
+
+    public static String decode_base64(Object obj){
+        try {
+            String str = String.valueOf(obj);
+            return new String(Base64.getDecoder().decode(str),"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException(e.getMessage(),e);
+        }
     }
 
     public static String md5(Object data) {
