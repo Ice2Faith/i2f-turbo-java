@@ -121,7 +121,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
 
         private final ExecutorMethodProvider methodProvider = new ExecutorMethodProvider();
         private final ConcurrentHashMap<String, LruList<IMethod>> executorMethods = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap<String,LruList<Method>> execContextMethods = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<String, LruList<Method>> execContextMethods = new ConcurrentHashMap<>();
 
         public class ExecutorMethodProvider {
             public Class<?> load_class(String className) {
@@ -212,13 +212,21 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 return tracking_comment(false);
             }
 
+            public String tracking_comment(Integer lineNumber) {
+                return tracking_comment(lineNumber, false);
+            }
+
             public String tracking_comment(boolean force) {
+                return tracking_comment(null, force);
+            }
+
+            public String tracking_comment(Integer lineNumber, boolean force) {
                 if (!force) {
                     if (!executor.isDebug()) {
                         return "";
                     }
                 }
-                return AbstractExecutorNode.getTrackingComment(ContextHolder.TRACE_NODE.get());
+                return AbstractExecutorNode.getTrackingComment(ContextHolder.TRACE_NODE.get(),lineNumber);
             }
 
             public void log_debug(Object obj) {
@@ -317,7 +325,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 synchronized (executorMethods) {
                     Method[] list = ExecutorMethodProvider.class.getMethods();
                     for (Method item : list) {
-                        executorMethods.computeIfAbsent(item.getName(),(k)->new LruList<>())
+                        executorMethods.computeIfAbsent(item.getName(), (k) -> new LruList<>())
                                 .add(new JdkInstanceStaticMethod(methodProvider, item));
                     }
                 }
@@ -330,7 +338,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 synchronized (execContextMethods) {
                     Method[] list = ExecContextMethodProvider.class.getMethods();
                     for (Method item : list) {
-                        execContextMethods.computeIfAbsent(item.getName(),(k)->new LruList<>())
+                        execContextMethods.computeIfAbsent(item.getName(), (k) -> new LruList<>())
                                 .add(item);
                     }
                 }

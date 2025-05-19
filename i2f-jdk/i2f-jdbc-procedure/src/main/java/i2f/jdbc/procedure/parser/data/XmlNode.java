@@ -31,6 +31,10 @@ public class XmlNode {
     }
 
     public static String getNodeLocation(XmlNode node) {
+        return getNodeLocation(node, null);
+    }
+
+    public static String getNodeLocation(XmlNode node,Integer lineNumber) {
         if (node == null) {
             return "";
         }
@@ -38,7 +42,7 @@ public class XmlNode {
         if(ret!=null){
             return ret;
         }
-        ret= "" + node.getLocationFile() + ":" + node.getLocationLineNumber() + ":" + node.getTagName() + "";
+        ret= "" + node.getLocationFile() + ":" + (lineNumber!=null?lineNumber:node.getLocationLineNumber()) + ":" + node.getTagName() + "";
         node.setNodeLocation(ret);
         return ret;
     }
