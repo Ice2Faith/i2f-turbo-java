@@ -56,7 +56,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     }
     public static String getTrackingComment(XmlNode node,Integer lineNumber) {
         if (node == null) {
-            return " ";
+            return "";
         }
         return " /* tracking at " + getNodeLocation(node,lineNumber) + " */ ";
     }
