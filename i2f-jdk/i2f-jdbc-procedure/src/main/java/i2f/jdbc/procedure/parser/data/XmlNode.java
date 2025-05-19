@@ -31,19 +31,26 @@ public class XmlNode {
     }
 
     public static String getNodeLocation(XmlNode node) {
-        return getNodeLocation(node, null);
-    }
-
-    public static String getNodeLocation(XmlNode node,Integer lineNumber) {
         if (node == null) {
             return "";
         }
         String ret = node.getNodeLocation();
-        if(ret!=null){
+        if (ret != null) {
             return ret;
         }
-        ret= "" + node.getLocationFile() + ":" + (lineNumber!=null?lineNumber:node.getLocationLineNumber()) + ":" + node.getTagName() + "";
+        ret = "" + node.getLocationFile() + ":" + node.getLocationLineNumber() + ":" + node.getTagName() + "";
         node.setNodeLocation(ret);
+        return ret;
+    }
+
+    public static String getNodeLocation(XmlNode node, Integer lineNumber) {
+        if (lineNumber == null || lineNumber < 0) {
+            return getNodeLocation(node);
+        }
+        if (node == null) {
+            return "";
+        }
+        String ret = "" + node.getLocationFile() + ":" + lineNumber + ":" + node.getTagName() + "";
         return ret;
     }
 }
