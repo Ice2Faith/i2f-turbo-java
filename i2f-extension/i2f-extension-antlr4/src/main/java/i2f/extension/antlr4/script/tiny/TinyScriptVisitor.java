@@ -1,4 +1,4 @@
-// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -79,12 +79,6 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParenSegment(TinyScriptParser.ParenSegmentContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyScriptParser#prefixOperatorSegment}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPrefixOperatorSegment(TinyScriptParser.PrefixOperatorSegmentContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#controlSegment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -157,13 +151,12 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExtractPair(TinyScriptParser.ExtractPairContext ctx);
 	/**
-     * Visit a parse tree produced by {@link TinyScriptParser#staticEnumValue}.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    T visitStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx);
-
-    /**
+	 * Visit a parse tree produced by {@link TinyScriptParser#staticEnumValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#newInstance}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

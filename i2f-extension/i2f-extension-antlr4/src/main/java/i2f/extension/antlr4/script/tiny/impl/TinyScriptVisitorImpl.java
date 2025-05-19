@@ -44,10 +44,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     }
 
     public void debugNode(ParseTree context) {
-        resolver.debugLog(() -> context.getClass().getSimpleName().replace("$", ".") + ": " + context.getText() + getTreeLocationText(", location ", context,null));
+        resolver.debugLog(() -> context.getClass().getSimpleName().replace("$", ".") + ": " + context.getText() + getTreeLocationText(", location ", context, null));
     }
 
-    public String getTreeLocationText(String prefix, ParseTree context,String suffix) {
+    public String getTreeLocationText(String prefix, ParseTree context, String suffix) {
         String loc = "";
         if (context instanceof ParserRuleContext) {
             ParserRuleContext ruleContext = (ParserRuleContext) context;
@@ -56,10 +56,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 if (prefix == null) {
                     prefix = "";
                 }
-                if(suffix==null){
-                    suffix="";
+                if (suffix == null) {
+                    suffix = "";
                 }
-                loc = prefix + "at line " + start.getLine() + ":" + start.getCharPositionInLine() +suffix;
+                loc = prefix + "at line " + start.getLine() + ":" + start.getCharPositionInLine() + suffix;
             }
         }
         return loc;
@@ -96,7 +96,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -127,8 +127,21 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.TrySegmentContext) {
                 TinyScriptParser.TrySegmentContext nextCtx = (TinyScriptParser.TrySegmentContext) item;
                 return visitTrySegment(nextCtx);
+            } else if (item instanceof TerminalNode) {
+                if (count == 2) {
+                    TerminalNode termNode = (TerminalNode) ctx.getChild(0);
+                    String term = (String) visitTerminal(termNode);
+                    String prefixOperator = term;
+                    ParseTree expressNode = ctx.getChild(1);
+                    if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
+                        throw new IllegalArgumentException("invalid double-operator right node, expect express, but found type: " + expressNode.getClass());
+                    }
+                    TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
+                    Object value = visitExpress(expressCtx);
+                    return resolver.resolvePrefixOperator(context, prefixOperator, value);
+                }
             } else if (item instanceof TinyScriptParser.ExpressContext) {
-                if(count==2){
+                if (count == 2) {
                     ParseTree leftNode = item;
                     ParseTree operatorNode = ctx.getChild(1);
                     if (!(leftNode instanceof TinyScriptParser.ExpressContext)) {
@@ -140,10 +153,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
                     TinyScriptParser.ExpressContext leftCtx = (TinyScriptParser.ExpressContext) leftNode;
                     TerminalNode operatorCtx = (TerminalNode) operatorNode;
-                    Object left =  visitExpress(leftCtx);
+                    Object left = visitExpress(leftCtx);
                     String operator = (String) visitTerminal(operatorCtx);
-                    return resolver.resolveSuffixOperator(context,left, operator);
-                }else if (count == 3) {
+                    return resolver.resolveSuffixOperator(context, left, operator);
+                } else if (count == 3) {
                     ParseTree leftNode = item;
                     ParseTree operatorNode = ctx.getChild(1);
                     ParseTree rightNode = ctx.getChild(2);
@@ -162,8 +175,8 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     Supplier<Object> leftSupplier = () -> visitExpress(leftCtx);
                     Supplier<Object> rightSupplier = () -> visitExpress(rightCtx);
                     String operator = (String) visitTerminal(operatorCtx);
-                    return resolver.resolveDoubleOperator(context,leftSupplier, operator, rightSupplier);
-                }else if(count==5){
+                    return resolver.resolveDoubleOperator(context, leftSupplier, operator, rightSupplier);
+                } else if (count == 5) {
                     ParseTree condNode = item;
                     ParseTree questionNode = ctx.getChild(1);
                     ParseTree trueNode = ctx.getChild(2);
@@ -190,19 +203,19 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     TerminalNode elseCtx = (TerminalNode) elseNode;
                     TinyScriptParser.ExpressContext falseCtx = (TinyScriptParser.ExpressContext) falseNode;
 
-                    String question=(String) visitTerminal(questionCtx);
-                    if(!"?".equals(question)){
+                    String question = (String) visitTerminal(questionCtx);
+                    if (!"?".equals(question)) {
                         throw new IllegalArgumentException("invalid  ternary-operator operator, expect '?' but found '" + question + "'!");
                     }
-                    String elseSep=(String)visitTerminal(elseCtx);
-                    if(!":".equals(elseSep)){
+                    String elseSep = (String) visitTerminal(elseCtx);
+                    if (!":".equals(elseSep)) {
                         throw new IllegalArgumentException("invalid  ternary-operator operator, expect ':' but found '" + elseSep + "'!");
                     }
                     Object obj = visitExpress(condCtx);
-                    boolean ok = resolver.toBoolean(context,obj);
-                    if(ok){
+                    boolean ok = resolver.toBoolean(context, obj);
+                    if (ok) {
                         return visitExpress(trueCtx);
-                    }else{
+                    } else {
                         return visitExpress(falseCtx);
                     }
                 } else {
@@ -211,9 +224,6 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.ParenSegmentContext) {
                 TinyScriptParser.ParenSegmentContext nextCtx = (TinyScriptParser.ParenSegmentContext) item;
                 return visitParenSegment(nextCtx);
-            } else if (item instanceof TinyScriptParser.PrefixOperatorSegmentContext) {
-                TinyScriptParser.PrefixOperatorSegmentContext nextCtx = (TinyScriptParser.PrefixOperatorSegmentContext) item;
-                return visitPrefixOperatorSegment(nextCtx);
             } else if (item instanceof TinyScriptParser.EqualValueContext) {
                 TinyScriptParser.EqualValueContext nextCtx = (TinyScriptParser.EqualValueContext) item;
                 return visitEqualValue(nextCtx);
@@ -250,7 +260,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -271,18 +281,18 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 throw new IllegalArgumentException("invalid negtive segment block, expect express node, but found " + ctx.getClass() + "!");
             }
             TerminalNode termCtx = (TerminalNode) termNode;
-            String term=(String)visitTerminal(termCtx);
-            if(!"-".equals(term)){
+            String term = (String) visitTerminal(termCtx);
+            if (!"-".equals(term)) {
                 throw new IllegalArgumentException("invalid negtive operator, expect '-' but found '" + term + "'!");
             }
             TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) objectNode;
             Object obj = visitExpress(expressCtx);
-            return resolver.resolvePrefixOperator(context,term, obj);
+            return resolver.resolvePrefixOperator(context, term, obj);
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -344,7 +354,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     boolean matched = false;
                     for (TinyScriptParser.ClassNameBlockContext clsCtx : ctxList) {
                         String clsName = (String) visitClassNameBlock(clsCtx);
-                        Class<?> clazz = resolver.loadClass(context,clsName);
+                        Class<?> clazz = resolver.loadClass(context, clsName);
                         if (clazz != null) {
                             if (TypeOf.instanceOf(e, clazz)) {
                                 matched = true;
@@ -373,7 +383,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -394,22 +404,22 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 throw new IllegalArgumentException("invalid throw segment block, expect express node, but found " + ctx.getClass() + "!");
             }
             TerminalNode termCtx = (TerminalNode) termNode;
-            String term=(String)visitTerminal(termCtx);
-            if(!"throw".equals(term)){
+            String term = (String) visitTerminal(termCtx);
+            if (!"throw".equals(term)) {
                 throw new IllegalArgumentException("invalid keyword, expect 'throw' but found '" + term + "'!");
             }
             TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) objectNode;
             Object obj = visitExpress(expressCtx);
-            if(obj instanceof Throwable){
-                throw (Throwable)obj;
-            }else{
-                throw new IllegalArgumentException("invalid throw object type, expect type of Throwable.class, but found " + (obj==null?"null":obj.getClass()) + "!");
+            if (obj instanceof Throwable) {
+                throw (Throwable) obj;
+            } else {
+                throw new IllegalArgumentException("invalid throw object type, expect type of Throwable.class, but found " + (obj == null ? "null" : obj.getClass()) + "!");
             }
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -431,7 +441,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -453,7 +463,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -475,7 +485,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -498,7 +508,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -542,39 +552,10 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
-    @Override
-    public Object visitPrefixOperatorSegment(TinyScriptParser.PrefixOperatorSegmentContext ctx) {
-        try {
-            debugNode(ctx);
-            int count = ctx.getChildCount();
-            if (count < 1) {
-                throw new IllegalArgumentException("missing parent segment!");
-            }
-            if (count == 2) {
-                TerminalNode termNode = (TerminalNode) ctx.getChild(0);
-                String term = (String) visitTerminal(termNode);
-                String prefixOperator = term;
-                ParseTree expressNode = ctx.getChild(1);
-                if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
-                    throw new IllegalArgumentException("invalid double-operator right node, expect express, but found type: " + expressNode.getClass());
-                }
-                TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
-                Object value = visitExpress(expressCtx);
-                return resolver.resolvePrefixOperator(context,prefixOperator, value);
-            }
-
-            throw new IllegalArgumentException("un-support parent segment found : " + ctx.getText());
-        } catch (Throwable e) {
-            if (e instanceof TinyScriptException) {
-                throw (TinyScriptException) e;
-            }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
-        }
-    }
 
     @Override
     public Object visitDebuggerSegment(TinyScriptParser.DebuggerSegmentContext ctx) {
@@ -613,14 +594,14 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 ok = (Boolean) visitConditionBlock(condCtx);
             }
             if (ok) {
-                resolver.openDebugger(context,tag, (condCtx == null ? null : condCtx.getText()));
+                resolver.openDebugger(context, tag, (condCtx == null ? null : condCtx.getText()));
             }
             return null;
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -640,7 +621,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 if (item instanceof TerminalNode) {
                     TerminalNode nextTerm = (TerminalNode) item;
                     String term = (String) visitTerminal(nextTerm);
-                    if (!Arrays.asList("if", "(", ")", "else","elif").contains(term)) {
+                    if (!Arrays.asList("if", "(", ")", "else", "elif").contains(term)) {
                         throw new IllegalArgumentException("invalid if segment separator, expect 'if/(/)/else/elif' but found '" + term + "'!");
                     }
                 } else if (item instanceof TinyScriptParser.ConditionBlockContext) {
@@ -672,7 +653,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -722,7 +703,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -740,7 +721,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 ParseTree item = ctx.getChild(i);
                 if (item instanceof TinyScriptParser.ConditionBlockContext) {
                     contitionCtx = (TinyScriptParser.ConditionBlockContext) item;
-                }else if (item instanceof TinyScriptParser.ScriptBlockContext) {
+                } else if (item instanceof TinyScriptParser.ScriptBlockContext) {
                     scriptCtx = (TinyScriptParser.ScriptBlockContext) item;
                 } else {
                     if (!(item instanceof TerminalNode)) {
@@ -778,7 +759,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -853,7 +834,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -912,11 +893,11 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     }
 
                 }
-            }else if (iter instanceof Iterator) {
+            } else if (iter instanceof Iterator) {
                 Iterator<?> iterator = (Iterator<?>) iter;
 
-                while(iterator.hasNext()) {
-                    Object item=iterator.next();
+                while (iterator.hasNext()) {
+                    Object item = iterator.next();
                     try {
                         resolver.setValue(context, naming, item);
                         lastValue = visitScriptBlock(scriptCtx);
@@ -927,11 +908,11 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     }
 
                 }
-            }else if (iter instanceof Enumeration) {
+            } else if (iter instanceof Enumeration) {
                 Enumeration<?> enumeration = (Enumeration<?>) iter;
 
-                while(enumeration.hasMoreElements()) {
-                    Object item=enumeration.nextElement();
+                while (enumeration.hasMoreElements()) {
+                    Object item = enumeration.nextElement();
                     try {
                         resolver.setValue(context, naming, item);
                         lastValue = visitScriptBlock(scriptCtx);
@@ -942,7 +923,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     }
 
                 }
-            }else if (iter instanceof Map) {
+            } else if (iter instanceof Map) {
                 Map<?, ?> map = (Map<?, ?>) iter;
                 for (Object item : map.keySet()) {
                     try {
@@ -983,7 +964,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1001,12 +982,12 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             }
             TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) item;
             Object ret = visitExpress(expressCtx);
-            return resolver.toBoolean(context,ret);
+            return resolver.toBoolean(context, ret);
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1029,7 +1010,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1064,8 +1045,8 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 throw new IllegalArgumentException("invalid equal value, expect '=,?=,.=,+=,-=,*=,/=,%=', but found '" + equal + "'!");
             }
             Object value = null;
-            if(!Arrays.asList("?=", ".=").contains(equal)){
-                value=visitExpress(expressCtx);
+            if (!Arrays.asList("?=", ".=").contains(equal)) {
+                value = visitExpress(expressCtx);
             }
 
             if (namingNode instanceof TerminalNode) {
@@ -1078,28 +1059,28 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     Object oldVal = resolver.getValue(context, naming);
                     if ("?=".equals(equal)) {
                         if (oldVal == null) {
-                            value=visitExpress(expressCtx);
+                            value = visitExpress(expressCtx);
                             resolver.setValue(context, naming, value);
                         }
                     } else if (".=".equals(equal)) {
                         if (oldVal != null) {
-                            value=visitExpress(expressCtx);
+                            value = visitExpress(expressCtx);
                             resolver.setValue(context, naming, value);
                         }
                     } else if ("+=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(context,oldVal, "+", value);
+                        value = resolver.resolveDoubleOperator(context, oldVal, "+", value);
                         resolver.setValue(context, naming, value);
                     } else if ("-=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(context,oldVal, "-", value);
+                        value = resolver.resolveDoubleOperator(context, oldVal, "-", value);
                         resolver.setValue(context, naming, value);
                     } else if ("*=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(context,oldVal, "*", value);
+                        value = resolver.resolveDoubleOperator(context, oldVal, "*", value);
                         resolver.setValue(context, naming, value);
                     } else if ("/=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(context,oldVal, "/", value);
+                        value = resolver.resolveDoubleOperator(context, oldVal, "/", value);
                         resolver.setValue(context, naming, value);
                     } else if ("%=".equals(equal)) {
-                        value = resolver.resolveDoubleOperator(context,oldVal, "%", value);
+                        value = resolver.resolveDoubleOperator(context, oldVal, "%", value);
                         resolver.setValue(context, naming, value);
                     }
                 } else {
@@ -1169,7 +1150,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1371,7 +1352,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1423,7 +1404,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1479,12 +1460,12 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 args = new ArrayList<>();
             }
 
-            return resolver.resolveFunctionCall(context,value, isNew, naming, args);
+            return resolver.resolveFunctionCall(context, value, isNew, naming, args);
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1522,7 +1503,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1553,7 +1534,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1615,7 +1596,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1632,7 +1613,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 ParseTree sepNode = ctx.getChild(1);
                 ParseTree valueNode = ctx.getChild(2);
                 if (!(namingNode instanceof TerminalNode)
-                && !(namingNode instanceof TinyScriptParser.ConstStringContext)) {
+                        && !(namingNode instanceof TinyScriptParser.ConstStringContext)) {
                     throw new IllegalArgumentException("invalid argument, expect naming/string node, but found " + namingNode.getClass() + "!");
                 }
                 if (!(sepNode instanceof TerminalNode)) {
@@ -1642,14 +1623,14 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     throw new IllegalArgumentException("invalid argument, expect argument-value node, but found " + valueNode.getClass() + "!");
                 }
                 String naming = null;
-                if(namingNode instanceof TerminalNode){
+                if (namingNode instanceof TerminalNode) {
                     TerminalNode namingCtx = (TerminalNode) namingNode;
-                    naming=(String) visitTerminal(namingCtx);
-                }else if(namingNode instanceof TinyScriptParser.ConstStringContext){
+                    naming = (String) visitTerminal(namingCtx);
+                } else if (namingNode instanceof TinyScriptParser.ConstStringContext) {
                     TinyScriptParser.ConstStringContext namingCtx = (TinyScriptParser.ConstStringContext) namingNode;
-                    naming=(String)visitConstString(namingCtx);
+                    naming = (String) visitConstString(namingCtx);
                 }
-                if(naming==null || naming.isEmpty()){
+                if (naming == null || naming.isEmpty()) {
                     throw new IllegalArgumentException("invalid argument naming, expect naming, but found '" + naming + "'!");
                 }
                 TerminalNode sepCtx = (TerminalNode) sepNode;
@@ -1673,7 +1654,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1695,7 +1676,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1839,7 +1820,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1860,16 +1841,16 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 }
                 term = term.trim();
                 char modifier = term.charAt(1);
-                if(modifier=='{') {
+                if (modifier == '{') {
                     term = term.substring("${".length(), term.length() - "}".length());
-                }else{
+                } else {
                     term = term.substring("$!{".length(), term.length() - "}".length());
                 }
                 term = term.trim();
                 Object value = resolver.getValue(context, term);
-                if(modifier=='!'){
-                    if(value==null){
-                        value="";
+                if (modifier == '!') {
+                    if (value == null) {
+                        value = "";
                     }
                 }
                 return value;
@@ -1879,7 +1860,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1902,14 +1883,14 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 if (term.endsWith(".class")) {
                     term = term.substring(0, term.length() - ".class".length());
                 }
-                return resolver.loadClass(context,term);
+                return resolver.loadClass(context, term);
             }
             throw new IllegalArgumentException("un-support const class found : " + ctx.getText());
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1942,7 +1923,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -1972,7 +1953,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2001,7 +1982,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2023,8 +2004,8 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 term = term.trim();
                 StringBuilder builder = new StringBuilder();
                 String firstLine = "";
-                String firstChar=term.substring(0,1);
-                String escapeFirstCharRegex="\\"+firstChar;
+                String firstChar = term.substring(0, 1);
+                String escapeFirstCharRegex = "\\" + firstChar;
                 String[] arr = term.split("\n");
                 for (int i = 0; i < arr.length; i++) {
                     String str = arr[i];
@@ -2049,7 +2030,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     }
                     featuresList.add(feature);
                 }
-                term = resolver.multilineString(context,builder.toString(), featuresList);
+                term = resolver.multilineString(context, builder.toString(), featuresList);
                 return term;
             }
             throw new IllegalArgumentException("un-support const multiline string found : " + ctx.getText());
@@ -2057,7 +2038,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2079,7 +2060,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 term = term.trim();
                 term = term.substring("r\"".length(), term.length() - "\"".length());
                 term = unescapeString(term);
-                term = resolver.renderString(context,term);
+                term = resolver.renderString(context, term);
                 return term;
             }
             throw new IllegalArgumentException("un-support const render string found : " + ctx.getText());
@@ -2087,7 +2068,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2130,7 +2111,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2166,7 +2147,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2202,7 +2183,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2238,7 +2219,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2272,7 +2253,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2327,7 +2308,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2374,7 +2355,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2422,7 +2403,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2477,7 +2458,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2524,7 +2505,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx," ") + "cause by: "+e.getMessage(), e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
@@ -2640,9 +2621,6 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.ParenSegmentContext) {
                 TinyScriptParser.ParenSegmentContext nextCtx = (TinyScriptParser.ParenSegmentContext) tree;
                 return visitParenSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.PrefixOperatorSegmentContext) {
-                TinyScriptParser.PrefixOperatorSegmentContext nextCtx = (TinyScriptParser.PrefixOperatorSegmentContext) tree;
-                return visitPrefixOperatorSegment(nextCtx);
             } else if (tree instanceof TinyScriptParser.TrySegmentContext) {
                 TinyScriptParser.TrySegmentContext nextCtx = (TinyScriptParser.TrySegmentContext) tree;
                 return visitTrySegment(nextCtx);
@@ -2715,7 +2693,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
             }
-            throw new TinyScriptEvaluateException(getTreeLocationText("location ", node," ") + "cause by: "+e.getMessage() , e);
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", node, " ") + "cause by: " + e.getMessage(), e);
         }
     }
 
