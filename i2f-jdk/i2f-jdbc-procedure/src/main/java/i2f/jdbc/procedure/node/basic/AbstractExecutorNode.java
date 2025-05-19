@@ -44,16 +44,21 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             walkTree(item, consumer);
         }
     }
-
     public static String getNodeLocation(XmlNode node) {
-        return XmlNode.getNodeLocation(node);
+        return getNodeLocation(node,null);
+    }
+    public static String getNodeLocation(XmlNode node,Integer lineNumber) {
+        return XmlNode.getNodeLocation(node,lineNumber);
     }
 
     public static String getTrackingComment(XmlNode node) {
+        return getTrackingComment(node,null);
+    }
+    public static String getTrackingComment(XmlNode node,Integer lineNumber) {
         if (node == null) {
             return " ";
         }
-        return " /* tracking at " + getNodeLocation(node) + " */ ";
+        return " /* tracking at " + getNodeLocation(node,lineNumber) + " */ ";
     }
 
     @Override
