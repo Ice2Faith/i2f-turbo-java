@@ -85,10 +85,6 @@ TERM_INTEGER:
     (TERM_DIGIT)+ ('_' TERM_DIGIT+)*
     ;
 
-PREFIX_OPERATOR:
-    '!' | 'not'
-    ;
-
 
 NAMING: ID (TERM_DOT ID)*;
 ROUTE_NAMING: ID (TERM_BRACKET_SQUARE_L TERM_INTEGER TERM_BRACKET_SQUARE_R)? (TERM_DOT ID (TERM_BRACKET_SQUARE_L TERM_INTEGER TERM_BRACKET_SQUARE_R)? )*;
@@ -142,7 +138,7 @@ express:
     | trySegment
     | throwSegment
     | parenSegment
-    | prefixOperatorSegment
+    | ('!' | 'not') express
     | equalValue
     | newInstance
     | invokeFunction
@@ -196,9 +192,6 @@ parenSegment:
     TERM_PAREN_L express TERM_PAREN_R
     ;
 
-prefixOperatorSegment:
-    PREFIX_OPERATOR express
-    ;
 
 controlSegment:
     'break'
