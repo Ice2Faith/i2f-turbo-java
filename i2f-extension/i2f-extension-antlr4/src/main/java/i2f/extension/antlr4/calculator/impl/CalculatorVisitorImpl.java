@@ -325,7 +325,7 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
             long num = ret.longValue();
             boolean isNeg = num < 0;
             num = Math.abs(num);
-            num = RANDOM.nextLong(num);
+            num = RANDOM.nextLong() % num;
             return BigDecimal.valueOf(isNeg ? -num : num);
         } else if ("feibo".equalsIgnoreCase(prefix)) {
             return calcFeibo(ret);
@@ -334,7 +334,8 @@ public class CalculatorVisitorImpl implements CalculatorVisitor<Object> {
             long num = ret.longValue();
             return BigDecimal.valueOf(~num);
         } else if ("sqrt".equalsIgnoreCase(prefix)) {
-            return ret.sqrt(MATH_CONTEXT);
+            return BigDecimal.valueOf(Math.sqrt(ret.doubleValue()));
+//            return ret.sqrt(MATH_CONTEXT);
         }
         throw new IllegalArgumentException("un-support prefix operator found : " + prefix);
     }

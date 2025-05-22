@@ -118,6 +118,7 @@ public class TinyScript {
         }
         CommonTokenStream tokens = parseTokens(formula);
         TinyScriptParser parser = new TinyScriptParser(tokens);
+        parser.setErrorHandler(new TinyScriptErrorStrategy());
         for (ANTLRErrorListener item : ERROR_LISTENER) {
             if (item == null) {
                 continue;

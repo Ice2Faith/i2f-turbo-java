@@ -1,10 +1,12 @@
-package i2f.extension.antlr4.script.tiny.impl.exception;
+package i2f.extension.antlr4.script.tiny.impl.exception.impl;
+
+import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptThrowException;
 
 /**
  * @author Ice2Faith
  * @date 2025/2/25 9:00
  */
-public class TinyScriptEvaluateException extends TinyScriptException{
+public class TinyScriptEvaluateException extends TinyScriptThrowException {
     public TinyScriptEvaluateException() {
     }
 

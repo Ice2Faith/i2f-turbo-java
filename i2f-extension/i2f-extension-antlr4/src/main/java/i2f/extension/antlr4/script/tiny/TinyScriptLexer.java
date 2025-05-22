@@ -1,4 +1,4 @@
-// Generated from/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from /extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 

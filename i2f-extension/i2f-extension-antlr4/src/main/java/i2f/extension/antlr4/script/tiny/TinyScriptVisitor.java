@@ -1,4 +1,4 @@
-// Generated from/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from /extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -19,6 +19,13 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitScript(TinyScriptParser.ScriptContext ctx);
 	/**
+     * Visit a parse tree produced by {@link TinyScriptParser#segments}.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitSegments(TinyScriptParser.SegmentsContext ctx);
+
+    /**
 	 * Visit a parse tree produced by {@link TinyScriptParser#express}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

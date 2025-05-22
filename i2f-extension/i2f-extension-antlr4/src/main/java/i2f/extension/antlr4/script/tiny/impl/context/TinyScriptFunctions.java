@@ -2,6 +2,8 @@ package i2f.extension.antlr4.script.tiny.impl.context;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.security.SecureRandom;
+import java.util.Date;
 
 /**
  * @author Ice2Faith
@@ -9,6 +11,19 @@ import java.lang.reflect.Array;
  * @desc
  */
 public class TinyScriptFunctions {
+    public static final SecureRandom RANDOM = new SecureRandom();
+
+    public static Date now() {
+        return new Date();
+    }
+
+    public static int rand() {
+        return RANDOM.nextInt();
+    }
+
+    public static int rand(int bound) {
+        return RANDOM.nextInt(bound);
+    }
     public static void println(Object... obj) {
         StringBuilder builder = new StringBuilder();
         boolean isFirst = true;

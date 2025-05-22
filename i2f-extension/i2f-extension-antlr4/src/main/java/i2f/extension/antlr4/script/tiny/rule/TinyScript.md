@@ -319,7 +319,7 @@ status=${tmp.status};
 
 ```shell
 tmp=getUserInfo();
-#{name:userName,age:userInfo.age,status}=tmp;
+#{name:userName,age:userInfo.age,status}=${tmp};
 ```
 
 - 这样就可以实现同时保存变量了

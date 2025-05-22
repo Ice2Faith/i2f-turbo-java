@@ -1,4 +1,4 @@
-// Generated from/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from /extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -26,6 +26,17 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitSegments(TinyScriptParser.SegmentsContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitExpress(TinyScriptParser.ExpressContext ctx) { return visitChildren(ctx); }
 	/**

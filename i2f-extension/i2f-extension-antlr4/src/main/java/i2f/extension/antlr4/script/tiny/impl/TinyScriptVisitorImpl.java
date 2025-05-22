@@ -2,10 +2,10 @@ package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
-import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptEvaluateException;
 import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptContinueException;
+import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptEvaluateException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptReturnException;
 import i2f.reflect.ReflectResolver;
 import i2f.typeof.TypeOf;
@@ -65,14 +65,45 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         return loc;
     }
 
-
     @Override
     public Object visitScript(TinyScriptParser.ScriptContext ctx) {
         try {
             debugNode(ctx);
             int count = ctx.getChildCount();
             if (count < 1) {
-                throw new IllegalArgumentException("missing script!");
+                throw new IllegalArgumentException("missing segments!");
+            }
+            TinyScriptParser.SegmentsContext segmentsCtx = null;
+            TerminalNode eofNode = null;
+            if (count == 2) {
+                segmentsCtx = (TinyScriptParser.SegmentsContext) ctx.getChild(0);
+                eofNode = (TerminalNode) ctx.getChild(1);
+            } else {
+                eofNode = (TerminalNode) ctx.getChild(0);
+            }
+            String eof = (String) visitTerminal(eofNode);
+            if (!"<EOF>".equals(eof)) {
+                throw new IllegalArgumentException("invalid grammar, expect '<EOF>' but found '" + eof + "'!");
+            }
+            if (segmentsCtx == null) {
+                return null;
+            }
+            return visitSegments(segmentsCtx);
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Object visitSegments(TinyScriptParser.SegmentsContext ctx) {
+        try {
+            debugNode(ctx);
+            int count = ctx.getChildCount();
+            if (count < 1) {
+                throw new IllegalArgumentException("missing segments!");
             }
             Object ret = null;
             for (int i = 0; i < count; i++) {
@@ -1567,19 +1598,19 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 }
                 return null;
             } else {
-                ParseTree scriptNode = ctx.getChild(1);
+                ParseTree segmentsNode = ctx.getChild(1);
                 ParseTree rightNode = ctx.getChild(2);
                 if (!(leftNode instanceof TerminalNode)) {
                     throw new IllegalArgumentException("invalid script block left node, expect '{', but found type: " + leftNode.getClass());
                 }
-                if (!(scriptNode instanceof TinyScriptParser.ScriptContext)) {
-                    throw new IllegalArgumentException("invalid script block right node, expect express, but found type: " + scriptNode.getClass());
+                if (!(segmentsNode instanceof TinyScriptParser.SegmentsContext)) {
+                    throw new IllegalArgumentException("invalid script block right node, expect segments, but found type: " + segmentsNode.getClass());
                 }
                 if (!(rightNode instanceof TerminalNode)) {
                     throw new IllegalArgumentException("invalid script block right node, expect '}', but found type: " + rightNode.getClass());
                 }
                 TerminalNode leftCtx = (TerminalNode) leftNode;
-                TinyScriptParser.ScriptContext scriptCtx = (TinyScriptParser.ScriptContext) scriptNode;
+                TinyScriptParser.SegmentsContext segmentsCtx = (TinyScriptParser.SegmentsContext) segmentsNode;
                 TerminalNode rightCtx = (TerminalNode) rightNode;
                 String left = (String) visitTerminal(leftCtx);
                 String right = (String) visitTerminal(rightCtx);
@@ -1589,7 +1620,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 if (!"}".equals(right)) {
                     throw new IllegalArgumentException("invalid script block right node, expect '(', but found : " + right);
                 }
-                Object value = visitScript(scriptCtx);
+                Object value = visitSegments(segmentsCtx);
                 return value;
             }
         } catch (Throwable e) {
@@ -2657,6 +2688,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.StaticEnumValueContext) {
                 TinyScriptParser.StaticEnumValueContext nextCtx = (TinyScriptParser.StaticEnumValueContext) tree;
                 return visitStaticEnumValue(nextCtx);
+            } else if (tree instanceof TinyScriptParser.SegmentsContext) {
+                TinyScriptParser.SegmentsContext nextCtx = (TinyScriptParser.SegmentsContext) tree;
+                return visitSegments(nextCtx);
             }
         } catch (TinyScriptBreakException e) {
 
