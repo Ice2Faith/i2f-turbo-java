@@ -1,4 +1,4 @@
-// Generated from/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from /extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
     package i2f.extension.antlr4.script.tiny;
 
@@ -20,6 +20,19 @@ public interface TinyScriptListener extends ParseTreeListener {
 	 */
 	void exitScript(TinyScriptParser.ScriptContext ctx);
 	/**
+     * Enter a parse tree produced by {@link TinyScriptParser#segments}.
+     * @param ctx the parse tree
+     */
+    void enterSegments(TinyScriptParser.SegmentsContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link TinyScriptParser#segments}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitSegments(TinyScriptParser.SegmentsContext ctx);
+
+    /**
 	 * Enter a parse tree produced by {@link TinyScriptParser#express}.
 	 * @param ctx the parse tree
 	 */

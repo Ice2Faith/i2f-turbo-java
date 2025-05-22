@@ -124,9 +124,12 @@ WS       : [ \t\r\n]+ -> skip ;
 
 
 script:
-     express (TERM_SEMICOLON express)* (TERM_SEMICOLON)?
+    segments?  EOF
     ;
 
+segments:
+    express (TERM_SEMICOLON express)* (TERM_SEMICOLON)?
+;
 
 express:
     debuggerSegment
@@ -224,7 +227,7 @@ conditionBlock:
     ;
 
 scriptBlock:
-    TERM_CURLY_L script? TERM_CURLY_R
+    TERM_CURLY_L (segments)? TERM_CURLY_R
     ;
 
 

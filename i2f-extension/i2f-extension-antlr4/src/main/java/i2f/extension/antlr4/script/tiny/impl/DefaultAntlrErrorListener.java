@@ -56,6 +56,7 @@ public class DefaultAntlrErrorListener extends BaseErrorListener {
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
         String errorMsg="line " + line + ":" + charPositionInLine + " " + msg;
         logError(errorMsg,e);
+        throw e;
     }
 
     public void logError(String msg,Throwable e){
