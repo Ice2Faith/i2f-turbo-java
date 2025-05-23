@@ -489,7 +489,11 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     public IMethod findMethod(Object context, String naming, List<Object> args) {
         LruList<IMethod> list = TinyScript.BUILTIN_METHOD.get(naming);
         if (list != null && !list.isEmpty()) {
-            return ReflectResolver.matchExecMethod(list, args);
+            IMethod method = ReflectResolver.matchExecMethod(list, args);
+            if(method!=null){
+                list.touch(method);
+            }
+            return method;
         }
         return null;
     }

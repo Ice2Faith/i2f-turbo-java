@@ -128,8 +128,9 @@ script:
     ;
 
 segments:
-    express (TERM_SEMICOLON express)* (TERM_SEMICOLON)?
-;
+     express (TERM_SEMICOLON express)* (TERM_SEMICOLON)?
+    ;
+
 
 express:
     debuggerSegment

@@ -164,6 +164,9 @@ public class TinyScript {
     public static void registryBuiltMethodByStaticMethod(Class<?> clazz, Predicate<Method> filter) {
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
+            if(Object.class.equals(method.getDeclaringClass())){
+                continue;
+            }
             int mod = method.getModifiers();
             if (!Modifier.isPublic(mod)) {
                 continue;
@@ -191,6 +194,9 @@ public class TinyScript {
         Class<?> clazz = object.getClass();
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
+            if(Object.class.equals(method.getDeclaringClass())){
+                continue;
+            }
             int mod = method.getModifiers();
             if (!Modifier.isPublic(mod)) {
                 continue;

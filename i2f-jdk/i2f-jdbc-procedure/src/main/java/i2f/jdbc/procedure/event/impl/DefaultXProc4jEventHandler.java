@@ -13,6 +13,8 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -29,6 +31,7 @@ public class DefaultXProc4jEventHandler implements XProc4jEventHandler {
     protected final Deque<XProc4jEvent> queue = new LinkedBlockingDeque<>();
     protected volatile Supplier<INamingContext> namingContextSupplier;
     protected volatile Thread dispatchThread=null;
+    protected volatile ExecutorService dispatchPool= new ForkJoinPool(4);
 
 
     public DefaultXProc4jEventHandler(Supplier<INamingContext> namingContextSupplier, XProc4jEventListener... listeners) {
@@ -113,7 +116,11 @@ public class DefaultXProc4jEventHandler implements XProc4jEventHandler {
             try {
                 XProc4jEvent event = queue.poll();
                 if (event != null) {
-                    dispatch(event);
+                    if(dispatchPool!=null){
+                        dispatchPool.submit(()->dispatch(event));
+                    }else {
+                        dispatch(event);
+                    }
                 } else {
                     Thread.sleep(1);
                 }

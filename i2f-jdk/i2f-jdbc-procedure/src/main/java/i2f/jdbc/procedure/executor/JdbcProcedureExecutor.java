@@ -15,6 +15,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.lru.LruList;
 import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
 import i2f.typeof.TypeOf;
@@ -51,7 +52,7 @@ public interface JdbcProcedureExecutor {
 
     void registryEvalScriptProvider(EvalScriptProvider provider);
 
-    List<EvalScriptProvider> getEvalScriptProviders();
+    LruList<EvalScriptProvider> getEvalScriptProviders();
 
     XProc4jEventHandler getEventHandler();
 
@@ -69,7 +70,7 @@ public interface JdbcProcedureExecutor {
         return getMetaMap().get(procedureId);
     }
 
-    List<ExecutorNode> getNodes();
+    LruList<ExecutorNode> getNodes();
 
     IEnvironment getEnvironment();
 

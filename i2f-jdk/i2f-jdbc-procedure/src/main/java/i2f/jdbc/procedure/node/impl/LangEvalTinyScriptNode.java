@@ -46,24 +46,16 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         System.out.println(obj);
     }
 
-    protected static final WeakHashMap<JdbcProcedureExecutor, ProcedureTinyScriptResolver> resolverMap = new WeakHashMap<>();
-
     public static Object evalTinyScript(String script, Object context, JdbcProcedureExecutor executor) {
+        return evalTinyScript(null,script,context,executor);
+    }
+
+    public static Object evalTinyScript(XmlNode node,String script, Object context, JdbcProcedureExecutor executor) {
 
         Object obj = null;
 
         try {
-            TinyScriptResolver resolver = null;
-            if (executor != null) {
-                synchronized (resolverMap) {
-                    resolver = resolverMap.get(executor);
-                    if (resolver == null) {
-                        ProcedureTinyScriptResolver val = new ProcedureTinyScriptResolver(executor);
-                        resolverMap.put(executor, val);
-                        resolver = val;
-                    }
-                }
-            }
+            TinyScriptResolver resolver = new ProcedureTinyScriptResolver(executor,node);
             obj = TinyScript.script(script, context, resolver);
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -118,12 +110,18 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
 
     public static class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
         protected JdbcProcedureExecutor executor;
+        protected XmlNode node;
 
-        private final ExecutorMethodProvider methodProvider = new ExecutorMethodProvider();
-        private final ConcurrentHashMap<String, LruList<IMethod>> executorMethods = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap<String, LruList<Method>> execContextMethods = new ConcurrentHashMap<>();
+        private static final ConcurrentHashMap<String, LruList<Method>> executorMethods = new ConcurrentHashMap<>();
+        private static final ConcurrentHashMap<String, LruList<Method>> execContextMethods = new ConcurrentHashMap<>();
 
-        public class ExecutorMethodProvider {
+        public static class ExecutorMethodProvider {
+            protected JdbcProcedureExecutor executor;
+
+            public ExecutorMethodProvider(JdbcProcedureExecutor executor) {
+                this.executor = executor;
+            }
+
             public Class<?> load_class(String className) {
                 return executor.loadClass(className);
             }
@@ -246,7 +244,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
             }
         }
 
-        public class ExecContextMethodProvider {
+        public static class ExecContextMethodProvider {
             public JdbcProcedureExecutor executor;
             public Object context;
 
@@ -320,24 +318,30 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
             }
         }
 
-        public List<IMethod> getExecutorMethods(String naming) {
+        public static LruList<Method> getExecutorMethods(String naming) {
             if (executorMethods.isEmpty()) {
                 synchronized (executorMethods) {
                     Method[] list = ExecutorMethodProvider.class.getMethods();
                     for (Method item : list) {
+                        if(Object.class.equals(item.getDeclaringClass())){
+                            continue;
+                        }
                         executorMethods.computeIfAbsent(item.getName(), (k) -> new LruList<>())
-                                .add(new JdkInstanceStaticMethod(methodProvider, item));
+                                .add(item);
                     }
                 }
             }
             return executorMethods.get(naming);
         }
 
-        public List<Method> getExecContextMethods(String naming) {
+        public static LruList<Method> getExecContextMethods(String naming) {
             if (execContextMethods.isEmpty()) {
                 synchronized (execContextMethods) {
                     Method[] list = ExecContextMethodProvider.class.getMethods();
                     for (Method item : list) {
+                        if(Object.class.equals(item.getDeclaringClass())){
+                            continue;
+                        }
                         execContextMethods.computeIfAbsent(item.getName(), (k) -> new LruList<>())
                                 .add(item);
                     }
@@ -348,6 +352,11 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
 
         public ProcedureTinyScriptResolver(JdbcProcedureExecutor executor) {
             this.executor = executor;
+        }
+
+        public ProcedureTinyScriptResolver(JdbcProcedureExecutor executor, XmlNode node) {
+            this.executor = executor;
+            this.node = node;
         }
 
         @Override
@@ -416,35 +425,40 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 return Reference.of(ret);
             } catch (NotFoundSignalException e) {
                 return Reference.nop();
+            }finally {
+                if(node!=null) {
+                    AbstractExecutorNode.updateTraceInfo(node, (Map<String, Object>) context, executor);
+                }
             }
         }
 
 
         @Override
         public IMethod findMethod(Object context, String naming, List<Object> args) {
-            List<IMethod> list = ContextHolder.INVOKE_METHOD_MAP.get(naming);
+            LruList<IMethod> list = ContextHolder.INVOKE_METHOD_MAP.get(naming);
             if (list != null && !list.isEmpty()) {
                 IMethod method = ReflectResolver.matchExecMethod(list, args);
                 if (method != null) {
+                    list.touch(method);
                     return method;
                 }
             }
 
-            list = getExecutorMethods(naming);
-            if (list != null && !list.isEmpty()) {
-                IMethod method = ReflectResolver.matchExecMethod(list, args);
+            LruList<Method> methods = getExecutorMethods(naming);
+            if (methods != null && !methods.isEmpty()) {
+                Method method = ReflectResolver.matchExecutable(methods, args);
                 if (method != null) {
-                    return method;
+                    methods.touch(method);
+                    return new JdkInstanceStaticMethod(new ExecutorMethodProvider(executor), method);
                 }
             }
 
-            list = getExecContextMethods(naming).stream()
-                    .map(e -> new JdkInstanceStaticMethod(new ExecContextMethodProvider(executor, context), e))
-                    .collect(Collectors.toList());
-            if (list != null && !list.isEmpty()) {
-                IMethod method = ReflectResolver.matchExecMethod(list, args);
+            methods = getExecContextMethods(naming);
+            if (methods != null && !methods.isEmpty()) {
+                Method method = ReflectResolver.matchExecutable(methods, args);
                 if (method != null) {
-                    return method;
+                    methods.touch(method);
+                    return new JdkInstanceStaticMethod(new ExecContextMethodProvider(executor,context), method);
                 }
             }
 

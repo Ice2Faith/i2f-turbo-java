@@ -33,18 +33,22 @@ public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScri
         System.out.println(obj);
     }
 
-    public static Object evalGroovyScript(String script, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        Map<String, Object> bindings = new HashMap<>();
-        bindings.put("executor", executor);
-        bindings.put("params", context);
-
-        String sourceCode = new StringBuilder()
+    public static String getFullSourceCode(String script){
+        return new StringBuilder()
                 .append(LangEvalJavaNode.EVAL_JAVA_IMPORTS).append("\n")
                 .append("def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable {").append("\n")
                 .append(script).append("\n")
                 .append("}").append("\n")
                 .append("exec(executor,params);").append("\n")
                 .toString();
+    }
+
+    public static Object evalGroovyScript(String script, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        Map<String, Object> bindings = new HashMap<>();
+        bindings.put("executor", executor);
+        bindings.put("params", context);
+
+        String sourceCode = getFullSourceCode(script);
 
         Object obj = null;
 
