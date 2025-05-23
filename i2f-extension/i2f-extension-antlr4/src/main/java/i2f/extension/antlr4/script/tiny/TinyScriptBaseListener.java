@@ -31,24 +31,18 @@ public class TinyScriptBaseListener implements TinyScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-    @Override
-    public void enterSegments(TinyScriptParser.SegmentsContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override
-    public void exitSegments(TinyScriptParser.SegmentsContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
+	@Override public void enterSegments(TinyScriptParser.SegmentsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSegments(TinyScriptParser.SegmentsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterExpress(TinyScriptParser.ExpressContext ctx) { }
 	/**
 	 * {@inheritDoc}

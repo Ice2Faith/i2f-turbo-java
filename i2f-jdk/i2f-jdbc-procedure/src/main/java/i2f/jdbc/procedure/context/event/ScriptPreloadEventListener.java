@@ -4,6 +4,7 @@ import i2f.compiler.MemoryCompiler;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.groovy.GroovyScript;
 import i2f.extension.ognl.OgnlUtil;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.consts.XProc4jConsts;
@@ -80,14 +81,14 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
                 try {
                     OgnlUtil.parseExpressionTreeNode(node.getTextBody());
                 } catch (Throwable e) {
-                    executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" error :"+e.getMessage(),e);
+                    executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" body error :"+e.getMessage(),e);
                 }
             }else if(TagConsts.LANG_EVAL_TS.equals(tagName)
                     ||TagConsts.LANG_EVAL_TINYSCRIPT.equals(tagName)){
                 try {
                     TinyScript.parse(node.getTextBody());
                 } catch (Throwable e) {
-                    executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" error :"+e.getMessage(),e);
+                    executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" body  error :"+e.getMessage(),e);
                 }
             }else if(TagConsts.LANG_EVAL_JAVA.equals(tagName)){
                 List<XmlNode> children = node.getChildren();
@@ -107,14 +108,14 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
                 try {
                     MemoryCompiler.findCompileClass(codeEntry.getValue(), codeEntry.getKey() + ".java", codeEntry.getKey());
                 } catch (Throwable e) {
-                    executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" error :"+e.getMessage()+"\n source code:\n"+codeEntry.getValue(),e);
+                    executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" body error :"+e.getMessage()+"\n source code:\n"+codeEntry.getValue(),e);
                 }
             }else if(TagConsts.LANG_EVAL_GROOVY.equals(tagName)){
                 String fullSourceCode = LangEvalGroovyNode.getFullSourceCode(node.getTextBody());
                 try {
                     GroovyScript.parseAsClass(fullSourceCode);
                 } catch (Throwable e) {
-                    executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" error :"+e.getMessage()+"\n source code:\n"+fullSourceCode,e);
+                    executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" body error :"+e.getMessage()+"\n source code:\n"+fullSourceCode,e);
                 }
             }
         }
@@ -129,29 +130,43 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
                         try {
                             OgnlUtil.parseExpressionTreeNode(node.getTagAttrMap().get(entry.getKey()));
                         } catch (Throwable e) {
-                            executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" error :"+e.getMessage(),e);
+                            executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" "+entry.getKey()+" feature error :"+e.getMessage(),e);
                         }
                     }else if(FeatureConsts.EVAL_TS.equals(feature)
                     ||FeatureConsts.EVAL_TINYSCRIPT.equals(feature)){
                         try {
                             TinyScript.parse(node.getTagAttrMap().get(entry.getKey()));
                         } catch (Throwable e) {
-                            executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" error :"+e.getMessage(),e);
+                            executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" "+entry.getKey()+" feature error :"+e.getMessage(),e);
                         }
                     } else if(FeatureConsts.EVAL_JAVA.equals(feature)){
                         Map.Entry<String, String> codeEntry = LangEvalJavaNode.getFullJavaSourceCode("", "", node.getTagAttrMap().get(entry.getKey()));
                         try {
                             MemoryCompiler.findCompileClass(codeEntry.getValue(), codeEntry.getKey() + ".java", codeEntry.getKey());
                         } catch (Throwable e) {
-                            executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" error :"+e.getMessage()+"\n source code:\n"+codeEntry.getValue(),e);
+                            executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" "+entry.getKey()+" feature error :"+e.getMessage()+"\n source code:\n"+codeEntry.getValue(),e);
                         }
                     }else if(FeatureConsts.EVAL_GROOVY.equals(feature)){
                         String fullSourceCode = LangEvalGroovyNode.getFullSourceCode(node.getTagAttrMap().get(entry.getKey()));
                         try {
                             GroovyScript.parseAsClass(fullSourceCode);
                         } catch (Throwable e) {
-                            executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" error :"+e.getMessage()+"\n source code:\n"+fullSourceCode,e);
+                            executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" "+entry.getKey()+" feature error :"+e.getMessage()+"\n source code:\n"+fullSourceCode,e);
                         }
+                    }
+                }
+            }
+        }
+
+        Map<String, String> attrMap = node.getTagAttrMap();
+        for (Map.Entry<String, String> entry : attrMap.entrySet()) {
+            if(AttrConsts.TEST.equals(entry.getKey())){
+                List<String> features = node.getAttrFeatureMap().get(entry.getKey());
+                if(features==null || features.isEmpty()){
+                    try {
+                        OgnlUtil.parseExpressionTreeNode(entry.getValue());
+                    } catch (Throwable e) {
+                        executor.logInfo(()->"script-preload at "+XmlNode.getNodeLocation(node)+" "+entry.getKey()+" error :"+e.getMessage(),e);
                     }
                 }
             }

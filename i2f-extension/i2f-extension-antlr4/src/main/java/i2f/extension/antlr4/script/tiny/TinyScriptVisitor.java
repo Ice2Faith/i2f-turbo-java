@@ -19,13 +19,12 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitScript(TinyScriptParser.ScriptContext ctx);
 	/**
-     * Visit a parse tree produced by {@link TinyScriptParser#segments}.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    T visitSegments(TinyScriptParser.SegmentsContext ctx);
-
-    /**
+	 * Visit a parse tree produced by {@link TinyScriptParser#segments}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSegments(TinyScriptParser.SegmentsContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyScriptParser#express}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
