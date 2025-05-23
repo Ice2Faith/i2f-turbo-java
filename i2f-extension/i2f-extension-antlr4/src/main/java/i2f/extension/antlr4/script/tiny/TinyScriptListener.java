@@ -20,19 +20,16 @@ public interface TinyScriptListener extends ParseTreeListener {
 	 */
 	void exitScript(TinyScriptParser.ScriptContext ctx);
 	/**
-     * Enter a parse tree produced by {@link TinyScriptParser#segments}.
-     * @param ctx the parse tree
-     */
-    void enterSegments(TinyScriptParser.SegmentsContext ctx);
-
-    /**
-     * Exit a parse tree produced by {@link TinyScriptParser#segments}.
-     *
-     * @param ctx the parse tree
-     */
-    void exitSegments(TinyScriptParser.SegmentsContext ctx);
-
-    /**
+	 * Enter a parse tree produced by {@link TinyScriptParser#segments}.
+	 * @param ctx the parse tree
+	 */
+	void enterSegments(TinyScriptParser.SegmentsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScriptParser#segments}.
+	 * @param ctx the parse tree
+	 */
+	void exitSegments(TinyScriptParser.SegmentsContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TinyScriptParser#express}.
 	 * @param ctx the parse tree
 	 */

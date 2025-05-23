@@ -22,7 +22,7 @@ grammar TinyScript;
 }
 
 // Lexer rules
-TERM_COMMENT_SINGLE_LINE: '//' (~('\n'))* '\n' -> skip;
+TERM_COMMENT_SINGLE_LINE: '//' (~('\n'))* -> skip;
 
 TERM_COMMENT_MULTI_LINE: '/*' .*? '*/' -> skip;
 
