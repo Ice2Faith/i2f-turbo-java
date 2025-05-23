@@ -3,6 +3,7 @@ package i2f.springboot.jdbc.bql.procedure;
 import i2f.context.std.INamingContext;
 import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
+import i2f.jdbc.procedure.context.event.ScriptPreloadEventListener;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.context.impl.ProcedureMetaMapGrammarReporterListener;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
@@ -73,27 +74,6 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     public XProc4jEventHandler xProc4jEventHandler(INamingContext namingContext) {
         log.info(XProc4jConsts.NAME + " config " + DefaultXProc4jEventHandler.class.getSimpleName() + " ...");
         DefaultXProc4jEventHandler ret = new DefaultXProc4jEventHandler(() -> namingContext);
-        return ret;
-    }
-
-    @ConditionalOnExpression("${xproc4j.listeners.xml-node-exec-invoke-log-listener.enable:true}")
-    @Bean
-    public XmlNodeExecInvokeLogListener xmlNodeExecInvokeLogListener(){
-        XmlNodeExecInvokeLogListener ret = new XmlNodeExecInvokeLogListener();
-        ret.setPrintFilter((evt) -> {
-            XmlNode node = evt.getNode();
-            String location = XmlNode.getNodeLocation(node);
-            List<String> regexes = jdbcProcedureProperties.getInvokeLogPredicateRegexes();
-            if (regexes == null || regexes.isEmpty()) {
-                return true;
-            }
-            for (String item : regexes) {
-                if (location.matches(item)) {
-                    return true;
-                }
-            }
-            return false;
-        });
         return ret;
     }
 
@@ -182,6 +162,30 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
+
+    @ConditionalOnExpression("${xproc4j.listeners.xml-node-exec-invoke-log-listener.enable:true}")
+    @ConditionalOnMissingBean(XmlNodeExecInvokeLogListener.class)
+    @Bean
+    public XmlNodeExecInvokeLogListener xmlNodeExecInvokeLogListener(){
+        XmlNodeExecInvokeLogListener ret = new XmlNodeExecInvokeLogListener();
+        ret.setPrintFilter((evt) -> {
+            XmlNode node = evt.getNode();
+            String location = XmlNode.getNodeLocation(node);
+            List<String> regexes = jdbcProcedureProperties.getInvokeLogPredicateRegexes();
+            if (regexes == null || regexes.isEmpty()) {
+                return true;
+            }
+            for (String item : regexes) {
+                if (location.matches(item)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        return ret;
+    }
+
+
     @ConditionalOnExpression("${xproc4j.procedure-meta.grammar-reporter.enable:true}")
     @ConditionalOnMissingBean(ProcedureMetaMapGrammarReporterListener.class)
     @Bean
@@ -192,4 +196,13 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
+    @ConditionalOnExpression("${xproc4j.procedure-meta.script-preload.enable:true}")
+    @ConditionalOnMissingBean(ScriptPreloadEventListener.class)
+    @Bean
+    public ScriptPreloadEventListener scriptPreloadEventListener(JdbcProcedureExecutor executor) {
+        log.info(XProc4jConsts.NAME + " config " + ScriptPreloadEventListener.class.getSimpleName() + " ...");
+        ScriptPreloadEventListener ret = new ScriptPreloadEventListener(executor);
+        ret.getMaxCount().set(jdbcProcedureProperties.getMaxPreloadCount());
+        return ret;
+    }
 }

@@ -16,17 +16,19 @@ import java.util.concurrent.TimeUnit;
 @ConfigurationProperties(prefix = "xproc4j")
 public class SpringJdbcProcedureProperties {
     public static final String DEFAULT_XML_LOCATIONS = "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml";
-    private boolean enable = true;
+    protected boolean enable = true;
 
-    private boolean debug = false;
+    protected boolean debug = false;
 
-    private boolean reportOnBoot = true;
+    protected boolean reportOnBoot = true;
 
-    private String xmlLocations = DEFAULT_XML_LOCATIONS;
+    protected String xmlLocations = DEFAULT_XML_LOCATIONS;
 
-    private long refreshXmlIntervalSeconds = -1;
+    protected long refreshXmlIntervalSeconds = -1;
 
-    private long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(5);
+    protected int maxPreloadCount=1;
+
+    protected long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(5);
 
     protected long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(30);
 

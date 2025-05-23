@@ -260,7 +260,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     }
 
     @Override
-    public List<EvalScriptProvider> getEvalScriptProviders() {
+    public LruList<EvalScriptProvider> getEvalScriptProviders() {
         return this.evalScriptProviders;
     }
 
@@ -308,7 +308,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     }
 
     @Override
-    public List<ExecutorNode> getNodes() {
+    public LruList<ExecutorNode> getNodes() {
         if (!hasApplyNodes.getAndSet(true)) {
             applyNodeExecutorComponents();
         }
@@ -397,16 +397,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 //            logDebug( "exec XmlNode [" + XmlNode.getNodeLocation(node) + "] use Map ... ");
 //        }
         execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
-            List<ExecutorNode> nodeList = getNodes();
-            for (ExecutorNode execNode : nodeList) {
-                if (execNode.support(vNode)) {
-                    if (nodeList instanceof LruList) {
-                        LruList<ExecutorNode> lruList = (LruList<ExecutorNode>) nodeList;
-                        lruList.touch(execNode);
-                    }
-                    execXmlNodeByExecutorNode(execNode, vNode, vParams, vBeforeNewConnection, vAfterCloseConnection);
-                    return;
-                }
+            LruList<ExecutorNode> nodeList = getNodes();
+            ExecutorNode execNode = nodeList.touchFirst(e -> e.support(vNode));
+            if(execNode!=null){
+                execXmlNodeByExecutorNode(execNode, vNode, vParams, vBeforeNewConnection, vAfterCloseConnection);
+                return;
             }
             if (isDebug()) {
                 logDebug("waring! tag " + vNode.getTagName() + " not found any executor!" + " at " + XmlNode.getNodeLocation(vNode));
@@ -526,15 +521,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (node != null) {
                 return node;
             }
-            List<ExecutorNode> nodeList = getNodes();
-            for (ExecutorNode item : nodeList) {
-                if (item instanceof ProcedureNode) {
-                    if (nodeList instanceof LruList) {
-                        LruList<ExecutorNode> lruList = (LruList<ExecutorNode>) nodeList;
-                        lruList.touch(item);
-                    }
-                    return (ProcedureNode) item;
-                }
+            LruList<ExecutorNode> nodeList = getNodes();
+            ExecutorNode item = nodeList.touchFirst(e -> e instanceof ProcedureNode);
+            if(item!=null){
+                return (ProcedureNode) item;
             }
             return ProcedureNode.INSTANCE;
         });
@@ -1222,14 +1212,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 //        if(isDebug()) {
 //            logDebug("eval script [" + script + "] on lang [" + lang + "] near [" + traceLocation() + "] ... ");
 //        }
-        EvalScriptProvider provider = null;
-        for (EvalScriptProvider item : evalScriptProviders) {
-            if (item.support(lang)) {
-                evalScriptProviders.touch(item);
-                provider = item;
-                break;
-            }
-        }
+        EvalScriptProvider provider = getEvalScriptProviders().touchFirst(e -> e.support(lang));
         if (provider == null) {
             throw new ThrowSignalException("eval script provider not found for lang=" + lang);
         }

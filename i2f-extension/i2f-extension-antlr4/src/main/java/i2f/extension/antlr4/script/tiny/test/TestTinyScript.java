@@ -41,7 +41,7 @@ public class TestTinyScript {
                 "static4=@" + className + ".type;" +
                 "", ctx);
 
-        File file = new File("i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/test/test.ts.txt");
+        File file = new File("jdbc-procedure-starter/src/main/java/com/newland/bi3/extension/antlr4/script/tiny/test/test.ts.txt");
         StringBuilder builder = new StringBuilder();
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
         String line = null;

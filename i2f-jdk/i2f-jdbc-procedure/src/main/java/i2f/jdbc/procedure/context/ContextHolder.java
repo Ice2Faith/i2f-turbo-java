@@ -18,7 +18,7 @@ import java.util.function.Function;
  */
 public class ContextHolder {
     // 用于静态直接根据方法名在这个集合类中查找同名的方法，使用于LangInvokeNode中，方法需要为public的，不限制是否为static的方法
-    public static final ConcurrentHashMap<String, List<IMethod>> INVOKE_METHOD_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, LruList<IMethod>> INVOKE_METHOD_MAP = new ConcurrentHashMap<>();
 
     // 用于静态直接根据方法名在这个集合类中查找同名的方法，使用于BasicJdbcProcedureExecutor的Feature中，方法需要为public static的，且一个入参，具有返回值
     public static final ConcurrentHashMap<String, IMethod> CONVERT_METHOD_MAP = new ConcurrentHashMap<>();
@@ -75,6 +75,9 @@ public class ContextHolder {
             if (method == null) {
                 continue;
             }
+            if(Object.class.equals(method.getDeclaringClass())){
+                continue;
+            }
             int mod = method.getModifiers();
             if (!Modifier.isPublic(mod)) {
                 continue;
@@ -109,6 +112,9 @@ public class ContextHolder {
         }
         for (Method method : methods) {
             if (method == null) {
+                continue;
+            }
+            if(Object.class.equals(method.getDeclaringClass())){
                 continue;
             }
             int mod = method.getModifiers();

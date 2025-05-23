@@ -276,7 +276,7 @@ public class TinyScriptParser extends Parser {
 				setState(110);
 			_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input, 1, _ctx);
-				while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
+				while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -535,7 +535,7 @@ public class TinyScriptParser extends Parser {
 				setState(163);
 			_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input, 5, _ctx);
-				while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
+				while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
@@ -880,7 +880,7 @@ public class TinyScriptParser extends Parser {
 				setState(197);
 			_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input, 9, _ctx);
-				while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
+				while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -1603,7 +1603,7 @@ public class TinyScriptParser extends Parser {
 				setState(270);
 			_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input, 14, _ctx);
-				while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
+				while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -2276,7 +2276,7 @@ public class TinyScriptParser extends Parser {
 					setState(337);
 				_errHandler.sync(this);
 					_alt = getInterpreter().adaptivePredict(_input, 24, _ctx);
-					while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
+					while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 					if ( _alt==1 ) {
 						{
 						{
@@ -2301,7 +2301,7 @@ public class TinyScriptParser extends Parser {
 					setState(345);
 				_errHandler.sync(this);
 					_alt = getInterpreter().adaptivePredict(_input, 25, _ctx);
-					while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
+					while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 					if ( _alt==1 ) {
 						{
 						{

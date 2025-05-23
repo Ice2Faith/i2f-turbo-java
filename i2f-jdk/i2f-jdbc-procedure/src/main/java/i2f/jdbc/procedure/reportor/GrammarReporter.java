@@ -95,27 +95,21 @@ public class GrammarReporter {
         if (nodeCount != null) {
             nodeCount.incrementAndGet();
         }
-        List<ExecutorNode> nodes = executor.getNodes();
-        for (ExecutorNode executorNode : nodes) {
-            if (executorNode.support(node)) {
-                if(nodes instanceof LruList){
-                    LruList<ExecutorNode> lruList=(LruList<ExecutorNode>) nodes;
-                    lruList.touch(executorNode);
-                }
-                try {
-                    executorNode.reportGrammar(node, (msg) -> {
-                        if (reportCount != null) {
-                            reportCount.incrementAndGet();
-                        }
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + msg);
-                    });
-                } catch (Throwable e) {
+        LruList<ExecutorNode> nodes = executor.getNodes();
+        ExecutorNode executorNode = nodes.touchFirst(e -> e.support(node));
+        if(executorNode!=null){
+            try {
+                executorNode.reportGrammar(node, (msg) -> {
                     if (reportCount != null) {
                         reportCount.incrementAndGet();
                     }
-                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + e.getMessage());
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + msg);
+                });
+            } catch (Throwable e) {
+                if (reportCount != null) {
+                    reportCount.incrementAndGet();
                 }
-                break;
+                warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + e.getMessage());
             }
         }
         String[] INVALID_STR_ARR = {
