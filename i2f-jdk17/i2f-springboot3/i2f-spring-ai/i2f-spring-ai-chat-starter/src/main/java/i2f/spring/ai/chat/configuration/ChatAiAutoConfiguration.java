@@ -6,13 +6,16 @@ import i2f.spring.ai.chat.properties.ChatAiProperties;
 import i2f.spring.ai.chat.session.ChatAiSessionRepository;
 import i2f.spring.ai.chat.session.impl.InMemoryChatAiSessionRepository;
 import i2f.spring.ai.chat.tools.DateTools;
+import i2f.spring.ai.chat.tools.MathTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
+import org.springframework.ai.chat.memory.ChatMemoryRepository;
+import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -46,11 +49,21 @@ public class ChatAiAutoConfiguration {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    @ConditionalOnExpression("${i2f.ai.chat.chat-memory.impl.in-memory.enable:true}")
+    @ConditionalOnMissingBean(ChatMemoryRepository.class)
+    @Bean
+    public ChatMemoryRepository chatMemoryRepository() {
+        return new InMemoryChatMemoryRepository();
+    }
+
     @ConditionalOnExpression("${i2f.ai.chat.chat-memory.enable:true}")
     @ConditionalOnMissingBean(ChatMemory.class)
     @Bean
-    public ChatMemory chatMemory() {
-        return new InMemoryChatMemory();
+    public ChatMemory chatMemory(ChatMemoryRepository chatMemoryRepository) {
+        return MessageWindowChatMemory.builder()
+                .chatMemoryRepository(chatMemoryRepository)
+                .maxMessages(chatProperties.getMemoryMaxCount())
+                .build();
     }
 
     @ConditionalOnExpression("${i2f.ai.chat.session-repository.enable:true}")
@@ -88,12 +101,13 @@ public class ChatAiAutoConfiguration {
 
         ChatClient.Builder builder = ChatClient.builder(chatModel)
                 .defaultAdvisors(new SimpleLoggerAdvisor(),
-                        new MessageChatMemoryAdvisor(chatMemory)
+                        MessageChatMemoryAdvisor.builder(chatMemory).build()
                 );
 
         if (chatProperties.isSupportTools()) {
             List<Object> toolsList = new ArrayList<>();
             toolsList.add(new DateTools());
+            toolsList.add(new MathTools());
 
             List<String> toolClasses = chatProperties.getToolClasses();
             if (toolClasses != null) {

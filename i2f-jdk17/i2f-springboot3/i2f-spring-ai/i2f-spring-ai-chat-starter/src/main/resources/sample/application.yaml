@@ -24,15 +24,42 @@ spring:
       api-key: xxx
       chat:
         options:
-          model: deepseek-r1
+          model: qwen-plus
           temperature: 0.7
 
 i2f:
   ai:
     chat:
+      enable: true
+      chat-client:
+        enable: true
+      chat-memory:
+        enable: true
+        impl:
+          in-memory: true
+      session-repository: enable
+      auth-provider: enable
       default-system: 你是一个资深植物学家，熟悉每种植物的养殖以及习性，根据用户问题，回答问题
+      default-system-resource: ''
+      api:
+        chat:
+          enable: true
+        history:
+          enable: true
+        session:
+          enable: true
+      cors:
+        enable: true
+      web-ui:
+        enable: true
       allow-auto-create-session-id: true
       allow-cookie-session-id: true
+      support-tools: true
+      tool-classes:
+        - i2f.spring.ai.chat.tools.FileSystemTools
+        - i2f.spring.ai.chat.tools.DatabaseMetadataTools
+      tool-names:
+        - baiduSearchTools
 
 logging:
   level:

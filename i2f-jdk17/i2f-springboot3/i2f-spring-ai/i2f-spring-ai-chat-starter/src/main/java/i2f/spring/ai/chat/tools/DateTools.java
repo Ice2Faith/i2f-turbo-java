@@ -1,6 +1,7 @@
 package i2f.spring.ai.chat.tools;
 
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,10 +33,12 @@ public class DateTools {
                     "'日期时间的时区:' O\n" +
                     "");
 
-    @Tool(description = "get current date,time,year,month,hour,minute,second,millisecond,week,zone,.etc detail information/" +
-            "获取当前（现在、今天）的日期、时间、年份、月份、小时、分钟、秒数、毫秒、星期、时区等详细信息")
+    @Tool(description = "get current date in user's timezone,time,year,month,hour,minute,second,millisecond,week,zone,.etc detail information/" +
+            "获取当前用户所在时区的（现在、今天）的日期、时间、年份、月份、小时、分钟、秒数、毫秒、星期、时区等详细信息")
     public String getCurrentDateTimeDescription() {
-        return CURRENT_TIME_FORMATTER.format(LocalDateTime.now());
+        String text = CURRENT_TIME_FORMATTER.format(LocalDateTime.now().atZone(LocaleContextHolder.getTimeZone().toZoneId()));
+        return text;
     }
+
 
 }

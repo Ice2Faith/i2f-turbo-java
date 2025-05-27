@@ -17,6 +17,7 @@ import java.util.List;
 public class ChatAiProperties {
     protected String defaultSystem;
     protected String defaultSystemResource;
+    protected int memoryMaxCount = 10;
     protected boolean allowAutoCreateSessionId = true;
     protected boolean allowCookieSessionId = false;
     protected boolean supportTools = false;

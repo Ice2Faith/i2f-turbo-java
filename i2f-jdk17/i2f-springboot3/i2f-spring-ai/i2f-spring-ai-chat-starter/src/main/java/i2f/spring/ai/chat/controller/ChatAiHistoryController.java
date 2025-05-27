@@ -33,7 +33,12 @@ public class ChatAiHistoryController {
         if (lastN == null) {
             lastN = Integer.MAX_VALUE;
         }
-        List<Message> messages = chatMemory.get(sessionId, lastN);
+        List<Message> messages = chatMemory.get(sessionId);
+        if (lastN >= 0 && lastN < Integer.MAX_VALUE) {
+            while (messages.size() > lastN) {
+                messages.remove(0);
+            }
+        }
         return messages.stream()
                 .map(e -> new ChatHistoryVo(e.getMessageType(), e.getText()))
                 .collect(Collectors.toList());

@@ -15,12 +15,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Slf4j
 @ConditionalOnExpression("${i2f.ai.chat.web-ui.enable:true}")
 @Configuration
-public class WebUiConfiguration implements WebMvcConfigurer,EnvironmentAware {
+public class WebUiConfiguration implements WebMvcConfigurer, EnvironmentAware {
     protected Environment environment;
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.environment=environment;
+        this.environment = environment;
     }
 
     @Override
@@ -29,6 +29,6 @@ public class WebUiConfiguration implements WebMvcConfigurer,EnvironmentAware {
                 .addResourceLocations("classpath:/assets/chat-ai")
                 .setCachePeriod(3600) // 设置缓存时间（可选）
                 .resourceChain(true); // 启用资源链（可选）
-        log.info("Chat-AI simple web-ui: http://localhost:"+environment.getProperty("server.port","8080") +"/chat-ai/index.html");
+        log.info("Chat-AI simple web-ui: http://localhost:" + environment.getProperty("server.port", "8080") + "/chat-ai/index.html");
     }
 }

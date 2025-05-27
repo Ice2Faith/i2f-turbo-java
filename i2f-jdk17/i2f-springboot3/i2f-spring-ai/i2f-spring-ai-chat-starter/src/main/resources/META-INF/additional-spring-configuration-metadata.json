@@ -22,6 +22,13 @@
       "defaultValue": true
     },
     {
+      "name": "i2f.ai.chat.chat-memory.impl.in-memory.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiAutoConfiguration",
+      "defaultValue": true
+    },
+    {
       "name": "i2f.ai.chat.chat-memory.enable",
       "type": "java.lang.Boolean",
       "description": "enable chat-ai.",
@@ -74,6 +81,13 @@
       "name": "i2f.ai.chat.tool-classes",
       "type": "java.util.List",
       "description": "ai tools classes name list.",
+      "sourceType": "i2f.spring.ai.chat.properties.ChatAiProperties",
+      "defaultValue": null
+    },
+    {
+      "name": "i2f.ai.chat.tool-names",
+      "type": "java.util.List",
+      "description": "ai tools bean name list.",
       "sourceType": "i2f.spring.ai.chat.properties.ChatAiProperties",
       "defaultValue": null
     },
