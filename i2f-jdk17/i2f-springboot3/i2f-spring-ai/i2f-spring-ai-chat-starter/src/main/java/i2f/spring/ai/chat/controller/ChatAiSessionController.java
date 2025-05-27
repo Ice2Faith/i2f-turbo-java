@@ -57,7 +57,7 @@ public class ChatAiSessionController {
         List<ChatSessionVo> ret = new ArrayList<>();
         for (String sessionId : sessionIds) {
             String title = null;
-            List<Message> messages = chatMemory.get(sessionId, 2);
+            List<Message> messages = chatMemory.get(sessionId);
             for (Message message : messages) {
                 if (message.getMessageType() == MessageType.USER) {
                     title = message.getText();

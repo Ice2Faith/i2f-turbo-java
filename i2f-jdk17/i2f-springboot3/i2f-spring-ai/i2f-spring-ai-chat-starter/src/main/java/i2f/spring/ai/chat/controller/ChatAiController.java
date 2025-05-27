@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.HttpHeaders;
@@ -128,13 +128,13 @@ public class ChatAiController {
         response.setHeader(HEADER_CHAT_AI_SESSION_ID_KEY, conversationId);
         response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HEADER_CHAT_AI_SESSION_ID_KEY);
         return chatClient.prompt()
-                .advisors(e -> e.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))
+                .advisors(e -> e.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .user(message);
     }
 
     public String getOrNewSessionId(HttpServletRequest request, HttpServletResponse response, String sessionId) {
         if (chatAiProperties.isAllowCookieSessionId()) {
-            if (sessionId == null) {
+            if (sessionId == null || sessionId.isEmpty()) {
                 Cookie[] cookies = request.getCookies();
                 if (cookies != null) {
                     for (Cookie cookie : cookies) {
@@ -152,13 +152,13 @@ public class ChatAiController {
         }
 
         String userId = chatAiAuthProvider.getUserId(request, response);
-        if (sessionId == null) {
+        if (sessionId == null || sessionId.isEmpty()) {
             if (chatAiProperties.isAllowAutoCreateSessionId()) {
                 sessionId = chatAiSessionRepository.create(userId);
             }
         }
 
-        if (sessionId == null) {
+        if (sessionId == null || sessionId.isEmpty()) {
             throw new IllegalStateException("invalid session id!");
         }
 
