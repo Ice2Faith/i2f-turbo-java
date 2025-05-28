@@ -84,6 +84,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 }
             } while (true);
         });
+        thread.setName("xproc4j-lang-injector");
         thread.setDaemon(true);
         thread.start();
     }
