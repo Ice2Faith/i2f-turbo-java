@@ -132,6 +132,13 @@
       "description": "ai enable web-ui access api.",
       "sourceType": "i2f.spring.ai.chat.configuration.WebUiConfiguration",
       "defaultValue": true
+    },
+    {
+      "name": "i2f.ai.chat.web-ui.allow-redirect-root-url.enable",
+      "type": "java.lang.Boolean",
+      "description": "ai web-ui allow direct root url to view.",
+      "sourceType": "i2f.spring.ai.chat.configuration.WebUiConfiguration",
+      "defaultValue": false
     }
   ],
   "hints": [
