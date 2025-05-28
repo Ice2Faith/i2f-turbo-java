@@ -100,6 +100,7 @@ public class JdbcProcedureProjectMetaHolder {
                 }
             } while (true);
         });
+        thread.setName("xproc4j-meta-holder");
         thread.setDaemon(true);
         thread.start();
     }
