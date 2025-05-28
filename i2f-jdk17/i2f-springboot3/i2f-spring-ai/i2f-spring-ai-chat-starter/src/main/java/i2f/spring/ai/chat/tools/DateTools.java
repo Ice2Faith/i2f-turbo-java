@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
+ * 今天是什么日期，三天后是什么日期、周几
+ *
  * @author Ice2Faith
  * @date 2025/4/26 19:22
  * @desc

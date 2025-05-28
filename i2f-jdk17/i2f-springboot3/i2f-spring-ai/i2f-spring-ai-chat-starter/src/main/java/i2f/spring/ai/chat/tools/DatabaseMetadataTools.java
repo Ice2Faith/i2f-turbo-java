@@ -1,10 +1,12 @@
 package i2f.spring.ai.chat.tools;
 
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 
 /**
  * test chat:
- * 给我基于系统表写一条SQL，统计前三种角色的用户数，显示角色名和用户数，回答结果只保留SQL语句，不要其他内容
+ * 首先查询系统中有哪些表，然后根据需要使用的表查询表结构，最后根据用户要求写一条SQL，回答结果只保留SQL语句，不要其他内容；
+ * 统计前三种角色的用户数，显示角色名和用户数，只显示用户和角色状态为启用的
  *
  * @author Ice2Faith
  * @date 2025/5/27 22:35
@@ -17,9 +19,9 @@ public class DatabaseMetadataTools {
         return "用户表：sys_user\n角色表：sys_role";
     }
 
-    @Tool(description = "get all system table names/" +
-            "获取指定系统表表的列结构信息")
-    public String getTableColumns(String tableName) {
+    @Tool(description = "get a table structure include columns information/" +
+            "获取指定系统表的表结构信息")
+    public String getTableColumns(@ToolParam(description = "系统表表名，例如：sys_user") String tableName) {
         if ("sys_user".equals(tableName)) {
             /*language=sql*/
             return "create table sys_user (\n" +

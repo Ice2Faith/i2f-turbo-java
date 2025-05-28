@@ -6,6 +6,9 @@ import org.springframework.ai.tool.annotation.ToolParam;
 import java.io.File;
 
 /**
+ * 我有哪些文件，要求文件大小使用KB为单位显示，按照文件大小从大到小排列；
+ * 其中最大的三个文件是哪些
+ *
  * @author Ice2Faith
  * @date 2025/5/27 21:42
  * @desc

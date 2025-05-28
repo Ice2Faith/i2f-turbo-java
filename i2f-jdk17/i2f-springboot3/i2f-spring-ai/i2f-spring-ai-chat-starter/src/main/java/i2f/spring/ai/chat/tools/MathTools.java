@@ -6,6 +6,8 @@ import org.springframework.ai.tool.annotation.ToolParam;
 import java.security.SecureRandom;
 
 /**
+ * 给我随机三个0-10之间的数字，还有5个小数并转换为百分制
+ *
  * @author Ice2Faith
  * @date 2025/5/27 22:22
  * @desc
