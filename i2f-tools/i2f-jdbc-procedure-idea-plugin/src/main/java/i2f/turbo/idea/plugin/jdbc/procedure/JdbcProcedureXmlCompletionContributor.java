@@ -7,6 +7,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -14,8 +15,10 @@ import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlTokenType;
 import i2f.jdbc.procedure.context.ProcedureMeta;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +31,9 @@ import java.util.Map;
  */
 public class JdbcProcedureXmlCompletionContributor extends CompletionContributor {
     public static final Logger log = Logger.getInstance(JdbcProcedureXmlCompletionContributor.class);
+
+    public static final Icon ICON= IconLoader.getIcon("/assets/action.svg", JdbcProcedureXmlCompletionContributor.class);
+
 
     {
         JdbcProcedureProjectMetaHolder.refreshThreadTask();
@@ -89,7 +95,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                     }
                     if (completions != null) {
                         for (String attr : completions) {
-                            result.addElement(LookupElementBuilder.create(name + attr));
+                            result.addElement(LookupElementBuilder.create(name + attr).withIcon(ICON));
                         }
                         return;
                     }
@@ -132,7 +138,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 
                         if (completions != null) {
                             for (String attr : completions) {
-                                result.addElement(LookupElementBuilder.create(attr));
+                                result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                             }
                             return;
                         }
@@ -166,7 +172,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                     }
                     if (completions != null) {
                         for (String attr : completions) {
-                            result.addElement(LookupElementBuilder.create(attr));
+                            result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                         }
                         return;
                     }
@@ -190,7 +196,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 ));
                 if (completions != null) {
                     for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr));
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                     }
                     return;
                 }
@@ -210,7 +216,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 ));
                 if (completions != null) {
                     for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr));
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                     }
                     return;
                 }
@@ -234,7 +240,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 ));
                 if (completions != null) {
                     for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr));
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                     }
                     return;
                 }
@@ -258,7 +264,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 ));
                 if (completions != null) {
                     for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr));
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                     }
                     return;
                 }
@@ -284,7 +290,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 ));
                 if (completions != null) {
                     for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr));
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                     }
                     return;
                 }
@@ -323,7 +329,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 ));
                 if (completions != null) {
                     for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr));
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                     }
                     return;
                 }
@@ -346,7 +352,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 ));
                 if (completions != null) {
                     for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr));
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                     }
                     return;
                 }
@@ -367,7 +373,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 ));
                 if (completions != null) {
                     for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr));
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                     }
                     return;
                 }
@@ -390,7 +396,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 ));
                 if (completions != null) {
                     for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr));
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(ICON));
                     }
                     return;
                 }
