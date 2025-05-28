@@ -52,6 +52,7 @@ i2f:
         enable: true
       web-ui:
         enable: true
+        allow-redirect-root-url: false
       allow-auto-create-session-id: true
       allow-cookie-session-id: true
       support-tools: true
