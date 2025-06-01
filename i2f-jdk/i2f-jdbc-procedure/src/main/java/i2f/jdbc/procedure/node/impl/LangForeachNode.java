@@ -7,8 +7,11 @@ import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.lang.reflect.Array;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -60,54 +63,108 @@ public class LangForeachNode extends AbstractExecutorNode {
         bakParams.put(itemName, executor.visit(itemName, context));
         bakParams.put(firstName, executor.visit(firstName, context));
         bakParams.put(indexName, executor.visit(indexName, context));
-        if (obj instanceof Iterable) {
-            Iterable<?> iter = (Iterable<?>) obj;
-            boolean isFirst = true;
-            int index = 0;
-            for (Object item : iter) {
-                Object val = executor.resultValue(item, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
-                // 覆盖堆栈
-                executor.visitSet(context, itemName, val);
-                executor.visitSet(context, firstName, isFirst);
-                executor.visitSet(context, indexName, index);
-                isFirst = false;
-                index++;
-                try {
-                    executor.execAsProcedure(node, context, false, false);
-                } catch (ContinueSignalException e) {
-                    continue;
-                } catch (BreakSignalException e) {
-                    break;
-                }
-
+        try {
+            if (obj instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) obj;
+                obj = map.entrySet();
             }
-        } else if (obj.getClass().isArray()) {
-            boolean isFirst = true;
-            int index = 0;
-            int len = Array.getLength(obj);
-            for (int i = 0; i < len; i++) {
-                Object val = Array.get(obj, i);
-                val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
+            if (obj instanceof Iterable) {
+                Iterable<?> iter = (Iterable<?>) obj;
+                boolean isFirst = true;
+                int index = 0;
+                for (Object item : iter) {
+                    Object val = executor.resultValue(item, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
+                    // 覆盖堆栈
+                    executor.visitSet(context, itemName, val);
+                    executor.visitSet(context, firstName, isFirst);
+                    executor.visitSet(context, indexName, index);
+                    isFirst = false;
+                    index++;
+                    try {
+                        executor.execAsProcedure(node, context, false, false);
+                    } catch (ContinueSignalException e) {
+                        continue;
+                    } catch (BreakSignalException e) {
+                        break;
+                    }
 
-                // 覆盖堆栈
-                executor.visitSet(context, itemName, val);
-                executor.visitSet(context, firstName, isFirst);
-                executor.visitSet(context, indexName, index);
-                isFirst = false;
-                index++;
-                try {
-                    executor.execAsProcedure(node, context, false, false);
-                } catch (ContinueSignalException e) {
-                    continue;
-                } catch (BreakSignalException e) {
-                    break;
                 }
+            } else if (obj.getClass().isArray()) {
+                boolean isFirst = true;
+                int index = 0;
+                int len = Array.getLength(obj);
+                for (int i = 0; i < len; i++) {
+                    Object val = Array.get(obj, i);
+                    val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
+
+                    // 覆盖堆栈
+                    executor.visitSet(context, itemName, val);
+                    executor.visitSet(context, firstName, isFirst);
+                    executor.visitSet(context, indexName, index);
+                    isFirst = false;
+                    index++;
+                    try {
+                        executor.execAsProcedure(node, context, false, false);
+                    } catch (ContinueSignalException e) {
+                        continue;
+                    } catch (BreakSignalException e) {
+                        break;
+                    }
+                }
+            } else if (obj instanceof Iterator) {
+                Iterator<?> iter = (Iterator<?>) obj;
+                boolean isFirst = true;
+                int index = 0;
+                while (iter.hasNext()) {
+                    Object item = iter.next();
+                    Object val = executor.resultValue(item, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
+                    // 覆盖堆栈
+                    executor.visitSet(context, itemName, val);
+                    executor.visitSet(context, firstName, isFirst);
+                    executor.visitSet(context, indexName, index);
+                    isFirst = false;
+                    index++;
+                    try {
+                        executor.execAsProcedure(node, context, false, false);
+                    } catch (ContinueSignalException e) {
+                        continue;
+                    } catch (BreakSignalException e) {
+                        break;
+                    }
+
+                }
+            } else if (obj instanceof Enumeration) {
+                Enumeration<?> iter = (Enumeration<?>) obj;
+                boolean isFirst = true;
+                int index = 0;
+                while (iter.hasMoreElements()) {
+                    Object item = iter.nextElement();
+                    Object val = executor.resultValue(item, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
+                    // 覆盖堆栈
+                    executor.visitSet(context, itemName, val);
+                    executor.visitSet(context, firstName, isFirst);
+                    executor.visitSet(context, indexName, index);
+                    isFirst = false;
+                    index++;
+                    try {
+                        executor.execAsProcedure(node, context, false, false);
+                    } catch (ContinueSignalException e) {
+                        continue;
+                    } catch (BreakSignalException e) {
+                        break;
+                    }
+
+                }
+            } else {
+                throw new ThrowSignalException("object cannot do foreach loop of type: " + obj.getClass() + " on express: " + collectionScript);
             }
+        }finally {
+            // 还原堆栈
+            executor.visitSet(context, itemName, bakParams.get(itemName));
+            executor.visitSet(context, firstName, bakParams.get(firstName));
+            executor.visitSet(context, indexName, bakParams.get(indexName));
         }
-        // 还原堆栈
-        executor.visitSet(context, itemName, bakParams.get(itemName));
-        executor.visitSet(context, firstName, bakParams.get(firstName));
-        executor.visitSet(context, indexName, bakParams.get(indexName));
+
     }
 
 }
