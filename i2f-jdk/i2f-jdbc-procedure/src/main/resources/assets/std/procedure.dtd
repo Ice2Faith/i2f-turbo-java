@@ -64,6 +64,8 @@
                 |context-invoke-method-class*
                 |context-convert-method-class*
                 |debugger*
+                |event-send*
+                |event-publish
                 )>
         <!ATTLIST procedure id CDATA #IMPLIED>
 
@@ -1075,3 +1077,9 @@
 
         <!ELEMENT context-convert-method-class (EMPTY)>
         <!ATTLIST context-convert-method-class class CDATA #IMPLIED>
+
+        <!ELEMENT event-send (EMPTY)>
+        <!ATTLIST event-send event-type CDATA #IMPLIED>
+
+        <!ELEMENT event-publish (EMPTY)>
+        <!ATTLIST event-publish event-type CDATA #IMPLIED>

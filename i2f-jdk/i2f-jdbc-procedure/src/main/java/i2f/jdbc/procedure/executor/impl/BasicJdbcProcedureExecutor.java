@@ -131,6 +131,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new ContextInvokeMethodClassNode());
         ret.add(new ContextLoadPackageNode());
         ret.add(new DebuggerNode());
+        ret.add(new EventPublishNode());
+        ret.add(new EventSendNode());
         ret.add(new FunctionCallNode());
         ret.add(new JavaCallNode());
         ret.add(new LangAsyncAllNode());
