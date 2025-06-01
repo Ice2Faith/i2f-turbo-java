@@ -120,6 +120,90 @@ from ${tableName} a
 - 虽然，兼容mybatis-xml中也支持使用#!{}语法，但是需要你确认确实需要这样干
 - 一般情况下，我认为是不需要这么干的
 
+### 4.3 SQL中的NULL运算
+
+- 在大多数数据库中，有一条原则
+- NULL与任意值的运算结果都是NULL
+- 如果这个运算使用在条件中，则条件永远为false不成立
+- 因此，在进行转换的过程中，遇到使用变量进行条件判定的时候
+- 就需要考虑变量是否可能为NULL的情况
+- 如果为NULL就需要先进行判空
+- 先举个例子说明一下
+
+```sql
+IF V_FLAG!=0 then
+   V_COUNT:=1;
+END IF;
+```
+
+- 在这个例子中，V_FLAG是一个变量
+- 则就存在可能空值的情况
+- 那么，如果值为NULL，则始终为false不成立
+- 那么，转换之后也要保证逻辑一致
+- 因此，就需要先判空，这样转换
+
+```xml
+<lang-if test="V_FLAG!=null and V_FLAG!=0">
+  <lang-set result="V_COUNT" value.int="1"/>
+</lang-if>
+```
+
+- 怎么验证原来的逻辑？
+- 可以通过下面的语句进行验证
+
+```sql
+select 
+    case when 条件表达式 then 'true'
+    else 'false'
+    end as v_ok
+from dual
+```
+
+- 因此，总结一下，遇到条件判定时，一定要考虑变量为空的情况
+- 要保证与原来的执行逻辑一致
+- 常见的一定要判空的场景包括以下表达式
+
+```shell
+变量 != 常量
+常量 != 变量
+变量 < 常量
+常量 > 变量
+变量 <= 常量
+常量 >= 变量
+变量 like 常量
+变量 not like 常量
+变量 in 常量
+变量 not in 常量
+```
+
+- 另外小心NULL的陷阱
+- 比如，在使用not like的时候
+- 举例说明
+- 原来的语句
+
+```sql
+IF V_NAME not like '%A10%' THEN
+```
+
+- 如果，你直接使用like函数进行取反 !like(V_NAME,'A10')
+- 那么结果就和原来的逻辑不一样了
+- 这里，如果V_NAME为NULL
+- 则，始终不成立
+- 因此，就需要判空，这样才对
+
+```xml
+<lang-if test.eval-ts="${V_NAME}!=null and !like(${V_NAME},'A10')">
+  
+</lang-if>
+```
+
+- 特别注意，在Oracle数据库中
+- 空字符串''等价于NULL
+- 也就是说，遇到这种情况判空的时候
+- 就需要进行is_empty判空
+- 而不单单是进行==null的判断
+
+
 ## 五、转换对照介绍
 
 ### 5.1 前置知识
@@ -468,6 +552,9 @@ V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里
 <lang-set result="V_BEGIN_TIME" value.date-now=""/>
 <lang-set result="V_CITY_CODE" value.render="${IN_CITY_CODE}00"/>
         <!-- 这里字符串拼接，使用render修饰符进行字符串模板渲染 -->
+
+<lang-set result="V_CITY_CODE" value.render="$!{IN_CITY_CODE}00"/>
+        <!-- 如果原来是Oracle的情况，则需要使用$!{}来定义占位符，以处理NULL变量的情况 -->
 ```
 
 - 转换方式2
@@ -479,6 +566,10 @@ V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里
     V_BEGIN_TIME=new Date();
     V_CITY_CODE=${IN_CITY_CODE}+'00'; // 字符串拼接可以直接使用+号连接，取变量则使用${}包裹
     // V_CITY_CODE=R"${IN_CITY_CODE}00"; // 或者也可以使用模板字符串语法
+
+   V_BEGIN_TIME=sysdate(); // 提供了sysdate()函数和now()函数
+   V_CITY_CODE=$!{IN_CITY_CODE}+'00'; // 如果原来是Oracle，则建议使用$!{}进行包裹，以处理NULL变量
+   // V_CITY_CODE=R"$!{IN_CITY_CODE}00"; // 或者也可以使用模板字符串语法
 </lang-eval-ts>
 ```
 
@@ -508,6 +599,27 @@ end if;
 <lang-if test='V_LINK_OPER == "OR" and v_cond_type==0 and v_role_key in {"admin","logger"} and v_ogran_key.startsWith("sys")'>
     <lang-set result="O_MSG" value.string="OK"/>
 </lang-if>
+
+<!-- 
+需要注意，NULL值运算在数据库中时非常特殊的，
+因为在大多数数据库中，NULL与任意值运算的结果都是NULL
+因此，建议对变量进行判空
+避免因为NULL值的出现，导致与原来的逻辑不一致
+ -->
+
+<lang-if test='(V_LINK_OPER!=null and V_LINK_OPER == "OR") and (v_cond_type!=null and v_cond_type==0) and (v_role_key!=null and v_role_key in {"admin","logger"}) and (v_ogran_key!=null and v_ogran_key.startsWith("sys"))'>
+    <lang-set result="O_MSG" value.string="OK"/>
+</lang-if>
+
+<!-- 
+特别注意，在Oracle中，空字符串''与NULL值是等价的
+因此，处理判空的时候，常常也需要判断是否是空字符串''
+这种时候，写起来比较复杂
+建议使用嵌入ts脚本修饰符进行转换
+-->
+<lang-if test.eval-ts='(!is_empty(${V_LINK_OPER}) and ${V_LINK_OPER} == "OR") and (!is_empty(${v_cond_type}) and ${v_cond_type}==0) and (!is_empty(${v_role_key}) and ${v_role_key} in ["admin","logger"]) and (!is_empty(${v_ogran_key}) and starts_with(${v_ogran_key},"sys"))'>
+    <lang-set result="O_MSG" value.string="OK"/>
+</lang-if>
 ```
 
 - 另外针对这种条件内部处理比较简单的
@@ -525,8 +637,32 @@ end if;
     and ${v_cond_type}==0
     and ${v_role_key} in ['admin','logger']
     and ${v_ogran_key}.startsWith("sys")){
-    O_MSG='OK';
+        O_MSG='OK';
     };
+</lang-eval-ts>
+
+<!-- 
+同样，注意数据库中的NULL运算处理判空
+-->
+<lang-eval-ts>
+  if(${V_LINK_OPER} == 'OR' // 可以不用判空，因为NULL时，不可能等于常量字面值
+  and ${v_cond_type}==0 // 同上
+  and ${v_role_key} in ['admin','logger'] // 同上
+  and starts_with(${v_ogran_key},"sys")){ // 改为内建函数，函数内部处理NULL的情况
+    O_MSG='OK';
+  };
+</lang-eval-ts>
+
+<!--
+同样，如果是Oracle数据库，因为空字符与NULL等价，因此特别判空
+-->
+<lang-eval-ts>
+  if(!is_empty(${V_LINK_OPER}) and ${V_LINK_OPER} == 'OR' // 必须使用is_empty判空，同时判定NULL和空字符的情况
+  and ${v_cond_type}==0 // 这里理论是数值类型，可以考虑不判断
+  and !is_empty(${v_role_key}) and ${v_role_key} in ['admin','logger'] // 同上必须判空
+  and !is_empty(${v_ogran_key}) and starts_with(${v_ogran_key},"sys")){ // 同上必须判空
+    O_MSG='OK';
+  };
 </lang-eval-ts>
 ```
 
@@ -1525,6 +1661,54 @@ end;
 </lang-choose>
 ```
 
+
+#### 5.18.3 除0异常或其他SQL异常(exception when ZERO_DIVIDE then)
+
+- 有时候，在存过的编写中，会利用一些数据库中触发的异常进行编写逻辑
+- 比如，当某一类异常出现时，就触发另一套逻辑
+- 比如，当运行的SQL出现了除0异常的时候，就进行另外的逻辑
+- 下面给出例子说明
+
+```sql
+v_sql:='select 1/0 from dual';
+
+begin
+execute immediate v_sql;
+exception 
+    when ZERO_DIVIDE then
+    rollback;
+    v_sql:='delete from sys_task_log where task_id='||V_TASK_ID;
+    execute immediate v_sql;
+end;
+```
+
+- 这个例子是一定会触发的案例
+- 实际情况中，可能并不能直接知道是哪一个参数导致的除0
+- 或者是很多参数都可能出现除0的情况，不好处理
+- 因此才使用这样的做法
+- 下面来看转换结果
+
+```xml
+<lang-render result="V_SQL" _lang="sql">
+    select 1/0 from dual
+</lang-render>
+<lang-try>
+    <lang-body>
+        <sql-query-object script="V_SQL"/>
+    </lang-body>
+    <!-- SQLException.getSQLState() 得到的是一个规范的SQL编码，当这个编码是22012的时候就是发生了除0异常 -->
+    <lang-catch type.cause-first="java.sql.SQLException" e="e" test.eval-ts="${e}.getSQLState()=='22012'">
+        <sql-trans-rollback/>
+        <sql-update>
+            delete from sys_task_log where task_id=#{V_TASK_ID}
+        </sql-update>
+    </lang-catch>
+</lang-try>
+```
+
+- 也就是通过SQL规范中定义的SQLState来确定是哪一种具体的数据库异常
+- 当然，这个是SQL规范，各个具体的数据库厂商，可能需要具体进行对待处理
+
 ## 六、完整转换案例
 
 - 经过上面的简单讲解之后
@@ -1539,6 +1723,11 @@ end;
 - 而不是其他的内容
 - 因此，请忽略这些业务上的逻辑
 - 只关注域语法的转换即可
+- 下面的案例，使用原来Oracle的语法，进行转换
+- 因为Oracle中NULL值的特殊性，也就是空字符等价于NULL
+- 所以，判空的时候都是用is_empty判空
+- 注意和其他数据库区分
+- 具体可根据自身数据库的特性进行调整
 
 ### 6.1 迁移转换纲领
 
