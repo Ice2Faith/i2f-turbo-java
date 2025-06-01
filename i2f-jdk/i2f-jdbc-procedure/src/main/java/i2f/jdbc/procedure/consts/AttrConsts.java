@@ -92,4 +92,6 @@ public interface AttrConsts {
     String FILE="file";
     String CHARSET="charset";
     String CONTENT="content";
+
+    String EVENT_TYPE = "event-type";
 }

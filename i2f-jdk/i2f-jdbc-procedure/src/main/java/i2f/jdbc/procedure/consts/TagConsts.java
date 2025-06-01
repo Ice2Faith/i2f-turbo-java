@@ -118,4 +118,7 @@ public interface TagConsts {
     String CONTEXT_CONVERT_METHOD_CLASS = "context-convert-method-class";
     String CONTEXT_INVOKE_METHOD_CLASS = "context-invoke-method-class";
     String CONTEXT_LOAD_PACKAGE = "context-load-package";
+
+    String EVENT_SEND = "event-send";
+    String EVENT_PUBLISH = "event-publish";
 }

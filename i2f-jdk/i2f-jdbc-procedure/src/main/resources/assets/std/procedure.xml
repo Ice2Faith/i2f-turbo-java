@@ -1614,4 +1614,22 @@ eval-ts使用TinyScript引擎进行处理
         <context-convert-method-class class="com.test.util.ConvertUtils"/>
     </script-segment>
 
+    <!--
+    同步发送事件，会阻塞到监听器执行完毕后继续执行，使用event-type指定事件的类型
+    可使用其他XML属性表示携带的事件变量
+    event-type默认以string访问
+    -->
+    <event-send event-type="" title="" content=""/>
+    <script-segment id="demo">
+        <event-send event-type="email" title.string="email title" content.render="email content:$!{trace.location}"/>
+    </script-segment>
+
+    <!--
+    异步发送事件，不糊阻塞执行，使用event-type指定事件的类型
+    可使用其他XML属性表示携带的事件变量
+    -->
+    <event-publish event-type="" title="" content=""/>
+    <script-segment id="demo">
+        <event-publish event-type="email" title.string="email title" content.render="email content:$!{trace.location}"/>
+    </script-segment>
 </procedure>
