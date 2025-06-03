@@ -50,6 +50,13 @@
       "defaultValue": true
     },
     {
+      "name": "i2f.ai.chat.tool-callback.spring-bean-provider.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable chat-ai spring-bean tool-callback-provider, which bean has @EnabledTools annotation.",
+      "sourceType": "i2f.spring.ai.chat.configuration.ChatAiAutoConfiguration",
+      "defaultValue": true
+    },
+    {
       "name": "i2f.ai.chat.default-system",
       "type": "java.lang.String",
       "description": "ai default system prompt text.",
