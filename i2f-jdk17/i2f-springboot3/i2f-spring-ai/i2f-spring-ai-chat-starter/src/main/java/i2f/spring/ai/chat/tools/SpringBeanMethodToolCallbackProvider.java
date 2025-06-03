@@ -31,7 +31,7 @@ public class SpringBeanMethodToolCallbackProvider implements ToolCallbackProvide
             if (e != null) {
                 return e;
             }
-            return getToolCallbacks();
+            return getCallbacks();
         });
     }
 
