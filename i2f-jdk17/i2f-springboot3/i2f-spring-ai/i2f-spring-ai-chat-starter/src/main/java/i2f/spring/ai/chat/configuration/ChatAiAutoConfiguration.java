@@ -7,6 +7,7 @@ import i2f.spring.ai.chat.session.ChatAiSessionRepository;
 import i2f.spring.ai.chat.session.impl.InMemoryChatAiSessionRepository;
 import i2f.spring.ai.chat.tools.DateTools;
 import i2f.spring.ai.chat.tools.MathTools;
+import i2f.spring.ai.chat.tools.SpringBeanMethodToolCallbackProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -48,6 +50,16 @@ public class ChatAiAutoConfiguration {
 
     @Autowired
     private ResourceLoader resourceLoader;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @ConditionalOnExpression("${i2f.ai.chat.tool-callback.spring-bean-provider.enable:true}")
+    @ConditionalOnMissingBean(ChatMemoryRepository.class)
+    @Bean
+    public SpringBeanMethodToolCallbackProvider springBeanMethodToolCallbackProvider() {
+        return new SpringBeanMethodToolCallbackProvider(applicationContext);
+    }
 
     @ConditionalOnExpression("${i2f.ai.chat.chat-memory.impl.in-memory.enable:true}")
     @ConditionalOnMissingBean(ChatMemoryRepository.class)
@@ -84,7 +96,8 @@ public class ChatAiAutoConfiguration {
     @ConditionalOnMissingBean(ChatClient.class)
     @Bean
     public ChatClient chatClient(ChatModel chatModel,
-                                 ChatMemory chatMemory) {
+                                 ChatMemory chatMemory,
+                                 @Autowired(required = false) SpringBeanMethodToolCallbackProvider springBeanMethodToolCallbackProvider) {
         String system = null;
         String defaultSystemResource = chatProperties.getDefaultSystemResource();
         if (defaultSystemResource != null && !defaultSystemResource.isEmpty()) {
@@ -128,6 +141,9 @@ public class ChatAiAutoConfiguration {
             }
 
             builder.defaultTools(toolsList.toArray());
+        }
+        if (springBeanMethodToolCallbackProvider != null) {
+            builder.defaultToolCallbacks(springBeanMethodToolCallbackProvider);
         }
 
         if (system != null && !system.isEmpty()) {
