@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -18,6 +19,7 @@ import java.util.Map;
  */
 public class SpringBeanMethodToolCallbackProvider implements ToolCallbackProvider {
     protected ApplicationContext applicationContext;
+    private final transient AtomicReference<ToolCallback[]> toolCallbacks = new AtomicReference<>();
 
     public SpringBeanMethodToolCallbackProvider(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
@@ -25,19 +27,28 @@ public class SpringBeanMethodToolCallbackProvider implements ToolCallbackProvide
 
     @Override
     public ToolCallback[] getToolCallbacks() {
-        List<ToolCallback> toolCallbacks = new ArrayList<>();
+        return toolCallbacks.updateAndGet(e -> {
+            if (e != null) {
+                return e;
+            }
+            return getToolCallbacks();
+        });
+    }
+
+    public ToolCallback[] getCallbacks() {
+        List<ToolCallback> list = new ArrayList<>();
         Map<String, Object> beanMap = applicationContext.getBeansWithAnnotation(EnabledTools.class);
         for (Map.Entry<String, Object> entry : beanMap.entrySet()) {
             Object bean = entry.getValue();
             try {
                 ToolCallback[] callbacks = ToolCallbacks.from(bean);
                 if (callbacks != null && callbacks.length > 0) {
-                    toolCallbacks.addAll(Arrays.asList(callbacks));
+                    list.addAll(Arrays.asList(callbacks));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return toolCallbacks.toArray(new ToolCallback[0]);
+        return list.toArray(new ToolCallback[0]);
     }
 }
