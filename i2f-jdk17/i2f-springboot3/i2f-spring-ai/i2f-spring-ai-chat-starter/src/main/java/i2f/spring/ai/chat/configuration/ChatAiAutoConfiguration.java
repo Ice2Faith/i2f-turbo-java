@@ -5,6 +5,7 @@ import i2f.spring.ai.chat.auth.impl.CookieChatAiAuthProvider;
 import i2f.spring.ai.chat.properties.ChatAiProperties;
 import i2f.spring.ai.chat.session.ChatAiSessionRepository;
 import i2f.spring.ai.chat.session.impl.InMemoryChatAiSessionRepository;
+import i2f.spring.ai.chat.tools.DatabaseMetadataTools;
 import i2f.spring.ai.chat.tools.DateTools;
 import i2f.spring.ai.chat.tools.MathTools;
 import i2f.spring.ai.chat.tools.SpringBeanMethodToolCallbackProvider;
@@ -19,6 +20,7 @@ import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -29,6 +31,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
+import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +59,15 @@ public class ChatAiAutoConfiguration {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @ConditionalOnExpression("${i2f.ai.chat.tools.database-metadata.enable:false}")
+    @ConditionalOnMissingBean(DatabaseMetadataTools.class)
+    @Bean
+    public DatabaseMetadataTools databaseMetadataTools(DataSource dataSource) {
+        return new DatabaseMetadataTools(dataSource);
+    }
+
     @ConditionalOnExpression("${i2f.ai.chat.tool-callback.spring-bean-provider.enable:true}")
-    @ConditionalOnMissingBean(ChatMemoryRepository.class)
+    @ConditionalOnMissingBean(SpringBeanMethodToolCallbackProvider.class)
     @Bean
     public SpringBeanMethodToolCallbackProvider springBeanMethodToolCallbackProvider() {
         return new SpringBeanMethodToolCallbackProvider(applicationContext);
