@@ -1,4 +1,9 @@
 spring:
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@192.1.x.x:1521/orcl
+    username: ai_dev
+    password: xxxxxx
   application:
     name: spring-ai-chat
   ai:
@@ -30,6 +35,12 @@ spring:
 i2f:
   ai:
     chat:
+      tools:
+        database-metadata:
+          enable: false
+      tool-callback:
+        spring-bean-provider:
+          enable: true
       enable: true
       chat-client:
         enable: true
@@ -39,7 +50,7 @@ i2f:
           in-memory: true
       session-repository: enable
       auth-provider: enable
-      default-system: 你是一个资深植物学家，熟悉每种植物的养殖以及习性，根据用户问题，回答问题
+      default-system: 你是一个资深数据库工程师，现在根据系统中的表结构信息，根据用户的提问，首先查询系统中有哪些表，根据表注释确定要使用哪些表，然后查询要使用的表的表结构信息，最后根据表结构信息，编写响应的SQL语句进行回答
       default-system-resource: ''
       api:
         chat:
@@ -58,7 +69,6 @@ i2f:
       support-tools: true
       tool-classes:
         - i2f.spring.ai.chat.tools.FileSystemTools
-        - i2f.spring.ai.chat.tools.DatabaseMetadataTools
       tool-names:
         - baiduSearchTools
 

@@ -19,7 +19,7 @@
       <div ref="historyContainerDom" class="main">
         <div v-for="(item,index) in historyList">
           <div class="message" :type="item.messageType">
-            {{item.content}}
+            <pre>{{item.content}}</pre>
           </div>
         </div>
 
@@ -107,6 +107,7 @@ export default {
       })
       fetchEventSource(this.baseUrl+'/ai/api/stream?sessionId='+this.sessionId,{
         method: 'POST',
+        timeout: 30*1000,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -242,6 +243,11 @@ export default {
   border-radius: 8px;
   padding: 8px;
   border: solid 1px #aaa;
+}
+
+.message > *{
+  display: inline-block;
+  text-wrap: wrap;
 }
 
 .message[type="SYSTEM"]{
