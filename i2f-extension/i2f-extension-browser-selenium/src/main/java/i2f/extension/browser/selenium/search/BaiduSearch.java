@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -23,6 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @desc
  */
 public class BaiduSearch {
+    public static final SecureRandom RANDOM = new SecureRandom();
+
     public static SearchContext baiduSearch(String question) {
         return baiduSearch(question, 5, null);
     }
@@ -84,6 +87,8 @@ public class BaiduSearch {
                 } catch (Exception e) {
                     continue;
                 }
+
+                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 1));
 
                 if (SearchType.SEARCH_FIRST == entry.getValue()) {
                     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
