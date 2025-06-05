@@ -9,6 +9,8 @@ import org.openqa.selenium.edge.EdgeOptions;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -120,6 +122,9 @@ public class BrowserSelenium {
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-gpu"); // 禁用 GPU 加速（解决某些系统报错）
             options.addArguments("--remote-allow-origins=*");
+            options.addArguments("--disable-blink-features=AutomationControlled");
+            options.setExperimentalOption("excludeSwitches", new ArrayList<>(Arrays.asList("enable-automation")));
+            options.setExperimentalOption("useAutomationExtension", false);
 
             // 初始化 WebDriver
             WebDriver driver = new EdgeDriver(options);
@@ -134,6 +139,9 @@ public class BrowserSelenium {
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-gpu"); // 禁用 GPU 加速（解决某些系统报错）
             options.addArguments("--remote-allow-origins=*");
+            options.addArguments("--disable-blink-features=AutomationControlled");
+            options.setExperimentalOption("excludeSwitches", new ArrayList<>(Arrays.asList("enable-automation")));
+            options.setExperimentalOption("useAutomationExtension", false);
 
             // 初始化 WebDriver
             WebDriver driver = new ChromeDriver(options);
