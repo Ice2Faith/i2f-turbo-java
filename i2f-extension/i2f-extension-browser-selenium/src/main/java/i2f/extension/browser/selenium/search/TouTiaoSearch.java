@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2025/6/5 20:36
  * @desc
  */
-public class BaiduSearch {
+public class TouTiaoSearch {
     public static final SecureRandom RANDOM = new SecureRandom();
 
     public static SearchContext search(String question) {
@@ -48,7 +48,7 @@ public class BaiduSearch {
         if (context != null) {
             SearchResult result = new SearchResult();
             try {
-                result.setUrl("https://www.baidu.com/s?ie=UTF-8&wd=" + URLEncoder.encode(context.getQuestion(), "UTF-8"));
+                result.setUrl("https://so.toutiao.com/search?dvpf=pc&source=input&keyword=" + URLEncoder.encode(context.getQuestion(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
 
             }
@@ -93,7 +93,7 @@ public class BaiduSearch {
                 if (SearchType.SEARCH_FIRST == entry.getValue()) {
                     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                     try {
-                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("div[tpl=\"www_index\"]"), 1));
+                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".s-result-list .result-content .cs-card-content"), 1));
                     } catch (Exception e) {
                         e.printStackTrace();
                         break;
@@ -103,37 +103,30 @@ public class BaiduSearch {
                 if (Arrays.asList(SearchType.SEARCH_FIRST,
                         SearchType.SEARCH_PAGE).contains(entry.getValue())) {
 
-                    // 开发者搜索聚合
-                    List<WebElement> kaifaBlockElems = driver.findElements(By.cssSelector("div[tpl=\"kaifa_pc_blog_weak_no_border\"] > div > .c-row a"));
-                    for (WebElement item : kaifaBlockElems) {
-                        String href = item.getAttribute("href");
-                        System.out.println("www-href:\n" + href);
-                        if (context != null) {
-                            SearchResult result = new SearchResult();
-                            result.setUrl(href);
-                            result.setDescription(item.getText());
-                            urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
-                        }
-                    }
 
                     // 普通条目聚合
-                    List<WebElement> wwwElems = driver.findElements(By.cssSelector("div[tpl=\"www_index\"]"));
+                    List<WebElement> wwwElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-card-content"));
                     for (WebElement item : wwwElems) {
                         String text = item.getText();
                         System.out.println("www-response:\n" + text);
-                        String href = item.getAttribute("mu");
+                        WebElement headerElem = item.findElement(By.cssSelector(".cs-header"));
+                        if (headerElem == null) {
+                            continue;
+                        }
+                        String title = headerElem.getText();
 //                        System.out.println("www-href:\n" + href);
-                        List<WebElement> aElems = item.findElements(By.cssSelector("a.sc-link"));
+                        List<WebElement> aElems = item.findElements(By.cssSelector(".cs-header a"));
                         if (aElems == null || aElems.isEmpty()) {
                             continue;
                         }
                         WebElement aElem = aElems.get(0);
                         if (aElem != null) {
-                            href = aElem.getAttribute("href");
+                            String href = aElem.getAttribute("href");
                             System.out.println("www-href:\n" + href);
                             if (context != null) {
                                 SearchResult result = new SearchResult();
                                 result.setUrl(href);
+                                result.setTitle(title);
                                 result.setDescription(item.getText());
                                 urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
                             }
@@ -148,9 +141,9 @@ public class BaiduSearch {
                 if (SearchType.SEARCH_FIRST == entry.getValue()) {
                     // 最大翻页
                     int maxPage = 5;
-                    List<WebElement> pageElems = driver.findElements(By.cssSelector("div[tpl=\"app/page\"] a"));
+                    List<WebElement> pageElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-pagination a"));
                     for (int i = 0; i < pageElems.size(); i++) {
-                        if (i == pageElems.size() - 1) {
+                        if (i == 0 || i == pageElems.size() - 1) {
                             continue;
                         }
                         WebElement page = pageElems.get(i);
@@ -168,28 +161,6 @@ public class BaiduSearch {
                         }
                     }
 
-                    // 等待AI回答响应完毕
-                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
-//                            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(20000));
-//                    TimeUnit.SECONDS.sleep(20);
-                    }
-
-                    // 第一页有可能有AI回答
-                    List<WebElement> aiElems = driver.findElements(By.cssSelector("div[tpl=\"ai_index\"] .dqa-markdown_5emil"));
-                    List<WebElement> ai2Elems = driver.findElements(By.cssSelector("div[tpl=\"new_baikan_index\"]"));
-                    aiElems.addAll(ai2Elems);
-                    for (WebElement item : aiElems) {
-                        String text = item.getText();
-                        System.out.println("ai-response:\n" + text);
-                        if (context != null) {
-                            SearchResult result = new SearchResult();
-                            result.setUrl(entry.getKey().getUrl());
-                            result.setTitle(context.getQuestion());
-                            result.setDescription("AI answer");
-                            result.setText(text);
-                            context.getResults().add(result);
-                        }
-                    }
 
                     if (context != null) {
                         SearchResult result = entry.getKey();
