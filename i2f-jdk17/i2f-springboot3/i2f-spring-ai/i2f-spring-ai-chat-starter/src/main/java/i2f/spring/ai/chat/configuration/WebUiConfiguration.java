@@ -23,7 +23,7 @@ public class WebUiConfiguration implements WebMvcConfigurer, EnvironmentAware {
     protected Environment environment;
 
     @Value("${i2f.ai.chat.web-ui.allow-redirect-root-url.enable:false}")
-    protected boolean allowRedirectRootUrl=false;
+    protected boolean allowRedirectRootUrl = false;
 
     @Override
     public void setEnvironment(Environment environment) {
@@ -43,7 +43,7 @@ public class WebUiConfiguration implements WebMvcConfigurer, EnvironmentAware {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/chat-ai")
                 .setViewName("forward:/chat-ai/index.html");
-        if(allowRedirectRootUrl) {
+        if (allowRedirectRootUrl) {
             registry.addViewController("/")
                     .setViewName("redirect:/chat-ai");
         }

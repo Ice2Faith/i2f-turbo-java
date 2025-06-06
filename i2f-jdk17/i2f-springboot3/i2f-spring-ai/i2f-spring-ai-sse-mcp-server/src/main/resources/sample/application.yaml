@@ -1,0 +1,15 @@
+server:
+  port: 6600
+
+spring:
+  ai:
+    mcp:
+      server:
+        name: sse-mcp-server
+        type: SYNC
+        request-timeout: 30s
+        instructions: "simple sse mcp server"
+
+logging:
+  level:
+    org.springframework.ai: debug
