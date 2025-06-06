@@ -59,6 +59,7 @@ public class ChatAiAutoConfiguration {
     @Autowired
     private ApplicationContext applicationContext;
 
+    // MCP-Client 提供的自动配置的工具
     @Autowired(required = false)
     private SyncMcpToolCallbackProvider syncMcpToolCallbackProvider;
 
