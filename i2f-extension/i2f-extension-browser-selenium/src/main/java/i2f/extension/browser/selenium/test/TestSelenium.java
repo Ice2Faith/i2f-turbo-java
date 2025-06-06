@@ -1,5 +1,8 @@
 package i2f.extension.browser.selenium.test;
 
+import i2f.extension.browser.selenium.search.BaiduSearch;
+import i2f.extension.browser.selenium.search.BiYingSearch;
+import i2f.extension.browser.selenium.search.SouGouSearch;
 import i2f.extension.browser.selenium.search.TouTiaoSearch;
 import i2f.extension.browser.selenium.search.data.SearchContext;
 
@@ -17,7 +20,7 @@ public class TestSelenium {
 
     public static void test() {
         long bts = System.currentTimeMillis();
-        SearchContext ctx = TouTiaoSearch.search("selenium在Java中报错无法进行websocket连接", 5, "G:/webdriver");
+        SearchContext ctx = BiYingSearch.search("selenium在Java中报错无法进行websocket连接", 5, "G:/webdriver");
         long ets = System.currentTimeMillis();
         long diff = (ets - bts) / 1000;
 //
