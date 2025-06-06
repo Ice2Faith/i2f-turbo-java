@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2025/6/5 20:36
  * @desc
  */
-public class TouTiaoSearch {
+public class SouGouSearch {
     public static final SecureRandom RANDOM = new SecureRandom();
 
     public static SearchContext search(String question) {
@@ -48,7 +48,7 @@ public class TouTiaoSearch {
         if (context != null) {
             SearchResult result = new SearchResult();
             try {
-                result.setUrl("https://so.toutiao.com/search?dvpf=pc&source=input&keyword=" + URLEncoder.encode(context.getQuestion(), "UTF-8"));
+                result.setUrl("https://sogou.com/web?ie=utf8&from=index-nologin&s_from=index&query=" + URLEncoder.encode(context.getQuestion(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
 
             }
@@ -58,22 +58,23 @@ public class TouTiaoSearch {
         AtomicInteger maxFetchCount = new AtomicInteger(maxArticleCount);
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, true, driverPath);
+
         if(true) {
-            driver.get("https://www.toutiao.com/");
+            driver.get("https://www.sogou.com/");
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
             try {
-                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".search-container .search"), 0));
+                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".search-box form"), 0));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            WebElement inputElem = driver.findElement(By.cssSelector(".search-container .search input"));
+            WebElement inputElem = driver.findElement(By.cssSelector(".search-box form .sec-input"));
             inputElem.click();
             inputElem.sendKeys(question);
 
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(3) + 1));
-            WebElement enterElem = driver.findElement(By.cssSelector(".search-container .search button"));
+            WebElement enterElem = driver.findElement(By.cssSelector(".search-box form .enter-input"));
             enterElem.click();
         }
         try {
@@ -99,6 +100,7 @@ public class TouTiaoSearch {
                 } else {
                     driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
                 }
+
                 try {
                     if(!Objects.equals(driver.getCurrentUrl(),entry.getKey().getUrl())) {
                         driver.navigate().to(entry.getKey().getUrl());
@@ -107,16 +109,18 @@ public class TouTiaoSearch {
                     continue;
                 }
 
+
                 driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 1));
 
                 if (SearchType.SEARCH_FIRST == entry.getValue()) {
                     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                     try {
-                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".s-result-list .result-content .cs-card-content"), 1));
+                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".results .vrwrap[exposed=\"1\"] .vr-title a"), 1));
                     } catch (Exception e) {
                         e.printStackTrace();
                         break;
                     }
+                    entry.getKey().setUrl(driver.getCurrentUrl());
                 }
                 // 百度搜索页面
                 if (Arrays.asList(SearchType.SEARCH_FIRST,
@@ -124,17 +128,21 @@ public class TouTiaoSearch {
 
 
                     // 普通条目聚合
-                    List<WebElement> wwwElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-card-content"));
+                    List<WebElement> wwwElems = driver.findElements(By.cssSelector(".results .vrwrap[exposed=\"1\"]"));
                     for (WebElement item : wwwElems) {
                         String text = item.getText();
                         System.out.println("www-response:\n" + text);
-                        WebElement headerElem = item.findElement(By.cssSelector(".cs-header"));
-                        if (headerElem == null) {
+                        List<WebElement> titleElems = item.findElements(By.cssSelector(".vr-title"));
+                        if(titleElems==null || titleElems.isEmpty()){
                             continue;
                         }
-                        String title = headerElem.getText();
+                        WebElement titleElem=titleElems.get(0);
+                        if (titleElem == null) {
+                            continue;
+                        }
+                        String title = titleElem.getText();
 //                        System.out.println("www-href:\n" + href);
-                        List<WebElement> aElems = item.findElements(By.cssSelector(".cs-header a"));
+                        List<WebElement> aElems = item.findElements(By.cssSelector(".vr-title a"));
                         if (aElems == null || aElems.isEmpty()) {
                             continue;
                         }
@@ -160,9 +168,9 @@ public class TouTiaoSearch {
                 if (SearchType.SEARCH_FIRST == entry.getValue()) {
                     // 最大翻页
                     int maxPage = 5;
-                    List<WebElement> pageElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-pagination a"));
+                    List<WebElement> pageElems = driver.findElements(By.cssSelector("#pagebar_container a"));
                     for (int i = 0; i < pageElems.size(); i++) {
-                        if (i == 0 || i == pageElems.size() - 1) {
+                        if ( i == pageElems.size() - 1) {
                             continue;
                         }
                         WebElement page = pageElems.get(i);

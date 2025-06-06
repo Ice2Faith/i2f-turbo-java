@@ -58,7 +58,24 @@ public class BaiduSearch {
         AtomicInteger maxFetchCount = new AtomicInteger(maxArticleCount);
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, true, driverPath);
+        if(true) {
+            driver.get("https://www.baidu.com/");
 
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+            try {
+                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#form[action=\"/s\"]"), 0));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            WebElement inputElem = driver.findElement(By.cssSelector("#form[action=\"/s\"] input[name=\"wd\"]"));
+            inputElem.click();
+            inputElem.sendKeys(question);
+
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(3) + 1));
+            WebElement enterElem = driver.findElement(By.cssSelector("#form[action=\"/s\"] input[type=\"submit\"]"));
+            enterElem.click();
+        }
         try {
 
             while (true) {
@@ -83,7 +100,9 @@ public class BaiduSearch {
                     driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
                 }
                 try {
-                    driver.navigate().to(entry.getKey().getUrl());
+                    if(!Objects.equals(driver.getCurrentUrl(),entry.getKey().getUrl())) {
+                        driver.navigate().to(entry.getKey().getUrl());
+                    }
                 } catch (Exception e) {
                     continue;
                 }
