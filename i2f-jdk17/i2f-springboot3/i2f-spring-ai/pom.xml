@@ -13,6 +13,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>i2f-spring-ai-chat-starter</module>
+        <module>i2f-spring-ai-sse-mcp-server</module>
+        <module>i2f-spring-ai-tool</module>
     </modules>
 
     <properties>
@@ -36,6 +38,12 @@
                 <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-spring-ai-tool</artifactId>
+                <version>${i2f.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

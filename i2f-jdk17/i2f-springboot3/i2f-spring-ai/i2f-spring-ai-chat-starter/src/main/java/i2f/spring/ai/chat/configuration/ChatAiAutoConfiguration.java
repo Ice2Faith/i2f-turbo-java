@@ -8,7 +8,7 @@ import i2f.spring.ai.chat.session.impl.InMemoryChatAiSessionRepository;
 import i2f.spring.ai.chat.tools.DatabaseMetadataTools;
 import i2f.spring.ai.chat.tools.DateTools;
 import i2f.spring.ai.chat.tools.MathTools;
-import i2f.spring.ai.chat.tools.SpringBeanMethodToolCallbackProvider;
+import i2f.spring.ai.tool.providers.SpringBeanMethodToolCallbackProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -19,8 +19,8 @@ import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -58,6 +58,9 @@ public class ChatAiAutoConfiguration {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired(required = false)
+    private SyncMcpToolCallbackProvider syncMcpToolCallbackProvider;
 
     @ConditionalOnExpression("${i2f.ai.chat.tools.database-metadata.enable:false}")
     @ConditionalOnMissingBean(DatabaseMetadataTools.class)
@@ -156,6 +159,9 @@ public class ChatAiAutoConfiguration {
         }
         if (springBeanMethodToolCallbackProvider != null) {
             builder.defaultToolCallbacks(springBeanMethodToolCallbackProvider);
+        }
+        if (syncMcpToolCallbackProvider != null) {
+            builder.defaultToolCallbacks(syncMcpToolCallbackProvider);
         }
 
         if (system != null && !system.isEmpty()) {
