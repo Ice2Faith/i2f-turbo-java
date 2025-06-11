@@ -55,7 +55,8 @@
       "description": "enable chat-ai datasource database metadata tools.",
       "sourceType": "i2f.spring.ai.chat.configuration.ChatAiAutoConfiguration",
       "defaultValue": false
-    },{
+    },
+    {
       "name": "i2f.ai.chat.tool-callback.spring-bean-provider.enable",
       "type": "java.lang.Boolean",
       "description": "enable chat-ai spring-bean tool-callback-provider, which bean has @EnabledTools annotation.",

@@ -1,6 +1,6 @@
-package i2f.spring.ai.chat.tools;
+package i2f.spring.ai.tool.providers;
 
-import i2f.spring.ai.chat.annotations.EnabledTools;
+import i2f.spring.ai.tool.annotations.AiTools;
 import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
@@ -37,7 +37,7 @@ public class SpringBeanMethodToolCallbackProvider implements ToolCallbackProvide
 
     public ToolCallback[] getCallbacks() {
         List<ToolCallback> list = new ArrayList<>();
-        Map<String, Object> beanMap = applicationContext.getBeansWithAnnotation(EnabledTools.class);
+        Map<String, Object> beanMap = applicationContext.getBeansWithAnnotation(AiTools.class);
         for (Map.Entry<String, Object> entry : beanMap.entrySet()) {
             Object bean = entry.getValue();
             try {

@@ -1,4 +1,4 @@
-package i2f.spring.ai.chat.annotations;
+package i2f.spring.ai.tool.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EnabledTools {
+public @interface AiTools {
 
 }
