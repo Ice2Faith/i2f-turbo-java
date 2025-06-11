@@ -573,7 +573,120 @@ V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里
 </lang-eval-ts>
 ```
 
-### 5.7 单分支条件语句-if
+### 5.7 拼接字符串
+
+- 原始语句
+
+```sql
+v_sql:=' and t.user_id='||v_user_id||' and t.status='||v_status;
+```
+
+- 注意，原始语句中这里是一个条件语句，最前面的and之前需要有空白符
+- 防止在之后进行拼接时发生关键字粘连
+- 使用.render修饰符
+
+```xml
+<lang-set result="V_SQL" value.render=" and t.user_id=$!{V_USER_ID} and t.status=$!{V_STATUS}"/>
+```
+
+- 使用.render的好处是可以自己精确控制前后的空格
+- 另外这里使用$!{}进行占位符包裹，$!{}表示的是，如果内部的变量为null，则显示的结果为空白字符串''
+- 按照原来的语句时Oracle的情况，Oracle如果变量为null，就是显示空白字符
+- 这个占位符是velocity模板引擎提供的
+- velocity引擎，提供了${}和$!{}占位符
+- 区别就在于对null变量的渲染规则上
+- ${}如果为null,则保持原样，举例：${v_status},如果为null，则渲染结果为：${v_status}
+- $!{}如果为null,则显示空字符，举例：[$!{v_status}],如果为null，则渲染结果为：[]
+- 默认情况下，框架的render都是使用velocity进行渲染字符串
+- 如果，要求null的时候，结果为'null',就要使用内建函数实现了
+
+```shell
+${_vm.str(${v_status})}
+```
+
+- 内部内建了一个 _vm 属性对象，用于提供内建的方法，这里 _vm.str 就是一个内建函数
+- 使用功能lang-render标签
+
+```xml
+<lang-render result.trim.spacing-left="V_SQL" _lang="sql">
+  and t.user_id=$!{V_USER_ID} and t.status=$!{V_STATUS}
+</lang-render>
+```
+
+- 这里使用lang-render渲染，这样的话方便书写和阅读，但是前后的空格处理有些缺陷
+- 如果要和原来的保持一模一样，那就需要和上面的修饰符一样，先进行trim，然后使用spacing-left在左侧添加一个空格
+- 另外使用_lang属性标注了内部的语法类型，是sql，结合插件就能够准确的实现内部语法高亮
+- 但是，对于举例的语句来说，保证前面有空白字符就行，后面有没有空白字符都可以
+- 这种情况，直接这样写就行，这样前面自然有一个换行，后面自然也有一个换行，因为XML标签内部内容都是内容
+
+```xml
+<lang-render result="V_SQL" _lang="sql">
+  and t.user_id=$!{V_USER_ID} and t.status=$!{V_STATUS}
+</lang-render>
+```
+
+- 当然，手动控制标签格式，也能达到一模一样的情况，比如像下面这样写
+
+```xml
+<lang-render result="V_SQL" _lang="sql"> and t.user_id=$!{V_USER_ID} and t.status=$!{V_STATUS}</lang-render>
+```
+
+- 使用ts脚本（TinyScript）
+
+```sql
+<lang-eval-ts>
+    V_SQL=' and t.user_id='+$!{V_USER_ID}+' and t.status='+${V_STATUS};
+</lang-eval-ts>
+```
+
+- 使用ts脚本的时候，可以直接用+号连接进行拼接即可
+- $!{}的语义和velocity一样，都是如果null，则结果为空字符串
+- 但是，${}的语义，和Java中时一样的，如果是null，结果就是'null'
+- 当然，ts还支持占位符渲染，框架内就是模板字符串，模板字符串规则和velocity一致
+- 因为实际上模板字符串就是用velocity实现的替换
+- 所以可以这样写
+
+```xml
+<lang-eval-ts>
+  V_SQL=R" and t.user_id=$!{V_USER_ID} and t.status=$!{V_STATUS}";
+</lang-eval-ts>
+```
+
+- 使用 R 引导的字符串就是模板字符串
+- 多行字符串也可以
+
+```xml
+<lang-eval-ts>
+  V_SQL=R" and t.user_id=$!{V_USER_ID}
+        and t.status=$!{V_STATUS}";
+</lang-eval-ts>
+```
+
+- 也可以使用专用的多行字符串
+- 语法上要求，引导的三个"或者`符号之后必须有一个换行
+- 结束的引导符之前也需要有一个换行
+
+```xml
+<lang-eval-ts>
+  V_SQL=R""" 
+    and t.user_id=$!{V_USER_ID}
+        and t.status=$!{V_STATUS}
+  """;
+</lang-eval-ts>
+```
+
+- 多行字符串内部也支持几个修饰符 align,trim,render
+
+```xml
+<lang-eval-ts>
+  V_SQL="""trim.render
+    and t.user_id=$!{V_USER_ID}
+        and t.status=$!{V_STATUS}
+  """;
+</lang-eval-ts>
+```
+
+### 5.8 单分支条件语句-if
 
 - if语句的情况，在转换时比较复杂
 - 因此分作两种情况讨论，第一种是只有一个if分支的
@@ -666,7 +779,7 @@ end if;
 </lang-eval-ts>
 ```
 
-### 5.8 多分支条件语句if-else
+### 5.9 多分支条件语句if-else
 
 - 针对多分支语句时，XML中则需要额外的标签来处理
 - 但是总体和Mybatis中对多分支的处理一致
@@ -738,7 +851,7 @@ end if;
 - 当然使用其他脚本语言也可以
 - 比如使用groovy，JavaScript，java都是可以的
 
-### 5.9 函数调用
+### 5.10 函数调用
 
 - 在存储过程中，很多地方都可能使用了数据库内建的函数，例如rtrim/replace等
 - 也会使用自定义的UDF函数
@@ -817,7 +930,7 @@ v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 - 都比原来的语句复杂的多
 - 因为TinyScript设计就是为了解决这个问题的，所以更偏向于使用TinyScript进行转换
 
-### 5.10 UDF自定义函数调用(内部之间调用)
+### 5.11 UDF自定义函数调用(内部之间调用)
 
 - UDF用户自定义函数常常也会出现在存储过程中
 - 现在，这种情况比较复杂，我们以一个例子来说明
@@ -952,7 +1065,7 @@ execute immediate v_sql into V_IS_TASK_TEST;
 
 - 上面这几种方式中，使用TinyScript是最好最方便快捷的
 
-### 5.11 Proc存储过程调用(内部之间调用)
+### 5.12 Proc存储过程调用(内部之间调用)
 
 - 其实函数掉调用时从存储过程的调用简化来的
 - 因此，很多部分和存储过程时基本一样的
@@ -1072,7 +1185,7 @@ execute immediate v_sql using in V_CITY_CODE, in V_SUM_MONTH, in V_COND_ID, out 
 </lang-eval-ts>
 ```
 
-### 5.12 Java程序调用XML过程(外部入口调用)
+### 5.13 Java程序调用XML过程(外部入口调用)
 
 - 这部分，直接使用上面内部调用的例子进行演示
 - Java程序调用，也就是在Java程序中调用XML的过程的方式
@@ -1148,7 +1261,7 @@ String oMsg = executor.visitAs(ret, "O_MSG");
 Integer oCode = executor.visitAs(ret, "O_CODE");
 ```
 
-### 5.13 游标转换
+### 5.14 游标转换
 
 - 游标cursor也是一个比较常见的现象
 - 现在看一下原来的语句
@@ -1200,7 +1313,7 @@ END LOOP;
 </sql-cursor>
 ```
 
-### 5.14 for循环转换
+### 5.15 for循环转换
 
 - 有时候，也会存在for春环变量的使用
 - 也就是for...in的语法
@@ -1239,7 +1352,7 @@ END LOOP;
 </sql-cursor>
 ```
 
-### 5.15 for-i型循环
+### 5.16 for-i型循环
 
 - 这种其实就是for-i语句
 - 直接进行转换即可
@@ -1279,7 +1392,7 @@ end loop;
 </lang-eval-ts>
 ```
 
-### 5.16 while型循环
+### 5.17 while型循环
 
 - 这种语句其实也比较常见
 - 直接转换即可
@@ -1321,7 +1434,7 @@ end loop;
 </lang-eval-ts>
 ```
 
-### 5.17 SQL语句拼接与执行
+### 5.18 SQL语句拼接与执行
 
 - SQL语句拼接是一个比较常见的场景
 - 下面将介绍进行语句拼接，并执行拼接之后的语句的场景
@@ -1466,7 +1579,7 @@ if (${v_inc_date}!= null) {
 - 当然执行SQL，不一定非要用sql-update标签
 - 根据实际场景，选择合适的sql-标签进行使用
 
-### 5.18 异常处理的转换
+### 5.19 异常处理的转换
 
 - 异常处理的转换比较复杂
 - 同时有一部分异常，因为是基于JDBC的，并不能得到和原始的写法一样的异常类型
@@ -1476,7 +1589,7 @@ if (${v_inc_date}!= null) {
 - 因此，本节将只会介绍一些能够进行区分的异常类型的转换过程
 - 未提及的，需要根据实际情况决定如何转换
 
-#### 5.18.1 普通一般性异常（exception when others then）
+#### 5.19.1 普通一般性异常（exception when others then）
 
 - 这种异常在不同的数据库中可能表达方式不一样
 - 主要的含义就是处理一切发生的异常
@@ -1556,7 +1669,7 @@ AS
     v_sql varchar2(4000);
 BEGIN
     v_sql :='delete from xxx where '; -- 错误的语句
-       
+   
     -- 内部语句块
 begin
 execute immediate v_sql;
@@ -1616,7 +1729,7 @@ end SP_TEST;
 </procedure>
 ```
 
-#### 5.18.2 无数据返回异常(exception when NO_DATA_FOUND then)
+#### 5.19.2 无数据返回异常(exception when NO_DATA_FOUND then)
 
 - 这种异常发生在进行查询时
 - 查询没有数据，一般来说，这是一种正常情况
@@ -1661,8 +1774,7 @@ end;
 </lang-choose>
 ```
 
-
-#### 5.18.3 除0异常或其他SQL异常(exception when ZERO_DIVIDE then)
+#### 5.19.3 除0异常或其他SQL异常(exception when ZERO_DIVIDE then)
 
 - 有时候，在存过的编写中，会利用一些数据库中触发的异常进行编写逻辑
 - 比如，当某一类异常出现时，就触发另一套逻辑
@@ -1768,7 +1880,7 @@ FUNCTION  F_GET_PARAM_NAME( IN_PARAM_ID NUMBER) RETURN VARCHAR2  AS
       IF IN_PARAM_ID IS NULL THEN
           RETURN NULL;
       END IF;
-    
+  
       v_sql := 'select param_name from sys_dict_param where param_id='||IN_PARAM_ID;
       execute immediate v_sql into v_result ;
 
@@ -1800,7 +1912,7 @@ FUNCTION  F_GET_PARAM_NAME( IN_PARAM_ID NUMBER) RETURN VARCHAR2  AS
             <lang-if test="IN_PARAM_ID==null">
                 <lang-return value.null=""/> <!-- 原来直接返回null值，这里也使用.null修饰符直接返回null -->
             </lang-if>
-        
+  
             <!--
             原来先拼接SQL，再执行SQL
             没有复杂的拼接场景
@@ -1815,7 +1927,7 @@ FUNCTION  F_GET_PARAM_NAME( IN_PARAM_ID NUMBER) RETURN VARCHAR2  AS
             因此结果集为一行数据，就可选sql-query-row读取一行
             语句中结果集只有一列，也就是只返回一个值，则选用sql-query-object更好
             -->
-        
+  
             <sql-query-object result="V_RESULT" result-type="string">
                 select param_name from sys_dict_param where param_id=#{IN_PARAM_ID}
             </sql-query-object>
@@ -1854,12 +1966,12 @@ FUNCTION  F_GET_PARAM_NAME( IN_PARAM_ID NUMBER) RETURN VARCHAR2  AS
             <lang-if test="IN_PARAM_ID==null">
                 <lang-return value.null=""/> <!-- 原来直接返回null值，这里也使用.null修饰符直接返回null -->
             </lang-if>
-        
+  
             <!--
             原来先拼接SQL，再执行SQL
             严格按照原来的逻辑来
             -->
-        
+  
             <!-- 
             先拼接SQL，这里为了使用绑定变量，避免SQL注入
             使用sql-script进行获取BindSql对象
@@ -1868,7 +1980,7 @@ FUNCTION  F_GET_PARAM_NAME( IN_PARAM_ID NUMBER) RETURN VARCHAR2  AS
             <sql-script result="V_SQL">
               select param_name from sys_dict_param where param_id=#{IN_PARAM_ID}
             </sql-script>
-        
+  
             <!--
             直接将V_SQL中的BindSql对象作为要执行的SQL传递给script作为sql-query-object执行的SQL语句
             其他的返回值和返回值类型也一样即可
@@ -1905,12 +2017,12 @@ FUNCTION  F_GET_PARAM_NAME( IN_PARAM_ID NUMBER) RETURN VARCHAR2  AS
             <lang-if test="IN_PARAM_ID==null">
                 <lang-return value.null=""/> <!-- 原来直接返回null值，这里也使用.null修饰符直接返回null -->
             </lang-if>
-        
+  
             <!--
             原来先拼接SQL，再执行SQL
             严格按照原来的逻辑来
             -->
-        
+  
             <!-- 
             先拼接SQL，这里直接进行字符串渲染，因为IN_PARAM_ID是number类型
             就刷直接拼接也没什么问题，因此可以使用lang-render来完成
@@ -1923,7 +2035,7 @@ FUNCTION  F_GET_PARAM_NAME( IN_PARAM_ID NUMBER) RETURN VARCHAR2  AS
             <lang-render result="V_SQL" _lang="sql">
               select param_name from sys_dict_param where param_id=$!{IN_PARAM_ID}
             </lang-render>
-        
+  
             <!--
             直接将V_SQL中的string对象作为要执行的SQL传递给script作为sql-query-object执行的SQL语句
             其他的返回值和返回值类型也一样即可
@@ -2182,11 +2294,10 @@ FUNCTION F_GET_TABLE_COLUMNS(IN_SEL_TABLE IN VARCHAR2,IN_SEL_OWNER IN VARCHAR2) 
 - 这个是存储过程，并且是在包里面的过程
 - 所以有些变量是在包里面定义与初始化的
 - 也就是对应迁移后的 global. 中的变量
-- 并且过程属于包 PKG_PARAM 
+- 并且过程属于包 PKG_PARAM
 - 内部也调用了同一个包下的其他过程或者函数
 - 迁移之后，包的概念就不存在了
 - 因此没有了包的概念，变为了全局变量维持
-
 - 原始代码
 
 ```sql
@@ -2750,13 +2861,13 @@ public class PreparedParamsEventListener implements XProc4jEventListener {
         Map<String, Object> context = evt.getContext();
         // 注入全局变量 props 
         executor.visitSet(context, "global.props", config);
-        
+  
         // 如果不存在线程的traceId则生成一个并保存
         String traceId = executor.visitAs("trace.traceId", context);
         if(traceId==null){
             traceId= UUID.randomUUID().toString().replaceAll("-","").toLowerCase();
             executor.visitSet(context,"trace.traceId",traceId);
-            
+    
             // 同时设置到Slf4j的MDC上下文中
             MDC.put("traceId",traceId);
         }
