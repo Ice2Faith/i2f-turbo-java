@@ -15,7 +15,6 @@ import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.page.ApiPage;
-import i2f.reflect.vistor.Visitor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -90,6 +89,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
         XmlNode queryNode = null;
         XmlNode extraNode = null;
         List<XmlNode> transformNodeList = new ArrayList<>();
+        List<Map.Entry<XmlNode,List<String>>> transformNodeAdditionalList=new ArrayList<>();
         XmlNode loadNode = null;
         XmlNode beforeNode = null;
         XmlNode afterNode = null;
@@ -101,7 +101,23 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 extraNode = item;
             }
             if (TagConsts.ETL_TRANSFORM.equals(item.getTagName())) {
-                transformNodeList.add(item);
+                List<String> itemAdditionalList=new ArrayList<>();
+                Map<String, String> attrMap = item.getTagAttrMap();
+                String[] additionalAttrs={AttrConsts.EXCLUDE,AttrConsts.INCLUDE,AttrConsts.EXTERNAL};
+                for (String attr : additionalAttrs) {
+                    if(attrMap.containsKey(attr)){
+                        boolean ok = executor.toBoolean(executor.attrValue(attr, FeatureConsts.BOOLEAN, item, context));
+                        if(ok){
+                           itemAdditionalList.add(attr);
+                        }
+                    }
+                }
+
+                if(itemAdditionalList.isEmpty()) {
+                    transformNodeList.add(item);
+                }else{
+                    transformNodeAdditionalList.add(new AbstractMap.SimpleEntry<>(item,itemAdditionalList));
+                }
             }
             if (TagConsts.ETL_LOAD.equals(item.getTagName())) {
                 loadNode = item;
@@ -127,6 +143,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
         Integer writeBatchSize = executor.convertAs(executor.attrValue(AttrConsts.WRITE_BATCH_SIZE, FeatureConsts.INT, node, context), Integer.class);
         boolean beforeTruncate = executor.toBoolean(executor.attrValue(AttrConsts.BEFORE_TRUNCATE, FeatureConsts.BOOLEAN, node, context));
         Integer commitSize = executor.convertAs(executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context), Integer.class);
+        String itemName = executor.convertAs(executor.attrValue(AttrConsts.ITEM, FeatureConsts.STRING, node, context), String.class);
         if (readBatchSize == null) {
             readBatchSize = 2000;
         }
@@ -136,6 +153,9 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
         if (commitSize == null) {
             commitSize = writeBatchSize;
+        }
+        if(itemName==null || itemName.isEmpty()){
+            itemName="item";
         }
 
         String loadDatasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, loadNode, context);
@@ -164,6 +184,10 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
         Map<String, Connection> bakConn = (Map<String, Connection>) context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key -> new HashMap<>()));
         executor.visitSet(context, ParamsConsts.CONNECTIONS, new HashMap<>());
+
+        // 备份堆栈
+        Object bakItem=executor.visit(itemName,context);
+
         try {
             executor.sqlTransNone(extraDatasource, context);
             executor.sqlTransBegin(loadDatasource, Connection.TRANSACTION_READ_COMMITTED, context);
@@ -180,6 +204,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
             Map<String, XmlNode> targetNodeMap = new LinkedHashMap<>();
             Map<String, Map.Entry<String, List<String>>> targetMap = new LinkedHashMap<>();
             Map<String, Class<?>> targetTypeMap = new LinkedHashMap<>();
+            Map<String,XmlNode> targetExternalNodeMap=new LinkedHashMap<>();
             String loadSql = "";
 
 
@@ -220,7 +245,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                                     if (extraName.equalsIgnoreCase(loadName)) {
 
                                         XmlNode xmlNode = new XmlNode();
-                                        xmlNode.setTagName("etl-transform");
+                                        xmlNode.setTagName(TagConsts.ETL_TRANSFORM);
                                         xmlNode.setNodeType(XmlNode.NodeType.ELEMENT);
                                         xmlNode.setChildren(new ArrayList<>());
                                         xmlNode.setTagAttrMap(new HashMap<>());
@@ -268,7 +293,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                     if (!transformNodeList.isEmpty()) {
                         for (XmlNode item : transformNodeList) {
-                            String target = item.getTagAttrMap().get(AttrConsts.TARGET);
+                            String target = executor.convertAs(executor.attrValue(AttrConsts.TARGET,FeatureConsts.STRING,item,context),String.class);
                             if (target != null && !target.isEmpty()) {
                                 String column = item.getTagAttrMap().get(AttrConsts.SOURCE);
                                 List<String> features = item.getAttrFeatureMap().get(AttrConsts.SOURCE);
@@ -281,6 +306,47 @@ public class SqlEtlNode extends AbstractExecutorNode {
                             targetNodeMap.put(target, item);
                         }
                     }
+
+                    if(!transformNodeAdditionalList.isEmpty()){
+                        for (Map.Entry<XmlNode, List<String>> entry : transformNodeAdditionalList) {
+                            List<String> attrs = entry.getValue();
+                            if(attrs.contains(AttrConsts.EXCLUDE)){
+                                XmlNode item=entry.getKey();
+                                String target = executor.convertAs(executor.attrValue(AttrConsts.TARGET,FeatureConsts.STRING,item,context),String.class);
+                                if (target != null && !target.isEmpty()) {
+                                    targetMap.remove(target);
+
+                                    targetTypeMap.remove(target);
+                                }
+                                targetNodeMap.remove(target);
+                            }
+                        }
+                    }
+
+                    if(!transformNodeAdditionalList.isEmpty()){
+                        for (Map.Entry<XmlNode, List<String>> entry : transformNodeAdditionalList) {
+                            List<String> attrs = entry.getValue();
+                            if(attrs.contains(AttrConsts.INCLUDE)
+                            ||attrs.contains(AttrConsts.EXTERNAL)){
+                                XmlNode item=entry.getKey();
+                                String target = executor.convertAs(executor.attrValue(AttrConsts.TARGET,FeatureConsts.STRING,item,context),String.class);
+                                if (target != null && !target.isEmpty()) {
+                                    String column = item.getTagAttrMap().get(AttrConsts.SOURCE);
+                                    List<String> features = item.getAttrFeatureMap().get(AttrConsts.SOURCE);
+                                    targetMap.put(target, new AbstractMap.SimpleEntry<>(column, features));
+
+                                    String typeName = item.getTagAttrMap().get(AttrConsts.TYPE);
+                                    Class<?> targetType = executor.loadClass(typeName);
+                                    targetTypeMap.put(target, targetType);
+                                }
+                                targetNodeMap.put(target, item);
+                                if(attrs.contains(AttrConsts.EXTERNAL)){
+                                    targetExternalNodeMap.put(target,item);
+                                }
+                            }
+                        }
+                    }
+
 
                     if (targetMap.isEmpty()) {
                         throw new SQLException("no target column transform found!");
@@ -317,17 +383,18 @@ public class SqlEtlNode extends AbstractExecutorNode {
                     List<Object> elems = new ArrayList<>();
                     for (Map.Entry<String, Map.Entry<String, List<String>>> entry : targetMap.entrySet()) {
                         Map.Entry<String, List<String>> value = entry.getValue();
-                        Object val = Visitor.visit(value.getKey(), obj).get();
+                        Object val = null;
+                        XmlNode externalNode = targetExternalNodeMap.get(entry.getKey());
+                        if(externalNode==null){
+                            val=executor.visit(value.getKey(), obj);
+                        }else{
+                            executor.visitSet(context,itemName,obj);
+                            val=executor.attrValue(AttrConsts.SOURCE, FeatureConsts.EVAL, externalNode, context);
+                        }
+
                         XmlNode definedNode = targetNodeMap.get(entry.getKey());
                         if (definedNode != null) {
-                            boolean isAttrValue = false;
-                            if (val == null) {
-                                val = executor.attrValue(AttrConsts.SOURCE, FeatureConsts.EVAL, definedNode, context);
-                                isAttrValue = true;
-                            }
-                            if (!isAttrValue) {
-                                val = executor.resultValue(val, value.getValue(), definedNode, context);
-                            }
+                            val = executor.resultValue(val, value.getValue(), definedNode, context);
                         }
                         Class<?> targetType = targetTypeMap.get(entry.getKey());
                         if (targetType != null) {
@@ -366,6 +433,9 @@ public class SqlEtlNode extends AbstractExecutorNode {
             executor.sqlTransRollback(loadDatasource, context);
             throw new ThrowSignalException(e.getMessage(), e);
         } finally {
+            // 还原堆栈
+            executor.visitSet(context,itemName,bakItem);
+
             Map<String, Connection> conns = (Map<String, Connection>) context.get(ParamsConsts.CONNECTIONS);
             for (Map.Entry<String, Connection> entry : conns.entrySet()) {
                 Connection conn = entry.getValue();

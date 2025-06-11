@@ -348,8 +348,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     public Map<String, Object> castArgListAsProcedureMap(String procedureId, List<Object> args) {
         Map<String, Object> ret = new LinkedHashMap<>();
-        Map<String, ProcedureMeta> nodeMap = getMetaMap();
-        ProcedureMeta node = nodeMap.get(procedureId);
+        ProcedureMeta node = getMeta(procedureId);
         if (node != null) {
             List<String> arguments = node.getArguments();
             Iterator<Object> argIter = args.iterator();
@@ -557,6 +556,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.put(ParamsConsts.CONTEXT, getNamingContext());
         ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
 
+        Map<String,Object> global=new HashMap<>();
+        global.put(ParamsConsts.METAS,new HashMap<>());
+        ret.put(ParamsConsts.GLOBAL,global);
 
         Map<String, Object> trace = new HashMap<>();
         trace.put(ParamsConsts.STACK, new Stack<>());
