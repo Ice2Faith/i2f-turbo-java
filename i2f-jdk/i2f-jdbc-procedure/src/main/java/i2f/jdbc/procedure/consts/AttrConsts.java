@@ -79,6 +79,10 @@ public interface AttrConsts {
     String BEFORE_TRUNCATE = "before-truncate";
     String COMMIT_SIZE = "commit-size";
 
+    String EXCLUDE="exclude";
+    String INCLUDE="include";
+    String EXTERNAL="external";
+
     String SOURCE = "source";
     String TABLE = "table";
 

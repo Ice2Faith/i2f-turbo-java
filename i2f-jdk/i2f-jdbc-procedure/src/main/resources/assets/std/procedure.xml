@@ -1505,11 +1505,13 @@ eval-ts使用TinyScript引擎进行处理
     写入到load指定的数据源datasource的table表中
     允许在开头是进行before-truncate清空表操作
     在进行commit-size条数据的写入之后，提交一次事务
+    item默认以string访问，为指定迭代的行变量的变量名，可用于在内部进行使用，特别是在transform节点中使用external特性时，可能会有用
      -->
     <sql-etl read-batch-size=""
              write-batch-size=""
              before-truncate=""
-             commit-size="">
+             commit-size=""
+             item="">
         <sql-query-list>
 
         </sql-query-list>
@@ -1522,8 +1524,18 @@ eval-ts使用TinyScript引擎进行处理
         type用于指定目标接受的类型，值应该是一个class类型
         source默认使用string访问，等价于 source.string ,可使用其他修饰符实现原始数据的转换或覆盖
         target使用string访问，等价于 target.string, 不支持修饰符
+        exclude默认以boolean访问，指定目标列target是否被移除，不进行同步
+        include默认以boolean访问，指定目标列target需要增加同步关系，进行同步
+        external默认以boolean访问，指定源列source的数据来源为整个Map上下文，而不是列名
+        特殊说明:
+        sql-etl节点允许没有任意一个transform节点，如果没有任意一个普通transform节点
+        将会进行自动列名映射，映射规则为查询结果集的列名与目标表的列名进行忽略大小写匹配
+        能够匹配上的列就进行传输，
+        因此，如果结果集中有比目标表多余的列或者不匹配的列，将不会被传输
+        特别的，具有exclude，include，external属性的transform节点，是特殊节点，不是普通节点，不参与自动映射的判定
+        处理规则：自动映射/手动映射->剔除exclude的目标->添加include/external的目标
         -->
-        <etl-transform source="" target="" type=""/>
+        <etl-transform source="" target="" type="" exclude="" include="" external=""/>
         <!--
         进行数据的写入，将数据写入到datasource指定的数据源中
         目标表用table表示
@@ -1544,11 +1556,23 @@ eval-ts使用TinyScript引擎进行处理
     </sql-etl>
     <!-- 举例 -->
     <script-segment id="demo">
+        <!--
+        直接指定源库表和目标库表
+        不进行transform列名映射
+        这样，源库的所有列都会列名一样的插入到目标表中
+        也就是同列名策略
+        -->
         <sql-etl>
             <etl-extra datasource="oracle" table="COMM.SYS_DICT"/>
             <etl-load datasource="primary" table="DIM_SYS_DICT"/>
         </sql-etl>
 
+        <!--
+        源为一个查询语句，目标指定为库表
+        这样，将会把源的查询结果集插入到目标表中
+        同时，没有指明transform列名映射
+        因此进行了列名同名插入，查询的所有列都会进行插入
+        -->
         <sql-etl>
             <sql-query-list datasource="oracle">
                 select * from COMM.SYS_DICT where status=1
@@ -1559,6 +1583,84 @@ eval-ts使用TinyScript引擎进行处理
                     truncate table DIM_SYS_DICT
                 </sql-update>
             </etl-before>
+        </sql-etl>
+
+        <!--
+        这里主要讲解transform节点的作用
+        默认情况下，没有任何transform节点时，将会所有源列都进行插入到目标表的列，这就是自动列名映射，
+        这时候就需要源的列名能够对应上目标表的列名
+        但是，如果具有transform节点，那就是手动列名映射，只会同步指定的transform节点的映射
+        比如这个例子中，只会同步两列的数据，即DICT_ID->DICT_ID,DICT_NAME->DICT_TEXT
+        其他列不会进行同步
+        -->
+        <sql-etl>
+            <etl-extra datasource="oracle" table="COMM.SYS_DICT"/>
+
+            <etl-transform source="DICT_ID" target="DICT_ID"/>
+            <etl-transform source="DICT_NAME" target="DICT_TEXT"/>
+
+            <etl-load datasource="primary" table="DIM_SYS_DICT"/>
+        </sql-etl>
+
+        <!--
+        这里主要间接transform节点的特殊属性作用
+        transform节点有几个特殊的属性：include,exclude,external
+        这三个属性预期输入都是boolean逻辑类型，也就是只是一个开关属性
+        表示是否启用这项特性
+        当transform节点都没有这几个属性任意一个时，那就是普通映射节点
+        在自动映射中，只计算普通映射节点
+        因此，在这个李总中，因为前两个映射DICT_ID->DICT_ID,DICT_NAME->DICT_TEXT是普通映射节点
+        因此，就不会进入自动映射逻辑，而是认定为手动映射
+        如果，这前两个映射删掉，剩下的都是特殊映射，那就没有普通映射节点
+        那就回启用自动映射逻辑
+        特殊映射都会基于普通映射（手动映射/自动映射）之后运行
+        因此，特殊映射实际上是对普通映射的调整（修改/补充）
+        -->
+        <sql-etl item="iter">
+            <etl-extra datasource="oracle" table="COMM.SYS_DICT"/>
+
+            <etl-transform source="DICT_ID" target="DICT_ID"/>
+            <etl-transform source="DICT_NAME" target="DICT_TEXT"/>
+
+            <!--
+            exclude属性开启，表示从source中移除一个列
+            这里就表示移除掉ROWID列，不进行同步
+             -->
+            <etl-transform source="ROWID" target="" exclude="true"/>
+
+            <!--
+            include属性开启，表示需要增加一个目标列插入逻辑
+            这里就添加了一个插入列映射DICT_NAME->DICT_TITLE
+            那这一个，结合前面的，那就是把一个源列，同时插入到两个目标列
+            -->
+            <etl-transform source="DICT_NAME" target="DICT_TITLE" include="true"/>
+
+            <!--
+            external属性开启，表示源列的数据来源是Map上下文中
+            而不是固定的源列的列名
+            这种情况下，就适合添加一些源列中没有的列，而数据的来源是整个Map上下文的情况
+            比如这里的例子中，使用的就是当前时间添加一列作为SYNC_TIME
+            -->
+            <etl-transform source.date-now="" target="SYNC_TIME" external="true"/>
+
+            <!--
+            external属性开启，表示源列的数据来源是Map上下文中
+            而不是固定的源列的列名
+            这个例子和上面的例子差不多，区别是这里直接访问了Map.SYNC_ID作为值
+            这个值可能是进入ETL之前的Map上下文中就保存得同步操作的流水批次号
+            -->
+            <etl-transform source.visit="SYNC_ID" target="SYNC_ID" external="true"/>
+
+            <!--
+           external属性开启，表示源列的数据来源是Map上下文中
+           而不是固定的源列的列名
+           和上面的类似，这个例子中时从Map.iter.DICT_ID取值
+           那么iter是怎么确定的？
+           这里的iter就是sql-etl节点的item属性指定的迭代变量的变量名iter
+           -->
+            <etl-transform source.visit="item.DICT_ID" target="SYNC_ID" external="true"/>
+
+            <etl-load datasource="primary" table="DIM_SYS_DICT"/>
         </sql-etl>
     </script-segment>
 

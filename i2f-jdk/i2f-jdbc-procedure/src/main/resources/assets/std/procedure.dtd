@@ -85,12 +85,14 @@
         <!ATTLIST lang-printf tag.string CDATA #IMPLIED>
 
         <!ATTLIST lang-printf value.string CDATA #IMPLIED>
+        <!ATTLIST lang-printf value.render CDATA #IMPLIED>
         <!ATTLIST lang-printf value.trim CDATA #IMPLIED>
         <!ATTLIST lang-printf value.align CDATA #IMPLIED>
         <!ATTLIST lang-printf value.body-text CDATA #IMPLIED>
         <!ATTLIST lang-printf value.body-xml CDATA #IMPLIED>
         <!ATTLIST lang-printf value.body-text.trim CDATA #IMPLIED>
         <!ATTLIST lang-printf value.body-xml.trim CDATA #IMPLIED>
+        <!ATTLIST lang-printf value.body-xml.trim.render CDATA #IMPLIED>
         <!ATTLIST lang-printf value.body-text.align CDATA #IMPLIED>
         <!ATTLIST lang-printf value.body-xml.align CDATA #IMPLIED>
 
@@ -1039,6 +1041,7 @@
         <!ATTLIST sql-etl write-batch-size CDATA #IMPLIED>
         <!ATTLIST sql-etl before-truncate CDATA #IMPLIED>
         <!ATTLIST sql-etl commit-size CDATA #IMPLIED>
+        <!ATTLIST sql-etl item CDATA #IMPLIED>
 
         <!ELEMENT etl-extra (EMPTY)>
         <!ATTLIST etl-extra datasource CDATA #IMPLIED>
@@ -1051,11 +1054,17 @@
         <!ATTLIST etl-transform source CDATA #IMPLIED>
         <!ATTLIST etl-transform target CDATA #IMPLIED>
         <!ATTLIST etl-transform type CDATA #IMPLIED>
+        <!ATTLIST etl-transform include CDATA #IMPLIED>
+        <!ATTLIST etl-transform exclude CDATA #IMPLIED>
+        <!ATTLIST etl-transform external CDATA #IMPLIED>
 
         <!ATTLIST etl-transform source.visit CDATA #IMPLIED>
         <!ATTLIST etl-transform source.eval CDATA #IMPLIED>
         <!ATTLIST etl-transform source.eval-java CDATA #IMPLIED>
         <!ATTLIST etl-transform source.test CDATA #IMPLIED>
+        <!ATTLIST etl-transform source.string CDATA #IMPLIED>
+        <!ATTLIST etl-transform source.render CDATA #IMPLIED>
+        <!ATTLIST etl-transform source.int CDATA #IMPLIED>
 
         <!ELEMENT etl-load (EMPTY)>
         <!ATTLIST etl-load datasource CDATA #IMPLIED>
@@ -1063,6 +1072,8 @@
 
         <!ATTLIST etl-load datasource.visit CDATA #IMPLIED>
         <!ATTLIST etl-load datasource.visit.string CDATA #IMPLIED>
+        <!ATTLIST etl-load datasource.string CDATA #IMPLIED>
+        <!ATTLIST etl-load datasource.render CDATA #IMPLIED>
 
         <!ELEMENT etl-before (ANY)>
 

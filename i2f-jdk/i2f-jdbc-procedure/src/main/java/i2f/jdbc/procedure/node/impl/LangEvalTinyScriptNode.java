@@ -389,7 +389,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         @Override
         public Reference<Object> beforeFunctionCall(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
             try {
-                ProcedureMeta meta = executor.getMeta(naming);
+                ProcedureMeta meta = executor.getMeta(naming,(Map<String, Object>) context);
                 if (meta == null) {
                     return Reference.nop();
                 }

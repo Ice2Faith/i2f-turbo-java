@@ -6,6 +6,7 @@ import i2f.context.std.INamingContext;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.environment.std.IEnvironment;
 import i2f.form.dialog.DialogBoxes;
+import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.event.XProc4jEvent;
@@ -67,6 +68,28 @@ public interface JdbcProcedureExecutor {
     }
 
     default ProcedureMeta getMeta(String procedureId) {
+        return getMeta(procedureId,null);
+    }
+
+    default ProcedureMeta getMeta(String procedureId,Map<String,Object> context){
+        if(context!=null){
+            // resolve segment-script naming, while multiply procedure.xml file has same id
+            // avoid segment-script naming fuzzy.
+            try {
+                Map<String,Object> global = (Map<String,Object>)context.get(ParamsConsts.GLOBAL);
+                if(global!=null) {
+                    Map<String,ProcedureMeta> metas = (Map<String,ProcedureMeta>)global.get(ParamsConsts.METAS);
+                    if(metas!=null) {
+                        ProcedureMeta meta = metas.get(procedureId);
+                        if (meta != null) {
+                            return meta;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+        }
         return getMetaMap().get(procedureId);
     }
 
@@ -162,7 +185,7 @@ public interface JdbcProcedureExecutor {
     }
 
     default Map<String, Object> exec(String procedureId, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
-        ProcedureMeta callNode = getMeta(procedureId);
+        ProcedureMeta callNode = getMeta(procedureId,params);
         if (callNode == null) {
             throw new NotFoundSignalException("not found node: " + procedureId);
         }
@@ -205,7 +228,7 @@ public interface JdbcProcedureExecutor {
     }
 
     default Map<String, Object> execAsProcedure(String procedureId, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
-        ProcedureMeta callNode = getMeta(procedureId);
+        ProcedureMeta callNode = getMeta(procedureId,params);
         if (callNode == null) {
             throw new NotFoundSignalException("not found node: " + procedureId);
         }

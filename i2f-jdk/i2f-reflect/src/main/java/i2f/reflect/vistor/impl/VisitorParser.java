@@ -148,6 +148,16 @@ public class VisitorParser {
         if (expression == null || expression.isEmpty()) {
             return new ConstVisitor(null);
         }
+        if(nodeObj instanceof Map){
+            Map map=(Map)nodeObj;
+            try {
+                if(map.containsKey(expression)){
+                    return new MapVisitor(map, expression);
+                }
+            } catch (Exception e) {
+
+            }
+        }
         Visitor ret = new ReadonlyVisitor(nodeObj, nodeObj);
         List<String> tokens = splitTokens(expression);
 
