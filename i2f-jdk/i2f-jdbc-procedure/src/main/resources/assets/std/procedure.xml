@@ -1623,10 +1623,10 @@ eval-ts使用TinyScript引擎进行处理
             <etl-transform source="DICT_NAME" target="DICT_TEXT"/>
 
             <!--
-            exclude属性开启，表示从source中移除一个列
+            exclude属性开启，表示从target中移除一个列
             这里就表示移除掉ROWID列，不进行同步
              -->
-            <etl-transform source="ROWID" target="" exclude="true"/>
+            <etl-transform source="" target="ROWID" exclude="true"/>
 
             <!--
             include属性开启，表示需要增加一个目标列插入逻辑
