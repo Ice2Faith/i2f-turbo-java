@@ -1054,6 +1054,7 @@
         <!ATTLIST etl-transform source CDATA #IMPLIED>
         <!ATTLIST etl-transform target CDATA #IMPLIED>
         <!ATTLIST etl-transform type CDATA #IMPLIED>
+        <!ATTLIST etl-transform jdbc-type CDATA #IMPLIED>
         <!ATTLIST etl-transform include CDATA #IMPLIED>
         <!ATTLIST etl-transform exclude CDATA #IMPLIED>
         <!ATTLIST etl-transform external CDATA #IMPLIED>

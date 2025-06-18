@@ -48,6 +48,8 @@ public interface AttrConsts {
     String E = "e";
     String CAUSE = "cause";
 
+    String JDBC_TYPE="jdbc-type";
+
     String REFID = "refid";
     String PARAMS = "params";
     String PARAMS_SHARE = "params-share";

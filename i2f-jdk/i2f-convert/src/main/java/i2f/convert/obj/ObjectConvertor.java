@@ -400,13 +400,21 @@ public class ObjectConvertor {
         if (TypeOf.typeOfAny(sourceType, numericTypes)
                 &&
                 TypeOf.typeOfAny(targetType, numericTypes)) {
-            BigDecimal decimal = new BigDecimal(String.valueOf(val));
-            for (Map.Entry<Class<?>, Function<BigDecimal, ?>> entry : bigDecimalTypeConverterMap.entrySet()) {
-                Class<?> itemClass = entry.getKey();
-                if (TypeOf.typeOf(itemClass, targetType)) {
-                    return entry.getValue().apply(decimal);
+            BigDecimal decimal = (val instanceof BigDecimal)?((BigDecimal) val):new BigDecimal(String.valueOf(val));
+            Function<BigDecimal, ?> func = bigDecimalTypeConverterMap.get(targetType);
+            if(func==null){
+                for (Map.Entry<Class<?>, Function<BigDecimal, ?>> entry : bigDecimalTypeConverterMap.entrySet()) {
+                    Class<?> itemClass = entry.getKey();
+                    if (TypeOf.typeOf(itemClass, targetType)) {
+                        func=entry.getValue();
+                        break;
+                    }
                 }
             }
+            if(func!=null){
+                return func.apply(decimal);
+            }
+
         }
 
         // 原始和目标都是 Boolean
@@ -415,11 +423,18 @@ public class ObjectConvertor {
                 &&
                 TypeOf.typeOfAny(targetType, boolTypes)) {
             boolean ok = (val == null) ? false : (Boolean) val;
-            for (Map.Entry<Class<?>, Function<Boolean, ?>> entry : boolTypeConverterMap.entrySet()) {
-                Class<?> itemClass = entry.getKey();
-                if (TypeOf.typeOf(itemClass, targetType)) {
-                    return entry.getValue().apply(ok);
+            Function<Boolean, ?> func = boolTypeConverterMap.get(targetType);
+            if(func==null) {
+                for (Map.Entry<Class<?>, Function<Boolean, ?>> entry : boolTypeConverterMap.entrySet()) {
+                    Class<?> itemClass = entry.getKey();
+                    if (TypeOf.typeOf(itemClass, targetType)) {
+                        func=entry.getValue();
+                        break;
+                    }
                 }
+            }
+            if(func!=null){
+                return func.apply(ok);
             }
         }
 
@@ -429,11 +444,18 @@ public class ObjectConvertor {
                 &&
                 TypeOf.typeOfAny(targetType, charTypes)) {
             char ch = (val == null) ? 0 : (Character) val;
-            for (Map.Entry<Class<?>, Function<Character, ?>> entry : charTypeConverterMap.entrySet()) {
-                Class<?> itemClass = entry.getKey();
-                if (TypeOf.typeOf(itemClass, targetType)) {
-                    return entry.getValue().apply(ch);
+            Function<Character, ?> func = charTypeConverterMap.get(targetType);
+            if(func==null) {
+                for (Map.Entry<Class<?>, Function<Character, ?>> entry : charTypeConverterMap.entrySet()) {
+                    Class<?> itemClass = entry.getKey();
+                    if (TypeOf.typeOf(itemClass, targetType)) {
+                        func=entry.getValue();
+                        break;
+                    }
                 }
+            }
+            if(func!=null){
+                return func.apply(ch);
             }
         }
 
@@ -444,20 +466,33 @@ public class ObjectConvertor {
                 &&
                 TypeOf.typeOfAny(targetType, dateTypes)) {
             Instant ins = null;
-            for (Map.Entry<Class<?>, Function<Object, Instant>> entry : date2InstantConverterMap.entrySet()) {
-                Class<?> itemClass = entry.getKey();
-                if (TypeOf.typeOf(itemClass, sourceType)) {
-                    ins = entry.getValue().apply(val);
-                    break;
+            Function<Object, Instant> sourceFunc = date2InstantConverterMap.get(sourceType);
+            if(sourceFunc==null) {
+                for (Map.Entry<Class<?>, Function<Object, Instant>> entry : date2InstantConverterMap.entrySet()) {
+                    Class<?> itemClass = entry.getKey();
+                    if (TypeOf.typeOf(itemClass, sourceType)) {
+                        sourceFunc=entry.getValue();
+                        break;
+                    }
                 }
+            }
+            if(sourceFunc!=null){
+                ins = sourceFunc.apply(val);
             }
 
             if (ins != null) {
-                for (Map.Entry<Class<?>, Function<Instant, ?>> entry : dateTypeConverterMap.entrySet()) {
-                    Class<?> itemClass = entry.getKey();
-                    if (TypeOf.typeOf(itemClass, targetType)) {
-                        return entry.getValue().apply(ins);
+                Function<Instant, ?> func = dateTypeConverterMap.get(targetType);
+                if(func==null) {
+                    for (Map.Entry<Class<?>, Function<Instant, ?>> entry : dateTypeConverterMap.entrySet()) {
+                        Class<?> itemClass = entry.getKey();
+                        if (TypeOf.typeOf(itemClass, targetType)) {
+                            func = entry.getValue();
+                            break;
+                        }
                     }
+                }
+                if(func!=null){
+                    return func.apply(ins);
                 }
             }
 
@@ -483,11 +518,18 @@ public class ObjectConvertor {
             }
 
             if (decimal != null) {
-                for (Map.Entry<Class<?>, Function<BigDecimal, ?>> entry : bigDecimalTypeConverterMap.entrySet()) {
-                    Class<?> itemClass = entry.getKey();
-                    if (TypeOf.typeOf(itemClass, targetType)) {
-                        return entry.getValue().apply(decimal);
+                Function<BigDecimal, ?> func = bigDecimalTypeConverterMap.get(targetType);
+                if(func==null) {
+                    for (Map.Entry<Class<?>, Function<BigDecimal, ?>> entry : bigDecimalTypeConverterMap.entrySet()) {
+                        Class<?> itemClass = entry.getKey();
+                        if (TypeOf.typeOf(itemClass, targetType)) {
+                            func = entry.getValue();
+                            break;
+                        }
                     }
+                }
+                if(func!=null){
+                    return func.apply(decimal);
                 }
             }
         }
