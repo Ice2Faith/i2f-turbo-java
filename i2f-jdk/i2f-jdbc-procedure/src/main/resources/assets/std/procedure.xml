@@ -1522,6 +1522,7 @@ eval-ts使用TinyScript引擎进行处理
         source表示原始的列名
         target表示目标列名，将用于load中构造插入语句的目标列名
         type用于指定目标接受的类型，值应该是一个class类型
+        jdbc-type用于指定目标接受的JDBCType类型，值应该是java.sql.JDBCType的枚举值，例如：VARCHAR,DATE等
         source默认使用string访问，等价于 source.string ,可使用其他修饰符实现原始数据的转换或覆盖
         target使用string访问，等价于 target.string, 不支持修饰符
         exclude默认以boolean访问，指定目标列target是否被移除，不进行同步
@@ -1535,7 +1536,7 @@ eval-ts使用TinyScript引擎进行处理
         特别的，具有exclude，include，external属性的transform节点，是特殊节点，不是普通节点，不参与自动映射的判定
         处理规则：自动映射/手动映射->剔除exclude的目标->添加include/external的目标
         -->
-        <etl-transform source="" target="" type="" exclude="" include="" external=""/>
+        <etl-transform source="" target="" type="int" jdbc-type="VARCHAR" exclude="" include="" external=""/>
         <!--
         进行数据的写入，将数据写入到datasource指定的数据源中
         目标表用table表示

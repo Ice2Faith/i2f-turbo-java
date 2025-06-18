@@ -5,6 +5,7 @@ import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
+import i2f.jdbc.data.TypedArgument;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
@@ -16,9 +17,9 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.page.ApiPage;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.Date;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -204,12 +205,14 @@ public class SqlEtlNode extends AbstractExecutorNode {
             Map<String, XmlNode> targetNodeMap = new LinkedHashMap<>();
             Map<String, Map.Entry<String, List<String>>> targetMap = new LinkedHashMap<>();
             Map<String, Class<?>> targetTypeMap = new LinkedHashMap<>();
+            Map<String,JDBCType> targetJdbcTypeMap=new LinkedHashMap<>();
             Map<String,XmlNode> targetExternalNodeMap=new LinkedHashMap<>();
             String loadSql = "";
 
 
             if (executor.isDebug()) {
                 bql = bql.concat(getTrackingComment(node));
+                executor.logDebug("etl extra: \n"+bql);
             }
 
             int pageIndex = 0;
@@ -230,7 +233,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 if (pageIndex == 0) {
 
                     if (transformNodeList.isEmpty()) {
-
+                        Map<String, XmlNode> autoMapping = new LinkedHashMap<>();
                         Object row = list.get(0);
                         if (row instanceof Map) {
                             Map<String, Object> map = (Map<String, Object>) row;
@@ -239,16 +242,18 @@ public class SqlEtlNode extends AbstractExecutorNode {
                             QueryResult loadResult = JdbcResolver.query(loadConn, loadMetaSql, new ArrayList<>());
                             List<QueryColumn> loadColumns = loadResult.getColumns();
 
+
                             for (QueryColumn loadColumn : loadColumns) {
+                                String loadName = loadColumn.getName();
                                 for (String extraName : map.keySet()) {
-                                    String loadName = loadColumn.getName();
                                     if (extraName.equalsIgnoreCase(loadName)) {
 
                                         XmlNode xmlNode = new XmlNode();
                                         xmlNode.setTagName(TagConsts.ETL_TRANSFORM);
                                         xmlNode.setNodeType(XmlNode.NodeType.ELEMENT);
                                         xmlNode.setChildren(new ArrayList<>());
-                                        xmlNode.setTagAttrMap(new HashMap<>());
+                                        xmlNode.setTagAttrMap(new LinkedHashMap<>());
+                                        xmlNode.setAttrFeatureMap(new LinkedHashMap<>());
                                         xmlNode.getTagAttrMap().put(AttrConsts.SOURCE, extraName);
                                         xmlNode.getTagAttrMap().put(AttrConsts.TARGET, loadName);
                                         String javaType = null;
@@ -261,32 +266,52 @@ public class SqlEtlNode extends AbstractExecutorNode {
                                             javaType = Date.class.getName();
                                         } else if (Types.VARCHAR == type
                                                 || Types.CHAR == type
-                                                || Types.LONGVARCHAR == type
-                                                || Types.LONGNVARCHAR == type
                                                 || Types.NCHAR == type
                                                 || Types.NVARCHAR == type) {
                                             javaType = String.class.getName();
-                                        } else if (Types.INTEGER == type
+                                        }else if (Types.LONGVARCHAR == type
+                                                || Types.LONGNVARCHAR == type) {
+                                            javaType = Clob.class.getName();
+                                        }  else if (Types.INTEGER == type
                                                 || Types.SMALLINT == type
                                                 || Types.TINYINT == type) {
                                             javaType = Integer.class.getName();
                                         } else if (Types.BIGINT == type) {
                                             javaType = Long.class.getName();
                                         } else if (Types.DOUBLE == type
-                                                || Types.FLOAT == type
-                                                || Types.REAL == type
+                                                || Types.FLOAT == type) {
+                                            javaType = Double.class.getName();
+                                        } else if (Types.REAL == type
                                                 || Types.NUMERIC == type
                                                 || Types.DECIMAL == type) {
-                                            javaType = Double.class.getName();
+                                            javaType = BigDecimal.class.getName();
+                                        } else if (Types.CLOB == type
+                                                || Types.NCLOB == type) {
+                                            javaType = Clob.class.getName();
+                                        } else if (Types.BLOB == type) {
+                                            javaType = Blob.class.getName();
                                         }
+
                                         if (javaType != null) {
                                             xmlNode.getTagAttrMap().put(AttrConsts.TYPE, javaType);
                                         }
-                                        targetNodeMap.put(loadName, xmlNode);
+                                        JDBCType jdbcType = null;
+                                        try{
+                                            jdbcType=JDBCType.valueOf(type);
+                                        }catch(Exception e){
+
+                                        }
+                                        if(jdbcType!=null){
+                                            xmlNode.getTagAttrMap().put(AttrConsts.JDBC_TYPE, jdbcType.name());
+                                        }
+                                        autoMapping.put(loadName, xmlNode);
                                         break;
                                     }
                                 }
                             }
+                        }
+                        for (Map.Entry<String, XmlNode> entry : autoMapping.entrySet()) {
+                            transformNodeList.add(entry.getValue());
                         }
                     }
 
@@ -302,6 +327,14 @@ public class SqlEtlNode extends AbstractExecutorNode {
                                 String typeName = item.getTagAttrMap().get(AttrConsts.TYPE);
                                 Class<?> targetType = executor.loadClass(typeName);
                                 targetTypeMap.put(target, targetType);
+
+                                String jdbcTypeName = item.getTagAttrMap().get(AttrConsts.JDBC_TYPE);
+                                JDBCType[] jdbcTypeArr = JDBCType.class.getEnumConstants();
+                                for (JDBCType jdbcType : jdbcTypeArr) {
+                                    if(jdbcType.name().equalsIgnoreCase(jdbcTypeName)){
+                                        targetJdbcTypeMap.put(target,jdbcType);
+                                    }
+                                }
                             }
                             targetNodeMap.put(target, item);
                         }
@@ -317,6 +350,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                                     targetMap.remove(target);
 
                                     targetTypeMap.remove(target);
+                                    targetJdbcTypeMap.remove(target);
                                 }
                                 targetNodeMap.remove(target);
                             }
@@ -338,6 +372,14 @@ public class SqlEtlNode extends AbstractExecutorNode {
                                     String typeName = item.getTagAttrMap().get(AttrConsts.TYPE);
                                     Class<?> targetType = executor.loadClass(typeName);
                                     targetTypeMap.put(target, targetType);
+
+                                    String jdbcTypeName = item.getTagAttrMap().get(AttrConsts.JDBC_TYPE);
+                                    JDBCType[] jdbcTypeArr = JDBCType.class.getEnumConstants();
+                                    for (JDBCType jdbcType : jdbcTypeArr) {
+                                        if(jdbcType.name().equalsIgnoreCase(jdbcTypeName)){
+                                            targetJdbcTypeMap.put(target,jdbcType);
+                                        }
+                                    }
                                 }
                                 targetNodeMap.put(target, item);
                                 if(attrs.contains(AttrConsts.EXTERNAL)){
@@ -375,6 +417,9 @@ public class SqlEtlNode extends AbstractExecutorNode {
                     loadSqlBuilder.append(" ) ");
 
                     loadSql = loadSqlBuilder.toString();
+                    if(executor.isDebug()){
+                        executor.logDebug("etl load: \n"+loadSql);
+                    }
                 }
 
                 int currentCount = 0;
@@ -394,11 +439,15 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                         XmlNode definedNode = targetNodeMap.get(entry.getKey());
                         if (definedNode != null) {
-                            val = executor.resultValue(val, value.getValue(), definedNode, context);
+                            val = executor.resultValue(val, definedNode.getAttrFeatureMap().get(AttrConsts.TARGET), definedNode, context);
                         }
                         Class<?> targetType = targetTypeMap.get(entry.getKey());
                         if (targetType != null) {
                             val = ObjectConvertor.tryConvertAsType(val, targetType);
+                        }
+                        JDBCType jdbcType = targetJdbcTypeMap.get(entry.getKey());
+                        if(jdbcType!=null){
+                            val=TypedArgument.of(jdbcType,val);
                         }
                         elems.add(val);
                     }

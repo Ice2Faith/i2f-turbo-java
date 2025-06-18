@@ -42,10 +42,7 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
         if (meta == null) {
             return;
         }
-        if (meta.getType() != ProcedureMeta.Type.XML) {
-            return;
-        }
-        XmlNode nextNode = (XmlNode) meta.getTarget();
+
         // 备份堆栈
         Map<String, Object> bakParams = new LinkedHashMap<>();
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
@@ -59,8 +56,7 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
             Object val = executor.attrValue(name, FeatureConsts.VISIT, node, context);
             executor.visitSet(context, name, val);
         }
-
-        executor.execAsProcedure(nextNode, context, false, false);
+        executor.execAsProcedure(meta,context,false,false);
 
         // 恢复堆栈
         for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
