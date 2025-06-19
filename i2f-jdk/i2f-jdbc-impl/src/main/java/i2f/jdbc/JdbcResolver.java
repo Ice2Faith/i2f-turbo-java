@@ -744,6 +744,9 @@ public class JdbcResolver {
             if (batchSize < 0) {
                 while (iterator.hasNext()) {
                     List<Object> elem = iterator.next();
+                    if(elem==null){
+                        continue;
+                    }
                     if (stat == null) {
                         stat = conn.prepareStatement(sql);
                     }
@@ -759,6 +762,9 @@ public class JdbcResolver {
                 int count = 0;
                 while (iterator.hasNext()) {
                     List<Object> elem = iterator.next();
+                    if(elem==null){
+                        continue;
+                    }
 
                     once.add(elem);
                     count++;

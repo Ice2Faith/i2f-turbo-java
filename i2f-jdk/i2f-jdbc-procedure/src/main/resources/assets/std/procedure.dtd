@@ -1042,6 +1042,7 @@
         <!ATTLIST sql-etl before-truncate CDATA #IMPLIED>
         <!ATTLIST sql-etl commit-size CDATA #IMPLIED>
         <!ATTLIST sql-etl item CDATA #IMPLIED>
+        <!ATTLIST sql-etl sync CDATA #IMPLIED>
 
         <!ELEMENT etl-extra (EMPTY)>
         <!ATTLIST etl-extra datasource CDATA #IMPLIED>

@@ -56,6 +56,8 @@ public interface AttrConsts {
 
     String BATCH_SIZE = "batch-size";
     String ACCEPT_BATCH = "accept-batch";
+    String SYNC="sync";
+    String ASYNC="async";
 
     String DATABASES = "databases";
 
