@@ -1824,12 +1824,21 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             if (item instanceof TinyScriptParser.ConstBoolContext) {
                 TinyScriptParser.ConstBoolContext nextCtx = (TinyScriptParser.ConstBoolContext) item;
                 return visitConstBool(nextCtx);
+            } else if (item instanceof TinyScriptParser.ConstClassContext) {
+                TinyScriptParser.ConstClassContext nextCtx = (TinyScriptParser.ConstClassContext) item;
+                return visitConstClass(nextCtx);
             } else if (item instanceof TinyScriptParser.ConstNullContext) {
                 TinyScriptParser.ConstNullContext nextCtx = (TinyScriptParser.ConstNullContext) item;
                 return visitConstNull(nextCtx);
             } else if (item instanceof TinyScriptParser.ConstStringContext) {
                 TinyScriptParser.ConstStringContext nextCtx = (TinyScriptParser.ConstStringContext) item;
                 return visitConstString(nextCtx);
+            } else if (item instanceof TinyScriptParser.ConstMultilineStringContext) {
+                TinyScriptParser.ConstMultilineStringContext nextCtx = (TinyScriptParser.ConstMultilineStringContext) item;
+                return visitConstMultilineString(nextCtx);
+            } else if (item instanceof TinyScriptParser.ConstRenderStringContext) {
+                TinyScriptParser.ConstRenderStringContext nextCtx = (TinyScriptParser.ConstRenderStringContext) item;
+                return visitConstRenderString(nextCtx);
             } else if (item instanceof TinyScriptParser.DecNumberContext) {
                 TinyScriptParser.DecNumberContext nextCtx = (TinyScriptParser.DecNumberContext) item;
                 return visitDecNumber(nextCtx);
@@ -1842,9 +1851,6 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.BinNumberContext) {
                 TinyScriptParser.BinNumberContext nextCtx = (TinyScriptParser.BinNumberContext) item;
                 return visitBinNumber(nextCtx);
-            } else if (item instanceof TinyScriptParser.ConstClassContext) {
-                TinyScriptParser.ConstClassContext nextCtx = (TinyScriptParser.ConstClassContext) item;
-                return visitConstClass(nextCtx);
             }
             throw new IllegalArgumentException("un-support const value found : " + ctx.getText());
         } catch (Throwable e) {
