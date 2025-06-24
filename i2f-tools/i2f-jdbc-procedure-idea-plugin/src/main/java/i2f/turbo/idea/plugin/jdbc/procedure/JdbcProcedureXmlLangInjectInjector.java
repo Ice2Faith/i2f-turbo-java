@@ -998,6 +998,17 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
                 return;
             }
+        }else if ("jdbc-type".equals(attrName)) {
+            Language lang = findPossibleLanguage("java");
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace("class MyDsl { void call() { java.sql.JDBCType obj=java.sql.JDBCType.",
+                                "; } }",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
+            }
         }
 
         if (attrName.contains(".int")
