@@ -1,17 +1,20 @@
 <templateSet group="XProc4j">
-    <template name="&lt;context-convert-method-class" value="&lt;context-convert-method-class class=&quot;$CLASS$&quot;/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;cdata" value="&lt;![CDATA[&#10;   $END$&#10;]]&gt;" description="" toReformat="false" toShortenFQNames="true">
+        <context />
+    </template>
+    <template name="&lt;context-convert-method-class" value="&lt;context-convert-method-class class=&quot;$CLASS$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="CLASS" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;context-invoke-method-class" value="&lt;context-invoke-method-class class=&quot;$CLASS$&quot;/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;context-invoke-method-class" value="&lt;context-invoke-method-class class=&quot;$CLASS$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="CLASS" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;context-load-package" value="&lt;context-load-package package=&quot;$PACKAGE$&quot; class=&quot;$CLASS$&quot;/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;context-load-package" value="&lt;context-load-package package=&quot;$PACKAGE$&quot; class=&quot;$CLASS$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="PACKAGE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <variable name="CLASS" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
@@ -25,38 +28,47 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;etl-after" value="&lt;etl-after&gt;&#10;    $END$&#10;&lt;/etl-after&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;etl-after" value="&lt;etl-after&gt;&#10;    $END$&#10;&lt;/etl-after&gt;" description="" toReformat="false" toShortenFQNames="true">
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;etl-before" value="&lt;etl-before&gt;&#10;    $END$&#10;&lt;/etl-before&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;etl-before" value="&lt;etl-before&gt;&#10;    $END$&#10;&lt;/etl-before&gt;" description="" toReformat="false" toShortenFQNames="true">
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;etl-extra" value="&lt;etl-extra datasource=&quot;$DATASOURCE$&quot; table=&quot;$TABLE$&quot;/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;etl-extra" value="&lt;etl-extra datasource=&quot;$DATASOURCE$&quot; table=&quot;$TABLE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="DATASOURCE" expression="" defaultValue="&quot;oracle&quot;" alwaysStopAt="true" />
         <variable name="TABLE" expression="" defaultValue="&quot;sys_user&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;etl-load" value="&lt;etl-load datasource=&quot;$DATASURCE$&quot; table=&quot;$TABLE$&quot;/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;etl-load" value="&lt;etl-load datasource=&quot;$DATASURCE$&quot; table=&quot;$TABLE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="DATASURCE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <variable name="TABLE" expression="" defaultValue="&quot;sys_user&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;etl-transform" value="&lt;etl-transform source$SOURCE_FEATURE$=&quot;$SOURCE$&quot; target=&quot;$TARGET$&quot; type=&quot;$TYPE$&quot;/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;etl-transform" value="&lt;etl-transform source$SOURCE_FEATURE$=&quot;$SOURCE$&quot; target=&quot;$TARGET$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="SOURCE_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <variable name="SOURCE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <variable name="TARGET" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
-        <variable name="TYPE" expression="" defaultValue="&quot;string&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
+    </template>
+    <template name="&lt;event-publish" value="&lt;event-publish event-type=&quot;$EVENT_TYPE$&quot; $ARGS$/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="EVENT_TYPE" expression="" defaultValue="&quot;log&quot;" alwaysStopAt="true" />
+        <variable name="ARGS" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
+    </template>
+    <template name="&lt;event-send" value="&lt;event-send event-type=&quot;$EVENT_TYPE$&quot; $ARGS$/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="EVENT_TYPE" expression="" defaultValue="&quot;log&quot;" alwaysStopAt="true" />
+        <variable name="ARGS" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
     </template>
     <template name="&lt;function-call" value="&lt;function-call refid=&quot;$ID$&quot; result=&quot;$RESULT$&quot; $PARAM_SHARE$&#10;    $PARAMS$ $ATTR$/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="ID" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
@@ -75,7 +87,7 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-async" value="&lt;lang-async $AWAIT$ $DELAY$ $TIME_UNIT$&gt;&#10;    $END$&#10;&lt;/lang-async&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-async" value="&lt;lang-async $AWAIT$ $DELAY$ $TIME_UNIT$&gt;&#10;    $END$&#10;&lt;/lang-async&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="AWAIT" expression="" defaultValue="&quot;await=\&quot;false\&quot;&quot;" alwaysStopAt="true" />
         <variable name="DELAY" expression="" defaultValue="&quot;delay=\&quot;0\&quot;&quot;" alwaysStopAt="true" />
         <variable name="TIME_UNIT" expression="" defaultValue="&quot;time-unit=\&quot;SECONDS\&quot;&quot;" alwaysStopAt="true" />
@@ -83,7 +95,7 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-async-all" value="&lt;lang-async-all $AWAIT$&gt;&#10;    &lt;lang-body&gt;&#10;        $END$&#10;    &lt;/lang-body&gt;&#10;&lt;/lang-async-all&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-async-all" value="&lt;lang-async-all $AWAIT$&gt;&#10;    &lt;lang-body&gt;&#10;        $END$&#10;    &lt;/lang-body&gt;&#10;&lt;/lang-async-all&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="AWAIT" expression="" defaultValue="&quot;await=\&quot;true\&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
@@ -111,63 +123,104 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-eval-groovy" value="&lt;lang-eval-groovy result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-groovy&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-eval-groovy" value="&lt;lang-eval-groovy result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-groovy&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-eval-java" value="&lt;lang-eval-java result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;    return null;&#10;&lt;/lang-eval-java&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-eval-java" value="&lt;lang-eval-java result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;    return null;&#10;&lt;/lang-eval-java&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-eval-javascript" value="&lt;lang-eval-javascript result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-javascript&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-eval-javascript" value="&lt;lang-eval-javascript result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-javascript&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-eval-js" value="&lt;lang-eval-js result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-js&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-eval-js" value="&lt;lang-eval-js result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-js&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-eval-tinyscript" value="&lt;lang-eval-tinyscript result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-tinyscript&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-eval-tinyscript" value="&lt;lang-eval-tinyscript result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-tinyscript&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-eval-ts" value="&lt;lang-eval-ts result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-ts&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-eval-ts" value="&lt;lang-eval-ts result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/lang-eval-ts&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
+    </template>
+    <template name="&lt;lang-file-delete" value="&lt;lang-file-delete file$FEATURE$=&quot;$FILE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="FILE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
+    </template>
+    <template name="&lt;lang-file-exists" value="&lt;lang-file-exists result$RESULT_FEATURE$=&quot;$RESULT$&quot; file$FILE_FEATURE$=&quot;$FILE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="RESULT_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="RESULT" expression="" defaultValue="&quot;v_result&quot;" alwaysStopAt="true" />
+        <variable name="FILE_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="FILE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
+    </template>
+    <template name="&lt;lang-file-list" value="&lt;lang-file-list result$RESULT_FEATURE$=&quot;$RESULT$&quot; file$FILE_FEATURE$=&quot;$FILE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="RESULT_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="RESULT" expression="" defaultValue="&quot;v_files&quot;" alwaysStopAt="true" />
+        <variable name="FILE_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="FILE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
+    </template>
+    <template name="&lt;lang-file-mkdirs" value="&lt;lang-file-mkdirs file$FEATURE$=&quot;$FILE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="FILE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
+    </template>
+    <template name="&lt;lang-file-read-text" value="&lt;lang-file-read-text result$RESULT_FEATURE$=&quot;$RESULT$&quot; file$FILE_FEATURE$=&quot;$FILE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="RESULT_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="RESULT" expression="" defaultValue="&quot;v_text&quot;" alwaysStopAt="true" />
+        <variable name="FILE_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="FILE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
+    </template>
+    <template name="&lt;lang-file-tree" value="&lt;lang-file-tree result$RESULT_FEATURE$=&quot;$RESULT$&quot; file$FILE_FEATURE$=&quot;$FILE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="RESULT_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="RESULT" expression="" defaultValue="&quot;v_files&quot;" alwaysStopAt="true" />
+        <variable name="FILE_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="FILE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
+    </template>
+    <template name="&lt;lang-file-write-text" value="&lt;lang-file-write-text content$CONTENT_FEATURE$=&quot;$CONTENT$&quot; file$FILE_FEATURE$=&quot;$FILE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="CONTENT_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="CONTENT" expression="" defaultValue="&quot;v_text&quot;" alwaysStopAt="true" />
+        <variable name="FILE_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="FILE" expression="" defaultValue="&quot;v_file&quot;" alwaysStopAt="true" />
+        <context />
     </template>
     <template name="&lt;lang-finally" value=" &lt;lang-finally&gt;&#10;    $END$&#10;&lt;/lang-finally&gt;" description="" toReformat="false" toShortenFQNames="true">
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-foreach" value="&lt;lang-foreach collection=&quot;$COLLECTION$&quot; item=&quot;$ITEM$&quot; $FIRST$ $INDEX$&gt;&#10;    $END$&#10;&lt;/lang-foreach&gt;" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-foreach" value="&lt;lang-foreach collection=&quot;$COLLECTION$&quot; item=&quot;$ITEM$&quot;&gt;&#10;    $END$&#10;&lt;/lang-foreach&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="COLLECTION" expression="" defaultValue="&quot;list&quot;" alwaysStopAt="true" />
         <variable name="ITEM" expression="" defaultValue="&quot;item&quot;" alwaysStopAt="true" />
-        <variable name="FIRST" expression="" defaultValue="&quot;first=\&quot;first\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="INDEX" expression="" defaultValue="&quot;index=\&quot;index\&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-fori" value="&lt;lang-fori item=&quot;$ITEM$&quot; begin.int=&quot;$BEGIN$&quot; end.int=&quot;$END_VAL$&quot; incr.int=&quot;$INCR$&quot; $FIRST$ $INDEX$&gt;&#10;    $END$&#10;&lt;/lang-fori&gt;" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-fori" value="&lt;lang-fori item=&quot;$ITEM$&quot; begin.int=&quot;$BEGIN$&quot; end.int=&quot;$END_VAL$&quot; incr.int=&quot;$INCR$&quot;&gt;&#10;    $END$&#10;&lt;/lang-fori&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="ITEM" expression="" defaultValue="&quot;item&quot;" alwaysStopAt="true" />
         <variable name="BEGIN" expression="" defaultValue="&quot;0&quot;" alwaysStopAt="true" />
         <variable name="END_VAL" expression="" defaultValue="&quot;10&quot;" alwaysStopAt="true" />
         <variable name="INCR" expression="" defaultValue="&quot;1&quot;" alwaysStopAt="true" />
-        <variable name="FIRST" expression="" defaultValue="&quot;first=\&quot;first\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="INDEX" expression="" defaultValue="&quot;index=\&quot;index\&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
@@ -206,22 +259,22 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-java-body" value="&lt;lang-java-body&gt;&#10;    $END$&#10;&lt;/lang-java-body&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-java-body" value="&lt;lang-java-body&gt;&#10;    $END$&#10;&lt;/lang-java-body&gt;" description="" toReformat="false" toShortenFQNames="true">
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-java-import" value="&lt;lang-java-import&gt;&#10;    $END$&#10;&lt;/lang-java-import&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-java-import" value="&lt;lang-java-import&gt;&#10;    $END$&#10;&lt;/lang-java-import&gt;" description="" toReformat="false" toShortenFQNames="true">
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-java-member" value="&lt;lang-java-member&gt;&#10;    $END$&#10;&lt;/lang-java-member&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-java-member" value="&lt;lang-java-member&gt;&#10;    $END$&#10;&lt;/lang-java-member&gt;" description="" toReformat="false" toShortenFQNames="true">
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-latch" value="&lt;lang-latch result=&quot;$RESULT$&quot; count$FEATURE$=&quot;$COUNT$&quot;/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-latch" value="&lt;lang-latch result=&quot;$RESULT$&quot; count$FEATURE$=&quot;$COUNT$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <variable name="FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <variable name="COUNT" expression="" defaultValue="&quot;1&quot;" alwaysStopAt="true" />
@@ -229,15 +282,13 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-latch-await" value="&lt;lang-latch-await name=&quot;$NAME$&quot; $TIMEOUT$ $TIME_UNIT$/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-latch-await" value="&lt;lang-latch-await name=&quot;$NAME$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="NAME" expression="" defaultValue="&quot;v_latch&quot;" alwaysStopAt="true" />
-        <variable name="TIMEOUT" expression="" defaultValue="&quot;timeout=\&quot;-1\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="TIME_UNIT" expression="" defaultValue="&quot;time-unit=\&quot;SECONDS\&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-latch-down" value="&lt;lang-latch-down name=&quot;$NAME$&quot;/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-latch-down" value="&lt;lang-latch-down name=&quot;$NAME$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="NAME" expression="" defaultValue="&quot;v_latch&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
@@ -255,12 +306,17 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-printf" value="&lt;lang-println tag=&quot;$TAG$&quot; $ATTR$/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
-        <variable name="TAG" expression="concat(fileName(),&quot;:&quot;,lineNumber())" defaultValue="" alwaysStopAt="true" />
-        <variable name="ATTR" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+    <template name="&lt;lang-printf" value="&lt;lang-printf value$FEATURE$=&quot;$VALUE$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="FEATURE" expression="" defaultValue="&quot;.string&quot;" alwaysStopAt="true" />
+        <variable name="VALUE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
+    </template>
+    <template name="&lt;lang-println" value="&lt;lang-println tag=&quot;$TAG$&quot; $ATTR$/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="TAG" expression="concat(fileName(),&quot;:&quot;,lineNumber())" defaultValue="" alwaysStopAt="true" />
+        <variable name="ATTR" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
     </template>
     <template name="&lt;lang-render" value="&lt;lang-render result$FEATURE$=&quot;$RESULT$&quot; _lang=&quot;$LANG$&quot;&gt;&#10;    $BODY$&#10;&lt;/lang-render&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
@@ -286,7 +342,14 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-sleep" value="&lt;lang-sleep timeout=&quot;$TIMEOUT$&quot; time-unit=&quot;$TIME_UNIT$&quot;/&gt;&#10;$END$" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-shell" value="&lt;lang-shell result$RESULT_FEATURE$=&quot;$RESULT$&quot; script$SCRIPT_FEATURE$=&quot;$SCRIPT$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="RESULT_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="RESULT" expression="" defaultValue="&quot;v_result&quot;" alwaysStopAt="true" />
+        <variable name="SCRIPT_FEATURE" expression="" defaultValue="&quot;.string&quot;" alwaysStopAt="true" />
+        <variable name="SCRIPT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <context />
+    </template>
+    <template name="&lt;lang-sleep" value="&lt;lang-sleep timeout=&quot;$TIMEOUT$&quot; time-unit=&quot;$TIME_UNIT$&quot;/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="TIMEOUT" expression="" defaultValue="&quot;1&quot;" alwaysStopAt="true" />
         <variable name="TIME_UNIT" expression="" defaultValue="&quot;SECONDS&quot;" alwaysStopAt="true" />
         <context>
@@ -338,10 +401,8 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;lang-while" value="&lt;lang-while test=&quot;$TEST$&quot; $FIRST$ $INDEX$&gt;&#10;    $END$&#10;&lt;/lang-while&gt;" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;lang-while" value="&lt;lang-while test=&quot;$TEST$&quot;&gt;&#10;    $END$&#10;&lt;/lang-while&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="TEST" expression="" defaultValue="&quot;false&quot;" alwaysStopAt="true" />
-        <variable name="FIRST" expression="" defaultValue="&quot;first=\&quot;first\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="INDEX" expression="" defaultValue="&quot;index=\&quot;index\&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
@@ -353,54 +414,42 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;procedure-call" value="&lt;procedure-call refid=&quot;$ID$&quot; result=&quot;$RESULT$&quot; $PARAM_SHARE$&#10;    $PARAMS$ $ATTR$/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;procedure-call" value="&lt;procedure-call refid=&quot;$ID$&quot; &#10;    result=&quot;$RESULT$&quot;&#10;    $ATTR$/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="ID" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <variable name="RESULT" expression="" defaultValue="&quot;callParams&quot;" alwaysStopAt="true" />
-        <variable name="PARAM_SHARE" expression="" defaultValue="&quot;params_share=\&quot;true\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="PARAMS" expression="" defaultValue="&quot;params=\&quot;callParams\&quot;&quot;" alwaysStopAt="true" />
         <variable name="ATTR" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;script-include" value="&lt;script-include refid=&quot;$ID$&quot; $ATTR$/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;script-include" value="&lt;script-include refid=&quot;$ID$&quot; &#10;    $ATTR$/&gt;&#10;$END$" description="" toReformat="false" toShortenFQNames="true">
         <variable name="ID" expression="" defaultValue="&quot;script&quot;" alwaysStopAt="true" />
         <variable name="ATTR" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;script-segment" value="&lt;script-segment id=&quot;$ID$&quot; $ATTR$&gt;&#10;    $END$&#10;&lt;/script-segment&gt;" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;script-segment" value="&lt;script-segment id=&quot;$ID$&quot; &#10;    $ATTR$&gt;&#10;    $END$&#10;&lt;/script-segment&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="ID" expression="" defaultValue="&quot;script&quot;" alwaysStopAt="true" />
         <variable name="ATTR" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;sql-cursor" value="&lt;sql-cursor item=&quot;$ITEM$&quot; $BATCH_SIZE$ $ACCEPT_BATCH$&gt;&#10;    &lt;sql-query-list $SCRIPT$ $DATASOURCE$ $OFFSET$ $LIMIT$ $RESULT_TYPE$&gt;&#10;        $SQL_BODY$&#10;    &lt;/sql-query-list&gt;&#10;    &lt;lang-body&gt;&#10;        $END$&#10;    &lt;/lang-body&gt;&#10;&lt;/sql-cursor&gt;&#10;" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;sql-cursor" value="&lt;sql-cursor item=&quot;$ITEM$&quot;&gt;&#10;    &lt;sql-query-list&gt;&#10;        $SQL_BODY$&#10;    &lt;/sql-query-list&gt;&#10;    &lt;lang-body&gt;&#10;        $END$&#10;    &lt;/lang-body&gt;&#10;&lt;/sql-cursor&gt;&#10;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="ITEM" expression="" defaultValue="&quot;item&quot;" alwaysStopAt="true" />
-        <variable name="BATCH_SIZE" expression="" defaultValue="&quot;batch-size=\&quot;300\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="ACCEPT_BATCH" expression="" defaultValue="&quot;accept-batch=\&quot;false\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="SCRIPT" expression="" defaultValue="&quot;script=\&quot;v_sql\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="DATASOURCE" expression="" defaultValue="&quot;datasource=\&quot;\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="OFFSET" expression="" defaultValue="&quot;offset=\&quot;\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="LIMIT" expression="" defaultValue="&quot;limit=\&quot;\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="RESULT_TYPE" expression="" defaultValue="&quot;result-type=\&quot;Map\&quot;&quot;" alwaysStopAt="true" />
         <variable name="SQL_BODY" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;sql-dialect" value="&lt;sql-dialect $SCRIPT$ databases=&quot;$DATABASES$&quot;&gt;&#10;    $END$&#10;&lt;/sql-dialect&gt;" description="" toReformat="false" toShortenFQNames="true">
-        <variable name="SCRIPT" expression="" defaultValue="&quot;script=\&quot;v_sql\&quot;&quot;" alwaysStopAt="true" />
+    <template name="&lt;sql-dialect" value="&lt;sql-dialect databases=&quot;$DATABASES$&quot;&gt;&#10;    $END$&#10;&lt;/sql-dialect&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="DATABASES" expression="" defaultValue="&quot;mysql,mariadb&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;sql-etl" value="&lt;sql-etl $BEFORE_TRUNCATE$&gt;&#10;    &lt;sql-query-list $SCRIPT$ datasource=&quot;$EXTRA_DATASOURCE$&quot;&gt;&#10;        $END$&#10;    &lt;/sql-query-list&gt;&#10;    &lt;etl-load datasource=&quot;$LOAD_DATASOURCE$&quot; table=&quot;$LOAD_TABLE$&quot;/&gt;&#10;&lt;/sql-etl&gt;" toReformat="false" toShortenFQNames="true">
-        <variable name="BEFORE_TRUNCATE" expression="" defaultValue="&quot;before-truncate=\&quot;false\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="SCRIPT" expression="" defaultValue="&quot;script=\&quot;v_sql\&quot;&quot;" alwaysStopAt="true" />
+    <template name="&lt;sql-etl" value="&lt;sql-etl&gt;&#10;    &lt;sql-query-list datasource=&quot;$EXTRA_DATASOURCE$&quot;&gt;&#10;        $END$&#10;    &lt;/sql-query-list&gt;&#10;    &lt;etl-load datasource=&quot;$LOAD_DATASOURCE$&quot; table=&quot;$LOAD_TABLE$&quot;/&gt;&#10;&lt;/sql-etl&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="EXTRA_DATASOURCE" expression="" defaultValue="&quot;oracle&quot;" alwaysStopAt="true" />
         <variable name="LOAD_DATASOURCE" expression="" defaultValue="&quot;mysql&quot;" alwaysStopAt="true" />
         <variable name="LOAD_TABLE" expression="" defaultValue="&quot;sys_user&quot;" alwaysStopAt="true" />
@@ -408,41 +457,27 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;sql-query-list" value="&lt;sql-query-list result=&quot;$RESULT$&quot; $SCRIPT$ $DATASOURCE$ $OFFSET$ $LIMIT$ $RESULT_TYPE$&gt;&#10;    $END$&#10;&lt;/sql-query-list&gt;" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;sql-query-list" value="&lt;sql-query-list result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/sql-query-list&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
-        <variable name="SCRIPT" expression="" defaultValue="&quot;script=\&quot;v_sql\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="DATASOURCE" expression="" defaultValue="&quot;datasource=\&quot;\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="OFFSET" expression="" defaultValue="&quot;offset=\&quot;0\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="LIMIT" expression="" defaultValue="&quot;limit=\&quot;100\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="RESULT_TYPE" expression="" defaultValue="&quot;result-type=\&quot;\&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;sql-query-object" value="&lt;sql-query-object result=&quot;$RESULT$&quot; $SCRIPT$  $DATASOURCE$ $LIMITED$ $RESULT_TYPE$&gt;&#10;    $END$&#10;&lt;/sql-query-object&gt;" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;sql-query-object" value="&lt;sql-query-object result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/sql-query-object&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
-        <variable name="SCRIPT" expression="" defaultValue="&quot;script=\&quot;v_sql\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="DATASOURCE" expression="" defaultValue="&quot;datasource=\&quot;\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="LIMITED" expression="" defaultValue="&quot;limited=\&quot;true\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="RESULT_TYPE" expression="" defaultValue="&quot;result-type=\&quot;\&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;sql-query-row" value="&lt;sql-query-row result=&quot;$RESULT$&quot; $SCRIPT$  $DATASOURCE$ $LIMITED$ $RESULT_TYPE$&gt;&#10;    $END$&#10;&lt;/sql-query-row&gt;" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;sql-query-row" value="&lt;sql-query-row result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/sql-query-row&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
-        <variable name="SCRIPT" expression="" defaultValue="&quot;script=\&quot;v_sql\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="DATASOURCE" expression="" defaultValue="&quot;datasource=\&quot;\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="LIMITED" expression="" defaultValue="&quot;limited=\&quot;true\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="RESULT_TYPE" expression="" defaultValue="&quot;result-type=\&quot;\&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;sql-scope" value="&lt;sql-scope datasources=&quot;$DATASURCES$&quot;&gt;&#10;    $END$&#10;&lt;/sql-scope&gt;" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;sql-scope" value="&lt;sql-scope datasources=&quot;$DATASURCES$&quot;&gt;&#10;    $END$&#10;&lt;/sql-scope&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="DATASURCES" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
         <context>
-            <option name="PL/SQL" value="false" />
             <option name="XML" value="true" />
         </context>
     </template>
@@ -452,10 +487,13 @@
             <option name="XML" value="true" />
         </context>
     </template>
-    <template name="&lt;sql-update" value="&lt;sql-update result=&quot;$RESULT$&quot; $SCRIPT$  $DATASOURCE$&gt;&#10;    $END$&#10;&lt;/sql-update&gt;" description="" toReformat="false" toShortenFQNames="true">
+    <template name="&lt;sql-transactional" value="&lt;sql-transactional datasources$DATASOURCE_FEATURE$=&quot;$DATASOURCE$&quot;&#10;                       rollback-for=&quot;RuntimeException&quot;&gt;&#10;    $END$&#10;&lt;/sql-transactional&gt;" description="" toReformat="false" toShortenFQNames="true">
+        <variable name="DATASOURCE_FEATURE" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
+        <variable name="DATASOURCE" expression="" defaultValue="&quot;all&quot;" alwaysStopAt="true" />
+        <context />
+    </template>
+    <template name="&lt;sql-update" value="&lt;sql-update result=&quot;$RESULT$&quot;&gt;&#10;    $END$&#10;&lt;/sql-update&gt;" description="" toReformat="false" toShortenFQNames="true">
         <variable name="RESULT" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true" />
-        <variable name="SCRIPT" expression="" defaultValue="&quot;script=\&quot;v_sql\&quot;&quot;" alwaysStopAt="true" />
-        <variable name="DATASOURCE" expression="" defaultValue="&quot;datasource=\&quot;\&quot;&quot;" alwaysStopAt="true" />
         <context>
             <option name="XML" value="true" />
         </context>

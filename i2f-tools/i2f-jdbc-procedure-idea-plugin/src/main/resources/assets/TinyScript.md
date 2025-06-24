@@ -137,12 +137,12 @@ R'abc ${count} def $${size} gh'
 - 并且首行和尾行只允许有空白符，不能出现其他字符
 - 当然，首行允许带有特性
 - 开头的引导符号之后可以紧跟着几个特性
-    - trim 进行trim
-    - align 表示只保留每行的第一个[|]符号之后的内容，可用于保持对其，缺点就是每行都需要这个引导符号
-    - render 表示要进行模板字符串渲染
-    - 特性之间通过[.]符号分割连接，特性从左至右依次执行
-    - 也就是说，允许重复使用特性
-    - 例如：trim.render.trim
+  - trim 进行trim
+  - align 表示只保留每行的第一个[|]符号之后的内容，可用于保持对其，缺点就是每行都需要这个引导符号
+  - render 表示要进行模板字符串渲染
+  - 特性之间通过[.]符号分割连接，特性从左至右依次执行
+  - 也就是说，允许重复使用特性
+  - 例如：trim.render.trim
 - 除此之外，也支持使用三个连续双引号["]包含
 - 这个目的也是为了避免转义
 
@@ -319,7 +319,7 @@ status=${tmp.status};
 
 ```shell
 tmp=getUserInfo();
-#{name:userName,age:userInfo.age,status}=tmp;
+#{name:userName,age:userInfo.age,status}=${tmp};
 ```
 
 - 这样就可以实现同时保存变量了
@@ -512,6 +512,7 @@ typeof 用法和is一样，是is的别名
 ```
 
 ### 静态变量/枚举值访问与赋值
+
 - 定义
 
 ```shell
@@ -814,9 +815,9 @@ Object eval(String|Appendable|CharSequence|StringBuilder|StringBuffer script)
 - 详情查阅源码类的静态构造代码块
 ```java
 public class TinyScript{
-    static{
-        // 此处的内建函数
-    }
+  static{
+    // 此处的内建函数
+  }
 }
 ```
 - 你也可以参照此方式注册内建函数
@@ -825,7 +826,7 @@ public class TinyScript{
 
 ### 自定义处理器 TinyScriptResolver
 - 如果想要修改一些默认的行为，包括调用一些特殊场景的函数，结合其他框架使用
-- 都可以实现自己的 TinyScriptResolver 
+- 都可以实现自己的 TinyScriptResolver
 - 但是，一般来说，你只需要继承 DefaultTinyScriptResolver 默认实现类
 - 修改你的特定逻辑即可
 - 然后使用你自己的 resolver 进行脚本解析执行即可
@@ -914,7 +915,7 @@ System.out.println(context);
 ```
 
 - 复杂使用案例
-    - 此案例仅说明复杂的场景，不具有实际运行性
+  - 此案例仅说明复杂的场景，不具有实际运行性
 
 ```shell
 user.status=new BigDecimal(${role.perm}.lrtim(Func.rtrim(replace(${user.name}.isEmpty("user",true).length().size(),"s+",12.125f,0x56l,0t27,0b101L,true),";"),",")).intValue();

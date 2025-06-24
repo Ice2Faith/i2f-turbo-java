@@ -22,7 +22,7 @@ grammar TinyScript;
 }
 
 // Lexer rules
-TERM_COMMENT_SINGLE_LINE: '//' (~('\n'))* '\n' -> skip;
+TERM_COMMENT_SINGLE_LINE: '//' (~('\n'))* -> skip;
 
 TERM_COMMENT_MULTI_LINE: '/*' .*? '*/' -> skip;
 
@@ -85,10 +85,6 @@ TERM_INTEGER:
     (TERM_DIGIT)+ ('_' TERM_DIGIT+)*
     ;
 
-PREFIX_OPERATOR:
-    '!' | 'not'
-    ;
-
 
 NAMING: ID (TERM_DOT ID)*;
 ROUTE_NAMING: ID (TERM_BRACKET_SQUARE_L TERM_INTEGER TERM_BRACKET_SQUARE_R)? (TERM_DOT ID (TERM_BRACKET_SQUARE_L TERM_INTEGER TERM_BRACKET_SQUARE_R)? )*;
@@ -128,6 +124,10 @@ WS       : [ \t\r\n]+ -> skip ;
 
 
 script:
+    segments?  EOF
+    ;
+
+segments:
      express (TERM_SEMICOLON express)* (TERM_SEMICOLON)?
     ;
 
@@ -142,7 +142,7 @@ express:
     | trySegment
     | throwSegment
     | parenSegment
-    | prefixOperatorSegment
+    | ('!' | 'not') express
     | equalValue
     | newInstance
     | invokeFunction
@@ -196,9 +196,6 @@ parenSegment:
     TERM_PAREN_L express TERM_PAREN_R
     ;
 
-prefixOperatorSegment:
-    PREFIX_OPERATOR express
-    ;
 
 controlSegment:
     'break'
@@ -231,7 +228,7 @@ conditionBlock:
     ;
 
 scriptBlock:
-    TERM_CURLY_L script? TERM_CURLY_R
+    TERM_CURLY_L (segments)? TERM_CURLY_R
     ;
 
 
