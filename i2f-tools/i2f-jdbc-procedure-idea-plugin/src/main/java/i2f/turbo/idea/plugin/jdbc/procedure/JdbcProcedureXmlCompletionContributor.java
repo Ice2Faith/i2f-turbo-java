@@ -471,7 +471,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
             XmlAttribute attribute = (XmlAttribute) elem;
             String name = attribute.getName();
             // result 出来的变量
-            if("result".equals(name)){
+            if(Arrays.asList("result","item").contains(name)){
                 String value = attribute.getValue();
                 if(value!=null && value.matches("[a-zA-Z0-9\\-_\\$\\.]+")){
                     variables.add(value.trim());
