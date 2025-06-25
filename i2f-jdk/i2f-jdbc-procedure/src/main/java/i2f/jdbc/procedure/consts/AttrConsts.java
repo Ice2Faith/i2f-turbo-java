@@ -48,7 +48,7 @@ public interface AttrConsts {
     String E = "e";
     String CAUSE = "cause";
 
-    String JDBC_TYPE="jdbc-type";
+    String JDBC_TYPE = "jdbc-type";
 
     String REFID = "refid";
     String PARAMS = "params";
@@ -56,8 +56,9 @@ public interface AttrConsts {
 
     String BATCH_SIZE = "batch-size";
     String ACCEPT_BATCH = "accept-batch";
-    String SYNC="sync";
-    String ASYNC="async";
+    String USE_CURSOR = "use-cursor";
+    String SYNC = "sync";
+    String ASYNC = "async";
 
     String DATABASES = "databases";
 
@@ -83,9 +84,9 @@ public interface AttrConsts {
     String BEFORE_TRUNCATE = "before-truncate";
     String COMMIT_SIZE = "commit-size";
 
-    String EXCLUDE="exclude";
-    String INCLUDE="include";
-    String EXTERNAL="external";
+    String EXCLUDE = "exclude";
+    String INCLUDE = "include";
+    String EXTERNAL = "external";
 
     String SOURCE = "source";
     String TABLE = "table";
@@ -97,9 +98,9 @@ public interface AttrConsts {
     String WORKDIR = "workdir";
     String ENVP = "envp";
 
-    String FILE="file";
-    String CHARSET="charset";
-    String CONTENT="content";
+    String FILE = "file";
+    String CHARSET = "charset";
+    String CONTENT = "content";
 
     String EVENT_TYPE = "event-type";
 }

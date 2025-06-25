@@ -1004,6 +1004,7 @@
         <!ATTLIST sql-cursor batch-size CDATA #IMPLIED>
         <!ATTLIST sql-cursor item CDATA #IMPLIED>
         <!ATTLIST sql-cursor accept-batch CDATA #IMPLIED>
+        <!ATTLIST sql-cursor use-cursor CDATA #IMPLIED>
 
         <!ELEMENT lang-eval-java (lang-java-import?|lang-java-member?|lang-java-body?|#PCDATA)>
         <!ATTLIST lang-eval-java result CDATA #IMPLIED>
@@ -1041,6 +1042,7 @@
         <!ATTLIST sql-etl write-batch-size CDATA #IMPLIED>
         <!ATTLIST sql-etl before-truncate CDATA #IMPLIED>
         <!ATTLIST sql-etl commit-size CDATA #IMPLIED>
+        <!ATTLIST sql-etl use-cursor CDATA #IMPLIED>
         <!ATTLIST sql-etl item CDATA #IMPLIED>
         <!ATTLIST sql-etl sync CDATA #IMPLIED>
 

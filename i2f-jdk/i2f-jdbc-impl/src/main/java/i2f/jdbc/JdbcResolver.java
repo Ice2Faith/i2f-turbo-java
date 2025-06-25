@@ -290,30 +290,62 @@ public class JdbcResolver {
         return cursor(conn, bql.getSql(), bql.getArgs(), beanClass);
     }
 
+    public static <E> JdbcCursor<E> cursor(Connection conn, BindSql bql, Class<E> beanClass,
+                                           SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
+        return cursor(conn, bql.getSql(), bql.getArgs(), beanClass, statementBuilder);
+    }
+
     public static <E> JdbcCursor<E> cursor(Connection conn, String sql, List<Object> args, Class<E> beanClass) throws SQLException {
-        return cursor(conn, sql, args, beanClass, null);
+        return cursor(conn, sql, args, beanClass, null, DEFAULT_CURSOR_STATEMENT_BUILDER);
+    }
+
+    public static <E> JdbcCursor<E> cursor(Connection conn, String sql, List<Object> args, Class<E> beanClass,
+                                           SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
+        return cursor(conn, sql, args, beanClass, null, statementBuilder);
     }
 
     public static <E> JdbcCursor<E> cursor(Connection conn, BindSql bql, Class<E> beanClass, Function<String, String> columnNameMapper) throws SQLException {
         return cursor(conn, bql.getSql(), bql.getArgs(), beanClass, columnNameMapper);
     }
 
+    public static <E> JdbcCursor<E> cursor(Connection conn, BindSql bql, Class<E> beanClass,
+                                           Function<String, String> columnNameMapper,
+                                           SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
+        return cursor(conn, bql.getSql(), bql.getArgs(), beanClass, columnNameMapper, statementBuilder);
+    }
+
     public static <E> JdbcCursor<E> cursor(Connection conn, String sql, List<Object> args, Class<E> beanClass, Function<String, String> columnNameMapper) throws SQLException {
+        return cursor(conn, sql, args, beanClass, columnNameMapper);
+    }
+
+    public static <E> JdbcCursor<E> cursor(Connection conn, String sql, List<Object> args, Class<E> beanClass,
+                                           Function<String, String> columnNameMapper,
+                                           SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
         return cursor0(conn, sql, args,
                 createResultSetRowBeanConvertor(beanClass),
                 createCursorContextInitializer(columnNameMapper),
-                DEFAULT_CURSOR_STATEMENT_BUILDER);
+                statementBuilder);
     }
 
     public static JdbcCursor<Map<String, Object>> cursor(Connection conn, BindSql bql) throws SQLException {
         return cursor(conn, bql.getSql(), bql.getArgs());
     }
 
+    public static JdbcCursor<Map<String, Object>> cursor(Connection conn, BindSql bql,
+                                                         SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
+        return cursor(conn, bql.getSql(), bql.getArgs(), statementBuilder);
+    }
+
     public static JdbcCursor<Map<String, Object>> cursor(Connection conn, String sql, List<Object> args) throws SQLException {
+        return cursor(conn, sql, args, DEFAULT_CURSOR_STATEMENT_BUILDER);
+    }
+
+    public static JdbcCursor<Map<String, Object>> cursor(Connection conn, String sql, List<Object> args,
+                                                         SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
         return cursor0(conn, sql, args,
                 DEFAULT_CURSOR_ROW_CONVERTOR,
                 DEFAULT_CURSOR_CONTEXT_INITIALIZER,
-                DEFAULT_CURSOR_STATEMENT_BUILDER);
+                statementBuilder);
     }
 
     public static <E, CTX> JdbcCursorImpl<E, CTX> cursor0(Connection conn, String sql, List<Object> args,
