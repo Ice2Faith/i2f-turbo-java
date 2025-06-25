@@ -1,33 +1,33 @@
-package i2f.extension.filesystem.minio;
+package i2f.extension.filesystem.oss.aliyun;
 
 
-import i2f.extension.minio.MinioMeta;
-import i2f.extension.minio.MinioUtil;
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.model.*;
+import i2f.extension.oss.aliyun.AliyunOssMeta;
+import i2f.extension.oss.aliyun.AliyunOssUtil;
 import i2f.io.filesystem.IFile;
 import i2f.io.filesystem.abs.AbsFileSystem;
 import i2f.io.stream.StreamUtil;
-import io.minio.*;
-import io.minio.messages.Item;
 
 import java.io.*;
 import java.util.*;
 
-public class MinioFileSystem extends AbsFileSystem {
-    private MinioMeta meta;
-    private MinioClient client;
+public class AliyunOssFileSystem extends AbsFileSystem {
+    private AliyunOssMeta meta;
+    private OSS client;
 
-    public MinioFileSystem(MinioMeta meta) {
+    public AliyunOssFileSystem(AliyunOssMeta meta) {
         this.meta = meta;
         this.client = getClient();
     }
 
-    public MinioFileSystem(MinioClient client) {
+    public AliyunOssFileSystem(OSS client) {
         this.client = client;
     }
 
-    public MinioClient getClient() {
+    public OSS getClient() {
         if (this.client == null) {
-            this.client = MinioUtil.getClient(this.meta);
+            this.client = AliyunOssUtil.getClient(this.meta);
         }
         return client;
     }
@@ -70,7 +70,7 @@ public class MinioFileSystem extends AbsFileSystem {
 
     @Override
     public IFile getFile(String path) {
-        return new MinioFile(this, path);
+        return new AliyunOssFile(this, path);
     }
 
     @Override
@@ -86,29 +86,23 @@ public class MinioFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
             try {
-                return getClient().bucketExists(BucketExistsArgs.builder().bucket(pair.getKey()).build());
+                return getClient().doesBucketExist(pair.getKey());
             } catch (Throwable e) {
 
             }
         } else {
-            Iterable<Result<Item>> iter = getClient().listObjects(ListObjectsArgs.builder()
-                    .bucket(pair.getKey())
-                    .prefix(pair.getValue())
-                    .recursive(false)
-                    .build()
-            );
-            for (Result<Item> res : iter) {
+            ObjectListing listing = getClient().listObjects(pair.getKey(), pair.getValue());
+            List<OSSObjectSummary> iter = listing.getObjectSummaries();
+            for (OSSObjectSummary item : iter) {
                 try {
-                    Item item = res.get();
-                    if (item.isDir()) {
-                        String name = item.objectName();
-                        if (name.endsWith(pathSeparator())) {
-                            name = name.substring(0, name.length() - pathSeparator().length());
-                        }
-                        if (name.equals(pair.getValue())) {
-                            return true;
-                        }
+                    String name = item.getKey();
+                    if (name.endsWith(pathSeparator())) {
+                        name = name.substring(0, name.length() - pathSeparator().length());
                     }
+                    if (name.equals(pair.getValue())) {
+                        return true;
+                    }
+
                 } catch (Throwable e) {
                 }
             }
@@ -124,12 +118,7 @@ public class MinioFileSystem extends AbsFileSystem {
             return false;
         }
         try {
-            ObjectStat stat = getClient().statObject(StatObjectArgs.builder()
-                    .bucket(pair.getKey())
-                    .object(pair.getValue())
-                    .build()
-            );
-            return true;
+            return getClient().doesObjectExist(pair.getKey(), pair.getValue());
         } catch (Throwable e) {
 
         }
@@ -144,21 +133,16 @@ public class MinioFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
             try {
-                return getClient().bucketExists(BucketExistsArgs.builder().bucket(pair.getKey()).build());
+                return getClient().doesBucketExist(pair.getKey());
             } catch (Throwable e) {
 
             }
         } else {
-            Iterable<Result<Item>> iter = getClient().listObjects(ListObjectsArgs.builder()
-                    .bucket(pair.getKey())
-                    .prefix(pair.getValue())
-                    .recursive(false)
-                    .build()
-            );
-            for (Result<Item> res : iter) {
+            ObjectListing listing = getClient().listObjects(pair.getKey(), pair.getValue());
+            List<OSSObjectSummary> iter = listing.getObjectSummaries();
+            for (OSSObjectSummary item : iter) {
                 try {
-                    Item item = res.get();
-                    String name = item.objectName();
+                    String name = item.getKey();
                     if (name.endsWith(pathSeparator())) {
                         name = name.substring(0, name.length() - pathSeparator().length());
                     }
@@ -176,21 +160,22 @@ public class MinioFileSystem extends AbsFileSystem {
     @Override
     public List<IFile> listFiles(String path) {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
-        Iterable<Result<Item>> iter = getClient().listObjects(ListObjectsArgs.builder()
-                .bucket(pair.getKey())
-                .prefix(ensureWithPathSeparator(pair.getValue()))
-                .recursive(false)
-                .build()
-        );
-        List<IFile> ret = new LinkedList<>();
-        for (Result<Item> res : iter) {
-            try {
-                Item item = res.get();
-                String name = item.objectName();
-                ret.add(getFile(pair.getKey(), name));
-            } catch (Throwable e) {
+        String subPath = ensureWithPathSeparator(pair.getValue());
+        List<IFile> ret = new ArrayList<>();
+        String nextMarker = null;
+        ObjectListing listing = null;
+        do {
+            listing = getClient().listObjects(pair.getKey(), subPath);
+            List<OSSObjectSummary> iter = listing.getObjectSummaries();
+            for (OSSObjectSummary item : iter) {
+                try {
+                    String name = item.getKey();
+                    ret.add(getFile(pair.getKey(), name));
+                } catch (Throwable e) {
+                }
             }
-        }
+            nextMarker = listing.getNextMarker();
+        } while (listing.isTruncated());
         return ret;
     }
 
@@ -199,10 +184,7 @@ public class MinioFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (isFile(path)) {
             try {
-                getClient().removeObject(RemoveObjectArgs.builder()
-                        .bucket(pair.getKey())
-                        .object(pair.getValue())
-                        .build());
+                getClient().deleteObject(pair.getKey(), pair.getValue());
             } catch (Throwable e) {
                 throw new IllegalStateException("delete failure:" + e.getMessage(), e);
             }
@@ -210,9 +192,7 @@ public class MinioFileSystem extends AbsFileSystem {
             if (pair.getKey() != null && !"".equals(pair.getKey())) {
                 if (pair.getValue() == null || "".equals(pair.getValue())) {
                     try {
-                        getClient().removeBucket(RemoveBucketArgs.builder()
-                                .bucket(pair.getKey())
-                                .build());
+                        getClient().deleteBucket(pair.getKey());
                     } catch (Exception e) {
                         throw new IllegalStateException("delete failure:" + e.getMessage(), e);
                     }
@@ -231,10 +211,9 @@ public class MinioFileSystem extends AbsFileSystem {
     public InputStream getInputStream(String path) throws IOException {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
-            return getClient().getObject(GetObjectArgs.builder()
-                    .bucket(pair.getKey())
-                    .object(pair.getValue())
-                    .build());
+
+            OSSObject obj = getClient().getObject(pair.getKey(), pair.getValue());
+            return obj.getObjectContent();
         } catch (Throwable e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -253,11 +232,12 @@ public class MinioFileSystem extends AbsFileSystem {
                 FileInputStream fis = null;
                 try {
                     fis = new FileInputStream(tmpFile);
-                    getClient().putObject(PutObjectArgs.builder()
-                            .bucket(pair.getKey())
-                            .object(pair.getValue())
-                            .stream(fis, tmpFile.length(), -1)
-                            .build());
+                    ObjectMetadata metadata = new ObjectMetadata();
+                    metadata.setContentLength(tmpFile.length());
+
+                    PutObjectRequest req = new PutObjectRequest(pair.getKey(), pair.getValue(), fis, metadata);
+                    PutObjectResult resp = getClient().putObject(req);
+
                 } catch (Throwable e) {
                     throw new IOException(e.getMessage(), e);
                 } finally {
@@ -279,17 +259,20 @@ public class MinioFileSystem extends AbsFileSystem {
     public void mkdir(String path) {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
-            boolean exBkt = getClient().bucketExists(BucketExistsArgs.builder().bucket(pair.getKey()).build());
+            boolean exBkt = getClient().doesBucketExist(pair.getKey());
             if (!exBkt) {
-                getClient().makeBucket(MakeBucketArgs.builder().bucket(pair.getKey()).build());
+                getClient().createBucket(pair.getKey());
             }
             if (pair.getKey() != null) {
                 String holdName = combinePath(pair.getValue(), ".ignore");
-                getClient().putObject(PutObjectArgs.builder()
-                        .bucket(pair.getKey())
-                        .object(holdName)
-                        .stream(new ByteArrayInputStream(new byte[0]), 0, -1)
-                        .build());
+
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentLength(0);
+                metadata.setContentType("application/octet-stream");
+
+                PutObjectRequest req = new PutObjectRequest(pair.getKey(), holdName, new ByteArrayInputStream(new byte[0]), metadata);
+                PutObjectResult resp = getClient().putObject(req);
+
             }
         } catch (Throwable e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -300,11 +283,10 @@ public class MinioFileSystem extends AbsFileSystem {
     public void store(String path, InputStream is) throws IOException {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
-            getClient().putObject(PutObjectArgs.builder()
-                    .bucket(pair.getKey())
-                    .object(pair.getValue())
-                    .stream(is, -1, -1)
-                    .build());
+            ObjectMetadata metadata = new ObjectMetadata();
+            PutObjectRequest req = new PutObjectRequest(pair.getKey(), pair.getValue(), is, metadata);
+            PutObjectResult resp = getClient().putObject(req);
+
         } catch (Throwable e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -315,10 +297,9 @@ public class MinioFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         InputStream is = null;
         try {
-            is = getClient().getObject(GetObjectArgs.builder()
-                    .bucket(pair.getKey())
-                    .object(pair.getValue())
-                    .build());
+            OSSObject obj = getClient().getObject(pair.getKey(), pair.getValue());
+            is = obj.getObjectContent();
+
             StreamUtil.streamCopy(is, os);
         } catch (Throwable e) {
             throw new IOException(e.getMessage(), e);
@@ -333,16 +314,37 @@ public class MinioFileSystem extends AbsFileSystem {
     public long length(String path) {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
-            ObjectStat stat = getClient().statObject(StatObjectArgs.builder()
-                    .bucket(pair.getKey())
-                    .object(pair.getValue())
-                    .build()
-            );
-            return stat.length();
+            ObjectMetadata metadata = getClient().getObjectMetadata(pair.getKey(), pair.getValue());
+            return metadata.getContentLength();
         } catch (Throwable e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
+    @Override
+    public void copyTo(String srcPath, String dstPath) throws IOException {
+        Map.Entry<String, String> srcPair = splitPathAsBucketAndObjectName(srcPath);
+        Map.Entry<String, String> dstPair = splitPathAsBucketAndObjectName(dstPath);
+        try {
+            getClient().copyObject(srcPair.getKey(), srcPair.getValue(), dstPair.getKey(), dstPair.getValue());
+        } catch (Throwable e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
 
+    @Override
+    public void moveTo(String srcPath, String dstPath) throws IOException {
+        Map.Entry<String, String> srcPair = splitPathAsBucketAndObjectName(srcPath);
+        Map.Entry<String, String> dstPair = splitPathAsBucketAndObjectName(dstPath);
+        try {
+            if (Objects.equals(srcPair.getKey(), dstPair.getKey())) {
+                getClient().renameObject(srcPair.getKey(), srcPair.getValue(), dstPair.getValue());
+            } else {
+                getClient().copyObject(srcPair.getKey(), srcPair.getValue(), dstPair.getKey(), dstPair.getValue());
+                getClient().deleteObject(srcPair.getKey(), srcPair.getValue());
+            }
+        } catch (Throwable e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
 }
