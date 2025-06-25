@@ -4,6 +4,8 @@ import i2f.bindsql.BindSql;
 import i2f.bindsql.BindSqlWrappers;
 import i2f.bindsql.data.PageBindSql;
 import i2f.convert.obj.ObjectConvertor;
+import i2f.jdbc.cursor.JdbcCursor;
+import i2f.jdbc.cursor.impl.JdbcCursorImpl;
 import i2f.jdbc.data.*;
 import i2f.jdbc.handler.ResultSetObjectConvertHandler;
 import i2f.jdbc.handler.StatementParameterSetHandler;
@@ -253,6 +255,78 @@ public class JdbcResolver {
                 }
             }
         }
+    }
+
+    public static PreparedStatement buildCursorStatement(Connection conn, String sql) throws SQLException {
+        return buildCursorStatement(conn, sql, -1);
+    }
+
+    public static PreparedStatement buildCursorStatement(Connection conn, String sql, int fetchSize) throws SQLException {
+        if (fetchSize <= 0) {
+            fetchSize = 500;
+        }
+        PreparedStatement stat = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        stat.setFetchDirection(ResultSet.FETCH_FORWARD);
+        stat.setFetchSize(fetchSize);
+        return stat;
+    }
+
+
+    public static final SQLBiFunction<Connection, String, PreparedStatement> DEFAULT_CURSOR_STATEMENT_BUILDER = JdbcResolver::buildCursorStatement;
+
+    public static final SQLFunction<ResultSet, List<QueryColumn>> DEFAULT_CURSOR_CONTEXT_INITIALIZER = JdbcResolver::parseResultSetColumns;
+
+    public static final SQLBiFunction<List<QueryColumn>, ResultSet, Map<String, Object>> DEFAULT_CURSOR_ROW_CONVERTOR = JdbcResolver::convertResultSetRowAsMap;
+
+
+    public static SQLFunction<ResultSet, List<QueryColumn>> createCursorContextInitializer(Function<String, String> columnNameMapper) {
+        if (columnNameMapper == null) {
+            return JdbcResolver::parseResultSetColumns;
+        }
+        return (rs) -> parseResultSetColumns(rs, columnNameMapper);
+    }
+
+    public static <E> JdbcCursor<E> cursor(Connection conn, BindSql bql, Class<E> beanClass) throws SQLException {
+        return cursor(conn, bql.getSql(), bql.getArgs(), beanClass);
+    }
+
+    public static <E> JdbcCursor<E> cursor(Connection conn, String sql, List<Object> args, Class<E> beanClass) throws SQLException {
+        return cursor(conn, sql, args, beanClass, null);
+    }
+
+    public static <E> JdbcCursor<E> cursor(Connection conn, BindSql bql, Class<E> beanClass, Function<String, String> columnNameMapper) throws SQLException {
+        return cursor(conn, bql.getSql(), bql.getArgs(), beanClass, columnNameMapper);
+    }
+
+    public static <E> JdbcCursor<E> cursor(Connection conn, String sql, List<Object> args, Class<E> beanClass, Function<String, String> columnNameMapper) throws SQLException {
+        return cursor0(conn, sql, args,
+                createResultSetRowBeanConvertor(beanClass),
+                createCursorContextInitializer(columnNameMapper),
+                DEFAULT_CURSOR_STATEMENT_BUILDER);
+    }
+
+    public static JdbcCursor<Map<String, Object>> cursor(Connection conn, BindSql bql) throws SQLException {
+        return cursor(conn, bql.getSql(), bql.getArgs());
+    }
+
+    public static JdbcCursor<Map<String, Object>> cursor(Connection conn, String sql, List<Object> args) throws SQLException {
+        return cursor0(conn, sql, args,
+                DEFAULT_CURSOR_ROW_CONVERTOR,
+                DEFAULT_CURSOR_CONTEXT_INITIALIZER,
+                DEFAULT_CURSOR_STATEMENT_BUILDER);
+    }
+
+    public static <E, CTX> JdbcCursorImpl<E, CTX> cursor0(Connection conn, String sql, List<Object> args,
+                                                          SQLBiFunction<CTX, ResultSet, E> rowConvertor,
+                                                          SQLFunction<ResultSet, CTX> contextInitializer,
+                                                          SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
+        if (statementBuilder == null) {
+            statementBuilder = DEFAULT_CURSOR_STATEMENT_BUILDER;
+        }
+        PreparedStatement stat = statementBuilder.apply(conn, sql);
+        fillStatementArgs(stat, args);
+        ResultSet rs = stat.executeQuery();
+        return new JdbcCursorImpl<>(stat, rs, rowConvertor, contextInitializer);
     }
 
     public static List<Map<String, Object>> list(Connection conn, BindSql sql) throws SQLException {
@@ -744,16 +818,13 @@ public class JdbcResolver {
             if (batchSize < 0) {
                 while (iterator.hasNext()) {
                     List<Object> elem = iterator.next();
-                    if(elem==null){
+                    if (elem == null) {
                         continue;
                     }
                     if (stat == null) {
                         stat = conn.prepareStatement(sql);
                     }
-                    int i = 1;
-                    for (Object val : elem) {
-                        setStatementObject(stat, i++, val);
-                    }
+                    fillStatementArgs(stat, elem);
                     stat.addBatch();
                 }
                 stat.executeBatch();
@@ -762,7 +833,7 @@ public class JdbcResolver {
                 int count = 0;
                 while (iterator.hasNext()) {
                     List<Object> elem = iterator.next();
-                    if(elem==null){
+                    if (elem == null) {
                         continue;
                     }
 
@@ -772,10 +843,7 @@ public class JdbcResolver {
                     if (stat == null) {
                         stat = conn.prepareStatement(sql);
                     }
-                    int i = 1;
-                    for (Object val : elem) {
-                        setStatementObject(stat, i++, val);
-                    }
+                    fillStatementArgs(stat, elem);
                     stat.addBatch();
                     if (count == batchSize) {
                         stat.executeBatch();
@@ -832,7 +900,7 @@ public class JdbcResolver {
      */
     public static Map<Integer, Object> call(Connection conn, String sql, List<?> args, Map<Integer, SQLType> outParams) throws SQLException {
         try (CallableStatement stat = callStatement(conn, sql, args, outParams)) {
-            int rsIdx=-1;
+            int rsIdx = -1;
             boolean ok = stat.execute();
             Map<Integer, Object> ret = new LinkedHashMap<>();
             ret.put(rsIdx, ok);
@@ -842,9 +910,9 @@ public class JdbcResolver {
                     ret.put(entry.getKey(), val);
                 }
             }
-            while(stat.getMoreResults()){
+            while (stat.getMoreResults()) {
                 rsIdx--;
-                try(ResultSet rs = stat.getResultSet()) {
+                try (ResultSet rs = stat.getResultSet()) {
                     QueryResult result = parseResultSet(rs);
                     ret.put(rsIdx, result);
                 }
@@ -949,7 +1017,7 @@ public class JdbcResolver {
         Map<Integer, NamingOutputParameter> namingMap = new LinkedHashMap<>();
 
         try (CallableStatement stat = namingCallableStatement(conn, sql, args, namingMap)) {
-            int rsIdx=-1;
+            int rsIdx = -1;
             boolean ok = stat.execute();
             Map<String, Object> ret = new LinkedHashMap<>();
             ret.put(String.valueOf(rsIdx), ok);
@@ -957,9 +1025,9 @@ public class JdbcResolver {
                 Object val = stat.getObject(entry.getKey());
                 ret.put(entry.getValue().getName(), val);
             }
-            while(stat.getMoreResults()){
+            while (stat.getMoreResults()) {
                 rsIdx--;
-                try(ResultSet rs = stat.getResultSet()) {
+                try (ResultSet rs = stat.getResultSet()) {
                     QueryResult result = parseResultSet(rs);
                     ret.put(String.valueOf(rsIdx), result);
                 }
@@ -1007,6 +1075,11 @@ public class JdbcResolver {
 
     public static PreparedStatement preparedStatement(Connection conn, String sql, List<?> args) throws SQLException {
         PreparedStatement stat = conn.prepareStatement(sql);
+        fillStatementArgs(stat, args);
+        return stat;
+    }
+
+    public static PreparedStatement fillStatementArgs(PreparedStatement stat, Collection<?> args) throws SQLException {
         if (args != null) {
             int i = 1;
             for (Object arg : args) {
@@ -1180,7 +1253,7 @@ public class JdbcResolver {
         }
         if (obj instanceof char[]) {
             char[] arr = (char[]) obj;
-            stat.setCharacterStream(index, new StringReader(new String(arr)),arr.length);
+            stat.setCharacterStream(index, new StringReader(new String(arr)), arr.length);
             return;
         }
         if (obj instanceof Reader) {
@@ -1188,10 +1261,10 @@ public class JdbcResolver {
             return;
         }
         if (obj instanceof InputStream) {
-            if(obj instanceof ByteArrayInputStream){
+            if (obj instanceof ByteArrayInputStream) {
                 ByteArrayInputStream bis = (ByteArrayInputStream) obj;
-                stat.setBlob(index,bis,bis.available());
-            }else {
+                stat.setBlob(index, bis, bis.available());
+            } else {
                 stat.setBlob(index, (InputStream) obj);
             }
             return;
@@ -1464,16 +1537,16 @@ public class JdbcResolver {
                 stat.setNull(index, Types.BLOB);
                 return true;
             } else {
-                if(obj instanceof Blob){
-                    stat.setBlob(index, (Blob)obj);
+                if (obj instanceof Blob) {
+                    stat.setBlob(index, (Blob) obj);
                     return true;
                 }
                 Object val = ObjectConvertor.tryConvertAsType(obj, InputStream.class);
                 if (val instanceof InputStream) {
-                    if(val instanceof ByteArrayInputStream){
-                        ByteArrayInputStream bis=(ByteArrayInputStream) val;
-                        stat.setBlob(index,bis,bis.available());
-                    }else {
+                    if (val instanceof ByteArrayInputStream) {
+                        ByteArrayInputStream bis = (ByteArrayInputStream) val;
+                        stat.setBlob(index, bis, bis.available());
+                    } else {
                         stat.setBlob(index, (InputStream) val);
                     }
                     return true;
@@ -1486,14 +1559,14 @@ public class JdbcResolver {
                 stat.setNull(index, Types.CLOB);
                 return true;
             } else {
-                if(obj instanceof Clob){
-                    stat.setClob(index, (Clob)obj);
+                if (obj instanceof Clob) {
+                    stat.setClob(index, (Clob) obj);
                     return true;
                 }
                 Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
                 if (val instanceof String) {
                     String str = (String) val;
-                    stat.setClob(index, new StringReader(str),str.length());
+                    stat.setClob(index, new StringReader(str), str.length());
                     return true;
                 }
             }
@@ -1504,14 +1577,14 @@ public class JdbcResolver {
                 stat.setNull(index, Types.NCLOB);
                 return true;
             } else {
-                if(obj instanceof NClob){
-                    stat.setNClob(index, (NClob)obj);
+                if (obj instanceof NClob) {
+                    stat.setNClob(index, (NClob) obj);
                     return true;
                 }
                 Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
                 if (val instanceof String) {
                     String str = (String) val;
-                    stat.setNClob(index, new StringReader(str),str.length());
+                    stat.setNClob(index, new StringReader(str), str.length());
                     return true;
                 }
             }
@@ -1525,7 +1598,7 @@ public class JdbcResolver {
                 Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
                 if (val instanceof String) {
                     String str = (String) val;
-                    stat.setCharacterStream(index, new StringReader(str),str.length());
+                    stat.setCharacterStream(index, new StringReader(str), str.length());
                     return true;
                 }
             }
@@ -1539,7 +1612,7 @@ public class JdbcResolver {
                 Object val = ObjectConvertor.tryConvertAsType(obj, String.class);
                 if (val instanceof String) {
                     String str = (String) val;
-                    stat.setNCharacterStream(index, new StringReader(str),str.length());
+                    stat.setNCharacterStream(index, new StringReader(str), str.length());
                     return true;
                 }
             }
@@ -1578,10 +1651,10 @@ public class JdbcResolver {
             } else {
                 Object val = ObjectConvertor.tryConvertAsType(obj, InputStream.class);
                 if (val instanceof InputStream) {
-                    if(val instanceof ByteArrayInputStream) {
+                    if (val instanceof ByteArrayInputStream) {
                         ByteArrayInputStream bis = (ByteArrayInputStream) val;
-                        stat.setBinaryStream(index, bis,bis.available());
-                    }else {
+                        stat.setBinaryStream(index, bis, bis.available());
+                    } else {
                         stat.setBinaryStream(index, (InputStream) val);
                     }
                     return true;
@@ -1601,14 +1674,14 @@ public class JdbcResolver {
             }
         }
         if (clazz == null) {
-            if(jdbcType!=null){
-                stat.setObject(index,null,jdbcType);
-            }else {
+            if (jdbcType != null) {
+                stat.setObject(index, null, jdbcType);
+            } else {
                 stat.setObject(index, null);
             }
             return;
         }
-        if (TypeOf.typeOfAny(clazz,short.class,Short.class, int.class, Integer.class, AtomicInteger.class)) {
+        if (TypeOf.typeOfAny(clazz, short.class, Short.class, int.class, Integer.class, AtomicInteger.class)) {
             stat.setNull(index, Types.INTEGER);
             return;
         }
@@ -1616,7 +1689,7 @@ public class JdbcResolver {
             stat.setNull(index, Types.BIGINT);
             return;
         }
-        if (TypeOf.typeOfAny(clazz, String.class,CharSequence.class,Appendable.class,char[].class)) {
+        if (TypeOf.typeOfAny(clazz, String.class, CharSequence.class, Appendable.class, char[].class)) {
             stat.setNull(index, Types.VARCHAR);
             return;
         }
@@ -1648,7 +1721,6 @@ public class JdbcResolver {
             QueryResult ret = new QueryResult();
 
             ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
 
             List<QueryColumn> columns = parseResultSetColumns(metaData, columnNameMapper);
             List<Map<String, Object>> rows = new LinkedList<>();
@@ -1661,12 +1733,7 @@ public class JdbcResolver {
                     break;
                 }
 
-                Map<String, Object> map = new LinkedHashMap<>();
-                for (int i = 0; i < columnCount; i++) {
-                    QueryColumn col = columns.get(i);
-                    Object val = getResultObject(rs, i + 1, col.getType());
-                    map.put(col.getName(), val);
-                }
+                Map<String, Object> map = convertResultSetRowAsMap(columns, rs);
                 rows.add(map);
 
                 currCount++;
@@ -1765,9 +1832,10 @@ public class JdbcResolver {
             List<T> ret = new LinkedList<>();
 
             ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
 
             List<QueryColumn> columns = parseResultSetColumns(metaData, columnNameMapper);
+
+            SQLBiFunction<List<QueryColumn>, ResultSet, T> beanConvertor = createResultSetRowBeanConvertor(beanClass);
 
             boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
             int currCount = 0;
@@ -1776,24 +1844,7 @@ public class JdbcResolver {
                     break;
                 }
 
-                Map<String, Object> map = new LinkedHashMap<>();
-                for (int i = 0; i < columnCount; i++) {
-                    QueryColumn col = columns.get(i);
-                    Object val = getResultObject(rs, i + 1, col.getType());
-                    map.put(col.getName(), val);
-                }
-
-                Object item = map;
-                if (!isDefaultMapType) {
-                    try {
-                        T bean = ReflectResolver.getInstance(beanClass);
-                        ReflectResolver.map2bean(map, bean);
-
-                        item = bean;
-                    } catch (Exception e) {
-                        throw new IllegalStateException(e.getMessage(), e);
-                    }
-                }
+                Object item = beanConvertor.apply(columns, rs);
 
                 ret.add((T) item);
 
@@ -1810,9 +1861,52 @@ public class JdbcResolver {
         }
     }
 
+
+    public static Map<String, Object> convertResultSetRowAsMap(List<QueryColumn> columns, ResultSet rs) throws SQLException {
+        if (columns == null || columns.isEmpty()) {
+            columns = parseResultSetColumns(rs);
+        }
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (int i = 0; i < columns.size(); i++) {
+            QueryColumn col = columns.get(i);
+            Object val = getResultObject(rs, i + 1, col.getType());
+            map.put(col.getName(), val);
+        }
+        return map;
+    }
+
+
+    public static <E> SQLBiFunction<List<QueryColumn>, ResultSet, E> createResultSetRowBeanConvertor(Class<E> beanClass) {
+        boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
+        if (isDefaultMapType) {
+            return (columns, rs) -> {
+                Map<String, Object> map = convertResultSetRowAsMap(columns, rs);
+                return (E) map;
+            };
+        }
+        return (columns, rs) -> {
+            try {
+                Map<String, Object> map = convertResultSetRowAsMap(columns, rs);
+                E bean = ReflectResolver.getInstance(beanClass);
+                ReflectResolver.map2bean(map, bean);
+                return bean;
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        };
+    }
+
+    public static List<QueryColumn> parseResultSetColumns(ResultSet rs) throws SQLException {
+        return parseResultSetColumns(rs, null);
+    }
+
     public static List<QueryColumn> parseResultSetColumns(ResultSet rs, Function<String, String> columnNameMapper) throws SQLException {
         ResultSetMetaData metaData = rs.getMetaData();
         return parseResultSetColumns(metaData, columnNameMapper);
+    }
+
+    public static List<QueryColumn> parseResultSetColumns(ResultSetMetaData metaData) throws SQLException {
+        return parseResultSetColumns(metaData, null);
     }
 
     public static List<QueryColumn> parseResultSetColumns(ResultSetMetaData metaData, Function<String, String> columnNameMapper) throws SQLException {
