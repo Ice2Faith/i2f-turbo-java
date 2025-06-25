@@ -1,6 +1,8 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.bindsql.BindSql;
+import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.cursor.JdbcCursor;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
@@ -12,6 +14,8 @@ import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 import i2f.page.ApiPage;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +94,8 @@ public class SqlCursorNode extends AbstractExecutorNode {
         if (item == null || item.isEmpty()) {
             item = AttrConsts.ITEM;
         }
+        boolean useCursor = executor.toBoolean(executor.attrValue(AttrConsts.USE_CURSOR, FeatureConsts.BOOLEAN, node, context));
+
 
         String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, queryNode, context);
         BindSql bql = SqlDialect.getSqlDialectList(datasource, queryNode, context, executor);
@@ -110,14 +116,41 @@ public class SqlCursorNode extends AbstractExecutorNode {
         }
         Map<String, Object> bakParams = new LinkedHashMap<>();
         bakParams.put(item, executor.visit(item, context));
+        JdbcCursor<?> cursor = null;
         try {
+            if (useCursor) {
+                Connection conn = executor.getConnection(datasource, context);
+                try {
+                    int cursorFetchSize = batchSize;
+                    cursor = JdbcResolver.cursor(conn, bql, resultType, (nn, ql) -> {
+                        return JdbcResolver.buildCursorStatement(nn, ql, cursorFetchSize);
+                    });
+                } catch (SQLException e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+            }
             while (true) {
-                List<?> list = executor.sqlQueryPage(datasource, bql, context, resultType, new ApiPage(pageIndex, batchSize));
-                if (list.isEmpty()) {
-                    if (executor.isDebug()) {
-                        executor.logDebug("no data found! at " + getNodeLocation(node));
+                List<?> list = null;
+                if (useCursor) {
+                    try {
+                        if (!cursor.hasRow()) {
+                            if (executor.isDebug()) {
+                                executor.logDebug("no data found! at " + getNodeLocation(node));
+                            }
+                            break;
+                        }
+                        list = cursor.nextCount(batchSize);
+                    } catch (SQLException e) {
+                        throw new IllegalStateException(e.getMessage(), e);
                     }
-                    break;
+                } else {
+                    list = executor.sqlQueryPage(datasource, bql, context, resultType, new ApiPage(pageIndex, batchSize));
+                    if (list.isEmpty()) {
+                        if (executor.isDebug()) {
+                            executor.logDebug("no data found! at " + getNodeLocation(node));
+                        }
+                        break;
+                    }
                 }
 
                 if (executor.isDebug()) {
@@ -165,6 +198,13 @@ public class SqlCursorNode extends AbstractExecutorNode {
                 executor.visitDelete(context, item);
             }
             executor.visitDelete(context, item);
+            if (cursor != null) {
+                try {
+                    cursor.dispose();
+                } catch (SQLException e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+            }
             for (Map.Entry<String, Object> entry : bakParams.entrySet()) {
                 executor.visitSet(context, entry.getKey(), entry.getValue());
             }

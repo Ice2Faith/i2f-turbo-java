@@ -1312,8 +1312,9 @@ eval-ts使用TinyScript引擎进行处理
     batch-size默认以int访问，等价于 batch-size.int
     item以string访问，不支持修饰符
     accept-batch默认以boolean访问，等价于 accept-batch.boolean
+    use-cursor默认以boolean访问，默认false，表示采用分页进行实现，如果为true，则采用jdbc forward-only fetch 实现
      -->
-    <sql-cursor item="item" batch-size="300" accept-batch="false">
+    <sql-cursor item="item" batch-size="300" accept-batch="false" use-cursor="false">
         <sql-query-list datasource="" script="" result-type="" offset="" limit="">
 
         </sql-query-list>
@@ -1507,13 +1508,15 @@ eval-ts使用TinyScript引擎进行处理
     在进行commit-size条数据的写入之后，提交一次事务
     item默认以string访问，为指定迭代的行变量的变量名，可用于在内部进行使用，特别是在transform节点中使用external特性时，可能会有用
     sync默认以boolean访问，默认就是false异步模式，指定etl的工作模式，如果为false则读写异步进行，读写互为两个线程，如果为true则读写同步进行，先读后写在一个线程中进行
+    use-cursor默认以boolean访问，默认false，表示采用分页进行实现，如果为true，则采用jdbc forward-only fetch 实现
      -->
     <sql-etl read-batch-size=""
              write-batch-size=""
-             before-truncate=""
+             before-truncate="false"
              commit-size=""
              item=""
-             sync="false">
+             sync="false"
+             use-cursor="false">
         <sql-query-list>
 
         </sql-query-list>

@@ -3,6 +3,7 @@ package i2f.jdbc.procedure.node.impl;
 import i2f.bindsql.BindSql;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.cursor.JdbcCursor;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.data.TypedArgument;
@@ -95,7 +96,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
         XmlNode queryNode = null;
         XmlNode extraNode = null;
         List<XmlNode> transformNodeList = new ArrayList<>();
-        List<Map.Entry<XmlNode,List<String>>> transformNodeAdditionalList=new ArrayList<>();
+        List<Map.Entry<XmlNode, List<String>>> transformNodeAdditionalList = new ArrayList<>();
         XmlNode loadNode = null;
         XmlNode beforeNode = null;
         XmlNode afterNode = null;
@@ -107,22 +108,22 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 extraNode = item;
             }
             if (TagConsts.ETL_TRANSFORM.equals(item.getTagName())) {
-                List<String> itemAdditionalList=new ArrayList<>();
+                List<String> itemAdditionalList = new ArrayList<>();
                 Map<String, String> attrMap = item.getTagAttrMap();
-                String[] additionalAttrs={AttrConsts.EXCLUDE,AttrConsts.INCLUDE,AttrConsts.EXTERNAL};
+                String[] additionalAttrs = {AttrConsts.EXCLUDE, AttrConsts.INCLUDE, AttrConsts.EXTERNAL};
                 for (String attr : additionalAttrs) {
-                    if(attrMap.containsKey(attr)){
+                    if (attrMap.containsKey(attr)) {
                         boolean ok = executor.toBoolean(executor.attrValue(attr, FeatureConsts.BOOLEAN, item, context));
-                        if(ok){
-                           itemAdditionalList.add(attr);
+                        if (ok) {
+                            itemAdditionalList.add(attr);
                         }
                     }
                 }
 
-                if(itemAdditionalList.isEmpty()) {
+                if (itemAdditionalList.isEmpty()) {
                     transformNodeList.add(item);
-                }else{
-                    transformNodeAdditionalList.add(new AbstractMap.SimpleEntry<>(item,itemAdditionalList));
+                } else {
+                    transformNodeAdditionalList.add(new AbstractMap.SimpleEntry<>(item, itemAdditionalList));
                 }
             }
             if (TagConsts.ETL_LOAD.equals(item.getTagName())) {
@@ -148,6 +149,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
         Integer readBatchSize = executor.convertAs(executor.attrValue(AttrConsts.READ_BATCH_SIZE, FeatureConsts.INT, node, context), Integer.class);
         Integer writeBatchSize = executor.convertAs(executor.attrValue(AttrConsts.WRITE_BATCH_SIZE, FeatureConsts.INT, node, context), Integer.class);
         boolean beforeTruncate = executor.toBoolean(executor.attrValue(AttrConsts.BEFORE_TRUNCATE, FeatureConsts.BOOLEAN, node, context));
+        boolean useCursor = executor.toBoolean(executor.attrValue(AttrConsts.USE_CURSOR, FeatureConsts.BOOLEAN, node, context));
         boolean sync = executor.toBoolean(executor.attrValue(AttrConsts.SYNC, FeatureConsts.BOOLEAN, node, context));
         Integer commitSize = executor.convertAs(executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context), Integer.class);
         String itemName = executor.convertAs(executor.attrValue(AttrConsts.ITEM, FeatureConsts.STRING, node, context), String.class);
@@ -161,8 +163,8 @@ public class SqlEtlNode extends AbstractExecutorNode {
         if (commitSize == null) {
             commitSize = writeBatchSize;
         }
-        if(itemName==null || itemName.isEmpty()){
-            itemName="item";
+        if (itemName == null || itemName.isEmpty()) {
+            itemName = "item";
         }
 
         String loadDatasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, loadNode, context);
@@ -193,7 +195,9 @@ public class SqlEtlNode extends AbstractExecutorNode {
         executor.visitSet(context, ParamsConsts.CONNECTIONS, new HashMap<>());
 
         // 备份堆栈
-        Object bakItem=executor.visit(itemName,context);
+        Object bakItem = executor.visit(itemName, context);
+
+        AtomicReference<JdbcCursor<?>> taskCursor = new AtomicReference<>();
 
         try {
             executor.sqlTransNone(extraDatasource, context);
@@ -211,40 +215,65 @@ public class SqlEtlNode extends AbstractExecutorNode {
             Map<String, XmlNode> targetNodeMap = new LinkedHashMap<>();
             Map<String, Map.Entry<String, List<String>>> targetMap = new LinkedHashMap<>();
             Map<String, Class<?>> targetTypeMap = new LinkedHashMap<>();
-            Map<String,JDBCType> targetJdbcTypeMap=new LinkedHashMap<>();
-            Map<String,XmlNode> targetExternalNodeMap=new LinkedHashMap<>();
+            Map<String, JDBCType> targetJdbcTypeMap = new LinkedHashMap<>();
+            Map<String, XmlNode> targetExternalNodeMap = new LinkedHashMap<>();
             AtomicReference<String> loadSql = new AtomicReference<>("");
 
 
             if (executor.isDebug()) {
                 bql = bql.concat(getTrackingComment(node));
-                executor.logDebug("etl extra: \n"+bql);
+                executor.logDebug("etl extra: \n" + bql);
             }
 
-            CountDownLatch latchPrepared=new CountDownLatch(1);
-            CountDownLatch latchReadFinish=new CountDownLatch(1);
-            CountDownLatch latchAllDone=new CountDownLatch(2);
+            CountDownLatch latchPrepared = new CountDownLatch(1);
+            CountDownLatch latchReadFinish = new CountDownLatch(1);
+            CountDownLatch latchAllDone = new CountDownLatch(2);
             AtomicInteger pageIndex = new AtomicInteger(0);
             LinkedBlockingQueue<List<Object>> loadArgs = new LinkedBlockingQueue<>(readBatchSize);
-            AtomicReference<Throwable> throwReadTask=new AtomicReference<>();
-            AtomicReference<Throwable> throwWriteTask=new AtomicReference<>();
+            AtomicReference<Throwable> throwReadTask = new AtomicReference<>();
+            AtomicReference<Throwable> throwWriteTask = new AtomicReference<>();
 
-            String taskExtraDatasource=extraDatasource;
-            BindSql taskBql=bql;
-            Class<?> taskResultType=resultType;
-            int taskReadBatchSize=readBatchSize;
-            String taskItemName=itemName;
-            int taskWriteBatchSize=writeBatchSize;
-            int taskCommitSize=commitSize;
+            String taskExtraDatasource = extraDatasource;
+            BindSql taskBql = bql;
+            Class<?> taskResultType = resultType;
+            int taskReadBatchSize = readBatchSize;
+            String taskItemName = itemName;
+            int taskWriteBatchSize = writeBatchSize;
+            int taskCommitSize = commitSize;
 
-            BiPredicate<Collection<List<Object>>,AtomicReference<Throwable>> delegateReadOnce=(collection,thrRef)->{
+
+            if (useCursor) {
+                Connection conn = executor.getConnection(taskExtraDatasource, context);
                 try {
-                    List<?> list = executor.sqlQueryPage(taskExtraDatasource, taskBql, context, taskResultType, new ApiPage(pageIndex.get(), taskReadBatchSize));
-                    if (list.isEmpty()) {
-                        if (executor.isDebug()) {
-                            executor.logDebug("etl-read no data found! at " + getNodeLocation(node));
+                    JdbcCursor<?> cursor = JdbcResolver.cursor(conn, taskBql, taskResultType, (nn, ql) -> {
+                        return JdbcResolver.buildCursorStatement(nn, ql, taskReadBatchSize);
+                    });
+                    taskCursor.set(cursor);
+                } catch (SQLException e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+            }
+
+            BiPredicate<Collection<List<Object>>, AtomicReference<Throwable>> delegateReadOnce = (collection, thrRef) -> {
+                try {
+                    List<?> list = null;
+                    JdbcCursor<?> cursor = taskCursor.get();
+                    if (useCursor) {
+                        if (!cursor.hasRow()) {
+                            if (executor.isDebug()) {
+                                executor.logDebug("etl-read no data found! at " + getNodeLocation(node));
+                            }
+                            return false;
                         }
-                        return false;
+                        list = cursor.nextCount(taskReadBatchSize);
+                    } else {
+                        list = executor.sqlQueryPage(taskExtraDatasource, taskBql, context, taskResultType, new ApiPage(pageIndex.get(), taskReadBatchSize));
+                        if (list.isEmpty()) {
+                            if (executor.isDebug()) {
+                                executor.logDebug("etl-read no data found! at " + getNodeLocation(node));
+                            }
+                            return false;
+                        }
                     }
 
                     if (executor.isDebug()) {
@@ -493,29 +522,30 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                     pageIndex.incrementAndGet();
                     if (executor.isDebug()) {
-                        executor.logDebug("etl-read next page "+pageIndex.get()+" loop! at " + getNodeLocation(node));
+                        executor.logDebug("etl-read next page " + pageIndex.get() + " loop! at " + getNodeLocation(node));
                     }
                     return true;
-                } catch (Throwable e){
+                } catch (Throwable e) {
                     thrRef.set(e);
                     return false;
                 }
             };
 
-            if(sync){
-                List<List<Object>> onceArgs=new ArrayList<>(taskReadBatchSize);
-                int commitCount=0;
+
+            if (sync) {
+                List<List<Object>> onceArgs = new ArrayList<>(taskReadBatchSize);
+                int commitCount = 0;
                 while (true) {
 
-                    boolean hasMoreData = delegateReadOnce.test(onceArgs,throwReadTask);
+                    boolean hasMoreData = delegateReadOnce.test(onceArgs, throwReadTask);
                     if (throwReadTask.get() != null) {
                         throw throwReadTask.get();
                     }
                     if (executor.isDebug()) {
-                        executor.logDebug("etl-write write once batch "+onceArgs.size()+"! at " + getNodeLocation(node));
+                        executor.logDebug("etl-write write once batch " + onceArgs.size() + "! at " + getNodeLocation(node));
                     }
                     JdbcResolver.batchByListableValues(loadConn, loadSql.get(), onceArgs.iterator(), taskWriteBatchSize);
-                    commitCount+=onceArgs.size();
+                    commitCount += onceArgs.size();
                     onceArgs.clear();
 
                     if (commitCount >= commitSize) {
@@ -530,24 +560,24 @@ public class SqlEtlNode extends AbstractExecutorNode {
                         break;
                     }
                 }
-            }else {
+            } else {
                 Runnable readTask = () -> {
                     try {
                         while (true) {
-                            double missWriteSleepMs=1;
+                            double missWriteSleepMs = 1;
                             while (loadArgs.size() >= taskReadBatchSize * 2) {
                                 if (executor.isDebug()) {
-                                    executor.logDebug("etl-read await "+((long)missWriteSleepMs)+"(ms) writer consumer! at " + getNodeLocation(node));
+                                    executor.logDebug("etl-read await " + ((long) missWriteSleepMs) + "(ms) writer consumer! at " + getNodeLocation(node));
                                 }
                                 try {
-                                    Thread.sleep((long)missWriteSleepMs);
+                                    Thread.sleep((long) missWriteSleepMs);
                                 } catch (Exception e) {
 
                                 }
-                                missWriteSleepMs=Math.min(missWriteSleepMs*1.1,90);
+                                missWriteSleepMs = Math.min(missWriteSleepMs * 1.1, 90);
                             }
 
-                            boolean hasMoreData = delegateReadOnce.test(loadArgs,throwReadTask);
+                            boolean hasMoreData = delegateReadOnce.test(loadArgs, throwReadTask);
                             if (throwReadTask.get() != null) {
                                 throw throwReadTask.get();
                             }
@@ -594,7 +624,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                                 break;
                             }
 
-                            double missDataSleepMs=1;
+                            double missDataSleepMs = 1;
                             while (onceCount < taskWriteBatchSize) {
                                 if (latchReadFinish.getCount() <= 0 && loadArgs.isEmpty()) {
                                     if (executor.isDebug()) {
@@ -614,25 +644,25 @@ public class SqlEtlNode extends AbstractExecutorNode {
                                 }
                                 if (row == null) {
                                     if (executor.isDebug()) {
-                                        executor.logDebug("etl-write await "+((long)missDataSleepMs)+"(ms) reader producer! at " + getNodeLocation(node));
+                                        executor.logDebug("etl-write await " + ((long) missDataSleepMs) + "(ms) reader producer! at " + getNodeLocation(node));
                                     }
                                     try {
-                                        Thread.sleep((long)missDataSleepMs);
+                                        Thread.sleep((long) missDataSleepMs);
                                     } catch (Exception e) {
 
                                     }
-                                    missDataSleepMs=Math.min(missDataSleepMs*1.1,90);
+                                    missDataSleepMs = Math.min(missDataSleepMs * 1.1, 90);
                                     continue;
                                 }
                                 onceArgs.add(row);
                                 onceCount++;
-                                missDataSleepMs=1;
+                                missDataSleepMs = 1;
                             }
 
 
                             if (onceCount > 0) {
                                 if (executor.isDebug()) {
-                                    executor.logDebug("etl-write write once "+onceArgs.size()+"! at " + getNodeLocation(node));
+                                    executor.logDebug("etl-write write once " + onceArgs.size() + "! at " + getNodeLocation(node));
                                 }
                                 JdbcResolver.batchByListableValues(loadConn, loadSql.get(), onceArgs.iterator(), taskWriteBatchSize);
                                 commitCount += onceCount;
@@ -657,10 +687,10 @@ public class SqlEtlNode extends AbstractExecutorNode {
                     }
                 };
 
-                String hcode = String.format("%x",latchAllDone.hashCode());
+                String hcode = String.format("%x", latchAllDone.hashCode());
 
-                newThread("read-"+hcode,readTask).start();
-                newThread("write-"+hcode,writeTask).start();
+                newThread("read-" + hcode, readTask).start();
+                newThread("write-" + hcode, writeTask).start();
 
                 try {
                     latchAllDone.await();
@@ -688,7 +718,16 @@ public class SqlEtlNode extends AbstractExecutorNode {
             throw new ThrowSignalException(e.getMessage(), e);
         } finally {
             // 还原堆栈
-            executor.visitSet(context,itemName,bakItem);
+            executor.visitSet(context, itemName, bakItem);
+
+            JdbcCursor<?> cursor = taskCursor.get();
+            if(cursor!=null){
+                try {
+                    cursor.dispose();
+                } catch (SQLException e) {
+                    throw new IllegalStateException(e.getMessage(),e);
+                }
+            }
 
             Map<String, Connection> conns = (Map<String, Connection>) context.get(ParamsConsts.CONNECTIONS);
             for (Map.Entry<String, Connection> entry : conns.entrySet()) {
@@ -708,9 +747,9 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
     }
 
-    public Thread newThread(String name,Runnable task){
+    public Thread newThread(String name, Runnable task) {
         Thread thread = new Thread(task);
-        thread.setName(TAG_NAME+"-"+name);
+        thread.setName(TAG_NAME + "-" + name);
         return thread;
     }
 }
