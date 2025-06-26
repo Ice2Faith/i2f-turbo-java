@@ -157,6 +157,7 @@
         <module>i2f-invokable</module>
         <module>i2f-bindsql-stringify</module>
         <module>i2f-form</module>
+        <module>i2f-database-dialect</module>
 
 
     </modules>

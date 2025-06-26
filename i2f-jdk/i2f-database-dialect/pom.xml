@@ -5,11 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>i2f.turbo</groupId>
-        <artifactId>i2f-extension</artifactId>
+        <artifactId>i2f-jdk</artifactId>
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-extension-mybatis</artifactId>
+    <artifactId>i2f-database-dialect</artifactId>
+
 
     <dependencies>
         <dependency>
@@ -19,40 +20,18 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-lru-map</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-database-type</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-match</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mybatis.spring.boot</groupId>
-            <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>3.0.3</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <addMavenDescriptor>true</addMavenDescriptor>
-                    </archive>
-                </configuration>
             </plugin>
         </plugins>
     </build>
+
 
 </project>
