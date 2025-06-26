@@ -31,12 +31,12 @@ public class JdbcProcedureXmlFindUsagesProvider implements FindUsagesProvider {
     @Override
     public @Nls
     @NotNull String getDescriptiveName(@NotNull PsiElement psiElement) {
-        if(!(psiElement instanceof XmlAttributeValue)){
+        if (!(psiElement instanceof XmlAttributeValue)) {
             return JsonBundle.message("unnamed.desc");
         }
         XmlAttributeValue element = (XmlAttributeValue) psiElement;
         String value = element.getValue();
-        if(value==null || value.isEmpty()){
+        if (value == null || value.isEmpty()) {
             return JsonBundle.message("unnamed.desc");
         }
         return value;

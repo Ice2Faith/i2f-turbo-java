@@ -35,7 +35,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     public static final ConcurrentHashMap<String, Language> LANG_JAVA_ENUM_MAP = new ConcurrentHashMap<>();
     public static volatile String JS_INJECT_PREFIX = "let executor={};let params={};";
 
-    public static final AtomicBoolean initRefreshThread=new AtomicBoolean(false);
+    public static final AtomicBoolean initRefreshThread = new AtomicBoolean(false);
+
     static {
         initInjectPrefix();
         startRefreshThread();
@@ -71,7 +72,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     }
 
     public static void startRefreshThread() {
-        if(initRefreshThread.getAndSet(true)){
+        if (initRefreshThread.getAndSet(true)) {
             return;
         }
         Thread thread = new Thread(() -> {
@@ -976,6 +977,12 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         || "result-type".equalsIgnoreCase(attrName)
                         || "rollback-for".equalsIgnoreCase(attrName)
                         || "no-rollback-for".equalsIgnoreCase(attrName)
+                        || "resultType".equalsIgnoreCase(attrName)
+                        || "parameterType".equalsIgnoreCase(attrName)
+                        || "className".equalsIgnoreCase(attrName)
+                        || "packageName".equalsIgnoreCase(attrName)
+                        || "return-type".equalsIgnoreCase(attrName)
+                        || "returnType".equalsIgnoreCase(attrName)
         ) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
@@ -998,7 +1005,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
                 return;
             }
-        }else if ("jdbc-type".equals(attrName)) {
+        } else if ("jdbc-type".equals(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)

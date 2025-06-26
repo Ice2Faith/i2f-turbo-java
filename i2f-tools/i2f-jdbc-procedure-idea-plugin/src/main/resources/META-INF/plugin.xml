@@ -91,6 +91,10 @@
         <!-- 定义语句模版 -->
         <defaultLiveTemplatesProvider order="first"
                 implementation="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jLiveTemplatesProvider"/>
+
+        <!-- 定义XML行的refid跳转标记，点击跳转到定义 -->
+        <dom.fileMetaData implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureDomFileDescription" rootTagName="procedure" />
+        <codeInsight.lineMarkerProvider language="XML" implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider" />
     </extensions>
 
 
@@ -105,6 +109,7 @@
                 icon="/assets/action.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="BasicEditorPopupMenu" anchor="first"/>
         </action>
     </actions>
 </idea-plugin>

@@ -11,17 +11,17 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiFileSystemItem;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.AbstractMap;
+import java.util.Map;
 
 public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
     public static final Logger log = Logger.getInstance(JdbcProcedureXmlProcedureJumpSourceFileAction.class);
@@ -32,14 +32,28 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         if (project == null) {
             return;
         }
-        VirtualFile file = getActionRefidAttributeValueJumpFile(event);
-        if(file==null){
+        Map.Entry<VirtualFile, Integer> file = getActionRefidAttributeValueJumpFile(event);
+        if (file == null) {
             return;
         }
-        new OpenFileDescriptor(project, file).navigate(true);
+        FileEditorManager editorManager = FileEditorManager.getInstance(project);
+        if (editorManager == null) {
+            new OpenFileDescriptor(project, file.getKey()).navigate(true);
+            return;
+        }
+        Editor editor = editorManager.openTextEditor(new OpenFileDescriptor(project, file.getKey()), true);
+        if (editor == null) {
+            new OpenFileDescriptor(project, file.getKey()).navigate(true);
+            return;
+        }
+        Integer lineNumber = file.getValue();
+        if (lineNumber != null && lineNumber > 0) {
+            editor.visualLineToY(lineNumber);
+        }
+
     }
 
-    public VirtualFile getActionRefidAttributeValueJumpFile(AnActionEvent event){
+    public Map.Entry<VirtualFile, Integer> getActionRefidAttributeValueJumpFile(AnActionEvent event) {
         Project project = event.getProject();
         if (project == null) {
             return null;
@@ -50,10 +64,10 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
 
         SelectionModel selectionModel = editor.getSelectionModel();
-        if(selectionModel!=null){
+        if (selectionModel != null) {
             String selectedText = selectionModel.getSelectedText();
-            VirtualFile file = getProcedureFileByProcedureId(selectedText);
-            if(file!=null){
+            Map.Entry<VirtualFile, Integer> file = getProcedureFileByProcedureId(selectedText);
+            if (file != null) {
                 return file;
             }
         }
@@ -79,7 +93,7 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         String name = xmlAttribute.getName();
 //        log.warn("xml-jump-source attr-name: " + name);
         if (!"refid".equals(name)
-                &&!"id".equals(name)) {
+                && !"id".equals(name)) {
             return null;
         }
         XmlAttributeValue xmlAttributeValue = (XmlAttributeValue) element;
@@ -87,12 +101,21 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         return getProcedureFileByProcedureId(value);
     }
 
-    public VirtualFile getProcedureFileByProcedureId(String value){
-        if(value==null){
+    public Map.Entry<VirtualFile, Integer> getProcedureFileByProcedureId(String value) {
+        if (value == null) {
             return null;
         }
-        if(value.endsWith(".xml")){
-            value=value.substring(0,value.length()-".xml".length());
+        String[] arr = value.split(":");
+        Integer lineNumber = null;
+        if (arr.length >= 2) {
+            try {
+                value = arr[0];
+                lineNumber = Integer.parseInt(arr[1]);
+            } catch (Exception e) {
+            }
+        }
+        if (value.endsWith(".xml")) {
+            value = value.substring(0, value.length() - ".xml".length());
         }
         //        log.warn("xml-jump-source attr-value: " + value);
         ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(value);
@@ -106,14 +129,14 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
             return null;
         }
 //        log.warn("xml-jump-source attr-meta-file-path: " + file.getPath());
-        return file;
+        return new AbstractMap.SimpleEntry<>(file, lineNumber);
     }
 
     @Override
     public void update(@NotNull AnActionEvent event) {
         super.update(event);
-        VirtualFile file = getActionRefidAttributeValueJumpFile(event);
-        if(file==null){
+        Map.Entry<VirtualFile, Integer> file = getActionRefidAttributeValueJumpFile(event);
+        if (file == null) {
             event.getPresentation().setEnabledAndVisible(false);
         }
     }

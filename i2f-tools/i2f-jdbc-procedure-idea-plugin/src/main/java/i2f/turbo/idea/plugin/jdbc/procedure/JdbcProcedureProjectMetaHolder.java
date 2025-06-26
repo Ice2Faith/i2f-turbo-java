@@ -22,8 +22,8 @@ import java.util.function.Predicate;
 public class JdbcProcedureProjectMetaHolder {
     public static final Logger log = Logger.getInstance(JdbcProcedureProjectMetaHolder.class);
 
-    public static final ConcurrentMap<String, VirtualFile> XML_FILE_MAP=new ConcurrentHashMap<>();
-    public static final ConcurrentMap<String, ProcedureMeta> PROCEDURE_META_MAP=new ConcurrentHashMap<>();
+    public static final ConcurrentMap<String, VirtualFile> XML_FILE_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<String, ProcedureMeta> PROCEDURE_META_MAP = new ConcurrentHashMap<>();
     public static final List<String> FEATURES = Arrays.asList(
             "int",
             "double",
@@ -81,14 +81,15 @@ public class JdbcProcedureProjectMetaHolder {
             "cause-root"
     );
 
-    public static final AtomicBoolean initRefreshThread=new AtomicBoolean(false);
+    public static final AtomicBoolean initRefreshThread = new AtomicBoolean(false);
+
     static {
         startRefreshThread();
     }
 
-    public static void startRefreshThread(){
-        if(initRefreshThread.getAndSet(true)){
-           return;
+    public static void startRefreshThread() {
+        if (initRefreshThread.getAndSet(true)) {
+            return;
         }
         Thread thread = new Thread(() -> {
             do {
@@ -105,7 +106,7 @@ public class JdbcProcedureProjectMetaHolder {
         thread.start();
     }
 
-    public static void refreshThreadTask(){
+    public static void refreshThreadTask() {
         log.warn("xml-search-refreshing");
 
         try {
@@ -121,27 +122,37 @@ public class JdbcProcedureProjectMetaHolder {
     }
 
 
-    public static void collectProcedureMeta(){
+    public static void collectProcedureMeta() {
         for (Map.Entry<String, VirtualFile> entry : XML_FILE_MAP.entrySet()) {
             VirtualFile value = entry.getValue();
-            try(InputStream is = value.getInputStream()) {
+            try (InputStream is = value.getInputStream()) {
                 Xml xml = XmlUtil.parseXmlSax(value.getName(), is);
                 Xml root = XmlUtil.getRootNode(xml);
-                String name = root.getName();
-                if(!"procedure".equals(name)){
-                    continue;
-                }
-                List<Xml> attributes = root.getAttributes();
-                if(attributes==null){
-                    continue;
-                }
-                ProcedureMeta meta=new ProcedureMeta();
+                inflateXml2Meta(null, 0, root, value);
+            } catch (Exception e) {
+
+            }
+        }
+    }
+
+    public static void inflateXml2Meta(String parentName, int level, Xml root, VirtualFile value) {
+        if (level > 4) {
+            return;
+        }
+        String name = root.getName();
+        if ("procedure".equals(name)
+                || "script-segment".equals(name)) {
+
+            List<Xml> attributes = root.getAttributes();
+            if (attributes != null) {
+
+                ProcedureMeta meta = new ProcedureMeta();
                 meta.setType(ProcedureMeta.Type.XML);
                 meta.setArguments(new ArrayList<>());
                 meta.setArgumentFeatures(new LinkedHashMap<>());
                 for (Xml attr : attributes) {
                     String attrName = attr.getName();
-                    if("id".equals(attrName)){
+                    if ("id".equals(attrName)) {
                         meta.setName(attr.getValue());
                         continue;
                     }
@@ -153,34 +164,49 @@ public class JdbcProcedureProjectMetaHolder {
                     }
                 }
                 meta.setTarget(value);
-                if(meta.getName()==null){
-                    continue;
+                if (meta.getName() != null) {
+//                    log.warn("xml-procedure-meta found:"+meta.getName());
+                    PROCEDURE_META_MAP.put(meta.getName(), meta);
+                    if (parentName != null && !parentName.isEmpty()) {
+                        PROCEDURE_META_MAP.put(parentName + "." + meta.getName(), meta);
+                    }
+                    if (level == 0) {
+                        parentName = meta.getName();
+                    } else {
+                        if (parentName != null && !parentName.contains(".")) {
+                            parentName = parentName + "." + meta.getName();
+                        }
+                    }
                 }
-//                log.warn("xml-procedure-meta found:"+meta.getName());
-                PROCEDURE_META_MAP.put(meta.getName(),meta);
-            }catch (Exception e){
-
+            }
+        }
+        List<Xml> children = root.getChildren();
+        if (children != null) {
+            for (Xml item : children) {
+                inflateXml2Meta(parentName, level + 1, item, value);
             }
         }
     }
 
 
     public static void refreshXmlFiles() {
+
+
         ProjectManager projectManager = ProjectManager.getInstance();
         @NotNull Project[] projects = projectManager.getOpenProjects();
         for (Project project : projects) {
             VirtualFile workspaceFile = project.getWorkspaceFile();
-            if(workspaceFile==null){
-                workspaceFile=project.getProjectFile();
+            if (workspaceFile == null) {
+                workspaceFile = project.getProjectFile();
             }
-            if(workspaceFile==null){
+            if (workspaceFile == null) {
                 continue;
             }
             VirtualFile searchDir = workspaceFile.getParent();
-            if(searchDir!=null){
-                searchDir=searchDir.getParent();
+            if (searchDir != null) {
+                searchDir = searchDir.getParent();
             }
-            if(searchDir==null) {
+            if (searchDir == null) {
                 continue;
             }
             log.warn("xml-search-dir:" + searchDir.getPath());
@@ -251,7 +277,7 @@ public class JdbcProcedureProjectMetaHolder {
                         path = "/" + path;
                     }
 
-                    XML_FILE_MAP.put(path,file);
+                    XML_FILE_MAP.put(path, file);
 //                    log.warn("xml-search-match:" + file.getName() + "," + file.getPath());
                 }
             }
