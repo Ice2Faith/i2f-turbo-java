@@ -1,5 +1,8 @@
 package i2f.lru;
 
+import i2f.clock.SystemClock;
+
+import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,6 +48,19 @@ public class LruMap<K, V> extends LinkedHashMap<K, V> {
     public LruMap(int initialCapacity, float loadFactor, boolean accessOrder, int maxSize) {
         super(initialCapacity, loadFactor, accessOrder);
         this.maxSize.set(maxSize);
+    }
+
+    public static String windowKey(Object key,Duration window){
+        return key+":wk_"+windowKey(window);
+    }
+
+    public static String windowKey(Duration window){
+        long range = window.toMillis();
+        if(range<=0){
+            range=1;
+        }
+        long windowCount = SystemClock.currentTimeMillis() / range;
+        return String.format("%x",windowCount);
     }
 
     public void setMaxSize(int maxSize) {
