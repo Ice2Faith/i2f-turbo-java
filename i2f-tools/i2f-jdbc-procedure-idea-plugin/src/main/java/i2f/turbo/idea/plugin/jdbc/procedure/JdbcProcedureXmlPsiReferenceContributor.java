@@ -1,16 +1,10 @@
 package i2f.turbo.idea.plugin.jdbc.procedure;
 
-import com.intellij.codeInsight.lookup.LookupElement;
-import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.actions.EditorActionUtil;
-import com.intellij.openapi.fileEditor.OpenFileDescriptor;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.source.xml.XmlAttributeReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
@@ -27,13 +21,13 @@ public class JdbcProcedureXmlPsiReferenceContributor extends PsiReferenceContrib
 
     @Override
     public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
-        registrar.registerReferenceProvider(PlatformPatterns.psiElement(XmlAttributeValue.class),new JdbcProcedureXmlPsiReferenceProvider());
+        registrar.registerReferenceProvider(PlatformPatterns.psiElement(XmlAttributeValue.class), new JdbcProcedureXmlPsiReferenceProvider());
     }
 
     public static class JdbcProcedureXmlPsiReferenceProvider extends PsiReferenceProvider {
         @NotNull
         @Override
-        public PsiReference [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+        public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
 //            log.warn("xml-psi-reference begin :"+element);
             if (!(element instanceof XmlAttributeValue)) {
                 return PsiReference.EMPTY_ARRAY;
@@ -41,11 +35,14 @@ public class JdbcProcedureXmlPsiReferenceContributor extends PsiReferenceContrib
 
             XmlAttributeValue xmlAttributeValue = (XmlAttributeValue) element;
             XmlAttribute xmlAttribute = PsiTreeUtil.getParentOfType(element, XmlAttribute.class, false);
+            if (xmlAttribute == null) {
+                return PsiReference.EMPTY_ARRAY;
+            }
 //            log.warn("xml-psi-reference attribute :"+xmlAttribute);
             String name = xmlAttribute.getName();
 //            log.warn("xml-psi-reference attr-name :"+name);
-            if("refid".equals(name)
-            ||"id".equals(name)){
+            if ("refid".equals(name)
+                    || "id".equals(name)) {
                 return createReference(xmlAttributeValue);
             }
 
@@ -55,15 +52,15 @@ public class JdbcProcedureXmlPsiReferenceContributor extends PsiReferenceContrib
         private PsiReference[] createReference(XmlAttributeValue xmlAttributeValue) {
             String value = xmlAttributeValue.getValue();
 //            log.warn("xml-psi-reference attr-value :"+value);
-            if(value==null || value.isEmpty()){
+            if (value == null || value.isEmpty()) {
                 return PsiReference.EMPTY_ARRAY;
             }
             ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(value);
 //            log.warn("xml-psi-reference attr-value-meta :"+meta);
-            if(meta==null){
+            if (meta == null) {
                 return PsiReference.EMPTY_ARRAY;
             }
-            List<PsiReference> ret=new ArrayList<>();
+            List<PsiReference> ret = new ArrayList<>();
             TextRange textRange = xmlAttributeValue.getTextRange();
             TextRange contentRange = new TextRange(
                     textRange.getStartOffset() + 1,
@@ -81,22 +78,24 @@ public class JdbcProcedureXmlPsiReferenceContributor extends PsiReferenceContrib
 
     public static class JdbcProcedureIdReference extends PsiReferenceBase<PsiElement> implements PsiPolyVariantReference {
         protected PsiFile targetPisElement;
-        public JdbcProcedureIdReference(@NotNull PsiElement element, TextRange textRange,PsiFile targetPisElement) {
+
+        public JdbcProcedureIdReference(@NotNull PsiElement element, TextRange textRange, PsiFile targetPisElement) {
             super(element, textRange);
-            this.targetPisElement=targetPisElement;
+            this.targetPisElement = targetPisElement;
         }
 
         @NotNull
         @Override
-        public ResolveResult [] multiResolve(boolean b) {
+        public ResolveResult[] multiResolve(boolean b) {
             PsiElementResolveResult resolveResult = new PsiElementResolveResult(targetPisElement);
             return new ResolveResult[]{resolveResult};
         }
+
         @Nullable
         @Override
         public PsiElement resolve() {
             ResolveResult[] resolveResults = multiResolve(false);
-            if(resolveResults==null || resolveResults.length==0){
+            if (resolveResults == null || resolveResults.length == 0) {
                 return null;
             }
             return resolveResults[0].getElement();

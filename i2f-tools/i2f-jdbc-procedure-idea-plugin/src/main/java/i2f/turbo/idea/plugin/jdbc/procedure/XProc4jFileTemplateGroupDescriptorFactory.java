@@ -9,7 +9,7 @@ import com.intellij.ide.fileTemplates.FileTemplateGroupDescriptorFactory;
  * @date 2025/6/24 14:47
  */
 public class XProc4jFileTemplateGroupDescriptorFactory implements FileTemplateGroupDescriptorFactory {
-    public static final String XPROC4J_XML_TEMPLATE = XProc4jConsts.NAME+" file.xml";
+    public static final String XPROC4J_XML_TEMPLATE = XProc4jConsts.NAME + " file.xml";
 
 
     @Override
