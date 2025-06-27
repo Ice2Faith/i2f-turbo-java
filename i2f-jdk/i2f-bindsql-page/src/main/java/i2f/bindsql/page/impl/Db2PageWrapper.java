@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class Db2PageWrapper implements IPageWrapper {
     @Override
-    public BindSql apply(BindSql bql, ApiOffsetSize page) {
+    public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {
             return bql;
         }
@@ -31,28 +31,35 @@ public class Db2PageWrapper implements IPageWrapper {
                     .append(bql.getSql())
                     .append(" ) AS TMP_PAGE ")
                     .append(" ) TMP_PAGE ")
-                    .append(" WHERE ROW_ID >= ? AND ROW_ID < ? ");
+                    .append(" WHERE ROW_ID >= ").append(embed ? (page.getOffset() + 1) : "?")
+                    .append(" AND ROW_ID < ").append(embed ? (page.getEnd() + 1) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getOffset() + 1);
-            pageSql.getArgs().add(page.getEnd() + 1);
+            if (!embed) {
+                pageSql.getArgs().add(page.getOffset() + 1);
+                pageSql.getArgs().add(page.getEnd() + 1);
+            }
         } else if (page.getOffset() != null) {
             builder.append(" SELECT * FROM ( ")
                     .append(" SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( ")
                     .append(bql.getSql())
                     .append(" ) AS TMP_PAGE ")
                     .append(" ) TMP_PAGE ")
-                    .append(" WHERE ROW_ID >= ? ");
+                    .append(" WHERE ROW_ID >= ").append(embed ? (page.getOffset() + 1) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getOffset() + 1);
+            if (!embed) {
+                pageSql.getArgs().add(page.getOffset() + 1);
+            }
         } else if (page.getSize() != null) {
             builder.append(" SELECT * FROM ( ")
                     .append(" SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( ")
                     .append(bql.getSql())
                     .append(" ) AS TMP_PAGE ")
                     .append(" ) TMP_PAGE ")
-                    .append(" WHERE ROW_ID < ? ");
+                    .append(" WHERE ROW_ID < ").append(embed ? (page.getSize() + 1) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getSize() + 1);
+            if (!embed) {
+                pageSql.getArgs().add(page.getSize() + 1);
+            }
         }
 
         pageSql.setSql(builder.toString());
