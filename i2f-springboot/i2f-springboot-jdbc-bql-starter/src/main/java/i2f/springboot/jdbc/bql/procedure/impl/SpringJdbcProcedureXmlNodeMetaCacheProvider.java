@@ -8,6 +8,8 @@ import i2f.jdbc.procedure.provider.types.xml.impl.AbstractJdbcProcedureXmlNodeMe
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -24,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 @NoArgsConstructor
 @Slf4j
-public class SpringJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider {
+public class SpringJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider implements ApplicationRunner {
 
     protected final CopyOnWriteArraySet<String> xmlLocations = new CopyOnWriteArraySet<>();
     protected final PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
@@ -36,6 +38,17 @@ public class SpringJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcPro
             return;
         }
         this.xmlLocations.addAll(xmlLocations);
+    }
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        new Thread(()->{
+            try{
+                parseResources();
+            }catch(Exception e){
+
+            }
+        }).start();
     }
 
     @Override

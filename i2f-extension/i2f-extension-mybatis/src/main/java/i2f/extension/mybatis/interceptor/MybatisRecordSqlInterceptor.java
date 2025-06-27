@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -60,6 +61,9 @@ public class MybatisRecordSqlInterceptor implements Interceptor {
     public static final String METHOD_UPDATE = "update";
     public static final String METHOD_QUERY = "query";
     public static final String METHOD_QUERY_CURSOR = "queryCursor";
+
+    protected Consumer<Object> infoLogger= System.out::println;
+    protected Consumer<Object> errorLogger= System.err::println;
 
     protected boolean enablePrintSql = false;
 
@@ -174,9 +178,13 @@ public class MybatisRecordSqlInterceptor implements Interceptor {
             }
 
             if (ex == null) {
-                System.out.println("mybatis record sql " + useTs + "(ms): " + shortId + " ==> " + mergeSql);
+                if(infoLogger!=null) {
+                    infoLogger.accept("mybatis record sql " + useTs + "(ms): " + shortId + " ==> " + mergeSql);
+                }
             } else {
-                System.err.println("mybatis record sql " + useTs + "(ms): " + shortId + " ==> " + mergeSql);
+                if(errorLogger!=null) {
+                    errorLogger.accept("mybatis record sql " + useTs + "(ms): " + shortId + " ==> " + mergeSql);
+                }
             }
         }
     }

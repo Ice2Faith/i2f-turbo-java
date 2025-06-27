@@ -1,22 +1,26 @@
 package i2f.springboot.jdbc.bql.procedure;
 
 import i2f.context.std.INamingContext;
+import i2f.environment.std.IEnvironment;
 import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.event.ScriptPreloadEventListener;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.context.impl.ProcedureMetaMapGrammarReporterListener;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
-import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
+import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.event.XmlNodeExecInvokeLogListener;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
 import i2f.jdbc.procedure.provider.types.class4j.impl.ContextJdbcProcedureJavaCallerMetaCacheProvider;
 import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
+import i2f.jdbc.procedure.provider.types.xml.impl.DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider;
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ContextJdbcProcedureMetaProviderRegistry;
+import i2f.resources.ResourceUtil;
 import i2f.spring.core.SpringContext;
+import i2f.spring.enviroment.SpringEnvironment;
 import i2f.springboot.jdbc.bql.procedure.impl.SpringContextJdbcProcedureExecutor;
 import i2f.springboot.jdbc.bql.procedure.impl.SpringJdbcProcedureXmlNodeMetaCacheProvider;
 import lombok.Data;
@@ -31,8 +35,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -68,19 +75,28 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
+    @ConditionalOnExpression("${xproc4j.environment.enable:true}")
+    @ConditionalOnMissingBean(IEnvironment.class)
+    @Bean
+    public IEnvironment iEnvironment() {
+        log.info(XProc4jConsts.NAME + " config " + IEnvironment.class.getSimpleName() + " ...");
+        IEnvironment ret = new SpringEnvironment(applicationContext.getEnvironment());
+        return ret;
+    }
+
     @ConditionalOnExpression("${xproc4j.event-handler.enable:true}")
     @ConditionalOnMissingBean(XProc4jEventHandler.class)
     @Bean
     public XProc4jEventHandler xProc4jEventHandler(INamingContext namingContext) {
-        log.info(XProc4jConsts.NAME + " config " + DefaultXProc4jEventHandler.class.getSimpleName() + " ...");
-        DefaultXProc4jEventHandler ret = new DefaultXProc4jEventHandler(() -> namingContext);
+        log.info(XProc4jConsts.NAME + " config " + ContextXProc4jEventHandler.class.getSimpleName() + " ...");
+        ContextXProc4jEventHandler ret = new ContextXProc4jEventHandler(namingContext);
         return ret;
     }
 
     @ConditionalOnExpression("${xproc4j.provider.xml-node.scan.enable:true}")
     @ConditionalOnMissingBean(JdbcProcedureXmlNodeMetaProvider.class)
     @Bean
-    public JdbcProcedureXmlNodeMetaProvider jdbcProcedureNodeMapSupplier(
+    public JdbcProcedureXmlNodeMetaProvider jdbcProcedureXmlNodeMetaProvider(
             @Autowired(required = false) XProc4jEventHandler eventHandler
     ) {
         log.info(XProc4jConsts.NAME + " config " + SpringJdbcProcedureXmlNodeMetaCacheProvider.class.getSimpleName() + " ...");
@@ -95,6 +111,49 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         String[] arr = xmlLocations.split("[,;\n]");
         ret.getXmlLocations().addAll(Arrays.asList(arr));
         ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
+        return ret;
+    }
+
+    @ConditionalOnExpression("${xproc4j.provider.xml-node.watching.enable:true}")
+    @ConditionalOnMissingBean(DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider.class)
+    @Bean
+    public DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider directoryWatchingJdbcProcedureXmlNodeMetaCacheProvider(
+            @Autowired(required = false) XProc4jEventHandler eventHandler
+    ) {
+        log.info(XProc4jConsts.NAME + " config " + DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider.class.getSimpleName() + " ...");
+        DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider ret = new DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider();
+        if (eventHandler != null) {
+            ret.setEventHandler(eventHandler);
+        }
+        String watchingDirectories = jdbcProcedureProperties.getWatchingDirectories();
+        if (watchingDirectories == null) {
+            watchingDirectories = SpringJdbcProcedureProperties.DEFAULT_WATCHING_DIRECTORIES;
+        }
+        String[] arr = watchingDirectories.split("[,;\n]");
+        Set<File> files = ResourceUtil.getResourcesFiles(Arrays.asList(arr));
+        Set<String> sourceCodeSet=new LinkedHashSet<>();
+        for (File file : files) {
+            if(file==null){
+                continue;
+            }
+            String path = file.getAbsolutePath();
+            path=path.replace("\\","/");
+            int idx=path.lastIndexOf("/target/classes/");
+            if(idx>=0){
+                String modulePath=path.substring(0,idx);
+                String mainPath=modulePath+"/src/main";
+                sourceCodeSet.add(mainPath+"/java");
+                sourceCodeSet.add(mainPath+"/resources");
+            }
+        }
+        for (String item : sourceCodeSet) {
+            files.add(new File(item));
+        }
+
+        ret.getDirs().addAll(files);
+        ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
+        ret.getEnableScanWhenWatching().set(false);
+        ret.runOnBackground();
         return ret;
     }
 
@@ -148,10 +207,12 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @ConditionalOnMissingBean(JdbcProcedureExecutor.class)
     @Bean
     public JdbcProcedureExecutor jdbcProcedureExecutor(JdbcProcedureContext context,
+                                                       IEnvironment iEnvironment,
+                                                       INamingContext namingContext,
                                                        @Autowired(required = false) XProc4jEventHandler eventHandler
     ) {
         log.info(XProc4jConsts.NAME + " config " + SpringContextJdbcProcedureExecutor.class.getSimpleName() + " ...");
-        SpringContextJdbcProcedureExecutor ret = new SpringContextJdbcProcedureExecutor(context, applicationContext);
+        SpringContextJdbcProcedureExecutor ret = new SpringContextJdbcProcedureExecutor(context, iEnvironment,namingContext);
         if (eventHandler != null) {
             ret.setEventHandler(eventHandler);
         }

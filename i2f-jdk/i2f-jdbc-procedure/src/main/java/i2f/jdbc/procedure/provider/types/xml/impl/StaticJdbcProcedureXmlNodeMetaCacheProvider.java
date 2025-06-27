@@ -3,7 +3,7 @@ package i2f.jdbc.procedure.provider.types.xml.impl;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.provider.event.ProcedureMetaProviderNotifyEvent;
+import i2f.jdbc.procedure.provider.event.ProcedureMetaProviderChangeEvent;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -28,9 +28,10 @@ public class StaticJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcPro
         putAll(map);
     }
 
-    public void notifyChange() {
-        ProcedureMetaProviderNotifyEvent event = new ProcedureMetaProviderNotifyEvent();
+    public void notifyChange(Map<String, XmlNode> map) {
+        ProcedureMetaProviderChangeEvent event = new ProcedureMetaProviderChangeEvent();
         event.setProvider(this);
+        event.setMetaMap(parseMetaMap(map));
         if (eventHandler != null) {
             eventHandler.publish(event);
         }
@@ -43,7 +44,7 @@ public class StaticJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcPro
             }
             staticMap.put(entry.getKey(), entry.getValue());
         }
-        notifyChange();
+        notifyChange(map);
     }
 
     @Override

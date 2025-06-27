@@ -6,7 +6,7 @@ import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.provider.event.ProcedureMetaProviderNotifyEvent;
+import i2f.jdbc.procedure.provider.event.ProcedureMetaProviderChangeEvent;
 import i2f.resources.ResourceUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +18,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 /**
@@ -28,9 +29,11 @@ import java.util.function.Predicate;
 @NoArgsConstructor
 public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider implements Runnable {
     protected final CopyOnWriteArraySet<File> dirs = new CopyOnWriteArraySet<>();
+    protected final AtomicBoolean enableScanWhenWatching=new AtomicBoolean(true);
     protected final ConcurrentHashMap<String, XmlNode> nodeMap = new ConcurrentHashMap<>();
     protected volatile WatchService watcher;
     protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
+    protected volatile Thread loopThread=null;
 
     public DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider(List<String> locations) {
         if (locations == null) {
@@ -85,9 +88,13 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
         }
     }
 
-    public void notifyChange() {
-        ProcedureMetaProviderNotifyEvent event = new ProcedureMetaProviderNotifyEvent();
+    public void notifyChange(Map<String, XmlNode> nodeMap) {
+        ProcedureMetaProviderChangeEvent event = new ProcedureMetaProviderChangeEvent();
         event.setProvider(this);
+        if(nodeMap==null){
+            nodeMap=new LinkedHashMap<>(this.nodeMap);
+        }
+        event.setMetaMap(parseMetaMap(nodeMap));
         if (eventHandler != null) {
             eventHandler.publish(event);
         }
@@ -106,13 +113,15 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
                     continue;
                 }
                 registerAll(Paths.get(dir.getAbsolutePath()));
-                walkFileTree(dir, (file) -> {
-                    handleXmlNodeFile(file);
-                    return true;
-                });
+                if(enableScanWhenWatching.get()) {
+                    walkFileTree(dir, (file) -> {
+                        handleXmlNodeFile(file, false);
+                        return true;
+                    });
+                }
             }
             if (!nodeMap.isEmpty()) {
-                notifyChange();
+                notifyChange(nodeMap);
             }
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -130,23 +139,45 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
         });
     }
 
+
     protected void register(Path dir) throws IOException {
-        WatchKey key = dir.register(watcher,
-                StandardWatchEventKinds.ENTRY_CREATE,
-                StandardWatchEventKinds.ENTRY_DELETE,
-                StandardWatchEventKinds.ENTRY_MODIFY);
-        System.out.println(XProc4jConsts.NAME + " watching directory: " + dir);
+
+            WatchKey key = dir.register(watcher,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_DELETE,
+                    StandardWatchEventKinds.ENTRY_MODIFY);
+
+            System.out.println(XProc4jConsts.NAME + " watching directory: " + dir);
+
     }
 
     @Override
     public void run() {
-        this.watching();
+        synchronized (this) {
+            if(this.watcher==null) {
+                this.watching();
+            }
+        }
         this.loopHandleEvents();
+    }
+
+    public synchronized void runOnBackground(){
+        if(loopThread!=null){
+            return;
+        }
+        loopThread=new Thread(this);
+        loopThread.setDaemon(true);
+        loopThread.setName("jdbc-proc-watcher");
+        loopThread.start();
     }
 
     // 处理所有事件
     void loopHandleEvents() {
-        this.watching();
+        synchronized (this) {
+            if(this.watcher==null) {
+                this.watching();
+            }
+        }
         while (true) {
             WatchKey key;
             try {
@@ -159,6 +190,12 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
                 WatchEvent.Kind<?> kind = event.kind();
 
                 if (kind == StandardWatchEventKinds.OVERFLOW) {
+                    continue;
+                }
+
+                // 解决文件修改时，会通知两次的问题
+                int count = event.count();
+                if(count>1){
                     continue;
                 }
 
@@ -177,7 +214,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
 
                 // 处理文件变化
                 if (StandardWatchEventKinds.ENTRY_DELETE != kind) {
-                    handleXmlNodeFile(file);
+                    handleXmlNodeFile(file,true);
                 }
             }
 
@@ -188,7 +225,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
         }
     }
 
-    public void handleXmlNodeFile(File file) {
+    public void handleXmlNodeFile(File file,boolean needNotifyChange) {
         if (file == null) {
             return;
         }
@@ -207,25 +244,33 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
         Map<String, XmlNode> ret = new HashMap<>();
         try {
             XmlNode node = JdbcProcedureParser.parse(file);
-            System.out.println(XProc4jConsts.NAME + " watching xml-node file change parsed:" + file.getAbsolutePath());
+            if(needNotifyChange) {
+                System.out.println(XProc4jConsts.NAME + " watching xml-node file change parsed:" + file.getAbsolutePath());
+            }
             String id = node.getTagAttrMap().get(AttrConsts.ID);
             if (id != null) {
                 ret.put(id, node);
-                System.out.println(XProc4jConsts.NAME + " watching xml-node node:" + id);
+                if(needNotifyChange) {
+                    System.out.println(XProc4jConsts.NAME + " watching xml-node node:" + id);
+                }
                 Map<String, XmlNode> next = new HashMap<>();
                 JdbcProcedureParser.resolveEmbedIdNode(node, next);
                 for (Map.Entry<String, XmlNode> entry : next.entrySet()) {
                     ret.put(entry.getKey(), entry.getValue());
                     if (!entry.getKey().equals(id)) {
                         String childId = id + "." + entry.getKey();
-                        System.out.println(XProc4jConsts.NAME + " watching xml-node node-child:" + childId);
+                        if(needNotifyChange) {
+                            System.out.println(XProc4jConsts.NAME + " watching xml-node node-child:" + childId);
+                        }
                         ret.put(childId, entry.getValue());
                     }
                 }
             }
             if (!ret.isEmpty()) {
                 nodeMap.putAll(ret);
-                notifyChange();
+                if(needNotifyChange) {
+                    notifyChange(ret);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
