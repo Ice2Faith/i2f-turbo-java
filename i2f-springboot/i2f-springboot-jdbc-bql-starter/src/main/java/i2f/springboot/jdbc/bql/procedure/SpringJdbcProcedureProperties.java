@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 @ConfigurationProperties(prefix = "xproc4j")
 public class SpringJdbcProcedureProperties {
     public static final String DEFAULT_XML_LOCATIONS = "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml";
+    public static final String DEFAULT_WATCHING_DIRECTORIES = "classpath*:procedure/;classpath*:com/";
     protected boolean enable = true;
 
     protected boolean debug = false;
@@ -23,6 +24,8 @@ public class SpringJdbcProcedureProperties {
     protected boolean reportOnBoot = true;
 
     protected String xmlLocations = DEFAULT_XML_LOCATIONS;
+
+    protected String watchingDirectories= DEFAULT_WATCHING_DIRECTORIES;
 
     protected long refreshXmlIntervalSeconds = -1;
 

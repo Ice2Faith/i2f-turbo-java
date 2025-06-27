@@ -4,9 +4,12 @@ import i2f.jdbc.procedure.context.CacheObjectRefresherSupplier;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.context.event.JdbcProcedureMetaMapRefreshedEvent;
+import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.XProc4jEventListener;
 import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
 import i2f.jdbc.procedure.provider.JdbcProcedureMetaProvider;
+import i2f.jdbc.procedure.provider.event.ProcedureMetaProviderChangeEvent;
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ListableJdbcProcedureMetaProviderRegistry;
 import lombok.Data;
@@ -24,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 public class DefaultJdbcProcedureContext
         extends CacheObjectRefresherSupplier<Map<String, ProcedureMeta>, ConcurrentHashMap<String, ProcedureMeta>>
-        implements JdbcProcedureContext {
+        implements JdbcProcedureContext, XProc4jEventListener {
     protected volatile JdbcProcedureMetaProviderRegistry registry = new ListableJdbcProcedureMetaProviderRegistry();
     protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
 
@@ -100,6 +103,11 @@ public class DefaultJdbcProcedureContext
 
         cache.putAll(metaMap);
 
+        notifyMetaMapRefreshed(metaMap);
+    }
+
+    public void notifyMetaMapRefreshed(Map<String,ProcedureMeta> metaMap){
+
         JdbcProcedureMetaMapRefreshedEvent event = new JdbcProcedureMetaMapRefreshedEvent();
         event.setContext(this);
         event.setMetaMap(metaMap);
@@ -107,4 +115,20 @@ public class DefaultJdbcProcedureContext
 
     }
 
+    @Override
+    public boolean support(XProc4jEvent event) {
+        return event instanceof ProcedureMetaProviderChangeEvent;
+    }
+
+    @Override
+    public boolean handle(XProc4jEvent event) {
+        ProcedureMetaProviderChangeEvent evt = (ProcedureMetaProviderChangeEvent) event;
+        Map<String, ProcedureMeta> metaMap = evt.getMetaMap();
+        if(metaMap!=null){
+             cache.putAll(metaMap);
+
+            notifyMetaMapRefreshed(metaMap);
+        }
+        return false;
+    }
 }

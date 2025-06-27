@@ -1,6 +1,8 @@
 package i2f.springboot.jdbc.bql.procedure.impl;
 
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
+import i2f.context.std.INamingContext;
+import i2f.environment.std.IEnvironment;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
@@ -31,12 +33,17 @@ import java.util.function.Supplier;
 public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExecutor {
     protected static final Logger log = LoggerFactory.getLogger(SpringContextJdbcProcedureExecutor.class);
 
+
     public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context, ApplicationContext applicationContext) {
         super(context, new SpringEnvironment(applicationContext.getEnvironment()), new SpringContext(applicationContext));
     }
 
     public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context, ApplicationContext applicationContext, Environment environment) {
         super(context, new SpringEnvironment(environment), new SpringContext(applicationContext));
+    }
+
+    public SpringContextJdbcProcedureExecutor(JdbcProcedureContext context, IEnvironment environment, INamingContext namingContext) {
+        super(context, environment, namingContext);
     }
 
     public static void detectPrimaryDatasource(Map<String, DataSource> ret) {

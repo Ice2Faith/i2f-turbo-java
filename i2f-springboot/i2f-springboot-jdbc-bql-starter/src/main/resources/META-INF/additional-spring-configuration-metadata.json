@@ -46,27 +46,6 @@
       "defaultValue": true
     },
     {
-      "name": "i2f.jdbc.procedure.enable",
-      "type": "java.lang.Boolean",
-      "description": "whether enable auto-configuration for jdbc procedure.",
-      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
-      "defaultValue": true
-    },
-    {
-      "name": "jdbc.xml.procedure.debug",
-      "type": "java.lang.Boolean",
-      "description": "whether enable debug log for jdbc procedure.",
-      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
-      "defaultValue": false
-    },
-    {
-      "name": "jdbc.xml.procedure.report-on-boot",
-      "type": "java.lang.Boolean",
-      "description": "whether enable report grammar issue on boot for jdbc procedure.",
-      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
-      "defaultValue": true
-    },
-    {
       "name": "xproc4j.enable",
       "type": "java.lang.Boolean",
       "description": "whether enable auto-configuration for jdbc procedure.",
@@ -93,6 +72,13 @@
       "description": "whether enable auto-configuration for jdbc procedure xml locations.",
       "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
       "defaultValue": "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml"
+    },
+    {
+      "name": "xproc4j.watching-directories",
+      "type": "java.lang.String",
+      "description": "whether enable auto-configuration for jdbc procedure xml watching change directories.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties",
+      "defaultValue": "classpath*:procedure/;classpath*:com/"
     },
     {
       "name": "xproc4j.refresh-xml-interval-seconds",
@@ -130,6 +116,13 @@
       "defaultValue": true
     },
     {
+      "name": "xproc4j.environment.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean IEnvironment.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
       "name": "xproc4j.event-handler.enable",
       "type": "java.lang.Boolean",
       "description": "whether enable bean XProc4jEventHandler.",
@@ -153,6 +146,13 @@
       "name": "xproc4j.provider.xml-node.scan.enable",
       "type": "java.lang.Boolean",
       "description": "whether enable bean JdbcProcedureXmlNodeMetaProvider.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.provider.xml-node.watching.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable bean DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider.",
       "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
       "defaultValue": true
     },

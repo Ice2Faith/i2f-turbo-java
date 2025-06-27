@@ -18,8 +18,12 @@ public interface JdbcProcedureJavaCallerMetaProvider extends JdbcProcedureMetaPr
 
     @Override
     default Map<String, ProcedureMeta> getMetaMap() {
-        Map<String, ProcedureMeta> metaMap = new LinkedHashMap<>();
         Map<String, JdbcProcedureJavaCaller> javaCallerMap = getJavaCallerMap();
+        return parseMetaMap(javaCallerMap);
+    }
+
+    default Map<String,ProcedureMeta> parseMetaMap(Map<String, JdbcProcedureJavaCaller> javaCallerMap){
+        Map<String, ProcedureMeta> metaMap = new LinkedHashMap<>();
         if (javaCallerMap != null) {
             for (Map.Entry<String, JdbcProcedureJavaCaller> entry : javaCallerMap.entrySet()) {
                 String key = entry.getKey();
