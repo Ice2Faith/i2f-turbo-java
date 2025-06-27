@@ -17,10 +17,7 @@ import com.intellij.util.xml.DomService;
 import com.intellij.util.xml.GenericAttributeValue;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -101,6 +98,7 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
             if (refid.equals(id)) {
                 targets.add(psiTag);
             }
+            searchInChildren(refid, psiTag.getChildren(), 0, targets);
         }
 
         if (targets.isEmpty()) {
@@ -113,5 +111,33 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
 
         result.add(builder.createLineMarkerInfo(xmlAttribute.getFirstChild()));
 
+    }
+
+    public void searchInChildren(String refid, PsiElement[] list, int level, List<PsiElement> targets) {
+        if (level > 3) {
+            return;
+        }
+        if (list == null || list.length == 0) {
+            return;
+        }
+        for (PsiElement item : list) {
+            if (!(item instanceof XmlTag)) {
+                continue;
+            }
+            XmlTag tag = (XmlTag) item;
+            String tagName = tag.getName();
+            if ("script-segment".equals(tagName)
+                    || "procedure".equals(tagName)) {
+                XmlAttribute idAttr = tag.getAttribute("id");
+                if (idAttr != null) {
+                    String id = idAttr.getValue();
+                    if (Objects.equals(refid, id)) {
+                        targets.add(tag);
+                    }
+                }
+            }
+            PsiElement[] children = item.getChildren();
+            searchInChildren(refid, children, level + 1, targets);
+        }
     }
 }
