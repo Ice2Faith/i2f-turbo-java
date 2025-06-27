@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class PostgreSqlPageWrapper implements IPageWrapper {
     @Override
-    public BindSql apply(BindSql bql, ApiOffsetSize page) {
+    public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {
             return bql;
         }
@@ -27,23 +27,29 @@ public class PostgreSqlPageWrapper implements IPageWrapper {
         if (page.getOffset() != null && page.getSize() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ? ")
-                    .append(" offset ? ");
+                    .append(" limit ").append(embed ? (page.getSize()) : "?").append(" ")
+                    .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getSize());
-            pageSql.getArgs().add(page.getOffset());
+            if (!embed) {
+                pageSql.getArgs().add(page.getSize());
+                pageSql.getArgs().add(page.getOffset());
+            }
         } else if (page.getOffset() != null) {
 
             builder.append(bql.getSql())
-                    .append(" offset ? ");
+                    .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getOffset());
+            if (!embed) {
+                pageSql.getArgs().add(page.getOffset());
+            }
         } else if (page.getSize() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ? ");
+                    .append(" limit ").append(embed ? (page.getSize()) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getSize());
+            if (!embed) {
+                pageSql.getArgs().add(page.getSize());
+            }
         }
 
         pageSql.setSql(builder.toString());

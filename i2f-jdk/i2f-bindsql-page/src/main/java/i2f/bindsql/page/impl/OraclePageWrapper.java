@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class OraclePageWrapper implements IPageWrapper {
     @Override
-    public BindSql apply(BindSql bql, ApiOffsetSize page) {
+    public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {
             return bql;
         }
@@ -31,27 +31,33 @@ public class OraclePageWrapper implements IPageWrapper {
                     .append(" FROM ( ")
                     .append(bql.getSql())
                     .append(" ) TMP ")
-                    .append(" WHERE ROWNUM < ?) TMP ")
-                    .append(" WHERE ROW_ID >= ? ");
+                    .append(" WHERE ROWNUM < ").append(embed ? (page.getEnd() + 1) : "?").append(" ) TMP ")
+                    .append(" WHERE ROW_ID >= ").append(embed ? (page.getOffset() + 1) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getEnd() + 1);
-            pageSql.getArgs().add(page.getOffset() + 1);
+            if (!embed) {
+                pageSql.getArgs().add(page.getEnd() + 1);
+                pageSql.getArgs().add(page.getOffset() + 1);
+            }
         } else if (page.getOffset() != null) {
             builder.append(" SELECT TMP.* ")
                     .append(" FROM ( ")
                     .append(bql.getSql())
                     .append(" ) TMP ")
-                    .append(" WHERE ROWNUM >= ? ");
+                    .append(" WHERE ROWNUM >= ").append(embed ? (page.getOffset() + 1) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getOffset() + 1);
+            if (!embed) {
+                pageSql.getArgs().add(page.getOffset() + 1);
+            }
         } else if (page.getEnd() != null) {
             builder.append(" SELECT TMP.* ")
                     .append(" FROM ( ")
                     .append(bql.getSql())
                     .append(" ) TMP ")
-                    .append(" WHERE ROWNUM < ? ");
+                    .append(" WHERE ROWNUM < ").append(embed ? (page.getEnd() + 1) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getEnd() + 1);
+            if (!embed) {
+                pageSql.getArgs().add(page.getEnd() + 1);
+            }
         }
 
         pageSql.setSql(builder.toString());

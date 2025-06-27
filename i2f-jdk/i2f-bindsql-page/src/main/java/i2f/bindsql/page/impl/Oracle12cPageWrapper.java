@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class Oracle12cPageWrapper implements IPageWrapper {
     @Override
-    public BindSql apply(BindSql bql, ApiOffsetSize page) {
+    public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {
             return bql;
         }
@@ -29,25 +29,31 @@ public class Oracle12cPageWrapper implements IPageWrapper {
 
             builder
                     .append(bql.getSql())
-                    .append(" offset ? ")
-                    .append(" rows fetch next ? rows only ");
+                    .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ")
+                    .append(" rows fetch next ").append(embed ? (page.getSize()) : "?").append(" rows only ");
 
-            pageSql.getArgs().add(page.getOffset());
-            pageSql.getArgs().add(page.getSize());
+            if (!embed) {
+                pageSql.getArgs().add(page.getOffset());
+                pageSql.getArgs().add(page.getSize());
+            }
         } else if (page.getOffset() != null) {
             builder
                     .append(bql.getSql())
-                    .append(" offset ? ");
+                    .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getOffset());
+            if (!embed) {
+                pageSql.getArgs().add(page.getOffset());
+            }
         } else if (page.getSize() != null) {
             builder
                     .append(bql.getSql())
-                    .append(" offset ? ")
-                    .append(" rows fetch next ? rows only ");
+                    .append(" offset ").append(embed ? (0) : "?").append(" ")
+                    .append(" rows fetch next ").append(embed ? (page.getSize()) : "?").append(" rows only ");
 
-            pageSql.getArgs().add(0);
-            pageSql.getArgs().add(page.getSize());
+            if (!embed) {
+                pageSql.getArgs().add(0);
+                pageSql.getArgs().add(page.getSize());
+            }
         }
 
         pageSql.setSql(builder.toString());

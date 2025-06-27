@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class MysqlPageWrapper implements IPageWrapper {
     @Override
-    public BindSql apply(BindSql bql, ApiOffsetSize page) {
+    public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {
             return bql;
         }
@@ -27,22 +27,31 @@ public class MysqlPageWrapper implements IPageWrapper {
         if (page.getOffset() != null && page.getSize() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ?, ? ");
+                    .append(" limit ").append(embed ? (page.getOffset()) : "?")
+                    .append(" , ").append(embed ? (page.getSize()) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getOffset());
-            pageSql.getArgs().add(page.getSize());
+            if (!embed) {
+                pageSql.getArgs().add(page.getOffset());
+                pageSql.getArgs().add(page.getSize());
+            }
         } else if (page.getOffset() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ?,? ");
+                    .append(" limit ").append(embed ? (page.getOffset()) : "?")
+                    .append(" , ").append(embed ? (Integer.MAX_VALUE) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getOffset(), Integer.MAX_VALUE);
+            if (!embed) {
+                pageSql.getArgs().add(page.getOffset());
+                pageSql.getArgs().add(Integer.MAX_VALUE);
+            }
         } else if (page.getSize() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ? ");
+                    .append(" limit ").append(embed ? (page.getSize()) : "?").append(" ");
 
-            pageSql.getArgs().add(page.getSize());
+            if (!embed) {
+                pageSql.getArgs().add(page.getSize());
+            }
         }
 
         pageSql.setSql(builder.toString());
