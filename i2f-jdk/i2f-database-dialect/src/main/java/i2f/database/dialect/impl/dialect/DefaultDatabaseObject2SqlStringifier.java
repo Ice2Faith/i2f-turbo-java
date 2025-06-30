@@ -1,4 +1,7 @@
-package i2f.database.dialect.impl;
+package i2f.database.dialect.impl.dialect;
+
+import i2f.database.dialect.impl.AbsDatabaseObject2SqlStringifier;
+import i2f.database.type.DatabaseType;
 
 /**
  * @author Ice2Faith
@@ -8,12 +11,9 @@ public class DefaultDatabaseObject2SqlStringifier extends AbsDatabaseObject2SqlS
     public static final DefaultDatabaseObject2SqlStringifier INSTANCE = new DefaultDatabaseObject2SqlStringifier();
 
     @Override
-    public boolean support(String databaseType) {
+    public boolean support(DatabaseType databaseType) {
         return true;
     }
 
-    @Override
-    public String toSql(Object value) {
-        return null;
-    }
+
 }

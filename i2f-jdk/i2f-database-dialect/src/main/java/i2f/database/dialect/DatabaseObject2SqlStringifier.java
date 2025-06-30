@@ -1,6 +1,8 @@
 package i2f.database.dialect;
 
 
+import i2f.database.type.DatabaseType;
+
 /**
  * 将Object对象转换为SQL字符串
  * 使用场景：
@@ -18,7 +20,7 @@ package i2f.database.dialect;
  * @date 2025/6/26 14:01
  */
 public interface DatabaseObject2SqlStringifier {
-    boolean support(String databaseType);
+    boolean support(DatabaseType databaseType);
 
     String stringify(Object value);
 }

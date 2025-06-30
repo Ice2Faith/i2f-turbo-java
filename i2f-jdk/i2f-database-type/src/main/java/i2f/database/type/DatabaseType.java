@@ -3,7 +3,6 @@ package i2f.database.type;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
@@ -108,6 +107,13 @@ public enum DatabaseType {
      * HighGo
      */
     HighGo("highgo", "瀚高数据库"),
+
+
+    /**
+     * Hive
+     */
+    Hive("hive", "Hive数据库"),
+
     /**
      * UNKONWN DB
      */
@@ -190,7 +196,7 @@ public enum DatabaseType {
             return DatabaseType.ORACLE;
         } else if (url.contains(":sqlserver:") || url.contains(":microsoft:")) {
             return DatabaseType.SQL_SERVER2005;
-        } else if (url.contains(":sqlserver2012:")) {
+        } else if (regexFind(":sqlserver\\d*:", url)) { // :sqlserver2012:
             return DatabaseType.SQL_SERVER;
         } else if (url.contains(":postgresql:")) {
             return DatabaseType.POSTGRE_SQL;
@@ -202,7 +208,7 @@ public enum DatabaseType {
             return DatabaseType.SQLITE;
         } else if (url.contains(":h2:")) {
             return DatabaseType.H2;
-        } else if (regexFind(":dm\\d*:", url)) {
+        } else if (regexFind(":dm\\d*:", url)) { // :dm8:
             return DatabaseType.DM;
         } else if (url.contains(":xugu:")) {
             return DatabaseType.XU_GU;
@@ -224,6 +230,8 @@ public enum DatabaseType {
             return DatabaseType.OCEAN_BASE;
         } else if (url.contains(":highgo:")) {
             return DatabaseType.HighGo;
+        } else if (regexFind(":hive\\d*:", url)) { // :hive2:
+            return DatabaseType.Hive;
         } else {
             //logger.warn("The jdbcUrl is " + jdbcUrl + ", Mybatis Plus Cannot Read Database type or The Database's Not Supported!");
             return DatabaseType.OTHER;
