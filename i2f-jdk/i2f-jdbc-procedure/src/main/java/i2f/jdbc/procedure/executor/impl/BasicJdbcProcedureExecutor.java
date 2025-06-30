@@ -1379,6 +1379,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             connectionMap.put(datasource, conn);
         }
 
+        if (conn == null) {
+            throw new IllegalStateException(XProc4jConsts.NAME + " missing datasource connection: " + newConnDs + " near [" + traceLocation() + "] ");
+        }
+
         return conn;
     }
 

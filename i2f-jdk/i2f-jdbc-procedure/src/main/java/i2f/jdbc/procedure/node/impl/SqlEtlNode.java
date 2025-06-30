@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -229,7 +230,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
             CountDownLatch latchReadFinish = new CountDownLatch(1);
             CountDownLatch latchAllDone = new CountDownLatch(2);
             AtomicInteger pageIndex = new AtomicInteger(0);
-            LinkedBlockingQueue<List<Object>> loadArgs = new LinkedBlockingQueue<>(readBatchSize);
+            LinkedBlockingQueue<List<Object>> loadArgs = new LinkedBlockingQueue<>();
             AtomicReference<Throwable> throwReadTask = new AtomicReference<>();
             AtomicReference<Throwable> throwWriteTask = new AtomicReference<>();
 
@@ -508,7 +509,12 @@ public class SqlEtlNode extends AbstractExecutorNode {
                             }
                             elems.add(val);
                         }
-                        collection.add(elems);
+                        if (collection instanceof BlockingQueue) {
+                            BlockingQueue<List<Object>> queue = (BlockingQueue<List<Object>>) collection;
+                            queue.put(elems);
+                        } else {
+                            collection.add(elems);
+                        }
                         currentCount++;
                     }
 
