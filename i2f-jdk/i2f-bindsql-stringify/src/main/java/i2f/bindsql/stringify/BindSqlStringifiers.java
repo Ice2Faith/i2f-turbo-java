@@ -6,21 +6,13 @@ import i2f.database.type.DatabaseType;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ServiceLoader;
 
 /**
  * @author Ice2Faith
  * @date 2025/3/20 15:31
  */
 public class BindSqlStringifiers {
-    public static BindSqlStringifier of(Connection conn) throws SQLException {
-        DatabaseType type = DatabaseType.typeOfConnection(conn);
-        return of(type);
-    }
-
-    public static BindSqlStringifier of(String jdbcUrl) {
-        DatabaseType type = DatabaseType.typeOfJdbcUrl(jdbcUrl);
-        return of(type);
-    }
 
     public static final WrappedBindSqlStringifier DEFAULT = WrappedBindSqlStringifier.INSTANCE;
 
@@ -34,7 +26,24 @@ public class BindSqlStringifiers {
     public static final WrappedBindSqlStringifier SQL_SERVER = new WrappedBindSqlStringifier(SqlServerDatabaseObject2SqlStringifier.INSTANCE);
     public static final WrappedBindSqlStringifier HIVE = new WrappedBindSqlStringifier(HiveDatabaseObject2SqlStringifier.INSTANCE);
 
+
+    public static BindSqlStringifier of(Connection conn) throws SQLException {
+        DatabaseType type = DatabaseType.typeOfConnection(conn);
+        return of(type);
+    }
+
+    public static BindSqlStringifier of(String jdbcUrl) {
+        DatabaseType type = DatabaseType.typeOfJdbcUrl(jdbcUrl);
+        return of(type);
+    }
+
     public static BindSqlStringifier of(DatabaseType type) {
+        ServiceLoader<BindSqlStringifier> list = ServiceLoader.load(BindSqlStringifier.class);
+        for (BindSqlStringifier item : list) {
+            if (item.support(type)) {
+                return item;
+            }
+        }
         switch (type) {
             case MYSQL:
                 return MYSQL;
