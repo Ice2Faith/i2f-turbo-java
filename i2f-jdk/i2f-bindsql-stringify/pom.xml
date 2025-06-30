@@ -30,12 +30,7 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-database-type</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-convert</artifactId>
+            <artifactId>i2f-database-dialect</artifactId>
         </dependency>
     </dependencies>
 

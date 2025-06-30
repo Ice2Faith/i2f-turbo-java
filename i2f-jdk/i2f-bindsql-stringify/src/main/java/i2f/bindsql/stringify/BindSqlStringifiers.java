@@ -1,7 +1,7 @@
 package i2f.bindsql.stringify;
 
-import i2f.bindsql.stringify.impl.BasicBindSqlStringifier;
-import i2f.bindsql.stringify.impl.dialect.*;
+import i2f.bindsql.stringify.impl.WrappedBindSqlStringifier;
+import i2f.database.dialect.impl.dialect.*;
 import i2f.database.type.DatabaseType;
 
 import java.sql.Connection;
@@ -22,48 +22,62 @@ public class BindSqlStringifiers {
         return of(type);
     }
 
+    public static final WrappedBindSqlStringifier DEFAULT = WrappedBindSqlStringifier.INSTANCE;
+
+    public static final WrappedBindSqlStringifier MYSQL = new WrappedBindSqlStringifier(MysqlDatabaseObject2SqlStringifier.INSTANCE);
+    public static final WrappedBindSqlStringifier ORACLE = new WrappedBindSqlStringifier(OracleDatabaseObject2SqlStringifier.INSTANCE);
+    public static final WrappedBindSqlStringifier POSTGRE = new WrappedBindSqlStringifier(PostgreSqlDatabaseObject2SqlStringifier.INSTANCE);
+    public static final WrappedBindSqlStringifier H2 = new WrappedBindSqlStringifier(H2DatabaseObject2SqlStringifier.INSTANCE);
+    public static final WrappedBindSqlStringifier PHOENIX = new WrappedBindSqlStringifier(PhoenixDatabaseObject2SqlStringifier.INSTANCE);
+    public static final WrappedBindSqlStringifier GUASS = new WrappedBindSqlStringifier(GuassDatabaseObject2SqlStringifier.INSTANCE);
+    public static final WrappedBindSqlStringifier DB2 = new WrappedBindSqlStringifier(Db2DatabaseObject2SqlStringifier.INSTANCE);
+    public static final WrappedBindSqlStringifier SQL_SERVER = new WrappedBindSqlStringifier(SqlServerDatabaseObject2SqlStringifier.INSTANCE);
+    public static final WrappedBindSqlStringifier HIVE = new WrappedBindSqlStringifier(HiveDatabaseObject2SqlStringifier.INSTANCE);
+
     public static BindSqlStringifier of(DatabaseType type) {
         switch (type) {
             case MYSQL:
-                return MySqlBindSqlStringifier.INSTANCE;
+                return MYSQL;
             case ORACLE:
-                return OracleBindSqlStringifier.INSTANCE;
+                return ORACLE;
             case MARIADB:
-                return MySqlBindSqlStringifier.INSTANCE;
+                return MYSQL;
             case GBASE:
-                return MySqlBindSqlStringifier.INSTANCE;
+                return MYSQL;
             case OSCAR:
-                return MySqlBindSqlStringifier.INSTANCE;
+                return MYSQL;
             case XU_GU:
-                return MySqlBindSqlStringifier.INSTANCE;
+                return MYSQL;
             case CLICK_HOUSE:
-                return MySqlBindSqlStringifier.INSTANCE;
+                return MYSQL;
             case OCEAN_BASE:
-                return MySqlBindSqlStringifier.INSTANCE;
+                return MYSQL;
             case POSTGRE_SQL:
-                return PostgreSqlBindSqlStringifier.INSTANCE;
+                return POSTGRE;
             case H2:
-                return H2BindSqlStringifier.INSTANCE;
+                return H2;
             case SQLITE:
-                return BasicBindSqlStringifier.INSTANCE;
+                return DEFAULT;
             case HSQL:
-                return BasicBindSqlStringifier.INSTANCE;
+                return DEFAULT;
             case KINGBASE_ES:
-                return MySqlBindSqlStringifier.INSTANCE;
+                return MYSQL;
             case PHOENIX:
-                return PhoenixBindSqlStringifier.INSTANCE;
+                return PHOENIX;
             case DM:
-                return OracleBindSqlStringifier.INSTANCE;
+                return ORACLE;
             case GAUSS:
-                return GuassBindSqlStringifier.INSTANCE;
+                return GUASS;
             case ORACLE_12C:
-                return OracleBindSqlStringifier.INSTANCE;
+                return ORACLE;
             case DB2:
-                return Db2BindSqlStringifier.INSTANCE;
+                return DB2;
             case SQL_SERVER:
-                return SqlServerBindSqlStringifier.INSTANCE;
+                return SQL_SERVER;
+            case Hive:
+                return HIVE;
             default:
-                return BasicBindSqlStringifier.INSTANCE;
+                return DEFAULT;
         }
     }
 }

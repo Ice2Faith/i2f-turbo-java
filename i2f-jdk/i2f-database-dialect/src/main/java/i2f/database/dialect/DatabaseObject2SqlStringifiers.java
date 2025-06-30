@@ -1,9 +1,6 @@
 package i2f.database.dialect;
 
-import i2f.database.dialect.impl.DefaultDatabaseObject2SqlStringifier;
-import i2f.database.dialect.impl.MysqlDatabaseObject2SqlStringifier;
-import i2f.database.dialect.impl.OracleDatabaseObject2SqlStringifier;
-import i2f.database.dialect.impl.PostgreSqlDatabaseObject2SqlStringifier;
+import i2f.database.dialect.impl.dialect.*;
 
 import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -20,9 +17,15 @@ public class DatabaseObject2SqlStringifiers {
         for (DatabaseObject2SqlStringifier item : iter) {
             stringifiers.add(item);
         }
+        stringifiers.add(Db2DatabaseObject2SqlStringifier.INSTANCE);
+        stringifiers.add(GuassDatabaseObject2SqlStringifier.INSTANCE);
+        stringifiers.add(H2DatabaseObject2SqlStringifier.INSTANCE);
+        stringifiers.add(HiveDatabaseObject2SqlStringifier.INSTANCE);
         stringifiers.add(MysqlDatabaseObject2SqlStringifier.INSTANCE);
         stringifiers.add(OracleDatabaseObject2SqlStringifier.INSTANCE);
+        stringifiers.add(PhoenixDatabaseObject2SqlStringifier.INSTANCE);
         stringifiers.add(PostgreSqlDatabaseObject2SqlStringifier.INSTANCE);
+        stringifiers.add(SqlServerDatabaseObject2SqlStringifier.INSTANCE);
     }
 
     public static DatabaseObject2SqlStringifier getStringifier(String databaseType) {
