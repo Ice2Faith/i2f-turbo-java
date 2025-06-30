@@ -4,6 +4,7 @@ import i2f.bindsql.BindSql;
 import i2f.bindsql.stringify.BindSqlStringifier;
 import i2f.database.dialect.DatabaseObject2SqlStringifier;
 import i2f.database.dialect.impl.dialect.DefaultDatabaseObject2SqlStringifier;
+import i2f.database.type.DatabaseType;
 import i2f.match.regex.RegexUtil;
 
 import java.util.Iterator;
@@ -18,6 +19,11 @@ public class WrappedBindSqlStringifier implements BindSqlStringifier {
 
     public WrappedBindSqlStringifier(DatabaseObject2SqlStringifier object2SqlStringifier) {
         this.object2SqlStringifier = object2SqlStringifier;
+    }
+
+    @Override
+    public boolean support(DatabaseType databaseType) {
+        return object2SqlStringifier.support(databaseType);
     }
 
     @Override
