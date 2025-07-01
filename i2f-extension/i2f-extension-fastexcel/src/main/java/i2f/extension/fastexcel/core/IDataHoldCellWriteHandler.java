@@ -22,6 +22,7 @@ import java.util.Map;
 @NoArgsConstructor
 public abstract class IDataHoldCellWriteHandler implements CellWriteHandler {
     protected List<?> list;
+    protected int offsetIndex = 0;
     protected Class<?> clazz;
     protected Map<String, Object> sheetContext;
     protected Map<String, Object> workbookContext;
@@ -61,7 +62,7 @@ public abstract class IDataHoldCellWriteHandler implements CellWriteHandler {
         Integer rowIndex = context.getRowIndex();
         Integer columnIndex = context.getColumnIndex();
 
-        int dataIndex = rowIndex - headCount;
+        int dataIndex = rowIndex - headCount - offsetIndex;
 
         Object rawObj = getRawData(dataIndex);
         Object rawData = null;
