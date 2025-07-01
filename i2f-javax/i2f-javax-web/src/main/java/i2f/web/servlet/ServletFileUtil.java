@@ -17,6 +17,40 @@ import java.io.*;
  * @desc
  */
 public class ServletFileUtil {
+    public static void downloadFileRangeSupport(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                File responseFile
+    ) throws IOException {
+        downloadFileRangeSupport(request, response, responseFile, null, null, true, true);
+    }
+
+    public static void downloadFileRangeSupport(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                File responseFile,
+                                                String virtualFileName
+    ) throws IOException {
+        downloadFileRangeSupport(request, response, responseFile, virtualFileName, null, true, true);
+    }
+
+    public static void downloadFileRangeSupport(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                File responseFile,
+                                                String virtualFileName,
+                                                String mimeType
+    ) throws IOException {
+        downloadFileRangeSupport(request, response, responseFile, virtualFileName, mimeType, true, true);
+    }
+
+    public static void downloadFileRangeSupport(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                File responseFile,
+                                                String virtualFileName,
+                                                String mimeType,
+                                                boolean allowCache
+    ) throws IOException {
+        downloadFileRangeSupport(request, response, responseFile, virtualFileName, mimeType, allowCache, true);
+    }
+
     /**
      * 支持断点续传的下载方式
      *
@@ -38,6 +72,9 @@ public class ServletFileUtil {
                                                 boolean useAttachment
     ) throws IOException {
 //        response.reset();
+        if (virtualFileName == null || virtualFileName.isEmpty()) {
+            virtualFileName = responseFile.getName();
+        }
         //接受范围下载
         response.setHeader("Accept-Ranges", "bytes");
         //设置MIME,特别指定则用指定的，否则用默认匹配的
@@ -135,23 +172,41 @@ public class ServletFileUtil {
         response.getWriter().write("<script>alert('404,not found file:" + fileName + "');</script>");
     }
 
+    public static void responseAsFileAttachment(InputStream is, String virtualFileName, HttpServletResponse response) throws IOException {
+        responseAsFileAttachment(is, true, virtualFileName, null, true, response);
+    }
+
+    public static void responseAsFileAttachment(InputStream is, String virtualFileName, String mimeType, HttpServletResponse response) throws IOException {
+        responseAsFileAttachment(is, true, virtualFileName, mimeType, true, response);
+    }
+
+    public static void responseAsFileAttachment(InputStream is, boolean closeStream, String virtualFileName, String mimeType, HttpServletResponse response) throws IOException {
+        responseAsFileAttachment(is, closeStream, virtualFileName, mimeType, true, response);
+    }
+
     /**
      * 普通文件直接下载方式
      *
-     * @param is
-     * @param closeStream
-     * @param virtualFileName
-     * @param response
+     * @param is              输入流
+     * @param closeStream     是否关闭输入流
+     * @param virtualFileName 虚拟文件名
+     * @param mimeType        响应类型
+     * @param useAttachment   是否附件下载，如果为false就是内联模式
+     * @param response        HTTP响应
      * @throws IOException
      */
-    public static void responseAsFileAttachment(InputStream is, boolean closeStream, String virtualFileName, String mimeType, HttpServletResponse response) throws IOException {
+    public static void responseAsFileAttachment(InputStream is, boolean closeStream, String virtualFileName, String mimeType, boolean useAttachment, HttpServletResponse response) throws IOException {
 //        response.reset();
         if (null != mimeType) {
             response.setContentType(mimeType + ";charset=UTF-8");
         } else {
             response.setContentType(FileMime.getMimeType(virtualFileName) + ";charset=UTF-8");
         }
-        response.setHeader("Content-Disposition", "attachment; filename=" + java.net.URLEncoder.encode(virtualFileName, "UTF-8")); // 设置文件名称
+        if (useAttachment) {
+            response.setHeader("Content-Disposition", "attachment; filename=" + java.net.URLEncoder.encode(virtualFileName, "UTF-8")); // 设置文件名称
+        } else {
+            response.setHeader("Content-Disposition", "inline; filename=" + java.net.URLEncoder.encode(virtualFileName, "UTF-8")); // 设置文件名称
+        }
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
 
         OutputStream os = response.getOutputStream();
@@ -163,10 +218,18 @@ public class ServletFileUtil {
         }
     }
 
+    public static void responseFileAttachment(File filePath, HttpServletResponse response) throws IOException {
+        responseFileAttachment(filePath, null, true, response);
+    }
+
     public static void responseFileAttachment(File filePath, String mimeType, HttpServletResponse response) throws IOException {
+        responseFileAttachment(filePath, mimeType, true, response);
+    }
+
+    public static void responseFileAttachment(File filePath, String mimeType, boolean useAttachment, HttpServletResponse response) throws IOException {
         String fileName = filePath.getName();
         InputStream is = new FileInputStream(filePath);
-        responseAsFileAttachment(is, true, fileName, mimeType, response);
+        responseAsFileAttachment(is, true, fileName, mimeType, useAttachment, response);
     }
 
     public static File saveAsFile2ContextPath(InputStream is, String fileName, HttpSession session, String relativePath) throws IOException {
