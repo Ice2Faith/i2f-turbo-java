@@ -128,20 +128,42 @@ public class ExcelExportUtil {
 
     public static File write(IDataProvider provider, File file, String sheetName, URL templateUrl, File tmpFile, Consumer<ExcelExportTask> taskConsumer) {
         ExcelExportTask task = new ExcelExportTask(provider, file, sheetName, templateUrl, tmpFile);
-        task.setBeforeConsumer(taskConsumer);
+        task.updateProperties(taskConsumer);
+        task.run();
+        return task.getFile();
+    }
+
+    public static File write(IDataProvider provider, Consumer<ExcelExportTask> taskConsumer) {
+        ExcelExportTask task = new ExcelExportTask(provider);
+        task.updateProperties(taskConsumer);
         task.run();
         return task.getFile();
     }
 
     public static URL urlOfFile(File templateFile) {
-        try {
-            return templateFile == null ? null : templateFile.toURI().toURL();
-        } catch (MalformedURLException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+        if (templateFile == null) {
+            return null;
         }
+        try {
+            return templateFile.toURI().toURL();
+        } catch (MalformedURLException e) {
+
+        }
+        return null;
     }
 
     public static URL urlOfClasspath(String resourcePath) {
-        return Thread.currentThread().getContextClassLoader().getResource(resourcePath);
+        if (resourcePath == null) {
+            return null;
+        }
+        if (resourcePath.startsWith("/")) {
+            resourcePath = resourcePath.substring(1);
+        }
+        try {
+            return Thread.currentThread().getContextClassLoader().getResource(resourcePath);
+        } catch (Exception e) {
+
+        }
+        return null;
     }
 }

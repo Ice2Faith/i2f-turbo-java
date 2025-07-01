@@ -45,8 +45,13 @@ public class ExcelExportTask implements Runnable, Callable<File> {
     private boolean enableCellStyleAnnotation;
     private CellWriteHandler writeHandler;
     private CountDownLatch latch;
+    private List<ExcelExportColumn> exportColumns;
     private Consumer<ExcelExportTask> beforeConsumer;
     private Consumer<ExcelExportTask> afterConsumer;
+
+    public ExcelExportTask(IDataProvider provider) {
+        this.provider = provider;
+    }
 
     public ExcelExportTask(IDataProvider provider, File file) {
         this.provider = provider;
@@ -188,22 +193,30 @@ public class ExcelExportTask implements Runnable, Callable<File> {
             Map<String, Object> workbookContext = new HashMap<>();
             Map<Integer, Map<String, Object>> sheetContext = new HashMap<>();
 
+            if (templateFile == null) {
+                if (exportColumns != null && !exportColumns.isEmpty()) {
+                    templateFile = createTemplateFileByColumns(file, exportColumns);
+                    createdMapTemplateFile = true;
+                }
+            }
 
-            if (templateUrl != null) {
-                try {
-                    String protocol = templateUrl.getProtocol();
-                    if ("file".equals(protocol)) {
-                        String templatePath = templateUrl.getFile();
-                        templateFile = new File(templatePath);
-                    } else {
-                        InputStream is = templateUrl.openStream();
-                        templateFile = getTempFile(".xlsx");
-                        StreamUtil.streamCopy(is, new FileOutputStream(templateFile));
-                        isTempTemplateFile = true;
+            if (templateFile == null) {
+                if (templateUrl != null) {
+                    try {
+                        String protocol = templateUrl.getProtocol();
+                        if ("file".equals(protocol)) {
+                            String templatePath = templateUrl.getFile();
+                            templateFile = new File(templatePath);
+                        } else {
+                            InputStream is = templateUrl.openStream();
+                            templateFile = getTempFile(".xlsx");
+                            StreamUtil.streamCopy(is, new FileOutputStream(templateFile));
+                            isTempTemplateFile = true;
+                        }
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
 
@@ -255,14 +268,16 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 List<?> data = provider.getData(null);
                 if (TypeOf.typeOf(clazz, Map.class)) {
                     if (!data.isEmpty()) {
-                        if (isTempTemplateFile) {
-                            if (templateFile != null) {
-                                templateFile.delete();
+                        if (!useTemplate) {
+                            if (isTempTemplateFile) {
+                                if (templateFile != null) {
+                                    templateFile.delete();
+                                }
                             }
+                            templateFile = createTemplateFileByMap(file, (Map<?, ?>) data.get(0));
+                            useTemplate = true;
+                            createdMapTemplateFile = true;
                         }
-                        templateFile = createTemplateFileByMap(file, (Map<?, ?>) data.get(0));
-                        useTemplate = true;
-                        createdMapTemplateFile = true;
                     }
                 }
                 int size = data.size();
@@ -296,14 +311,16 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                         if (excelWriter == null) {
                             if (TypeOf.typeOf(clazz, Map.class)) {
                                 if (!data.isEmpty()) {
-                                    if (isTempTemplateFile) {
-                                        if (templateFile != null) {
-                                            templateFile.delete();
+                                    if (!useTemplate) {
+                                        if (isTempTemplateFile) {
+                                            if (templateFile != null) {
+                                                templateFile.delete();
+                                            }
                                         }
+                                        templateFile = createTemplateFileByMap(file, (Map<?, ?>) item);
+                                        useTemplate = true;
+                                        createdMapTemplateFile = true;
                                     }
-                                    templateFile = createTemplateFileByMap(file, (Map<?, ?>) item);
-                                    useTemplate = true;
-                                    createdMapTemplateFile = true;
                                 }
                             }
                             // 处理使用模板的情况
@@ -368,14 +385,16 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                     if (excelWriter == null) {
                         if (TypeOf.typeOf(clazz, Map.class)) {
                             if (!data.isEmpty()) {
-                                if (isTempTemplateFile) {
-                                    if (templateFile != null) {
-                                        templateFile.delete();
+                                if (!useTemplate) {
+                                    if (isTempTemplateFile) {
+                                        if (templateFile != null) {
+                                            templateFile.delete();
+                                        }
                                     }
+                                    templateFile = createTemplateFileByMap(file, (Map<?, ?>) data.get(0));
+                                    useTemplate = true;
+                                    createdMapTemplateFile = true;
                                 }
-                                templateFile = createTemplateFileByMap(file, (Map<?, ?>) data.get(0));
-                                useTemplate = true;
-                                createdMapTemplateFile = true;
                             }
                         }
                         if (useTemplate) {
@@ -470,7 +489,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
-    public static File createTemplateFileByMap(File file, Map<?, ?> map) {
+    public static File createTemplateFileByColumns(File file, List<ExcelExportColumn> columns) {
         String tmpSuffix = "";
         String name = file.getName();
         int idx = name.lastIndexOf(".");
@@ -485,11 +504,22 @@ public class ExcelExportTask implements Runnable, Callable<File> {
             StreamUtil.writeBytes(is, templateFile);
 
             List<Map<String, Object>> data = new ArrayList<>();
-            for (Object item : map.keySet()) {
-                String prop = String.valueOf(item);
+            for (ExcelExportColumn column : columns) {
+                if (column == null) {
+                    continue;
+                }
+                String label = column.getTitle();
+                String propExpr = column.getProp();
+                if (propExpr == null) {
+                    propExpr = "";
+                }
+                propExpr = propExpr.trim();
+                if (!propExpr.startsWith("{")) {
+                    propExpr = "{." + propExpr + "}";
+                }
                 Map<String, Object> val = new HashMap<>();
-                val.put("label", prop);
-                val.put("prop", "{." + prop + "}");
+                val.put("label", label);
+                val.put("prop", propExpr);
                 data.add(val);
             }
 
@@ -512,6 +542,18 @@ public class ExcelExportTask implements Runnable, Callable<File> {
         } finally {
             templateFile.delete();
         }
+    }
+
+    public static File createTemplateFileByMap(File file, Map<?, ?> map) {
+        List<ExcelExportColumn> columns = new ArrayList<>();
+        for (Object item : map.keySet()) {
+            String prop = String.valueOf(item);
+            ExcelExportColumn column = new ExcelExportColumn();
+            column.setTitle(prop);
+            column.setProp(prop);
+            columns.add(column);
+        }
+        return createTemplateFileByColumns(file, columns);
     }
 
 }
