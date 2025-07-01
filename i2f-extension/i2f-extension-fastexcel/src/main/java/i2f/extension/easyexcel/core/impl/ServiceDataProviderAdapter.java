@@ -1,8 +1,8 @@
 package i2f.extension.easyexcel.core.impl;
 
-
 import i2f.extension.easyexcel.core.ExcelExportMode;
 import i2f.extension.easyexcel.core.ExcelExportPage;
+import i2f.extension.easyexcel.core.IDataProvider;
 
 import java.util.List;
 
@@ -16,11 +16,13 @@ import java.util.List;
  * 使用时必须实现抽象方法 doRequestData，一般来说，在抽象方法中你需要做的事如下
  * List<DTO> data=SERVICE.queryPage(ARGUMENT,page,args);
  */
-public abstract class ServiceDataProviderAdapter<ARGUMENT, SERVICE, RETURN_TYPE> extends AbsDataProviderAdapter {
+public abstract class ServiceDataProviderAdapter<ARGUMENT, SERVICE, RETURN_TYPE> implements IDataProvider {
+    protected Object[] params;
     private Class<RETURN_TYPE> returnBeanClass;
     private ExcelExportMode mode = ExcelExportMode.ALL;
     private ARGUMENT reqVo;
     private SERVICE service;
+
 
     /**
      * 构造简单的Service数据提供者

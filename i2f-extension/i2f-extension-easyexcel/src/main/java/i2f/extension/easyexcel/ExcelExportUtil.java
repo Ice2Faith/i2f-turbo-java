@@ -1,13 +1,17 @@
 package i2f.extension.easyexcel;
 
+
+import i2f.extension.easyexcel.core.ExcelExportPage;
 import i2f.extension.easyexcel.core.ExcelExportTask;
 import i2f.extension.easyexcel.core.IDataProvider;
+import i2f.extension.easyexcel.core.impl.DefaultDataProvider;
 import i2f.extension.easyexcel.core.impl.ListDataProvider;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * @author Ice2Faith
@@ -21,6 +25,10 @@ public class ExcelExportUtil {
 
     public static File write(List<?> data, Class<?> elemType, File file) {
         return write(new ListDataProvider(data, elemType), file);
+    }
+
+    public static <E> File write(Function<ExcelExportPage, List<E>> dataExtractor, Class<E> elemType, File file) {
+        return write(new DefaultDataProvider<>(dataExtractor, elemType), file);
     }
 
     public static File write(IDataProvider provider, File file) {
