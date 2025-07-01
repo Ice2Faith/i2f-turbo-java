@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  */
 @Data
 public class ExcelExportTask implements Runnable, Callable<File> {
-    private int pageSize = 65530; // 旧版本的excel,单个sheet仅支持 65535 ，0x7fff
+    private int pageSize = 5000; // 旧版本的excel,单个sheet仅支持 65535 ，0x7fff，这个值对应分页大小，也就是单次分页查询的最大大小，建议合理设置，避免OOM
     private IDataProvider provider;
     private File file;
     private File tmpFile;
@@ -89,8 +89,13 @@ public class ExcelExportTask implements Runnable, Callable<File> {
         return this;
     }
 
-    public ExcelExportTask setExcludeColumnNames(Set<String> excludeColumnNames) {
-        this.excludeColumnNames = excludeColumnNames;
+    public ExcelExportTask setExcludeColumnTags(Collection<String> excludeColumnTags) {
+        this.excludeColumnTags = new LinkedHashSet<>(excludeColumnTags);
+        return this;
+    }
+
+    public ExcelExportTask setExcludeColumnNames(Collection<String> excludeColumnNames) {
+        this.excludeColumnNames = new LinkedHashSet<>(excludeColumnNames);
         return this;
     }
 
