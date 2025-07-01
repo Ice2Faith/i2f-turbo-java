@@ -1,13 +1,13 @@
-package i2f.extension.easyexcel.core;
+package i2f.extension.fastexcel.core;
 
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.enums.WriteDirectionEnum;
-import com.alibaba.excel.write.handler.CellWriteHandler;
-import com.alibaba.excel.write.metadata.WriteSheet;
-import com.alibaba.excel.write.metadata.fill.FillConfig;
-import i2f.extension.easyexcel.annotation.ExcelTag;
-import i2f.extension.easyexcel.style.AnnotationExcelStyleCellWriteHandler;
+import cn.idev.excel.ExcelWriter;
+import cn.idev.excel.FastExcel;
+import cn.idev.excel.enums.WriteDirectionEnum;
+import cn.idev.excel.write.handler.CellWriteHandler;
+import cn.idev.excel.write.metadata.WriteSheet;
+import cn.idev.excel.write.metadata.fill.FillConfig;
+import i2f.extension.fastexcel.annotation.ExcelTag;
+import i2f.extension.fastexcel.style.AnnotationExcelStyleCellWriteHandler;
 import i2f.io.stream.StreamUtil;
 import i2f.reflect.ReflectResolver;
 import i2f.resources.ResourceUtil;
@@ -268,12 +268,12 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 int size = data.size();
                 if (size <= pageSize) {
                     if (useTemplate) {
-                        ExcelWriter excelWriter = EasyExcel.write(tmpFile)
+                        ExcelWriter excelWriter = FastExcel.write(tmpFile)
                                 .withTemplate(templateFile)
                                 .registerWriteHandler(writeHandler)
                                 .excludeColumnFieldNames(excludeColumnNames)
                                 .build();
-                        WriteSheet writeSheet = EasyExcel.write()
+                        WriteSheet writeSheet = FastExcel.write()
                                 .sheet(0, sheetName)
                                 .build();
                         updateWriteHandler(data, clazz, sheetContext, 0, workbookContext);
@@ -281,7 +281,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                         excelWriter.finish();
                     } else {
                         updateWriteHandler(data, clazz, sheetContext, 0, workbookContext);
-                        EasyExcel.write(tmpFile, clazz)
+                        FastExcel.write(tmpFile, clazz)
                                 .sheet(0, sheetName)
                                 .registerWriteHandler(writeHandler)
                                 .excludeColumnFieldNames(excludeColumnNames)
@@ -308,20 +308,20 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                             }
                             // 处理使用模板的情况
                             if (useTemplate) {
-                                excelWriter = EasyExcel.write(tmpFile)
+                                excelWriter = FastExcel.write(tmpFile)
                                         .withTemplate(templateFile)
                                         .registerWriteHandler(writeHandler)
                                         .excludeColumnFieldNames(excludeColumnNames)
                                         .build();
                             } else {
-                                excelWriter = EasyExcel.write(tmpFile, clazz)
+                                excelWriter = FastExcel.write(tmpFile, clazz)
                                         .registerWriteHandler(writeHandler)
                                         .excludeColumnFieldNames(excludeColumnNames)
                                         .build();
                             }
                         }
                         if (count == pageSize) {
-                            WriteSheet writeSheet = EasyExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
+                            WriteSheet writeSheet = FastExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
                                     .excludeColumnFieldNames(excludeColumnNames)
                                     .build();
                             updateWriteHandler(curData, clazz, sheetContext, curPageIndex, workbookContext);
@@ -339,7 +339,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                         count++;
                     }
                     if (count > 0) {
-                        WriteSheet writeSheet = EasyExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
+                        WriteSheet writeSheet = FastExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
                                 .excludeColumnFieldNames(excludeColumnNames)
                                 .build();
                         updateWriteHandler(curData, clazz, sheetContext, curPageIndex, workbookContext);
@@ -379,13 +379,13 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                             }
                         }
                         if (useTemplate) {
-                            excelWriter = EasyExcel.write(tmpFile)
+                            excelWriter = FastExcel.write(tmpFile)
                                     .withTemplate(templateFile)
                                     .registerWriteHandler(writeHandler)
                                     .excludeColumnFieldNames(excludeColumnNames)
                                     .build();
                         } else {
-                            excelWriter = EasyExcel.write(tmpFile, clazz)
+                            excelWriter = FastExcel.write(tmpFile, clazz)
                                     .registerWriteHandler(writeHandler)
                                     .excludeColumnFieldNames(excludeColumnNames)
                                     .build();
@@ -394,7 +394,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
 
                     int dsize = data.size();
 
-                    WriteSheet writeSheet = EasyExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
+                    WriteSheet writeSheet = FastExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
                             .excludeColumnFieldNames(excludeColumnNames)
                             .build();
                     updateWriteHandler(data, clazz, sheetContext, curPageIndex, workbookContext);
@@ -412,7 +412,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 }
 
                 if (excelWriter == null) {
-                    excelWriter = EasyExcel.write(tmpFile, clazz)
+                    excelWriter = FastExcel.write(tmpFile, clazz)
                             .registerWriteHandler(writeHandler)
                             .excludeColumnFieldNames(excludeColumnNames)
                             .build();
@@ -493,10 +493,10 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 data.add(val);
             }
 
-            ExcelWriter excelWriter = EasyExcel.write(ret)
+            ExcelWriter excelWriter = FastExcel.write(ret)
                     .withTemplate(templateFile)
                     .build();
-            WriteSheet writeSheet = EasyExcel.write()
+            WriteSheet writeSheet = FastExcel.write()
                     .sheet(0, "sheet")
                     .build();
             FillConfig fillConfig = FillConfig.builder()
