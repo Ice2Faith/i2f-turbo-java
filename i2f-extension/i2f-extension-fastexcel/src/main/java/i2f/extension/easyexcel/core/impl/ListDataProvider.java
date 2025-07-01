@@ -2,6 +2,7 @@ package i2f.extension.easyexcel.core.impl;
 
 
 import i2f.extension.easyexcel.core.ExcelExportPage;
+import i2f.extension.easyexcel.core.IDataProvider;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2021/10/19
  */
-public class ListDataProvider extends AbsDataProviderAdapter {
+public class ListDataProvider implements IDataProvider {
     private List<?> data;
     private Class<?> clazz;
 
