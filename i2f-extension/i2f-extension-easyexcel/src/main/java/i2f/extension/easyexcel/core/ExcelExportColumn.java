@@ -12,4 +12,11 @@ import lombok.NoArgsConstructor;
 public class ExcelExportColumn {
     protected String title;
     protected String prop;
+
+    public ExcelExportColumn(String title, String prop) {
+        this.title = title;
+        this.prop = prop;
+    }
+
+
 }
