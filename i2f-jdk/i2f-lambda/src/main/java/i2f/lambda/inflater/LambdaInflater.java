@@ -23,6 +23,33 @@ public class LambdaInflater {
 
     private static LruMap<String, Optional<Field>> fastFieldMap = new LruMap<>(8192);
 
+    @FunctionalInterface
+    public interface IGetter<R, V> extends Serializable {
+        R apply(V v) throws Throwable;
+    }
+
+    @FunctionalInterface
+    public interface ISetter<T, V> extends Serializable {
+        void accept(T obj, V val) throws Throwable;
+    }
+
+    @FunctionalInterface
+    public interface IBuilder<R, T, V> extends Serializable {
+        R apply(T obj, V val) throws Throwable;
+    }
+
+    public static <R, V> Field getField(IGetter<R, V> getter) {
+        return fastSerializedLambdaFieldNullable(getter);
+    }
+
+    public static <T, V> Field getField(ISetter<T, V> setter) {
+        return fastSerializedLambdaFieldNullable(setter);
+    }
+
+    public static <R, T, V> Field getField(IBuilder<R, T, V> builder) {
+        return fastSerializedLambdaFieldNullable(builder);
+    }
+
     public static Field fastSerializedLambdaFieldNullable(Object obj) {
         SerializedLambda lambda = getSerializedLambdaNullable(obj);
         if (lambda == null) {
@@ -67,6 +94,18 @@ public class LambdaInflater {
     }
 
     private static LruMap<String, Optional<Method>> fastMethodMap = new LruMap<>(8192);
+
+    public static <R, V> Method getMethod(IGetter<R, V> getter) {
+        return fastSerializedLambdaMethodNullable(getter);
+    }
+
+    public static <T, V> Method getMethod(ISetter<T, V> setter) {
+        return fastSerializedLambdaMethodNullable(setter);
+    }
+
+    public static <R, T, V> Method getMethod(IBuilder<R, T, V> builder) {
+        return fastSerializedLambdaMethodNullable(builder);
+    }
 
     public static Method fastSerializedLambdaMethodNullable(Object obj) {
         SerializedLambda lambda = getSerializedLambdaNullable(obj);
