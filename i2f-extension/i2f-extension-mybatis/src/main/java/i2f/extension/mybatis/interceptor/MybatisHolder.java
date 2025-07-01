@@ -1,5 +1,6 @@
 package i2f.extension.mybatis.interceptor;
 
+import i2f.extension.mybatis.data.ColumnMeta;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 
@@ -17,8 +18,19 @@ public class MybatisHolder {
 
     public static final ThreadLocal<List<Map.Entry<String, Map.Entry<BoundSql, MappedStatement>>>> EXEC_SQL_LIST = new ThreadLocal<>();
 
+    public static final ThreadLocal<Boolean> ENABLE_RECORD_META = ThreadLocal.withInitial(() -> false);
+
+    public static final ThreadLocal<List<ColumnMeta>> EXEC_COLUMNS_META = new ThreadLocal<>();
+
+
     public static boolean isRecordingSql() {
         Boolean ok = MybatisHolder.ENABLE_RECORD_SQL.get();
+        return ok != null && ok;
+    }
+
+
+    public static boolean isRecordingMeta() {
+        Boolean ok = MybatisHolder.ENABLE_RECORD_META.get();
         return ok != null && ok;
     }
 
@@ -60,6 +72,16 @@ public class MybatisHolder {
             EXEC_SQL_LIST.set(list);
         }
         list.add(new AbstractMap.SimpleEntry<>(sql, new AbstractMap.SimpleEntry<>(boundSql, ms)));
+    }
+
+    public static List<ColumnMeta> getColumnsMetaAndClear() {
+        List<ColumnMeta> ret = EXEC_COLUMNS_META.get();
+        EXEC_COLUMNS_META.remove();
+        return ret;
+    }
+
+    public static void setExecColumnsMeta(List<ColumnMeta> columns) {
+        EXEC_COLUMNS_META.set(columns);
     }
 
 }
