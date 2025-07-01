@@ -227,9 +227,15 @@ public class ServletFileUtil {
     }
 
     public static void responseFileAttachment(File filePath, String mimeType, boolean useAttachment, HttpServletResponse response) throws IOException {
-        String fileName = filePath.getName();
+        responseFileAttachment(filePath, null, mimeType, useAttachment, response);
+    }
+
+    public static void responseFileAttachment(File filePath, String virtualFileName, String mimeType, boolean useAttachment, HttpServletResponse response) throws IOException {
+        if (virtualFileName == null || virtualFileName.isEmpty()) {
+            virtualFileName = filePath.getName();
+        }
         InputStream is = new FileInputStream(filePath);
-        responseAsFileAttachment(is, true, fileName, mimeType, useAttachment, response);
+        responseAsFileAttachment(is, true, virtualFileName, mimeType, useAttachment, response);
     }
 
     public static File saveAsFile2ContextPath(InputStream is, String fileName, HttpSession session, String relativePath) throws IOException {
