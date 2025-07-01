@@ -1,5 +1,6 @@
 package i2f.extension.easyexcel.core;
 
+import cn.idev.excel.enums.CellDataTypeEnum;
 import cn.idev.excel.metadata.Head;
 import cn.idev.excel.metadata.data.WriteCellData;
 import cn.idev.excel.write.handler.context.CellWriteHandlerContext;
@@ -36,7 +37,7 @@ public abstract class IDataHoldStyleCellWriteHandler extends IDataHoldCellWriteH
         CellStyle originCellStyle = cellData.getOriginCellStyle();
         if (writeCellStyle != null || originCellStyle != null) {
             WriteWorkbookHolder writeWorkbookHolder = context.getWriteWorkbookHolder();
-            context.getCell().setCellStyle(writeWorkbookHolder.createCellStyle(writeCellStyle, originCellStyle));
+            context.getCell().setCellStyle(writeWorkbookHolder.createCellStyle(writeCellStyle, originCellStyle, CellDataTypeEnum.EMPTY));
         }
     }
 
