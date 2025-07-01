@@ -1,6 +1,7 @@
 package i2f.springboot.mybatis;
 
 import i2f.extension.mybatis.interceptor.MybatisRecordSqlInterceptor;
+import i2f.extension.mybatis.interceptor.MybatisResultSetMetaInterceptor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
@@ -26,6 +27,16 @@ public class MybatisDynamicAutoConfiguration {
         ret.setInfoLogger(e->logger.info(String.valueOf(e)));
         ret.setErrorLogger(e->logger.error(String.valueOf(e)));
         ret.setEnablePrintSql(enablePrintRecordSql);
+        return ret;
+    }
+
+    @ConditionalOnExpression("${i2f.mybatis.interceptor.result-set-meta.enable:true}")
+    @Bean
+    public MybatisResultSetMetaInterceptor mybatisResultSetMetaInterceptor() {
+        MybatisResultSetMetaInterceptor ret = new MybatisResultSetMetaInterceptor();
+        Logger logger = LoggerFactory.getLogger(ret.getClass());
+        ret.setInfoLogger(e -> logger.info(String.valueOf(e)));
+        ret.setErrorLogger(e -> logger.error(String.valueOf(e)));
         return ret;
     }
 }

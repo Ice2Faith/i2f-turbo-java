@@ -1944,6 +1944,7 @@ public class JdbcResolver {
     public static List<QueryColumn> parseResultSetColumns(ResultSetMetaData metaData, Function<String, String> columnNameMapper) throws SQLException {
         List<QueryColumn> columns = new ArrayList<>();
         int columnCount = metaData.getColumnCount();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
         for (int i = 0; i < columnCount; i++) {
             QueryColumn col = new QueryColumn();
             col.setIndex(i);
@@ -1955,9 +1956,28 @@ public class JdbcResolver {
             col.setOriginName(metaData.getColumnName(i + 1));
             col.setCatalog(metaData.getCatalogName(i + 1));
             col.setClazzName(metaData.getColumnClassName(i + 1));
+            if (col.getClazz() == null) {
+                try {
+                    col.setClazz(Class.forName(col.getClazzName()));
+                } catch (Exception e) {
+
+                }
+            }
+            if (col.getClazz() == null) {
+                try {
+                    col.setClazz(loader.loadClass(col.getClazzName()));
+                } catch (Exception e) {
+
+                }
+            }
             col.setDisplaySize(metaData.getColumnDisplaySize(i + 1));
             col.setLabel(metaData.getColumnLabel(i + 1));
             col.setType(metaData.getColumnType(i + 1));
+            try {
+                col.setJdbcType(JDBCType.valueOf(col.getType()));
+            } catch (Exception e) {
+
+            }
             col.setTypeName(metaData.getColumnTypeName(i + 1));
             col.setPrecision(metaData.getPrecision(i + 1));
             col.setScale(metaData.getScale(i + 1));

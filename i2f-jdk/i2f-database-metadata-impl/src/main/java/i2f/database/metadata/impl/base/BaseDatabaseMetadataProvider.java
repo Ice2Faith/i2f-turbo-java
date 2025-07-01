@@ -16,10 +16,7 @@ import i2f.jdbc.data.QueryResult;
 import i2f.url.UriMeta;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -548,7 +545,19 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
             meta.setDefaultValue(null);
 
 
-            StdType type = StdType.VARCHAR;
+            StdType type = null;
+            JDBCType jdbcType = column.getJdbcType();
+            if (jdbcType != null) {
+                for (StdType item : StdType.values()) {
+                    if (item.name().equalsIgnoreCase(jdbcType.name())) {
+                        type = item;
+                        break;
+                    }
+                }
+            }
+            if (type == null) {
+                type = StdType.VARCHAR;
+            }
             for (Map.Entry<String, StdType> entry : typeMap.entrySet()) {
                 if (entry.getKey().equalsIgnoreCase(meta.getType())) {
                     type = entry.getValue();

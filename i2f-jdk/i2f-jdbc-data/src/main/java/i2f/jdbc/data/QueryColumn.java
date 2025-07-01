@@ -3,6 +3,8 @@ package i2f.jdbc.data;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.JDBCType;
+
 /**
  * @author Ice2Faith
  * @date 2024/3/14 11:05
@@ -16,9 +18,11 @@ public class QueryColumn {
     protected String originName;
     protected String catalog;
     protected String clazzName;
+    protected Class<?> clazz;
     protected int displaySize;
     protected String label;
     protected int type;
+    protected JDBCType jdbcType;
     protected String typeName;
     protected int precision;
     protected int scale;
