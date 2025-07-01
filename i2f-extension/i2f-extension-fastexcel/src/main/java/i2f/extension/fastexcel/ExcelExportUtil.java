@@ -1,11 +1,11 @@
-package i2f.extension.easyexcel;
+package i2f.extension.fastexcel;
 
 
-import i2f.extension.easyexcel.core.ExcelExportPage;
-import i2f.extension.easyexcel.core.ExcelExportTask;
-import i2f.extension.easyexcel.core.IDataProvider;
-import i2f.extension.easyexcel.core.impl.DefaultDataProvider;
-import i2f.extension.easyexcel.core.impl.ListDataProvider;
+import i2f.extension.fastexcel.core.ExcelExportPage;
+import i2f.extension.fastexcel.core.ExcelExportTask;
+import i2f.extension.fastexcel.core.IDataProvider;
+import i2f.extension.fastexcel.core.impl.DefaultDataProvider;
+import i2f.extension.fastexcel.core.impl.ListDataProvider;
 
 import java.io.File;
 import java.net.MalformedURLException;
