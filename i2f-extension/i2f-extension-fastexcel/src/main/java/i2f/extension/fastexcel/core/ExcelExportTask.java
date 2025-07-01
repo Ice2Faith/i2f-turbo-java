@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
  */
 @Data
 public class ExcelExportTask implements Runnable, Callable<File> {
+    private int sheetSize = 65530;
     private int pageSize = 5000; // 旧版本的excel,单个sheet仅支持 65535 ，0x7fff，这个值对应分页大小，也就是单次分页查询的最大大小，建议合理设置，避免OOM
     private IDataProvider provider;
     private File file;
@@ -79,6 +80,11 @@ public class ExcelExportTask implements Runnable, Callable<File> {
         this.tmpFile = tmpFile;
     }
 
+    public ExcelExportTask setSheetSize(int sheetSize) {
+        this.sheetSize = sheetSize;
+        return this;
+    }
+
     public ExcelExportTask setPageSize(int pageSize) {
         this.pageSize = pageSize;
         return this;
@@ -115,6 +121,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
     protected void updateWriteHandler(List<?> list, Class<?> clazz,
                                       Map<Integer, Map<String, Object>> sheetContext,
                                       int sheetIndex,
+                                      int offsetIndex,
                                       Map<String, Object> workbookContext) {
         if (writeHandler == null) {
             return;
@@ -129,6 +136,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
         if (clazz != null) {
             handler.setClazz(clazz);
         }
+        handler.setOffsetIndex(offsetIndex);
         handler.setWorkbookContext(workbookContext);
         if (!sheetContext.containsKey(sheetIndex)) {
             sheetContext.put(sheetIndex, new HashMap<>());
@@ -286,7 +294,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                     }
                 }
                 int size = data.size();
-                if (size <= pageSize) {
+                if (size <= sheetSize) {
                     if (useTemplate) {
                         ExcelWriter excelWriter = FastExcel.write(tmpFile)
                                 .withTemplate(templateFile)
@@ -296,11 +304,11 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                         WriteSheet writeSheet = FastExcel.write()
                                 .sheet(0, sheetName)
                                 .build();
-                        updateWriteHandler(data, clazz, sheetContext, 0, workbookContext);
+                        updateWriteHandler(data, clazz, sheetContext, 0, 0, workbookContext);
                         excelWriter.fill(data, writeSheet);
                         excelWriter.finish();
                     } else {
-                        updateWriteHandler(data, clazz, sheetContext, 0, workbookContext);
+                        updateWriteHandler(data, clazz, sheetContext, 0, 0, workbookContext);
                         FastExcel.write(tmpFile, clazz)
                                 .sheet(0, sheetName)
                                 .registerWriteHandler(writeHandler)
@@ -309,10 +317,14 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                     }
                 } else {
                     ExcelWriter excelWriter = null;
-                    int curPageIndex = 0;
+                    int currSheetIndex = 0;
                     int count = 0;
-                    List<Object> curData = new ArrayList<>(pageSize);
+                    List<Object> curData = new LinkedList<>();
                     for (Object item : data) {
+
+                        curData.add(item);
+                        count++;
+
                         if (excelWriter == null) {
                             if (TypeOf.typeOf(clazz, Map.class)) {
                                 if (!data.isEmpty()) {
@@ -342,11 +354,13 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                                         .build();
                             }
                         }
-                        if (count == pageSize) {
-                            WriteSheet writeSheet = FastExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
+
+
+                        if (count == sheetSize) {
+                            WriteSheet writeSheet = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
                                     .excludeColumnFieldNames(excludeColumnNames)
                                     .build();
-                            updateWriteHandler(curData, clazz, sheetContext, curPageIndex, workbookContext);
+                            updateWriteHandler(curData, clazz, sheetContext, currSheetIndex, 0, workbookContext);
                             if (useTemplate) {
                                 excelWriter.fill(curData, writeSheet);
                             } else {
@@ -354,17 +368,16 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                             }
 
                             count = 0;
-                            curPageIndex++;
+                            currSheetIndex++;
                             curData.clear();
                         }
-                        curData.add(item);
-                        count++;
+
                     }
                     if (count > 0) {
-                        WriteSheet writeSheet = FastExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
+                        WriteSheet writeSheet = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
                                 .excludeColumnFieldNames(excludeColumnNames)
                                 .build();
-                        updateWriteHandler(curData, clazz, sheetContext, curPageIndex, workbookContext);
+                        updateWriteHandler(curData, clazz, sheetContext, currSheetIndex, 0, workbookContext);
                         if (useTemplate) {
                             excelWriter.fill(curData, writeSheet);
                         } else {
@@ -372,16 +385,27 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                         }
                     }
 
+                    if (excelWriter == null) {
+                        excelWriter = FastExcel.write(tmpFile, clazz)
+                                .registerWriteHandler(writeHandler)
+                                .excludeColumnFieldNames(excludeColumnNames)
+                                .build();
+                    }
+
                     excelWriter.finish();
                 }
             } else {
-                int curPageIndex = 0;
+                int currPageIndex = 0;
 
                 Class<?> clazz = provider.getDataClass();
                 ExcelWriter excelWriter = null;
 
+                WriteSheet writeSheet = null;
+                int currSheetIndex = 0;
+                int count = 0;
+
                 while (true) {
-                    ExcelExportPage page = new ExcelExportPage(curPageIndex, pageSize);
+                    ExcelExportPage page = new ExcelExportPage(currPageIndex, pageSize);
                     List<?> data = provider.getData(page);
                     if (data == null || data.isEmpty()) {
                         break;
@@ -416,24 +440,72 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                         }
                     }
 
-                    int dsize = data.size();
-
-                    WriteSheet writeSheet = FastExcel.writerSheet(curPageIndex, ((curPageIndex == 0) ? sheetName : (sheetName + "-" + curPageIndex)))
-                            .excludeColumnFieldNames(excludeColumnNames)
-                            .build();
-                    updateWriteHandler(data, clazz, sheetContext, curPageIndex, workbookContext);
-                    if (useTemplate) {
-                        excelWriter.fill(data, writeSheet);
-                    } else {
-                        excelWriter.write(data, writeSheet);
+                    if (writeSheet == null) {
+                        writeSheet = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
+                                .excludeColumnFieldNames(excludeColumnNames)
+                                .build();
                     }
 
-                    curPageIndex++;
+                    int dsize = data.size();
+                    int offsetCount = count;
+                    if (count + dsize > sheetSize) {
+                        List<Object> once = new LinkedList<>();
+                        List<Object> left = new LinkedList<>();
+                        int leftCount = 0;
+                        for (Object item : data) {
+                            if (count < sheetSize) {
+                                once.add(item);
+                            } else {
+                                left.add(item);
+                                leftCount++;
+                            }
+                            count++;
+                        }
+
+                        if (!once.isEmpty()) {
+                            updateWriteHandler(once, clazz, sheetContext, currSheetIndex, offsetCount, workbookContext);
+                            if (useTemplate) {
+                                excelWriter.fill(once, writeSheet);
+                            } else {
+                                excelWriter.write(once, writeSheet);
+                            }
+                        }
+
+                        currSheetIndex++;
+                        writeSheet = null;
+                        count = leftCount;
+                        offsetCount = 0;
+
+                        data = left;
+
+                    } else {
+                        count += dsize;
+                    }
+
+
+                    if (!data.isEmpty()) {
+                        if (writeSheet == null) {
+                            writeSheet = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
+                                    .excludeColumnFieldNames(excludeColumnNames)
+                                    .build();
+                        }
+
+
+                        updateWriteHandler(data, clazz, sheetContext, currSheetIndex, offsetCount, workbookContext);
+                        if (useTemplate) {
+                            excelWriter.fill(data, writeSheet);
+                        } else {
+                            excelWriter.write(data, writeSheet);
+                        }
+                    }
+
+                    currPageIndex++;
 
                     if (dsize < pageSize) {
                         break;
                     }
                 }
+
 
                 if (excelWriter == null) {
                     excelWriter = FastExcel.write(tmpFile, clazz)
