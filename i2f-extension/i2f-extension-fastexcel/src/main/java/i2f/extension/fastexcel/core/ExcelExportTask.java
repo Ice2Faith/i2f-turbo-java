@@ -13,11 +13,11 @@ import i2f.reflect.ReflectResolver;
 import i2f.resources.ResourceUtil;
 import i2f.typeof.TypeOf;
 import lombok.Data;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -41,6 +41,8 @@ public class ExcelExportTask implements Runnable, Callable<File> {
     private File tmpFile;
     private String sheetName;
     private URL templateUrl;
+    private boolean useFirstSheetTemplate = true;
+    private int maxFirstSheetCloneCount = 100;
     private Set<String> excludeColumnTags;
     private Set<String> excludeColumnNames;
     private boolean enableCellStyleAnnotation;
@@ -342,11 +344,28 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                             }
                             // 处理使用模板的情况
                             if (useTemplate) {
-                                excelWriter = FastExcel.write(tmpFile)
-                                        .withTemplate(templateFile)
-                                        .registerWriteHandler(writeHandler)
-                                        .excludeColumnFieldNames(excludeColumnNames)
-                                        .build();
+                                if (useFirstSheetTemplate) {
+                                    Workbook workbook = WorkbookFactory.create(templateFile);
+                                    String baseName = workbook.getSheetName(0);
+                                    for (int i = 0; i < maxFirstSheetCloneCount; i++) {
+                                        Sheet sheet = workbook.cloneSheet(0);
+                                        workbook.setSheetName(i + 1, baseName + "-" + (i + 1));
+                                    }
+                                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                                    workbook.write(bos);
+
+                                    excelWriter = FastExcel.write(tmpFile)
+                                            .withTemplate(new ByteArrayInputStream(bos.toByteArray()))
+                                            .registerWriteHandler(writeHandler)
+                                            .excludeColumnFieldNames(excludeColumnNames)
+                                            .build();
+                                } else {
+                                    excelWriter = FastExcel.write(tmpFile)
+                                            .withTemplate(templateFile)
+                                            .registerWriteHandler(writeHandler)
+                                            .excludeColumnFieldNames(excludeColumnNames)
+                                            .build();
+                                }
                             } else {
                                 excelWriter = FastExcel.write(tmpFile, clazz)
                                         .registerWriteHandler(writeHandler)
@@ -382,6 +401,14 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                             excelWriter.fill(curData, writeSheet);
                         } else {
                             excelWriter.write(curData, writeSheet);
+                        }
+                    }
+
+                    if (useFirstSheetTemplate && excelWriter != null) {
+                        Workbook workbook = excelWriter.writeContext().writeWorkbookHolder().getWorkbook();
+                        int numberOfSheets = workbook.getNumberOfSheets();
+                        for (int i = numberOfSheets - 1; i > currSheetIndex; i--) {
+                            workbook.removeSheetAt(i);
                         }
                     }
 
@@ -427,11 +454,28 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                             }
                         }
                         if (useTemplate) {
-                            excelWriter = FastExcel.write(tmpFile)
-                                    .withTemplate(templateFile)
-                                    .registerWriteHandler(writeHandler)
-                                    .excludeColumnFieldNames(excludeColumnNames)
-                                    .build();
+                            if (useFirstSheetTemplate) {
+                                Workbook workbook = WorkbookFactory.create(templateFile);
+                                String baseName = workbook.getSheetName(0);
+                                for (int i = 0; i < maxFirstSheetCloneCount; i++) {
+                                    Sheet sheet = workbook.cloneSheet(0);
+                                    workbook.setSheetName(i + 1, baseName + "-" + (i + 1));
+                                }
+                                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                                workbook.write(bos);
+
+                                excelWriter = FastExcel.write(tmpFile)
+                                        .withTemplate(new ByteArrayInputStream(bos.toByteArray()))
+                                        .registerWriteHandler(writeHandler)
+                                        .excludeColumnFieldNames(excludeColumnNames)
+                                        .build();
+                            } else {
+                                excelWriter = FastExcel.write(tmpFile)
+                                        .withTemplate(templateFile)
+                                        .registerWriteHandler(writeHandler)
+                                        .excludeColumnFieldNames(excludeColumnNames)
+                                        .build();
+                            }
                         } else {
                             excelWriter = FastExcel.write(tmpFile, clazz)
                                     .registerWriteHandler(writeHandler)
@@ -506,6 +550,13 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                     }
                 }
 
+                if (useFirstSheetTemplate && excelWriter != null) {
+                    Workbook workbook = excelWriter.writeContext().writeWorkbookHolder().getWorkbook();
+                    int numberOfSheets = workbook.getNumberOfSheets();
+                    for (int i = numberOfSheets - 1; i > currSheetIndex; i--) {
+                        workbook.removeSheetAt(i);
+                    }
+                }
 
                 if (excelWriter == null) {
                     excelWriter = FastExcel.write(tmpFile, clazz)
