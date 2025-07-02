@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * @desc
  */
 public class OraclePageWrapper implements IPageWrapper {
+    public static final OraclePageWrapper INSTANCE = new OraclePageWrapper();
     @Override
     public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {
@@ -27,32 +28,32 @@ public class OraclePageWrapper implements IPageWrapper {
         if (page.getOffset() != null && page.getEnd() != null) {
 
             builder.append(" SELECT * ")
-                    .append(" FROM (SELECT TMP.*, ROWNUM ROW_ID ")
+                    .append(" FROM (SELECT ROWNUM PAGE_ROW_ID,TMP_PAGE.* ")
                     .append(" FROM ( ")
                     .append(bql.getSql())
-                    .append(" ) TMP ")
+                    .append(" ) TMP_PAGE ")
                     .append(" WHERE ROWNUM < ").append(embed ? (page.getEnd() + 1) : "?").append(" ) TMP ")
-                    .append(" WHERE ROW_ID >= ").append(embed ? (page.getOffset() + 1) : "?").append(" ");
+                    .append(" WHERE PAGE_ROW_ID >= ").append(embed ? (page.getOffset() + 1) : "?").append(" ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getEnd() + 1);
                 pageSql.getArgs().add(page.getOffset() + 1);
             }
         } else if (page.getOffset() != null) {
-            builder.append(" SELECT TMP.* ")
+            builder.append(" SELECT TMP_PAGE.* ")
                     .append(" FROM ( ")
                     .append(bql.getSql())
-                    .append(" ) TMP ")
+                    .append(" ) TMP_PAGE ")
                     .append(" WHERE ROWNUM >= ").append(embed ? (page.getOffset() + 1) : "?").append(" ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getOffset() + 1);
             }
         } else if (page.getEnd() != null) {
-            builder.append(" SELECT TMP.* ")
+            builder.append(" SELECT TMP_PAGE.* ")
                     .append(" FROM ( ")
                     .append(bql.getSql())
-                    .append(" ) TMP ")
+                    .append(" ) TMP_PAGE ")
                     .append(" WHERE ROWNUM < ").append(embed ? (page.getEnd() + 1) : "?").append(" ");
 
             if (!embed) {

@@ -108,11 +108,20 @@ public enum DatabaseType {
      */
     HighGo("highgo", "瀚高数据库"),
 
-
     /**
      * Hive
      */
     Hive("hive", "Hive数据库"),
+
+    /**
+     * YaShanDB
+     */
+    YaShanDB("YaShanDB", "崖山数据库"),
+
+    /**
+     * TDengine
+     */
+    TDengine("TDengine", "涛思数据库"),
 
     /**
      * UNKONWN DB
@@ -158,16 +167,16 @@ public enum DatabaseType {
         return OTHER;
     }
 
-    protected static final  Map<Connection,DatabaseType> TYPE_MAP= new WeakHashMap<>();
+    protected static final Map<Connection, DatabaseType> TYPE_MAP = new WeakHashMap<>();
 
     public static DatabaseType typeOfConnection(Connection conn) throws SQLException {
         DatabaseType type = TYPE_MAP.get(conn);
-        if(type!=null){
+        if (type != null) {
             return type;
         }
         synchronized (TYPE_MAP) {
             type = TYPE_MAP.get(conn);
-            if(type!=null){
+            if (type != null) {
                 return type;
             }
             type = typeOfJdbcUrl(conn.getMetaData().getURL());
@@ -232,6 +241,12 @@ public enum DatabaseType {
             return DatabaseType.HighGo;
         } else if (regexFind(":hive\\d*:", url)) { // :hive2:
             return DatabaseType.Hive;
+        } else if (url.contains(":yasdb:")) {
+            return DatabaseType.YaShanDB;
+        } else if (url.contains(":taos:")
+                || url.contains(":taos-ws:")
+                || url.contains(":taos-rs:")) {
+            return DatabaseType.TDengine;
         } else {
             //logger.warn("The jdbcUrl is " + jdbcUrl + ", Mybatis Plus Cannot Read Database type or The Database's Not Supported!");
             return DatabaseType.OTHER;

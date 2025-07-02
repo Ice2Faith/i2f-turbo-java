@@ -30,7 +30,7 @@ public class BindSqlWrappers {
         PageBindSql ret = new PageBindSql();
         IPageWrapper pageWrapper = PageWrappers.wrapper(type);
         BindSql pageSql = pageWrapper.apply(sql, page);
-        ICountWrapper countWrapper = CountWrappers.wrapper();
+        ICountWrapper countWrapper = CountWrappers.wrapper(type);
         BindSql countSql = countWrapper.apply(sql);
 
         ret.setPage(page);

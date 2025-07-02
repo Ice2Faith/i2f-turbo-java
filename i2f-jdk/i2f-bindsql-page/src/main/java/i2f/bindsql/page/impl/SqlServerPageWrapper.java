@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * @desc
  */
 public class SqlServerPageWrapper implements IPageWrapper {
+    public static final SqlServerPageWrapper INSTANCE = new SqlServerPageWrapper();
     @Override
     public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {
