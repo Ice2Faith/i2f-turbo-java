@@ -41,7 +41,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
     private File tmpFile;
     private String sheetName;
     private URL templateUrl;
-    private boolean useFirstSheetTemplate;
+    private boolean useFirstSheetTemplate = true;
     private int maxFirstSheetCloneCount = 100;
     private Set<String> excludeColumnTags;
     private Set<String> excludeColumnNames;
