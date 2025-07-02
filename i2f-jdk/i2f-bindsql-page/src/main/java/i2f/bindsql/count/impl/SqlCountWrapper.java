@@ -11,6 +11,8 @@ import java.util.ArrayList;
  * @desc
  */
 public class SqlCountWrapper implements ICountWrapper {
+    public static final SqlCountWrapper INSTANCE = new SqlCountWrapper();
+
     @Override
     public BindSql apply(BindSql bql) {
 
@@ -22,7 +24,7 @@ public class SqlCountWrapper implements ICountWrapper {
         builder.append(" select count(1) cnt ")
                 .append(" from ( ")
                 .append(bql.getSql())
-                .append(" ) tmp ");
+                .append(" ) tmp_cnt ");
 
         pageSql.setSql(builder.toString());
         return pageSql;

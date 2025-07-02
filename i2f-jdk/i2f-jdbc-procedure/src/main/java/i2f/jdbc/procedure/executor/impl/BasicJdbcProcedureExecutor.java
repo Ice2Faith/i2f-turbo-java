@@ -1560,7 +1560,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             Connection conn = getConnection(datasource, params);
             DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
-            ICountWrapper wrapper = CountWrappers.wrapper();
+            ICountWrapper wrapper = CountWrappers.wrapper(databaseType);
             bql = wrapper.apply(bql);
             BindSql pageSql = bql;
             if (isDebug()) {

@@ -5,6 +5,7 @@ import i2f.database.type.DatabaseType;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ServiceLoader;
 
 /**
  * @author Ice2Faith
@@ -12,12 +13,6 @@ import java.sql.SQLException;
  * @desc
  */
 public class PageWrappers {
-    public static final IPageWrapper MYSQL = new MysqlPageWrapper();
-    public static final IPageWrapper ORACLE = new OraclePageWrapper();
-    public static final IPageWrapper POSTGRE_SQL = new PostgreSqlPageWrapper();
-    public static final IPageWrapper ORACLE_12C = new Oracle12cPageWrapper();
-    public static final IPageWrapper DB2 = new Db2PageWrapper();
-    public static final IPageWrapper SQL_SERVER = new SqlServerPageWrapper();
 
     public static IPageWrapper wrapper(Connection conn) throws SQLException {
         DatabaseType type = DatabaseType.typeOfConnection(conn);
@@ -31,45 +26,67 @@ public class PageWrappers {
 
 
     public static IPageWrapper wrapper(DatabaseType type) {
+        ServiceLoader<IPageWrapperProvider> list = ServiceLoader.load(IPageWrapperProvider.class);
+        for (IPageWrapperProvider item : list) {
+            if (list == null) {
+                continue;
+            }
+            if (item.support(type)) {
+                IPageWrapper pageWrapper = item.getPageWrapper();
+                if (pageWrapper != null) {
+                    return pageWrapper;
+                }
+            }
+        }
         switch (type) {
             case MYSQL:
-                return MYSQL;
+                return MysqlPageWrapper.INSTANCE;
             case ORACLE:
-                return ORACLE;
+                return OraclePageWrapper.INSTANCE;
             case MARIADB:
-                return MYSQL;
+                return MysqlPageWrapper.INSTANCE;
             case GBASE:
-                return MYSQL;
+                return MysqlPageWrapper.INSTANCE;
             case OSCAR:
-                return MYSQL;
+                return MysqlPageWrapper.INSTANCE;
             case XU_GU:
-                return MYSQL;
+                return MysqlPageWrapper.INSTANCE;
             case CLICK_HOUSE:
-                return MYSQL;
+                return MysqlPageWrapper.INSTANCE;
             case OCEAN_BASE:
-                return MYSQL;
+                return MysqlPageWrapper.INSTANCE;
             case POSTGRE_SQL:
-                return POSTGRE_SQL;
+                return PostgreSqlPageWrapper.INSTANCE;
             case H2:
-                return POSTGRE_SQL;
+                return PostgreSqlPageWrapper.INSTANCE;
             case SQLITE:
-                return POSTGRE_SQL;
+                return PostgreSqlPageWrapper.INSTANCE;
             case HSQL:
-                return POSTGRE_SQL;
+                return PostgreSqlPageWrapper.INSTANCE;
             case KINGBASE_ES:
-                return POSTGRE_SQL;
+                return PostgreSqlPageWrapper.INSTANCE;
             case PHOENIX:
-                return POSTGRE_SQL;
+                return PostgreSqlPageWrapper.INSTANCE;
             case DM:
-                return ORACLE;
+                return OraclePageWrapper.INSTANCE;
             case GAUSS:
-                return ORACLE;
+                return OraclePageWrapper.INSTANCE;
             case ORACLE_12C:
-                return ORACLE_12C;
+                return Oracle12cPageWrapper.INSTANCE;
             case DB2:
-                return DB2;
+                return Db2PageWrapper.INSTANCE;
             case SQL_SERVER:
-                return SQL_SERVER;
+                return SqlServerPageWrapper.INSTANCE;
+            case FIREBIRD:
+                return FirebirdPageWrapper.INSTANCE;
+            case HighGo:
+                return PostgreSqlPageWrapper.INSTANCE;
+            case Hive:
+                return MysqlPageWrapper.INSTANCE;
+            case YaShanDB:
+                return PostgreSqlPageWrapper.INSTANCE;
+            case TDengine:
+                return MysqlPageWrapper.INSTANCE;
             default:
                 throw new UnsupportedOperationException("un-support auto page route db type");
         }
