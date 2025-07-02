@@ -18,11 +18,14 @@ import i2f.page.Page;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
@@ -33,6 +36,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -1749,15 +1754,50 @@ public class JdbcResolver {
     }
 
     public static QueryResult parseResultSet(ResultSet rs, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
-        try {
+        return parseResultSet(rs, maxCount, Map.class,
+                columnNameMapper,
+                (ctx) -> {
             QueryResult ret = new QueryResult();
+                    ret.setColumns(ctx.getColumns());
+                    ret.setRows(new LinkedList<>());
+                    return ret;
+                }, (col, elem) -> {
+                    col.getRows().add(elem);
+                }, (ctx, row) -> {
+                    return row;
+                });
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ParseResultSetRowContext<T> {
+        protected ResultSetMetaData metaData;
+        protected List<QueryColumn> columns;
+        protected Class<T> elemType;
+        protected Map<String, Object> context;
+
+        public <E> E getContextValue(String key) {
+            return (E) context.get(key);
+        }
+    }
+
+    public static <T, R> R parseResultSet(ResultSet rs, int maxCount, Class<T> elemType,
+                                          Function<String, String> columnNameMapper,
+                                          Function<ParseResultSetRowContext<T>, R> returnTypeInitializer,
+                                          BiConsumer<R, T> rowCollector,
+                                          BiFunction<ParseResultSetRowContext<T>, Map<String, Object>, T> rowConvertor) throws SQLException {
+        try {
 
             ResultSetMetaData metaData = rs.getMetaData();
 
             List<QueryColumn> columns = parseResultSetColumns(metaData, columnNameMapper);
-            List<Map<String, Object>> rows = new LinkedList<>();
-            ret.setColumns(columns);
-            ret.setRows(rows);
+            ParseResultSetRowContext<T> context = new ParseResultSetRowContext<>();
+            context.setMetaData(metaData);
+            context.setColumns(columns);
+            context.setElemType(elemType);
+            context.setContext(new LinkedHashMap<>());
+
+            R ret = returnTypeInitializer.apply(context);
 
             int currCount = 0;
             while (rs.next()) {
@@ -1766,7 +1806,8 @@ public class JdbcResolver {
                 }
 
                 Map<String, Object> map = convertResultSetRowAsMap(columns, rs);
-                rows.add(map);
+                T elem = rowConvertor.apply(context, map);
+                rowCollector.accept(ret, elem);
 
                 currCount++;
 
@@ -1860,37 +1901,71 @@ public class JdbcResolver {
     }
 
     public static <T> List<T> parseResultSetAsBeanList(ResultSet rs, Class<T> beanClass, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
-        try {
-            List<T> ret = new LinkedList<>();
-
-            ResultSetMetaData metaData = rs.getMetaData();
-
-            List<QueryColumn> columns = parseResultSetColumns(metaData, columnNameMapper);
-
-            SQLBiFunction<List<QueryColumn>, ResultSet, T> beanConvertor = createResultSetRowBeanConvertor(beanClass);
-
-            boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
-            int currCount = 0;
-            while (rs.next()) {
-                if (maxCount >= 0 && currCount >= maxCount) {
-                    break;
-                }
-
-                Object item = beanConvertor.apply(columns, rs);
-
-                ret.add((T) item);
-
-                currCount++;
-
-                if (maxCount >= 0 && currCount >= maxCount) {
-                    break;
-                }
-            }
-
-            return ret;
-        } finally {
-            rs.close();
-        }
+        boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
+        String rowConvertorKey = "rowConvertor";
+        return parseResultSet(rs, maxCount, beanClass,
+                columnNameMapper,
+                (ctx) -> {
+                    Map<String, Field> resultMap = new LinkedHashMap<>();
+                    if (!isDefaultMapType) {
+                        List<QueryColumn> columns = ctx.getColumns();
+                        Map<String, QueryColumn> equalMap = new LinkedHashMap<>();
+                        Map<String, QueryColumn> equalIgnoreMap = new LinkedHashMap<>();
+                        Map<String, QueryColumn> fuzzyMap = new LinkedHashMap<>();
+                        for (QueryColumn item : columns) {
+                            String name = item.getName();
+                            equalMap.putIfAbsent(name, item);
+                            equalIgnoreMap.putIfAbsent(name.toLowerCase(), item);
+                            fuzzyMap.putIfAbsent(name.toLowerCase().replace("_", ""), item);
+                        }
+                        Map<Field, Class<?>> fields = ReflectResolver.getFields(beanClass);
+                        for (Map.Entry<Field, Class<?>> entry : fields.entrySet()) {
+                            Field field = entry.getKey();
+                            String name = field.getName();
+                            QueryColumn column = equalMap.get(name);
+                            if (column != null) {
+                                resultMap.putIfAbsent(column.getName(), field);
+                                continue;
+                            }
+                            column = equalIgnoreMap.get(name.toLowerCase());
+                            if (column != null) {
+                                resultMap.putIfAbsent(column.getName(), field);
+                                continue;
+                            }
+                            column = fuzzyMap.get(name.toLowerCase().replace("_", ""));
+                            if (column != null) {
+                                resultMap.putIfAbsent(column.getName(), field);
+                                continue;
+                            }
+                        }
+                    }
+                    Function<Map<String, Object>, T> rowConvertor = (row) -> {
+                        if (isDefaultMapType) {
+                            return (T) row;
+                        }
+                        Map<String, Object> map = row;
+                        if (!resultMap.isEmpty()) {
+                            map = new LinkedHashMap<>();
+                            for (Map.Entry<String, Field> entry : resultMap.entrySet()) {
+                                map.put(entry.getValue().getName(), row.get(entry.getKey()));
+                            }
+                        }
+                        try {
+                            T bean = ReflectResolver.getInstance(beanClass);
+                            ReflectResolver.map2bean(map, bean);
+                            return bean;
+                        } catch (Exception e) {
+                            throw new IllegalStateException(e.getMessage(), e);
+                        }
+                    };
+                    ctx.getContext().put(rowConvertorKey, rowConvertor);
+                    return new LinkedList<T>();
+                }, (col, elem) -> {
+                    col.add(elem);
+                }, (ctx, row) -> {
+                    Function<Map<String, Object>, T> rowConvertor = ctx.getContextValue(rowConvertorKey);
+                    return rowConvertor.apply(row);
+                });
     }
 
 
@@ -1899,9 +1974,10 @@ public class JdbcResolver {
             columns = parseResultSetColumns(rs);
         }
         Map<String, Object> map = new LinkedHashMap<>();
-        for (int i = 0; i < columns.size(); i++) {
+        int size = columns.size();
+        for (int i = 1; i <= size; i++) {
             QueryColumn col = columns.get(i);
-            Object val = getResultObject(rs, i + 1, col.getType());
+            Object val = getResultObject(rs, i, col.getType());
             map.put(col.getName(), val);
         }
         return map;
@@ -1945,17 +2021,17 @@ public class JdbcResolver {
         List<QueryColumn> columns = new ArrayList<>();
         int columnCount = metaData.getColumnCount();
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        for (int i = 0; i < columnCount; i++) {
+        for (int i = 1; i <= columnCount; i++) {
             QueryColumn col = new QueryColumn();
-            col.setIndex(i);
-            String colName = metaData.getColumnLabel(i + 1);
+            col.setIndex(i - 1);
+            String colName = metaData.getColumnLabel(i);
             if (columnNameMapper != null) {
                 colName = columnNameMapper.apply(colName);
             }
             col.setName(colName);
-            col.setOriginName(metaData.getColumnName(i + 1));
-            col.setCatalog(metaData.getCatalogName(i + 1));
-            col.setClazzName(metaData.getColumnClassName(i + 1));
+            col.setOriginName(metaData.getColumnName(i));
+            col.setCatalog(metaData.getCatalogName(i));
+            col.setClazzName(metaData.getColumnClassName(i));
             if (col.getClazz() == null) {
                 try {
                     col.setClazz(Class.forName(col.getClazzName()));
@@ -1970,28 +2046,28 @@ public class JdbcResolver {
 
                 }
             }
-            col.setDisplaySize(metaData.getColumnDisplaySize(i + 1));
-            col.setLabel(metaData.getColumnLabel(i + 1));
-            col.setType(metaData.getColumnType(i + 1));
+            col.setDisplaySize(metaData.getColumnDisplaySize(i));
+            col.setLabel(metaData.getColumnLabel(i));
+            col.setType(metaData.getColumnType(i));
             try {
                 col.setJdbcType(JDBCType.valueOf(col.getType()));
             } catch (Exception e) {
 
             }
-            col.setTypeName(metaData.getColumnTypeName(i + 1));
-            col.setPrecision(metaData.getPrecision(i + 1));
-            col.setScale(metaData.getScale(i + 1));
-            col.setSchema(metaData.getSchemaName(i + 1));
-            col.setTable(metaData.getTableName(i + 1));
-            col.setNullable(metaData.isNullable(i + 1) != ResultSetMetaData.columnNoNulls);
-            col.setAutoIncrement(metaData.isAutoIncrement(i + 1));
-            col.setReadonly(metaData.isReadOnly(i + 1));
-            col.setWritable(metaData.isWritable(i + 1));
-            col.setCaseSensitive(metaData.isCaseSensitive(i + 1));
-            col.setCurrency(metaData.isCurrency(i + 1));
-            col.setDefinitelyWritable(metaData.isDefinitelyWritable(i + 1));
-            col.setSearchable(metaData.isSearchable(i + 1));
-            col.setSigned(metaData.isSigned(i + 1));
+            col.setTypeName(metaData.getColumnTypeName(i));
+            col.setPrecision(metaData.getPrecision(i));
+            col.setScale(metaData.getScale(i));
+            col.setSchema(metaData.getSchemaName(i));
+            col.setTable(metaData.getTableName(i));
+            col.setNullable(metaData.isNullable(i) != ResultSetMetaData.columnNoNulls);
+            col.setAutoIncrement(metaData.isAutoIncrement(i));
+            col.setReadonly(metaData.isReadOnly(i));
+            col.setWritable(metaData.isWritable(i));
+            col.setCaseSensitive(metaData.isCaseSensitive(i));
+            col.setCurrency(metaData.isCurrency(i));
+            col.setDefinitelyWritable(metaData.isDefinitelyWritable(i));
+            col.setSearchable(metaData.isSearchable(i));
+            col.setSigned(metaData.isSigned(i));
 
             columns.add(col);
         }
