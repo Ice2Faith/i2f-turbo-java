@@ -53,7 +53,11 @@ public abstract class IDataHoldCellWriteHandler implements CellWriteHandler {
 
         Head head = context.getHeadData();
         Boolean isHead = context.getHead();
-        int headCount = head.getHeadNameList().size();
+        int headCount = 1;
+
+        if (head != null) {
+            headCount = head.getHeadNameList().size();
+        }
 
         List<WriteCellData<?>> cellDataList = context.getCellDataList();
 
