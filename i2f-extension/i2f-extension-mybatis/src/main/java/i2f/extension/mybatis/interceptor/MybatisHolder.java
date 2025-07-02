@@ -28,6 +28,10 @@ public class MybatisHolder {
         return ok != null && ok;
     }
 
+    public static void startRecordMeta() {
+        ENABLE_RECORD_META.set(true);
+    }
+
 
     public static boolean isRecordingMeta() {
         Boolean ok = MybatisHolder.ENABLE_RECORD_META.get();

@@ -3,16 +3,19 @@ package i2f.extension.mybatis.interceptor;
 import i2f.extension.mybatis.data.ColumnMeta;
 import lombok.Data;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.ResultMap;
+import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.plugin.*;
+import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.sql.JDBCType;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.lang.reflect.Proxy;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -30,6 +33,7 @@ import java.util.function.Consumer;
                 args = {Statement.class}),
 
 })
+@Component
 public class MybatisResultSetMetaInterceptor implements Interceptor {
     public static final String METHOD_RESULT_SSET = "handleResultSets";
     public static final String METHOD_CURSOR_RESULT_SET = "handleCursorResultSets";
@@ -61,7 +65,131 @@ public class MybatisResultSetMetaInterceptor implements Interceptor {
 
         Statement statement = (Statement) args[0];
 
-        ResultSet rs = statement.getResultSet();
+        AtomicReference<List<ColumnMeta>> columnsRef = new AtomicReference<>();
+        Statement proxy = (Statement) Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                new Class[]{Statement.class}, new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        Object ret = method.invoke(statement, args);
+                        Class<?> returnType = method.getReturnType();
+                        if (ResultSet.class.isAssignableFrom(returnType)) {
+                            ResultSet rs = (ResultSet) ret;
+                            List<ColumnMeta> columns = parseResultSetColumns(rs);
+                            columnsRef.set(columns);
+                            MybatisHolder.setExecColumnsMeta(columns);
+                        }
+                        return ret;
+                    }
+                });
+
+        args[0] = proxy;
+
+        Object ret = invocation.proceed();
+
+
+        try {
+            Field msField = null;
+            Field autoMappingsField = null;
+            Field[] fields = executor.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                Class<?> type = field.getType();
+                if (MappedStatement.class.isAssignableFrom(type)) {
+                    msField = field;
+                }
+                if (Map.class.isAssignableFrom(type)) {
+                    if ("autoMappingsCache".equals(field.getName())) {
+                        autoMappingsField = field;
+                    }
+                }
+            }
+            if (msField != null) {
+                List<ColumnMeta> metas = columnsRef.get();
+                Map<String, ColumnMeta> metaMap = new LinkedHashMap<>();
+                for (ColumnMeta meta : metas) {
+                    metaMap.put(meta.getName().toUpperCase(), meta);
+                }
+
+                msField.setAccessible(true);
+                MappedStatement ms = (MappedStatement) msField.get(executor);
+                String id = ms.getId();
+
+                if (autoMappingsField != null) {
+                    try {
+                        String autoMappingKey = id + "-Inline:null";
+                        autoMappingsField.setAccessible(true);
+                        Map<String, Object> autoMap = (Map<String, Object>) autoMappingsField.get(executor);
+                        Object mappingList = autoMap.get(autoMappingKey);
+                        if (mappingList == null) {
+                            for (Map.Entry<String, Object> entry : autoMap.entrySet()) {
+                                mappingList = entry.getValue();
+                                break;
+                            }
+                        }
+                        if (mappingList != null) {
+                            if (mappingList instanceof List) {
+                                List list = (List) mappingList;
+                                Class<?> mappingClass = null;
+                                Field columnField = null;
+                                Field propertyField = null;
+                                for (Object mapping : list) {
+                                    if (mapping == null) {
+                                        continue;
+                                    }
+                                    if (mappingClass == null) {
+                                        mappingClass = mapping.getClass();
+                                        columnField = mappingClass.getDeclaredField("column");
+                                        columnField.setAccessible(true);
+                                        propertyField = mappingClass.getDeclaredField("property");
+                                        propertyField.setAccessible(true);
+                                    }
+
+                                    String column = String.valueOf(columnField.get(mapping)).toUpperCase();
+                                    ColumnMeta meta = metaMap.get(column.toUpperCase());
+                                    if (meta == null) {
+                                        continue;
+                                    }
+                                    String property = String.valueOf(propertyField.get(mapping));
+                                    meta.setProp(property);
+                                }
+                            }
+                        }
+                    } catch (Throwable e) {
+
+                    }
+                }
+
+                List<ResultMap> list = ms.getResultMaps();
+                if (!list.isEmpty()) {
+
+                    ResultMap resultMap = list.get(0);
+                    Class<?> elemType = resultMap.getType();
+                    for (ColumnMeta meta : metas) {
+                        meta.setElemType(elemType);
+                    }
+
+                    List<ResultMapping> propertyResultMappings = resultMap.getPropertyResultMappings();
+                    for (ResultMapping mapping : propertyResultMappings) {
+                        String column = mapping.getColumn();
+                        String property = mapping.getProperty();
+                        ColumnMeta meta = metaMap.get(column.toUpperCase());
+                        if (meta == null) {
+                            continue;
+                        }
+                        meta.setProp(property);
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        }
+
+
+        return ret;
+
+    }
+
+    public List<ColumnMeta> parseResultSetColumns(ResultSet rs) throws SQLException {
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
 
@@ -116,10 +244,7 @@ public class MybatisResultSetMetaInterceptor implements Interceptor {
             columns.add(meta);
         }
 
-        MybatisHolder.setExecColumnsMeta(columns);
-
-        return invocation.proceed();
-
+        return columns;
     }
 
     public boolean enable(Invocation invocation) {
