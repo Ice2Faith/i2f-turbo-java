@@ -1757,7 +1757,7 @@ public class JdbcResolver {
         return parseResultSet(rs, maxCount, Map.class,
                 columnNameMapper,
                 (ctx) -> {
-            QueryResult ret = new QueryResult();
+                    QueryResult ret = new QueryResult();
                     ret.setColumns(ctx.getColumns());
                     ret.setRows(new LinkedList<>());
                     return ret;
@@ -1779,6 +1779,31 @@ public class JdbcResolver {
         public <E> E getContextValue(String key) {
             return (E) context.get(key);
         }
+    }
+
+    public static <T> List<T> parseResultSet(ResultSet rs, int maxCount, Class<T> beanClass,
+                                             Function<String, String> columnNameMapper,
+                                             BiFunction<List<QueryColumn>, Class<T>, Function<Map<String, Object>, T>> rowConvertorBuilder) throws SQLException {
+        boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
+        String rowConvertorKey = "rowConvertor";
+        return parseResultSet(rs, maxCount, beanClass,
+                columnNameMapper,
+                (ctx) -> {
+                    Function<Map<String, Object>, T> realRowConvertor = isDefaultMapType ? null : rowConvertorBuilder.apply(ctx.getColumns(), beanClass);
+                    Function<Map<String, Object>, T> rowConvertor = (row) -> {
+                        if (isDefaultMapType) {
+                            return (T) row;
+                        }
+                        return realRowConvertor.apply(row);
+                    };
+                    ctx.getContext().put(rowConvertorKey, rowConvertor);
+                    return new LinkedList<T>();
+                }, (col, elem) -> {
+                    col.add(elem);
+                }, (ctx, row) -> {
+                    Function<Map<String, Object>, T> rowConvertor = ctx.getContextValue(rowConvertorKey);
+                    return rowConvertor.apply(row);
+                });
     }
 
     public static <T, R> R parseResultSet(ResultSet rs, int maxCount, Class<T> elemType,
@@ -1900,72 +1925,62 @@ public class JdbcResolver {
         return parseResultSetAsBeanList(rs, beanClass, maxCount, null);
     }
 
+    public static <T> Function<Map<String, Object>, T> createDefaultRowConvertor(List<QueryColumn> columns, Class<T> beanType) {
+        Map<String, Field> resultMap = new LinkedHashMap<>();
+
+        Map<String, QueryColumn> equalMap = new LinkedHashMap<>();
+        Map<String, QueryColumn> equalIgnoreMap = new LinkedHashMap<>();
+        Map<String, QueryColumn> fuzzyMap = new LinkedHashMap<>();
+        for (QueryColumn item : columns) {
+            String name = item.getName();
+            equalMap.putIfAbsent(name, item);
+            equalIgnoreMap.putIfAbsent(name.toLowerCase(), item);
+            fuzzyMap.putIfAbsent(name.toLowerCase().replace("_", ""), item);
+        }
+        Map<Field, Class<?>> fields = ReflectResolver.getFields(beanType);
+        for (Map.Entry<Field, Class<?>> entry : fields.entrySet()) {
+            Field field = entry.getKey();
+            String name = field.getName();
+            QueryColumn column = equalMap.get(name);
+            if (column != null) {
+                resultMap.putIfAbsent(column.getName(), field);
+                continue;
+            }
+            column = equalIgnoreMap.get(name.toLowerCase());
+            if (column != null) {
+                resultMap.putIfAbsent(column.getName(), field);
+                continue;
+            }
+            column = fuzzyMap.get(name.toLowerCase().replace("_", ""));
+            if (column != null) {
+                resultMap.putIfAbsent(column.getName(), field);
+                continue;
+            }
+        }
+
+        Function<Map<String, Object>, T> rowConvertor = (row) -> {
+            Map<String, Object> map = row;
+            if (!resultMap.isEmpty()) {
+                map = new LinkedHashMap<>();
+                for (Map.Entry<String, Field> entry : resultMap.entrySet()) {
+                    map.put(entry.getValue().getName(), row.get(entry.getKey()));
+                }
+            }
+            try {
+                T bean = ReflectResolver.getInstance(beanType);
+                ReflectResolver.map2bean(map, bean);
+                return bean;
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        };
+        return rowConvertor;
+    }
+
     public static <T> List<T> parseResultSetAsBeanList(ResultSet rs, Class<T> beanClass, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
-        boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
-        String rowConvertorKey = "rowConvertor";
         return parseResultSet(rs, maxCount, beanClass,
                 columnNameMapper,
-                (ctx) -> {
-                    Map<String, Field> resultMap = new LinkedHashMap<>();
-                    if (!isDefaultMapType) {
-                        List<QueryColumn> columns = ctx.getColumns();
-                        Map<String, QueryColumn> equalMap = new LinkedHashMap<>();
-                        Map<String, QueryColumn> equalIgnoreMap = new LinkedHashMap<>();
-                        Map<String, QueryColumn> fuzzyMap = new LinkedHashMap<>();
-                        for (QueryColumn item : columns) {
-                            String name = item.getName();
-                            equalMap.putIfAbsent(name, item);
-                            equalIgnoreMap.putIfAbsent(name.toLowerCase(), item);
-                            fuzzyMap.putIfAbsent(name.toLowerCase().replace("_", ""), item);
-                        }
-                        Map<Field, Class<?>> fields = ReflectResolver.getFields(beanClass);
-                        for (Map.Entry<Field, Class<?>> entry : fields.entrySet()) {
-                            Field field = entry.getKey();
-                            String name = field.getName();
-                            QueryColumn column = equalMap.get(name);
-                            if (column != null) {
-                                resultMap.putIfAbsent(column.getName(), field);
-                                continue;
-                            }
-                            column = equalIgnoreMap.get(name.toLowerCase());
-                            if (column != null) {
-                                resultMap.putIfAbsent(column.getName(), field);
-                                continue;
-                            }
-                            column = fuzzyMap.get(name.toLowerCase().replace("_", ""));
-                            if (column != null) {
-                                resultMap.putIfAbsent(column.getName(), field);
-                                continue;
-                            }
-                        }
-                    }
-                    Function<Map<String, Object>, T> rowConvertor = (row) -> {
-                        if (isDefaultMapType) {
-                            return (T) row;
-                        }
-                        Map<String, Object> map = row;
-                        if (!resultMap.isEmpty()) {
-                            map = new LinkedHashMap<>();
-                            for (Map.Entry<String, Field> entry : resultMap.entrySet()) {
-                                map.put(entry.getValue().getName(), row.get(entry.getKey()));
-                            }
-                        }
-                        try {
-                            T bean = ReflectResolver.getInstance(beanClass);
-                            ReflectResolver.map2bean(map, bean);
-                            return bean;
-                        } catch (Exception e) {
-                            throw new IllegalStateException(e.getMessage(), e);
-                        }
-                    };
-                    ctx.getContext().put(rowConvertorKey, rowConvertor);
-                    return new LinkedList<T>();
-                }, (col, elem) -> {
-                    col.add(elem);
-                }, (ctx, row) -> {
-                    Function<Map<String, Object>, T> rowConvertor = ctx.getContextValue(rowConvertorKey);
-                    return rowConvertor.apply(row);
-                });
+                JdbcResolver::createDefaultRowConvertor);
     }
 
 
