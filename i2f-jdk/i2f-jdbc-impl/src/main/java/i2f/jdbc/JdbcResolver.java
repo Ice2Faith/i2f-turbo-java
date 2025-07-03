@@ -279,18 +279,6 @@ public class JdbcResolver {
 
     public static final SQLBiFunction<Connection, String, PreparedStatement> DEFAULT_CURSOR_STATEMENT_BUILDER = JdbcResolver::buildCursorStatement;
 
-    public static final SQLFunction<ResultSet, List<QueryColumn>> DEFAULT_CURSOR_CONTEXT_INITIALIZER = JdbcResolver::parseResultSetColumns;
-
-    public static final SQLBiFunction<List<QueryColumn>, ResultSet, Map<String, Object>> DEFAULT_CURSOR_ROW_CONVERTOR = JdbcResolver::convertResultSetRowAsMap;
-
-
-    public static SQLFunction<ResultSet, List<QueryColumn>> createCursorContextInitializer(Function<String, String> columnNameMapper) {
-        if (columnNameMapper == null) {
-            return JdbcResolver::parseResultSetColumns;
-        }
-        return (rs) -> parseResultSetColumns(rs, columnNameMapper);
-    }
-
     public static <E> JdbcCursor<E> cursor(Connection conn, BindSql bql, Class<E> beanClass) throws SQLException {
         return cursor(conn, bql.getSql(), bql.getArgs(), beanClass);
     }
@@ -320,15 +308,16 @@ public class JdbcResolver {
     }
 
     public static <E> JdbcCursor<E> cursor(Connection conn, String sql, List<Object> args, Class<E> beanClass, Function<String, String> columnNameMapper) throws SQLException {
-        return cursor(conn, sql, args, beanClass, columnNameMapper);
+        return cursor(conn, sql, args, beanClass, columnNameMapper, JdbcResolver::buildCursorStatement);
     }
 
     public static <E> JdbcCursor<E> cursor(Connection conn, String sql, List<Object> args, Class<E> beanClass,
                                            Function<String, String> columnNameMapper,
                                            SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
         return cursor0(conn, sql, args,
-                createResultSetRowBeanConvertor(beanClass),
-                createCursorContextInitializer(columnNameMapper),
+                beanClass,
+                columnNameMapper,
+                JdbcResolver::createDefaultRowConvertor,
                 statementBuilder);
     }
 
@@ -348,22 +337,46 @@ public class JdbcResolver {
     public static JdbcCursor<Map<String, Object>> cursor(Connection conn, String sql, List<Object> args,
                                                          SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
         return cursor0(conn, sql, args,
-                DEFAULT_CURSOR_ROW_CONVERTOR,
-                DEFAULT_CURSOR_CONTEXT_INITIALIZER,
+                (Function<String, String>) null,
+                e -> e,
                 statementBuilder);
     }
 
-    public static <E, CTX> JdbcCursorImpl<E, CTX> cursor0(Connection conn, String sql, List<Object> args,
-                                                          SQLBiFunction<CTX, ResultSet, E> rowConvertor,
-                                                          SQLFunction<ResultSet, CTX> contextInitializer,
-                                                          SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
+    public static <E> JdbcCursorImpl<E> cursor0(Connection conn, String sql, List<Object> args,
+                                                Class<E> beanClass,
+                                                Function<String, String> columnNameMapper,
+                                                SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
+        return cursor0(conn, sql, args, beanClass,
+                columnNameMapper,
+                JdbcResolver::createDefaultRowConvertor,
+                statementBuilder);
+    }
+
+    public static <E> JdbcCursorImpl<E> cursor0(Connection conn, String sql, List<Object> args,
+                                                Class<E> beanClass,
+                                                Function<String, String> columnNameMapper,
+                                                BiFunction<List<QueryColumn>, Class<E>, Function<Map<String, Object>, E>> rowConvertorBuilder,
+                                                SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
         if (statementBuilder == null) {
             statementBuilder = DEFAULT_CURSOR_STATEMENT_BUILDER;
         }
         PreparedStatement stat = statementBuilder.apply(conn, sql);
         fillStatementArgs(stat, args);
         ResultSet rs = stat.executeQuery();
-        return new JdbcCursorImpl<>(stat, rs, rowConvertor, contextInitializer);
+        return new JdbcCursorImpl<>(stat, rs, beanClass, columnNameMapper, rowConvertorBuilder);
+    }
+
+    public static <E> JdbcCursorImpl<E> cursor0(Connection conn, String sql, List<Object> args,
+                                                Function<String, String> columnNameMapper,
+                                                Function<Map<String, Object>, E> rowConvertor,
+                                                SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
+        if (statementBuilder == null) {
+            statementBuilder = DEFAULT_CURSOR_STATEMENT_BUILDER;
+        }
+        PreparedStatement stat = statementBuilder.apply(conn, sql);
+        fillStatementArgs(stat, args);
+        ResultSet rs = stat.executeQuery();
+        return new JdbcCursorImpl<>(stat, rs, columnNameMapper, rowConvertor);
     }
 
     public static List<Map<String, Object>> list(Connection conn, BindSql sql) throws SQLException {
@@ -489,6 +502,10 @@ public class JdbcResolver {
         return query(conn, sql, args, (rs) -> parseResultSetAsBeanList(rs, clazz, maxCount, columnNameMapper));
     }
 
+    public static <T> List<T> list(Connection conn, String sql, List<Object> args, Class<T> clazz, int maxCount, Function<String, String> columnNameMapper, BiFunction<List<QueryColumn>, Class<T>, Function<Map<String, Object>, T>> rowConvertorBuilder) throws SQLException {
+        return query(conn, sql, args, (rs) -> parseResultSet(rs, maxCount, clazz, columnNameMapper, rowConvertorBuilder));
+    }
+
     public static <T> Page<T> page(Connection conn, BindSql sql, Class<T> clazz, ApiOffsetSize page) throws SQLException {
         PageBindSql pageBindSql = BindSqlWrappers.page(conn, sql, page);
         return page(conn, pageBindSql, clazz, null);
@@ -518,6 +535,15 @@ public class JdbcResolver {
         List<T> rows = new ArrayList<>();
         if (total > 0) {
             rows = query(conn, pageBindSql.getPageSql(), (rs) -> parseResultSetAsBeanList(rs, clazz, -1, columnNameMapper));
+        }
+        return Page.of(pageBindSql.getPage(), total, rows);
+    }
+
+    public static <T> Page<T> page(Connection conn, PageBindSql pageBindSql, Class<T> clazz, Function<String, String> columnNameMapper, BiFunction<List<QueryColumn>, Class<T>, Function<Map<String, Object>, T>> rowConvertorBuilder) throws SQLException {
+        Long total = get(conn, pageBindSql.getCountSql(), Long.class);
+        List<T> rows = new ArrayList<>();
+        if (total > 0) {
+            rows = query(conn, pageBindSql.getPageSql(), (rs) -> parseResultSet(rs, -1, clazz, columnNameMapper, rowConvertorBuilder));
         }
         return Page.of(pageBindSql.getPage(), total, rows);
     }
@@ -558,6 +584,17 @@ public class JdbcResolver {
 
     public static <T> T find(Connection conn, String sql, List<Object> args, Class<T> clazz, Function<String, String> columnNameMapper) throws SQLException {
         List<T> list = query(conn, sql, args, (rs) -> parseResultSetAsBeanList(rs, clazz, 2, columnNameMapper));
+        if (!list.isEmpty()) {
+            if (list.size() > 1) {
+                throw new SQLDataException("expect one row return but more than one has got.");
+            }
+            return list.get(0);
+        }
+        return null;
+    }
+
+    public static <T> T find(Connection conn, String sql, List<Object> args, Class<T> clazz, Function<String, String> columnNameMapper, BiFunction<List<QueryColumn>, Class<T>, Function<Map<String, Object>, T>> rowConvertorBuilder) throws SQLException {
+        List<T> list = query(conn, sql, args, (rs) -> parseResultSet(rs, 2, clazz, columnNameMapper, rowConvertorBuilder));
         if (!list.isEmpty()) {
             if (list.size() > 1) {
                 throw new SQLDataException("expect one row return but more than one has got.");
@@ -1916,7 +1953,6 @@ public class JdbcResolver {
         return val;
     }
 
-
     public static <T> List<T> parseResultSetAsBeanList(ResultSet rs, Class<T> beanClass) throws SQLException {
         return parseResultSetAsBeanList(rs, beanClass, -1, null);
     }
@@ -1983,7 +2019,6 @@ public class JdbcResolver {
                 JdbcResolver::createDefaultRowConvertor);
     }
 
-
     public static Map<String, Object> convertResultSetRowAsMap(List<QueryColumn> columns, ResultSet rs) throws SQLException {
         if (columns == null || columns.isEmpty()) {
             columns = parseResultSetColumns(rs);
@@ -1996,27 +2031,6 @@ public class JdbcResolver {
             map.put(col.getName(), val);
         }
         return map;
-    }
-
-
-    public static <E> SQLBiFunction<List<QueryColumn>, ResultSet, E> createResultSetRowBeanConvertor(Class<E> beanClass) {
-        boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
-        if (isDefaultMapType) {
-            return (columns, rs) -> {
-                Map<String, Object> map = convertResultSetRowAsMap(columns, rs);
-                return (E) map;
-            };
-        }
-        return (columns, rs) -> {
-            try {
-                Map<String, Object> map = convertResultSetRowAsMap(columns, rs);
-                E bean = ReflectResolver.getInstance(beanClass);
-                ReflectResolver.map2bean(map, bean);
-                return bean;
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(e.getMessage(), e);
-            }
-        };
     }
 
     public static List<QueryColumn> parseResultSetColumns(ResultSet rs) throws SQLException {
