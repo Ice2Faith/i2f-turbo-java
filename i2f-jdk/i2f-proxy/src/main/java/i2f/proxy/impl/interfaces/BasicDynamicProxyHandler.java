@@ -1,6 +1,6 @@
 package i2f.proxy.impl.interfaces;
 
-import i2f.invokable.IInvokable;
+import i2f.invokable.Invocation;
 import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.proxy.std.IProxyHandler;
 
@@ -13,10 +13,10 @@ import java.lang.reflect.Method;
  */
 public abstract class BasicDynamicProxyHandler implements IProxyHandler {
     @Override
-    public Object before(Object context, Object ivkObj, IInvokable invokable, Object... args) {
-        JdkMethod invoker = (JdkMethod) invokable;
+    public Object before(Object context, Invocation invocation) {
+        JdkMethod invoker = (JdkMethod) invocation.getInvokable();
         Method method = invoker.getMethod();
-        return resolve(context, ivkObj, method, args);
+        return resolve(context, invocation.getTarget(), method, invocation.getArgs());
     }
 
 

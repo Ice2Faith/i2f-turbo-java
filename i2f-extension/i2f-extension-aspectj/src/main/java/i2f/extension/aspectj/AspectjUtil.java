@@ -3,6 +3,7 @@ package i2f.extension.aspectj;
 
 import i2f.extension.aspectj.impl.AspectjInvoker;
 import i2f.invokable.IInvokable;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.proxy.JdkProxyUtil;
 import i2f.proxy.std.IProxyHandler;
 import i2f.proxy.std.IProxyInvocationHandler;
@@ -23,7 +24,14 @@ public class AspectjUtil {
     }
 
     public static ProceedingJoinPoint proxy(ProceedingJoinPoint pjp, IProxyInvocationHandler handler) {
-        ProceedingJoinPoint proxy = JdkProxyUtil.proxy(pjp, (IProxyInvocationHandler) (ivkObj, invokable, args) -> aop(pjp, handler));
+        ProceedingJoinPoint proxy = JdkProxyUtil.proxy(pjp, (IProxyInvocationHandler) (ivkObj, invokable, args) -> {
+            JdkMethod invoker = (JdkMethod) invokable;
+            Method method = invoker.getMethod();
+            if (method.getName().equals("proceed")) {
+                return aop(pjp, handler);
+            }
+            return invokable.invoke(ivkObj, args);
+        });
         return proxy;
     }
 

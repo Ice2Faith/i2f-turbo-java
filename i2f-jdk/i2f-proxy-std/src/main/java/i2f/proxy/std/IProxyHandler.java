@@ -1,7 +1,7 @@
 package i2f.proxy.std;
 
 
-import i2f.invokable.IInvokable;
+import i2f.invokable.Invocation;
 
 /**
  * @author Ice2Faith
@@ -18,12 +18,10 @@ public interface IProxyHandler {
      * 在调用之前Hook
      * 返回值不为null,则表示提前返回，不再执行代理对象的调用
      *
-     * @param ivkObj
-     * @param invokable
-     * @param args
+     * @param invocation
      * @return
      */
-    default Object before(Object context, Object ivkObj, IInvokable invokable, Object... args) {
+    default Object before(Object context, Invocation invocation) {
         return null;
     }
 
@@ -31,13 +29,11 @@ public interface IProxyHandler {
      * 在调用之后Hook，返回值为调用返回后的值
      * 一般情况下，返回值应该和第三个入参retVal一致
      *
-     * @param ivkObj
-     * @param invokable
+     * @param invocation
      * @param retVal
-     * @param args
      * @return
      */
-    default Object after(Object context, Object ivkObj, IInvokable invokable, Object retVal, Object... args) {
+    default Object after(Object context, Invocation invocation, Object retVal) {
         return retVal;
     }
 
@@ -45,13 +41,11 @@ public interface IProxyHandler {
      * 在调用发生异常时Hook，返回值为调用抛出的异常对象
      * 一般情况下，返回值应该和第三个入参ex一致
      *
-     * @param ivkObj
-     * @param invokable
+     * @param invocation
      * @param ex
-     * @param args
      * @return
      */
-    default Throwable except(Object context, Object ivkObj, IInvokable invokable, Throwable ex, Object... args) {
+    default Throwable except(Object context, Invocation invocation, Throwable ex) {
         return ex;
     }
 
@@ -59,12 +53,12 @@ public interface IProxyHandler {
      * 调用完毕之后执行finally块
      * 主要是提供完成的代理流程
      *
-     * @param ivkObj
-     * @param invokable
-     * @param args
+     * @param invocation
+     * @param retVal
+     * @param ex
      * @return
      */
-    default void onFinally(Object context, Object ivkObj, IInvokable invokable, Object... args) {
+    default void onFinally(Object context, Invocation invocation, Object retVal, Throwable ex) {
 
     }
 }

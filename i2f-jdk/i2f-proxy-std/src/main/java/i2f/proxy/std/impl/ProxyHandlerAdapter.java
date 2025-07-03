@@ -1,6 +1,7 @@
 package i2f.proxy.std.impl;
 
 import i2f.invokable.IInvokable;
+import i2f.invokable.Invocation;
 import i2f.proxy.std.IProxyHandler;
 import i2f.proxy.std.IProxyInvocationHandler;
 
@@ -18,19 +19,22 @@ public class ProxyHandlerAdapter implements IProxyInvocationHandler {
     @Override
     public Object invoke(Object ivkObj, IInvokable invokable, Object... args) throws Throwable {
         Object context = handler.initContext();
+        Invocation invocation = new Invocation(ivkObj, invokable, args);
+        Object ret = null;
+        Throwable ex = null;
         try {
-            Object beforeRet = handler.before(context, ivkObj, invokable, args);
-            if (beforeRet != null) {
-                return beforeRet;
+            ret = handler.before(context, invocation);
+            if (ret != null) {
+                return ret;
             }
-            Object ret = invokable.invoke(ivkObj, args);
-            ret = handler.after(context, ivkObj, invokable, ret, args);
+            ret = invokable.invoke(ivkObj, args);
+            ret = handler.after(context, invocation, ret);
             return ret;
         } catch (Exception e) {
-            Throwable ex = handler.except(context, ivkObj, invokable, e, args);
+            ex = handler.except(context, invocation, ex);
             throw ex;
         } finally {
-            handler.onFinally(context, ivkObj, invokable, args);
+            handler.onFinally(context, invocation, ret, ex);
         }
     }
 }

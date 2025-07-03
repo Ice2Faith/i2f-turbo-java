@@ -1,6 +1,7 @@
 package i2f.proxy.std;
 
 import i2f.invokable.IInvokable;
+import i2f.invokable.Invocation;
 import i2f.proxy.std.impl.ProxyHandlerAdapter;
 
 /**
@@ -11,6 +12,10 @@ import i2f.proxy.std.impl.ProxyHandlerAdapter;
 public interface IProxyInvocationHandler {
     static IProxyInvocationHandler of(IProxyHandler handler) {
         return new ProxyHandlerAdapter(handler);
+    }
+
+    default Object invoke(Invocation invocation) throws Throwable {
+        return invoke(invocation.getTarget(), invocation.getInvokable(), invocation.getArgs());
     }
 
     Object invoke(Object ivkObj, IInvokable invokable, Object... args) throws Throwable;
