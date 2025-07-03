@@ -81,12 +81,12 @@
                     重点！配置要织入的 maven 依赖
                     要对第三方依赖进行织入时，必须在此处包含进来，否则不会进行织入
                      -->
-                    <weaveDependencies>
+                    <!--<weaveDependencies>
                         <weaveDependency>
                             <groupId>org.apache.ibatis</groupId>
                             <artifactId>ibatis-sqlmap</artifactId>
                         </weaveDependency>
-                    </weaveDependencies>
+                    </weaveDependencies>-->
                 </configuration>
                 <executions>
                     <execution>
