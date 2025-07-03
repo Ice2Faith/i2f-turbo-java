@@ -36,7 +36,8 @@ public class LogConfiguration {
             "log.properties",
             "resources/log.properties",
             "config/log.properties",
-            "conf/log.properties"
+            "conf/log.properties",
+            "META-INF/log.properties",
     };
 
     public static void config() {

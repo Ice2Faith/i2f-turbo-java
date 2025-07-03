@@ -25,6 +25,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class StdioLogger extends AbsLogger {
     protected String location;
+    protected boolean stdout = true;
 
     public StdioLogger(String location) {
         this.location = location;
@@ -58,7 +59,7 @@ public class StdioLogger extends AbsLogger {
 
     @Override
     public void writeLogData(LogData data) {
-        String str = format(data, true);
+        String str = format(data, stdout);
         if (data.getLevel().level() < LogLevel.INFO.level()) {
             System.err.println(str);
         } else {

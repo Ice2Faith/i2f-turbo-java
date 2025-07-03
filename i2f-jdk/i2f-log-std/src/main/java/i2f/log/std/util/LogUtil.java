@@ -8,6 +8,7 @@ import i2f.log.std.mdc.LogMdcHolder;
 import i2f.lru.LruMap;
 import i2f.trace.ThreadTrace;
 
+import java.lang.reflect.Array;
 import java.util.Date;
 
 /**
@@ -18,16 +19,64 @@ public class LogUtil {
     public static LruMap<String, String> CACHE_LOCATION = new LruMap<>(1024);
 
     public static String formatMsg(String format, Object... args) {
-        try {
-            return String.format(format, args);
-        } catch (Exception e) {
+        int placeHolderCount = 0;
+        if (format != null) {
+            for (int i = 0; i < format.length(); i++) {
+                char ch = format.charAt(i);
+                if (ch == '%') {
+                    placeHolderCount++;
+                }
+            }
+            try {
+                format = String.format(format, args);
+                if (placeHolderCount >= args.length) {
+                    return format;
+                }
+            } catch (Exception e) {
+            }
         }
+
         StringBuilder builder = new StringBuilder();
         builder.append(format);
-        for (Object item : args) {
-            builder.append(", ").append(item);
-        }
+        formatArgs(builder, placeHolderCount, -1, args);
         return builder.toString();
+    }
+
+    public static StringBuilder formatArgs(StringBuilder builder, int startIndex, int endIndex, Object... args) {
+        if (args == null || args.length == 0) {
+            return builder;
+        }
+        if (endIndex < 0) {
+            endIndex = Integer.MAX_VALUE;
+        }
+        if (startIndex < 0) {
+            startIndex = 0;
+        }
+        for (int i = startIndex; i < args.length && i < endIndex; i++) {
+            Object item = args[i];
+            builder.append((i == startIndex) ? "" : ", ")
+                    .append("[").append(i).append("]")
+                    .append("(").append(item == null ? "" : item.getClass().getSimpleName()).append(")");
+            append(builder, item);
+        }
+        return builder;
+    }
+
+    public static StringBuilder append(StringBuilder builder, Object obj) {
+        if (obj == null) {
+            return builder.append(obj);
+        }
+        if (!obj.getClass().isArray()) {
+            return builder.append(obj);
+        }
+        int len = Array.getLength(obj);
+        builder.append("[");
+        for (int i = 0; i < len; i++) {
+            builder.append((i == 0) ? "" : ", ");
+            append(builder, Array.get(obj, i));
+        }
+        builder.append("]");
+        return builder;
     }
 
     public static LogData newLogData(LogLevel level, String location) {
