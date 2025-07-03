@@ -1,6 +1,6 @@
 package i2f.log.writer.impl;
 
-import i2f.log.data.LogData;
+import i2f.log.std.data.LogData;
 import i2f.log.writer.ILogWriter;
 import i2f.uid.SnowflakeLongUid;
 import lombok.Data;

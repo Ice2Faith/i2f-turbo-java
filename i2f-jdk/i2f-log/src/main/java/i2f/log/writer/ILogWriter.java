@@ -1,6 +1,6 @@
 package i2f.log.writer;
 
-import i2f.log.data.LogData;
+import i2f.log.std.data.LogData;
 
 /**
  * @author Ice2Faith

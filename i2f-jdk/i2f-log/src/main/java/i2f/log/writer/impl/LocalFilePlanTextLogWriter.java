@@ -1,7 +1,7 @@
 package i2f.log.writer.impl;
 
 import i2f.clock.SystemClock;
-import i2f.log.enums.LogLevel;
+import i2f.log.std.enums.LogLevel;
 import i2f.log.writer.AbsPlainTextLogWriter;
 import lombok.Data;
 import lombok.NoArgsConstructor;

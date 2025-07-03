@@ -2,8 +2,8 @@ package i2f.log.config;
 
 import i2f.log.decide.ILogDecider;
 import i2f.log.decide.impl.DefaultClassNamePattenLogDecider;
-import i2f.log.enums.LogLevel;
 import i2f.log.holder.LogHolder;
+import i2f.log.std.enums.LogLevel;
 import i2f.log.stdout.StdoutRedirectPrintStream;
 import i2f.log.writer.DefaultBroadcastLogWriter;
 import i2f.log.writer.ILogWriter;

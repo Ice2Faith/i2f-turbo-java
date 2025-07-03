@@ -1,4 +1,4 @@
-package i2f.log.perf;
+package i2f.log.std.perf;
 
 /**
  * @author Ice2Faith

@@ -1,4 +1,4 @@
-package i2f.log.enums;
+package i2f.log.std.enums;
 
 /**
  * @author Ice2Faith

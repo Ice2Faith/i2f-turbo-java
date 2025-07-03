@@ -1,7 +1,7 @@
 package i2f.extension.log.slf4j;
 
-import i2f.log.data.LogData;
-import i2f.log.enums.LogLevel;
+import i2f.log.std.data.LogData;
+import i2f.log.std.enums.LogLevel;
 import i2f.log.writer.ILogWriter;
 import i2f.lru.LruMap;
 import org.slf4j.Logger;

@@ -1,6 +1,6 @@
 package i2f.extension.slf4j.log;
 
-import i2f.log.LoggerFactory;
+import i2f.log.std.LoggerFactory;
 import i2f.lru.LruMap;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;

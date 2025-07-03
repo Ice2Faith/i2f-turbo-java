@@ -1,7 +1,7 @@
 package i2f.log.writer;
 
-import i2f.log.data.LogData;
-import i2f.log.spi.SpiLogWriterProvider;
+import i2f.log.provider.LogWriterProvider;
+import i2f.log.std.data.LogData;
 import i2f.log.writer.impl.StdoutPlanTextLogWriter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -61,9 +61,9 @@ public class DefaultBroadcastLogWriter implements ILogWriter {
     }
 
     public void loadSpiWriters() {
-        ServiceLoader<SpiLogWriterProvider> providers = ServiceLoader.load(SpiLogWriterProvider.class);
-        List<SpiLogWriterProvider> loaded = new ArrayList<>();
-        for (SpiLogWriterProvider provider : providers) {
+        ServiceLoader<LogWriterProvider> providers = ServiceLoader.load(LogWriterProvider.class);
+        List<LogWriterProvider> loaded = new ArrayList<>();
+        for (LogWriterProvider provider : providers) {
             if (provider.test()) {
                 String name = provider.getName();
                 ILogWriter writer = provider.getWriter();
@@ -72,7 +72,7 @@ public class DefaultBroadcastLogWriter implements ILogWriter {
                 loaded.add(provider);
             }
         }
-        for (SpiLogWriterProvider provider : loaded) {
+        for (LogWriterProvider provider : loaded) {
             provider.loaded(this);
         }
     }

@@ -1,8 +1,8 @@
 package i2f.log.writer;
 
-import i2f.log.data.LogData;
-import i2f.log.enums.LogLevel;
 import i2f.log.holder.LogHolder;
+import i2f.log.std.data.LogData;
+import i2f.log.std.enums.LogLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

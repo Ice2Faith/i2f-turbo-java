@@ -159,6 +159,7 @@
         <module>i2f-form</module>
         <module>i2f-database-dialect</module>
         <module>i2f-proxy-std</module>
+        <module>i2f-log-std</module>
 
 
     </modules>

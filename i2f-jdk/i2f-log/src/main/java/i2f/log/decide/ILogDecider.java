@@ -1,7 +1,7 @@
 package i2f.log.decide;
 
-import i2f.log.data.LogData;
-import i2f.log.enums.LogLevel;
+import i2f.log.std.data.LogData;
+import i2f.log.std.enums.LogLevel;
 
 /**
  * @author Ice2Faith

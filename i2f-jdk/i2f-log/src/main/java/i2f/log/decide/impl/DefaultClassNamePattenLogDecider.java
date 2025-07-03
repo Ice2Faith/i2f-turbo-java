@@ -1,7 +1,7 @@
 package i2f.log.decide.impl;
 
 import i2f.log.decide.ILogDecider;
-import i2f.log.enums.LogLevel;
+import i2f.log.std.enums.LogLevel;
 import i2f.match.StringMatcher;
 import lombok.Data;
 import lombok.NoArgsConstructor;

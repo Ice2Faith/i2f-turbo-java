@@ -1,9 +1,9 @@
 package i2f.log.stdout;
 
-import i2f.log.ILogger;
-import i2f.log.LoggerFactory;
-import i2f.log.enums.LogLevel;
-import i2f.log.perf.PerfSupplier;
+import i2f.log.std.ILogger;
+import i2f.log.std.LoggerFactory;
+import i2f.log.std.enums.LogLevel;
+import i2f.log.std.perf.PerfSupplier;
 import i2f.log.writer.impl.StdoutPlanTextLogWriter;
 import i2f.trace.ThreadTrace;
 

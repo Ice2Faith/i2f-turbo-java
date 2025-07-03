@@ -1,6 +1,6 @@
 package i2f.extension.log.slf4j;
 
-import i2f.log.spi.SpiLogWriterProvider;
+import i2f.log.provider.LogWriterProvider;
 import i2f.log.writer.DefaultBroadcastLogWriter;
 import i2f.log.writer.ILogWriter;
 import i2f.log.writer.impl.StdoutPlanTextLogWriter;
@@ -11,7 +11,7 @@ import i2f.log.writer.impl.StdoutPlanTextLogWriter;
  * @date 2024/7/1 14:26
  * @desc
  */
-public class LogSlf4jSpiLogWriterProvider implements SpiLogWriterProvider {
+public class LogSlf4jSpiLogWriterProvider implements LogWriterProvider {
     public static final String CLASS_NAME = "org.slf4j.Logger";
 
     @Override

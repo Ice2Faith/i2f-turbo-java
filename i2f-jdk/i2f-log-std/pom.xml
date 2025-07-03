@@ -9,7 +9,8 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-log</artifactId>
+    <artifactId>i2f-log-std</artifactId>
+
 
     <dependencies>
         <dependency>
@@ -19,22 +20,22 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-log-std</artifactId>
+            <artifactId>i2f-clock-impl</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-uid-impl</artifactId>
+            <artifactId>i2f-trace</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-match</artifactId>
+            <artifactId>i2f-lru-map</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-reflect</artifactId>
+            <artifactId>i2f-console-color</artifactId>
         </dependency>
 
     </dependencies>

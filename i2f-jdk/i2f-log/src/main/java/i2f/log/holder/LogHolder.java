@@ -2,15 +2,13 @@ package i2f.log.holder;
 
 import i2f.log.decide.ILogDecider;
 import i2f.log.decide.impl.DefaultClassNamePattenLogDecider;
-import i2f.log.enums.LogLevel;
 import i2f.log.format.ILogDataFormatter;
 import i2f.log.format.ILogMsgFormatter;
 import i2f.log.format.impl.DefaultLogDataFormatter;
 import i2f.log.format.impl.IndexedPattenLogMsgFormatter;
+import i2f.log.std.enums.LogLevel;
 import i2f.log.writer.DefaultBroadcastLogWriter;
 import i2f.log.writer.ILogWriter;
-
-import java.util.UUID;
 
 /**
  * @author Ice2Faith
@@ -23,8 +21,6 @@ public class LogHolder {
     public static final ILogMsgFormatter DEFAULT_MSG_FORMATTER = new IndexedPattenLogMsgFormatter();
     public static final ILogDataFormatter DEFAULT_DATA_FORMATTER = new DefaultLogDataFormatter();
 
-    public static final ThreadLocal<String> TRACE_ID_HOLDER = new ThreadLocal<>();
-
     public static volatile ILogDecider GLOBAL_DECIDER = DEFAULT_DECIDER;
     public static ThreadLocal<ILogDecider> THREAD_DECIDER = new ThreadLocal<>();
 
@@ -36,31 +32,6 @@ public class LogHolder {
 
     public static volatile ILogDataFormatter GLOBAL_DATA_FORMATTER = DEFAULT_DATA_FORMATTER;
     public static ThreadLocal<ILogDataFormatter> THREAD_DATA_FORMATTER = new ThreadLocal<>();
-
-    public static void setTraceId(String traceId) {
-        TRACE_ID_HOLDER.set(traceId);
-    }
-
-    public static String getTraceId() {
-        return TRACE_ID_HOLDER.get();
-    }
-
-    public static void removeTraceId() {
-        TRACE_ID_HOLDER.remove();
-    }
-
-    public static String newTraceId() {
-        return UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
-    }
-
-    public synchronized static String getOrNewTraceId() {
-        String traceId = getTraceId();
-        if (traceId == null) {
-            traceId = newTraceId();
-            setTraceId(traceId);
-        }
-        return traceId;
-    }
 
     public static void replaceWriter(ILogWriter writer) {
         if (writer != null) {
