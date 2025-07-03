@@ -1,9 +1,10 @@
 package i2f.spring.cglib;
 
-import i2f.proxy.IProxyHandler;
-import i2f.proxy.IProxyProvider;
-import i2f.spring.cglib.core.CglibProxy;
 
+import i2f.proxy.std.IProxyInvocationHandler;
+import i2f.proxy.std.IProxyProvider;
+import i2f.spring.cglib.impl.CglibProxyInvocationHandlerAdapter;
+import org.springframework.cglib.proxy.Enhancer;
 
 /**
  * @author Ice2Faith
@@ -11,26 +12,19 @@ import i2f.spring.cglib.core.CglibProxy;
  * @desc
  */
 public class CglibProxyProvider implements IProxyProvider {
-    private CglibProxy proxy;
+    private Enhancer enhancer;
 
     public CglibProxyProvider() {
-        proxy = new CglibProxy();
+        enhancer = new Enhancer();
     }
 
-    public CglibProxyProvider(CglibProxy proxy) {
-        this.proxy = proxy;
-    }
-
-    public CglibProxyProvider(IEnhancerSetting setting) {
-        proxy = new CglibProxy(setting);
+    public CglibProxyProvider(Enhancer proxy) {
+        this.enhancer = proxy;
     }
 
     @Override
-    public <T> T proxy(Object obj, IProxyHandler handler) {
-        return proxy.getProxy((Class<T>) obj, handler);
+    public <T> T proxy(Object obj, IProxyInvocationHandler handler) {
+        return CglibUtil.proxy((Class<T>) obj, new CglibProxyInvocationHandlerAdapter(handler), enhancer);
     }
 
-    public <T> T proxyNative(Class<T> clazz, IProxyHandler handler) {
-        return proxy(clazz, handler);
-    }
 }

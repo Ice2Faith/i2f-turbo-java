@@ -1,9 +1,16 @@
 package i2f.extension.aspectj;
 
 
-import i2f.extension.aspectj.core.AspectjProxy;
-import i2f.proxy.IProxyHandler;
+import i2f.extension.aspectj.impl.AspectjInvoker;
+import i2f.invokable.IInvokable;
+import i2f.proxy.JdkProxyUtil;
+import i2f.proxy.std.IProxyHandler;
+import i2f.proxy.std.IProxyInvocationHandler;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 /**
  * @author Ice2Faith
@@ -11,12 +18,24 @@ import org.aspectj.lang.ProceedingJoinPoint;
  * @desc
  */
 public class AspectjUtil {
-    public static AspectjProxy proxy(IProxyHandler handler) {
-        return new AspectjProxyProvider().proxyNative(handler);
+    public static ProceedingJoinPoint proxy(ProceedingJoinPoint pjp, IProxyHandler handler) {
+        return proxy(pjp, IProxyInvocationHandler.of(handler));
     }
 
-    public static Object aop(ProceedingJoinPoint pjp, IProxyHandler handler) throws Throwable {
-        AspectjProxy proxy = proxy(handler);
-        return proxy.invoke(pjp);
+    public static ProceedingJoinPoint proxy(ProceedingJoinPoint pjp, IProxyInvocationHandler handler) {
+        ProceedingJoinPoint proxy = JdkProxyUtil.proxy(pjp, (IProxyInvocationHandler) (ivkObj, invokable, args) -> aop(pjp, handler));
+        return proxy;
+    }
+
+    public static Object aop(ProceedingJoinPoint pjp, IProxyInvocationHandler handler) throws Throwable {
+        MethodSignature ms = (MethodSignature) pjp.getSignature();
+        Method method = ms.getMethod();
+        Class clazz = method.getDeclaringClass();
+        Parameter[] params = method.getParameters();
+        Object[] args = pjp.getArgs();
+        Object target = pjp.getTarget();
+
+        IInvokable invokable = new AspectjInvoker(pjp);
+        return handler.invoke(pjp, invokable, args);
     }
 }

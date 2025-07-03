@@ -1,9 +1,9 @@
 package i2f.extension.aspectj;
 
 
-import i2f.extension.aspectj.core.AspectjProxy;
-import i2f.proxy.IProxyHandler;
-import i2f.proxy.IProxyProvider;
+import i2f.proxy.std.IProxyInvocationHandler;
+import i2f.proxy.std.IProxyProvider;
+import org.aspectj.lang.ProceedingJoinPoint;
 
 /**
  * @author Ice2Faith
@@ -11,12 +11,9 @@ import i2f.proxy.IProxyProvider;
  * @desc
  */
 public class AspectjProxyProvider implements IProxyProvider {
-    @Override
-    public <T> T proxy(Object obj, IProxyHandler handler) {
-        return (T) new AspectjProxy(handler);
-    }
 
-    public AspectjProxy proxyNative(IProxyHandler handler) {
-        return proxy(null, handler);
+    @Override
+    public <T> T proxy(Object obj, IProxyInvocationHandler handler) {
+        return (T) AspectjUtil.proxy((ProceedingJoinPoint) obj, handler);
     }
 }

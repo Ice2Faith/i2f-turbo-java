@@ -12,9 +12,10 @@
     <artifactId>i2f-proxy</artifactId>
 
     <dependencies>
+
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-invokable</artifactId>
+            <artifactId>i2f-proxy-std</artifactId>
         </dependency>
     </dependencies>
 
