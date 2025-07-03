@@ -120,11 +120,11 @@
 package i2f.log.test;
 
 import i2f.clock.SystemClock;
-import i2f.log.ILogger;
-import i2f.log.LoggerFactory;
+import i2f.log.std.ILogger;
+import i2f.log.std.LoggerFactory;
 import i2f.log.decide.ILogDecider;
 import i2f.log.decide.impl.DefaultClassNamePattenLogDecider;
-import i2f.log.enums.LogLevel;
+import i2f.log.std.enums.LogLevel;
 import i2f.log.format.impl.StringFormatLogMsgFormatter;
 import i2f.log.holder.LogHolder;
 import i2f.log.stdout.StdoutRedirectPrintStream;

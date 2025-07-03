@@ -1,6 +1,6 @@
 package i2f.extension.slf4j.log;
 
-import i2f.log.ILogger;
+import i2f.log.std.ILogger;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 

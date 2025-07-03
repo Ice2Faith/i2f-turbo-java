@@ -1,6 +1,6 @@
-package i2f.log.data;
+package i2f.log.std.data;
 
-import i2f.log.enums.LogLevel;
+import i2f.log.std.enums.LogLevel;
 import lombok.Data;
 
 import java.util.Date;

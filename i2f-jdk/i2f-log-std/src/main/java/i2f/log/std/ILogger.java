@@ -1,7 +1,7 @@
-package i2f.log;
+package i2f.log.std;
 
-import i2f.log.enums.LogLevel;
-import i2f.log.perf.PerfSupplier;
+import i2f.log.std.enums.LogLevel;
+import i2f.log.std.perf.PerfSupplier;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

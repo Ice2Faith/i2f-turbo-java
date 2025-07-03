@@ -1,6 +1,6 @@
 package i2f.log.config;
 
-import i2f.log.enums.LogLevel;
+import i2f.log.std.enums.LogLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

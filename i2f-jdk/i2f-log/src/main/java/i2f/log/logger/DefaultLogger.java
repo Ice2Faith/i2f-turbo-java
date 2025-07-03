@@ -1,18 +1,15 @@
 package i2f.log.logger;
 
-import i2f.clock.SystemClock;
-import i2f.log.ILogger;
-import i2f.log.data.LogData;
 import i2f.log.decide.ILogDecider;
-import i2f.log.enums.LogLevel;
 import i2f.log.holder.LogHolder;
+import i2f.log.std.data.LogData;
+import i2f.log.std.enums.LogLevel;
+import i2f.log.std.logger.AbsLogger;
 import i2f.log.writer.ILogWriter;
 import i2f.lru.ExpireConcurrentMap;
-import i2f.trace.ThreadTrace;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,8 +19,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Data
 @NoArgsConstructor
-public class DefaultLogger implements ILogger {
-    private String location;
+public class DefaultLogger extends AbsLogger {
+    protected String location;
     private ILogDecider decider;
     private ILogWriter writer;
     private long expireTs = 30 * 1000;
@@ -34,11 +31,6 @@ public class DefaultLogger implements ILogger {
         this.location = location;
         this.decider = decider;
         this.writer = writer;
-    }
-
-    @Override
-    public String getLocation() {
-        return location;
     }
 
     @Override
@@ -53,74 +45,13 @@ public class DefaultLogger implements ILogger {
         return ret;
     }
 
-    public LogData newLogData(LogLevel level) {
-        LogData data = new LogData();
-        data.setLocation(location);
-        data.setLevel(level);
-        data.setDate(new Date(SystemClock.currentTimeMillis()));
-        Thread thread = Thread.currentThread();
-        data.setThreadName(thread.getName());
-        data.setThreadId(thread.getId());
-        if (level.level() >= LogLevel.DEBUG.level()) {
-            StackTraceElement elem = ThreadTrace.beforeTrace(ILogger.class.getName())[0];
-            data.setClassName(elem.getClassName());
-            data.setMethodName(elem.getMethodName());
-            data.setFileName(elem.getFileName());
-            data.setLineNumber(elem.getLineNumber());
-        }
-        data.setTraceId(getTraceId());
-        return data;
-    }
-
+    @Override
     public String formatMsg(String format, Object... args) {
         return LogHolder.getMsgFormatter().format(format, args);
     }
 
     @Override
-    public void setTraceId(String traceId) {
-        LogHolder.setTraceId(traceId);
-    }
-
-    @Override
-    public String getTraceId() {
-        return LogHolder.getTraceId();
-    }
-
-    @Override
-    public void removeTraceId() {
-        LogHolder.removeTraceId();
-    }
-
-    @Override
-    public String newTraceId() {
-        return LogHolder.newTraceId();
-    }
-
-    @Override
-    public String getOrNewTraceId() {
-        return LogHolder.getOrNewTraceId();
-    }
-
-    @Override
-    public void write(Object meta, LogLevel level, String format, Object... args) {
-        if (!decider.enableLevel(level, location)) {
-            return;
-        }
-        LogData data = newLogData(level);
-        data.setMsg(formatMsg(format, args));
-        data.setMeta(meta);
-        writer.write(data);
-    }
-
-    @Override
-    public void write(Object meta, LogLevel level, Throwable ex, String format, Object... args) {
-        if (!decider.enableLevel(level, location)) {
-            return;
-        }
-        LogData data = newLogData(level);
-        data.setMsg(formatMsg(format, args));
-        data.setMeta(meta);
-        data.setEx(ex);
+    public void writeLogData(LogData data) {
         writer.write(data);
     }
 }

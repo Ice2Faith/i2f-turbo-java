@@ -1,16 +1,14 @@
-package i2f.log.spi;
+package i2f.log.std.provider;
 
-import i2f.log.ILogger;
+import i2f.log.std.ILogger;
 
 /**
  * @author Ice2Faith
  * @date 2024/7/1 14:12
  * @desc
  */
-public interface SpiLoggerProvider {
+public interface LoggerProvider {
     String getName();
-
-    boolean test();
 
     ILogger getLogger(String location);
 }

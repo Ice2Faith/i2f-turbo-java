@@ -1,4 +1,4 @@
-package i2f.log.spi;
+package i2f.log.provider;
 
 import i2f.log.writer.DefaultBroadcastLogWriter;
 import i2f.log.writer.ILogWriter;
@@ -8,7 +8,7 @@ import i2f.log.writer.ILogWriter;
  * @date 2024/7/1 14:18
  * @desc
  */
-public interface SpiLogWriterProvider {
+public interface LogWriterProvider {
     String getName();
 
     boolean test();
