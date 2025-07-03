@@ -41,6 +41,44 @@
                     </archive>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.15.0</version>
+                <configuration>
+                    <!-- 解决与 Lombok 的冲突 -->
+                    <forceAjcCompile>true</forceAjcCompile>
+                    <sources/>
+                    <weaveDirectories>
+                        <weaveDirectory>${project.build.directory}/classes</weaveDirectory>
+                    </weaveDirectories>
+                    <!-- JDK版本 -->
+                    <complianceLevel>1.8</complianceLevel>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <!-- 展示织入信息 -->
+                    <showWeaveInfo>true</showWeaveInfo>
+                    <encoding>UTF-8</encoding>
+                    <!--
+                    重点！配置要织入的 maven 依赖
+                    要对第三方依赖进行织入时，必须在此处包含进来，否则不会进行织入
+                     -->
+                    <weaveDependencies>
+                        <weaveDependency>
+                            <groupId>org.apache.ibatis</groupId>
+                            <artifactId>ibatis-sqlmap</artifactId>
+                        </weaveDependency>
+                    </weaveDependencies>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
