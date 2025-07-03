@@ -1,6 +1,7 @@
 package i2f.database.dialect;
 
 import i2f.database.dialect.impl.dialect.*;
+import i2f.database.type.DatabaseType;
 
 import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,7 +29,7 @@ public class DatabaseObject2SqlStringifiers {
         stringifiers.add(SqlServerDatabaseObject2SqlStringifier.INSTANCE);
     }
 
-    public static DatabaseObject2SqlStringifier getStringifier(String databaseType) {
+    public static DatabaseObject2SqlStringifier getStringifier(DatabaseType databaseType) {
         for (DatabaseObject2SqlStringifier item : stringifiers) {
             if (item.support(databaseType)) {
                 return item;
@@ -37,7 +38,7 @@ public class DatabaseObject2SqlStringifiers {
         return DefaultDatabaseObject2SqlStringifier.INSTANCE;
     }
 
-    public static String stringify(Object value, String databaseType) {
+    public static String stringify(Object value, DatabaseType databaseType) {
         DatabaseObject2SqlStringifier stringifier = getStringifier(databaseType);
         return stringifier.stringify(value);
     }
