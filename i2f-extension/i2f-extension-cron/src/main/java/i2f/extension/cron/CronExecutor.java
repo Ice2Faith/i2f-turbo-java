@@ -4,9 +4,6 @@ import com.cronutils.model.Cron;
 import com.cronutils.model.CronType;
 import i2f.thread.NamingThreadFactory;
 
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,32 +29,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * - 提交给执行任务的线程池executePool
  */
 public class CronExecutor {
-    public static void main(String[] args) throws IOException {
-
-        for (int i = 0; i < 1; i++) {
-            testExecutor();
-        }
-
-        System.in.read();
-    }
-
-    public static void testExecutor() {
-        SecureRandom rand = new SecureRandom();
-        CronExecutor executor = new CronExecutor();
-        for (int i = 1; i < 30; i++) {
-            final int taskIter = i;
-            executor.submit(CronType.QUARTZ, "0/" + i + " * * * * ?", () -> {
-                try {
-                    Thread.sleep(rand.nextInt(3000));
-                } catch (Exception e) {
-
-                }
-                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date date = new Date(System.currentTimeMillis());
-                System.out.println("exec" + taskIter + ":" + fmt.format(date));
-            });
-        }
-    }
 
     // 实例自增长ID
     private static volatile AtomicInteger instanceId = new AtomicInteger(0);
