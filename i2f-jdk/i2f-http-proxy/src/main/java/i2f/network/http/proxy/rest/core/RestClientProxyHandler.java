@@ -8,7 +8,7 @@ import i2f.net.http.data.HttpResponse;
 import i2f.net.http.data.MultipartFile;
 import i2f.net.http.interfaces.IHttpProcessor;
 import i2f.network.http.proxy.rest.annotations.*;
-import i2f.proxy.impl.BasicDynamicProxyHandler;
+import i2f.proxy.impl.interfaces.BasicDynamicProxyHandler;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.serialize.std.str.IStringObjectSerializer;

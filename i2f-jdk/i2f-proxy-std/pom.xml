@@ -5,28 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>i2f.turbo</groupId>
-        <artifactId>i2f-extension</artifactId>
+        <artifactId>i2f-jdk</artifactId>
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-extension-cglib</artifactId>
+    <artifactId>i2f-proxy-std</artifactId>
+
 
     <dependencies>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-proxy-std</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
-            <version>3.3.0</version>
-            <scope>provided</scope>
+            <artifactId>i2f-invokable</artifactId>
         </dependency>
     </dependencies>
 
@@ -35,12 +24,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <addMavenDescriptor>true</addMavenDescriptor>
-                    </archive>
-                </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>

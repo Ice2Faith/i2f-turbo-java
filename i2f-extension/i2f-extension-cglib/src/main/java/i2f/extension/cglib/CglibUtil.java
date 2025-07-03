@@ -1,6 +1,10 @@
 package i2f.extension.cglib;
 
-import i2f.proxy.IProxyHandler;
+import i2f.extension.cglib.impl.CglibProxyInvocationHandlerAdapter;
+import i2f.proxy.std.IProxyHandler;
+import i2f.proxy.std.IProxyInvocationHandler;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
 
 /**
  * @author Ice2Faith
@@ -8,7 +12,35 @@ import i2f.proxy.IProxyHandler;
  * @desc
  */
 public class CglibUtil {
+    public static final Enhancer DEFAULT_ENHANCER = new Enhancer();
+
     public static <T> T proxy(Class<T> clazz, IProxyHandler handler) {
-        return new CglibProxyProvider().proxyNative(clazz, handler);
+        return proxy(clazz, handler, null);
+    }
+
+    public static <T> T proxy(Class<T> clazz, IProxyHandler handler, Enhancer enhancer) {
+        return proxy(clazz, IProxyInvocationHandler.of(handler), enhancer);
+    }
+
+    public static <T> T proxy(Class<T> clazz, IProxyInvocationHandler handler) {
+        return proxy(clazz, handler, null);
+    }
+
+    public static <T> T proxy(Class<T> clazz, IProxyInvocationHandler handler, Enhancer enhancer) {
+        return proxy(clazz, new CglibProxyInvocationHandlerAdapter(handler), enhancer);
+    }
+
+    public static <T> T proxy(Class<T> clazz, MethodInterceptor handler) {
+        return proxy(clazz, handler, null);
+    }
+
+    public static <T> T proxy(Class<T> clazz, MethodInterceptor handler, Enhancer enhancer) {
+        if (enhancer == null) {
+            enhancer = DEFAULT_ENHANCER;
+        }
+        enhancer.setUseFactory(true);
+        enhancer.setSuperclass(clazz);
+        enhancer.setCallback(handler);
+        return (T) enhancer.create();
     }
 }

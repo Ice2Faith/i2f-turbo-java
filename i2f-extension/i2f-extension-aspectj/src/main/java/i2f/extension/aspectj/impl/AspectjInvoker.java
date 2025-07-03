@@ -4,8 +4,6 @@ import i2f.invokable.method.impl.jdk.JdkMethod;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 
-import java.lang.reflect.Method;
-
 /**
  * @author Ice2Faith
  * @date 2022/3/26 19:27
@@ -13,7 +11,6 @@ import java.lang.reflect.Method;
  */
 public class AspectjInvoker extends JdkMethod {
     protected ProceedingJoinPoint pjp;
-    protected Method method;
 
     public AspectjInvoker(ProceedingJoinPoint pjp) {
         super(((MethodSignature) pjp.getSignature()).getMethod());
