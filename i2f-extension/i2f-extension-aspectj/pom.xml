@@ -42,6 +42,23 @@
                 </configuration>
             </plugin>
 
+            <!--
+            配置aspectj的注解编译器织入插件
+            真正意义上的aspectj是在编译器通过修改织入类的代码实现的织入
+            实际上就是和lombok原理一样，通过在编译器添加AnnotationProcessor实现注解处理
+            在编译期修改生成的字节码，达到实现切面的目的
+            这种方式，只需要在编译器使用这样的插件完成编译即可，不依赖于运行期
+            也不会出现失效的情况
+            同时，这种情况支持的切面类型更多，更完善
+
+            而不是通常在springboot中使用的aspectj
+            springboot中的aspectj只是使用代理的方式完成的织入，所以才会有 aspectj 失效的情况
+            因为springboot是对配置在ApplicationContext中的Bean创建代理，在代理中进行实现aop
+            因此，如果一个类，即使声明为 @Aspect 切面类，但是，如果没有配置为 spring-bean
+            那么切面就不会生效，这个就是原因
+            这种就是spring-aop的Aspectj方式，是在运行期实现的
+            这种方式，由于是通过代理的方式实现的，因此支持的切面类型相对较少
+            -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>

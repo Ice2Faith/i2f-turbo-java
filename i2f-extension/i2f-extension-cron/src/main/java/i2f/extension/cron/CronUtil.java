@@ -7,7 +7,6 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
 
-import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,14 +25,7 @@ import java.util.List;
  * </dependency>
  */
 public class CronUtil {
-    public static void main(String[] args) {
-        List<Date> list = nextQuartzCronTimes("0 0/7 * * * ?", 10);
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (Date date : list) {
-            String str = fmt.format(date);
-            System.out.println(str);
-        }
-    }
+
 
     public static List<Date> nextUnixCronTimes(String cron, int count) {
         return nextCronTimes(CronType.UNIX, cron, count);
