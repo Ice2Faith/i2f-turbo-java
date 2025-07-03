@@ -47,8 +47,8 @@ public class DollarVariablesLangInjectInjector implements MultiHostInjector {
 
     public static final Map<Class<? extends PsiElement>, Integer> elementTypeLayerMapping = new LinkedHashMap<>() {
         {
-            int topLayer = 99999;
-            int normalLayer = 99999;//100
+            int topLayer = 50000;
+            int normalLayer = 500;//100
             // xml 字符串
             put(XmlText.class, normalLayer);
             put(XmlAttribute.class, normalLayer);

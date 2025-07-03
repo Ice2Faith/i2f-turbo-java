@@ -983,6 +983,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         || "packageName".equalsIgnoreCase(attrName)
                         || "return-type".equalsIgnoreCase(attrName)
                         || "returnType".equalsIgnoreCase(attrName)
+                        || "javaType".equalsIgnoreCase(attrName)
+                        || "typeHandler".equalsIgnoreCase(attrName)
         ) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
@@ -1005,7 +1007,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
                 return;
             }
-        } else if ("jdbc-type".equals(attrName)) {
+        } else if ("jdbc-type".equals(attrName)
+                || "jdbcType".equals(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
