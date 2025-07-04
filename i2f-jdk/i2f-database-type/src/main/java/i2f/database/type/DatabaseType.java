@@ -159,6 +159,11 @@ public enum DatabaseType {
     RedShift("RedShift", "RedShift数据库"),
 
     /**
+     * Trino
+     */
+    Trino("Trino", "Trino分布式协调数据库"),
+
+    /**
      * UNKONWN DB
      */
     OTHER("other", "其他数据库"),
@@ -308,6 +313,8 @@ public enum DatabaseType {
             return DatabaseType.Databricks;
         } else if (url.contains(":redshift:")) {
             return DatabaseType.RedShift;
+        } else if (url.contains(":trino:")) {
+            return DatabaseType.Trino;
         } else {
             //logger.warn("The jdbcUrl is " + jdbcUrl + ", Mybatis Plus Cannot Read Database type or The Database's Not Supported!");
             return DatabaseType.OTHER;

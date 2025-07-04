@@ -100,6 +100,8 @@ public class PageWrappers {
                 return PostgreSqlPageWrapper.INSTANCE;
             case RedShift:
                 return PostgreSqlPageWrapper.INSTANCE;
+            case Trino:
+                return PostgreSqlPageWrapper.INSTANCE;
             default:
                 throw new UnsupportedOperationException("un-support auto page route db type");
         }
