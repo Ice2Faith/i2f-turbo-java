@@ -24,7 +24,6 @@ public class PageWrappers {
         return wrapper(type);
     }
 
-
     public static IPageWrapper wrapper(DatabaseType type) {
         ServiceLoader<IPageWrapperProvider> list = ServiceLoader.load(IPageWrapperProvider.class);
         for (IPageWrapperProvider item : list) {
@@ -48,7 +47,7 @@ public class PageWrappers {
             case GBASE:
                 return MysqlPageWrapper.INSTANCE;
             case OSCAR:
-                return MysqlPageWrapper.INSTANCE;
+                return PostgreSqlPageWrapper.INSTANCE;
             case XU_GU:
                 return MysqlPageWrapper.INSTANCE;
             case CLICK_HOUSE:
@@ -72,13 +71,13 @@ public class PageWrappers {
             case GAUSS:
                 return OraclePageWrapper.INSTANCE;
             case ORACLE_12C:
-                return Oracle12cPageWrapper.INSTANCE;
+                return SqlServerPageWrapper.INSTANCE;
             case DB2:
                 return Db2PageWrapper.INSTANCE;
             case SQL_SERVER:
                 return SqlServerPageWrapper.INSTANCE;
             case FIREBIRD:
-                return FirebirdPageWrapper.INSTANCE;
+                return SqlServerPageWrapper.INSTANCE;
             case HighGo:
                 return PostgreSqlPageWrapper.INSTANCE;
             case Hive:
@@ -87,6 +86,20 @@ public class PageWrappers {
                 return PostgreSqlPageWrapper.INSTANCE;
             case TDengine:
                 return MysqlPageWrapper.INSTANCE;
+            case HerdDB:
+                return MysqlPageWrapper.INSTANCE;
+            case CirroData:
+                return CirroDataPageWrapper.INSTANCE;
+            case IbmAs400:
+                return IbmAs400PageWrapper.INSTANCE;
+            case Informix:
+                return InformixPageWrapper.INSTANCE;
+            case Snowflake:
+                return PostgreSqlPageWrapper.INSTANCE;
+            case Databricks:
+                return PostgreSqlPageWrapper.INSTANCE;
+            case RedShift:
+                return PostgreSqlPageWrapper.INSTANCE;
             default:
                 throw new UnsupportedOperationException("un-support auto page route db type");
         }

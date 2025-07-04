@@ -124,13 +124,52 @@ public enum DatabaseType {
     TDengine("TDengine", "涛思数据库"),
 
     /**
+     * HerdDB
+     */
+    HerdDB("HerdDB", "HerdDB嵌入式分布式数据库"),
+
+    /**
+     * CirroData
+     */
+    CirroData("CirroData", "东方国信数据库"),
+
+    /**
+     * IbmAs400
+     */
+    IbmAs400("IbmAs400", "IBM AS/400数据库"),
+
+    /**
+     * Informix
+     */
+    Informix("Informix", "Informix数据库"),
+
+    /**
+     * Snowflake
+     */
+    Snowflake("Snowflake", "Snowflake数据库"),
+
+    /**
+     * Databricks
+     */
+    Databricks("Databricks", "Databricks数据库"),
+
+    /**
+     * RedShift
+     */
+    RedShift("RedShift", "RedShift数据库"),
+
+    /**
      * UNKONWN DB
      */
     OTHER("other", "其他数据库"),
+
     /**
      * URL参数无法读取或者错误
      */
     ERROR("error", "URL参数读取错误");
+
+    public static final ThreadLocal<DatabaseType> SELECT_DATABASE = new ThreadLocal<>();
+
     /**
      * 数据库名称
      */
@@ -170,7 +209,11 @@ public enum DatabaseType {
     protected static final Map<Connection, DatabaseType> TYPE_MAP = new WeakHashMap<>();
 
     public static DatabaseType typeOfConnection(Connection conn) throws SQLException {
-        DatabaseType type = TYPE_MAP.get(conn);
+        DatabaseType type = SELECT_DATABASE.get();
+        if (type != null) {
+            return type;
+        }
+        type = TYPE_MAP.get(conn);
         if (type != null) {
             return type;
         }
@@ -192,6 +235,10 @@ public enum DatabaseType {
      * @return ignore
      */
     public static DatabaseType typeOfJdbcUrl(String jdbcUrl) {
+        DatabaseType type = SELECT_DATABASE.get();
+        if (type != null) {
+            return type;
+        }
         if (jdbcUrl == null || jdbcUrl.trim().isEmpty()) {
             //"Error: The jdbcUrl is Null, Cannot read database type"
             return DatabaseType.ERROR;
@@ -247,6 +294,20 @@ public enum DatabaseType {
                 || url.contains(":taos-ws:")
                 || url.contains(":taos-rs:")) {
             return DatabaseType.TDengine;
+        } else if (url.contains(":herddb:")) {
+            return DatabaseType.HerdDB;
+        } else if (url.contains(":xcloud:")) {
+            return DatabaseType.CirroData;
+        } else if (url.contains(":as400:")) {
+            return DatabaseType.IbmAs400;
+        } else if (url.contains(":informix-sqli:")) {
+            return DatabaseType.Informix;
+        } else if (url.contains(":snowflake:")) {
+            return DatabaseType.Snowflake;
+        } else if (url.contains(":databricks:")) {
+            return DatabaseType.Databricks;
+        } else if (url.contains(":redshift:")) {
+            return DatabaseType.RedShift;
         } else {
             //logger.warn("The jdbcUrl is " + jdbcUrl + ", Mybatis Plus Cannot Read Database type or The Database's Not Supported!");
             return DatabaseType.OTHER;
