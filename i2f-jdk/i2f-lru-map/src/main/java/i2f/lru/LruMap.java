@@ -50,36 +50,36 @@ public class LruMap<K, V> extends LinkedHashMap<K, V> {
         this.maxSize.set(maxSize);
     }
 
-    public static String windowKey(Object key,Duration window){
-        return key+":wk_"+windowKey(window);
+    public static String windowKey(Object key, Duration window) {
+        return key + ":wk_" + windowKey(window);
     }
 
-    public static String windowKey(Duration window){
+    public static String windowKey(Duration window) {
         long range = window.toMillis();
-        if(range<=0){
-            range=1;
+        if (range <= 0) {
+            range = 1;
         }
         long windowCount = SystemClock.currentTimeMillis() / range;
-        return String.format("%x",windowCount);
+        return String.format("%x", windowCount);
     }
 
     public void setMaxSize(int maxSize) {
         this.maxSize.set(maxSize);
-        if(size()>maxSize){
+        if (size() > maxSize) {
             shrink();
         }
     }
 
-    protected void shrink(){
+    protected void shrink() {
         lock.writeLock().lock();
         try {
-            Map<K,V> map=new LinkedHashMap<>(this);
+            Map<K, V> map = new LinkedHashMap<>(this);
             clear();
-            int max=maxSize.get();
+            int max = maxSize.get();
             for (Map.Entry<K, V> entry : map.entrySet()) {
-                if(max>=0){
-                    put(entry.getKey(),entry.getValue());
-                }else{
+                if (max >= 0) {
+                    put(entry.getKey(), entry.getValue());
+                } else {
                     break;
                 }
                 max--;

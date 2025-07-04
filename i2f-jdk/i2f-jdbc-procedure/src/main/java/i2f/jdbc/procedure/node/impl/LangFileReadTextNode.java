@@ -34,43 +34,43 @@ public class LangFileReadTextNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object obj = executor.attrValue(AttrConsts.FILE, FeatureConsts.VISIT, node, context);
-        URL url=null;
-        File file=null;
-        if(obj==null){
+        URL url = null;
+        File file = null;
+        if (obj == null) {
 
-        }else if(obj instanceof File){
-            file=(File) obj;
-        }else if(obj instanceof URL){
-            url=(URL)obj;
-        }else{
-            String str=String.valueOf(obj);
-            if(str.startsWith(ResourceUtil.CLASSPATH_PREFIX)
-            ||str.startsWith(ResourceUtil.CLASSPATH_MUL_PREFIX)){
+        } else if (obj instanceof File) {
+            file = (File) obj;
+        } else if (obj instanceof URL) {
+            url = (URL) obj;
+        } else {
+            String str = String.valueOf(obj);
+            if (str.startsWith(ResourceUtil.CLASSPATH_PREFIX)
+                    || str.startsWith(ResourceUtil.CLASSPATH_MUL_PREFIX)) {
                 try {
-                    url=ResourceUtil.getResource(str);
+                    url = ResourceUtil.getResource(str);
                 } catch (IOException e) {
 
                 }
             }
-            if(url==null) {
+            if (url == null) {
                 try {
                     url = new URL(str);
                 } catch (Exception e) {
 
                 }
             }
-            file=new File(str);
+            file = new File(str);
         }
         String charset = executor.convertAs(executor.attrValue(AttrConsts.CHARSET, FeatureConsts.STRING, node, context), String.class);
-        if(charset==null || charset.isEmpty()){
-            charset="UTF-8";
+        if (charset == null || charset.isEmpty()) {
+            charset = "UTF-8";
         }
         try {
-            String val= null;
-            if(url!=null){
-                val=StreamUtil.readString(url,charset);
-            }else{
-                val=StreamUtil.readString(file,charset);
+            String val = null;
+            if (url != null) {
+                val = StreamUtil.readString(url, charset);
+            } else {
+                val = StreamUtil.readString(file, charset);
             }
             String result = node.getTagAttrMap().get(AttrConsts.RESULT);
             if (result != null) {
@@ -78,7 +78,7 @@ public class LangFileReadTextNode extends AbstractExecutorNode {
                 executor.visitSet(context, result, res);
             }
         } catch (IOException e) {
-            throw new ThrowSignalException(e.getMessage(),e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 

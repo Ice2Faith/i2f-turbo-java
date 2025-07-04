@@ -25,13 +25,13 @@ public interface TagConsts {
 
     String LANG_SHELL = "lang-shell";
 
-    String LANG_FILE_EXISTS="lang-file-exists";
-    String LANG_FILE_MKDIRS="lang-file-mkdirs";
-    String LANG_FILE_DELETE="lang-file-delete";
-    String LANG_FILE_LIST="lang-file-list";
-    String LANG_FILE_TREE="lang-file-tree";
-    String LANG_FILE_READ_TEXT="lang-file-read-text";
-    String LANG_FILE_WRITE_TEXT="lang-file-write-text";
+    String LANG_FILE_EXISTS = "lang-file-exists";
+    String LANG_FILE_MKDIRS = "lang-file-mkdirs";
+    String LANG_FILE_DELETE = "lang-file-delete";
+    String LANG_FILE_LIST = "lang-file-list";
+    String LANG_FILE_TREE = "lang-file-tree";
+    String LANG_FILE_READ_TEXT = "lang-file-read-text";
+    String LANG_FILE_WRITE_TEXT = "lang-file-write-text";
 
     String LANG_BODY = "lang-body";
 

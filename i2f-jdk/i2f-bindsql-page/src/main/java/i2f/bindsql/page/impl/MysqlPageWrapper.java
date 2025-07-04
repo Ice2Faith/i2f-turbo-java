@@ -13,6 +13,7 @@ import java.util.ArrayList;
  */
 public class MysqlPageWrapper implements IPageWrapper {
     public static final MysqlPageWrapper INSTANCE = new MysqlPageWrapper();
+
     @Override
     public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {

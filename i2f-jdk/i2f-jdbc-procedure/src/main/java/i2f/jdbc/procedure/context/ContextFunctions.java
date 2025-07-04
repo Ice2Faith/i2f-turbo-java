@@ -567,20 +567,20 @@ public class ContextFunctions {
         return v1 != null ? v1 : v2;
     }
 
-    public static Object if_empty(Object v1,Object v2){
-        return is_empty(v1)?v2:v1;
+    public static Object if_empty(Object v1, Object v2) {
+        return is_empty(v1) ? v2 : v1;
     }
 
-    public static Object evl(Object v1,Object v2){
-        return if_empty(v1,v2);
+    public static Object evl(Object v1, Object v2) {
+        return if_empty(v1, v2);
     }
 
-    public static Object if_blank(Object v1,Object v2){
-        return is_blank(v1)?v2:v1;
+    public static Object if_blank(Object v1, Object v2) {
+        return is_blank(v1) ? v2 : v1;
     }
 
-    public static Object bvl(Object v1,Object v2){
-        return if_blank(v1,v2);
+    public static Object bvl(Object v1, Object v2) {
+        return if_blank(v1, v2);
     }
 
     public static Object if2(Object cond, Object trueVal, Object falseVal) {
@@ -1250,39 +1250,39 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
 
-    public static String encode_url(Object obj){
+    public static String encode_url(Object obj) {
         try {
             String str = String.valueOf(obj);
-            return URLEncoder.encode(str,"UTF-8");
+            return URLEncoder.encode(str, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException(e.getMessage(),e);
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
 
-    public static String decode_url(Object obj){
+    public static String decode_url(Object obj) {
         try {
             String str = String.valueOf(obj);
-            return URLDecoder.decode(str,"UTF-8");
+            return URLDecoder.decode(str, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException(e.getMessage(),e);
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
 
-    public static String encode_base64(Object obj){
+    public static String encode_base64(Object obj) {
         try {
             String str = String.valueOf(obj);
             return Base64.getEncoder().encodeToString(str.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException(e.getMessage(),e);
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
 
-    public static String decode_base64(Object obj){
+    public static String decode_base64(Object obj) {
         try {
             String str = String.valueOf(obj);
-            return new String(Base64.getDecoder().decode(str),"UTF-8");
+            return new String(Base64.getDecoder().decode(str), "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException(e.getMessage(),e);
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
 

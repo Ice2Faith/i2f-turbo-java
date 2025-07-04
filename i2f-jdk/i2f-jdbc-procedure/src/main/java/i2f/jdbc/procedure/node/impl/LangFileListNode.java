@@ -32,17 +32,17 @@ public class LangFileListNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object obj = executor.attrValue(AttrConsts.FILE, FeatureConsts.VISIT, node, context);
-        File file=null;
-        if(obj==null){
+        File file = null;
+        if (obj == null) {
 
-        }else if(obj instanceof File){
-            file=(File) obj;
-        }else{
-            file=new File(String.valueOf(obj));
+        } else if (obj instanceof File) {
+            file = (File) obj;
+        } else {
+            file = new File(String.valueOf(obj));
         }
-        List<File> val=new ArrayList<>();
+        List<File> val = new ArrayList<>();
         File[] files = file.listFiles();
-        if(files!=null){
+        if (files != null) {
             val.addAll(Arrays.asList(files));
         }
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);

@@ -16,7 +16,7 @@ public class TinyScriptFile extends PsiFileBase {
 
     @NotNull
     @Override
-    public  FileType getFileType() {
+    public FileType getFileType() {
         return TinyScriptFileType.INSTANCE;
     }
 

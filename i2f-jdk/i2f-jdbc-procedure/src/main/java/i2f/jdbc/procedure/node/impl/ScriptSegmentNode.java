@@ -41,8 +41,8 @@ public class ScriptSegmentNode extends AbstractExecutorNode {
         if (id != null && !id.isEmpty()) {
             ProcedureMeta meta = ProcedureMeta.ofMeta(node);
             executor.getContext().registry(id, meta);
-            Map<String,ProcedureMeta> metas = executor.visitAs(ParamsConsts.GLOBAL_METAS, context);
-            metas.put(id,meta);
+            Map<String, ProcedureMeta> metas = executor.visitAs(ParamsConsts.GLOBAL_METAS, context);
+            metas.put(id, meta);
         }
     }
 

@@ -12,7 +12,7 @@ public interface TinyScriptResolver {
 
     void debugLog(Supplier<Object> supplier);
 
-    void openDebugger(Object context,String tag,String conditionExpression);
+    void openDebugger(Object context, String tag, String conditionExpression);
 
     void setValue(Object context, String name, Object value);
 

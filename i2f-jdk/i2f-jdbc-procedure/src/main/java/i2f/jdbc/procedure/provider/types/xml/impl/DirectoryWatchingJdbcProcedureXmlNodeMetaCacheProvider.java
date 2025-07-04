@@ -29,11 +29,11 @@ import java.util.function.Predicate;
 @NoArgsConstructor
 public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcProcedureXmlNodeMetaCacheProvider implements Runnable {
     protected final CopyOnWriteArraySet<File> dirs = new CopyOnWriteArraySet<>();
-    protected final AtomicBoolean enableScanWhenWatching=new AtomicBoolean(true);
+    protected final AtomicBoolean enableScanWhenWatching = new AtomicBoolean(true);
     protected final ConcurrentHashMap<String, XmlNode> nodeMap = new ConcurrentHashMap<>();
     protected volatile WatchService watcher;
     protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
-    protected volatile Thread loopThread=null;
+    protected volatile Thread loopThread = null;
 
     public DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider(List<String> locations) {
         if (locations == null) {
@@ -91,8 +91,8 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
     public void notifyChange(Map<String, XmlNode> nodeMap) {
         ProcedureMetaProviderChangeEvent event = new ProcedureMetaProviderChangeEvent();
         event.setProvider(this);
-        if(nodeMap==null){
-            nodeMap=new LinkedHashMap<>(this.nodeMap);
+        if (nodeMap == null) {
+            nodeMap = new LinkedHashMap<>(this.nodeMap);
         }
         event.setMetaMap(parseMetaMap(nodeMap));
         if (eventHandler != null) {
@@ -113,7 +113,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
                     continue;
                 }
                 registerAll(Paths.get(dir.getAbsolutePath()));
-                if(enableScanWhenWatching.get()) {
+                if (enableScanWhenWatching.get()) {
                     walkFileTree(dir, (file) -> {
                         handleXmlNodeFile(file, false);
                         return true;
@@ -142,30 +142,30 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
 
     protected void register(Path dir) throws IOException {
 
-            WatchKey key = dir.register(watcher,
-                    StandardWatchEventKinds.ENTRY_CREATE,
-                    StandardWatchEventKinds.ENTRY_DELETE,
-                    StandardWatchEventKinds.ENTRY_MODIFY);
+        WatchKey key = dir.register(watcher,
+                StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_DELETE,
+                StandardWatchEventKinds.ENTRY_MODIFY);
 
-            System.out.println(XProc4jConsts.NAME + " watching directory: " + dir);
+        System.out.println(XProc4jConsts.NAME + " watching directory: " + dir);
 
     }
 
     @Override
     public void run() {
         synchronized (this) {
-            if(this.watcher==null) {
+            if (this.watcher == null) {
                 this.watching();
             }
         }
         this.loopHandleEvents();
     }
 
-    public synchronized void runOnBackground(){
-        if(loopThread!=null){
+    public synchronized void runOnBackground() {
+        if (loopThread != null) {
             return;
         }
-        loopThread=new Thread(this);
+        loopThread = new Thread(this);
         loopThread.setDaemon(true);
         loopThread.setName("jdbc-proc-watcher");
         loopThread.start();
@@ -174,7 +174,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
     // 处理所有事件
     void loopHandleEvents() {
         synchronized (this) {
-            if(this.watcher==null) {
+            if (this.watcher == null) {
                 this.watching();
             }
         }
@@ -195,7 +195,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
 
                 // 解决文件修改时，会通知两次的问题
                 int count = event.count();
-                if(count>1){
+                if (count > 1) {
                     continue;
                 }
 
@@ -214,7 +214,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
 
                 // 处理文件变化
                 if (StandardWatchEventKinds.ENTRY_DELETE != kind) {
-                    handleXmlNodeFile(file,true);
+                    handleXmlNodeFile(file, true);
                 }
             }
 
@@ -225,7 +225,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
         }
     }
 
-    public void handleXmlNodeFile(File file,boolean needNotifyChange) {
+    public void handleXmlNodeFile(File file, boolean needNotifyChange) {
         if (file == null) {
             return;
         }
@@ -244,13 +244,13 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
         Map<String, XmlNode> ret = new HashMap<>();
         try {
             XmlNode node = JdbcProcedureParser.parse(file);
-            if(needNotifyChange) {
+            if (needNotifyChange) {
                 System.out.println(XProc4jConsts.NAME + " watching xml-node file change parsed:" + file.getAbsolutePath());
             }
             String id = node.getTagAttrMap().get(AttrConsts.ID);
             if (id != null) {
                 ret.put(id, node);
-                if(needNotifyChange) {
+                if (needNotifyChange) {
                     System.out.println(XProc4jConsts.NAME + " watching xml-node node:" + id);
                 }
                 Map<String, XmlNode> next = new HashMap<>();
@@ -259,7 +259,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
                     ret.put(entry.getKey(), entry.getValue());
                     if (!entry.getKey().equals(id)) {
                         String childId = id + "." + entry.getKey();
-                        if(needNotifyChange) {
+                        if (needNotifyChange) {
                             System.out.println(XProc4jConsts.NAME + " watching xml-node node-child:" + childId);
                         }
                         ret.put(childId, entry.getValue());
@@ -268,7 +268,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
             }
             if (!ret.isEmpty()) {
                 nodeMap.putAll(ret);
-                if(needNotifyChange) {
+                if (needNotifyChange) {
                     notifyChange(ret);
                 }
             }

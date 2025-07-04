@@ -35,7 +35,7 @@ public interface JdbcProcedureExecutor {
 
     boolean DEFAULT_BEFORE_NEW_CONNECTION = false;
     boolean DEFAULT_AFTER_CLOSE_CONNECTION = true;
-    boolean DEFAULT_CHECKED_TRANSACTION=true;
+    boolean DEFAULT_CHECKED_TRANSACTION = true;
 
     default Reference<?> nop() {
         return Reference.nop();
@@ -68,18 +68,18 @@ public interface JdbcProcedureExecutor {
     }
 
     default ProcedureMeta getMeta(String procedureId) {
-        return getMeta(procedureId,null);
+        return getMeta(procedureId, null);
     }
 
-    default ProcedureMeta getMeta(String procedureId,Map<String,Object> context){
-        if(context!=null){
+    default ProcedureMeta getMeta(String procedureId, Map<String, Object> context) {
+        if (context != null) {
             // resolve segment-script naming, while multiply procedure.xml file has same id
             // avoid segment-script naming fuzzy.
             try {
-                Map<String,Object> global = (Map<String,Object>)context.get(ParamsConsts.GLOBAL);
-                if(global!=null) {
-                    Map<String,ProcedureMeta> metas = (Map<String,ProcedureMeta>)global.get(ParamsConsts.METAS);
-                    if(metas!=null) {
+                Map<String, Object> global = (Map<String, Object>) context.get(ParamsConsts.GLOBAL);
+                if (global != null) {
+                    Map<String, ProcedureMeta> metas = (Map<String, ProcedureMeta>) global.get(ParamsConsts.METAS);
+                    if (metas != null) {
                         ProcedureMeta meta = metas.get(procedureId);
                         if (meta != null) {
                             return meta;
@@ -185,7 +185,7 @@ public interface JdbcProcedureExecutor {
     }
 
     default Map<String, Object> exec(String procedureId, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
-        ProcedureMeta callNode = getMeta(procedureId,params);
+        ProcedureMeta callNode = getMeta(procedureId, params);
         if (callNode == null) {
             throw new NotFoundSignalException("not found node: " + procedureId);
         }
@@ -228,7 +228,7 @@ public interface JdbcProcedureExecutor {
     }
 
     default Map<String, Object> execAsProcedure(String procedureId, Map<String, Object> params, boolean beforeNewConnection, boolean afterCloseConnection) {
-        ProcedureMeta callNode = getMeta(procedureId,params);
+        ProcedureMeta callNode = getMeta(procedureId, params);
         if (callNode == null) {
             throw new NotFoundSignalException("not found node: " + procedureId);
         }
@@ -348,8 +348,8 @@ public interface JdbcProcedureExecutor {
 
     Object evalScript(String lang, String script, Map<String, Object> params);
 
-    default Object evalScriptUiInput(String lang,Map<String,Object> params){
-        return evalScript(lang, DialogBoxes.input("脚本输入框","请输入["+lang+"]脚本",""),params);
+    default Object evalScriptUiInput(String lang, Map<String, Object> params) {
+        return evalScript(lang, DialogBoxes.input("脚本输入框", "请输入[" + lang + "]脚本", ""), params);
     }
 
     void visitSet(Map<String, Object> params, String result, Object value);
@@ -404,22 +404,22 @@ public interface JdbcProcedureExecutor {
 
     void sqlTransBegin(String datasource, int isolation, Map<String, Object> params);
 
-    void sqlTransCommit(String datasource, Map<String, Object> params,boolean checked);
+    void sqlTransCommit(String datasource, Map<String, Object> params, boolean checked);
 
-    default void sqlTransCommit(String datasource, Map<String, Object> params){
-        sqlTransCommit(datasource,params,DEFAULT_CHECKED_TRANSACTION);
+    default void sqlTransCommit(String datasource, Map<String, Object> params) {
+        sqlTransCommit(datasource, params, DEFAULT_CHECKED_TRANSACTION);
     }
 
-    void sqlTransRollback(String datasource, Map<String, Object> params,boolean checked);
+    void sqlTransRollback(String datasource, Map<String, Object> params, boolean checked);
 
-    default void sqlTransRollback(String datasource, Map<String, Object> params){
-        sqlTransRollback(datasource,params,DEFAULT_CHECKED_TRANSACTION);
+    default void sqlTransRollback(String datasource, Map<String, Object> params) {
+        sqlTransRollback(datasource, params, DEFAULT_CHECKED_TRANSACTION);
     }
 
-    void sqlTransNone(String datasource, Map<String, Object> params,boolean checked);
+    void sqlTransNone(String datasource, Map<String, Object> params, boolean checked);
 
-    default void sqlTransNone(String datasource, Map<String, Object> params){
-        sqlTransNone(datasource,params,DEFAULT_CHECKED_TRANSACTION);
+    default void sqlTransNone(String datasource, Map<String, Object> params) {
+        sqlTransNone(datasource, params, DEFAULT_CHECKED_TRANSACTION);
     }
 
 }

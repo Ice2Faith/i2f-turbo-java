@@ -475,10 +475,10 @@ public class MybatisMapperInflater {
         String str = RegexUtil.regexFindAndReplace(sql, "[\\$|#](\\!)?\\{\\s*[^}]+\\s*\\}", (patten) -> {
             boolean isDolar = patten.startsWith("$");
             patten = patten.substring(2, patten.length() - 1);
-            boolean emptyFlag=false;
-            if(patten.startsWith("{")){
-                patten=patten.substring(1);
-                emptyFlag=true;
+            boolean emptyFlag = false;
+            if (patten.startsWith("{")) {
+                patten = patten.substring(1);
+                emptyFlag = true;
             }
             String expression = patten.trim();
             if (isDolar) {
@@ -488,11 +488,11 @@ public class MybatisMapperInflater {
                     args.addAll(bql.getArgs());
                     return bql.getSql();
                 }
-               if(obj==null){
-                   if(emptyFlag){
-                       obj="";
-                   }
-               }
+                if (obj == null) {
+                    if (emptyFlag) {
+                        obj = "";
+                    }
+                }
                 return obj == null ? "" : String.valueOf(obj);
             } else {
                 Object obj = null;
@@ -506,9 +506,9 @@ public class MybatisMapperInflater {
                         args.addAll(bql.getArgs());
                         return bql.getSql();
                     }
-                    if(obj==null){
-                        if(emptyFlag){
-                            obj="";
+                    if (obj == null) {
+                        if (emptyFlag) {
+                            obj = "";
                         }
                     }
                     String handlerName = parameters.get(HANDLER_KEY);
@@ -573,9 +573,9 @@ public class MybatisMapperInflater {
                     args.addAll(bql.getArgs());
                     return bql.getSql();
                 }
-                if(obj==null){
-                    if(emptyFlag){
-                        obj="";
+                if (obj == null) {
+                    if (emptyFlag) {
+                        obj = "";
                     }
                 }
                 args.add(obj);

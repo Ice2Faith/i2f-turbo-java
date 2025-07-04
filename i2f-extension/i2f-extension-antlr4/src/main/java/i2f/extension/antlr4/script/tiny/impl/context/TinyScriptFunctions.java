@@ -24,6 +24,7 @@ public class TinyScriptFunctions {
     public static int rand(int bound) {
         return RANDOM.nextInt(bound);
     }
+
     public static void println(Object... obj) {
         StringBuilder builder = new StringBuilder();
         boolean isFirst = true;

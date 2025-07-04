@@ -2,36 +2,39 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.impl;
 
 import java.util.List;
+
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
+
 import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
+
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptPsiElement;
 import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.*;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.impl.TinyScriptPsiImplUtil;
 
 public class TinyScriptExtractExpressImpl extends TinyScriptPsiElement implements TinyScriptExtractExpress {
 
-  public TinyScriptExtractExpressImpl(@NotNull ASTNode node) {
-    super(node);
-  }
+    public TinyScriptExtractExpressImpl(@NotNull ASTNode node) {
+        super(node);
+    }
 
-  public void accept(@NotNull TinyScriptVisitor visitor) {
-    visitor.visitExtractExpress(this);
-  }
+    public void accept(@NotNull TinyScriptVisitor visitor) {
+        visitor.visitExtractExpress(this);
+    }
 
-  @Override
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof TinyScriptVisitor) accept((TinyScriptVisitor)visitor);
-    else super.accept(visitor);
-  }
+    @Override
+    public void accept(@NotNull PsiElementVisitor visitor) {
+        if (visitor instanceof TinyScriptVisitor) accept((TinyScriptVisitor) visitor);
+        else super.accept(visitor);
+    }
 
-  @Override
-  @Nullable
-  public TinyScriptExtractPairs getExtractPairs() {
-    return findChildByClass(TinyScriptExtractPairs.class);
-  }
+    @Override
+    @Nullable
+    public TinyScriptExtractPairs getExtractPairs() {
+        return findChildByClass(TinyScriptExtractPairs.class);
+    }
 
 }

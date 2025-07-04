@@ -29,7 +29,7 @@ public class SpringContext implements IWritableNamingContext, ApplicationContext
 
     public SpringContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-        this.beanFactory=applicationContext;
+        this.beanFactory = applicationContext;
     }
 
     public SpringContext(ApplicationContext applicationContext, BeanFactory beanFactory) {

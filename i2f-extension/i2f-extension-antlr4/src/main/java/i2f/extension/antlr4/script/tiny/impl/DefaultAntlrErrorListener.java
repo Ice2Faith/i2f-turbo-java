@@ -12,36 +12,36 @@ import java.lang.reflect.Method;
  */
 public class DefaultAntlrErrorListener extends BaseErrorListener {
 
-    public static final DefaultAntlrErrorListener INSTANCE=new DefaultAntlrErrorListener();
+    public static final DefaultAntlrErrorListener INSTANCE = new DefaultAntlrErrorListener();
 
     protected static volatile Object SLF4J_LOGGER;
     protected static volatile Method SLF4J_ERROR_METHOD;
 
     static {
         Class<?> clazz = null;
-        try{
-            clazz=Thread.currentThread().getContextClassLoader().loadClass("org.slf4j.LoggerFactory");
-        }catch(Throwable e){
+        try {
+            clazz = Thread.currentThread().getContextClassLoader().loadClass("org.slf4j.LoggerFactory");
+        } catch (Throwable e) {
 
         }
-        if(clazz==null) {
+        if (clazz == null) {
             try {
                 clazz = Class.forName("org.slf4j.LoggerFactory");
             } catch (Throwable e) {
 
             }
         }
-        if(clazz==null){
-            SLF4J_LOGGER=null;
+        if (clazz == null) {
+            SLF4J_LOGGER = null;
         }
         try {
             Method method = clazz.getMethod("getLogger", Class.class);
-            if(method!=null){
+            if (method != null) {
                 SLF4J_LOGGER = method.invoke(null, DefaultAntlrErrorListener.class);
             }
         } catch (Exception e) {
         }
-        if(SLF4J_LOGGER!=null){
+        if (SLF4J_LOGGER != null) {
             try {
                 Class<?> cls = SLF4J_LOGGER.getClass();
                 SLF4J_ERROR_METHOD = cls.getMethod("error", String.class, Throwable.class);
@@ -54,15 +54,15 @@ public class DefaultAntlrErrorListener extends BaseErrorListener {
 
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        String errorMsg="line " + line + ":" + charPositionInLine + " " + msg;
-        logError(errorMsg,e);
+        String errorMsg = "line " + line + ":" + charPositionInLine + " " + msg;
+        logError(errorMsg, e);
         throw e;
     }
 
-    public void logError(String msg,Throwable e){
-        if(SLF4J_ERROR_METHOD!=null){
+    public void logError(String msg, Throwable e) {
+        if (SLF4J_ERROR_METHOD != null) {
             try {
-                SLF4J_ERROR_METHOD.invoke(SLF4J_LOGGER,msg,e);
+                SLF4J_ERROR_METHOD.invoke(SLF4J_LOGGER, msg, e);
             } catch (Exception ex) {
             }
             return;

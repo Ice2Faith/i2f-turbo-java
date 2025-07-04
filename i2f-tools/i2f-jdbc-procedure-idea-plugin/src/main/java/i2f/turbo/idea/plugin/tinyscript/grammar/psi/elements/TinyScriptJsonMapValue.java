@@ -2,12 +2,13 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
+
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptJsonMapValue extends PsiElement {
 
-  @Nullable
-  TinyScriptJsonPairs getJsonPairs();
+    @Nullable
+    TinyScriptJsonPairs getJsonPairs();
 
 }

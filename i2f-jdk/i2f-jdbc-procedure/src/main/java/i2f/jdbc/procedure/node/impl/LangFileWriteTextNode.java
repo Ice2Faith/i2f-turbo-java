@@ -32,27 +32,27 @@ public class LangFileWriteTextNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object obj = executor.attrValue(AttrConsts.FILE, FeatureConsts.VISIT, node, context);
-        File file=null;
-        if(obj==null){
+        File file = null;
+        if (obj == null) {
 
-        }else if(obj instanceof File){
-            file=(File) obj;
-        }else{
-            String str=String.valueOf(obj);
-            file=new File(str);
+        } else if (obj instanceof File) {
+            file = (File) obj;
+        } else {
+            String str = String.valueOf(obj);
+            file = new File(str);
         }
         String charset = executor.convertAs(executor.attrValue(AttrConsts.CHARSET, FeatureConsts.STRING, node, context), String.class);
-        if(charset==null || charset.isEmpty()){
-            charset="UTF-8";
+        if (charset == null || charset.isEmpty()) {
+            charset = "UTF-8";
         }
-        String content=executor.convertAs(executor.attrValue(AttrConsts.CONTENT,FeatureConsts.VISIT,node,context),String.class);
-        if(content==null){
-            content=node.getTextBody();
+        String content = executor.convertAs(executor.attrValue(AttrConsts.CONTENT, FeatureConsts.VISIT, node, context), String.class);
+        if (content == null) {
+            content = node.getTextBody();
         }
         try {
-            StreamUtil.writeString(content,file);
+            StreamUtil.writeString(content, file);
         } catch (IOException e) {
-            throw new ThrowSignalException(e.getMessage(),e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 

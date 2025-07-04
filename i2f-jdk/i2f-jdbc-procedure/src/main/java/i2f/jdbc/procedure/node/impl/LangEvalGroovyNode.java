@@ -33,7 +33,7 @@ public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScri
         System.out.println(obj);
     }
 
-    public static String getFullSourceCode(String script){
+    public static String getFullSourceCode(String script) {
         return new StringBuilder()
                 .append(LangEvalJavaNode.EVAL_JAVA_IMPORTS).append("\n")
                 .append("def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable {").append("\n")

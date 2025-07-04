@@ -7,13 +7,14 @@ import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptControlExceptio
  * @date 2025/2/25 9:01
  */
 public class TinyScriptReturnException extends TinyScriptControlException {
-    protected boolean hasRetValue=false;
+    protected boolean hasRetValue = false;
     protected Object retValue;
+
     public TinyScriptReturnException() {
     }
 
     public TinyScriptReturnException(Object retValue) {
-        this.hasRetValue=true;
+        this.hasRetValue = true;
         this.retValue = retValue;
     }
 
@@ -37,7 +38,7 @@ public class TinyScriptReturnException extends TinyScriptControlException {
         return hasRetValue;
     }
 
-    public Object getRetValue(){
+    public Object getRetValue() {
         return this.retValue;
     }
 }

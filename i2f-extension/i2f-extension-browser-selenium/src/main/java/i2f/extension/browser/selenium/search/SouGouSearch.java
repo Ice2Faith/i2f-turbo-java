@@ -59,7 +59,7 @@ public class SouGouSearch {
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, true, driverPath);
 
-        if(true) {
+        if (true) {
             driver.get("https://www.sogou.com/");
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
@@ -102,7 +102,7 @@ public class SouGouSearch {
                 }
 
                 try {
-                    if(!Objects.equals(driver.getCurrentUrl(),entry.getKey().getUrl())) {
+                    if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
                         driver.navigate().to(entry.getKey().getUrl());
                     }
                 } catch (Exception e) {
@@ -133,10 +133,10 @@ public class SouGouSearch {
                         String text = item.getText();
                         System.out.println("www-response:\n" + text);
                         List<WebElement> titleElems = item.findElements(By.cssSelector(".vr-title"));
-                        if(titleElems==null || titleElems.isEmpty()){
+                        if (titleElems == null || titleElems.isEmpty()) {
                             continue;
                         }
-                        WebElement titleElem=titleElems.get(0);
+                        WebElement titleElem = titleElems.get(0);
                         if (titleElem == null) {
                             continue;
                         }
@@ -170,7 +170,7 @@ public class SouGouSearch {
                     int maxPage = 5;
                     List<WebElement> pageElems = driver.findElements(By.cssSelector("#pagebar_container a"));
                     for (int i = 0; i < pageElems.size(); i++) {
-                        if ( i == pageElems.size() - 1) {
+                        if (i == pageElems.size() - 1) {
                             continue;
                         }
                         WebElement page = pageElems.get(i);

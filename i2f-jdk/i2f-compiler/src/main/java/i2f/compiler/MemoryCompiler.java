@@ -182,8 +182,8 @@ public class MemoryCompiler {
     }
 
     public static Class<?> findCompileClass(String javaSourceCode, String javaFileName, String fullClassName) throws Exception {
-        if(javaSourceCode!=null){
-            javaSourceCode=javaSourceCode.trim();
+        if (javaSourceCode != null) {
+            javaSourceCode = javaSourceCode.trim();
         }
         String key = fullClassName + "##" + javaFileName + "##" + javaSourceCode;
         Class<?> set = CACHE_FIND_COMPILE_CLASS.get(key);

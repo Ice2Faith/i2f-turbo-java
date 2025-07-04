@@ -16,7 +16,7 @@ import i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes;
 import org.jetbrains.annotations.NotNull;
 
 public class TinyScriptParserDefinition implements ParserDefinition {
-    public static final IFileElementType FILE=new IFileElementType(TinyScriptLanguage.INSTANCE);
+    public static final IFileElementType FILE = new IFileElementType(TinyScriptLanguage.INSTANCE);
 
     @Override
     public @NotNull Lexer createLexer(Project project) {

@@ -26,13 +26,13 @@ public class JdbcScriptRunner {
     protected boolean removeCrChar = false;
     protected boolean escapeProcessing = true;
     protected String delimiter = DEFAULT_DELIMITER;
-    protected boolean fullLineDelimiter=false;
+    protected boolean fullLineDelimiter = false;
 
     public JdbcScriptRunner(Connection connection) {
         this.connection = connection;
     }
 
-    public void runScript(File file) throws IOException{
+    public void runScript(File file) throws IOException {
         runScript(new FileInputStream(file));
     }
 
@@ -40,15 +40,15 @@ public class JdbcScriptRunner {
         runScript(url.openStream());
     }
 
-    public void runScript(InputStream is) throws IOException{
-        runScript(is,"UTF-8");
+    public void runScript(InputStream is) throws IOException {
+        runScript(is, "UTF-8");
     }
 
-    public void runScript(InputStream is,String charset) throws IOException {
-        runScript(new InputStreamReader(is,charset));
+    public void runScript(InputStream is, String charset) throws IOException {
+        runScript(new InputStreamReader(is, charset));
     }
 
-    public void runScript(String str){
+    public void runScript(String str) {
         runScript(new StringReader(str));
     }
 
@@ -92,9 +92,9 @@ public class JdbcScriptRunner {
             this.commitConnection();
         } catch (Exception e) {
             String errMsg = "Error executing: " + script + ".  Cause: " + e.getMessage();
-            this.printlnError(errMsg,e);
+            this.printlnError(errMsg, e);
             throw new IllegalStateException(errMsg, e);
-        }finally {
+        } finally {
             try {
                 reader.close();
             } catch (IOException e) {
@@ -119,9 +119,9 @@ public class JdbcScriptRunner {
             this.checkForMissingLineTerminator(command);
         } catch (Exception e) {
             String errMsg = "Error executing: " + command + ".  Cause: " + e.getMessage();
-            this.printlnError(errMsg,e);
+            this.printlnError(errMsg, e);
             throw new IllegalStateException(errMsg, e);
-        }finally {
+        } finally {
             try {
                 reader.close();
             } catch (IOException e) {
@@ -234,7 +234,7 @@ public class JdbcScriptRunner {
                 }
 
                 String message = "Error executing: " + command + ".  Cause: " + e.getMessage();
-                this.printlnError(message,e);
+                this.printlnError(message, e);
             }
         } catch (Throwable e) {
             if (statement != null) {
@@ -269,14 +269,14 @@ public class JdbcScriptRunner {
             return;
         }
         try {
-            ResultSet rs=null;
+            ResultSet rs = null;
 
             try {
                 rs = statement.getResultSet();
                 ResultSetMetaData metaData = rs.getMetaData();
                 int columnCount = metaData.getColumnCount();
 
-                StringBuilder builder=new StringBuilder();
+                StringBuilder builder = new StringBuilder();
                 for (int i = 0; i < columnCount; i++) {
                     String value = metaData.getColumnLabel(i + 1);
                     builder.append(value).append("\t");
@@ -284,7 +284,7 @@ public class JdbcScriptRunner {
                 builder.append("\n");
                 this.print(builder.toString());
 
-                while(rs.next()){
+                while (rs.next()) {
                     builder.setLength(0);
                     for (int i = 0; i < columnCount; ++i) {
                         String value = rs.getString(i + 1);
@@ -303,14 +303,14 @@ public class JdbcScriptRunner {
                 }
 
                 throw e;
-            }finally {
+            } finally {
                 if (rs != null) {
                     rs.close();
                 }
             }
 
         } catch (SQLException e) {
-            this.printlnError("Error printing results: " + e.getMessage(),e);
+            this.printlnError("Error printing results: " + e.getMessage(), e);
         }
 
 
@@ -320,9 +320,9 @@ public class JdbcScriptRunner {
         System.out.println(o);
     }
 
-    protected void printlnError(Object o,Throwable e) {
+    protected void printlnError(Object o, Throwable e) {
         System.err.println(o);
-        if(e!=null){
+        if (e != null) {
             e.printStackTrace(System.err);
         }
     }

@@ -8,7 +8,8 @@ import i2f.extension.velocity.stringify.Stringifier;
  * @date 2025/4/2 8:52
  */
 public class DefaultStringifier implements Stringifier {
-    public static final DefaultStringifier INSTANCE=new DefaultStringifier();
+    public static final DefaultStringifier INSTANCE = new DefaultStringifier();
+
     @Override
     public boolean support(Object obj) {
         return true;
@@ -16,6 +17,6 @@ public class DefaultStringifier implements Stringifier {
 
     @Override
     public String stringify(Object obj) {
-        return ObjectConvertor.stringify(obj,"null");
+        return ObjectConvertor.stringify(obj, "null");
     }
 }

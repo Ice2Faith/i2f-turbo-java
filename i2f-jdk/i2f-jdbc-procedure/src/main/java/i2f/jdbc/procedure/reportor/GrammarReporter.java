@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.reportor;
 
+import groovy.lang.GroovyShell;
 import i2f.compiler.MemoryCompiler;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.ognl.OgnlUtil;
@@ -11,7 +12,6 @@ import i2f.jdbc.procedure.node.impl.LangEvalJavaNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.lru.LruList;
 import i2f.match.regex.RegexPattens;
-import groovy.lang.GroovyShell;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
@@ -97,7 +97,7 @@ public class GrammarReporter {
         }
         LruList<ExecutorNode> nodes = executor.getNodes();
         ExecutorNode executorNode = nodes.touchFirst(e -> e.support(node));
-        if(executorNode!=null){
+        if (executorNode != null) {
             try {
                 executorNode.reportGrammar(node, (msg) -> {
                     if (reportCount != null) {
@@ -238,7 +238,7 @@ public class GrammarReporter {
             }
         }
 
-        if(!TagConsts.SCRIPT_SEGMENT.equals(node.getTagName())) {
+        if (!TagConsts.SCRIPT_SEGMENT.equals(node.getTagName())) {
             int latchSize = node.getTagAttrMap().size();
             CountDownLatch latch = new CountDownLatch(latchSize);
             for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
@@ -335,11 +335,11 @@ public class GrammarReporter {
                 }
             }
         }
-        while(!parenStack.isEmpty()){
+        while (!parenStack.isEmpty()) {
             char pop = parenStack.pop();
             warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + (-1) + " error: sql maybe missing right parent , left is: " + pop);
         }
-        while(!strStack.isEmpty()){
+        while (!strStack.isEmpty()) {
             char pop = strStack.pop();
             warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " char at:" + (-1) + " error: sql maybe missing right str enclosed , left is: " + pop);
         }

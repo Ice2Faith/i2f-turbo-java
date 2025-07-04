@@ -400,7 +400,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
             LruList<ExecutorNode> nodeList = getNodes();
             ExecutorNode execNode = nodeList.touchFirst(e -> e.support(vNode));
-            if(execNode!=null){
+            if (execNode != null) {
                 execXmlNodeByExecutorNode(execNode, vNode, vParams, vBeforeNewConnection, vAfterCloseConnection);
                 return;
             }
@@ -524,7 +524,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             LruList<ExecutorNode> nodeList = getNodes();
             ExecutorNode item = nodeList.touchFirst(e -> e instanceof ProcedureNode);
-            if(item!=null){
+            if (item != null) {
                 return (ProcedureNode) item;
             }
             return ProcedureNode.INSTANCE;
@@ -556,9 +556,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.put(ParamsConsts.CONTEXT, getNamingContext());
         ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
 
-        Map<String,Object> global=new HashMap<>();
-        global.put(ParamsConsts.METAS,new HashMap<>());
-        ret.put(ParamsConsts.GLOBAL,global);
+        Map<String, Object> global = new HashMap<>();
+        global.put(ParamsConsts.METAS, new HashMap<>());
+        ret.put(ParamsConsts.GLOBAL, global);
 
         Map<String, Object> trace = new HashMap<>();
         trace.put(ParamsConsts.STACK, new Stack<>());
@@ -876,7 +876,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             return value;
         }
         FeatureFunction featureFunction = featuresMap.get(feature);
-        if(featureFunction!=null){
+        if (featureFunction != null) {
             return featureFunction.feature(value, node, context);
         } else {
             try {

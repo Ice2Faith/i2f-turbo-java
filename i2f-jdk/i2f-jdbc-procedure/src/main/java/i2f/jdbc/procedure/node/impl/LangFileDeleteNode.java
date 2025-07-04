@@ -29,15 +29,15 @@ public class LangFileDeleteNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object obj = executor.attrValue(AttrConsts.FILE, FeatureConsts.VISIT, node, context);
-        File file=null;
-        if(obj==null){
+        File file = null;
+        if (obj == null) {
 
-        }else if(obj instanceof File){
-            file=(File) obj;
-        }else{
-            file=new File(String.valueOf(obj));
+        } else if (obj instanceof File) {
+            file = (File) obj;
+        } else {
+            file = new File(String.valueOf(obj));
         }
-        boolean val=true;
+        boolean val = true;
         deleteFile(file);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {
@@ -46,16 +46,16 @@ public class LangFileDeleteNode extends AbstractExecutorNode {
         }
     }
 
-    public static void deleteFile(File file){
-        if(file==null){
+    public static void deleteFile(File file) {
+        if (file == null) {
             return;
         }
-        if(!file.exists()){
+        if (!file.exists()) {
             return;
         }
-        if(file.isDirectory()){
+        if (file.isDirectory()) {
             File[] files = file.listFiles();
-            if(files!=null){
+            if (files != null) {
                 for (File item : files) {
                     deleteFile(item);
                 }

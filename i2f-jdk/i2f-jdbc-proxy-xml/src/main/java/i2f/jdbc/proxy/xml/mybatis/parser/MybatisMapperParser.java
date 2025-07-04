@@ -22,10 +22,10 @@ public class MybatisMapperParser {
     };
     public static final Set<String> XML_ELEMENT_TAG_NAME_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(XML_ELEMENT_TAG_NAME)));
 
-    public static final String[] SCRIPT_ELEMENT_TAG_NAME={
-        "if","dialect","choose","when","otherwise",
-            "dialect-choose","dialect-when","dialect-otherwise",
-            "foreach","trim","set","where","include"
+    public static final String[] SCRIPT_ELEMENT_TAG_NAME = {
+            "if", "dialect", "choose", "when", "otherwise",
+            "dialect-choose", "dialect-when", "dialect-otherwise",
+            "foreach", "trim", "set", "where", "include"
     };
     public static final Set<String> SCRIPT_ELEMENT_TAG_NAME_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(SCRIPT_ELEMENT_TAG_NAME)));
 
@@ -192,19 +192,19 @@ public class MybatisMapperParser {
     }
 
     public static MybatisMapperNode parseScriptNode(String script) throws Exception {
-        Document document =null;
-        try{
+        Document document = null;
+        try {
             StringBuilder builder = new StringBuilder();
             builder.append("<script>");
             builder.append(resolveEscapeXml(script));
             builder.append("</script>");
-            document= XmlUtil.parseXml(builder.toString());
-        }catch (Throwable e){
+            document = XmlUtil.parseXml(builder.toString());
+        } catch (Throwable e) {
             StringBuilder builder = new StringBuilder();
             builder.append("<script>");
             builder.append(script);
             builder.append("</script>");
-            document= XmlUtil.parseXml(builder.toString());
+            document = XmlUtil.parseXml(builder.toString());
         }
         Node node = XmlUtil.getRootNode(document);
         return parseSqlNode(node);

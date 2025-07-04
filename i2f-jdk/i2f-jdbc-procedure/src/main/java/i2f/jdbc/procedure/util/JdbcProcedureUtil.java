@@ -14,7 +14,7 @@ public class JdbcProcedureUtil {
     public static final String ABS_EXEC_NODE_CLASS_NAME = AbstractExecutorNode.class.getName();
     public static final String BASIC_EXECUTOR_CLASS_NAME = BasicJdbcProcedureExecutor.class.getName();
 
-    public static <T extends Throwable> T purifyStackTrace(T re,boolean deep) {
+    public static <T extends Throwable> T purifyStackTrace(T re, boolean deep) {
         if (re == null) {
             return re;
         }
@@ -29,10 +29,10 @@ public class JdbcProcedureUtil {
                 }).collect(Collectors.toList())
                 .toArray(new StackTraceElement[0]);
         re.setStackTrace(arr);
-        if(deep){
+        if (deep) {
             Throwable cause = re.getCause();
-            if(cause!=null){
-                purifyStackTrace(cause,deep);
+            if (cause != null) {
+                purifyStackTrace(cause, deep);
             }
         }
         return re;

@@ -74,8 +74,8 @@ public class TestTinyScript {
         return str.matches(regex);
     }
 
-    public static void testImpl(){
-        String formula=getFormula();
+    public static void testImpl() {
+        String formula = getFormula();
 
         Map<String, Object> context = new HashMap<>();
         context.put("str", "1,2,3 4-5-6  7  8  9");
@@ -84,8 +84,8 @@ public class TestTinyScript {
         System.out.println(context);
     }
 
-    public static void testRaw(){
-        String formula=getFormula();
+    public static void testRaw() {
+        String formula = getFormula();
         CommonTokenStream tokens = TinyScript.parseTokens(formula);
         TinyScriptParser parser = new TinyScriptParser(tokens);
         TinyScriptParser.ScriptContext tree = parser.script();
@@ -98,9 +98,9 @@ public class TestTinyScript {
         System.out.println(context);
     }
 
-    public static String getFormula(){
+    public static String getFormula() {
         String formula = "num=1+1.125;num2=${num}+10L;tmp=new String(\"@@@\");str=${str}+1;sadd=${str};svl=String.valueOf(1L);slen=${str}.length();srptlen=${str}.repeat(2).length();\n";
-        formula+="complex=[{\n" +
+        formula += "complex=[{\n" +
                 " username: \"123\",\n" +
                 " roles: [\"admin\",\"log\"],\n" +
                 " status: true,\n" +
@@ -109,10 +109,10 @@ public class TestTinyScript {
                 " len: String.length(),\n" +
                 " token: null\n" +
                 "}];\n";
-        formula+="streq=${str}==${sadd};\n";
-        formula+="strneq=${str}==${tmp};\n";
-        formula+="numeeq=${num}>=${slen};\n";
-        formula+="\n" +
+        formula += "streq=${str}==${sadd};\n";
+        formula += "strneq=${str}==${tmp};\n";
+        formula += "numeeq=${num}>=${slen};\n";
+        formula += "\n" +
                 "if(${num}>4){\n" +
                 "    ok=3;\n" +
                 "}else if(${num}>3){\n" +

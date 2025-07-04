@@ -145,7 +145,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     public void logInfo(Supplier<Object> supplier, Throwable e) {
         String location = traceLocation();
         if (e != null) {
-            JdbcProcedureUtil.purifyStackTrace(e,true);
+            JdbcProcedureUtil.purifyStackTrace(e, true);
             log.info("near " + location + ", msg: " + supplier.get(), e);
         } else {
             log.info("near " + location + ", msg: " + supplier.get());
@@ -156,7 +156,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     public void logWarn(Supplier<Object> supplier, Throwable e) {
         String location = traceLocation();
         if (e != null) {
-            JdbcProcedureUtil.purifyStackTrace(e,true);
+            JdbcProcedureUtil.purifyStackTrace(e, true);
             log.warn("near " + location + ", msg: " + supplier.get(), e);
         } else {
             log.warn("near " + location + ", msg: " + supplier.get());
@@ -167,7 +167,7 @@ public class SpringContextJdbcProcedureExecutor extends DefaultJdbcProcedureExec
     public void logError(Supplier<Object> supplier, Throwable e) {
         String location = traceLocation();
         if (e != null) {
-            JdbcProcedureUtil.purifyStackTrace(e,true);
+            JdbcProcedureUtil.purifyStackTrace(e, true);
             log.error("near " + location + ", msg: " + supplier.get(), e);
         } else {
             log.error("near " + location + ", msg: " + supplier.get());

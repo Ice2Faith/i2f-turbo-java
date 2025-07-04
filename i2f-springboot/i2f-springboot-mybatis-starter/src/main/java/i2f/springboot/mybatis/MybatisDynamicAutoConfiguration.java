@@ -17,15 +17,15 @@ import org.springframework.context.annotation.Bean;
 public class MybatisDynamicAutoConfiguration {
 
     @Value("${i2f.mybatis.interceptor.record-sql.enable:true}")
-    protected boolean enablePrintRecordSql=false;
+    protected boolean enablePrintRecordSql = false;
 
     @ConditionalOnExpression("${i2f.mybatis.interceptor.record-sql.enable:true}")
     @Bean
-    public MybatisRecordSqlInterceptor mybatisRecordSqlInterceptor(){
+    public MybatisRecordSqlInterceptor mybatisRecordSqlInterceptor() {
         MybatisRecordSqlInterceptor ret = new MybatisRecordSqlInterceptor();
-        Logger logger= LoggerFactory.getLogger(ret.getClass());
-        ret.setInfoLogger(e->logger.info(String.valueOf(e)));
-        ret.setErrorLogger(e->logger.error(String.valueOf(e)));
+        Logger logger = LoggerFactory.getLogger(ret.getClass());
+        ret.setInfoLogger(e -> logger.info(String.valueOf(e)));
+        ret.setErrorLogger(e -> logger.error(String.valueOf(e)));
         ret.setEnablePrintSql(enablePrintRecordSql);
         return ret;
     }

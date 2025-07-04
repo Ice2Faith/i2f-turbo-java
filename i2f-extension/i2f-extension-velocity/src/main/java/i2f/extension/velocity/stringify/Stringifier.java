@@ -6,5 +6,6 @@ package i2f.extension.velocity.stringify;
  */
 public interface Stringifier {
     boolean support(Object obj);
+
     String stringify(Object obj);
 }

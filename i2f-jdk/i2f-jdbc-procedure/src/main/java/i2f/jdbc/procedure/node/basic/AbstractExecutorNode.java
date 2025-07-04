@@ -44,21 +44,24 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             walkTree(item, consumer);
         }
     }
+
     public static String getNodeLocation(XmlNode node) {
-        return getNodeLocation(node,null);
+        return getNodeLocation(node, null);
     }
-    public static String getNodeLocation(XmlNode node,Integer lineNumber) {
-        return XmlNode.getNodeLocation(node,lineNumber);
+
+    public static String getNodeLocation(XmlNode node, Integer lineNumber) {
+        return XmlNode.getNodeLocation(node, lineNumber);
     }
 
     public static String getTrackingComment(XmlNode node) {
-        return getTrackingComment(node,null);
+        return getTrackingComment(node, null);
     }
-    public static String getTrackingComment(XmlNode node,Integer lineNumber) {
+
+    public static String getTrackingComment(XmlNode node, Integer lineNumber) {
         if (node == null) {
             return "";
         }
-        return " /* tracking at " + getNodeLocation(node,lineNumber) + " */ ";
+        return " /* tracking at " + getNodeLocation(node, lineNumber) + " */ ";
     }
 
     @Override
@@ -221,7 +224,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
             throw re;
         } finally {
-            updateTraceInfo(node,context,executor);
+            updateTraceInfo(node, context, executor);
 
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;

@@ -1,6 +1,5 @@
 package i2f.extension.velocity;
 
-import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.velocity.stringify.Stringifier;
 import i2f.extension.velocity.stringify.impl.DefaultStringifier;
 import i2f.extension.velocity.stringify.impl.ListableStringifier;
@@ -27,7 +26,7 @@ import java.util.*;
  * @desc
  */
 public class GeneratorTool {
-    public static final Stringifier STRINGIFIER=new ListableStringifier();
+    public static final Stringifier STRINGIFIER = new ListableStringifier();
     private final String sharp = "#";
     private final String dolar = "$";
 
@@ -77,7 +76,7 @@ public class GeneratorTool {
     }
 
     public static String str(Object obj) {
-        if(STRINGIFIER.support(obj)){
+        if (STRINGIFIER.support(obj)) {
             return STRINGIFIER.stringify(obj);
         }
         return DefaultStringifier.INSTANCE.stringify(obj);

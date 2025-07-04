@@ -49,21 +49,21 @@ public class LruMap<K, V> extends LinkedHashMap<K, V> {
 
     public void setMaxSize(int maxSize) {
         this.maxSize.set(maxSize);
-        if(size()>maxSize){
+        if (size() > maxSize) {
             shrink();
         }
     }
 
-    protected void shrink(){
+    protected void shrink() {
         lock.writeLock().lock();
         try {
-            Map<K,V> map=new LinkedHashMap<>(this);
+            Map<K, V> map = new LinkedHashMap<>(this);
             clear();
-            int max=maxSize.get();
+            int max = maxSize.get();
             for (Map.Entry<K, V> entry : map.entrySet()) {
-                if(max>=0){
-                    put(entry.getKey(),entry.getValue());
-                }else{
+                if (max >= 0) {
+                    put(entry.getKey(), entry.getValue());
+                } else {
                     break;
                 }
                 max--;
