@@ -8,11 +8,12 @@ import java.util.ArrayList;
 
 /**
  * @author Ice2Faith
- * @date 2024/4/28 14:42
+ * @date 2024/4/28 9:24
  * @desc
  */
-public class Oracle12cPageWrapper implements IPageWrapper {
-    public static final Oracle12cPageWrapper INSTANCE = new Oracle12cPageWrapper();
+public class InformixPageWrapper implements IPageWrapper {
+    public static final InformixPageWrapper INSTANCE = new InformixPageWrapper();
+
     @Override
     public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {
@@ -25,34 +26,39 @@ public class Oracle12cPageWrapper implements IPageWrapper {
         pageSql.setArgs(new ArrayList<>(bql.getArgs()));
 
         StringBuilder builder = new StringBuilder();
-
         if (page.getOffset() != null && page.getSize() != null) {
 
-            builder
+            builder.append(" select ")
+                    .append(" skip ").append(embed ? (page.getOffset()) : "?")
+                    .append(" first ").append(embed ? (page.getSize()) : "?")
+                    .append(" * from ( ")
                     .append(bql.getSql())
-                    .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ")
-                    .append(" rows fetch next ").append(embed ? (page.getSize()) : "?").append(" rows only ");
+                    .append(" ) TMP_PAGE ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getOffset());
                 pageSql.getArgs().add(page.getSize());
             }
         } else if (page.getOffset() != null) {
-            builder
+
+            builder.append(" select ")
+                    .append(" skip ").append(embed ? (page.getOffset()) : "?")
+                    .append(" * from ( ")
                     .append(bql.getSql())
-                    .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ");
+                    .append(" ) TMP_PAGE ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getOffset());
             }
         } else if (page.getSize() != null) {
-            builder
+
+            builder.append(" select ")
+                    .append(" first ").append(embed ? (page.getSize()) : "?")
+                    .append(" * from ( ")
                     .append(bql.getSql())
-                    .append(" offset ").append(embed ? (0) : "?").append(" ")
-                    .append(" rows fetch next ").append(embed ? (page.getSize()) : "?").append(" rows only ");
+                    .append(" ) TMP_PAGE ");
 
             if (!embed) {
-                pageSql.getArgs().add(0);
                 pageSql.getArgs().add(page.getSize());
             }
         }
