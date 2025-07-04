@@ -136,23 +136,24 @@ public class VelocityGenerator {
         return renderAsString(engine, templateName, params);
     }
 
-    protected static volatile VelocityEngine DEFAULT_STRING_ENGINE=null;
+    protected static volatile VelocityEngine DEFAULT_STRING_ENGINE = null;
 
-    public static VelocityEngine getDefaultStringEngine(Properties config){
-        if(config==null || config.isEmpty()){
-            if(DEFAULT_STRING_ENGINE==null){
-                synchronized (VelocityGenerator.class){
-                    if(DEFAULT_STRING_ENGINE==null) {
+    public static VelocityEngine getDefaultStringEngine(Properties config) {
+        if (config == null || config.isEmpty()) {
+            if (DEFAULT_STRING_ENGINE == null) {
+                synchronized (VelocityGenerator.class) {
+                    if (DEFAULT_STRING_ENGINE == null) {
                         DEFAULT_STRING_ENGINE = getDefaultStringEngine0(config);
                     }
                 }
             }
             return DEFAULT_STRING_ENGINE;
-        }else{
+        } else {
             return getDefaultStringEngine0(config);
         }
     }
-    public static VelocityEngine getDefaultStringEngine0(Properties config){
+
+    public static VelocityEngine getDefaultStringEngine0(Properties config) {
         //初始化引擎，默认从classpath加载模板文件
         VelocityEngine engine = new VelocityEngine();
 
@@ -170,14 +171,14 @@ public class VelocityGenerator {
     }
 
     public static String renderByStringResource(Properties config, String template, Map<String, Object> params) {
-        VelocityEngine engine=getDefaultStringEngine(config);
+        VelocityEngine engine = getDefaultStringEngine(config);
 
         String templateName = useStringResource(engine, template);
 
         try {
             return renderAsString(engine, templateName, params);
-        }finally {
-            removeStringResource(engine,templateName);
+        } finally {
+            removeStringResource(engine, templateName);
         }
     }
 

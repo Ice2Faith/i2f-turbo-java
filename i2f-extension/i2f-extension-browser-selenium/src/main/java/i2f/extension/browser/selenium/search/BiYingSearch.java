@@ -58,7 +58,7 @@ public class BiYingSearch {
         AtomicInteger maxFetchCount = new AtomicInteger(maxArticleCount);
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, true, driverPath);
-        if(true) {
+        if (true) {
             driver.get("https://cn.bing.com/");
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
@@ -100,7 +100,7 @@ public class BiYingSearch {
                     driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
                 }
                 try {
-                    if(!Objects.equals(driver.getCurrentUrl(),entry.getKey().getUrl())) {
+                    if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
                         driver.navigate().to(entry.getKey().getUrl());
                     }
                 } catch (Exception e) {

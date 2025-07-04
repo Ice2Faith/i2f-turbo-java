@@ -24,35 +24,44 @@ public class TinyScriptColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Paren", TinyScriptSyntaxHighlighter.PAREN),
             new AttributesDescriptor("Bad value", TinyScriptSyntaxHighlighter.BAD_CHARACTER)
     };
+
     @Nullable
     @Override
     public Icon getIcon() {
         return TinyScriptConsts.ICON;
     }
+
     @NotNull
     @Override
     public SyntaxHighlighter getHighlighter() {
         return new TinyScriptSyntaxHighlighter();
     }
+
     @NonNls
     @NotNull
     @Override
     public String getDemoText() {
         return "user.roles[0].name=${login.default}.getDefaultRole().getName();";
     }
+
     @Nullable
     @Override
     public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
         return null;
     }
+
     @NotNull
-    @Override public AttributesDescriptor  [] getAttributeDescriptors() {
+    @Override
+    public AttributesDescriptor[] getAttributeDescriptors() {
         return DESCRIPTORS;
     }
+
     @NotNull
-    @Override public ColorDescriptor  [] getColorDescriptors() {
+    @Override
+    public ColorDescriptor[] getColorDescriptors() {
         return ColorDescriptor.EMPTY_ARRAY;
     }
+
     @NotNull
     @Override
     public String getDisplayName() {

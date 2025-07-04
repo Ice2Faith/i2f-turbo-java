@@ -59,7 +59,7 @@ public class BaiduKaifaSearch {
         AtomicInteger maxFetchCount = new AtomicInteger(maxArticleCount);
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, true, driverPath);
-        if(true) {
+        if (true) {
             driver.get("https://kaifa.baidu.com/");
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
@@ -101,7 +101,7 @@ public class BaiduKaifaSearch {
                     driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
                 }
                 try {
-                    if(!Objects.equals(driver.getCurrentUrl(),entry.getKey().getUrl())) {
+                    if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
                         driver.navigate().to(entry.getKey().getUrl());
                     }
                 } catch (Exception e) {
@@ -167,7 +167,7 @@ public class BaiduKaifaSearch {
 //                        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 8));
                         TimeUnit.SECONDS.sleep(RANDOM.nextInt(3) + 2);
 
-                        if(true){
+                        if (true) {
                             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                             try {
                                 wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#content-left .ant-list-items .ant-list-item"), 1));

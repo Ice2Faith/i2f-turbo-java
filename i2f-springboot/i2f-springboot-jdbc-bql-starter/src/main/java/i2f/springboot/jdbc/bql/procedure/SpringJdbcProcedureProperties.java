@@ -25,11 +25,11 @@ public class SpringJdbcProcedureProperties {
 
     protected String xmlLocations = DEFAULT_XML_LOCATIONS;
 
-    protected String watchingDirectories= DEFAULT_WATCHING_DIRECTORIES;
+    protected String watchingDirectories = DEFAULT_WATCHING_DIRECTORIES;
 
     protected long refreshXmlIntervalSeconds = -1;
 
-    protected int maxPreloadCount=1;
+    protected int maxPreloadCount = 1;
 
     protected long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(5);
 

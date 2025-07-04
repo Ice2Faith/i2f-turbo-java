@@ -13,6 +13,7 @@ import java.util.ArrayList;
  */
 public class PostgreSqlPageWrapper implements IPageWrapper {
     public static final PostgreSqlPageWrapper INSTANCE = new PostgreSqlPageWrapper();
+
     @Override
     public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {

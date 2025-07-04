@@ -144,19 +144,19 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
             return COMMENT_KEYS;
         }
 
-        if(tokenType.equals(TinyScriptTypes.TERM_BRACKET_SQUARE_L)
-        ||tokenType.equals(TinyScriptTypes.TERM_BRACKET_SQUARE_R)
-                ||tokenType.equals(TinyScriptTypes.TERM_COLON)
-                ||tokenType.equals(TinyScriptTypes.TERM_COMMA)
-                ||tokenType.equals(TinyScriptTypes.TERM_CURLY_L)
-                ||tokenType.equals(TinyScriptTypes.TERM_CURLY_R)
-                ||tokenType.equals(TinyScriptTypes.TERM_DOLLAR)
-                ||tokenType.equals(TinyScriptTypes.TERM_DOT)
-                ||tokenType.equals(TinyScriptTypes.TERM_PAREN_L)
-                ||tokenType.equals(TinyScriptTypes.TERM_PAREN_R)
-                ||tokenType.equals(TinyScriptTypes.TERM_QUESTION)
-                ||tokenType.equals(TinyScriptTypes.TERM_SEMICOLON)
-        ){
+        if (tokenType.equals(TinyScriptTypes.TERM_BRACKET_SQUARE_L)
+                || tokenType.equals(TinyScriptTypes.TERM_BRACKET_SQUARE_R)
+                || tokenType.equals(TinyScriptTypes.TERM_COLON)
+                || tokenType.equals(TinyScriptTypes.TERM_COMMA)
+                || tokenType.equals(TinyScriptTypes.TERM_CURLY_L)
+                || tokenType.equals(TinyScriptTypes.TERM_CURLY_R)
+                || tokenType.equals(TinyScriptTypes.TERM_DOLLAR)
+                || tokenType.equals(TinyScriptTypes.TERM_DOT)
+                || tokenType.equals(TinyScriptTypes.TERM_PAREN_L)
+                || tokenType.equals(TinyScriptTypes.TERM_PAREN_R)
+                || tokenType.equals(TinyScriptTypes.TERM_QUESTION)
+                || tokenType.equals(TinyScriptTypes.TERM_SEMICOLON)
+        ) {
             return PAREN_KEYS;
         }
 

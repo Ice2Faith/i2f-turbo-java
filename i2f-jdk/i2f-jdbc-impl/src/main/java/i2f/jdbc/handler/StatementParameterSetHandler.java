@@ -9,5 +9,5 @@ import java.sql.SQLType;
  */
 @FunctionalInterface
 public interface StatementParameterSetHandler {
-    boolean set(PreparedStatement stat, int index, Object obj, SQLType jdbcType,Class<?> javaTye);
+    boolean set(PreparedStatement stat, int index, Object obj, SQLType jdbcType, Class<?> javaTye);
 }

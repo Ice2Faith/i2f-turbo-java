@@ -17,13 +17,13 @@ public class TestCalculator {
 //        testRaw();
     }
 
-    public static void testImpl(){
+    public static void testImpl() {
         String formula = "avg(4+3,5,6)";
         BigDecimal ret = Calculator.eval(formula);
         System.out.println(ret);
     }
 
-    public static void testRaw(){
+    public static void testRaw() {
         String formula = "avg(4+3,5,6)";
         CommonTokenStream tokens = Calculator.parseTokens(formula);
         CalculatorParser parser = new CalculatorParser(tokens);

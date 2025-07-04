@@ -106,7 +106,7 @@ public class DefaultJdbcProcedureContext
         notifyMetaMapRefreshed(metaMap);
     }
 
-    public void notifyMetaMapRefreshed(Map<String,ProcedureMeta> metaMap){
+    public void notifyMetaMapRefreshed(Map<String, ProcedureMeta> metaMap) {
 
         JdbcProcedureMetaMapRefreshedEvent event = new JdbcProcedureMetaMapRefreshedEvent();
         event.setContext(this);
@@ -124,8 +124,8 @@ public class DefaultJdbcProcedureContext
     public boolean handle(XProc4jEvent event) {
         ProcedureMetaProviderChangeEvent evt = (ProcedureMetaProviderChangeEvent) event;
         Map<String, ProcedureMeta> metaMap = evt.getMetaMap();
-        if(metaMap!=null){
-             cache.putAll(metaMap);
+        if (metaMap != null) {
+            cache.putAll(metaMap);
 
             notifyMetaMapRefreshed(metaMap);
         }

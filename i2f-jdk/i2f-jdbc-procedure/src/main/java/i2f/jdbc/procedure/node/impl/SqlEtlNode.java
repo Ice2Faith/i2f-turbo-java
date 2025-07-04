@@ -727,11 +727,11 @@ public class SqlEtlNode extends AbstractExecutorNode {
             executor.visitSet(context, itemName, bakItem);
 
             JdbcCursor<?> cursor = taskCursor.get();
-            if(cursor!=null){
+            if (cursor != null) {
                 try {
                     cursor.dispose();
                 } catch (SQLException e) {
-                    throw new IllegalStateException(e.getMessage(),e);
+                    throw new IllegalStateException(e.getMessage(), e);
                 }
             }
 

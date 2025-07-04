@@ -13,6 +13,7 @@ import java.util.ArrayList;
  */
 public class IbmAs400PageWrapper implements IPageWrapper {
     public static final IbmAs400PageWrapper INSTANCE = new IbmAs400PageWrapper();
+
     @Override
     public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {

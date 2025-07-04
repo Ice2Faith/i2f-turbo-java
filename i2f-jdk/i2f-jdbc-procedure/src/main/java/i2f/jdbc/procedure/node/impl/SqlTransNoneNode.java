@@ -26,7 +26,7 @@ public class SqlTransNoneNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        String datasource =(String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
+        String datasource = (String) executor.attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
         executor.sqlTransNone(datasource, context);
     }
 

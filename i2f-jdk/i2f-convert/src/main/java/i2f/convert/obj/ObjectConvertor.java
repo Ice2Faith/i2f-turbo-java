@@ -264,19 +264,19 @@ public class ObjectConvertor {
         return false;
     }
 
-    public static String stringifyReader(Reader reader,String nullAs) throws IOException {
+    public static String stringifyReader(Reader reader, String nullAs) throws IOException {
         if (reader == null) {
             return nullAs;
         }
-        try{
-            StringBuilder builder=new StringBuilder();
-            char[] buff=new char[4096];
-            int len=0;
-            while((len=reader.read(buff))>0){
-                builder.append(buff,0,len);
+        try {
+            StringBuilder builder = new StringBuilder();
+            char[] buff = new char[4096];
+            int len = 0;
+            while ((len = reader.read(buff)) > 0) {
+                builder.append(buff, 0, len);
             }
             return builder.toString();
-        }finally {
+        } finally {
             reader.close();
         }
     }
@@ -285,35 +285,35 @@ public class ObjectConvertor {
         if (obj == null) {
             return nullAs;
         }
-        if(obj instanceof byte[]){
-            obj=new ByteArrayInputStream((byte[])obj);
-        }else if(obj instanceof char[]){
-            obj=new CharArrayReader((char[])obj);
+        if (obj instanceof byte[]) {
+            obj = new ByteArrayInputStream((byte[]) obj);
+        } else if (obj instanceof char[]) {
+            obj = new CharArrayReader((char[]) obj);
         }
         Class<?> clazz = obj.getClass();
-        if(TypeOf.typeOf(clazz, Clob.class)){
+        if (TypeOf.typeOf(clazz, Clob.class)) {
             Clob clob = (Clob) obj;
-            try(Reader reader = clob.getCharacterStream()) {
+            try (Reader reader = clob.getCharacterStream()) {
                 return stringifyReader(reader, nullAs);
             } catch (Exception e) {
-                throw new IllegalStateException(e.getMessage(),e);
+                throw new IllegalStateException(e.getMessage(), e);
             }
-        }else if(TypeOf.typeOf(clazz, Reader.class)){
+        } else if (TypeOf.typeOf(clazz, Reader.class)) {
             Reader reader = (Reader) obj;
-            try{
-                return stringifyReader(reader,nullAs);
+            try {
+                return stringifyReader(reader, nullAs);
             } catch (Exception e) {
-                throw new IllegalStateException(e.getMessage(),e);
+                throw new IllegalStateException(e.getMessage(), e);
             }
-        }else if(TypeOf.typeOf(clazz, InputStream.class)){
-            InputStream is=(InputStream)obj;
+        } else if (TypeOf.typeOf(clazz, InputStream.class)) {
+            InputStream is = (InputStream) obj;
             Reader reader = new InputStreamReader(is);
-            try{
-                return stringifyReader(reader,nullAs);
+            try {
+                return stringifyReader(reader, nullAs);
             } catch (Exception e) {
-                throw new IllegalStateException(e.getMessage(),e);
+                throw new IllegalStateException(e.getMessage(), e);
             }
-        }else if (clazz.isArray()) {
+        } else if (clazz.isArray()) {
             StringBuilder builder = new StringBuilder();
             int len = Array.getLength(obj);
             builder.append("[");
@@ -345,51 +345,51 @@ public class ObjectConvertor {
             return val;
         }
         // 目标类型为 String ，都能转
-        if (TypeOf.typeOfAny(targetType, String.class,CharSequence.class,Appendable.class,char[].class,Reader.class,InputStream.class,byte[].class)) {
-            String str= stringify(val, null);
-            if(str==null){
+        if (TypeOf.typeOfAny(targetType, String.class, CharSequence.class, Appendable.class, char[].class, Reader.class, InputStream.class, byte[].class)) {
+            String str = stringify(val, null);
+            if (str == null) {
                 return null;
             }
-            if(TypeOf.typeOf(targetType,char[].class)){
+            if (TypeOf.typeOf(targetType, char[].class)) {
                 return str.toCharArray();
-            } else if(TypeOf.typeOf(targetType,Appendable.class)){
-                if(TypeOf.typeOf(targetType,StringBuilder.class)){
-                    StringBuilder builder=new StringBuilder(str);
+            } else if (TypeOf.typeOf(targetType, Appendable.class)) {
+                if (TypeOf.typeOf(targetType, StringBuilder.class)) {
+                    StringBuilder builder = new StringBuilder(str);
                     return builder;
-                }else if(TypeOf.typeOf(targetType,StringBuffer.class)){
-                    StringBuffer buffer=new StringBuffer(str);
+                } else if (TypeOf.typeOf(targetType, StringBuffer.class)) {
+                    StringBuffer buffer = new StringBuffer(str);
                     return buffer;
                 }
-            } else if(TypeOf.typeOfAny(targetType,Reader.class)){
+            } else if (TypeOf.typeOfAny(targetType, Reader.class)) {
                 return new StringReader(str);
-            } else if(TypeOf.typeOfAny(targetType,InputStream.class)){
+            } else if (TypeOf.typeOfAny(targetType, InputStream.class)) {
                 return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
-            } else if(TypeOf.typeOfAny(targetType,byte[].class)){
+            } else if (TypeOf.typeOfAny(targetType, byte[].class)) {
                 return str.getBytes(StandardCharsets.UTF_8);
-            }else{
+            } else {
                 return str;
             }
         }
 
         // 源类型为String，目标类型为可转类型
-        if(TypeOf.typeOfAny(sourceType,String.class, CharSequence.class,Appendable.class,char[].class,Reader.class,InputStream.class,byte[].class)){
-            String str=stringify(val, null);
+        if (TypeOf.typeOfAny(sourceType, String.class, CharSequence.class, Appendable.class, char[].class, Reader.class, InputStream.class, byte[].class)) {
+            String str = stringify(val, null);
 
-            if(TypeOf.typeOf(targetType,char[].class)){
+            if (TypeOf.typeOf(targetType, char[].class)) {
                 return str.toCharArray();
-            } else if(TypeOf.typeOf(targetType,Appendable.class)){
-                if(TypeOf.typeOf(targetType,StringBuilder.class)){
-                    StringBuilder builder=new StringBuilder(str);
+            } else if (TypeOf.typeOf(targetType, Appendable.class)) {
+                if (TypeOf.typeOf(targetType, StringBuilder.class)) {
+                    StringBuilder builder = new StringBuilder(str);
                     return builder;
-                }else if(TypeOf.typeOf(targetType,StringBuffer.class)){
-                    StringBuffer buffer=new StringBuffer(str);
+                } else if (TypeOf.typeOf(targetType, StringBuffer.class)) {
+                    StringBuffer buffer = new StringBuffer(str);
                     return buffer;
                 }
-            } else if(TypeOf.typeOfAny(targetType,Reader.class)){
+            } else if (TypeOf.typeOfAny(targetType, Reader.class)) {
                 return new StringReader(str);
-            } else if(TypeOf.typeOfAny(targetType,InputStream.class)){
+            } else if (TypeOf.typeOfAny(targetType, InputStream.class)) {
                 return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
-            } else if(TypeOf.typeOfAny(targetType,byte[].class)){
+            } else if (TypeOf.typeOfAny(targetType, byte[].class)) {
                 return str.getBytes(StandardCharsets.UTF_8);
             }
         }
@@ -400,18 +400,18 @@ public class ObjectConvertor {
         if (TypeOf.typeOfAny(sourceType, numericTypes)
                 &&
                 TypeOf.typeOfAny(targetType, numericTypes)) {
-            BigDecimal decimal = (val instanceof BigDecimal)?((BigDecimal) val):new BigDecimal(String.valueOf(val));
+            BigDecimal decimal = (val instanceof BigDecimal) ? ((BigDecimal) val) : new BigDecimal(String.valueOf(val));
             Function<BigDecimal, ?> func = bigDecimalTypeConverterMap.get(targetType);
-            if(func==null){
+            if (func == null) {
                 for (Map.Entry<Class<?>, Function<BigDecimal, ?>> entry : bigDecimalTypeConverterMap.entrySet()) {
                     Class<?> itemClass = entry.getKey();
                     if (TypeOf.typeOf(itemClass, targetType)) {
-                        func=entry.getValue();
+                        func = entry.getValue();
                         break;
                     }
                 }
             }
-            if(func!=null){
+            if (func != null) {
                 return func.apply(decimal);
             }
 
@@ -424,16 +424,16 @@ public class ObjectConvertor {
                 TypeOf.typeOfAny(targetType, boolTypes)) {
             boolean ok = (val == null) ? false : (Boolean) val;
             Function<Boolean, ?> func = boolTypeConverterMap.get(targetType);
-            if(func==null) {
+            if (func == null) {
                 for (Map.Entry<Class<?>, Function<Boolean, ?>> entry : boolTypeConverterMap.entrySet()) {
                     Class<?> itemClass = entry.getKey();
                     if (TypeOf.typeOf(itemClass, targetType)) {
-                        func=entry.getValue();
+                        func = entry.getValue();
                         break;
                     }
                 }
             }
-            if(func!=null){
+            if (func != null) {
                 return func.apply(ok);
             }
         }
@@ -445,16 +445,16 @@ public class ObjectConvertor {
                 TypeOf.typeOfAny(targetType, charTypes)) {
             char ch = (val == null) ? 0 : (Character) val;
             Function<Character, ?> func = charTypeConverterMap.get(targetType);
-            if(func==null) {
+            if (func == null) {
                 for (Map.Entry<Class<?>, Function<Character, ?>> entry : charTypeConverterMap.entrySet()) {
                     Class<?> itemClass = entry.getKey();
                     if (TypeOf.typeOf(itemClass, targetType)) {
-                        func=entry.getValue();
+                        func = entry.getValue();
                         break;
                     }
                 }
             }
-            if(func!=null){
+            if (func != null) {
                 return func.apply(ch);
             }
         }
@@ -467,22 +467,22 @@ public class ObjectConvertor {
                 TypeOf.typeOfAny(targetType, dateTypes)) {
             Instant ins = null;
             Function<Object, Instant> sourceFunc = date2InstantConverterMap.get(sourceType);
-            if(sourceFunc==null) {
+            if (sourceFunc == null) {
                 for (Map.Entry<Class<?>, Function<Object, Instant>> entry : date2InstantConverterMap.entrySet()) {
                     Class<?> itemClass = entry.getKey();
                     if (TypeOf.typeOf(itemClass, sourceType)) {
-                        sourceFunc=entry.getValue();
+                        sourceFunc = entry.getValue();
                         break;
                     }
                 }
             }
-            if(sourceFunc!=null){
+            if (sourceFunc != null) {
                 ins = sourceFunc.apply(val);
             }
 
             if (ins != null) {
                 Function<Instant, ?> func = dateTypeConverterMap.get(targetType);
-                if(func==null) {
+                if (func == null) {
                     for (Map.Entry<Class<?>, Function<Instant, ?>> entry : dateTypeConverterMap.entrySet()) {
                         Class<?> itemClass = entry.getKey();
                         if (TypeOf.typeOf(itemClass, targetType)) {
@@ -491,7 +491,7 @@ public class ObjectConvertor {
                         }
                     }
                 }
-                if(func!=null){
+                if (func != null) {
                     return func.apply(ins);
                 }
             }
@@ -499,7 +499,7 @@ public class ObjectConvertor {
         }
 
         // 字符串字面值处理
-        String valStr = stringify(val,null);
+        String valStr = stringify(val, null);
         if (TypeOf.typeOfAny(targetType, numericTypes)) {
             BigDecimal decimal = null;
             if (valStr.matches("(\\+|\\-)?([1-9]([0-9]+)?|0)")) {
@@ -519,7 +519,7 @@ public class ObjectConvertor {
 
             if (decimal != null) {
                 Function<BigDecimal, ?> func = bigDecimalTypeConverterMap.get(targetType);
-                if(func==null) {
+                if (func == null) {
                     for (Map.Entry<Class<?>, Function<BigDecimal, ?>> entry : bigDecimalTypeConverterMap.entrySet()) {
                         Class<?> itemClass = entry.getKey();
                         if (TypeOf.typeOf(itemClass, targetType)) {
@@ -528,7 +528,7 @@ public class ObjectConvertor {
                         }
                     }
                 }
-                if(func!=null){
+                if (func != null) {
                     return func.apply(decimal);
                 }
             }

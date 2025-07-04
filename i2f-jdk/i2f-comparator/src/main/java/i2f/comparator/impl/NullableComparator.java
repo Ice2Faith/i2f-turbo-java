@@ -61,7 +61,7 @@ public class NullableComparator<T> implements Comparator<T> {
         if (o2 == null) {
             return reverseNull ? -1 : 1;
         }
-        if(o1.equals(o2)){
+        if (o1.equals(o2)) {
             return 0;
         }
         return COMPARE_UN_NULL_RETURN_VALUE;

@@ -11,19 +11,19 @@ import java.util.concurrent.atomic.AtomicReference;
  * @desc
  */
 public class JvmUtil {
-    private static final AtomicReference<String> PID=new AtomicReference<>();
-    private static final AtomicReference<String> START_USER=new AtomicReference<>();
-    private static final AtomicReference<Boolean> IS_DEBUG=new AtomicReference<>();
-    private static final AtomicReference<Boolean> IS_AGENT=new AtomicReference<>();
-    private static final AtomicReference<Boolean> IS_NO_VERIFY=new AtomicReference<>();
+    private static final AtomicReference<String> PID = new AtomicReference<>();
+    private static final AtomicReference<String> START_USER = new AtomicReference<>();
+    private static final AtomicReference<Boolean> IS_DEBUG = new AtomicReference<>();
+    private static final AtomicReference<Boolean> IS_AGENT = new AtomicReference<>();
+    private static final AtomicReference<Boolean> IS_NO_VERIFY = new AtomicReference<>();
 
     public static RuntimeMXBean getRuntimeMXBean() {
         return ManagementFactory.getRuntimeMXBean();
     }
 
     public static String getPid() {
-        return PID.updateAndGet(v->{
-            if(v!=null){
+        return PID.updateAndGet(v -> {
+            if (v != null) {
                 return v;
             }
             String name = getRuntimeMXBean().getName();
@@ -36,8 +36,8 @@ public class JvmUtil {
     }
 
     public static String getStartUser() {
-        return START_USER.updateAndGet(v->{
-            if(v!=null){
+        return START_USER.updateAndGet(v -> {
+            if (v != null) {
                 return v;
             }
             String name = getRuntimeMXBean().getName();
@@ -54,8 +54,8 @@ public class JvmUtil {
     }
 
     public static boolean isDebug() {
-        return IS_DEBUG.updateAndGet(v->{
-            if(v!=null){
+        return IS_DEBUG.updateAndGet(v -> {
+            if (v != null) {
                 return v;
             }
             List<String> args = getInputArguments();
@@ -69,8 +69,8 @@ public class JvmUtil {
     }
 
     public static boolean isAgent() {
-        return IS_AGENT.updateAndGet(v->{
-            if(v!=null){
+        return IS_AGENT.updateAndGet(v -> {
+            if (v != null) {
                 return v;
             }
             List<String> args = getInputArguments();
@@ -84,8 +84,8 @@ public class JvmUtil {
     }
 
     public static boolean isNoVerify() {
-        return IS_NO_VERIFY.updateAndGet(v->{
-            if(v!=null){
+        return IS_NO_VERIFY.updateAndGet(v -> {
+            if (v != null) {
                 return v;
             }
             List<String> args = getInputArguments();

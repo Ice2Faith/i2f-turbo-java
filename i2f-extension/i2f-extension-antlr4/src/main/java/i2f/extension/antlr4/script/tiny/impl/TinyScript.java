@@ -105,8 +105,8 @@ public class TinyScript {
     }
 
     public static TinyScriptParser.ScriptContext parse(String formula) {
-        if(formula!=null){
-            formula=formula.trim();
+        if (formula != null) {
+            formula = formula.trim();
         }
         try {
             TinyScriptParser.ScriptContext ret = TREE_MAP.get(formula);
@@ -164,7 +164,7 @@ public class TinyScript {
     public static void registryBuiltMethodByStaticMethod(Class<?> clazz, Predicate<Method> filter) {
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            if(Object.class.equals(method.getDeclaringClass())){
+            if (Object.class.equals(method.getDeclaringClass())) {
                 continue;
             }
             int mod = method.getModifiers();
@@ -194,7 +194,7 @@ public class TinyScript {
         Class<?> clazz = object.getClass();
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            if(Object.class.equals(method.getDeclaringClass())){
+            if (Object.class.equals(method.getDeclaringClass())) {
                 continue;
             }
             int mod = method.getModifiers();

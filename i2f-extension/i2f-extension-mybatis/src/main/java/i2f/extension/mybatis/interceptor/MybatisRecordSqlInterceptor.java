@@ -62,8 +62,8 @@ public class MybatisRecordSqlInterceptor implements Interceptor {
     public static final String METHOD_QUERY = "query";
     public static final String METHOD_QUERY_CURSOR = "queryCursor";
 
-    protected Consumer<Object> infoLogger= System.out::println;
-    protected Consumer<Object> errorLogger= System.err::println;
+    protected Consumer<Object> infoLogger = System.out::println;
+    protected Consumer<Object> errorLogger = System.err::println;
 
     protected boolean enablePrintSql = false;
 
@@ -178,11 +178,11 @@ public class MybatisRecordSqlInterceptor implements Interceptor {
             }
 
             if (ex == null) {
-                if(infoLogger!=null) {
+                if (infoLogger != null) {
                     infoLogger.accept("mybatis record sql " + useTs + "(ms): " + shortId + " ==> " + mergeSql);
                 }
             } else {
-                if(errorLogger!=null) {
+                if (errorLogger != null) {
                     errorLogger.accept("mybatis record sql " + useTs + "(ms): " + shortId + " ==> " + mergeSql);
                 }
             }

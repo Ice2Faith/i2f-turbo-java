@@ -131,19 +131,19 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         }
         String[] arr = watchingDirectories.split("[,;\n]");
         Set<File> files = ResourceUtil.getResourcesFiles(Arrays.asList(arr));
-        Set<String> sourceCodeSet=new LinkedHashSet<>();
+        Set<String> sourceCodeSet = new LinkedHashSet<>();
         for (File file : files) {
-            if(file==null){
+            if (file == null) {
                 continue;
             }
             String path = file.getAbsolutePath();
-            path=path.replace("\\","/");
-            int idx=path.lastIndexOf("/target/classes/");
-            if(idx>=0){
-                String modulePath=path.substring(0,idx);
-                String mainPath=modulePath+"/src/main";
-                sourceCodeSet.add(mainPath+"/java");
-                sourceCodeSet.add(mainPath+"/resources");
+            path = path.replace("\\", "/");
+            int idx = path.lastIndexOf("/target/classes/");
+            if (idx >= 0) {
+                String modulePath = path.substring(0, idx);
+                String mainPath = modulePath + "/src/main";
+                sourceCodeSet.add(mainPath + "/java");
+                sourceCodeSet.add(mainPath + "/resources");
             }
         }
         for (String item : sourceCodeSet) {
@@ -212,7 +212,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
                                                        @Autowired(required = false) XProc4jEventHandler eventHandler
     ) {
         log.info(XProc4jConsts.NAME + " config " + SpringContextJdbcProcedureExecutor.class.getSimpleName() + " ...");
-        SpringContextJdbcProcedureExecutor ret = new SpringContextJdbcProcedureExecutor(context, iEnvironment,namingContext);
+        SpringContextJdbcProcedureExecutor ret = new SpringContextJdbcProcedureExecutor(context, iEnvironment, namingContext);
         if (eventHandler != null) {
             ret.setEventHandler(eventHandler);
         }
@@ -227,7 +227,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @ConditionalOnExpression("${xproc4j.listeners.xml-node-exec-invoke-log-listener.enable:true}")
     @ConditionalOnMissingBean(XmlNodeExecInvokeLogListener.class)
     @Bean
-    public XmlNodeExecInvokeLogListener xmlNodeExecInvokeLogListener(){
+    public XmlNodeExecInvokeLogListener xmlNodeExecInvokeLogListener() {
         XmlNodeExecInvokeLogListener ret = new XmlNodeExecInvokeLogListener();
         ret.setPrintFilter((evt) -> {
             XmlNode node = evt.getNode();

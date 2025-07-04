@@ -21,8 +21,8 @@ public class OgnlUtil {
     }
 
     public static Object parseExpressionTreeNode(String expression) throws OgnlException {
-        if(expression!=null){
-            expression=expression.trim();
+        if (expression != null) {
+            expression = expression.trim();
         }
         try {
             Object ret = EXPRESSION_MAP.get(expression);

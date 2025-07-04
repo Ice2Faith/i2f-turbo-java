@@ -36,7 +36,7 @@ public class TestAiChat {
         aiConsumer();
     }
 
-    public static void aiConsumer() throws Throwable{
+    public static void aiConsumer() throws Throwable {
         AiChatModel chatModel = AiChatModel.builder()
                 .baseUrl(AI_BASE_URL)
                 .apiKey(AI_API_KEY)
@@ -44,31 +44,31 @@ public class TestAiChat {
                 .system(AI_SYSTEM)
                 .build();
 
-        Scanner scanner=new Scanner(System.in);
-        String line=null;
-        while(true){
+        Scanner scanner = new Scanner(System.in);
+        String line = null;
+        while (true) {
             System.out.println("\n please input message for chat with ai, input \"/bye\" to exit:");
             System.out.print(">/ ");
-            line=scanner.nextLine();
-            if("/bye".equals(line)){
+            line = scanner.nextLine();
+            if ("/bye".equals(line)) {
                 break;
             }
 
             System.out.println("ai>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-            CountDownLatch latch=new CountDownLatch(1);
+            CountDownLatch latch = new CountDownLatch(1);
             chatModel.stream(line, new Consumer<String>() {
                 @Override
                 public void accept(String s) {
-                    if(s==null){
+                    if (s == null) {
                         latch.countDown();
                         return;
                     }
                     System.out.print(s);
                 }
             });
-            try{
+            try {
                 latch.await();
-            }catch(Exception e){
+            } catch (Exception e) {
             }
             System.out.println();
         }
@@ -76,7 +76,7 @@ public class TestAiChat {
         System.out.println("system: bye~");
     }
 
-    public static void aiStream() throws Throwable{
+    public static void aiStream() throws Throwable {
         AiChatModel chatModel = AiChatModel.builder()
                 .baseUrl(AI_BASE_URL)
                 .apiKey(AI_API_KEY)
@@ -84,19 +84,19 @@ public class TestAiChat {
                 .system(AI_SYSTEM)
                 .build();
 
-        Scanner scanner=new Scanner(System.in);
-        String line=null;
-        while(true){
+        Scanner scanner = new Scanner(System.in);
+        String line = null;
+        while (true) {
             System.out.println("\n please input message for chat with ai, input \"/bye\" to exit:");
             System.out.print(">/ ");
-            line=scanner.nextLine();
-            if("/bye".equals(line)){
+            line = scanner.nextLine();
+            if ("/bye".equals(line)) {
                 break;
             }
 
             Iterator<String> resp = chatModel.stream(line);
             System.out.println("ai>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-            while(resp.hasNext()){
+            while (resp.hasNext()) {
                 System.out.print(resp.next());
             }
             System.out.println();
@@ -105,7 +105,7 @@ public class TestAiChat {
         System.out.println("system: bye~");
     }
 
-    public static void aiChat() throws Throwable{
+    public static void aiChat() throws Throwable {
         AiChatModel chatModel = AiChatModel.builder()
                 .baseUrl(AI_BASE_URL)
                 .apiKey(AI_API_KEY)
@@ -113,69 +113,68 @@ public class TestAiChat {
                 .system(AI_SYSTEM)
                 .build();
 
-        Scanner scanner=new Scanner(System.in);
-        String line=null;
-        while(true){
+        Scanner scanner = new Scanner(System.in);
+        String line = null;
+        while (true) {
             System.out.println("\n please input message for chat with ai, input \"/bye\" to exit:");
             System.out.print(">/ ");
-            line=scanner.nextLine();
-            if("/bye".equals(line)){
+            line = scanner.nextLine();
+            if ("/bye".equals(line)) {
                 break;
             }
 
             String resp = chatModel.chat(line);
-            System.out.println("ai>>>>>>>>>>>>>>>>>>>>>>>>>>\n"+resp);
+            System.out.println("ai>>>>>>>>>>>>>>>>>>>>>>>>>>\n" + resp);
         }
 
         System.out.println("system: bye~");
     }
 
     public static void stream() throws Throwable {
-        StreamingChatModel chatModel=OpenAiStreamingChatModel.builder()
+        StreamingChatModel chatModel = OpenAiStreamingChatModel.builder()
                 .baseUrl(AI_BASE_URL)
                 .apiKey(AI_API_KEY)
                 .modelName(AI_MODEL_NAME)
-                .build()
-                ;
+                .build();
 
-        List<ChatMessage> messages=new ArrayList<>();
+        List<ChatMessage> messages = new ArrayList<>();
         sendChatSystem(messages, AI_SYSTEM);
 
-        sendChatMessage(messages,"香水柠檬");
-        awaitChatResponse(chatModel,messages);
+        sendChatMessage(messages, "香水柠檬");
+        awaitChatResponse(chatModel, messages);
 
-        sendChatMessage(messages,"花香吗");
-        awaitChatResponse(chatModel,messages);
+        sendChatMessage(messages, "花香吗");
+        awaitChatResponse(chatModel, messages);
 
-        Scanner scanner=new Scanner(System.in);
-        String line=null;
-        while(true){
+        Scanner scanner = new Scanner(System.in);
+        String line = null;
+        while (true) {
             System.out.println("\n please input message for chat with ai, input \"/bye\" to exit:");
             System.out.print(">/ ");
-            line=scanner.nextLine();
-            if("/bye".equals(line)){
+            line = scanner.nextLine();
+            if ("/bye".equals(line)) {
                 break;
             }
 
-            sendChatMessage(messages,line);
-            awaitChatResponse(chatModel,messages);
+            sendChatMessage(messages, line);
+            awaitChatResponse(chatModel, messages);
         }
 
         System.out.println("system: bye~");
     }
 
-    public static void sendChatSystem(List<ChatMessage> messages,String text) throws Throwable {
+    public static void sendChatSystem(List<ChatMessage> messages, String text) throws Throwable {
         messages.add(new SystemMessage(text));
-        System.out.println("\nsystem:********************************\n"+text);
+        System.out.println("\nsystem:********************************\n" + text);
     }
 
-    public static void sendChatMessage(List<ChatMessage> messages,String text) throws Throwable {
+    public static void sendChatMessage(List<ChatMessage> messages, String text) throws Throwable {
         messages.add(new UserMessage(text));
-        System.out.println("\nuser:<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"+text);
+        System.out.println("\nuser:<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" + text);
     }
 
-    public static void awaitChatResponse(StreamingChatModel chatModel,List<ChatMessage> messages) throws Throwable {
-        CountDownLatch latch=new CountDownLatch(1);
+    public static void awaitChatResponse(StreamingChatModel chatModel, List<ChatMessage> messages) throws Throwable {
+        CountDownLatch latch = new CountDownLatch(1);
         chatModel.chat(messages, new StreamingChatResponseHandler() {
             @Override
             public void onPartialResponse(String s) {
@@ -186,7 +185,7 @@ public class TestAiChat {
             public void onCompleteResponse(ChatResponse chatResponse) {
                 AiMessage aiMessage = chatResponse.aiMessage();
                 messages.add(aiMessage);
-                System.out.println("\nai:>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"+aiMessage.text());
+                System.out.println("\nai:>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n" + aiMessage.text());
                 latch.countDown();
             }
 
@@ -200,15 +199,14 @@ public class TestAiChat {
         latch.await();
     }
 
-    public static void chat(){
-        ChatModel chatModel=OpenAiChatModel.builder()
+    public static void chat() {
+        ChatModel chatModel = OpenAiChatModel.builder()
                 .baseUrl(AI_BASE_URL)
                 .apiKey(AI_API_KEY)
                 .modelName(AI_MODEL_NAME)
-                .build()
-                ;
+                .build();
 
-        List<ChatMessage> messages=new ArrayList<>();
+        List<ChatMessage> messages = new ArrayList<>();
         messages.add(new SystemMessage(AI_SYSTEM));
 
         messages.add(new UserMessage("香水柠檬"));

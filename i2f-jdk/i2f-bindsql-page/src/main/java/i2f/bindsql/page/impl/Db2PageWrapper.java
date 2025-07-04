@@ -13,6 +13,7 @@ import java.util.ArrayList;
  */
 public class Db2PageWrapper implements IPageWrapper {
     public static final Db2PageWrapper INSTANCE = new Db2PageWrapper();
+
     @Override
     public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {

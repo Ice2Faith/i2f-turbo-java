@@ -42,10 +42,10 @@ public class SpringJdbcProcedureXmlNodeMetaCacheProvider extends AbstractJdbcPro
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        new Thread(()->{
-            try{
+        new Thread(() -> {
+            try {
                 parseResources();
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }).start();

@@ -54,7 +54,7 @@ public class OsUtil {
     }
 
     public static String startCmd(String cmd, String[] envp, File dir, String charset) {
-        return execCmd(false,-1, cmd,envp,dir,charset);
+        return execCmd(false, -1, cmd, envp, dir, charset);
     }
 
     public static String runCmd(String cmd) {
@@ -66,15 +66,15 @@ public class OsUtil {
     }
 
     public static String runCmd(String cmd, String[] envp, File dir, String charset) {
-        return execCmd(true,TimeUnit.MINUTES.toMillis(3), cmd,envp,dir,charset);
+        return execCmd(true, TimeUnit.MINUTES.toMillis(3), cmd, envp, dir, charset);
     }
 
-    public static String execCmd(boolean requireOutput,long waitForMillsSeconds,String cmd, String[] envp, File dir, String charset) {
+    public static String execCmd(boolean requireOutput, long waitForMillsSeconds, String cmd, String[] envp, File dir, String charset) {
         try {
             Runtime runtime = Runtime.getRuntime();
 
             Process process = runtime.exec(cmd, envp, dir);
-            if(!requireOutput){
+            if (!requireOutput) {
                 return null;
             }
             InputStream is = process.getInputStream();
@@ -92,9 +92,9 @@ public class OsUtil {
             }
             bos.flush();
 
-            if(waitForMillsSeconds>=0) {
+            if (waitForMillsSeconds >= 0) {
                 process.waitFor(waitForMillsSeconds, TimeUnit.MILLISECONDS);
-            }else{
+            } else {
                 process.waitFor();
             }
             if (charset == null || charset.isEmpty()) {

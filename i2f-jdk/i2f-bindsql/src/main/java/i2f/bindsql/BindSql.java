@@ -122,19 +122,19 @@ public class BindSql {
         return Objects.hash(type, sql, args);
     }
 
-    public String toArgsString(){
-        if(args==null){
+    public String toArgsString() {
+        if (args == null) {
             return "null";
         }
-        StringBuilder builder=new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         builder.append("[");
-        boolean isFirst=true;
+        boolean isFirst = true;
         for (Object arg : args) {
-            if(!isFirst){
+            if (!isFirst) {
                 builder.append(", ");
             }
-            builder.append("(").append((arg==null?"null":arg.getClass().getSimpleName())).append(")").append(arg);
-            isFirst=false;
+            builder.append("(").append((arg == null ? "null" : arg.getClass().getSimpleName())).append(")").append(arg);
+            isFirst = false;
         }
         builder.append("]");
         return builder.toString();

@@ -11,6 +11,7 @@ public class TinyScriptTokenType extends IElementType {
     public TinyScriptTokenType(@NonNls @NotNull String debugName) {
         super(debugName, TinyScriptLanguage.INSTANCE);
     }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "." + super.toString();

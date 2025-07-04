@@ -188,7 +188,7 @@ public class ResourceUtil {
         return ret;
     }
 
-    public static Set<File> getResourcesFiles(Collection<String> locations){
+    public static Set<File> getResourcesFiles(Collection<String> locations) {
         Set<File> ret = new LinkedHashSet<>();
         if (locations == null) {
             return ret;
@@ -204,16 +204,16 @@ public class ResourceUtil {
         return ret;
     }
 
-    public static Set<File> getResourceFiles(String location)  {
+    public static Set<File> getResourceFiles(String location) {
         Set<File> ret = new LinkedHashSet<>();
         if (location == null) {
             return ret;
         }
 
         Set<String> rootClassPathsDirs = new LinkedHashSet<>();
-        try{
-            rootClassPathsDirs=ResourceUtil.getAllRootClassPaths().stream().filter(e -> e.isDirectory()).map(e -> e.getAbsolutePath()).collect(Collectors.toSet());
-        }catch(Exception e){
+        try {
+            rootClassPathsDirs = ResourceUtil.getAllRootClassPaths().stream().filter(e -> e.isDirectory()).map(e -> e.getAbsolutePath()).collect(Collectors.toSet());
+        } catch (Exception e) {
 
         }
 

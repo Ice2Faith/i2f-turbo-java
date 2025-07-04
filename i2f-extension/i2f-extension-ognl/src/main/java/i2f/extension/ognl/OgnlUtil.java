@@ -10,23 +10,23 @@ import ognl.OgnlException;
  * @date 2024/10/9 13:49
  */
 public class OgnlUtil {
-    public static final LruMap<String,Object> EXPRESSION_MAP=new LruMap<>(4096);
+    public static final LruMap<String, Object> EXPRESSION_MAP = new LruMap<>(4096);
 
     public static Object evaluateExpression(String expression, Object root) throws Exception {
         OgnlContext context = new OgnlContext(null, null, DefaultMemberAccess.INSTANCE);
         context.put("$root", root);
         context.setRoot(root);
-        Object tree=parseExpressionTreeNode(expression);
+        Object tree = parseExpressionTreeNode(expression);
         return Ognl.getValue(tree, context, context.getRoot());
     }
 
     public static Object parseExpressionTreeNode(String expression) throws OgnlException {
-        if(expression!=null){
-            expression=expression.trim();
+        if (expression != null) {
+            expression = expression.trim();
         }
         try {
             Object ret = EXPRESSION_MAP.get(expression);
-            if(ret!=null){
+            if (ret != null) {
                 return ret;
             }
         } catch (Exception e) {
@@ -34,7 +34,7 @@ public class OgnlUtil {
         }
         Object tree = Ognl.parseExpression(expression);
         try {
-            EXPRESSION_MAP.put(expression,tree);
+            EXPRESSION_MAP.put(expression, tree);
         } catch (Exception e) {
 
         }

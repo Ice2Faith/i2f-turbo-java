@@ -31,19 +31,19 @@ public class TypedArgument {
         this.value = value;
     }
 
-    public TypedArgument(Object value,ArgumentTypeHandler handler) {
+    public TypedArgument(Object value, ArgumentTypeHandler handler) {
         this.value = value;
         this.handler = handler;
     }
 
-    public TypedArgument(SQLType jdbcType,Object value){
-        this.jdbcType=jdbcType;
-        this.value=value;
+    public TypedArgument(SQLType jdbcType, Object value) {
+        this.jdbcType = jdbcType;
+        this.value = value;
     }
 
-    public TypedArgument(JDBCType jdbcType,Object value){
-        this.jdbcType=jdbcType;
-        this.value=value;
+    public TypedArgument(JDBCType jdbcType, Object value) {
+        this.jdbcType = jdbcType;
+        this.value = value;
     }
 
     public static TypedArgument of(Class<?> javaType) {
@@ -54,12 +54,14 @@ public class TypedArgument {
         return new TypedArgument(javaType, value);
     }
 
-    public static TypedArgument of(Object value,ArgumentTypeHandler handler){
-        return new TypedArgument(value,handler);
+    public static TypedArgument of(Object value, ArgumentTypeHandler handler) {
+        return new TypedArgument(value, handler);
     }
+
     public static TypedArgument of(SQLType jdbcType, Object value) {
         return new TypedArgument(jdbcType, value);
     }
+
     public static TypedArgument of(JDBCType jdbcType, Object value) {
         return new TypedArgument(jdbcType, value);
     }

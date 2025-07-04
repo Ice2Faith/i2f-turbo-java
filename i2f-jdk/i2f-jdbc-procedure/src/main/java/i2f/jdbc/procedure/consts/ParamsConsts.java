@@ -60,8 +60,8 @@ public interface ParamsConsts {
     String RETURN = "return";
 
     // 动态节点/局部节点
-    String METAS="metas";
-    String GLOBAL_METAS=GLOBAL+"."+METAS;
+    String METAS = "metas";
+    String GLOBAL_METAS = GLOBAL + "." + METAS;
 
     // 这些值，将会始终保存在上下文中，也就是每个params中都应该存在这些键值
     String[] KEEP_NAMES = {

@@ -25,7 +25,7 @@ public class GroovyScript {
     }
 
     public static final GroovyShell DEFAULT_SHELL = new GroovyShell();
-    protected static final LruMap<String,Class> SCRIPT_MAP =new LruMap<>(4096);
+    protected static final LruMap<String, Class> SCRIPT_MAP = new LruMap<>(4096);
 
     public static Object eval(String script, Map<String, Object> params) {
         Binding binding = new Binding(params == null ? new HashMap<>() : params);
@@ -35,21 +35,21 @@ public class GroovyScript {
     }
 
     public static Class parseAsClass(String script) {
-        if(script==null){
+        if (script == null) {
             return null;
         }
-        script=script.trim();
+        script = script.trim();
 
         Class clazz = SCRIPT_MAP.get(script);
-        if(clazz!=null){
+        if (clazz != null) {
             return clazz;
         }
-        clazz = DEFAULT_SHELL.getClassLoader().parseClass(script, "GvyRc"+getTextDigest(script)+".groovy");
-        SCRIPT_MAP.put(script,clazz);
+        clazz = DEFAULT_SHELL.getClassLoader().parseClass(script, "GvyRc" + getTextDigest(script) + ".groovy");
+        SCRIPT_MAP.put(script, clazz);
         return clazz;
     }
 
-    public static String getTextDigest(String text){
+    public static String getTextDigest(String text) {
         StringBuilder hexBuilder = new StringBuilder();
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-1");

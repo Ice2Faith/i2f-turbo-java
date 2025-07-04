@@ -158,7 +158,7 @@ public class LangForeachNode extends AbstractExecutorNode {
             } else {
                 throw new ThrowSignalException("object cannot do foreach loop of type: " + obj.getClass() + " on express: " + collectionScript);
             }
-        }finally {
+        } finally {
             // 还原堆栈
             executor.visitSet(context, itemName, bakParams.get(itemName));
             executor.visitSet(context, firstName, bakParams.get(firstName));

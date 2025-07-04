@@ -13,6 +13,7 @@ import java.util.ArrayList;
  */
 public class OraclePageWrapper implements IPageWrapper {
     public static final OraclePageWrapper INSTANCE = new OraclePageWrapper();
+
     @Override
     public BindSql apply(BindSql bql, ApiOffsetSize page, boolean embed) {
         if (page == null) {

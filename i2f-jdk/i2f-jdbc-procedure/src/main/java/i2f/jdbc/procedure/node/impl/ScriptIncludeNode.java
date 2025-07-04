@@ -38,7 +38,7 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String refid = (String) executor.attrValue(AttrConsts.REFID, FeatureConsts.STRING, node, context);
-        ProcedureMeta meta = executor.getMeta(refid,context);
+        ProcedureMeta meta = executor.getMeta(refid, context);
         if (meta == null) {
             return;
         }
@@ -56,7 +56,7 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
             Object val = executor.attrValue(name, FeatureConsts.VISIT, node, context);
             executor.visitSet(context, name, val);
         }
-        executor.execAsProcedure(meta,context,false,false);
+        executor.execAsProcedure(meta, context, false, false);
 
         // 恢复堆栈
         for (Map.Entry<String, Object> entry : bakParams.entrySet()) {

@@ -75,7 +75,7 @@ public class ContextHolder {
             if (method == null) {
                 continue;
             }
-            if(Object.class.equals(method.getDeclaringClass())){
+            if (Object.class.equals(method.getDeclaringClass())) {
                 continue;
             }
             int mod = method.getModifiers();
@@ -114,7 +114,7 @@ public class ContextHolder {
             if (method == null) {
                 continue;
             }
-            if(Object.class.equals(method.getDeclaringClass())){
+            if (Object.class.equals(method.getDeclaringClass())) {
                 continue;
             }
             int mod = method.getModifiers();

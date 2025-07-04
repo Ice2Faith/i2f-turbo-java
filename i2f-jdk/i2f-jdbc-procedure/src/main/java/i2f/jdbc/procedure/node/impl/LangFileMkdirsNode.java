@@ -29,15 +29,15 @@ public class LangFileMkdirsNode extends AbstractExecutorNode {
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object obj = executor.attrValue(AttrConsts.FILE, FeatureConsts.VISIT, node, context);
-        File file=null;
-        if(obj==null){
+        File file = null;
+        if (obj == null) {
 
-        }else if(obj instanceof File){
-            file=(File) obj;
-        }else{
-            file=new File(String.valueOf(obj));
+        } else if (obj instanceof File) {
+            file = (File) obj;
+        } else {
+            file = new File(String.valueOf(obj));
         }
-        boolean val=file.mkdirs();
+        boolean val = file.mkdirs();
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {
             Object res = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);

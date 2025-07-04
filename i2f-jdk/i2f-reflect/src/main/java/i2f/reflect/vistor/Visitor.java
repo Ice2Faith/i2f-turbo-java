@@ -36,8 +36,8 @@ public interface Visitor {
 
     void set(Object value);
 
-    default void delete(){
-        throw new IllegalStateException("un-support delete operation on type"+getClass());
+    default void delete() {
+        throw new IllegalStateException("un-support delete operation on type" + getClass());
     }
 
     default Object parent() {

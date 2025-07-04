@@ -196,7 +196,7 @@ public class ReflectResolver {
             "com.sun.nio.zipfs."
     };
 
-    public static final String[] LOAD_CLASS_PREFIXES=new String[]{
+    public static final String[] LOAD_CLASS_PREFIXES = new String[]{
             "",
             "java.lang.",
             "java.util.",
@@ -271,13 +271,13 @@ public class ReflectResolver {
         return ret;
     }
 
-    protected static final LruMap<String,Class<?>> CACHE_LOAD_CLASS=new LruMap<>(2048);
+    protected static final LruMap<String, Class<?>> CACHE_LOAD_CLASS = new LruMap<>(2048);
 
     public static Class<?> loadClass(String className) {
-            if(className==null){
-                return null;
-            }
-            return cacheDelegate(CACHE_LOAD_CLASS,className,ReflectResolver::loadClass1,e->e);
+        if (className == null) {
+            return null;
+        }
+        return cacheDelegate(CACHE_LOAD_CLASS, className, ReflectResolver::loadClass1, e -> e);
     }
 
     public static Class<?> loadClass1(String className) {
@@ -908,11 +908,11 @@ public class ReflectResolver {
         if (constructor == null) {
             throw new IllegalArgumentException("not found constructor : " + clazz + " with args count " + args.size());
         }
-        return execConstructor(constructor,args);
+        return execConstructor(constructor, args);
     }
 
-    public static Object execConstructor( Constructor<?> constructor,List<Object> args) {
-        
+    public static Object execConstructor(Constructor<?> constructor, List<Object> args) {
+
         Class<?>[] parameterTypes = constructor.getParameterTypes();
         Object[] invokeArgs = convertAsExecutableArgs(parameterTypes, args);
 
@@ -960,7 +960,8 @@ public class ReflectResolver {
 
         return execMethod(target, method, args);
     }
-    public static Object execMethod(Object target,Method method, List<Object> args ) {
+
+    public static Object execMethod(Object target, Method method, List<Object> args) {
         return execMethod(target, new JdkMethod(method), args);
     }
 
@@ -985,7 +986,7 @@ public class ReflectResolver {
     public static Method matchExecMethod(Class<?> clazz, String methodName, List<Object> args) {
         List<Executable> executables = new ArrayList<>();
         Map<Method, Class<?>> methods = getMethods(clazz);
-        executables.addAll(methods.keySet().stream().filter(e->e.getName().equals(methodName)).collect(Collectors.toList()));
+        executables.addAll(methods.keySet().stream().filter(e -> e.getName().equals(methodName)).collect(Collectors.toList()));
         Executable executable = matchExecutable(executables, args);
         Method method = (Method) executable;
         return method;
@@ -2157,7 +2158,7 @@ public class ReflectResolver {
     }
 
     public static boolean isArray(Object obj) {
-        if(obj==null){
+        if (obj == null) {
             return false;
         }
         if (obj instanceof Class) {

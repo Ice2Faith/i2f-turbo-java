@@ -2,39 +2,40 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
+
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptConstValue extends PsiElement {
 
-  @Nullable
-  TinyScriptBinNumber getBinNumber();
+    @Nullable
+    TinyScriptBinNumber getBinNumber();
 
-  @Nullable
-  TinyScriptConstBool getConstBool();
+    @Nullable
+    TinyScriptConstBool getConstBool();
 
-  @Nullable
-  TinyScriptConstClass getConstClass();
+    @Nullable
+    TinyScriptConstClass getConstClass();
 
-  @Nullable
-  TinyScriptConstMultilineString getConstMultilineString();
+    @Nullable
+    TinyScriptConstMultilineString getConstMultilineString();
 
-  @Nullable
-  TinyScriptConstNull getConstNull();
+    @Nullable
+    TinyScriptConstNull getConstNull();
 
-  @Nullable
-  TinyScriptConstRenderString getConstRenderString();
+    @Nullable
+    TinyScriptConstRenderString getConstRenderString();
 
-  @Nullable
-  TinyScriptConstString getConstString();
+    @Nullable
+    TinyScriptConstString getConstString();
 
-  @Nullable
-  TinyScriptDecNumber getDecNumber();
+    @Nullable
+    TinyScriptDecNumber getDecNumber();
 
-  @Nullable
-  TinyScriptHexNumber getHexNumber();
+    @Nullable
+    TinyScriptHexNumber getHexNumber();
 
-  @Nullable
-  TinyScriptOtcNumber getOtcNumber();
+    @Nullable
+    TinyScriptOtcNumber getOtcNumber();
 
 }

@@ -17,8 +17,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * @author Ice2Faith
@@ -29,59 +27,64 @@ public class AiChatModel {
     protected String apiKey;
     protected String modelName;
     protected String system;
-    protected List<ChatMessage> messages=new ArrayList<>();
+    protected List<ChatMessage> messages = new ArrayList<>();
     protected StreamingChatModel chatModel;
 
-    protected static class Builder{
+    protected static class Builder {
         protected AiChatModel model;
-        protected Builder(AiChatModel model){
-            this.model=model;
+
+        protected Builder(AiChatModel model) {
+            this.model = model;
         }
-        public AiChatModel build(){
+
+        public AiChatModel build() {
             OpenAiStreamingChatModel.OpenAiStreamingChatModelBuilder builder = OpenAiStreamingChatModel.builder();
-            if(model.baseUrl!=null){
+            if (model.baseUrl != null) {
                 builder.baseUrl(model.baseUrl);
             }
-            if(model.apiKey!=null){
+            if (model.apiKey != null) {
                 builder.apiKey(model.apiKey);
             }
-            if(model.modelName!=null){
+            if (model.modelName != null) {
                 builder.modelName(model.modelName);
             }
-            if(model.system!=null){
+            if (model.system != null) {
                 model.messages.add(new SystemMessage(model.system));
             }
-            model.chatModel= builder.build();
+            model.chatModel = builder.build();
             return model;
         }
 
-        public Builder baseUrl(String baseUrl){
-            model.baseUrl=baseUrl;
+        public Builder baseUrl(String baseUrl) {
+            model.baseUrl = baseUrl;
             return this;
         }
-        public Builder apiKey(String apiKey){
-            model.apiKey=apiKey;
+
+        public Builder apiKey(String apiKey) {
+            model.apiKey = apiKey;
             return this;
         }
-        public Builder modelName(String modelName){
-            model.modelName=modelName;
+
+        public Builder modelName(String modelName) {
+            model.modelName = modelName;
             return this;
         }
-        public Builder system(String system){
-            model.system=system;
+
+        public Builder system(String system) {
+            model.system = system;
             return this;
         }
     }
 
 
-    public static Builder builder(){
+    public static Builder builder() {
         return new Builder(new AiChatModel());
     }
 
-    public String chat(String message){
+    public String chat(String message) {
         messages.add(new UserMessage(message));
-        AtomicReference<String> ref=new AtomicReference<>();
-        CountDownLatch latch=new CountDownLatch(1);
+        AtomicReference<String> ref = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
         chatModel.chat(messages, new StreamingChatResponseHandler() {
             @Override
             public void onPartialResponse(String s) {
@@ -101,15 +104,15 @@ public class AiChatModel {
                 latch.countDown();
             }
         });
-        try{
+        try {
             latch.await();
-        }catch(Exception e){
+        } catch (Exception e) {
 
         }
         return ref.get();
     }
 
-    public void stream(String message, Consumer<String> consumer){
+    public void stream(String message, Consumer<String> consumer) {
         messages.add(new UserMessage(message));
         chatModel.chat(messages, new StreamingChatResponseHandler() {
             @Override
@@ -130,10 +133,10 @@ public class AiChatModel {
         });
     }
 
-    public Iterator<String> stream(String message){
+    public Iterator<String> stream(String message) {
         messages.add(new UserMessage(message));
-        LinkedBlockingQueue<String> queue=new LinkedBlockingQueue<>();
-        AtomicBoolean finish=new AtomicBoolean(false);
+        LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        AtomicBoolean finish = new AtomicBoolean(false);
         StreamingChatResponseHandler handler = new StreamingChatResponseHandler() {
             @Override
             public void onPartialResponse(String s) {
@@ -164,7 +167,7 @@ public class AiChatModel {
                 finish.set(true);
             }
         };
-        Iterator<String> ret=new Iterator<String>() {
+        Iterator<String> ret = new Iterator<String>() {
             @Override
             public boolean hasNext() {
                 return !finish.get() || !queue.isEmpty();
@@ -176,7 +179,7 @@ public class AiChatModel {
                     String str = queue.take();
                     return str;
                 } catch (InterruptedException e) {
-                    throw new IllegalStateException(e.getMessage(),e);
+                    throw new IllegalStateException(e.getMessage(), e);
                 }
             }
         };

@@ -27,7 +27,7 @@ public class LruList<E> implements List<E> {
 
     }
 
-    public LruList(E ... elems){
+    public LruList(E... elems) {
         this.delegate.addAll(Arrays.asList(elems));
     }
 
@@ -38,46 +38,46 @@ public class LruList<E> implements List<E> {
         }
     }
 
-    public LruList(Iterator<E> iterator){
-        while(iterator.hasNext()){
+    public LruList(Iterator<E> iterator) {
+        while (iterator.hasNext()) {
             delegate.add(iterator.next());
         }
     }
 
-    public LruList(Enumeration<E> enumeration){
-        while(enumeration.hasMoreElements()){
+    public LruList(Enumeration<E> enumeration) {
+        while (enumeration.hasMoreElements()) {
             delegate.add(enumeration.nextElement());
         }
     }
 
-    public static<E> LruList<E> of(E ... elems){
+    public static <E> LruList<E> of(E... elems) {
         return new LruList<>(elems);
     }
 
-    public static<E> LruList<E> of(Iterable<E> iterable){
+    public static <E> LruList<E> of(Iterable<E> iterable) {
         return new LruList<>(iterable);
     }
 
-    public static<E> LruList<E> of(Iterator<E> iterator){
+    public static <E> LruList<E> of(Iterator<E> iterator) {
         return new LruList<>(iterator);
     }
 
-    public static<E> LruList<E> of(Enumeration<E> enumeration){
+    public static <E> LruList<E> of(Enumeration<E> enumeration) {
         return new LruList<>(enumeration);
     }
 
     public E touch(E val) {
         lock.writeLock().lock();
         try {
-            if(!delegate.isEmpty()) {
+            if (!delegate.isEmpty()) {
                 E head = delegate.get(0);
-                if(head==val){
+                if (head == val) {
                     return head;
                 }
             }
             boolean ok = delegate.remove(val);
             if (ok) {
-                delegate.addFirst( val);
+                delegate.addFirst(val);
             }
             return val;
         } finally {
@@ -88,8 +88,8 @@ public class LruList<E> implements List<E> {
     public E touch(int index) {
         lock.writeLock().lock();
         try {
-            if(index==0){
-                if(!delegate.isEmpty()) {
+            if (index == 0) {
+                if (!delegate.isEmpty()) {
                     E head = delegate.get(0);
                     return head;
                 }
@@ -102,13 +102,13 @@ public class LruList<E> implements List<E> {
         }
     }
 
-    public E touchFirst(Predicate<E> predicate){
+    public E touchFirst(Predicate<E> predicate) {
         lock.writeLock().lock();
         try {
-            E ret=null;
+            E ret = null;
             for (E item : delegate) {
-                if(predicate.test(item)){
-                    ret=item;
+                if (predicate.test(item)) {
+                    ret = item;
                     touch(item);
                     break;
                 }
@@ -119,45 +119,45 @@ public class LruList<E> implements List<E> {
         }
     }
 
-    public void touchIf(Predicate<E> predicate){
+    public void touchIf(Predicate<E> predicate) {
         lock.writeLock().lock();
         try {
-            List<E> list=new ArrayList<>();
+            List<E> list = new ArrayList<>();
             Iterator<E> iterator = delegate.iterator();
-            while(iterator.hasNext()){
-                E val=iterator.next();
-                if(predicate.test(val)){
+            while (iterator.hasNext()) {
+                E val = iterator.next();
+                if (predicate.test(val)) {
                     list.add(val);
                     iterator.remove();
                 }
             }
             for (E item : list) {
-                delegate.add(0,item);
+                delegate.add(0, item);
             }
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public void syncDelegate(Consumer<List<E>> consumer){
+    public void syncDelegate(Consumer<List<E>> consumer) {
         lock.writeLock().unlock();
-        try{
+        try {
             consumer.accept(delegate);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public void sync(Consumer<LruList<E>> consumer){
+    public void sync(Consumer<LruList<E>> consumer) {
         lock.writeLock().unlock();
-        try{
+        try {
             consumer.accept(this);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public ReentrantReadWriteLock getLock(){
+    public ReentrantReadWriteLock getLock() {
         return lock;
     }
 
@@ -185,7 +185,7 @@ public class LruList<E> implements List<E> {
     public boolean contains(Object o) {
         lock.readLock().lock();
         try {
-            boolean ok= delegate.contains(o);
+            boolean ok = delegate.contains(o);
             return ok;
         } finally {
             lock.readLock().unlock();
@@ -196,15 +196,15 @@ public class LruList<E> implements List<E> {
     public Iterator<E> iterator() {
         lock.readLock().lock();
         try {
-            return new SyncWrappedIterator<>(delegate.iterator(),lock);
+            return new SyncWrappedIterator<>(delegate.iterator(), lock);
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    public static class SyncWrappedIterator<E> implements Iterator<E>{
+    public static class SyncWrappedIterator<E> implements Iterator<E> {
         protected Iterator<E> delegate;
-        protected ReadWriteLock lock=new ReentrantReadWriteLock();
+        protected ReadWriteLock lock = new ReentrantReadWriteLock();
 
         public SyncWrappedIterator(Iterator<E> delegate) {
             this.delegate = delegate;
@@ -218,9 +218,9 @@ public class LruList<E> implements List<E> {
         @Override
         public boolean hasNext() {
             lock.readLock().lock();
-            try{
+            try {
                 return delegate.hasNext();
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -228,9 +228,9 @@ public class LruList<E> implements List<E> {
         @Override
         public E next() {
             lock.readLock().lock();
-            try{
+            try {
                 return delegate.next();
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -238,9 +238,9 @@ public class LruList<E> implements List<E> {
         @Override
         public void remove() {
             lock.writeLock().lock();
-            try{
+            try {
                 delegate.remove();
-            }finally {
+            } finally {
                 lock.writeLock().unlock();
             }
         }
@@ -248,9 +248,9 @@ public class LruList<E> implements List<E> {
         @Override
         public void forEachRemaining(Consumer<? super E> action) {
             lock.readLock().lock();
-            try{
+            try {
                 delegate.forEachRemaining(action);
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -320,7 +320,7 @@ public class LruList<E> implements List<E> {
     public boolean addAll(int index, Collection<? extends E> c) {
         lock.writeLock().lock();
         try {
-            return delegate.addAll(index,c);
+            return delegate.addAll(index, c);
         } finally {
             lock.writeLock().unlock();
         }
@@ -390,7 +390,7 @@ public class LruList<E> implements List<E> {
     public E set(int index, E element) {
         lock.writeLock().lock();
         try {
-            return delegate.set(index,element);
+            return delegate.set(index, element);
         } finally {
             lock.writeLock().unlock();
         }
@@ -400,7 +400,7 @@ public class LruList<E> implements List<E> {
     public void add(int index, E element) {
         lock.writeLock().lock();
         try {
-             delegate.add(index,element);
+            delegate.add(index, element);
         } finally {
             lock.writeLock().unlock();
         }
@@ -441,7 +441,7 @@ public class LruList<E> implements List<E> {
     public ListIterator<E> listIterator() {
         lock.readLock().lock();
         try {
-            return new SyncWrappedListIterator<>(delegate.listIterator(),lock);
+            return new SyncWrappedListIterator<>(delegate.listIterator(), lock);
         } finally {
             lock.readLock().unlock();
         }
@@ -451,7 +451,7 @@ public class LruList<E> implements List<E> {
     public ListIterator<E> listIterator(int index) {
         lock.readLock().lock();
         try {
-            return new SyncWrappedListIterator<>(delegate.listIterator(index),lock);
+            return new SyncWrappedListIterator<>(delegate.listIterator(index), lock);
         } finally {
             lock.readLock().unlock();
         }
@@ -459,7 +459,7 @@ public class LruList<E> implements List<E> {
 
     public static class SyncWrappedListIterator<E> implements ListIterator<E> {
         protected ListIterator<E> delegate;
-        protected ReadWriteLock lock=new ReentrantReadWriteLock();
+        protected ReadWriteLock lock = new ReentrantReadWriteLock();
 
         public SyncWrappedListIterator(ListIterator<E> delegate) {
             this.delegate = delegate;
@@ -473,9 +473,9 @@ public class LruList<E> implements List<E> {
         @Override
         public boolean hasNext() {
             lock.readLock().lock();
-            try{
+            try {
                 return delegate.hasNext();
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -483,9 +483,9 @@ public class LruList<E> implements List<E> {
         @Override
         public E next() {
             lock.readLock().lock();
-            try{
+            try {
                 return delegate.next();
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -493,9 +493,9 @@ public class LruList<E> implements List<E> {
         @Override
         public boolean hasPrevious() {
             lock.readLock().lock();
-            try{
+            try {
                 return delegate.hasPrevious();
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -503,9 +503,9 @@ public class LruList<E> implements List<E> {
         @Override
         public E previous() {
             lock.readLock().lock();
-            try{
+            try {
                 return delegate.previous();
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -513,9 +513,9 @@ public class LruList<E> implements List<E> {
         @Override
         public int nextIndex() {
             lock.readLock().lock();
-            try{
+            try {
                 return delegate.nextIndex();
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -523,9 +523,9 @@ public class LruList<E> implements List<E> {
         @Override
         public int previousIndex() {
             lock.readLock().lock();
-            try{
+            try {
                 return delegate.previousIndex();
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }
@@ -533,9 +533,9 @@ public class LruList<E> implements List<E> {
         @Override
         public void remove() {
             lock.writeLock().lock();
-            try{
+            try {
                 delegate.remove();
-            }finally {
+            } finally {
                 lock.writeLock().unlock();
             }
         }
@@ -543,9 +543,9 @@ public class LruList<E> implements List<E> {
         @Override
         public void set(E e) {
             lock.writeLock().lock();
-            try{
+            try {
                 delegate.set(e);
-            }finally {
+            } finally {
                 lock.writeLock().unlock();
             }
         }
@@ -553,9 +553,9 @@ public class LruList<E> implements List<E> {
         @Override
         public void add(E e) {
             lock.writeLock().lock();
-            try{
+            try {
                 delegate.add(e);
-            }finally {
+            } finally {
                 lock.writeLock().unlock();
             }
         }
@@ -563,9 +563,9 @@ public class LruList<E> implements List<E> {
         @Override
         public void forEachRemaining(Consumer<? super E> action) {
             lock.readLock().lock();
-            try{
+            try {
                 delegate.forEachRemaining(action);
-            }finally {
+            } finally {
                 lock.readLock().unlock();
             }
         }

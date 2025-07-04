@@ -47,15 +47,15 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
     }
 
     public static Object evalTinyScript(String script, Object context, JdbcProcedureExecutor executor) {
-        return evalTinyScript(null,script,context,executor);
+        return evalTinyScript(null, script, context, executor);
     }
 
-    public static Object evalTinyScript(XmlNode node,String script, Object context, JdbcProcedureExecutor executor) {
+    public static Object evalTinyScript(XmlNode node, String script, Object context, JdbcProcedureExecutor executor) {
 
         Object obj = null;
 
         try {
-            TinyScriptResolver resolver = new ProcedureTinyScriptResolver(executor,node);
+            TinyScriptResolver resolver = new ProcedureTinyScriptResolver(executor, node);
             obj = TinyScript.script(script, context, resolver);
         } catch (Exception e) {
             if (e instanceof SignalException) {
@@ -224,7 +224,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                         return "";
                     }
                 }
-                return AbstractExecutorNode.getTrackingComment(ContextHolder.TRACE_NODE.get(),lineNumber);
+                return AbstractExecutorNode.getTrackingComment(ContextHolder.TRACE_NODE.get(), lineNumber);
             }
 
             public void log_debug(Object obj) {
@@ -323,7 +323,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 synchronized (executorMethods) {
                     Method[] list = ExecutorMethodProvider.class.getMethods();
                     for (Method item : list) {
-                        if(Object.class.equals(item.getDeclaringClass())){
+                        if (Object.class.equals(item.getDeclaringClass())) {
                             continue;
                         }
                         executorMethods.computeIfAbsent(item.getName(), (k) -> new LruList<>())
@@ -339,7 +339,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 synchronized (execContextMethods) {
                     Method[] list = ExecContextMethodProvider.class.getMethods();
                     for (Method item : list) {
-                        if(Object.class.equals(item.getDeclaringClass())){
+                        if (Object.class.equals(item.getDeclaringClass())) {
                             continue;
                         }
                         execContextMethods.computeIfAbsent(item.getName(), (k) -> new LruList<>())
@@ -389,7 +389,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         @Override
         public Reference<Object> beforeFunctionCall(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
             try {
-                ProcedureMeta meta = executor.getMeta(naming,(Map<String, Object>) context);
+                ProcedureMeta meta = executor.getMeta(naming, (Map<String, Object>) context);
                 if (meta == null) {
                     return Reference.nop();
                 }
@@ -425,8 +425,8 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 return Reference.of(ret);
             } catch (NotFoundSignalException e) {
                 return Reference.nop();
-            }finally {
-                if(node!=null) {
+            } finally {
+                if (node != null) {
                     AbstractExecutorNode.updateTraceInfo(node, (Map<String, Object>) context, executor);
                 }
             }
@@ -458,7 +458,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 Method method = ReflectResolver.matchExecutable(methods, args);
                 if (method != null) {
                     methods.touch(method);
-                    return new JdkInstanceStaticMethod(new ExecContextMethodProvider(executor,context), method);
+                    return new JdkInstanceStaticMethod(new ExecContextMethodProvider(executor, context), method);
                 }
             }
 
