@@ -18,13 +18,11 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -103,15 +101,22 @@ public class MybaisPaginationInterceptor implements Interceptor {
 
         DatabaseType databaseType = detectDatabaseType(invocation, executor, ms);
 
-        ICountWrapper countWrapper = getCountWrapper(databaseType, invocation, executor, ms);
-        IPageWrapper pageWrapper = getPageWrapper(databaseType, invocation, executor, ms);
+        if (!MybatisPagination.isDisabledCount()) {
+            ICountWrapper countWrapper = getCountWrapper(databaseType, invocation, executor, ms);
 
+            long count = executeCount(countWrapper, executor, ms, parameter, boundSql, rowBounds, resultHandler);
+            setTotal(count);
+            if (count <= 0) {
+                if (QUERY.equals(method.getName())) {
+                    return new ArrayList<>();
+                } else {
 
-        long count = executeCount(countWrapper, executor, ms, parameter, boundSql, rowBounds, resultHandler);
-        setTotal(count);
-        if (count <= 0) {
-            return new ArrayList<>();
+                    return EMPTY_CURSOR;
+                }
+            }
         }
+
+        IPageWrapper pageWrapper = getPageWrapper(databaseType, invocation, executor, ms);
 
 
         if (QUERY.equals(method.getName())) {
@@ -303,5 +308,32 @@ public class MybaisPaginationInterceptor implements Interceptor {
         return builder;
     }
 
+    public static final Cursor<?> EMPTY_CURSOR = new Cursor() {
+        private List<?> list = new ArrayList<>();
 
+        @Override
+        public Iterator<?> iterator() {
+            return list.iterator();
+        }
+
+        @Override
+        public void close() throws IOException {
+
+        }
+
+        @Override
+        public boolean isOpen() {
+            return true;
+        }
+
+        @Override
+        public boolean isConsumed() {
+            return false;
+        }
+
+        @Override
+        public int getCurrentIndex() {
+            return 0;
+        }
+    };
 }
