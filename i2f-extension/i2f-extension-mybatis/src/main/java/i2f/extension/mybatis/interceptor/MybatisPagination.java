@@ -2,6 +2,9 @@ package i2f.extension.mybatis.interceptor;
 
 import i2f.database.type.DatabaseType;
 import i2f.page.ApiOffsetSize;
+import i2f.page.Page;
+
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -72,5 +75,9 @@ public class MybatisPagination {
 
     public static void clearDatabaseType() {
         DATABASE_HOLDER.remove();
+    }
+
+    public static <T> Page<T> ofPage(List<T> list) {
+        return Page.of(getPageAndClear(), getTotalAndClear(), list);
     }
 }
