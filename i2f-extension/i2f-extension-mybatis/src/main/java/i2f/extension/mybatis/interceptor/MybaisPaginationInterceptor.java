@@ -67,7 +67,7 @@ public class MybaisPaginationInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        ApiOffsetSize page = getPage();
+        ApiOffsetSize page = getPage(invocation);
         if (page == null) {
             return invocation.proceed();
         }
@@ -101,11 +101,11 @@ public class MybaisPaginationInterceptor implements Interceptor {
 
         DatabaseType databaseType = detectDatabaseType(invocation, executor, ms);
 
-        if (!MybatisPagination.isDisabledCount()) {
+        if (!isDisabledCount(invocation)) {
             ICountWrapper countWrapper = getCountWrapper(databaseType, invocation, executor, ms);
 
             long count = executeCount(countWrapper, executor, ms, parameter, boundSql, rowBounds, resultHandler);
-            setTotal(count);
+            setTotal(invocation, count);
             if (count <= 0) {
                 if (QUERY.equals(method.getName())) {
                     return new ArrayList<>();
@@ -132,11 +132,15 @@ public class MybaisPaginationInterceptor implements Interceptor {
         }
     }
 
-    public void setTotal(long count) {
+    public boolean isDisabledCount(Invocation invocation) {
+        return MybatisPagination.isDisabledCount();
+    }
+
+    public void setTotal(Invocation invocation, long count) {
         MybatisPagination.setTotal(count);
     }
 
-    public ApiOffsetSize getPage() {
+    public ApiOffsetSize getPage(Invocation invocation) {
         return MybatisPagination.getPage();
     }
 
