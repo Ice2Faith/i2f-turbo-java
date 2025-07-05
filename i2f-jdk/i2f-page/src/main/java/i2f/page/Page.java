@@ -42,7 +42,7 @@ public class Page<T> extends ApiPage {
         return ret;
     }
 
-    public Page<T> data(long total, List<T> list) {
+    public Page<T> data(Long total, List<T> list) {
         this.total = total;
         this.list = list;
         return this;

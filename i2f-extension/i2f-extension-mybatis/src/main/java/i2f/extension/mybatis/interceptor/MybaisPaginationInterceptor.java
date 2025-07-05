@@ -7,8 +7,6 @@ import i2f.bindsql.page.IPageWrapper;
 import i2f.bindsql.page.PageWrappers;
 import i2f.database.type.DatabaseType;
 import i2f.page.ApiOffsetSize;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;
@@ -37,25 +35,27 @@ import java.util.Properties;
 @Component
 @Intercepts(
         {
-                @Signature(type = Executor.class, method = "query", args = {
+                @Signature(type = Executor.class, method = MybaisPaginationInterceptor.QUERY, args = {
                         MappedStatement.class,
                         Object.class,
                         RowBounds.class,
                         ResultHandler.class}),
-                @Signature(type = Executor.class, method = "query", args = {
+                @Signature(type = Executor.class, method = MybaisPaginationInterceptor.QUERY, args = {
                         MappedStatement.class,
                         Object.class,
                         RowBounds.class,
                         ResultHandler.class,
                         CacheKey.class,
                         BoundSql.class}),
-                @Signature(type = Executor.class, method = "queryCursor", args = {
+                @Signature(type = Executor.class, method = MybaisPaginationInterceptor.QUERY_CURSOR, args = {
                         MappedStatement.class,
                         Object.class,
                         RowBounds.class}),
         }
 )
 public class MybaisPaginationInterceptor implements Interceptor {
+    public static final String QUERY = "query";
+    public static final String QUERY_CURSOR = "queryCursor";
     protected Properties properties = new Properties();
 
     @Override
@@ -68,23 +68,7 @@ public class MybaisPaginationInterceptor implements Interceptor {
         this.properties = properties;
     }
 
-    @Data
-    @NoArgsConstructor
-    public static class PaginationContext {
-        protected Invocation invocation;
-        protected ApiOffsetSize page;
 
-        protected Executor executor;
-        protected Method method;
-        protected Object[] args;
-
-        protected MappedStatement ms;
-        protected Object parameter;
-        protected RowBounds rowBounds;
-        protected ResultHandler resultHandler;
-        protected CacheKey cacheKey;
-        protected BoundSql boundSql;
-    }
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
@@ -92,10 +76,6 @@ public class MybaisPaginationInterceptor implements Interceptor {
         if (page == null) {
             return invocation.proceed();
         }
-
-        PaginationContext context = new PaginationContext();
-        context.setInvocation(invocation);
-        context.setPage(page);
 
         Executor executor = (Executor) invocation.getTarget();
         Method method = invocation.getMethod();
@@ -109,7 +89,7 @@ public class MybaisPaginationInterceptor implements Interceptor {
         CacheKey cacheKey = null;
         BoundSql boundSql = null;
 
-        if ("query".equals(method.getName())) {
+        if (QUERY.equals(method.getName())) {
             if (args.length == 4) {
                 resultHandler = (ResultHandler<?>) args[3];
                 boundSql = ms.getBoundSql(parameter);
@@ -119,7 +99,7 @@ public class MybaisPaginationInterceptor implements Interceptor {
                 cacheKey = (CacheKey) args[4];
                 boundSql = (BoundSql) args[5];
             }
-        } else if ("queryCursor".equals(method.getName())) {
+        } else if (QUERY_CURSOR.equals(method.getName())) {
             boundSql = ms.getBoundSql(parameter);
             cacheKey = executor.createCacheKey(ms, parameter, RowBounds.DEFAULT, boundSql);
         }
@@ -137,7 +117,7 @@ public class MybaisPaginationInterceptor implements Interceptor {
         }
 
 
-        if ("query".equals(method.getName())) {
+        if (QUERY.equals(method.getName())) {
 
             List<?> list = executePage(pageWrapper, page, executor, ms, parameter, boundSql, rowBounds, resultHandler, cacheKey);
 
@@ -213,7 +193,7 @@ public class MybaisPaginationInterceptor implements Interceptor {
 
         StaticSqlSource staticSqlSource = new StaticSqlSource(ms.getConfiguration(), pageSql, boundSql.getParameterMappings());
 
-        MappedStatement.Builder pageMsBuilder = copyMappedStatement(ms, pageMsId, staticSqlSource, ms.getSqlCommandType());
+        MappedStatement.Builder pageMsBuilder = copyMappedStatement(ms, pageMsId, staticSqlSource, null);
 
         MappedStatement pageMs = pageMsBuilder.build();
 
@@ -233,7 +213,7 @@ public class MybaisPaginationInterceptor implements Interceptor {
                                ResultHandler<?> resultHandler,
                                CacheKey cacheKey) throws Throwable {
         String pageMsId = ms.getId() + "_pagination_page";
-        MappedStatement.Builder pageMsBuilder = copyMappedStatement(ms, pageMsId, ms.getSqlSource(), ms.getSqlCommandType());
+        MappedStatement.Builder pageMsBuilder = copyMappedStatement(ms, pageMsId, null, null);
         MappedStatement pageMs = pageMsBuilder.build();
 
         CacheKey pageKey = executor.createCacheKey(pageMs, parameter, RowBounds.DEFAULT, boundSql);
