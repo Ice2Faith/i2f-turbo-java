@@ -29,7 +29,7 @@ public class MysqlPageWrapper implements IPageWrapper {
         if (page.getOffset() != null && page.getSize() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ").append(embed ? (page.getOffset()) : "?")
+                    .append("\n limit ").append(embed ? (page.getOffset()) : "?")
                     .append(" , ").append(embed ? (page.getSize()) : "?").append(" ");
 
             if (!embed) {
@@ -39,7 +39,7 @@ public class MysqlPageWrapper implements IPageWrapper {
         } else if (page.getOffset() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ").append(embed ? (page.getOffset()) : "?")
+                    .append("\n limit ").append(embed ? (page.getOffset()) : "?")
                     .append(" , ").append(embed ? (Integer.MAX_VALUE) : "?").append(" ");
 
             if (!embed) {
@@ -49,7 +49,7 @@ public class MysqlPageWrapper implements IPageWrapper {
         } else if (page.getSize() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ").append(embed ? (page.getSize()) : "?").append(" ");
+                    .append("\n limit ").append(embed ? (page.getSize()) : "?").append(" ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getSize());

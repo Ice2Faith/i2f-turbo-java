@@ -29,7 +29,7 @@ public class CirroDataPageWrapper implements IPageWrapper {
         if (page.getOffset() != null && page.getEnd() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit (").append(embed ? (page.getOffset() + 1) : "?")
+                    .append("\n limit (").append(embed ? (page.getOffset() + 1) : "?")
                     .append(" , ").append(embed ? (page.getEnd()) : "?").append(" ) ");
 
             if (!embed) {
@@ -39,7 +39,7 @@ public class CirroDataPageWrapper implements IPageWrapper {
         } else if (page.getOffset() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit (").append(embed ? (page.getOffset() + 1) : "?")
+                    .append("\n limit (").append(embed ? (page.getOffset() + 1) : "?")
                     .append(" , ").append(embed ? (Integer.MAX_VALUE) : "?").append(" ) ");
 
             if (!embed) {
@@ -49,7 +49,7 @@ public class CirroDataPageWrapper implements IPageWrapper {
         } else if (page.getEnd() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit (").append(embed ? (1) : "?")
+                    .append("\n limit (").append(embed ? (1) : "?")
                     .append(" , ").append(embed ? (page.getEnd()) : "?").append(" ) ");
 
             if (!embed) {

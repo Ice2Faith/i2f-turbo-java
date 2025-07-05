@@ -29,7 +29,7 @@ public class PostgreSqlPageWrapper implements IPageWrapper {
         if (page.getOffset() != null && page.getSize() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ").append(embed ? (page.getSize()) : "?").append(" ")
+                    .append("\n limit ").append(embed ? (page.getSize()) : "?").append(" ")
                     .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ");
 
             if (!embed) {
@@ -39,7 +39,7 @@ public class PostgreSqlPageWrapper implements IPageWrapper {
         } else if (page.getOffset() != null) {
 
             builder.append(bql.getSql())
-                    .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ");
+                    .append("\n offset ").append(embed ? (page.getOffset()) : "?").append(" ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getOffset());
@@ -47,7 +47,7 @@ public class PostgreSqlPageWrapper implements IPageWrapper {
         } else if (page.getSize() != null) {
 
             builder.append(bql.getSql())
-                    .append(" limit ").append(embed ? (page.getSize()) : "?").append(" ");
+                    .append("\n limit ").append(embed ? (page.getSize()) : "?").append(" ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getSize());

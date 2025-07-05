@@ -29,7 +29,7 @@ public class FirebirdPageWrapper implements IPageWrapper {
         if (page.getOffset() != null && page.getSize() != null) {
 
             builder.append(bql.getSql())
-                    .append(" rows ").append(embed ? (page.getOffset() + 1) : "?")
+                    .append("\n rows ").append(embed ? (page.getOffset() + 1) : "?")
                     .append(" to ").append(embed ? (page.getEnd() + 1) : "?").append(" ");
 
             if (!embed) {
@@ -39,7 +39,7 @@ public class FirebirdPageWrapper implements IPageWrapper {
         } else if (page.getOffset() != null) {
 
             builder.append(bql.getSql())
-                    .append(" rows ").append(embed ? (page.getOffset() + 1) : "?")
+                    .append("\n rows ").append(embed ? (page.getOffset() + 1) : "?")
                     .append(" to ").append(embed ? (Integer.MAX_VALUE) : "?").append(" ");
 
             if (!embed) {
@@ -49,7 +49,7 @@ public class FirebirdPageWrapper implements IPageWrapper {
         } else if (page.getEnd() != null) {
 
             builder.append(bql.getSql())
-                    .append(" rows ").append(embed ? (1) : "?")
+                    .append("\n rows ").append(embed ? (1) : "?")
                     .append(" to ").append(embed ? (page.getEnd() + 1) : "?").append(" ");
 
             if (!embed) {

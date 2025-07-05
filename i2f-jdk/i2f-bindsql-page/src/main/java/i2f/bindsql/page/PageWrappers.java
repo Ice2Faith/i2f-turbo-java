@@ -13,18 +13,40 @@ import java.util.ServiceLoader;
  * @desc
  */
 public class PageWrappers {
+    public static final ThreadLocal<IPageWrapper> WRAPPER_HOLDER = new ThreadLocal<>();
+    public static final ThreadLocal<DatabaseType> DATABASE_HOLDER = new ThreadLocal<>();
 
     public static IPageWrapper wrapper(Connection conn) throws SQLException {
-        DatabaseType type = DatabaseType.typeOfConnection(conn);
+        IPageWrapper ret = WRAPPER_HOLDER.get();
+        if (ret != null) {
+            return ret;
+        }
+        DatabaseType type = DATABASE_HOLDER.get();
+        if (type != null) {
+            return wrapper(type);
+        }
+        type = DatabaseType.typeOfConnection(conn);
         return wrapper(type);
     }
 
     public static IPageWrapper wrapper(String jdbcUrl) {
-        DatabaseType type = DatabaseType.typeOfJdbcUrl(jdbcUrl);
+        IPageWrapper ret = WRAPPER_HOLDER.get();
+        if (ret != null) {
+            return ret;
+        }
+        DatabaseType type = DATABASE_HOLDER.get();
+        if (type != null) {
+            return wrapper(type);
+        }
+        type = DatabaseType.typeOfJdbcUrl(jdbcUrl);
         return wrapper(type);
     }
 
     public static IPageWrapper wrapper(DatabaseType type) {
+        IPageWrapper ret = WRAPPER_HOLDER.get();
+        if (ret != null) {
+            return ret;
+        }
         ServiceLoader<IPageWrapperProvider> list = ServiceLoader.load(IPageWrapperProvider.class);
         for (IPageWrapperProvider item : list) {
             if (list == null) {

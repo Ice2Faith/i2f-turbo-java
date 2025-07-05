@@ -21,10 +21,10 @@ public class SqlCountWrapper implements ICountWrapper {
         pageSql.setArgs(new ArrayList<>(bql.getArgs()));
 
         StringBuilder builder = new StringBuilder();
-        builder.append(" select count(1) cnt ")
-                .append(" from ( ")
+        builder.append(" select count(1) cnt \n")
+                .append(" from ( \n")
                 .append(bql.getSql())
-                .append(" ) tmp_cnt ");
+                .append("\n ) tmp_cnt ");
 
         pageSql.setSql(builder.toString());
         return pageSql;
