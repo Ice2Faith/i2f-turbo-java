@@ -173,8 +173,6 @@ public enum DatabaseType {
      */
     ERROR("error", "URL参数读取错误");
 
-    public static final ThreadLocal<DatabaseType> SELECT_DATABASE = new ThreadLocal<>();
-
     /**
      * 数据库名称
      */
@@ -214,11 +212,7 @@ public enum DatabaseType {
     protected static final Map<Connection, DatabaseType> TYPE_MAP = new WeakHashMap<>();
 
     public static DatabaseType typeOfConnection(Connection conn) throws SQLException {
-        DatabaseType type = SELECT_DATABASE.get();
-        if (type != null) {
-            return type;
-        }
-        type = TYPE_MAP.get(conn);
+        DatabaseType type = TYPE_MAP.get(conn);
         if (type != null) {
             return type;
         }
@@ -240,10 +234,6 @@ public enum DatabaseType {
      * @return ignore
      */
     public static DatabaseType typeOfJdbcUrl(String jdbcUrl) {
-        DatabaseType type = SELECT_DATABASE.get();
-        if (type != null) {
-            return type;
-        }
         if (jdbcUrl == null || jdbcUrl.trim().isEmpty()) {
             //"Error: The jdbcUrl is Null, Cannot read database type"
             return DatabaseType.ERROR;
