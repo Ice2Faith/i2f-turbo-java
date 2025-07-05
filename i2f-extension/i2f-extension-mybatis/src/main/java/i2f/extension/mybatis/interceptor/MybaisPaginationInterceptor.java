@@ -69,7 +69,6 @@ public class MybaisPaginationInterceptor implements Interceptor {
     }
 
 
-
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
         ApiOffsetSize page = getPage();
