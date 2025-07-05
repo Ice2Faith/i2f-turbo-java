@@ -13,9 +13,23 @@ import java.util.List;
  */
 public class MybatisPagination {
 
+    protected static ThreadLocal<Boolean> DISABLED_COUNT = new ThreadLocal<>();
     protected static ThreadLocal<ApiOffsetSize> PAGE_HOLDER = new ThreadLocal<>();
     protected static ThreadLocal<Long> TOTAL_HOLDER = new ThreadLocal<>();
     protected static ThreadLocal<DatabaseType> DATABASE_HOLDER = new ThreadLocal<>();
+
+    public static void disableCount() {
+        DISABLED_COUNT.set(true);
+    }
+
+    public static void enableCount() {
+        DISABLED_COUNT.remove();
+    }
+
+    public static boolean isDisabledCount() {
+        Boolean ok = DISABLED_COUNT.get();
+        return ok != null && ok;
+    }
 
     public static ApiOffsetSize getPage() {
         return PAGE_HOLDER.get();
