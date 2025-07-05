@@ -28,12 +28,12 @@ public class OraclePageWrapper implements IPageWrapper {
         StringBuilder builder = new StringBuilder();
         if (page.getOffset() != null && page.getEnd() != null) {
 
-            builder.append(" SELECT * ")
-                    .append(" FROM (SELECT ROWNUM PAGE_ROW_ID,TMP_PAGE.* ")
-                    .append(" FROM ( ")
+            builder.append(" SELECT * \n")
+                    .append(" FROM (SELECT ROWNUM PAGE_ROW_ID,TMP_PAGE.* \n")
+                    .append(" FROM ( \n")
                     .append(bql.getSql())
-                    .append(" ) TMP_PAGE ")
-                    .append(" WHERE ROWNUM < ").append(embed ? (page.getEnd() + 1) : "?").append(" ) TMP ")
+                    .append("\n ) TMP_PAGE \n")
+                    .append(" WHERE ROWNUM < ").append(embed ? (page.getEnd() + 1) : "?").append(" ) TMP \n")
                     .append(" WHERE PAGE_ROW_ID >= ").append(embed ? (page.getOffset() + 1) : "?").append(" ");
 
             if (!embed) {
@@ -41,20 +41,20 @@ public class OraclePageWrapper implements IPageWrapper {
                 pageSql.getArgs().add(page.getOffset() + 1);
             }
         } else if (page.getOffset() != null) {
-            builder.append(" SELECT TMP_PAGE.* ")
-                    .append(" FROM ( ")
+            builder.append(" SELECT TMP_PAGE.* \n")
+                    .append(" FROM ( \n")
                     .append(bql.getSql())
-                    .append(" ) TMP_PAGE ")
+                    .append("\n ) TMP_PAGE \n")
                     .append(" WHERE ROWNUM >= ").append(embed ? (page.getOffset() + 1) : "?").append(" ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getOffset() + 1);
             }
         } else if (page.getEnd() != null) {
-            builder.append(" SELECT TMP_PAGE.* ")
-                    .append(" FROM ( ")
+            builder.append(" SELECT TMP_PAGE.* \n")
+                    .append(" FROM ( \n")
                     .append(bql.getSql())
-                    .append(" ) TMP_PAGE ")
+                    .append("\n ) TMP_PAGE \n")
                     .append(" WHERE ROWNUM < ").append(embed ? (page.getEnd() + 1) : "?").append(" ");
 
             if (!embed) {

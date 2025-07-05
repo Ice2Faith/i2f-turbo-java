@@ -28,12 +28,12 @@ public class Db2PageWrapper implements IPageWrapper {
         StringBuilder builder = new StringBuilder();
         if (page.getOffset() != null && page.getSize() != null) {
 
-            builder.append(" SELECT * FROM ( ")
-                    .append(" SELECT ROWNUMBER() OVER() AS PAGE_ROW_ID,TMP_PAGE.* FROM ( ")
+            builder.append(" SELECT * FROM ( \n")
+                    .append(" SELECT ROWNUMBER() OVER() AS PAGE_ROW_ID,TMP_PAGE.* FROM ( \n")
                     .append(bql.getSql())
-                    .append(" ) AS TMP_PAGE ")
-                    .append(" ) TMP_PAGE ")
-                    .append(" WHERE PAGE_ROW_ID >= ").append(embed ? (page.getOffset() + 1) : "?")
+                    .append("\n ) AS TMP_PAGE \n")
+                    .append(" ) TMP_PAGE \n")
+                    .append(" WHERE PAGE_ROW_ID >= ").append(embed ? (page.getOffset() + 1) : "?").append("\n")
                     .append(" AND PAGE_ROW_ID < ").append(embed ? (page.getEnd() + 1) : "?").append(" ");
 
             if (!embed) {
@@ -41,22 +41,22 @@ public class Db2PageWrapper implements IPageWrapper {
                 pageSql.getArgs().add(page.getEnd() + 1);
             }
         } else if (page.getOffset() != null) {
-            builder.append(" SELECT * FROM ( ")
-                    .append(" SELECT ROWNUMBER() OVER() AS PAGE_ROW_ID,TMP_PAGE.* FROM ( ")
+            builder.append(" SELECT * FROM ( \n")
+                    .append(" SELECT ROWNUMBER() OVER() AS PAGE_ROW_ID,TMP_PAGE.* FROM ( \n")
                     .append(bql.getSql())
-                    .append(" ) AS TMP_PAGE ")
-                    .append(" ) TMP_PAGE ")
+                    .append("\n ) AS TMP_PAGE \n")
+                    .append(" ) TMP_PAGE \n")
                     .append(" WHERE PAGE_ROW_ID >= ").append(embed ? (page.getOffset() + 1) : "?").append(" ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getOffset() + 1);
             }
         } else if (page.getSize() != null) {
-            builder.append(" SELECT * FROM ( ")
-                    .append(" SELECT ROWNUMBER() OVER() AS PAGE_ROW_ID,TMP_PAGE.* FROM ( ")
+            builder.append(" SELECT * FROM ( \n")
+                    .append(" SELECT ROWNUMBER() OVER() AS PAGE_ROW_ID,TMP_PAGE.* FROM ( \n")
                     .append(bql.getSql())
-                    .append(" ) AS TMP_PAGE ")
-                    .append(" ) TMP_PAGE ")
+                    .append("\n ) AS TMP_PAGE \n")
+                    .append(" ) TMP_PAGE \n")
                     .append(" WHERE PAGE_ROW_ID < ").append(embed ? (page.getSize() + 1) : "?").append(" ");
 
             if (!embed) {

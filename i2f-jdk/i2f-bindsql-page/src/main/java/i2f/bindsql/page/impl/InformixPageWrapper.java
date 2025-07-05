@@ -28,12 +28,12 @@ public class InformixPageWrapper implements IPageWrapper {
         StringBuilder builder = new StringBuilder();
         if (page.getOffset() != null && page.getSize() != null) {
 
-            builder.append(" select ")
-                    .append(" skip ").append(embed ? (page.getOffset()) : "?")
-                    .append(" first ").append(embed ? (page.getSize()) : "?")
-                    .append(" * from ( ")
+            builder.append(" select \n")
+                    .append(" skip ").append(embed ? (page.getOffset()) : "?").append("\n")
+                    .append(" first ").append(embed ? (page.getSize()) : "?").append("\n")
+                    .append(" * from ( \n")
                     .append(bql.getSql())
-                    .append(" ) TMP_PAGE ");
+                    .append("\n ) TMP_PAGE ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getOffset());
@@ -52,11 +52,11 @@ public class InformixPageWrapper implements IPageWrapper {
             }
         } else if (page.getSize() != null) {
 
-            builder.append(" select ")
-                    .append(" first ").append(embed ? (page.getSize()) : "?")
-                    .append(" * from ( ")
+            builder.append(" select \n")
+                    .append(" first ").append(embed ? (page.getSize()) : "?").append("\n")
+                    .append(" * from ( \n")
                     .append(bql.getSql())
-                    .append(" ) TMP_PAGE ");
+                    .append("\n ) TMP_PAGE ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getSize());

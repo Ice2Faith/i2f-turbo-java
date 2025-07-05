@@ -30,7 +30,7 @@ public class SqlServerPageWrapper implements IPageWrapper {
 
             builder
                     .append(bql.getSql())
-                    .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ")
+                    .append("\n offset ").append(embed ? (page.getOffset()) : "?").append(" ")
                     .append(" rows fetch next ").append(embed ? (page.getSize()) : "?").append(" rows only ");
 
             if (!embed) {
@@ -40,7 +40,7 @@ public class SqlServerPageWrapper implements IPageWrapper {
         } else if (page.getOffset() != null) {
             builder
                     .append(bql.getSql())
-                    .append(" offset ").append(embed ? (page.getOffset()) : "?").append(" ");
+                    .append("\n offset ").append(embed ? (page.getOffset()) : "?").append(" ");
 
             if (!embed) {
                 pageSql.getArgs().add(page.getOffset());
@@ -48,7 +48,7 @@ public class SqlServerPageWrapper implements IPageWrapper {
         } else if (page.getSize() != null) {
             builder
                     .append(bql.getSql())
-                    .append(" offset ").append(embed ? (0) : "?").append(" ")
+                    .append("\n offset ").append(embed ? (0) : "?").append(" ")
                     .append(" rows fetch next ").append(embed ? (page.getSize()) : "?").append(" rows only ");
 
             if (!embed) {
