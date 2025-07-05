@@ -1,6 +1,7 @@
 package i2f.form.dialog;
 
 import i2f.form.dialog.impl.image.*;
+import i2f.form.dialog.impl.media.MediaFilePreviewDialog;
 import i2f.form.dialog.impl.media.MediaPreviewDialog;
 import i2f.form.dialog.impl.media.MediaUriPreviewDialog;
 import i2f.form.dialog.impl.media.MediaUrlPreviewDialog;
