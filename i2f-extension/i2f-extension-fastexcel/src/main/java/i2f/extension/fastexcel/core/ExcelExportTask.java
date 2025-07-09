@@ -434,13 +434,10 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 while (true) {
                     ExcelExportPage page = new ExcelExportPage(currPageIndex, pageSize);
                     List<?> data = provider.getData(page);
-                    if (data == null || data.isEmpty()) {
-                        break;
-                    }
 
                     if (excelWriter == null) {
                         if (TypeOf.typeOf(clazz, Map.class)) {
-                            if (!data.isEmpty()) {
+                            if (data != null && !data.isEmpty()) {
                                 if (!useTemplate) {
                                     if (isTempTemplateFile) {
                                         if (templateFile != null) {
@@ -488,6 +485,10 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                         writeSheet = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
                                 .excludeColumnFieldNames(excludeColumnNames)
                                 .build();
+                    }
+
+                    if (data == null || data.isEmpty()) {
+                        break;
                     }
 
                     int dsize = data.size();
