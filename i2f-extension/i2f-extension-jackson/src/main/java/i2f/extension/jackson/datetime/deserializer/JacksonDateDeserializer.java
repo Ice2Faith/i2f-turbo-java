@@ -1,13 +1,18 @@
-package i2f.extension.jackson.datetime;
+package i2f.extension.jackson.datetime.deserializer;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import i2f.convert.obj.ObjectConvertor;
-import i2f.extension.jackson.base.BaseJacksonContextDeserializer;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -15,14 +20,29 @@ import java.util.Date;
  * @date 2023/6/16 23:18
  * @desc
  */
-public class JacksonDateDeserializer extends BaseJacksonContextDeserializer<Date> {
+public class JacksonDateDeserializer extends JsonDeserializer<Date> implements ContextualDeserializer {
     private DateFormat formatter;
-
-    public JacksonDateDeserializer() {
-    }
 
     public JacksonDateDeserializer(DateFormat formatter) {
         this.formatter = formatter;
+    }
+
+    @Override
+    public JsonDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) throws JsonMappingException {
+        if (beanProperty == null) {
+            return this;
+        }
+        JsonFormat ann = beanProperty.getAnnotation(JsonFormat.class);
+        if (ann == null) {
+            ann = beanProperty.getAnnotation(JsonFormat.class);
+        }
+        if (ann != null) {
+            String pattern = ann.pattern();
+            if (pattern != null && !pattern.isEmpty()) {
+                return new JacksonDateDeserializer(new SimpleDateFormat(pattern));
+            }
+        }
+        return this;
     }
 
     @Override
@@ -50,13 +70,6 @@ public class JacksonDateDeserializer extends BaseJacksonContextDeserializer<Date
                 return formatter.parse(str);
             }
         } catch (Exception e) {
-
-        }
-        try {
-            if (formatPatten != null) {
-                return ObjectConvertor.parseDate(formatPatten, str);
-            }
-        } catch (Exception e1) {
 
         }
         return ObjectConvertor.tryParseDate(str);
