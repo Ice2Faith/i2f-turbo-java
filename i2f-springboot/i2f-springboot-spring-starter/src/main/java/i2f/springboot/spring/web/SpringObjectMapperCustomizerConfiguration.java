@@ -45,7 +45,7 @@ public class SpringObjectMapperCustomizerConfiguration {
                     builder.serializerByType(Long.TYPE, ToStringSerializer.instance);
                     builder.serializerByType(long.class, ToStringSerializer.instance);
                 }
-                if (StringUtils.isEmpty(dateFormat)) {
+                if (!StringUtils.isEmpty(dateFormat)) {
                     builder.deserializerByType(Date.class, new JacksonDateDeserializer());
                 }
                 if (!StringUtils.isEmpty(dateFormat)) {
