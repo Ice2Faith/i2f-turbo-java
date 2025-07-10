@@ -1,7 +1,12 @@
 package i2f.springboot.spring.web;
 
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import i2f.extension.jackson.datetime.*;
+import i2f.extension.jackson.datetime.deserializer.JacksonDateDeserializer;
+import i2f.extension.jackson.datetime.deserializer.JacksonLocalDateDeserializer;
+import i2f.extension.jackson.datetime.deserializer.JacksonLocalDateTimeDeserializer;
+import i2f.extension.jackson.datetime.deserializer.JacksonLocalTimeDeserializer;
+import i2f.extension.jackson.datetime.serializer.JacksonTemporalSerializer;
+import i2f.extension.jackson.types.JacksonLong2StringSerializer;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -11,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,6 +37,8 @@ public class SpringObjectMapperCustomizerConfiguration {
 
     private boolean enableLongToString = true;
 
+    private boolean enableGlobalLong2String = true;
+
     private String localDateFormat;
 
     private String localTimeFormat;
@@ -41,12 +49,19 @@ public class SpringObjectMapperCustomizerConfiguration {
             @Override
             public void customize(Jackson2ObjectMapperBuilder builder) {
                 if (enableLongToString) {
-                    builder.serializerByType(Long.class, ToStringSerializer.instance);
-                    builder.serializerByType(Long.TYPE, ToStringSerializer.instance);
-                    builder.serializerByType(long.class, ToStringSerializer.instance);
+                    if (enableGlobalLong2String) {
+                        builder.serializerByType(Long.class, ToStringSerializer.instance);
+                        builder.serializerByType(Long.TYPE, ToStringSerializer.instance);
+                        builder.serializerByType(long.class, ToStringSerializer.instance);
+                    } else {
+                        builder.serializerByType(Long.class, new JacksonLong2StringSerializer());
+                        builder.serializerByType(Long.TYPE, new JacksonLong2StringSerializer());
+                        builder.serializerByType(long.class, new JacksonLong2StringSerializer());
+                    }
                 }
                 if (!StringUtils.isEmpty(dateFormat)) {
-                    builder.deserializerByType(Date.class, new JacksonDateDeserializer());
+                    SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+                    builder.deserializerByType(Date.class, new JacksonDateDeserializer(formatter));
                 }
                 if (!StringUtils.isEmpty(dateFormat)) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
