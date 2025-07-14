@@ -223,7 +223,7 @@ public class AliyunOssFileSystem extends AbsFileSystem {
     @Override
     public OutputStream getOutputStream(String path) throws IOException {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
-        File tmpFile = File.createTempFile("minio-" + UUID.randomUUID().toString(), ".tmp");
+        File tmpFile = File.createTempFile("aliyun-oss-" + UUID.randomUUID().toString(), ".tmp");
         FileOutputStream fos = new FileOutputStream(tmpFile);
         return new FilterOutputStream(fos) {
             @Override
@@ -252,7 +252,7 @@ public class AliyunOssFileSystem extends AbsFileSystem {
 
     @Override
     public OutputStream getAppendOutputStream(String path) throws IOException {
-        throw new UnsupportedOperationException("minio not support appendable stream");
+        throw new UnsupportedOperationException("aliyun-oss not support appendable stream");
     }
 
     @Override
