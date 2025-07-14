@@ -1,0 +1,31 @@
+springdoc:
+  swagger-ui:
+    # Disabling the swagger-ui
+    enabled: true
+    # swagger-ui custom path
+    path: /swagger-ui.html
+  api-docs:
+    # Disabling the /v3/api-docs endpoint
+    enabled: true
+    # /api-docs endpoint custom path
+    path: /api-docs
+  show-actuator: true
+  use-management-port: true
+  # Packages to include
+  packagesToScan: com.package1, com.package2
+  pathsToMatch: /v1/**, /api/**
+  group-configs:
+    - group: user-module
+      display-name: 用户模块
+      packages-to-scan: com.test.modules.user
+      paths-to-match: /api/user/**
+
+# This property enables the openapi and swagger-ui endpoints to be exposed beneath the actuator base path.
+management:
+  server:
+    port: 9090
+  endpoints:
+    web:
+      exposure:
+        include: openapi, swagger-ui
+
