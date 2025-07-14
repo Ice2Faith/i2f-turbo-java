@@ -129,7 +129,10 @@ public class AliyunOssUtil {
         String nextMarker = null;
         ObjectListing listing = null;
         do {
-            listing = client.listObjects(bucketName);
+            ListObjectsRequest req = new ListObjectsRequest();
+            req.setBucketName(bucketName);
+            req.setMarker(nextMarker);
+            listing = client.listObjects(req);
             ret.addAll(listing.getObjectSummaries());
             nextMarker = listing.getNextMarker();
         } while (listing.isTruncated());
@@ -141,7 +144,11 @@ public class AliyunOssUtil {
         String nextMarker = null;
         ObjectListing listing = null;
         do {
-            listing = client.listObjects(bucketName, prefix);
+            ListObjectsRequest req = new ListObjectsRequest();
+            req.setBucketName(bucketName);
+            req.setPrefix(prefix);
+            req.setMarker(nextMarker);
+            listing = client.listObjects(req);
             ret.addAll(listing.getObjectSummaries());
             nextMarker = listing.getNextMarker();
         } while (listing.isTruncated());
