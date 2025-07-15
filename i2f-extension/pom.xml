@@ -81,6 +81,8 @@
         <module>i2f-extension-browser-selenium</module>
         <module>i2f-extension-oss-aliyun</module>
         <module>i2f-extension-filesystem-oss-aliyun</module>
+        <module>i2f-extension-sqlparser</module>
+        <module>i2f-extension-oss-aws-s3</module>
     </modules>
 
 
