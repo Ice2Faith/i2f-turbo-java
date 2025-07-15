@@ -1,8 +1,12 @@
-package i2f.extension.jackson.datetime;
+package i2f.extension.jackson.datetime.serializer;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import i2f.extension.jackson.base.BaseJacksonContextSerializer;
+import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -13,7 +17,7 @@ import java.time.temporal.Temporal;
  * @date 2023/6/16 23:18
  * @desc
  */
-public class JacksonTemporalSerializer<T extends Temporal> extends BaseJacksonContextSerializer<T> {
+public class JacksonTemporalSerializer<T extends Temporal> extends JsonSerializer<T> implements ContextualSerializer {
     private DateTimeFormatter formatter;
 
     public JacksonTemporalSerializer() {
@@ -21,6 +25,24 @@ public class JacksonTemporalSerializer<T extends Temporal> extends BaseJacksonCo
 
     public JacksonTemporalSerializer(DateTimeFormatter formatter) {
         this.formatter = formatter;
+    }
+
+    @Override
+    public JsonSerializer<?> createContextual(SerializerProvider serializerProvider, BeanProperty beanProperty) throws JsonMappingException {
+        if (beanProperty == null) {
+            return this;
+        }
+        JsonFormat ann = beanProperty.getAnnotation(JsonFormat.class);
+        if (ann == null) {
+            ann = beanProperty.getAnnotation(JsonFormat.class);
+        }
+        if (ann != null) {
+            String pattern = ann.pattern();
+            if (pattern != null && !pattern.isEmpty()) {
+                return new JacksonTemporalSerializer<>(DateTimeFormatter.ofPattern(pattern));
+            }
+        }
+        return this;
     }
 
     @Override
@@ -52,9 +74,6 @@ public class JacksonTemporalSerializer<T extends Temporal> extends BaseJacksonCo
             }
         } catch (Exception e) {
 
-        }
-        if (formatPatten != null) {
-            return DateTimeFormatter.ofPattern(formatPatten).format(temporal);
         }
         return null;
     }

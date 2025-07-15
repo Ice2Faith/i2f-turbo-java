@@ -28,6 +28,10 @@ public interface IDataProvider {
         return new DefaultDataProvider<>(dataExtractor, returnType);
     }
 
+    static IDataProvider ofAny(Function<ExcelExportPage, List<?>> dataExtractor, Class<?> returnType) {
+        return new DefaultDataProvider(dataExtractor, returnType);
+    }
+
     static <R> IDataProvider of(List<R> list, Class<R> returnType) {
         return new ListDataProvider(list, returnType);
     }
