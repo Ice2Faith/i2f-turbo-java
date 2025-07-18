@@ -141,7 +141,7 @@ public class MybaisPaginationInterceptor implements Interceptor {
     }
 
     public ApiOffsetSize getPage(Invocation invocation) {
-        return MybatisPagination.getPage();
+        return MybatisPagination.getPageAndClear();
     }
 
     public ICountWrapper getCountWrapper(DatabaseType databaseType, Invocation invocation, Executor executor, MappedStatement ms) {
