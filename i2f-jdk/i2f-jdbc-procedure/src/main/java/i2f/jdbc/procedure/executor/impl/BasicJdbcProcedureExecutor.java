@@ -1604,8 +1604,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     public BindSql resolveSqlScript(String script, Map<String, Object> params) throws Exception {
         MybatisMapperNode mapperNode = MybatisMapperParser.parseScriptNode(script);
-        BindSql bql = MybatisMapperInflater.INSTANCE.inflateSqlNode(mapperNode, params, new HashMap<>());
+        BindSql bql = getMybatisMapperInflater().inflateSqlNode(mapperNode, params, new HashMap<>());
         return bql;
+    }
+
+    public MybatisMapperInflater getMybatisMapperInflater() {
+        return MybatisMapperInflater.INSTANCE;
     }
 
     public Map.Entry<String, BindSql> getDialectSqlScript(List<Map.Entry<String, Object>> dialectScriptList,
