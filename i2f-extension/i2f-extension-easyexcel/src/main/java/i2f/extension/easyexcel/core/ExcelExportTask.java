@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -192,7 +193,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
             }
 
             if (tmpFile.exists()) {
-                tmpFile.delete();
+                deleteFileSync(tmpFile);
             }
 
             if (writeHandler == null) {
@@ -286,7 +287,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                         if (!useTemplate) {
                             if (isTempTemplateFile) {
                                 if (templateFile != null) {
-                                    templateFile.delete();
+                                    deleteFileSync(templateFile);
                                 }
                             }
                             templateFile = createTemplateFileByMap(file, (Map<?, ?>) data.get(0));
@@ -333,7 +334,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                                     if (!useTemplate) {
                                         if (isTempTemplateFile) {
                                             if (templateFile != null) {
-                                                templateFile.delete();
+                                                deleteFileSync(templateFile);
                                             }
                                         }
                                         templateFile = createTemplateFileByMap(file, (Map<?, ?>) item);
@@ -441,7 +442,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                                 if (!useTemplate) {
                                     if (isTempTemplateFile) {
                                         if (templateFile != null) {
-                                            templateFile.delete();
+                                            deleteFileSync(templateFile);
                                         }
                                     }
                                     templateFile = createTemplateFileByMap(file, (Map<?, ?>) data.get(0));
@@ -568,7 +569,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 excelWriter.finish();
             }
             if (file.exists()) {
-                file.delete();
+                deleteFileSync(file);
             }
 
             File fileDir = file.getParentFile();
@@ -583,12 +584,12 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 afterConsumer.accept(this);
             }
             if (tmpFile != null) {
-                tmpFile.delete();
+                deleteFileAsync(tmpFile);
             }
 
             if (createdMapTemplateFile || isTempTemplateFile) {
                 if (templateFile != null) {
-                    templateFile.delete();
+                    deleteFileAsync(templateFile);
                 }
             }
 
@@ -596,6 +597,43 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 latch.countDown();
             }
         }
+    }
+
+    public static ForkJoinPool deletePool = new ForkJoinPool(4);
+
+    public static void deleteFileSync(File file) {
+        if (file == null) {
+            return;
+        }
+        if (!file.exists()) {
+            return;
+        }
+        int count = 0;
+        while (count < 10) {
+            boolean ok = file.delete();
+            if (ok) {
+                break;
+            }
+            try {
+                Thread.sleep(30L * count);
+            } catch (Exception e) {
+
+            }
+            count++;
+        }
+
+    }
+
+    public static void deleteFileAsync(File file) {
+        if (file == null) {
+            return;
+        }
+        if (!file.exists()) {
+            return;
+        }
+        deletePool.submit(() -> {
+            deleteFileSync(file);
+        });
     }
 
     public static File getTempFile() {
@@ -669,7 +707,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
-            templateFile.delete();
+            deleteFileAsync(templateFile);
         }
     }
 
