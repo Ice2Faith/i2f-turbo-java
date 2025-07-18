@@ -65,6 +65,17 @@ public class MybatisMapperInflater {
         return Visitor.visit(expression, params).get();
     }
 
+    public Object runScript(String script, String lang, Map<String, Object> params, MybatisMapperNode node) {
+        if (lang != null) {
+            lang = lang.trim().toLowerCase();
+        }
+        if (lang == null || lang.isEmpty()) {
+            Object obj = evalExpression(script, params);
+            return obj;
+        }
+        throw new IllegalArgumentException("un-support script lang=" + lang + " !");
+    }
+
     public BindSql inflateSql(Connection conn, String unqId, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) throws SQLException {
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
         params.put(DATABASE_TYPE, databaseType);
@@ -215,6 +226,26 @@ public class MybatisMapperInflater {
                     Iterable<?> iter = (Iterable<?>) col;
                     boolean isFirst = true;
                     for (Object obj : iter) {
+                        iterParam.put(item, obj);
+                        BindSql next = inflateSqlNode(child, iterParam, nodeMap);
+                        if (isFirst) {
+                            builder.append(open);
+                        }
+                        if (!isFirst) {
+                            builder.append(separator);
+                        }
+                        builder.append(next.getSql());
+                        args.addAll(next.getArgs());
+                        isFirst = false;
+                    }
+                    if (!isFirst) {
+                        builder.append(close);
+                    }
+                }
+                if (col instanceof Map) {
+                    Map<?, ?> iter = (Map<?, ?>) col;
+                    boolean isFirst = true;
+                    for (Object obj : iter.entrySet()) {
                         iterParam.put(item, obj);
                         BindSql next = inflateSqlNode(child, iterParam, nodeMap);
                         if (isFirst) {
@@ -408,6 +439,16 @@ public class MybatisMapperInflater {
                 args.addAll(next.getArgs());
                 continue;
             }
+            if ("script".equalsIgnoreCase(tagName)) {
+                String lang = Optional.ofNullable(child.getAttributes().get("_lang")).orElse("");
+                String script = child.getTextContent();
+                Object rs = runScript(script, lang, params, child);
+                String result = child.getAttributes().get("result");
+                if (result != null && !result.isEmpty()) {
+                    Visitor.visit(result, params).set(rs);
+                }
+                continue;
+            }
             BindSql next = inflateSqlNode(child, params, nodeMap);
             builder.append(next.getSql());
             args.addAll(next.getArgs());
@@ -415,6 +456,7 @@ public class MybatisMapperInflater {
         }
         return new BindSql(builder.toString(), args);
     }
+
 
     public static void main(String[] args) {
         String expression = " user.name.replace(\"a,b,c\",\"cba\"), jdbcType = VARCHAR, handler= java.util.DateHandler ";

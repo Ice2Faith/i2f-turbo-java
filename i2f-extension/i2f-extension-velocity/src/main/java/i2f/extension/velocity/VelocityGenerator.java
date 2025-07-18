@@ -1,9 +1,6 @@
 package i2f.extension.velocity;
 
-import i2f.extension.velocity.directives.common.ForiDirective;
-import i2f.extension.velocity.directives.common.ReplaceAllDirective;
-import i2f.extension.velocity.directives.common.RichForDirective;
-import i2f.extension.velocity.directives.common.TrimDirective;
+import i2f.extension.velocity.directives.common.*;
 import i2f.extension.velocity.directives.sql.SqlSetDirective;
 import i2f.extension.velocity.directives.sql.SqlWhereDirective;
 import i2f.io.stream.StreamUtil;
@@ -242,6 +239,7 @@ public class VelocityGenerator {
         engine.loadDirective(SqlSetDirective.class.getName());
         engine.loadDirective(RichForDirective.class.getName());
         engine.loadDirective(ForiDirective.class.getName());
+        engine.loadDirective(ScriptDirective.class.getName());
 
         engine.setProperty(Velocity.ENCODING_DEFAULT, "UTF-8");
         engine.setProperty(Velocity.OUTPUT_ENCODING, "UTF-8");
