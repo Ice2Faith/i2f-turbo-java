@@ -3,6 +3,8 @@ package i2f.proxy.std;
 
 import i2f.invokable.Invocation;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * @author Ice2Faith
  * @date 2022/3/25 20:29
@@ -10,18 +12,19 @@ import i2f.invokable.Invocation;
  */
 public interface IProxyHandler {
 
-    default Object initContext() {
+    default Object initContext(Invocation invocation) {
         return null;
     }
 
     /**
      * 在调用之前Hook
      * 返回值不为null,则表示提前返回，不再执行代理对象的调用
+     * 则对 返回值 进行 get 之后返回值作为整个代理的值
      *
      * @param invocation
      * @return
      */
-    default Object before(Object context, Invocation invocation) {
+    default AtomicReference<Object> before(Object context, Invocation invocation) {
         return null;
     }
 

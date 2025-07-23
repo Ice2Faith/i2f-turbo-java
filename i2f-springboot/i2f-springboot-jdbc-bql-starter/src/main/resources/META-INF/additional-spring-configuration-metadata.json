@@ -33,17 +33,15 @@
     },
     {
       "name": "i2f.jdbc.proxy.mapper-packages",
-      "type": "java.lang.Boolean",
+      "type": "java.util.List",
       "description": "whether enable auto-configuration for jdbc proxy mapper packages.",
-      "sourceType": "i2f.springboot.jdbc.bql.properties.JdbcProxyProperties",
-      "defaultValue": true
+      "sourceType": "i2f.springboot.jdbc.bql.properties.JdbcProxyProperties"
     },
     {
       "name": "i2f.jdbc.proxy.script-locations",
-      "type": "java.lang.Boolean",
+      "type": "java.util.List",
       "description": "whether enable auto-configuration for jdbc proxy script locations.",
-      "sourceType": "i2f.springboot.jdbc.bql.properties.JdbcProxyProperties",
-      "defaultValue": true
+      "sourceType": "i2f.springboot.jdbc.bql.properties.JdbcProxyProperties"
     },
     {
       "name": "xproc4j.enable",
@@ -190,6 +188,19 @@
       "description": "whether enable bean ProcedureMetaMapGrammarReporterListener.",
       "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringContextJdbcProcedureExecutorAutoConfiguration",
       "defaultValue": true
+    },
+    {
+      "name": "xproc4j.proxy.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable auto-configuration for jdbc procedure proxy mapper.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.proxy.SpringJdbcProcedureProxyMapperAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "xproc4j.mapper-packages",
+      "type": "java.util.List",
+      "description": "whether enable auto-configuration for jdbc procedure mapper packages.",
+      "sourceType": "i2f.springboot.jdbc.bql.procedure.SpringJdbcProcedureProperties"
     }
   ],
   "hints": [

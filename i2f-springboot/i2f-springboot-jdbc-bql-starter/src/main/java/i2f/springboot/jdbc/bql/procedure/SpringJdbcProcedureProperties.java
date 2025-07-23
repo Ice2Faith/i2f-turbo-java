@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class SpringJdbcProcedureProperties {
     public static final String DEFAULT_XML_LOCATIONS = "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml";
     public static final String DEFAULT_WATCHING_DIRECTORIES = "classpath*:procedure/;classpath*:com/";
+
     protected boolean enable = true;
 
     protected boolean debug = false;
@@ -38,4 +39,6 @@ public class SpringJdbcProcedureProperties {
     protected long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
 
     protected List<String> invokeLogPredicateRegexes = new ArrayList<>();
+
+    protected List<String> mapperPackages = new ArrayList<>();
 }

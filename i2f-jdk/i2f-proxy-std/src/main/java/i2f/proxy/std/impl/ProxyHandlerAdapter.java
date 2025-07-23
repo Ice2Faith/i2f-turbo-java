@@ -18,8 +18,8 @@ public class ProxyHandlerAdapter implements IProxyInvocationHandler {
 
     @Override
     public Object invoke(Object ivkObj, IInvokable invokable, Object... args) throws Throwable {
-        Object context = handler.initContext();
         Invocation invocation = new Invocation(ivkObj, invokable, args);
+        Object context = handler.initContext(invocation);
         Object ret = null;
         Throwable ex = null;
         try {

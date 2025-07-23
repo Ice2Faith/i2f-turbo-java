@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -33,7 +34,7 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
     }
 
     @Override
-    public Object resolve(Object context, Object ivkObj, Method method, Object... args) {
+    public AtomicReference<Object> resolve(Object context, Object ivkObj, Method method, Object... args) {
         HttpRequest request = new HttpRequest();
         Class<?> clazz = method.getDeclaringClass();
         Parameter[] parameters = method.getParameters();
@@ -205,7 +206,7 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
             throw new IllegalStateException(e.getMessage(), e);
         }
 
-        return ret;
+        return new AtomicReference<>(ret);
     }
 
     public static String joinUrlPath(String basePath, String subPath) {
