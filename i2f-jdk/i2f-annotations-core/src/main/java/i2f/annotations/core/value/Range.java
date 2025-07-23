@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Comment({
         "范围",
         "在指定的范围内",
-        "值在min-max之间，通过left和right为true分别指定是否包含左右边界"
+        "值在min-max之间，这是闭区间，也就是包含最大最小值"
 })
 @Target({
         ElementType.FIELD,
@@ -34,7 +34,5 @@ public @interface Range {
 
     String max();
 
-    boolean left() default true;
-
-    boolean right() default false;
+    String message() default "";
 }

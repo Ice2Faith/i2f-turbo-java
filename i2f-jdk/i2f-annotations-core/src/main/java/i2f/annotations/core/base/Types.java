@@ -30,4 +30,6 @@ import java.lang.annotation.*;
 @Documented
 public @interface Types {
     Class<?>[] value() default {};
+
+    String message() default "";
 }
