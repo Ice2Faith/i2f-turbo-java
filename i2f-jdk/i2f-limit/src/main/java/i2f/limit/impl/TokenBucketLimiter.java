@@ -106,6 +106,7 @@ public class TokenBucketLimiter implements Limiter {
         incrementCount.set(Math.max(1, increment));
     }
 
+    @Override
     public boolean require(String name) {
         if (!initialed.get()) {
             init();

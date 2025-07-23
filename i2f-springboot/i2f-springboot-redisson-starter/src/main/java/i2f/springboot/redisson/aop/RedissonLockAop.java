@@ -136,17 +136,17 @@ public class RedissonLockAop {
                 }
                 if (!Object.class.equals(clazz)) {
                     if (!StringUtils.isEmpty(lockName)) {
-                        lock = redissonLockProvider.getLock(clazz, lockName);
+                        lock = redissonLockProvider.getRedisLock(clazz, lockName);
                     } else {
-                        lock = redissonLockProvider.getLock(clazz);
+                        lock = redissonLockProvider.getRedisLock(clazz);
                     }
                 } else {
                     if (!StringUtils.isEmpty(lockName)) {
-                        lock = redissonLockProvider.getLock(lockName);
+                        lock = redissonLockProvider.getRedisLock(lockName);
                     }
                 }
                 if (lock == null) {
-                    lock = redissonLockProvider.getLock(method.getDeclaringClass(), method.getName());
+                    lock = redissonLockProvider.getRedisLock(method.getDeclaringClass(), method.getName());
                 }
 
                 log.info("RLock lock clazz=" + clazz + ",value=" + lockName + ",timeout=" + timeout + ",unit=" + timeUnit);
