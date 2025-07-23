@@ -43,7 +43,9 @@ public @interface Retry {
 
     long delay() default 3;
 
-    double multiplier() default 1;
+    long maxDelay() default 30;
+
+    double multiplier() default 1.1;
 
     TimeUnit unit() default TimeUnit.SECONDS;
 

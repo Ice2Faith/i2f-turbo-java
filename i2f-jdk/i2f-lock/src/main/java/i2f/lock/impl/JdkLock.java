@@ -1,31 +1,27 @@
 package i2f.lock.impl;
 
-
 import i2f.lock.INotifyLock;
 
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Ice2Faith
- * @date 2022/4/15 8:40
- * @desc
+ * @date 2025/7/23 16:13
  */
-public class JdkReentrantLock implements INotifyLock {
-    protected ReentrantLock lock;
-    protected Condition cond;
+public class JdkLock implements INotifyLock {
+    protected Lock lock = new ReentrantLock();
+    protected Condition cond = lock.newCondition();
 
-    public JdkReentrantLock() {
-        lock = new ReentrantLock();
-        cond = lock.newCondition();
+    public JdkLock() {
     }
 
-    public JdkReentrantLock(ReentrantLock lock) {
+    public JdkLock(Lock lock) {
         this.lock = lock;
-        this.cond = this.lock.newCondition();
     }
 
-    public JdkReentrantLock(ReentrantLock lock, Condition cond) {
+    public JdkLock(Lock lock, Condition cond) {
         this.lock = lock;
         this.cond = cond;
     }
