@@ -32,4 +32,6 @@ import java.lang.annotation.*;
 @Repeatable(NotMatches.class)
 public @interface NotMatch {
     String value();
+
+    String message() default "";
 }

@@ -11,7 +11,7 @@ import java.lang.annotation.*;
  */
 @Comment({
         "最小值",
-        "指定最小值，可以通过with参数指定是否包含边界"
+        "指定最小值，包含最小值"
 })
 @Target({
         ElementType.FIELD,
@@ -31,5 +31,5 @@ import java.lang.annotation.*;
 public @interface Min {
     String value();
 
-    boolean with() default true;
+    String message() default "";
 }

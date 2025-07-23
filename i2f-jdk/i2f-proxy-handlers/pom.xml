@@ -33,6 +33,21 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-lock</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-convert</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-comparator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-reflect</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

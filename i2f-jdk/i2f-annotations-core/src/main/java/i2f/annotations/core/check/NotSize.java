@@ -1,6 +1,5 @@
 package i2f.annotations.core.check;
 
-
 import i2f.annotations.core.doc.Comment;
 
 import java.lang.annotation.*;
@@ -11,8 +10,9 @@ import java.lang.annotation.*;
  * @desc
  */
 @Comment({
-        "匹配检查",
-        "检查是否满足匹配表达式value"
+        "大小检查",
+        "检查值是否满足在指定的大小范围内，针对集合/数组/字符串",
+        "值在min-max之间，这是闭区间，也就是包含最大最小值"
 })
 @Target({
         ElementType.FIELD,
@@ -29,9 +29,10 @@ import java.lang.annotation.*;
 })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Repeatable(Matches.class)
-public @interface Match {
-    String value();
+public @interface NotSize {
+    String min();
+
+    String max();
 
     String message() default "";
 }

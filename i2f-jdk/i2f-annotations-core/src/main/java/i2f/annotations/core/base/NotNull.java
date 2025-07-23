@@ -29,4 +29,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface NotNull {
+    String message() default "";
 }
