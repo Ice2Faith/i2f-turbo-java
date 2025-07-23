@@ -3,8 +3,7 @@ package i2f.jdbc.proxy;
 import i2f.jdbc.proxy.handler.ProxyRenderSqlHandler;
 import i2f.jdbc.proxy.provider.ProxyRenderSqlProvider;
 import i2f.jdbc.std.context.JdbcInvokeContextProvider;
-
-import java.lang.reflect.Proxy;
+import i2f.proxy.JdkProxyUtil;
 
 /**
  * @author Ice2Faith
@@ -13,9 +12,7 @@ import java.lang.reflect.Proxy;
  */
 public class ProxySqlExecuteGenerator {
     public static <T> T proxy(Class<T> clazz, ProxyRenderSqlHandler sqlHandler) {
-        return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                new Class[]{clazz},
-                sqlHandler);
+        return JdkProxyUtil.proxy(clazz, sqlHandler);
     }
 
     public static <T> T proxy(Class<T> clazz, JdbcInvokeContextProvider<?> contextProvider,

@@ -5,6 +5,7 @@ import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.proxy.std.IProxyHandler;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -13,12 +14,12 @@ import java.lang.reflect.Method;
  */
 public abstract class BasicDynamicProxyHandler implements IProxyHandler {
     @Override
-    public Object before(Object context, Invocation invocation) {
+    public AtomicReference<Object> before(Object context, Invocation invocation) {
         JdkMethod invoker = (JdkMethod) invocation.getInvokable();
         Method method = invoker.getMethod();
         return resolve(context, invocation.getTarget(), method, invocation.getArgs());
     }
 
 
-    public abstract Object resolve(Object context, Object ivkObj, Method method, Object... args);
+    public abstract AtomicReference<Object> resolve(Object context, Object ivkObj, Method method, Object... args);
 }

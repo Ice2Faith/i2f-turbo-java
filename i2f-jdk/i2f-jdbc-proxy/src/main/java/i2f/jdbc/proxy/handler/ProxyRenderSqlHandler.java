@@ -4,6 +4,8 @@ import i2f.annotations.core.naming.Name;
 import i2f.bindsql.BindSql;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.database.type.DatabaseType;
+import i2f.invokable.IInvokable;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.proxy.annotations.IgnorePage;
@@ -12,12 +14,12 @@ import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 import i2f.lru.LruMap;
 import i2f.page.ApiOffsetSize;
 import i2f.page.Page;
+import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.RichConverter;
 import i2f.typeof.TypeOf;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -32,7 +34,7 @@ import java.util.Map;
  * @date 2024/6/6 8:56
  * @desc
  */
-public class ProxyRenderSqlHandler implements InvocationHandler {
+public class ProxyRenderSqlHandler implements IProxyInvocationHandler {
 
     private Class<?> proxyClass;
 
@@ -49,12 +51,17 @@ public class ProxyRenderSqlHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object ivkObj, IInvokable invokable, Object... args) throws Throwable {
+        if (!(invokable instanceof JdkMethod)) {
+            throw new IllegalStateException("un-support proxy invokable type=" + invokable.getClass());
+        }
+        JdkMethod ivkMethod = (JdkMethod) invokable;
+        Method method = ivkMethod.getMethod();
         if (method.getName().equals("toString") && method.getParameterCount() == 0) {
-            return proxyClass.getName() + proxy.getClass().getSimpleName();
+            return proxyClass.getName() + ivkObj.getClass().getSimpleName();
         }
         if (method.getName().equals("hashCode") && method.getParameterCount() == 0) {
-            return proxy.getClass().getName().hashCode();
+            return ivkObj.getClass().getName().hashCode();
         }
         Class<?> clazz = method.getDeclaringClass();
         String methodId = clazz.getName().replaceAll("\\$", ".") + "." + method.getName();
@@ -201,5 +208,4 @@ public class ProxyRenderSqlHandler implements InvocationHandler {
             contextProvider.endContextInner(context, conn);
         }
     }
-
 }
