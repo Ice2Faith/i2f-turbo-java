@@ -5,6 +5,8 @@ import i2f.invokable.Invocation;
 import i2f.proxy.std.IProxyHandler;
 import i2f.proxy.std.IProxyInvocationHandler;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * @author Ice2Faith
  * @date 2025/7/3 9:30
@@ -23,11 +25,12 @@ public class ProxyHandlerAdapter implements IProxyInvocationHandler {
         Object ret = null;
         Throwable ex = null;
         try {
-            ret = handler.before(context, invocation);
-            if (ret != null) {
+            AtomicReference<Object> ref = handler.before(context, invocation);
+            if (ref != null) {
+                ret = ref.get();
                 return ret;
             }
-            ret = invokable.invoke(ivkObj, args);
+            ret = invocation.getInvokable().invoke(invocation.getTarget(), invocation.getArgs());
             ret = handler.after(context, invocation, ret);
             return ret;
         } catch (Exception e) {
