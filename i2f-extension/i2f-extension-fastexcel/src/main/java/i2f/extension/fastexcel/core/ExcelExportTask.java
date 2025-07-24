@@ -1,12 +1,16 @@
 package i2f.extension.fastexcel.core;
 
-import cn.idev.excel.ExcelWriter;
 import cn.idev.excel.FastExcel;
+import cn.idev.excel.ExcelWriter;
+import cn.idev.excel.converters.Converter;
 import cn.idev.excel.enums.WriteDirectionEnum;
+import cn.idev.excel.write.builder.ExcelWriterBuilder;
+import cn.idev.excel.write.builder.ExcelWriterSheetBuilder;
 import cn.idev.excel.write.handler.CellWriteHandler;
 import cn.idev.excel.write.metadata.WriteSheet;
 import cn.idev.excel.write.metadata.fill.FillConfig;
 import i2f.extension.fastexcel.annotation.ExcelTag;
+import i2f.extension.fastexcel.core.convertor.Convertors;
 import i2f.extension.fastexcel.style.AnnotationExcelStyleCellWriteHandler;
 import i2f.io.stream.StreamUtil;
 import i2f.reflect.ReflectResolver;
@@ -52,6 +56,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
     private List<ExcelExportColumn> exportColumns;
     private Consumer<ExcelExportTask> beforeConsumer;
     private Consumer<ExcelExportTask> afterConsumer;
+    private List<Converter<?>> convertors = Convertors.getConvertors();
 
     public ExcelExportTask(IDataProvider provider) {
         this.provider = provider;
@@ -274,6 +279,10 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 excludeColumnNames.addAll(names);
             }
 
+            if(convertors==null){
+                convertors=new ArrayList<>();
+            }
+
             if (beforeConsumer != null) {
                 beforeConsumer.accept(this);
             }
@@ -299,23 +308,35 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 int size = data.size();
                 if (size <= sheetSize) {
                     if (useTemplate) {
-                        ExcelWriter excelWriter = FastExcel.write(tmpFile)
+                        ExcelWriterBuilder excelWriterBuilder = FastExcel.write(tmpFile)
                                 .withTemplate(templateFile)
                                 .registerWriteHandler(writeHandler)
-                                .excludeColumnFieldNames(excludeColumnNames)
+                                .excludeColumnFieldNames(excludeColumnNames);
+                        for (Converter<?> convertor : convertors) {
+                            excelWriterBuilder.registerConverter(convertor);
+                        }
+                        ExcelWriter excelWriter = excelWriterBuilder
                                 .build();
-                        WriteSheet writeSheet = FastExcel.write()
-                                .sheet(0, sheetName)
+                        ExcelWriterSheetBuilder excelWriterSheetBuilder = FastExcel.write()
+                                .sheet(0, sheetName);
+                        for (Converter<?> convertor : convertors) {
+                            excelWriterSheetBuilder.registerConverter(convertor);
+                        }
+                        WriteSheet writeSheet = excelWriterSheetBuilder
                                 .build();
                         updateWriteHandler(data, clazz, sheetContext, 0, 0, workbookContext);
                         excelWriter.fill(data, writeSheet);
                         excelWriter.finish();
                     } else {
                         updateWriteHandler(data, clazz, sheetContext, 0, 0, workbookContext);
-                        FastExcel.write(tmpFile, clazz)
+                        ExcelWriterSheetBuilder excelWriterSheetBuilder = FastExcel.write(tmpFile, clazz)
                                 .sheet(0, sheetName)
                                 .registerWriteHandler(writeHandler)
-                                .excludeColumnFieldNames(excludeColumnNames)
+                                .excludeColumnFieldNames(excludeColumnNames);
+                        for (Converter<?> convertor : convertors) {
+                            excelWriterSheetBuilder.registerConverter(convertor);
+                        }
+                        excelWriterSheetBuilder
                                 .doWrite(data);
                     }
                 } else {
@@ -355,30 +376,46 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                                     workbook.write(bos);
 
-                                    excelWriter = FastExcel.write(tmpFile)
+                                    ExcelWriterBuilder excelWriterBuilder = FastExcel.write(tmpFile)
                                             .withTemplate(new ByteArrayInputStream(bos.toByteArray()))
                                             .registerWriteHandler(writeHandler)
-                                            .excludeColumnFieldNames(excludeColumnNames)
+                                            .excludeColumnFieldNames(excludeColumnNames);
+                                    for (Converter<?> convertor : convertors) {
+                                        excelWriterBuilder.registerConverter(convertor);
+                                    }
+                                    excelWriter = excelWriterBuilder
                                             .build();
                                 } else {
-                                    excelWriter = FastExcel.write(tmpFile)
+                                    ExcelWriterBuilder excelWriterBuilder = FastExcel.write(tmpFile)
                                             .withTemplate(templateFile)
                                             .registerWriteHandler(writeHandler)
-                                            .excludeColumnFieldNames(excludeColumnNames)
+                                            .excludeColumnFieldNames(excludeColumnNames);
+                                    for (Converter<?> convertor : convertors) {
+                                        excelWriterBuilder.registerConverter(convertor);
+                                    }
+                                    excelWriter = excelWriterBuilder
                                             .build();
                                 }
                             } else {
-                                excelWriter = FastExcel.write(tmpFile, clazz)
+                                ExcelWriterBuilder excelWriterBuilder = FastExcel.write(tmpFile, clazz)
                                         .registerWriteHandler(writeHandler)
-                                        .excludeColumnFieldNames(excludeColumnNames)
+                                        .excludeColumnFieldNames(excludeColumnNames);
+                                for (Converter<?> convertor : convertors) {
+                                    excelWriterBuilder.registerConverter(convertor);
+                                }
+                                excelWriter = excelWriterBuilder
                                         .build();
                             }
                         }
 
 
                         if (count == sheetSize) {
-                            WriteSheet writeSheet = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
-                                    .excludeColumnFieldNames(excludeColumnNames)
+                            ExcelWriterSheetBuilder excelWriterSheetBuilder = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
+                                    .excludeColumnFieldNames(excludeColumnNames);
+                            for (Converter<?> convertor : convertors) {
+                                excelWriterSheetBuilder.registerConverter(convertor);
+                            }
+                            WriteSheet writeSheet = excelWriterSheetBuilder
                                     .build();
                             updateWriteHandler(curData, clazz, sheetContext, currSheetIndex, 0, workbookContext);
                             if (useTemplate) {
@@ -394,8 +431,12 @@ public class ExcelExportTask implements Runnable, Callable<File> {
 
                     }
                     if (count > 0) {
-                        WriteSheet writeSheet = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
-                                .excludeColumnFieldNames(excludeColumnNames)
+                        ExcelWriterSheetBuilder excelWriterSheetBuilder = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
+                                .excludeColumnFieldNames(excludeColumnNames);
+                        for (Converter<?> convertor : convertors) {
+                            excelWriterSheetBuilder.registerConverter(convertor);
+                        }
+                        WriteSheet writeSheet = excelWriterSheetBuilder
                                 .build();
                         updateWriteHandler(curData, clazz, sheetContext, currSheetIndex, 0, workbookContext);
                         if (useTemplate) {
@@ -414,9 +455,13 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                     }
 
                     if (excelWriter == null) {
-                        excelWriter = FastExcel.write(tmpFile, clazz)
+                        ExcelWriterBuilder excelWriterBuilder = FastExcel.write(tmpFile, clazz)
                                 .registerWriteHandler(writeHandler)
-                                .excludeColumnFieldNames(excludeColumnNames)
+                                .excludeColumnFieldNames(excludeColumnNames);
+                        for (Converter<?> convertor : convertors) {
+                            excelWriterBuilder.registerConverter(convertor);
+                        }
+                        excelWriter = excelWriterBuilder
                                 .build();
                     }
 
@@ -462,29 +507,45 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                                 workbook.write(bos);
 
-                                excelWriter = FastExcel.write(tmpFile)
+                                ExcelWriterBuilder excelWriterBuilder = FastExcel.write(tmpFile)
                                         .withTemplate(new ByteArrayInputStream(bos.toByteArray()))
                                         .registerWriteHandler(writeHandler)
-                                        .excludeColumnFieldNames(excludeColumnNames)
+                                        .excludeColumnFieldNames(excludeColumnNames);
+                                for (Converter<?> convertor : convertors) {
+                                    excelWriterBuilder.registerConverter(convertor);
+                                }
+                                excelWriter = excelWriterBuilder
                                         .build();
                             } else {
-                                excelWriter = FastExcel.write(tmpFile)
+                                ExcelWriterBuilder excelWriterBuilder = FastExcel.write(tmpFile)
                                         .withTemplate(templateFile)
                                         .registerWriteHandler(writeHandler)
-                                        .excludeColumnFieldNames(excludeColumnNames)
+                                        .excludeColumnFieldNames(excludeColumnNames);
+                                for (Converter<?> convertor : convertors) {
+                                    excelWriterBuilder.registerConverter(convertor);
+                                }
+                                excelWriter = excelWriterBuilder
                                         .build();
                             }
                         } else {
-                            excelWriter = FastExcel.write(tmpFile, clazz)
+                            ExcelWriterBuilder excelWriterBuilder = FastExcel.write(tmpFile, clazz)
                                     .registerWriteHandler(writeHandler)
-                                    .excludeColumnFieldNames(excludeColumnNames)
+                                    .excludeColumnFieldNames(excludeColumnNames);
+                            for (Converter<?> convertor : convertors) {
+                                excelWriterBuilder.registerConverter(convertor);
+                            }
+                            excelWriter = excelWriterBuilder
                                     .build();
                         }
                     }
 
                     if (writeSheet == null) {
-                        writeSheet = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
-                                .excludeColumnFieldNames(excludeColumnNames)
+                        ExcelWriterSheetBuilder excelWriterSheetBuilder = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
+                                .excludeColumnFieldNames(excludeColumnNames);
+                        for (Converter<?> convertor : convertors) {
+                            excelWriterSheetBuilder.registerConverter(convertor);
+                        }
+                        writeSheet = excelWriterSheetBuilder
                                 .build();
                     }
 
@@ -531,8 +592,12 @@ public class ExcelExportTask implements Runnable, Callable<File> {
 
                     if (!data.isEmpty()) {
                         if (writeSheet == null) {
-                            writeSheet = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
-                                    .excludeColumnFieldNames(excludeColumnNames)
+                            ExcelWriterSheetBuilder excelWriterSheetBuilder = FastExcel.writerSheet(currSheetIndex, ((currSheetIndex == 0) ? sheetName : (sheetName + "-" + currSheetIndex)))
+                                    .excludeColumnFieldNames(excludeColumnNames);
+                            for (Converter<?> convertor : convertors) {
+                                excelWriterSheetBuilder.registerConverter(convertor);
+                            }
+                            writeSheet = excelWriterSheetBuilder
                                     .build();
                         }
 
@@ -561,9 +626,13 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 }
 
                 if (excelWriter == null) {
-                    excelWriter = FastExcel.write(tmpFile, clazz)
+                    ExcelWriterBuilder excelWriterBuilder = FastExcel.write(tmpFile, clazz)
                             .registerWriteHandler(writeHandler)
-                            .excludeColumnFieldNames(excludeColumnNames)
+                            .excludeColumnFieldNames(excludeColumnNames);
+                    for (Converter<?> convertor : convertors) {
+                        excelWriterBuilder.registerConverter(convertor);
+                    }
+                    excelWriter = excelWriterBuilder
                             .build();
                 }
                 excelWriter.finish();

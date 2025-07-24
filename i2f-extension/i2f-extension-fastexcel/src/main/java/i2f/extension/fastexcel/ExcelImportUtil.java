@@ -1,11 +1,14 @@
 package i2f.extension.fastexcel;
 
+import cn.idev.excel.EasyExcel;
 import cn.idev.excel.ExcelReader;
-import cn.idev.excel.FastExcel;
+import cn.idev.excel.converters.Converter;
+import cn.idev.excel.read.builder.ExcelReaderBuilder;
 import cn.idev.excel.read.metadata.ReadSheet;
 import i2f.extension.fastexcel.core.MapAnalysisEventListener;
 import i2f.extension.fastexcel.core.ObjectAnalysisEventListener;
 import i2f.extension.fastexcel.core.WrapAnalysisEventListener;
+import i2f.extension.fastexcel.core.convertor.Convertors;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,8 +56,13 @@ public class ExcelImportUtil {
     }
 
     public static <T, R> List<R> read(InputStream is, Class<?> beanClass, int sheetNo, WrapAnalysisEventListener<T, R> listener) {
-        ExcelReader excelReader = FastExcel.read(is, beanClass, listener).build();
-        ReadSheet readSheet = FastExcel.readSheet(sheetNo).build();
+        ExcelReaderBuilder excelReaderBuilder = EasyExcel.read(is, beanClass, listener);
+        List<Converter<?>> convertors = Convertors.getConvertors();
+        for (Converter<?> convertor : convertors) {
+            excelReaderBuilder.registerConverter(convertor);
+        }
+        ExcelReader excelReader = excelReaderBuilder.build();
+        ReadSheet readSheet = EasyExcel.readSheet(sheetNo).build();
         excelReader.read(readSheet);
         excelReader.finish();
         return listener.getLegalData();
