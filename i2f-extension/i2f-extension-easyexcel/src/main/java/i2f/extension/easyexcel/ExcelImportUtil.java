@@ -2,10 +2,13 @@ package i2f.extension.easyexcel;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelReader;
+import com.alibaba.excel.converters.Converter;
+import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import i2f.extension.easyexcel.core.MapAnalysisEventListener;
 import i2f.extension.easyexcel.core.ObjectAnalysisEventListener;
 import i2f.extension.easyexcel.core.WrapAnalysisEventListener;
+import i2f.extension.easyexcel.core.convertor.Convertors;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,7 +56,12 @@ public class ExcelImportUtil {
     }
 
     public static <T, R> List<R> read(InputStream is, Class<?> beanClass, int sheetNo, WrapAnalysisEventListener<T, R> listener) {
-        ExcelReader excelReader = EasyExcel.read(is, beanClass, listener).build();
+        ExcelReaderBuilder excelReaderBuilder = EasyExcel.read(is, beanClass, listener);
+        List<Converter<?>> convertors = Convertors.getConvertors();
+        for (Converter<?> convertor : convertors) {
+            excelReaderBuilder.registerConverter(convertor);
+        }
+        ExcelReader excelReader = excelReaderBuilder.build();
         ReadSheet readSheet = EasyExcel.readSheet(sheetNo).build();
         excelReader.read(readSheet);
         excelReader.finish();
