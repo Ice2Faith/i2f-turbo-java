@@ -1,5 +1,6 @@
 package i2f.database.metadata.impl.dm;
 
+import i2f.database.metadata.std.IColumnType;
 import i2f.database.metadata.std.StdType;
 
 /**
@@ -7,7 +8,7 @@ import i2f.database.metadata.std.StdType;
  * @date 2024/3/14 16:02
  * @desc actual equals oracle
  */
-public enum DmType {
+public enum DmType implements IColumnType {
     NUMBER("NUMBER", true, true, StdType.DECIMAL),
     VARCHAR2("VARCHAR2", true, false, StdType.VARCHAR),
     CHAR("CHAR", true, false, StdType.CHAR),
@@ -40,18 +41,22 @@ public enum DmType {
         this.stdType = stdType;
     }
 
+    @Override
     public String text() {
         return text;
     }
 
+    @Override
     public boolean precision() {
         return precision;
     }
 
+    @Override
     public boolean scale() {
         return scale;
     }
 
+    @Override
     public StdType stdType() {
         return stdType;
     }

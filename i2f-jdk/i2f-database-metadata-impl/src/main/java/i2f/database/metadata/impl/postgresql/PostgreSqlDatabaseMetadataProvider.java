@@ -166,20 +166,20 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
 
 
         StdType type = StdType.VARCHAR;
-        PostgreSqlType oracleType = null;
+        PostgreSqlType postgreType = null;
         for (PostgreSqlType item : PostgreSqlType.values()) {
             if (item.text().equalsIgnoreCase(col.getType())) {
                 type = item.stdType();
-                oracleType = item;
+                postgreType = item;
                 break;
             }
         }
 
         String columnType = col.getType();
-        if (oracleType != null) {
-            if (oracleType.precision()) {
+        if (postgreType != null) {
+            if (postgreType.precision()) {
                 columnType += "(" + col.getPrecision();
-                if (oracleType.scale()) {
+                if (postgreType.scale()) {
                     columnType += "," + col.getScale();
                 }
                 columnType += ")";
@@ -195,6 +195,7 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
         }
         col.setColumnType(columnType);
 
+        col.setRawDialectType(postgreType);
         col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
         col.setRawJdbcType(type.jdbcType());

@@ -1,9 +1,6 @@
 package i2f.database.metadata.reverse.ddl;
 
-import i2f.database.metadata.reverse.ddl.impl.MysqlDdlDatabaseReverseEngineer;
-import i2f.database.metadata.reverse.ddl.impl.OracleDdlDatabaseReverseEngineer;
-import i2f.database.metadata.reverse.ddl.impl.PostgreDdlDatabaseReverseEngineer;
-import i2f.database.metadata.reverse.ddl.impl.StdDdlDatabaseReverseEngineer;
+import i2f.database.metadata.reverse.ddl.impl.*;
 import i2f.database.type.DatabaseType;
 
 import java.sql.Connection;
@@ -29,7 +26,7 @@ public class DdlDatabaseReverseEngineers {
             case MARIADB:
                 return MysqlDdlDatabaseReverseEngineer.INSTANCE;
             case GBASE:
-                return MysqlDdlDatabaseReverseEngineer.INSTANCE;
+                return GbaseDdlDatabaseReverseEngineer.INSTANCE;
 //            case OSCAR:
 //                return PostgreDdlDatabaseReverseEngineer.INSTANCE;
 //            case XU_GU:

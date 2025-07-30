@@ -240,6 +240,7 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
         }
         col.setColumnType(columnType);
 
+        col.setRawDialectType(oracleType);
         col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
         col.setRawJdbcType(type.jdbcType());

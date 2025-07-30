@@ -10,7 +10,7 @@ import java.util.Date;
  * @date 2024/3/14 16:02
  * @desc
  */
-public enum StdType {
+public enum StdType implements IColumnType {
     INT("int", false, false, Integer.class, JDBCType.INTEGER, Integer.class, JDBCType.NUMERIC),
     VARCHAR("varchar", true, false, String.class, JDBCType.VARCHAR, String.class, JDBCType.VARCHAR),
     BIGINT("bigint", false, false, Long.class, JDBCType.BIGINT, Long.class, JDBCType.NUMERIC),
@@ -63,17 +63,26 @@ public enum StdType {
         this.looseJdbcType = looseJdbcType;
     }
 
+    @Override
     public String text() {
         return text;
     }
 
+    @Override
     public boolean precision() {
         return precision;
     }
 
+    @Override
     public boolean scale() {
         return scale;
     }
+
+    @Override
+    public StdType stdType() {
+        return this;
+    }
+
 
     public Class<?> javaType() {
         return javaType;

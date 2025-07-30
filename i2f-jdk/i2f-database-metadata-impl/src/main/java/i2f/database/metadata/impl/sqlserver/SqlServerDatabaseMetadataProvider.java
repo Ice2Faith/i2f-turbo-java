@@ -233,7 +233,7 @@ public class SqlServerDatabaseMetadataProvider extends BaseDatabaseMetadataProvi
         }
         col.setColumnType(columnType);
 
-
+        col.setRawDialectType(sqlServerType);
         col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
         col.setRawJdbcType(type.jdbcType());

@@ -9,10 +9,10 @@ import i2f.database.metadata.std.StdType;
  * @author Ice2Faith
  * @date 2025/7/30 11:10
  */
-public class MysqlDdlDatabaseReverseEngineer extends DefaultDdlDatabaseReverseEngineer {
-    public static final MysqlDdlDatabaseReverseEngineer INSTANCE = new MysqlDdlDatabaseReverseEngineer();
+public class GbaseDdlDatabaseReverseEngineer extends DefaultDdlDatabaseReverseEngineer {
+    public static final GbaseDdlDatabaseReverseEngineer INSTANCE = new GbaseDdlDatabaseReverseEngineer();
 
-    public static final MysqlDdlDatabaseReverseEngineer CONVERT = new MysqlDdlDatabaseReverseEngineer() {
+    public static final GbaseDdlDatabaseReverseEngineer CONVERT = new GbaseDdlDatabaseReverseEngineer() {
 
         @Override
         public String convertColumnType(ColumnMeta column) {

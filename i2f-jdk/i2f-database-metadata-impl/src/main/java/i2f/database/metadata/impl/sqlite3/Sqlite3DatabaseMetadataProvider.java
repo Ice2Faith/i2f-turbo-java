@@ -186,6 +186,7 @@ public class Sqlite3DatabaseMetadataProvider extends BaseDatabaseMetadataProvide
         }
         col.setColumnType(columnType);
 
+        col.setRawDialectType(sqlite3Type);
         col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
         col.setRawJdbcType(type.jdbcType());
@@ -254,6 +255,7 @@ public class Sqlite3DatabaseMetadataProvider extends BaseDatabaseMetadataProvide
                 }
                 column.setColumnType(pdl.getColumnType());
 
+                column.setRawDialectType(pdl.getRawDialectType());
                 column.setRawJavaType(pdl.getRawJavaType());
                 column.setJavaType(pdl.getJavaType());
                 column.setRawJdbcType(pdl.getRawJdbcType());
@@ -547,6 +549,7 @@ public class Sqlite3DatabaseMetadataProvider extends BaseDatabaseMetadataProvide
             }
             column.setColumnType(columnType);
 
+            column.setRawDialectType(sqlite3Type);
             column.setRawJavaType(type.javaType());
             column.setJavaType(type.javaType().getSimpleName());
             column.setRawJdbcType(type.jdbcType());

@@ -487,6 +487,7 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
         }
         col.setColumnType(columnType);
 
+        col.setRawDialectType(type);
         col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
         col.setRawJdbcType(type.jdbcType());
@@ -580,6 +581,7 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
 
             meta.setColumnType(columnType);
 
+            meta.setRawDialectType(jdbcType);
             meta.setRawJavaType(type.javaType());
             meta.setJavaType(type.javaType().getSimpleName());
             meta.setRawJdbcType(type.jdbcType());

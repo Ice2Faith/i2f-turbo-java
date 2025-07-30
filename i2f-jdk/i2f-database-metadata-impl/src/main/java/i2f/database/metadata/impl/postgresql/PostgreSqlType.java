@@ -1,5 +1,6 @@
 package i2f.database.metadata.impl.postgresql;
 
+import i2f.database.metadata.std.IColumnType;
 import i2f.database.metadata.std.StdType;
 
 /**
@@ -7,7 +8,7 @@ import i2f.database.metadata.std.StdType;
  * @date 2024/3/14 16:02
  * @desc
  */
-public enum PostgreSqlType {
+public enum PostgreSqlType implements IColumnType {
     INTEGER("integer", false, false, StdType.INT),
     VARCHAR("varchar", true, false, StdType.VARCHAR),
     BIGINT("bigint", false, false, StdType.BIGINT),
@@ -77,18 +78,22 @@ public enum PostgreSqlType {
         this.stdType = stdType;
     }
 
+    @Override
     public String text() {
         return text;
     }
 
+    @Override
     public boolean precision() {
         return precision;
     }
 
+    @Override
     public boolean scale() {
         return scale;
     }
 
+    @Override
     public StdType stdType() {
         return stdType;
     }

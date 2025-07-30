@@ -72,6 +72,7 @@ public class GbaseDatabaseMetadataProvider extends MysqlDatabaseMetadataProvider
         }
         col.setColumnType(columnType);
 
+        col.setRawDialectType(gbaseType);
         col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
         col.setRawJdbcType(type.jdbcType());

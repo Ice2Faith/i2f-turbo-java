@@ -1,5 +1,6 @@
 package i2f.database.metadata.impl.mysql;
 
+import i2f.database.metadata.std.IColumnType;
 import i2f.database.metadata.std.StdType;
 
 /**
@@ -7,7 +8,7 @@ import i2f.database.metadata.std.StdType;
  * @date 2024/3/14 16:02
  * @desc
  */
-public enum MySqlType {
+public enum MySqlType implements IColumnType {
     INT("int", false, false, StdType.INT),
     VARCHAR("varchar", true, false, StdType.VARCHAR),
     BIGINT("bigint", false, false, StdType.BIGINT),
@@ -65,18 +66,22 @@ public enum MySqlType {
         this.stdType = stdType;
     }
 
+    @Override
     public String text() {
         return text;
     }
 
+    @Override
     public boolean precision() {
         return precision;
     }
 
+    @Override
     public boolean scale() {
         return scale;
     }
 
+    @Override
     public StdType stdType() {
         return stdType;
     }

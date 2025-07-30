@@ -18,6 +18,10 @@ public class PostgreDdlDatabaseReverseEngineer extends DefaultDdlDatabaseReverse
     public static final PostgreDdlDatabaseReverseEngineer CONVERT = new PostgreDdlDatabaseReverseEngineer() {
         @Override
         public String convertColumnType(ColumnMeta column) {
+            Object rawDialectType = column.getRawDialectType();
+            if (rawDialectType instanceof PostgreSqlType) {
+                return column.getColumnType();
+            }
             if (column.isAutoIncrement()) {
                 StdType stdType = column.getRawStdType();
                 if (stdType == StdType.INT || stdType == StdType.INTEGER) {
