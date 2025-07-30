@@ -11,7 +11,7 @@ public enum OracleType {
     NUMBER("NUMBER", true, true, StdType.DECIMAL),
     VARCHAR2("VARCHAR2", true, false, StdType.VARCHAR),
     CHAR("CHAR", true, false, StdType.CHAR),
-    DATE("DATE", false, false, StdType.DATE),
+    DATE("DATE", false, false, StdType.DATETIME),
     FLOAT("FLOAT", true, true, StdType.FLOAT),
     REAL("REAL", true, true, StdType.REAL),
     LONG("LONG", false, false, StdType.TEXT),

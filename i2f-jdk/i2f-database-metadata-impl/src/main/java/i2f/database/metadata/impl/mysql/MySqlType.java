@@ -81,4 +81,77 @@ public enum MySqlType {
         return stdType;
     }
 
+
+    public static MySqlType ofStd(StdType type) {
+        switch (type) {
+            case INT:
+                return MySqlType.INT;
+            case VARCHAR:
+                return MySqlType.VARCHAR;
+            case BIGINT:
+                return MySqlType.BIGINT;
+            case DATETIME:
+                return MySqlType.DATETIME;
+            case DECIMAL:
+                return MySqlType.DECIMAL;
+            case CHAR:
+                return MySqlType.CHAR;
+            case DOUBLE:
+                return MySqlType.DOUBLE;
+            case FLOAT:
+                return MySqlType.FLOAT;
+            case REAL:
+                return MySqlType.REAL;
+            case TEXT:
+                return MySqlType.TEXT;
+            case BLOB:
+                return MySqlType.BLOB;
+            case TIMESTAMP:
+                return MySqlType.TIMESTAMP;
+            case INTEGER:
+                return MySqlType.INTEGER;
+            case BIT:
+                return MySqlType.BIT;
+            case BOOL:
+                return MySqlType.BOOL;
+            case DATE:
+                return MySqlType.DATE;
+            case TIME:
+                return MySqlType.TIME;
+            case NUMERIC:
+                return MySqlType.NUMERIC;
+            case TINYINT:
+                return MySqlType.TINYINT;
+            case SMALLINT:
+                return MySqlType.SMALLINT;
+            case MEDIUMINT:
+                return MySqlType.MEDIUMINT;
+            case LONG:
+                return MySqlType.LONG;
+            case TINYTEXT:
+                return MySqlType.TINYTEXT;
+            case MEDIUMTEXT:
+                return MySqlType.MEDIUMTEXT;
+            case LONGTEXT:
+                return MySqlType.LONGTEXT;
+            case TINYBLOB:
+                return MySqlType.TINYBLOB;
+            case MEDIUMBLOB:
+                return MySqlType.MEDIUMBLOB;
+            case LONGBLOB:
+                return MySqlType.LONGBLOB;
+            case BINARY:
+                return MySqlType.BINARY;
+            case VARBINARY:
+                return MySqlType.VARBINARY;
+            case YEAR:
+                return MySqlType.YEAR;
+            case ENUM:
+                return MySqlType.ENUM;
+            case SET:
+                return MySqlType.SET;
+            default:
+                return MySqlType.VARCHAR;
+        }
+    }
 }

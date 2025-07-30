@@ -219,6 +219,7 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
             }
         }
 
+
         String columnType = col.getType();
         if (oracleType != null) {
             if (oracleType.precision()) {
