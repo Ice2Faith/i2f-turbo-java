@@ -186,10 +186,15 @@ public class Sqlite3DatabaseMetadataProvider extends BaseDatabaseMetadataProvide
         }
         col.setColumnType(columnType);
 
+        col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
+        col.setRawJdbcType(type.jdbcType());
         col.setJdbcType(type.jdbcType().getName());
+        col.setRawStdType(type);
         col.setStdType(type.text());
+        col.setRawLooseJavaType(type.looseJavaType());
         col.setLooseJavaType(type.looseJavaType().getSimpleName());
+        col.setRawLooseJdbcType(type.looseJdbcType());
         col.setLooseJdbcType(type.looseJdbcType().getName());
         return col;
     }
@@ -248,10 +253,16 @@ public class Sqlite3DatabaseMetadataProvider extends BaseDatabaseMetadataProvide
                     column.setScale(pdl.getScale());
                 }
                 column.setColumnType(pdl.getColumnType());
+
+                column.setRawJavaType(pdl.getRawJavaType());
                 column.setJavaType(pdl.getJavaType());
+                column.setRawJdbcType(pdl.getRawJdbcType());
                 column.setJdbcType(pdl.getJdbcType());
+                column.setRawStdType(pdl.getRawStdType());
                 column.setStdType(pdl.getStdType());
+                column.setRawLooseJavaType(pdl.getRawLooseJavaType());
                 column.setLooseJavaType(pdl.getLooseJavaType());
+                column.setRawLooseJdbcType(pdl.getRawLooseJdbcType());
                 column.setLooseJdbcType(pdl.getLooseJdbcType());
             }
             if (column.getComment() == null || "".equals(column.getComment())) {
@@ -536,10 +547,15 @@ public class Sqlite3DatabaseMetadataProvider extends BaseDatabaseMetadataProvide
             }
             column.setColumnType(columnType);
 
+            column.setRawJavaType(type.javaType());
             column.setJavaType(type.javaType().getSimpleName());
+            column.setRawJdbcType(type.jdbcType());
             column.setJdbcType(type.jdbcType().getName());
+            column.setRawStdType(type);
             column.setStdType(type.text());
+            column.setRawLooseJavaType(type.looseJavaType());
             column.setLooseJavaType(type.looseJavaType().getSimpleName());
+            column.setRawLooseJdbcType(type.looseJdbcType());
             column.setLooseJdbcType(type.looseJdbcType().getName());
             ret.getColumns().add(column);
         }

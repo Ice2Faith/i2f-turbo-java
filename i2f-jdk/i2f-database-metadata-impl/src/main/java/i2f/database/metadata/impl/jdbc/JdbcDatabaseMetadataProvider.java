@@ -201,10 +201,15 @@ public class JdbcDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
 
         col.setColumnType(columnType);
 
+        col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
+        col.setRawJdbcType(type.jdbcType());
         col.setJdbcType(type.jdbcType().getName());
+        col.setRawStdType(type);
         col.setStdType(type.text());
+        col.setRawLooseJavaType(type.looseJavaType());
         col.setLooseJavaType(type.looseJavaType().getSimpleName());
+        col.setRawLooseJdbcType(type.looseJdbcType());
         col.setLooseJdbcType(type.looseJdbcType().getName());
         return col;
     }

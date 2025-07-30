@@ -2026,7 +2026,7 @@ public class JdbcResolver {
         Map<String, Object> map = new LinkedHashMap<>();
         int size = columns.size();
         for (int i = 1; i <= size; i++) {
-            QueryColumn col = columns.get(i);
+            QueryColumn col = columns.get(i - 1);
             Object val = getResultObject(rs, i, col.getType());
             map.put(col.getName(), val);
         }
