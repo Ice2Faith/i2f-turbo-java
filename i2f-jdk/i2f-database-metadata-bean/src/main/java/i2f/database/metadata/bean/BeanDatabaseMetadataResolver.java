@@ -265,6 +265,7 @@ public class BeanDatabaseMetadataResolver {
                 }
                 if (ann instanceof JdbcType) {
                     JdbcType dban = (JdbcType) ann;
+                    col.setRawJdbcType(dban.value());
                     col.setJdbcType(dban.value().getName());
                 }
                 if (ann instanceof Nullable) {
@@ -386,14 +387,19 @@ public class BeanDatabaseMetadataResolver {
                 columnType += ")";
             }
             col.setColumnType(columnType);
+            col.setRawJavaType(field.getType());
             col.setJavaType(field.getType().getSimpleName());
             StdType stdType = StdType.detectType(col.getType(), col.getJavaType());
             if (stdType == null) {
                 stdType = StdType.VARCHAR;
             }
+            col.setRawJdbcType(stdType.jdbcType());
             col.setJdbcType(stdType.jdbcType().getName());
+            col.setRawStdType(stdType);
             col.setStdType(stdType.text());
+            col.setRawLooseJavaType(stdType.looseJavaType());
             col.setLooseJavaType(stdType.looseJavaType().getSimpleName());
+            col.setRawLooseJdbcType(stdType.looseJdbcType());
             col.setLooseJdbcType(stdType.looseJdbcType().getName());
             columns.add(col);
         }

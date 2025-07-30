@@ -1,7 +1,9 @@
 package i2f.database.metadata.data;
 
+import i2f.database.metadata.std.StdType;
 import lombok.Data;
 
+import java.sql.JDBCType;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +34,12 @@ public class ColumnMeta {
     protected String stdType;
     protected String looseJavaType;
     protected String looseJdbcType;
+
+    protected Class<?> rawJavaType;
+    protected JDBCType rawJdbcType;
+    protected StdType rawStdType;
+    protected Class<?> rawLooseJavaType;
+    protected JDBCType rawLooseJdbcType;
 
     // 以下字段，需要使用 TableMeta.fillColumnIndexMeta 后才有值，才能正确使用
     protected boolean isPrimaryKey;
