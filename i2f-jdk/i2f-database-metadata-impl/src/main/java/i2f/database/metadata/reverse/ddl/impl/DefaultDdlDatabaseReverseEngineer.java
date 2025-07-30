@@ -18,11 +18,30 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
     @Override
     public String generate(TableMeta meta) {
         StringBuilder builder = new StringBuilder();
-        builder.append("-- ").append(meta.getDatabase()).append(".").append(meta.getName()).append(" ").append(meta.getComment()).append("\n");
+        generateBefore(meta, builder);
 
         generateDropTable(meta, builder);
         builder.append("\n");
 
+        generateCreateTable(meta, builder);
+
+        generateUniqueIndexes(meta, builder);
+
+        generateIndexes(meta, builder);
+
+        generateAfter(meta, builder);
+        return builder.toString();
+    }
+
+    public void generateBefore(TableMeta meta, StringBuilder builder) {
+        builder.append("-- ").append(meta.getDatabase()).append(".").append(meta.getName()).append(" ").append(meta.getComment()).append("\n");
+    }
+
+    public void generateAfter(TableMeta meta, StringBuilder builder) {
+
+    }
+
+    public void generateCreateTable(TableMeta meta, StringBuilder builder) {
         builder.append("create table ").append(meta.getName()).append("\n")
                 .append("(").append("\n");
         List<ColumnMeta> columns = meta.getColumns();
@@ -66,12 +85,6 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
             builder.append(" comment ").append(decorateSqlString(meta.getComment()));
         }
         builder.append(";").append("\n");
-
-        generateUniqueIndexes(meta, builder);
-
-        generateIndexes(meta, builder);
-
-        return builder.toString();
     }
 
     public void generateDropTable(TableMeta meta, StringBuilder builder) {
