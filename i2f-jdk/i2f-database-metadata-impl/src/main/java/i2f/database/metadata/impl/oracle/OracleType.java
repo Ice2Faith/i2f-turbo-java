@@ -56,4 +56,77 @@ public enum OracleType {
         return stdType;
     }
 
+
+    public static OracleType ofStd(StdType type) {
+        switch (type) {
+            case INT:
+                return OracleType.NUMBER;
+            case VARCHAR:
+                return OracleType.VARCHAR2;
+            case BIGINT:
+                return OracleType.NUMBER;
+            case DATETIME:
+                return OracleType.DATE;
+            case DECIMAL:
+                return OracleType.NUMBER;
+            case CHAR:
+                return OracleType.CHAR;
+            case DOUBLE:
+                return OracleType.NUMBER;
+            case FLOAT:
+                return OracleType.FLOAT;
+            case REAL:
+                return OracleType.REAL;
+            case TEXT:
+                return OracleType.CLOB;
+            case BLOB:
+                return OracleType.BLOB;
+            case TIMESTAMP:
+                return OracleType.TIMESTAMP;
+            case INTEGER:
+                return OracleType.NUMBER;
+            case BIT:
+                return OracleType.NUMBER;
+            case BOOL:
+                return OracleType.NUMBER;
+            case DATE:
+                return OracleType.DATE;
+            case TIME:
+                return OracleType.DATE;
+            case NUMERIC:
+                return OracleType.NUMBER;
+            case TINYINT:
+                return OracleType.NUMBER;
+            case SMALLINT:
+                return OracleType.NUMBER;
+            case MEDIUMINT:
+                return OracleType.NUMBER;
+            case LONG:
+                return OracleType.NUMBER;
+            case TINYTEXT:
+                return OracleType.CLOB;
+            case MEDIUMTEXT:
+                return OracleType.CLOB;
+            case LONGTEXT:
+                return OracleType.CLOB;
+            case TINYBLOB:
+                return OracleType.BLOB;
+            case MEDIUMBLOB:
+                return OracleType.BLOB;
+            case LONGBLOB:
+                return OracleType.BLOB;
+            case BINARY:
+                return OracleType.BLOB;
+            case VARBINARY:
+                return OracleType.BLOB;
+            case YEAR:
+                return OracleType.VARCHAR2;
+            case ENUM:
+                return OracleType.VARCHAR2;
+            case SET:
+                return OracleType.VARCHAR2;
+            default:
+                return OracleType.VARCHAR2;
+        }
+    }
 }

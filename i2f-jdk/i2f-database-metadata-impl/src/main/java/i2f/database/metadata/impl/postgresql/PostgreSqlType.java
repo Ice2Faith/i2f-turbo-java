@@ -93,4 +93,77 @@ public enum PostgreSqlType {
         return stdType;
     }
 
+
+    public static PostgreSqlType ofStd(StdType type) {
+        switch (type) {
+            case INT:
+                return PostgreSqlType.INTEGER;
+            case VARCHAR:
+                return PostgreSqlType.VARCHAR;
+            case BIGINT:
+                return PostgreSqlType.BIGINT;
+            case DATETIME:
+                return PostgreSqlType.TIMESTAMP;
+            case DECIMAL:
+                return PostgreSqlType.DECIMAL;
+            case CHAR:
+                return PostgreSqlType.CHAR;
+            case DOUBLE:
+                return PostgreSqlType.DOUBLE;
+            case FLOAT:
+                return PostgreSqlType.DOUBLE;
+            case REAL:
+                return PostgreSqlType.REAL;
+            case TEXT:
+                return PostgreSqlType.TEXT;
+            case BLOB:
+                return PostgreSqlType.TEXT;
+            case TIMESTAMP:
+                return PostgreSqlType.TIMESTAMP;
+            case INTEGER:
+                return PostgreSqlType.INTEGER;
+            case BIT:
+                return PostgreSqlType.BIT;
+            case BOOL:
+                return PostgreSqlType.BOOL;
+            case DATE:
+                return PostgreSqlType.DATE;
+            case TIME:
+                return PostgreSqlType.TIME;
+            case NUMERIC:
+                return PostgreSqlType.NUMERIC;
+            case TINYINT:
+                return PostgreSqlType.INT2;
+            case SMALLINT:
+                return PostgreSqlType.INT4;
+            case MEDIUMINT:
+                return PostgreSqlType.INT8;
+            case LONG:
+                return PostgreSqlType.BIGINT;
+            case TINYTEXT:
+                return PostgreSqlType.TEXT;
+            case MEDIUMTEXT:
+                return PostgreSqlType.TEXT;
+            case LONGTEXT:
+                return PostgreSqlType.TEXT;
+            case TINYBLOB:
+                return PostgreSqlType.TEXT;
+            case MEDIUMBLOB:
+                return PostgreSqlType.TEXT;
+            case LONGBLOB:
+                return PostgreSqlType.TEXT;
+            case BINARY:
+                return PostgreSqlType.TEXT;
+            case VARBINARY:
+                return PostgreSqlType.TEXT;
+            case YEAR:
+                return PostgreSqlType.VARCHAR;
+            case ENUM:
+                return PostgreSqlType.VARCHAR;
+            case SET:
+                return PostgreSqlType.VARCHAR;
+            default:
+                return PostgreSqlType.VARCHAR;
+        }
+    }
 }
