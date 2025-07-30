@@ -18,6 +18,10 @@ public class OracleDdlDatabaseReverseEngineer extends DefaultDdlDatabaseReverseE
     public static final OracleDdlDatabaseReverseEngineer CONVERT = new OracleDdlDatabaseReverseEngineer() {
         @Override
         public String convertColumnType(ColumnMeta column) {
+            Object rawDialectType = column.getRawDialectType();
+            if (rawDialectType instanceof OracleType) {
+                return column.getColumnType();
+            }
             StdType stdType = column.getRawStdType();
             OracleType type = OracleType.ofStd(stdType);
             if (stdType == StdType.BIGINT || stdType == StdType.LONG) {

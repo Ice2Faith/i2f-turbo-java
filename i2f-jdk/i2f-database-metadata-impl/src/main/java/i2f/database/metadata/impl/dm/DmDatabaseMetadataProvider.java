@@ -86,6 +86,7 @@ public class DmDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
         }
         col.setColumnType(columnType);
 
+        col.setRawDialectType(dmType);
         col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
         col.setRawJdbcType(type.jdbcType());

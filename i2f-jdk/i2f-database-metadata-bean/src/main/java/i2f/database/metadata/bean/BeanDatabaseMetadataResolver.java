@@ -393,6 +393,7 @@ public class BeanDatabaseMetadataResolver {
             if (stdType == null) {
                 stdType = StdType.VARCHAR;
             }
+            col.setRawDialectType(stdType);
             col.setRawJdbcType(stdType.jdbcType());
             col.setJdbcType(stdType.jdbcType().getName());
             col.setRawStdType(stdType);

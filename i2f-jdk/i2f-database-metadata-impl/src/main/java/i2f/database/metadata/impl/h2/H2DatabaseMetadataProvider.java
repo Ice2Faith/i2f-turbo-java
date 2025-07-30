@@ -198,6 +198,7 @@ public class H2DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
         }
         col.setColumnType(columnType);
 
+        col.setRawDialectType(mysqlType);
         col.setRawJavaType(type.javaType());
         col.setJavaType(type.javaType().getSimpleName());
         col.setRawJdbcType(type.jdbcType());

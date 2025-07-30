@@ -41,6 +41,8 @@ public class ColumnMeta {
     protected Class<?> rawLooseJavaType;
     protected JDBCType rawLooseJdbcType;
 
+    protected Object rawDialectType;
+
     // 以下字段，需要使用 TableMeta.fillColumnIndexMeta 后才有值，才能正确使用
     protected boolean isPrimaryKey;
     protected String primaryKeyName;

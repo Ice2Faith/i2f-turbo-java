@@ -1,5 +1,6 @@
 package i2f.database.metadata.impl.sqlserver;
 
+import i2f.database.metadata.std.IColumnType;
 import i2f.database.metadata.std.StdType;
 
 /**
@@ -7,7 +8,7 @@ import i2f.database.metadata.std.StdType;
  * @date 2024/3/14 16:02
  * @desc
  */
-public enum SqlServerType {
+public enum SqlServerType implements IColumnType {
     BIGINT_IDENTITY("bigint identity", false, false, StdType.BIGINT),
     INT("int", false, false, StdType.INT),
     VARCHAR("varchar", true, false, StdType.VARCHAR),
@@ -73,18 +74,22 @@ public enum SqlServerType {
         this.stdType = stdType;
     }
 
+    @Override
     public String text() {
         return text;
     }
 
+    @Override
     public boolean precision() {
         return precision;
     }
 
+    @Override
     public boolean scale() {
         return scale;
     }
 
+    @Override
     public StdType stdType() {
         return stdType;
     }

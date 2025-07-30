@@ -1,5 +1,6 @@
 package i2f.database.metadata.impl.sqlite3;
 
+import i2f.database.metadata.std.IColumnType;
 import i2f.database.metadata.std.StdType;
 
 /**
@@ -7,7 +8,7 @@ import i2f.database.metadata.std.StdType;
  * @date 2024/3/14 16:02
  * @desc
  */
-public enum Sqlite3Type {
+public enum Sqlite3Type implements IColumnType {
     INTEGER("integer", false, false, StdType.DOUBLE),
     TEXT("text", false, false, StdType.VARCHAR),
     REAL("real", false, false, StdType.REAL),
@@ -26,18 +27,22 @@ public enum Sqlite3Type {
         this.stdType = stdType;
     }
 
+    @Override
     public String text() {
         return text;
     }
 
+    @Override
     public boolean precision() {
         return precision;
     }
 
+    @Override
     public boolean scale() {
         return scale;
     }
 
+    @Override
     public StdType stdType() {
         return stdType;
     }
