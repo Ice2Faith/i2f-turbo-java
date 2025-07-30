@@ -55,4 +55,26 @@ public class ColumnMeta {
     public static int compare(ColumnMeta o1, ColumnMeta o2) {
         return Integer.compare(o1.getIndex(), o2.getIndex());
     }
+
+    public ColumnMeta fillRawTypes() {
+        if (rawStdType == null) {
+            rawStdType = StdType.detectType(stdType, javaType);
+        }
+        if (rawStdType == null) {
+            return this;
+        }
+        if (rawJavaType == null) {
+            rawJavaType = rawStdType.javaType();
+        }
+        if (rawJdbcType == null) {
+            rawJdbcType = rawStdType.jdbcType();
+        }
+        if (rawLooseJavaType == null) {
+            rawLooseJavaType = rawStdType.looseJavaType();
+        }
+        if (rawLooseJdbcType == null) {
+            rawLooseJdbcType = rawStdType.looseJdbcType();
+        }
+        return this;
+    }
 }

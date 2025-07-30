@@ -18,6 +18,8 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
     @Override
     public String generate(TableMeta meta) {
         StringBuilder builder = new StringBuilder();
+        meta.fillColumnIndexMeta();
+
         generateBefore(meta, builder);
 
         generateDropTable(meta, builder);
@@ -34,7 +36,7 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
     }
 
     public void generateBefore(TableMeta meta, StringBuilder builder) {
-        builder.append("-- ").append(meta.getDatabase()).append(".").append(meta.getName()).append(" ").append(meta.getComment()).append("\n");
+        builder.append("-- ").append(tableName(meta.getDatabase())).append(".").append(tableName(meta.getName())).append(" ").append(meta.getComment()).append("\n");
     }
 
     public void generateAfter(TableMeta meta, StringBuilder builder) {
@@ -42,7 +44,7 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
     }
 
     public void generateCreateTable(TableMeta meta, StringBuilder builder) {
-        builder.append("create table ").append(meta.getName()).append("\n")
+        builder.append(keyword("create table ")).append(tableName(meta.getName())).append("\n")
                 .append("(").append("\n");
         List<ColumnMeta> columns = meta.getColumns();
         if (columns != null) {
@@ -56,18 +58,20 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
                     builder.append(",");
                 }
 
-                builder.append(column.getName()).append(" ").append(column.getColumnType());
+
+                builder.append(columnName(column.getName())).append(" ").append(keyword(convertColumnType(column)));
+
                 if (column.isAutoIncrement()) {
-                    builder.append(" ").append("auto_increment");
+                    builder.append(" ").append(keyword("auto_increment"));
                 }
                 if (!isEmpty(column.getDefaultValue())) {
-                    builder.append(" ").append("default ").append(decorateSqlString(column.getDefaultValue()));
+                    builder.append(" ").append(keyword("default ")).append(decorateSqlString(column.getDefaultValue()));
                 }
                 if (!column.isNullable()) {
-                    builder.append(" ").append("not null");
+                    builder.append(" ").append(keyword("not null"));
                 }
                 if (!isEmpty(column.getComment())) {
-                    builder.append(" ").append("comment ").append(decorateSqlString(column.getComment()));
+                    builder.append(" ").append(keyword("comment ")).append(decorateSqlString(column.getComment()));
                 }
                 builder.append("\n");
                 isFirst = false;
@@ -76,19 +80,19 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
         IndexMeta primary = meta.getPrimary();
         if (primary != null) {
             builder.append("\n");
-            builder.append("\t").append(",primary key (");
+            builder.append("\t").append(keyword(",primary key ("));
             generateIndexColumns(primary, builder);
             builder.append(")").append("\n");
         }
         builder.append(")");
         if (!isEmpty(meta.getComment())) {
-            builder.append(" comment ").append(decorateSqlString(meta.getComment()));
+            builder.append(keyword(" comment ")).append(decorateSqlString(meta.getComment()));
         }
         builder.append(";").append("\n");
     }
 
     public void generateDropTable(TableMeta meta, StringBuilder builder) {
-        builder.append("drop table if exists ").append(meta.getName()).append(";").append("\n");
+        builder.append(keyword("drop table if exists ")).append(tableName(meta.getName())).append(";").append("\n");
     }
 
     public void generateIndexes(TableMeta meta, StringBuilder builder) {
@@ -96,8 +100,8 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
         if (indexes != null) {
             builder.append("\n");
             for (IndexMeta index : indexes) {
-                builder.append("create index ").append(index.getName()).append("\n")
-                        .append("\t").append("on ").append(meta.getName()).append("(");
+                builder.append(keyword("create index ")).append(tableName(index.getName())).append("\n")
+                        .append("\t").append(keyword("on ")).append(tableName(meta.getName())).append("(");
                 generateIndexColumns(index, builder);
                 builder.append(");").append("\n");
             }
@@ -109,8 +113,8 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
         if (uniqueIndexes != null) {
             builder.append("\n");
             for (IndexMeta index : uniqueIndexes) {
-                builder.append("create unique index ").append(index.getName()).append("\n")
-                        .append("\t").append("on ").append(meta.getName()).append("(");
+                builder.append(keyword("create unique index ")).append(tableName(index.getName())).append("\n")
+                        .append("\t").append(keyword("on ")).append(tableName(meta.getName())).append("(");
                 generateIndexColumns(index, builder);
                 builder.append(");").append("\n");
             }
@@ -124,12 +128,37 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
             if (!isFirst) {
                 builder.append(", ");
             }
-            builder.append(item.getName());
+            builder.append(columnName(item.getName()));
             if (item.isDesc()) {
-                builder.append(" desc");
+                builder.append(keyword(" desc"));
             }
             isFirst = false;
         }
+    }
+
+    public String convertColumnType(ColumnMeta column) {
+        return column.getColumnType();
+    }
+
+    public String keyword(String str) {
+        if (str == null) {
+            return str;
+        }
+        return str;
+    }
+
+    public String tableName(String str) {
+        if (str == null) {
+            return str;
+        }
+        return str;
+    }
+
+    public String columnName(String str) {
+        if (str == null) {
+            return str;
+        }
+        return str;
     }
 
     public boolean isEmpty(String str) {
@@ -138,7 +167,7 @@ public class DefaultDdlDatabaseReverseEngineer implements DdlDatabaseReverseEngi
 
     public String decorateSqlString(String str) {
         if (str == null) {
-            return "null";
+            return keyword("null");
         }
         return "'" + str.replace("'", "''") + "'";
     }

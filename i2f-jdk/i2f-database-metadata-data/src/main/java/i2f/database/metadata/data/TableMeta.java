@@ -70,6 +70,14 @@ public class TableMeta {
                 }
             }
         }
+        if (columns != null) {
+            for (ColumnMeta column : columns) {
+                if (column == null) {
+                    continue;
+                }
+                column.fillRawTypes();
+            }
+        }
         return this;
     }
 }
