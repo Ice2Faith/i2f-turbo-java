@@ -15,6 +15,45 @@ import java.util.List;
 public class PostgreDdlDatabaseReverseEngineer extends DefaultDdlDatabaseReverseEngineer {
     public static final PostgreDdlDatabaseReverseEngineer INSTANCE = new PostgreDdlDatabaseReverseEngineer();
 
+    public static final PostgreDdlDatabaseReverseEngineer CONVERT = new PostgreDdlDatabaseReverseEngineer() {
+        @Override
+        public String convertColumnType(ColumnMeta column) {
+            if (column.isAutoIncrement()) {
+                StdType stdType = column.getRawStdType();
+                if (stdType == StdType.INT || stdType == StdType.INTEGER) {
+                    return PostgreSqlType.SERIAL.text();
+                } else if (stdType == StdType.SMALLINT || stdType == StdType.TINYINT) {
+                    return PostgreSqlType.SMALLSERIAL.text();
+                } else {
+                    return PostgreSqlType.BIGSERIAL.text();
+                }
+            } else {
+                StdType stdType = column.getRawStdType();
+                PostgreSqlType type = PostgreSqlType.ofStd(stdType);
+                if (type.precision() && type.scale()) {
+                    return type.text() + "(" + column.getPrecision() + ", " + column.getScale() + ")";
+                } else if (type.precision()) {
+                    return type.text() + "(" + column.getPrecision() + ")";
+                }
+                return type.text();
+            }
+        }
+
+        @Override
+        public String keyword(String str) {
+            return str == null ? null : str.toLowerCase();
+        }
+
+        @Override
+        public String tableName(String str) {
+            return str == null ? null : str.toLowerCase();
+        }
+
+        @Override
+        public String columnName(String str) {
+            return str == null ? null : str.toLowerCase();
+        }
+    };
 
     @Override
     public void generateCreateTable(TableMeta meta, StringBuilder builder) {
@@ -95,18 +134,4 @@ public class PostgreDdlDatabaseReverseEngineer extends DefaultDdlDatabaseReverse
         }
     }
 
-    @Override
-    public String keyword(String str) {
-        return str == null ? null : str.toLowerCase();
-    }
-
-    @Override
-    public String tableName(String str) {
-        return str == null ? null : str.toLowerCase();
-    }
-
-    @Override
-    public String columnName(String str) {
-        return str == null ? null : str.toLowerCase();
-    }
 }

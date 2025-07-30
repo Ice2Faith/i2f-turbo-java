@@ -3,6 +3,8 @@ package i2f.database.metadata.reverse.ddl.impl;
 import i2f.database.metadata.data.ColumnMeta;
 import i2f.database.metadata.data.IndexMeta;
 import i2f.database.metadata.data.TableMeta;
+import i2f.database.metadata.impl.oracle.OracleType;
+import i2f.database.metadata.std.StdType;
 
 import java.util.List;
 
@@ -12,6 +14,48 @@ import java.util.List;
  */
 public class OracleDdlDatabaseReverseEngineer extends DefaultDdlDatabaseReverseEngineer {
     public static final OracleDdlDatabaseReverseEngineer INSTANCE = new OracleDdlDatabaseReverseEngineer();
+
+    public static final OracleDdlDatabaseReverseEngineer CONVERT = new OracleDdlDatabaseReverseEngineer() {
+        @Override
+        public String convertColumnType(ColumnMeta column) {
+            StdType stdType = column.getRawStdType();
+            OracleType type = OracleType.ofStd(stdType);
+            if (stdType == StdType.BIGINT || stdType == StdType.LONG) {
+                return type.text() + "(32,0)";
+            } else if (stdType == StdType.INT || stdType == StdType.INTEGER) {
+                return type.text() + "(15,0)";
+            } else if (stdType == StdType.SMALLINT || stdType == StdType.MEDIUMINT) {
+                return type.text() + "(8,0)";
+            } else if (stdType == StdType.TINYINT) {
+                return type.text() + "(3,0)";
+            }
+            if (stdType == StdType.DECIMAL || stdType == StdType.DOUBLE
+                    || stdType == StdType.REAL || stdType == StdType.NUMERIC) {
+                return type.text() + "(32,8)";
+            }
+            if (type.precision() && type.scale()) {
+                return type.text() + "(" + column.getPrecision() + ", " + column.getScale() + ")";
+            } else if (type.precision()) {
+                return type.text() + "(" + column.getPrecision() + ")";
+            }
+            return type.text();
+        }
+
+        @Override
+        public String keyword(String str) {
+            return str == null ? null : str.toUpperCase();
+        }
+
+        @Override
+        public String tableName(String str) {
+            return str == null ? null : str.toUpperCase();
+        }
+
+        @Override
+        public String columnName(String str) {
+            return str == null ? null : str.toUpperCase();
+        }
+    };
 
     @Override
     public void generateCreateTable(TableMeta meta, StringBuilder builder) {
@@ -102,18 +146,5 @@ public class OracleDdlDatabaseReverseEngineer extends DefaultDdlDatabaseReverseE
         }
     }
 
-    @Override
-    public String keyword(String str) {
-        return str == null ? null : str.toUpperCase();
-    }
 
-    @Override
-    public String tableName(String str) {
-        return str == null ? null : str.toUpperCase();
-    }
-
-    @Override
-    public String columnName(String str) {
-        return str == null ? null : str.toUpperCase();
-    }
 }
