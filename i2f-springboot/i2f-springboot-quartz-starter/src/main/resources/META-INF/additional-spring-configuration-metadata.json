@@ -1,0 +1,49 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.config.quartz",
+      "type": "i2f.springboot.quartz.QuartzAutoConfiguration",
+      "sourceType": "i2f.springboot.quartz.QuartzAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.config.quartz.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable quartz configuration.",
+      "sourceType": "i2f.springboot.quartz.QuartzAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.config.quartz.scaner.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable quartz configuration.",
+      "sourceType": "i2f.springboot.quartz.QuartzScannerConfig",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

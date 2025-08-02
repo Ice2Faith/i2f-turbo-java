@@ -1,2 +1,3 @@
 i2f.springboot.mybatis.dynamic.SpringMybatisDynamicScriptExecutor
 i2f.springboot.mybatis.MybatisDynamicAutoConfiguration
+i2f.springboot.mybatis.MybatisAutoConfiguration

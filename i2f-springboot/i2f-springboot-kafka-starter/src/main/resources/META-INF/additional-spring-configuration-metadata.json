@@ -1,0 +1,54 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.config.kafka",
+      "type": "i2f.springboot.mq.kafka.KafkaConfigProperties",
+      "sourceType": "i2f.springboot.mq.kafka.KafkaConfigProperties"
+    },
+    {
+      "name": "i2f.springboot.config.spring-kafka",
+      "type": "i2f.springboot.mq.kafka.SpringKafkaConfiguration",
+      "sourceType": "i2f.springboot.mq.kafka.SpringKafkaConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.config.kafka.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable kafka configuration.",
+      "sourceType": "i2f.springboot.mq.kafka.KafkaAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.config.spring-kafka.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable spring-kafka configuration.",
+      "sourceType": "i2f.springboot.mq.kafka.SpringKafkaConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
