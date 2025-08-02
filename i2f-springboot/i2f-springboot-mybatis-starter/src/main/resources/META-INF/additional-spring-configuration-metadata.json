@@ -13,6 +13,27 @@
       "description": "whether enable dynamic script executor.",
       "sourceType": "i2f.springboot.mybatis.dynamic.SpringMybatisDynamicScriptExecutor",
       "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.config.mybatis.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable mybatis customer configuration.",
+      "sourceType": "i2f.springboot.mybatis.MybatisAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.config.mybatis.interceptor.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable mybatis interceptor.",
+      "sourceType": "i2f.springboot.mybatis.MybatisAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.config.mybatis.enable-pagination-interceptor",
+      "type": "java.lang.Boolean",
+      "description": "whether enable mybatis pagination interceptor.",
+      "sourceType": "i2f.springboot.mybatis.MybatisAutoConfiguration",
+      "defaultValue": false
     }
   ],
   "hints": [

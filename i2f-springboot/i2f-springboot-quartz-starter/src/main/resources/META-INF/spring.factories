@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    i2f.springboot.quartz.QuartzAutoConfiguration,\
+    i2f.springboot.quartz.QuartzScannerConfig,\
+    i2f.springboot.quartz.SpringJobFactory

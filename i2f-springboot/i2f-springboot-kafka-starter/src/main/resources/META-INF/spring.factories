@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    i2f.springboot.mq.kafka.KafkaAutoConfiguration,\
+    i2f.springboot.mq.kafka.KafkaConfigProperties,\
+    i2f.springboot.mq.kafka.SpringKafkaConfiguration

@@ -1,0 +1,56 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.config.rabbit",
+      "type": "i2f.springboot.mq.rabbit.RabbitMqAutoConfiguration",
+      "sourceType": "i2f.springboot.mq.rabbit.RabbitMqAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.config.rabbit.mandatory",
+      "type": "java.lang.Boolean",
+      "description": "whether enable rabbit-mq mandatory.",
+      "sourceType": "i2f.springboot.mq.rabbit.RabbitMqAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.config.rabbit.log-confirm-callback",
+      "type": "java.lang.Boolean",
+      "description": "whether enable rabbit-mq log confirm callback.",
+      "sourceType": "i2f.springboot.mq.rabbit.RabbitMqAutoConfiguration",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.config.rabbit.log-return-callback",
+      "type": "java.lang.Boolean",
+      "description": "whether enable rabbit-mq log return callback.",
+      "sourceType": "i2f.springboot.mq.rabbit.RabbitMqAutoConfiguration",
+      "defaultValue": false
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
