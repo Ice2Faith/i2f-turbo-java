@@ -37,6 +37,16 @@ spring:
           connections:
             demo-server:
               url: http://localhost:6600
+
+test:
+  ai:
+    chat:
+      tools:
+        database:
+          execute:
+            query: false
+            update: false
+
 i2f:
   ai:
     chat:
