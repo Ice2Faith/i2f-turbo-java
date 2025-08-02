@@ -27,7 +27,7 @@ public class AtomicBooleanBooleanConvertor implements Converter<AtomicBoolean> {
     @Override
     public AtomicBoolean convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         Boolean num = cellData.getBooleanValue();
-        if(num==null){
+        if (num == null) {
             return null;
         }
         return new AtomicBoolean(num);

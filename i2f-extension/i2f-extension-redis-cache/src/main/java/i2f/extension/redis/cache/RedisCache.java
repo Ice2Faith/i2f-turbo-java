@@ -1,8 +1,8 @@
 package i2f.extension.redis.cache;
 
-import i2f.cache.impl.IExpireContainerCache;
-import i2f.cache.persist.IDistributedCache;
-import i2f.cache.persist.IPersistCache;
+import i2f.cache.std.ext.IExpireContainerCache;
+import i2f.cache.std.persist.IDistributedCache;
+import i2f.cache.std.persist.IPersistCache;
 import i2f.extension.redis.api.IRedisClient;
 
 import java.util.Collection;

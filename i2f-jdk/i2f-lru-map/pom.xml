@@ -13,13 +13,18 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-clock-impl</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-cache-std</artifactId>
         </dependency>
     </dependencies>
 

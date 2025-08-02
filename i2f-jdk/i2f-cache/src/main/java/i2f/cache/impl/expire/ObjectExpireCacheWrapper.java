@@ -1,6 +1,6 @@
 package i2f.cache.impl.expire;
 
-import i2f.cache.base.ICache;
+import i2f.cache.std.base.ICache;
 
 import java.util.concurrent.locks.Lock;
 

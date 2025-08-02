@@ -15,7 +15,7 @@ import java.util.Collection;
  * @date 2025/7/24 14:04
  */
 public class CollectionJsonStringConvertor extends AbsObjectJsonStringConvertor<Collection<?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public CollectionJsonStringConvertor() {
     }
@@ -36,6 +36,7 @@ public class CollectionJsonStringConvertor extends AbsObjectJsonStringConvertor<
 
     @Override
     public Collection<?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<ArrayList<?>>() {});
+        return objectMapper.readValue(text, new TypeReference<ArrayList<?>>() {
+        });
     }
 }

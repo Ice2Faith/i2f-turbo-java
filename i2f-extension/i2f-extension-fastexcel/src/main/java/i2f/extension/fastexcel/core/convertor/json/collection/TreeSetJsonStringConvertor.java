@@ -14,7 +14,7 @@ import java.util.TreeSet;
  * @date 2025/7/24 14:04
  */
 public class TreeSetJsonStringConvertor extends AbsObjectJsonStringConvertor<TreeSet<?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public TreeSetJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class TreeSetJsonStringConvertor extends AbsObjectJsonStringConvertor<Tre
 
     @Override
     public TreeSet<?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<TreeSet<?>>() {});
+        return objectMapper.readValue(text, new TypeReference<TreeSet<?>>() {
+        });
     }
 }

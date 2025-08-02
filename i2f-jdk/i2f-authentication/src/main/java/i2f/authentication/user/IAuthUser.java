@@ -1,7 +1,7 @@
 package i2f.authentication.user;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/21 16:26
  * @desc
  */

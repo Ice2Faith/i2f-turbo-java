@@ -1,7 +1,7 @@
 package i2f.springboot.security.def.guarder;
 
-import i2f.cache.base.ICache;
-import i2f.cache.expire.IExpireCache;
+import i2f.cache.std.base.ICache;
+import i2f.cache.std.expire.IExpireCache;
 import i2f.web.guarder.LoginGuarder;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;

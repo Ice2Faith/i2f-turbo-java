@@ -1,6 +1,6 @@
 package i2f.web.guarder;
 
-import i2f.cache.expire.IExpireCache;
+import i2f.cache.std.expire.IExpireCache;
 import lombok.Data;
 
 /**

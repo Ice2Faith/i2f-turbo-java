@@ -6,6 +6,8 @@ import i2f.invokable.IInvokable;
 import i2f.invokable.Invocation;
 import i2f.invokable.method.IMethod;
 import i2f.proxy.std.IProxyInvocationHandler;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
@@ -27,6 +29,8 @@ import java.util.function.Consumer;
  * @author Ice2Faith
  * @date 2025/7/23 15:52
  */
+@Data
+@NoArgsConstructor
 public class MybatisResultSetMetaProxyHandler implements IProxyInvocationHandler {
     public static final String METHOD_RESULT_SSET = "handleResultSets";
     public static final String METHOD_CURSOR_RESULT_SET = "handleCursorResultSets";

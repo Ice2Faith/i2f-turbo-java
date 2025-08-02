@@ -2,6 +2,8 @@ package i2f.springboot.mybatis;
 
 import i2f.extension.mybatis.interceptor.MybatisRecordSqlInterceptor;
 import i2f.extension.mybatis.interceptor.MybatisResultSetMetaInterceptor;
+import i2f.extension.mybatis.proxy.handler.MybatisRecordSqlProxyHandler;
+import i2f.extension.mybatis.proxy.handler.MybatisResultSetMetaProxyHandler;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
@@ -22,21 +24,27 @@ public class MybatisDynamicAutoConfiguration {
     @ConditionalOnExpression("${i2f.mybatis.interceptor.record-sql.enable:true}")
     @Bean
     public MybatisRecordSqlInterceptor mybatisRecordSqlInterceptor() {
-        MybatisRecordSqlInterceptor ret = new MybatisRecordSqlInterceptor();
-        Logger logger = LoggerFactory.getLogger(ret.getClass());
-        ret.setInfoLogger(e -> logger.info(String.valueOf(e)));
-        ret.setErrorLogger(e -> logger.error(String.valueOf(e)));
-        ret.setEnablePrintSql(enablePrintRecordSql);
+        MybatisRecordSqlProxyHandler handler = new MybatisRecordSqlProxyHandler();
+        Logger logger = LoggerFactory.getLogger(handler.getClass());
+        handler.setInfoLogger(e -> logger.info(String.valueOf(e)));
+        handler.setErrorLogger(e -> logger.error(String.valueOf(e)));
+        handler.setEnablePrintSql(enablePrintRecordSql);
+
+        MybatisRecordSqlInterceptor ret = new MybatisRecordSqlInterceptor(handler);
+
         return ret;
     }
 
     @ConditionalOnExpression("${i2f.mybatis.interceptor.result-set-meta.enable:true}")
     @Bean
     public MybatisResultSetMetaInterceptor mybatisResultSetMetaInterceptor() {
+        MybatisResultSetMetaProxyHandler handler = new MybatisResultSetMetaProxyHandler();
+        Logger logger = LoggerFactory.getLogger(handler.getClass());
+        handler.setInfoLogger(e -> logger.info(String.valueOf(e)));
+        handler.setErrorLogger(e -> logger.error(String.valueOf(e)));
+
         MybatisResultSetMetaInterceptor ret = new MybatisResultSetMetaInterceptor();
-        Logger logger = LoggerFactory.getLogger(ret.getClass());
-        ret.setInfoLogger(e -> logger.info(String.valueOf(e)));
-        ret.setErrorLogger(e -> logger.error(String.valueOf(e)));
+
         return ret;
     }
 }

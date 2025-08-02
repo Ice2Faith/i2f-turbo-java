@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import org.apache.shiro.authc.AuthenticationToken;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/21 18:19
  * @desc
  */

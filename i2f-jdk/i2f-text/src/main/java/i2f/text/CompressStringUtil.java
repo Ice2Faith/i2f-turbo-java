@@ -1,7 +1,7 @@
 package i2f.text;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/3/31 13:44
  * @desc 仅适用于大量出现重复连续字符的场景，否则使用后不但不会起到压缩的效果，甚至还会使得数据量翻倍
  */

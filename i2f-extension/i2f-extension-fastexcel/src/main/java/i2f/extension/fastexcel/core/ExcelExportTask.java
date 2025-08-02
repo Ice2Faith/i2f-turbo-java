@@ -1,7 +1,7 @@
 package i2f.extension.fastexcel.core;
 
-import cn.idev.excel.FastExcel;
 import cn.idev.excel.ExcelWriter;
+import cn.idev.excel.FastExcel;
 import cn.idev.excel.converters.Converter;
 import cn.idev.excel.enums.WriteDirectionEnum;
 import cn.idev.excel.write.builder.ExcelWriterBuilder;
@@ -279,8 +279,8 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 excludeColumnNames.addAll(names);
             }
 
-            if(convertors==null){
-                convertors=new ArrayList<>();
+            if (convertors == null) {
+                convertors = new ArrayList<>();
             }
 
             if (beforeConsumer != null) {

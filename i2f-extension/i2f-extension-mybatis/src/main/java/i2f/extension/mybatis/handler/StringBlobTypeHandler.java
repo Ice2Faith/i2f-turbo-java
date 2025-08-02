@@ -10,7 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.*;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/3/9 19:56
  * @desc 用于在Blob与String之间自动转换
  * 插入时：

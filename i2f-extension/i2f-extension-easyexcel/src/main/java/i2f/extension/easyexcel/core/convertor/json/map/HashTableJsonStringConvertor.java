@@ -13,8 +13,8 @@ import java.util.Hashtable;
  * @author Ice2Faith
  * @date 2025/7/24 14:04
  */
-public class HashTableJsonStringConvertor extends AbsObjectJsonStringConvertor<Hashtable<?,?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+public class HashTableJsonStringConvertor extends AbsObjectJsonStringConvertor<Hashtable<?, ?>> {
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public HashTableJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class HashTableJsonStringConvertor extends AbsObjectJsonStringConvertor<H
 
     @Override
     public Hashtable<?, ?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<Hashtable<?, ?>>() {});
+        return objectMapper.readValue(text, new TypeReference<Hashtable<?, ?>>() {
+        });
     }
 }

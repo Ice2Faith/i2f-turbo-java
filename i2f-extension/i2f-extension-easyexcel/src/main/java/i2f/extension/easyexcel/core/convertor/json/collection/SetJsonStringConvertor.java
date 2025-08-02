@@ -15,7 +15,7 @@ import java.util.Set;
  * @date 2025/7/24 14:04
  */
 public class SetJsonStringConvertor extends AbsObjectJsonStringConvertor<Set<?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public SetJsonStringConvertor() {
     }
@@ -36,6 +36,7 @@ public class SetJsonStringConvertor extends AbsObjectJsonStringConvertor<Set<?>>
 
     @Override
     public Set<?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<HashSet<?>>() {});
+        return objectMapper.readValue(text, new TypeReference<HashSet<?>>() {
+        });
     }
 }

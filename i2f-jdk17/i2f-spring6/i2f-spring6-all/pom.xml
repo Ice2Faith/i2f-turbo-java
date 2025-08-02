@@ -28,6 +28,10 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring6-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-spring6-swl</artifactId>
+        </dependency>
 
     </dependencies>
 

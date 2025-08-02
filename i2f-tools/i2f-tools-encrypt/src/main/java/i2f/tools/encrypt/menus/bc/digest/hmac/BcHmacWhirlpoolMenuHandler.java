@@ -2,8 +2,8 @@ package i2f.tools.encrypt.menus.bc.digest.hmac;
 
 
 import i2f.codec.CodecUtil;
+import i2f.crypto.impl.jdk.digest.hmac.HmacMessageDigester;
 import i2f.extension.jce.bc.digest.hmac.BcHmacMessageDigester;
-import i2f.jce.jdk.digest.hmac.HmacMessageDigester;
 import i2f.tools.encrypt.IMenuHandler;
 
 public class BcHmacWhirlpoolMenuHandler implements IMenuHandler {

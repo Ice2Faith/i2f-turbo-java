@@ -13,8 +13,8 @@ import java.util.LinkedHashMap;
  * @author Ice2Faith
  * @date 2025/7/24 14:04
  */
-public class LinkedHashMapJsonStringConvertor extends AbsObjectJsonStringConvertor<LinkedHashMap<?,?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+public class LinkedHashMapJsonStringConvertor extends AbsObjectJsonStringConvertor<LinkedHashMap<?, ?>> {
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public LinkedHashMapJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class LinkedHashMapJsonStringConvertor extends AbsObjectJsonStringConvert
 
     @Override
     public LinkedHashMap<?, ?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<LinkedHashMap<?, ?>>() {});
+        return objectMapper.readValue(text, new TypeReference<LinkedHashMap<?, ?>>() {
+        });
     }
 }

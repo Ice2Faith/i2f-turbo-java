@@ -1,13 +1,13 @@
 package i2f.springboot.security.def.token;
 
-import i2f.cache.expire.IExpireCache;
+import i2f.cache.std.expire.IExpireCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/7 11:05
  * @desc
  */

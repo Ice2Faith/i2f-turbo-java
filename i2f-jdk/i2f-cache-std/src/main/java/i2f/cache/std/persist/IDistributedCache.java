@@ -1,6 +1,6 @@
-package i2f.cache.persist;
+package i2f.cache.std.persist;
 
-import i2f.cache.base.ICache;
+import i2f.cache.std.base.ICache;
 
 /**
  * @author Ice2Faith

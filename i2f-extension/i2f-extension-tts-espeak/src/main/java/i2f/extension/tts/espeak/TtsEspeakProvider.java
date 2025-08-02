@@ -2,6 +2,7 @@ package i2f.extension.tts.espeak;
 
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
+import i2f.std.consts.StdConst;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,7 +21,7 @@ public class TtsEspeakProvider {
     public static final String OFFICIAL_URL = "https://espeak.sourceforge.net/";
 
     public static final String CLASS_PATH = "windows/espeak.zip";
-    public static final String BIN_PATH = "./espeak/windows";
+    public static final String BIN_PATH = "./" + StdConst.RUNTIME_PERSIST_DIR + "/espeak/windows";
     public static final String BIN_FILE = BIN_PATH + "/espeak.exe";
     public static final String RESOURCE_PATH = BIN_PATH + "/espeak-data";
     private static final AtomicBoolean initialed = new AtomicBoolean(false);

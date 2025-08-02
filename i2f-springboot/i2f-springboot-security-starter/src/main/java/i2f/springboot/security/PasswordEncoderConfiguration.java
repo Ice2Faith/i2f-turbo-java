@@ -7,7 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/7 10:53
  * @desc
  */

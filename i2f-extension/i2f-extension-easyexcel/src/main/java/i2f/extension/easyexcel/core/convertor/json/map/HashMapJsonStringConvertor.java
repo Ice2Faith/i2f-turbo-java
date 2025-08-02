@@ -13,8 +13,8 @@ import java.util.HashMap;
  * @author Ice2Faith
  * @date 2025/7/24 14:04
  */
-public class HashMapJsonStringConvertor extends AbsObjectJsonStringConvertor<HashMap<?,?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+public class HashMapJsonStringConvertor extends AbsObjectJsonStringConvertor<HashMap<?, ?>> {
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public HashMapJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class HashMapJsonStringConvertor extends AbsObjectJsonStringConvertor<Has
 
     @Override
     public HashMap<?, ?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<HashMap<?, ?>>() {});
+        return objectMapper.readValue(text, new TypeReference<HashMap<?, ?>>() {
+        });
     }
 }

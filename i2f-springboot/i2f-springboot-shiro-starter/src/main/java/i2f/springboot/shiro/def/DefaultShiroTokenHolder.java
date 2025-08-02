@@ -1,8 +1,8 @@
 package i2f.springboot.shiro.def;
 
-import i2f.cache.expire.IExpireCache;
 import i2f.cache.impl.container.MapCache;
 import i2f.cache.impl.expire.ObjectExpireCacheWrapper;
+import i2f.cache.std.expire.IExpireCache;
 import i2f.springboot.shiro.ShiroAutoConfiguration;
 import i2f.springboot.shiro.token.AbstractShiroTokenHolder;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/7 11:05
  * @desc
  */

@@ -25,26 +25,26 @@ public abstract class AbsObjectJsonStringConvertor<T> implements Converter<T> {
     @Override
     public T convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         String text = cellData.getStringValue();
-        if(text==null){
+        if (text == null) {
             return null;
         }
-        text=text.trim();
-        return parseJson(text,cellData,contentProperty,globalConfiguration);
+        text = text.trim();
+        return parseJson(text, cellData, contentProperty, globalConfiguration);
     }
 
     @Override
     public WriteCellData<?> convertToExcelData(T value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        if(value==null){
+        if (value == null) {
             return new WriteCellData<>("");
         }
-        String text=toJson(value,contentProperty,globalConfiguration);
+        String text = toJson(value, contentProperty, globalConfiguration);
         return new WriteCellData<>(text);
     }
 
-    public abstract Class<?> getSupportType() ;
+    public abstract Class<?> getSupportType();
 
     public abstract String toJson(T value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception;
 
-    public abstract T parseJson(String text,ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception;
+    public abstract T parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception;
 
 }

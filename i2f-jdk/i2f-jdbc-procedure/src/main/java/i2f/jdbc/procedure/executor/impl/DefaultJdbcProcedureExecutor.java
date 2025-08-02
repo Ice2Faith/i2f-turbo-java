@@ -27,6 +27,7 @@ import java.util.Map;
  */
 public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
     protected volatile MybatisMapperInflater mybatisMapperInflater;
+
     public DefaultJdbcProcedureExecutor() {
     }
 

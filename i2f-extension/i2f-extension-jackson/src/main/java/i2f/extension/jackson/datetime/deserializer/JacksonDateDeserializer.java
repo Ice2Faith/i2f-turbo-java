@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import i2f.convert.obj.ObjectConvertor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -20,6 +22,8 @@ import java.util.Date;
  * @date 2023/6/16 23:18
  * @desc
  */
+@Data
+@NoArgsConstructor
 public class JacksonDateDeserializer extends JsonDeserializer<Date> implements ContextualDeserializer {
     private DateFormat formatter;
 

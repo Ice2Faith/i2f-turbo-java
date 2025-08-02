@@ -1,7 +1,7 @@
 package i2f.tools.encrypt.menus.digest.hmac;
 
 import i2f.codec.CodecUtil;
-import i2f.jce.jdk.digest.hmac.HmacMessageDigester;
+import i2f.crypto.impl.jdk.digest.hmac.HmacMessageDigester;
 import i2f.tools.encrypt.IMenuHandler;
 
 public class HmacSha384MenuHandler implements IMenuHandler {

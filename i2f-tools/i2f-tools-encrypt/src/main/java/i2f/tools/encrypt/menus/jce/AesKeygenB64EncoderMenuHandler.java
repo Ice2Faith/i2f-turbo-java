@@ -1,7 +1,8 @@
 package i2f.tools.encrypt.menus.jce;
 
-import i2f.jce.jdk.encrypt.symmetric.AesType;
-import i2f.jce.jdk.encrypt.symmetric.SymmetricEncryptor;
+
+import i2f.crypto.impl.jdk.encrypt.symmetric.AesType;
+import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricEncryptor;
 import i2f.tools.encrypt.IMenuHandler;
 
 import java.util.Base64;

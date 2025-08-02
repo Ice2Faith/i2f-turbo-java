@@ -1,7 +1,7 @@
 package i2f.cache.impl.expire;
 
-import i2f.cache.base.ICache;
-import i2f.cache.expire.IExpireCache;
+import i2f.cache.std.base.ICache;
+import i2f.cache.std.expire.IExpireCache;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;

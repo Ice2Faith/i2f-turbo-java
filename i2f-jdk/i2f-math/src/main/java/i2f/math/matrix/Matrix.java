@@ -3,7 +3,7 @@ package i2f.math.matrix;
 import java.util.List;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/6/20 11:05
  * @desc 矩阵类
  */

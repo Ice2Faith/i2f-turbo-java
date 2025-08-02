@@ -2,7 +2,7 @@ package i2f.math.matrix;
 
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/6/20 11:16
  * @desc
  */

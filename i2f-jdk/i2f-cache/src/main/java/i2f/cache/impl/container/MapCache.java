@@ -1,6 +1,6 @@
 package i2f.cache.impl.container;
 
-import i2f.cache.container.IContainerCache;
+import i2f.cache.std.container.IContainerCache;
 
 import java.util.Collection;
 import java.util.Map;

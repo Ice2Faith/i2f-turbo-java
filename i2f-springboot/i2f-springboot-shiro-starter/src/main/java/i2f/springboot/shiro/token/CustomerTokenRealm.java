@@ -8,7 +8,7 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UnknownAccountException;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/21 16:15
  * @desc
  */

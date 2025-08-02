@@ -1,5 +1,6 @@
 package i2f.extension.ocr.tesseract;
 
+import i2f.std.consts.StdConst;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
@@ -16,7 +17,7 @@ import java.io.InputStream;
  */
 public class OcrTesseractProvider {
     public static final String TRAINED_DATA_DOWNLOAD_URL = "https://github.com/tesseract-ocr/tessdata";
-    public static final String TRAINED_DATA_FILE = "./tesseract/ocr";
+    public static final String TRAINED_DATA_FILE = "./" + StdConst.RUNTIME_PERSIST_DIR + "/tesseract/ocr";
     public static final String TRAINED_DATA_SUFFIX = ".traineddata";
     public static final String[] LANGUAGES = {
             "chi_sim",

@@ -3,6 +3,7 @@ package i2f.swl.cert.impl;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import i2f.lru.LruMap;
+import i2f.std.consts.StdConst;
 import i2f.swl.cert.SwlCertManager;
 import i2f.swl.cert.SwlCertUtil;
 import i2f.swl.cert.data.SwlCert;
@@ -28,7 +29,7 @@ public class SwlResourceCertManager implements SwlCertManager {
     public static final String CLIENT_SUFFIX = ".client" + SUFFIX;
     public static final String DEFAULT_PATH = "swl/cert";
     private String classpathBasePath = DEFAULT_PATH;
-    private File localFilePath = new File("./" + DEFAULT_PATH);
+    private File localFilePath = new File("./" + StdConst.RUNTIME_PERSIST_DIR + "/" + DEFAULT_PATH);
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -47,7 +48,7 @@ public class SwlResourceCertManager implements SwlCertManager {
     }
 
     public File getCertFile(String fileName) {
-        File baseDir = new File("./" + DEFAULT_PATH);
+        File baseDir = new File("./" + StdConst.RUNTIME_PERSIST_DIR + "/" + DEFAULT_PATH);
         if (localFilePath != null) {
             baseDir = localFilePath;
         }

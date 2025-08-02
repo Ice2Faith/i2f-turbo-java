@@ -3,6 +3,7 @@ package i2f.compiler;
 import i2f.io.file.FileUtil;
 import i2f.lru.LruMap;
 import i2f.reflect.ReflectResolver;
+import i2f.std.consts.StdConst;
 
 import javax.tools.*;
 import java.io.*;
@@ -171,7 +172,7 @@ public class MemoryCompiler {
     }
 
     public static Set<Class<?>> compileClass0(String javaSourceCode, String javaFileName) throws Exception {
-        File outputDir = new File("./memory-compiler/classes/" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase()));
+        File outputDir = new File("./" + StdConst.RUNTIME_TMP_DIR + "/memory-compiler/classes/" + (UUID.randomUUID().toString().replaceAll("-", "").toLowerCase()));
         outputDir.mkdirs();
         try {
             Map<Class<?>, File> map = compileAsClass(javaSourceCode, javaFileName, outputDir);

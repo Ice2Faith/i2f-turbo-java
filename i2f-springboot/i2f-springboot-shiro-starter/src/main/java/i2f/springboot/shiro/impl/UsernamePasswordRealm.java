@@ -7,7 +7,7 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/21 16:15
  * @desc
  */

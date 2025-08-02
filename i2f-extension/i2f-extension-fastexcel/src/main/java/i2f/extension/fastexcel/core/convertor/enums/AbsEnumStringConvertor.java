@@ -25,36 +25,36 @@ public abstract class AbsEnumStringConvertor<T extends Enum> implements Converte
     @Override
     public T convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         String text = cellData.getStringValue();
-        if(text==null){
+        if (text == null) {
             return null;
         }
-        text=text.trim();
-        if(text.isEmpty()){
+        text = text.trim();
+        if (text.isEmpty()) {
             return null;
         }
-        return parseEnum(text,cellData,contentProperty,globalConfiguration);
+        return parseEnum(text, cellData, contentProperty, globalConfiguration);
     }
 
     @Override
     public WriteCellData<?> convertToExcelData(T value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        if(value==null){
+        if (value == null) {
             return new WriteCellData<>("");
         }
-        String text=toText(value,contentProperty,globalConfiguration);
+        String text = toText(value, contentProperty, globalConfiguration);
         return new WriteCellData<>(text);
     }
 
-    public abstract Class<T> getSupportType() ;
+    public abstract Class<T> getSupportType();
 
-    protected String toText(T value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception{
+    protected String toText(T value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         return value.name();
     }
 
-    public T parseEnum(String text,ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception{
+    public T parseEnum(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         Class<T> enumType = getSupportType();
         T[] arr = enumType.getEnumConstants();
         for (T item : arr) {
-            if(item.name().equalsIgnoreCase(text)){
+            if (item.name().equalsIgnoreCase(text)) {
                 return item;
             }
         }

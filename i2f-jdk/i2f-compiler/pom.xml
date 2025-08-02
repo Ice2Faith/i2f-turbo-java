@@ -13,6 +13,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-io-file</artifactId>
         </dependency>
@@ -23,6 +27,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-lru-map</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-std-const</artifactId>
         </dependency>
     </dependencies>
 

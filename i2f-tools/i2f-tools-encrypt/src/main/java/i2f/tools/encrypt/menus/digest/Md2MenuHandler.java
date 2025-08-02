@@ -2,7 +2,7 @@ package i2f.tools.encrypt.menus.digest;
 
 
 import i2f.codec.CodecUtil;
-import i2f.jce.jdk.digest.md.MessageDigester;
+import i2f.crypto.impl.jdk.digest.md.MessageDigester;
 import i2f.tools.encrypt.IMenuHandler;
 
 public class Md2MenuHandler implements IMenuHandler {

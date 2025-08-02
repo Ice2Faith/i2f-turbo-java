@@ -30,7 +30,7 @@ public class AtomicLongNumberConvertor implements Converter<AtomicLong> {
     @Override
     public AtomicLong convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         BigDecimal num = cellData.getNumberValue();
-        if(num==null){
+        if (num == null) {
             return null;
         }
         return new AtomicLong(num.longValue());

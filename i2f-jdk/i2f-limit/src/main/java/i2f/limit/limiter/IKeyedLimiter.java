@@ -1,7 +1,7 @@
 package i2f.limit.limiter;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/5/6 17:44
  * @desc 限流器
  */

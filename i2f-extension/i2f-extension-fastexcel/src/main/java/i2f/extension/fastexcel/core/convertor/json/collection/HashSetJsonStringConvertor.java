@@ -14,7 +14,7 @@ import java.util.HashSet;
  * @date 2025/7/24 14:04
  */
 public class HashSetJsonStringConvertor extends AbsObjectJsonStringConvertor<HashSet<?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public HashSetJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class HashSetJsonStringConvertor extends AbsObjectJsonStringConvertor<Has
 
     @Override
     public HashSet<?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<HashSet<?>>() {});
+        return objectMapper.readValue(text, new TypeReference<HashSet<?>>() {
+        });
     }
 }

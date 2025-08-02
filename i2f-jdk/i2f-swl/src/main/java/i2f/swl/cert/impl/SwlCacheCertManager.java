@@ -1,7 +1,7 @@
 package i2f.swl.cert.impl;
 
-import i2f.cache.base.ICache;
 import i2f.cache.impl.container.MapCache;
+import i2f.cache.std.base.ICache;
 import i2f.lru.LruMap;
 import i2f.swl.cert.SwlCertManager;
 import i2f.swl.cert.SwlCertUtil;
