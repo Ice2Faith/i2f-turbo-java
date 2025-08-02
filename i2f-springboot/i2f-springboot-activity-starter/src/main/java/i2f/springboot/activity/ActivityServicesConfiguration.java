@@ -28,31 +28,31 @@ public class ActivityServicesConfiguration {
 
     @Bean
     public RepositoryService repositoryService(){
-        log.info("ActivityServicesConfig RepositoryService config done.");
+        log.info("RepositoryService config done.");
         return processEngine.getRepositoryService();
     }
 
     @Bean
     public RuntimeService runtimeService(){
-        log.info("ActivityServicesConfig RuntimeService config done.");
+        log.info("RuntimeService config done.");
         return processEngine.getRuntimeService();
     }
 
     @Bean
     public HistoryService historyService(){
-        log.info("ActivityServicesConfig HistoryService config done.");
+        log.info("HistoryService config done.");
         return processEngine.getHistoryService();
     }
 
     @Bean
     public ManagementService managementService(){
-        log.info("ActivityServicesConfig ManagementService config done.");
+        log.info("ManagementService config done.");
         return processEngine.getManagementService();
     }
 
     @Bean
     public TaskService taskService(){
-        log.info("ActivityServicesConfig TaskService config done.");
+        log.info("TaskService config done.");
         return processEngine.getTaskService();
     }
 }
