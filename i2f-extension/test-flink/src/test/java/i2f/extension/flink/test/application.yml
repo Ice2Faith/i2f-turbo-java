@@ -1,0 +1,11 @@
+logging:
+  level:
+    root: info
+    org.apache.flink: warn
+    org.apache.flink.runtime: warn
+    org.apache.flink.runtime.dispatcher: info
+    org.apache.flink.runtime.resourcemanager.slotmanager: info
+# flink + kafka
+# flink <-- yarn
+# kafka <-- zookeeper
+# \u90FD\u662F\u96C6\u7FA4

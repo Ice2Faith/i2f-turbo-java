@@ -1,0 +1,101 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.config.activity",
+      "type": "i2f.springboot.activity.ActivityAutoConfiguration",
+      "sourceType": "i2f.springboot.activity.ActivityAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.config.activity.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable activity configuration.",
+      "sourceType": "i2f.springboot.activity.ActivityAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.config.activity.enable-jdbc-nonnection",
+      "type": "java.lang.Boolean",
+      "description": "whether enable alone jdbc datasource.",
+      "sourceType": "i2f.springboot.activity.ActivityAutoConfiguration",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.config.activity.datasource-name",
+      "type": "java.lang.String",
+      "description": "use datasource bean name.",
+      "sourceType": "i2f.springboot.activity.ActivityAutoConfiguration",
+      "defaultValue": ""
+    },
+    {
+      "name": "i2f.springboot.config.activity.jdbc-driver",
+      "type": "java.lang.String",
+      "description": "alone jdbc driver.",
+      "sourceType": "i2f.springboot.activity.ActivityAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.config.activity.jdbc-url",
+      "type": "java.lang.String",
+      "description": "alone jdbc url.",
+      "sourceType": "i2f.springboot.activity.ActivityAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.config.activity.jdbc-username",
+      "type": "java.lang.String",
+      "description": "alone jdbc username.",
+      "sourceType": "i2f.springboot.activity.ActivityAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.config.activity.jdbc-password",
+      "type": "java.lang.String",
+      "description": "alone jdbc password.",
+      "sourceType": "i2f.springboot.activity.ActivityAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.config.activity.enable-activity-manager",
+      "type": "java.lang.Boolean",
+      "description": "enable activity manager bean.",
+      "sourceType": "i2f.springboot.activity.ActivityManager",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.config.activity.enable-ioc-services",
+      "type": "java.lang.Boolean",
+      "description": "enable activity services bean.",
+      "sourceType": "i2f.springboot.activity.ActivityServicesConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.config.activity.api.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable activity api controller.",
+      "sourceType": "i2f.springboot.activity.ActivityController",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

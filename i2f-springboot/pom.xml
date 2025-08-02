@@ -34,6 +34,7 @@
         <module>i2f-springboot-oss-minio-starter</module>
         <module>i2f-springboot-shiro-starter</module>
         <module>i2f-springboot-security-starter</module>
+        <module>i2f-springboot-activity-starter</module>
         <!--        <module>i2f-springboot-maven-project</module>-->
     </modules>
 

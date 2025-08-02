@@ -1,0 +1,21 @@
+# activity 配置
+i2f:
+  springboot:
+    config:
+      activity:
+        enable: true
+        # 是否适用直接的jdbc配置，如果为true，则需要配置连接，不为true则使用项目中的datasource
+        enable-jdbc-connection: false
+        # 是否需要使用指定的datasource,不指定则使用默认
+        datasource-name: ''
+        # 是否自动建表
+        enable-auto-build-tables: true
+        # 是否将activity的services交给ioc容器管理
+        enable-ioc-services: true
+        # 是否启用管理工具
+        enable-activity-manager: true
+        # jdbc连接配置
+        jdbc-driver: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/activity_test_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+        jdbc-username: root
+        jdbc-password: xxx
