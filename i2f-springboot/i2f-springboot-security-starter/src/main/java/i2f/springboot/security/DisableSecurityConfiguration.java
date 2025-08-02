@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/22 10:34
  * @desc
  */

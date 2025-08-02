@@ -3,7 +3,7 @@ package i2f.text.escape;
 import java.util.*;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/5/20 14:11
  * @desc 处理转义的类，适用泛类型
  * 转义，实质上是一些列的泛型替换

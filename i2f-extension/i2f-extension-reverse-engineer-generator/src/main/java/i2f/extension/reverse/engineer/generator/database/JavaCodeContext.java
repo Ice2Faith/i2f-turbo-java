@@ -3,7 +3,7 @@ package i2f.extension.reverse.engineer.generator.database;
 import lombok.Data;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/6/15 16:49
  * @desc
  */

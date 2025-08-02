@@ -3,7 +3,7 @@ package i2f.net.nio.tcp;
 import java.io.IOException;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/5/11 10:26
  * @desc
  */

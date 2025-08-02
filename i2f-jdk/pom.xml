@@ -161,6 +161,8 @@
         <module>i2f-proxy-std</module>
         <module>i2f-log-std</module>
         <module>i2f-proxy-handlers</module>
+        <module>i2f-cache-std</module>
+        <module>i2f-std-const</module>
 
 
     </modules>

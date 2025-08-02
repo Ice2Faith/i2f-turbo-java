@@ -3,7 +3,7 @@ package i2f.springboot.security.impl;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/7 10:26
  * @desc
  */

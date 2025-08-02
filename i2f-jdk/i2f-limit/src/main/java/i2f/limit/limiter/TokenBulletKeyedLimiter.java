@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/5/6 18:02
  * @desc 令牌桶限流
  * 令牌每隔一定时间产生，直到达到最大令牌数量

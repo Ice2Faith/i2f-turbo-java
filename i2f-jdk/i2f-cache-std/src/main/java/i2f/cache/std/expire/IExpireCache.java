@@ -1,6 +1,6 @@
-package i2f.cache.expire;
+package i2f.cache.std.expire;
 
-import i2f.cache.base.ICache;
+import i2f.cache.std.base.ICache;
 
 import java.util.concurrent.TimeUnit;
 

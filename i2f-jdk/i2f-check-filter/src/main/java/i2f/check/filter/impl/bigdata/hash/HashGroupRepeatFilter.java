@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/27 10:06
  * @desc 适用于，多个大数据量文件，要求找出这些文件中重复的项
  * 使用hash分组切片小数据进行重复性校验，精确，但是需要IO次数高，需要两倍空间

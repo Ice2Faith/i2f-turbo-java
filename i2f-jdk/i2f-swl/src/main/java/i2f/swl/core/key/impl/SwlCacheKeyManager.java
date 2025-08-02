@@ -1,7 +1,7 @@
 package i2f.swl.core.key.impl;
 
-import i2f.cache.base.ICache;
 import i2f.cache.impl.container.MapCache;
+import i2f.cache.std.base.ICache;
 import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.lru.LruMap;
 import i2f.swl.core.key.SwlKeyManager;

@@ -1,8 +1,8 @@
 package i2f.swl.core;
 
-import i2f.cache.expire.IExpireCache;
 import i2f.cache.impl.container.MapCache;
 import i2f.cache.impl.expire.ObjectExpireCacheWrapper;
+import i2f.cache.std.expire.IExpireCache;
 import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.swl.core.exchanger.SwlExchanger;
 import i2f.swl.data.SwlData;

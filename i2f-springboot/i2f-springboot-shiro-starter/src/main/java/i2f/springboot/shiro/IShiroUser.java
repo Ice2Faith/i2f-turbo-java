@@ -3,7 +3,7 @@ package i2f.springboot.shiro;
 import i2f.authentication.user.IRbacAuthUser;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/21 16:26
  * @desc
  */

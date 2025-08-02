@@ -16,7 +16,6 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-authentication</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-core</artifactId>
@@ -25,7 +24,6 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-mvc-metadata</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-redis</artifactId>
@@ -33,6 +31,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-spring-swl</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>

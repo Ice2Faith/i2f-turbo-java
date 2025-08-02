@@ -2,7 +2,7 @@ package i2f.lifecycle.exception;
 
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/27 11:19
  * @desc
  */

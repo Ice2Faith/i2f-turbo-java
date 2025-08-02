@@ -5,6 +5,7 @@ import com.jacob.com.Dispatch;
 import com.jacob.com.LibraryLoader;
 import com.jacob.com.Variant;
 import i2f.io.file.FileUtil;
+import i2f.std.consts.StdConst;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class TtsJacobProvider {
             "lib/jacob-1.21-x64.dll",
             "lib/jacob-1.21-x86.dll"
     };
-    public static final String DLL_PATH = "./jacob";
+    public static final String DLL_PATH = "./" + StdConst.RUNTIME_PERSIST_DIR + "/jacob";
     private static final AtomicBoolean initialed = new AtomicBoolean(false);
 
     static {

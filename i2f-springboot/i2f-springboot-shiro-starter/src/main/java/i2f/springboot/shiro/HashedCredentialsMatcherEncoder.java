@@ -6,7 +6,7 @@ import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.crypto.hash.SimpleHash;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/21 17:59
  * @desc
  */

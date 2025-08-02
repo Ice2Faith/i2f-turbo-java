@@ -32,7 +32,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/2/25 8:48
  * @desc
  */

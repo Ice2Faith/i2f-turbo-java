@@ -2,7 +2,7 @@ package i2f.text;
 
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/3/19 15:30
  * @desc
  */

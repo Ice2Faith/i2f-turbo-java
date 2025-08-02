@@ -1,7 +1,11 @@
 package i2f.springboot.spring.web;
 
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import i2f.extension.jackson.datetime.*;
+import i2f.extension.jackson.datetime.deserializer.JacksonDateDeserializer;
+import i2f.extension.jackson.datetime.deserializer.JacksonLocalDateDeserializer;
+import i2f.extension.jackson.datetime.deserializer.JacksonLocalDateTimeDeserializer;
+import i2f.extension.jackson.datetime.deserializer.JacksonLocalTimeDeserializer;
+import i2f.extension.jackson.datetime.serializer.JacksonTemporalSerializer;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;

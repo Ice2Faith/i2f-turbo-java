@@ -1,8 +1,8 @@
 package i2f.springcloud.gateway.swl;
 
-import i2f.cache.expire.IExpireCache;
 import i2f.cache.impl.container.MapCache;
 import i2f.cache.impl.expire.ObjectExpireCacheWrapper;
+import i2f.cache.std.expire.IExpireCache;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;

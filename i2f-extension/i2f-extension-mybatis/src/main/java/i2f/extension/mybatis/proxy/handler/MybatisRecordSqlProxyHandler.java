@@ -7,6 +7,8 @@ import i2f.invokable.IInvokable;
 import i2f.invokable.Invocation;
 import i2f.invokable.method.IMethod;
 import i2f.proxy.std.IProxyInvocationHandler;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -23,6 +25,8 @@ import java.util.function.Function;
  * @author Ice2Faith
  * @date 2025/7/23 15:45
  */
+@Data
+@NoArgsConstructor
 public class MybatisRecordSqlProxyHandler implements IProxyInvocationHandler {
     public static final String METHOD_UPDATE = "update";
     public static final String METHOD_QUERY = "query";

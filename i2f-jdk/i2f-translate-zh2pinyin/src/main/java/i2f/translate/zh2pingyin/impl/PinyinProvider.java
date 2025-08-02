@@ -9,6 +9,7 @@ import i2f.jdbc.context.impl.DirectJdbcInvokeContextProvider;
 import i2f.lifecycle.ILifeCycle;
 import i2f.lru.LruMap;
 import i2f.resources.ResourceUtil;
+import i2f.std.consts.StdConst;
 import i2f.text.StringUtils;
 import i2f.translate.zh2pingyin.data.Zh2PinyinVo;
 import lombok.Data;
@@ -68,7 +69,7 @@ public class PinyinProvider implements ILifeCycle {
 
     public synchronized Connection getConnection() throws Exception {
 
-        File dir = new File("../database");
+        File dir = new File("./" + StdConst.RUNTIME_PERSIST_DIR + "/database");
         if (!dir.exists()) {
             dir.mkdirs();
         }

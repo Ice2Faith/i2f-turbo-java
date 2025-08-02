@@ -2,9 +2,9 @@ package i2f.tools.encrypt.menus.bc.encrypt;
 
 
 import i2f.codec.CodecUtil;
+import i2f.crypto.std.encrypt.symmetric.ISymmetricEncryptor;
 import i2f.extension.jce.bc.encrypt.symmetric.BcSymmetricEncryptor;
 import i2f.extension.jce.bc.encrypt.symmetric.Sm4Type;
-import i2f.jce.std.encrypt.symmetric.ISymmetricEncryptor;
 import i2f.tools.encrypt.IMenuHandler;
 
 import javax.crypto.SecretKey;

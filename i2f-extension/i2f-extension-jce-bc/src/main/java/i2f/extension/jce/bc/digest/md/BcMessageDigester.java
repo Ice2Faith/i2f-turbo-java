@@ -24,8 +24,8 @@ public class BcMessageDigester extends MessageDigester {
     public static final BcMessageDigester SHA512 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA512.text(), BcProvider.PROVIDER_NAME));
     public static final BcMessageDigester SHA512_224 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA512_224.text(), BcProvider.PROVIDER_NAME));
     public static final BcMessageDigester SHA512_256 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA512_256.text(), BcProvider.PROVIDER_NAME));
-    //    public static final BcMessageDigester SHAKE_128 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHAKE_128.text(), BcProvider.PROVIDER_NAME));
-//    public static final BcMessageDigester SHAKE_256 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHAKE_256.text(), BcProvider.PROVIDER_NAME));
+    public static final BcMessageDigester SHAKE_128 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHAKE_128.text(), BcProvider.PROVIDER_NAME));
+    public static final BcMessageDigester SHAKE_256 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHAKE_256.text(), BcProvider.PROVIDER_NAME));
     public static final BcMessageDigester SHA3_224 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA3_224.text(), BcProvider.PROVIDER_NAME));
     public static final BcMessageDigester SHA3_256 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA3_256.text(), BcProvider.PROVIDER_NAME));
     public static final BcMessageDigester SHA3_384 = new BcMessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA3_384.text(), BcProvider.PROVIDER_NAME));

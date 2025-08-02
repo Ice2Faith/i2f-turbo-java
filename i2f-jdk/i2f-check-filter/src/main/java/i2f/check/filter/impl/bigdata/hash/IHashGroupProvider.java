@@ -6,7 +6,7 @@ import i2f.data.processor.IDataWriter;
 import i2f.lifecycle.ILifeCycle;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/27 10:11
  * @desc
  */

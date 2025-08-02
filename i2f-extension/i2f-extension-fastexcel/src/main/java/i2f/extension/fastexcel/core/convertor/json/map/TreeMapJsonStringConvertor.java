@@ -13,8 +13,8 @@ import java.util.TreeMap;
  * @author Ice2Faith
  * @date 2025/7/24 14:04
  */
-public class TreeMapJsonStringConvertor extends AbsObjectJsonStringConvertor<TreeMap<?,?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+public class TreeMapJsonStringConvertor extends AbsObjectJsonStringConvertor<TreeMap<?, ?>> {
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public TreeMapJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class TreeMapJsonStringConvertor extends AbsObjectJsonStringConvertor<Tre
 
     @Override
     public TreeMap<?, ?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<TreeMap<?, ?>>() {});
+        return objectMapper.readValue(text, new TypeReference<TreeMap<?, ?>>() {
+        });
     }
 }

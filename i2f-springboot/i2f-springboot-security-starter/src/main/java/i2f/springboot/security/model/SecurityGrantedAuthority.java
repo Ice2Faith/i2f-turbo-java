@@ -6,7 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/15 16:16
  * @desc
  */

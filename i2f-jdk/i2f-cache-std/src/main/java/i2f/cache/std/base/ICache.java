@@ -1,4 +1,4 @@
-package i2f.cache.base;
+package i2f.cache.std.base;
 
 /**
  * @author Ice2Faith

@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/3/9 19:56
  * @desc 用于在CharacterStream与String之间自动转换
  * 插入时：

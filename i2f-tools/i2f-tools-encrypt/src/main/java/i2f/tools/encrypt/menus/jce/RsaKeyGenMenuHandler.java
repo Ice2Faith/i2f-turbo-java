@@ -2,8 +2,8 @@ package i2f.tools.encrypt.menus.jce;
 
 
 import i2f.codec.CodecUtil;
-import i2f.jce.jdk.encrypt.Encryptor;
-import i2f.jce.jdk.encrypt.asymmetric.RsaType;
+import i2f.crypto.impl.jdk.encrypt.Encryptor;
+import i2f.crypto.impl.jdk.encrypt.asymmetric.RsaType;
 import i2f.tools.encrypt.IMenuHandler;
 
 import java.security.KeyPair;

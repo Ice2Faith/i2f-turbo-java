@@ -29,7 +29,7 @@ public class AtomicBooleanNumberConvertor implements Converter<AtomicBoolean> {
     @Override
     public AtomicBoolean convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         BigDecimal num = cellData.getNumberValue();
-        if(num==null){
+        if (num == null) {
             return null;
         }
         return new AtomicBoolean(num.longValue() != 0);
@@ -38,6 +38,6 @@ public class AtomicBooleanNumberConvertor implements Converter<AtomicBoolean> {
     @Override
     public WriteCellData<?> convertToExcelData(AtomicBoolean value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         boolean ok = value.get();
-        return NumberUtils.formatToCellData(ok?1:0, contentProperty);
+        return NumberUtils.formatToCellData(ok ? 1 : 0, contentProperty);
     }
 }

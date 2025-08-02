@@ -16,236 +16,266 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-7zip</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-agent-javassist</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-ai-langchain4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-antlr4</artifactId>
+        </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-aspectj</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-asr-vosk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-browser-selenium</artifactId>
+        </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-canal</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-cglib</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-compress</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-cron</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-document</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-easyexcel</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-elasticsearch</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-email</artifactId>
         </dependency>
-
-
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-fastexcel</artifactId>
+        </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-fastjson</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-fastjson2</artifactId>
         </dependency>
-
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-filesystem-ftp</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-filesystem-hdfs</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-filesystem-minio</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-extension-mybatis</artifactId>
+            <artifactId>i2f-extension-filesystem-oss-aliyun</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-filesystem-sftp</artifactId>
         </dependency>
-
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-ftp</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-gif</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-groovy</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-gson</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-hdfs</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-httpclient</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-image-metadata</artifactId>
+        </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-jackson</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-javassist</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-jce-bc</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-jce-sm-antherd</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-jedis</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-log-slf4j</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-minio</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-mybatis</artifactId>
+        </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-netty</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-ocr-tesseract</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-ognl</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-opencv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-opencv-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-opencv-javacv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-oss-aliyun</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-oss-aws-s3</artifactId>
+        </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-qrcode</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-quartz</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-redis-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-redis-cache</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-reverse-engineer-generator</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-sftp</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-slf4j</artifactId>
         </dependency>
-
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-slf4j-log</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-sqlparser</artifactId>
+        </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-swl</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-tokenlization-ansj</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-tokenlization-hanlp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-tokenlization-jcseg</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-tokenlization-jieba</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-tts-espeak</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-tts-jacob</artifactId>
+        </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-velocity</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-velocity-bindsql</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-verifycode</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-zip4j</artifactId>
         </dependency>
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-zookeeper</artifactId>

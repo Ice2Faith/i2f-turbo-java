@@ -4,7 +4,7 @@ package i2f.hash.impl;
 import i2f.serialize.std.bytes.IBytesObjectSerializer;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/27 15:05
  * @desc
  */

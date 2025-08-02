@@ -9,6 +9,7 @@ import i2f.jdbc.context.impl.DirectJdbcInvokeContextProvider;
 import i2f.lru.LruMap;
 import i2f.match.regex.RegexUtil;
 import i2f.resources.ResourceUtil;
+import i2f.std.consts.StdConst;
 import i2f.text.StringUtils;
 import i2f.translate.ITranslator;
 import lombok.Data;
@@ -86,7 +87,7 @@ public class SimpleWordTranslator implements ITranslator {
 
     public synchronized Connection getConnection() throws Exception {
 
-        File dir = new File("../database");
+        File dir = new File("./" + StdConst.RUNTIME_PERSIST_DIR + "/database");
         if (!dir.exists()) {
             dir.mkdirs();
         }

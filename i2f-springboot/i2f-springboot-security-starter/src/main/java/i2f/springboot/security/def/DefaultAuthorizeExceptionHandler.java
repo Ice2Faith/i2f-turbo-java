@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.stereotype.Component;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/7 10:28
  * @desc
  */

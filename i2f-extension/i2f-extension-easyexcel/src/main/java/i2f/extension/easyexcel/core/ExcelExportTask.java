@@ -279,8 +279,8 @@ public class ExcelExportTask implements Runnable, Callable<File> {
                 excludeColumnNames.addAll(names);
             }
 
-            if(convertors==null){
-                convertors=new ArrayList<>();
+            if (convertors == null) {
+                convertors = new ArrayList<>();
             }
 
             if (beforeConsumer != null) {

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/27 8:47
  * @desc bloom filter
  * which only mark and check

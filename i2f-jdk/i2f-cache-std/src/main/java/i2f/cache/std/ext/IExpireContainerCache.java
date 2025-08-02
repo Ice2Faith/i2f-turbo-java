@@ -1,7 +1,7 @@
-package i2f.cache.impl;
+package i2f.cache.std.ext;
 
-import i2f.cache.container.IContainerCache;
-import i2f.cache.expire.IExpireCache;
+import i2f.cache.std.container.IContainerCache;
+import i2f.cache.std.expire.IExpireCache;
 
 /**
  * @author Ice2Faith

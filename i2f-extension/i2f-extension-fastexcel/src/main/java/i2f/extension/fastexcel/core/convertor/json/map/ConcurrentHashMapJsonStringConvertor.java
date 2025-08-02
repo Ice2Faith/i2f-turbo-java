@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Ice2Faith
  * @date 2025/7/24 14:04
  */
-public class ConcurrentHashMapJsonStringConvertor extends AbsObjectJsonStringConvertor<ConcurrentHashMap<?,?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+public class ConcurrentHashMapJsonStringConvertor extends AbsObjectJsonStringConvertor<ConcurrentHashMap<?, ?>> {
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public ConcurrentHashMapJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class ConcurrentHashMapJsonStringConvertor extends AbsObjectJsonStringCon
 
     @Override
     public ConcurrentHashMap<?, ?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<ConcurrentHashMap<?, ?>>() {});
+        return objectMapper.readValue(text, new TypeReference<ConcurrentHashMap<?, ?>>() {
+        });
     }
 }

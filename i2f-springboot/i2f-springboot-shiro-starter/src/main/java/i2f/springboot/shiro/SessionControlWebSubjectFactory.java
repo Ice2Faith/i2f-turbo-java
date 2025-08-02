@@ -7,7 +7,7 @@ import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.web.mgt.DefaultWebSubjectFactory;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/23 19:40
  * @desc
  */

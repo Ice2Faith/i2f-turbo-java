@@ -78,6 +78,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-cache-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-check</artifactId>
         </dependency>
         <dependency>
@@ -90,11 +94,19 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-clock-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-code</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-codec-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-codec-std</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -114,6 +126,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-compress-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-console-color</artifactId>
         </dependency>
         <dependency>
@@ -130,7 +146,19 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-context-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-convert</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-crypto-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-crypto-std</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -142,11 +170,7 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-database-metadata-std</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-database-metadata-impl</artifactId>
+            <artifactId>i2f-database-dialect</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -155,6 +179,14 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-database-metadata-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-database-metadata-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-database-metadata-std</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -182,6 +214,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-environment-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-event</artifactId>
         </dependency>
         <dependency>
@@ -195,6 +231,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-firewall</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-form</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -242,6 +282,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-image-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-invokable</artifactId>
         </dependency>
         <dependency>
@@ -266,7 +310,11 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-crypto-impl</artifactId>
+            <artifactId>i2f-jdbc-bql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jdbc-data</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -274,7 +322,7 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc-bql</artifactId>
+            <artifactId>i2f-jdbc-procedure</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -286,11 +334,19 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jdbc-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jvm</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-lambda</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-launcher</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -307,6 +363,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-log</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-log-std</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -366,11 +426,19 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-properties</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-proxy</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-properties</artifactId>
+            <artifactId>i2f-proxy-handlers</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-proxy-std</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -398,11 +466,23 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-search</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-serialize-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-serialize-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-std-const</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -411,6 +491,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-swl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-template-render</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -430,7 +514,19 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-translate-en2zh</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-translate-zh2pinyin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-tuple-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-tuple-std</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -442,7 +538,15 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-uid-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-unsafe</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-verifycode</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>

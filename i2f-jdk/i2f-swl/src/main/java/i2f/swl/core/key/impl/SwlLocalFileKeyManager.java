@@ -3,6 +3,7 @@ package i2f.swl.core.key.impl;
 import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.io.file.FileUtil;
 import i2f.lru.LruMap;
+import i2f.std.consts.StdConst;
 import i2f.swl.core.key.SwlKeyManager;
 import i2f.swl.impl.SwlBase64Obfuscator;
 import i2f.swl.std.ISwlObfuscator;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @desc
  */
 public class SwlLocalFileKeyManager implements SwlKeyManager {
-    public static final String DEFAULT_KEY_ROOT_DIR_NAME = "./swl/key-data";
+    public static final String DEFAULT_KEY_ROOT_DIR_NAME = "./" + StdConst.RUNTIME_PERSIST_DIR + "/swl/key-data";
     public static final String SELF_KEY_DIR_NAME = "self-key";
     public static final String OTHER_KEY_DIR_NAME = "other-key";
     public static final String SELF_KEY_FILE_SUFFIX = ".self.key";

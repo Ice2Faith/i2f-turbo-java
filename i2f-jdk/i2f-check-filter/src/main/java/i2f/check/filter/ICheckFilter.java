@@ -1,7 +1,7 @@
 package i2f.check.filter;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/27 8:50
  * @desc unify check filter
  * use for check an element whether exist

@@ -1,6 +1,6 @@
-package i2f.cache.container;
+package i2f.cache.std.container;
 
-import i2f.cache.base.ICache;
+import i2f.cache.std.base.ICache;
 
 import java.util.Collection;
 import java.util.function.Consumer;

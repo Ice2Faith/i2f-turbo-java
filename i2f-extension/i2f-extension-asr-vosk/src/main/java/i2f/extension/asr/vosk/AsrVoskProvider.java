@@ -1,5 +1,6 @@
 package i2f.extension.asr.vosk;
 
+import i2f.std.consts.StdConst;
 import org.vosk.Model;
 import org.vosk.Recognizer;
 
@@ -16,7 +17,7 @@ import java.io.*;
 public class AsrVoskProvider {
     public static final String MODELS_DOWNLOAD_URL = "https://alphacephei.com/vosk/models";
     public static final String MODEL_CN_SMALL_DOWNLOAD_URL = "https://alphacephei.com/vosk/models/vosk-model-small-cn-0.22.zip";
-    public static final String MODEL_PATH = "./vosk/vosk-model-small-cn-0.22";
+    public static final String MODEL_PATH = "./" + StdConst.RUNTIME_PERSIST_DIR + "/vosk/vosk-model-small-cn-0.22";
     public static Model model;
 
     public static void init() {

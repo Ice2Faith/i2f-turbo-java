@@ -1,5 +1,6 @@
 package i2f.extension.browser.selenium;
 
+import i2f.std.consts.StdConst;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -31,7 +32,7 @@ public class BrowserSelenium {
 
     public static final String EDGE_DRIVER_NAME = "msedgedriver";
     public static final String CHROME_DRIVER_NAME = "chromedriver";
-    public static final String DEFAULT_DRIVERS_PATH = "./webdriver";
+    public static final String DEFAULT_DRIVERS_PATH = "./" + StdConst.RUNTIME_PERSIST_DIR + "/webdriver";
     private static final AtomicBoolean hasReleased = new AtomicBoolean(false);
 
     public static void releaseDrivers() {

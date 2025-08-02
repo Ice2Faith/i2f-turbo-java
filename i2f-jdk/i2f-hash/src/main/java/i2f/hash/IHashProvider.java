@@ -1,7 +1,7 @@
 package i2f.hash;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/27 8:51
  * @desc
  */

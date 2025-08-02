@@ -1,6 +1,6 @@
 package i2f.springboot.shiro.def;
 
-import i2f.cache.expire.IExpireCache;
+import i2f.cache.std.expire.IExpireCache;
 import i2f.extension.redis.cache.RedisCache;
 import i2f.springboot.shiro.token.AbstractShiroTokenHolder;
 import lombok.Data;
@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/7 11:05
  * @desc
  */

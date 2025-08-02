@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/27 14:20
  * @desc 使用布隆过滤器，过滤重复项
  * 属于模糊的匹配，只能说可能重复，不精确

@@ -13,8 +13,8 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/7/24 14:04
  */
-public class MapJsonStringConvertor extends AbsObjectJsonStringConvertor<Map<?,?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+public class MapJsonStringConvertor extends AbsObjectJsonStringConvertor<Map<?, ?>> {
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public MapJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class MapJsonStringConvertor extends AbsObjectJsonStringConvertor<Map<?,?
 
     @Override
     public Map<?, ?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<Map<?, ?>>() {});
+        return objectMapper.readValue(text, new TypeReference<Map<?, ?>>() {
+        });
     }
 }

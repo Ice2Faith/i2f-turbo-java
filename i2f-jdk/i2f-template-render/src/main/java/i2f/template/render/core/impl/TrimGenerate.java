@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2021/10/28
  */
 public class TrimGenerate implements IGenerate {

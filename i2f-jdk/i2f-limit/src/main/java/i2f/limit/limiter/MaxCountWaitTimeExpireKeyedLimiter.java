@@ -1,15 +1,15 @@
 package i2f.limit.limiter;
 
-import i2f.cache.expire.IExpireCache;
 import i2f.cache.impl.container.MapCache;
 import i2f.cache.impl.expire.ObjectExpireCacheWrapper;
+import i2f.cache.std.expire.IExpireCache;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/5/6 17:42
  * @desc 做大次数限制器
  * 在触发了限制达到最大次数之后，将会限制，直到等待时间过后

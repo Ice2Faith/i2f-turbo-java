@@ -1,6 +1,7 @@
 package i2f.extension.opencv.javacv.test;
 
 import i2f.extension.opencv.data.OpenCvDataFileProvider;
+import i2f.std.consts.StdConst;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
@@ -19,8 +20,8 @@ import java.util.*;
  */
 public class TestRawFaceRecognize {
     public static void main(String[] args) throws IOException {
-        File modelFile = new File("./models/face.model.xml");
-        File modelLabelFile = new File("./models/face.model.labels.txt");
+        File modelFile = new File("./" + StdConst.RUNTIME_PERSIST_DIR + "/models/face.model.xml");
+        File modelLabelFile = new File("./" + StdConst.RUNTIME_PERSIST_DIR + "/models/face.model.labels.txt");
         if (!modelFile.getParentFile().exists()) {
             modelFile.getParentFile().mkdirs();
         }
@@ -44,7 +45,7 @@ public class TestRawFaceRecognize {
             }
             reader.close();
         } else {
-            File dir = new File("./trained");
+            File dir = new File("./" + StdConst.RUNTIME_PERSIST_DIR + "/trained");
             if (!dir.exists()) {
                 dir.mkdirs();
             }
@@ -148,7 +149,7 @@ public class TestRawFaceRecognize {
         }
         System.out.println();
 
-        File testDir = new File("./testing");
+        File testDir = new File("./" + StdConst.RUNTIME_PERSIST_DIR + "/testing");
         if (!testDir.exists()) {
             testDir.mkdirs();
         }

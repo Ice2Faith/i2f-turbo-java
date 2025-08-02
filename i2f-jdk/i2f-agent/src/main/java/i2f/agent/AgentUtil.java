@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 import java.util.jar.JarFile;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/4/3 11:13
  * @desc
  */

@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @date 2025/7/24 14:04
  */
 public class CopyOnWriteArrayListJsonStringConvertor extends AbsObjectJsonStringConvertor<CopyOnWriteArrayList<?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public CopyOnWriteArrayListJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class CopyOnWriteArrayListJsonStringConvertor extends AbsObjectJsonString
 
     @Override
     public CopyOnWriteArrayList<?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<CopyOnWriteArrayList<?>>() {});
+        return objectMapper.readValue(text, new TypeReference<CopyOnWriteArrayList<?>>() {
+        });
     }
 }

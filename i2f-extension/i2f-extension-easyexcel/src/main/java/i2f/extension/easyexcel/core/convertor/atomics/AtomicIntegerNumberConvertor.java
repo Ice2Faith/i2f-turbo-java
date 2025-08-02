@@ -29,7 +29,7 @@ public class AtomicIntegerNumberConvertor implements Converter<AtomicInteger> {
     @Override
     public AtomicInteger convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         BigDecimal num = cellData.getNumberValue();
-        if(num==null){
+        if (num == null) {
             return null;
         }
         return new AtomicInteger(num.intValue());

@@ -14,7 +14,7 @@ import java.util.LinkedHashSet;
  * @date 2025/7/24 14:04
  */
 public class LinkedHashSetJsonStringConvertor extends AbsObjectJsonStringConvertor<LinkedHashSet<?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public LinkedHashSetJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class LinkedHashSetJsonStringConvertor extends AbsObjectJsonStringConvert
 
     @Override
     public LinkedHashSet<?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<LinkedHashSet<?>>() {});
+        return objectMapper.readValue(text, new TypeReference<LinkedHashSet<?>>() {
+        });
     }
 }

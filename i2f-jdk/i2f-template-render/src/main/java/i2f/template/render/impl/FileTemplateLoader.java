@@ -7,7 +7,7 @@ import java.io.File;
 import java.util.function.Function;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2021/10/26
  * 文件模板加载器
  * 支持classpath写法

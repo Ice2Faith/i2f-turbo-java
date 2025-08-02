@@ -1,6 +1,7 @@
 package i2f.extension.opencv.data;
 
 import i2f.io.file.FileUtil;
+import i2f.std.consts.StdConst;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.io.IOException;
  * @desc
  */
 public class OpenCvDataFileProvider {
-    public static final String ROOT_PATH = "./opencv";
+    public static final String ROOT_PATH = "./" + StdConst.RUNTIME_PERSIST_DIR + "/opencv";
     public static final String DATA_PATH = ROOT_PATH + "/data";
 
     public static File getClasspathOpenCvDataFile(String fontFaceXmlName) {

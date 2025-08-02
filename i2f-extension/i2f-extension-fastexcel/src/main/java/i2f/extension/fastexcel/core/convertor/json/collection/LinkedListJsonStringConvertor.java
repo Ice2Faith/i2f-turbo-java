@@ -14,7 +14,7 @@ import java.util.LinkedList;
  * @date 2025/7/24 14:04
  */
 public class LinkedListJsonStringConvertor extends AbsObjectJsonStringConvertor<LinkedList<?>> {
-    protected ObjectMapper objectMapper=new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     public LinkedListJsonStringConvertor() {
     }
@@ -35,6 +35,7 @@ public class LinkedListJsonStringConvertor extends AbsObjectJsonStringConvertor<
 
     @Override
     public LinkedList<?> parseJson(String text, ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return objectMapper.readValue(text, new TypeReference<LinkedList<?>>() {});
+        return objectMapper.readValue(text, new TypeReference<LinkedList<?>>() {
+        });
     }
 }
