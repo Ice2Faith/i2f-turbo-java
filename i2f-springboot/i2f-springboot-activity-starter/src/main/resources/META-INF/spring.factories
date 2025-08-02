@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.activity.ActivityAutoConfiguration,\
+  i2f.springboot.activity.ActivityServicesConfiguration,\
+  i2f.springboot.activity.ActivityManager,\
+i2f.springboot.activity.ActivityController
