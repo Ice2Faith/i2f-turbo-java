@@ -512,10 +512,10 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-translate</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-translate-en2zh</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-translate-zh2pinyin</artifactId>
