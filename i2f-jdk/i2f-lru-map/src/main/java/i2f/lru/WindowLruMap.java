@@ -1,5 +1,7 @@
 package i2f.lru;
 
+import java.time.Duration;
+
 /**
  * @author Ice2Faith
  * @date 2025/8/2 13:44
@@ -37,7 +39,7 @@ public class WindowLruMap<T> extends LruMap<String, T> {
         }
     }
 
-    public void put(String key, Duration duration, T value) {
+    public T put(String key, Duration duration, T value) {
         lock.writeLock().lock();
         try {
             return super.put(windowKey(key, duration), value);
