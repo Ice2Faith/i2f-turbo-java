@@ -15,6 +15,7 @@
         <module>i2f-spring-ai-chat-starter</module>
         <module>i2f-spring-ai-sse-mcp-server</module>
         <module>i2f-spring-ai-tool</module>
+        <module>test-spring-ai-chat</module>
     </modules>
 
     <properties>
