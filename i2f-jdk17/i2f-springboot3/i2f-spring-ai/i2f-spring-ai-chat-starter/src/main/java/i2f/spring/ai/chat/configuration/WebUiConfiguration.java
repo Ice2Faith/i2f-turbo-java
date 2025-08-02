@@ -22,7 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebUiConfiguration implements WebMvcConfigurer, EnvironmentAware {
     protected Environment environment;
 
-    @Value("${i2f.ai.chat.web-ui.allow-redirect-root-url.enable:false}")
+    @Value("${i2f.ai.chat.web-ui.allow-redirect-root-url:false}")
     protected boolean allowRedirectRootUrl = false;
 
     @Override

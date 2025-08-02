@@ -148,7 +148,7 @@
       "defaultValue": true
     },
     {
-      "name": "i2f.ai.chat.web-ui.allow-redirect-root-url.enable",
+      "name": "i2f.ai.chat.web-ui.allow-redirect-root-url",
       "type": "java.lang.Boolean",
       "description": "ai web-ui allow direct root url to view.",
       "sourceType": "i2f.spring.ai.chat.configuration.WebUiConfiguration",

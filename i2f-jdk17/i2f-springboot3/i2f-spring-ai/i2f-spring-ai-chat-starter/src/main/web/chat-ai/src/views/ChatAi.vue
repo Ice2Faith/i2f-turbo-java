@@ -11,7 +11,8 @@
         <ul class="user-session-list">
           <li v-for="(item,index) in sessionList"
               :class="item.id==sessionId?'active':''"
-              @click="switchSession(item)">{{item.title?item.title.substring(item.title.length-10):''}}</li>
+              @click="switchSession(item)">{{ item.title ? item.title.substring(item.title.length - 10) : '' }}
+          </li>
         </ul>
       </div>
     </div>
@@ -19,14 +20,14 @@
       <div ref="historyContainerDom" class="main">
         <div v-for="(item,index) in historyList">
           <div class="message" :type="item.messageType">
-            <pre>{{item.content}}</pre>
+            <pre>{{ item.content }}</pre>
           </div>
         </div>
 
       </div>
       <div class="footer">
         <div class="textarea">
-          <textarea v-model="userMsg"></textarea>
+          <textarea v-model="userMsg" @keydown="handleKeyDown"></textarea>
         </div>
         <div class="send">
           <button @click="sendUserMsg">发送</button>
@@ -37,36 +38,33 @@
 </template>
 
 <script>
-import { fetchEventSource } from '@microsoft/fetch-event-source';
+import {fetchEventSource} from '@microsoft/fetch-event-source';
+
 export default {
-  data(){
+  data() {
     return {
-      userMsg:'',
+      userMsg: '',
       // baseUrl: 'http://localhost:8080',
       baseUrl: '',
       sessionId: '',
-      sessionList:[
-
-      ],
-      historyList:[
-
-      ]
+      sessionList: [],
+      historyList: []
     }
   },
-  created(){
+  created() {
     this.querySessionList()
   },
-  methods:{
-    scrollToEnd(){
-      this.$nextTick(()=>{
-        this.$refs.historyContainerDom.scrollTop=this.$refs.historyContainerDom.scrollHeight
+  methods: {
+    scrollToEnd() {
+      this.$nextTick(() => {
+        this.$refs.historyContainerDom.scrollTop = this.$refs.historyContainerDom.scrollHeight
       })
     },
-    createSession(){
-      fetch(this.baseUrl+'/ai/session/create',{
+    createSession() {
+      fetch(this.baseUrl + '/ai/session/create', {
         method: 'post'
-      }).then(res=>res.text())
-          .then(json=>{
+      }).then(res => res.text())
+          .then(json => {
             this.sessionList.unshift({
               id: json,
               title: json
@@ -75,13 +73,19 @@ export default {
           })
 
     },
-    switchSession(item){
-      this.sessionId=item.id
+    switchSession(item) {
+      this.sessionId = item.id
       this.queryHistoryList()
     },
-    sendUserMsg(){
-      let message=this.userMsg
-      if(message==''){
+    handleKeyDown(event) {
+      if (event.key === 'Enter' && event.ctrlKey) {
+        event.preventDefault()
+        this.sendUserMsg()
+      }
+    },
+    sendUserMsg() {
+      let message = this.userMsg
+      if (message == '') {
         return
       }
       this.historyList.push({
@@ -92,30 +96,31 @@ export default {
         message: 'ASSISTANT',
         content: '思考中...'
       })
-      this.userMsg=''
+      this.userMsg = ''
 
       this.scrollToEnd()
-      let respText=''
-      let _this=this
-      this.sessionList=this.sessionList.map(item=>{
-        if(item.id==_this.sessionId){
-          if(!item.title || item.title==''){
-            item.title=message
+      let respText = ''
+      let _this = this
+      this.sessionList = this.sessionList.map(item => {
+        if (item.id == _this.sessionId) {
+          if (!item.title || item.title == '') {
+            item.title = message
           }
         }
         return item
       })
-      fetchEventSource(this.baseUrl+'/ai/api/stream?sessionId='+this.sessionId,{
+      fetchEventSource(this.baseUrl + '/ai/api/stream?sessionId=' + this.sessionId, {
         method: 'POST',
-        timeout: 30*1000,
+        timeout: 30 * 1000,
+        openWhenHidden: true, // 避免反复发出重试请求，导致耗费大量的Token
         headers: {
           'Content-Type': 'application/json',
         },
-          body: JSON.stringify({
-            message:message
-          }),
-        onmessage(ev){
-          respText+=ev.data
+        body: JSON.stringify({
+          message: message
+        }),
+        onmessage(ev) {
+          respText += ev.data
           _this.historyList.pop()
           _this.historyList.push({
             message: 'ASSISTANT',
@@ -124,26 +129,26 @@ export default {
           _this.scrollToEnd()
         }
       })
-     },
-    queryHistoryList(){
-      if(!this.sessionId || this.sessionId==''){
+    },
+    queryHistoryList() {
+      if (!this.sessionId || this.sessionId == '') {
         return
       }
-      fetch(this.baseUrl+'/ai/history/list/'+this.sessionId,{
+      fetch(this.baseUrl + '/ai/history/list/' + this.sessionId, {
         method: 'GET',
-      }).then(res=>res.json())
-          .then(json=>{
-            this.historyList=json
+      }).then(res => res.json())
+          .then(json => {
+            this.historyList = json
             this.scrollToEnd()
           })
     },
-    querySessionList(){
-      fetch(this.baseUrl+'/ai/session/list',{
+    querySessionList() {
+      fetch(this.baseUrl + '/ai/session/list', {
         method: 'GET',
-      }).then(res=>res.json())
-          .then(json=>{
-            this.sessionList=json
-            if(this.sessionList.length>0){
+      }).then(res => res.json())
+          .then(json => {
+            this.sessionList = json
+            if (this.sessionList.length > 0) {
               this.switchSession(this.sessionList[0])
             }
           })
@@ -153,89 +158,99 @@ export default {
 </script>
 
 <style scoped>
-.page{
+.page {
   width: 100vw;
   height: 100vh;
   display: block;
   overflow: auto;
 }
-.sidebar{
+
+.sidebar {
   width: 20%;
   height: 100%;
   float: left;
   background-color: darkseagreen;
 }
-.logo{
+
+.logo {
   font-size: 24px;
   color: white;
   text-align: center;
   border-bottom: solid 1px white;
   font-weight: bold;
 }
-.sidebar-menu{
+
+.sidebar-menu {
   padding: 8px 5px;
 }
 
-.sidebar-menu-operation{
+.sidebar-menu-operation {
   padding-bottom: 8px;
   border-bottom: solid 1px #ccc;
 }
 
-.sidebar-menu-operation button{
+.sidebar-menu-operation button {
   width: calc(100% - 18px);
 }
-.user-session-list{
+
+.user-session-list {
   margin-top: 3px;
   padding: 3px 0px;
   max-height: calc(100vh - 90px);
   overflow: auto;
 }
-.user-session-list li{
+
+.user-session-list li {
   margin: 3px 5px;
   padding: 3px 8px;
   color: white;
   background-color: lightseagreen;
 }
 
-.user-session-list li[class="active"]{
+.user-session-list li[class="active"] {
   background-color: lightsalmon;
 }
 
-.user-session-list li::before{
+.user-session-list li::before {
   content: '会话：';
   display: inline-block;
 }
-.user-session-list li::after{
+
+.user-session-list li::after {
   content: '>';
   display: inline-block;
   float: right;
   color: whitesmoke;
 }
-.container{
+
+.container {
   width: 80%;
   height: 99%;
   max-height: 100vh;
   float: right;
   background-color: lightyellow;
 }
-.main{
+
+.main {
   height: 79%;
   width: 100%;
   background-color: lightcyan;
   position: relative;
   overflow: auto;
 }
-.footer{
+
+.footer {
   height: 20%;
   background-color: lightskyblue;
 }
 
-.main > div::after{
+.main > div::after {
   content: '';
   clear: both;
   display: block;
 }
-.message{
+
+.message {
   margin: 8px;
   width: calc(min-content + 20px);
   max-width: 80%;
@@ -245,68 +260,70 @@ export default {
   border: solid 1px #aaa;
 }
 
-.message > *{
+.message > * {
   display: inline-block;
   text-wrap: wrap;
 }
 
-.message[type="SYSTEM"]{
+.message[type="SYSTEM"] {
   min-width: 50%;
   text-align: center;
   margin: 8px auto;
   background-color: lightsalmon;
 }
-.message[type="SYSTEM"]::before{
+
+.message[type="SYSTEM"]::before {
   content: '系统：';
   display: inline;
 }
 
-.message[type="USER"]{
+.message[type="USER"] {
   float: right;
   background-color: lightskyblue;
 }
 
-.message[type="USER"]::after{
+.message[type="USER"]::after {
   content: '：我';
   display: inline;
 }
 
-.message[type="ASSISTANT"]{
+.message[type="ASSISTANT"] {
   float: left;
 }
 
-.message[type="ASSISTANT"]::before{
+.message[type="ASSISTANT"]::before {
   content: 'AI：';
   display: inline;
 }
 
-.message[type="TOOL"]{
+.message[type="TOOL"] {
   float: left;
   background-color: lightgray;
 }
 
-.message[type="TOOL"]::before{
+.message[type="TOOL"]::before {
   content: 'TOOL：';
   display: inline;
 }
 
-.footer > div{
+.footer > div {
   height: 100%;
   display: inline-block;
 }
 
-.footer .textarea{
+.footer .textarea {
   width: 95%;
   float: left;
   background-color: lightsalmon;
 }
-.footer .send{
+
+.footer .send {
   width: 5%;
   float: right;
   background-color: lightgreen;
 }
 
-.footer .textarea textarea{
+.footer .textarea textarea {
   width: 100%;
   height: 100%;
   display: inline-flex;
