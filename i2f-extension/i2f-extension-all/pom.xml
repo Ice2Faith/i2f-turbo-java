@@ -36,10 +36,10 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-asr-vosk</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-browser-selenium</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-canal</artifactId>
@@ -176,18 +176,18 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-ognl</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-opencv</artifactId>
-        </dependency>
-        <dependency>
+        </dependency>-->
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-opencv-data</artifactId>
-        </dependency>
-        <dependency>
+        </dependency>-->
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-opencv-javacv</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-oss-aliyun</artifactId>
@@ -252,14 +252,14 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-tokenlization-jieba</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-tts-espeak</artifactId>
-        </dependency>
-        <dependency>
+        </dependency>-->
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-tts-jacob</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-velocity</artifactId>
