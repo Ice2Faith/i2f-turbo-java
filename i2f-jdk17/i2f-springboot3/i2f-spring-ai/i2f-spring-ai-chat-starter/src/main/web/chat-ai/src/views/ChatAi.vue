@@ -20,7 +20,8 @@
       <div ref="historyContainerDom" class="main">
         <div v-for="(item,index) in historyList">
           <div class="message" :type="item.messageType">
-            <pre>{{ item.content }}</pre>
+<!--            <pre>{{ item.content }}</pre> -->
+            <v-md-preview class="markdown-preview" :text="item.content"></v-md-preview>
           </div>
         </div>
 
@@ -30,7 +31,7 @@
           <textarea v-model="userMsg" @keydown="handleKeyDown"></textarea>
         </div>
         <div class="send">
-          <button @click="sendUserMsg">发送</button>
+          <button @click="sendUserMsg">发送<br/><span style="font-size: 9px">Ctrl+Enter</span></button>
         </div>
       </div>
     </div>
@@ -258,6 +259,16 @@ export default {
   border-radius: 8px;
   padding: 8px;
   border: solid 1px #aaa;
+  position: relative;
+}
+
+.message .markdown-preview{
+
+}
+
+.message .markdown-preview /deep/ > div{
+  padding: 0px 12px 0px 24px!important;
+  font-size: 12px;
 }
 
 .message > * {
@@ -275,6 +286,8 @@ export default {
 .message[type="SYSTEM"]::before {
   content: '系统：';
   display: inline;
+  position: absolute;
+  top: 5px;
 }
 
 .message[type="USER"] {
@@ -294,6 +307,8 @@ export default {
 .message[type="ASSISTANT"]::before {
   content: 'AI：';
   display: inline;
+  position: absolute;
+  top: 5px;
 }
 
 .message[type="TOOL"] {
@@ -304,6 +319,8 @@ export default {
 .message[type="TOOL"]::before {
   content: 'TOOL：';
   display: inline;
+  position: absolute;
+  top: 5px;
 }
 
 .footer > div {
