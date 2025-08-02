@@ -7,6 +7,7 @@ import org.activiti.engine.*;
 import org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -45,6 +46,7 @@ public class ActivityAutoConfiguration implements ApplicationContextAware {
         this.applicationContext=applicationContext;
     }
 
+    @ConditionalOnMissingBean(ProcessEngineConfiguration.class)
     @Bean
     public ProcessEngineConfiguration processEngineConfiguration(){
         StandaloneProcessEngineConfiguration config=new StandaloneProcessEngineConfiguration();
@@ -53,7 +55,7 @@ public class ActivityAutoConfiguration implements ApplicationContextAware {
             config.setJdbcUrl(jdbcUrl);
             config.setJdbcUsername(jdbcUsername);
             config.setJdbcPassword(jdbcPassword);
-            log.info("ActivityConfig use jdbc connection.");
+            log.info("use jdbc connection.");
         }else{
             DataSource dataSource=null;
             if(datasourceName!=null && !"".equals(datasourceName)){
@@ -63,16 +65,17 @@ public class ActivityAutoConfiguration implements ApplicationContextAware {
                 dataSource=applicationContext.getBean(DataSource.class);
             }
             config.setDataSource(dataSource);
-            log.info("ActivityConfig use datasource connection.");
+            log.info("use datasource connection.");
         }
         config.setDatabaseSchemaUpdate(enableAutoBuildTables+"");
-        log.info("ActivityConfig ProcessEngineConfiguration config done.");
+        log.info("ProcessEngineConfiguration config done.");
         return config;
     }
 
+    @ConditionalOnMissingBean(ProcessEngine.class)
     @Bean
-    public ProcessEngine processEngine(){
-        log.info("ActivityConfig ProcessEngine config done.");
+    public ProcessEngine processEngine(ProcessEngineConfiguration configuration){
+        log.info("ProcessEngine config done.");
         return processEngineConfiguration().buildProcessEngine();
     }
 
