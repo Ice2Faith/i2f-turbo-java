@@ -1,0 +1,48 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.nginx.rtmp.auth.default-validator",
+      "type": "i2f.springboot.nginx.rtmp.auth.server.DefaultNginxRtmpAuthTokenValidator",
+      "sourceType": "i2f.springboot.nginx.rtmp.auth.server.DefaultNginxRtmpAuthTokenValidator"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.nginx.rtmp.auth.default-validator.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable default validator.",
+      "sourceType": "i2f.springboot.nginx.rtmp.auth.server.DefaultNginxRtmpAuthTokenValidator",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.nginx.rtmp.auth.default-validator.access-token",
+      "type": "java.lang.String",
+      "description": "default validator access-token.",
+      "sourceType": "i2f.springboot.nginx.rtmp.auth.server.DefaultNginxRtmpAuthTokenValidator"
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

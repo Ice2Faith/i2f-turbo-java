@@ -1,0 +1,22 @@
+server:
+  port: 11936
+
+spring:
+  application:
+    name: nginx-rtmp-auth-server
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss SSS
+    time-zone: GMT+8
+
+logging:
+  level:
+    root: info
+
+i2f:
+  springboot:
+    nginx:
+      rtmp:
+        auth:
+          default-validator:
+            enable: true
+            access-token: 123456
