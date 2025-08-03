@@ -27,6 +27,13 @@
         <module>i2f-springcloud-netflix-hystrix-starter</module>
         <module>i2f-springcloud-netflix-ribbon-starter</module>
         <module>i2f-springcloud-netflix-zuul-starter</module>
+        <module>i2f-springcloud-actuator-admin-starter</module>
+        <module>i2f-springcloud-actuator-starter</module>
+        <module>i2f-springcloud-config-server-starter</module>
+        <module>i2f-springcloud-config-client-starter</module>
+        <module>i2f-springcloud-loadbalancer-starter</module>
+        <module>i2f-springcloud-sleuth-starter</module>
+        <module>i2f-springcloud-zipkin-starter</module>
     </modules>
 
     <properties>

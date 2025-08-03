@@ -1319,6 +1319,16 @@
             <!-- ############################################################ -->
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-actuator-admin-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-actuator-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-alibaba-nacos-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -1334,6 +1344,16 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-config-client-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-config-server-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-discovery-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -1345,6 +1365,11 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-gateway-swl-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-loadbalancer-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -1380,6 +1405,16 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-refresh-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-sleuth-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-zipkin-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
 
