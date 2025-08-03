@@ -84,6 +84,7 @@
         <module>i2f-extension-sqlparser</module>
         <module>i2f-extension-oss-aws-s3</module>
         <module>test-flink</module>
+        <module>i2f-extension-mongodb</module>
     </modules>
 
 

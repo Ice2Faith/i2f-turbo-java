@@ -38,6 +38,8 @@
         <module>i2f-springboot-kafka-starter</module>
         <module>i2f-springboot-rabbitmq-starter</module>
         <module>i2f-springboot-quartz-starter</module>
+        <module>i2f-springboot-dubbo-starter</module>
+        <module>i2f-springboot-websocket-starter</module>
         <!--        <module>i2f-springboot-maven-project</module>-->
     </modules>
 

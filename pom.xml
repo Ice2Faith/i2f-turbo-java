@@ -991,6 +991,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-mongodb</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-mybatis</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -1191,6 +1196,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springboot-dubbo-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-dynamic-datasource-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -1216,12 +1226,27 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springboot-kafka-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-mybatis-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-oss-minio-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springboot-quartz-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springboot-rabbitmq-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -1267,6 +1292,11 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-trace-mdc-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springboot-websocket-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>

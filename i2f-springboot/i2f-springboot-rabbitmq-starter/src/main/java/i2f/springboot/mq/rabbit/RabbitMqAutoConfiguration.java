@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2021/9/13
  */
 @Slf4j

@@ -1,0 +1,61 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.websocket",
+      "type": "i2f.springboot.websocket.WebSocketAutoConfiguration",
+      "sourceType": "i2f.springboot.websocket.WebSocketAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.websocket.registry",
+      "type": "i2f.springboot.websocket.WebSocketAutoConfiguration",
+      "sourceType": "i2f.springboot.websocket.WebSocketAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.websocket.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable websocket configuration.",
+      "sourceType": "i2f.springboot.websocket.WebSocketAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.websocket.default-endpoint.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable websocket default endpoint configuration.",
+      "sourceType": "i2f.springboot.websocket.DefaultWebsocketEndpointHandler",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.websocket.default-endpoint.path",
+      "type": "java.lang.String",
+      "description": "default endpoint path.",
+      "sourceType": "i2f.springboot.websocket.DefaultWebsocketEndpointHandler",
+      "defaultValue": "/default/broadcast"
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
