@@ -85,6 +85,7 @@
         <module>i2f-extension-oss-aws-s3</module>
         <module>test-flink</module>
         <module>i2f-extension-mongodb</module>
+        <module>i2f-extension-hazelcast</module>
     </modules>
 
 
