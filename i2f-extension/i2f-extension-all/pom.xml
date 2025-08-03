@@ -122,6 +122,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-hazelcast</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-hdfs</artifactId>
         </dependency>
         <dependency>
