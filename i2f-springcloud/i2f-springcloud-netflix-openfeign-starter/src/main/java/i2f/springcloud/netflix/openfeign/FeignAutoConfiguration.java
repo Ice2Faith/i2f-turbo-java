@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/3/27 14:06
  * @desc
  */

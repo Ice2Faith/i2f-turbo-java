@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author ltb
+ * @author Ice2Faith
  * @date 2022/5/28 19:46
  * @desc
  */
