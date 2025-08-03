@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.feign",
+      "type": "i2f.springcloud.netflix.openfeign.FeignAutoConfiguration",
+      "sourceType": "i2f.springcloud.netflix.openfeign.FeignAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.feign.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable feign.",
+      "sourceType": "i2f.springcloud.netflix.openfeign.FeignAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

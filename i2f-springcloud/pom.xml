@@ -21,6 +21,12 @@
         <module>i2f-springcloud-alibaba-nacos-starter</module>
         <module>i2f-springcloud-alibaba-seata-starter</module>
         <module>i2f-springcloud-alibaba-sentinel-starter</module>
+        <module>i2f-springcloud-netflix-eureka-server-starter</module>
+        <module>i2f-springcloud-netflix-eureka-client-starter</module>
+        <module>i2f-springcloud-netflix-openfeign-starter</module>
+        <module>i2f-springcloud-netflix-hystrix-starter</module>
+        <module>i2f-springcloud-netflix-ribbon-starter</module>
+        <module>i2f-springcloud-netflix-zuul-starter</module>
     </modules>
 
     <properties>

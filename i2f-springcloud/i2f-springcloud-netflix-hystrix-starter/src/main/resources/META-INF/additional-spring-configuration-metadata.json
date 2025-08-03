@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.hystrix",
+      "type": "i2f.springcloud.netflix.hystrix.HystrixAutoConfiguration",
+      "sourceType": "i2f.springcloud.netflix.hystrix.HystrixAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.hystrix.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable hystrix.",
+      "sourceType": "i2f.springcloud.netflix.hystrix.HystrixAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

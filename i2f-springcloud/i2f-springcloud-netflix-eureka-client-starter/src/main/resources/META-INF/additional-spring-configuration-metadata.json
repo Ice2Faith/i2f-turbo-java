@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.eureka-client",
+      "type": "i2f.springcloud.netflix.eureka.client.EurekaClientAutoConfiguration",
+      "sourceType": "i2f.springcloud.netflix.eureka.client.EurekaClientAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.eureka-client.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable eureka-client.",
+      "sourceType": "i2f.springcloud.netflix.eureka.client.EurekaClientAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
