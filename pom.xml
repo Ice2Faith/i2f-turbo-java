@@ -1317,7 +1317,21 @@
 
 
             <!-- ############################################################ -->
-
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-alibaba-nacos-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-alibaba-seata-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springcloud-alibaba-sentinel-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-discovery-starter</artifactId>
