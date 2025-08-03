@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.config.dubbo",
+      "type": "i2f.springboot.dubbo.DubboAutoConfiguration",
+      "sourceType": "i2f.springboot.dubbo.DubboAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.config.dubbo.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether enable dubbo configuration.",
+      "sourceType": "i2f.springboot.dubbo.DubboAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

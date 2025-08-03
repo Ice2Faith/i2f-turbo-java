@@ -22,13 +22,15 @@ import springfox.documentation.spring.web.plugins.Docket;
  * @date 2024/6/26 20:25
  * @desc
  */
+@ConditionalOnExpression("${i2f.swagger2.enable:true}")
 @Slf4j
 @Data
 @EnableConfigurationProperties({
         Swagger2ApiInfoProperties.class
 })
 @Import({
-        Swagger2RestfulConfiguration.class
+        Swagger2RestfulConfiguration.class,
+        DynamicSwaggerApisConfiguration.class
 })
 @ConfigurationProperties(prefix = "i2f.swagger2.apis")
 public class Swagger2AutoConfiguration {
@@ -51,7 +53,7 @@ public class Swagger2AutoConfiguration {
     public Docket allApi(ApiInfo apiInfo) {
         log.info("SwaggerConfig all api config.");
         return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("10-all")
+                .groupName("all")
                 .select()
                 .apis(RequestHandlerSelectors
                         .any())

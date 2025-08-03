@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    i2f.springboot.websocket.DefaultWebsocketEndpointHandler,\
+    i2f.springboot.websocket.WebSocketAutoConfiguration
