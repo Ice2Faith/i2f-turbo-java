@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.nginx.rtmp.auth.server.DefaultNginxRtmpAuthTokenValidator,\
+i2f.springboot.nginx.rtmp.auth.server.NginxRtmpAuthController
