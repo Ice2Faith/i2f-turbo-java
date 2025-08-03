@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.ribbon",
+      "type": "i2f.springcloud.netflix.ribbon.RibbonAutoConfiguration",
+      "sourceType": "i2f.springcloud.netflix.ribbon.RibbonAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.ribbon.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ribbon.",
+      "sourceType": "i2f.springcloud.netflix.ribbon.RibbonAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
