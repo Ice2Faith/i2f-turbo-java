@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.seata",
+      "type": "i2f.springcloud.alibaba.seata.SeataAutoConfiguration",
+      "sourceType": "i2f.springcloud.alibaba.seata.SeataAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.seata.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable seata.",
+      "sourceType": "i2f.springcloud.alibaba.seata.SeataAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

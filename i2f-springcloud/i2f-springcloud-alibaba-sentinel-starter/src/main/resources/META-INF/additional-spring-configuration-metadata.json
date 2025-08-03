@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.sentinel",
+      "type": "i2f.springcloud.alibaba.sentinel.SentinelAutoConfiguration",
+      "sourceType": "i2f.springcloud.alibaba.sentinel.SentinelAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.sentinel.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable sentinel.",
+      "sourceType": "i2f.springcloud.alibaba.sentinel.SentinelAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

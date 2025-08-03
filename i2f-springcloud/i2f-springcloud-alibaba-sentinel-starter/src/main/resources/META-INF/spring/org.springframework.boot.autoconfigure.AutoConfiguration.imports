@@ -1,0 +1,2 @@
+i2f.springcloud.alibaba.sentinel.SentinelAutoConfiguration
+i2f.springcloud.alibaba.sentinel.DefaultSentinelBlockExceptionHandler
