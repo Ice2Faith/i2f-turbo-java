@@ -13,7 +13,8 @@ import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.client.CommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration;
+import org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientAutoConfiguration;
+import org.springframework.cloud.client.discovery.composite.reactive.ReactiveCompositeDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.context.ApplicationListener;
@@ -41,7 +42,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
         proxyBeanMethods = false
 )
 @AutoConfigureBefore({
-        NoopDiscoveryClientAutoConfiguration.class,
+        ReactiveCompositeDiscoveryClientAutoConfiguration.class,
+        CompositeDiscoveryClientAutoConfiguration.class,
         CommonsClientAutoConfiguration.class,
         SimpleDiscoveryClientAutoConfiguration.class
 })
