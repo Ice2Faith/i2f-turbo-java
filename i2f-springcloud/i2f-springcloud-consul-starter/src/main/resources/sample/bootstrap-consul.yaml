@@ -1,0 +1,25 @@
+spring:
+  application:
+    # 设置服务名称
+    name: cloud-payment-service
+  cloud:
+    # 配置consul
+    consul:
+      # consul所在的IP地址
+      host: localhost
+      # consul所在的端口号
+      port: 8500
+      discovery:
+        # 服务以什么名字注册到 consul 中
+        service-name: ${spring.application.name}
+        # 开启心跳模式，如果不开启服务注册后一直是红×
+        heartbeat:
+          enabled: true
+      # 分布式配置
+      config:
+        # 对应consul管理页面的Key/Value配置： config/{service-name}-{profile}/data 文件
+        # 因此，就在这个data文件里面填写你的配置即可
+        # default value is ","，we update '-'
+        profile-separator: '-'
+        # setting config document style;
+        format: yaml
