@@ -173,8 +173,8 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
                 // 重新构造请求
                 if (srcText != null) {
-                    byte[] dataBytes = srcText.getBytes(request.getCharacterEncoding());
-                    wrapper = new HttpServletRequestProxyWrapper(request, dataBytes);
+                    body = srcText.getBytes(request.getCharacterEncoding());
+                    wrapper = new HttpServletRequestProxyWrapper(request, body);
                 }
 
                 // 覆盖请求参数
@@ -191,6 +191,9 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
                     wrapper.setAttachHeader("Content-Type", realContentType);
                     wrapper.setContentType(realContentType);
                 }
+
+                wrapper.setContentLength(body.length);
+                wrapper.setAttachHeader("Content-Length",String.valueOf(body.length));
 
                 // 替换请求为包装请求
                 nextRequest = wrapper;
@@ -313,7 +316,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
             }
         }
         response.setContentType("text/plain");
-        response.setContentLengthLong(responseText.length());
+        response.setContentLengthLong(responseBody.length);
 
         // 响应数据
         response.setContentType(responseWrapper.getContentType());
