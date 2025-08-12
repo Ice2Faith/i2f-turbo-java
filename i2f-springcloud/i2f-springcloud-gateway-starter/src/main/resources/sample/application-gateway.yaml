@@ -63,15 +63,14 @@ spring:
       # 配置全局跨域支持，可以配置多个
       # 这里就配置一个全部允许跨域为例
       globalcors:
+        add-to-simple-url-handler-mapping: true
         cors-configurations:
           '[/**]':
             allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTION
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowedCredentials: true
+            maxAge: 36000
 
     # 服务发现能力的整合，这里使用整合nacos为例
     # 其实就是直接引入nacos即可，配置上服务发现discovery

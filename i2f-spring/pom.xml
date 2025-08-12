@@ -24,11 +24,6 @@
         <module>i2f-spring-swl</module>
     </modules>
 
-    <properties>
-        <spring.version>5.2.12.RELEASE</spring.version>
-        <spring.security.version>5.3.6.RELEASE</spring.security.version>
-        <jackson-version>2.11.3</jackson-version>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -107,12 +102,12 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>${jackson-version}</version>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson-version}</version>
+                <version>${jackson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

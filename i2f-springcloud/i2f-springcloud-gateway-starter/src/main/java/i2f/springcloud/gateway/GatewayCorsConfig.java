@@ -12,6 +12,8 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -28,6 +30,7 @@ public class GatewayCorsConfig {
     private String allowOrigins = "*";
     private String allowMethods = "*";
     private String allowHeaders = "*";
+    private String exposedHeaders = "*";
 
     private boolean allowCredentials = true;
     private long maxAge = 6000L;
@@ -35,10 +38,15 @@ public class GatewayCorsConfig {
     @Order(-100)
     @Bean
     public CorsWebFilter corsFilter() {
+        List<String> originList = Arrays.asList(allowOrigins.split(",|;"));
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedMethods(Arrays.asList(allowMethods.split(",")));
-        config.setAllowedOrigins(Arrays.asList(allowOrigins.split(",")));
-        config.setAllowedHeaders(Arrays.asList(allowHeaders.split(",")));
+        config.setAllowedMethods(Arrays.asList(allowMethods.split(",|;")));
+        config.setAllowedOrigins(originList.stream().filter(e->!e.contains("*")).collect(Collectors.toList()));
+        config.setAllowedHeaders(Arrays.asList(allowHeaders.split(",|;")));
+        config.setExposedHeaders(Arrays.asList(exposedHeaders.split(",|;")));
+        for (String item : originList) {
+            config.addAllowedOriginPattern(item);
+        }
 
         config.setAllowCredentials(allowCredentials);
 

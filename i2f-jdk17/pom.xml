@@ -23,6 +23,17 @@
         <java.target.version>17</java.target.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+
+
+        <!-- spring 体系 -->
+        <spring.version>6.1.21</spring.version>
+        <spring.security.version>>6.1.5</spring.security.version>
+        <spring-boot.version>3.3.13</spring-boot.version>
+        <spring-cloud.version>2023.0.6</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.3.2</spring-cloud-alibaba.version>
+
+        <jackson.version>2.17.3</jackson.version>
+        <slf4j.version>2.0.17</slf4j.version>
     </properties>
 
 

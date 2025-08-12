@@ -10,6 +10,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -27,6 +29,7 @@ public class SpringCorsAutoConfiguration {
     private String allowOrigins = "*";
     private String allowMethods = "*";
     private String allowHeaders = "*";
+    private String exposedHeaders = "*";
 
     private boolean allowCredentials = true;
     private long maxAge = 6000L;
@@ -35,11 +38,14 @@ public class SpringCorsAutoConfiguration {
     @Order(1)
     @Bean
     public CorsFilter corsFilter() {
+        List<String> originList = Arrays.asList(allowOrigins.split(",|;"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         OriginPattenCorsConfiguration config = new OriginPattenCorsConfiguration();
         config.setAllowedMethods(Arrays.asList(allowMethods.split(",|;")));
-        config.setAllowedOrigins(Arrays.asList(allowOrigins.split(",|;")));
+        config.setAllowedOrigins(originList.stream().filter(e->!e.contains("*")).collect(Collectors.toList()));
         config.setAllowedHeaders(Arrays.asList(allowHeaders.split(",|;")));
+        config.setExposedHeaders(Arrays.asList(exposedHeaders.split(",|;")));
+        config.setAllowedOriginPatterns(originList);
 
         config.setAllowCredentials(allowCredentials);
 
