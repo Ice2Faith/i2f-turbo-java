@@ -23,6 +23,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.*;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -73,11 +74,11 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
 
         String method = String.valueOf(request.getMethod());
-        if ("OPTIONS".equalsIgnoreCase(method)) {
+        if (HttpMethod.OPTIONS.name().equalsIgnoreCase(method)) {
             return chain.filter(exchange);
         }
 
-        if ("TRACE".equalsIgnoreCase(method)) {
+        if (HttpMethod.TRACE.name().equalsIgnoreCase(method)) {
             return chain.filter(exchange);
         }
 
@@ -96,7 +97,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
         }
         contentType = contentType.toLowerCase();
 
-        if (contentType.contains("multipart/form-data")) {
+        if (contentType.contains(MediaType.MULTIPART_FORM_DATA_VALUE)) {
             ctrl.setIn(false);
         }
 
@@ -231,8 +232,11 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         // 覆盖真实请求内容类型
                         String realContentType = request.getHeaders().getFirst(config.getRealContentTypeHeaderName());
                         if (realContentType != null && !realContentType.isEmpty()) {
-                            headers.set("Content-Type", realContentType);
+                            headers.set(HttpHeaders.CONTENT_TYPE, realContentType);
                         }
+
+                        headers.set(HttpHeaders.CONTENT_LENGTH,String.valueOf(body.length));
+
 
                         // 替换请求为包装请求
                         URI uri = request.getURI();
@@ -333,8 +337,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                     if (item == null || item.isEmpty()) {
                         continue;
                     }
-                    String str = item.toLowerCase().trim();
-                    if ("content-disposition".equals(str)) {
+                    if (HttpHeaders.CONTENT_DISPOSITION.equalsIgnoreCase(item)) {
                         String header = delegateResponse.getHeaders().getFirst(item);
                         if (header != null && !header.isEmpty()) {
                             specificResponseBody = true;
@@ -368,7 +371,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         }
                     }
                     if (responseCharset == null || responseCharset.isEmpty()) {
-                        responseCharset = "UTF-8";
+                        responseCharset = StandardCharsets.UTF_8.name();
                     }
 
 
@@ -404,7 +407,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
                     responseText = responseData.getParts().get(0);
                     try {
-                        responseBody = responseText.getBytes("UTF-8");
+                        responseBody = responseText.getBytes(StandardCharsets.UTF_8.name());
                     } catch (UnsupportedEncodingException e) {
                         throw new SwlException(SwlCode.INTERNAL_EXCEPTION.code(), e.getMessage(), e);
                     }
@@ -423,7 +426,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         }
                     }
 
-                    MediaType responseMediaType = MediaType.parseMediaType("text/plain;charset=" + responseCharset);
+                    MediaType responseMediaType = MediaType.parseMediaType(MediaType.TEXT_PLAIN_VALUE+";charset=" + responseCharset);
                     delegateResponse.getHeaders().setContentType(responseMediaType);
 
                     // 响应数据

@@ -18,6 +18,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.gateway.route.RouteLocator;
+import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
@@ -154,5 +156,14 @@ public class SwlGatewayAutoConfiguration {
 
 
         return ret;
+    }
+
+    @ConditionalOnExpression("${i2f.gateway.swl.api-route.enable:true}")
+    @Bean
+    public RouteLocator routes(RouteLocatorBuilder builder) {
+        return builder.routes()
+                .route("swl_api_route", r -> r.path(SwlGatewayApiFilter.KEY_PATH,SwlGatewayApiFilter.KEY_SWAP_PATH)
+                        .uri("http://localhost:80"))
+                .build();
     }
 }

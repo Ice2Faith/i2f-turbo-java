@@ -88,7 +88,7 @@ Random.prototype.nextShort=function (){
  * @return {number}
  */
 Random.prototype.nextLowerInt=function(max){
-    return Random.nextLowerInt()
+    return Random.nextLowerInt(max)
 }
 
 /**
