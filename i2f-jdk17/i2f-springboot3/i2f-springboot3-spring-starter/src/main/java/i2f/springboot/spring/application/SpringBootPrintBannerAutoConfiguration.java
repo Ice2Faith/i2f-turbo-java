@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Bean;
  * @date 2024/7/12 22:14
  * @desc
  */
+@ConditionalOnExpression("${i2f.spring.print-banner.enable:true}")
 @AutoConfigureOrder(-1)
 @Data
 @NoArgsConstructor
