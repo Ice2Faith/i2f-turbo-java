@@ -18,6 +18,7 @@ move /Y %dst_path% .\backup
 rd /q /s %dst_path%
 mkdir %dst_path%
 
+rd %src_path%\%target_dir%
 for /F %%i in ('dir /S /B %src_path%\%target_dir%') do (
 
       for /F %%j in ('dir  /B %%i\*.jar') do (
