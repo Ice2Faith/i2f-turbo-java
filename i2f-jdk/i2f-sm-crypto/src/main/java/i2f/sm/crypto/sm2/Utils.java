@@ -42,11 +42,19 @@ public class Utils {
         return new EcParam(curve, g, n);
     }
 
+    public static KeyPair generateKeyPairHex() {
+        return generateKeyPairHex(null, 10, 1);
+    }
     /**
      * 生成密钥对：publicKey = privateKey * G
      */
-    public static KeyPair generateKeyPairHex(BigInteger a, BigInteger b, BigInteger c) {
-        BigInteger random = a != null ? new BigInteger(a, b, c) : new BigInteger(EC_PARAM.getN().bitLength(), rng);
+    public static KeyPair generateKeyPairHex(String a, int b, int c) {
+        if (b <= 0) {
+            b = 10;
+        }
+        c = c >= 0 ? 1 : -1;
+
+        BigInteger random = a != null ? new BigInteger(a, b).multiply(BigInteger.valueOf(c)) : new BigInteger(EC_PARAM.getN().bitLength(), rng);
         BigInteger d = random.mod(EC_PARAM.getN().subtract(BigInteger.ONE)).add(BigInteger.ONE); // 随机数
         String privateKey = CipUtils.leftPad(d.toString(16), 64);
 
