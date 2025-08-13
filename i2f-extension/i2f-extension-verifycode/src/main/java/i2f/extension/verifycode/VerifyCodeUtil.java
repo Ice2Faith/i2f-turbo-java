@@ -3,7 +3,7 @@ package i2f.extension.verifycode;
 import com.google.code.kaptcha.Producer;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;
-import i2f.codec.CodecUtil;
+import i2f.codec.bytes.base64.Base64UrlStringByteCodec;
 import i2f.extension.verifycode.data.VerifyCodeData;
 
 import javax.imageio.ImageIO;
@@ -120,7 +120,7 @@ public class VerifyCodeUtil {
         ImageIO.write(img, "jpg", os);
         os.close();
 
-        base64Img = CodecUtil.toBase64(os.toByteArray());
+        base64Img = Base64UrlStringByteCodec.INSTANCE.encode(os.toByteArray());
 
         VerifyCodeData data = new VerifyCodeData();
         data.setImg(img);

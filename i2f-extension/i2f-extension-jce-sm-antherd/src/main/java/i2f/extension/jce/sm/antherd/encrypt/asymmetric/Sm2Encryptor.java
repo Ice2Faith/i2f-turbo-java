@@ -1,17 +1,17 @@
 package i2f.extension.jce.sm.antherd.encrypt.asymmetric;
 
+import com.antherd.smcrypto.NashornProvider;
 import com.antherd.smcrypto.sm2.Keypair;
 import com.antherd.smcrypto.sm2.Sm2;
-import i2f.codec.CodecUtil;
 import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.crypto.std.encrypt.asymmetric.IAsymmetricEncryptor;
 import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.crypto.std.encrypt.asymmetric.key.BytesPrivateKey;
 import i2f.crypto.std.encrypt.asymmetric.key.BytesPublicKey;
-import i2f.extension.jce.sm.antherd.NashornProvider;
 import i2f.extension.jce.sm.antherd.SmAntherdProvider;
 import lombok.Data;
 
+import javax.script.ScriptException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -51,22 +51,30 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
 
     public Sm2Encryptor(KeyPair keyPair) {
         if (keyPair.getPublic() != null) {
-            this.pubKey = CodecUtil.toHexString(keyPair.getPublic().getEncoded());
+            this.pubKey = HexStringByteCodec.INSTANCE.encode(keyPair.getPublic().getEncoded());
         }
         if (keyPair.getPrivate() != null) {
-            this.priKey = CodecUtil.toHexString(keyPair.getPrivate().getEncoded());
+            this.priKey = HexStringByteCodec.INSTANCE.encode(keyPair.getPrivate().getEncoded());
         }
     }
 
     public static Keypair genKey() {
-        return Sm2.generateKeyPairHex();
+        try {
+            return Sm2.generateKeyPairHex();
+        } catch (ScriptException e) {
+            throw new IllegalStateException(e.getMessage(),e);
+        }
     }
 
     public static KeyPair genKeyPair() {
-        Keypair keypair = Sm2.generateKeyPairHex();
+        try {
+            Keypair keypair = Sm2.generateKeyPairHex();
 
-        return new KeyPair(new BytesPublicKey("sm2", "hex", CodecUtil.ofHexString(keypair.getPublicKey())),
-                new BytesPrivateKey("sm2", "hex", CodecUtil.ofHexString(keypair.getPrivateKey())));
+            return new KeyPair(new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(keypair.getPublicKey())),
+                    new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(keypair.getPrivateKey())));
+        } catch (ScriptException e) {
+            throw new IllegalStateException(e.getMessage(),e);
+        }
     }
 
     public static KeyPair keyPairOf(byte[] publicKey, byte[] privateKey) throws Exception {
@@ -237,19 +245,19 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
     }
 
     public byte[] publicKeyTo() {
-        return CodecUtil.ofHexString(pubKey);
+        return HexStringByteCodec.INSTANCE.decode(pubKey);
     }
 
     public byte[] privateKeyTo() {
-        return CodecUtil.ofHexString(priKey);
+        return HexStringByteCodec.INSTANCE.decode(priKey);
     }
 
     public void ofPublicKey(byte[] codes) {
-        this.pubKey = CodecUtil.toHexString(codes);
+        this.pubKey = HexStringByteCodec.INSTANCE.encode(codes);
     }
 
     public void ofPrivateKey(byte[] codes) {
-        this.priKey = CodecUtil.toHexString(codes);
+        this.priKey = HexStringByteCodec.INSTANCE.encode(codes);
     }
 
     @Override

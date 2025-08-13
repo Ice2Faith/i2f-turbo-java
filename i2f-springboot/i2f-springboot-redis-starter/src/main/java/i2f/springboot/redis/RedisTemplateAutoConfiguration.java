@@ -2,7 +2,7 @@ package i2f.springboot.redis;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -15,7 +15,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @date 2022/4/15 16:06
  * @desc
  */
-@ConditionalOnBean(RedisAutoConfiguration.class)
+@AutoConfigureAfter(RedisAutoConfiguration.class)
 @ConditionalOnExpression("${i2f.spring.redis.redis-template.enable:true}")
 @Slf4j
 public class RedisTemplateAutoConfiguration {
@@ -25,7 +25,7 @@ public class RedisTemplateAutoConfiguration {
 
     // 1.项目启动时此方法先被注册成bean被spring管理,如果没有这个bean，则redis可视化工具中的中文内容（key或者value）都会以二进制存储，不易检查。
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+    public RedisTemplate<String, Object> redisStringKeyTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String, Object> template = new RedisTemplate<String, Object>();
         template.setConnectionFactory(factory);
 
