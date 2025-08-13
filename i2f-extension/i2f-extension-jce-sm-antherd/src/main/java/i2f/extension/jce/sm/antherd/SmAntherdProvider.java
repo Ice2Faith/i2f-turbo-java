@@ -13,7 +13,7 @@ public class SmAntherdProvider {
             "<dependency>\n" +
             "    <groupId>com.antherd</groupId>\n" +
             "    <artifactId>sm-crypto</artifactId>\n" +
-            "    <version>0.3.2</version>\n" +
+            "    <version>0.3.2.1-RELEASE</version>\n" +
             "</dependency>";
     public static final String NPM_DEPENDENCY = "" +
             "npm install --save sm-crypto";

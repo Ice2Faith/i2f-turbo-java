@@ -1,5 +1,6 @@
 package i2f.extension.jce.sm.antherd;
 
+import com.antherd.smcrypto.NashornProvider;
 import i2f.extension.jce.sm.antherd.digest.Sm3Digester;
 import i2f.extension.jce.sm.antherd.encrypt.asymmetric.Sm2Encryptor;
 import i2f.extension.jce.sm.antherd.encrypt.symmetric.Sm4Encryptor;

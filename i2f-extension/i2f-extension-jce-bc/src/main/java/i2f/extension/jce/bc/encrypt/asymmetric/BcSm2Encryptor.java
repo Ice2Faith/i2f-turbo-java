@@ -1,6 +1,5 @@
 package i2f.extension.jce.bc.encrypt.asymmetric;
 
-import i2f.codec.CodecUtil;
 import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.crypto.impl.jdk.supports.SecureRandomAlgorithm;
 import i2f.crypto.std.encrypt.asymmetric.IAsymmetricEncryptor;
@@ -65,10 +64,10 @@ public class BcSm2Encryptor implements IAsymmetricEncryptor {
 
     public BcSm2Encryptor(KeyPair keyPair) {
         if (keyPair.getPublic() != null) {
-            this.publicKey = CodecUtil.toHexString(keyPair.getPublic().getEncoded());
+            this.publicKey = HexStringByteCodec.INSTANCE.encode(keyPair.getPublic().getEncoded());
         }
         if (keyPair.getPrivate() != null) {
-            this.privateKey = CodecUtil.toHexString(keyPair.getPrivate().getEncoded());
+            this.privateKey = HexStringByteCodec.INSTANCE.encode(keyPair.getPrivate().getEncoded());
         }
     }
 

@@ -1,10 +1,11 @@
 package i2f.extension.jce.sm.antherd.digest;
 
+import com.antherd.smcrypto.NashornProvider;
 import com.antherd.smcrypto.sm3.Sm3;
 import i2f.crypto.std.digest.IMessageDigester;
-import i2f.extension.jce.sm.antherd.NashornProvider;
 import i2f.extension.jce.sm.antherd.SmAntherdProvider;
 
+import javax.script.ScriptException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
@@ -46,12 +47,20 @@ public class Sm3Digester implements IMessageDigester {
     }
 
     public String digest(String str) {
-        return Sm3.sm3(str);
+        try {
+            return Sm3.sm3(str);
+        } catch (ScriptException e) {
+            throw new IllegalStateException(e.getMessage(),e);
+        }
     }
 
     public boolean verify(String sign, String str) {
-        String hash = Sm3.sm3(str);
-        return hash.equalsIgnoreCase(sign);
+        try {
+            String hash = Sm3.sm3(str);
+            return hash.equalsIgnoreCase(sign);
+        } catch (ScriptException e) {
+            throw new IllegalStateException(e.getMessage(),e);
+        }
     }
 
 }

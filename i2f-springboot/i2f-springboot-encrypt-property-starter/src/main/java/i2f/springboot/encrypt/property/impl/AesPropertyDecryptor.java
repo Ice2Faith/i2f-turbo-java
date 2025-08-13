@@ -1,7 +1,8 @@
 package i2f.springboot.encrypt.property.impl;
 
 
-import i2f.codec.CodecUtil;
+import i2f.codec.bytes.charset.CharsetStringByteCodec;
+import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.crypto.impl.jdk.encrypt.symmetric.AesType;
 import i2f.crypto.impl.jdk.encrypt.symmetric.SymmetricEncryptor;
 import i2f.crypto.impl.jdk.supports.SecureRandomAlgorithm;
@@ -29,8 +30,8 @@ public class AesPropertyDecryptor extends PrefixPropertyDecryptor implements ITe
     @Override
     public String decryptText(String text) {
         try {
-            byte[] data = encryptor.decrypt(CodecUtil.ofHexString(text));
-            return CodecUtil.ofUtf8(data);
+            byte[] data = encryptor.decrypt(HexStringByteCodec.INSTANCE.decode(text));
+            return CharsetStringByteCodec.UTF8.encode(data);
         } catch (Exception e) {
             return text;
         }
@@ -39,8 +40,8 @@ public class AesPropertyDecryptor extends PrefixPropertyDecryptor implements ITe
     @Override
     public String encrypt(String text) {
         try {
-            byte[] enc = encryptor.encrypt(CodecUtil.toUtf8(text));
-            return AES_PREFIX + CodecUtil.toHexString(enc);
+            byte[] enc = encryptor.encrypt(CharsetStringByteCodec.UTF8.decode(text));
+            return AES_PREFIX + HexStringByteCodec.INSTANCE.encode(enc);
         } catch (Exception e) {
             return AES_PREFIX + text;
         }

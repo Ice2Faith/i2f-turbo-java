@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 
@@ -20,17 +20,13 @@ import java.text.SimpleDateFormat;
  */
 @ConditionalOnExpression("${i2f.spring.redis.enable:true}")
 @Slf4j
-@Import({
-        RedisTemplateAutoConfiguration.class,
-        LettuceRedisHeartbeatConfiguration.class,
-        RedisCacheConfiguration.class
-})
 @ConfigurationProperties(prefix = "i2f.spring.redis")
 @EnableRedisRepositories
 public class RedisAutoConfiguration {
 
     String dateFormat = "yyyy-MM-dd HH:mm:ss SSS";
 
+    @ConditionalOnMissingBean(Jackson2JsonRedisSerializer.class)
     @Bean
     public Jackson2JsonRedisSerializer<Object> getRedisSerializer() {
         ObjectMapper objectMapper = new ObjectMapper();

@@ -1,12 +1,12 @@
 package i2f.extension.jce.sm.antherd.signature;
 
+import com.antherd.smcrypto.NashornProvider;
 import com.antherd.smcrypto.sm2.Keypair;
-import i2f.codec.CodecUtil;
+import com.antherd.smcrypto.sm2.Sm2;
+import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.crypto.std.signature.ISignatureSigner;
-import i2f.extension.jce.sm.antherd.NashornProvider;
 import i2f.extension.jce.sm.antherd.SmAntherdProvider;
 import i2f.extension.jce.sm.antherd.encrypt.asymmetric.Sm2Encryptor;
-import i2f.extension.jce.sm.antherd.jdk15.Sm2;
 
 import java.security.KeyPair;
 import java.util.Objects;
@@ -40,10 +40,10 @@ public class Sm2SignatureSigner implements ISignatureSigner {
 
     public Sm2SignatureSigner(KeyPair keyPair) {
         if (keyPair.getPublic() != null) {
-            this.publicKey = CodecUtil.toHexString(keyPair.getPublic().getEncoded());
+            this.publicKey = HexStringByteCodec.INSTANCE.encode(keyPair.getPublic().getEncoded());
         }
         if (keyPair.getPrivate() != null) {
-            this.privateKey = CodecUtil.toHexString(keyPair.getPrivate().getEncoded());
+            this.privateKey = HexStringByteCodec.INSTANCE.encode(keyPair.getPrivate().getEncoded());
         }
     }
 

@@ -1,2 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  i2f.springboot.redis.RedisAutoConfiguration
+  i2f.springboot.redis.RedisAutoConfiguration,\
+  i2f.springboot.redis.RedisCacheConfiguration,\
+  i2f.springboot.redis.RedisTemplateAutoConfiguration,\
+  i2f.springboot.redis.LettuceRedisHeartbeatConfiguration

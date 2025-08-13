@@ -6,7 +6,7 @@ import i2f.spring.redis.SpringRedisClient;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -19,7 +19,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
  * @date 2024/6/27 9:35
  * @desc
  */
-@ConditionalOnBean(RedisAutoConfiguration.class)
+@AutoConfigureAfter({RedisAutoConfiguration.class,RedisTemplateAutoConfiguration.class})
 @ConditionalOnExpression("${i2f.spring.redis.redis-cache.enable:true}")
 @Slf4j
 @Data
@@ -41,6 +41,7 @@ public class RedisCacheConfiguration {
         return new SpringRedisClient(clientPrefix, redisTemplate);
     }
 
+    @ConditionalOnMissingBean(RedisCache.class)
     @Bean
     public RedisCache redisCache(IRedisClient redisClient) {
         return new RedisCache(cachePrefix, redisClient, (obj) -> {
