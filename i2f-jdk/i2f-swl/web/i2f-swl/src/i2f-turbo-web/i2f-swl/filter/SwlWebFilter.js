@@ -50,6 +50,24 @@ SwlWebFilter.prototype.requestFilter = function (res) {
         body=JSON.stringify(res.data)
         swlSendContext.data=body
     }
+    let url=res.url
+    if(url){
+        let idx=url.indexOf('?');
+        if(idx>=0){
+            res.url=url.substring(0,idx);
+            let sp=url.substring(idx+1);
+            sp=sp.trim();
+            if(sp.length>0){
+                let obj=qs.parse(sp);
+                res.params={
+                    ...res.params,
+                    ...obj
+                }
+            }
+
+        }
+    }
+
     let params=null
     if(res.params!=undefined){
         params=qs.stringify(res.params)
