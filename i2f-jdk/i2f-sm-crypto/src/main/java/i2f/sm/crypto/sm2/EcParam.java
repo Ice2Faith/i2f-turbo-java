@@ -13,6 +13,12 @@ import java.math.BigInteger;
 @NoArgsConstructor
 public class EcParam {
     protected EcCurveFp curve;
-    protected BigInteger g;
+    protected EcPointFp g;
     protected BigInteger n;
+
+    public EcParam(EcCurveFp curve, EcPointFp g, BigInteger n) {
+        this.curve = curve;
+        this.g = g;
+        this.n = n;
+    }
 }

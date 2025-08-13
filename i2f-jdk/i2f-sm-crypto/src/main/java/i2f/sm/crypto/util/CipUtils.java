@@ -46,5 +46,20 @@ public class CipUtils {
         return (x << s) | (x >>> (32 - s));
     }
 
+    /**
+     * 补全16进制字符串
+     */
+    public static String leftPad(String input, int num) {
+        if (input.length() >= num) {
+            return input;
+        }
+        int diffLen = num - input.length();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < diffLen; i++) {
+            builder.append('0');
+        }
+        builder.append(input);
+        return builder.toString();
+    }
 
 }
