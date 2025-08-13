@@ -164,6 +164,7 @@
         <module>i2f-cache-std</module>
         <module>i2f-std-const</module>
         <module>i2f-workflow</module>
+        <module>i2f-sm-crypto</module>
 
 
     </modules>
