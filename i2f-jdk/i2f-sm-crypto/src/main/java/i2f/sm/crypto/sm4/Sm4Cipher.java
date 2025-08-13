@@ -1,10 +1,9 @@
 package i2f.sm.crypto.sm4;
 
-import com.sun.istack.internal.Nullable;
-import i2f.codec.bytes.charset.CharsetStringByteCodec;
-import i2f.codec.bytes.raw.HexStringByteCodec;
-import i2f.sm.crypto.SmException;
+import i2f.sm.crypto.exception.SmException;
+import i2f.sm.crypto.util.CipUtils;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +31,7 @@ public class Sm4Cipher {
     public static final int ROUND = 32;
     public static final int BLOCK = 16;
 
-    public static final int[] Sbox = {
+    protected static final int[] Sbox = {
             0xd6, 0x90, 0xe9, 0xfe, 0xcc, 0xe1, 0x3d, 0xb7, 0x16, 0xb6, 0x14, 0xc2, 0x28, 0xfb, 0x2c, 0x05,
             0x2b, 0x67, 0x9a, 0x76, 0x2a, 0xbe, 0x04, 0xc3, 0xaa, 0x44, 0x13, 0x26, 0x49, 0x86, 0x06, 0x99,
             0x9c, 0x42, 0x50, 0xf4, 0x91, 0xef, 0x98, 0x7a, 0x33, 0x54, 0x0b, 0x43, 0xed, 0xcf, 0xac, 0x62,
@@ -51,7 +50,7 @@ public class Sm4Cipher {
             0x18, 0xf0, 0x7d, 0xec, 0x3a, 0xdc, 0x4d, 0x20, 0x79, 0xee, 0x5f, 0x3e, 0xd7, 0xcb, 0x39, 0x48
     };
 
-    public static final int[] CK = {
+    protected static final int[] CK = {
             0x00070e15, 0x1c232a31, 0x383f464d, 0x545b6269,
             0x70777e85, 0x8c939aa1, 0xa8afb6bd, 0xc4cbd2d9,
             0xe0e7eef5, 0xfc030a11, 0x181f262d, 0x343b4249,
@@ -62,41 +61,6 @@ public class Sm4Cipher {
             0x10171e25, 0x2c333a41, 0x484f565d, 0x646b7279
     };
 
-    /**
-     * 16 进制串转字节数组
-     */
-    public static byte[] hexToArray(String str) {
-        return HexStringByteCodec.INSTANCE.decode(str);
-    }
-
-    /**
-     * 字节数组转 16 进制串
-     */
-    public static String ArrayToHex(byte[] arr) {
-        return HexStringByteCodec.INSTANCE.encode(arr);
-    }
-
-    /**
-     * utf8 串转字节数组
-     */
-    public static byte[] utf8ToArray(String str) {
-        return CharsetStringByteCodec.UTF8.decode(str);
-    }
-
-    /**
-     * 字节数组转 utf8 串
-     */
-    public static String arrayToUtf8(byte[] arr) {
-        return CharsetStringByteCodec.UTF8.encode(arr);
-    }
-
-    /**
-     * 32 比特循环左移
-     */
-    public static int rotl(int x, int n) {
-        int s = n & 31;
-        return (x << s) | (x >>> (32 - s));
-    }
 
     /**
      * 非线性变换
@@ -112,14 +76,14 @@ public class Sm4Cipher {
      * 线性变换，加密/解密用
      */
     public static int l1(int b) {
-        return b ^ rotl(b, 2) ^ rotl(b, 10) ^ rotl(b, 18) ^ rotl(b, 24);
+        return b ^ CipUtils.rotl(b, 2) ^ CipUtils.rotl(b, 10) ^ CipUtils.rotl(b, 18) ^ CipUtils.rotl(b, 24);
     }
 
     /**
      * 线性变换，生成轮密钥用
      */
     public static int l2(int b) {
-        return b ^ rotl(b, 13) ^ rotl(b, 23);
+        return b ^ CipUtils.rotl(b, 13) ^ CipUtils.rotl(b, 23);
     }
 
     /**
@@ -211,36 +175,36 @@ public class Sm4Cipher {
     }
 
     public static String sm4(String inArray, String key, CryptFlag cryptFlag,
-                             @Nullable Padding padding, @Nullable Mode mode, @Nullable String iv) {
+                             Padding padding, Mode mode, String iv) {
         // 检查输入
         byte[] inArr = new byte[0];
         if (cryptFlag != CryptFlag.DECRYPT) {
             // 加密，输入为 utf8 串
-            inArr = utf8ToArray(inArray);
+            inArr = CipUtils.utf8ToArray(inArray);
         } else {
             // 解密，输入为 16 进制串
-            inArr = hexToArray(inArray);
+            inArr = CipUtils.hexToArray(inArray);
         }
         ;
 
         byte[] ret = sm4(inArr,
-                hexToArray(key),
+                CipUtils.hexToArray(key),
                 cryptFlag,
                 padding, mode,
-                iv == null ? null : hexToArray(iv));
+                iv == null ? null : CipUtils.hexToArray(iv));
 
         // 调整输出
         if (cryptFlag != CryptFlag.DECRYPT) {
             // 加密，输出转 16 进制串
-            return ArrayToHex(ret);
+            return CipUtils.ArrayToHex(ret);
         } else {
             // 解密，输出转 utf8 串
-            return arrayToUtf8(ret);
+            return CipUtils.arrayToUtf8(ret);
         }
     }
 
     public static byte[] sm4(byte[] inArray, byte[] key, CryptFlag cryptFlag,
-                             @Nullable Padding padding, @Nullable Mode mode, @Nullable byte[] iv) {
+                             Padding padding, Mode mode, byte[] iv) {
         if (padding == null) {
             padding = Padding.PKCS_7;
         }
@@ -270,10 +234,10 @@ public class Sm4Cipher {
             int paddingCount = BLOCK - inArray.length % BLOCK;
             byte[] buff = new byte[inArray.length + paddingCount];
             System.arraycopy(inArray, 0, buff, 0, inArray.length);
-            inArray = buff;
             for (int i = 0; i < paddingCount; i++) {
                 buff[inArray.length + i] = (byte) paddingCount;
             }
+            inArray = buff;
         }
 
         // 生成轮密钥
@@ -349,6 +313,15 @@ public class Sm4Cipher {
             ret[i] = (byte) (int) outArray.get(i);
         }
 
+        return ret;
+    }
+
+    public static final int KEY_BITS = 128;
+    public static final SecureRandom random = new SecureRandom();
+
+    public static byte[] generateKey() {
+        byte[] ret = new byte[KEY_BITS / 8];
+        random.nextBytes(ret);
         return ret;
     }
 }

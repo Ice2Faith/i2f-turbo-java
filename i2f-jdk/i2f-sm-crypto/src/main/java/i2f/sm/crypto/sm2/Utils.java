@@ -31,7 +31,7 @@ public class Utils {
         // 基点
         String gxHex = "32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7";
         String gyHex = "BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0";
-        BigInteger g = curve.decodePointHex("04" + gxHex + gyHex);
+        BigInteger g = null;//curve.decodePointHex("04" + gxHex + gyHex);
 
         BigInteger n = new BigInteger("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16);
 

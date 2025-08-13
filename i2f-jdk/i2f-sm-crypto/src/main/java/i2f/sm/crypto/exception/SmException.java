@@ -1,4 +1,4 @@
-package i2f.sm.crypto;
+package i2f.sm.crypto.exception;
 
 /**
  * @author Ice2Faith
