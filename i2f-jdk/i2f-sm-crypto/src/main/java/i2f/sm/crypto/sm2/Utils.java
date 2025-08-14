@@ -2,6 +2,11 @@ package i2f.sm.crypto.sm2;
 
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
 import i2f.codec.bytes.raw.HexStringByteCodec;
+import i2f.sm.crypto.exception.SmException;
+import i2f.sm.crypto.sm2.ec.EcCurveFp;
+import i2f.sm.crypto.sm2.ec.EcFieldElementFp;
+import i2f.sm.crypto.sm2.ec.EcParam;
+import i2f.sm.crypto.sm2.ec.EcPointFp;
 import i2f.sm.crypto.util.CipUtils;
 
 import java.math.BigInteger;
@@ -58,7 +63,7 @@ public class Utils {
         BigInteger d = random.mod(EC_PARAM.getN().subtract(BigInteger.ONE)).add(BigInteger.ONE); // 随机数
         String privateKey = CipUtils.leftPad(d.toString(16), 64);
 
-        BigInteger P = EC_PARAM.getG().multiply(d); // P = dG，p 为公钥，d 为私钥
+        EcPointFp P = EC_PARAM.getG().multiply(d); // P = dG，p 为公钥，d 为私钥
         String Px = CipUtils.leftPad(P.getX().toBigInteger().toString(16), 64);
         String Py = CipUtils.leftPad(P.getY().toBigInteger().toString(16), 64);
         String publicKey = "04" + Px + Py;
@@ -91,15 +96,78 @@ public class Utils {
      */
     public static String utf8ToHex(String input) {
         byte[] bytes = CharsetStringByteCodec.UTF8.decode(input);
-        return HexStringByteCodec.INSTANCE.encode(bytes);
+
+        int length = bytes.length;
+
+        // 转换到字数组
+        int[] words = new int[(length+3)/4];
+        for (int i = 0; i < length; i++) {
+            words[i >>> 2] |= (bytes[i] & 0x0ff) << (24 - (i % 4) * 8);
+        }
+
+        // 转换到16进制
+        StringBuilder hexChars = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int bite = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0x0ff;
+            hexChars.append(Integer.toString(bite >>> 4,16));
+            hexChars.append(Integer.toString(bite & 0x0f,16));
+        }
+
+        return hexChars.toString();
     }
 
+    /**
+     * 转成utf8串
+     */
+    public static String arrayToUtf8(byte[] arr) {
+        int[] words = new int[(arr.length*2+7)/8];
+        int j = 0;
+        for (int i = 0; i < arr.length * 2; i += 2) {
+            words[i >>> 3] |= Integer.parseInt((arr[j]&0x0ff)+"", 10) << (24 - (i % 8) * 4);
+            j++;
+        }
+
+        try {
+            byte[] latin1Chars = new byte[arr.length];
+
+            for (int i = 0; i < arr.length; i++) {
+                byte bite = (byte)((words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0x0ff);
+                latin1Chars[i]=bite;
+            }
+
+            return CharsetStringByteCodec.UTF8.encode(latin1Chars);
+        } catch (Exception e) {
+            throw new SmException("Malformed UTF-8 data");
+        }
+    }
+
+
+    /**
+     * 转成字节数组
+     */
+    public static byte[] hexToArray(String hexStr) {
+        int hexStrLength = hexStr.length();
+
+        if (hexStrLength % 2 != 0) {
+            hexStr = CipUtils.leftPad(hexStr, hexStrLength + 1);
+        }
+
+        hexStrLength = hexStr.length();
+
+        byte[] words = new byte[hexStrLength/2];
+        int j=0;
+        for (int i = 0; i < hexStrLength; i += 2) {
+            String s = hexStr.substring(i, i+2);
+            words[j++]=(byte)(Integer.parseInt(s, 16)&0x0ff);
+        }
+        return words;
+    }
     /**
      * 验证公钥是否为椭圆曲线上的点
      */
     public static boolean verifyPublicKey(String publicKey) {
         EcCurveFp curve = EC_PARAM.getCurve();
-        EcPointFp point = curve.decodePointHex(publicKey)
+        EcPointFp point = curve.decodePointHex(publicKey);
         if (point == null) {
             return false;
         }
@@ -108,7 +176,7 @@ public class Utils {
         EcFieldElementFp y = point.getY();
 
         // 验证 y^2 是否等于 x^3 + ax + b
-        return y.square().equals(x.multiply(x.square()).add(x.multiply(curve.a)).add(curve.b));
+        return y.square().equals(x.multiply(x.square()).add(x.multiply(curve.getA())).add(curve.getB()));
     }
 
     /**

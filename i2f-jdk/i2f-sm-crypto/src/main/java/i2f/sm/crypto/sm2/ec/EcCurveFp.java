@@ -1,4 +1,4 @@
-package i2f.sm.crypto.sm2;
+package i2f.sm.crypto.sm2.ec;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +23,16 @@ public class EcCurveFp {
         this.a = fromBigInteger(a);
         this.b = fromBigInteger(b);
         this.infinity = new EcPointFp(this, null, null, null); // 无穷远点
+    }
+
+    /**
+     * 判断两个椭圆曲线是否相等
+     */
+    public boolean equals(EcCurveFp other) {
+        if (other == this){
+            return true;
+        }
+        return (this.q.equals(other.q) && this.a.equals(other.a) && this.b.equals(other.b));
     }
 
     /**
@@ -55,7 +65,7 @@ public class EcCurveFp {
                         ));
                 // 算出结果 2 进制最后 1 位不等于第 1 个字节减 2 则取反
                 if (!y.toBigInteger().mod(new BigInteger("2")).equals(new BigInteger(s.substring(0, 2), 16).subtract(new BigInteger("2")))) {
-                    y = y.negate()
+                    y = y.negate();
                 }
                 return new EcPointFp(this, x, y, null);
             case 4:
