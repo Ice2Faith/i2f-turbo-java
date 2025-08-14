@@ -36,12 +36,6 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-swl</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>21.0.1</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <build>
