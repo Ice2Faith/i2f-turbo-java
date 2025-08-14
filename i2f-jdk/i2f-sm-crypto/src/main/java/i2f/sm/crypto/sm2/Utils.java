@@ -1,7 +1,6 @@
 package i2f.sm.crypto.sm2;
 
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
-import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.sm.crypto.exception.SmException;
 import i2f.sm.crypto.sm2.ec.EcCurveFp;
 import i2f.sm.crypto.sm2.ec.EcFieldElementFp;
@@ -59,7 +58,7 @@ public class Utils {
         }
         c = c >= 0 ? 1 : -1;
 
-        BigInteger random = a != null ? new BigInteger(a, b).multiply(BigInteger.valueOf(c)) : new BigInteger(EC_PARAM.getN().bitLength(), rng);
+        BigInteger random = a != null && !a.isEmpty() ? new BigInteger(a, b).multiply(BigInteger.valueOf(c)) : new BigInteger(EC_PARAM.getN().bitLength(), rng);
         BigInteger d = random.mod(EC_PARAM.getN().subtract(BigInteger.ONE)).add(BigInteger.ONE); // 随机数
         String privateKey = CipUtils.leftPad(d.toString(16), 64);
 
@@ -76,11 +75,11 @@ public class Utils {
      */
     public static String compressPublicKeyHex(String s) {
         if (s.length() != 130) {
-            throw new Error("Invalid public key to compress");
+            throw new SmException("Invalid public key to compress");
         }
 
         int len = (s.length() - 2) / 2;
-        String xHex = s.substring(2, len);
+        String xHex = s.substring(2, 2 + len);
         BigInteger y = new BigInteger(s.substring(len + 2), 16);
 
         String prefix = "03";
@@ -109,7 +108,7 @@ public class Utils {
         StringBuilder hexChars = new StringBuilder();
         for (int i = 0; i < length; i++) {
             int bite = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0x0ff;
-            hexChars.append(Integer.toString(bite >>> 4,16));
+            hexChars.append(Integer.toString((bite >>> 4) & 0x0f, 16));
             hexChars.append(Integer.toString(bite & 0x0f,16));
         }
 
@@ -123,7 +122,7 @@ public class Utils {
         int[] words = new int[(arr.length*2+7)/8];
         int j = 0;
         for (int i = 0; i < arr.length * 2; i += 2) {
-            words[i >>> 3] |= Integer.parseInt((arr[j]&0x0ff)+"", 10) << (24 - (i % 8) * 4);
+            words[i >>> 3] |= (arr[j] & 0x0ff) << (24 - (i % 8) * 4);
             j++;
         }
 
@@ -152,15 +151,7 @@ public class Utils {
             hexStr = CipUtils.leftPad(hexStr, hexStrLength + 1);
         }
 
-        hexStrLength = hexStr.length();
-
-        byte[] words = new byte[hexStrLength/2];
-        int j=0;
-        for (int i = 0; i < hexStrLength; i += 2) {
-            String s = hexStr.substring(i, i+2);
-            words[j++]=(byte)(Integer.parseInt(s, 16)&0x0ff);
-        }
-        return words;
+        return CipUtils.hexToArray(hexStr);
     }
     /**
      * 验证公钥是否为椭圆曲线上的点

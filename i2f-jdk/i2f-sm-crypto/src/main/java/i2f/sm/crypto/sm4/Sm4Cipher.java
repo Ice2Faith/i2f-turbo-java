@@ -66,10 +66,10 @@ public class Sm4Cipher {
      * 非线性变换
      */
     public static int byteSub(int a) {
-        return (Sbox[a >>> 24 & 0xFF] & 0xFF) << 24 |
-                (Sbox[a >>> 16 & 0xFF] & 0xFF) << 16 |
-                (Sbox[a >>> 8 & 0xFF] & 0xFF) << 8 |
-                (Sbox[a & 0xFF] & 0xFF);
+        return (Sbox[a >>> 24 & 0x0FF] & 0x0FF) << 24 |
+                (Sbox[a >>> 16 & 0x0FF] & 0x0FF) << 16 |
+                (Sbox[a >>> 8 & 0x0FF] & 0x0FF) << 8 |
+                (Sbox[a & 0x0FF] & 0x0FF);
     }
 
     /**
@@ -196,7 +196,7 @@ public class Sm4Cipher {
         // 调整输出
         if (cryptFlag != CryptFlag.DECRYPT) {
             // 加密，输出转 16 进制串
-            return CipUtils.ArrayToHex(ret);
+            return CipUtils.arrayToHex(ret);
         } else {
             // 解密，输出转 utf8 串
             return CipUtils.arrayToUtf8(ret);

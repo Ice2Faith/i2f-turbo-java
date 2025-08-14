@@ -29,7 +29,7 @@ public class Sm2Cipher {
     public static String doEncrypt(String msg, String publicKey, CipherMode cipherMode) {
         byte[] msgArr = Utils.hexToArray(Utils.utf8ToHex(msg));
         byte[] retArr = doEncrypt(msgArr, publicKey, cipherMode);
-        return CipUtils.ArrayToHex(retArr);
+        return CipUtils.arrayToHex(retArr);
     }
 
     /**
@@ -76,10 +76,10 @@ public class Sm2Cipher {
             // [...z, ct >> 24 & 0x00ff, ct >> 16 & 0x00ff, ct >> 8 & 0x00ff, ct & 0x00ff]
             byte[] buff = new byte[z.length + 4];
             System.arraycopy(z, 0, buff, 0, z.length);
-            buff[z.length + 0] = (byte) (ct.get() >> 24 & 0x00ff);
-            buff[z.length + 1] = (byte) (ct.get() >> 16 & 0x00ff);
-            buff[z.length + 2] = (byte) (ct.get() >> 8 & 0x00ff);
-            buff[z.length + 3] = (byte) (ct.get() & 0x00ff);
+            buff[z.length + 0] = (byte) ((ct.get() >> 24) & 0x0ff);
+            buff[z.length + 1] = (byte) ((ct.get() >> 16) & 0x0ff);
+            buff[z.length + 2] = (byte) ((ct.get() >> 8) & 0x0ff);
+            buff[z.length + 3] = (byte) ((ct.get()) & 0x0ff);
             t.set(Sm3Inner.sm3(buff));
             ct.incrementAndGet();
             offset.set(0);
@@ -112,7 +112,7 @@ public class Sm2Cipher {
     }
 
     public static String doDecrypt(String encryptData, String privateKey, CipherMode cipherMode) {
-        byte[] encArr = CipUtils.hexToArray(encryptData);
+        byte[] encArr = Utils.hexToArray(encryptData);
         byte[] retArr = doDecrypt(encArr, privateKey, cipherMode);
         return Utils.arrayToUtf8(retArr);
     }
@@ -122,21 +122,22 @@ public class Sm2Cipher {
      */
     public static byte[] doDecrypt(byte[] encryptData, String privateKeyHex, CipherMode cipherMode) {
         if (cipherMode == null) {
-            cipherMode = CipherMode.C1C2C3;
+            cipherMode = CipherMode.C1C3C2;
         }
         BigInteger privateKey = new BigInteger(privateKeyHex, 16);
 
-        byte[] c3 = Arrays.copyOfRange(encryptData, 128 / 8, 128 / 8 + 64 / 8);
-        byte[] c2 = Arrays.copyOfRange(encryptData, 128 / 8 + 64 / 8, encryptData.length);
+        // 两个Hex字符对应一个byte字节
+        byte[] c3 = Arrays.copyOfRange(encryptData, 128 / 2, (128 / 2) + (64 / 2));
+        byte[] c2 = Arrays.copyOfRange(encryptData, (128 / 2) + (64 / 2), encryptData.length);
 
         if (cipherMode == CipherMode.C1C2C3) {
-            c3 = Arrays.copyOfRange(encryptData, encryptData.length - 64 / 8, encryptData.length);
-            c2 = Arrays.copyOfRange(encryptData, 128 / 8, encryptData.length - 128 / 8 - 64 / 8);
+            c3 = Arrays.copyOfRange(encryptData, encryptData.length - (64 / 2), encryptData.length);
+            c2 = Arrays.copyOfRange(encryptData, 128 / 2, (128 / 2) + (encryptData.length - (128 / 2) - (64 / 2)));
         }
 
         byte[] msg = c2;
 
-        EcPointFp c1 = Utils.getGlobalCurve().decodePointHex("04" + CipUtils.ArrayToHex(Arrays.copyOfRange(encryptData, 0 / 8, 128 / 8)));
+        EcPointFp c1 = Utils.getGlobalCurve().decodePointHex("04" + CipUtils.arrayToHex(Arrays.copyOfRange(encryptData, 0 / 2, 128 / 2)));
 
         EcPointFp p = c1.multiply(privateKey);
         byte[] x2 = Utils.hexToArray(CipUtils.leftPad(p.getX().toBigInteger().toString(16), 64));
@@ -155,10 +156,10 @@ public class Sm2Cipher {
             // [...z, ct >> 24 & 0x00ff, ct >> 16 & 0x00ff, ct >> 8 & 0x00ff, ct & 0x00ff]
             byte[] buff = new byte[z.length + 4];
             System.arraycopy(z, 0, buff, 0, z.length);
-            buff[z.length + 0] = (byte) (ct.get() >> 24 & 0x00ff);
-            buff[z.length + 1] = (byte) (ct.get() >> 16 & 0x00ff);
-            buff[z.length + 2] = (byte) (ct.get() >> 8 & 0x00ff);
-            buff[z.length + 3] = (byte) (ct.get() & 0x00ff);
+            buff[z.length + 0] = (byte) ((ct.get() >> 24) & 0x0ff);
+            buff[z.length + 1] = (byte) ((ct.get() >> 16) & 0x0ff);
+            buff[z.length + 2] = (byte) ((ct.get() >> 8) & 0x0ff);
+            buff[z.length + 3] = (byte) ((ct.get()) & 0x0ff);
             t.set(Sm3Inner.sm3(buff));
             ct.incrementAndGet();
             offset.set(0);
@@ -172,7 +173,7 @@ public class Sm2Cipher {
             }
 
             // c2 = msg ^ t
-            msg[i] = (byte) (msg[i] ^ t.get()[offset.getAndIncrement()] & 0x0ff);
+            msg[i] = (byte) ((msg[i] ^ t.get()[offset.getAndIncrement()]) & 0x0ff);
         }
 
         // c3 = hash(x2 || msg || y2)
@@ -198,7 +199,7 @@ public class Sm2Cipher {
         String hex = Utils.utf8ToHex(msg);
         byte[] msgArr = Utils.hexToArray(hex);
         byte[] retArr = doSignature(msgArr, privateKey, pointPool, der, hash, publicKey, userId);
-        return CipUtils.ArrayToHex(retArr);
+        return CipUtils.arrayToHex(retArr);
     }
 
     public static byte[] doSignature(byte[] msg, String privateKey) {
@@ -211,7 +212,7 @@ public class Sm2Cipher {
     public static byte[] doSignature(byte[] msg, String privateKey,
                                      List<Point> pointPool, boolean der, boolean hash, String publicKey, String userId
     ) {
-        String hashHex = CipUtils.ArrayToHex(msg);
+        String hashHex = CipUtils.arrayToHex(msg);
 
         if (hash) {
             // sm3杂凑
@@ -234,7 +235,7 @@ public class Sm2Cipher {
             do {
                 Point point = null;
                 if (pointPool != null && !pointPool.isEmpty()) {
-                    point = pointPool.get(0);
+                    point = pointPool.remove(pointPool.size() - 1);
                 } else {
                     point = getPoint();
                 }
@@ -265,7 +266,7 @@ public class Sm2Cipher {
                                             boolean der, boolean hash, String userId) {
         String hex = Utils.utf8ToHex(msg);
         byte[] msgArr = CipUtils.hexToArray(hex);
-        return doVerifySignature(msgArr, CipUtils.hexToArray(hex), publicKey, der, hash, userId);
+        return doVerifySignature(msgArr, CipUtils.hexToArray(signHex), publicKey, der, hash, userId);
     }
 
     public static boolean doVerifySignature(byte[] msg, byte[] signHex, String publicKey) {
@@ -277,8 +278,8 @@ public class Sm2Cipher {
      */
     public static boolean doVerifySignature(byte[] msg, byte[] signHexByte, String publicKey,
                                             boolean der, boolean hash, String userId) {
-        String signHex = CipUtils.ArrayToHex(signHexByte);
-        String hashHex = CipUtils.ArrayToHex(msg);
+        String signHex = CipUtils.arrayToHex(signHexByte);
+        String hashHex = CipUtils.arrayToHex(msg);
 
         if (hash) {
             // sm3杂凑
@@ -319,10 +320,15 @@ public class Sm2Cipher {
         return r.equals(R);
     }
 
+    public static String getHash(String hashHex, String publicKey, String userId) {
+        byte[] hashBytes = Utils.hexToArray(hashHex);
+        byte[] retArr = getHash(hashBytes, publicKey, userId);
+        return CipUtils.arrayToHex(retArr);
+    }
     /**
      * sm3杂凑算法
      */
-    public static String getHash(String hashHex, String publicKey, String userId) {
+    public static byte[] getHash(byte[] hashHex, String publicKey, String userId) {
         if (userId == null || userId.isEmpty()) {
             userId = "1234567812345678";
         }
@@ -356,11 +362,10 @@ public class Sm2Cipher {
         byte[] z = Sm3Inner.sm3(data);
 
         // e = hash(z || msg)
-        byte[] hashBytes = Utils.hexToArray(hashHex);
-        byte[] buff = new byte[z.length + hashBytes.length];
+        byte[] buff = new byte[z.length + hashHex.length];
         System.arraycopy(z, 0, buff, 0, z.length);
-        System.arraycopy(hashBytes, 0, buff, z.length, hashBytes.length);
-        return CipUtils.ArrayToHex(Sm3Inner.sm3(buff));
+        System.arraycopy(hashHex, 0, buff, z.length, hashHex.length);
+        return Sm3Inner.sm3(buff);
     }
 
     /**

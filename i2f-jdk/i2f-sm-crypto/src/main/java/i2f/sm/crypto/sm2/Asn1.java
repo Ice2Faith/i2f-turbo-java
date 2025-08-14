@@ -51,12 +51,12 @@ public class Asn1 {
 
         int vIndexR = Asn1Inner.getStartOfV(input, start);
         int lR = Asn1Inner.getL(input, start);
-        String vR = input.substring(vIndexR, lR * 2);
+        String vR = input.substring(vIndexR, vIndexR + (lR * 2));
 
         int nextStart = vIndexR + vR.length();
         int vIndexS = Asn1Inner.getStartOfV(input, nextStart);
         int lS = Asn1Inner.getL(input, nextStart);
-        String vS = input.substring(vIndexS, lS * 2);
+        String vS = input.substring(vIndexS, vIndexS + (lS * 2));
 
         BigInteger r = new BigInteger(vR, 16);
         BigInteger s = new BigInteger(vS, 16);

@@ -3,6 +3,8 @@ package i2f.sm.crypto.sm2;
 import i2f.bytes.ByteUtil;
 import i2f.sm.crypto.util.CipUtils;
 
+import java.util.Arrays;
+
 /**
  * @author Ice2Faith
  * @date 2025/8/13 18:39
@@ -47,8 +49,8 @@ public class Sm3InnerCipher {
         k = k >= 448 ? 512 - (k % 448) - 1 : 448 - k - 1;
 
         // 填充
-        int[] kArr = new int[(k - 7) / 8];
-        int[] lenArr = new int[8];
+        byte[] kArr = new byte[(k - 7) / 8];
+        byte[] lenArr = new byte[8];
         for (int i = 0, l = kArr.length; i < l; i++) {
             kArr[i] = 0;
         }
@@ -59,29 +61,20 @@ public class Sm3InnerCipher {
         for (int i = 7; i >= 0; i--) {
             if (sLen.length() > 8) {
                 int start = sLen.length() - 8;
-                lenArr[i] = Integer.parseInt(sLen.substring(start), 2);
+                lenArr[i] = (byte) Integer.parseInt(sLen.substring(start), 2);
                 sLen = sLen.substring(0, start);
-            } else if (sLen.length() > 0) {
-                lenArr[i] = Integer.parseInt(sLen, 2);
+            } else if (!sLen.isEmpty()) {
+                lenArr[i] = (byte) Integer.parseInt(sLen, 2);
                 sLen = "";
             }
         }
 
         // const m = new Uint8Array([...array, 0x80, ...kArr, ...lenArr]);
         byte[] m = new byte[array.length + 1 + kArr.length + lenArr.length];
-        if (m.length > 0) {
-            int j = 0;
-            for (int i = 0; i < array.length; i++) {
-                m[j++] = array[i];
-            }
-            m[j++] = (byte) 0x80;
-            for (int i = 0; i < kArr.length; i++) {
-                m[j++] = (byte) kArr[i];
-            }
-            for (int i = 0; i < lenArr.length; i++) {
-                m[j++] = (byte) lenArr[i];
-            }
-        }
+        System.arraycopy(array, 0, m, 0, array.length);
+        m[array.length] = (byte) 0x80;
+        System.arraycopy(kArr, 0, m, array.length + 1, kArr.length);
+        System.arraycopy(lenArr, 0, m, array.length + 1 + kArr.length, lenArr.length);
 
         byte[] dataView = m;
 
@@ -93,6 +86,8 @@ public class Sm3InnerCipher {
         int n = m.length / 64;
         int[] V = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e};
         for (int i = 0; i < n; i++) {
+            Arrays.fill(W, 0);
+            Arrays.fill(M, 0);
 
             // 将消息分组B划分为 16 个字 W0， W1，……，W15
             int start = 16 * i;
@@ -187,7 +182,7 @@ public class Sm3InnerCipher {
      * hmac 实现
      */
     public static byte[] hmac(byte[] input, byte[] key) {
-// 密钥填充
+        // 密钥填充
         if (key.length > blockLen) {
             key = sm3(key);
         }
