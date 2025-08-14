@@ -1,4 +1,4 @@
-package i2f.sm.crypto.sm2;
+package i2f.sm.crypto.sm2.ec;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
