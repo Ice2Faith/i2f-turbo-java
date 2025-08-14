@@ -47,7 +47,7 @@ public class Asn1Inner {
         if (Integer.parseInt(str.charAt(start + 2) + "") < 8) {
             return 1; // l 以0开头，则表示短格式，只占一个字节
         }
-        return Integer.parseInt(str.substring(start + 2, 2)) & 0x07f + 1; // 长格式，取第一个字节后7位作为长度真正占用字节数，再加上本身
+        return Integer.parseInt(str.substring(start + 2, (start + 2) + 2)) & 0x07f + 1; // 长格式，取第一个字节后7位作为长度真正占用字节数，再加上本身
     }
 
     /**
@@ -56,7 +56,7 @@ public class Asn1Inner {
     public static int getL(String str, int start) {
         // 获取 l
         int len = getLenOfL(str, start);
-        String l = str.substring(start + 2, len * 2);
+        String l = str.substring(start + 2, (start + 2) + (len * 2));
 
         if (l == null || l.isEmpty()) {
             return -1;

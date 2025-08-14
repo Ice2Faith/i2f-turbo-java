@@ -20,8 +20,8 @@ public class CipUtils {
     /**
      * 字节数组转 16 进制串
      */
-    public static String ArrayToHex(byte[] arr) {
-        return HexStringByteCodec.INSTANCE.encode(arr);
+    public static String arrayToHex(byte[] arr) {
+        return HexStringByteCodec.INSTANCE.encode(arr).toLowerCase();
     }
 
     /**

@@ -14,7 +14,7 @@ public class Sm4 {
 
     public static String generateHexKey() {
         byte[] hex = generateKey();
-        return CipUtils.ArrayToHex(hex);
+        return CipUtils.arrayToHex(hex);
     }
 
     public static byte[] encrypt(byte[] inArray, byte[] key) {

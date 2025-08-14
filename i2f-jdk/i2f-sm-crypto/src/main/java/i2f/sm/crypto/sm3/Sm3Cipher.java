@@ -15,11 +15,10 @@ public class Sm3Cipher {
     }
 
     public static String sm3(String input, Mode mode, String key) {
-        return CipUtils.ArrayToHex(
-                sm3(CipUtils.utf8ToArray(input), mode,
-                        key == null ? null : CipUtils.hexToArray(key)
-                )
-        );
+        byte[] inputArr = CipUtils.utf8ToArray(input);
+        byte[] keyArr = key == null || key.isEmpty() ? null : CipUtils.hexToArray(key);
+        byte[] retArr = sm3(inputArr, mode, keyArr);
+        return CipUtils.arrayToHex(retArr);
     }
 
     public static byte[] sm3(byte[] input, Mode mode, byte[] key) {
