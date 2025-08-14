@@ -1,12 +1,16 @@
 package i2f.sm.crypto.sm2;
 
 import i2f.sm.crypto.exception.SmException;
+import i2f.sm.crypto.sm2.ec.EcCurveFp;
 import i2f.sm.crypto.sm2.ec.EcParam;
 import i2f.sm.crypto.sm2.ec.EcPointFp;
 import i2f.sm.crypto.util.CipUtils;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -183,5 +187,217 @@ public class Sm2Cipher {
         }
 
         return msg;
+    }
+    public static String doSignature(String msg, String privateKey
+    ){
+        return doSignature(msg,privateKey,null,false,false,null,null);
+    }
+    public static String doSignature(String msg, String privateKey,
+                                     List<Point> pointPool, boolean der, boolean hash, String publicKey, String userId
+    ) {
+        String hex = Utils.utf8ToHex(msg);
+        byte[] msgArr = Utils.hexToArray(hex);
+        byte[] retArr = doSignature(msgArr, privateKey, pointPool, der, hash, publicKey, userId);
+        return CipUtils.ArrayToHex(retArr);
+    }
+
+    public static byte[] doSignature(byte[] msg, String privateKey) {
+        return doSignature(msg, privateKey, null, false, false, null, null);
+    }
+
+    /**
+     * 签名
+     */
+    public static byte[] doSignature(byte[] msg, String privateKey,
+                                     List<Point> pointPool, boolean der, boolean hash, String publicKey, String userId
+    ) {
+        String hashHex = CipUtils.ArrayToHex(msg);
+
+        if (hash) {
+            // sm3杂凑
+            if (publicKey == null || publicKey.isEmpty()) {
+                publicKey = getPublicKeyFromPrivateKey(privateKey);
+            }
+            hashHex = getHash(hashHex, publicKey, userId);
+        }
+
+        BigInteger dA = new BigInteger(privateKey, 16);
+        BigInteger e = new BigInteger(hashHex, 16);
+
+        // k
+        BigInteger k = null;
+        BigInteger r = null;
+        BigInteger s = null;
+
+        BigInteger n = EC_PARAM.getN();
+        do {
+            do {
+                Point point = null;
+                if (pointPool != null && !pointPool.isEmpty()) {
+                    point = pointPool.get(0);
+                } else {
+                    point = getPoint();
+                }
+                k = point.k;
+
+                // r = (e + x1) mod n
+                r = e.add(point.x1).mod(n);
+            } while (r.equals(BigInteger.ZERO) || r.add(k).equals(n));
+
+            // s = ((1 + dA)^-1 * (k - r * dA)) mod n
+            s = dA.add(BigInteger.ONE).modInverse(n).multiply(k.subtract(r.multiply(dA))).mod(n);
+        } while (s.equals(BigInteger.ZERO));
+
+        if (der) {
+            String retHex = Asn1.encodeDer(r, s); // asn.1 der 编码
+            return Utils.hexToArray(retHex);
+        }
+
+        String retHex = CipUtils.leftPad(r.toString(16), 64) + CipUtils.leftPad(s.toString(16), 64);
+        return Utils.hexToArray(retHex);
+    }
+
+    public static boolean doVerifySignature(String msg, String signHex, String publicKey) {
+        return doVerifySignature(msg, signHex, publicKey, false, false, null);
+    }
+
+    public static boolean doVerifySignature(String msg, String signHex, String publicKey,
+                                            boolean der, boolean hash, String userId) {
+        String hex = Utils.utf8ToHex(msg);
+        byte[] msgArr = CipUtils.hexToArray(hex);
+        return doVerifySignature(msgArr, CipUtils.hexToArray(hex), publicKey, der, hash, userId);
+    }
+
+    public static boolean doVerifySignature(byte[] msg, byte[] signHex, String publicKey) {
+        return doVerifySignature(msg, signHex, publicKey, false, false, null);
+    }
+
+    /**
+     * 验签
+     */
+    public static boolean doVerifySignature(byte[] msg, byte[] signHexByte, String publicKey,
+                                            boolean der, boolean hash, String userId) {
+        String signHex = CipUtils.ArrayToHex(signHexByte);
+        String hashHex = CipUtils.ArrayToHex(msg);
+
+        if (hash) {
+            // sm3杂凑
+            hashHex = getHash(hashHex, publicKey, userId);
+        }
+
+        BigInteger r = null;
+        BigInteger s = null;
+        if (der) {
+            Asn1.Der decodeDerObj = Asn1.decodeDer(signHex); // asn.1 der 解码
+            r = decodeDerObj.getR();
+            s = decodeDerObj.getS();
+        } else {
+            r = new BigInteger(signHex.substring(0, 64), 16);
+            s = new BigInteger(signHex.substring(64), 16);
+        }
+
+        EcCurveFp curve = EC_PARAM.getCurve();
+        BigInteger n = EC_PARAM.getN();
+        EcPointFp G = EC_PARAM.getG();
+
+        EcPointFp PA = curve.decodePointHex(publicKey);
+        BigInteger e = new BigInteger(hashHex, 16);
+
+        // t = (r + s) mod n
+        BigInteger t = r.add(s).mod(n);
+
+        if (t.equals(BigInteger.ZERO)) {
+            return false;
+        }
+
+        // x1y1 = s * G + t * PA
+        EcPointFp x1y1 = G.multiply(s).add(PA.multiply(t));
+
+        // R = (e + x1) mod n
+        BigInteger R = e.add(x1y1.getX().toBigInteger()).mod(n);
+
+        return r.equals(R);
+    }
+
+    /**
+     * sm3杂凑算法
+     */
+    public static String getHash(String hashHex, String publicKey, String userId) {
+        if (userId == null || userId.isEmpty()) {
+            userId = "1234567812345678";
+        }
+        EcPointFp G = EC_PARAM.getG();
+        // z = hash(entl || userId || a || b || gx || gy || px || py)
+        userId = Utils.utf8ToHex(userId);
+        String a = CipUtils.leftPad(G.getCurve().getA().toBigInteger().toString(16), 64);
+        String b = CipUtils.leftPad(G.getCurve().getB().toBigInteger().toString(16), 64);
+        String gx = CipUtils.leftPad(G.getX().toBigInteger().toString(16), 64);
+        String gy = CipUtils.leftPad(G.getY().toBigInteger().toString(16), 64);
+        String px = null;
+        String py = null;
+        if (publicKey.length() == 128) {
+            px = publicKey.substring(0, 64);
+            py = publicKey.substring(64, 64 + 64);
+        } else {
+            EcPointFp point = G.getCurve().decodePointHex(publicKey);
+            px = CipUtils.leftPad(point.getX().toBigInteger().toString(16), 64);
+            py = CipUtils.leftPad(point.getY().toBigInteger().toString(16), 64);
+        }
+        byte[] data = Utils.hexToArray(userId + a + b + gx + gy + px + py);
+
+        int entl = userId.length() * 4;
+
+        byte[] tmp = new byte[2 + data.length];
+        tmp[0] = (byte) (entl & 0x00ff);
+        tmp[1] = (byte) (entl >> 8 & 0x00ff);
+        System.arraycopy(data, 0, tmp, 2, data.length);
+        data = tmp;
+
+        byte[] z = Sm3Inner.sm3(data);
+
+        // e = hash(z || msg)
+        byte[] hashBytes = Utils.hexToArray(hashHex);
+        byte[] buff = new byte[z.length + hashBytes.length];
+        System.arraycopy(z, 0, buff, 0, z.length);
+        System.arraycopy(hashBytes, 0, buff, z.length, hashBytes.length);
+        return CipUtils.ArrayToHex(Sm3Inner.sm3(buff));
+    }
+
+    /**
+     * 计算公钥
+     */
+    public static String getPublicKeyFromPrivateKey(String privateKey) {
+        EcPointFp G = EC_PARAM.getG();
+        EcPointFp PA = G.multiply(new BigInteger(privateKey, 16));
+        String x = CipUtils.leftPad(PA.getX().toBigInteger().toString(16), 64);
+        String y = CipUtils.leftPad(PA.getY().toBigInteger().toString(16), 64);
+        return "04" + x + y;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class Point extends KeyPair {
+        protected BigInteger k;
+        protected BigInteger x1;
+
+    }
+
+    /**
+     * 获取椭圆曲线点
+     */
+    public static Point getPoint() {
+        EcCurveFp curve = EC_PARAM.getCurve();
+        KeyPair keypair = Utils.generateKeyPairHex();
+        EcPointFp PA = curve.decodePointHex(keypair.publicKey);
+
+        BigInteger k = new BigInteger(keypair.privateKey, 16);
+        BigInteger x1 = PA.getX().toBigInteger();
+
+        Point ret = new Point();
+        ret.setPublicKey(keypair.getPublicKey());
+        ret.setPrivateKey(keypair.getPrivateKey());
+        ret.setK(k);
+        ret.setX1(x1);
+        return ret;
     }
 }

@@ -1,5 +1,9 @@
 package i2f.sm.crypto.test;
 
+import i2f.sm.crypto.sm2.KeyPair;
+import i2f.sm.crypto.sm2.Sm2;
+import i2f.sm.crypto.sm2.Sm2Cipher;
+import i2f.sm.crypto.sm2.Utils;
 import i2f.sm.crypto.sm3.Sm3;
 import i2f.sm.crypto.sm4.Sm4;
 
@@ -13,6 +17,8 @@ public class TestSm {
         testSm3();
 
         testSm4();
+
+        testSm2();
     }
 
     public static void testSm3() throws Exception {
@@ -40,6 +46,13 @@ public class TestSm {
 
     public static void testSm2() throws Exception {
         System.out.println("Testing Sm2 ==============");
-
+        KeyPair key = Utils.generateKeyPairHex();
+        String text = "Hello World!";
+        System.out.println("text: " + text);
+        String enc = Sm2Cipher.doEncrypt(text, key.getPublicKey(),null);
+        System.out.println("enc: " + enc);
+        String dec = Sm2Cipher.doDecrypt(enc, key.getPrivateKey(),null);
+        System.out.println("dec: " + dec);
+        assert text.equals(dec);
     }
 }
