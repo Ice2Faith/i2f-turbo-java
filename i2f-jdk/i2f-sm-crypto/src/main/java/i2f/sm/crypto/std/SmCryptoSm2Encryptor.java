@@ -1,7 +1,9 @@
 package i2f.sm.crypto.std;
 
+import i2f.codec.bytes.charset.CharsetStringByteCodec;
 import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.crypto.std.encrypt.asymmetric.IAsymmetricEncryptor;
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.crypto.std.encrypt.asymmetric.key.BytesPrivateKey;
 import i2f.crypto.std.encrypt.asymmetric.key.BytesPublicKey;
 import i2f.sm.crypto.exception.SmException;
@@ -81,61 +83,141 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
 
     @Override
     public void setPublicKey(PublicKey publicKey) {
-
+        this.pubKey = HexStringByteCodec.INSTANCE.encode(publicKey.getEncoded());
     }
 
     @Override
     public PublicKey getPublicKey() {
-        return null;
+        return new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.pubKey));
     }
 
     @Override
     public void setPrivateKey(PrivateKey privateKey) {
-
+        this.priKey = HexStringByteCodec.INSTANCE.encode(privateKey.getEncoded());
     }
 
     @Override
     public PrivateKey getPrivateKey() {
-        return null;
+        return new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.priKey));
     }
 
     @Override
     public void setPublicKeyBytes(byte[] publicKeyBytes) {
-
+        this.pubKey = HexStringByteCodec.INSTANCE.encode(publicKeyBytes);
     }
 
     @Override
     public byte[] getPublicKeyBytes() {
-        return new byte[0];
+        return HexStringByteCodec.INSTANCE.decode(pubKey);
     }
 
     @Override
     public void setPrivateKeyBytes(byte[] privateKeyBytes) {
-
+        this.priKey = HexStringByteCodec.INSTANCE.encode(privateKeyBytes);
     }
 
     @Override
     public byte[] getPrivateKeyBytes() {
-        return new byte[0];
+        return HexStringByteCodec.INSTANCE.decode(this.priKey);
     }
 
     @Override
     public void setKeyPair(KeyPair keyPair) {
-
+        PublicKey pub = keyPair.getPublic();
+        if (pub != null) {
+            this.pubKey = HexStringByteCodec.INSTANCE.encode(pub.getEncoded());
+        }
+        PrivateKey pri = keyPair.getPrivate();
+        if (pri != null) {
+            this.priKey = HexStringByteCodec.INSTANCE.encode(pri.getEncoded());
+        }
     }
 
     @Override
     public KeyPair getKeyPair() {
-        return null;
+        PublicKey pub = null;
+        PrivateKey pri = null;
+        if (this.pubKey != null && !this.pubKey.isEmpty()) {
+            pub = new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.pubKey));
+        }
+        if (this.priKey != null && !this.priKey.isEmpty()) {
+            pri = new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.priKey));
+        }
+        return new KeyPair(pub, pri);
+    }
+
+    @Override
+    public void setPublicKeyString(String str) {
+        this.pubKey = str;
+    }
+
+    @Override
+    public String getPublicKeyString() {
+        return this.pubKey;
+    }
+
+    @Override
+    public void setPrivateKeyString(String str) {
+        this.priKey = str;
+    }
+
+    @Override
+    public String getPrivateKeyString() {
+        return this.priKey;
+    }
+
+    @Override
+    public void setAsymKeyPair(AsymKeyPair keyPair) {
+        this.pubKey = keyPair.getPublicKey();
+        this.priKey = keyPair.getPrivateKey();
+    }
+
+    @Override
+    public AsymKeyPair getAsymKeyPair() {
+        return new AsymKeyPair(this.pubKey, this.priKey);
     }
 
     @Override
     public byte[] encrypt(byte[] data) throws Exception {
-        return new byte[0];
+        String str = CharsetStringByteCodec.UTF8.encode(data);
+        String hex = encrypt(str);
+        return HexStringByteCodec.INSTANCE.decode(hex);
     }
 
     @Override
     public byte[] decrypt(byte[] data) throws Exception {
-        return new byte[0];
+        String hex = HexStringByteCodec.INSTANCE.encode(data);
+        String enc = decrypt(hex);
+        return CharsetStringByteCodec.UTF8.decode(enc);
+    }
+
+    @Override
+    public byte[] sign(byte[] data) throws Exception {
+        String str = CharsetStringByteCodec.UTF8.encode(data);
+        String sign = sign(str);
+        return HexStringByteCodec.INSTANCE.decode(sign);
+    }
+
+    @Override
+    public boolean verify(byte[] sign, byte[] data) throws Exception {
+        String signHex = HexStringByteCodec.INSTANCE.encode(data);
+        String str = CharsetStringByteCodec.UTF8.encode(data);
+        return verify(signHex, str);
+    }
+
+    public String encrypt(String data) throws Exception {
+        return Sm2.doEncrypt(data, pubKey);
+    }
+
+    public String decrypt(String data) throws Exception {
+        return Sm2.doDecrypt(data, priKey);
+    }
+
+    public String sign(String data) throws Exception {
+        return Sm2.doSignature(data, priKey);
+    }
+
+    public boolean verify(String sign, String data) throws Exception {
+        return Sm2.doVerifySignature(data, sign, pubKey);
     }
 }
