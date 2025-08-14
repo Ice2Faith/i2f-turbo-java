@@ -11,8 +11,9 @@ import java.io.InputStream;
  * @author Ice2Faith
  * @date 2025/8/14 17:47
  */
-public class SmCryptoSm3MessageDigester implements IMessageDigester {
-    public SmCryptoSm3MessageDigester() {
+public class SmCryptoSm3Digester implements IMessageDigester {
+    public static final SmCryptoSm3Digester INSTANCE=new SmCryptoSm3Digester();
+    public SmCryptoSm3Digester() {
     }
 
     @Override
