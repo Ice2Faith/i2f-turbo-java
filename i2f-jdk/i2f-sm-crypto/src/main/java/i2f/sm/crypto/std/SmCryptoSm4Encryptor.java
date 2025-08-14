@@ -35,7 +35,7 @@ public class SmCryptoSm4Encryptor implements ISymmetricEncryptor {
     }
 
     public static Key keyOf(String key){
-        return new BytesKey("sm4","hex",HexStringByteCodec.INSTANCE.decode(key));
+        return keyOf(HexStringByteCodec.INSTANCE.decode(key));
     }
 
     @Override
@@ -46,7 +46,7 @@ public class SmCryptoSm4Encryptor implements ISymmetricEncryptor {
     @Override
     public Key getKey() {
         byte[] bytes = HexStringByteCodec.INSTANCE.decode(key);
-        return new BytesKey("sm4","hex",bytes);
+        return keyOf(bytes);
     }
 
     @Override

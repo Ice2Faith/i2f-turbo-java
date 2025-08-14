@@ -88,7 +88,7 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
 
     @Override
     public PublicKey getPublicKey() {
-        return new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.pubKey));
+        return publicKeyOf(HexStringByteCodec.INSTANCE.decode(this.pubKey));
     }
 
     @Override
@@ -98,7 +98,7 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
 
     @Override
     public PrivateKey getPrivateKey() {
-        return new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.priKey));
+        return privateKeyOf(HexStringByteCodec.INSTANCE.decode(this.priKey));
     }
 
     @Override
@@ -138,10 +138,10 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
         PublicKey pub = null;
         PrivateKey pri = null;
         if (this.pubKey != null && !this.pubKey.isEmpty()) {
-            pub = new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.pubKey));
+            pub = publicKeyOf(HexStringByteCodec.INSTANCE.decode(this.pubKey));
         }
         if (this.priKey != null && !this.priKey.isEmpty()) {
-            pri = new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(this.priKey));
+            pri = privateKeyOf(HexStringByteCodec.INSTANCE.decode(this.priKey));
         }
         return new KeyPair(pub, pri);
     }
