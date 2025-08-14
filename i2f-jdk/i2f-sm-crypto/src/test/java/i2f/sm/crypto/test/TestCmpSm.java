@@ -1,8 +1,8 @@
 package i2f.sm.crypto.test;
 
+import com.antherd.smcrypto.sm2.Keypair;
 import i2f.sm.crypto.sm2.KeyPair;
 import i2f.sm.crypto.sm2.Sm2;
-import i2f.sm.crypto.sm2.Utils;
 import i2f.sm.crypto.sm3.Sm3;
 import i2f.sm.crypto.sm4.Sm4;
 
@@ -42,6 +42,24 @@ public class TestCmpSm {
         assert cmpS1.equals(cmpS2);
 
         assert s1.equals(cmpS1);
+
+        long bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            String bs = Sm3.sm3(text);
+        }
+        long ets = System.currentTimeMillis();
+        long uts = ets - bts;
+        System.out.println("use time: " + uts + "ms");
+
+        bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            String bs = com.antherd.smcrypto.sm3.Sm3.sm3(text);
+        }
+        ets = System.currentTimeMillis();
+        long cmpUts = ets - bts;
+        System.out.println("use time: " + cmpUts + "ms");
+
+        System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
     }
 
     public static void testSm4() throws Exception {
@@ -70,13 +88,54 @@ public class TestCmpSm {
         String cmp3Dec = Sm4.decrypt(cmpEnc, key);
         System.out.println("cmp3Dec: " + cmp3Dec);
         assert text.equals(cmp3Dec);
+
+
+        long bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            String e = Sm4.encrypt(text, key);
+            String d = Sm4.decrypt(e, key);
+        }
+        long ets = System.currentTimeMillis();
+        long uts = ets - bts;
+        System.out.println("use time: " + uts + "ms");
+
+        bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            String e = com.antherd.smcrypto.sm4.Sm4.encrypt(text, key);
+            String d = com.antherd.smcrypto.sm4.Sm4.decrypt(e, key);
+        }
+        ets = System.currentTimeMillis();
+        long cmpUts = ets - bts;
+        System.out.println("use time: " + cmpUts + "ms");
+
+        System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
     }
 
     public static void testSm2() throws Exception {
         System.out.println("\n\nTesting Sm2 ==============");
-        KeyPair key = Utils.generateKeyPairHex();
+        KeyPair key = Sm2.generateKeyPairHex();
         String text = "Hello你好 World世界!";
         System.out.println("text: " + text);
+
+
+        long bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            KeyPair k = Sm2.generateKeyPairHex();
+        }
+        long ets = System.currentTimeMillis();
+        long uts = ets - bts;
+        System.out.println("use time: " + uts + "ms");
+
+        bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            Keypair k = com.antherd.smcrypto.sm2.Sm2.generateKeyPairHex();
+        }
+        ets = System.currentTimeMillis();
+        long cmpUts = ets - bts;
+        System.out.println("use time: " + cmpUts + "ms");
+
+        System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
+
         System.out.println("========sign/verify");
         String sign = Sm2.doSignature(text, key.getPrivateKey());
         System.out.println("sign: " + sign);
@@ -94,6 +153,27 @@ public class TestCmpSm {
 
         boolean cmp3Ok = com.antherd.smcrypto.sm2.Sm2.doVerifySignature(text, sign, key.getPublicKey());
         System.out.println("cmp3Ok: " + cmp3Ok);
+
+
+        bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            String s = Sm2.doSignature(text, key.getPrivateKey());
+            boolean o = Sm2.doVerifySignature(text, sign, key.getPublicKey());
+        }
+        ets = System.currentTimeMillis();
+        uts = ets - bts;
+        System.out.println("use time: " + uts + "ms");
+
+        bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            String s = com.antherd.smcrypto.sm2.Sm2.doSignature(text, key.getPrivateKey());
+            boolean o = com.antherd.smcrypto.sm2.Sm2.doVerifySignature(text, s, key.getPublicKey());
+        }
+        ets = System.currentTimeMillis();
+        cmpUts = ets - bts;
+        System.out.println("use time: " + cmpUts + "ms");
+
+        System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
 
 
         System.out.println("\n\n========encrypt/decrypt");
@@ -122,5 +202,26 @@ public class TestCmpSm {
         System.out.println("cmp3Dec: " + cmp3Dec);
         assert text.equals(cmp3Dec);
         assert Arrays.equals(text.getBytes("UTF-8"), cmp3Dec.getBytes("UTF-8"));
+
+
+        bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            String e = Sm2.doEncrypt(text, key.getPublicKey());
+            String d = Sm2.doDecrypt(e, key.getPrivateKey());
+        }
+        ets = System.currentTimeMillis();
+        uts = ets - bts;
+        System.out.println("use time: " + uts + "ms");
+
+        bts = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            String e = com.antherd.smcrypto.sm2.Sm2.doEncrypt(text, key.getPublicKey());
+            String d = com.antherd.smcrypto.sm2.Sm2.doDecrypt(e, key.getPrivateKey());
+        }
+        ets = System.currentTimeMillis();
+        cmpUts = ets - bts;
+        System.out.println("use time: " + cmpUts + "ms");
+
+        System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
     }
 }
