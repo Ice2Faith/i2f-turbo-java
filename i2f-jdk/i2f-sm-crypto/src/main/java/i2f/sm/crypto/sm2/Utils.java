@@ -49,6 +49,7 @@ public class Utils {
     public static KeyPair generateKeyPairHex() {
         return generateKeyPairHex(null, 10, 1);
     }
+
     /**
      * 生成密钥对：publicKey = privateKey * G
      */
@@ -99,7 +100,7 @@ public class Utils {
         int length = bytes.length;
 
         // 转换到字数组
-        int[] words = new int[(length+3)/4];
+        int[] words = new int[(length + 3) / 4];
         for (int i = 0; i < length; i++) {
             words[i >>> 2] |= (bytes[i] & 0x0ff) << (24 - (i % 4) * 8);
         }
@@ -109,7 +110,7 @@ public class Utils {
         for (int i = 0; i < length; i++) {
             int bite = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0x0ff;
             hexChars.append(Integer.toString((bite >>> 4) & 0x0f, 16));
-            hexChars.append(Integer.toString(bite & 0x0f,16));
+            hexChars.append(Integer.toString(bite & 0x0f, 16));
         }
 
         return hexChars.toString();
@@ -119,7 +120,7 @@ public class Utils {
      * 转成utf8串
      */
     public static String arrayToUtf8(byte[] arr) {
-        int[] words = new int[(arr.length*2+7)/8];
+        int[] words = new int[(arr.length * 2 + 7) / 8];
         int j = 0;
         for (int i = 0; i < arr.length * 2; i += 2) {
             words[i >>> 3] |= (arr[j] & 0x0ff) << (24 - (i % 8) * 4);
@@ -130,8 +131,8 @@ public class Utils {
             byte[] latin1Chars = new byte[arr.length];
 
             for (int i = 0; i < arr.length; i++) {
-                byte bite = (byte)((words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0x0ff);
-                latin1Chars[i]=bite;
+                byte bite = (byte) ((words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0x0ff);
+                latin1Chars[i] = bite;
             }
 
             return CharsetStringByteCodec.UTF8.encode(latin1Chars);
@@ -153,6 +154,7 @@ public class Utils {
 
         return CipUtils.hexToArray(hexStr);
     }
+
     /**
      * 验证公钥是否为椭圆曲线上的点
      */

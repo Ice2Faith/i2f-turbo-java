@@ -7,8 +7,9 @@ import java.util.stream.Collectors;
  * @author Ice2Faith
  * @date 2025/8/14 9:05
  */
-public class DerSequence extends Asn1Object{
+public class DerSequence extends Asn1Object {
     protected List<Asn1Object> asn1Array;
+
     public DerSequence(List<Asn1Object> asn1Array) {
         super();
 

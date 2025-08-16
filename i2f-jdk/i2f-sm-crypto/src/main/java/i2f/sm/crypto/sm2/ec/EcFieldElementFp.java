@@ -30,7 +30,7 @@ public class EcFieldElementFp {
      * 判断相等
      */
     public boolean equals(EcFieldElementFp other) {
-        if (other == this){
+        if (other == this) {
             return true;
         }
         return (this.q.equals(other.q) && this.x.equals(other.x));

@@ -15,31 +15,31 @@ import java.util.Arrays;
  * @desc
  */
 public class TestCmpSm {
-    public static final SecureRandom random=new SecureRandom();
+    public static final SecureRandom random = new SecureRandom();
     public static final boolean perf = true;
     public static String text = "Hello你好 World世界!";
-    public static int perfCount=1000;
+    public static int perfCount = 1000;
 
     public static void main(String[] args) throws Exception {
 
         perfPreHot();
 
-        int enCharRange=0x7f-0x20;
-        int cnCharRange=0x9fff-0x4e00;
-        StringBuilder builder=new StringBuilder();
-        int loopCount=perf?1:300;
+        int enCharRange = 0x7f - 0x20;
+        int cnCharRange = 0x9fff - 0x4e00;
+        StringBuilder builder = new StringBuilder();
+        int loopCount = perf ? 1 : 300;
         for (int i = 0; i < loopCount; i++) {
-            if(i>0){
+            if (i > 0) {
                 builder.setLength(0);
-                int len=random.nextInt(128)+4;
+                int len = random.nextInt(128) + 4;
                 for (int j = 0; j < len; j++) {
-                    char ch=(char)(random.nextInt(enCharRange)+0x20);
-                    if(random.nextBoolean()){
-                        ch=(char)(random.nextInt(cnCharRange)+0x4e00);
+                    char ch = (char) (random.nextInt(enCharRange) + 0x20);
+                    if (random.nextBoolean()) {
+                        ch = (char) (random.nextInt(cnCharRange) + 0x4e00);
                     }
                     builder.append(ch);
                 }
-                text=builder.toString();
+                text = builder.toString();
             }
             testSm3();
 
@@ -51,7 +51,7 @@ public class TestCmpSm {
     }
 
     public static void perfPreHot() throws Exception {
-        if(!perf){
+        if (!perf) {
             return;
         }
         System.out.println("perf pre hot ...");
@@ -77,10 +77,10 @@ public class TestCmpSm {
             dec = com.antherd.smcrypto.sm2.Sm2.doDecrypt(enc, keyPair.getPrivateKey());
 
             String sign = Sm2.doSignature(text, keyPair.getPrivateKey());
-            Sm2.doVerifySignature(text,sign,keyPair.getPublicKey());
+            Sm2.doVerifySignature(text, sign, keyPair.getPublicKey());
 
             sign = com.antherd.smcrypto.sm2.Sm2.doSignature(text, keyPair.getPrivateKey());
-            com.antherd.smcrypto.sm2.Sm2.doVerifySignature(text,sign,keyPair.getPublicKey());
+            com.antherd.smcrypto.sm2.Sm2.doVerifySignature(text, sign, keyPair.getPublicKey());
         }
 
         System.out.println("perf pre hot finished.");
@@ -112,7 +112,7 @@ public class TestCmpSm {
             }
             long ets = System.currentTimeMillis();
             long uts = ets - bts;
-            System.out.println("use time: " + uts + "ms");
+            System.out.println("use time: " + uts + "ms, " + (uts / perfCount) + "ms");
 
             bts = System.currentTimeMillis();
             for (int i = 0; i < perfCount; i++) {
@@ -120,7 +120,7 @@ public class TestCmpSm {
             }
             ets = System.currentTimeMillis();
             long cmpUts = ets - bts;
-            System.out.println("use time: " + cmpUts + "ms");
+            System.out.println("use time: " + cmpUts + "ms, " + (cmpUts / perfCount) + "ms");
 
             System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
         }
@@ -152,7 +152,7 @@ public class TestCmpSm {
             }
             long ets = System.currentTimeMillis();
             long uts = ets - bts;
-            System.out.println("use time: " + uts + "ms");
+            System.out.println("use time: " + uts + "ms, " + (uts / perfCount) + "ms");
 
             bts = System.currentTimeMillis();
             for (int i = 0; i < perfCount; i++) {
@@ -161,7 +161,7 @@ public class TestCmpSm {
             }
             ets = System.currentTimeMillis();
             long cmpUts = ets - bts;
-            System.out.println("use time: " + cmpUts + "ms");
+            System.out.println("use time: " + cmpUts + "ms, " + (cmpUts / perfCount) + "ms");
 
             System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
         }
@@ -189,7 +189,7 @@ public class TestCmpSm {
             }
             long ets = System.currentTimeMillis();
             long uts = ets - bts;
-            System.out.println("use time: " + uts + "ms");
+            System.out.println("use time: " + uts + "ms, " + (uts / perfCount) + "ms");
 
             bts = System.currentTimeMillis();
             for (int i = 0; i < perfCount; i++) {
@@ -197,7 +197,7 @@ public class TestCmpSm {
             }
             ets = System.currentTimeMillis();
             long cmpUts = ets - bts;
-            System.out.println("use time: " + cmpUts + "ms");
+            System.out.println("use time: " + cmpUts + "ms, " + (cmpUts / perfCount) + "ms");
 
             System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
         }
@@ -222,7 +222,7 @@ public class TestCmpSm {
             }
             long ets = System.currentTimeMillis();
             long uts = ets - bts;
-            System.out.println("use time: " + uts + "ms");
+            System.out.println("use time: " + uts + "ms, " + (uts / perfCount) + "ms");
 
             bts = System.currentTimeMillis();
             for (int i = 0; i < perfCount; i++) {
@@ -231,7 +231,7 @@ public class TestCmpSm {
             }
             ets = System.currentTimeMillis();
             long cmpUts = ets - bts;
-            System.out.println("use time: " + cmpUts + "ms");
+            System.out.println("use time: " + cmpUts + "ms, " + (cmpUts / perfCount) + "ms");
 
             System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
         }
@@ -268,7 +268,7 @@ public class TestCmpSm {
             }
             long ets = System.currentTimeMillis();
             long uts = ets - bts;
-            System.out.println("use time: " + uts + "ms");
+            System.out.println("use time: " + uts + "ms, " + (uts / perfCount) + "ms");
 
             bts = System.currentTimeMillis();
             for (int i = 0; i < perfCount; i++) {
@@ -277,7 +277,7 @@ public class TestCmpSm {
             }
             ets = System.currentTimeMillis();
             long cmpUts = ets - bts;
-            System.out.println("use time: " + cmpUts + "ms");
+            System.out.println("use time: " + cmpUts + "ms, " + (cmpUts / perfCount) + "ms");
 
             System.out.println("speed rate:" + (cmpUts * 1.0 / uts));
         }

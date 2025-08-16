@@ -67,10 +67,9 @@ public class Asn1Inner {
     }
 
     /**
-     *
      * 获取 v 的位置
      */
-    public static int getStartOfV(String str,int start) {
+    public static int getStartOfV(String str, int start) {
         int len = getLenOfL(str, start);
         return start + (len + 1) * 2;
     }
