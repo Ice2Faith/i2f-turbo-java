@@ -5,7 +5,7 @@ const M = new Uint32Array(64) // W'
 /**
  * 循环左移
  */
-function rotl(x, n) {
+export function rotl(x, n) {
     const s = n & 31
     return (x << s) | (x >>> (32 - s))
 }
@@ -13,7 +13,7 @@ function rotl(x, n) {
 /**
  * 二进制异或运算
  */
-function xor(x, y) {
+export function xor(x, y) {
     const result = []
     for (let i = x.length - 1; i >= 0; i--) result[i] = (x[i] ^ y[i]) & 0xff
     return result
@@ -22,14 +22,14 @@ function xor(x, y) {
 /**
  * 压缩函数中的置换函数 P0(X) = X xor (X <<< 9) xor (X <<< 17)
  */
-function P0(X) {
+export function P0(X) {
     return (X ^ rotl(X, 9)) ^ rotl(X, 17)
 }
 
 /**
  * 消息扩展中的置换函数 P1(X) = X xor (X <<< 15) xor (X <<< 23)
  */
-function P1(X) {
+export function P1(X) {
     return (X ^ rotl(X, 15)) ^ rotl(X, 23)
 }
 

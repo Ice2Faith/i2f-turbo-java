@@ -56,7 +56,7 @@ export default {
   created(){
     console.log({sm2,sm3,sm4})
 
-    this.test.sm3.sign=sm3(this.test.text)
+    this.test.sm3.sign=sm3.digest(this.test.text)
 
     this.test.sm4.enc=sm4.encrypt(this.test.text,this.test.sm4.key)
     this.test.sm4.dec=sm4.decrypt(this.test.sm4.enc,this.test.sm4.key)
