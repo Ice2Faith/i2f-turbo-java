@@ -4,7 +4,7 @@ import * as _sm4 from './sm4/index'
 
 const _sm={
     sm2: {..._sm2},
-    sm3: _sm3.default,
+    sm3: {..._sm3},
     sm4: {..._sm4},
 }
 

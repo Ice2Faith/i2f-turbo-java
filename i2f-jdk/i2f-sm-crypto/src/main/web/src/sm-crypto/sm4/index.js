@@ -36,7 +36,7 @@ const CK = [
 /**
  * 16 进制串转字节数组
  */
-function hexToArray(str) {
+export function hexToArray(str) {
     const arr = []
     for (let i = 0, len = str.length; i < len; i += 2) {
         arr.push(parseInt(str.substr(i, 2), 16))
@@ -47,7 +47,7 @@ function hexToArray(str) {
 /**
  * 字节数组转 16 进制串
  */
-function ArrayToHex(arr) {
+export function ArrayToHex(arr) {
     return arr.map(item => {
         item = item.toString(16)
         return item.length === 1 ? '0' + item : item
@@ -57,7 +57,7 @@ function ArrayToHex(arr) {
 /**
  * utf8 串转字节数组
  */
-function utf8ToArray(str) {
+export function utf8ToArray(str) {
     const arr = []
 
     for (let i = 0, len = str.length; i < len; i++) {
@@ -95,7 +95,7 @@ function utf8ToArray(str) {
 /**
  * 字节数组转 utf8 串
  */
-function arrayToUtf8(arr) {
+export function arrayToUtf8(arr) {
     const str = []
     for (let i = 0, len = arr.length; i < len; i++) {
         if (arr[i] >= 0xf0 && arr[i] <= 0xf7) {
@@ -122,7 +122,7 @@ function arrayToUtf8(arr) {
 /**
  * 32 比特循环左移
  */
-function rotl(x, n) {
+export function rotl(x, n) {
     const s = n & 31
     return (x << s) | (x >>> (32 - s))
 }
@@ -130,7 +130,7 @@ function rotl(x, n) {
 /**
  * 非线性变换
  */
-function byteSub(a) {
+export function byteSub(a) {
     return (Sbox[a >>> 24 & 0xFF] & 0xFF) << 24 |
         (Sbox[a >>> 16 & 0xFF] & 0xFF) << 16 |
         (Sbox[a >>> 8 & 0xFF] & 0xFF) << 8 |
@@ -140,21 +140,21 @@ function byteSub(a) {
 /**
  * 线性变换，加密/解密用
  */
-function l1(b) {
+export function l1(b) {
     return b ^ rotl(b, 2) ^ rotl(b, 10) ^ rotl(b, 18) ^ rotl(b, 24)
 }
 
 /**
  * 线性变换，生成轮密钥用
  */
-function l2(b) {
+export function l2(b) {
     return b ^ rotl(b, 13) ^ rotl(b, 23)
 }
 
 /**
  * 以一组 128 比特进行加密/解密操作
  */
-function sms4Crypt(input, output, roundKey) {
+export function sms4Crypt(input, output, roundKey) {
     const x = new Array(4)
 
     // 字节数组转成字数组（此处 1 字 = 32 比特）
@@ -194,7 +194,7 @@ function sms4Crypt(input, output, roundKey) {
 /**
  * 密钥扩展算法
  */
-function sms4KeyExt(key, roundKey, cryptFlag) {
+export function sms4KeyExt(key, roundKey, cryptFlag) {
     const x = new Array(4)
 
     // 字节数组转成字数组（此处 1 字 = 32 比特）
@@ -238,7 +238,7 @@ function sms4KeyExt(key, roundKey, cryptFlag) {
     }
 }
 
-function sm4(inArray, key, cryptFlag, {
+export function sm4(inArray, key, cryptFlag, {
     padding = 'pkcs#7', mode, iv = [], output = 'string'
 } = {}) {
     if (mode === 'cbc') {

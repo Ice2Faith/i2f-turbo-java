@@ -3,7 +3,7 @@ import {sm3, hmac} from '../sm2/sm3'
 /**
  * 补全16进制字符串
  */
-function leftPad(input, num) {
+export function leftPad(input, num) {
     if (input.length >= num) return input
 
     return (new Array(num - input.length + 1)).join('0') + input
@@ -12,7 +12,7 @@ function leftPad(input, num) {
 /**
  * 字节数组转 16 进制串
  */
-function ArrayToHex(arr) {
+export function ArrayToHex(arr) {
     return arr.map(item => {
         item = item.toString(16)
         return item.length === 1 ? '0' + item : item
@@ -22,7 +22,7 @@ function ArrayToHex(arr) {
 /**
  * 转成字节数组
  */
-function hexToArray(hexStr) {
+export function hexToArray(hexStr) {
     const words = []
     let hexStrLength = hexStr.length
 
@@ -41,7 +41,7 @@ function hexToArray(hexStr) {
 /**
  * utf8 串转字节数组
  */
-function utf8ToArray(str) {
+export function utf8ToArray(str) {
     const arr = []
 
     for (let i = 0, len = str.length; i < len; i++) {
@@ -76,7 +76,7 @@ function utf8ToArray(str) {
     return arr
 }
 
-export default function (input, options) {
+export function digest(input, options) {
     input = typeof input === 'string' ? utf8ToArray(input) : Array.prototype.slice.call(input)
 
     if (options) {
