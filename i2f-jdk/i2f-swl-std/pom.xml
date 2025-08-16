@@ -9,7 +9,7 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-sm-crypto</artifactId>
+    <artifactId>i2f-swl-std</artifactId>
 
 
     <dependencies>
@@ -20,37 +20,9 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-codec-impl</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-bytes</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-crypto-std</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.antherd</groupId>
-            <artifactId>sm-crypto</artifactId>
-            <version>0.3.2.1-RELEASE</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!--
-        如果Java环境高于java15,则需要添加此依赖，否则不要添加
-        原因是 nashorn 的 JavaScript 引擎在 java15 被正式移除
-         -->
-        <dependency>
-            <groupId>org.openjdk.nashorn</groupId>
-            <artifactId>nashorn-core</artifactId>
-            <version>15.4</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
 
     <build>
@@ -61,6 +33,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

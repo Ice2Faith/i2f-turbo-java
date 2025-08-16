@@ -1,6 +1,6 @@
 package i2f.springcloud.alibaba.sentinel;
 
-import com.alibaba.csp.sentinel.adapter.servlet.callback.UrlBlockHandler;
+import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.authority.AuthorityException;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeException;
@@ -26,9 +26,10 @@ import java.io.IOException;
 @ConditionalOnExpression("${i2f.springcloud.sentinel.global-exception-handler.enable:true}")
 @Slf4j
 @Configuration
-public class DefaultSentinelBlockExceptionHandler implements UrlBlockHandler {
+public class DefaultSentinelBlockExceptionHandler implements BlockExceptionHandler {
+
     @Override
-    public void blocked(HttpServletRequest request, HttpServletResponse response, BlockException e) throws IOException {
+    public void handle(HttpServletRequest request, HttpServletResponse response, BlockException e) throws Exception {
         log.warn("DefaultSentinelBlockExceptionHandler handle exception by rule:"+e.getRule());
         e.printStackTrace();
 

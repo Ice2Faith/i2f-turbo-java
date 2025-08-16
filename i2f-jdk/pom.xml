@@ -165,6 +165,8 @@
         <module>i2f-std-const</module>
         <module>i2f-workflow</module>
         <module>i2f-sm-crypto</module>
+        <module>i2f-sm-crypto-swl</module>
+        <module>i2f-swl-std</module>
 
 
     </modules>
