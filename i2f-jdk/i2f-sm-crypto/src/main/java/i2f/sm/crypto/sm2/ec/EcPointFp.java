@@ -30,7 +30,7 @@ public class EcPointFp {
 
 
     public EcFieldElementFp getX() {
-        if (this.zinv == null){
+        if (this.zinv == null) {
             this.zinv = this.z.modInverse(this.curve.q);
         }
 
@@ -38,7 +38,7 @@ public class EcPointFp {
     }
 
     public EcFieldElementFp getY() {
-        if (this.zinv == null){
+        if (this.zinv == null) {
             this.zinv = this.z.modInverse(this.curve.q);
         }
 
@@ -50,19 +50,19 @@ public class EcPointFp {
      * 判断相等
      */
     public boolean equals(EcPointFp other) {
-        if (other == this){
+        if (other == this) {
             return true;
         }
         if (this.isInfinity()) {
             return other.isInfinity();
         }
-        if (other.isInfinity()){
+        if (other.isInfinity()) {
             return this.isInfinity();
         }
 
         // u = y2 * z1 - y1 * z2
         BigInteger u = other.y.toBigInteger().multiply(this.z).subtract(this.y.toBigInteger().multiply(other.z)).mod(this.curve.q);
-        if (!u.equals(BigInteger.ZERO)){
+        if (!u.equals(BigInteger.ZERO)) {
             return false;
         }
 
@@ -75,7 +75,7 @@ public class EcPointFp {
      * 是否是无穷远点
      */
     public boolean isInfinity() {
-        if ((this.x == null) && (this.y == null)){
+        if ((this.x == null) && (this.y == null)) {
             return true;
         }
         return this.z.equals(BigInteger.ZERO) && !this.y.toBigInteger().equals(BigInteger.ZERO);
@@ -92,9 +92,9 @@ public class EcPointFp {
 
     /**
      * 相加
-     *
+     * <p>
      * 标准射影坐标系：
-     *
+     * <p>
      * λ1 = x1 * z2
      * λ2 = x2 * z1
      * λ3 = λ1 − λ2
@@ -111,10 +111,10 @@ public class EcPointFp {
      * z3 = λ10 * λ8
      */
     public EcPointFp add(EcPointFp b) {
-        if (this.isInfinity()){
+        if (this.isInfinity()) {
             return b;
         }
-        if (b.isInfinity()){
+        if (b.isInfinity()) {
             return this;
         }
 
@@ -156,9 +156,9 @@ public class EcPointFp {
 
     /**
      * 自加
-     *
+     * <p>
      * 标准射影坐标系：
-     *
+     * <p>
      * λ1 = 3 * x1^2 + a * z1^2
      * λ2 = 2 * y1 * z1
      * λ3 = y1^2
@@ -170,10 +170,10 @@ public class EcPointFp {
      * z3 = λ2 * λ5
      */
     public EcPointFp twice() {
-        if (this.isInfinity()){
+        if (this.isInfinity()) {
             return this;
         }
-        if (this.y.toBigInteger().signum()==0){
+        if (this.y.toBigInteger().signum() == 0) {
             return this.curve.infinity;
         }
 
@@ -202,10 +202,10 @@ public class EcPointFp {
      * 倍点计算
      */
     public EcPointFp multiply(BigInteger k) {
-        if (this.isInfinity()){
+        if (this.isInfinity()) {
             return this;
         }
-        if (k.signum()==0){
+        if (k.signum() == 0) {
             return this.curve.infinity;
         }
 

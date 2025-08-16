@@ -12,7 +12,8 @@ import java.io.InputStream;
  * @date 2025/8/14 17:47
  */
 public class SmCryptoSm3Digester implements IMessageDigester {
-    public static final SmCryptoSm3Digester INSTANCE=new SmCryptoSm3Digester();
+    public static final SmCryptoSm3Digester INSTANCE = new SmCryptoSm3Digester();
+
     public SmCryptoSm3Digester() {
     }
 
@@ -41,7 +42,7 @@ public class SmCryptoSm3Digester implements IMessageDigester {
         try {
             return Sm3.sm3(str);
         } catch (SmException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
@@ -50,7 +51,7 @@ public class SmCryptoSm3Digester implements IMessageDigester {
             String hash = Sm3.sm3(str);
             return hash.equalsIgnoreCase(sign);
         } catch (SmException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 }

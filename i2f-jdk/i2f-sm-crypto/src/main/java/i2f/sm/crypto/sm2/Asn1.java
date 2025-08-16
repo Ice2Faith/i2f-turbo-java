@@ -17,7 +17,7 @@ import java.util.Arrays;
 public class Asn1 {
     @Data
     @NoArgsConstructor
-    public static class Der{
+    public static class Der {
         protected BigInteger r;
         protected BigInteger s;
 
@@ -26,13 +26,15 @@ public class Asn1 {
             this.s = s;
         }
     }
-    public static String encodeDer(Der der){
-        return encodeDer(der.getR(),der.getS());
+
+    public static String encodeDer(Der der) {
+        return encodeDer(der.getR(), der.getS());
     }
+
     /**
      * ASN.1 der 编码，针对 sm2 签名
      */
-    public static String encodeDer(BigInteger r, BigInteger s){
+    public static String encodeDer(BigInteger r, BigInteger s) {
         DerInteger derR = new DerInteger(r);
         DerInteger derS = new DerInteger(s);
         DerSequence derSeq = new DerSequence(new ArrayList<>(Arrays.asList(derR, derS)));
@@ -61,6 +63,6 @@ public class Asn1 {
         BigInteger r = new BigInteger(vR, 16);
         BigInteger s = new BigInteger(vS, 16);
 
-        return new Der(r,s);
+        return new Der(r, s);
     }
 }

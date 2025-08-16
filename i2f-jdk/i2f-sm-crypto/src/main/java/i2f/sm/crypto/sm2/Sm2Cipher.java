@@ -2,7 +2,6 @@ package i2f.sm.crypto.sm2;
 
 import i2f.sm.crypto.exception.SmException;
 import i2f.sm.crypto.sm2.ec.EcCurveFp;
-import i2f.sm.crypto.sm2.ec.EcParam;
 import i2f.sm.crypto.sm2.ec.EcPointFp;
 import i2f.sm.crypto.util.CipUtils;
 import lombok.Data;
@@ -11,6 +10,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,7 +24,32 @@ public class Sm2Cipher {
         C1C2C3,
     }
 
-    public static final EcParam EC_PARAM = Utils.generateEcparam();
+
+    protected static volatile KeyPair boostKeyPair = Utils.generateKeyPairHex();
+
+    static {
+        Thread thread = new Thread(() -> {
+            try {
+                KeyPair pair = Utils.generateKeyPairHex();
+                if (pair != null) {
+                    boostKeyPair = pair;
+                }
+            } catch (Throwable e) {
+                System.err.println(e);
+            }
+            try {
+                TimeUnit.SECONDS.sleep(15);
+            } catch (Exception e) {
+            }
+        });
+        thread.setDaemon(true);
+        thread.setName("boost-sm2-key-gen");
+        thread.start();
+    }
+
+    protected static KeyPair getBoostKeyPair() {
+        return boostKeyPair;
+    }
 
     public static String doEncrypt(String msg, String publicKey, CipherMode cipherMode) {
         byte[] msgArr = Utils.hexToArray(Utils.utf8ToHex(msg));
@@ -39,7 +64,7 @@ public class Sm2Cipher {
         byte[] msg = Utils.hexToArray(Utils.utf8ToHex(msgStr));
         EcPointFp publicKey = Utils.getGlobalCurve().decodePointHex(publicKeyHex); // 先将公钥转成点
 
-        KeyPair keypair = Utils.generateKeyPairHex();
+        KeyPair keypair = getBoostKeyPair();
         BigInteger k = new BigInteger(keypair.privateKey, 16); // 随机数 k
 
         // c1 = k * G
@@ -107,7 +132,7 @@ public class Sm2Cipher {
         }
         EcPointFp publicKey = Utils.getGlobalCurve().decodePointHex(publicKeyHex); // 先将公钥转成点
 
-        KeyPair keypair = Utils.generateKeyPairHex();
+        KeyPair keypair = getBoostKeyPair();
         BigInteger k = new BigInteger(keypair.privateKey, 16); // 随机数 k
 
         // c1 = k * G
@@ -367,7 +392,7 @@ public class Sm2Cipher {
         BigInteger r = null;
         BigInteger s = null;
 
-        BigInteger n = EC_PARAM.getN();
+        BigInteger n = Utils.EC_PARAM.getN();
         do {
             do {
                 Point point = null;
@@ -434,9 +459,9 @@ public class Sm2Cipher {
             s = new BigInteger(signHex.substring(64), 16);
         }
 
-        EcCurveFp curve = EC_PARAM.getCurve();
-        BigInteger n = EC_PARAM.getN();
-        EcPointFp G = EC_PARAM.getG();
+        EcCurveFp curve = Utils.EC_PARAM.getCurve();
+        BigInteger n = Utils.EC_PARAM.getN();
+        EcPointFp G = Utils.EC_PARAM.getG();
 
         EcPointFp PA = curve.decodePointHex(publicKey);
         BigInteger e = new BigInteger(hashHex, 16);
@@ -470,7 +495,7 @@ public class Sm2Cipher {
         if (userId == null || userId.isEmpty()) {
             userId = "1234567812345678";
         }
-        EcPointFp G = EC_PARAM.getG();
+        EcPointFp G = Utils.EC_PARAM.getG();
         // z = hash(entl || userId || a || b || gx || gy || px || py)
         userId = Utils.utf8ToHex(userId);
         String a = CipUtils.leftPad(G.getCurve().getA().toBigInteger().toString(16), 64);
@@ -510,7 +535,7 @@ public class Sm2Cipher {
      * 计算公钥
      */
     public static String getPublicKeyFromPrivateKey(String privateKey) {
-        EcPointFp G = EC_PARAM.getG();
+        EcPointFp G = Utils.EC_PARAM.getG();
         EcPointFp PA = G.multiply(new BigInteger(privateKey, 16));
         String x = CipUtils.leftPad(PA.getX().toBigInteger().toString(16), 64);
         String y = CipUtils.leftPad(PA.getY().toBigInteger().toString(16), 64);
@@ -529,8 +554,8 @@ public class Sm2Cipher {
      * 获取椭圆曲线点
      */
     public static Point getPoint() {
-        EcCurveFp curve = EC_PARAM.getCurve();
-        KeyPair keypair = Utils.generateKeyPairHex();
+        EcCurveFp curve = Utils.EC_PARAM.getCurve();
+        KeyPair keypair = getBoostKeyPair();
         EcPointFp PA = curve.decodePointHex(keypair.publicKey);
 
         BigInteger k = new BigInteger(keypair.privateKey, 16);

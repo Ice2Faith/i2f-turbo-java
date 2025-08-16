@@ -11,7 +11,6 @@ import i2f.sm.crypto.sm2.Sm2;
 import i2f.sm.crypto.sm2.Sm2Cipher;
 import lombok.Data;
 
-import javax.script.ScriptException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -22,7 +21,7 @@ import java.security.PublicKey;
  */
 @Data
 public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
-    protected Sm2Cipher.CipherMode cipherMode= Sm2Cipher.CipherMode.C1C2C3;
+    protected Sm2Cipher.CipherMode cipherMode = Sm2Cipher.CipherMode.C1C2C3;
     protected String pubKey;
     protected String priKey;
 
@@ -52,7 +51,7 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
         try {
             return Sm2.generateKeyPairHex();
         } catch (SmException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
@@ -63,7 +62,7 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
             return new KeyPair(new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(keypair.getPublicKey())),
                     new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(keypair.getPrivateKey())));
         } catch (SmException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 

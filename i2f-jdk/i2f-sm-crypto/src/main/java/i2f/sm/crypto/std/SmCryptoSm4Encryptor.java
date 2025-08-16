@@ -23,24 +23,24 @@ public class SmCryptoSm4Encryptor implements ISymmetricEncryptor {
     }
 
     public SmCryptoSm4Encryptor(Key key) {
-        this.key= HexStringByteCodec.INSTANCE.encode(key.getEncoded());
+        this.key = HexStringByteCodec.INSTANCE.encode(key.getEncoded());
     }
 
-    public static String genKey(){
+    public static String genKey() {
         return Sm4.generateHexKey();
     }
 
-    public static Key keyOf(byte[] bytes){
-        return new BytesKey("sm4","hex",bytes);
+    public static Key keyOf(byte[] bytes) {
+        return new BytesKey("sm4", "hex", bytes);
     }
 
-    public static Key keyOf(String key){
+    public static Key keyOf(String key) {
         return keyOf(HexStringByteCodec.INSTANCE.decode(key));
     }
 
     @Override
     public void setKey(Key key) {
-        this.key= HexStringByteCodec.INSTANCE.encode(key.getEncoded());
+        this.key = HexStringByteCodec.INSTANCE.encode(key.getEncoded());
     }
 
     @Override
@@ -51,7 +51,7 @@ public class SmCryptoSm4Encryptor implements ISymmetricEncryptor {
 
     @Override
     public void setKeyBytes(byte[] keyBytes) {
-        this.key=HexStringByteCodec.INSTANCE.encode(keyBytes);
+        this.key = HexStringByteCodec.INSTANCE.encode(keyBytes);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class SmCryptoSm4Encryptor implements ISymmetricEncryptor {
 
     @Override
     public void setKeyString(String str) {
-        this.key=str;
+        this.key = str;
     }
 
     @Override
@@ -88,6 +88,6 @@ public class SmCryptoSm4Encryptor implements ISymmetricEncryptor {
     }
 
     public String decrypt(String data) throws Exception {
-        return Sm4.decrypt(data,key);
+        return Sm4.decrypt(data, key);
     }
 }

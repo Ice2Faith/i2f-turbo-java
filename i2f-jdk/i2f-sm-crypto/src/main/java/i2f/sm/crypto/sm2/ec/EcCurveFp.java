@@ -18,6 +18,7 @@ public class EcCurveFp {
     protected EcFieldElementFp a;
     protected EcFieldElementFp b;
     protected EcPointFp infinity;
+
     public EcCurveFp(BigInteger q, BigInteger a, BigInteger b) {
         this.q = q;
         this.a = fromBigInteger(a);
@@ -29,7 +30,7 @@ public class EcCurveFp {
      * 判断两个椭圆曲线是否相等
      */
     public boolean equals(EcCurveFp other) {
-        if (other == this){
+        if (other == this) {
             return true;
         }
         return (this.q.equals(other.q) && this.a.equals(other.a) && this.b.equals(other.b));
