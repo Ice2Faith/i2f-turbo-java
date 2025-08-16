@@ -157,7 +157,7 @@ public class ByteUtil {
         long ret = 0;
         for (int i = 0; i < byteCount; i++) {
             ret <<= 8;
-            ret |= data[offset + i];
+            ret |= data[offset + i] & 0x0ff;
         }
         return ret;
     }
@@ -166,7 +166,7 @@ public class ByteUtil {
         long ret = 0;
         for (int i = 0; i < byteCount; i++) {
             ret <<= 8;
-            ret |= data[offset + (byteCount - 1 - i)];
+            ret |= data[offset + (byteCount - 1 - i)] &0x0ff;
         }
         return ret;
     }
