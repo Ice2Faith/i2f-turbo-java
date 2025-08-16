@@ -18,7 +18,7 @@ public class TestCmpSm {
 
         boolean perf = false;
 
-        if(perf){
+        if (perf) {
             // 预热
             for (int i = 0; i < 5000; i++) {
                 String bs = Sm3.sm3("123456");
@@ -75,7 +75,8 @@ public class TestCmpSm {
 
     public static void testSm4(boolean perf) throws Exception {
         System.out.println("\n\nTesting Sm4 ==============");
-        String key = Sm4.generateHexKey();
+//        String key = Sm4.generateHexKey();
+        String key = "4eeb7d027804a89384671c8221398d4f";
         String text = "Hello你好 World世界!";
         System.out.println("text: " + text);
         String enc = Sm4.encrypt(text, key);
@@ -127,7 +128,11 @@ public class TestCmpSm {
 
     public static void testSm2(boolean perf) throws Exception {
         System.out.println("\n\nTesting Sm2 ==============");
-        KeyPair key = Sm2.generateKeyPairHex();
+//        KeyPair key = Sm2.generateKeyPairHex();
+        KeyPair key = new KeyPair(
+                "045df2c1bb0718c41fdfd8765ad4fb6e4c62bced3c0b0ee0198072ebb4cf48633cb70dde25b7d8e9ca4f11fb1c2a8ae6c362ccc6b83ac32a6789bdb0d57d490204",
+                "f22151d457b3c8e2142311616dd4972fc7f878e50a8f3974b423e5850ace98dc"
+        );
         String text = "Hello你好 World世界!";
         System.out.println("text: " + text);
 
