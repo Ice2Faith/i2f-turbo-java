@@ -18,6 +18,13 @@ public class TestCmpSm {
 
         boolean perf = false;
 
+        if(perf){
+            // 预热
+            for (int i = 0; i < 5000; i++) {
+                String bs = Sm3.sm3("123456");
+            }
+        }
+
         testSm3(perf);
 
         testSm4(perf);
