@@ -478,6 +478,14 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-sm-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-sm-crypto-swl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spi</artifactId>
         </dependency>
         <dependency>
@@ -491,6 +499,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-swl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-swl-std</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>

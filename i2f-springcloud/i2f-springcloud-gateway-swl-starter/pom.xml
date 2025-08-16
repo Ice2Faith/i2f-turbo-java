@@ -48,7 +48,32 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-sm-crypto-swl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-javax-swl</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-swl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.antherd</groupId>
+            <artifactId>sm-crypto</artifactId>
+            <version>0.3.2.1-RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15to18</artifactId>
+            <version>1.74</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
