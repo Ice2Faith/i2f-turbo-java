@@ -58,13 +58,13 @@ export default {
 
     this.test.sm3.sign=sm3.digest(this.test.text)
 
-    // this.test.sm4.enc=sm4.encrypt(this.test.text,this.test.sm4.key)
+    this.test.sm4.enc=sm4.encrypt(this.test.text,this.test.sm4.key)
     this.test.sm4.dec=sm4.decrypt(this.test.sm4.enc,this.test.sm4.key)
 
-    // this.test.sm2.enc=sm2.doEncrypt(this.test.text,this.test.sm2.keypair.publicKey)
+    this.test.sm2.enc=sm2.doEncrypt(this.test.text,this.test.sm2.keypair.publicKey)
     this.test.sm2.dec=sm2.doDecrypt(this.test.sm2.enc,this.test.sm2.keypair.privateKey)
 
-    // this.test.sm2.sign=sm2.doSignature(this.test.text,this.test.sm2.keypair.privateKey)
+    this.test.sm2.sign=sm2.doSignature(this.test.text,this.test.sm2.keypair.privateKey)
     this.test.sm2.verify=sm2.doVerifySignature(this.test.text,this.test.sm2.sign,this.test.sm2.keypair.publicKey)
   },
   mounted(){
