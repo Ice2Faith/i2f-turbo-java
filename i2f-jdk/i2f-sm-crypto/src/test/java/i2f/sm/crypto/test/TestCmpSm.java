@@ -6,6 +6,7 @@ import i2f.sm.crypto.sm2.Sm2;
 import i2f.sm.crypto.sm3.Sm3;
 import i2f.sm.crypto.sm4.Sm4;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
@@ -14,27 +15,79 @@ import java.util.Arrays;
  * @desc
  */
 public class TestCmpSm {
+    public static final SecureRandom random=new SecureRandom();
+    public static final boolean perf = true;
+    public static String text = "Hello你好 World世界!";
+    public static int perfCount=1000;
+
     public static void main(String[] args) throws Exception {
 
-        boolean perf = false;
+        perfPreHot();
 
-        if (perf) {
-            // 预热
-            for (int i = 0; i < 5000; i++) {
-                String bs = Sm3.sm3("123456");
+        int enCharRange=0x7f-0x20;
+        int cnCharRange=0x9fff-0x4e00;
+        StringBuilder builder=new StringBuilder();
+        int loopCount=perf?1:300;
+        for (int i = 0; i < loopCount; i++) {
+            if(i>0){
+                builder.setLength(0);
+                int len=random.nextInt(128)+4;
+                for (int j = 0; j < len; j++) {
+                    char ch=(char)(random.nextInt(enCharRange)+0x20);
+                    if(random.nextBoolean()){
+                        ch=(char)(random.nextInt(cnCharRange)+0x4e00);
+                    }
+                    builder.append(ch);
+                }
+                text=builder.toString();
             }
+            testSm3();
+
+            testSm4();
+
+            testSm2();
         }
 
-        testSm3(perf);
-
-        testSm4(perf);
-
-        testSm2(perf);
     }
 
-    public static void testSm3(boolean perf) throws Exception {
+    public static void perfPreHot() throws Exception {
+        if(!perf){
+            return;
+        }
+        System.out.println("perf pre hot ...");
+        // 预热
+        for (int i = 0; i < 50; i++) {
+            String bs = Sm3.sm3(text);
+            com.antherd.smcrypto.sm3.Sm3.sm3(text);
+
+            String key = Sm4.generateHexKey();
+            String enc = Sm4.encrypt(text, key);
+            String dec = Sm4.decrypt(enc, key);
+
+            enc = com.antherd.smcrypto.sm4.Sm4.encrypt(text, key);
+            dec = com.antherd.smcrypto.sm4.Sm4.decrypt(enc, key);
+
+            KeyPair keyPair = Sm2.generateKeyPairHex();
+            com.antherd.smcrypto.sm2.Sm2.generateKeyPairHex();
+
+            enc = Sm2.doEncrypt(text, keyPair.getPublicKey());
+            dec = Sm2.doDecrypt(enc, keyPair.getPrivateKey());
+
+            enc = com.antherd.smcrypto.sm2.Sm2.doEncrypt(text, keyPair.getPublicKey());
+            dec = com.antherd.smcrypto.sm2.Sm2.doDecrypt(enc, keyPair.getPrivateKey());
+
+            String sign = Sm2.doSignature(text, keyPair.getPrivateKey());
+            Sm2.doVerifySignature(text,sign,keyPair.getPublicKey());
+
+            sign = com.antherd.smcrypto.sm2.Sm2.doSignature(text, keyPair.getPrivateKey());
+            com.antherd.smcrypto.sm2.Sm2.doVerifySignature(text,sign,keyPair.getPublicKey());
+        }
+
+        System.out.println("perf pre hot finished.");
+    }
+
+    public static void testSm3() throws Exception {
         System.out.println("\n\nTesting Sm3 ==============");
-        String text = "Hello你好 World世界!";
         System.out.println("text: " + text);
         String s1 = Sm3.sm3(text);
         System.out.println("s1: " + s1);
@@ -54,7 +107,7 @@ public class TestCmpSm {
 
         if (perf) {
             long bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 String bs = Sm3.sm3(text);
             }
             long ets = System.currentTimeMillis();
@@ -62,7 +115,7 @@ public class TestCmpSm {
             System.out.println("use time: " + uts + "ms");
 
             bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 String bs = com.antherd.smcrypto.sm3.Sm3.sm3(text);
             }
             ets = System.currentTimeMillis();
@@ -73,11 +126,9 @@ public class TestCmpSm {
         }
     }
 
-    public static void testSm4(boolean perf) throws Exception {
+    public static void testSm4() throws Exception {
         System.out.println("\n\nTesting Sm4 ==============");
-//        String key = Sm4.generateHexKey();
-        String key = "4eeb7d027804a89384671c8221398d4f";
-        String text = "Hello你好 World世界!";
+        String key = Sm4.generateHexKey();
         System.out.println("text: " + text);
         String enc = Sm4.encrypt(text, key);
         System.out.println("enc: " + enc);
@@ -95,7 +146,7 @@ public class TestCmpSm {
 
         if (perf) {
             long bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 String e = Sm4.encrypt(text, key);
                 String d = Sm4.decrypt(e, key);
             }
@@ -104,7 +155,7 @@ public class TestCmpSm {
             System.out.println("use time: " + uts + "ms");
 
             bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 String e = com.antherd.smcrypto.sm4.Sm4.encrypt(text, key);
                 String d = com.antherd.smcrypto.sm4.Sm4.decrypt(e, key);
             }
@@ -126,19 +177,14 @@ public class TestCmpSm {
 
     }
 
-    public static void testSm2(boolean perf) throws Exception {
+    public static void testSm2() throws Exception {
         System.out.println("\n\nTesting Sm2 ==============");
-//        KeyPair key = Sm2.generateKeyPairHex();
-        KeyPair key = new KeyPair(
-                "045df2c1bb0718c41fdfd8765ad4fb6e4c62bced3c0b0ee0198072ebb4cf48633cb70dde25b7d8e9ca4f11fb1c2a8ae6c362ccc6b83ac32a6789bdb0d57d490204",
-                "f22151d457b3c8e2142311616dd4972fc7f878e50a8f3974b423e5850ace98dc"
-        );
-        String text = "Hello你好 World世界!";
+        KeyPair key = Sm2.generateKeyPairHex();
         System.out.println("text: " + text);
 
         if (perf) {
             long bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 KeyPair k = Sm2.generateKeyPairHex();
             }
             long ets = System.currentTimeMillis();
@@ -146,7 +192,7 @@ public class TestCmpSm {
             System.out.println("use time: " + uts + "ms");
 
             bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 Keypair k = com.antherd.smcrypto.sm2.Sm2.generateKeyPairHex();
             }
             ets = System.currentTimeMillis();
@@ -170,7 +216,7 @@ public class TestCmpSm {
 
         if (perf) {
             long bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 String s = Sm2.doSignature(text, key.getPrivateKey());
                 boolean o = Sm2.doVerifySignature(text, sign, key.getPublicKey());
             }
@@ -179,7 +225,7 @@ public class TestCmpSm {
             System.out.println("use time: " + uts + "ms");
 
             bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 String s = com.antherd.smcrypto.sm2.Sm2.doSignature(text, key.getPrivateKey());
                 boolean o = com.antherd.smcrypto.sm2.Sm2.doVerifySignature(text, s, key.getPublicKey());
             }
@@ -216,7 +262,7 @@ public class TestCmpSm {
 
         if (perf) {
             long bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 String e = Sm2.doEncrypt(text, key.getPublicKey());
                 String d = Sm2.doDecrypt(e, key.getPrivateKey());
             }
@@ -225,7 +271,7 @@ public class TestCmpSm {
             System.out.println("use time: " + uts + "ms");
 
             bts = System.currentTimeMillis();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < perfCount; i++) {
                 String e = com.antherd.smcrypto.sm2.Sm2.doEncrypt(text, key.getPublicKey());
                 String d = com.antherd.smcrypto.sm2.Sm2.doDecrypt(e, key.getPrivateKey());
             }
