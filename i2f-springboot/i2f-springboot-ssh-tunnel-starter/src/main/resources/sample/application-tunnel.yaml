@@ -1,0 +1,21 @@
+i2f:
+  springboot:
+    ssh:
+      tunnel:
+        servers:
+          - name: jump-server
+            ssh:
+              host: 10.1.x.101
+              port: 22
+              username: app
+              password: 123xxxx
+            tunnels:
+            - name: mysql
+              localPort: 3306
+              remoteHost: 10.5.x.102
+              remotePort: 3306
+              # jdbc:mysql://localhost:3306/test_db
+            - name: redis
+              localPort: 6379
+              remoteHost: 10.7.x.106
+              remotePort: 6379
