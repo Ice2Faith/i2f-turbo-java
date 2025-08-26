@@ -117,20 +117,24 @@ public class SshTunnelUtil {
         return this.session == null || !this.session.isConnected();
     }
 
-    public Session getSession() throws JSchException  {
+    public Session getSession()  {
         if(isInvalidSession()){
             synchronized (this) {
                 if(isInvalidSession()) {
-                    JSch jSch = new JSch();
-                    if (knownHostFilePath != null && !knownHostFilePath.isEmpty()) {
-                        jSch.setKnownHosts(knownHostFilePath);
+                    try {
+                        JSch jSch = new JSch();
+                        if (knownHostFilePath != null && !knownHostFilePath.isEmpty()) {
+                            jSch.setKnownHosts(knownHostFilePath);
+                        }
+
+                        session = jSch.getSession(sshUser, sshHost, sshPort > 0 ? sshPort : 22);
+                        session.setPassword(sshPassword);
+                        session.setConfig("StrictHostKeyChecking", "no");
+
+                        session.connect();
+                    } catch (JSchException e) {
+                        throw new IllegalStateException(e.getMessage(),e);
                     }
-
-                    session = jSch.getSession(sshUser, sshHost, sshPort > 0 ? sshPort : 22);
-                    session.setPassword(sshPassword);
-                    session.setConfig("StrictHostKeyChecking", "no");
-
-                    session.connect();
                 }
             }
         }

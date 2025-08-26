@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.ssh.tunnel",
+      "type": "i2f.springboot.ssh.tunnel.TunnelProperties",
+      "sourceType": "i2f.springboot.ssh.tunnel.TunnelProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.ssh.tunnel.enable",
+      "type": "java.lang.Boolean",
+      "description": "all.",
+      "sourceType": "i2f.springboot.ssh.tunnel.TunnelAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
