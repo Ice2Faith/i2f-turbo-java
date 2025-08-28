@@ -68,8 +68,8 @@ public class JdbcResolver {
 
     public static Connection getConnection(String driver,
                                            String url) throws SQLException {
-        loadDriver(driver);
-        return DriverManager.getConnection(url);
+        Properties properties=new Properties();
+        return getConnection(driver,url,properties);
     }
 
     public static void loadDriver(String driver) throws SQLException {
@@ -96,26 +96,47 @@ public class JdbcResolver {
                                            String url,
                                            String username,
                                            String password) throws SQLException {
-        loadDriver(driver);
-        return DriverManager.getConnection(url, username, password);
+        Properties properties = new Properties();
+        if (username != null) {
+            properties.put("user", username);
+        }
+        if (password != null) {
+            properties.put("password", password);
+        }
+        return getConnection(driver,url,properties);
     }
 
     public static Connection getConnection(String driver,
                                            String url,
                                            Properties properties) throws SQLException {
         loadDriver(driver);
+        try {
+            Driver dv = DriverManager.getDriver(url);
+        } catch (SQLException e) {
+            // 如果是这个异常，表示 DriverManager.getDriver 找不到合适的驱动
+            // 此时有可能是因为， DriverManager 内部检查 ClassLoader 不通过导致的
+            // 但是，这种情况下，有可能通过SPI是能够拿到合适的驱动的
+            // 因此，这里就进行预检，进行兼容
+            if("08001".equals(e.getSQLState())) {
+                ServiceLoader<Driver> drivers = ServiceLoader.load(Driver.class);
+                for (Driver item : drivers) {
+                    if (item.acceptsURL(url)) {
+                        return item.connect(url, properties);
+                    }
+                }
+            }
+        }
         return DriverManager.getConnection(url, properties);
     }
 
     public static Connection getConnection(JdbcMeta meta) throws SQLException {
-        loadDriver(meta.getDriver());
         if (meta.getProperties() != null && !meta.getProperties().isEmpty()) {
-            return DriverManager.getConnection(meta.getUrl(), meta.getProperties());
+            return getConnection(meta.getDriver(),meta.getUrl(), meta.getProperties());
         }
         if (meta.getUsername() != null || meta.getPassword() != null) {
-            return DriverManager.getConnection(meta.getUrl(), meta.getUsername(), meta.getPassword());
+            return getConnection(meta.getDriver(),meta.getUrl(), meta.getUsername(), meta.getPassword());
         }
-        return DriverManager.getConnection(meta.getUrl());
+        return getConnection(meta.getDriver(),meta.getUrl());
     }
 
     public static Connection begin(Connection conn) throws SQLException {
