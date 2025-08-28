@@ -3,6 +3,7 @@ package i2f.extension.jedis;
 import i2f.extension.redis.api.IRedisClient;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.net.SocketTimeoutException;
@@ -24,6 +25,45 @@ public class JedisRedisClient implements IRedisClient {
 
     public JedisRedisClient(JedisPool pool) {
         this.pool = pool;
+    }
+
+    public JedisRedisClient(String prefix, JedisMeta meta) {
+        this.prefix = prefix;
+        this.pool = createPool(meta);
+    }
+
+    public JedisRedisClient(JedisMeta meta) {
+        this.pool = createPool(meta);
+    }
+
+    public static JedisPool createPool(JedisMeta meta) {
+        return createPool(null, meta);
+    }
+
+    public static JedisPool createPool(JedisPoolConfig poolConfig, JedisMeta meta) {
+        if (poolConfig == null) {
+            poolConfig = new JedisPoolConfig();
+            // 最大活跃连接数
+            poolConfig.setMaxTotal(100);
+            // 最大空闲连接数
+            poolConfig.setMaxIdle(5);
+            // 每次借用前测试连接有效性
+            poolConfig.setTestOnBorrow(true);
+            // 归还时测试连接有效性
+            poolConfig.setTestOnReturn(true);
+            // 创建时测试连接有效性
+            poolConfig.setTestOnCreate(true);
+            // 测试空闲链接的有效性
+            poolConfig.setTestWhileIdle(true);
+        }
+        JedisPool pool = new JedisPool(poolConfig,
+                meta.getHost(),
+                meta.getPort() <= 0 ? 6379 : meta.getPort(),
+                meta.getTimeout() <= 0 ? 3000 : meta.getTimeout(),
+                meta.getPassword(),
+                meta.getDatabase() < 0 ? 0 : meta.getDatabase(),
+                meta.isSsl());
+        return pool;
     }
 
     synchronized public Jedis getJedis() {
