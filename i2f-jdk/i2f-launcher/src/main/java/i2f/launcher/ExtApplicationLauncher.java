@@ -75,7 +75,7 @@ public class ExtApplicationLauncher {
         for (URL url : urls) {
             log("ext-resource: " + url);
         }
-        return new ExtClasspathClassLoader(urls.toArray(new URL[0]), this.getClass().getClassLoader());
+        return new ExtClasspathClassLoader(urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
     }
 
     public List<URL> getPathUrls(List<String> paths) {
