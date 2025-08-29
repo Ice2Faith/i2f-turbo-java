@@ -30,6 +30,9 @@ BOOL_FALSE=0
 # ##################################################################################################################
 # 常用配置区
 # ##################################################################################################################
+# 是否前台启动，如果前台启动将会占用终端，适用于容器中运行时启用
+# 必须是定义的BOOL常量
+ENABLE_FRONTEND_STARTUP=$BOOL_FALSE
 
 # Springboot 配置常见配置区
 # 是否开启Springboot配置
@@ -47,6 +50,12 @@ SPRING_APPLICATION_NAME=
 # 应用的根日志级别重定义
 # 有值/非空则使用
 SPRING_LOGGING_LEVEL_ROOT=info
+# 应用配置文件路径，可用于加载外部的配置文件
+# 有值/非空则使用
+SPRING_CONFIG_LOCATION=
+# 应用配置文件路径，可用于加载额外的配置文件
+# 有值/非空则使用
+SPRING_CONFIG_ADDITIONAL_LOCATION=
 
 # logback 配置区
 # 是否开启Logback配置
@@ -368,6 +377,12 @@ function prepareSpringCfg(){
     if [[ -n "${SPRING_LOGGING_LEVEL_ROOT}" ]]; then
       JVM_OPTS="${JVM_OPTS} -Dlogging.level.root=${SPRING_LOGGING_LEVEL_ROOT}"
     fi
+    if [[ -n "${SPRING_CONFIG_LOCATION}" ]]; then
+      JVM_OPTS="${JVM_OPTS} -Dspring.config.location=${SPRING_CONFIG_LOCATION}"
+    fi
+    if [[ -n "${SPRING_CONFIG_ADDITIONAL_LOCATION}" ]]; then
+      JVM_OPTS="${JVM_OPTS} -Dspring.config.additional-location=${SPRING_CONFIG_ADDITIONAL_LOCATION}"
+    fi
 }
 # 准备logback的启动参数
 function prepareLogbackCfg() {
@@ -550,10 +565,18 @@ function start() {
   mkdir -p ${LOG_DIR}
 
   if [ $ENABLE_LOGBACK_CFG == $BOOL_TRUE ];then
-    nohup $JAVA_PATH -jar  $JVM_OPTS $JarName > /dev/null 2>&1 & echo $! > $PID_FILE
+    if [ $ENABLE_FRONTEND_STARTUP == $BOOL_TRUE ];then
+      nohup $JAVA_PATH -jar  $JVM_OPTS $JarName > /dev/null 2>&1 & echo $! > $PID_FILE
+    else
+      $JAVA_PATH -jar  $JVM_OPTS $JarName > /dev/null 2>&1 echo $! > $PID_FILE
+    fi
     echo -e "\033[0;34m logback \033[0m start ..."
   else
-    nohup $JAVA_PATH -jar  $JVM_OPTS $JarName > $LOG_FILE 2>&1 & echo $! > $PID_FILE
+    if [ $ENABLE_FRONTEND_STARTUP == $BOOL_TRUE ];then
+      nohup $JAVA_PATH -jar  $JVM_OPTS $JarName > $LOG_FILE 2>&1 & echo $! > $PID_FILE
+    else
+      $JAVA_PATH -jar  $JVM_OPTS $JarName > $LOG_FILE 2>&1 echo $! > $PID_FILE
+    fi
     echo -e "\033[0;34m sysout \033[0m start ..."
   fi
 
