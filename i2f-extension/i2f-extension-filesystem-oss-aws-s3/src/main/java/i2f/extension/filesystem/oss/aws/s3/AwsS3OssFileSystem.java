@@ -1,33 +1,37 @@
-package i2f.extension.filesystem.oss.aliyun;
+package i2f.extension.filesystem.oss.aws.s3;
 
 
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.model.*;
-import i2f.extension.oss.aliyun.AliyunOssMeta;
-import i2f.extension.oss.aliyun.AliyunOssUtil;
+import i2f.extension.oss.aws.s3.AwsS3OssMeta;
+import i2f.extension.oss.aws.s3.AwsS3OssUtil;
 import i2f.io.filesystem.IFile;
 import i2f.io.filesystem.abs.AbsFileSystem;
 import i2f.io.stream.StreamUtil;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class AliyunOssFileSystem extends AbsFileSystem {
-    private AliyunOssMeta meta;
-    private OSS client;
+public class AwsS3OssFileSystem extends AbsFileSystem {
+    private AwsS3OssMeta meta;
+    protected S3Client client;
 
-    public AliyunOssFileSystem(AliyunOssMeta meta) {
+    public AwsS3OssFileSystem(AwsS3OssMeta meta) {
         this.meta = meta;
         this.client = getClient();
     }
 
-    public AliyunOssFileSystem(OSS client) {
+    public AwsS3OssFileSystem(S3Client client) {
         this.client = client;
     }
 
-    public OSS getClient() {
+
+    public S3Client getClient() {
         if (this.client == null) {
-            this.client = AliyunOssUtil.getClient(this.meta);
+            this.client = AwsS3OssUtil.getClient(this.meta);
         }
         return client;
     }
@@ -70,7 +74,7 @@ public class AliyunOssFileSystem extends AbsFileSystem {
 
     @Override
     public IFile getFile(String path) {
-        return new AliyunOssFile(this, path);
+        return new AwsS3OssFile(this, path);
     }
 
     @Override
@@ -86,16 +90,31 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
             try {
-                return getClient().doesBucketExist(pair.getKey());
+                GetBucketPolicyStatusResponse resp = getClient().getBucketPolicyStatus(e -> {
+                    e.bucket(pair.getKey());
+                });
+                if (resp.sdkHttpResponse().isSuccessful()) {
+                    PolicyStatus policyStatus = resp.policyStatus();
+                    if (policyStatus != null) {
+                        return true;
+                    }
+                }
+                return false;
             } catch (Throwable e) {
 
             }
         } else {
-            ObjectListing listing = getClient().listObjects(pair.getKey(), pair.getValue());
-            List<OSSObjectSummary> iter = listing.getObjectSummaries();
-            for (OSSObjectSummary item : iter) {
+            ListObjectsResponse resp = getClient().listObjects(e -> {
+                e.bucket(pair.getKey())
+                        .prefix(pair.getValue());
+            });
+            if (resp == null) {
+                return false;
+            }
+            List<S3Object> contents = resp.contents();
+            for (S3Object item : contents) {
                 try {
-                    String name = item.getKey();
+                    String name = item.key();
                     if (name.endsWith(pathSeparator())) {
                         name = name.substring(0, name.length() - pathSeparator().length());
                     }
@@ -118,7 +137,11 @@ public class AliyunOssFileSystem extends AbsFileSystem {
             return false;
         }
         try {
-            return getClient().doesObjectExist(pair.getKey(), pair.getValue());
+            ResponseInputStream<GetObjectResponse> resp = getClient().getObject(e -> {
+                e.bucket(pair.getKey())
+                        .key(pair.getValue());
+            });
+            return resp != null && resp.response() != null;
         } catch (Throwable e) {
 
         }
@@ -132,15 +155,23 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         }
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
-            try {
-                return getClient().doesBucketExist(pair.getKey());
-            } catch (Throwable e) {
-
+            GetBucketPolicyStatusResponse resp = getClient().getBucketPolicyStatus(e -> {
+                e.bucket(pair.getKey());
+            });
+            if (resp.sdkHttpResponse().isSuccessful()) {
+                PolicyStatus policyStatus = resp.policyStatus();
+                if (policyStatus != null) {
+                    return true;
+                }
             }
-        } else {
-            return getClient().doesObjectExist(pair.getKey(), pair.getValue());
-        }
 
+        } else {
+            ResponseInputStream<GetObjectResponse> resp = getClient().getObject(e -> {
+                e.bucket(pair.getKey())
+                        .key(pair.getValue());
+            });
+            return resp != null && resp.response() != null;
+        }
         return false;
     }
 
@@ -149,20 +180,24 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         String subPath = ensureWithPathSeparator(pair.getValue());
         List<IFile> ret = new ArrayList<>();
-        String nextMarker = null;
-        ObjectListing listing = null;
+        ListObjectsResponse resp = null;
+        AtomicReference<String> nextMarker = new AtomicReference<>(null);
         do {
-            listing = getClient().listObjects(pair.getKey(), subPath);
-            List<OSSObjectSummary> iter = listing.getObjectSummaries();
-            for (OSSObjectSummary item : iter) {
-                try {
-                    String name = item.getKey();
-                    ret.add(getFile(pair.getKey(), name));
-                } catch (Throwable e) {
-                }
+            resp = getClient().listObjects(e -> {
+                e.bucket(pair.getKey())
+                        .prefix(subPath)
+                        .marker(nextMarker.get());
+            });
+            if (resp == null) {
+                break;
             }
-            nextMarker = listing.getNextMarker();
-        } while (listing.isTruncated());
+            List<S3Object> contents = resp.contents();
+            for (S3Object item : contents) {
+                ret.add(getFile(pair.getKey(), item.key()));
+            }
+            nextMarker.set(resp.nextMarker());
+        } while (resp != null && resp.isTruncated());
+
         return ret;
     }
 
@@ -171,7 +206,10 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (isFile(path)) {
             try {
-                getClient().deleteObject(pair.getKey(), pair.getValue());
+                getClient().deleteObject(e -> {
+                    e.bucket(pair.getKey())
+                            .key(pair.getValue());
+                });
             } catch (Throwable e) {
                 throw new IllegalStateException("delete failure:" + e.getMessage(), e);
             }
@@ -179,7 +217,9 @@ public class AliyunOssFileSystem extends AbsFileSystem {
             if (pair.getKey() != null && !"".equals(pair.getKey())) {
                 if (pair.getValue() == null || "".equals(pair.getValue())) {
                     try {
-                        getClient().deleteBucket(pair.getKey());
+                        getClient().deleteBucket(e -> {
+                            e.bucket(pair.getKey());
+                        });
                     } catch (Exception e) {
                         throw new IllegalStateException("delete failure:" + e.getMessage(), e);
                     }
@@ -198,9 +238,11 @@ public class AliyunOssFileSystem extends AbsFileSystem {
     public InputStream getInputStream(String path) throws IOException {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
-
-            OSSObject obj = getClient().getObject(pair.getKey(), pair.getValue());
-            return obj.getObjectContent();
+            ResponseInputStream<GetObjectResponse> resp = getClient().getObject(e -> {
+                e.bucket(pair.getKey())
+                        .key(pair.getValue());
+            });
+            return resp;
         } catch (Throwable e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -219,12 +261,12 @@ public class AliyunOssFileSystem extends AbsFileSystem {
                 FileInputStream fis = null;
                 try {
                     fis = new FileInputStream(tmpFile);
-                    ObjectMetadata metadata = new ObjectMetadata();
-                    metadata.setContentLength(tmpFile.length());
 
-                    PutObjectRequest req = new PutObjectRequest(pair.getKey(), pair.getValue(), fis, metadata);
-                    PutObjectResult resp = getClient().putObject(req);
-
+                    PutObjectResponse resp = getClient().putObject(e -> {
+                        e.bucket(pair.getKey())
+                                .key(pair.getValue())
+                                .contentLength(tmpFile.length());
+                    }, RequestBody.fromFile(tmpFile));
                 } catch (Throwable e) {
                     throw new IOException(e.getMessage(), e);
                 } finally {
@@ -246,20 +288,38 @@ public class AliyunOssFileSystem extends AbsFileSystem {
     public void mkdir(String path) {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
-            boolean exBkt = getClient().doesBucketExist(pair.getKey());
+            boolean exBkt = false;
+            try {
+                GetBucketPolicyStatusResponse resp = getClient().getBucketPolicyStatus(e -> {
+                    e.bucket(pair.getKey());
+                });
+                if (resp.sdkHttpResponse().isSuccessful()) {
+                    PolicyStatus policyStatus = resp.policyStatus();
+                    if (policyStatus != null) {
+                        exBkt = true;
+                    }
+                }
+            } catch (Throwable e) {
+
+            }
             if (!exBkt) {
-                getClient().createBucket(pair.getKey());
+                CreateBucketResponse resp = getClient().createBucket(e -> {
+                    e.bucket(pair.getKey())
+                            .createBucketConfiguration(
+                                    CreateBucketConfiguration.builder()
+                                            .build()
+                            );
+                });
             }
             if (pair.getKey() != null) {
                 String holdName = combinePath(pair.getValue(), ".ignore");
 
-                ObjectMetadata metadata = new ObjectMetadata();
-                metadata.setContentLength(0);
-                metadata.setContentType("application/octet-stream");
-
-                PutObjectRequest req = new PutObjectRequest(pair.getKey(), holdName, new ByteArrayInputStream(new byte[0]), metadata);
-                PutObjectResult resp = getClient().putObject(req);
-
+                PutObjectResponse resp = getClient().putObject(e -> {
+                    e.bucket(pair.getKey())
+                            .key(holdName)
+                            .contentLength(0L)
+                            .contentType("application/octet-stream");
+                }, RequestBody.fromInputStream(new ByteArrayInputStream(new byte[0]), 0L));
             }
         } catch (Throwable e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -270,9 +330,11 @@ public class AliyunOssFileSystem extends AbsFileSystem {
     public void store(String path, InputStream is) throws IOException {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
-            ObjectMetadata metadata = new ObjectMetadata();
-            PutObjectRequest req = new PutObjectRequest(pair.getKey(), pair.getValue(), is, metadata);
-            PutObjectResult resp = getClient().putObject(req);
+            PutObjectResponse resp = getClient().putObject(e -> {
+                e.bucket(pair.getKey())
+                        .key(pair.getValue())
+                        .contentLength(0L);
+            }, RequestBody.fromInputStream(is, -1L));
 
         } catch (Throwable e) {
             throw new IOException(e.getMessage(), e);
@@ -284,8 +346,10 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         InputStream is = null;
         try {
-            OSSObject obj = getClient().getObject(pair.getKey(), pair.getValue());
-            is = obj.getObjectContent();
+            is = getClient().getObject(e -> {
+                e.bucket(pair.getKey())
+                        .key(pair.getValue());
+            });
 
             StreamUtil.streamCopy(is, os);
         } catch (Throwable e) {
@@ -301,8 +365,14 @@ public class AliyunOssFileSystem extends AbsFileSystem {
     public long length(String path) {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
-            ObjectMetadata metadata = getClient().getObjectMetadata(pair.getKey(), pair.getValue());
-            return metadata.getContentLength();
+            ResponseInputStream<GetObjectResponse> resp = getClient().getObject(e -> {
+                e.bucket(pair.getKey())
+                        .key(pair.getValue());
+            });
+
+            int ret = resp.available();
+            resp.close();
+            return ret;
         } catch (Throwable e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -313,7 +383,12 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         Map.Entry<String, String> srcPair = splitPathAsBucketAndObjectName(srcPath);
         Map.Entry<String, String> dstPair = splitPathAsBucketAndObjectName(dstPath);
         try {
-            getClient().copyObject(srcPair.getKey(), srcPair.getValue(), dstPair.getKey(), dstPair.getValue());
+            getClient().copyObject(e -> {
+                e.sourceBucket(srcPair.getKey())
+                        .sourceKey(srcPair.getValue())
+                        .destinationBucket(dstPair.getKey())
+                        .destinationKey(dstPair.getValue());
+            });
         } catch (Throwable e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -324,12 +399,18 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         Map.Entry<String, String> srcPair = splitPathAsBucketAndObjectName(srcPath);
         Map.Entry<String, String> dstPair = splitPathAsBucketAndObjectName(dstPath);
         try {
-            if (Objects.equals(srcPair.getKey(), dstPair.getKey())) {
-                getClient().renameObject(srcPair.getKey(), srcPair.getValue(), dstPair.getValue());
-            } else {
-                getClient().copyObject(srcPair.getKey(), srcPair.getValue(), dstPair.getKey(), dstPair.getValue());
-                getClient().deleteObject(srcPair.getKey(), srcPair.getValue());
-            }
+
+            getClient().copyObject(e -> {
+                e.sourceBucket(srcPair.getKey())
+                        .sourceKey(srcPair.getValue())
+                        .destinationBucket(dstPair.getKey())
+                        .destinationKey(dstPair.getValue());
+            });
+
+            getClient().deleteObject(e -> {
+                e.bucket(srcPair.getKey())
+                        .key(srcPair.getValue());
+            });
         } catch (Throwable e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
