@@ -1,6 +1,7 @@
 package i2f.database.dialect;
 
 import i2f.database.dialect.impl.dialect.*;
+import i2f.database.type.DatabaseDialectMapping;
 import i2f.database.type.DatabaseType;
 
 import java.util.ServiceLoader;
@@ -12,6 +13,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class DatabaseObject2SqlStringifiers {
     public static final CopyOnWriteArrayList<DatabaseObject2SqlStringifier> stringifiers = new CopyOnWriteArrayList<>();
+
+    public static final DatabaseDialectMapping DIALECT_MAPPING = new DatabaseDialectMapping() {
+        @Override
+        public void init() {
+            redirect(DatabaseType.DM, DatabaseType.ORACLE);
+        }
+    };
 
     static {
         ServiceLoader<DatabaseObject2SqlStringifier> iter = ServiceLoader.load(DatabaseObject2SqlStringifier.class);
@@ -30,6 +38,7 @@ public class DatabaseObject2SqlStringifiers {
     }
 
     public static DatabaseObject2SqlStringifier getStringifier(DatabaseType databaseType) {
+        databaseType = DIALECT_MAPPING.dialectOf(databaseType);
         for (DatabaseObject2SqlStringifier item : stringifiers) {
             if (item.support(databaseType)) {
                 return item;

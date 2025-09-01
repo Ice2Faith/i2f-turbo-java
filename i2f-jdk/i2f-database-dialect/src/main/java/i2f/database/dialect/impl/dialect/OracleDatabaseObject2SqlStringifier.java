@@ -19,8 +19,7 @@ public class OracleDatabaseObject2SqlStringifier extends AbsDatabaseObject2SqlSt
     public boolean support(DatabaseType databaseType) {
         return Arrays.asList(
                 DatabaseType.ORACLE,
-                DatabaseType.ORACLE_12C,
-                DatabaseType.DM
+                DatabaseType.ORACLE_12C
         ).contains(databaseType);
     }
 
