@@ -19,11 +19,29 @@ import java.sql.SQLException;
 public class BindSqlWrappers {
 
     public static PageBindSql page(Connection conn, BindSql sql, ApiOffsetSize page) throws SQLException {
-        return page(DatabaseType.typeOfConnection(conn), sql, page);
+        PageBindSql ret = new PageBindSql();
+        IPageWrapper pageWrapper = PageWrappers.wrapper(conn);
+        BindSql pageSql = pageWrapper.apply(sql, page);
+        ICountWrapper countWrapper = CountWrappers.wrapper(conn);
+        BindSql countSql = countWrapper.apply(sql);
+
+        ret.setPage(page);
+        ret.setPageSql(pageSql);
+        ret.setCountSql(countSql);
+        return ret;
     }
 
     public static PageBindSql page(String jdbcUrl, BindSql sql, ApiOffsetSize page) {
-        return page(DatabaseType.typeOfJdbcUrl(jdbcUrl), sql, page);
+        PageBindSql ret = new PageBindSql();
+        IPageWrapper pageWrapper = PageWrappers.wrapper(jdbcUrl);
+        BindSql pageSql = pageWrapper.apply(sql, page);
+        ICountWrapper countWrapper = CountWrappers.wrapper(jdbcUrl);
+        BindSql countSql = countWrapper.apply(sql);
+
+        ret.setPage(page);
+        ret.setPageSql(pageSql);
+        ret.setCountSql(countSql);
+        return ret;
     }
 
     public static PageBindSql page(DatabaseType type, BindSql sql, ApiOffsetSize page) {

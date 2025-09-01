@@ -2,6 +2,7 @@ package i2f.bindsql.stringify;
 
 import i2f.bindsql.stringify.impl.WrappedBindSqlStringifier;
 import i2f.database.dialect.impl.dialect.*;
+import i2f.database.type.DatabaseDialectMapping;
 import i2f.database.type.DatabaseType;
 
 import java.sql.Connection;
@@ -26,14 +27,28 @@ public class BindSqlStringifiers {
     public static final WrappedBindSqlStringifier SQL_SERVER = new WrappedBindSqlStringifier(SqlServerDatabaseObject2SqlStringifier.INSTANCE);
     public static final WrappedBindSqlStringifier HIVE = new WrappedBindSqlStringifier(HiveDatabaseObject2SqlStringifier.INSTANCE);
 
+    public static DatabaseDialectMapping DIALECT_MAPPING = new DatabaseDialectMapping() {
+        @Override
+        public void init() {
+            redirect(DatabaseType.MARIADB, DatabaseType.MYSQL);
+            redirect(DatabaseType.GBASE, DatabaseType.MYSQL);
+            redirect(DatabaseType.OSCAR, DatabaseType.MYSQL);
+            redirect(DatabaseType.XU_GU, DatabaseType.MYSQL);
+            redirect(DatabaseType.CLICK_HOUSE, DatabaseType.MYSQL);
+            redirect(DatabaseType.OCEAN_BASE, DatabaseType.MYSQL);
+            redirect(DatabaseType.KINGBASE_ES, DatabaseType.MYSQL);
+            redirect(DatabaseType.DM, DatabaseType.ORACLE);
+            redirect(DatabaseType.ORACLE_12C, DatabaseType.ORACLE);
+        }
+    };
 
     public static BindSqlStringifier of(Connection conn) throws SQLException {
-        DatabaseType type = DatabaseType.typeOfConnection(conn);
+        DatabaseType type = DIALECT_MAPPING.dialectOf(conn);
         return of(type);
     }
 
     public static BindSqlStringifier of(String jdbcUrl) {
-        DatabaseType type = DatabaseType.typeOfJdbcUrl(jdbcUrl);
+        DatabaseType type = DIALECT_MAPPING.dialectOf(jdbcUrl);
         return of(type);
     }
 
@@ -44,41 +59,20 @@ public class BindSqlStringifiers {
                 return item;
             }
         }
+        type = DIALECT_MAPPING.dialectOf(type);
         switch (type) {
             case MYSQL:
                 return MYSQL;
             case ORACLE:
                 return ORACLE;
-            case MARIADB:
-                return MYSQL;
-            case GBASE:
-                return MYSQL;
-            case OSCAR:
-                return MYSQL;
-            case XU_GU:
-                return MYSQL;
-            case CLICK_HOUSE:
-                return MYSQL;
-            case OCEAN_BASE:
-                return MYSQL;
             case POSTGRE_SQL:
                 return POSTGRE;
             case H2:
                 return H2;
-            case SQLITE:
-                return DEFAULT;
-            case HSQL:
-                return DEFAULT;
-            case KINGBASE_ES:
-                return MYSQL;
             case PHOENIX:
                 return PHOENIX;
-            case DM:
-                return ORACLE;
             case GAUSS:
                 return GUASS;
-            case ORACLE_12C:
-                return ORACLE;
             case DB2:
                 return DB2;
             case SQL_SERVER:

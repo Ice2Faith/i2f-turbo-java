@@ -160,7 +160,7 @@ public class MybatisPaginationProxyHandler implements IProxyInvocationHandler {
 
         }
 
-        DatabaseType databaseType = DatabaseType.typeOfConnection(connection);
+        DatabaseType databaseType = PageWrappers.DIALECT_MAPPING.dialectOf(connection);
 
         return databaseType;
     }

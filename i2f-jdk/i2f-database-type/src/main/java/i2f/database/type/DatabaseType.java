@@ -4,7 +4,9 @@ package i2f.database.type;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.WeakHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 
 /**
@@ -195,6 +197,15 @@ public enum DatabaseType {
         this.desc = desc;
     }
 
+    public static final CopyOnWriteArraySet<DatabaseTypeDetector> DETECTORS = new CopyOnWriteArraySet<>();
+
+    static {
+        ServiceLoader<DatabaseTypeDetector> list = ServiceLoader.load(DatabaseTypeDetector.class);
+        for (DatabaseTypeDetector item : list) {
+            DETECTORS.add(item);
+        }
+    }
+
     /**
      * 获取数据库类型
      *
@@ -209,6 +220,19 @@ public enum DatabaseType {
         return OTHER;
     }
 
+    public static boolean isValid(DatabaseType type) {
+        if (type == null) {
+            return false;
+        }
+        if (type == DatabaseType.ERROR) {
+            return false;
+        }
+        if (type == DatabaseType.OTHER) {
+            return false;
+        }
+        return true;
+    }
+
     protected static final Map<Connection, DatabaseType> TYPE_MAP = new WeakHashMap<>();
 
     public static DatabaseType typeOfConnection(Connection conn) throws SQLException {
@@ -221,7 +245,13 @@ public enum DatabaseType {
             if (type != null) {
                 return type;
             }
-            type = typeOfJdbcUrl(conn.getMetaData().getURL());
+            for (DatabaseTypeDetector detector : DETECTORS) {
+                type = detector.detect(conn);
+                if (isValid(type)) {
+                    break;
+                }
+            }
+            type = typeOfJdbcUrl(conn.getMetaData().getURL(), false);
             TYPE_MAP.put(conn, type);
             return type;
         }
@@ -234,9 +264,24 @@ public enum DatabaseType {
      * @return ignore
      */
     public static DatabaseType typeOfJdbcUrl(String jdbcUrl) {
+        return typeOfJdbcUrl(jdbcUrl, true);
+    }
+
+    protected static DatabaseType typeOfJdbcUrl(String jdbcUrl, boolean spi) {
         if (jdbcUrl == null || jdbcUrl.trim().isEmpty()) {
             //"Error: The jdbcUrl is Null, Cannot read database type"
             return DatabaseType.ERROR;
+        }
+        if (spi) {
+            for (DatabaseTypeDetector detector : DETECTORS) {
+                if (detector == null) {
+                    continue;
+                }
+                DatabaseType type = detector.detect(jdbcUrl);
+                if (isValid(type)) {
+                    return type;
+                }
+            }
         }
         String url = jdbcUrl.toLowerCase();
         if (url.contains(":mysql:") || url.contains(":cobar:")) {
