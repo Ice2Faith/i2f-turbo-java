@@ -918,7 +918,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     public List<String> detectDatabaseType(Connection conn) throws Exception {
         List<String> ret = new ArrayList<>();
-        DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+        DatabaseType databaseType = getDatabaseType(conn);
         if (databaseType == null) {
             return ret;
         }
@@ -1416,7 +1416,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         try {
             Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            DatabaseType databaseType = getDatabaseType(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             if (isDebug()) {
                 logDebug("sql-query-list:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
@@ -1440,13 +1440,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
+    public DatabaseType getDatabaseType(Connection conn) throws SQLException {
+        return DatabaseType.typeOfConnection(conn);
+    }
+
     @Override
     public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
         try {
             Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            DatabaseType databaseType = getDatabaseType(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             if (isDebug()) {
                 logDebug("sql-query-object:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
@@ -1476,7 +1480,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         try {
             Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            DatabaseType databaseType = getDatabaseType(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             if (isDebug()) {
                 logDebug("sql-query-row:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
@@ -1506,7 +1510,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         try {
             Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            DatabaseType databaseType = getDatabaseType(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             if (isDebug()) {
                 logDebug("sql-update:datasource=" + datasource + " near [" + traceLocation() + "] " + " \n\tbql:\n" + bql);
@@ -1534,7 +1538,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public BindSql sqlWrapPage(String datasource, BindSql bql, ApiOffsetSize page, Map<String, Object> params) {
         try {
             Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            DatabaseType databaseType = getDatabaseType(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             if (page != null && (page.getOffset() != null || page.getSize() != null)) {
                 IPageWrapper wrapper = PageWrappers.wrapper(conn);
@@ -1558,7 +1562,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public BindSql sqlWrapCount(String datasource, BindSql bql, Map<String, Object> params) {
         try {
             Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            DatabaseType databaseType = getDatabaseType(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             ICountWrapper wrapper = CountWrappers.wrapper(databaseType);
             bql = wrapper.apply(bql);
@@ -1581,7 +1585,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         try {
             Connection conn = getConnection(datasource, params);
             Map.Entry<String, BindSql> entry = getDialectSqlScript(dialectScriptList, conn, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            DatabaseType databaseType = getDatabaseType(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             BindSql bql = entry.getValue();
             if (page != null && (page.getOffset() != null || page.getSize() != null)) {
@@ -1661,7 +1665,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         try {
             Connection conn = getConnection(datasource, params);
-            DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
+            DatabaseType databaseType = getDatabaseType(conn);
             visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
             if (page != null && (page.getOffset() != null || page.getSize() != null)) {
                 IPageWrapper wrapper = PageWrappers.wrapper(conn);

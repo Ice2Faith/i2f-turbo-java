@@ -1,11 +1,13 @@
 package i2f.bindsql.page;
 
 import i2f.bindsql.page.impl.*;
+import i2f.database.type.DatabaseDialectMapping;
 import i2f.database.type.DatabaseType;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ServiceLoader;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Ice2Faith
@@ -14,18 +16,51 @@ import java.util.ServiceLoader;
  */
 public class PageWrappers {
     public static final ThreadLocal<IPageWrapper> WRAPPER_HOLDER = new ThreadLocal<>();
-    public static final ThreadLocal<DatabaseType> DATABASE_HOLDER = new ThreadLocal<>();
+    public static final CopyOnWriteArraySet<IPageWrapperProvider> PROVIDERS = new CopyOnWriteArraySet<>();
+    public static DatabaseDialectMapping DIALECT_MAPPING = new DatabaseDialectMapping() {
+        @Override
+        public void init() {
+            redirect(DatabaseType.MARIADB, DatabaseType.MYSQL);
+            redirect(DatabaseType.GBASE, DatabaseType.MYSQL);
+            redirect(DatabaseType.OSCAR, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.XU_GU, DatabaseType.MYSQL);
+            redirect(DatabaseType.CLICK_HOUSE, DatabaseType.MYSQL);
+            redirect(DatabaseType.OCEAN_BASE, DatabaseType.MYSQL);
+            redirect(DatabaseType.H2, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.SQLITE, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.HSQL, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.KINGBASE_ES, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.PHOENIX, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.DM, DatabaseType.ORACLE);
+            redirect(DatabaseType.GAUSS, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.ORACLE_12C, DatabaseType.SQL_SERVER);
+            redirect(DatabaseType.FIREBIRD, DatabaseType.SQL_SERVER);
+            redirect(DatabaseType.HighGo, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.Hive, DatabaseType.MYSQL);
+            redirect(DatabaseType.YaShanDB, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.TDengine, DatabaseType.MYSQL);
+            redirect(DatabaseType.HerdDB, DatabaseType.MYSQL);
+            redirect(DatabaseType.Snowflake, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.Databricks, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.RedShift, DatabaseType.POSTGRE_SQL);
+            redirect(DatabaseType.Trino, DatabaseType.POSTGRE_SQL);
+        }
+    };
+
+    static {
+        ServiceLoader<IPageWrapperProvider> list = ServiceLoader.load(IPageWrapperProvider.class);
+        for (IPageWrapperProvider item : list) {
+            PROVIDERS.add(item);
+        }
+    }
+
 
     public static IPageWrapper wrapper(Connection conn) throws SQLException {
         IPageWrapper ret = WRAPPER_HOLDER.get();
         if (ret != null) {
             return ret;
         }
-        DatabaseType type = DATABASE_HOLDER.get();
-        if (type != null) {
-            return wrapper(type);
-        }
-        type = DatabaseType.typeOfConnection(conn);
+        DatabaseType type = DIALECT_MAPPING.dialectOf(conn);
         return wrapper(type);
     }
 
@@ -34,11 +69,7 @@ public class PageWrappers {
         if (ret != null) {
             return ret;
         }
-        DatabaseType type = DATABASE_HOLDER.get();
-        if (type != null) {
-            return wrapper(type);
-        }
-        type = DatabaseType.typeOfJdbcUrl(jdbcUrl);
+        DatabaseType type = DIALECT_MAPPING.dialectOf(jdbcUrl);
         return wrapper(type);
     }
 
@@ -47,9 +78,8 @@ public class PageWrappers {
         if (ret != null) {
             return ret;
         }
-        ServiceLoader<IPageWrapperProvider> list = ServiceLoader.load(IPageWrapperProvider.class);
-        for (IPageWrapperProvider item : list) {
-            if (list == null) {
+        for (IPageWrapperProvider item : PROVIDERS) {
+            if (item == null) {
                 continue;
             }
             if (item.support(type)) {
@@ -59,71 +89,26 @@ public class PageWrappers {
                 }
             }
         }
+
+        type = DIALECT_MAPPING.dialectOf(type);
+
         switch (type) {
             case MYSQL:
                 return MysqlPageWrapper.INSTANCE;
             case ORACLE:
                 return OraclePageWrapper.INSTANCE;
-            case MARIADB:
-                return MysqlPageWrapper.INSTANCE;
-            case GBASE:
-                return MysqlPageWrapper.INSTANCE;
-            case OSCAR:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case XU_GU:
-                return MysqlPageWrapper.INSTANCE;
-            case CLICK_HOUSE:
-                return MysqlPageWrapper.INSTANCE;
-            case OCEAN_BASE:
-                return MysqlPageWrapper.INSTANCE;
             case POSTGRE_SQL:
                 return PostgreSqlPageWrapper.INSTANCE;
-            case H2:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case SQLITE:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case HSQL:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case KINGBASE_ES:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case PHOENIX:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case DM:
-                return OraclePageWrapper.INSTANCE;
-            case GAUSS:
-                return OraclePageWrapper.INSTANCE;
-            case ORACLE_12C:
-                return SqlServerPageWrapper.INSTANCE;
             case DB2:
                 return Db2PageWrapper.INSTANCE;
             case SQL_SERVER:
                 return SqlServerPageWrapper.INSTANCE;
-            case FIREBIRD:
-                return SqlServerPageWrapper.INSTANCE;
-            case HighGo:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case Hive:
-                return MysqlPageWrapper.INSTANCE;
-            case YaShanDB:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case TDengine:
-                return MysqlPageWrapper.INSTANCE;
-            case HerdDB:
-                return MysqlPageWrapper.INSTANCE;
             case CirroData:
                 return CirroDataPageWrapper.INSTANCE;
             case IbmAs400:
                 return IbmAs400PageWrapper.INSTANCE;
             case Informix:
                 return InformixPageWrapper.INSTANCE;
-            case Snowflake:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case Databricks:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case RedShift:
-                return PostgreSqlPageWrapper.INSTANCE;
-            case Trino:
-                return PostgreSqlPageWrapper.INSTANCE;
             default:
                 throw new UnsupportedOperationException("un-support auto page route db type");
         }
