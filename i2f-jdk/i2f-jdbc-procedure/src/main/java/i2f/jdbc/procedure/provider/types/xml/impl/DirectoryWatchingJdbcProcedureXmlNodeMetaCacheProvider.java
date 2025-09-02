@@ -243,7 +243,29 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
         }
         Map<String, XmlNode> ret = new HashMap<>();
         try {
-            XmlNode node = JdbcProcedureParser.parse(file);
+            XmlNode node=null;
+            Exception lasEx=null;
+            // nio 通知发生的时候，有可能文件还没有落盘完成
+            // 如果直接读取可能会出现错误，因此延迟重试几次，确保落盘完成
+            for (int i = 0; i < 3; i++) {
+                try {
+                    node = JdbcProcedureParser.parse(file);
+                    break;
+                } catch (Exception e) {
+                    lasEx=e;
+                }
+                try{
+                    Thread.sleep(300);
+                }catch(Exception e){
+                }
+            }
+            if(node==null){
+                if(lasEx!=null) {
+                    throw lasEx;
+                }else{
+                    throw new IllegalStateException("read xml file error: "+file.getName());
+                }
+            }
             if (needNotifyChange) {
                 System.out.println(XProc4jConsts.NAME + " watching xml-node file change parsed:" + file.getAbsolutePath());
             }
