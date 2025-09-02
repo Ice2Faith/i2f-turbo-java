@@ -1,6 +1,5 @@
 package i2f.jdbc.procedure.reportor;
 
-import groovy.lang.GroovyShell;
 import i2f.compiler.MemoryCompiler;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.ognl.OgnlUtil;
@@ -12,18 +11,17 @@ import i2f.jdbc.procedure.node.impl.LangEvalJavaNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.lru.LruList;
 import i2f.match.regex.RegexPattens;
+import groovy.lang.GroovyShell;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -34,6 +32,19 @@ import java.util.function.Consumer;
 public class GrammarReporter {
     protected static ExecutorService pool = new ForkJoinPool(Math.min(16, Runtime.getRuntime().availableProcessors()) * 2);
     protected static ExecutorService exprPool = new ForkJoinPool(Math.min(32, Runtime.getRuntime().availableProcessors()) * 2);
+
+    // 双单引号('')，可能是错误的转义
+    public static final AtomicBoolean checkDoubleSingleQuote=new AtomicBoolean(false);
+    // 双管道符(||)，可能是错误使用
+    public static final AtomicBoolean checkDoublePipe=new AtomicBoolean(false);
+    // 括号、引号，占位符的花括号等封闭语义符号是否封闭，没封闭可能是错误
+    public static final AtomicBoolean checkEnclosedChar=new AtomicBoolean(false);
+    // 对调用其他过程时，未接受返回值的情况，可能导致返回值丢失
+    public static final AtomicBoolean checkCallResult=new AtomicBoolean(false);
+    // 入参值为空白字符串时，可能是忘记写入参
+    public static final AtomicBoolean checkBlankAttribute=new AtomicBoolean(false);
+    // 是否允许调用子过程时忽略出参，虽然大多数情况下忽略也可以，但是如果既是入参也是出参的时候，如果忽略可能导致缺少入参
+    public static final AtomicBoolean checkOutputArgument=new AtomicBoolean(false);
 
     public static void reportGrammar(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
         if (metaMap == null) {
@@ -112,15 +123,22 @@ public class GrammarReporter {
                 warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + e.getMessage());
             }
         }
-        String[] INVALID_STR_ARR = {
-                "''",
-//                "||",
+        List<String> INVALID_STR_ARR = new ArrayList<>(Arrays.asList(
                 "{{",
                 "}}",
                 "{}",
+                "}{",
                 "$}",
+                "#}",
                 "$ {",
-        };
+                "# {"
+                ));
+        if(checkDoubleSingleQuote.get()){
+            INVALID_STR_ARR.add("''");
+        }
+        if(checkDoublePipe.get()){
+            INVALID_STR_ARR.add("||");
+        }
         if (Arrays.asList(
                 TagConsts.SQL_QUERY_LIST,
                 TagConsts.SQL_QUERY_ROW,
@@ -194,7 +212,7 @@ public class GrammarReporter {
                 if (params != null && !params.isEmpty()) {
                     reportFlag = false;
                 }
-                if (reportFlag) {
+                if (reportFlag && checkCallResult.get()) {
                     if (reportCount != null) {
                         reportCount.incrementAndGet();
                     }
@@ -212,6 +230,16 @@ public class GrammarReporter {
                 }
             }
             ProcedureMeta meta = metaMap.get(refid);
+            if(meta==null){
+                String subId="."+refid;
+                for (Map.Entry<String, ProcedureMeta> entry : metaMap.entrySet()) {
+                    String key = entry.getKey();
+                    if(key.endsWith(subId)){
+                        meta=entry.getValue();
+                        break;
+                    }
+                }
+            }
             if (meta != null) {
                 List<String> arguments = meta.getArguments();
                 for (String argument : arguments) {
@@ -223,6 +251,15 @@ public class GrammarReporter {
                     ).contains(argument)) {
                         continue;
                     }
+
+                    if (!checkOutputArgument.get()) {
+                        List<String> features = meta.getArgumentFeatures().get(argument);
+                        if (features != null && !features.isEmpty()) {
+                            if (features.contains(FeatureConsts.OUT)) {
+                                continue;
+                            }
+                        }
+                    }
                     if (!attrMap.containsKey(argument)) {
                         if (reportCount != null) {
                             reportCount.incrementAndGet();
@@ -231,10 +268,20 @@ public class GrammarReporter {
                     }
                 }
             } else if (refid != null && !refid.isEmpty()) {
-                if (reportCount != null) {
-                    reportCount.incrementAndGet();
+                boolean reportFlag=true;
+                List<String> features = node.getAttrFeatureMap().get(AttrConsts.REFID);
+                if(features!=null && !features.isEmpty()){
+                    String feature = features.get(0);
+                    if(!FeatureConsts.STRING.equals(feature)){
+                        reportFlag=false;
+                    }
                 }
-                warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: call node missing target refid [" + refid + "]");
+                if(reportFlag) {
+                    if (reportCount != null) {
+                        reportCount.incrementAndGet();
+                    }
+                    warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: call node missing target refid [" + refid + "]");
+                }
             }
         }
 
@@ -267,6 +314,9 @@ public class GrammarReporter {
     }
 
     public static void reportEnclosedCharString(String body, XmlNode node, Consumer<String> warnPoster) {
+        if(!checkEnclosedChar.get()){
+            return;
+        }
         body = body.trim();
         if (Arrays.asList("(", "[", "{", "'", "\"").contains(body)) {
             return;
@@ -368,7 +418,7 @@ public class GrammarReporter {
                         reportFlag = false;
                     }
                 }
-                if (reportFlag) {
+                if (reportFlag && checkBlankAttribute.get()) {
                     warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, check tag [" + node.getTagName() + "] " + ", at " + XmlNode.getNodeLocation(node) + " for attribute: [" + attr + "]" + node.getAttrFeatureMap().get(attr) + " maybe wrong blank value [" + test + "]");
                 }
             }
