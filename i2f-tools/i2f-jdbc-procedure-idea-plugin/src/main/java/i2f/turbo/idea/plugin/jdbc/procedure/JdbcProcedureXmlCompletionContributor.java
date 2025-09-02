@@ -432,7 +432,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 Set<String> completions = lastVariables.updateAndGet((v) -> {
                     Set<String> ret = new LinkedHashSet<>();
                     long cts = System.currentTimeMillis();
-                    if ((cts - lastUpdateMillSeconds.get()) < 500) {
+                    if ((cts - lastUpdateMillSeconds.get()) < 1200) {
                         return v;
                     }
                     getXmlFileVariables(root, position, ret);
@@ -465,7 +465,8 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
             XmlAttribute attribute = (XmlAttribute) elem;
             String name = attribute.getName();
             // result 出来的变量
-            if (Arrays.asList("result", "item").contains(name)) {
+            if (Arrays.asList("result", "item").contains(name)
+            ||(name!=null && name.contains("result."))) {
                 String value = attribute.getValue();
                 if (value != null && value.matches("[a-zA-Z0-9\\-_\\$\\.]+")) {
                     variables.add(value.trim());
