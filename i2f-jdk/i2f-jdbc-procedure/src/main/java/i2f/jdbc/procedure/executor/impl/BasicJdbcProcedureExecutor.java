@@ -1484,7 +1484,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     }
 
     public void fillDatabaseDialectType(Map<String, Object> params, Connection conn) throws SQLException {
-        DatabaseType databaseType = getDialectType(conn);
+        DatabaseType databaseType = getDatabaseType(conn);
         visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
     }
 
