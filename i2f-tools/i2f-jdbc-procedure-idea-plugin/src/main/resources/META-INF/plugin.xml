@@ -59,6 +59,11 @@
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
 
+        <completion.contributor
+                language="VTL"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
+
         <!-- 注册文件类型 -->
         <fileType name="TinyScript"
                   implementationClass="i2f.turbo.idea.plugin.tinyscript.TinyScriptFileType"
@@ -80,6 +85,10 @@
         <colorSettingsPage
                 implementation="i2f.turbo.idea.plugin.tinyscript.lang.highlighter.TinyScriptColorSettingsPage"/>
 
+        <completion.contributor
+                language="TinyScript"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
         <!-- 定义引用跳转定义 -->
         <!--        <psi.referenceContributor language="XML"-->
         <!--                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlPsiReferenceContributor"/>-->
