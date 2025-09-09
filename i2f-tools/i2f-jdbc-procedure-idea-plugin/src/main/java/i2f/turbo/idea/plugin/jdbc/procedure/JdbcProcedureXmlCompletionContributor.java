@@ -16,6 +16,7 @@ import com.intellij.psi.xml.XmlTokenType;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexMatchItem;
+import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptTokenType;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.JDBCType;
@@ -42,6 +43,17 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
         completion(parameters, result);
     }
 
+    public static PsiElement getRootElement(PsiElement element){
+        if(element==null){
+            return null;
+        }
+        PsiElement parent = element.getParent();
+        if(parent==null){
+            return element;
+        }
+        return getRootElement(parent);
+    }
+
     public void completion(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
 //        log.warn("xml-attr completion trigger:" + parameters);
         Project project = parameters.getOriginalFile().getProject();
@@ -55,6 +67,114 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 //        log.warn("xml-attr completion-1:" + position.getClass());
 
         IElementType type = node.getElementType();
+        if("com.intellij.velocity.java.reference.VtlPsiReferenceExpression".equals(type.getClass().getName())){
+            log.warn("xml-vtl:" + type.getClass()+", "+position.getText());
+            // 控制遍历频率，避免CPU过高
+            Set<String> completions = lastVariables.updateAndGet((v) -> {
+                Set<String> ret = new LinkedHashSet<>();
+                long cts = System.currentTimeMillis();
+                if ((cts - lastUpdateMillSeconds.get()) < 1200) {
+                    return v;
+                }
+                getXmlFileVariables(lastVarElem.get(), lastVarStopElem.get(), ret);
+                lastUpdateMillSeconds.set(cts);
+                return ret;
+            });
+            log.warn("xml-vtl-completions:" + completions);
+            if (completions != null) {
+                for (String attr : completions) {
+                    result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
+                }
+                return;
+            }
+        }
+        if(type instanceof TinyScriptTokenType){
+            TinyScriptTokenType tokenType=(TinyScriptTokenType) type;
+            String name = tokenType.getDebugName();
+            log.warn("xml-ts:" + tokenType.getDebugName() + "," + type.getClass()+", "+position.getText());
+            if("NAMING".equalsIgnoreCase(name)){
+                // 控制遍历频率，避免CPU过高
+                Set<String> completions = lastVariables.updateAndGet((v) -> {
+                    Set<String> ret = new LinkedHashSet<>();
+                    long cts = System.currentTimeMillis();
+                    if ((cts - lastUpdateMillSeconds.get()) < 1200) {
+                        return v;
+                    }
+                    getXmlFileVariables(lastVarElem.get(), lastVarStopElem.get(), ret);
+                    lastUpdateMillSeconds.set(cts);
+                    return ret;
+                });
+                log.warn("xml-ts-completions:" + completions);
+                if (completions != null) {
+                    for (String attr : completions) {
+                        result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
+                    }
+                    return;
+                }
+            } else if("REF_EXPRESS".equalsIgnoreCase(name)){
+                // 控制遍历频率，避免CPU过高
+                Set<String> completions = lastVariables.updateAndGet((v) -> {
+                    Set<String> ret = new LinkedHashSet<>();
+                    long cts = System.currentTimeMillis();
+                    if ((cts - lastUpdateMillSeconds.get()) < 1200) {
+                        return v;
+                    }
+                    getXmlFileVariables(lastVarElem.get(), lastVarStopElem.get(), ret);
+                    lastUpdateMillSeconds.set(cts);
+                    return ret;
+                });
+                String text = position.getText();
+                String[] arr = text.split("[\n;]", 2);
+                text=arr[0].trim();
+                log.warn("xml-ts-ref:[" + text+"]");
+                String prefix="";
+                String suffix="";
+                if(text.startsWith("$!{")){
+                    prefix="$!{";
+                    suffix="}";
+                }else if(text.startsWith("#!{")){
+                    prefix="#!{";
+                    suffix="}";
+                }else if(text.startsWith("${")){
+                    prefix="${";
+                    suffix="}";
+                }else if(text.startsWith("#{")){
+                    prefix="#{";
+                    suffix="}";
+                }
+                if(text.endsWith("}")){
+                    suffix="";
+                }
+                if (completions != null) {
+                    for (String attr : completions) {
+                        result.addElement(LookupElementBuilder.create(prefix+attr+suffix).withIcon(XProc4jConsts.ICON));
+                    }
+                    return;
+                }
+            } else if("$".equalsIgnoreCase(name)){
+                // 控制遍历频率，避免CPU过高
+                Set<String> completions = lastVariables.updateAndGet((v) -> {
+                    Set<String> ret = new LinkedHashSet<>();
+                    long cts = System.currentTimeMillis();
+                    if ((cts - lastUpdateMillSeconds.get()) < 1200) {
+                        return v;
+                    }
+                    getXmlFileVariables(lastVarElem.get(), lastVarStopElem.get(), ret);
+                    lastUpdateMillSeconds.set(cts);
+                    return ret;
+                });
+
+                String prefix="${";
+                String suffix="}";
+                if (completions != null) {
+                    for (String attr : completions) {
+                        result.addElement(LookupElementBuilder.create(prefix+attr+suffix).withIcon(XProc4jConsts.ICON));
+                    }
+                    return;
+                }
+            }
+        }
+
         if (type == XmlTokenType.XML_NAME) {
 
 
@@ -435,6 +555,8 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                     if ((cts - lastUpdateMillSeconds.get()) < 1200) {
                         return v;
                     }
+                    lastVarElem.set(root);
+                    lastVarStopElem.set(position);
                     getXmlFileVariables(root, position, ret);
                     lastUpdateMillSeconds.set(cts);
                     return ret;
@@ -453,6 +575,8 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 
     public static final AtomicLong lastUpdateMillSeconds = new AtomicLong(0);
     public static final AtomicReference<Set<String>> lastVariables = new AtomicReference<>();
+    public static final AtomicReference<PsiElement> lastVarElem=new AtomicReference<>();
+    public static final AtomicReference<PsiElement> lastVarStopElem=new AtomicReference<>();
 
     public static void getXmlFileVariables(PsiElement elem, PsiElement stopElem, Set<String> variables) {
         if (elem == null) {
