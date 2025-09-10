@@ -33,7 +33,8 @@ intellij {
         "com.intellij.java",
         "com.intellij.database",
         "org.intellij.intelliLang",
-//        "com.intellij.modules.xml"
+//        "com.intellij.modules.xml",
+        "com.intellij.velocity"
         )
     )
 
