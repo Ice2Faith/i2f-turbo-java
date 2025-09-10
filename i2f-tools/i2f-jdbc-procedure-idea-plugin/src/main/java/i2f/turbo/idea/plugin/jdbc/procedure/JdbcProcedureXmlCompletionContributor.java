@@ -8,11 +8,19 @@ import com.intellij.lang.ASTNode;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
+import com.intellij.psi.xml.XmlToken;
 import com.intellij.psi.xml.XmlTokenType;
+import com.intellij.sql.psi.SqlBinaryExpression;
+import com.intellij.sql.psi.SqlIdentifier;
+import com.intellij.sql.psi.SqlParameter;
+import com.intellij.sql.psi.SqlTokenType;
+import com.intellij.velocity.java.reference.VtlPsiReferenceExpression;
+import com.intellij.velocity.psi.*;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexMatchItem;
@@ -40,18 +48,33 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
 //        log.warn("xml-attr completion override");
-        completion(parameters, result);
+        try {
+            completion(parameters, result);
+        } catch (Throwable e) {
+            log.warn("xml-completion error:"+e.getClass()+" : "+e.getMessage());
+        }
     }
 
-    public static PsiElement getRootElement(PsiElement element){
+    public static<T extends PsiElement> T getRootElement(PsiElement element,Class<T> searchType){
+        AtomicReference<T> ref=new AtomicReference<>();
+        getRootElementNext(element,searchType,ref);
+        return ref.get();
+    }
+    protected static<T extends PsiElement> void getRootElementNext(PsiElement element,Class<T> searchType,AtomicReference<T> result){
         if(element==null){
-            return null;
+            return;
+        }
+        if(searchType!=null){
+            if(searchType.isAssignableFrom(element.getClass())){
+                result.set((T)element);
+            }
+        }else{
+            result.set((T)element);
         }
         PsiElement parent = element.getParent();
-        if(parent==null){
-            return element;
+        if(parent!=null) {
+            getRootElementNext(parent,searchType,result);
         }
-        return getRootElement(parent);
     }
 
     public void completion(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
@@ -59,7 +82,6 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
         Project project = parameters.getOriginalFile().getProject();
         PsiElement position = parameters.getPosition();
 //        log.warn("xml-attr completion-0:" + position.getClass());
-
         ASTNode node = position.getNode();
         if (node == null) {
             return;
@@ -67,31 +89,73 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 //        log.warn("xml-attr completion-1:" + position.getClass());
 
         IElementType type = node.getElementType();
-        if("com.intellij.velocity.java.reference.VtlPsiReferenceExpression".equals(type.getClass().getName())){
-            log.warn("xml-vtl:" + type.getClass()+", "+position.getText());
-            // 控制遍历频率，避免CPU过高
-            Set<String> completions = lastVariables.updateAndGet((v) -> {
-                Set<String> ret = new LinkedHashSet<>();
-                long cts = System.currentTimeMillis();
-                if ((cts - lastUpdateMillSeconds.get()) < 1200) {
-                    return v;
+
+//        log.warn("xml-elem:" + type.getClass()+", "+position.getText());
+
+        if(type instanceof SqlTokenType) {
+            SqlTokenType tokenType = (SqlTokenType) type;
+            String name = tokenType.getDebugName();
+//            log.warn("xml-sql-state: completionType=" + parameters.getCompletionType()
+//                    +", invocationCount="+parameters.getInvocationCount()
+//                    +", autoPopup="+parameters.isAutoPopup()
+//                    +", extendCompletion="+parameters.isExtendedCompletion()
+//                    +", isStopped="+result.isStopped());
+//            log.warn("xml-sql-param:" + tokenType.getDebugName() + "," + type.getClass() + ", [" + position.getText()+"]");
+            if ("SQL_IDENT".equalsIgnoreCase(name)) {
+                PsiElement parent = position.getParent();
+//                log.warn("xml-sql-parent:" +  parent.getClass() + ", " + parent.getText());
+                if(parent instanceof SqlParameter){
+                    // 控制遍历频率，避免CPU过高
+                    Set<String> completions = lastVariables.updateAndGet((v) -> {
+                        Set<String> ret = new LinkedHashSet<>();
+                        long cts = System.currentTimeMillis();
+                        if ((cts - lastUpdateMillSeconds.get()) < 1200) {
+                            return v;
+                        }
+                        getXmlFileVariables(lastVarElem.updateAndGet(e->{
+                            if(e!=null){
+                                return e;
+                            }
+                            XmlTag xRet = getRootElement(position, XmlTag.class);
+                            if(xRet!=null){
+                                return xRet;
+                            }
+                            return position.getContainingFile();
+                        }), lastVarStopElem.get(), ret);
+                        lastUpdateMillSeconds.set(cts);
+                        return ret;
+                    });
+//                    log.warn("xml-sql-param-completions:" + completions);
+                    if (completions != null &&!completions.isEmpty()) {
+                        boolean withPrefix=false;
+                        PsiElement pparent = parent.getParent();
+                        if(pparent!=null){
+                            if(pparent instanceof SqlIdentifier){
+                                withPrefix=true;
+                            }
+                            if(pparent instanceof SqlBinaryExpression){
+                                withPrefix=false;
+                            }
+                        }
+                        for (String attr : completions) {
+                            result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
+                            if(withPrefix){
+                                result.addElement(LookupElementBuilder.create("${"+attr).withIcon(XProc4jConsts.ICON));
+                                result.addElement(LookupElementBuilder.create("#{"+attr).withIcon(XProc4jConsts.ICON));
+                                result.addElement(LookupElementBuilder.create("$!{"+attr).withIcon(XProc4jConsts.ICON));
+                                result.addElement(LookupElementBuilder.create("#!{"+attr).withIcon(XProc4jConsts.ICON));
+                            }
+                        }
+                        result.stopHere();
+                        return;
+                    }
                 }
-                getXmlFileVariables(lastVarElem.get(), lastVarStopElem.get(), ret);
-                lastUpdateMillSeconds.set(cts);
-                return ret;
-            });
-            log.warn("xml-vtl-completions:" + completions);
-            if (completions != null) {
-                for (String attr : completions) {
-                    result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
-                }
-                return;
             }
         }
         if(type instanceof TinyScriptTokenType){
             TinyScriptTokenType tokenType=(TinyScriptTokenType) type;
             String name = tokenType.getDebugName();
-            log.warn("xml-ts:" + tokenType.getDebugName() + "," + type.getClass()+", "+position.getText());
+//            log.warn("xml-ts:" + tokenType.getDebugName() + "," + type.getClass()+", "+position.getText());
             if("NAMING".equalsIgnoreCase(name)){
                 // 控制遍历频率，避免CPU过高
                 Set<String> completions = lastVariables.updateAndGet((v) -> {
@@ -100,12 +164,21 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                     if ((cts - lastUpdateMillSeconds.get()) < 1200) {
                         return v;
                     }
-                    getXmlFileVariables(lastVarElem.get(), lastVarStopElem.get(), ret);
+                    getXmlFileVariables(lastVarElem.updateAndGet(e->{
+                        if(e!=null){
+                            return e;
+                        }
+                        XmlTag xRet = getRootElement(position, XmlTag.class);
+                        if(xRet!=null){
+                            return xRet;
+                        }
+                        return position.getContainingFile();
+                    }), lastVarStopElem.get(), ret);
                     lastUpdateMillSeconds.set(cts);
                     return ret;
                 });
-                log.warn("xml-ts-completions:" + completions);
-                if (completions != null) {
+//                log.warn("xml-ts-completions:" + completions);
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -119,14 +192,23 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                     if ((cts - lastUpdateMillSeconds.get()) < 1200) {
                         return v;
                     }
-                    getXmlFileVariables(lastVarElem.get(), lastVarStopElem.get(), ret);
+                    getXmlFileVariables(lastVarElem.updateAndGet(e->{
+                        if(e!=null){
+                            return e;
+                        }
+                        XmlTag xRet = getRootElement(position, XmlTag.class);
+                        if(xRet!=null){
+                            return xRet;
+                        }
+                        return position.getContainingFile();
+                    }), lastVarStopElem.get(), ret);
                     lastUpdateMillSeconds.set(cts);
                     return ret;
                 });
                 String text = position.getText();
                 String[] arr = text.split("[\n;]", 2);
                 text=arr[0].trim();
-                log.warn("xml-ts-ref:[" + text+"]");
+//                log.warn("xml-ts-ref:[" + text+"]");
                 String prefix="";
                 String suffix="";
                 if(text.startsWith("$!{")){
@@ -145,7 +227,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 if(text.endsWith("}")){
                     suffix="";
                 }
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(prefix+attr+suffix).withIcon(XProc4jConsts.ICON));
                     }
@@ -166,7 +248,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 
                 String prefix="${";
                 String suffix="}";
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(prefix+attr+suffix).withIcon(XProc4jConsts.ICON));
                     }
@@ -210,7 +292,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         completions.addAll(JdbcProcedureProjectMetaHolder.FEATURES_CAUSE);
                         completions.addAll(JdbcProcedureProjectMetaHolder.FEATURES);
                     }
-                    if (completions != null) {
+                    if (completions != null && !completions.isEmpty()) {
                         for (String attr : completions) {
                             result.addElement(LookupElementBuilder.create(name + attr).withIcon(XProc4jConsts.ICON));
                         }
@@ -261,7 +343,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                             String completionItem = completionAllArgs.toString();
                             result.addElement(LookupElementBuilder.create(completionItem).withIcon(XProc4jConsts.ICON).withItemTextItalic(true));
                         }
-                        if (completions != null) {
+                        if (completions != null && !completions.isEmpty()) {
                             for (String attr : completions) {
                                 result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                             }
@@ -295,7 +377,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         ProcedureMeta value = entry.getValue();
                         completions.add(value.getName());
                     }
-                    if (completions != null) {
+                    if (completions != null && !completions.isEmpty()) {
                         for (String attr : completions) {
                             result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                         }
@@ -319,7 +401,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         "NEVER",
                         "NESTED"
                 ));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -339,7 +421,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         "TRANSACTION_REPEATABLE_READ",
                         "TRANSACTION_SERIALIZABLE"
                 ));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -363,7 +445,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         "true",
                         "false"
                 ));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -387,7 +469,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         "HOURS",
                         "DAYS"
                 ));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -404,7 +486,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 JDBCType[] arr = JDBCType.class.getEnumConstants();
                 List<String> completions = new ArrayList<>();
                 completions.addAll(Arrays.stream(arr).map(e -> e.name()).collect(Collectors.toList()));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -430,7 +512,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         "yyyyMMdd",
                         "yyyyMM"
                 ));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -469,7 +551,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         "size",
                         "length"
                 ));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -492,7 +574,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         "dm",
                         "postgre"
                 ));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -513,7 +595,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         "main",
                         "slave"
                 ));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -536,7 +618,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         "double",
                         "float"
                 ));
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }
@@ -544,7 +626,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
             } else {
-                XmlTag root = PsiTreeUtil.getTopmostParentOfType(position, XmlTag.class);
+                XmlTag root = getRootElement(position, XmlTag.class);
                 if (root == null) {
                     return;
                 }
@@ -562,7 +644,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                     return ret;
                 });
 
-                if (completions != null) {
+                if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
                     }

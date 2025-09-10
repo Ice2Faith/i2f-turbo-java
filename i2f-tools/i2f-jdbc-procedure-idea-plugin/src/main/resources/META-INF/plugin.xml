@@ -34,6 +34,7 @@
     <depends>com.intellij.java</depends>
     <depends>com.intellij.database</depends>
     <depends>com.intellij.modules.xml</depends>
+    <depends>com.intellij.velocity</depends>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
@@ -60,9 +61,19 @@
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
 
         <completion.contributor
-                language="VTL"
+                language="TinyScript"
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
+
+        <completion.contributor
+                language="SQL"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
+
+        <!--<completion.contributor
+                language="VTL"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>-->
 
         <!-- 注册文件类型 -->
         <fileType name="TinyScript"
@@ -85,10 +96,6 @@
         <colorSettingsPage
                 implementation="i2f.turbo.idea.plugin.tinyscript.lang.highlighter.TinyScriptColorSettingsPage"/>
 
-        <completion.contributor
-                language="TinyScript"
-                order="first"
-                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
         <!-- 定义引用跳转定义 -->
         <!--        <psi.referenceContributor language="XML"-->
         <!--                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlPsiReferenceContributor"/>-->
