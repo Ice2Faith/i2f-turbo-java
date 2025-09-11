@@ -559,6 +559,58 @@ public class ContextFunctions {
         }
     }
 
+    public static String lpad(Object str,int len,Object padStr){
+        if(str==null){
+            return null;
+        }
+        String mainStr=String.valueOf(str);
+        if(mainStr.length()>=len){
+            return mainStr;
+        }
+        if(padStr==null){
+            padStr=" ";
+        }
+        String padStr2=String.valueOf(padStr);
+        if(padStr2.isEmpty()){
+            padStr2=" ";
+        }
+        int diffLen=len-mainStr.length();
+        int j=0;
+        StringBuilder builder=new StringBuilder();
+        while(diffLen>0){
+            builder.append(padStr2.charAt(j));
+            j=(j+1)%padStr2.length();
+            diffLen--;
+        }
+        return builder+mainStr;
+    }
+
+    public static String rpad(Object str,int len,Object padStr){
+        if(str==null){
+            return null;
+        }
+        String mainStr=String.valueOf(str);
+        if(mainStr.length()>=len){
+            return mainStr;
+        }
+        if(padStr==null){
+            padStr=" ";
+        }
+        String padStr2=String.valueOf(padStr);
+        if(padStr2.isEmpty()){
+            padStr2=" ";
+        }
+        int diffLen=len-mainStr.length();
+        int j=0;
+        StringBuilder builder=new StringBuilder();
+        while(diffLen>0){
+            builder.append(padStr2.charAt(j));
+            j=(j+1)%padStr2.length();
+            diffLen--;
+        }
+        return mainStr+builder;
+    }
+
     public static Object nvl(Object v1, Object v2) {
         return ifnull(v1, v2);
     }
