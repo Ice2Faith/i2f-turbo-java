@@ -109,8 +109,11 @@
                 implementation="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jLiveTemplatesProvider"/>
 
         <!-- 定义XML行的refid跳转标记，点击跳转到定义 -->
-        <dom.fileMetaData implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureDomFileDescription" rootTagName="procedure" />
-        <codeInsight.lineMarkerProvider language="XML" implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider" />
+        <dom.fileMetaData rootTagName="procedure"
+                          implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureDomFileDescription"  />
+        <codeInsight.lineMarkerProvider
+                language="XML"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider" />
     </extensions>
 
 

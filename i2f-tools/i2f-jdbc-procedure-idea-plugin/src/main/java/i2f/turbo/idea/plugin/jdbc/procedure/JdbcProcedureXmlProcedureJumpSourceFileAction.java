@@ -1,5 +1,6 @@
 package i2f.turbo.idea.plugin.jdbc.procedure;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -139,5 +140,10 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         if (file == null) {
             event.getPresentation().setEnabledAndVisible(false);
         }
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 }

@@ -3,8 +3,7 @@ package i2f.turbo.idea.plugin.jdbc.procedure;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider;
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtilCore;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -25,8 +24,11 @@ import java.util.*;
  * @desc
  */
 public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerProvider {
+    public static final Logger log = Logger.getInstance(JdbcProcedureRefidLineMarkerProvider.class);
+
     @Override
     protected void collectNavigationMarkers(@NotNull PsiElement element, @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result) {
+//        log.warn("xml-line-marker-elem:" + element.getClass());
         if (!(element instanceof XmlAttribute)) {
             return;
         }
@@ -35,12 +37,14 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
         if (psiFile == null) {
             return;
         }
+//        log.warn("xml-line-marker-file:" + psiFile.getClass());
         if (!(psiFile instanceof XmlFile)) {
             return;
         }
 
         XmlAttribute xmlAttribute = (XmlAttribute) element;
         String attrName = xmlAttribute.getName();
+//        log.warn("xml-line-marker-attr:" + attrName);
         if (!"refid".equals(attrName)) {
             return;
         }
@@ -59,6 +63,7 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
         }
 
         String refid = xmlAttribute.getValue();
+//        log.warn("xml-line-marker-refid:" + refid);
         if (refid == null || refid.isEmpty()) {
             return;
         }
@@ -68,15 +73,16 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
 
         List<PsiElement> targets = new ArrayList<>();
 
-        GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
-        Module module = ModuleUtilCore.findModuleForPsiElement(element);
-        if (null != module) {
-            scope = GlobalSearchScope.moduleScope(module);
-        }
+        GlobalSearchScope scope = GlobalSearchScope.everythingScope(project);
+//        Module module = ModuleUtilCore.findModuleForPsiElement(element);
+//        if (null != module) {
+//            scope = GlobalSearchScope.moduleScope(module);
+//        }
 
         DomService domService = DomService.getInstance();
         List<DomFileElement<ProcedureDomElement>> xmlFiles = domService.getFileElements(ProcedureDomElement.class, project, scope);
 
+//        log.warn("xml-line-marker-files:" + xmlFiles.size());
         if (xmlFiles == null || xmlFiles.isEmpty()) {
             return;
         }

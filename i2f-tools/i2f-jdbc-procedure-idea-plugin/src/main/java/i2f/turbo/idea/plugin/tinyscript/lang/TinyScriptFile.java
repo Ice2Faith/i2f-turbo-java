@@ -1,7 +1,6 @@
 package i2f.turbo.idea.plugin.tinyscript.lang;
 
 import com.intellij.extapi.psi.PsiFileBase;
-import com.intellij.lang.Language;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.FileViewProvider;
 import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
