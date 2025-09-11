@@ -20,12 +20,7 @@
 - xproc4j-preview.gif
 ![xproc4j-preview.gif](res%2Fxproc4j-preview.gif)
 
-## IDEA 视频效果
-
-[xproc4j-preview.mp4](res%2Fxproc4j-preview.mp4)
-
-
-
+  
 ## IDEA 整体效果图
 ![xproc4j-preview-all.png](res%2Fxproc4j-preview-all.png)
 
