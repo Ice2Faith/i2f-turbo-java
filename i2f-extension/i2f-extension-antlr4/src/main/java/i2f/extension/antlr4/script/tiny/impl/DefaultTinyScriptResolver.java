@@ -8,6 +8,8 @@ import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -513,71 +515,99 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return map;
     }
 
+    @Data
+    @NoArgsConstructor
+    public static class DefaultFunctionCallContext{
+        protected TinyScriptResolver resolver;
+        protected Object context;
+        protected Object target;
+        protected boolean isNew;
+        protected String naming;
+        protected List<Object> argList;
+    }
+
+    public Object getFunctionCallContext(Object context, Object target, boolean isNew, String naming, List<Object> argList){
+        DefaultFunctionCallContext ret=new DefaultFunctionCallContext();
+        ret.setResolver(this);
+        ret.setContext(context);
+        ret.setTarget(target);
+        ret.setNew(isNew);
+        ret.setNaming(naming);
+        ret.setArgList(argList);
+        return ret;
+    }
+
     @Override
     public Object resolveFunctionCall(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
-        if (!isNew) {
-            // 处理内建函数 Object eval(String|Appendable|CharSequence|StringBuilder|StringBuffer script)
-            if ("eval".equals(naming)) {
-                if (argList.size() == 1) {
-                    Object arg = argList.get(0);
-                    if (arg == null || arg instanceof CharSequence || arg instanceof Appendable) {
-                        String script = String.valueOf(arg);
-                        return TinyScript.script(script, context, this);
+        Object functionCallContext = getFunctionCallContext(context, target, isNew, naming, argList);
+        TinyScript.FUNCTION_CALL_CONTEXT.set(functionCallContext);
+        try {
+            if (!isNew) {
+                // 处理内建函数 Object eval(String|Appendable|CharSequence|StringBuilder|StringBuffer script)
+                if ("eval".equals(naming)) {
+                    if (argList.size() == 1) {
+                        Object arg = argList.get(0);
+                        if (arg == null || arg instanceof CharSequence || arg instanceof Appendable) {
+                            String script = String.valueOf(arg);
+                            return TinyScript.script(script, context, this);
+                        }
                     }
                 }
             }
-        }
-        Reference<Object> ref = beforeFunctionCall(context, target, isNew, naming, argList);
-        if (ref != null) {
-            if (ref.isValue()) {
-                return ref.get();
-            }
-        }
-        List<Object> args = new ArrayList<>();
-        for (Object arg : argList) {
-            if (arg instanceof TinyScriptVisitorImpl.NamingBindArgument) {
-                TinyScriptVisitorImpl.NamingBindArgument val = (TinyScriptVisitorImpl.NamingBindArgument) arg;
-                args.add(val.value);
-            } else {
-                args.add(arg);
-            }
-        }
-        Class<?> clazz = null;
-        if (isNew) {
-            clazz = loadClass(context, naming);
-        } else {
-            if (target == null) {
-                int idx = naming.lastIndexOf(".");
-                if (idx > 0) {
-                    String className = naming.substring(0, idx);
-                    naming = naming.substring(idx + 1);
-                    clazz = loadClass(context, className);
+            Reference<Object> ref = beforeFunctionCall(context, target, isNew, naming, argList);
+            if (ref != null) {
+                if (ref.isValue()) {
+                    return ref.get();
                 }
-            } else {
-                clazz = target.getClass();
             }
-        }
-        if (isNew) {
-            Object ret = ReflectResolver.execNewInstance(clazz, args);
-            return ret;
-        } else {
-            String methodName = naming;
+            List<Object> args = new ArrayList<>();
+            for (Object arg : argList) {
+                if (arg instanceof TinyScriptVisitorImpl.NamingBindArgument) {
+                    TinyScriptVisitorImpl.NamingBindArgument val = (TinyScriptVisitorImpl.NamingBindArgument) arg;
+                    args.add(val.value);
+                } else {
+                    args.add(arg);
+                }
+            }
+            Class<?> clazz = null;
+            if (isNew) {
+                clazz = loadClass(context, naming);
+            } else {
+                if (target == null) {
+                    int idx = naming.lastIndexOf(".");
+                    if (idx > 0) {
+                        String className = naming.substring(0, idx);
+                        naming = naming.substring(idx + 1);
+                        clazz = loadClass(context, className);
+                    }
+                } else {
+                    clazz = target.getClass();
+                }
+            }
+            if (isNew) {
+                Object ret = ReflectResolver.execNewInstance(clazz, args);
+                return ret;
+            } else {
+                String methodName = naming;
 
-            if (clazz != null) {
-                Method method = ReflectResolver.matchExecMethod(clazz, methodName, args);
+                if (clazz != null) {
+                    Method method = ReflectResolver.matchExecMethod(clazz, methodName, args);
+                    if (method != null) {
+                        return ReflectResolver.execMethod(target, clazz, methodName, args);
+                    }
+                }
+
+                IMethod method = findMethod(context, methodName, args);
                 if (method != null) {
-                    return ReflectResolver.execMethod(target, clazz, methodName, args);
+                    Object ret = ReflectResolver.execMethod(target, method, args);
+                    return ret;
                 }
-            }
 
-            IMethod method = findMethod(context, methodName, args);
-            if (method != null) {
-                Object ret = ReflectResolver.execMethod(target, method, args);
+                Object ret = ReflectResolver.execMethod(target, clazz, methodName, args);
                 return ret;
             }
-
-            Object ret = ReflectResolver.execMethod(target, clazz, methodName, args);
-            return ret;
+        } finally {
+            TinyScript.FUNCTION_CALL_CONTEXT.remove();
         }
     }
 

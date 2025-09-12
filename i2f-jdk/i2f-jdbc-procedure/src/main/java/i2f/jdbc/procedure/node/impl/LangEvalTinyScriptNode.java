@@ -19,6 +19,8 @@ import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.lru.LruList;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -108,6 +110,8 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         return obj;
     }
 
+    @Data
+    @NoArgsConstructor
     public static class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
         protected JdbcProcedureExecutor executor;
         protected XmlNode node;
@@ -384,6 +388,28 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         @Override
         public Class<?> loadClass(Object context, String className) {
             return executor.loadClass(className);
+        }
+
+        @Data
+        @NoArgsConstructor
+        public static class ProcedureFunctionCallContext extends DefaultFunctionCallContext{
+            protected JdbcProcedureExecutor executor;
+            protected XmlNode node;
+
+        }
+
+        @Override
+        public Object getFunctionCallContext(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
+            ProcedureFunctionCallContext ret=new ProcedureFunctionCallContext();
+            ret.setResolver(this);
+            ret.setContext(context);
+            ret.setTarget(target);
+            ret.setNew(isNew);
+            ret.setNaming(naming);
+            ret.setArgList(argList);
+            ret.setExecutor(executor);
+            ret.setNode(node);
+            return ret;
         }
 
         @Override
