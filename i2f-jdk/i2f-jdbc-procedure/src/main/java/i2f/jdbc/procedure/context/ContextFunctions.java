@@ -97,6 +97,35 @@ public class ContextFunctions {
         return replacement;
     }
 
+    public static String env(String key) {
+        return System.getenv(key);
+    }
+
+    public static String jvm(String key) {
+        String prop = System.getProperty(key);
+        return prop;
+    }
+
+    public static void gc() {
+        System.gc();
+    }
+
+    public static void exit(int status) {
+        System.exit(status);
+    }
+
+    public static void yield() {
+        Thread.yield();
+    }
+
+    public static long thread_id() {
+        return Thread.currentThread().getId();
+    }
+
+    public static String thread_name() {
+        return Thread.currentThread().getName();
+    }
+
     public static boolean isnull(Object obj) {
         return obj == null;
     }
@@ -461,6 +490,10 @@ public class ContextFunctions {
         return "" + ch;
     }
 
+    public static int char_code(String str, int index) {
+        return str.charAt(index);
+    }
+
     public static String rtrim(String str) {
         return rtrim(str, null);
     }
@@ -559,56 +592,64 @@ public class ContextFunctions {
         }
     }
 
-    public static String lpad(Object str,int len,Object padStr){
-        if(str==null){
-            return null;
-        }
-        String mainStr=String.valueOf(str);
-        if(mainStr.length()>=len){
-            return mainStr;
-        }
-        if(padStr==null){
-            padStr=" ";
-        }
-        String padStr2=String.valueOf(padStr);
-        if(padStr2.isEmpty()){
-            padStr2=" ";
-        }
-        int diffLen=len-mainStr.length();
-        int j=0;
-        StringBuilder builder=new StringBuilder();
-        while(diffLen>0){
-            builder.append(padStr2.charAt(j));
-            j=(j+1)%padStr2.length();
-            diffLen--;
-        }
-        return builder+mainStr;
+    public static String lpad(Object str, int len) {
+        return lpad(str, len, null);
     }
 
-    public static String rpad(Object str,int len,Object padStr){
-        if(str==null){
+    public static String lpad(Object str, int len, Object padStr) {
+        if (str == null) {
             return null;
         }
-        String mainStr=String.valueOf(str);
-        if(mainStr.length()>=len){
+        String mainStr = String.valueOf(str);
+        if (mainStr.length() >= len) {
             return mainStr;
         }
-        if(padStr==null){
-            padStr=" ";
+        if (padStr == null) {
+            padStr = " ";
         }
-        String padStr2=String.valueOf(padStr);
-        if(padStr2.isEmpty()){
-            padStr2=" ";
+        String padStr2 = String.valueOf(padStr);
+        if (padStr2.isEmpty()) {
+            padStr2 = " ";
         }
-        int diffLen=len-mainStr.length();
-        int j=0;
-        StringBuilder builder=new StringBuilder();
-        while(diffLen>0){
+        int diffLen = len - mainStr.length();
+        int j = 0;
+        StringBuilder builder = new StringBuilder();
+        while (diffLen > 0) {
             builder.append(padStr2.charAt(j));
-            j=(j+1)%padStr2.length();
+            j = (j + 1) % padStr2.length();
             diffLen--;
         }
-        return mainStr+builder;
+        return builder + mainStr;
+    }
+
+    public static String rpad(Object str, int len) {
+        return rpad(str, len, null);
+    }
+
+    public static String rpad(Object str, int len, Object padStr) {
+        if (str == null) {
+            return null;
+        }
+        String mainStr = String.valueOf(str);
+        if (mainStr.length() >= len) {
+            return mainStr;
+        }
+        if (padStr == null) {
+            padStr = " ";
+        }
+        String padStr2 = String.valueOf(padStr);
+        if (padStr2.isEmpty()) {
+            padStr2 = " ";
+        }
+        int diffLen = len - mainStr.length();
+        int j = 0;
+        StringBuilder builder = new StringBuilder();
+        while (diffLen > 0) {
+            builder.append(padStr2.charAt(j));
+            j = (j + 1) % padStr2.length();
+            diffLen--;
+        }
+        return mainStr + builder;
     }
 
     public static Object nvl(Object v1, Object v2) {
@@ -822,12 +863,89 @@ public class ContextFunctions {
         return String.valueOf(obj);
     }
 
+    public static String to_string(Object obj) {
+        return to_char(obj, null);
+    }
+
+    public static String to_string(Object obj, String pattern) {
+        return to_char(obj, pattern);
+    }
+
+    public static String left(Object obj, int len) {
+        if (obj == null) {
+            return null;
+        }
+        String str = String.valueOf(obj);
+        if (len < 0) {
+            len = str.length() + len;
+        }
+        if (len >= str.length()) {
+            return str;
+        }
+        return str.substring(0, len);
+    }
+
+    public static String right(Object obj, int len) {
+        if (obj == null) {
+            return null;
+        }
+        String str = String.valueOf(obj);
+        if (len < 0) {
+            len = str.length() + len;
+        }
+        if (len >= str.length()) {
+            return str;
+        }
+        return str.substring(str.length() - len);
+    }
+
+    public static String uuid() {
+        return UUID.randomUUID().toString();
+    }
+
     public static Date sysdate() {
         return new Date(SystemClock.currentTimeMillis());
     }
 
     public static Date now() {
         return new Date(SystemClock.currentTimeMillis());
+    }
+
+    public static long timestamp() {
+        return SystemClock.currentTimeSeconds();
+    }
+
+    public static Date timestamp_to_date(Object ts) {
+        long lts = -1;
+        if (ts == null) {
+            return null;
+        }
+        if (ts instanceof Long) {
+            lts = (Long) ts;
+        } else {
+            lts = Long.parseLong(String.valueOf(ts));
+        }
+        return new Date(lts * 1000);
+    }
+
+    public static Long date_to_timestamp(Object date) {
+        if (date == null) {
+            return null;
+        }
+        Date dt = (Date) ObjectConvertor.tryConvertAsType(date, Date.class);
+        return dt.getTime() / 1000;
+    }
+
+    public static String reverse(Object str) {
+        if (str == null) {
+            return null;
+        }
+        String s = String.valueOf(str);
+        StringBuilder builder = new StringBuilder();
+        for (int i = s.length() - 1; i >= 0; i--) {
+            builder.append(s.charAt(i));
+        }
+        return builder.toString();
     }
 
     public static Object add_months(Object date, long interval) {
@@ -1052,6 +1170,34 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(time, date.getClass());
     }
 
+    public static int day(Object date) {
+        return extract(ChronoUnit.DAYS.name(), date);
+    }
+
+    public static int month(Object date) {
+        return extract(ChronoUnit.MONTHS.name(), date);
+    }
+
+    public static int year(Object date) {
+        return extract(ChronoUnit.YEARS.name(), date);
+    }
+
+    public static int hour(Object date) {
+        return extract(ChronoUnit.HOURS.name(), date);
+    }
+
+    public static int minute(Object date) {
+        return extract(ChronoUnit.MINUTES.name(), date);
+    }
+
+    public static int second(Object date) {
+        return extract(ChronoUnit.SECONDS.name(), date);
+    }
+
+    public static int week(Object date) {
+        return extract(ChronoUnit.WEEKS.name(), date);
+    }
+
     public static int extract(String fmt, Object date) {
         if (date == null) {
             return -1;
@@ -1061,18 +1207,27 @@ public class ContextFunctions {
             throw new IllegalArgumentException("date cannot cast as date type, of type :" + date.getClass());
         }
         LocalDateTime time = (LocalDateTime) obj;
-        if ("year".equalsIgnoreCase(fmt)) {
+        ChronoUnit unit = chrono_unit(fmt);
+        if (unit == ChronoUnit.YEARS) {
             return time.getYear();
-        } else if ("month".equalsIgnoreCase(fmt)) {
+        } else if (unit == ChronoUnit.MONTHS) {
             return time.getMonth().getValue();
-        } else if ("day".equalsIgnoreCase(fmt)) {
+        } else if (unit == ChronoUnit.DAYS) {
             return time.getDayOfMonth();
-        } else if ("hour".equalsIgnoreCase(fmt)) {
+        } else if (unit == ChronoUnit.HOURS) {
             return time.getHour();
-        } else if ("minute".equalsIgnoreCase(fmt)) {
+        } else if (unit == ChronoUnit.MINUTES) {
             return time.getMinute();
-        } else if ("second".equalsIgnoreCase(fmt)) {
+        } else if (unit == ChronoUnit.SECONDS) {
             return time.getSecond();
+        } else if (unit == ChronoUnit.MILLIS) {
+            return time.getNano() / 1000 / 1000;
+        } else if (unit == ChronoUnit.MICROS) {
+            return time.getNano() / 1000;
+        } else if (unit == ChronoUnit.NANOS) {
+            return time.getNano();
+        } else if (unit == ChronoUnit.WEEKS) {
+            return time.getDayOfWeek().getValue();
         }
         return -1;
     }
