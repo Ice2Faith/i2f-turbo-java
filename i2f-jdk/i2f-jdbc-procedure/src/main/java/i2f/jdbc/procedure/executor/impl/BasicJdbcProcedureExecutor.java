@@ -56,6 +56,7 @@ import lombok.Data;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -96,6 +97,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected volatile long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(5);
     protected volatile long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(30);
     protected volatile long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
+    protected final AtomicBoolean defaultTransactionalConnection=new AtomicBoolean(true);
 
     public final DatabaseDialectMapping DIALECT_MAPPING = new DatabaseDialectMapping() {
         @Override
@@ -445,9 +447,19 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     if (isDebug()) {
                         logDebug("close connection : " + entry.getKey());
                     }
-                    conn.close();
+                    if(!conn.isClosed()) {
+                        if (!conn.getAutoCommit()) {
+                            conn.commit();
+                        }
+                    }
                 } catch (SQLException e) {
                     logWarn(e.getMessage(), e);
+                }finally {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        logWarn(e.getMessage(), e);
+                    }
                 }
             }
         }
@@ -1366,6 +1378,21 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             } catch (Exception e) {
                 logWarn(() -> "connection closed or are invalided:" + e.getMessage(), e);
             }
+            try {
+                if(!conn.isClosed()){
+                    if(!conn.getAutoCommit()){
+                       conn.commit();
+                    }
+                }
+            } catch (SQLException e) {
+                logWarn(e.getMessage(), e);
+            }finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    logWarn(() -> e.getMessage(), e);
+                }
+            }
         }
 
         Map<String, DataSource> datasourceMap = (Map<String, DataSource>) params.get(ParamsConsts.DATASOURCES);
@@ -1373,6 +1400,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (ds != null) {
             try {
                 conn = ds.getConnection();
+                afterNewConnection(datasource,conn);
             } catch (SQLException e) {
                 throw new ThrowSignalException(e.getMessage(), e);
             }
@@ -1391,6 +1419,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
 
         return conn;
+    }
+
+    public void afterNewConnection(String datasource,Connection conn) throws SQLException {
+        if(defaultTransactionalConnection.get()) {
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        }
     }
 
     public Function<String, String> getColumnNameMapper(Class<?> resultType) {
