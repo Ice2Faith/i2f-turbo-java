@@ -2,7 +2,7 @@ package i2f.springboot.shiro.filter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import i2f.authentication.LoginPasswordDecoder;
+import i2f.authentication.password.LoginPasswordDecoder;
 import i2f.springboot.shiro.handler.ILoginFailureHandler;
 import i2f.springboot.shiro.handler.ILoginSuccessHandler;
 import i2f.springboot.shiro.handler.ILogoutHandler;

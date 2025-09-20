@@ -23,6 +23,11 @@
             <artifactId>spring-security-crypto</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-authentication</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

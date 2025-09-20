@@ -1,4 +1,4 @@
-package i2f.match;
+package i2f.match.std;
 
 /**
  * @author Ice2Faith
@@ -7,8 +7,11 @@ package i2f.match;
  * 在一般匹配结果为布尔值的情况下，增强了用于同一个串匹配多个表达式时，能够得出哪一个表达式更加匹配
  * 在某些情况下，用于根据匹配表达式得到表达式之间的优先级
  */
-public interface IMatcher {
+public interface IPriorMatcher extends IMatcher {
     double MATCH_FAILURE_VALUE = -1.0;
+    /*
+     * 成功的值都是大于0的，但是哟可能小数精度问题，导致和0判断时可能存在问题，因此此处选用-0.5来避免这种问题
+     */
     double MATCH_SUCCESS_LIMIT = -0.5;
 
     /**
@@ -22,10 +25,11 @@ public interface IMatcher {
      * @param patten
      * @return
      */
-    double match(String str, String patten);
+    double matchRate(String str, String patten);
 
-    default boolean isMatch(String str, String patten) {
-        return matched(match(str, patten));
+    @Override
+    default boolean matches(String str, String patten) {
+        return matched(matchRate(str, patten));
     }
 
     default boolean matched(double rate) {

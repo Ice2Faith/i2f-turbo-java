@@ -1,7 +1,7 @@
 package i2f.match.impl;
 
 
-import i2f.match.IMatcher;
+import i2f.match.std.IPriorMatcher;
 
 /**
  * @author Ice2Faith
@@ -17,7 +17,10 @@ import i2f.match.IMatcher;
  * 当\之后不是关键的*和?时，\的含义保持，不需要转义
  * 因此\\就是\\，而不是\
  */
-public class AntMatcher implements IMatcher {
+public class AntMatcher implements IPriorMatcher {
+    public static final AntMatcher PATH=new AntMatcher("/");
+    public static final AntMatcher PKG=new AntMatcher(".");
+
     protected String sep;
 
     public AntMatcher() {
@@ -26,15 +29,6 @@ public class AntMatcher implements IMatcher {
 
     public AntMatcher(String sep) {
         this.sep = sep;
-    }
-
-    public String getSep() {
-        return sep;
-    }
-
-    public AntMatcher setSep(String sep) {
-        this.sep = sep;
-        return this;
     }
 
     /**
@@ -46,14 +40,22 @@ public class AntMatcher implements IMatcher {
      * @return
      */
     @Override
-    public double match(String str, String patten) {
+    public double matchRate(String str, String patten) {
         int pi = 0;
         int plen = patten.length();
         int si = 0;
         int slen = str.length();
         int mlen = 0;
         while (pi < plen) {
+            String cpattern=patten.substring(pi);
+            String cstr=str.substring(si);
             if (si >= slen) {
+                String leftPattern = patten.substring(pi);
+                if("*".equals(leftPattern)
+                || "**".equals(leftPattern)){
+                    pi+=leftPattern.length();
+                    break;
+                }
                 return MATCH_FAILURE_VALUE;
             }
             char pch = patten.charAt(pi);
@@ -140,7 +142,7 @@ public class AntMatcher implements IMatcher {
                                 break;
                             }
                             if (nextStr.startsWith(sep)) {
-                                break;
+                                return MATCH_FAILURE_VALUE;
                             }
                             m++;
                         }
