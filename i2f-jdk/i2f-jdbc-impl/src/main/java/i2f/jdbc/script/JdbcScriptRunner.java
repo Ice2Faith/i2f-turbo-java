@@ -10,6 +10,8 @@ import lombok.Data;
 import java.io.*;
 import java.net.URL;
 import java.sql.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +29,13 @@ public class JdbcScriptRunner {
     protected boolean escapeProcessing = true;
     protected String delimiter = DEFAULT_DELIMITER;
     protected boolean fullLineDelimiter = false;
+    protected Consumer<Object> logPrinter=System.out::println;
+    protected BiConsumer<Object,Throwable> logErrorPrinter=(obj,err)->{
+        System.err.println(obj);
+        if (err != null) {
+            err.printStackTrace(System.err);
+        }
+    };
 
     public JdbcScriptRunner(Connection connection) {
         this.connection = connection;
@@ -67,7 +76,6 @@ public class JdbcScriptRunner {
             } catch (IOException e) {
 
             }
-            this.rollbackConnection();
         }
 
     }
@@ -93,6 +101,7 @@ public class JdbcScriptRunner {
         } catch (Exception e) {
             String errMsg = "Error executing: " + script + ".  Cause: " + e.getMessage();
             this.printlnError(errMsg, e);
+            this.rollbackConnection();
             throw new IllegalStateException(errMsg, e);
         } finally {
             try {
@@ -120,6 +129,7 @@ public class JdbcScriptRunner {
         } catch (Exception e) {
             String errMsg = "Error executing: " + command + ".  Cause: " + e.getMessage();
             this.printlnError(errMsg, e);
+            this.rollbackConnection();
             throw new IllegalStateException(errMsg, e);
         } finally {
             try {
@@ -317,13 +327,14 @@ public class JdbcScriptRunner {
     }
 
     protected void print(Object o) {
-        System.out.println(o);
+        if(logPrinter!=null){
+            logPrinter.accept(o);
+        }
     }
 
     protected void printlnError(Object o, Throwable e) {
-        System.err.println(o);
-        if (e != null) {
-            e.printStackTrace(System.err);
+        if(logErrorPrinter!=null){
+            logErrorPrinter.accept(o,e);
         }
     }
 }

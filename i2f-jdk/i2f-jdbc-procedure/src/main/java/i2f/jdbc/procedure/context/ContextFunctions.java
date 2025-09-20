@@ -720,7 +720,7 @@ public class ContextFunctions {
         Class<?> clazz = type.getClass();
         if (type instanceof Class) {
             clazz = (Class<?>) type;
-        } else if (type instanceof CharSequence) {
+        } else {
             try {
                 Class<?> clz = ReflectResolver.loadClass(String.valueOf(type));
                 if (clz != null) {
@@ -1296,13 +1296,7 @@ public class ContextFunctions {
     public static String substr(Object obj, int index, int len) {
         String str = null;
         if (obj != null) {
-            if (obj instanceof CharSequence
-                    || obj instanceof String
-                    || obj instanceof Appendable) {
-                str = String.valueOf(obj);
-            } else {
-                throw new IllegalArgumentException("substr(obj) cannot support type:" + obj.getClass());
-            }
+            str = String.valueOf(obj);
         }
         if (str == null) {
             return str;
