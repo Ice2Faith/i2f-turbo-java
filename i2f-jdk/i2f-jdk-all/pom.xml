@@ -382,6 +382,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-match-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-math</artifactId>
         </dependency>
         <dependency>

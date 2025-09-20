@@ -2,7 +2,7 @@ package i2f.springboot.security.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import i2f.authentication.LoginPasswordDecoder;
+import i2f.authentication.password.LoginPasswordDecoder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;

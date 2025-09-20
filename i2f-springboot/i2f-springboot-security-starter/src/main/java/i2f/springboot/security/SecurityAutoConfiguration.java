@@ -1,6 +1,6 @@
 package i2f.springboot.security;
 
-import i2f.authentication.LoginPasswordDecoder;
+import i2f.authentication.password.LoginPasswordDecoder;
 import i2f.springboot.security.impl.AuthorizeExceptionHandler;
 import i2f.springboot.security.impl.ISecurityConfigListener;
 import i2f.springboot.security.impl.JsonSupportUsernamePasswordAuthenticationFilter;

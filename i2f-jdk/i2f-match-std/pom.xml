@@ -9,7 +9,8 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>i2f-match</artifactId>
+    <artifactId>i2f-match-std</artifactId>
+
 
     <dependencies>
         <dependency>
@@ -17,20 +18,6 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-match-std</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-lru-map</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-iterator</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

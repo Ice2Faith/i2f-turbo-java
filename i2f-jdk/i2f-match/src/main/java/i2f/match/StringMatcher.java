@@ -4,6 +4,7 @@ package i2f.match;
 import i2f.iterator.iterator.Iterators;
 import i2f.match.impl.AntMatcher;
 import i2f.match.impl.SimpleMatcher;
+import i2f.match.std.IPriorMatcher;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -53,21 +54,21 @@ public class StringMatcher {
         return new StringMatcher(new AntMatcher(ANT_SEP_CLASS));
     }
 
-    protected IMatcher matcher;
+    protected IPriorMatcher matcher;
 
     public StringMatcher() {
         this.matcher = new SimpleMatcher();
     }
 
-    public StringMatcher(IMatcher matcher) {
+    public StringMatcher(IPriorMatcher matcher) {
         this.matcher = matcher;
     }
 
-    public IMatcher getMatcher() {
+    public IPriorMatcher getMatcher() {
         return matcher;
     }
 
-    public StringMatcher setMatcher(IMatcher matcher) {
+    public StringMatcher setMatcher(IPriorMatcher matcher) {
         this.matcher = matcher;
         return this;
     }
@@ -118,6 +119,6 @@ public class StringMatcher {
     }
 
     public double matchWithRate(String str, String patten) {
-        return matcher.match(str, patten);
+        return matcher.matchRate(str, patten);
     }
 }

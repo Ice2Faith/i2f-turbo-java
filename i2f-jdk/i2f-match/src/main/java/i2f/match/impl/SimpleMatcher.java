@@ -1,6 +1,6 @@
 package i2f.match.impl;
 
-import i2f.match.IMatcher;
+import i2f.match.std.IPriorMatcher;
 
 /**
  * @author Ice2Faith
@@ -15,7 +15,7 @@ import i2f.match.IMatcher;
  * 当\之后不是关键的*和?时，\的含义保持，不需要转义
  * 因此\\就是\\，而不是\
  */
-public class SimpleMatcher implements IMatcher {
+public class SimpleMatcher implements IPriorMatcher {
     /**
      * 通配符匹配
      * 返回值含义，为负数，表示不匹配
@@ -28,7 +28,7 @@ public class SimpleMatcher implements IMatcher {
      * @return
      */
     @Override
-    public double match(String str, String patten) {
+    public double matchRate(String str, String patten) {
         int sidx = 0;
         int pidx = 0;
         int plen = patten.length();
