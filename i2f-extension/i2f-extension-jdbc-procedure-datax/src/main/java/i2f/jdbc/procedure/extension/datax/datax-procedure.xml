@@ -8,7 +8,16 @@
 <procedure id="flink-procedure"
 >
 
-    <datax-exec result="" command="/app/datax.py" script="" _lang="JSON">
+    <!--
+    使用command指定的datax.py脚本路径执行script指定的json任务文件，执行的标准输出保存到result中
+    当script指定的值为空时，使用XML节点内部的文本作为任务的json文件
+    如果指定了await，则根据句await的值决定是否阻塞执行命令，直到命令执行完毕
+    command默认以string访问，表示datax.py文件的路径
+    script默认以visit访问，表示保存json的变量字符串
+    result为命令执行完毕之后的标准输出内容文本，如果指定了属性，将会捕获标准输出内容，否则不捕获输出
+    await默认以boolean访问，默认为true，阻塞执行
+    -->
+    <datax-exec result="v_log" command="/app/datax.py" script="" await="true"  _lang="JSON">
         {
             "job": {
                 "setting": {
