@@ -22,6 +22,11 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jdbc-procedure</artifactId>
+        </dependency>
+
         <!-- flink -->
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -95,11 +100,6 @@
             <artifactId>flink-table-planner-blink_${flink.scala.version}</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc-procedure</artifactId>
         </dependency>
     </dependencies>
 

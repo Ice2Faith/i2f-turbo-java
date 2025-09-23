@@ -1,0 +1,75 @@
+<!--
+这是作为 procedure 框架的拓展的其中之一
+为集成 datax 拓展
+以使用 datax 的操作能力
+目前主要用于进行异构数据的 ETL 操作
+-->
+<!DOCTYPE procedure SYSTEM "datax-procedure.dtd">
+<procedure id="flink-procedure"
+>
+
+    <datax-exec result="" command="/app/datax.py" script="" _lang="JSON">
+        {
+            "job": {
+                "setting": {
+                    "speed": {
+                        "channel": 1
+                    },
+                    "errorLimit": {
+                        "percentage": 0.5
+                    }
+                },
+                "content": [
+                    {
+                        "reader": {
+                            "name": "oraclereader",
+                            "parameter": {
+                                "username": "root",
+                                "password": "xxx123456",
+                                "column": [
+                                    "*"
+                                ],
+                                "connection": [
+                                    {
+                                        "table": [
+                                            "SYS_USER"
+                                        ],
+                                        "jdbcUrl": [
+                                            "jdbc:oracle:thin:@192.168.1.201:1521:orcl"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "writer": {
+                            "name": "oceanbasev10writer",
+                            "parameter": {
+                                "writeMode": "insert",
+                                "batchSize": 500,
+                                "memstoreThreshold": "80",
+                                "username": "sys@oracle_utf8#dev_cls",
+                                "password": "xxx123456",
+                                "column": [
+                                    "*"
+                                ],
+                                "preSql": [
+                                    "truncate table SYS_USER"
+                                ],
+                                "connection": [
+                                    {
+                                        "table": [
+                                            "SYS_USER"
+                                        ],
+                                        "jdbcUrl": "jdbc:oceanbase://192.168.1.202:2883/SYS?pool=false"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+    </datax-exec>
+
+</procedure>

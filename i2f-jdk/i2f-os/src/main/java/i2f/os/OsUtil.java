@@ -2,6 +2,7 @@ package i2f.os;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
@@ -45,16 +46,16 @@ public class OsUtil {
         return builder.toString();
     }
 
-    public static String startCmd(String cmd) {
-        return runCmd(cmd, getCmdCharset());
+    public static void startCmd(String cmd) {
+         runCmd(cmd, getCmdCharset());
     }
 
-    public static String startCmd(String cmd, String charset) {
-        return startCmd(cmd, null, null, charset);
+    public static void startCmd(String cmd, String charset) {
+         startCmd(cmd, null, null, charset);
     }
 
-    public static String startCmd(String cmd, String[] envp, File dir, String charset) {
-        return execCmd(false, -1, cmd, envp, dir, charset);
+    public static void startCmd(String cmd, String[] envp, File dir, String charset) {
+        execCmd(false, -1, cmd, envp, dir, charset);
     }
 
     public static String runCmd(String cmd) {
@@ -77,34 +78,77 @@ public class OsUtil {
             if (!requireOutput) {
                 return null;
             }
-            InputStream is = process.getInputStream();
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            byte[] buf = new byte[4096];
-            int len = 0;
-            while ((len = is.read(buf)) > 0) {
-                bos.write(buf, 0, len);
-            }
-            bos.flush();
-
-            InputStream es = process.getErrorStream();
-            while ((len = es.read(buf)) > 0) {
-                bos.write(buf, 0, len);
-            }
-            bos.flush();
-
-            if (waitForMillsSeconds >= 0) {
-                process.waitFor(waitForMillsSeconds, TimeUnit.MILLISECONDS);
-            } else {
-                process.waitFor();
-            }
-            if (charset == null || charset.isEmpty()) {
-                charset = "UTF-8";
-            }
-            String str = new String(bos.toByteArray(), charset);
-            return str;
+            return getProcessStdout(waitForMillsSeconds, process, charset);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
+    }
+
+
+    public static void startCmd(String... cmdArr) {
+        runCmd(cmdArr, getCmdCharset());
+    }
+
+    public static void startCmd(String[] cmdArr, String charset) {
+        startCmd(cmdArr, null, null, charset);
+    }
+
+    public static void startCmd(String[] cmdArr, String[] envp, File dir, String charset) {
+        execCmd(false, -1, cmdArr, envp, dir, charset);
+    }
+
+    public static String runCmd(String... cmdArr) {
+        return runCmd(cmdArr, getCmdCharset());
+    }
+
+    public static String runCmd(String[] cmdArr, String charset) {
+        return runCmd(cmdArr, null, null, charset);
+    }
+
+    public static String runCmd(String[] cmdArr, String[] envp, File dir, String charset) {
+        return execCmd(true, TimeUnit.MINUTES.toMillis(3), cmdArr, envp, dir, charset);
+    }
+
+    public static String execCmd(boolean requireOutput, long waitForMillsSeconds, String[] cmdArr, String[] envp, File dir, String charset) {
+        try {
+            Runtime runtime = Runtime.getRuntime();
+
+            Process process = runtime.exec(cmdArr, envp, dir);
+            if (!requireOutput) {
+                return null;
+            }
+            return getProcessStdout(waitForMillsSeconds, process, charset);
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    public static String getProcessStdout(long waitForMillsSeconds, Process process, String charset) throws IOException, InterruptedException {
+        InputStream is = process.getInputStream();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
+        int len = 0;
+        while ((len = is.read(buf)) > 0) {
+            bos.write(buf, 0, len);
+        }
+        bos.flush();
+
+        InputStream es = process.getErrorStream();
+        while ((len = es.read(buf)) > 0) {
+            bos.write(buf, 0, len);
+        }
+        bos.flush();
+
+        if (waitForMillsSeconds >= 0) {
+            process.waitFor(waitForMillsSeconds, TimeUnit.MILLISECONDS);
+        } else {
+            process.waitFor();
+        }
+        if (charset == null || charset.isEmpty()) {
+            charset = "UTF-8";
+        }
+        String str = new String(bos.toByteArray(), charset);
+        return str;
     }
 
     public static boolean is64bit() {

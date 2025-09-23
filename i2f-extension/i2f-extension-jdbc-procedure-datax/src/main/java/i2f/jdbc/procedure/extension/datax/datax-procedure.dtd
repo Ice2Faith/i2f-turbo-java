@@ -1,0 +1,12 @@
+<!-- datax-procedure.dtd -->
+
+
+        <!ELEMENT datax-exec (ANY|EMPTY)>
+        <!ATTLIST datax-exec command CDATA #IMPLIED>
+        <!ATTLIST datax-exec script CDATA #IMPLIED>
+        <!ATTLIST datax-exec result CDATA #IMPLIED>
+
+        <!ATTLIST datax-exec _lang CDATA #IMPLIED>
+
+        <!ATTLIST datax-exec script.text-body CDATA #IMPLIED>
+        <!ATTLIST datax-exec script.text-body.render CDATA #IMPLIED>
