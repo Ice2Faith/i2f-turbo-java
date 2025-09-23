@@ -1,0 +1,8 @@
+i2f.jdbc.procedure.extension.flink.node.FlinkExecEnvNode
+i2f.jdbc.procedure.extension.flink.node.FlinkExecSqlNode
+i2f.jdbc.procedure.extension.flink.node.FlinkExecuteNode
+i2f.jdbc.procedure.extension.flink.node.FlinkExplainSqlNode
+i2f.jdbc.procedure.extension.flink.node.FlinkPrintDataStreamNode
+i2f.jdbc.procedure.extension.flink.node.FlinkQuerySqlNode
+i2f.jdbc.procedure.extension.flink.node.FlinkTableEnvNode
+i2f.jdbc.procedure.extension.flink.node.FlinkToChangelogStreamNode
