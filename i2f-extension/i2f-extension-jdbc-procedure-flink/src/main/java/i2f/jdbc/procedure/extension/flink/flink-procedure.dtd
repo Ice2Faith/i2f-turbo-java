@@ -1,0 +1,47 @@
+<!-- flink-procedure.dtd -->
+
+
+        <!ELEMENT flink-exec-env (ANY|EMPTY)>
+        <!ATTLIST flink-exec-env result CDATA #IMPLIED>
+
+        <!ELEMENT flink-table-env (ANY|EMPTY)>
+        <!ATTLIST flink-table-env exec-env CDATA #IMPLIED>
+        <!ATTLIST flink-table-env result CDATA #IMPLIED>
+
+        <!ELEMENT flink-exec-sql (ANY|EMPTY)>
+        <!ATTLIST flink-exec-sql tab-env CDATA #IMPLIED>
+        <!ATTLIST flink-exec-sql script CDATA #IMPLIED>
+        <!ATTLIST flink-exec-sql result CDATA #IMPLIED>
+
+        <!ATTLIST flink-exec-sql script.text-body CDATA #IMPLIED>
+        <!ATTLIST flink-exec-sql script.text-body.render CDATA #IMPLIED>
+
+        <!ELEMENT flink-explain-sql (ANY|EMPTY)>
+        <!ATTLIST flink-explain-sql tab-env CDATA #IMPLIED>
+        <!ATTLIST flink-explain-sql script CDATA #IMPLIED>
+        <!ATTLIST flink-explain-sql result CDATA #IMPLIED>
+
+        <!ATTLIST flink-explain-sql script.text-body CDATA #IMPLIED>
+        <!ATTLIST flink-explain-sql script.text-body.render CDATA #IMPLIED>
+
+        <!ELEMENT flink-query-sql (ANY|EMPTY)>
+        <!ATTLIST flink-query-sql tab-env CDATA #IMPLIED>
+        <!ATTLIST flink-query-sql script CDATA #IMPLIED>
+        <!ATTLIST flink-query-sql result CDATA #IMPLIED>
+
+        <!ATTLIST flink-query-sql script.text-body CDATA #IMPLIED>
+        <!ATTLIST flink-query-sql script.text-body.render CDATA #IMPLIED>
+
+        <!ELEMENT flink-to-changelog-stream (ANY|EMPTY)>
+        <!ATTLIST flink-to-changelog-stream tab-env CDATA #IMPLIED>
+        <!ATTLIST flink-to-changelog-stream table CDATA #IMPLIED>
+        <!ATTLIST flink-to-changelog-stream result CDATA #IMPLIED>
+
+        <!ELEMENT flink-print-data-stream (ANY|EMPTY)>
+        <!ATTLIST flink-print-data-stream value CDATA #IMPLIED>
+        <!ATTLIST flink-print-data-stream result CDATA #IMPLIED>
+
+        <!ELEMENT flink-execute (ANY|EMPTY)>
+        <!ATTLIST flink-execute exec-env CDATA #IMPLIED>
+        <!ATTLIST flink-execute name CDATA #IMPLIED>
+        <!ATTLIST flink-execute result CDATA #IMPLIED>

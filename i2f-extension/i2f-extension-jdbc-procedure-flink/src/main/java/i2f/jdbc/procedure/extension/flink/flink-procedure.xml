@@ -1,0 +1,147 @@
+<!--
+这是作为 procedure 框架的拓展的其中之一
+为集成 flinksql 拓展
+以使用 flinksql 的操作能力
+从而使用 flink 的各种 source,sink 能力
+目前主要用于进行异构数据的 ETL 操作
+-->
+<!DOCTYPE procedure SYSTEM "flink-procedure.dtd">
+<procedure id="flink-procedure"
+>
+
+    <!--
+    创建一个默认的 flink 执行环境
+    将这个环境保存到 result 指定的变量名中
+    等价Java代码
+    Configuration conf = new Configuration();
+    StreamExecutionEnvironment v_exec_env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
+    -->
+    <flink-exec-env result="v_exec_env"/>
+
+    <!--
+    创建一个 TableEnvironment
+    使用 exec-env 指定的 flink 执行环境创建一个 table 执行环境保存到 result 指定的变量名中
+    exec-env默认以visit访问，目前也仅支持这样的访问方式
+    等价Java代码
+    StreamTableEnvironment v_tab_env = StreamTableEnvironment.create(v_exec_env);
+    -->
+    <flink-table-env result="v_tab_env" exec-env="v_exec_env"/>
+
+    <!--
+    使用 table 环境执行 flinksql 语句
+    使用 tab-env 指定的 table 执行环境执行 script 指定的SQL语句，结果保存到 result 指定的变量名中
+    如果没有指定script，那么将使用XML节点内部的文本作为SQL语句执行
+    tab-env默认以visit访问，目前也仅支持这样的访问方式
+    script默认以visit访问，表示存储SQL语句的变量名
+    等价Java代码
+    TableResult v_tab_res = v_tab_env.executeSql(script);
+    -->
+    <flink-exec-sql result="v_tab_res" script="" tab-env="v_tab_env">
+        CREATE
+        TEMPORARY SYSTEM TABLE MySqlSource (
+                id INT PRIMARY KEY,
+                name STRING,
+                email STRING,
+                registration_date TIMESTAMP(3),
+                balance DECIMAL(10,2)
+            )
+            WITH (
+                'connector' = 'jdbc',
+                'url' = 'jdbc:mysql://localhost:3306/mydb',
+                'username' = 'root',
+                'password' = 'password',
+                'driver' = 'com.mysql.cj.jdbc.Driver',
+                'query' = 'SELECT * FROM users' -- 可替换为全表扫描或自定义查询
+            )
+    </flink-exec-sql>
+    <flink-exec-sql result="" script="" tab-env="v_tab_env">
+        CREATE
+        TEMPORARY SYSTEM TABLE OracleSink (
+                id NUMBER(10) PRIMARY KEY,
+                name VARCHAR2(50),
+                email VARCHAR2(100),
+                registration_date TIMESTAMP(3),
+                balance NUMBER(10,2)
+            )
+            WITH (
+                'connector' = 'jdbc',
+                'url' = 'jdbc:oracle:thin:@localhost:1521:xe',
+                'username' = 'system',
+                'password' = 'oracle',
+                'driver' = 'oracle.jdbc.driver.OracleDriver',
+                'sink.write-mode' = 'insert-only' -- 可选: insert-only/upsert/update
+            )
+    </flink-exec-sql>
+
+    <!--
+      使用 table 环境查看 flinksql 语句的执行计划
+      使用 tab-env 指定的 table 执行环境执行 script 指定的SQL语句，结果保存到 result 指定的变量名中
+      如果没有指定script，那么将使用XML节点内部的文本作为SQL语句执行
+      tab-env默认以visit访问，目前也仅支持这样的访问方式
+      script默认以visit访问，表示存储SQL语句的变量名
+      等价Java代码
+      String v_explain = v_tab_env.explainSql(script,
+                ExplainDetail.JSON_EXECUTION_PLAN,ExplainDetail.ESTIMATED_COST,ExplainDetail.CHANGELOG_MODE);
+      -->
+    <flink-explain-sql result="v_explain" script="" tab-env="v_tab_env">
+        INSERT INTO OracleSink
+        SELECT id, name, email, registration_date, balance
+        FROM (SELECT * FROM MySqlSource)
+        WHERE NOT EXISTS (SELECT id FROM OracleSink WHERE id = MySqlSource.id)
+    </flink-explain-sql>
+    <lang-printf value.visit="v_explain"/>
+
+    <flink-exec-sql result="" script="" tab-env="v_tab_env">
+        INSERT INTO OracleSink
+        SELECT id, name, email, registration_date, balance
+        FROM (SELECT * FROM MySqlSource)
+        WHERE NOT EXISTS (SELECT id FROM OracleSink WHERE id = MySqlSource.id)
+    </flink-exec-sql>
+
+    <!--
+      使用 table 环境查询 flinksql 语句的结果 Table 对象
+      使用 tab-env 指定的 table 执行环境执行 script 指定的SQL语句，结果保存到 result 指定的变量名中
+      结果的 Table 对象目前仅用于打印输出，提供日志观察能力，暂无其他功能
+      如果没有指定script，那么将使用XML节点内部的文本作为SQL语句执行
+      tab-env默认以visit访问，目前也仅支持这样的访问方式
+      script默认以visit访问，表示存储SQL语句的变量名
+      等价Java代码
+        Table v_tmp_table = v_tab_env.sqlQuery(script);
+      -->
+    <flink-query-sql result="v_tmp_table" script="" tab-env="v_tab_env">
+        SELECT id, name, email, registration_date, balance
+        FROM MySqlSource
+    </flink-query-sql>
+
+    <!--
+    使用 table 环境将 Table 对象转换为一个 DataStream 对象
+    使用 tab-env 指定的 table 将 table 指定的 Table 对象转换为 DataStream 对象保存到 result 指定的变量名中
+    结果的 DataStream 对象目前仅用于打印输出，提供日志观察能力，暂无其他功能
+    tab-env默认以visit访问，目前也仅支持这样的访问方式
+     table默认以visit访问，表示存储Table对象的变量名
+     等价Java代码
+      DataStream<Row> v_changelog = v_tab_env.toChangelogStream(v_tmp_table);
+    -->
+    <flink-to-changelog-stream result="v_changelog" table="v_tmp_table" tab-env="v_tab_env"/>
+
+    <!--
+    调用 DataStream 对象的 print 方法实现打印输出
+    使用 value 指定的 DataStream 对象，调用其 print() 方法完成输出，结果保存到 result 指定的变量名中
+    value默认以visit访问，目前也仅支持这样的访问方式
+    等价Java代码
+    DataStreamSink v_sink = v_changelog.print();
+    -->
+    <flink-print-data-stream result="v_sink" value="v_changelog"/>
+
+    <!--
+    调用 ExecuteEnvironment 执行环境的 execute 方法完成任务执行
+    使用 exec-env 指定的执行环境，调用其 execute 方法完成任务执行，结果保存到 result 指定的变量名中
+    如果还指定了name，那么就是调用其 execute(String name) 方法执行任务
+    exec-env默认以visit访问，目前也仅支持这样的访问方式
+    name默认以string访问，表示 jobName
+    等价Java代码
+     JobExecutionResult v_exec_res=v_exec_env.execute(name);
+    -->
+    <flink-execute result="v_exec_res" name="" exec-env="v_exec_env"/>
+
+</procedure>

@@ -87,6 +87,7 @@
         <module>i2f-extension-mongodb</module>
         <module>i2f-extension-hazelcast</module>
         <module>i2f-extension-filesystem-oss-aws-s3</module>
+        <module>i2f-extension-jdbc-procedure-flink</module>
     </modules>
 
 
