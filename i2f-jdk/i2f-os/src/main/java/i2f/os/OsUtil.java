@@ -75,10 +75,7 @@ public class OsUtil {
             Runtime runtime = Runtime.getRuntime();
 
             Process process = runtime.exec(cmd, envp, dir);
-            if (!requireOutput) {
-                return null;
-            }
-            return getProcessStdout(waitForMillsSeconds, process, charset);
+            return getProcessStdout(requireOutput,waitForMillsSeconds, process, charset);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -114,35 +111,38 @@ public class OsUtil {
             Runtime runtime = Runtime.getRuntime();
 
             Process process = runtime.exec(cmdArr, envp, dir);
-            if (!requireOutput) {
-                return null;
-            }
-            return getProcessStdout(waitForMillsSeconds, process, charset);
+            return getProcessStdout(requireOutput,waitForMillsSeconds, process, charset);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
-    public static String getProcessStdout(long waitForMillsSeconds, Process process, String charset) throws IOException, InterruptedException {
-        InputStream is = process.getInputStream();
+    public static String getProcessStdout(boolean requireOutput,long waitForMillsSeconds, Process process, String charset) throws IOException, InterruptedException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        byte[] buf = new byte[4096];
-        int len = 0;
-        while ((len = is.read(buf)) > 0) {
-            bos.write(buf, 0, len);
-        }
-        bos.flush();
+        if(requireOutput) {
+            InputStream is = process.getInputStream();
+            byte[] buf = new byte[4096];
+            int len = 0;
+            while ((len = is.read(buf)) > 0) {
+                bos.write(buf, 0, len);
+            }
+            bos.flush();
 
-        InputStream es = process.getErrorStream();
-        while ((len = es.read(buf)) > 0) {
-            bos.write(buf, 0, len);
+            InputStream es = process.getErrorStream();
+            while ((len = es.read(buf)) > 0) {
+                bos.write(buf, 0, len);
+            }
+            bos.flush();
         }
-        bos.flush();
 
         if (waitForMillsSeconds >= 0) {
             process.waitFor(waitForMillsSeconds, TimeUnit.MILLISECONDS);
         } else {
             process.waitFor();
+        }
+
+        if(!requireOutput){
+            return null;
         }
         if (charset == null || charset.isEmpty()) {
             charset = "UTF-8";

@@ -42,6 +42,8 @@ public class DataxExecNode extends AbstractExecutorNode {
         if(script==null || script.isEmpty()){
             script=node.getTextBody();
         }
+        String result = node.getTagAttrMap().get(AttrConsts.RESULT);
+        Boolean await=executor.convertAs(executor.attrValue(AttrConsts.AWAIT,FeatureConsts.BOOLEAN,node,context),Boolean.class);
 
         File jobFile=null;
         try {
@@ -49,9 +51,8 @@ public class DataxExecNode extends AbstractExecutorNode {
             StreamUtil.writeString(script, StandardCharsets.UTF_8,jobFile);
             String jobFilePath=jobFile.getAbsolutePath();
 
-            String res = OsUtil.runCmd(new String[]{commandFilePath,jobFilePath});
+            String res = OsUtil.execCmd((result!=null),(await==null || await)?-1L:1L,new String[]{commandFilePath,jobFilePath},null,null,null);
 
-            String result = node.getTagAttrMap().get(AttrConsts.RESULT);
             if (result != null) {
                 Object val = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
                 executor.visitSet(context, result, val);
