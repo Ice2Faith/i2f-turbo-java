@@ -1,0 +1,12 @@
+i2f:
+  springcloud:
+    discovery:
+      server:
+        enable: true
+        api:
+          enable: true
+        secret-key: 123456
+        keepalive-seconds: 30
+        redis-manager:
+          enable: true
+          prefix: default

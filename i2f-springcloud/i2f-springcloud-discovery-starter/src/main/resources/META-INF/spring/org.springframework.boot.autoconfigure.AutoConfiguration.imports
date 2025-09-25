@@ -1,1 +1,2 @@
 i2f.springcloud.discovery.DiscoveryAutoConfiguration
+i2f.springcloud.discovery.remote.RemoteDiscoveryClientProvider

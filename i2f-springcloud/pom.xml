@@ -35,6 +35,7 @@
         <module>i2f-springcloud-sleuth-starter</module>
         <module>i2f-springcloud-zipkin-starter</module>
         <module>i2f-springcloud-consul-starter</module>
+        <module>i2f-springcloud-discovery-server-starter</module>
     </modules>
 
 

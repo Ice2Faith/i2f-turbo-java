@@ -1,0 +1,56 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springcloud.discovery.server",
+      "type": "i2f.springcloud.discovery.server.properties.DiscoveryServerProperties",
+      "sourceType": "i2f.springcloud.discovery.server.properties.DiscoveryServerProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springcloud.discovery.server.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable discovery server.",
+      "sourceType": "i2f.springcloud.discovery.server.autoconfiguration.DiscoveryServerAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.discovery.server.api.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable discovery server api.",
+      "sourceType": "i2f.springcloud.discovery.server.controller.DiscoverServerController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springcloud.discovery.server.redis-manager.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable discovery server api.",
+      "sourceType": "i2f.springcloud.discovery.server.manager.impl.RedisServiceInstanceManager",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
