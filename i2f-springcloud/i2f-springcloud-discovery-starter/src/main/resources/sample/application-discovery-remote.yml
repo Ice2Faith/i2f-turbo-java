@@ -1,0 +1,15 @@
+i2f:
+  springcloud:
+    discovery:
+      registry:
+        # 是否启用服务发现
+        enable: true
+        base-url: http://localhost:9999
+        registry-path: /api/registry
+        pull-path: /api/services
+        secret-key: 123456
+        heart-beat-seconds: 10
+        pull-service-seconds: 30
+        # 此服务发现的优先级
+        order: 0
+
