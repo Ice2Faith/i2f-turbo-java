@@ -32,6 +32,10 @@ public class DefaultJdbcProcedureLogger implements JdbcProcedureLogger {
 
     @Override
     public boolean isDebug() {
+        Boolean ok = ContextHolder.DEBUG_MODE.get();
+        if (ok != null && ok) {
+            return true;
+        }
         return debug.get();
     }
 
