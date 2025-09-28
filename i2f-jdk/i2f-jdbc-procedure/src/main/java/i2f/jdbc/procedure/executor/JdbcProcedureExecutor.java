@@ -11,6 +11,7 @@ import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
@@ -24,7 +25,6 @@ import i2f.typeof.TypeOf;
 import java.sql.Connection;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -286,55 +286,7 @@ public interface JdbcProcedureExecutor {
 
     void openDebugger(String tag, Object context, String conditionExpression);
 
-    default void logDebug(Object obj) {
-        logDebug(() -> obj);
-    }
-
-    void logDebug(Supplier<Object> supplier);
-
-    default void logInfo(Object obj) {
-        logInfo(() -> obj);
-    }
-
-    default void logInfo(Supplier<Object> supplier) {
-        logInfo(supplier, null);
-    }
-
-    default void logInfo(Object obj, Throwable e) {
-        logInfo(() -> obj, e);
-    }
-
-    void logInfo(Supplier<Object> supplier, Throwable e);
-
-    default void logWarn(Object obj) {
-        logWarn(() -> obj);
-    }
-
-    default void logWarn(Supplier<Object> supplier) {
-        logWarn(supplier, null);
-    }
-
-    default void logWarn(Object obj, Throwable e) {
-        logWarn(() -> obj, e);
-    }
-
-    void logWarn(Supplier<Object> supplier, Throwable e);
-
-    default void logError(Object obj) {
-        logError(() -> obj);
-    }
-
-    default void logError(Supplier<Object> supplier) {
-        logError(supplier, null);
-    }
-
-    default void logError(Object obj, Throwable e) {
-        logError(() -> obj, e);
-    }
-
-    void logError(Supplier<Object> supplier, Throwable e);
-
-    String traceLocation();
+    JdbcProcedureLogger logger();
 
     Class<?> loadClass(String className);
 

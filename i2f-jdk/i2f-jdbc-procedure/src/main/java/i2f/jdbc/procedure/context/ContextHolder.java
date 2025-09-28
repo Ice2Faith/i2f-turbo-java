@@ -157,4 +157,9 @@ public class ContextHolder {
             LOAD_PACKAGE_SET.add(packageName);
         }
     }
+
+    public static String traceLocation() {
+        XmlNode node = TRACE_NODE.get();
+        return TRACE_LOCATION.get() + ":" + TRACE_LINE.get() + ":" + (node == null ? "" : node.getTagName());
+    }
 }

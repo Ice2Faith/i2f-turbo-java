@@ -187,7 +187,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
             }
 
             public String trace_location() {
-                return executor.traceLocation();
+                return ContextHolder.traceLocation();
             }
 
             public String trace_file() {
@@ -232,19 +232,19 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
             }
 
             public void log_debug(Object obj) {
-                executor.logDebug(obj);
+                executor.logger().logDebug(obj);
             }
 
             public void log_info(Object obj) {
-                executor.logInfo(obj);
+                executor.logger().logInfo(obj);
             }
 
             public void log_warn(Object obj) {
-                executor.logWarn(obj);
+                executor.logger().logWarn(obj);
             }
 
             public void log_error(Object obj) {
-                executor.logError(obj);
+                executor.logger().logError(obj);
             }
         }
 
@@ -366,7 +366,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         @Override
         public void debugLog(Supplier<Object> supplier) {
 //            if(executor.isDebug()) {
-//                executor.logDebug(() -> "tiny-script:" + supplier.get() + " , at " + ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get());
+//                executor.logger().logDebug(() -> "tiny-script:" + supplier.get() + " , at " + ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get());
 //            }
         }
 

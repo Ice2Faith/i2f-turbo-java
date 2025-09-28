@@ -1,16 +1,20 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.clock.SystemClock;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
+import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -69,11 +73,28 @@ public class LangForiNode extends AbstractExecutorNode {
             incr = executor.convertAs(executor.attrValue(AttrConsts.INCR, FeatureConsts.INT, node, context), Integer.class);
         }
 
+        Map<String, Object> pointContext = new HashMap<>();
+        String snapshotTraceId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
+        String location = getNodeLocation(node);
+        boolean isDebugMode = executor.isDebug();
+        pointContext.put(POINT_KEY_LOCATION, location);
+        pointContext.put(POINT_KEY_IS_DEBUG_MODE, isDebugMode);
+        pointContext.put(POINT_KEY_SNAPSHOT_TRACE_ID, snapshotTraceId);
+
         boolean isFirst = true;
         int index = 0;
         for (int j = begin; j < end; j += incr) {
+            long bts = SystemClock.currentTimeMillis();
+
+            pointContext.put(POINT_KEY_BEGIN_TS, bts);
+            pointContext.put(POINT_KEY_LOOP_IS_FIRST, isFirst);
+            pointContext.put(POINT_KEY_LOOP_INDEX, index);
+            pointContext.put(POINT_KEY_LOCATION, location + "@" + index);
+
             Object val = j;
             val = executor.resultValue(val, node.getAttrFeatureMap().get(AttrConsts.ITEM), node, context);
+
+            pointContext.put(POINT_KEY_LOOP_VALUE, val);
             // 覆盖堆栈
             executor.visitSet(context, itemName, val);
             executor.visitSet(context, firstName, isFirst);
@@ -86,6 +107,18 @@ public class LangForiNode extends AbstractExecutorNode {
                 continue;
             } catch (BreakSignalException e) {
                 break;
+            } finally {
+                long ets = SystemClock.currentTimeMillis();
+                long useTs = ets - bts;
+                XmlExecUseTimeEvent event = new XmlExecUseTimeEvent();
+                event.setExecutorNode(this);
+                event.setPointContext(pointContext);
+                event.setNode(node);
+                event.setContext(context);
+                event.setExecutor(executor);
+                executor.sendEvent(event);
+                event.setUseTs(useTs);
+                executor.publishEvent(event);
             }
         }
 

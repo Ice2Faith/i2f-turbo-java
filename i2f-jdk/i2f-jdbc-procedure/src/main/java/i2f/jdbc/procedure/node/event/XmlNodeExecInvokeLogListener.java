@@ -71,7 +71,7 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
                                 traceCalls.removeFirst();
                                 size--;
                             }
-                            executor.logDebug("call-params:\n===================> " + callSnapshot);
+                            executor.logger().logDebug("call-params:\n===================> " + callSnapshot);
                         }
                     }
                 }
@@ -94,7 +94,7 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
                                 traceCalls.removeFirst();
                                 size--;
                             }
-                            executor.logDebug("call-params:\n===================> " + callSnapshot);
+                            executor.logger().logDebug("call-params:\n===================> " + callSnapshot);
                         }
                     }
                 }
@@ -121,7 +121,7 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
                                         traceCalls.removeFirst();
                                         size--;
                                     }
-                                    executor.logDebug("call-params:\n===================> " + callSnapshot);
+                                    executor.logger().logDebug("call-params:\n===================> " + callSnapshot);
                                 }
                             }
                         }

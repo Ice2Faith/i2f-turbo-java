@@ -36,7 +36,7 @@ public class LangRenderNode extends AbstractExecutorNode {
         }
         String val = rs;
         if (executor.isDebug()) {
-            executor.logDebug("at " + getNodeLocation(node) + " render string: " + val);
+            executor.logger().logDebug("at " + getNodeLocation(node) + " render string: " + val);
         }
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {

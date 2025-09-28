@@ -1,17 +1,21 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.clock.SystemClock;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
+import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -60,9 +64,26 @@ public class LangWhileNode extends AbstractExecutorNode {
         bakParams.put(firstName, executor.visit(firstName, context));
         bakParams.put(indexName, executor.visit(indexName, context));
 
+        Map<String, Object> pointContext = new HashMap<>();
+        String snapshotTraceId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
+        String location = getNodeLocation(node);
+        boolean isDebugMode = executor.isDebug();
+        pointContext.put(POINT_KEY_LOCATION, location);
+        pointContext.put(POINT_KEY_IS_DEBUG_MODE, isDebugMode);
+        pointContext.put(POINT_KEY_SNAPSHOT_TRACE_ID, snapshotTraceId);
+
         boolean isFirst = true;
         int index = 0;
         while (executor.toBoolean(executor.attrValue(AttrConsts.TEST, AttrConsts.TEST, node, context))) {
+            long bts = SystemClock.currentTimeMillis();
+
+            pointContext.put(POINT_KEY_BEGIN_TS, bts);
+            pointContext.put(POINT_KEY_LOOP_IS_FIRST, isFirst);
+            pointContext.put(POINT_KEY_LOOP_INDEX, index);
+            pointContext.put(POINT_KEY_LOCATION, location + "@" + index);
+
+            pointContext.put(POINT_KEY_LOOP_VALUE, true);
+
             executor.visitSet(context, firstName, isFirst);
             executor.visitSet(context, indexName, index);
             isFirst = false;
@@ -73,6 +94,18 @@ public class LangWhileNode extends AbstractExecutorNode {
                 continue;
             } catch (BreakSignalException e) {
                 break;
+            } finally {
+                long ets = SystemClock.currentTimeMillis();
+                long useTs = ets - bts;
+                XmlExecUseTimeEvent event = new XmlExecUseTimeEvent();
+                event.setExecutorNode(this);
+                event.setPointContext(pointContext);
+                event.setNode(node);
+                event.setContext(context);
+                event.setExecutor(executor);
+                executor.sendEvent(event);
+                event.setUseTs(useTs);
+                executor.publishEvent(event);
             }
         }
         // 还原堆栈
