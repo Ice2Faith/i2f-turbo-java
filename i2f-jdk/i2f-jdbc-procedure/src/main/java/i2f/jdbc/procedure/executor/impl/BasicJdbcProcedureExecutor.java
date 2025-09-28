@@ -1011,6 +1011,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     @Override
     public boolean isDebug() {
+        Boolean ok = ContextHolder.DEBUG_MODE.get();
+        if (ok != null && ok) {
+            return true;
+        }
         return this.debug.get();
     }
 
