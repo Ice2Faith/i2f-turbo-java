@@ -45,10 +45,10 @@ public class ProcedureMetaMapGrammarReporterListener
         JdbcProcedureMetaMapRefreshedEvent evt = (JdbcProcedureMetaMapRefreshedEvent) event;
         Map<String, ProcedureMeta> metaMap = evt.getMetaMap();
         if (reportOnBoot.getAndSet(false)) {
-            GrammarReporter.reportGrammar(executor, new HashMap<>(metaMap), (msg) -> executor.logWarn(msg));
+            GrammarReporter.reportGrammar(executor, new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
         } else {
             reportPool.submit(() -> {
-                GrammarReporter.reportGrammar(executor, new HashMap<>(metaMap), (msg) -> executor.logWarn(msg));
+                GrammarReporter.reportGrammar(executor, new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
             });
         }
         return false;

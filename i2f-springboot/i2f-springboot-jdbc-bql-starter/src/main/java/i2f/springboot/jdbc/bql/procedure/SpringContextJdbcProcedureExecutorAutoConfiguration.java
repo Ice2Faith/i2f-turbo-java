@@ -10,6 +10,7 @@ import i2f.jdbc.procedure.context.impl.ProcedureMetaMapGrammarReporterListener;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.node.event.XmlNodeExecInvokeLogListener;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
@@ -21,6 +22,7 @@ import i2f.jdbc.procedure.registry.impl.ContextJdbcProcedureMetaProviderRegistry
 import i2f.resources.ResourceUtil;
 import i2f.spring.core.SpringContext;
 import i2f.spring.enviroment.SpringEnvironment;
+import i2f.springboot.jdbc.bql.procedure.impl.Slf4jJdbcProcedureLogger;
 import i2f.springboot.jdbc.bql.procedure.impl.SpringContextJdbcProcedureExecutor;
 import i2f.springboot.jdbc.bql.procedure.impl.SpringJdbcProcedureXmlNodeMetaCacheProvider;
 import lombok.Data;
@@ -203,18 +205,31 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
+    @ConditionalOnMissingBean(JdbcProcedureLogger.class)
+    @Bean
+    public JdbcProcedureLogger jdbcProcedureLogger() {
+        Slf4jJdbcProcedureLogger ret = new Slf4jJdbcProcedureLogger();
+        ret.debug(jdbcProcedureProperties.isDebug());
+        return ret;
+    }
+
     @ConditionalOnExpression("${xproc4j.executor.enable:true}")
     @ConditionalOnMissingBean(JdbcProcedureExecutor.class)
     @Bean
     public JdbcProcedureExecutor jdbcProcedureExecutor(JdbcProcedureContext context,
                                                        IEnvironment iEnvironment,
                                                        INamingContext namingContext,
-                                                       @Autowired(required = false) XProc4jEventHandler eventHandler
+                                                       @Autowired(required = false) XProc4jEventHandler eventHandler,
+                                                       @Autowired(required = false) JdbcProcedureLogger jdbcProcedureLogger
     ) {
         log.info(XProc4jConsts.NAME + " config " + SpringContextJdbcProcedureExecutor.class.getSimpleName() + " ...");
         SpringContextJdbcProcedureExecutor ret = new SpringContextJdbcProcedureExecutor(context, iEnvironment, namingContext);
         if (eventHandler != null) {
             ret.setEventHandler(eventHandler);
+        }
+        if (jdbcProcedureLogger != null) {
+            ret.setLogger(jdbcProcedureLogger);
+            jdbcProcedureLogger.debug(jdbcProcedureProperties.isDebug());
         }
         ret.setSlowSqlMinMillsSeconds(jdbcProcedureProperties.getSlowSqlMinMillsSeconds());
         ret.setSlowNodeMillsSeconds(jdbcProcedureProperties.getSlowNodeMillsSeconds());
@@ -266,5 +281,4 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         ret.getMaxCount().set(jdbcProcedureProperties.getMaxPreloadCount());
         return ret;
     }
-
 }

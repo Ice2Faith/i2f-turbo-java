@@ -223,7 +223,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
             if (executor.isDebug()) {
                 bql = bql.concat(getTrackingComment(node));
-                executor.logDebug("etl extra: \n" + bql);
+                executor.logger().logDebug("etl extra: \n" + bql);
             }
 
             CountDownLatch latchPrepared = new CountDownLatch(1);
@@ -262,7 +262,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                     if (useCursor) {
                         if (!cursor.hasRow()) {
                             if (executor.isDebug()) {
-                                executor.logDebug("etl-read no data found! at " + getNodeLocation(node));
+                                executor.logger().logDebug("etl-read no data found! at " + getNodeLocation(node));
                             }
                             return false;
                         }
@@ -271,19 +271,19 @@ public class SqlEtlNode extends AbstractExecutorNode {
                         list = executor.sqlQueryPage(taskExtraDatasource, taskBql, context, taskResultType, new ApiPage(pageIndex.get(), taskReadBatchSize));
                         if (list.isEmpty()) {
                             if (executor.isDebug()) {
-                                executor.logDebug("etl-read no data found! at " + getNodeLocation(node));
+                                executor.logger().logDebug("etl-read no data found! at " + getNodeLocation(node));
                             }
                             return false;
                         }
                     }
 
                     if (executor.isDebug()) {
-                        executor.logDebug("etl-read found batch data! at " + getNodeLocation(node));
+                        executor.logger().logDebug("etl-read found batch data! at " + getNodeLocation(node));
                     }
 
                     if (pageIndex.get() == 0) {
                         if (executor.isDebug()) {
-                            executor.logDebug("etl-read at page 0! at " + getNodeLocation(node));
+                            executor.logger().logDebug("etl-read at page 0! at " + getNodeLocation(node));
                         }
                         if (transformNodeList.isEmpty()) {
                             Map<String, XmlNode> autoMapping = new LinkedHashMap<>();
@@ -471,14 +471,14 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                         loadSql.set(loadSqlBuilder.toString());
                         if (executor.isDebug()) {
-                            executor.logDebug("etl load: \n" + loadSql.get());
+                            executor.logger().logDebug("etl load: \n" + loadSql.get());
                         }
 
                         latchPrepared.countDown();
                     }
 
                     if (executor.isDebug()) {
-                        executor.logDebug("etl-read convert data, at " + getNodeLocation(node));
+                        executor.logger().logDebug("etl-read convert data, at " + getNodeLocation(node));
                     }
 
                     int currentCount = 0;
@@ -520,7 +520,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                     if (currentCount < taskReadBatchSize) {
                         if (executor.isDebug()) {
-                            executor.logDebug("etl-read lower than read batch size! at " + getNodeLocation(node));
+                            executor.logger().logDebug("etl-read lower than read batch size! at " + getNodeLocation(node));
                         }
                         return false;
                     }
@@ -528,7 +528,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                     pageIndex.incrementAndGet();
                     if (executor.isDebug()) {
-                        executor.logDebug("etl-read next page " + pageIndex.get() + " loop! at " + getNodeLocation(node));
+                        executor.logger().logDebug("etl-read next page " + pageIndex.get() + " loop! at " + getNodeLocation(node));
                     }
                     return true;
                 } catch (Throwable e) {
@@ -548,7 +548,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                         throw throwReadTask.get();
                     }
                     if (executor.isDebug()) {
-                        executor.logDebug("etl-write write once batch " + onceArgs.size() + "! at " + getNodeLocation(node));
+                        executor.logger().logDebug("etl-write write once batch " + onceArgs.size() + "! at " + getNodeLocation(node));
                     }
                     JdbcResolver.batchByListableValues(loadConn, loadSql.get(), onceArgs.iterator(), taskWriteBatchSize);
                     commitCount += onceArgs.size();
@@ -556,7 +556,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                     if (commitCount >= commitSize) {
                         if (executor.isDebug()) {
-                            executor.logDebug("etl-write commit once! at " + getNodeLocation(node));
+                            executor.logger().logDebug("etl-write commit once! at " + getNodeLocation(node));
                         }
                         executor.sqlTransCommit(loadDatasource, context);
                         commitCount = 0;
@@ -573,7 +573,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                             double missWriteSleepMs = 1;
                             while (loadArgs.size() >= taskReadBatchSize * 2) {
                                 if (executor.isDebug()) {
-                                    executor.logDebug("etl-read await " + ((long) missWriteSleepMs) + "(ms) writer consumer! at " + getNodeLocation(node));
+                                    executor.logger().logDebug("etl-read await " + ((long) missWriteSleepMs) + "(ms) writer consumer! at " + getNodeLocation(node));
                                 }
                                 try {
                                     Thread.sleep((long) missWriteSleepMs);
@@ -593,7 +593,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                         }
                     } catch (Throwable e) {
                         throwReadTask.set(e);
-                        executor.logError("etl read task error: " + e.getMessage(), e);
+                        executor.logger().logError("etl read task error: " + e.getMessage(), e);
                     } finally {
                         latchPrepared.countDown();
                         latchReadFinish.countDown();
@@ -605,13 +605,13 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 Runnable writeTask = () -> {
                     try {
                         if (executor.isDebug()) {
-                            executor.logDebug("etl-write await reader prepared! at " + getNodeLocation(node));
+                            executor.logger().logDebug("etl-write await reader prepared! at " + getNodeLocation(node));
                         }
 
                         latchPrepared.await();
                         if (throwReadTask.get() != null) {
                             if (executor.isDebug()) {
-                                executor.logDebug("etl-write found reader prepare error! at " + getNodeLocation(node));
+                                executor.logger().logDebug("etl-write found reader prepare error! at " + getNodeLocation(node));
                             }
                             return;
                         }
@@ -624,7 +624,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                             if (latchReadFinish.getCount() <= 0 && loadArgs.isEmpty()) {
                                 if (executor.isDebug()) {
-                                    executor.logDebug("etl-write no more data! at " + getNodeLocation(node));
+                                    executor.logger().logDebug("etl-write no more data! at " + getNodeLocation(node));
                                 }
                                 hasData = false;
                                 break;
@@ -634,7 +634,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                             while (onceCount < taskWriteBatchSize) {
                                 if (latchReadFinish.getCount() <= 0 && loadArgs.isEmpty()) {
                                     if (executor.isDebug()) {
-                                        executor.logDebug("etl-write no more data, process last once! at " + getNodeLocation(node));
+                                        executor.logger().logDebug("etl-write no more data, process last once! at " + getNodeLocation(node));
                                     }
                                     hasData = false;
                                     break;
@@ -650,7 +650,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                                 }
                                 if (row == null) {
                                     if (executor.isDebug()) {
-                                        executor.logDebug("etl-write await " + ((long) missDataSleepMs) + "(ms) reader producer! at " + getNodeLocation(node));
+                                        executor.logger().logDebug("etl-write await " + ((long) missDataSleepMs) + "(ms) reader producer! at " + getNodeLocation(node));
                                     }
                                     try {
                                         Thread.sleep((long) missDataSleepMs);
@@ -668,7 +668,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                             if (onceCount > 0) {
                                 if (executor.isDebug()) {
-                                    executor.logDebug("etl-write write once " + onceArgs.size() + "! at " + getNodeLocation(node));
+                                    executor.logger().logDebug("etl-write write once " + onceArgs.size() + "! at " + getNodeLocation(node));
                                 }
                                 JdbcResolver.batchByListableValues(loadConn, loadSql.get(), onceArgs.iterator(), taskWriteBatchSize);
                                 commitCount += onceCount;
@@ -678,7 +678,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
                             if (commitCount >= taskCommitSize) {
                                 if (executor.isDebug()) {
-                                    executor.logDebug("etl-write commit once! at " + getNodeLocation(node));
+                                    executor.logger().logDebug("etl-write commit once! at " + getNodeLocation(node));
                                 }
                                 executor.sqlTransCommit(loadDatasource, context);
                                 commitCount = 0;
@@ -687,7 +687,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                         }
                     } catch (Throwable e) {
                         throwWriteTask.set(e);
-                        executor.logError("etl write task error: " + e.getMessage(), e);
+                        executor.logger().logError("etl write task error: " + e.getMessage(), e);
                     } finally {
                         latchAllDone.countDown();
                     }
@@ -742,7 +742,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                     try {
                         conn.close();
                     } catch (SQLException e) {
-                        executor.logWarn(() -> e.getMessage(), e);
+                        executor.logger().logWarn(() -> e.getMessage(), e);
                         e.printStackTrace();
                     }
                 }

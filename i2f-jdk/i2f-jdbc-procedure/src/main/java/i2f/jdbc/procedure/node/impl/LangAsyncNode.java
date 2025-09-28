@@ -45,7 +45,7 @@ public class LangAsyncNode extends AbstractExecutorNode {
                 }
                 executor.execAsProcedure(node, context, false, false);
             } catch (Throwable e) {
-                executor.logWarn(() -> e.getMessage(), e);
+                executor.logger().logWarn(() -> e.getMessage(), e);
                 e.printStackTrace();
             } finally {
                 latch.countDown();

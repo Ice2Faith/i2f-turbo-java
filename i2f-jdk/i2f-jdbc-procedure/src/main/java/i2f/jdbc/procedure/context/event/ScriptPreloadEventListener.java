@@ -50,7 +50,7 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
         count.incrementAndGet();
         JdbcProcedureMetaMapRefreshedEvent evt = (JdbcProcedureMetaMapRefreshedEvent) event;
         if (executor != null) {
-            executor.logInfo(() -> XProc4jConsts.NAME + " script-preload begin...");
+            executor.logger().logInfo(() -> XProc4jConsts.NAME + " script-preload begin...");
         }
         long beginTs = System.currentTimeMillis();
         Map<String, ProcedureMeta> metaMap = evt.getMetaMap();
@@ -66,7 +66,7 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
         long endTs = System.currentTimeMillis();
         long useTs = endTs - beginTs;
         if (executor != null) {
-            executor.logInfo(() -> XProc4jConsts.NAME + " script-preload finish, use " + useTs + "(ms).");
+            executor.logger().logInfo(() -> XProc4jConsts.NAME + " script-preload finish, use " + useTs + "(ms).");
         }
         return false;
     }
@@ -81,14 +81,14 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
                 try {
                     OgnlUtil.parseExpressionTreeNode(node.getTextBody());
                 } catch (Throwable e) {
-                    executor.logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body error :" + e.getMessage(), e);
+                    executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body error :" + e.getMessage(), e);
                 }
             } else if (TagConsts.LANG_EVAL_TS.equals(tagName)
                     || TagConsts.LANG_EVAL_TINYSCRIPT.equals(tagName)) {
                 try {
                     TinyScript.parse(node.getTextBody());
                 } catch (Throwable e) {
-                    executor.logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body  error :" + e.getMessage(), e);
+                    executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body  error :" + e.getMessage(), e);
                 }
             } else if (TagConsts.LANG_EVAL_JAVA.equals(tagName)) {
                 List<XmlNode> children = node.getChildren();
@@ -108,14 +108,14 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
                 try {
                     MemoryCompiler.findCompileClass(codeEntry.getValue(), codeEntry.getKey() + ".java", codeEntry.getKey());
                 } catch (Throwable e) {
-                    executor.logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body error :" + e.getMessage() + "\n source code:\n" + codeEntry.getValue(), e);
+                    executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body error :" + e.getMessage() + "\n source code:\n" + codeEntry.getValue(), e);
                 }
             } else if (TagConsts.LANG_EVAL_GROOVY.equals(tagName)) {
                 String fullSourceCode = LangEvalGroovyNode.getFullSourceCode(node.getTextBody());
                 try {
                     GroovyScript.parseAsClass(fullSourceCode);
                 } catch (Throwable e) {
-                    executor.logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body error :" + e.getMessage() + "\n source code:\n" + fullSourceCode, e);
+                    executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body error :" + e.getMessage() + "\n source code:\n" + fullSourceCode, e);
                 }
             }
         }
@@ -130,28 +130,28 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
                         try {
                             OgnlUtil.parseExpressionTreeNode(node.getTagAttrMap().get(entry.getKey()));
                         } catch (Throwable e) {
-                            executor.logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage(), e);
+                            executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage(), e);
                         }
                     } else if (FeatureConsts.EVAL_TS.equals(feature)
                             || FeatureConsts.EVAL_TINYSCRIPT.equals(feature)) {
                         try {
                             TinyScript.parse(node.getTagAttrMap().get(entry.getKey()));
                         } catch (Throwable e) {
-                            executor.logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage(), e);
+                            executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage(), e);
                         }
                     } else if (FeatureConsts.EVAL_JAVA.equals(feature)) {
                         Map.Entry<String, String> codeEntry = LangEvalJavaNode.getFullJavaSourceCode("", "", node.getTagAttrMap().get(entry.getKey()));
                         try {
                             MemoryCompiler.findCompileClass(codeEntry.getValue(), codeEntry.getKey() + ".java", codeEntry.getKey());
                         } catch (Throwable e) {
-                            executor.logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage() + "\n source code:\n" + codeEntry.getValue(), e);
+                            executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage() + "\n source code:\n" + codeEntry.getValue(), e);
                         }
                     } else if (FeatureConsts.EVAL_GROOVY.equals(feature)) {
                         String fullSourceCode = LangEvalGroovyNode.getFullSourceCode(node.getTagAttrMap().get(entry.getKey()));
                         try {
                             GroovyScript.parseAsClass(fullSourceCode);
                         } catch (Throwable e) {
-                            executor.logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage() + "\n source code:\n" + fullSourceCode, e);
+                            executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage() + "\n source code:\n" + fullSourceCode, e);
                         }
                     }
                 }
@@ -166,7 +166,7 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
                     try {
                         OgnlUtil.parseExpressionTreeNode(entry.getValue());
                     } catch (Throwable e) {
-                        executor.logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " error :" + e.getMessage(), e);
+                        executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " error :" + e.getMessage(), e);
                     }
                 }
             }

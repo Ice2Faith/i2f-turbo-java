@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.reportor;
 
+import groovy.lang.GroovyShell;
 import i2f.compiler.MemoryCompiler;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.ognl.OgnlUtil;
@@ -11,7 +12,6 @@ import i2f.jdbc.procedure.node.impl.LangEvalJavaNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.lru.LruList;
 import i2f.match.regex.RegexPattens;
-import groovy.lang.GroovyShell;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
@@ -66,7 +66,7 @@ public class GrammarReporter {
                         if (meta.getType() == ProcedureMeta.Type.XML) {
                             XmlNode node = (XmlNode) meta.getTarget();
                             if (executor.isDebug()) {
-                                executor.logDebug(XProc4jConsts.NAME + " report xml grammar rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + XmlNode.getNodeLocation(node));
+                                executor.logger().logDebug(XProc4jConsts.NAME + " report xml grammar rate " + String.format("%6.02f%%", reportSize.get() * 100.0 / mapSize) + ", on node: " + node.getTagName() + ", at " + XmlNode.getNodeLocation(node));
                             }
                             AtomicInteger reportCount = new AtomicInteger(0);
                             AtomicInteger nodeCount = new AtomicInteger(0);

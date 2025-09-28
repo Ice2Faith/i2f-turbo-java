@@ -31,6 +31,10 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     public static final String POINT_KEY_END_TS = "endTs";
     public static final String POINT_KEY_USE_TS = "useTs";
 
+    public static final String POINT_KEY_LOOP_IS_FIRST = "loopIsFirst";
+    public static final String POINT_KEY_LOOP_INDEX = "loopIndex";
+    public static final String POINT_KEY_LOOP_VALUE = "loopValue";
+
     public static void walkTree(XmlNode node, Consumer<XmlNode> consumer) {
         if (node == null) {
             return;
@@ -106,7 +110,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             try {
                 onBefore(pointContext, node, context, executor);
             } catch (Throwable e) {
-                executor.logWarn(() -> e.getMessage(), e);
+                executor.logger().logWarn(() -> e.getMessage(), e);
             }
 
             execInner(node, context, executor);
@@ -116,7 +120,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             try {
                 onAfter(pointContext, node, context, executor);
             } catch (Throwable e) {
-                executor.logWarn(() -> e.getMessage(), e);
+                executor.logger().logWarn(() -> e.getMessage(), e);
             }
 
             if (TagConsts.PROCEDURE.equals(node.getTagName())) {
@@ -133,7 +137,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 try {
                     onThrowing(e, pointContext, node, context, executor);
                 } catch (Throwable ex) {
-                    executor.logWarn(() -> ex.getMessage(), e);
+                    executor.logger().logWarn(() -> ex.getMessage(), e);
                 }
             }
 
@@ -189,7 +193,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 SignalException se = (SignalException) re;
 
                 if (se.getCause() == null || !se.hasLogout()) {
-                    executor.logError(() -> se.getMessage(), se);
+                    executor.logger().logError(() -> se.getMessage(), se);
                     se.setHasLogout(true);
                 }
             }
@@ -219,7 +223,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             try {
                 onThrowing(re, pointContext, node, context, executor);
             } catch (Throwable ex) {
-                executor.logWarn(() -> ex.getMessage(), ex);
+                executor.logger().logWarn(() -> ex.getMessage(), ex);
             }
 
             throw re;
@@ -244,7 +248,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             try {
                 onFinally(pointContext, node, context, executor);
             } catch (Throwable e) {
-                executor.logWarn(() -> e.getMessage(), e);
+                executor.logger().logWarn(() -> e.getMessage(), e);
             }
         }
     }

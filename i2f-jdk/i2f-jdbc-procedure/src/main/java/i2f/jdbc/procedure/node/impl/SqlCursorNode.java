@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.node.impl;
 
 import i2f.bindsql.BindSql;
+import i2f.clock.SystemClock;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.cursor.JdbcCursor;
 import i2f.jdbc.procedure.consts.AttrConsts;
@@ -9,6 +10,7 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
+import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
@@ -16,9 +18,7 @@ import i2f.page.ApiPage;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -110,6 +110,17 @@ public class SqlCursorNode extends AbstractExecutorNode {
             bql = bql.concat(getTrackingComment(node));
         }
 
+        Map<String, Object> pointContext = new HashMap<>();
+        String snapshotTraceId = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
+        String location = getNodeLocation(node);
+        boolean isDebugMode = executor.isDebug();
+        pointContext.put(POINT_KEY_LOCATION, location);
+        pointContext.put(POINT_KEY_IS_DEBUG_MODE, isDebugMode);
+        pointContext.put(POINT_KEY_SNAPSHOT_TRACE_ID, snapshotTraceId);
+
+        int loopIndex = 0;
+        boolean loopIsFirst = true;
+
         int pageIndex = 0;
         if (batchSize == null || batchSize <= 0) {
             batchSize = 2000;
@@ -135,7 +146,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
                     try {
                         if (!cursor.hasRow()) {
                             if (executor.isDebug()) {
-                                executor.logDebug("no data found! at " + getNodeLocation(node));
+                                executor.logger().logDebug("no data found! at " + getNodeLocation(node));
                             }
                             break;
                         }
@@ -147,17 +158,28 @@ public class SqlCursorNode extends AbstractExecutorNode {
                     list = executor.sqlQueryPage(datasource, bql, context, resultType, new ApiPage(pageIndex, batchSize));
                     if (list.isEmpty()) {
                         if (executor.isDebug()) {
-                            executor.logDebug("no data found! at " + getNodeLocation(node));
+                            executor.logger().logDebug("no data found! at " + getNodeLocation(node));
                         }
                         break;
                     }
                 }
 
                 if (executor.isDebug()) {
-                    executor.logDebug("found batch data! at " + getNodeLocation(node));
+                    executor.logger().logDebug("found batch data! at " + getNodeLocation(node));
                 }
 
                 if (acceptBatch) {
+                    long bts = SystemClock.currentTimeMillis();
+
+                    pointContext.put(POINT_KEY_BEGIN_TS, bts);
+                    pointContext.put(POINT_KEY_LOOP_IS_FIRST, loopIsFirst);
+                    pointContext.put(POINT_KEY_LOOP_INDEX, loopIndex);
+                    pointContext.put(POINT_KEY_LOCATION, location + "@" + loopIndex);
+
+                    pointContext.put(POINT_KEY_LOOP_VALUE, list);
+
+                    loopIndex++;
+                    loopIsFirst = false;
                     try {
                         executor.visitSet(context, item, list);
                         executor.execAsProcedure(bodyNode, context, false, false);
@@ -165,11 +187,35 @@ public class SqlCursorNode extends AbstractExecutorNode {
                         continue;
                     } catch (BreakSignalException e) {
                         break;
+                    } finally {
+                        long ets = SystemClock.currentTimeMillis();
+                        long useTs = ets - bts;
+                        XmlExecUseTimeEvent event = new XmlExecUseTimeEvent();
+                        event.setExecutorNode(this);
+                        event.setPointContext(pointContext);
+                        event.setNode(node);
+                        event.setContext(context);
+                        event.setExecutor(executor);
+                        executor.sendEvent(event);
+                        event.setUseTs(useTs);
+                        executor.publishEvent(event);
                     }
                 } else {
                     boolean breakSignal = false;
                     int count = 0;
                     for (Object obj : list) {
+                        long bts = SystemClock.currentTimeMillis();
+
+                        pointContext.put(POINT_KEY_BEGIN_TS, bts);
+                        pointContext.put(POINT_KEY_LOOP_IS_FIRST, loopIsFirst);
+                        pointContext.put(POINT_KEY_LOOP_INDEX, loopIndex);
+                        pointContext.put(POINT_KEY_LOCATION, location + "@" + loopIndex);
+
+                        pointContext.put(POINT_KEY_LOOP_VALUE, obj);
+
+                        loopIndex++;
+                        loopIsFirst = false;
+
                         count++;
                         try {
                             executor.visitSet(context, item, obj);
@@ -179,6 +225,18 @@ public class SqlCursorNode extends AbstractExecutorNode {
                         } catch (BreakSignalException e) {
                             breakSignal = true;
                             break;
+                        } finally {
+                            long ets = SystemClock.currentTimeMillis();
+                            long useTs = ets - bts;
+                            XmlExecUseTimeEvent event = new XmlExecUseTimeEvent();
+                            event.setExecutorNode(this);
+                            event.setPointContext(pointContext);
+                            event.setNode(node);
+                            event.setContext(context);
+                            event.setExecutor(executor);
+                            executor.sendEvent(event);
+                            event.setUseTs(useTs);
+                            executor.publishEvent(event);
                         }
                     }
 

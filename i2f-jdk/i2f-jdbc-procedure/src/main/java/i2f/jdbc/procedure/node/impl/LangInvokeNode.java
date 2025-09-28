@@ -76,7 +76,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
             try {
                 evalObj = executor.attrValue(AttrConsts.ARG + argEntry.getKey(), FeatureConsts.VISIT, node, context);
             } catch (Exception e) {
-                executor.logWarn(() -> e.getMessage(), e);
+                executor.logger().logWarn(() -> e.getMessage(), e);
             }
             if (evalObj == null) {
                 evalObj = argScript;

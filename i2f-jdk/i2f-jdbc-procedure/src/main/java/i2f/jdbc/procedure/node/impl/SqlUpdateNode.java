@@ -37,7 +37,7 @@ public class SqlUpdateNode extends AbstractExecutorNode {
         }
         int row = executor.sqlUpdate(datasource, bql, context);
         if (executor.isDebug()) {
-            executor.logDebug("found data is : " + row + "! at " + getNodeLocation(node));
+            executor.logger().logDebug("found data is : " + row + "! at " + getNodeLocation(node));
         }
         if (result != null) {
             Object val = executor.resultValue(row, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);

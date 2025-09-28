@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.event;
 
 import i2f.jdbc.procedure.executor.event.ExecutorContextEvent;
 import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,4 +20,15 @@ public class XmlExecUseTimeEvent extends ExecutorContextEvent {
     protected Map<String, Object> pointContext;
     protected XmlNode node;
     protected long useTs;
+
+    public String getPreferLocation() {
+        String location = null;
+        if (pointContext != null) {
+            location = (String) pointContext.get(AbstractExecutorNode.POINT_KEY_LOCATION);
+        }
+        if (location == null || location.isEmpty()) {
+            location = XmlNode.getNodeLocation(node);
+        }
+        return location;
+    }
 }
