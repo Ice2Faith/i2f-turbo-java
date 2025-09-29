@@ -29,6 +29,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -56,11 +58,19 @@ import java.util.Set;
 @EnableConfigurationProperties({
         SpringJdbcProcedureProperties.class
 })
-public class SpringContextJdbcProcedureExecutorAutoConfiguration implements ApplicationContextAware {
+public class SpringContextJdbcProcedureExecutorAutoConfiguration implements ApplicationContextAware, ApplicationRunner {
     private ApplicationContext applicationContext;
 
     @Autowired
     private SpringJdbcProcedureProperties jdbcProcedureProperties;
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        new Thread(() -> {
+            JdbcProcedureContext bean = applicationContext.getBean(JdbcProcedureContext.class);
+            bean.getMetaMap();
+        }).start();
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
