@@ -461,29 +461,26 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
 
         @Override
         public IMethod findMethod(Object context, String naming, List<Object> args) {
-            LruList<IMethod> list = ContextHolder.INVOKE_METHOD_MAP.get(naming);
-            if (list != null && !list.isEmpty()) {
-                IMethod method = ReflectResolver.matchExecMethod(list, args);
+            LruList<IMethod> namingMethods = ContextHolder.INVOKE_METHOD_MAP.get(naming);
+            if (namingMethods != null && !namingMethods.isEmpty()) {
+                IMethod method = namingMethods.touchDelegate(list -> ReflectResolver.matchExecMethod(list, args));
                 if (method != null) {
-                    list.touch(method);
                     return method;
                 }
             }
 
             LruList<Method> methods = getExecutorMethods(naming);
             if (methods != null && !methods.isEmpty()) {
-                Method method = ReflectResolver.matchExecutable(methods, args);
+                Method method = methods.touchDelegate(list -> ReflectResolver.matchExecutable(list, args));
                 if (method != null) {
-                    methods.touch(method);
                     return new JdkInstanceStaticMethod(new ExecutorMethodProvider(executor), method);
                 }
             }
 
             methods = getExecContextMethods(naming);
             if (methods != null && !methods.isEmpty()) {
-                Method method = ReflectResolver.matchExecutable(methods, args);
+                Method method = methods.touchDelegate(list -> ReflectResolver.matchExecutable(list, args));
                 if (method != null) {
-                    methods.touch(method);
                     return new JdkInstanceStaticMethod(new ExecContextMethodProvider(executor, context), method);
                 }
             }
