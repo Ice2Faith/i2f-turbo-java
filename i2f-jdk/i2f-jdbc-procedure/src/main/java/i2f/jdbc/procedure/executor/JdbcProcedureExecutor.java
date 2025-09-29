@@ -6,6 +6,7 @@ import i2f.context.std.INamingContext;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.environment.std.IEnvironment;
 import i2f.form.dialog.DialogBoxes;
+import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
@@ -319,6 +320,8 @@ public interface JdbcProcedureExecutor {
     Connection getConnection(String datasource, Map<String, Object> params);
 
     List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType);
+
+    List<QueryColumn> sqlQueryColumns(String datasource, BindSql bql, Map<String, Object> params);
 
     Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType);
 

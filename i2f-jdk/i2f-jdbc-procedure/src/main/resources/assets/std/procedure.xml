@@ -976,7 +976,7 @@ eval-ts使用TinyScript引擎进行处理
     其他数据库也一样，只不过根据不同的数据库类型实现相同的分页包装
     内部语句会被包装为分页语句进行执行
      -->
-    <sql-query-list result="">
+    <sql-query-list result="" result-type="" offset="" limit="">
         <trim prefix="select" prefixOverrides="," suffixOverrides=",">
             id,
             username,
@@ -1015,6 +1015,36 @@ eval-ts使用TinyScript引擎进行处理
         <sql-query-list result="userList" script="v_sql"/>
 
         <sql-query-list script="v_sql" offset="100" limit="15"/>
+    </script-segment>
+
+    <!--
+    表示一个查询列元信息的查询语句，预期为多行数据，执行结果放到result指定的变量名中
+    返回这个查询的列头的元数据信息，每行的元素为 QueryColumn 类型的数据
+    用以提供查询的列的列名信息
+     -->
+    <sql-query-columns result="">
+        select *
+        from sys_user
+        where 1!=1
+    </sql-query-columns>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <sql-query-columns result="v_columns">
+            select *
+            from sys_user
+            where 1!=1
+        </sql-query-columns>
+
+        <sql-query-columns result="v_columns" script="v_sql"/>
+
+        <!-- 这里直接举例拼接列名 -->
+        <lang-set result="v_sql" value.string=""/>
+        <lang-foreach collection="v_columns" item="item" first="v_first">
+            <lang-if test="v_first==false">
+                <lang-set result="v_sql" value.render="$!{v_sql},"/>
+            </lang-if>
+            <lang-set result="v_sql" value.render="$!{v_sql}$!{item.label}"/>
+        </lang-foreach>
     </script-segment>
 
     <!--
