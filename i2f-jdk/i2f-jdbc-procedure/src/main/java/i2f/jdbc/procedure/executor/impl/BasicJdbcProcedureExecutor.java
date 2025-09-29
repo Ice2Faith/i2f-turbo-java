@@ -15,6 +15,8 @@ import i2f.environment.impl.ListableDelegateEnvironment;
 import i2f.environment.std.IEnvironment;
 import i2f.invokable.method.IMethod;
 import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.data.QueryColumn;
+import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.procedure.consts.*;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
@@ -191,6 +193,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new ScriptSegmentNode());
         ret.add(new SqlCursorNode());
         ret.add(new SqlEtlNode());
+        ret.add(new SqlQueryColumnsNode());
         ret.add(new SqlQueryListNode());
         ret.add(new SqlQueryObjectNode());
         ret.add(new SqlQueryRowNode());
@@ -1474,6 +1477,36 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             execBql = bql;
             List<?> list = JdbcResolver.list(conn, bql, resultType, -1, getColumnNameMapper(resultType));
+            if (isDebug()) {
+                logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
+            }
+            return list;
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\n" + execBql) : e.getMessage(), e);
+            }
+        } finally {
+            long ets = SystemClock.currentTimeMillis();
+            long useTs = ets - bts;
+            reportSlowSql(useTs, execBql);
+        }
+    }
+
+    @Override
+    public List<QueryColumn> sqlQueryColumns(String datasource, BindSql bql, Map<String, Object> params) {
+        long bts = SystemClock.currentTimeMillis();
+        BindSql execBql = null;
+        try {
+            Connection conn = getConnection(datasource, params);
+            fillDatabaseDialectType(params, conn);
+            if (isDebug()) {
+                logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
+            }
+            execBql = bql;
+            QueryResult qr = JdbcResolver.query(conn, bql, 1);
+            List<QueryColumn> list = qr.getColumns();
             if (isDebug()) {
                 logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }

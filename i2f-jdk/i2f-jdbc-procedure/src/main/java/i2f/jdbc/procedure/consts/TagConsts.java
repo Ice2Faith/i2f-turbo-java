@@ -103,6 +103,7 @@ public interface TagConsts {
     String SQL_QUERY_OBJECT = "sql-query-object";
     String SQL_QUERY_ROW = "sql-query-row";
     String SQL_UPDATE = "sql-update";
+    String SQL_QUERY_COLUMNS = "sql-query-columns";
 
     String SQL_DIALECT = "sql-dialect";
     String SQL_SCOPE = "sql-scope";

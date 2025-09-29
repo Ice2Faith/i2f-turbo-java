@@ -35,6 +35,7 @@
                 |lang-synchronized*
                 |sql-query-row*
                 |sql-query-list*
+                |sql-query-columns*
                 |sql-query-object*
                 |sql-update*
                 |sql-script*
@@ -859,6 +860,17 @@
 
         <!ATTLIST sql-query-list datasource.visit CDATA #IMPLIED>
         <!ATTLIST sql-query-list datasource.visit.string CDATA #IMPLIED>
+
+
+        <!ELEMENT sql-query-columns (EMPTY|sql-dialect*
+                |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
+                )>
+        <!ATTLIST sql-query-columns datasource CDATA #IMPLIED>
+        <!ATTLIST sql-query-columns script CDATA #IMPLIED>
+        <!ATTLIST sql-query-columns result CDATA #IMPLIED>
+
+        <!ATTLIST sql-query-columns datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-query-columns datasource.visit.string CDATA #IMPLIED>
 
         <!ELEMENT sql-query-object (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
