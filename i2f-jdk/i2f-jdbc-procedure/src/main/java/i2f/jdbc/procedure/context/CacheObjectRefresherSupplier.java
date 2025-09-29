@@ -68,7 +68,9 @@ public abstract class CacheObjectRefresherSupplier<R, T> {
         Thread thread = new Thread(() -> {
             while (refreshing.get()) {
                 try {
-                    refresh();
+                    synchronized (CacheObjectRefresherSupplier.this) {
+                        refresh();
+                    }
                 } catch (Exception e) {
                 }
                 try {
