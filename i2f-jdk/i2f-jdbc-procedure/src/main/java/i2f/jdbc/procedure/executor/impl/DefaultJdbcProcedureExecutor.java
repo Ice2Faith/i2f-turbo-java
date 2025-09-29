@@ -13,13 +13,11 @@ import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.inflater.impl.OgnlMybatisMapperInflater;
-import i2f.lru.LruList;
 import i2f.reflect.ReflectResolver;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author Ice2Faith
@@ -27,7 +25,6 @@ import java.util.Map;
  */
 public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
     protected volatile MybatisMapperInflater mybatisMapperInflater;
-
     public DefaultJdbcProcedureExecutor() {
     }
 
@@ -90,27 +87,29 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
             }
 
             JdbcProcedureExecutor executor = this;
-            LruList<EvalScriptProvider> providers = getEvalScriptProviders();
-            List<ScriptDirective.VelocityScriptProvider> adapters = new ArrayList<>();
-            for (EvalScriptProvider item : providers) {
-                adapters.add(new ScriptDirective.VelocityScriptProvider() {
-                    @Override
-                    public boolean support(String lang) {
-                        return item.support(lang);
-                    }
-
-                    @Override
-                    public Object eval(String script, Object params) {
-                        Map<String, Object> ctx = new HashMap<>();
-                        if (params instanceof Map) {
-                            ctx = (Map<String, Object>) params;
-                        } else {
-                            ctx.put("root", params);
+            CopyOnWriteArrayList<ScriptDirective.VelocityScriptProvider> adapters = new CopyOnWriteArrayList<>();
+            getEvalScriptProviders().sync(list -> {
+                for (EvalScriptProvider item : list) {
+                    adapters.add(new ScriptDirective.VelocityScriptProvider() {
+                        @Override
+                        public boolean support(String lang) {
+                            return item.support(lang);
                         }
-                        return item.eval(script, ctx, executor);
-                    }
-                });
-            }
+
+                        @Override
+                        public Object eval(String script, Object params) {
+                            Map<String, Object> ctx = new HashMap<>();
+                            if (params instanceof Map) {
+                                ctx = (Map<String, Object>) params;
+                            } else {
+                                ctx.put("root", params);
+                            }
+                            return item.eval(script, ctx, executor);
+                        }
+                    });
+                }
+            });
+
             ScriptDirective.THREAD_PROVIDERS.set(adapters);
             return VelocityGenerator.render(script, renderMap);
         } catch (Exception e) {

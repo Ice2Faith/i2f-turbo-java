@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -20,7 +21,7 @@ import java.util.stream.Stream;
  * @date 2025/5/13 11:24
  */
 public class LruList<E> implements List<E> {
-    protected final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    protected final ReadWriteLock lock = new ReentrantReadWriteLock();
     protected final LinkedList<E> delegate = new LinkedList<>();
 
     public LruList() {
@@ -139,8 +140,21 @@ public class LruList<E> implements List<E> {
         }
     }
 
-    public void syncDelegate(Consumer<List<E>> consumer) {
-        lock.writeLock().unlock();
+    public E touchDelegate(Function<List<E>, E> extractor) {
+        lock.writeLock().lock();
+        try {
+            E elem = extractor.apply(delegate);
+            if (elem != null) {
+                touch(elem);
+            }
+            return elem;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void sync(Consumer<List<E>> consumer) {
+        lock.writeLock().lock();
         try {
             consumer.accept(delegate);
         } finally {
@@ -148,16 +162,7 @@ public class LruList<E> implements List<E> {
         }
     }
 
-    public void sync(Consumer<LruList<E>> consumer) {
-        lock.writeLock().unlock();
-        try {
-            consumer.accept(this);
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    public ReentrantReadWriteLock getLock() {
+    public ReadWriteLock getLock() {
         return lock;
     }
 
