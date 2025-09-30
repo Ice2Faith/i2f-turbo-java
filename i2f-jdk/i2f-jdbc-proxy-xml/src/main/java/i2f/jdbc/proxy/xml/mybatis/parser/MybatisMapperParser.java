@@ -201,11 +201,16 @@ public class MybatisMapperParser {
             builder.append("</script>");
             document = XmlUtil.parseXml(builder.toString());
         } catch (Throwable e) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("<script>");
-            builder.append(script);
-            builder.append("</script>");
-            document = XmlUtil.parseXml(builder.toString());
+            try {
+                StringBuilder builder = new StringBuilder();
+                builder.append("<script>");
+                builder.append(script);
+                builder.append("</script>");
+                document = XmlUtil.parseXml(builder.toString());
+            } catch (Exception ex) {
+                ex.addSuppressed(e);
+                throw ex;
+            }
         }
         Node node = XmlUtil.getRootNode(document);
         return parseSqlNode(node);
