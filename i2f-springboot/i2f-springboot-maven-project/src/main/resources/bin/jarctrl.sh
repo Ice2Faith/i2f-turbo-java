@@ -642,10 +642,13 @@ function status() {
 function findLogFile() {
       _func_ret=
 
-      _p_log_file=`ls -t ${LOG_DIR} | grep .log | grep -v grep | grep ${AppName} | head -n 1`
+      # this rule only support 1 level dir find
+      # _p_log_file=`ls -t ${LOG_DIR} | grep .log | grep -v grep | grep ${AppName} | head -n 1`
+      # this rule support multi level dir find
+      _p_log_file=`find ${LOG_DIR} -type f -name '*.log' -exec ls -t {} + | grep -v grep | grep ${AppName} | head -n 1`
       if [[ "${_p_log_file}" = "" ]]; then
         echo -e "\033[0;31m not found ${AppName}*.log , try find most newest log file... \033[0m"
-        _p_log_file=`ls -t ${LOG_DIR} | grep .log | grep -v grep | head -n 1`
+        _p_log_file=`find ${LOG_DIR} -type f -name '*.log' -exec ls -t {} + | grep -v grep | head -n 1`
       fi
 
       _func_ret=$_p_log_file
@@ -658,8 +661,8 @@ function log() {
     _p_log_file=$_func_ret
 
     if [[ -n "$_p_log_file" ]]; then
-        echo -e "\033[0;34m found log file ${LOG_DIR}/$_p_log_file \033[0m"
-        tail -f -n $TAIL_LOG_LINES ${LOG_DIR}/$_p_log_file
+        echo -e "\033[0;34m found log file $_p_log_file \033[0m"
+        tail -f -n $TAIL_LOG_LINES $_p_log_file
     else
       echo -e "\033[0;31m not found log file like ${AppName}*.log. \033[0m"
     fi
@@ -672,8 +675,8 @@ function except() {
     _p_log_file=$_func_ret
 
     if [[ -n "$_p_log_file" ]]; then
-        echo -e "\033[0;34m found log file ${LOG_DIR}/$_p_log_file \033[0m"
-        tail -f -n $TAIL_EXCEPT_LINES ${LOG_DIR}/$_p_log_file | grep -in -B $TAIL_EXCEPT_BEFORE_LINES -A $TAIL_EXCEPT_AFTER_LINES exception
+        echo -e "\033[0;34m found log file $_p_log_file \033[0m"
+        tail -f -n $TAIL_EXCEPT_LINES $_p_log_file | grep -in -B $TAIL_EXCEPT_BEFORE_LINES -A $TAIL_EXCEPT_AFTER_LINES exception
     else
       echo -e "\033[0;31m not found log file like ${AppName}*.log. \033[0m"
     fi
@@ -773,7 +776,7 @@ function prepareAppContext(){
       _p_log_file=$_func_ret
 
       if [[ -n "$_p_log_file" ]]; then
-        LOG_FILE=${LOG_DIR}/$_p_log_file
+        LOG_FILE=$_p_log_file
       fi
 }
 
