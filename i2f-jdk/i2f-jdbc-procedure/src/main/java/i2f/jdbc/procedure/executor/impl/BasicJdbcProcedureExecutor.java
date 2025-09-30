@@ -1502,13 +1502,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             Connection conn = getConnection(datasource, params);
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
-                logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
+                logger().logDebug("sql-query-columns:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
             execBql = bql;
             QueryResult qr = JdbcResolver.query(conn, bql, 1);
             List<QueryColumn> list = qr.getColumns();
             if (isDebug()) {
-                logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
+                logger().logDebug("sql-query-columns:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }
             return list;
         } catch (Exception e) {
