@@ -17,6 +17,7 @@ import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.lru.LruList;
+import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import lombok.Data;
@@ -289,6 +290,10 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 return executor.test(expression, context);
             }
 
+            public boolean sql_adapt(String datasource, String databases) {
+                return executor.sqlAdapt(datasource, databases, (Map<String, Object>) context);
+            }
+
             public void sql_trans_begin(String datasource) {
                 executor.sqlTransBegin(datasource, Connection.TRANSACTION_READ_COMMITTED, (Map<String, Object>) context);
             }
@@ -317,8 +322,46 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
                 return executor.sqlQueryList(datasource, new BindSql(sql, new ArrayList<>(Arrays.asList(args))), (Map<String, Object>) context, null);
             }
 
+            public Object sql_query_page(String datasource, int offset, int size, String sql, Object... args) {
+                return executor.sqlQueryPage(datasource, new BindSql(sql, new ArrayList<>(Arrays.asList(args))), (Map<String, Object>) context, null, new ApiOffsetSize(offset, size));
+            }
+
+            public Object sql_query_columns(String datasource, String sql, Object... args) {
+                return executor.sqlQueryColumns(datasource, new BindSql(sql, new ArrayList<>(Arrays.asList(args))), (Map<String, Object>) context);
+            }
+
             public Object sql_update(String datasource, String sql, Object... args) {
                 return executor.sqlUpdate(datasource, new BindSql(sql, new ArrayList<>(Arrays.asList(args))), (Map<String, Object>) context);
+            }
+
+            public Object sql_script_query_object(String datasource, String sql) {
+                BindSql bql = executor.sqlScriptString(datasource, Collections.singletonList(new AbstractMap.SimpleEntry<>(null, sql)), (Map<String, Object>) context);
+                return executor.sqlQueryObject(datasource, bql, (Map<String, Object>) context, null);
+            }
+
+            public Object sql_script_query_row(String datasource, String sql) {
+                BindSql bql = executor.sqlScriptString(datasource, Collections.singletonList(new AbstractMap.SimpleEntry<>(null, sql)), (Map<String, Object>) context);
+                return executor.sqlQueryRow(datasource, bql, (Map<String, Object>) context, null);
+            }
+
+            public Object sql_script_query_list(String datasource, String sql) {
+                BindSql bql = executor.sqlScriptString(datasource, Collections.singletonList(new AbstractMap.SimpleEntry<>(null, sql)), (Map<String, Object>) context);
+                return executor.sqlQueryList(datasource, bql, (Map<String, Object>) context, null);
+            }
+
+            public Object sql_script_query_page(String datasource, int offset, int size, String sql) {
+                BindSql bql = executor.sqlScriptString(datasource, Collections.singletonList(new AbstractMap.SimpleEntry<>(null, sql)), (Map<String, Object>) context);
+                return executor.sqlQueryPage(datasource, bql, (Map<String, Object>) context, null, new ApiOffsetSize(offset, size));
+            }
+
+            public Object sql_script_query_columns(String datasource, String sql) {
+                BindSql bql = executor.sqlScriptString(datasource, Collections.singletonList(new AbstractMap.SimpleEntry<>(null, sql)), (Map<String, Object>) context);
+                return executor.sqlQueryColumns(datasource, bql, (Map<String, Object>) context);
+            }
+
+            public Object sql_script_update(String datasource, String sql) {
+                BindSql bql = executor.sqlScriptString(datasource, Collections.singletonList(new AbstractMap.SimpleEntry<>(null, sql)), (Map<String, Object>) context);
+                return executor.sqlUpdate(datasource, bql, (Map<String, Object>) context);
             }
         }
 
@@ -392,7 +435,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
 
         @Data
         @NoArgsConstructor
-        public static class ProcedureFunctionCallContext extends DefaultFunctionCallContext{
+        public static class ProcedureFunctionCallContext extends DefaultFunctionCallContext {
             protected JdbcProcedureExecutor executor;
             protected XmlNode node;
 
@@ -400,7 +443,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
 
         @Override
         public Object getFunctionCallContext(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
-            ProcedureFunctionCallContext ret=new ProcedureFunctionCallContext();
+            ProcedureFunctionCallContext ret = new ProcedureFunctionCallContext();
             ret.setResolver(this);
             ret.setContext(context);
             ret.setTarget(target);
