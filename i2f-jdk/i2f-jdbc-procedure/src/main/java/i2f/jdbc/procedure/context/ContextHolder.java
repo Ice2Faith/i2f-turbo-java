@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.context;
 
 import i2f.invokable.method.IMethod;
+import i2f.invokable.method.impl.jdk.JdkInstanceStaticMethod;
 import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.lru.LruList;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
@@ -39,7 +41,7 @@ public class ContextHolder {
     public static final ThreadLocal<Boolean> DEBUG_MODE = new ThreadLocal<>();
 
     static {
-        registryAllInvokeMethods(ContextFunctions.class);
+        registryInvokeMethodByInstanceMethod(ContextFunctions.INSTANCE);
 
         registryAllConvertMethods(
                 String.class,
@@ -158,6 +160,46 @@ public class ContextHolder {
             }
             String packageName = name.substring(0, idx + 1);
             LOAD_PACKAGE_SET.add(packageName);
+        }
+    }
+
+    public static void registryInvokeMethod(Method method) {
+        registryInvokeMethod(new JdkMethod(method));
+    }
+
+    public static void registryInvokeMethod(IMethod method) {
+        LruList<IMethod> list = INVOKE_METHOD_MAP.computeIfAbsent(method.getName(), (key) -> new LruList<>());
+        list.add(method);
+    }
+
+    public static void registryInvokeMethodByInstanceMethod(Object object) {
+        registryInvokeMethodByInstanceMethod(object, null);
+    }
+
+    public static void registryInvokeMethodByInstanceMethod(Object object, Predicate<Method> filter) {
+        if (object == null) {
+            return;
+        }
+        Class<?> clazz = object.getClass();
+        Method[] methods = clazz.getMethods();
+        for (Method method : methods) {
+            if (Object.class.equals(method.getDeclaringClass())) {
+                continue;
+            }
+            int mod = method.getModifiers();
+            if (!Modifier.isPublic(mod)) {
+                continue;
+            }
+            if (Modifier.isAbstract(mod)) {
+                continue;
+            }
+            if (filter == null || filter.test(method)) {
+                if (Modifier.isStatic(mod)) {
+                    registryInvokeMethod(method);
+                } else {
+                    registryInvokeMethod(new JdkInstanceStaticMethod(object, method));
+                }
+            }
         }
     }
 
