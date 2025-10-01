@@ -39,8 +39,10 @@ import java.util.stream.Collectors;
  * @author Ice2Faith
  * @date 2025/2/17 16:09
  */
-public class ContextFunctions {
-    public static final String[][] ORACLE_REGEX_REPLACE_MAPPING = {
+public interface ContextFunctions {
+    ContextFunctions INSTANCE = new ContextFunctions() {
+    };
+    String[][] ORACLE_REGEX_REPLACE_MAPPING = {
             {"[:alpha:]", "a-zA-Z"},
             {"[:alnum:]", "a-zA-Z0-9"},
             {"[:alphanum:]", "a-zA-Z0-9"},
@@ -52,7 +54,7 @@ public class ContextFunctions {
             {"[:grah:]", "\\S"},
 
     };
-    public static final String[][] CHRONO_UNIT_MAPPING = {
+    String[][] CHRONO_UNIT_MAPPING = {
             {"day", "DAYS"},
             {"dd", "DAYS"},
             {"month", "MONTHS"},
@@ -78,10 +80,10 @@ public class ContextFunctions {
             {"ns", "NANOS"},
 
     };
-    public static final MathContext MATH_CONTEXT = new MathContext(20, RoundingMode.HALF_UP);
-    public static final BigDecimal NUM_0_5 = new BigDecimal("0.5");
+    MathContext MATH_CONTEXT = new MathContext(20, RoundingMode.HALF_UP);
+    BigDecimal NUM_0_5 = new BigDecimal("0.5");
 
-    public static String convertOracleRegexExpression(String regex) {
+    default String convertOracleRegexExpression(String regex) {
         if (regex == null) {
             return null;
         }
@@ -91,7 +93,7 @@ public class ContextFunctions {
         return regex;
     }
 
-    public static String convertOracleRegexReplacement(String replacement) {
+    default String convertOracleRegexReplacement(String replacement) {
         if (replacement == null) {
             return null;
         }
@@ -101,40 +103,66 @@ public class ContextFunctions {
         return replacement;
     }
 
-    public static String env(String key) {
+    default void print(Object... objs) {
+        StringBuilder builder = new StringBuilder();
+        boolean isFirst = true;
+        for (Object obj : objs) {
+            if (!isFirst) {
+                builder.append(", ");
+            }
+            builder.append(obj);
+            isFirst = false;
+        }
+        System.out.print(builder.toString());
+    }
+
+    default void println(Object... objs) {
+        StringBuilder builder = new StringBuilder();
+        boolean isFirst = true;
+        for (Object obj : objs) {
+            if (!isFirst) {
+                builder.append(", ");
+            }
+            builder.append(obj);
+            isFirst = false;
+        }
+        System.out.println(builder.toString());
+    }
+
+    default String sys_env(String key) {
         return System.getenv(key);
     }
 
-    public static String jvm(String key) {
+    default String jvm(String key) {
         String prop = System.getProperty(key);
         return prop;
     }
 
-    public static void gc() {
+    default void gc() {
         System.gc();
     }
 
-    public static void exit(int status) {
+    default void exit(int status) {
         System.exit(status);
     }
 
-    public static void yield() {
+    default void yield() {
         Thread.yield();
     }
 
-    public static long thread_id() {
+    default long thread_id() {
         return Thread.currentThread().getId();
     }
 
-    public static String thread_name() {
+    default String thread_name() {
         return Thread.currentThread().getName();
     }
 
-    public static boolean isnull(Object obj) {
+    default boolean isnull(Object obj) {
         return obj == null;
     }
 
-    public static boolean is_empty(Object obj) {
+    default boolean is_empty(Object obj) {
         if (obj == null) {
             return true;
         }
@@ -161,7 +189,7 @@ public class ContextFunctions {
         return false;
     }
 
-    public static boolean is_blank(Object obj) {
+    default boolean is_blank(Object obj) {
         if (obj == null) {
             return true;
         }
@@ -181,11 +209,11 @@ public class ContextFunctions {
         return is_empty(obj);
     }
 
-    public static List<Object> list_of(Object... arr) {
+    default List<Object> list_of(Object... arr) {
         return new ArrayList<>(Arrays.asList(arr));
     }
 
-    public static Map<Object, Object> map_of(Object... arr) {
+    default Map<Object, Object> map_of(Object... arr) {
         Map<Object, Object> ret = new LinkedHashMap<>();
         for (int i = 0; i < arr.length; i += 2) {
             if (i + 1 < arr.length) {
@@ -197,7 +225,7 @@ public class ContextFunctions {
         return ret;
     }
 
-    public static int index_of(String str, String sstr) {
+    default int index_of(String str, String sstr) {
         if (str == null) {
             return -1;
         }
@@ -210,7 +238,7 @@ public class ContextFunctions {
         return str.indexOf(sstr);
     }
 
-    public static int last_index_of(String str, String sstr) {
+    default int last_index_of(String str, String sstr) {
         if (str == null) {
             return -1;
         }
@@ -223,11 +251,11 @@ public class ContextFunctions {
         return str.lastIndexOf(sstr);
     }
 
-    public static String replace(String str, String target) {
+    default String replace(String str, String target) {
         return replace(str, target, "");
     }
 
-    public static String replace(String str, String target, String replacement) {
+    default String replace(String str, String target, String replacement) {
         if (str == null) {
             return str;
         }
@@ -240,15 +268,15 @@ public class ContextFunctions {
         return str.replace(target, replacement);
     }
 
-    public static String regex_replace(String str, String regex) {
+    default String regex_replace(String str, String regex) {
         return regex_replace(str, regex, "");
     }
 
-    public static String regex_replace(String str, String regex, String replacement) {
+    default String regex_replace(String str, String regex, String replacement) {
         return regex_replace(str, regex, replacement, -1);
     }
 
-    public static String regex_replace(String str, String regex, String replacement, int occurrence) {
+    default String regex_replace(String str, String regex, String replacement, int occurrence) {
         if (str == null) {
             return str;
         }
@@ -276,19 +304,19 @@ public class ContextFunctions {
         }
     }
 
-    public static String regexp_replace(String str, String regex) {
+    default String regexp_replace(String str, String regex) {
         return regexp_replace(str, regex, "");
     }
 
-    public static String regexp_replace(String str, String regex, String replacement) {
+    default String regexp_replace(String str, String regex, String replacement) {
         return regex_replace(str, regex, replacement);
     }
 
-    public static String regexp_replace(String str, String regex, String replacement, int occurrence) {
+    default String regexp_replace(String str, String regex, String replacement, int occurrence) {
         return regex_replace(str, regex, replacement, occurrence);
     }
 
-    public static boolean regex_like(String str, String regex) {
+    default boolean regex_like(String str, String regex) {
         if (str == null) {
             return false;
         }
@@ -299,11 +327,11 @@ public class ContextFunctions {
         return str.matches(regex);
     }
 
-    public static boolean regexp_like(String str, String regex) {
+    default boolean regexp_like(String str, String regex) {
         return regex_like(str, regex);
     }
 
-    public static List<String> regex_find(String str, String regex) {
+    default List<String> regex_find(String str, String regex) {
         if (str == null) {
             return null;
         }
@@ -316,7 +344,7 @@ public class ContextFunctions {
                 .collect(Collectors.toList());
     }
 
-    public static boolean regex_contains(String str, String regex) {
+    default boolean regex_contains(String str, String regex) {
         if (str == null) {
             return false;
         }
@@ -331,11 +359,11 @@ public class ContextFunctions {
         return false;
     }
 
-    public static boolean regexp_contains(String str, String regex) {
+    default boolean regexp_contains(String str, String regex) {
         return regex_contains(str, regex);
     }
 
-    public static int regex_index(String str, String regex) {
+    default int regex_index(String str, String regex) {
         if (str == null) {
             return -1;
         }
@@ -351,11 +379,11 @@ public class ContextFunctions {
         return -1;
     }
 
-    public static int regexp_index(String str, String regex) {
+    default int regexp_index(String str, String regex) {
         return regex_index(str, regex);
     }
 
-    public static String regex_extra(String str, String regex) {
+    default String regex_extra(String str, String regex) {
         if (str == null) {
             return null;
         }
@@ -371,48 +399,48 @@ public class ContextFunctions {
         return null;
     }
 
-    public static String regexp_extra(String str, String regex) {
+    default String regexp_extra(String str, String regex) {
         return regex_extra(str, regex);
     }
 
-    public static String regex_find_join(String str, String regex) {
+    default String regex_find_join(String str, String regex) {
         return regex_find_join(str, regex, ",");
     }
 
-    public static String regex_find_join(String str, String regex, Object separator) {
+    default String regex_find_join(String str, String regex, Object separator) {
         List<String> list = regex_find(str, regex);
         return join(list, separator);
     }
 
-    public static String to_camel(String str) {
+    default String to_camel(String str) {
         return StringUtils.toCamel(str);
     }
 
-    public static String to_pascal(String str) {
+    default String to_pascal(String str) {
         return StringUtils.toPascal(str);
     }
 
-    public static String to_underscore(String str) {
+    default String to_underscore(String str) {
         return StringUtils.toUnderScore(str);
     }
 
-    public static String to_snake(String str) {
+    default String to_snake(String str) {
         return StringUtils.toSnake(str);
     }
 
-    public static String join(Object obj) {
+    default String join(Object obj) {
         return join(obj, ",", false, false);
     }
 
-    public static String join(Object obj, Object separator) {
+    default String join(Object obj, Object separator) {
         return join(obj, separator, false, false);
     }
 
-    public static String join(Object obj, Object separator, boolean ignoreNull) {
+    default String join(Object obj, Object separator, boolean ignoreNull) {
         return join(obj, separator, ignoreNull, false);
     }
 
-    public static String join(Object obj, Object separator, boolean ignoreNull, boolean ignoreEmpty) {
+    default String join(Object obj, Object separator, boolean ignoreNull, boolean ignoreEmpty) {
         if (obj == null) {
             if (ignoreNull) {
                 return "";
@@ -543,41 +571,41 @@ public class ContextFunctions {
         return str;
     }
 
-    public static String trim(String str) {
+    default String trim(String str) {
         if (str == null) {
             return str;
         }
         return str.trim();
     }
 
-    public static String upper(String str) {
+    default String upper(String str) {
         if (str == null) {
             return str;
         }
         return str.toUpperCase();
     }
 
-    public static String lower(String str) {
+    default String lower(String str) {
         if (str == null) {
             return str;
         }
         return str.toLowerCase();
     }
 
-    public static String chr(int ascii) {
+    default String chr(int ascii) {
         char ch = (char) ascii;
         return "" + ch;
     }
 
-    public static int char_code(String str, int index) {
+    default int char_code(String str, int index) {
         return str.charAt(index);
     }
 
-    public static String rtrim(String str) {
+    default String rtrim(String str) {
         return rtrim(str, null);
     }
 
-    public static String rtrim(String str, String substr) {
+    default String rtrim(String str, String substr) {
         if (str == null) {
             return str;
         }
@@ -605,7 +633,7 @@ public class ContextFunctions {
         }
     }
 
-    public static int length(Object obj) {
+    default int length(Object obj) {
         if (obj == null) {
             return -1;
         }
@@ -626,7 +654,7 @@ public class ContextFunctions {
         throw new IllegalArgumentException("length(obj) function cannot support type:" + obj.getClass());
     }
 
-    public static int lengthb(Object obj) {
+    default int lengthb(Object obj) {
         if (obj == null) {
             return -1;
         }
@@ -639,11 +667,11 @@ public class ContextFunctions {
         return length(obj);
     }
 
-    public static String ltrim(String str) {
+    default String ltrim(String str) {
         return ltrim(str, null);
     }
 
-    public static String ltrim(String str, String substr) {
+    default String ltrim(String str, String substr) {
         if (str == null) {
             return str;
         }
@@ -671,11 +699,11 @@ public class ContextFunctions {
         }
     }
 
-    public static String lpad(Object str, int len) {
+    default String lpad(Object str, int len) {
         return lpad(str, len, null);
     }
 
-    public static String lpad(Object str, int len, Object padStr) {
+    default String lpad(Object str, int len, Object padStr) {
         if (str == null) {
             return null;
         }
@@ -701,11 +729,11 @@ public class ContextFunctions {
         return builder + mainStr;
     }
 
-    public static String rpad(Object str, int len) {
+    default String rpad(Object str, int len) {
         return rpad(str, len, null);
     }
 
-    public static String rpad(Object str, int len, Object padStr) {
+    default String rpad(Object str, int len, Object padStr) {
         if (str == null) {
             return null;
         }
@@ -731,31 +759,31 @@ public class ContextFunctions {
         return mainStr + builder;
     }
 
-    public static Object nvl(Object v1, Object v2) {
+    default Object nvl(Object v1, Object v2) {
         return ifnull(v1, v2);
     }
 
-    public static Object ifnull(Object v1, Object v2) {
+    default Object ifnull(Object v1, Object v2) {
         return v1 != null ? v1 : v2;
     }
 
-    public static Object if_empty(Object v1, Object v2) {
+    default Object if_empty(Object v1, Object v2) {
         return is_empty(v1) ? v2 : v1;
     }
 
-    public static Object evl(Object v1, Object v2) {
+    default Object evl(Object v1, Object v2) {
         return if_empty(v1, v2);
     }
 
-    public static Object if_blank(Object v1, Object v2) {
+    default Object if_blank(Object v1, Object v2) {
         return is_blank(v1) ? v2 : v1;
     }
 
-    public static Object bvl(Object v1, Object v2) {
+    default Object bvl(Object v1, Object v2) {
         return if_blank(v1, v2);
     }
 
-    public static Object if2(Object cond, Object trueVal, Object falseVal) {
+    default Object if2(Object cond, Object trueVal, Object falseVal) {
         if (cond instanceof Boolean) {
             Boolean ok = (Boolean) cond;
             if (ok) {
@@ -771,11 +799,11 @@ public class ContextFunctions {
         }
     }
 
-    public static Object nvl2(Object cond, Object trueVal, Object falseVal) {
+    default Object nvl2(Object cond, Object trueVal, Object falseVal) {
         return if2(cond, trueVal, falseVal);
     }
 
-    public static Object decode(Object target, Object... args) {
+    default Object decode(Object target, Object... args) {
         int i = 0;
         while (i + 1 < args.length) {
             if (Objects.equals(target, args[i])) {
@@ -789,7 +817,7 @@ public class ContextFunctions {
         return target;
     }
 
-    public static Object cast(Object val, Object type) {
+    default Object cast(Object val, Object type) {
         if (type == null) {
             throw new ClassCastException("cannot cast value to type null");
         }
@@ -812,11 +840,11 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(val, clazz);
     }
 
-    public static Object convert(Object val, Object type) {
+    default Object convert(Object val, Object type) {
         return cast(val, type);
     }
 
-    public static ChronoUnit chrono_unit(String unit) {
+    default ChronoUnit chrono_unit(String unit) {
         if (unit == null || unit.isEmpty()) {
             return ChronoUnit.DAYS;
         }
@@ -845,11 +873,11 @@ public class ContextFunctions {
         return ChronoUnit.DAYS;
     }
 
-    public static Object date_sub(Object date, String unit, long interval) {
+    default Object date_sub(Object date, String unit, long interval) {
         return date_add(date, unit, -interval);
     }
 
-    public static Object date_add(Object date, String unit, long interval) {
+    default Object date_add(Object date, String unit, long interval) {
         if (date == null) {
             return null;
         }
@@ -860,14 +888,14 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(rv, rawType);
     }
 
-    public static Date to_date(Object obj) {
+    default Date to_date(Object obj) {
         if (obj instanceof Date) {
             return (Date) obj;
         }
         return ObjectConvertor.tryParseDate(String.valueOf(obj));
     }
 
-    public static Date to_date(Object obj, String pattern) {
+    default Date to_date(Object obj, String pattern) {
         String str = null;
         if (obj == null) {
             str = null;
@@ -895,7 +923,7 @@ public class ContextFunctions {
         }
     }
 
-    public static String date_format(Object date, String pattern) {
+    default String date_format(Object date, String pattern) {
         if (date == null) {
             return null;
         }
@@ -910,7 +938,7 @@ public class ContextFunctions {
         throw new IllegalArgumentException("un-support date type[" + date.getClass() + "] format!");
     }
 
-    public static Object last_day(Object date) {
+    default Object last_day(Object date) {
         if (date == null) {
             return null;
         }
@@ -921,11 +949,11 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(rv, rawType);
     }
 
-    public static String to_char(Object obj) {
+    default String to_char(Object obj) {
         return to_char(obj, null);
     }
 
-    public static String to_char(Object obj, String pattern) {
+    default String to_char(Object obj, String pattern) {
         if (obj == null) {
             return null;
         }
@@ -942,15 +970,15 @@ public class ContextFunctions {
         return String.valueOf(obj);
     }
 
-    public static String to_string(Object obj) {
+    default String to_string(Object obj) {
         return to_char(obj, null);
     }
 
-    public static String to_string(Object obj, String pattern) {
+    default String to_string(Object obj, String pattern) {
         return to_char(obj, pattern);
     }
 
-    public static String left(Object obj, int len) {
+    default String left(Object obj, int len) {
         if (obj == null) {
             return null;
         }
@@ -964,7 +992,7 @@ public class ContextFunctions {
         return str.substring(0, len);
     }
 
-    public static String right(Object obj, int len) {
+    default String right(Object obj, int len) {
         if (obj == null) {
             return null;
         }
@@ -978,27 +1006,27 @@ public class ContextFunctions {
         return str.substring(str.length() - len);
     }
 
-    public static String uuid() {
+    default String uuid() {
         return UUID.randomUUID().toString();
     }
 
-    public static long snowflake_id() {
+    default long snowflake_id() {
         return SnowflakeLongUid.getId();
     }
 
-    public static Date sysdate() {
+    default Date sysdate() {
         return new Date(SystemClock.currentTimeMillis());
     }
 
-    public static Date now() {
+    default Date now() {
         return new Date(SystemClock.currentTimeMillis());
     }
 
-    public static long timestamp() {
+    default long timestamp() {
         return SystemClock.currentTimeSeconds();
     }
 
-    public static Date timestamp_to_date(Object ts) {
+    default Date timestamp_to_date(Object ts) {
         long lts = -1;
         if (ts == null) {
             return null;
@@ -1011,7 +1039,7 @@ public class ContextFunctions {
         return new Date(lts * 1000);
     }
 
-    public static Long date_to_timestamp(Object date) {
+    default Long date_to_timestamp(Object date) {
         if (date == null) {
             return null;
         }
@@ -1019,7 +1047,7 @@ public class ContextFunctions {
         return dt.getTime() / 1000;
     }
 
-    public static String reverse(Object str) {
+    default String reverse(Object str) {
         if (str == null) {
             return null;
         }
@@ -1031,15 +1059,15 @@ public class ContextFunctions {
         return builder.toString();
     }
 
-    public static Object add_months(Object date, long interval) {
+    default Object add_months(Object date, long interval) {
         return date_add(date, ChronoUnit.MONTHS.name(), interval);
     }
 
-    public static Object add_days(Object date, long interval) {
+    default Object add_days(Object date, long interval) {
         return date_add(date, ChronoUnit.DAYS.name(), interval);
     }
 
-    public static Object trunc(Object obj) {
+    default Object trunc(Object obj) {
         if (obj == null) {
             return null;
         }
@@ -1052,7 +1080,7 @@ public class ContextFunctions {
         throw new IllegalArgumentException("un-support trunc apply to type, expect date/number, but found :" + clazz);
     }
 
-    public static Object trunc(Object date, String format) {
+    default Object trunc(Object date, String format) {
         if (date == null) {
             return null;
         }
@@ -1123,7 +1151,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(obj, date.getClass());
     }
 
-    public static Object trunc(Object number, Integer precision) {
+    default Object trunc(Object number, Integer precision) {
         if (number == null) {
             return null;
         }
@@ -1156,11 +1184,11 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
 
-    public static Object round(Object number) {
+    default Object round(Object number) {
         return round(number, 0);
     }
 
-    public static Object round(Object number, Integer precision) {
+    default Object round(Object number, Integer precision) {
         if (number == null) {
             return null;
         }
@@ -1193,7 +1221,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
 
-    public static String concat(Object... args) {
+    default String concat(Object... args) {
         StringBuilder builder = new StringBuilder();
         for (Object item : args) {
             builder.append(item);
@@ -1201,7 +1229,7 @@ public class ContextFunctions {
         return builder.toString();
     }
 
-    public static String concat(Iterable<?> args) {
+    default String concat(Iterable<?> args) {
         StringBuilder builder = new StringBuilder();
         for (Object item : args) {
             builder.append(item);
@@ -1209,22 +1237,7 @@ public class ContextFunctions {
         return builder.toString();
     }
 
-    public static String join(Object separator, Object... args) {
-        StringBuilder builder = new StringBuilder();
-        boolean isFirst = true;
-        for (Object item : args) {
-            if (!isFirst) {
-                if (separator != null) {
-                    builder.append(separator);
-                }
-            }
-            builder.append(item);
-            isFirst = false;
-        }
-        return builder.toString();
-    }
-
-    public static String join(Object separator, Iterable<?> args) {
+    default String join(Object separator, Object... args) {
         StringBuilder builder = new StringBuilder();
         boolean isFirst = true;
         for (Object item : args) {
@@ -1239,7 +1252,22 @@ public class ContextFunctions {
         return builder.toString();
     }
 
-    public static Object first_day(Object date) {
+    default String join(Object separator, Iterable<?> args) {
+        StringBuilder builder = new StringBuilder();
+        boolean isFirst = true;
+        for (Object item : args) {
+            if (!isFirst) {
+                if (separator != null) {
+                    builder.append(separator);
+                }
+            }
+            builder.append(item);
+            isFirst = false;
+        }
+        return builder.toString();
+    }
+
+    default Object first_day(Object date) {
         if (date == null) {
             return null;
         }
@@ -1253,35 +1281,35 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(time, date.getClass());
     }
 
-    public static int day(Object date) {
+    default int day(Object date) {
         return extract(ChronoUnit.DAYS.name(), date);
     }
 
-    public static int month(Object date) {
+    default int month(Object date) {
         return extract(ChronoUnit.MONTHS.name(), date);
     }
 
-    public static int year(Object date) {
+    default int year(Object date) {
         return extract(ChronoUnit.YEARS.name(), date);
     }
 
-    public static int hour(Object date) {
+    default int hour(Object date) {
         return extract(ChronoUnit.HOURS.name(), date);
     }
 
-    public static int minute(Object date) {
+    default int minute(Object date) {
         return extract(ChronoUnit.MINUTES.name(), date);
     }
 
-    public static int second(Object date) {
+    default int second(Object date) {
         return extract(ChronoUnit.SECONDS.name(), date);
     }
 
-    public static int week(Object date) {
+    default int week(Object date) {
         return extract(ChronoUnit.WEEKS.name(), date);
     }
 
-    public static int extract(String fmt, Object date) {
+    default int extract(String fmt, Object date) {
         if (date == null) {
             return -1;
         }
@@ -1315,7 +1343,7 @@ public class ContextFunctions {
         return -1;
     }
 
-    public static BigDecimal to_number(Object obj) {
+    default BigDecimal to_number(Object obj) {
         if (obj == null) {
             return null;
         }
@@ -1325,7 +1353,7 @@ public class ContextFunctions {
         return (BigDecimal) ObjectConvertor.tryConvertAsType(obj, BigDecimal.class);
     }
 
-    public static Integer to_int(Object obj) {
+    default Integer to_int(Object obj) {
         if (obj == null) {
             return null;
         }
@@ -1338,7 +1366,7 @@ public class ContextFunctions {
         return (Integer) ObjectConvertor.tryConvertAsType(obj, Integer.class);
     }
 
-    public static Long to_long(Object obj) {
+    default Long to_long(Object obj) {
         if (obj == null) {
             return null;
         }
@@ -1351,11 +1379,11 @@ public class ContextFunctions {
         return (Long) ObjectConvertor.tryConvertAsType(obj, Long.class);
     }
 
-    public static boolean to_boolean(Object obj) {
+    default boolean to_boolean(Object obj) {
         return ObjectConvertor.toBoolean(obj);
     }
 
-    public static void sleep(long seconds) {
+    default void sleep(long seconds) {
         if (seconds >= 0) {
             try {
                 Thread.sleep(seconds * 1000);
@@ -1365,7 +1393,7 @@ public class ContextFunctions {
         }
     }
 
-    public static int instr(Object obj, Object sub) {
+    default int instr(Object obj, Object sub) {
         String str = null;
         if (obj != null) {
             str = String.valueOf(obj);
@@ -1380,11 +1408,11 @@ public class ContextFunctions {
         return str.indexOf(sstr);
     }
 
-    public static String substr(Object obj, int index) {
+    default String substr(Object obj, int index) {
         return substr(obj, index, -1);
     }
 
-    public static String substr(Object obj, int index, int len) {
+    default String substr(Object obj, int index, int len) {
         String str = null;
         if (obj != null) {
             str = String.valueOf(obj);
@@ -1406,11 +1434,11 @@ public class ContextFunctions {
         }
     }
 
-    public static String substrb(Object str, int index) {
+    default String substrb(Object str, int index) {
         return substrb(str, index, -1);
     }
 
-    public static String substrb(Object str, int index, int len) {
+    default String substrb(Object str, int index, int len) {
         String ret = substr(str, index, len);
         if (ret == null || ret.isEmpty()) {
             return ret;
@@ -1440,7 +1468,7 @@ public class ContextFunctions {
         return builder.toString();
     }
 
-    public static String substr_index(Object obj, String substr, int len) {
+    default String substr_index(Object obj, String substr, int len) {
         int idx = instr(obj, substr);
         if (idx < 0) {
             return "";
@@ -1448,11 +1476,11 @@ public class ContextFunctions {
         return substr(obj, idx, len);
     }
 
-    public static ArrayList<String> splitRegex(String str, String regex) {
+    default ArrayList<String> splitRegex(String str, String regex) {
         return splitRegex(str, regex, -1);
     }
 
-    public static ArrayList<String> splitRegex(String str, String regex, int limit) {
+    default ArrayList<String> splitRegex(String str, String regex, int limit) {
         if (str == null) {
             return new ArrayList<>();
         }
@@ -1463,11 +1491,11 @@ public class ContextFunctions {
         return new ArrayList<>(Arrays.asList(arr));
     }
 
-    public static ArrayList<String> splitLiteral(String str, String regex) {
+    default ArrayList<String> splitLiteral(String str, String regex) {
         return splitLiteral(str, regex, -1);
     }
 
-    public static ArrayList<String> splitLiteral(String str, String regex, int limit) {
+    default ArrayList<String> splitLiteral(String str, String regex, int limit) {
         if (str == null) {
             return new ArrayList<>();
         }
@@ -1478,7 +1506,7 @@ public class ContextFunctions {
         return new ArrayList<>(Arrays.asList(arr));
     }
 
-    public static boolean contains(Object obj, Object substr) {
+    default boolean contains(Object obj, Object substr) {
         if (obj == null || substr == null) {
             return false;
         }
@@ -1493,15 +1521,15 @@ public class ContextFunctions {
         return str.contains(sstr);
     }
 
-    public static boolean like(Object obj, Object substr) {
+    default boolean like(Object obj, Object substr) {
         return contains(obj, substr);
     }
 
-    public static boolean ends(Object obj, Object substr) {
+    default boolean ends(Object obj, Object substr) {
         return ends_with(obj, substr);
     }
 
-    public static boolean starts_with(Object obj, Object substr) {
+    default boolean starts_with(Object obj, Object substr) {
         if (obj == null || substr == null) {
             return false;
         }
@@ -1516,11 +1544,11 @@ public class ContextFunctions {
         return str.startsWith(sstr);
     }
 
-    public static boolean starts(Object obj, String substr) {
+    default boolean starts(Object obj, String substr) {
         return starts_with(obj, substr);
     }
 
-    public static boolean ends_with(Object obj, Object substr) {
+    default boolean ends_with(Object obj, Object substr) {
         if (obj == null || substr == null) {
             return false;
         }
@@ -1535,7 +1563,7 @@ public class ContextFunctions {
         return str.endsWith(sstr);
     }
 
-    public static Object neg(Object number) {
+    default Object neg(Object number) {
         if (number == null) {
             return null;
         }
@@ -1550,7 +1578,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
 
-    public static Object abs(Object number) {
+    default Object abs(Object number) {
         if (number == null) {
             return null;
         }
@@ -1565,7 +1593,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
 
-    public static Object ln(Object number) {
+    default Object ln(Object number) {
         if (number == null) {
             return null;
         }
@@ -1580,7 +1608,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
 
-    public static Object add(Object number1, Object number2) {
+    default Object add(Object number1, Object number2) {
         if (number1 == null) {
             return null;
         }
@@ -1603,7 +1631,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object sub(Object number1, Object number2) {
+    default Object sub(Object number1, Object number2) {
         if (number1 == null) {
             return null;
         }
@@ -1626,7 +1654,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object mul(Object number1, Object number2) {
+    default Object mul(Object number1, Object number2) {
         if (number1 == null) {
             return null;
         }
@@ -1649,7 +1677,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object div(Object number1, Object number2) {
+    default Object div(Object number1, Object number2) {
         if (number1 == null) {
             return null;
         }
@@ -1672,7 +1700,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object mod(Object number1, Object number2) {
+    default Object mod(Object number1, Object number2) {
         if (number1 == null) {
             return null;
         }
@@ -1695,7 +1723,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object pow(Object number1, Object number2) {
+    default Object pow(Object number1, Object number2) {
         if (number1 == null) {
             return null;
         }
@@ -1718,7 +1746,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object sin(Object number1) {
+    default Object sin(Object number1) {
         if (number1 == null) {
             return null;
         }
@@ -1734,7 +1762,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object cos(Object number1) {
+    default Object cos(Object number1) {
         if (number1 == null) {
             return null;
         }
@@ -1750,7 +1778,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object tan(Object number1) {
+    default Object tan(Object number1) {
         if (number1 == null) {
             return null;
         }
@@ -1766,7 +1794,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object asin(Object number1) {
+    default Object asin(Object number1) {
         if (number1 == null) {
             return null;
         }
@@ -1782,7 +1810,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object acos(Object number1) {
+    default Object acos(Object number1) {
         if (number1 == null) {
             return null;
         }
@@ -1798,7 +1826,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object atan(Object number1) {
+    default Object atan(Object number1) {
         if (number1 == null) {
             return null;
         }
@@ -1814,7 +1842,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static Object sqrt(Object number1) {
+    default Object sqrt(Object number1) {
         if (number1 == null) {
             return null;
         }
@@ -1830,7 +1858,7 @@ public class ContextFunctions {
         return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
-    public static String encode_url(Object obj) {
+    default String encode_url(Object obj) {
         try {
             String str = String.valueOf(obj);
             return URLEncoder.encode(str, "UTF-8");
@@ -1839,7 +1867,7 @@ public class ContextFunctions {
         }
     }
 
-    public static String decode_url(Object obj) {
+    default String decode_url(Object obj) {
         try {
             String str = String.valueOf(obj);
             return URLDecoder.decode(str, "UTF-8");
@@ -1848,7 +1876,7 @@ public class ContextFunctions {
         }
     }
 
-    public static String encode_base64(Object obj) {
+    default String encode_base64(Object obj) {
         try {
             String str = String.valueOf(obj);
             return Base64.getEncoder().encodeToString(str.getBytes("UTF-8"));
@@ -1857,7 +1885,7 @@ public class ContextFunctions {
         }
     }
 
-    public static String decode_base64(Object obj) {
+    default String decode_base64(Object obj) {
         try {
             String str = String.valueOf(obj);
             return new String(Base64.getDecoder().decode(str), "UTF-8");
@@ -1866,35 +1894,35 @@ public class ContextFunctions {
         }
     }
 
-    public static String md5(Object data) {
+    default String md5(Object data) {
         return mds("MD5", data, "hex", null);
     }
 
-    public static String sha1(Object data) {
+    default String sha1(Object data) {
         return mds("SHA-1", data, "hex", null);
     }
 
-    public static String sha256(Object data) {
+    default String sha256(Object data) {
         return mds("SHA-256", data, "hex", null);
     }
 
-    public static String sha384(Object data) {
+    default String sha384(Object data) {
         return mds("SHA-384", data, "hex", null);
     }
 
-    public static String sha512(Object data) {
+    default String sha512(Object data) {
         return mds("SHA-512", data, "hex", null);
     }
 
-    public static String mds(String algorithm, Object data) {
+    default String mds(String algorithm, Object data) {
         return mds(algorithm, data, "hex", null);
     }
 
-    public static String mds(String algorithm, Object data, String format) {
+    default String mds(String algorithm, Object data, String format) {
         return mds(algorithm, data, format, null);
     }
 
-    public static String mds(String algorithm, Object data, String format, String provider) {
+    default String mds(String algorithm, Object data, String format, String provider) {
         if (data == null) {
             return null;
         }
