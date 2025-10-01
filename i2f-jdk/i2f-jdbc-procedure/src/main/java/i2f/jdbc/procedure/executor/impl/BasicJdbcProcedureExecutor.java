@@ -1026,9 +1026,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (isDebug()) {
             String location = null;
             try {
-                Object loc = visit(ParamsConsts.TRACE_LOCATION, context);
-                Object line = visit(ParamsConsts.TRACE_LINE, context);
-                location = loc + ":" + line;
+                location = String.valueOf(visit(ParamsConsts.TRACE_LOCATION, context));
             } catch (Exception e) {
 
             }

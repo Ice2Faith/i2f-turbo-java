@@ -32,7 +32,7 @@ public class SpringSlf4jFunctions {
     }
 
     public static Logger logger() {
-        return logger(ContextHolder.TRACE_LOCATION.get());
+        return logger(ContextHolder.TRACE_FILE.get());
     }
 
     public static void log(Object... objs) {
