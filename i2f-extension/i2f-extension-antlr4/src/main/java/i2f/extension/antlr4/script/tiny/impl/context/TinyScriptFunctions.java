@@ -25,6 +25,10 @@ public class TinyScriptFunctions {
         return RANDOM.nextInt(bound);
     }
 
+    public static double random() {
+        return RANDOM.nextDouble();
+    }
+
     public static void println(Object... obj) {
         StringBuilder builder = new StringBuilder();
         boolean isFirst = true;
