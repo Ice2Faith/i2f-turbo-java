@@ -353,6 +353,8 @@ public interface JdbcProcedureExecutor {
         return sqlScript(datasource, dialectScriptList, params, null);
     }
 
+    boolean sqlAdapt(String datasource, String databases, Map<String, Object> params);
+
     BindSql sqlScript(String datasource, List<Map.Entry<String, Object>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page);
 
     List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, ApiOffsetSize page);

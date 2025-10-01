@@ -1666,6 +1666,36 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
+
+    @Override
+    public boolean sqlAdapt(String datasource, String databases, Map<String, Object> params) {
+        try {
+            String key = databases;
+            if (key == null || key.isEmpty()) {
+                return false;
+            }
+            Connection conn = getConnection(datasource, params);
+            List<String> databaseNames = detectDatabaseType(conn);
+            String[] arr = key.split(",");
+            for (String item : arr) {
+                for (String databaseName : databaseNames) {
+                    if (item.equalsIgnoreCase(databaseName)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
+        }
+
+    }
+
     @Override
     public BindSql sqlScript(String datasource, List<Map.Entry<String, Object>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page) {
         try {
@@ -1701,10 +1731,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return MybatisMapperInflater.INSTANCE;
     }
 
+
     public Map.Entry<String, BindSql> getDialectSqlScript(List<Map.Entry<String, Object>> dialectScriptList,
                                                           Connection conn,
                                                           Map<String, Object> params) throws Exception {
-        List<String> databaseNames = detectDatabaseType(conn);
         Map.Entry<String, BindSql> firstScript = null;
         Map.Entry<String, BindSql> nullScript = null;
         for (Map.Entry<String, Object> entry : dialectScriptList) {
@@ -1728,6 +1758,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 }
             }
             if (key != null) {
+                List<String> databaseNames = detectDatabaseType(conn);
                 String[] arr = key.split(",");
                 for (String item : arr) {
                     for (String databaseName : databaseNames) {

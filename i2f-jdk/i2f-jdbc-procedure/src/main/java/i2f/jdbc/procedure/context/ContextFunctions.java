@@ -4,7 +4,10 @@ import i2f.clock.SystemClock;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.io.stream.StreamUtil;
 import i2f.match.regex.RegexUtil;
+import i2f.match.regex.data.RegexMatchItem;
 import i2f.reflect.ReflectResolver;
+import i2f.text.StringUtils;
+import i2f.uid.SnowflakeLongUid;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +15,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.net.URLDecoder;
@@ -312,6 +316,65 @@ public class ContextFunctions {
                 .collect(Collectors.toList());
     }
 
+    public static boolean regex_contains(String str, String regex) {
+        if (str == null) {
+            return false;
+        }
+        if (regex == null) {
+            return false;
+        }
+        regex = convertOracleRegexExpression(regex);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex);
+        if (!list.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean regexp_contains(String str, String regex) {
+        return regex_contains(str, regex);
+    }
+
+    public static int regex_index(String str, String regex) {
+        if (str == null) {
+            return -1;
+        }
+        if (regex == null) {
+            return -1;
+        }
+        regex = convertOracleRegexExpression(regex);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex);
+        if (!list.isEmpty()) {
+            RegexMatchItem item = list.get(0);
+            return item.getIdxStart();
+        }
+        return -1;
+    }
+
+    public static int regexp_index(String str, String regex) {
+        return regex_index(str, regex);
+    }
+
+    public static String regex_extra(String str, String regex) {
+        if (str == null) {
+            return null;
+        }
+        if (regex == null) {
+            return null;
+        }
+        regex = convertOracleRegexExpression(regex);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex);
+        if (!list.isEmpty()) {
+            RegexMatchItem item = list.get(0);
+            return item.getMatchStr();
+        }
+        return null;
+    }
+
+    public static String regexp_extra(String str, String regex) {
+        return regex_extra(str, regex);
+    }
+
     public static String regex_find_join(String str, String regex) {
         return regex_find_join(str, regex, ",");
     }
@@ -319,6 +382,22 @@ public class ContextFunctions {
     public static String regex_find_join(String str, String regex, Object separator) {
         List<String> list = regex_find(str, regex);
         return join(list, separator);
+    }
+
+    public static String to_camel(String str) {
+        return StringUtils.toCamel(str);
+    }
+
+    public static String to_pascal(String str) {
+        return StringUtils.toPascal(str);
+    }
+
+    public static String to_underscore(String str) {
+        return StringUtils.toUnderScore(str);
+    }
+
+    public static String to_snake(String str) {
+        return StringUtils.toSnake(str);
     }
 
     public static String join(Object obj) {
@@ -903,6 +982,10 @@ public class ContextFunctions {
         return UUID.randomUUID().toString();
     }
 
+    public static long snowflake_id() {
+        return SnowflakeLongUid.getId();
+    }
+
     public static Date sysdate() {
         return new Date(SystemClock.currentTimeMillis());
     }
@@ -1282,7 +1365,15 @@ public class ContextFunctions {
         }
     }
 
-    public static int instr(String str, String sstr) {
+    public static int instr(Object obj, Object sub) {
+        String str = null;
+        if (obj != null) {
+            str = String.valueOf(obj);
+        }
+        String sstr = null;
+        if (sub != null) {
+            sstr = String.valueOf(sub);
+        }
         if (str == null || sstr == null) {
             return -1;
         }
@@ -1347,6 +1438,14 @@ public class ContextFunctions {
             builder.append(ch);
         }
         return builder.toString();
+    }
+
+    public static String substr_index(Object obj, String substr, int len) {
+        int idx = instr(obj, substr);
+        if (idx < 0) {
+            return "";
+        }
+        return substr(obj, idx, len);
     }
 
     public static ArrayList<String> splitRegex(String str, String regex) {
@@ -1436,6 +1535,21 @@ public class ContextFunctions {
         return str.endsWith(sstr);
     }
 
+    public static Object neg(Object number) {
+        if (number == null) {
+            return null;
+        }
+        Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+        if (!(num instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
+        }
+
+        BigDecimal obj = (BigDecimal) num;
+        obj = obj.negate(MATH_CONTEXT);
+
+        return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+    }
+
     public static Object abs(Object number) {
         if (number == null) {
             return null;
@@ -1449,6 +1563,271 @@ public class ContextFunctions {
         obj = obj.abs(MATH_CONTEXT);
 
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+    }
+
+    public static Object ln(Object number) {
+        if (number == null) {
+            return null;
+        }
+        Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+        if (!(num instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
+        }
+
+        BigDecimal obj = (BigDecimal) num;
+        obj = BigDecimal.valueOf(Math.log(obj.doubleValue()));
+
+        return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+    }
+
+    public static Object add(Object number1, Object number2) {
+        if (number1 == null) {
+            return null;
+        }
+        if (number2 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+        Object num2 = ObjectConvertor.tryConvertAsType(number2, BigDecimal.class);
+        if (!(num2 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number2.getClass());
+        }
+
+        BigDecimal b1 = (BigDecimal) num1;
+        BigDecimal b2 = (BigDecimal) num2;
+        b1 = b1.add(b2, MATH_CONTEXT);
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object sub(Object number1, Object number2) {
+        if (number1 == null) {
+            return null;
+        }
+        if (number2 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+        Object num2 = ObjectConvertor.tryConvertAsType(number2, BigDecimal.class);
+        if (!(num2 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number2.getClass());
+        }
+
+        BigDecimal b1 = (BigDecimal) num1;
+        BigDecimal b2 = (BigDecimal) num2;
+        b1 = b1.subtract(b2, MATH_CONTEXT);
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object mul(Object number1, Object number2) {
+        if (number1 == null) {
+            return null;
+        }
+        if (number2 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+        Object num2 = ObjectConvertor.tryConvertAsType(number2, BigDecimal.class);
+        if (!(num2 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number2.getClass());
+        }
+
+        BigDecimal b1 = (BigDecimal) num1;
+        BigDecimal b2 = (BigDecimal) num2;
+        b1 = b1.multiply(b2, MATH_CONTEXT);
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object div(Object number1, Object number2) {
+        if (number1 == null) {
+            return null;
+        }
+        if (number2 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+        Object num2 = ObjectConvertor.tryConvertAsType(number2, BigDecimal.class);
+        if (!(num2 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number2.getClass());
+        }
+
+        BigDecimal b1 = (BigDecimal) num1;
+        BigDecimal b2 = (BigDecimal) num2;
+        b1 = b1.divide(b2, MATH_CONTEXT);
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object mod(Object number1, Object number2) {
+        if (number1 == null) {
+            return null;
+        }
+        if (number2 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigInteger.class);
+        if (!(num1 instanceof BigInteger)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+        Object num2 = ObjectConvertor.tryConvertAsType(number2, BigInteger.class);
+        if (!(num2 instanceof BigInteger)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number2.getClass());
+        }
+
+        BigInteger b1 = (BigInteger) num1;
+        BigInteger b2 = (BigInteger) num2;
+        b1 = b1.mod(b2);
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object pow(Object number1, Object number2) {
+        if (number1 == null) {
+            return null;
+        }
+        if (number2 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+        Object num2 = ObjectConvertor.tryConvertAsType(number2, BigDecimal.class);
+        if (!(num2 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number2.getClass());
+        }
+
+        BigDecimal b1 = (BigDecimal) num1;
+        BigDecimal b2 = (BigDecimal) num2;
+        b1 = BigDecimal.valueOf(Math.pow(b1.doubleValue(), b2.doubleValue()));
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object sin(Object number1) {
+        if (number1 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+
+
+        BigDecimal b1 = (BigDecimal) num1;
+        b1 = BigDecimal.valueOf(Math.sin(b1.doubleValue()));
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object cos(Object number1) {
+        if (number1 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+
+
+        BigDecimal b1 = (BigDecimal) num1;
+        b1 = BigDecimal.valueOf(Math.cos(b1.doubleValue()));
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object tan(Object number1) {
+        if (number1 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+
+
+        BigDecimal b1 = (BigDecimal) num1;
+        b1 = BigDecimal.valueOf(Math.tan(b1.doubleValue()));
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object asin(Object number1) {
+        if (number1 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+
+
+        BigDecimal b1 = (BigDecimal) num1;
+        b1 = BigDecimal.valueOf(Math.asin(b1.doubleValue()));
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object acos(Object number1) {
+        if (number1 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+
+
+        BigDecimal b1 = (BigDecimal) num1;
+        b1 = BigDecimal.valueOf(Math.acos(b1.doubleValue()));
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object atan(Object number1) {
+        if (number1 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+
+
+        BigDecimal b1 = (BigDecimal) num1;
+        b1 = BigDecimal.valueOf(Math.atan(b1.doubleValue()));
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+    }
+
+    public static Object sqrt(Object number1) {
+        if (number1 == null) {
+            return null;
+        }
+        Object num1 = ObjectConvertor.tryConvertAsType(number1, BigDecimal.class);
+        if (!(num1 instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number1.getClass());
+        }
+
+
+        BigDecimal b1 = (BigDecimal) num1;
+        b1 = BigDecimal.valueOf(Math.sqrt(b1.doubleValue()));
+
+        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
     }
 
     public static String encode_url(Object obj) {
