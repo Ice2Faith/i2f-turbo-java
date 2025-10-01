@@ -27,7 +27,7 @@ public class TestProcedureExecutor {
     }
 
     public static void testProcedure() throws Exception {
-        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test/test-basic.xml");
+        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/test/java/i2f/jdbc/procedure/test/test-basic.xml");
         XmlNode node = JdbcProcedureParser.parse(file);
 
         BasicJdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
@@ -74,7 +74,7 @@ public class TestProcedureExecutor {
     }
 
     public static void testBasic() throws Exception {
-        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test/test-basic.xml");
+        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/test/java/i2f/jdbc/procedure/test/test-basic.xml");
         XmlNode node = JdbcProcedureParser.parse(file);
 
 //        BasicJdbcProcedureExecutor executor = new BasicJdbcProcedureExecutor();
