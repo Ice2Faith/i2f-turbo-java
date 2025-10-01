@@ -11,7 +11,7 @@ import java.io.File;
  */
 public class TestProcedureParser {
     public static void main(String[] args) throws Exception {
-        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/main/java/i2f/jdbc/procedure/test/test-basic.xml");
+        File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/test/java/i2f/jdbc/procedure/test/test-basic.xml");
         XmlNode node = JdbcProcedureParser.parse(file);
 
         System.out.println("ok");

@@ -22,7 +22,6 @@ class GvyTestProcedure extends InheritContextJdbcProcedureJavaCallerAdapter {
 
         params.now1 = new Date()
         println("now1:${params.now1}")
-        exec
         return null
     }
 }
