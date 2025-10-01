@@ -30,7 +30,9 @@ public class ContextHolder {
     public static final CopyOnWriteArraySet<String> LOAD_PACKAGE_SET = new CopyOnWriteArraySet<>();
 
     public static final ThreadLocal<String> TRACE_LOCATION = new ThreadLocal<>();
+    public static final ThreadLocal<String> TRACE_FILE = new ThreadLocal<>();
     public static final ThreadLocal<Integer> TRACE_LINE = new ThreadLocal<>();
+    public static final ThreadLocal<String> TRACE_TAG = new ThreadLocal<>();
     public static final ThreadLocal<String> TRACE_ERRMSG = new ThreadLocal<>();
     public static final ThreadLocal<Throwable> TRACE_ERROR = new ThreadLocal<>();
     public static final ThreadLocal<XmlNode> TRACE_NODE = new ThreadLocal<>();
@@ -161,6 +163,6 @@ public class ContextHolder {
 
     public static String traceLocation() {
         XmlNode node = TRACE_NODE.get();
-        return TRACE_LOCATION.get() + ":" + TRACE_LINE.get() + ":" + (node == null ? "" : node.getTagName());
+        return TRACE_LOCATION.get() + ":" + (node == null ? "" : node.getTagName());
     }
 }

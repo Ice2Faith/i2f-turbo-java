@@ -23,7 +23,9 @@ public interface ParamsConsts {
 
     String TRACE = "trace";
     String LOCATION = "location";
+    String FILE = "file";
     String LINE = "line";
+    String TAG = "tag";
     String ERRMSG = "errmsg";
     String NODE = "node";
     String STACK = "stack";
@@ -32,7 +34,9 @@ public interface ParamsConsts {
     String ERROR = "error";
 
     String TRACE_LOCATION = TRACE + "." + LOCATION;
+    String TRACE_FILE = TRACE + "." + FILE;
     String TRACE_LINE = TRACE + "." + LINE;
+    String TRACE_TAG = TRACE + "." + TAG;
     String TRACE_ERRMSG = TRACE + "." + ERRMSG;
     String TRACE_NODE = TRACE + "." + NODE;
     String TRACE_STACK = TRACE + "." + STACK;

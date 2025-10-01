@@ -12,7 +12,7 @@ public class SignalException extends RuntimeException {
     protected boolean hasLogout = false;
 
     {
-        location = ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get();
+        location = ContextHolder.TRACE_LOCATION.get();
     }
 
     protected SignalException() {

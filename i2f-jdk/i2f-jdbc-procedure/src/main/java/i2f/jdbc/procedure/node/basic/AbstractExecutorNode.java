@@ -254,11 +254,15 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
     }
 
     public static void updateTraceInfo(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        executor.visitSet(context, ParamsConsts.TRACE_LOCATION, node.getLocationFile());
+        executor.visitSet(context, ParamsConsts.TRACE_LOCATION, getNodeLocation(node));
+        executor.visitSet(context, ParamsConsts.TRACE_FILE, node.getLocationFile());
         executor.visitSet(context, ParamsConsts.TRACE_LINE, node.getLocationLineNumber());
+        executor.visitSet(context, ParamsConsts.TRACE_TAG, node.getTagName());
         executor.visitSet(context, ParamsConsts.TRACE_NODE, node);
-        ContextHolder.TRACE_LOCATION.set(node.getLocationFile());
+        ContextHolder.TRACE_LOCATION.set(node.getNodeLocation());
+        ContextHolder.TRACE_FILE.set(node.getLocationFile());
         ContextHolder.TRACE_LINE.set(node.getLocationLineNumber());
+        ContextHolder.TRACE_TAG.set(node.getTagName());
         ContextHolder.TRACE_NODE.set(node);
     }
 
