@@ -38,7 +38,11 @@ public class SystemAdditionalEnvironment implements IWritableEnvironment {
     static {
         RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
         Map<String, String> map = new HashMap<>();
-        map.put(RUNTIME_BOOT_CLASS_PATH, runtimeMXBean.getBootClassPath());
+        try {
+            map.put(RUNTIME_BOOT_CLASS_PATH, runtimeMXBean.getBootClassPath());
+        } catch (Exception e) {
+
+        }
         map.put(RUNTIME_CLASS_PATH, runtimeMXBean.getClassPath());
         StringJoiner joiner = new StringJoiner("\n");
         List<String> arguments = runtimeMXBean.getInputArguments();
