@@ -67,6 +67,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -100,6 +101,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected volatile long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
     protected final AtomicBoolean defaultTransactionalConnection=new AtomicBoolean(true);
 
+    protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
+    protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
+
     public final DatabaseDialectMapping DIALECT_MAPPING = new DatabaseDialectMapping() {
         @Override
         public void init() {
@@ -114,6 +118,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
         registryEvalScriptProvider(this);
         initFeatureMap();
+        initConstAttrValueOptimizeFeatures();
     }
 
     public BasicJdbcProcedureExecutor() {
@@ -709,6 +714,90 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return ret;
     }
 
+    /**
+     * 在进行对 XML 的 node 节点进行提取 attr 属性的值的时候进行常量优化
+     * 如果属性可以被优化，则返回 Reference.of() 值，下次被调用时，直接从 node.attrConstValueMap 返回值
+     * 例如，当修饰符为 V_AGE.trim.int.boolean=" 1 " 这样的修饰符时，很明显，这样的值是确定的常量
+     * 因为无论运行多少次，结果都是一致的
+     * 因为其等价代码表示为 V_AGE=boolean(int(trim(" 1 ")))
+     * 很明显，这样的语句，无论执行多少遍，V_AGE的结果都是 true
+     * 虽然这个例子不是很恰当，但是依旧能够说明问题
+     * 这个函数的目的就是为了针对常量 feature 修饰符进行优化为常量
+     * 能够提升一定的运行性能
+     * 再例如这个例子 V_SQL.text-body.trim.render=""
+     * 这个表达式中，text-body.trim 这部分是可以常量话，因此就可以被优化
+     * 因此，实际多次运行的时候，就只需要进行 render 修饰符的处理即可
+     * 减少了中间 feature 修饰符的路径
+     *
+     * @param attr   属性名
+     * @param action 默认的 feature 修饰符行为
+     * @param node   XML 节点
+     * @return 是否已经被优化，已经被优化返回含有值的 Reference.of() , 如果没有被优化，则返回 Reference.nop() 无值
+     */
+    public Reference<Object> constAttrValueOptimize(String attr, String action, XmlNode node) {
+        if (!optimizeConstAttrValue.get()) {
+            return Reference.nop();
+        }
+        String attrConstKey = attr;
+        List<String> features = node.getAttrFeatureMap().get(attr);
+        if (features == null || features.isEmpty()) {
+            attrConstKey = attr + "#" + action;
+        }
+        Map<String, Optional<Reference<Object>>> attrConstValueMap = node.getAttrConstValueMap();
+        Optional<Reference<Object>> result = attrConstValueMap.get(attrConstKey);
+        if (result != null) {
+            Reference<Object> val = result.orElse(Reference.nop());
+            return val;
+
+        }
+        synchronized (node) {
+
+            String attrScript = node.getTagAttrMap().get(attr);
+            Object value = attrScript;
+
+            boolean resolved = false;
+
+            if (features != null && !features.isEmpty()) {
+                int size = 0;
+                for (String feature : features) {
+                    if (feature == null || feature.isEmpty()) {
+                        size++;
+                        continue;
+                    }
+                    if (!constAttrValueOptimizeFeatures.contains(feature)) {
+                        break;
+                    }
+                    value = resolveFeature(value, feature, node, null);
+                    resolved = true;
+                    size++;
+                }
+                List<String> list = node.getAttrConstFeatureMap().computeIfAbsent(attrConstKey, k -> new ArrayList<>());
+                for (int i = size; i < features.size(); i++) {
+                    list.add(features.get(i));
+                }
+            } else {
+                if (constAttrValueOptimizeFeatures.contains(action)) {
+                    value = resolveFeature(attrScript, action, node, null);
+                    resolved = true;
+                }
+            }
+
+            if (resolved) {
+                Reference<Object> ret = Reference.of(value);
+                attrConstValueMap.put(attrConstKey, Optional.ofNullable(ret));
+                return ret;
+            }
+            attrConstValueMap.put(attrConstKey, Optional.ofNullable(Reference.nop()));
+        }
+
+        return Reference.nop();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "@0x" + String.format("%08x", hashCode());
+    }
+
     @Override
     public Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params) {
 //        if(isDebug()) {
@@ -721,7 +810,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             return null;
         }
-        Object value = attrScript;
+
+        Reference<Object> constVal = constAttrValueOptimize(attr, action, node);
+
+        Object value = constVal.isValue() ? constVal.get() :attrScript;
 
         String radixText = node.getTagAttrMap().get(AttrConsts.RADIX);
         if (radixText != null && !radixText.isEmpty()) {
@@ -740,6 +832,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
         List<String> features = node.getAttrFeatureMap().get(attr);
         if (features != null && !features.isEmpty()) {
+            if (constVal.isValue()) {
+                features = node.getAttrConstFeatureMap().get(attr);
+            }
             for (String feature : features) {
                 if (feature == null || feature.isEmpty()) {
                     continue;
@@ -747,7 +842,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 value = resolveFeature(value, feature, node, params);
             }
         } else {
-            value = resolveFeature(attrScript, action, node, params);
+            if (!constVal.isValue()) {
+                value = resolveFeature(attrScript, action, node, params);
+            }
         }
 
         Object logObj = value;
@@ -941,6 +1038,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         featuresMap.put(FeatureConsts.SNOW_UID, (value, node, context) -> {
             return SnowflakeLongUid.getId();
         });
+        featuresMap.put(FeatureConsts.LOCATION_FILE, (value, node, context) -> {
+            return node.getLocationFile();
+        });
+        featuresMap.put(FeatureConsts.LOCATION_LINE, (value, node, context) -> {
+            return node.getLocationLineNumber();
+        });
+        featuresMap.put(FeatureConsts.LOCATION_TAG, (value, node, context) -> {
+            return node.getTagName();
+        });
+        featuresMap.put(FeatureConsts.LOCATION, (value, node, context) -> {
+            return XmlNode.getNodeLocation(node);
+        });
+    }
+
+    protected void initConstAttrValueOptimizeFeatures() {
+        constAttrValueOptimizeFeatures.addAll(Arrays.asList(FeatureConsts.CONST_FEATURES));
     }
 
     public Object resolveFeature(Object value, String feature, XmlNode node, Map<String, Object> context) {

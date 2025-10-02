@@ -32,6 +32,12 @@ public interface FeatureConsts {
     String BODY_TEXT = "body-text";
     String BODY_XML = "body-xml";
 
+    // 节点属性
+    String LOCATION_FILE = "location-file";
+    String LOCATION_LINE = "location-line";
+    String LOCATION_TAG = "location-tag";
+    String LOCATION = "location";
+
     String SPACING_LEFT = "spacing-left";
     String SPACING_RIGHT = "spacing-right";
     String SPACING = "spacing";
@@ -46,7 +52,7 @@ public interface FeatureConsts {
     String EVAL_TINYSCRIPT = "eval-tinyscript";
     String EVAL_TS = "eval-ts";
     String EVAL_GROOVY = "eval-groovy";
-    String CLASS = ".class";
+    String CLASS = "class";
 
     String NOT = "not";
 
@@ -69,4 +75,15 @@ public interface FeatureConsts {
     String CAUSE_LAST = "cause-last";
     String CAUSE_RAW = "cause-raw";
     String CAUSE_ROOT = "cause-root";
+
+    // 常量属性，表示不需要上下文且能保证多次运行的结果一致的属性修饰符
+    String[] CONST_FEATURES = {
+            INT, DOUBLE, FLOAT, STRING, LONG, SHORT, CHAR, BYTE, BOOLEAN, NULL,
+            TRIM, ALIGN, BODY_TEXT, BODY_XML,
+            LOCATION_FILE, LOCATION_LINE, LOCATION_TAG, LOCATION,
+            SPACING, SPACING_LEFT, SPACING_RIGHT,
+            CLASS,
+            NOT,
+            IS_NULL, IS_NOT_EMPTY, IS_EMPTY, IS_NOT_EMPTY
+    };
 }
