@@ -94,9 +94,42 @@ public class TestProcedureExecutor {
         executor.getContext().registry("SIMPLE", javaMeta);
 
         executor.getContext().registry(javaMeta.getName(), javaMeta);
+        long bts = 0;
+        long ets = 0;
+        int loop = 10000;
 
-        executor.exec(node, params, false, true);
+        System.out.println("==========hot vm false=============");
+        executor.getOptimizeConstAttrValue().set(false);
+        bts = System.currentTimeMillis();
+        for (int i = 0; i < loop; i++) {
+            executor.exec(node, params, false, true);
+        }
+        ets = System.currentTimeMillis();
+        System.out.println("useTs:" + (ets - bts));
 
+        for (int j = 0; j < 5; j++) {
+            System.out.println("===========run false============");
+            executor.getOptimizeConstAttrValue().set(false);
+            bts = System.currentTimeMillis();
+            for (int i = 0; i < loop; i++) {
+                executor.exec(node, params, false, true);
+            }
+            ets = System.currentTimeMillis();
+            System.out.println("useTs:" + (ets - bts));
+        }
+
+        for (int j = 0; j < 5; j++) {
+            System.out.println("===========run true============");
+            executor.getOptimizeConstAttrValue().set(true);
+            bts = System.currentTimeMillis();
+            for (int i = 0; i < loop; i++) {
+                executor.exec(node, params, false, true);
+            }
+            ets = System.currentTimeMillis();
+            System.out.println("useTs:" + (ets - bts));
+        }
+
+        System.out.println("=======================");
         executor.exec(javaMeta.getName(), params);
 
         executor.exec("SIMPLE", params);
