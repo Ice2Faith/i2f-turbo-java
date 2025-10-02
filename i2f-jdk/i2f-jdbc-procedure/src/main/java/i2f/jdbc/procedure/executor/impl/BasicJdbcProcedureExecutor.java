@@ -738,19 +738,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (!optimizeConstAttrValue.get()) {
             return Reference.nop();
         }
-        String attrConstKey = attr;
         List<String> features = node.getAttrFeatureMap().get(attr);
-        if (features == null || features.isEmpty()) {
-            attrConstKey = attr + "#" + action;
-        }
-        Map<String, Optional<Reference<Object>>> attrConstValueMap = node.getAttrConstValueMap();
-        Optional<Reference<Object>> result = attrConstValueMap.get(attrConstKey);
-        if (result != null) {
-            Reference<Object> val = result.orElse(Reference.nop());
-            return val;
+        String attrConstKey = (features == null || features.isEmpty()) ? (attr + "#" + action) : attr;
 
-        }
-        synchronized (node) {
+        Map<String, Optional<Reference<Object>>> attrConstValueMap = node.getAttrConstValueMap();
+        Optional<Reference<Object>> result = attrConstValueMap.computeIfAbsent(attrConstKey, (_k) -> {
 
             String attrScript = node.getTagAttrMap().get(attr);
             Object value = attrScript;
@@ -784,13 +776,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
             if (resolved) {
                 Reference<Object> ret = Reference.of(value);
-                attrConstValueMap.put(attrConstKey, Optional.ofNullable(ret));
-                return ret;
+                return Optional.ofNullable(ret);
             }
-            attrConstValueMap.put(attrConstKey, Optional.ofNullable(Reference.nop()));
-        }
-
-        return Reference.nop();
+            return Optional.ofNullable(Reference.nop());
+        });
+        Reference<Object> val = result.orElse(Reference.nop());
+        return val;
     }
 
     @Override
