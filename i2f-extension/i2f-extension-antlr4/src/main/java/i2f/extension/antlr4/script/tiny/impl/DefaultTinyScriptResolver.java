@@ -1,6 +1,7 @@
 package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.extension.antlr4.script.tiny.impl.context.DefaultFunctionCallContext;
 import i2f.invokable.method.IMethod;
 import i2f.lru.LruList;
 import i2f.match.regex.RegexUtil;
@@ -8,8 +9,6 @@ import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -512,16 +511,6 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return map;
     }
 
-    @Data
-    @NoArgsConstructor
-    public static class DefaultFunctionCallContext{
-        protected TinyScriptResolver resolver;
-        protected Object context;
-        protected Object target;
-        protected boolean isNew;
-        protected String naming;
-        protected List<Object> argList;
-    }
 
     public Object getFunctionCallContext(Object context, Object target, boolean isNew, String naming, List<Object> argList){
         DefaultFunctionCallContext ret=new DefaultFunctionCallContext();
