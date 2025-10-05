@@ -166,9 +166,9 @@ from dual
 ```shell
 变量 != 常量
 常量 != 变量
-变量 < 常量
+变量 &lt; 常量
 常量 > 变量
-变量 <= 常量
+变量 &lt;= 常量
 常量 >= 变量
 变量 like 常量
 变量 not like 常量
@@ -804,9 +804,9 @@ end if;
 - 例如如下符号
 
 ```shell
-< <
-> >
-& &
+< &amp;lt;
+> &amp;gt;
+& &amp;amp;
 ```
 
 - 直接来看转换的XML结果
@@ -905,7 +905,7 @@ v_f_cnt:=LENGTH(COND.CONTENT) - LENGTH(REPLACE(COND.CONTENT, ';', ''))+1;
 
 <lang-eval-java>
     String content = executor.visitAs("COND.CONTENT", params);
-    content=ContextFunctions.trim(content);
+  content=ContextFunctions.INSTANCE.trim(content);
     content=content.replace("1=1","1 = 1 ");
     executor.visitSet(params,"COND.CONTENT",content);
     int len=content.length()-content.replace(";","").length()+1;
@@ -1427,7 +1427,7 @@ end loop;
 <lang-eval-ts>
     v_size=0;
     v_i=0;
-    while (${v_i} < ${v_count} ) {
+  while (${v_i} lt ${v_count} ) {
       v_size=${v_size}+${v_i};
       v_i=${v_i}+1;
     };
@@ -2737,9 +2737,90 @@ END  SP_GET_PARAM_VALUE;
 </lang-render>
 ```
 
-## 八、问题解答
+## 八、内建函数（TinyScript）
 
-### 8.1 怎么将主数据切换为其他数据源来执行过程？
+- 内建函数，这里说的是在 TinyScript 环境中使用的函数
+- 也就是说，可以在 lang-eval-ts 标签内，或者在 eval-ts 属性修饰符内使用的函数
+- 目前，有以下几类来源定义了可用的函数
+- TinyScript 脚本语言默认注册的函数
+- 与 Jdbc-Procedure 框架集成之后注册的函数
+
+### 8.1 TinyScript 脚本语言默认注册的函数
+
+- 这个是在 TinyScript 脚本中默认注册的
+- 在 TinyScript.BUILTIN_METHOD 中保存了默认注册的内建函数
+- 当然，也可以向其中添加自己的函数，以实现自己的拓展函数
+- 可以通过 TinyScript 类中提供的 registry 类函数进行注册函数
+- 也可以自己根据规则，将函数直接注册到 TinyScript.BUILTIN_METHOD 静态变量中
+- 默认注册的函数在 TinyScript 类的静态代码块中进行了初始化
+- 具体包含的函数可以再静态代码块中进行查看，哪些函数进行了注册
+- 同时，在 TinyScriptFunctions 类中，定义了一些内建函数
+- 也可以通过代码实现查看，有哪些函数注册到了其中
+
+### 8.2 与 Jdbc-Procedure 框架集成之后注册的函数
+
+- 与 Jdbc-Procedure 框架集成之后，添加的函数
+- 主要是为了对接数据库中的函数而添加的部分函数
+- 为了方便在进行存储过程转换后的数据库函数的转换问题
+- 这部分函数，主要分为以下几个部分
+- 通过 ContextHolder.INVOKE_METHOD_MAP 中保存的注册的静态内建函数
+  - 当然，你也可以向其中添加自己的函数，注册到其中，以便自己的使用
+- 还有，类中通过 ExecutorMethodProvider 和 ExecContextMethodProvider 绑定的上下文函数
+  - 另外，也提供了 ProcedureFunctionCallContext 线程上下文参数，可以通过 TinyScript.FUNCTION_CALL_CONTEXT 获取到这个上下文参数
+  - 这个上下文参数中，保存了调用内建函数时的上下文参数，以便能获得基于上下文操作的能力
+  - 从而提供了更加有效的函数，而不用局限于上下文无关的函数
+
+#### 8.2.1 静态注册的函数
+
+- 通过 ContextHolder.INVOKE_METHOD_MAP 中保存的注册的静态内建函数
+- 在 ContextFunctions 类中，定义了默认注册的函数
+- 包含了一些列常用的和数据库函数类似的函数
+- 以辅助进行数据库函数的转换
+- 具体包含的函数和出入参数，可以在其中进行查看详情
+- 以了解具体的使用方法和与数据库函数的差异
+
+#### 8.2.2 绑定的上下文函数
+
+- 这部分是深度整合 Jdbc-Procedure 框架之后，从框架的执行上下文中添加的绑定函数
+- 提供了基于上下文操纵的能力以及相关的交互函数
+- 其中，可用的函数可以在 在 ExecutorMethodProvider 和 ExecContextMethodProvider 类进行查看可以使用的函数
+- 当然，绑定上下文函数，已经实现在了这两个内部类中
+- 有可能你不希望直接修改这两个类
+- 因此，你也可以通过 TinyScript.FUNCTION_CALL_CONTEXT 线程上下文参数获取到执行函数是的上下文参数
+- 这样，即使你定义的静态函数，也能够通过线程上下文参数获取到执行上下文信息 ProcedureFunctionCallContext 对象
+- 这样就能够具备上下文访问变更的能力
+- 下面给出一段示例代码，用于体现通过线程上下文获取执行上下文实现一个注册内建函数
+
+```java
+public class TestThreadLocalContextFunctions {
+
+  public static void main(String[] args) {
+    // 此处的注册，在默认与 springboot 集成的环境中，可以考虑在 ApplicationRunner 中进行注册
+    // 或者直接通过 springboot 提供的一些其他的初始化点中进行注册，例如 Aware 类接口、
+
+    // 直接注册到 TinyScript 脚本中
+    TinyScript.registryBuiltMethodByStaticMethod(TestThreadLocalContextFunctions.class);
+
+    // 或者注册到与 Jdbc-Procedure 框架集成的环境中
+    ContextHolder.registryAllInvokeMethods(TestThreadLocalContextFunctions.class);
+  }
+
+  public static ProcedureFunctionCallContext function_call_context() {
+    // 注意，这里获取到的线程上下文参数，因为是和 Jdbc-Procedure 框架集成了，所以，类型才是 ProcedureFunctionCallContext
+    // 否则，默认是 DefaultFunctionCallContext 类型
+    return (ProcedureFunctionCallContext) TinyScript.FUNCTION_CALL_CONTEXT.get();
+  }
+
+  public static XmlNode get_node() {
+    ProcedureFunctionCallContext context = function_call_context();
+    return context.getNode();
+  }
+}
+```
+
+## 九、问题解答
+
+### 9.1 怎么将主数据切换为其他数据源来执行过程？
 
 - 默认情况下，框架自动检测primary,master,main,default,leader这些数据源作为主数据源primary
 - 在多数据源场景中，就是按照这个顺序进行检测的，检测到为止，则不再继续检测
@@ -2781,7 +2862,7 @@ Map<String, Object> ret = JdbcProcedureHelper.call("SP_ODS_MAIN", (map) -> {
 - 不建议在过程内部也调整映射
 - 因为在内部调整之后，可能在子过程或者内部过程调用时，发生事务控制混乱以及主数据源混乱的情况
 
-### 8.2 上下文中有哪些固定的参数？
+### 9.2 上下文中有哪些固定的参数？
 
 - 内置了一些固定的运行常量
 - 这些常量可以根据需要进行使用和调整值
@@ -2810,7 +2891,7 @@ BasicJdbcProcedureExecutor.createParams()
 - executor 类型JdbcProcedureExecutor,用于提供executor的操作能力，方便在一些场景中，能够获取executor的操作能力
 - 关于这些参数是如何在发生内部调用时进行传递的，请看下一节
 
-### 8.3 发生内部嵌套调用时上下文是怎么传递的？
+### 9.3 发生内部嵌套调用时上下文是怎么传递的？
 
 - 针对固定参数是使用直接引用赋值的方式进行传递的
 - 始终保持引用不变
@@ -2820,7 +2901,7 @@ BasicJdbcProcedureExecutor.createParams()
 BasicJdbcProcedureExecutor.newParams()
 ```
 
-### 8.4 是怎么注入了上下文的固定参数的？
+### 9.4 是怎么注入了上下文的固定参数的？
 
 - 用户调用古城，一般只需要传递过程声明的形式参数
 - 但是固定参数，用户一般都不需要显式的进行设置
@@ -2831,7 +2912,7 @@ BasicJdbcProcedureExecutor.newParams()
 BasicJdbcProcedureExecutor.prepareParams()
 ```
 
-### 8.5 怎么添加自己的全局自定义参数？
+### 9.5 怎么添加自己的全局自定义参数？
 
 - 比较常见的就是，希望在每个过程运行的时候
 - 都能够注入自己的全局参数
@@ -2876,9 +2957,9 @@ public class PreparedParamsEventListener implements XProc4jEventListener {
 }
 ```
 
-## 九、拓展和其他
+## 十、拓展和其他
 
-### 9.1 拓展自己的TinyScript自定义函数
+### 10.1 拓展自己的TinyScript自定义函数
 
 - 一些函数是TinyScript内建的函数
 - 能够提供基本和数据库内建函数一样的能力
@@ -2892,7 +2973,7 @@ public class PreparedParamsEventListener implements XProc4jEventListener {
 - 直接使用方法名的方式调用
 - 那么就需要注册内建函数
 
-#### 9.1.1 内建函数的保存
+#### 10.1.1 内建函数的保存
 
 - 内建函数是通过静态变量实现的
 - 变量位置如下
@@ -2976,7 +3057,7 @@ TinyScript.registryBuiltMethodByStaticMethod(MySqlFunctions .class);
 </lang-eval-ts>
 ```
 
-#### 9.1.2 TinyScript默认内建函数
+#### 10.1.2 TinyScript默认内建函数
 
 - 除此之外，TinyScript默认就将一部分Java类函数注册为内建函数了
 - 具体可以查看如下的位置
@@ -2990,11 +3071,11 @@ public class TinyScript {
 }
 ```
 
-#### 9.1.3 Jdbc-Procedure集成内建函数
+#### 10.1.3 Jdbc-Procedure集成内建函数
 
-- 当然，因为TInyScript被Jdbc-Procedure集成了
+- 当然，因为TinyScript被Jdbc-Procedure集成了
 - 因此也可以使用集成的方式
-- 这种方式，不但TInyScript可以进行使用
+- 这种方式，不但TinyScript可以进行使用
 - 在lang-invoke中也可以进行使用
 - 同样也是通过静态变量维护内建函数的
 
@@ -3007,6 +3088,8 @@ public class ContextHolder {
 ```
 
 - 同样通过静态方法进行注册
+- 也可以支持将实例公开方法转换为实例静态方法的方法
+- 将实例公开方法转换为静态方法进行注册
 
 ```java
 public class ContextHolder {
@@ -3019,10 +3102,26 @@ public class ContextHolder {
     public static void registryAllInvokeMethods(Method... methods) {
 
     }
+
+  // 将对象实例的公开方法转换为静态方法进行注册
+  // 这样就允许将实例的公开方法思维静态方法，提供了一些非静态方法注册的可能性
+  public static void registryInvokeMethodByInstanceMethod(Object object) {
+
+  }
+
+  // 将对象实例的公开方法转换为静态方法进行注册
+  public static void registryInvokeMethodByInstanceMethod(Object object, Predicate<Method> filter) {
+
+  }
 }
 ```
 
-### 9.2 拓展自己的属性修饰符feature
+- 默认的 Jdbc-Procedure 内建函数在 ContextFunctions 中进行定义
+- 包含了一些常用的数据库函数的实现
+- 另外，在 ExecutorMethodProvider 和 ExecContextMethodProvider 绑定上下文的内建函数
+- 这些函数，可以在 eval-ts 中进行使用
+
+### 10.2 拓展自己的属性修饰符feature
 
 - 之前已经介绍过属性修饰符了
 - 因为其直接作用在属性上，方便了一些场景的处理
@@ -3066,13 +3165,13 @@ public static R convert(T obj);
 - 并且需要具有一个形参和返回值
 - 至于形参和返回值的类型不做要求
 
-### 9.3 拓展自己的XML节点
+### 10.3 拓展自己的XML节点
 
 - 目前内置的节点主要分为两类lang-(逻辑控制类)和sql-(数据库操作类)两类
 - 如果有需求增加其他的控制，也可以编写自己的xml-node节点来处理
 - 比如，想要实现命令执行的节点
 
-#### 9.3.1 定义节点规则（非必要）
+#### 10.3.1 定义节点规则（非必要）
 
 - 定义如下
 
@@ -3091,7 +3190,7 @@ await指定是否需要等待命令执行结束
 
 - 好了，节点的规范定义好了
 
-#### 9.3.2 定义节点DTD语法约束（非必要）
+#### 10.3.2 定义节点DTD语法约束（非必要）
 
 - 那么，就可以添加对应节点定义的DTD约束了
 
@@ -3116,7 +3215,7 @@ await指定是否需要等待命令执行结束
 
 - 这样dtd文件规则就编写好了
 
-#### 9.3.3 定义节点处理逻辑（必要）
+#### 10.3.3 定义节点处理逻辑（必要）
 
 - 接下来，就需要实现自己的节点处理逻辑了
 - 首先需要实现ExecutorNode接口
@@ -3296,7 +3395,7 @@ com.test.xpro4j.node.HttpRequestNode
 
 - 这样即可
 
-### 9.4 事件系统（event）
+### 10.4 事件系统（event）
 
 - 在一些情况下，我们可能需要再框架的基础上，增加一些自己的处理逻辑
 - 比如
@@ -3371,7 +3470,7 @@ public class PreparedParamsEventListener implements XProc4jEventListener {
 - 具体通过查看源码，已确定是否是同步事件
 - 另外，事件的发送，会根据实际需要，慢慢迭代添加一些事件
 
-### 9.5 IDEA(Jetbrains 系列IDE)插件支持
+### 10.5 IDEA(Jetbrains 系列IDE)插件支持
 
 - jdbc-procedure-plugin(或 xproc4j-plugin) 是针对 xproc4j 框架开发的一款适用于 Jetbrains 系列IDE的插件
 - 能够提供语法高亮和部分语法的自动补全提示
@@ -3434,7 +3533,7 @@ test.xml
 - 能够看到语法正常高亮即可
 - 也就是关键字的语法高亮正常即可
 
-### 9.6 调试XML过程
+### 10.6 调试XML过程
 
 - 由于是对XML过程进行解析执行
 - IDE自带的调试功能是对Java代码进行调试的
@@ -3597,7 +3696,7 @@ xproc4j:
 - 当然，这个根据你的中的过程数量来决定的
 - 特别是大型项目，启动时间就会更长，浪费在语法检查上
 
-### 9.7 和其他框架集成
+### 10.7 和其他框架集成
 
 - 默认情况下，是和springboot框架进行了继承
 - 如果需要和其他框架进行继承
@@ -3606,7 +3705,7 @@ xproc4j:
 - 以及SpringContextJdbcProcedureExecutorAutoConfiguration类的实现组合原理
 - 这部分比较简单，不再进行展开讲解，根据源码进行查看即可
 
-### 9.8 直接独立使用，不与springboot集成
+### 10.8 直接独立使用，不与springboot集成
 
 - 这部分，请参考TestProcedureExecutor类以及所在包的测试代码
 - 结合SpringContextJdbcProcedureExecutorAutoConfiguration配置
