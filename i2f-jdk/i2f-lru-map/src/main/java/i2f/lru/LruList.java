@@ -1,6 +1,7 @@
 package i2f.lru;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
@@ -76,8 +77,17 @@ public class LruList<E> implements List<E> {
                     return head;
                 }
             }
-            boolean ok = delegate.remove(val);
-            if (ok) {
+            boolean find = false;
+            Iterator<E> iterator = delegate.iterator();
+            while (iterator.hasNext()) {
+                E elem = iterator.next();
+                if (elem == val) {
+                    find = true;
+                    iterator.remove();
+                    break;
+                }
+            }
+            if (find) {
                 delegate.addFirst(val);
             }
             return val;
@@ -106,15 +116,23 @@ public class LruList<E> implements List<E> {
     public E touchFirst(Predicate<E> predicate) {
         lock.writeLock().lock();
         try {
-            E ret = null;
-            for (E item : delegate) {
-                if (predicate.test(item)) {
-                    ret = item;
-                    touch(item);
+            AtomicReference<E> ref = null;
+            Iterator<E> iterator = delegate.iterator();
+            while (iterator.hasNext()) {
+                E val = iterator.next();
+                if (predicate.test(val)) {
+                    ref = new AtomicReference<>(val);
+                    iterator.remove();
                     break;
                 }
             }
-            return ret;
+            if (ref != null) {
+                delegate.add(0, ref.get());
+            }
+            if (ref == null) {
+                return null;
+            }
+            return ref.get();
         } finally {
             lock.writeLock().unlock();
         }
