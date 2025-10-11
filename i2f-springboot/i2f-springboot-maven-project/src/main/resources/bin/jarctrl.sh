@@ -713,7 +713,7 @@ function rollback() {
 # 准备运行Jar包的上下文
 function prepareAppContext(){
       # 如果指定了APP_JAVA_HOME,则使用APP_JAVA_HOME下面的JAVA
-      if [[ "$APP_JAVA_HOME" -ne "" ]]; then
+      if [[ -n "$APP_JAVA_HOME" ]]; then
         JAVA_PATH=${APP_JAVA_HOME}/bin/java
       fi
 
