@@ -18,13 +18,14 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
-import i2f.lru.LruList;
 import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
 import i2f.typeof.TypeOf;
 
 import java.sql.Connection;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -54,7 +55,7 @@ public interface JdbcProcedureExecutor {
 
     void registryEvalScriptProvider(EvalScriptProvider provider);
 
-    LruList<EvalScriptProvider> getEvalScriptProviders();
+    CopyOnWriteArrayList<EvalScriptProvider> getEvalScriptProviders();
 
     XProc4jEventHandler getEventHandler();
 
@@ -94,7 +95,21 @@ public interface JdbcProcedureExecutor {
         return getMetaMap().get(procedureId);
     }
 
-    LruList<ExecutorNode> getNodes();
+    String nodeTagKey(String tag);
+
+    ConcurrentHashMap<String, CopyOnWriteArrayList<ExecutorNode>> getNodesMap();
+
+    default CopyOnWriteArrayList<ExecutorNode> getNodes(String tagName) {
+        return getNodesMap().get(nodeTagKey(tagName));
+    }
+
+    default ExecutorNode getSupportNode(XmlNode node) {
+        CopyOnWriteArrayList<ExecutorNode> list = getNodes(nodeTagKey(node.getTagName()));
+        if (list == null) {
+            return null;
+        }
+        return list.get(0);
+    }
 
     IEnvironment getEnvironment();
 

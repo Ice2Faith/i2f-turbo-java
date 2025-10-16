@@ -26,12 +26,10 @@ public class LangTryNode extends AbstractExecutorNode {
     public static final String TAG_NAME = TagConsts.LANG_TRY;
 
     @Override
-    public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
-            return false;
-        }
-        return TAG_NAME.equals(node.getTagName());
+    public String tag() {
+        return TAG_NAME;
     }
+
 
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {

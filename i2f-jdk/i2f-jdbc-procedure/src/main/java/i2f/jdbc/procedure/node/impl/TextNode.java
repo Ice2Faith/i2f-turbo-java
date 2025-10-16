@@ -13,6 +13,11 @@ import java.util.Map;
  */
 public class TextNode extends AbstractExecutorNode {
     @Override
+    public String tag() {
+        return null;
+    }
+
+    @Override
     public boolean support(XmlNode node) {
         XmlNode.NodeType type = node.getNodeType();
         return XmlNode.NodeType.TEXT == type

@@ -7,7 +7,6 @@ import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
 import i2f.invokable.method.IMethod;
 import i2f.invokable.method.impl.jdk.JdkInstanceStaticMethod;
 import i2f.invokable.method.impl.jdk.JdkMethod;
-import i2f.lru.LruList;
 import i2f.lru.LruMap;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -27,7 +26,7 @@ import java.util.function.Predicate;
 public class TinyScript {
     public static final ThreadLocal<Object> FUNCTION_CALL_CONTEXT=new ThreadLocal<>();
 
-    public static final ConcurrentHashMap<String, LruList<IMethod>> BUILTIN_METHOD = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> BUILTIN_METHOD = new ConcurrentHashMap<>();
     public static final LruMap<String, TinyScriptParser.ScriptContext> TREE_MAP = new LruMap<>(4096);
 
     public static final CopyOnWriteArrayList<ANTLRErrorListener> ERROR_LISTENER = new CopyOnWriteArrayList<>();
@@ -154,7 +153,7 @@ public class TinyScript {
     }
 
     public static void registryBuiltinMethod(IMethod method) {
-        LruList<IMethod> list = BUILTIN_METHOD.computeIfAbsent(method.getName(), (key) -> new LruList<>());
+        CopyOnWriteArrayList<IMethod> list = BUILTIN_METHOD.computeIfAbsent(method.getName(), (key) -> new CopyOnWriteArrayList<>());
         list.add(method);
     }
 

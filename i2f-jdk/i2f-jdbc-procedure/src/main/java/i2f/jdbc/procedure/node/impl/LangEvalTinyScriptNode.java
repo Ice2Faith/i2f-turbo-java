@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 public class LangEvalTinyScriptNode extends AbstractExecutorNode implements EvalScriptProvider {
     public static final String TAG_NAME = TagConsts.LANG_EVAL_TINYSCRIPT;
     public static final String ALIAS_TAG_NAME = TagConsts.LANG_EVAL_TS;
+    public static final String[] ALIAS = {ALIAS_TAG_NAME};
 
     public static void main(String[] args) {
         /*language=tinyscript*/
@@ -59,13 +60,15 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
     }
 
     @Override
-    public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
-            return false;
-        }
-        return TAG_NAME.equals(node.getTagName())
-                || ALIAS_TAG_NAME.equals(node.getTagName());
+    public String[] alias() {
+        return ALIAS;
     }
+
+    @Override
+    public String tag() {
+        return TAG_NAME;
+    }
+
 
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
