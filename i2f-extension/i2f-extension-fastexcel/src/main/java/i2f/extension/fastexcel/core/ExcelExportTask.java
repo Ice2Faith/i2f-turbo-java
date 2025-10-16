@@ -2,6 +2,7 @@ package i2f.extension.fastexcel.core;
 
 import cn.idev.excel.ExcelWriter;
 import cn.idev.excel.FastExcel;
+import cn.idev.excel.annotation.ExcelProperty;
 import cn.idev.excel.converters.Converter;
 import cn.idev.excel.enums.WriteDirectionEnum;
 import cn.idev.excel.write.builder.ExcelWriterBuilder;
@@ -54,6 +55,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
     private boolean enableCellStyleAnnotation;
     private CellWriteHandler writeHandler;
     private CountDownLatch latch;
+    private Set<String> exportColumnTags;
     private List<ExcelExportColumn> exportColumns;
     private Consumer<ExcelExportTask> beforeConsumer;
     private Consumer<ExcelExportTask> afterConsumer;
@@ -101,6 +103,16 @@ public class ExcelExportTask implements Runnable, Callable<File> {
 
     public ExcelExportTask setTemplateUrl(URL templateUrl) {
         this.templateUrl = templateUrl;
+        return this;
+    }
+
+    public ExcelExportTask setExportColumnTags(Collection<String> exportColumnTags) {
+        this.exportColumnTags = new LinkedHashSet<>(exportColumnTags);
+        return this;
+    }
+
+    public ExcelExportTask setExportColumn(Collection<ExcelExportColumn> exportColumns) {
+        this.exportColumns = new ArrayList<>(exportColumns);
         return this;
     }
 
@@ -216,6 +228,87 @@ public class ExcelExportTask implements Runnable, Callable<File> {
             Map<Integer, Map<String, Object>> sheetContext = new HashMap<>();
 
             if (templateFile == null) {
+                if (exportColumns == null) {
+                    exportColumns = new ArrayList<>();
+                }
+                if (dataClass != null && !exportColumnTags.isEmpty()) {
+                    // 获取包含TAG的字段
+                    Map<Field, Class<?>> fields = ReflectResolver.getFields(dataClass, (field) -> {
+                        int modifiers = field.getModifiers();
+                        if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
+                            return false;
+                        }
+                        ExcelTag ann = ReflectResolver.getAnnotation(field, ExcelTag.class);
+                        if (ann == null) {
+                            return false;
+                        }
+                        String[] tags = ann.value();
+                        if (tags == null) {
+                            return false;
+                        }
+                        for (String tag : tags) {
+                            if (exportColumnTags.contains(tag)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
+
+                    // 获取字段上的注解
+                    List<Map.Entry<Field, ExcelProperty>> list = new ArrayList<>();
+                    for (Field field : fields.keySet()) {
+                        ExcelProperty ann = ReflectResolver.getAnnotation(field, ExcelProperty.class);
+                        list.add(new AbstractMap.SimpleEntry<>(field, ann));
+                    }
+                    // 根据注解排序
+                    list.sort((c1, c2) -> {
+                        ExcelProperty v1 = c1.getValue();
+                        ExcelProperty v2 = c2.getValue();
+                        if (v1 == v2) {
+                            return 0;
+                        }
+                        if (v1 == null) {
+                            return -1;
+                        }
+                        if (v2 == null) {
+                            return 1;
+                        }
+                        return Integer.compare(v1.order(), v2.order());
+                    });
+                    // 剔除使用index指定顺序的字段
+                    TreeMap<Integer, Map.Entry<Field, ExcelProperty>> indexMap = new TreeMap<>();
+                    Iterator<Map.Entry<Field, ExcelProperty>> iterator = list.iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry<Field, ExcelProperty> entry = iterator.next();
+                        ExcelProperty ann = entry.getValue();
+                        if (ann != null) {
+                            if (ann.index() >= 0) {
+                                indexMap.put(ann.index(), entry);
+                                iterator.remove();
+                            }
+                        }
+                    }
+                    // 回插使用index指定顺序的字段
+                    for (Map.Entry<Integer, Map.Entry<Field, ExcelProperty>> entry : indexMap.entrySet()) {
+                        Integer idx = entry.getKey();
+                        Map.Entry<Field, ExcelProperty> item = entry.getValue();
+                        if (idx < list.size()) {
+                            list.add(idx, item);
+                        } else {
+                            list.add(item);
+                        }
+                    }
+                    // 生成导出列列头
+                    for (Map.Entry<Field, ExcelProperty> item : list) {
+                        String prop = item.getKey().getName();
+                        String title = item.getKey().getName();
+                        ExcelProperty ann = item.getValue();
+                        if (ann != null && ann.value() != null && ann.value().length > 0) {
+                            title = ann.value()[0];
+                        }
+                        exportColumns.add(new ExcelExportColumn(title, prop));
+                    }
+                }
                 if (exportColumns != null && !exportColumns.isEmpty()) {
                     templateFile = createTemplateFileByColumns(file, exportColumns);
                     createdMapTemplateFile = true;
