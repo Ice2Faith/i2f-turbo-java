@@ -9,7 +9,6 @@ import i2f.clock.SystemClock;
 import i2f.context.impl.ListableNamingContext;
 import i2f.context.std.INamingContext;
 import i2f.convert.obj.ObjectConvertor;
-import i2f.database.type.DatabaseDialectMapping;
 import i2f.database.type.DatabaseType;
 import i2f.environment.impl.ListableDelegateEnvironment;
 import i2f.environment.std.IEnvironment;
@@ -46,7 +45,6 @@ import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
-import i2f.lru.LruList;
 import i2f.lru.LruMap;
 import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
@@ -59,7 +57,6 @@ import lombok.Data;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -67,6 +64,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -85,9 +83,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected static final AtomicBoolean hasApplyNodes = new AtomicBoolean(false);
     protected transient final AtomicReference<ProcedureNode> procedureNodeHolder = new AtomicReference<>();
     protected transient final LruMap<String, Object> executorLru = new LruMap<>(4096);
-    protected final LruList<ExecutorNode> nodes = new LruList<>();
+    protected final ConcurrentHashMap<String, CopyOnWriteArrayList<ExecutorNode>> nodes = new ConcurrentHashMap<>();
     protected final ConcurrentHashMap<String, FeatureFunction> featuresMap = new ConcurrentHashMap<>();
-    protected final LruList<EvalScriptProvider> evalScriptProviders = new LruList<>();
+    protected final CopyOnWriteArrayList<EvalScriptProvider> evalScriptProviders = new CopyOnWriteArrayList<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected volatile JdbcProcedureLogger logger = new DefaultJdbcProcedureLogger(debug);
     public volatile Function<String, String> mapTypeColumnNameMapper = StringUtils::toUpper;
@@ -103,13 +101,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
     protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
-
-    public final DatabaseDialectMapping DIALECT_MAPPING = new DatabaseDialectMapping() {
-        @Override
-        public void init() {
-            redirect(DatabaseType.DM, DatabaseType.ORACLE);
-        }
-    };
 
     {
         List<ExecutorNode> list = defaultExecutorNodes();
@@ -216,6 +207,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return ret;
     }
 
+    @Override
+    public String nodeTagKey(String tag) {
+        if (tag == null || tag.isEmpty()) {
+            return "#";
+        }
+        return tag;
+    }
+
     public void registryExecutorNode(ExecutorNode node) {
         if (node == null) {
             return;
@@ -223,7 +222,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (isDebug()) {
             logger().logDebug("registry executor node:" + node.getClass());
         }
-        this.nodes.add(node);
+        String tagKey = nodeTagKey(node.tag());
+        this.nodes.computeIfAbsent(tagKey, k -> new CopyOnWriteArrayList<>()).add(node);
+        String[] aliasArr = node.alias();
+        if (aliasArr != null) {
+            for (String name : aliasArr) {
+                String tagNameKey = nodeTagKey(name);
+                this.nodes.computeIfAbsent(tagNameKey, k -> new CopyOnWriteArrayList<>()).add(node);
+            }
+        }
         if (node instanceof EvalScriptProvider) {
             EvalScriptProvider provider = (EvalScriptProvider) node;
             registryEvalScriptProvider(provider);
@@ -278,7 +285,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     }
 
     @Override
-    public LruList<EvalScriptProvider> getEvalScriptProviders() {
+    public CopyOnWriteArrayList<EvalScriptProvider> getEvalScriptProviders() {
         return this.evalScriptProviders;
     }
 
@@ -320,18 +327,20 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         List<Object> beansList = getNamingContext().getAllBeans();
         for (Object bean : beansList) {
             if (bean instanceof ExecutorNode) {
-                this.nodes.add(0, (ExecutorNode) bean);
+                ExecutorNode eNode = (ExecutorNode) bean;
+                registryExecutorNode(eNode);
             }
         }
     }
 
     @Override
-    public LruList<ExecutorNode> getNodes() {
+    public ConcurrentHashMap<String, CopyOnWriteArrayList<ExecutorNode>> getNodesMap() {
         if (!hasApplyNodes.getAndSet(true)) {
             applyNodeExecutorComponents();
         }
         return nodes;
     }
+
 
 
     @Override
@@ -414,8 +423,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 //            logger().logDebug( "exec XmlNode [" + XmlNode.getNodeLocation(node) + "] use Map ... ");
 //        }
         execXmlNodeDelegate((vNode, vParams, vBeforeNewConnection, vAfterCloseConnection) -> {
-            LruList<ExecutorNode> nodeList = getNodes();
-            ExecutorNode execNode = nodeList.touchFirst(e -> e.support(vNode));
+            ExecutorNode execNode = getSupportNode(node);
             if (execNode != null) {
                 execXmlNodeByExecutorNode(execNode, vNode, vParams, vBeforeNewConnection, vAfterCloseConnection);
                 return;
@@ -548,8 +556,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (node != null) {
                 return node;
             }
-            LruList<ExecutorNode> nodeList = getNodes();
-            ExecutorNode item = nodeList.touchFirst(e -> e instanceof ProcedureNode);
+            List<ExecutorNode> nodeList = getNodes(TagConsts.PROCEDURE);
+            ExecutorNode item = null;
+            for (ExecutorNode iter : nodeList) {
+                item = iter;
+                break;
+            }
             if (item != null) {
                 return (ProcedureNode) item;
             }
@@ -1349,7 +1361,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 //        if(isDebug()) {
 //            logger().logDebug("eval script [" + script + "] on lang [" + lang + "] near [" + ContextHolder.traceLocation() + "] ... ");
 //        }
-        EvalScriptProvider provider = getEvalScriptProviders().touchFirst(e -> e.support(lang));
+
+        EvalScriptProvider provider = null;
+        CopyOnWriteArrayList<EvalScriptProvider> list = getEvalScriptProviders();
+        for (EvalScriptProvider item : list) {
+            if (item.support(lang)) {
+                provider = item;
+                break;
+            }
+        }
         if (provider == null) {
             throw new ThrowSignalException("eval script provider not found for lang=" + lang);
         }
@@ -1482,11 +1502,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (connectionMap == null) {
             connectionMap = new LinkedHashMap<>();
             params.put(ParamsConsts.CONNECTIONS, connectionMap);
+            if (isDebug()) {
+                logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] none connection map");
+            }
         }
         Connection conn = connectionMap.get(datasource);
         if (conn != null) {
             try {
                 if (!conn.isClosed() && conn.isValid(300)) {
+                    if (isDebug()) {
+                        logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] find in map");
+                    }
                     return conn;
                 }
             } catch (Exception e) {
@@ -1496,6 +1522,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 if(!conn.isClosed()){
                     if(!conn.getAutoCommit()){
                        conn.commit();
+                        if (isDebug()) {
+                            logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] commit before close");
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -1503,6 +1532,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }finally {
                 try {
                     conn.close();
+                    if (isDebug()) {
+                        logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] close");
+                    }
                 } catch (SQLException e) {
                     logger().logWarn(() -> e.getMessage(), e);
                 }
@@ -1514,6 +1546,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (ds != null) {
             try {
                 conn = ds.getConnection();
+                if (isDebug()) {
+                    logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] new connection from datasource");
+                }
                 afterNewConnection(datasource,conn);
             } catch (SQLException e) {
                 throw new ThrowSignalException(e.getMessage(), e);
@@ -1539,7 +1574,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if(defaultTransactionalConnection.get()) {
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-            conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+//            conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            if (isDebug()) {
+                logger().logDebug("after-new-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] none-auto-commit");
+            }
+        } else {
+            conn.setAutoCommit(true);
+            if (isDebug()) {
+                logger().logDebug("after-new-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] auto-commit");
+            }
         }
     }
 
@@ -1630,9 +1673,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return DatabaseType.typeOfConnection(conn);
     }
 
-    public DatabaseType getDialectType(Connection conn) throws SQLException {
-        return DIALECT_MAPPING.dialectOf(conn);
-    }
 
     @Override
     public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
@@ -1925,6 +1965,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             Connection conn = getConnection(datasource, params);
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(isolation);
+            if (isDebug()) {
+                logger().logDebug("sql-trans-begin:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] no-auto-commit");
+            }
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
@@ -1940,9 +1983,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (checked) {
                 if (!conn.getAutoCommit()) {
                     conn.commit();
+                    if (isDebug()) {
+                        logger().logDebug("sql-trans-commit:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] checked commit");
+                    }
                 }
             } else {
                 conn.commit();
+                if (isDebug()) {
+                    logger().logDebug("sql-trans-commit:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] direct commit");
+                }
             }
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
@@ -1959,9 +2008,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (checked) {
                 if (!conn.getAutoCommit()) {
                     conn.rollback();
+                    if (isDebug()) {
+                        logger().logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] checked rollback");
+                    }
                 }
             } else {
                 conn.rollback();
+                if (isDebug()) {
+                    logger().logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] direct rollback");
+                }
             }
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
@@ -1978,9 +2033,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (checked) {
                 if (!conn.getAutoCommit()) {
                     conn.commit();
+                    if (isDebug()) {
+                        logger().logDebug("sql-trans-none:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] checked commit");
+                    }
                 }
             }
             conn.setAutoCommit(true);
+            if (isDebug()) {
+                logger().logDebug("sql-trans-none:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] auto-commit");
+            }
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }

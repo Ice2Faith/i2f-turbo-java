@@ -3,7 +3,6 @@ package i2f.extension.antlr4.script.tiny.impl;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.tiny.impl.context.DefaultFunctionCallContext;
 import i2f.invokable.method.IMethod;
-import i2f.lru.LruList;
 import i2f.match.regex.RegexUtil;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
@@ -23,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -488,9 +488,9 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     public IMethod findMethod(Object context, String naming, List<Object> args) {
-        LruList<IMethod> methods = TinyScript.BUILTIN_METHOD.get(naming);
+        CopyOnWriteArrayList<IMethod> methods = TinyScript.BUILTIN_METHOD.get(naming);
         if (methods != null && !methods.isEmpty()) {
-            IMethod method = methods.touchDelegate(list -> ReflectResolver.matchExecMethod(list, args));
+            IMethod method = ReflectResolver.matchExecMethod(methods, args);
             return method;
         }
         return null;

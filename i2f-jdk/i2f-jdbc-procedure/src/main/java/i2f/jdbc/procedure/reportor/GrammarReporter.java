@@ -10,7 +10,6 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.impl.LangEvalJavaNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.lru.LruList;
 import i2f.match.regex.RegexPattens;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -106,8 +105,7 @@ public class GrammarReporter {
         if (nodeCount != null) {
             nodeCount.incrementAndGet();
         }
-        LruList<ExecutorNode> nodes = executor.getNodes();
-        ExecutorNode executorNode = nodes.touchFirst(e -> e.support(node));
+        ExecutorNode executorNode = executor.getSupportNode(node);
         if (executorNode != null) {
             try {
                 executorNode.reportGrammar(node, (msg) -> {

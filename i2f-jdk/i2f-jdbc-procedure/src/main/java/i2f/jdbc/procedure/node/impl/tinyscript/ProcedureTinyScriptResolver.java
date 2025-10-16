@@ -11,7 +11,6 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
-import i2f.lru.LruList;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import lombok.Data;
@@ -22,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -36,10 +36,10 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
     protected JdbcProcedureExecutor executor;
     protected XmlNode node;
 
-    private static final ConcurrentHashMap<String, LruList<Method>> executorMethods = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<String, LruList<Method>> execContextMethods = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Method>> executorMethods = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Method>> execContextMethods = new ConcurrentHashMap<>();
 
-    public static LruList<Method> getExecutorMethods(String naming) {
+    public static CopyOnWriteArrayList<Method> getExecutorMethods(String naming) {
         if (executorMethods.isEmpty()) {
             synchronized (executorMethods) {
                 Method[] list = ExecutorMethodProvider.class.getMethods();
@@ -47,7 +47,7 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
                     if (Object.class.equals(item.getDeclaringClass())) {
                         continue;
                     }
-                    executorMethods.computeIfAbsent(item.getName(), (k) -> new LruList<>())
+                    executorMethods.computeIfAbsent(item.getName(), (k) -> new CopyOnWriteArrayList<>())
                             .add(item);
                 }
             }
@@ -55,7 +55,7 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
         return executorMethods.get(naming);
     }
 
-    public static LruList<Method> getExecContextMethods(String naming) {
+    public static CopyOnWriteArrayList<Method> getExecContextMethods(String naming) {
         if (execContextMethods.isEmpty()) {
             synchronized (execContextMethods) {
                 Method[] list = ExecContextMethodProvider.class.getMethods();
@@ -63,7 +63,7 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
                     if (Object.class.equals(item.getDeclaringClass())) {
                         continue;
                     }
-                    execContextMethods.computeIfAbsent(item.getName(), (k) -> new LruList<>())
+                    execContextMethods.computeIfAbsent(item.getName(), (k) -> new CopyOnWriteArrayList<>())
                             .add(item);
                 }
             }
@@ -171,17 +171,17 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
 
     @Override
     public IMethod findMethod(Object context, String naming, List<Object> args) {
-        LruList<IMethod> namingMethods = ContextHolder.INVOKE_METHOD_MAP.get(naming);
+        CopyOnWriteArrayList<IMethod> namingMethods = ContextHolder.INVOKE_METHOD_MAP.get(naming);
         if (namingMethods != null && !namingMethods.isEmpty()) {
-            IMethod method = namingMethods.touchDelegate(list -> ReflectResolver.matchExecMethod(list, args));
+            IMethod method = ReflectResolver.matchExecMethod(namingMethods, args);
             if (method != null) {
                 return method;
             }
         }
 
-        LruList<Method> methods = getExecutorMethods(naming);
+        CopyOnWriteArrayList<Method> methods = getExecutorMethods(naming);
         if (methods != null && !methods.isEmpty()) {
-            Method method = methods.touchDelegate(list -> ReflectResolver.matchExecutable(list, args));
+            Method method = ReflectResolver.matchExecutable(methods, args);
             if (method != null) {
                 return new JdkInstanceStaticMethod(new ExecutorMethodProvider(executor), method);
             }
@@ -189,7 +189,7 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
 
         methods = getExecContextMethods(naming);
         if (methods != null && !methods.isEmpty()) {
-            Method method = methods.touchDelegate(list -> ReflectResolver.matchExecutable(list, args));
+            Method method = ReflectResolver.matchExecutable(methods, args);
             if (method != null) {
                 return new JdkInstanceStaticMethod(new ExecContextMethodProvider(executor, context), method);
             }

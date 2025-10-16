@@ -2,8 +2,8 @@ package i2f.lru;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  * @date 2025/5/13 11:24
  */
 public class LruList<E> implements List<E> {
-    protected final ReadWriteLock lock = new ReentrantReadWriteLock();
+    protected final Lock lock = new ReentrantLock();
     protected final LinkedList<E> delegate = new LinkedList<>();
 
     public LruList() {
@@ -69,7 +69,7 @@ public class LruList<E> implements List<E> {
     }
 
     public E touch(E val) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             if (!delegate.isEmpty()) {
                 E head = delegate.get(0);
@@ -92,12 +92,12 @@ public class LruList<E> implements List<E> {
             }
             return val;
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     public E touch(int index) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             if (index == 0) {
                 if (!delegate.isEmpty()) {
@@ -109,12 +109,12 @@ public class LruList<E> implements List<E> {
             delegate.addFirst(ret);
             return ret;
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     public E touchFirst(Predicate<E> predicate) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             AtomicReference<E> ref = null;
             Iterator<E> iterator = delegate.iterator();
@@ -134,12 +134,12 @@ public class LruList<E> implements List<E> {
             }
             return ref.get();
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     public void touchIf(Predicate<E> predicate) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             List<E> list = new ArrayList<>();
             Iterator<E> iterator = delegate.iterator();
@@ -154,12 +154,12 @@ public class LruList<E> implements List<E> {
                 delegate.add(0, item);
             }
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     public E touchDelegate(Function<List<E>, E> extractor) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             E elem = extractor.apply(delegate);
             if (elem != null) {
@@ -167,521 +167,521 @@ public class LruList<E> implements List<E> {
             }
             return elem;
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     public void sync(Consumer<List<E>> consumer) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             consumer.accept(delegate);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
-    public ReadWriteLock getLock() {
+    public Lock getLock() {
         return lock;
     }
 
     @Override
     public int size() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.size();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean isEmpty() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.isEmpty();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean contains(Object o) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             boolean ok = delegate.contains(o);
             return ok;
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public Iterator<E> iterator() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return new SyncWrappedIterator<>(delegate.iterator(), lock);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     public static class SyncWrappedIterator<E> implements Iterator<E> {
         protected Iterator<E> delegate;
-        protected ReadWriteLock lock = new ReentrantReadWriteLock();
+        protected Lock lock = new ReentrantLock();
 
         public SyncWrappedIterator(Iterator<E> delegate) {
             this.delegate = delegate;
         }
 
-        public SyncWrappedIterator(Iterator<E> delegate, ReadWriteLock lock) {
+        public SyncWrappedIterator(Iterator<E> delegate, Lock lock) {
             this.delegate = delegate;
             this.lock = lock;
         }
 
         @Override
         public boolean hasNext() {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 return delegate.hasNext();
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public E next() {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 return delegate.next();
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public void remove() {
-            lock.writeLock().lock();
+            lock.lock();
             try {
                 delegate.remove();
             } finally {
-                lock.writeLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public void forEachRemaining(Consumer<? super E> action) {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 delegate.forEachRemaining(action);
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
     }
 
     @Override
     public Object[] toArray() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.toArray();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.toArray(a);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean add(E e) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.add(e);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean remove(Object o) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.remove(o);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.containsAll(c);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.addAll(c);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.addAll(index, c);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.removeAll(c);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.retainAll(c);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void clear() {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             delegate.clear();
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean equals(Object o) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.equals(o);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public int hashCode() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.hashCode();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public E get(int index) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.get(index);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public E set(int index, E element) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.set(index, element);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void add(int index, E element) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             delegate.add(index, element);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public E remove(int index) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.remove(index);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public int indexOf(Object o) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             int ret = delegate.indexOf(o);
             return ret;
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public int lastIndexOf(Object o) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.lastIndexOf(o);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public ListIterator<E> listIterator() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return new SyncWrappedListIterator<>(delegate.listIterator(), lock);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public ListIterator<E> listIterator(int index) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return new SyncWrappedListIterator<>(delegate.listIterator(index), lock);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     public static class SyncWrappedListIterator<E> implements ListIterator<E> {
         protected ListIterator<E> delegate;
-        protected ReadWriteLock lock = new ReentrantReadWriteLock();
+        protected Lock lock = new ReentrantLock();
 
         public SyncWrappedListIterator(ListIterator<E> delegate) {
             this.delegate = delegate;
         }
 
-        public SyncWrappedListIterator(ListIterator<E> delegate, ReadWriteLock lock) {
+        public SyncWrappedListIterator(ListIterator<E> delegate, Lock lock) {
             this.delegate = delegate;
             this.lock = lock;
         }
 
         @Override
         public boolean hasNext() {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 return delegate.hasNext();
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public E next() {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 return delegate.next();
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public boolean hasPrevious() {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 return delegate.hasPrevious();
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public E previous() {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 return delegate.previous();
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public int nextIndex() {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 return delegate.nextIndex();
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public int previousIndex() {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 return delegate.previousIndex();
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public void remove() {
-            lock.writeLock().lock();
+            lock.lock();
             try {
                 delegate.remove();
             } finally {
-                lock.writeLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public void set(E e) {
-            lock.writeLock().lock();
+            lock.lock();
             try {
                 delegate.set(e);
             } finally {
-                lock.writeLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public void add(E e) {
-            lock.writeLock().lock();
+            lock.lock();
             try {
                 delegate.add(e);
             } finally {
-                lock.writeLock().unlock();
+                lock.unlock();
             }
         }
 
         @Override
         public void forEachRemaining(Consumer<? super E> action) {
-            lock.readLock().lock();
+            lock.lock();
             try {
                 delegate.forEachRemaining(action);
             } finally {
-                lock.readLock().unlock();
+                lock.unlock();
             }
         }
     }
 
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.subList(fromIndex, toIndex);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void replaceAll(UnaryOperator<E> operator) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             delegate.replaceAll(operator);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void sort(Comparator<? super E> c) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             delegate.sort(c);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public Spliterator<E> spliterator() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.spliterator();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean removeIf(Predicate<? super E> filter) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return delegate.removeIf(filter);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public Stream<E> stream() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.stream();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public Stream<E> parallelStream() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.parallelStream();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void forEach(Consumer<? super E> action) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             delegate.forEach(action);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
 
     @Override
     public String toString() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return delegate.toString();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 

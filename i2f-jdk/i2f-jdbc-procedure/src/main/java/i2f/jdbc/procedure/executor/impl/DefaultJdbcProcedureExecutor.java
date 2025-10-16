@@ -88,27 +88,25 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
 
             JdbcProcedureExecutor executor = this;
             CopyOnWriteArrayList<ScriptDirective.VelocityScriptProvider> adapters = new CopyOnWriteArrayList<>();
-            getEvalScriptProviders().sync(list -> {
-                for (EvalScriptProvider item : list) {
-                    adapters.add(new ScriptDirective.VelocityScriptProvider() {
-                        @Override
-                        public boolean support(String lang) {
-                            return item.support(lang);
-                        }
+            for (EvalScriptProvider item : getEvalScriptProviders()) {
+                adapters.add(new ScriptDirective.VelocityScriptProvider() {
+                    @Override
+                    public boolean support(String lang) {
+                        return item.support(lang);
+                    }
 
-                        @Override
-                        public Object eval(String script, Object params) {
-                            Map<String, Object> ctx = new HashMap<>();
-                            if (params instanceof Map) {
-                                ctx = (Map<String, Object>) params;
-                            } else {
-                                ctx.put("root", params);
-                            }
-                            return item.eval(script, ctx, executor);
+                    @Override
+                    public Object eval(String script, Object params) {
+                        Map<String, Object> ctx = new HashMap<>();
+                        if (params instanceof Map) {
+                            ctx = (Map<String, Object>) params;
+                        } else {
+                            ctx.put("root", params);
                         }
-                    });
-                }
-            });
+                        return item.eval(script, ctx, executor);
+                    }
+                });
+            }
 
             ScriptDirective.THREAD_PROVIDERS.set(adapters);
             return VelocityGenerator.render(script, renderMap);
@@ -163,7 +161,14 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
 
                         }
                     }
-                    EvalScriptProvider provider = executor.getEvalScriptProviders().touchFirst(e -> e.support(lang));
+                    EvalScriptProvider provider = null;
+                    CopyOnWriteArrayList<EvalScriptProvider> list = executor.getEvalScriptProviders();
+                    for (EvalScriptProvider item : list) {
+                        if (item.support(lang)) {
+                            provider = item;
+                            break;
+                        }
+                    }
                     if (provider == null) {
                         throw new ThrowSignalException("eval script provider not found for lang=" + lang);
                     }

@@ -17,11 +17,8 @@ public class SqlTransRollbackNode extends AbstractExecutorNode {
     public static final String TAG_NAME = TagConsts.SQL_TRANS_ROLLBACK;
 
     @Override
-    public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
-            return false;
-        }
-        return TAG_NAME.equals(node.getTagName());
+    public String tag() {
+        return TAG_NAME;
     }
 
     @Override
