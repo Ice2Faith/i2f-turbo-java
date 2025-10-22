@@ -33,6 +33,7 @@
                 |lang-file-write-text*
                 |lang-try*
                 |lang-synchronized*
+                |lang-lock*
                 |sql-query-row*
                 |sql-query-list*
                 |sql-query-columns*
@@ -835,6 +836,14 @@
 
         <!ELEMENT lang-synchronized (ANY|EMPTY)>
         <!ATTLIST lang-synchronized target CDATA #IMPLIED>
+
+        <!ELEMENT lang-lock (ANY|EMPTY)>
+        <!ATTLIST lang-lock value CDATA #IMPLIED>
+        <!ATTLIST lang-lock result CDATA #IMPLIED>
+
+        <!ATTLIST lang-lock value.visit CDATA #IMPLIED>
+        <!ATTLIST lang-lock value.string CDATA #IMPLIED>
+        <!ATTLIST lang-lock value.render CDATA #IMPLIED>
 
         <!ELEMENT sql-query-row (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*

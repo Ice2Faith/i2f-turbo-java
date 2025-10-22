@@ -890,7 +890,10 @@ eval-ts使用TinyScript引擎进行处理
     </script-segment>
 
     <!--
-    对应synchronized关键字,允许指定target，不指定则对当前节点的上下文context同步
+    对应synchronized关键字,允许指定target，不指定则对当前节点的上下文的global同步
+    因为global对象在整个过程调用树期间都市同一个实例
+    如果要对app应用级别进行同步，可以使用executor对象
+    等价于 synchronized(target)
     target默认以visit访问，等价于 target.visit
      -->
     <lang-synchronized target="">
@@ -901,6 +904,23 @@ eval-ts使用TinyScript引擎进行处理
         <lang-synchronized target="global">
             <sql-update script="v_sql"/>
         </lang-synchronized>
+    </script-segment>
+
+    <!--
+    对应一个应用级别的键锁，内部维护一个Map<String,Lock> 静态对象用于维持锁的键和锁的关系
+    通过VALUE指定使用的锁键，获得锁对象，是对 lang-synchronized 能力的补充，提供更加完整的锁同步机制
+    允许使用result获取锁对象，VALUE都会被String.valueOf转换为锁键，因此请合理使用锁键VALUE
+    同时，需要避免产生非常多的锁对象，导致产生大量的锁实例，无法释放，导致内存泄漏或者OOM
+    VALUE默认以string访问，等价于 value.visit
+   -->
+    <lang-lock result="" value="">
+
+    </lang-lock>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-lock value="global">
+            <sql-update script="v_sql"/>
+        </lang-lock>
     </script-segment>
 
     <!--

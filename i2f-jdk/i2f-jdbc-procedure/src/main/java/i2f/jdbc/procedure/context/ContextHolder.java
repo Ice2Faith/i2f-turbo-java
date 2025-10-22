@@ -203,7 +203,6 @@ public class ContextHolder {
     }
 
     public static String traceLocation() {
-        XmlNode node = TRACE_NODE.get();
-        return TRACE_LOCATION.get() + ":" + (node == null ? "" : node.getTagName());
+        return TRACE_LOCATION.get();
     }
 }

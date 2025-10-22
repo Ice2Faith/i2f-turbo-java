@@ -168,6 +168,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new LangLatchAwaitNode());
         ret.add(new LangLatchDownNode());
         ret.add(new LangLatchNode());
+        ret.add(new LangLockNode());
         ret.add(new LangNewParamsNode());
         ret.add(new LangPrintfNode());
         ret.add(new LangPrintlnNode());
@@ -215,6 +216,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return tag;
     }
 
+    @Override
     public void registryExecutorNode(ExecutorNode node) {
         if (node == null) {
             return;
