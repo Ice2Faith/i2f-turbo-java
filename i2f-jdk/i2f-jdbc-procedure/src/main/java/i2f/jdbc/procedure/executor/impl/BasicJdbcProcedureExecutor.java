@@ -194,6 +194,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new SqlQueryListNode());
         ret.add(new SqlQueryObjectNode());
         ret.add(new SqlQueryRowNode());
+        ret.add(new SqlRunnerNode());
         ret.add(new SqlScopeNode());
         ret.add(new SqlScriptNode());
         ret.add(new SqlTransactionalNode());
@@ -216,7 +217,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return tag;
     }
 
-    @Override
     public void registryExecutorNode(ExecutorNode node) {
         if (node == null) {
             return;
@@ -917,6 +917,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             String text = value == null ? "" : String.valueOf(value);
             return test(text, context);
         });
+        featuresMap.put(FeatureConsts.CONTEXT, (value, node, context) -> {
+            return context;
+        });
+        featuresMap.put(FeatureConsts.EXECUTOR, (value, node, context) -> {
+            return BasicJdbcProcedureExecutor.this;
+        });
+        featuresMap.put(FeatureConsts.NODE, (value, node, context) -> {
+            return node;
+        });
         featuresMap.put(FeatureConsts.NULL, (value, node, context) -> {
             return null;
         });
@@ -982,6 +991,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             String text = value == null ? "" : String.valueOf(value);
             return " " + text + " ";
         });
+        featuresMap.put(FeatureConsts.LOWER, (value, node, context) -> {
+            return value == null ? null : String.valueOf(value).toLowerCase();
+        });
+        featuresMap.put(FeatureConsts.UPPER, (value, node, context) -> {
+            return value == null ? null : String.valueOf(value).toUpperCase();
+        });
+        featuresMap.put(FeatureConsts.HASHCODE, (value, node, context) -> {
+            return value == null ? 0 : value.hashCode();
+        });
         featuresMap.put(FeatureConsts.EVAL_JAVA, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalJavaNode.evalJava(context, this, "", "", text);
@@ -1042,6 +1060,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         });
         featuresMap.put(FeatureConsts.SNOW_UID, (value, node, context) -> {
             return SnowflakeLongUid.getId();
+        });
+        featuresMap.put(FeatureConsts.NEW_MAP, (value, node, context) -> {
+            return new LinkedHashMap<>();
+        });
+        featuresMap.put(FeatureConsts.NEW_LIST, (value, node, context) -> {
+            return new ArrayList<>();
+        });
+        featuresMap.put(FeatureConsts.NEW_SET, (value, node, context) -> {
+            return new LinkedHashSet<>();
         });
         featuresMap.put(FeatureConsts.LOCATION_FILE, (value, node, context) -> {
             return node.getLocationFile();

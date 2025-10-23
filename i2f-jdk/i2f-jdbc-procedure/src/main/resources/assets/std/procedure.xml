@@ -1215,6 +1215,53 @@ eval-ts使用TinyScript引擎进行处理
     </script-segment>
 
     <!--
+        运行SQL脚本，指由多条SQL语句构成的SQL语句，或者是一个语句块
+        主要是为了方便将一整个SQL脚本直接进行执行，而不是将每条语句拆开执行
+        允许使用script指定使用的脚本
+        如果你的脚本需要使用动态替换参数的情况，先试用lang-render进行渲染之后再作为script变量传入即可
+        注意，script只接受string类型，非string类型会被强制转换为string类型
+        也就是说，bindsql作为参数的情况下，如果BindSqlStringifier没有合适地处理变量，可能会出现问题
+        script默认以visit进行访问，指向运行的脚本变量名，如果没有使用script指定变量，则将标签内部的文本作为脚本运行
+        separator默认以string进行访问，表示脚本使用的分隔符，默认就是半角分号[;]
+        full-send默认以boolean进行访问，默认为false，表示整个脚本是否完整的发送给驱动执行，某些JDBC驱动支持完整发送，例如ORACLE完整发送一个语句块或者过程函数等
+            这种语句块，如果不完整发送，驱动将会认为是错误的语句无法执行
+        jump-error默认以boolean进行访问，默认为false，表示当执行过程中发生错误时，是否忽略错误继续执行脚本
+    -->
+    <sql-runner datasource="" result="" script="" separator=";" full-send="false" jump-error="false">
+
+    </sql-runner>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <!-- 直接使用 -->
+        <sql-runner>
+            delete
+            from sys_user_role
+            where user_id in (select a.user_id
+                              from sys_user
+                              where del_flag = 1;
+            );
+            delete
+            from sys_user
+            where del_flag = 1;
+        </sql-runner>
+
+        <!-- 先进行变量渲染 -->
+        <lang-set result="v_del_flag" value.int="1"/>
+        <lang-render result="v_sql" _lang="sql">
+            delete
+            from sys_user_role
+            where user_id in (select a.user_id
+                              from sys_user
+                              where del_flag = $!{v_del_flag};
+            );
+            delete
+            from sys_user
+            where del_flag = $!{v_del_flag};
+        </lang-render>
+        <sql-runner script="v_sql"/>
+    </script-segment>
+
+    <!--
     异步执行，await表示是否需要等待执行结束，delay表示延迟多长时间再开始执行
     await默认以boolean访问，等价于 await.boolean
     delay默认以long访问，等价于 delay.long

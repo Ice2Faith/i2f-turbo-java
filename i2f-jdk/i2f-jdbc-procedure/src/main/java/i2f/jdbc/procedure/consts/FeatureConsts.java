@@ -42,10 +42,19 @@ public interface FeatureConsts {
     String SPACING_RIGHT = "spacing-right";
     String SPACING = "spacing";
 
+    String LOWER = "lower";
+    String UPPER = "upper";
+
+    String HASHCODE = "hashcode";
+
     // 处理转换组
     String VISIT = "visit";
     String EVAL = "eval";
     String TEST = "test";
+
+    String CONTEXT = "context";
+    String EXECUTOR = "executor";
+    String NODE = "node";
 
     String EVAL_JAVA = "eval-java";
     String EVAL_JS = "eval-js";
@@ -70,6 +79,11 @@ public interface FeatureConsts {
     String CURRENT_TIME_MILLIS = "current-time-millis";
     String SNOW_UID = "snow-uid";
 
+    // 特殊实例
+    String NEW_MAP = "new-map";
+    String NEW_LIST = "new-list";
+    String NEW_SET = "new-set";
+
     // 异常的处理
     String CAUSE_FIRST = "cause-first";
     String CAUSE_LAST = "cause-last";
@@ -82,6 +96,7 @@ public interface FeatureConsts {
             TRIM, ALIGN, BODY_TEXT, BODY_XML,
             LOCATION_FILE, LOCATION_LINE, LOCATION_TAG, LOCATION,
             SPACING, SPACING_LEFT, SPACING_RIGHT,
+            LOWER, UPPER,
             CLASS,
             NOT,
             IS_NULL, IS_NOT_EMPTY, IS_EMPTY, IS_NOT_EMPTY
