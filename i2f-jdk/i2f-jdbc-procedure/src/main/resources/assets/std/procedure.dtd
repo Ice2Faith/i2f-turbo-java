@@ -45,6 +45,7 @@
                 |sql-trans-rollback*
                 |sql-trans-none*
                 |sql-transactional*
+                |sql-runner*
                 |lang-async*
                 |lang-latch*
                 |lang-async-all*
@@ -994,6 +995,23 @@
         <!ATTLIST sql-transactional no-rollback-for.cause-last CDATA #IMPLIED>
         <!ATTLIST sql-transactional no-rollback-for.cause-raw CDATA #IMPLIED>
         <!ATTLIST sql-transactional no-rollback-for.cause-root CDATA #IMPLIED>
+
+        <!ELEMENT sql-runner (EMPTY|ANY)>
+        <!ATTLIST sql-runner datasource CDATA #IMPLIED>
+        <!ATTLIST sql-runner result CDATA #IMPLIED>
+        <!ATTLIST sql-runner script CDATA #IMPLIED>
+        <!ATTLIST sql-runner separator CDATA #IMPLIED>
+        <!ATTLIST sql-runner full-send CDATA #IMPLIED>
+        <!ATTLIST sql-runner jump-error CDATA #IMPLIED>
+
+        <!ATTLIST sql-runner datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-runner result.trim CDATA #IMPLIED>
+        <!ATTLIST sql-runner script.visit CDATA #IMPLIED>
+        <!ATTLIST sql-runner script.body-text CDATA #IMPLIED>
+        <!ATTLIST sql-runner script.body-text.render CDATA #IMPLIED>
+        <!ATTLIST sql-runner separator.string CDATA #IMPLIED>
+        <!ATTLIST sql-runner full-send.boolean CDATA #IMPLIED>
+        <!ATTLIST sql-runner jump-error.boolean CDATA #IMPLIED>
 
         <!ELEMENT lang-async (ANY|EMPTY)>
         <!ATTLIST lang-async await CDATA #IMPLIED>

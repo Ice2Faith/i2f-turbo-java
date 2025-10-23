@@ -91,6 +91,9 @@ public interface AttrConsts {
     String SOURCE = "source";
     String TABLE = "table";
 
+    String JUMP_ERROR = "jump-error";
+    String FULL_SEND = "full-send";
+
     String PACKAGE = "package";
     String CLASS = "class";
 
