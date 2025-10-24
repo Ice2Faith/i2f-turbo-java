@@ -8,5 +8,7 @@ package i2f.turbo.idea.plugin.jdbc.procedure.completion;
 public enum CompletionScope {
     VARIABLES,
     SQL_IDENTIFIER,
-    FUNCTIONS
+    FUNCTIONS,
+    TINY_SCRIPT,
+    SQL
 }

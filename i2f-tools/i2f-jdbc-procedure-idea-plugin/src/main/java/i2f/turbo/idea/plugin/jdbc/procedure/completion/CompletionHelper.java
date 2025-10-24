@@ -16,10 +16,12 @@ import com.intellij.psi.xml.XmlElement;
 import com.intellij.psi.xml.XmlTag;
 import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
 import i2f.jdbc.procedure.context.ContextFunctions;
+import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.node.impl.tinyscript.ExecContextMethodProvider;
 import i2f.jdbc.procedure.node.impl.tinyscript.ExecutorMethodProvider;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexMatchItem;
+import i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureProjectMetaHolder;
 import i2f.turbo.idea.plugin.jdbc.procedure.XProc4jConsts;
 
 import java.lang.reflect.Method;
@@ -150,7 +152,7 @@ public class CompletionHelper {
                 if (name.contains("$")) {
                     continue;
                 }
-                StringBuilder completionBuilder=new StringBuilder();
+                StringBuilder completionBuilder = new StringBuilder();
                 StringBuilder signatureBuilder = new StringBuilder();
                 Class<?> returnType = item.getReturnType();
                 String returnText = returnType == null ? "?" : returnType.getSimpleName();
@@ -180,6 +182,34 @@ public class CompletionHelper {
                         .withItemTextItalic(true);
                 ret.put(signature, elem);
             }
+        }
+
+        for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.entrySet()) {
+            ProcedureMeta meta = entry.getValue();
+            StringBuilder completionBuilder = new StringBuilder();
+            StringBuilder signatureBuilder = new StringBuilder();
+            signatureBuilder.append(meta.getName()).append("(");
+            completionBuilder.append(meta.getName()).append("(");
+            List<String> parameters = meta.getArguments();
+            boolean isFirst = true;
+            for (String parameter : parameters) {
+                if (!isFirst) {
+                    signatureBuilder.append(", ");
+                    completionBuilder.append(", ");
+                }
+                signatureBuilder.append(parameter);
+                completionBuilder.append(parameter).append(": ");
+                isFirst = false;
+            }
+            signatureBuilder.append(")");
+            completionBuilder.append(")");
+            String signature = signatureBuilder.toString();
+            LookupElement elem = LookupElementBuilder.create(completionBuilder.toString())
+                    .withTypeText("Procedures")
+                    .withPresentableText(signature)
+                    .withIcon(XProc4jConsts.ICON)
+                    .withItemTextItalic(true);
+            ret.put(signature, elem);
         }
 
         return ret;
@@ -388,30 +418,32 @@ public class CompletionHelper {
             completionTypesByPsiFile(psiFile, result);
             return;
         }
-        if(elem instanceof XmlAttributeValue){
+        if (elem instanceof XmlAttributeValue) {
 //            log.warn("any-help xml-attr-value:" + elem.getClass());
             XmlAttributeValue attrValue = (XmlAttributeValue) elem;
             PsiElement parent = attrValue.getParent();
 //            log.warn("any-help xml-attr-value-parent:" + parent.getClass());
-            if(parent!=null){
-                if(parent instanceof XmlAttribute){
+            if (parent != null) {
+                if (parent instanceof XmlAttribute) {
                     XmlAttribute attr = (XmlAttribute) parent;
                     String name = attr.getName();
 //                    log.warn("any-help xml-attr-name:" + name);
-                    if(name==null){
-                        name="";
+                    if (name == null) {
+                        name = "";
                     }
                     String[] arr = name.split("[.:;]");
 //                    log.warn("any-help xml-attr-name-split:" + Arrays.toString(arr));
-                    if(arr.length>=2){
-                        if(Arrays.asList("eval-ts","eval-tinyscript").contains(arr[1])){
+                    if (arr.length >= 2) {
+                        if (Arrays.asList("eval-ts", "eval-tinyscript").contains(arr[1])) {
                             result.add(CompletionScope.FUNCTIONS);
                             result.add(CompletionScope.SQL_IDENTIFIER);
                             result.add(CompletionScope.VARIABLES);
+                            result.add(CompletionScope.TINY_SCRIPT);
+                            result.add(CompletionScope.SQL);
                             return;
                         }
                     }
-                    if(name.equals("method")){
+                    if (name.equals("method")) {
                         result.add(CompletionScope.FUNCTIONS);
                         return;
                     }
@@ -434,6 +466,7 @@ public class CompletionHelper {
                         "sqlite", "sqlite3", "h2").contains(lang)) {
                     result.add(CompletionScope.SQL_IDENTIFIER);
                     result.add(CompletionScope.VARIABLES);
+                    result.add(CompletionScope.SQL);
                     return;
                 }
             }
@@ -442,6 +475,8 @@ public class CompletionHelper {
                     || name.endsWith("-sql")) {
                 result.add(CompletionScope.SQL_IDENTIFIER);
                 result.add(CompletionScope.VARIABLES);
+                result.add(CompletionScope.SQL);
+                return;
             }
 
             if (name.contains("eval-ts")
@@ -449,6 +484,8 @@ public class CompletionHelper {
                 result.add(CompletionScope.FUNCTIONS);
                 result.add(CompletionScope.SQL_IDENTIFIER);
                 result.add(CompletionScope.VARIABLES);
+                result.add(CompletionScope.TINY_SCRIPT);
+                result.add(CompletionScope.SQL);
                 return;
             }
         }
@@ -482,6 +519,9 @@ public class CompletionHelper {
         if (language != null) {
             if ("xml".equalsIgnoreCase(language.getID())) {
                 result.add(CompletionScope.VARIABLES);
+            } else if ("sql".equalsIgnoreCase(language.getID())) {
+                result.add(CompletionScope.SQL);
+                result.add(CompletionScope.SQL_IDENTIFIER);
             }
         }
         VirtualFile virtualFile = psiFile.getVirtualFile();
@@ -490,6 +530,10 @@ public class CompletionHelper {
             if ("xml".equalsIgnoreCase(extension)
                     || ".xml".equalsIgnoreCase(extension)) {
                 result.add(CompletionScope.VARIABLES);
+            } else if ("sql".equalsIgnoreCase(extension)
+                    || ".sql".equalsIgnoreCase(extension)) {
+                result.add(CompletionScope.SQL);
+                result.add(CompletionScope.SQL_IDENTIFIER);
             }
         }
     }

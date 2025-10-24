@@ -119,6 +119,9 @@
         <codeInsight.lineMarkerProvider
                 language="XML"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider" />
+        <codeInsight.lineMarkerProvider
+                language="TinyScript"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider" />
     </extensions>
 
 
