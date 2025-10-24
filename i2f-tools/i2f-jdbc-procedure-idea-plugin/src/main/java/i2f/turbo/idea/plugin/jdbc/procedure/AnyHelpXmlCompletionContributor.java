@@ -21,6 +21,75 @@ import java.util.Set;
 public class AnyHelpXmlCompletionContributor extends CompletionContributor {
     public static final Logger log = Logger.getInstance(AnyHelpXmlCompletionContributor.class);
 
+    public static final String[] tinyScriptKeywords = {
+            "null",
+            "true",
+            "false",
+            "new",
+            "class",
+            "as", "cast",
+            "is", "instanceof", "typeof",
+            "in", "notin",
+            "gte", "lte",
+            "ne", "neq", "eq",
+            "gt", "lt",
+            "and", "or",
+            "debugger",
+            "try", "catch", "finally", "throw",
+            "break", "continue", "return",
+            "while", "for", "foreach",
+            "if", "else", "elif"
+    };
+
+    public static final String[] sqlKeywords = {
+            "select", "distinct", "top", "as",
+            "case", "when", "then", "else", "end",
+            "over", "partition", "partition by",
+            "from", "join", "left", "left join",
+            "right", "right join",
+            "inner", "inner join",
+            "outer", "outer join",
+            "on", "and", "or",
+            "where", "like", "exists",
+            "in", "not", "not in",
+            "null", "is null", "is not null", "not null",
+            "group", "by", "group by",
+            "having",
+            "order", "order by", "asc", "desc",
+            "limit", "offset",
+            "with",
+            "union", "all", "union all",
+            "lead", "lag",
+            "sum", "max", "min", "avg", "round", "instr", "substr", "trim",
+            "count", "count(1)",
+            "insert", "into", "insert into",
+            "values",
+            "update", "set",
+            "delete", "delete from",
+            "begin", "commit", "rollback",
+            "create", "table", "view", "function", "procedure", "replace", "sequence", "index", "trigger",
+            "create table",
+            "primary", "key", "primary key",
+            "auto_increment", "auto", "increment",
+            "foreign", "foreign key", "references",
+            "comment", "comment on",
+            "column",
+            "default", "unique",
+            "drop", "drop table",
+            "truncate", "truncate table",
+            "alter", "alter table",
+            "add", "remove",
+            "grant", "revoke", "execute",
+            "grant all",
+            "int", "bigint", "varchar", "date", "datetime",
+            "number",
+            "nextval",
+            "now()", "sysdate",
+            "next", "rows", "fetch",
+            "cursor",
+            "exception",
+
+    };
 
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
@@ -62,6 +131,30 @@ public class AnyHelpXmlCompletionContributor extends CompletionContributor {
                 for (String candidate : candidates) {
                     LookupElement item = LookupElementBuilder.create(candidate)
                             .withTypeText("Sql Identifiers")
+                            .withIcon(XProc4jConsts.ICON)
+                            .withItemTextItalic(true);
+                    result.addElement(item);
+                }
+            }
+        }
+        if (scopes.contains(CompletionScope.SQL)) {
+            String[] candidates = sqlKeywords;
+            if (candidates != null) {
+                for (String candidate : candidates) {
+                    LookupElement item = LookupElementBuilder.create(candidate)
+                            .withTypeText("Sql Keywords")
+                            .withIcon(XProc4jConsts.ICON)
+                            .withItemTextItalic(true);
+                    result.addElement(item);
+                }
+            }
+        }
+        if (scopes.contains(CompletionScope.TINY_SCRIPT)) {
+            String[] candidates = tinyScriptKeywords;
+            if (candidates != null) {
+                for (String candidate : candidates) {
+                    LookupElement item = LookupElementBuilder.create(candidate)
+                            .withTypeText("TinyScript Keywords")
                             .withIcon(XProc4jConsts.ICON)
                             .withItemTextItalic(true);
                     result.addElement(item);

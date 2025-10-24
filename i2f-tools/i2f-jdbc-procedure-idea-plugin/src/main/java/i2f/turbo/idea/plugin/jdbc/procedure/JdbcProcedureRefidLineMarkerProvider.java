@@ -14,6 +14,7 @@ import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.xml.DomFileElement;
 import com.intellij.util.xml.DomService;
 import com.intellij.util.xml.GenericAttributeValue;
+import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.TinyScriptFunctionCall;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -28,48 +29,58 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
 
     @Override
     protected void collectNavigationMarkers(@NotNull PsiElement element, @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result) {
-//        log.warn("xml-line-marker-elem:" + element.getClass());
-        if (!(element instanceof XmlAttribute)) {
-            return;
-        }
+        addXmlRefidMarkers(element, result);
 
-        PsiFile psiFile = element.getContainingFile();
-        if (psiFile == null) {
-            return;
-        }
+    }
+
+    public void addXmlRefidMarkers(PsiElement element, Collection<? super RelatedItemLineMarkerInfo<?>> result) {
+        //        log.warn("xml-line-marker-elem:" + element.getClass());
+        String refid = null;
+        if (element instanceof XmlAttribute) {
+
+            PsiFile psiFile = element.getContainingFile();
+            if (psiFile == null) {
+                return;
+            }
 //        log.warn("xml-line-marker-file:" + psiFile.getClass());
-        if (!(psiFile instanceof XmlFile)) {
-            return;
-        }
+            if (!(psiFile instanceof XmlFile)) {
+                return;
+            }
 
-        XmlAttribute xmlAttribute = (XmlAttribute) element;
-        String attrName = xmlAttribute.getName();
+            XmlAttribute xmlAttribute = (XmlAttribute) element;
+            String attrName = xmlAttribute.getName();
 //        log.warn("xml-line-marker-attr:" + attrName);
-        if (!"refid".equals(attrName)) {
-            return;
+            if (!"refid".equals(attrName)) {
+                return;
+            }
+
+            XmlTag xmlTag = xmlAttribute.getParent();
+            if (xmlTag == null) {
+                return;
+            }
+
+            String name = xmlTag.getName();
+            if (!Arrays.asList(
+                    "procedure-call",
+                    "function-call",
+                    "script-include").contains(name)) {
+                return;
+            }
+
+            refid = xmlAttribute.getValue();
+        } else if (element instanceof TinyScriptFunctionCall) {
+            TinyScriptFunctionCall call = (TinyScriptFunctionCall) element;
+            PsiElement naming = call.getNaming();
+            refid = naming.getText();
         }
 
-        XmlTag xmlTag = xmlAttribute.getParent();
-        if (xmlTag == null) {
-            return;
-        }
-
-        String name = xmlTag.getName();
-        if (!Arrays.asList(
-                "procedure-call",
-                "function-call",
-                "script-include").contains(name)) {
-            return;
-        }
-
-        String refid = xmlAttribute.getValue();
 //        log.warn("xml-line-marker-refid:" + refid);
         if (refid == null || refid.isEmpty()) {
             return;
         }
 
 
-        Project project = xmlAttribute.getProject();
+        Project project = element.getProject();
 
         List<PsiElement> targets = new ArrayList<>();
 
@@ -115,8 +126,7 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
                 .setTargets(targets)
                 .setTooltipText("Navigate to " + XProc4jConsts.NAME + " file.");
 
-        result.add(builder.createLineMarkerInfo(xmlAttribute.getFirstChild()));
-
+        result.add(builder.createLineMarkerInfo(element.getFirstChild()));
     }
 
     public void searchInChildren(String refid, PsiElement[] list, int level, List<PsiElement> targets) {
