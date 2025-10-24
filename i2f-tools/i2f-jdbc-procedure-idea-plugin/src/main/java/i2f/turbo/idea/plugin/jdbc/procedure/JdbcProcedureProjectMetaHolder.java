@@ -25,6 +25,11 @@ public class JdbcProcedureProjectMetaHolder {
     public static final ConcurrentMap<String, VirtualFile> XML_FILE_MAP = new ConcurrentHashMap<>();
     public static final ConcurrentMap<String, ProcedureMeta> PROCEDURE_META_MAP = new ConcurrentHashMap<>();
     public static final List<String> FEATURES = Arrays.asList(
+            // 进出参
+            "in",
+            "out",
+
+            // 基础类型组
             "int",
             "double",
             "float",
@@ -34,20 +39,41 @@ public class JdbcProcedureProjectMetaHolder {
             "char",
             "byte",
             "boolean",
-            "render",
-            "visit",
-            "eval",
-            "test",
             "null",
+
+            // 复合类型组
             "date",
+
+            // 字符串组
+            "render",
             "trim",
             "align",
-
             "body-text",
             "body-xml",
+
+            // 节点属性
+            "location-file",
+            "location-line",
+            "location-tag",
+            "location",
+
             "spacing-left",
             "spacing-right",
             "spacing",
+
+            "lower",
+            "upper",
+
+            "hashcode",
+
+            // 处理转换组
+            "visit",
+            "eval",
+            "test",
+
+            "context",
+            "executor",
+            "node",
 
             "eval-java",
             "eval-js",
@@ -55,22 +81,27 @@ public class JdbcProcedureProjectMetaHolder {
             "eval-ts",
             "eval-groovy",
             "class",
+
             "not",
 
             "dialect",
 
+            // 主要用于test进行判断
             "is-null",
             "is-not-null",
             "is-empty",
             "is-not-empty",
 
+            // 环境值
             "date-now",
             "uuid",
             "current-time-millis",
             "snow-uid",
 
-            "in",
-            "out"
+            // 特殊实例
+            "new-map",
+            "new-list",
+            "new-set"
 
     );
 

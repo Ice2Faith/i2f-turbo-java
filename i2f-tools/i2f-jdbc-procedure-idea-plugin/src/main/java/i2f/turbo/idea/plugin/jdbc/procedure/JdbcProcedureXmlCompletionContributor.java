@@ -18,15 +18,12 @@ import com.intellij.sql.psi.SqlIdentifier;
 import com.intellij.sql.psi.SqlParameter;
 import com.intellij.sql.psi.SqlTokenType;
 import i2f.jdbc.procedure.context.ProcedureMeta;
-import i2f.match.regex.RegexUtil;
-import i2f.match.regex.data.RegexMatchItem;
+import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptTokenType;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.JDBCType;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -51,28 +48,6 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
         }
     }
 
-    public static <T extends PsiElement> T getRootElement(PsiElement element, Class<T> searchType) {
-        AtomicReference<T> ref = new AtomicReference<>();
-        getRootElementNext(element, searchType, ref);
-        return ref.get();
-    }
-
-    protected static <T extends PsiElement> void getRootElementNext(PsiElement element, Class<T> searchType, AtomicReference<T> result) {
-        if (element == null) {
-            return;
-        }
-        if (searchType != null) {
-            if (searchType.isAssignableFrom(element.getClass())) {
-                result.set((T) element);
-            }
-        } else {
-            result.set((T) element);
-        }
-        PsiElement parent = element.getParent();
-        if (parent != null) {
-            getRootElementNext(parent, searchType, result);
-        }
-    }
 
     public void completion(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
 //        log.warn("xml-attr completion trigger:" + parameters);
@@ -103,25 +78,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 //                log.warn("xml-sql-parent:" +  parent.getClass() + ", " + parent.getText());
                 if (parent instanceof SqlParameter) {
                     // 控制遍历频率，避免CPU过高
-                    Set<String> completions = lastVariables.updateAndGet((v) -> {
-                        Set<String> ret = new LinkedHashSet<>();
-                        long cts = System.currentTimeMillis();
-                        if ((cts - lastUpdateMillSeconds.get()) < 1200) {
-                            return v;
-                        }
-                        getXmlFileVariables(lastVarElem.updateAndGet(e -> {
-                            if (e != null) {
-                                return e;
-                            }
-                            XmlTag xRet = getRootElement(position, XmlTag.class);
-                            if (xRet != null) {
-                                return xRet;
-                            }
-                            return position.getContainingFile();
-                        }), lastVarStopElem.get(), ret);
-                        lastUpdateMillSeconds.set(cts);
-                        return ret;
-                    });
+                    Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
 //                    log.warn("xml-sql-param-completions:" + completions);
                     if (completions != null && !completions.isEmpty()) {
                         boolean withPrefix = false;
@@ -155,25 +112,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 //            log.warn("xml-ts:" + tokenType.getDebugName() + "," + type.getClass()+", "+position.getText());
             if ("NAMING".equalsIgnoreCase(name)) {
                 // 控制遍历频率，避免CPU过高
-                Set<String> completions = lastVariables.updateAndGet((v) -> {
-                    Set<String> ret = new LinkedHashSet<>();
-                    long cts = System.currentTimeMillis();
-                    if ((cts - lastUpdateMillSeconds.get()) < 1200) {
-                        return v;
-                    }
-                    getXmlFileVariables(lastVarElem.updateAndGet(e -> {
-                        if (e != null) {
-                            return e;
-                        }
-                        XmlTag xRet = getRootElement(position, XmlTag.class);
-                        if (xRet != null) {
-                            return xRet;
-                        }
-                        return position.getContainingFile();
-                    }), lastVarStopElem.get(), ret);
-                    lastUpdateMillSeconds.set(cts);
-                    return ret;
-                });
+                Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
 //                log.warn("xml-ts-completions:" + completions);
                 if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
@@ -183,25 +122,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
             } else if ("REF_EXPRESS".equalsIgnoreCase(name)) {
                 // 控制遍历频率，避免CPU过高
-                Set<String> completions = lastVariables.updateAndGet((v) -> {
-                    Set<String> ret = new LinkedHashSet<>();
-                    long cts = System.currentTimeMillis();
-                    if ((cts - lastUpdateMillSeconds.get()) < 1200) {
-                        return v;
-                    }
-                    getXmlFileVariables(lastVarElem.updateAndGet(e -> {
-                        if (e != null) {
-                            return e;
-                        }
-                        XmlTag xRet = getRootElement(position, XmlTag.class);
-                        if (xRet != null) {
-                            return xRet;
-                        }
-                        return position.getContainingFile();
-                    }), lastVarStopElem.get(), ret);
-                    lastUpdateMillSeconds.set(cts);
-                    return ret;
-                });
+                Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
                 String text = position.getText();
                 String[] arr = text.split("[\n;]", 2);
                 text = arr[0].trim();
@@ -232,16 +153,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
             } else if ("$".equalsIgnoreCase(name)) {
                 // 控制遍历频率，避免CPU过高
-                Set<String> completions = lastVariables.updateAndGet((v) -> {
-                    Set<String> ret = new LinkedHashSet<>();
-                    long cts = System.currentTimeMillis();
-                    if ((cts - lastUpdateMillSeconds.get()) < 1200) {
-                        return v;
-                    }
-                    getXmlFileVariables(lastVarElem.get(), lastVarStopElem.get(), ret);
-                    lastUpdateMillSeconds.set(cts);
-                    return ret;
-                });
+                Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
 
                 String prefix = "${";
                 String suffix = "}";
@@ -457,7 +369,9 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                     "before-truncate",
                     "write-only",
                     "enable",
-                    "disable"
+                    "disable",
+                    "jump-error",
+                    "full-send"
             ).contains(attributeName)) {
                 if (xmlTag == null) {
                     return;
@@ -655,23 +569,8 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
             } else {
-                XmlTag root = getRootElement(position, XmlTag.class);
-                if (root == null) {
-                    return;
-                }
                 // 控制遍历频率，避免CPU过高
-                Set<String> completions = lastVariables.updateAndGet((v) -> {
-                    Set<String> ret = new LinkedHashSet<>();
-                    long cts = System.currentTimeMillis();
-                    if ((cts - lastUpdateMillSeconds.get()) < 1200) {
-                        return v;
-                    }
-                    lastVarElem.set(root);
-                    lastVarStopElem.set(position);
-                    getXmlFileVariables(root, position, ret);
-                    lastUpdateMillSeconds.set(cts);
-                    return ret;
-                });
+                Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
 
                 if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
@@ -684,135 +583,5 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
         }
     }
 
-    public static final AtomicLong lastUpdateMillSeconds = new AtomicLong(0);
-    public static final AtomicReference<Set<String>> lastVariables = new AtomicReference<>();
-    public static final AtomicReference<PsiElement> lastVarElem = new AtomicReference<>();
-    public static final AtomicReference<PsiElement> lastVarStopElem = new AtomicReference<>();
-
-    public static void getXmlFileVariables(PsiElement elem, PsiElement stopElem, Set<String> variables) {
-        if (elem == null) {
-            return;
-        }
-        if (elem == stopElem) {
-            return;
-        }
-        if (elem instanceof XmlAttribute) {
-            XmlAttribute attribute = (XmlAttribute) elem;
-            String name = attribute.getName();
-            // result 出来的变量
-            if (Arrays.asList("result", "item").contains(name)
-                    || (name != null && name.contains("result."))) {
-                String value = attribute.getValue();
-                if (value != null && value.matches("[a-zA-Z0-9\\-_\\$\\.]+")) {
-                    variables.add(value.trim());
-                }
-            } else {
-                String value = attribute.getValue();
-                if (value != null) {
-                    getDolarVaraibles(value, variables);
-                }
-            }
-        } else if (elem instanceof XmlTag) {
-            XmlTag tag = (XmlTag) elem;
-            String name = tag.getName();
-            // 过程声明的入参
-            if (Arrays.asList("procedure", "script-segment").contains(name)) {
-                XmlAttribute[] attributes = tag.getAttributes();
-                if (attributes != null) {
-                    for (XmlAttribute item : attributes) {
-                        String attrName = item.getName();
-                        if (attrName == null) {
-                            continue;
-                        }
-                        int idx = attrName.indexOf(".");
-                        if (idx >= 0) {
-                            attrName = attrName.substring(0, idx);
-                        }
-                        if (attrName.isEmpty()) {
-                            continue;
-                        }
-                        if (!Arrays.asList("return", "refid", "id", "param-share").contains(attrName)) {
-                            if (attrName.matches("[a-zA-Z0-9\\-_\\$\\.]+")) {
-                                variables.add(attrName.trim());
-                            }
-                        }
-                    }
-                }
-            }
-            try {
-                XmlAttribute[] attributes = tag.getAttributes();
-                if (attributes != null) {
-                    for (XmlAttribute item : attributes) {
-                        getXmlFileVariables(item, stopElem, variables);
-                    }
-                }
-            } catch (Exception e) {
-
-            }
-
-            // 内部的占位符变量
-            String text = tag.getText();
-            getDolarVaraibles(text, variables);
-
-            // 处理TS的赋值语句
-            if (Arrays.asList("lang-eval-ts", "lang-eval-tinyscript").contains(name)) {
-                List<RegexMatchItem> list = RegexUtil.regexFinds(text, "[a-zA-Z0-9\\-_\\$\\.]+\\s*=");
-                for (RegexMatchItem item : list) {
-                    String str = item.matchStr;
-                    str = str.substring(0, str.length() - 1);
-                    variables.add(str.trim());
-                }
-            }
-
-            // 处理groovy的赋值语句
-            if (Arrays.asList("lang-eval-groovy").contains(name)) {
-                List<RegexMatchItem> list = RegexUtil.regexFinds(text, "params\\.[a-zA-Z0-9\\-_\\$\\.]+\\s*=");
-                for (RegexMatchItem item : list) {
-                    String str = item.matchStr;
-                    str = str.substring("params.".length(), str.length() - 1);
-                    variables.add(str.trim());
-                }
-            }
-
-            // 处理java的赋值语句
-            if (Arrays.asList("lang-eval-java", "lang-java-body").contains(name)) {
-                List<RegexMatchItem> list = RegexUtil.regexFinds(text, "params\\.put\\(\"[a-zA-Z0-9\\-_\\$\\.]+\"\\s*,\\)");
-                for (RegexMatchItem item : list) {
-                    String str = item.matchStr;
-                    int idx = str.indexOf("\"");
-                    int eidx = str.lastIndexOf("\"");
-                    str = str.substring(idx + 1, eidx);
-                    variables.add(str.trim());
-                }
-            }
-
-            // 子元素
-            try {
-                PsiElement[] children = tag.getChildren();
-                if (children != null) {
-                    for (PsiElement item : children) {
-                        getXmlFileVariables(item, stopElem, variables);
-                    }
-                }
-            } catch (Exception e) {
-
-            }
-        }
-
-
-    }
-
-    public static void getDolarVaraibles(String text, Set<String> variables) {
-        if (text == null || "".equals(text)) {
-            return;
-        }
-        List<RegexMatchItem> list = RegexUtil.regexFinds(text, "[\\$#](\\!)?\\{[a-zA-Z0-9\\-_\\$\\.]+\\}");
-        for (RegexMatchItem item : list) {
-            String str = item.matchStr;
-            int idx = str.indexOf("{");
-            str = str.substring(idx + 1, str.length() - 1);
-            variables.add(str.trim());
-        }
-    }
 
 }

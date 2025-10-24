@@ -843,6 +843,9 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         XmlTag tag = attr.getParent();
         String tagName = tag.getName();
         String attrName = attr.getName();
+        if(attrName==null){
+            attrName="";
+        }
         if ("lang-set".equals(tagName)) {
             if ("radix".equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
@@ -850,6 +853,18 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     registrar.startInjecting(lang)
                             .addPlace("class MyDsl { public Object v=",
                                     ";}",
+                                    (PsiLanguageInjectionHost) attrValueElement,
+                                    new TextRange(0, attrValueElement.getTextRange().getLength()))
+                            .doneInjecting();
+                    return;
+                }
+            }
+            if("value".equals(attrName) || attrName.startsWith("value.")) {
+                Language lang = detectXmlTagLangAttribute(tag);
+                if (lang != null) {
+                    registrar.startInjecting(lang)
+                            .addPlace("",
+                                    "",
                                     (PsiLanguageInjectionHost) attrValueElement,
                                     new TextRange(0, attrValueElement.getTextRange().getLength()))
                             .doneInjecting();

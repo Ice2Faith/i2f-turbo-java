@@ -70,6 +70,11 @@
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
 
+        <completion.contributor
+                language="any"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.AnyHelpXmlCompletionContributor"/>
+
         <!--<completion.contributor
                 language="VTL"
                 order="first"
