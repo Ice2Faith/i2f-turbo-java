@@ -1,4 +1,4 @@
-// Generated from /extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
 package i2f.extension.antlr4.script.tiny;
 
@@ -50,6 +50,34 @@ public interface TinyScriptListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void exitExpress(TinyScriptParser.ExpressContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link TinyScriptParser#declareFunction}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link TinyScriptParser#declareFunction}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link TinyScriptParser#parameterList}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterParameterList(TinyScriptParser.ParameterListContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link TinyScriptParser#parameterList}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitParameterList(TinyScriptParser.ParameterListContext ctx);
 
     /**
      * Enter a parse tree produced by {@link TinyScriptParser#negtiveSegment}.

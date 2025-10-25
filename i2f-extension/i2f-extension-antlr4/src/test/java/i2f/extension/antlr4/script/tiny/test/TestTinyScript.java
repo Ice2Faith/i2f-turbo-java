@@ -22,6 +22,33 @@ public class TestTinyScript {
     public static JDBCType type = JDBCType.INTEGER;
 
     public static void main(String[] args) throws Exception {
+        testFunc();
+
+//        testBasic();
+
+//        testImpl();
+
+//        testRaw();
+    }
+
+    public static void testFunc() throws Exception {
+        Map<String, Object> ctx = new HashMap<>();
+        Object result = TinyScript.script("v_num=5;\n" +
+                "func factor(in_num,in_level){\n" +
+                "    println('level='+${in_level});\n" +
+                "    if(${in_num}<=1){\n" +
+                "        println('v_num='+${global.v_num});\n" +
+                "        return 1;\n" +
+                "    };\n" +
+                "    return ${in_num}*factor(${in_num}-1,${in_level}+1);\n" +
+                "};\n" +
+                "v_ret=factor(${v_num},0);\n" +
+                "${v_ret};", ctx);
+        System.out.println("result = " + result);
+        System.out.println("ok");
+    }
+
+    public static void testBasic() throws Exception {
 
         TinyScript.registryBuiltMethodByStaticMethod(TestTinyScript.class, (method) -> {
             return method.getName().startsWith("regex");
@@ -58,10 +85,6 @@ public class TestTinyScript {
         Object ret = TinyScript.script(script, params);
         System.out.println("ok");
 
-
-//        testImpl();
-
-//        testRaw();
     }
 
     public static boolean regexLike(String str, String regex) {
