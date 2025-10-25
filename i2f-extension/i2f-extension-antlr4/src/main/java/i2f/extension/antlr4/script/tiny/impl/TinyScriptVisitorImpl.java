@@ -3,12 +3,14 @@ package i2f.extension.antlr4.script.tiny.impl;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
 import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptException;
+import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptMethod;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptContinueException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptEvaluateException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptReturnException;
 import i2f.reflect.ReflectResolver;
 import i2f.typeof.TypeOf;
+import lombok.Data;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -21,6 +23,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 
 /**
@@ -28,9 +32,13 @@ import java.util.function.Supplier;
  * @date 2025/2/20 21:03
  * @desc
  */
+@Data
 public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
+    protected Object global = null;
     protected Object context = new HashMap<>();
+    protected ConcurrentHashMap<String, CopyOnWriteArrayList<TinyScriptMethod>> declareFunctionMap = new ConcurrentHashMap<>();
     protected TinyScriptResolver resolver = new DefaultTinyScriptResolver();
+
 
     public TinyScriptVisitorImpl(Object context) {
         this.context = context;
@@ -41,6 +49,65 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         if (resolver != null) {
             this.resolver = resolver;
         }
+    }
+
+
+    @Override
+    public Object visitDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx) {
+        TinyScriptMethod method = new TinyScriptMethod();
+        int count = ctx.getChildCount();
+        for (int i = 0; i < count; i++) {
+            ParseTree item = ctx.getChild(i);
+            if (item instanceof TerminalNode) {
+                TerminalNode terminalNode = (TerminalNode) item;
+                String token = (String) visitTerminal(terminalNode);
+                if (i == 0) {
+                    if (!"func".equals(token)) {
+                        throw new IllegalArgumentException("invalid declare function, expect 'func' but found '" + token + "'!");
+                    }
+                } else if (i == 1) {
+                    String name = token;
+                    method.setName(name);
+                } else {
+                    if (!Arrays.asList("(", ")").contains(token)) {
+                        throw new IllegalArgumentException("invalid declare function parameter separator, expect '(/)' but found '" + token + "'!");
+                    }
+                }
+            } else if (item instanceof TinyScriptParser.ParameterListContext) {
+                TinyScriptParser.ParameterListContext parameterListCtx = (TinyScriptParser.ParameterListContext) item;
+                List<String> parameters = (List<String>) visitParameterList(parameterListCtx);
+                method.setParameters(parameters);
+            } else if (item instanceof TinyScriptParser.ScriptBlockContext) {
+                TinyScriptParser.ScriptBlockContext scriptBlockCtx = (TinyScriptParser.ScriptBlockContext) item;
+                method.setScriptBlockContext(scriptBlockCtx);
+            }
+        }
+        if (method.getName() == null || method.getName().isEmpty()) {
+            throw new IllegalArgumentException("invalid declare function, expect function name but found '" + method.getName() + "'!");
+        }
+        if (method.getScriptBlockContext() == null) {
+            throw new IllegalArgumentException("invalid declare function, expect function body but not found !");
+        }
+        CopyOnWriteArrayList<TinyScriptMethod> list = declareFunctionMap.computeIfAbsent(method.getName(), k -> new CopyOnWriteArrayList<>());
+        list.add(0, method);
+        return method;
+    }
+
+    @Override
+    public Object visitParameterList(TinyScriptParser.ParameterListContext ctx) {
+        List<String> ret = new ArrayList<>();
+        int count = ctx.getChildCount();
+        for (int i = 0; i < count; i++) {
+            ParseTree item = ctx.getChild(i);
+            if (item instanceof TerminalNode) {
+                TerminalNode terminalNode = (TerminalNode) item;
+                String token = (String) visitTerminal(terminalNode);
+                if (!",".equals(token)) {
+                    ret.add(token);
+                }
+            }
+        }
+        return ret;
     }
 
     public void debugNode(ParseTree context) {
@@ -285,6 +352,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.StaticEnumValueContext) {
                 TinyScriptParser.StaticEnumValueContext nextCtx = (TinyScriptParser.StaticEnumValueContext) item;
                 return visitStaticEnumValue(nextCtx);
+            } else if (item instanceof TinyScriptParser.DeclareFunctionContext) {
+                TinyScriptParser.DeclareFunctionContext nextCtx = (TinyScriptParser.DeclareFunctionContext) item;
+                return visitDeclareFunction(nextCtx);
             }
             throw new IllegalArgumentException("un-support express found : " + ctx.getText());
         } catch (Throwable e) {
@@ -1491,6 +1561,37 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                 args = new ArrayList<>();
             }
 
+
+            if (!isNew) {
+                // 处理内建函数 Object eval(String|Appendable|CharSequence|StringBuilder|StringBuffer script)
+                // eval 函数是共享当前的上下文，因此直接解析执行即可
+                if ("eval".equals(naming)) {
+                    if (args.size() == 1) {
+                        Object arg = args.get(0);
+                        if (arg == null || arg instanceof CharSequence || arg instanceof Appendable) {
+                            String script = String.valueOf(arg);
+                            TinyScriptParser.ScriptContext scriptCtx = TinyScript.parse(script);
+                            return visitScript(scriptCtx);
+                        }
+                    }
+                }
+                // 处理脚本内申明的自定义函数
+                // 因为是自定义函数，就存在上下文切换的问题，也就是函数作用域的问题，所以需要使用函数调用的方式
+                TinyScriptMethod method = null;
+                CopyOnWriteArrayList<TinyScriptMethod> list = declareFunctionMap.get(naming);
+                if (list != null) {
+                    for (TinyScriptMethod item : list) {
+                        if (item.getParameterCount() == args.size()) {
+                            method = item;
+                            break;
+                        }
+                    }
+                    if (method != null) {
+                        return method.invoke(this, args.toArray());
+                    }
+                }
+
+            }
             return resolver.resolveFunctionCall(context, value, isNew, naming, args);
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
@@ -2697,6 +2798,12 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.SegmentsContext) {
                 TinyScriptParser.SegmentsContext nextCtx = (TinyScriptParser.SegmentsContext) tree;
                 return visitSegments(nextCtx);
+            } else if (tree instanceof TinyScriptParser.DeclareFunctionContext) {
+                TinyScriptParser.DeclareFunctionContext nextCtx = (TinyScriptParser.DeclareFunctionContext) tree;
+                return visitDeclareFunction(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ParameterListContext) {
+                TinyScriptParser.ParameterListContext nextCtx = (TinyScriptParser.ParameterListContext) tree;
+                return visitParameterList(nextCtx);
             }
         } catch (TinyScriptBreakException e) {
 

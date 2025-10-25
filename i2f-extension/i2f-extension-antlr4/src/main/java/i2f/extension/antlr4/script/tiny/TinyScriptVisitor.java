@@ -1,4 +1,4 @@
-// Generated from /extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
 package i2f.extension.antlr4.script.tiny;
 
@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  * by {@link TinyScriptParser}.
  *
  * @param <T> The return type of the visit operation. Use {@link Void} for
- *            operations with no return type.
+ * operations with no return type.
  */
 public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
     /**
@@ -35,6 +35,22 @@ public interface TinyScriptVisitor<T> extends ParseTreeVisitor<T> {
      * @return the visitor result
      */
     T visitExpress(TinyScriptParser.ExpressContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#declareFunction}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link TinyScriptParser#parameterList}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitParameterList(TinyScriptParser.ParameterListContext ctx);
 
     /**
      * Visit a parse tree produced by {@link TinyScriptParser#negtiveSegment}.

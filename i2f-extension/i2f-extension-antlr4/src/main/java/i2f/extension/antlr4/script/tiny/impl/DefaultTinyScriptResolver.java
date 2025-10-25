@@ -528,18 +528,6 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         Object functionCallContext = getFunctionCallContext(context, target, isNew, naming, argList);
         TinyScript.FUNCTION_CALL_CONTEXT.set(functionCallContext);
         try {
-            if (!isNew) {
-                // 处理内建函数 Object eval(String|Appendable|CharSequence|StringBuilder|StringBuffer script)
-                if ("eval".equals(naming)) {
-                    if (argList.size() == 1) {
-                        Object arg = argList.get(0);
-                        if (arg == null || arg instanceof CharSequence || arg instanceof Appendable) {
-                            String script = String.valueOf(arg);
-                            return TinyScript.script(script, context, this);
-                        }
-                    }
-                }
-            }
             Reference<Object> ref = beforeFunctionCall(context, target, isNew, naming, argList);
             if (ref != null) {
                 if (ref.isValue()) {

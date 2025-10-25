@@ -1,4 +1,4 @@
-// Generated from /extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
+// Generated from C:/home/dev/java/dev-center/i2f-turbo-java/i2f-extension/i2f-extension-antlr4/src/main/java/i2f/extension/antlr4/script/tiny/rule/TinyScript.g4 by ANTLR 4.13.2
 
 package i2f.extension.antlr4.script.tiny;
 
@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
  * of the available methods.
  *
  * @param <T> The return type of the visit operation. Use {@link Void} for
- *            operations with no return type.
+ * operations with no return type.
  */
 @SuppressWarnings("CheckReturnValue")
 public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements TinyScriptVisitor<T> {
@@ -44,6 +44,28 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
      */
     @Override
     public T visitExpress(TinyScriptParser.ExpressContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitParameterList(TinyScriptParser.ParameterListContext ctx) {
         return visitChildren(ctx);
     }
 
