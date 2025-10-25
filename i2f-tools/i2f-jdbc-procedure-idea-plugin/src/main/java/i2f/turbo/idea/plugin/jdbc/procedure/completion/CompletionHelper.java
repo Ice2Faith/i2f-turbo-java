@@ -42,18 +42,22 @@ public class CompletionHelper {
     public static final AtomicLong lastUpdateFunctionsMillSeconds = new AtomicLong(0);
 
     public static Map<String, LookupElement> getXmlFileFunctionsFast(PsiElement position) {
-        return lastFunctions.updateAndGet((v) -> {
-            if (position == null) {
-                return v;
-            }
-            long cts = System.currentTimeMillis();
-            if ((cts - lastUpdateFunctionsMillSeconds.get()) < 1200) {
-                return v;
-            }
+        if (position == null) {
+            return lastFunctions.get();
+        }
+        long cts = System.currentTimeMillis();
+        if ((cts - lastUpdateFunctionsMillSeconds.get()) < 1200) {
+            return lastFunctions.get();
+        }
+
+        lastUpdateFunctionsMillSeconds.set(cts);
+        lastFunctions.updateAndGet((v) -> {
             Map<String, LookupElement> functions = getXmlFileFunctions(position);
-            lastUpdateFunctionsMillSeconds.set(cts);
+
             return functions;
         });
+
+        return lastFunctions.get();
     }
 
     public static Map<String, LookupElement> getXmlFileFunctions(PsiElement position) {
@@ -226,25 +230,27 @@ public class CompletionHelper {
     }
 
     public static Set<String> getXmlFileVariablesFast(PsiElement position) {
-        return lastVariables.updateAndGet((v) -> {
-            if (position == null) {
-                return v;
-            }
+        if (position == null) {
+            return lastVariables.get();
+        }
+        long cts = System.currentTimeMillis();
+        if ((cts - lastUpdateMillSeconds.get()) < 1500) {
+            return lastVariables.get();
+        }
+        lastUpdateMillSeconds.set(cts);
+        lastVariables.updateAndGet((v) -> {
             Set<String> variables = new LinkedHashSet<>();
             Set<String> sqlIdentifiers = new LinkedHashSet<>();
-            long cts = System.currentTimeMillis();
-            if ((cts - lastUpdateMillSeconds.get()) < 1200) {
-                return v;
-            }
             PsiElement root = getRootElement(position, XmlTag.class);
             if (root == null) {
                 root = position.getContainingFile();
             }
             getXmlFileVariables(root, position, variables, sqlIdentifiers);
             lastSqlIdentifiers.set(sqlIdentifiers);
-            lastUpdateMillSeconds.set(cts);
             return variables;
         });
+
+        return lastVariables.get();
     }
 
     public static void getXmlFileVariables(PsiElement elem, PsiElement stopElem, Set<String> variables, Set<String> sqlIdentifiers) {
