@@ -42,7 +42,8 @@ public class DollarVariablesLangInjectInjector implements MultiHostInjector {
     }
 
     @Override
-    public @NotNull List<? extends Class<? extends PsiElement>> elementsToInjectIn() {
+    public @NotNull
+    List<? extends Class<? extends PsiElement>> elementsToInjectIn() {
         return List.copyOf(elementTypeLayerMapping.keySet());
     }
 
@@ -66,22 +67,9 @@ public class DollarVariablesLangInjectInjector implements MultiHostInjector {
         }
     };
 
-    private static final WeakHashMap<PsiElement, Long> lastTsMap = new WeakHashMap<>();
-
     public static void highlighterDollarVariables(PsiElement context) {
         if (context == null) {
             return;
-        }
-        // 进行防抖，避免高频应用
-        synchronized (lastTsMap) {
-            Long lts = lastTsMap.get(context);
-            if (lts != null) {
-                long cts = System.currentTimeMillis();
-                if ((cts - lts) < 300) {
-                    return;
-                }
-                lastTsMap.put(context, cts);
-            }
         }
         Editor editor = PsiEditorUtil.findEditor(context);
         if (editor == null) {
@@ -110,7 +98,11 @@ public class DollarVariablesLangInjectInjector implements MultiHostInjector {
             List<RangeHighlighter> weakList = weakHighlighterMap.get(context);
             if (weakList != null) {
                 for (RangeHighlighter highlighter : weakList) {
-                    markupModel.removeHighlighter(highlighter);
+                    try {
+                        markupModel.removeHighlighter(highlighter);
+                    } catch (Throwable e) {
+
+                    }
                 }
             }
 
