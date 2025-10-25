@@ -66,7 +66,7 @@ public class TinyScript {
                     && !name.startsWith("yield");
         });
         registryBuiltMethodByStaticMethod(System.class);
-        registryBuiltMethodByStaticMethod(TinyScriptFunctions.class);
+        registryBuiltMethodByInstanceMethod(TinyScriptFunctions.INSTANCE);
         registryBuiltMethodByInstanceMethod(System.out, (method) -> {
             String name = method.getName();
             return name.startsWith("print");
