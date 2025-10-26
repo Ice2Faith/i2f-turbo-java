@@ -2,19 +2,18 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
-
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptForSegment extends PsiElement {
 
-    @NotNull
-    TinyScriptConditionBlock getConditionBlock();
+  @NotNull
+  TinyScriptConditionBlock getConditionBlock();
 
-    @NotNull
-    List<TinyScriptExpress> getExpressList();
+  @NotNull
+  List<TinyScriptExpress> getExpressList();
 
-    @NotNull
-    TinyScriptScriptBlock getScriptBlock();
+  @NotNull
+  TinyScriptScriptBlock getScriptBlock();
 
 }

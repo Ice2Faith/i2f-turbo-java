@@ -2,16 +2,15 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
-
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptSegment extends PsiElement {
 
-    @Nullable
-    TinyScriptCommentSegment getCommentSegment();
+  @Nullable
+  TinyScriptCommentSegment getCommentSegment();
 
-    @Nullable
-    TinyScriptExpress getExpress();
+  @Nullable
+  TinyScriptExpress getExpress();
 
 }

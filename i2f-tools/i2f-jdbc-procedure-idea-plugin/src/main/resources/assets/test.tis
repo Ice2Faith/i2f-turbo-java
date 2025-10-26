@@ -11,6 +11,13 @@
   }
 ];
 
+func factor(in_num){
+    if(${in_num}<=1){
+        return 1;
+    };
+    return ${in_num}*factor(${in_num}-1);
+};
+
 name = "zhang";
 age = 12;
 role = {

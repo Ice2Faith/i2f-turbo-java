@@ -1,4 +1,4 @@
-package i2f.turbo.idea.plugin.tinyscript.grammar.parser;
+package i2f.turbo.idea.plugin.tinyscript.grammar;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
@@ -124,6 +124,7 @@ WS=[ \t\r\n]+
   "if"                                      { return KEY_IF; }
   "else"                                    { return KEY_ELSE; }
   "new"                                     { return KEY_NEW; }
+  "func"                                    { return KEY_FUNC; }
   "KEY_ELIF"                                { return KEY_ELIF; }
 
   {TERM_COMMENT_SINGLE_LINE}                { return TERM_COMMENT_SINGLE_LINE; }
