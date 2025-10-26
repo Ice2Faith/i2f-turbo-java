@@ -134,6 +134,7 @@ segments:
 
 express:
     debuggerSegment
+    | declareFunction
     | ifSegment
     | foreachSegment
     | forSegment
@@ -159,6 +160,15 @@ express:
     | negtiveSegment
     | express '?' express ':' express
     ;
+
+declareFunction:
+    'func' NAMING TERM_PAREN_L parameterList? TERM_PAREN_R scriptBlock
+    ;
+
+parameterList:
+    NAMING ( TERM_COMMA NAMING )*
+    ;
+
 
 negtiveSegment:
     '-' express

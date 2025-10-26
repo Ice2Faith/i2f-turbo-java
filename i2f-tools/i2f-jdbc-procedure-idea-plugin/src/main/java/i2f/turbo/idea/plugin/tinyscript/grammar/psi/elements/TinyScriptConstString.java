@@ -2,16 +2,15 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
-
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptConstString extends PsiElement {
 
-    @Nullable
-    PsiElement getTermConstString();
+  @Nullable
+  PsiElement getTermConstString();
 
-    @Nullable
-    PsiElement getTermConstStringSingle();
+  @Nullable
+  PsiElement getTermConstStringSingle();
 
 }

@@ -2,16 +2,15 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
-
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptWhileSegment extends PsiElement {
 
-    @NotNull
-    TinyScriptConditionBlock getConditionBlock();
+  @NotNull
+  TinyScriptConditionBlock getConditionBlock();
 
-    @NotNull
-    TinyScriptScriptBlock getScriptBlock();
+  @NotNull
+  TinyScriptScriptBlock getScriptBlock();
 
 }

@@ -64,6 +64,7 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(TinyScriptTypes.KEY_THROW)
                 || tokenType.equals(TinyScriptTypes.KEY_TRY)
                 || tokenType.equals(TinyScriptTypes.KEY_WHILE)
+                || tokenType.equals(TinyScriptTypes.KEY_FUNC)
                 || tokenType.equals(TinyScriptTypes.OP_ADD)
                 || tokenType.equals(TinyScriptTypes.OP_AND)
                 || tokenType.equals(TinyScriptTypes.OP_AND_STR)

@@ -2,25 +2,24 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
-
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptEqualValue extends PsiElement {
 
-    @NotNull
-    TinyScriptExpress getExpress();
+  @NotNull
+  TinyScriptExpress getExpress();
 
-    @Nullable
-    TinyScriptExtractExpress getExtractExpress();
+  @Nullable
+  TinyScriptExtractExpress getExtractExpress();
 
-    @Nullable
-    TinyScriptStaticEnumValue getStaticEnumValue();
+  @Nullable
+  TinyScriptStaticEnumValue getStaticEnumValue();
 
-    @Nullable
-    PsiElement getNaming();
+  @Nullable
+  PsiElement getNaming();
 
-    @Nullable
-    PsiElement getRouteNaming();
+  @Nullable
+  PsiElement getRouteNaming();
 
 }

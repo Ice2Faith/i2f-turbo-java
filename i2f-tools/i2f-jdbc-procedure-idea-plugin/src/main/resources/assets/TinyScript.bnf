@@ -147,6 +147,7 @@
     KEY_IF='if';
     KEY_ELSE='else';
     KEY_NEW='new';
+    KEY_FUNC='func';
 
     TERM_DIGIT="regexp:[0-9]"; // 数字
 
@@ -202,6 +203,7 @@ operatorSegment::=
 
 expressSegment::=
         debuggerSegment
+        | declareFunction
         | ifSegment
         | foreachSegment
         | forSegment
@@ -220,6 +222,15 @@ expressSegment::=
         | jsonValue
         | negtiveSegment
         ;
+
+declareFunction::=
+    KEY_FUNC NAMING TERM_PAREN_L parameterList? TERM_PAREN_R scriptBlock
+    ;
+
+parameterList::=
+    NAMING ( TERM_COMMA NAMING )*
+    ;
+
 
 negtiveSegment::=
     OP_SUB express
