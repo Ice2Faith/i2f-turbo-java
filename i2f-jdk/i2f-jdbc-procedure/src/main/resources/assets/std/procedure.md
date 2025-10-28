@@ -43,10 +43,245 @@
 - test: 表示计算表达式的布尔逻辑值，当表达式的结果不是boolean类型时，会隐式转换为boolean类型，默认使用OGNL引擎进行表达式运算
 - render: 表示进行字符串渲染，使用Velocity模板引擎实现
 
-## 三、存储过程转换案例讲解
+## 三、快速入门
 
-- 下面以Oracle语法的存储过程转换对照进行说明
-- 其他SQL语言的可以进行参考转换
+- 你可以通过查看 procedure.xml 中的注释
+- 获取节点定义以及功能的详细描述
+
+### 3.1 Ognl 对象图表达式语言快速入门
+
+- 在本框架中，Ognl 被用作 if 等条件分的 test 属性判断，以及在SQL中用作取值使用
+- 如果你使用过 Mybatis/Mybatis-Plus 这个 ORM 框架，那么你就已经学会了 OGNL 语言的基础使用
+- 已经足够在本框架中使用了，可以忽略此处的介绍和入门讲解
+- 下面，我们开始讲解 OGNL 在本框架中最常见的使用方式
+- OGNL 对象图表达式语言，主要是针对一个单一表达式构建的语言
+- 可以调用JAVA中的实例方法
+- 详细介绍可以到官网查看
+
+```shell
+https://commons.apache.org/dormant/commons-ognl/language-guide.html
+```
+
+#### 3.1.1 if/when 分支判断中用作条件判断语句
+
+- 一个场景就是使用在 test 属性中
+
+```xml
+
+<lang-if test="V_NUM>0">
+
+</lang-if>
+```
+
+- 在这里例子中，下面的这个不分就是 OGNL 表达式驱动的
+
+```shell
+V_NUM>0
+```
+
+- 其含义是，使用环境中的 V_NUM 变量与 0 进行比较
+- 因为在本框架中，这是最多使用的场景，因此就以案例进行说明
+- 多条件使用 and/or 进行连接，也支持使用括号定义优先级
+
+```xml
+
+<lang-if test="(V_NUM!=null and V_NUM>0) or V_NAME!=null">
+
+</lang-if>
+```
+
+- 如果是与字符串进行比较，则需要使用双引号，则XML属性就使用单引号
+
+```xml
+
+<lang-if test='V_NAME=="admin"'>
+
+</lang-if>
+```
+
+- 如果是与空字符串比较，则可以使用单引号
+
+```xml
+
+<lang-if test="V_NAME!=null and V_NAME!=''">
+
+</lang-if>
+```
+
+- 因为 OGNL 是基于 JAVA 的，所以可以调用变量的方法
+
+```xml
+
+<lang-if test="V_NAME!=null and V_NAME.length()>0">
+
+</lang-if>
+```
+
+- 有了上面的基础知识之后，下面直接使用对照案例的方式来描述SQL与OGNL表达式的对比
+- 同时，因为 TinyScript 是为了进行数据库转换提供的脚本语言，因此也先在这里进行一些对比
+
+```shell
+// OGNL 的变量名直接书写即可
+// TinyScript 的变量引用需要使用 ${} 进行包裹
+SQL: V_NAME is null
+OGNL: V_NAME==null
+TinyScript: ${V_NAME}==null
+TinyScript: isnull(${V_NAME})
+
+SQL: V_NAME is not null
+OGNL: V_NAME !=null
+TinyScript: ${V_NAME} !=null
+TinyScript: !isnull(${V_NAME})
+
+// 注意，SQL中，一般情况下，任何null参与的逻辑表达式结果都为null，而null逻辑含义为false
+// 所以，转换之后，就需要考虑判空的逻辑，否则可能导致逻辑不一致
+SQL: V_NAME >= 0
+OGNL: V_NAME!=null and V_NAME >= 0
+TinyScript: ${V_NAME}!=null and ${V_NAME} >= 0
+
+SQL: V_NAME like '%abc%'
+OGNL: V_NAME !=null and V_NAME.contains("abc")
+TinyScript: like(${V_NAME},'abc')
+
+// TinyScript 的 like 函数虽然支持空参数判断
+// 但是如果直接使用取反，却会导致和原来的逻辑不一致
+// 如果 V_NAME 为 null , 那么按照原来的逻辑，表达式null与其他值进行逻辑运算，逻辑结果为false
+// 所以，转换之后，都需要进行判空
+SQL: V_NAME not like '%abc%'
+OGNL: V_NAME !=null and !V_NAME.contains("abc")
+TinyScript: ${V_NAME}!=null and !like(${V_NAME},'abc')
+
+SQL: V_NAME like 'abc%'
+OGNL: V_NAME !=null and V_NAME.startsWith("abc")
+TinyScript: starts_with(${V_NAME},'abc')
+
+SQL: V_NAME like '%abc'
+OGNL: V_NAME !=null and V_NAME.endsWith("abc")
+TinyScript: ends_with(${V_NAME},'abc')
+
+// 在 ONGL 中，in 的多值使用 {} 花括号表示
+// 而在 TinyScript 中，in 的多值使用 [] 中括号表示
+SQL: V_ID in (1,2,3)
+OGNL: V_ID in {1,2,3}
+TinyScript: ${V_ID} in [1,2,3]
+
+// TinyScript 提供的 notin 是合并在一起的，不是分开的
+SQL: V_ID not in ('1','2','3')
+OGNL: V_ID not in {"1","2","3"}
+SQL: ${V_ID} notin ['1','2','3']
+```
+
+#### 3.1.2 sql语句中用作占位符
+
+- 和 Mybatis 框架中的用法一样
+- ${} 用作替换字符串，#{} 用作替换为占位符变量
+
+```xml
+
+<sql-update>
+  select * from ${V_TABLE} where ${V_COLUMN}=#{V_VALUE}
+</sql-update>
+```
+
+- 在这个例子中，就已经表示了在sql中使用的两种方式
+- 那么，这条语句实际在驱动中执行的时候
+- 将会变成这样
+
+```sql
+select *
+from sys_user
+where status = ?
+```
+
+- 这里就说明了使用 ${} 包裹和使用 #{} 包裹的区别
+- ${} 是直接将变量替换为字符串
+- #{} 是将变量作为变量占位符进行预编译
+- 因此，为了避免可能存在的SQL注入
+- 请尽量使用 #{} 而不是 ${} 进行变量占位符
+- 除非 ${} 是可信的
+- 同时，为了与 Velocity 中的写法统一
+- 也支持 $!{} 和 #!{} 这样的变种
+- 但是，这样写没有其他任何含义和区别
+
+### 3.2 Velocity 模版引擎快速入门
+
+- 在本框架中，Velocity 被用作字符串的渲染，使用在字符串拼接，占位符替换等场景中
+- 如果你使用过 Velocity 引擎，那么可以跳过此部分的介绍和入门讲解
+- 详细介绍可以到官网查看
+
+```shell
+https://velocity.apache.org/engine/devel/user-guide.html
+```
+
+#### 3.2.1 作为模板字符串的占位符
+
+- 这是在本框架中最常使用的方式，一般都是只用来替换变量占位符
+- 一般很少会使用其它的动态渲染的功能
+- 因此，此处也只介绍这部分
+- ${} 用来替换变量，如果变量不存在，则原样显示 ${} 占位符
+- $!{} 用来替换变量，如果变量不存在，则显示未空字符串
+- 下面直接看例子
+
+```xml
+
+<lang-render result="V_SQL" _lang="sql">
+  from ${V_TABLE}$!{V_SUFFIX} where status=1
+</lang-render>
+```
+
+- 渲染的结果为
+
+```shell
+from sys_user_his where status=1
+```
+
+- 这里，我们假设 V_SUFFIX=_his,V_TABLE=sys_user
+- 因此，渲染的结果，就是粘合在一起的
+
+- 如果为null的情况下，则渲染结果如下
+
+```shell
+from ${V_TABLE} where status=1
+```
+
+- 也就是说您，V_TABLE为空，又没有使用 $!{} 包裹，因此此处原样保留
+
+### 3.3 TinyScript 脚本引擎
+
+- 此脚本引擎是专门为了解决转换过程中XML繁琐，以及其他脚本语言调用函数繁琐的问题而专门设计的
+- 目的是为了尽量贴近原始存储过程的变成体验
+- 主要是函数式环境
+- 更多详情，请查看 TinyScript.md
+- 此部分作为快速入门，只会介绍一些简单的部分
+- ${} 表示引用变量
+- $!{} 表示引用变量，如果变量为null,则返回空字符串
+- 语句之间使用;分号分隔，特别注意if等语句块的括号后面的分号不要丢掉
+
+```xml
+
+<lang-eval-ts>
+  V_NUM=0;
+  V_CNT=${V_NUM}+1;
+  V_MSG='123'+$!{V_NAME};
+</lang-eval-ts>
+```
+
+- 在这个例子中，两种引用变量都包括了
+- 运行这段脚本之后，将会得到以下的几个变量
+
+```shell
+V_NUM: 0
+V_CNT: 1
+V_MSG: "123"
+```
+
+- 因为，这里 V_NAME 没有值，默认是 null
+- 所以，使用了 $!{} 将 null 替换为空字符串
+- 如果是使用 ${}, 则得到的是
+
+```shell
+V_MSG: "123null"
+```
 
 ## 四、转换注意事项
 
@@ -205,6 +440,9 @@ IF V_NAME not like '%A10%' THEN
 
 
 ## 五、转换对照介绍
+
+- 下面以Oracle语法的存储过程转换对照进行说明
+- 其他SQL语言的可以进行参考转换
 
 ### 5.1 前置知识
 
@@ -3545,7 +3783,7 @@ test.xml
 - 首先，在Java代码中调用此过程
 
 ```java
-import i2f.springboot.jdbc.bql.procedure.JdbcProcedureHelper;
+import com.newland.bi3.springboot.jdbc.bql.procedure.JdbcProcedureHelper;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
