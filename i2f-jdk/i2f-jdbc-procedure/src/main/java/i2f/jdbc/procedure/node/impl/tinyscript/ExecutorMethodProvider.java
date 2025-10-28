@@ -26,7 +26,7 @@ public class ExecutorMethodProvider {
         return executor.loadClass(className);
     }
 
-    public boolean is_deug() {
+    public boolean is_debug() {
         return executor.isDebug();
     }
 
