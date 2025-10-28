@@ -2,8 +2,8 @@ package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
+import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptMethod;
 import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptException;
-import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptMethod;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptContinueException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptEvaluateException;

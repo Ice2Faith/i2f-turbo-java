@@ -15,7 +15,7 @@ public class ExecutorMethodProvider {
         return null;
     }
 
-    public boolean is_deug() {
+    public boolean is_debug() {
         return false;
     }
 
