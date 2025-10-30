@@ -45,6 +45,7 @@ import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
+import i2f.lock.ILockProvider;
 import i2f.lru.LruMap;
 import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
@@ -80,17 +81,18 @@ import java.util.function.Function;
 @Data
 public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalScriptProvider {
     public static transient final LruMap<String, Object> staticLru = new LruMap<>(4096);
-    protected static final AtomicBoolean hasApplyNodes = new AtomicBoolean(false);
     protected transient final AtomicReference<ProcedureNode> procedureNodeHolder = new AtomicReference<>();
     protected transient final LruMap<String, Object> executorLru = new LruMap<>(4096);
     protected final ConcurrentHashMap<String, CopyOnWriteArrayList<ExecutorNode>> nodes = new ConcurrentHashMap<>();
     protected final ConcurrentHashMap<String, FeatureFunction> featuresMap = new ConcurrentHashMap<>();
     protected final CopyOnWriteArrayList<EvalScriptProvider> evalScriptProviders = new CopyOnWriteArrayList<>();
+    protected final ConcurrentHashMap<String, ILockProvider> lockProviders = new ConcurrentHashMap<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected volatile JdbcProcedureLogger logger = new DefaultJdbcProcedureLogger(debug);
     public volatile Function<String, String> mapTypeColumnNameMapper = StringUtils::toUpper;
     public volatile Function<String, String> otherTypeColumnNameMapper = null;
     protected volatile JdbcProcedureContext context = new DefaultJdbcProcedureContext();
+    protected static final AtomicBoolean hasApplyNamingContext = new AtomicBoolean(false);
     protected volatile IEnvironment environment = new ListableDelegateEnvironment();
     protected volatile INamingContext namingContext = new ListableNamingContext();
     protected volatile XProc4jEventHandler eventHandler = new ContextXProc4jEventHandler(namingContext);
@@ -106,6 +108,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         List<ExecutorNode> list = defaultExecutorNodes();
         for (ExecutorNode node : list) {
             registryExecutorNode(node);
+            if (node instanceof EvalScriptProvider) {
+                registryEvalScriptProvider((EvalScriptProvider) node);
+            }
+            if (node instanceof ILockProvider) {
+                registryLockProvider((ILockProvider) node);
+            }
         }
         registryEvalScriptProvider(this);
         initFeatureMap();
@@ -233,10 +241,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 this.nodes.computeIfAbsent(tagNameKey, k -> new CopyOnWriteArrayList<>()).add(node);
             }
         }
-        if (node instanceof EvalScriptProvider) {
-            EvalScriptProvider provider = (EvalScriptProvider) node;
-            registryEvalScriptProvider(provider);
-        }
     }
 
     @Override
@@ -288,7 +292,38 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     @Override
     public CopyOnWriteArrayList<EvalScriptProvider> getEvalScriptProviders() {
+        applyNamingContextComponents();
         return this.evalScriptProviders;
+    }
+
+    @Override
+    public void registryLockProvider(ILockProvider provider) {
+        if (provider == null) {
+            return;
+        }
+        String name = provider.name();
+        if (isDebug()) {
+            logger().logDebug("registry lock provider [" + name + "] : " + provider.getClass());
+        }
+        this.lockProviders.put(name, provider);
+    }
+
+
+    @Override
+    public ConcurrentHashMap<String, ILockProvider> getLockProviders() {
+        applyNamingContextComponents();
+        return this.lockProviders;
+    }
+
+    @Override
+    public void registryFeatureFunction(String name, FeatureFunction function) {
+        featuresMap.putIfAbsent(name, function);
+    }
+
+    @Override
+    public ConcurrentHashMap<String, FeatureFunction> getFeatureFunctions() {
+        applyNamingContextComponents();
+        return featuresMap;
     }
 
     @Override
@@ -325,25 +360,37 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return context;
     }
 
-    public void applyNodeExecutorComponents() {
+    public void applyNamingContextComponents() {
+        if (hasApplyNamingContext.getAndSet(true)) {
+            return;
+        }
         List<Object> beansList = getNamingContext().getAllBeans();
         for (Object bean : beansList) {
             if (bean instanceof ExecutorNode) {
                 ExecutorNode eNode = (ExecutorNode) bean;
                 registryExecutorNode(eNode);
             }
+            if (bean instanceof EvalScriptProvider) {
+                EvalScriptProvider provider = (EvalScriptProvider) bean;
+                registryEvalScriptProvider(provider);
+            }
+            if (bean instanceof ILockProvider) {
+                ILockProvider provider = (ILockProvider) bean;
+                registryLockProvider(provider);
+            }
+            handleNamingContextCompnentBean(bean);
         }
+    }
+
+    public void handleNamingContextCompnentBean(Object bean) {
+
     }
 
     @Override
     public ConcurrentHashMap<String, CopyOnWriteArrayList<ExecutorNode>> getNodesMap() {
-        if (!hasApplyNodes.getAndSet(true)) {
-            applyNodeExecutorComponents();
-        }
+        applyNamingContextComponents();
         return nodes;
     }
-
-
 
     @Override
     public <T> T invoke(String procedureId, Map<String, Object> params) {
@@ -874,62 +921,62 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     }
 
     protected void initFeatureMap() {
-        featuresMap.put(FeatureConsts.INT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.INT, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Integer.class);
         });
-        featuresMap.put(FeatureConsts.DOUBLE, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.DOUBLE, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Double.class);
         });
-        featuresMap.put(FeatureConsts.FLOAT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.FLOAT, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Float.class);
         });
-        featuresMap.put(FeatureConsts.STRING, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.STRING, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, String.class);
         });
-        featuresMap.put(FeatureConsts.LONG, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.LONG, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Long.class);
         });
-        featuresMap.put(FeatureConsts.SHORT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.SHORT, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Short.class);
         });
-        featuresMap.put(FeatureConsts.CHAR, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.CHAR, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Character.class);
         });
-        featuresMap.put(FeatureConsts.BYTE, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.BYTE, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Byte.class);
         });
-        featuresMap.put(FeatureConsts.BOOLEAN, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.BOOLEAN, (value, node, context) -> {
             return ObjectConvertor.tryConvertAsType(value, Boolean.class);
         });
-        featuresMap.put(FeatureConsts.RENDER, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.RENDER, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return render(text, context);
         });
-        featuresMap.put(FeatureConsts.VISIT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.VISIT, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return visit(text, context);
         });
-        featuresMap.put(FeatureConsts.EVAL, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.EVAL, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return eval(text, context);
         });
-        featuresMap.put(FeatureConsts.TEST, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.TEST, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return test(text, context);
         });
-        featuresMap.put(FeatureConsts.CONTEXT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.CONTEXT, (value, node, context) -> {
             return context;
         });
-        featuresMap.put(FeatureConsts.EXECUTOR, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.EXECUTOR, (value, node, context) -> {
             return BasicJdbcProcedureExecutor.this;
         });
-        featuresMap.put(FeatureConsts.NODE, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.NODE, (value, node, context) -> {
             return node;
         });
-        featuresMap.put(FeatureConsts.NULL, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.NULL, (value, node, context) -> {
             return null;
         });
-        featuresMap.put(FeatureConsts.DATE, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.DATE, (value, node, context) -> {
             String text = String.valueOf(value);
             String patternText = node.getTagAttrMap().get(AttrConsts.PATTERN);
             boolean processed = false;
@@ -949,13 +996,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             return value;
         });
-        featuresMap.put(FeatureConsts.TRIM, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.TRIM, (value, node, context) -> {
             if (value == null) {
                 return null;
             }
             return String.valueOf(value).trim();
         });
-        featuresMap.put(FeatureConsts.ALIGN, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.ALIGN, (value, node, context) -> {
             if (value == null) {
                 return null;
             }
@@ -973,60 +1020,60 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             return builder.toString();
         });
-        featuresMap.put(FeatureConsts.BODY_TEXT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.BODY_TEXT, (value, node, context) -> {
             return node.getTextBody();
         });
-        featuresMap.put(FeatureConsts.BODY_XML, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.BODY_XML, (value, node, context) -> {
             return node.getTagBody();
         });
-        featuresMap.put(FeatureConsts.SPACING_LEFT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.SPACING_LEFT, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return " " + text;
         });
-        featuresMap.put(FeatureConsts.SPACING_RIGHT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.SPACING_RIGHT, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return text + " ";
         });
-        featuresMap.put(FeatureConsts.SPACING, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.SPACING, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return " " + text + " ";
         });
-        featuresMap.put(FeatureConsts.LOWER, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.LOWER, (value, node, context) -> {
             return value == null ? null : String.valueOf(value).toLowerCase();
         });
-        featuresMap.put(FeatureConsts.UPPER, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.UPPER, (value, node, context) -> {
             return value == null ? null : String.valueOf(value).toUpperCase();
         });
-        featuresMap.put(FeatureConsts.HASHCODE, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.HASHCODE, (value, node, context) -> {
             return value == null ? 0 : value.hashCode();
         });
-        featuresMap.put(FeatureConsts.EVAL_JAVA, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.EVAL_JAVA, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalJavaNode.evalJava(context, this, "", "", text);
         });
-        featuresMap.put(FeatureConsts.EVAL_JS, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.EVAL_JS, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalJavascriptNode.evalJavascript(text, context, this);
         });
-        featuresMap.put(FeatureConsts.EVAL_TINYSCRIPT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.EVAL_TINYSCRIPT, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalTinyScriptNode.evalTinyScript(text, context, this);
         });
-        featuresMap.put(FeatureConsts.EVAL_TS, featuresMap.get(FeatureConsts.EVAL_TINYSCRIPT));
+        registryFeatureFunction(FeatureConsts.EVAL_TS, featuresMap.get(FeatureConsts.EVAL_TINYSCRIPT));
 
-        featuresMap.put(FeatureConsts.EVAL_GROOVY, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.EVAL_GROOVY, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalGroovyNode.evalGroovyScript(text, context, this);
         });
-        featuresMap.put(FeatureConsts.CLASS, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.CLASS, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return loadClass(text);
         });
-        featuresMap.put(FeatureConsts.NOT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.NOT, (value, node, context) -> {
             boolean ok = toBoolean(value);
             return !ok;
         });
-        featuresMap.put(FeatureConsts.DIALECT, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.DIALECT, (value, node, context) -> {
             try {
                 String databases = value == null ? null : String.valueOf(value);
                 String datasource = (String) attrValue(AttrConsts.DATASOURCE, FeatureConsts.STRING, node, context);
@@ -1037,49 +1084,49 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             return false;
         });
-        featuresMap.put(FeatureConsts.IS_NULL, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.IS_NULL, (value, node, context) -> {
             return value == null;
         });
-        featuresMap.put(FeatureConsts.IS_NOT_NULL, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.IS_NOT_NULL, (value, node, context) -> {
             return value != null;
         });
-        featuresMap.put(FeatureConsts.IS_EMPTY, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.IS_EMPTY, (value, node, context) -> {
             return value == null || "".equals(value);
         });
-        featuresMap.put(FeatureConsts.IS_NOT_EMPTY, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.IS_NOT_EMPTY, (value, node, context) -> {
             return value != null && !"".equals(value);
         });
-        featuresMap.put(FeatureConsts.DATE_NOW, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.DATE_NOW, (value, node, context) -> {
             return new Date();
         });
-        featuresMap.put(FeatureConsts.UUID, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.UUID, (value, node, context) -> {
             return UUID.randomUUID().toString();
         });
-        featuresMap.put(FeatureConsts.CURRENT_TIME_MILLIS, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.CURRENT_TIME_MILLIS, (value, node, context) -> {
             return System.currentTimeMillis();
         });
-        featuresMap.put(FeatureConsts.SNOW_UID, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.SNOW_UID, (value, node, context) -> {
             return SnowflakeLongUid.getId();
         });
-        featuresMap.put(FeatureConsts.NEW_MAP, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.NEW_MAP, (value, node, context) -> {
             return new LinkedHashMap<>();
         });
-        featuresMap.put(FeatureConsts.NEW_LIST, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.NEW_LIST, (value, node, context) -> {
             return new ArrayList<>();
         });
-        featuresMap.put(FeatureConsts.NEW_SET, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.NEW_SET, (value, node, context) -> {
             return new LinkedHashSet<>();
         });
-        featuresMap.put(FeatureConsts.LOCATION_FILE, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.LOCATION_FILE, (value, node, context) -> {
             return node.getLocationFile();
         });
-        featuresMap.put(FeatureConsts.LOCATION_LINE, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.LOCATION_LINE, (value, node, context) -> {
             return node.getLocationLineNumber();
         });
-        featuresMap.put(FeatureConsts.LOCATION_TAG, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.LOCATION_TAG, (value, node, context) -> {
             return node.getTagName();
         });
-        featuresMap.put(FeatureConsts.LOCATION, (value, node, context) -> {
+        registryFeatureFunction(FeatureConsts.LOCATION, (value, node, context) -> {
             return XmlNode.getNodeLocation(node);
         });
     }
@@ -1092,7 +1139,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (feature == null || feature.isEmpty()) {
             return value;
         }
-        FeatureFunction featureFunction = featuresMap.get(feature);
+        FeatureFunction featureFunction = getFeatureFunctions().get(feature);
         if (featureFunction != null) {
             return featureFunction.feature(value, node, context);
         } else {

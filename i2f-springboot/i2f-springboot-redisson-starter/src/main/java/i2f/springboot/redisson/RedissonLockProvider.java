@@ -8,11 +8,35 @@ import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 
 public class RedissonLockProvider implements ILockProvider {
+    public static final String NAME = "redisson";
 
-    private RedissonClient redissonClient;
+    protected String keyPrefix = "lock:";
+
+    protected RedissonClient redissonClient;
 
     public RedissonLockProvider(RedissonClient redissonClient) {
         this.redissonClient = redissonClient;
+    }
+
+    public RedissonLockProvider(String keyPrefix, RedissonClient redissonClient) {
+        this.keyPrefix = keyPrefix;
+        this.redissonClient = redissonClient;
+    }
+
+    @Override
+    public String name() {
+        return NAME;
+    }
+
+    public String getLockKey(String key) {
+        String prefix = keyPrefix;
+        if (prefix == null || prefix.isEmpty()) {
+            return key;
+        }
+        if (prefix.endsWith(":")) {
+            return prefix + key;
+        }
+        return prefix + ":" + key;
     }
 
     @Override
@@ -21,11 +45,11 @@ public class RedissonLockProvider implements ILockProvider {
     }
 
     public RLock getRedisLock(String lockName) {
-        return redissonClient.getLock(lockName);
+        return redissonClient.getLock(getLockKey(lockName));
     }
 
     public RReadWriteLock getReadWriteLock(String lockName) {
-        return redissonClient.getReadWriteLock(lockName);
+        return redissonClient.getReadWriteLock(getLockKey(lockName));
     }
 
     public RLock getRedisLock(Class<?> clazz) {
