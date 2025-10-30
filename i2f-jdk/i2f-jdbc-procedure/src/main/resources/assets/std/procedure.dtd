@@ -32,6 +32,7 @@
                 |lang-file-read-text*
                 |lang-file-write-text*
                 |lang-try*
+                |lang-retry*
                 |lang-synchronized*
                 |lang-lock*
                 |sql-query-row*
@@ -834,6 +835,14 @@
         <!ATTLIST lang-catch test.eval-ts CDATA #IMPLIED>
 
         <!ELEMENT lang-finally (ANY|EMPTY)>
+
+        <!ELEMENT lang-retry (ANY|EMPTY)>
+        <!ATTLIST lang-retry result CDATA #IMPLIED>
+        <!ATTLIST lang-retry count CDATA #IMPLIED>
+        <!ATTLIST lang-retry type CDATA #IMPLIED>
+        <!ATTLIST lang-retry delay CDATA #IMPLIED>
+        <!ATTLIST lang-retry time-unit CDATA #IMPLIED>
+        <!ATTLIST lang-retry incr CDATA #IMPLIED>
 
         <!ELEMENT lang-synchronized (ANY|EMPTY)>
         <!ATTLIST lang-synchronized target CDATA #IMPLIED>
