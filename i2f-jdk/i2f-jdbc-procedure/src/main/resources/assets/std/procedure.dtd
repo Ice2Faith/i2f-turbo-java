@@ -841,10 +841,14 @@
         <!ELEMENT lang-lock (ANY|EMPTY)>
         <!ATTLIST lang-lock value CDATA #IMPLIED>
         <!ATTLIST lang-lock result CDATA #IMPLIED>
+        <!ATTLIST lang-lock type CDATA #IMPLIED>
 
         <!ATTLIST lang-lock value.visit CDATA #IMPLIED>
         <!ATTLIST lang-lock value.string CDATA #IMPLIED>
         <!ATTLIST lang-lock value.render CDATA #IMPLIED>
+
+        <!ATTLIST lang-lock type.string CDATA #IMPLIED>
+        <!ATTLIST lang-lock type.visit CDATA #IMPLIED>
 
         <!ELEMENT sql-query-row (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*

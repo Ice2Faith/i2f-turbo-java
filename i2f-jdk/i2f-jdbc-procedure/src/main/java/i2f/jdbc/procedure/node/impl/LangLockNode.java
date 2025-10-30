@@ -6,40 +6,67 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.lock.ILock;
+import i2f.lock.ILockProvider;
+import i2f.lock.impl.JdkCacheLockProvider;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Ice2Faith
  * @date 2025/1/20 14:07
  */
-public class LangLockNode extends AbstractExecutorNode {
+public class LangLockNode extends AbstractExecutorNode implements ILockProvider {
     public static final String TAG_NAME = TagConsts.LANG_LOCK;
-    public static ConcurrentHashMap<String, Lock> lockMap = new ConcurrentHashMap<>();
+    public ILockProvider defaultProvider = new JdkCacheLockProvider();
 
     @Override
     public String tag() {
         return TAG_NAME;
     }
 
-
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object value = executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
+        String type = (String) executor.attrValue(AttrConsts.TYPE, FeatureConsts.STRING, node, context);
         String lockKey = String.valueOf(value);
-        Lock lock = lockMap.computeIfAbsent(lockKey, k -> new ReentrantLock());
+        ConcurrentHashMap<String, ILockProvider> lockProviders = executor.getLockProviders();
+        ILockProvider provider = lockProviders.get(type);
+        if (provider == null) {
+            for (Map.Entry<String, ILockProvider> entry : lockProviders.entrySet()) {
+                provider = entry.getValue();
+                break;
+            }
+        }
+        if (provider == null) {
+            provider = defaultProvider;
+        }
+        ILock lock = provider.getLock(lockKey);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {
             executor.visitSet(context, result, lock);
         }
-        lock.lock();
         try {
-            executor.execAsProcedure(node, context, false, false);
-        } finally {
-            lock.unlock();
+            lock.lock();
+            try {
+                executor.execAsProcedure(node, context, false, false);
+            } finally {
+                lock.unlock();
+            }
+        } catch (Throwable e) {
+            throw new ThrowSignalException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public String name() {
+        return defaultProvider.name();
+    }
+
+    @Override
+    public ILock getLock(String key) {
+        return defaultProvider.getLock(key);
     }
 }

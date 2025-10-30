@@ -18,6 +18,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.lock.ILockProvider;
 import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
 import i2f.typeof.TypeOf;
@@ -56,6 +57,14 @@ public interface JdbcProcedureExecutor {
     void registryEvalScriptProvider(EvalScriptProvider provider);
 
     CopyOnWriteArrayList<EvalScriptProvider> getEvalScriptProviders();
+
+    void registryLockProvider(ILockProvider provider);
+
+    ConcurrentHashMap<String, ILockProvider> getLockProviders();
+
+    void registryFeatureFunction(String name, FeatureFunction function);
+
+    ConcurrentHashMap<String, FeatureFunction> getFeatureFunctions();
 
     XProc4jEventHandler getEventHandler();
 
@@ -105,8 +114,13 @@ public interface JdbcProcedureExecutor {
 
     default ExecutorNode getSupportNode(XmlNode node) {
         CopyOnWriteArrayList<ExecutorNode> list = getNodes(nodeTagKey(node.getTagName()));
-        if (list == null) {
+        if (list == null || list.isEmpty()) {
             return null;
+        }
+        for (ExecutorNode item : list) {
+            if (item.support(node)) {
+                return item;
+            }
         }
         return list.get(0);
     }

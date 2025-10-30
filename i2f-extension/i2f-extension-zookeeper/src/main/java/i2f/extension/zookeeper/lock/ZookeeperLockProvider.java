@@ -15,10 +15,42 @@ import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 @Data
 @NoArgsConstructor
 public class ZookeeperLockProvider implements ILockProvider {
+    public static final String NAME = "zookeeper";
+
+    protected String keyPrefix = "/lock/";
+
     private CuratorFramework curator;
 
     public ZookeeperLockProvider(CuratorFramework curator) {
         this.curator = curator;
+    }
+
+    @Override
+    public String name() {
+        return NAME;
+    }
+
+    public String getLockKey(String key) {
+        String prefix = keyPrefix;
+        if (prefix == null || prefix.isEmpty()) {
+            if (!key.startsWith("/")) {
+                return "/" + key;
+            }
+            return key;
+        }
+        if (!prefix.startsWith("/")) {
+            prefix = "/" + prefix;
+        }
+        if (prefix.endsWith("/")) {
+            if (key.startsWith("/")) {
+                return prefix + key.substring(1);
+            }
+            return prefix + key;
+        }
+        if (key.startsWith("/")) {
+            return prefix + key;
+        }
+        return prefix + "/" + key;
     }
 
     @Override
@@ -27,10 +59,10 @@ public class ZookeeperLockProvider implements ILockProvider {
     }
 
     public ZookeeperInterMutexLock getZkLock(String path) {
-        return ZookeeperLockUtil.getZkMutexLock(path, curator);
+        return ZookeeperLockUtil.getZkMutexLock(getLockKey(path), curator);
     }
 
     public InterProcessMutex getMutex(String path) {
-        return ZookeeperLockUtil.getMutexLock(path, curator);
+        return ZookeeperLockUtil.getMutexLock(getLockKey(path), curator);
     }
 }
