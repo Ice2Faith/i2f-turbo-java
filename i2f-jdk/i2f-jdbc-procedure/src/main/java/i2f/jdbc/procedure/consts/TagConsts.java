@@ -66,6 +66,8 @@ public interface TagConsts {
     String LANG_CATCH = "lang-catch";
     String LANG_FINALLY = "lang-finally";
 
+    String LANG_RETRY = "lang-retry";
+
     String LANG_THROW = "lang-throw";
 
     String LANG_ASYNC_ALL = "lang-async-all";
