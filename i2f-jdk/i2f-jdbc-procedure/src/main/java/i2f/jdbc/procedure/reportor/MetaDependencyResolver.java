@@ -12,6 +12,8 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.match.regex.RegexPattens;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexMatchItem;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.InputStream;
@@ -78,6 +80,53 @@ public class MetaDependencyResolver {
 
         }
         return builder;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class EchartsGraphNode {
+        public String id;
+        public String name;
+
+        public EchartsGraphNode(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class EchartsGraphLink {
+        public String source;
+        public String target;
+
+        public EchartsGraphLink(String source, String target) {
+            this.source = source;
+            this.target = target;
+        }
+    }
+
+    @Data
+    public static class EchartsGraph {
+        public List<EchartsGraphNode> data;
+        public List<EchartsGraphLink> links;
+    }
+
+    public static EchartsGraph convertAsEchartsGraph(Map<String, DependencyNode> dependencyGraph) {
+        EchartsGraph ret = new EchartsGraph();
+        ret.data = new ArrayList<>();
+        ret.links = new ArrayList<>();
+        for (Map.Entry<String, DependencyNode> entry : dependencyGraph.entrySet()) {
+            ret.data.add(new EchartsGraphNode(entry.getKey(), entry.getKey()));
+            DependencyNode value = entry.getValue();
+            Set<String> dependencies = value.getDependencies();
+            if (dependencies != null) {
+                for (String dependency : dependencies) {
+                    ret.links.add(new EchartsGraphLink(entry.getKey(), dependency));
+                }
+            }
+        }
+        return ret;
     }
 
     public static List<DependencyNode> findAllRootNodes(Map<String, DependencyNode> dependencyGraph) {
@@ -182,7 +231,9 @@ public class MetaDependencyResolver {
         }
         if (Arrays.asList(
                 TagConsts.PROCEDURE_CALL,
-                TagConsts.FUNCTION_CALL
+                TagConsts.FUNCTION_CALL,
+                TagConsts.JAVA_CALL,
+                TagConsts.SCRIPT_INCLUDE
         ).contains(tagName)) {
             String refid = node.getTagAttrMap().get(AttrConsts.REFID);
             if (refid != null && !refid.isEmpty()) {
@@ -254,12 +305,20 @@ public class MetaDependencyResolver {
         if (script == null) {
             return;
         }
-        script = script.replaceAll(RegexPattens.SINGLE_LINE_COMMENT_SQL_REGEX, "");
-        script = script.replaceAll(RegexPattens.MULTI_LINE_COMMENT_REGEX, "");
-        List<RegexMatchItem> items = RegexUtil.regexFinds(script, "[a-zA-Z0-9_]+\\s*\\(");
+        try {
+            script = script.replaceAll(RegexPattens.SINGLE_LINE_COMMENT_SQL_REGEX, "");
+        } catch (Exception e) {
+
+        }
+        try {
+            script = script.replaceAll(RegexPattens.MULTI_LINE_COMMENT_REGEX, "");
+        } catch (Exception e) {
+
+        }
+        List<RegexMatchItem> items = RegexUtil.regexFinds(script, "[a-zA-Z0-9_]{3,}\\s*\\(");
         for (RegexMatchItem item : items) {
             String matchStr = item.getMatchStr();
-            List<RegexMatchItem> strs = RegexUtil.regexFinds(matchStr, "[a-zA-Z0-9_]+");
+            List<RegexMatchItem> strs = RegexUtil.regexFinds(matchStr, "[a-zA-Z0-9_]{3,}");
             for (RegexMatchItem str : strs) {
                 String naming = str.getMatchStr();
                 naming = naming.substring(1, naming.length() - 1);
@@ -338,6 +397,8 @@ public class MetaDependencyResolver {
                 ;
     }
 
+    @Data
+    @NoArgsConstructor
     public static class DependencyNode {
         public String naming;
         public Set<String> dependencies = new LinkedHashSet<>();
