@@ -1,76 +1,6 @@
 <!-- procedure.dtd -->
 
-        <!ELEMENT procedure (
-                lang-println*
-                |lang-printf*
-                |script-segment*
-                |script-include*
-                |lang-body*
-                |lang-set*
-                |lang-format-date*
-                |lang-format*
-                |lang-string-join*
-                |lang-new-params*
-                |procedure-call*
-                |lang-return*
-                |lang-throw*
-                |lang-eval*
-                |lang-string*
-                |lang-render*
-                |lang-if*
-                |lang-choose*
-                |lang-foreach*
-                |lang-fori*
-                |lang-while*
-                |lang-invoke*
-                |lang-shell*
-                |lang-file-exists*
-                |lang-file-mkdirs*
-                |lang-file-delete*
-                |lang-file-list*
-                |lang-file-tree*
-                |lang-file-read-text*
-                |lang-file-write-text*
-                |lang-try*
-                |lang-retry*
-                |lang-synchronized*
-                |lang-lock*
-                |sql-query-row*
-                |sql-query-list*
-                |sql-query-columns*
-                |sql-query-object*
-                |sql-update*
-                |sql-script*
-                |sql-trans-begin*
-                |sql-trans-commit*
-                |sql-trans-rollback*
-                |sql-trans-none*
-                |sql-transactional*
-                |sql-runner*
-                |lang-async*
-                |lang-latch*
-                |lang-async-all*
-                |lang-latch-await*
-                |lang-latch-down*
-                |sql-cursor*
-                |lang-eval-java*
-                |lang-eval-javascript*
-                |lang-eval-js*
-                |lang-eval-tinyscript*
-                |lang-eval-ts*
-                |lang-eval-groovy*
-                |sql-scope*
-                |lang-sleep*
-                |sql-etl*
-                |java-call*
-                |function-call*
-                |context-load-package*
-                |context-invoke-method-class*
-                |context-convert-method-class*
-                |debugger*
-                |event-send*
-                |event-publish
-                )>
+        <!ELEMENT procedure (ANY|EMPTY)>
         <!ATTLIST procedure id CDATA #IMPLIED>
 
         <!ELEMENT debugger (ANY|EMPTY)>
@@ -851,6 +781,7 @@
         <!ATTLIST lang-lock value CDATA #IMPLIED>
         <!ATTLIST lang-lock result CDATA #IMPLIED>
         <!ATTLIST lang-lock type CDATA #IMPLIED>
+        <!ATTLIST lang-lock test CDATA #IMPLIED>
 
         <!ATTLIST lang-lock value.visit CDATA #IMPLIED>
         <!ATTLIST lang-lock value.string CDATA #IMPLIED>
@@ -858,6 +789,9 @@
 
         <!ATTLIST lang-lock type.string CDATA #IMPLIED>
         <!ATTLIST lang-lock type.visit CDATA #IMPLIED>
+
+        <!ATTLIST lang-lock test.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-lock test.visit CDATA #IMPLIED>
 
         <!ELEMENT sql-query-row (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*

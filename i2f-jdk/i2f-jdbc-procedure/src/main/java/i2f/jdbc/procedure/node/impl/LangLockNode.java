@@ -31,6 +31,15 @@ public class LangLockNode extends AbstractExecutorNode implements ILockProvider 
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object value = executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
         String type = (String) executor.attrValue(AttrConsts.TYPE, FeatureConsts.STRING, node, context);
+        boolean enable = true;
+        String test = node.getTagAttrMap().get(AttrConsts.TEST);
+        if (test != null) {
+            enable = executor.toBoolean(executor.attrValue(AttrConsts.TEST, FeatureConsts.EVAL, node, context));
+        }
+        if (!enable) {
+            executor.execAsProcedure(node, context, false, false);
+            return;
+        }
         String lockKey = String.valueOf(value);
         ConcurrentHashMap<String, ILockProvider> lockProviders = executor.getLockProviders();
         ILockProvider provider = lockProviders.get(type);

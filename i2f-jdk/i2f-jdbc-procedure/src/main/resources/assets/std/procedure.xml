@@ -937,8 +937,9 @@ eval-ts使用TinyScript引擎进行处理
     同时，需要避免产生非常多的锁对象，导致产生大量的锁实例，无法释放，导致内存泄漏或者OOM
     VALUE默认以string访问，等价于 value.visit
     type默认以string访问，用于指定特定的 ILockProvider, 不指定则使用默认的Jdk锁实现
+    test默认以eval访问，用于指定是否开启锁，默认开启
    -->
-    <lang-lock result="" value="" type="">
+    <lang-lock result="" value="" type="" test="">
 
     </lang-lock>
     <!-- 举例 -->
