@@ -36,6 +36,13 @@ public class RegexUtil {
         return PATTERN_MAP.computeIfAbsent(regex, (key) -> Pattern.compile(regex));
     }
 
+    public static Pattern getPattern(String regex, int flags) {
+        if (regex == null) {
+            return null;
+        }
+        return PATTERN_MAP.computeIfAbsent(regex, (key) -> Pattern.compile(regex, flags));
+    }
+
     public static List<RegexMatchItem> regexFinds(String str, String regex) {
         List<RegexMatchItem> ret = new ArrayList<>();
         Pattern patten = getPattern(regex);

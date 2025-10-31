@@ -225,67 +225,76 @@ public interface ContextFunctions {
         return ret;
     }
 
-    default int index_of(String str, String sstr) {
-        if (str == null) {
+    default int index_of(Object oStr, Object oSstr) {
+        if (oStr == null) {
             return -1;
         }
-        if (sstr == null) {
+        if (oSstr == null) {
             return -1;
         }
+        String sstr = String.valueOf(oSstr);
         if (sstr.isEmpty()) {
             return 0;
         }
+        String str = String.valueOf(oStr);
         return str.indexOf(sstr);
     }
 
-    default int last_index_of(String str, String sstr) {
-        if (str == null) {
+    default int last_index_of(Object oStr, Object oSstr) {
+        if (oStr == null) {
             return -1;
         }
-        if (sstr == null) {
+        if (oSstr == null) {
             return -1;
         }
+        String sstr = String.valueOf(oSstr);
         if (sstr.isEmpty()) {
             return 0;
         }
+        String str = String.valueOf(oStr);
         return str.lastIndexOf(sstr);
     }
 
-    default String replace(String str, String target) {
+    default String replace(Object str, Object target) {
         return replace(str, target, "");
     }
 
-    default String replace(String str, String target, String replacement) {
-        if (str == null) {
+    default String replace(Object oStr, Object oTarget, Object oReplacement) {
+        if (oStr == null) {
+            return null;
+        }
+        String str = String.valueOf(oStr);
+        if (oTarget == null) {
             return str;
         }
-        if (target == null) {
-            return str;
+        if (oReplacement == null) {
+            oReplacement = "";
         }
-        if (replacement == null) {
-            replacement = "";
-        }
+        String target = String.valueOf(oTarget);
+        String replacement = String.valueOf(oReplacement);
         return str.replace(target, replacement);
     }
 
-    default String regex_replace(String str, String regex) {
+    default String regex_replace(Object str, String regex) {
         return regex_replace(str, regex, "");
     }
 
-    default String regex_replace(String str, String regex, String replacement) {
+    default String regex_replace(Object str, String regex, Object replacement) {
         return regex_replace(str, regex, replacement, -1);
     }
 
-    default String regex_replace(String str, String regex, String replacement, int occurrence) {
-        if (str == null) {
-            return str;
+    default String regex_replace(Object oStr, String regex, Object oReplacement, int occurrence) {
+        if (oStr == null) {
+            return null;
         }
         if (regex == null) {
-            return str;
+            return null;
         }
-        if (replacement == null) {
-            replacement = "";
+        if (oReplacement == null) {
+            oReplacement = "";
         }
+        String str = String.valueOf(oStr);
+        String replacement = String.valueOf(oReplacement);
         regex = convertOracleRegexExpression(regex);
         replacement = convertOracleRegexReplacement(replacement);
         if (occurrence <= 0) {
@@ -304,53 +313,57 @@ public interface ContextFunctions {
         }
     }
 
-    default String regexp_replace(String str, String regex) {
+    default String regexp_replace(Object str, String regex) {
         return regexp_replace(str, regex, "");
     }
 
-    default String regexp_replace(String str, String regex, String replacement) {
+    default String regexp_replace(Object str, String regex, Object replacement) {
         return regex_replace(str, regex, replacement);
     }
 
-    default String regexp_replace(String str, String regex, String replacement, int occurrence) {
+    default String regexp_replace(Object str, String regex, Object replacement, int occurrence) {
         return regex_replace(str, regex, replacement, occurrence);
     }
 
-    default boolean regex_like(String str, String regex) {
-        if (str == null) {
+    default boolean regex_like(Object oStr, String regex) {
+        if (oStr == null) {
             return false;
         }
         if (regex == null) {
             return false;
         }
+        String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
         return str.matches(regex);
     }
 
-    default boolean regexp_like(String str, String regex) {
+    default boolean regexp_like(Object str, String regex) {
         return regex_like(str, regex);
     }
 
-    default List<String> regex_find(String str, String regex) {
-        if (str == null) {
+    default List<String> regex_find(Object oStr, String regex) {
+        if (oStr == null) {
             return null;
         }
         if (regex == null) {
             return new ArrayList<>();
         }
+        String str = String.valueOf(oStr);
+        regex = convertOracleRegexExpression(regex);
         return RegexUtil.regexFinds(str, regex)
                 .stream()
                 .map(e -> e.getMatchStr())
                 .collect(Collectors.toList());
     }
 
-    default boolean regex_contains(String str, String regex) {
-        if (str == null) {
+    default boolean regex_contains(Object oStr, String regex) {
+        if (oStr == null) {
             return false;
         }
         if (regex == null) {
             return false;
         }
+        String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
         List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex);
         if (!list.isEmpty()) {
@@ -359,17 +372,18 @@ public interface ContextFunctions {
         return false;
     }
 
-    default boolean regexp_contains(String str, String regex) {
+    default boolean regexp_contains(Object str, String regex) {
         return regex_contains(str, regex);
     }
 
-    default int regex_index(String str, String regex) {
-        if (str == null) {
+    default int regex_index(Object oStr, String regex) {
+        if (oStr == null) {
             return -1;
         }
         if (regex == null) {
             return -1;
         }
+        String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
         List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex);
         if (!list.isEmpty()) {
@@ -379,17 +393,39 @@ public interface ContextFunctions {
         return -1;
     }
 
-    default int regexp_index(String str, String regex) {
+    default int regexp_index(Object str, String regex) {
         return regex_index(str, regex);
     }
 
-    default String regex_extra(String str, String regex) {
-        if (str == null) {
+    default int regex_index_end(Object oStr, String regex) {
+        if (oStr == null) {
+            return -1;
+        }
+        if (regex == null) {
+            return -1;
+        }
+        String str = String.valueOf(oStr);
+        regex = convertOracleRegexExpression(regex);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex);
+        if (!list.isEmpty()) {
+            RegexMatchItem item = list.get(0);
+            return item.getIdxEnd();
+        }
+        return -1;
+    }
+
+    default int regexp_index_end(Object str, String regex) {
+        return regex_index_end(str, regex);
+    }
+
+    default String regex_extra(Object oStr, String regex) {
+        if (oStr == null) {
             return null;
         }
         if (regex == null) {
             return null;
         }
+        String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
         List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex);
         if (!list.isEmpty()) {
@@ -399,15 +435,15 @@ public interface ContextFunctions {
         return null;
     }
 
-    default String regexp_extra(String str, String regex) {
+    default String regexp_extra(Object str, String regex) {
         return regex_extra(str, regex);
     }
 
-    default String regex_find_join(String str, String regex) {
+    default String regex_find_join(Object str, String regex) {
         return regex_find_join(str, regex, ",");
     }
 
-    default String regex_find_join(String str, String regex, Object separator) {
+    default String regex_find_join(Object str, String regex, Object separator) {
         List<String> list = regex_find(str, regex);
         return join(list, separator);
     }
@@ -1468,44 +1504,108 @@ public interface ContextFunctions {
         return builder.toString();
     }
 
-    default String substr_index(Object obj, String substr, int len) {
+    default String substr_index(Object obj, Object substr, int len) {
         int idx = instr(obj, substr);
         if (idx < 0) {
             return "";
         }
+        if (len < 0) {
+            return substr(obj, idx);
+        }
         return substr(obj, idx, len);
     }
 
-    default ArrayList<String> splitRegex(String str, String regex) {
-        return splitRegex(str, regex, -1);
+    default String substr_index(Object obj, Object substr) {
+        return substr_index(obj, substr, -1);
     }
 
-    default ArrayList<String> splitRegex(String str, String regex, int limit) {
-        if (str == null) {
+    default String substr_index_end(Object obj, Object substr, int len) {
+        int idx = instr(obj, substr);
+        if (idx < 0) {
+            return "";
+        }
+        int l = length(substr);
+        if (len < 0) {
+            return substr(obj, idx + len);
+        }
+        return substr(obj, idx + len, len);
+    }
+
+    default String substr_index_end(Object obj, Object substr) {
+        return substr_index_end(obj, substr, -1);
+    }
+
+    default String substr_regex_index(Object obj, String substr, int len) {
+        int idx = regex_index(obj, substr);
+        if (idx < 0) {
+            return "";
+        }
+        if (len < 0) {
+            return substr(obj, idx);
+        }
+        return substr(obj, idx, len);
+    }
+
+    default String substr_regex_index(Object obj, String substr) {
+        return substr_regex_index(obj, substr, -1);
+    }
+
+    default String substr_regex_index_end(Object obj, String substr, int len) {
+        int idx = regex_index_end(obj, substr);
+        if (idx < 0) {
+            return "";
+        }
+        if (len < 0) {
+            return substr(obj, idx);
+        }
+        return substr(obj, idx, len);
+    }
+
+    default String substr_regex_index_end(Object obj, String substr) {
+        return substr_regex_index_end(obj, substr, -1);
+    }
+
+    default ArrayList<String> regex_split(Object str, String regex) {
+        return regex_split(str, regex, -1);
+    }
+
+    default ArrayList<String> regex_split(Object oStr, String regex, int limit) {
+        if (oStr == null) {
             return new ArrayList<>();
         }
+        String str = String.valueOf(oStr);
         if (regex == null) {
             return new ArrayList<>(Collections.singletonList(str));
         }
-        String[] arr = Pattern.compile(regex).split(str, limit);
+        regex = convertOracleRegexExpression(regex);
+        String[] arr = RegexUtil.getPattern(regex).split(str, limit);
         return new ArrayList<>(Arrays.asList(arr));
     }
 
-    default ArrayList<String> splitLiteral(String str, String regex) {
-        return splitLiteral(str, regex, -1);
+    default ArrayList<String> split_literal(Object str, Object literal) {
+        return split_literal(str, literal, -1);
     }
 
-    default ArrayList<String> splitLiteral(String str, String regex, int limit) {
-        if (str == null) {
+    default ArrayList<String> split(Object str, Object literal) {
+        return split_literal(str, literal);
+    }
+
+    default ArrayList<String> split_literal(Object oStr, Object oLiteral, int limit) {
+        if (oStr == null) {
             return new ArrayList<>();
         }
-        if (regex == null) {
+        String str = String.valueOf(oStr);
+        if (oLiteral == null) {
             return new ArrayList<>(Collections.singletonList(str));
         }
-        String[] arr = Pattern.compile(regex, Pattern.LITERAL).split(str, limit);
+        String literal = String.valueOf(oLiteral);
+        String[] arr = RegexUtil.getPattern(literal, Pattern.LITERAL).split(str, limit);
         return new ArrayList<>(Arrays.asList(arr));
     }
 
+    default ArrayList<String> split(Object str, Object literal, int limit) {
+        return split_literal(str, literal, limit);
+    }
     default boolean contains(Object obj, Object substr) {
         if (obj == null || substr == null) {
             return false;
