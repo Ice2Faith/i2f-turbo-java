@@ -168,6 +168,7 @@
         <module>i2f-sm-crypto-swl</module>
         <module>i2f-swl-std</module>
         <module>i2f-match-std</module>
+        <module>i2f-ai-std</module>
 
 
     </modules>

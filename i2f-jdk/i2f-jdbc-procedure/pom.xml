@@ -86,6 +86,11 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-ai-std</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-form</artifactId>
             <version>1.0</version>
         </dependency>
