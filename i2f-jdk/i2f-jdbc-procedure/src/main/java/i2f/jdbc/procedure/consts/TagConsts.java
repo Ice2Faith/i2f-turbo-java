@@ -76,6 +76,8 @@ public interface TagConsts {
     String LANG_SYNCHRONIZED = "lang-synchronized";
     String LANG_LOCK = "lang-lock";
 
+    String LANG_AI = "lang-ai";
+
     String LANG_LATCH = "lang-latch";
     String LANG_LATCH_AWAIT = "lang-latch-await";
     String LANG_LATCH_DOWN = "lang-latch-down";

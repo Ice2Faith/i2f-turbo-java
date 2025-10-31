@@ -790,8 +790,19 @@
         <!ATTLIST lang-lock type.string CDATA #IMPLIED>
         <!ATTLIST lang-lock type.visit CDATA #IMPLIED>
 
-        <!ATTLIST lang-lock test.boolean CDATA #IMPLIED>
-        <!ATTLIST lang-lock test.visit CDATA #IMPLIED>
+        <!ELEMENT lang-ai (ANY|EMPTY)>
+        <!ATTLIST lang-ai value CDATA #IMPLIED>
+        <!ATTLIST lang-ai result CDATA #IMPLIED>
+        <!ATTLIST lang-ai type CDATA #IMPLIED>
+
+        <!ATTLIST lang-ai value.visit CDATA #IMPLIED>
+        <!ATTLIST lang-ai value.string CDATA #IMPLIED>
+        <!ATTLIST lang-ai value.render CDATA #IMPLIED>
+        <!ATTLIST lang-ai value.body-text CDATA #IMPLIED>
+        <!ATTLIST lang-ai value.body-text.render CDATA #IMPLIED>
+
+        <!ATTLIST lang-ai type.string CDATA #IMPLIED>
+        <!ATTLIST lang-ai type.visit CDATA #IMPLIED>
 
         <!ELEMENT sql-query-row (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*

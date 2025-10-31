@@ -949,6 +949,21 @@ eval-ts使用TinyScript引擎进行处理
         </lang-lock>
     </script-segment>
 
+    <lang-ai result="" value="" type="">
+
+    </lang-ai>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-ai result="v_answer" type="spring">
+            你是一个熟悉SQL的数据库DBA，熟悉Oracle数据库。如何重建序列以设置起始值？
+        </lang-ai>
+
+        <lang-render result="v_question">
+            你是一个熟悉SQL的数据库DBA，熟悉Oracle数据库。请专业的回答以下问题：$!{v_user_msg}
+        </lang-render>
+        <lang-ai result="v_answer" value="v_question" type="spring"/>
+    </script-segment>
+
     <!--
     用法类似lang-render
     区别是lang-render的结果是string类型，需要自信处理以避免sql注入
