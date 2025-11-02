@@ -9,18 +9,21 @@ import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.executor.FeatureFunction;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
 import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
-import i2f.lru.LruList;
+import i2f.lock.ILockProvider;
 import i2f.page.ApiOffsetSize;
 
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author Ice2Faith
@@ -40,7 +43,7 @@ public interface DefaultContextJdbcProcedureJavaCaller extends ContextJdbcProced
     }
 
     @Override
-    default LruList<EvalScriptProvider> getEvalScriptProviders() {
+    default CopyOnWriteArrayList<EvalScriptProvider> getEvalScriptProviders() {
         return executor().getEvalScriptProviders();
     }
 
@@ -65,8 +68,34 @@ public interface DefaultContextJdbcProcedureJavaCaller extends ContextJdbcProced
     }
 
     @Override
-    default LruList<ExecutorNode> getNodes() {
-        return executor().getNodes();
+    default String nodeTagKey(String key) {
+        return executor().nodeTagKey(key);
+    }
+
+    @Override
+    default ConcurrentHashMap<String, CopyOnWriteArrayList<ExecutorNode>> getNodesMap() {
+        return executor().getNodesMap();
+    }
+
+
+    @Override
+    default void registryLockProvider(ILockProvider provider) {
+        executor().registryLockProvider(provider);
+    }
+
+    @Override
+    default ConcurrentHashMap<String, ILockProvider> getLockProviders() {
+        return executor().getLockProviders();
+    }
+
+    @Override
+    default void registryFeatureFunction(String name, FeatureFunction function) {
+        executor().registryFeatureFunction(name, function);
+    }
+
+    @Override
+    default ConcurrentHashMap<String, FeatureFunction> getFeatureFunctions() {
+        return executor().getFeatureFunctions();
     }
 
     @Override
