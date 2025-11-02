@@ -10,7 +10,6 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 import java.util.Map;
 
@@ -22,11 +21,8 @@ public class FlinkExecuteNode extends AbstractExecutorNode {
     public static final String TAG_NAME = FlinkTagConsts.FLINK_EXECUTE;
 
     @Override
-    public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
-            return false;
-        }
-        return TAG_NAME.equals(node.getTagName());
+    public String tag() {
+        return TAG_NAME;
     }
 
     @Override

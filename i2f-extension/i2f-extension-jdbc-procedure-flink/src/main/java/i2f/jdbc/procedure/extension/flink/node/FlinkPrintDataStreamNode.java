@@ -3,15 +3,11 @@ package i2f.jdbc.procedure.extension.flink.node;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.extension.flink.consts.FlinkAttrConsts;
 import i2f.jdbc.procedure.extension.flink.consts.FlinkTagConsts;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.types.Row;
 
 import java.util.Map;
 
@@ -23,11 +19,8 @@ public class FlinkPrintDataStreamNode extends AbstractExecutorNode {
     public static final String TAG_NAME = FlinkTagConsts.FLINK_PRINT_DATA_STREAM;
 
     @Override
-    public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
-            return false;
-        }
-        return TAG_NAME.equals(node.getTagName());
+    public String tag() {
+        return TAG_NAME;
     }
 
     @Override

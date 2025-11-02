@@ -8,7 +8,6 @@ import i2f.jdbc.procedure.extension.flink.consts.FlinkTagConsts;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import org.apache.flink.table.api.ExplainDetail;
-import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 import java.util.Map;
@@ -21,11 +20,8 @@ public class FlinkExplainSqlNode extends AbstractExecutorNode {
     public static final String TAG_NAME = FlinkTagConsts.FLINK_EXPLAIN_SQL;
 
     @Override
-    public boolean support(XmlNode node) {
-        if (XmlNode.NodeType.ELEMENT != node.getNodeType()) {
-            return false;
-        }
-        return TAG_NAME.equals(node.getTagName());
+    public String tag() {
+        return TAG_NAME;
     }
 
     @Override
