@@ -1,0 +1,10 @@
+# 开发环境配置
+spring:
+  datasource:
+    dynamic:
+      datasource:
+        master:
+          url: jdbc:h2:file:./h9/xxl_job.h2.db
+          username: root
+          password: 123456
+          driver-class-name: org.h2.Driver
