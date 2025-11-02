@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ops - Datasource</title>
+  <script src="../lib/vue/vue-2.js"></script>
+  <script src="../lib/moment/moment-2.24.0.js"></script>
+  <script src="../lib/element-ui/element-ui-2.15.10.js"></script>
+  <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10.css"/>
+  <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10-icon.css"/>
+  <link href="../lib/element-ui/fonts/element-icons.ttf"/>
+  <link href="../lib/element-ui/fonts/element-icons.woff"/>
+  <script src="../lib/axios/axios-1.1.3.min.js"></script>
+  <script src="../lib/axios/qs.js"></script>
+  <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm4.js"></script>
+  <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm3.js"></script>
+  <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm2.js"></script>
+  <script src="../lib/base64/Base64.js"></script>
+  <script src="../common/OpsSecureKeyPair.js"></script>
+  <script src="../common/OpsSecureCertPair.js"></script>
+  <script src="../common/OpsSecureDto.js"></script>
+  <script src="../common/OpsSecureHelper.js"></script>
+  <script src="../common/OpsSecureTransfer.js"></script>
+</head>
+<body>
+<div id="app">
+  <el-divider>连接证书</el-divider>
+  <el-input
+          type="textarea"
+          :rows="3"
+          placeholder="请输入连接证书"
+          v-model="metas.cert"
+          @change="onCertChange">
+  </el-input>
+  <el-divider>SQL操作</el-divider>
+  <el-input ref="refInputSql"
+          type="textarea"
+          :rows="10"
+          placeholder="请输入SQL"
+          v-model="form.sql"
+            @change="onSqlChange">
+  </el-input>
+  <el-row>
+    <el-form inline label-position="left" label-width="80px">
+      <el-form-item label="数据源">
+        <el-select v-model="form.datasource" placeholder="数据源">
+          <el-option
+                  v-for="item in metas.datasourceList"
+                  :key="item"
+                  :label="item"
+                  :value="item">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="执行类型">
+        <el-select v-model="metas.operate" placeholder="执行类型">
+          <el-option
+                  v-for="item in metas.operateList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="结果数">
+        <el-input-number v-model="form.maxCount" :min="-1"></el-input-number>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="onExecute">执行</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="success" @click="onViewMetadata">元数据</el-button>
+      </el-form-item>
+    </el-form>
+  </el-row>
+  <el-divider>操作结果</el-divider>
+  <el-select v-model="metas.resultType" placeholder="结果类型">
+    <el-option
+            v-for="item in metas.resultTypeList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+    </el-option>
+  </el-select>
+  <el-button type="success" @click="onViewText(metas.resultList,'数据集')">表格JSON</el-button>
+  <el-button type="warning" @click="onViewText(metas.resultColumns,'表头信息')">表头JSON</el-button>
+  <el-row v-show="metas.resultType=='table'">
+    <el-table border stripe highlight-current-row
+              :data="metas.resultList"
+              style="width: 100%">
+      <el-table-column show-overflow-tooltip
+                       label="操作">
+        <template slot-scope="scope">
+          <el-tag type="success" @click="onViewText(scope.row,'数据行')">显示JSON</el-tag>
+        </template>
+      </el-table-column>
+      <template v-for="column in metas.resultColumns">
+        <el-table-column show-overflow-tooltip
+                :prop="column.label"
+                :label="column.label">
+          <template slot-scope="scope">
+            {{scope.row[column.label]}}
+          </template>
+        </el-table-column>
+      </template>
+
+    </el-table>
+  </el-row>
+  <el-row v-show="metas.resultType=='text'">
+    <el-input
+            type="textarea"
+            :rows="8"
+            placeholder="执行结果"
+            v-model="metas.resultText">
+    </el-input>
+  </el-row>
+  <el-drawer
+          title="元数据"
+          :visible.sync="drawer.metadata.show"
+          direction="rtl"
+          size="75%">
+    <el-row type="flex">
+      <el-col :span="8" style="border-right: solid 1px #777;">
+        <el-row style="width: 100%;">
+          <el-row>
+            数据库<el-button type="primary" @click="onRefreshDatabases">刷新</el-button>
+            <el-button type="success" @click="onViewText(drawer.metadata.databases,'数据库列表')">数据库JSON</el-button>
+          </el-row>
+          <el-row>
+            <el-input v-model="drawer.metadata.checkDatabase" placeholder="选中数据库"></el-input>
+          </el-row>
+          <el-row v-for="(item,index) in drawer.metadata.databases"
+                  :class="'list-item '+(item==drawer.metadata.checkDatabase?'checked-item':'')"
+                  @click.native="onClickDatabaseItem(item)">
+            {{item}}
+          </el-row>
+        </el-row>
+      </el-col>
+      <el-col :span="16">
+        <el-row style="width: 100%;">
+          <el-row>
+            表<el-button type="primary" @click="onRefreshTables">刷新</el-button>
+            <el-button type="success" @click="onViewText(drawer.metadata.tables,'表列表')">表JSON</el-button>
+          </el-row>
+          <el-row>
+            <el-input v-model="drawer.metadata.checkTable" placeholder="选中表"></el-input>
+          </el-row>
+          <el-row type="flex"
+                  v-for="(item,index) in drawer.metadata.tables"
+                  :class="'list-item '+(item.name==drawer.metadata.checkTable?'checked-item':'')"
+                  @click.native="onClickTableItem(item)">
+            <el-col :span="12"  style="border-right: solid 1px #777;">
+              <el-tag type="primary" @click="onViewTableInfo(item)">结构</el-tag>
+              {{item.name}}
+            </el-col>
+            <el-col :span="12">
+              {{item.comment}}
+            </el-col>
+          </el-row>
+        </el-row>
+      </el-col>
+    </el-row>
+  </el-drawer>
+  <el-dialog
+          :title="dialog.tableInfo.title"
+          :visible.sync="dialog.tableInfo.show"
+          width="75%">
+    <el-row>
+      表名：{{dialog.tableInfo.meta.name}}
+    </el-row>
+    <el-row>
+      注释：{{dialog.tableInfo.meta.comment}}
+    </el-row>
+    <el-row>
+      <el-button type="primary" @click="doLoadTableInfo">刷新</el-button>
+      <el-button type="success" @click="onViewText(dialog.tableInfo.meta,'表结构')">表结构JSON</el-button>
+    </el-row>
+    <el-row>
+      <el-table border stripe
+              :data="dialog.tableInfo.meta.columns"
+              style="width: 100%">
+        <el-table-column
+                label="操作">
+          <template slot-scope="scope">
+            <el-tag type="success" @click="onViewText(scope.row,'列信息')">显示JSON</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+                prop="index"
+                label="序号">
+        </el-table-column>
+        <el-table-column
+                prop="name"
+                label="列名">
+        </el-table-column>
+        <el-table-column
+                prop="columnType"
+                label="类型">
+        </el-table-column>
+        <el-table-column
+                prop="primaryKey"
+                label="主键">
+          <template slot-scope="scope">
+            {{scope.row.primaryKey?'是':''}}
+          </template>
+        </el-table-column>
+        <el-table-column
+                prop="uniqueKey"
+                label="唯一">
+          <template slot-scope="scope">
+            {{scope.row.uniqueKey?'是':''}}
+          </template>
+        </el-table-column>
+        <el-table-column
+                prop="nullable"
+                label="非空">
+          <template slot-scope="scope">
+            {{scope.row.nullable?'':'是'}}
+          </template>
+        </el-table-column>
+        <el-table-column
+                prop="comment"
+                label="注释">
+        </el-table-column>
+      </el-table>
+    </el-row>
+
+    <el-row style="margin-top: 3px;border-bottom: solid 1px #777;">
+      主键：
+      <el-row v-if="dialog.tableInfo.meta.primary">
+        <el-row>
+          键名：{{dialog.tableInfo.meta.primary.name}}
+        </el-row>
+        <el-row>
+          列：
+          <template v-for="(item,index) in dialog.tableInfo.meta.primary.columns">
+            {{index>0?',':''}} {{item.name}} {{item.desc?'desc':'asc'}}
+          </template>
+        </el-row>
+      </el-row>
+    </el-row>
+
+
+    <el-row style="margin-top: 3px;border-bottom: solid 1px #777;">
+      唯一索引：
+      <el-row v-if="dialog.tableInfo.meta.uniqueIndexes">
+        <el-row v-for="tableIndex in dialog.tableInfo.meta.uniqueIndexes">
+          <el-row>
+            键名：{{tableIndex.name}}
+          </el-row>
+          <el-row>
+            列：
+            <template v-for="(item,index) in tableIndex.columns">
+              {{index>0?',':''}} {{item.name}} {{item.desc?'desc':'asc'}}
+            </template>
+          </el-row>
+        </el-row>
+      </el-row>
+    </el-row>
+
+    <el-row style="margin-top: 3px;border-bottom: solid 1px #777;">
+      普通索引：
+      <el-row v-if="dialog.tableInfo.meta.indexes">
+        <el-row v-for="tableIndex in dialog.tableInfo.meta.indexes">
+          <el-row>
+            键名：{{tableIndex.name}}
+          </el-row>
+          <el-row>
+            列：
+            <template v-for="(item,index) in tableIndex.columns">
+              {{index>0?',':''}} {{item.name}} {{item.desc?'desc':'asc'}}
+            </template>
+          </el-row>
+        </el-row>
+      </el-row>
+    </el-row>
+
+    <el-row>
+      DDL:
+      <el-button type="primary" @click="onLoadTableDdl">加载DDL</el-button>
+      <el-select v-model="dialog.tableInfo.ddlType" placeholder="DDL方言">
+        <el-option
+                v-for="item in metas.ddlTypeList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+        </el-option>
+      </el-select>
+      <el-input
+              type="textarea"
+              :rows="10"
+              placeholder="DDL"
+              v-model="dialog.tableInfo.tableDdl">
+      </el-input>
+    </el-row>
+
+  </el-dialog>
+
+  <el-dialog
+          :title="dialog.textViewer.title"
+          :visible.sync="dialog.textViewer.show"
+          width="60%">
+      <el-input
+              type="textarea"
+              :rows="15"
+              placeholder="文本浏览"
+              v-model="dialog.textViewer.text">
+      </el-input>
+    </el-dialog>
+</div>
+</body>
+<script>
+
+  window.app = new Vue({
+    data() {
+      return {
+        metas:{
+          cert: '',
+          datasourceList: [],
+          operate: 'query',
+          operateList:[
+            {
+              label: '查询',
+              value: 'query'
+            },{
+              label: '更新',
+              value: 'update'
+            }
+          ],
+          resultType: 'table',
+          resultTypeList:[
+            {
+              label: '表格',
+              value: 'table'
+            },{
+              label: '文本',
+              value: 'text'
+            }
+          ],
+          resultText: '',
+          resultColumns:[],
+          resultList:[],
+          ddlTypeList:[
+            {
+              label: 'Auto',
+              value: 'auto',
+            }, {
+              label: 'Oracle',
+              value: 'oracle',
+            },{
+              label: 'MySQL',
+              value: 'mysql',
+            },{
+              label: 'PostgreSQL',
+              value: 'postgre',
+            },{
+              label: 'Gbase',
+              value: 'gbase',
+            }
+          ]
+        },
+        drawer:{
+          metadata:{
+            show:  false,
+            checkDatabase: '',
+            databases:[],
+            checkTable: '',
+            tables:[],
+          }
+        },
+        dialog:{
+          tableInfo:{
+            show: false,
+            title: '表结构',
+            meta:{},
+            ddlType: 'auto',
+            tableDdl: '',
+          },
+          textViewer:{
+            show: false,
+            title: '文本浏览',
+            text: ''
+          }
+        },
+        form:{
+          datasource: '',
+          sql: '',
+          selectSql: '',
+          maxCount: 300
+        }
+      }
+    },
+    created() {
+
+    },
+    methods: {
+      getTransfer(){
+        debugger
+        let certPair = OpsSecureHelper.generateCertPair();
+        let serverTransfer=new OpsSecureTransfer(OpsSecureHelper.deserializeKeyPair(certPair.serverCert))
+        let dto = serverTransfer.send('1234');
+        let clientTransfer=new OpsSecureTransfer(OpsSecureHelper.deserializeKeyPair(certPair.clientCert))
+        let resp = clientTransfer.recv(dto);
+        let cert=this.metas.cert;
+        if(!cert || cert.length==0){
+          cert='';
+        }
+        cert=cert.trim();
+        let keyPair=OpsSecureHelper.deserializeKeyPair(cert)
+        return new OpsSecureTransfer(keyPair)
+      },
+      onCertChange(){
+        this.doRefreshDatasources()
+      },
+      doRefreshDatasources(){
+        let timestamp=new Date().getTime();
+        let transfer = this.getTransfer();
+        this.$axios({
+          url: '/datasources',
+          method: 'post',
+          data: transfer.send(timestamp)
+        }).then(res=>{
+          if(res.data.code==200){
+            console.log(res.data)
+            let resp=transfer.recv(res.data.data)
+            console.log(resp)
+            this.metas.datasourceList=resp.list;
+            this.form.datasource=resp.defaultName;
+          }else{
+            this.$message.error(res.data.msg)
+          }
+        }).catch(err=>{
+          this.$message.error(err.errorMessage||'操作失败')
+        })
+      },
+      onSqlChange() {
+        let sql=this.form.sql;
+        if(!sql){
+          return;
+        }
+        sql=sql.trim();
+        let arr = sql.split(/\s+/,2);
+        let key=arr[0].toLowerCase();
+        if(['select','with'].some(e=>e==key)){
+          this.metas.operate='query'
+        }else{
+          this.metas.operate='update'
+        }
+      },
+      onExecute(){
+        debugger
+        let sql=this.form.sql;
+
+        let req={
+          datasource: this.form.datasource,
+          sql: sql,
+          maxCount: this.form.maxCount,
+        };
+        let operate=this.metas.operate;
+        let transfer = this.getTransfer();
+        this.$axios({
+          url: `/${operate}`,
+          method: 'post',
+          data: transfer.send(req)
+        }).then(res=>{
+          if(res.data.code==200){
+            console.log(res.data)
+            let resp=transfer.recv(res.data.data)
+            console.log(resp)
+            if(operate=='update' && !resp.columns){
+              this.metas.resultText=resp+'';
+              this.metas.resultType='text';
+            }else{
+              this.metas.resultList=resp.rows;
+              this.metas.resultColumns=resp.columns;
+              this.metas.resultType='table';
+            }
+          }else{
+            this.$message.error(res.data.msg)
+          }
+        }).catch(err=>{
+          this.$message.error(err.errorMessage||'操作失败')
+        })
+      },
+      onViewMetadata(){
+        this.drawer.metadata.show=true
+      },
+      onRefreshDatabases(){
+        let req={
+          datasource: this.form.datasource
+        };
+        let transfer = this.getTransfer();
+        this.$axios({
+          url: '/metadata/databases',
+          method: 'post',
+          data: transfer.send(req)
+        }).then(res=>{
+          if(res.data.code==200){
+            console.log(res.data)
+            let resp=transfer.recv(res.data.data)
+            console.log(resp)
+            this.drawer.metadata.databases=resp.list;
+            this.drawer.metadata.checkDatabase=resp.defaultName;
+          }else{
+            this.$message.error(res.data.msg)
+          }
+        }).catch(err=>{
+          this.$message.error(err.errorMessage||'操作失败')
+        })
+      },
+      onClickDatabaseItem(database){
+        this.drawer.metadata.checkDatabase=database;
+      },
+      onRefreshTables(){
+        let req={
+          datasource: this.form.datasource,
+          database: this.drawer.metadata.checkDatabase,
+        };
+        let transfer = this.getTransfer();
+        this.$axios({
+          url: '/metadata/tables',
+          method: 'post',
+          data: transfer.send(req)
+        }).then(res=>{
+          if(res.data.code==200) {
+            console.log(res.data)
+            let resp = transfer.recv(res.data.data)
+            console.log(resp)
+            this.drawer.metadata.tables = resp;
+          }else{
+            this.$message.error(res.data.msg)
+          }
+        }).catch(err=>{
+          this.$message.error(err.errorMessage||'操作失败')
+        })
+      },
+      onClickTableItem(item){
+        this.drawer.metadata.checkTable=item.name;
+      },
+      onViewTableInfo(item){
+        this.drawer.metadata.checkTable=item.name;
+        this.dialog.tableInfo.show=true;
+        if(this.dialog.tableInfo.meta && this.dialog.tableInfo.meta.name==item.name){
+          return;
+        }
+        this.doLoadTableInfo()
+      },
+      doLoadTableInfo(){
+        let req={
+          datasource: this.form.datasource,
+          database: this.drawer.metadata.checkDatabase,
+          table: this.drawer.metadata.checkTable
+        };
+        let transfer = this.getTransfer();
+        this.$axios({
+          url: '/metadata/table/info',
+          method: 'post',
+          data: transfer.send(req)
+        }).then(res=>{
+          if(res.data.code==200){
+            console.log(res.data)
+            let resp=transfer.recv(res.data.data)
+            console.log(resp)
+            this.dialog.tableInfo.meta=resp;
+            this.dialog.tableInfo.title=resp.name;
+          }else{
+            this.$message.error(res.data.msg)
+          }
+        }).catch(err=>{
+          this.$message.error(err.errorMessage||'操作失败')
+        })
+      },
+      onLoadTableDdl(){
+        let req={
+          datasource: this.form.datasource,
+          database: this.drawer.metadata.checkDatabase,
+          table: this.drawer.metadata.checkTable,
+          ddlType: this.dialog.tableInfo.ddlType
+        };
+        let transfer = this.getTransfer();
+        this.$axios({
+          url: '/metadata/table/ddl',
+          method: 'post',
+          data: transfer.send(req)
+        }).then(res=>{
+          if(res.data.code==200){
+            console.log(res.data)
+            let resp=transfer.recv(res.data.data)
+            console.log(resp)
+            this.dialog.tableInfo.tableDdl=resp;
+          }else{
+            this.$message.error(res.data.msg)
+          }
+        }).catch(err=>{
+          this.$message.error(err.errorMessage||'操作失败')
+        })
+      },
+      onViewText(obj,title){
+        if(title && title.length>0){
+          this.dialog.textViewer.title=title;
+        }else{
+          this.dialog.textViewer.title='文本浏览';
+        }
+        let text=''
+        if(typeof obj=='string'){
+          text=obj;
+        }else{
+          text=JSON.stringify(obj,null,'    ');
+        }
+        this.dialog.textViewer.text=text;
+        this.dialog.textViewer.show=true;
+      }
+    }
+  })
+  let defaultConfig={
+    baseURL: './',
+    timeout: 10*60*1000,
+    responseType: 'json'
+  }
+  let request = axios.create(defaultConfig)
+  window.app.$axios=request
+  window.app.$mount('#app')
+</script>
+<style>
+  .list-item{
+    margin-top: 3px;
+    border-bottom: solid 1px    #777;
+  }
+  .list-item:hover{
+    background: lightskyblue;
+  }
+  .checked-item{
+    background: darkorange;
+  }
+</style>
+</html>
