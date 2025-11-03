@@ -852,7 +852,7 @@
       },
       doRenderEcharts(){
         let option=this.convertAsEChartsOptions(this.metas.resultList,this.dialog.visualChart.config);
-        let dom = this.$refs.refEchartDom.$el;
+        let dom = this.$refs.refEchartDom;
         let myChart = echarts.init(dom, null, {
           renderer: 'canvas',
           useDirtyRect: false
