@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class DatasourceMetadataDto {
-    protected String datasource;
+public class DatasourceMetadataDto extends DatasourceSelectDto {
     protected String database;
     protected String table;
     protected String ddlType;
