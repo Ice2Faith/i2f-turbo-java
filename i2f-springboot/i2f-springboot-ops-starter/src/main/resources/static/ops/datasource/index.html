@@ -21,6 +21,7 @@
   <script src="../common/OpsSecureDto.js"></script>
   <script src="../common/OpsSecureHelper.js"></script>
   <script src="../common/OpsSecureTransfer.js"></script>
+  <script src="../lib/echarts-5/echarts.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -124,6 +125,7 @@
   </el-select>
   <el-button type="success" @click="onViewText(metas.resultList,'数据集')">表格JSON</el-button>
   <el-button type="warning" @click="onViewText(metas.resultColumns,'表头信息')">表头JSON</el-button>
+  <el-button type="primary" @click="onVisualCharts">可视化图表</el-button>
   <el-row v-show="metas.resultType=='table'">
     <el-table border stripe highlight-current-row
               :data="metas.resultList"
@@ -421,6 +423,39 @@
     </el-row>
 
   </el-dialog>
+
+  <el-dialog
+          :title="dialog.visualChart.title"
+          :visible.sync="dialog.visualChart.show"
+          width="60%">
+    <el-form :inline="true">
+      <el-form-item label="X轴">
+        <el-select v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
+          <el-option
+                  v-for="item in metas.resultColumns"
+                  :key="item.label"
+                  :label="item.label"
+                  :value="item.label">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="Y轴">
+        <el-select v-model="dialog.visualChart.config.yAxisList" multiple  placeholder="Y轴">
+          <el-option
+                  v-for="item in metas.resultColumns"
+                  :key="item.label"
+                  :label="item.label"
+                  :value="item.label">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="doRenderEcharts">绘制图表</el-button>
+      </el-form-item>
+    </el-form>
+
+    <div id="refEchartDom" style="height: 100%"></div>
+  </el-dialog>
 </div>
 </body>
 <script>
@@ -502,6 +537,14 @@
             delimiter: ';',
             sendFullScript: false,
             stopOnError: true
+          },
+          visualChart:{
+            show: false,
+            title: '可视化图表',
+            config: {
+              xAxis: null,
+              yAxisList:[]
+            }
           }
         },
         form:{
@@ -803,6 +846,93 @@
         }
         this.dialog.textViewer.text=text;
         this.dialog.textViewer.show=true;
+      },
+      onVisualCharts(){
+        this.dialog.visualChart.show=true;
+      },
+      doRenderEcharts(){
+        let option=this.convertAsEChartsOptions(this.metas.resultList,this.dialog.visualChart.config);
+        let dom = this.$refs.refEchartDom.$el;
+        let myChart = echarts.init(dom, null, {
+          renderer: 'canvas',
+          useDirtyRect: false
+        });
+        if (option && typeof option === 'object') {
+          myChart.setOption(option);
+        }
+        window.addEventListener('resize', myChart.resize);
+      },
+      convertAsEChartsOptions(dataList,config){
+        if(!dataList){
+          dataList=[];
+        }
+        if(!config){
+          config={
+            xAxis: 'label',
+            yAxisList:['value']
+          };
+        }
+        let xAxisList=[];
+        let seriasMap={};
+        dataList.forEach(item=>{
+
+          xAxisList.push(item[config.xAxis])
+
+          for(let i=0;i<config.yAxisList.length;i++){
+            let prop=config.yAxisList[i];
+            if(!seriasMap[prop]){
+              seriasMap[prop]={
+                name: prop,
+                type: 'line',
+                data:[]
+              }
+            }
+            seriasMap[prop].data.push(item[prop])
+          }
+
+
+        })
+
+        let serias=[]
+        let legendList=[]
+        Object.keys(seriasMap).forEach(k=>{
+          serias.push(seriasMap[k])
+          legendList.push(k)
+        })
+
+
+        let option = {
+          title: {
+            text: 'Visual Line'
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          legend: {
+            data: legendList
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          toolbox: {
+            feature: {
+              saveAsImage: {}
+            }
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: xAxisList
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: serias
+        };
+        return option;
       }
     }
   })
