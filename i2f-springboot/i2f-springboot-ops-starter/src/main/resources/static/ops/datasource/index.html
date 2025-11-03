@@ -55,7 +55,7 @@
                       :value="item">
               </el-option>
             </el-select>
-            <el-button type="primary" @click="doRefreshDrivers">刷新</el-button>
+            <el-button v-loading="metas.driverListLoading" type="primary" @click="doRefreshDrivers">刷新</el-button>
           </el-form-item>
           <el-form-item label="JDBC URL">
             <el-input v-model="form.url" placeholder="jdbc:mysql://localhost:3306"></el-input>
@@ -77,9 +77,10 @@
                       :value="item">
               </el-option>
             </el-select>
-            <el-button type="primary" @click="doRefreshDatasources">刷新</el-button>
+            <el-button v-loading="metas.datasourceListLoading" type="primary" @click="doRefreshDatasources">刷新</el-button>
           </el-form-item>
         </template>
+        <el-button @click="doResetData">重置</el-button>
       </el-row>
       <el-row type="flex">
         <el-col :span="16">
@@ -98,7 +99,7 @@
               <el-input-number v-model="form.maxCount" :min="-1"></el-input-number>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="onExecute">执行</el-button>
+              <el-button v-loading="metas.resultLoading" type="primary" @click="onExecute">执行</el-button>
               <el-button type="warning" @click="onExecuteScript">执行脚本</el-button>
             </el-form-item>
           </el-row>
@@ -174,7 +175,7 @@
               <el-row type="flex" justify="end">
                 <el-button type="success" @click="onViewText(drawer.metadata.databases,'数据库列表')">数据库JSON
                 </el-button>
-                <el-button type="primary" @click="onRefreshDatabases">刷新</el-button>
+                <el-button v-loading="drawer.metadata.databasesLoading" type="primary" @click="onRefreshDatabases">刷新</el-button>
               </el-row>
             </el-col>
 
@@ -201,7 +202,7 @@
             <el-col :span="12">
               <el-row type="flex" justify="end">
                 <el-button type="success" @click="onViewText(drawer.metadata.tables,'表列表')">表JSON</el-button>
-                <el-button type="primary" @click="onRefreshTables">刷新</el-button>
+                <el-button v-loading="drawer.metadata.tablesLoading" type="primary" @click="onRefreshTables">刷新</el-button>
               </el-row>
             </el-col>
           </el-row>
@@ -237,7 +238,7 @@
       注释：{{dialog.tableInfo.meta.comment}}
     </el-row>
     <el-row>
-      <el-button type="primary" @click="doLoadTableInfo">刷新</el-button>
+      <el-button v-loading="dialog.tableInfo.metaLoading" type="primary" @click="doLoadTableInfo">刷新</el-button>
       <el-button type="success" @click="onViewText(dialog.tableInfo.meta,'表结构')">表结构JSON</el-button>
     </el-row>
     <el-row>
@@ -342,8 +343,8 @@
 
     <el-row>
       DDL:
-      <el-button type="primary" @click="onLoadTableDdl">加载DDL</el-button>
-      <el-select v-model="dialog.tableInfo.ddlType" placeholder="DDL方言">
+      <el-button v-loading="dialog.tableInfo.tableDdlLoading" type="primary" @click="onLoadTableDdl">加载DDL</el-button>
+      <el-select v-model="dialog.tableInfo.ddlType" placeholder="DDL方言" @change="onChangeDdlType">
         <el-option
                 v-for="item in metas.ddlTypeList"
                 :key="item.value"
@@ -427,7 +428,7 @@
   <el-dialog
           :title="dialog.visualChart.title"
           :visible.sync="dialog.visualChart.show"
-          width="60%">
+          width="80%">
     <el-form :inline="true">
       <el-form-item label="X轴">
         <el-select v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
@@ -449,6 +450,16 @@
           </el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="图表形式">
+        <el-select v-model="dialog.visualChart.config.type"  placeholder="图表形式">
+          <el-option
+                  v-for="item in metas.echartsTypeList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="doRenderEcharts">绘制图表</el-button>
       </el-form-item>
@@ -462,108 +473,193 @@
 
   window.app = new Vue({
     data() {
-      return {
-        metas:{
-          cert: '',
-          datasourceList: [],
-          operate: 'query',
-          operateList:[
-            {
-              label: '查询',
-              value: 'query'
-            },{
-              label: '更新',
-              value: 'update'
-            }
-          ],
-          resultType: 'table',
-          resultTypeList:[
-            {
-              label: '表格',
-              value: 'table'
-            },{
-              label: '文本',
-              value: 'text'
-            }
-          ],
-          resultText: '',
-          resultColumns:[],
-          resultList:[],
-          ddlTypeList:[
-            {
-              label: 'Auto',
-              value: 'auto',
-            }, {
-              label: 'Oracle',
-              value: 'oracle',
-            },{
-              label: 'MySQL',
-              value: 'mysql',
-            },{
-              label: 'PostgreSQL',
-              value: 'postgre',
-            },{
-              label: 'Gbase',
-              value: 'gbase',
-            }
-          ]
-        },
-        drawer:{
-          metadata:{
-            show:  false,
-            checkDatabase: '',
-            databases:[],
-            checkTable: '',
-            tables:[],
-          }
-        },
-        dialog:{
-          tableInfo:{
-            show: false,
-            title: '表结构',
-            meta:{},
-            ddlType: 'auto',
-            tableDdl: '',
-          },
-          textViewer:{
-            show: false,
-            title: '文本浏览',
-            text: ''
-          },
-          scriptRunner: {
-            show: false,
-            title: '执行脚本',
-            autoCommit: false,
-            delimiter: ';',
-            sendFullScript: false,
-            stopOnError: true
-          },
-          visualChart:{
-            show: false,
-            title: '可视化图表',
-            config: {
-              xAxis: null,
-              yAxisList:[]
-            }
-          }
-        },
-        form:{
-          datasource: '',
-          useCustomDatasource: false,
-          driver: '',
-          url: '',
-          username: '',
-          password: '',
-          sql: '',
-          selectSql: '',
-          maxCount: 300
-        }
-      }
+      return this.getDefaultData()
     },
     created() {
-
+      this.loadData();
+      setInterval(()=>{
+        this.storeData();
+      },1000);
     },
     methods: {
+      doResetData(){
+        let newData=this.getDefaultData();
+        Object.keys(newData).forEach(k=>{
+          this.$data[k]=newData[k];
+        })
+      },
+      getDefaultData(){
+        return {
+          storage:{
+            defaultDatasource:'',
+            datasourceList:[],
+            driverList:[],
+            defaultDatabaseMap:{
+              // key: #datasource, value: defaultDatabaseName
+            },
+            databaseMap:{
+              // key: #datasource, value: databaseList
+            },
+            tablesMap:{
+              // key: #datasource#database, value: tableList
+            },
+            tableInfoMap:{
+              // key: #datasource#database#table, value: tableMeta
+            },
+            tableDdlMap:{
+              // key: #datasource#database#table#ddlType, value: ddlText
+            }
+          },
+          metas:{
+            cert: '',
+            chart: null,
+            datasourceListLoading: false,
+            datasourceList: [],
+            driverListLoading: false,
+            driverList:[],
+            operate: 'query',
+            operateList:[
+              {
+                label: '查询',
+                value: 'query'
+              },{
+                label: '更新',
+                value: 'update'
+              }
+            ],
+            resultType: 'table',
+            resultTypeList:[
+              {
+                label: '表格',
+                value: 'table'
+              },{
+                label: '文本',
+                value: 'text'
+              }
+            ],
+            resultLoading: false,
+            resultText: '',
+            resultColumns:[],
+            resultList:[],
+            ddlTypeList:[
+              {
+                label: 'Auto',
+                value: 'auto',
+              }, {
+                label: 'Oracle',
+                value: 'oracle',
+              },{
+                label: 'MySQL',
+                value: 'mysql',
+              },{
+                label: 'PostgreSQL',
+                value: 'postgre',
+              },{
+                label: 'Gbase',
+                value: 'gbase',
+              }
+            ],
+            echartsTypeList:[
+              {
+                label: '折线图',
+                value: 'line',
+              }, {
+                label: '柱状图',
+                value: 'bar',
+              },{
+                label: '玫瑰图',
+                value: 'pie',
+              }
+            ]
+          },
+          drawer:{
+            metadata:{
+              show:  false,
+              databasesLoading: false,
+              checkDatabase: '',
+              databases:[],
+              checkTable: '',
+              tablesLoading: false,
+              tables:[],
+            }
+          },
+          dialog:{
+            tableInfo:{
+              show: false,
+              title: '表结构',
+              metaLoading: false,
+              meta:{},
+              ddlType: 'auto',
+              tableDdlLoading: false,
+              tableDdl: '',
+            },
+            textViewer:{
+              show: false,
+              title: '文本浏览',
+              text: ''
+            },
+            scriptRunner: {
+              show: false,
+              title: '执行脚本',
+              autoCommit: false,
+              delimiter: ';',
+              sendFullScript: false,
+              stopOnError: true
+            },
+            visualChart:{
+              show: false,
+              title: '可视化图表',
+              config: {
+                type: 'line',
+                xAxis: null,
+                yAxisList:[]
+              }
+            }
+          },
+          form:{
+            datasource: '',
+            useCustomDatasource: false,
+            driver: '',
+            url: '',
+            username: '',
+            password: '',
+            sql: '',
+            selectSql: '',
+            maxCount: 300
+          }
+        }
+      },
+      loadData(){
+        let content=localStorage.getItem('ops:datasource:data');
+        if(!content){
+          return
+        }
+        content=content.trim();
+        if(content.length==0){
+          return;
+        }
+        try {
+          let obj = JSON.parse(content);
+          Object.keys(obj).forEach(k => {
+            this.$data[k] = obj[k];
+          });
+        } catch(e){
+
+        }
+      },
+      storeData(){
+        try {
+          let data = this.$data;
+          let json = JSON.stringify(data);
+          let obj = JSON.parse(json);
+          obj.metas.cert = '';
+          obj.metas.chart=null;
+          let content = JSON.stringify(obj);
+          localStorage.setItem('ops:datasource:data', content);
+        }catch(e){
+
+        }
+      },
       getTransfer(){
         debugger
         let certPair = OpsSecureHelper.generateCertPair();
@@ -587,48 +683,67 @@
         this.doRefreshDrivers()
       },
       doRefreshDatasources(){
-        let timestamp=new Date().getTime();
-        let transfer = this.getTransfer();
-        this.$axios({
-          url: '/datasources',
-          method: 'post',
-          data: transfer.send(timestamp)
-        }).then(res=>{
-          if(res.data.code==200){
-            console.log(res.data)
-            let resp=transfer.recv(res.data.data)
-            console.log(resp)
-            this.metas.datasourceList=resp.list;
-            this.form.datasource=resp.defaultName;
-          }else{
-            this.$message.error(res.data.msg)
-          }
-        }).catch(err=>{
-          this.$message.error(err.errorMessage||'操作失败')
-        })
+        this.metas.datasourceListLoading=true;
+        try {
+          let timestamp = new Date().getTime();
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/datasources',
+            method: 'post',
+            data: transfer.send(timestamp)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data)
+              console.log(resp)
+              this.metas.datasourceList = resp.list;
+              this.form.datasource = resp.defaultName;
+              this.storage.defaultDatasource = resp.defaultName;
+              this.storage.datasourceList = resp.list;
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.metas.datasourceListLoading = false;
+          })
+        }catch (err){
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.metas.datasourceListLoading = false;
+        }
       },
       doRefreshDrivers() {
-        let timestamp = new Date().getTime();
-        let transfer = this.getTransfer();
-        this.$axios({
-          url: '/drivers',
-          method: 'post',
-          data: transfer.send(timestamp)
-        }).then(res => {
-          if (res.data.code == 200) {
-            console.log(res.data)
-            let resp = transfer.recv(res.data.data)
-            console.log(resp)
-            this.metas.driverList = resp;
-            if (resp.length > 0 && this.form.driver == '') {
-              this.form.driver = resp[0];
+        this.metas.driverListLoading=true;
+        try {
+          let timestamp = new Date().getTime();
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/drivers',
+            method: 'post',
+            data: transfer.send(timestamp)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data)
+              console.log(resp)
+              this.metas.driverList = resp;
+              if (resp.length > 0 && this.form.driver == '') {
+                this.form.driver = resp[0];
+              }
+              this.storage.driverList = resp;
+            } else {
+              this.$message.error(res.data.msg)
             }
-          } else {
-            this.$message.error(res.data.msg)
-          }
-        }).catch(err => {
-          this.$message.error(err.errorMessage || '操作失败')
-        })
+          }).catch(err => {
+            this.$message.error(err.errorMessage || '操作失败')
+          }).finally(() => {
+            this.metas.driverListLoading = false;
+          })
+        }catch (err){
+          this.$message.error(err.errorMessage||err.message || '操作失败')
+          this.metas.driverListLoading = false;
+        }
       },
       fillDatasourceForm(req) {
         req.useCustomDatasource = this.form.useCustomDatasource;
@@ -642,6 +757,16 @@
           req.datasource = this.form.datasource;
         }
         return req;
+      },
+      getDatasourceStorageKey(req){
+        if(!req) {
+          req = this.fillDatasourceForm({});
+        }
+        let storageKey = '#' + req.datasource;
+        if(req.useCustomDatasource) {
+          storageKey='#$'+Base64.encode(req.driver+'#'+req.url+'#'+req.username);
+        }
+        return storageKey;
       },
       onSqlChange() {
         let sql=this.form.sql;
@@ -659,178 +784,271 @@
       },
       onExecute(){
         debugger
-        let sql=this.form.sql;
-
-        let req = this.fillDatasourceForm({
-          sql: sql,
-          maxCount: this.form.maxCount,
-        });
-        let operate=this.metas.operate;
-        let transfer = this.getTransfer();
-        this.$axios({
-          url: `/${operate}`,
-          method: 'post',
-          data: transfer.send(req)
-        }).then(res=>{
-          if(res.data.code==200){
-            console.log(res.data)
-            let resp=transfer.recv(res.data.data)
-            console.log(resp)
-            if(operate=='update' && !resp.columns){
-              this.metas.resultText=resp+'';
-              this.metas.resultType='text';
-            }else{
-              this.metas.resultList=resp.rows;
-              this.metas.resultColumns=resp.columns;
-              this.metas.resultType='table';
+        this.metas.resultLoading=true;
+        try {
+          let sql = this.form.sql;
+          let req = this.fillDatasourceForm({
+            sql: sql,
+            maxCount: this.form.maxCount,
+          });
+          let operate = this.metas.operate;
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: `/${operate}`,
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data)
+              console.log(resp)
+              if (operate == 'update' && !resp.columns) {
+                this.metas.resultText = resp + '';
+                this.metas.resultType = 'text';
+              } else {
+                this.metas.resultList = resp.rows;
+                this.metas.resultColumns = resp.columns;
+                this.metas.resultType = 'table';
+              }
+            } else {
+              this.$message.error(res.data.msg)
             }
-          }else{
-            this.$message.error(res.data.msg)
-          }
-        }).catch(err=>{
-          this.$message.error(err.errorMessage||'操作失败')
-        })
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.metas.resultLoading = false;
+          })
+        }catch (err){
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.metas.resultLoading = false;
+        }
       },
       onExecuteScript() {
         this.dialog.scriptRunner.show = true;
       },
       doExecuteScript() {
+        this.dialog.scriptRunner.show=false;
+        this.metas.resultLoading=true;
         debugger
-        let sql = this.form.sql;
+        try {
+          let sql = this.form.sql;
 
-        let req = this.fillDatasourceForm({
-          sql: sql,
-          autoCommit: this.dialog.scriptRunner.autoCommit,
-          delimiter: this.dialog.scriptRunner.delimiter,
-          sendFullScript: this.dialog.scriptRunner.sendFullScript,
-          stopOnError: this.dialog.scriptRunner.stopOnError,
-        });
-        let transfer = this.getTransfer();
-        this.$axios({
-          url: `/runner`,
-          method: 'post',
-          data: transfer.send(req)
-        }).then(res => {
-          if (res.data.code == 200) {
-            console.log(res.data)
-            let resp = transfer.recv(res.data.data)
-            console.log(resp)
-            this.metas.resultText = resp + '';
-            this.metas.resultType = 'text';
-          } else {
-            this.$message.error(res.data.msg)
-          }
-        }).catch(err => {
-          this.$message.error(err.errorMessage || '操作失败')
-        })
+          let req = this.fillDatasourceForm({
+            sql: sql,
+            autoCommit: this.dialog.scriptRunner.autoCommit,
+            delimiter: this.dialog.scriptRunner.delimiter,
+            sendFullScript: this.dialog.scriptRunner.sendFullScript,
+            stopOnError: this.dialog.scriptRunner.stopOnError,
+          });
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: `/runner`,
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data)
+              console.log(resp)
+              this.metas.resultText = resp + '';
+              this.metas.resultType = 'text';
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.metas.resultLoading = false;
+          })
+        }catch (err){
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.metas.resultLoading = false;
+        }
       },
       onViewMetadata(){
-        this.drawer.metadata.show=true
+        this.drawer.metadata.show=true;
+        let storageKey=this.getDatasourceStorageKey();
+        let databaseList=this.storage.databaseMap[storageKey]
+        if(databaseList && databaseList.length>0){
+          this.drawer.metadata.databases=databaseList;
+        }
+        let defaultDatabase=this.storage.defaultDatabaseMap[storageKey];
+        if(defaultDatabase && defaultDatabase.length>0){
+          this.drawer.metadata.checkDatabase=defaultDatabase;
+          this.onClickDatabaseItem(defaultDatabase)
+        }
+
       },
       onRefreshDatabases(){
-        let req = this.fillDatasourceForm({});
-        let transfer = this.getTransfer();
-        this.$axios({
-          url: '/metadata/databases',
-          method: 'post',
-          data: transfer.send(req)
-        }).then(res=>{
-          if(res.data.code==200){
-            console.log(res.data)
-            let resp=transfer.recv(res.data.data)
-            console.log(resp)
-            this.drawer.metadata.databases=resp.list;
-            this.drawer.metadata.checkDatabase=resp.defaultName;
-          }else{
-            this.$message.error(res.data.msg)
-          }
-        }).catch(err=>{
-          this.$message.error(err.errorMessage||'操作失败')
-        })
+        this.drawer.metadata.databasesLoading=true;
+        try {
+          let req = this.fillDatasourceForm({});
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/metadata/databases',
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data)
+              console.log(resp)
+              this.drawer.metadata.databases = resp.list;
+              this.drawer.metadata.checkDatabase = resp.defaultName;
+              let storageKey = this.getDatasourceStorageKey(req);
+              this.storage.defaultDatabaseMap[storageKey] = resp.defaultName;
+              this.storage.databaseMap[storageKey] = resp.list;
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.drawer.metadata.databasesLoading = false;
+          })
+        }catch (err){
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.drawer.metadata.databasesLoading = false;
+        }
       },
       onClickDatabaseItem(database){
         this.drawer.metadata.checkDatabase=database;
+        let storageKey = this.getDatasourceStorageKey()+'#'+database;
+        let tableList=this.storage.tablesMap[storageKey];
+        if(tableList && tableList.length>=0){
+          this.drawer.metadata.tables=tableList;
+        }
       },
       onRefreshTables(){
-        let req = this.fillDatasourceForm({
-          database: this.drawer.metadata.checkDatabase,
-        });
-        let transfer = this.getTransfer();
-        this.$axios({
-          url: '/metadata/tables',
-          method: 'post',
-          data: transfer.send(req)
-        }).then(res=>{
-          if(res.data.code==200) {
-            console.log(res.data)
-            let resp = transfer.recv(res.data.data)
-            console.log(resp)
-            this.drawer.metadata.tables = resp;
-          }else{
-            this.$message.error(res.data.msg)
-          }
-        }).catch(err=>{
-          this.$message.error(err.errorMessage||'操作失败')
-        })
+        this.drawer.metadata.tablesLoading=true;
+        try {
+          let req = this.fillDatasourceForm({
+            database: this.drawer.metadata.checkDatabase,
+          });
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/metadata/tables',
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data)
+              console.log(resp)
+              this.drawer.metadata.tables = resp;
+              let storageKey = this.getDatasourceStorageKey(req)+'#'+req.database;
+              this.storage.tablesMap[storageKey] = resp;
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.drawer.metadata.tablesLoading = false;
+          })
+        }catch (err){
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.drawer.metadata.tablesLoading = false;
+        }
       },
       onClickTableItem(item){
         this.drawer.metadata.checkTable=item.name;
       },
       onViewTableInfo(item){
         this.drawer.metadata.checkTable=item.name;
+        this.dialog.tableInfo.title=item.name;
         this.dialog.tableInfo.show=true;
         if(this.dialog.tableInfo.meta && this.dialog.tableInfo.meta.name==item.name){
+          return;
+        }
+        let storageKey=this.getDatasourceStorageKey()+'#'+this.drawer.metadata.checkDatabase+'#'+item.name;
+        let tableMeta=this.storage.tableInfoMap[storageKey];
+        let tableDdl=this.storage.tableDdlMap[storageKey+'#'+this.dialog.tableInfo.ddlType]
+        if(tableDdl && tableDdl.length>0){
+          this.dialog.tableInfo.tableDdl=tableDdl;
+        }
+        if(tableMeta && tableMeta.name){
+          this.dialog.tableInfo.meta=tableMeta;
           return;
         }
         this.doLoadTableInfo()
       },
       doLoadTableInfo(){
-        let req = this.fillDatasourceForm({
-          database: this.drawer.metadata.checkDatabase,
-          table: this.drawer.metadata.checkTable
-        });
-        let transfer = this.getTransfer();
-        this.$axios({
-          url: '/metadata/table/info',
-          method: 'post',
-          data: transfer.send(req)
-        }).then(res=>{
-          if(res.data.code==200){
-            console.log(res.data)
-            let resp=transfer.recv(res.data.data)
-            console.log(resp)
-            this.dialog.tableInfo.meta=resp;
-            this.dialog.tableInfo.title=resp.name;
-          }else{
-            this.$message.error(res.data.msg)
-          }
-        }).catch(err=>{
-          this.$message.error(err.errorMessage||'操作失败')
-        })
+        this.dialog.tableInfo.metaLoading=true;
+        try {
+          let req = this.fillDatasourceForm({
+            database: this.drawer.metadata.checkDatabase,
+            table: this.drawer.metadata.checkTable
+          });
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/metadata/table/info',
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data)
+              console.log(resp)
+              this.dialog.tableInfo.meta = resp;
+              this.dialog.tableInfo.title = resp.name;
+              let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table;
+              this.storage.tableInfoMap[storageKey] = resp;
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.dialog.tableInfo.metaLoading = false;
+          })
+        }catch (err){
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.dialog.tableInfo.metaLoading = false;
+        }
       },
       onLoadTableDdl(){
-        let req = this.fillDatasourceForm({
-          database: this.drawer.metadata.checkDatabase,
-          table: this.drawer.metadata.checkTable,
-          ddlType: this.dialog.tableInfo.ddlType
-        });
-        let transfer = this.getTransfer();
-        this.$axios({
-          url: '/metadata/table/ddl',
-          method: 'post',
-          data: transfer.send(req)
-        }).then(res=>{
-          if(res.data.code==200){
-            console.log(res.data)
-            let resp=transfer.recv(res.data.data)
-            console.log(resp)
-            this.dialog.tableInfo.tableDdl=resp;
-          }else{
-            this.$message.error(res.data.msg)
-          }
-        }).catch(err=>{
-          this.$message.error(err.errorMessage||'操作失败')
-        })
+        this.dialog.tableInfo.tableDdlLoading=true;
+        try {
+          let req = this.fillDatasourceForm({
+            database: this.drawer.metadata.checkDatabase,
+            table: this.drawer.metadata.checkTable,
+            ddlType: this.dialog.tableInfo.ddlType
+          });
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/metadata/table/ddl',
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data);
+              console.log(resp)
+              this.dialog.tableInfo.tableDdl = resp;
+              let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table + '#' + req.ddlType;
+              this.storage.tableDdlMap[storageKey] = resp;
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.dialog.tableInfo.tableDdlLoading = false;
+          })
+        }catch (err){
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.dialog.tableInfo.tableDdlLoading = false;
+        }
+      },
+      onChangeDdlType(){
+        let tableName=this.drawer.metadata.checkTable;
+        let ddlType=this.dialog.tableInfo.ddlType;
+        let storageKey=this.getDatasourceStorageKey()+'#'+this.drawer.metadata.checkDatabase+'#'+tableName;
+        let tableDdl=this.storage.tableDdlMap[storageKey+'#'+ddlType]
+        if(tableDdl && tableDdl.length>0){
+          this.dialog.tableInfo.tableDdl=tableDdl;
+        }
       },
       onViewText(obj,title){
         if(title && title.length>0){
@@ -853,14 +1071,17 @@
       doRenderEcharts(){
         let option=this.convertAsEChartsOptions(this.metas.resultList,this.dialog.visualChart.config);
         let dom = this.$refs.refEchartDom;
-        let myChart = echarts.init(dom, null, {
+        if(this.metas.chart){
+          this.metas.chart.dispose();
+        }
+        this.metas.chart = echarts.init(dom, null, {
           renderer: 'canvas',
           useDirtyRect: false
         });
         if (option && typeof option === 'object') {
-          myChart.setOption(option);
+          this.metas.chart.setOption(option);
         }
-        window.addEventListener('resize', myChart.resize);
+        window.addEventListener('resize', this.metas.chart.resize);
       },
       convertAsEChartsOptions(dataList,config){
         if(!dataList){
@@ -868,6 +1089,7 @@
         }
         if(!config){
           config={
+            type: 'line',
             xAxis: 'label',
             yAxisList:['value']
           };
@@ -876,20 +1098,47 @@
         let seriasMap={};
         dataList.forEach(item=>{
 
-          xAxisList.push(item[config.xAxis])
+          let name=item[config.xAxis]
+          xAxisList.push(name)
 
           for(let i=0;i<config.yAxisList.length;i++){
             let prop=config.yAxisList[i];
             if(!seriasMap[prop]){
               seriasMap[prop]={
                 name: prop,
-                type: 'line',
-                data:[]
+                type: config.type, // line,bar,pie
+                data:[],
+              }
+              if(config.type=='pie'){
+                seriasMap[prop]=Object.assign(seriasMap[prop],{
+                  type: 'pie',
+                  radius: [25, 160],
+                  center: ['50%', '50%'],
+                  roseType: 'area',
+                  itemStyle: {
+                    borderRadius: 8
+                  },
+                })
+              }else if(config.type=='line' || config.type=='bar'){
+
+                seriasMap[prop]=Object.assign(seriasMap[prop],{
+                  markPoint: {
+                    data: [
+                      { type: 'max', name: '最大值' },
+                      { type: 'min', name: '最小值' }
+                    ]
+                  },
+                  markLine: {
+                    data: [{ type: 'average', name: '平均值' }]
+                  }
+                })
               }
             }
-            seriasMap[prop].data.push(item[prop])
+            seriasMap[prop].data.push({
+              value:item[prop],
+              name:name
+            })
           }
-
 
         })
 
@@ -900,16 +1149,38 @@
           legendList.push(k)
         })
 
+        if(config.type=='pie'){
+          for (let i = 0; i < serias.length; i++) {
+            serias[i].center=[((i+0.5)*(100.0/serias.length))+'%', '50%']
+          }
+        }
 
-        let option = {
+        let additionalOption={}
+        if(config.type=='pie'){
+
+        }else if(config.type=='line' || config.type=='bar'){
+          additionalOption={
+            xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              data: xAxisList
+            },
+            yAxis: {
+              type: 'value'
+            },
+          }
+        }
+
+        let option = Object.assign(additionalOption,{
           title: {
-            text: 'Visual Line'
+            text: 'Visual Data'
           },
           tooltip: {
             trigger: 'axis'
           },
           legend: {
-            data: legendList
+            data: legendList,
+            top: 'bottom'
           },
           grid: {
             left: '3%',
@@ -918,20 +1189,17 @@
             containLabel: true
           },
           toolbox: {
+            show: true,
             feature: {
-              saveAsImage: {}
+              mark: { show: true },
+              dataView: { show: true, readOnly: false },
+              restore: { show: true },
+              saveAsImage: { show: true }
             }
           },
-          xAxis: {
-            type: 'category',
-            boundaryGap: false,
-            data: xAxisList
-          },
-          yAxis: {
-            type: 'value'
-          },
+
           series: serias
-        };
+        });
         return option;
       }
     }

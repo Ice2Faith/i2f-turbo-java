@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @date 2025/11/2 14:43
  * @desc
  */
-@SpringBootApplication
+//@SpringBootApplication
 public class TestOpsApplication {
     public static void main(String[] args){
         SpringApplication.run(TestOpsApplication.class,args);
