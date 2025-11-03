@@ -1,0 +1,41 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.ops.secure",
+      "type": "i2f.springboot.ops.common.OpsSecureProperties",
+      "sourceType": "i2f.springboot.ops.common.OpsSecureProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.ops.secure.cert",
+      "type": "java.lang.String",
+      "description": "ops secure cert.",
+      "sourceType": "i2f.springboot.ops.common.OpsSecureProperties"
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
