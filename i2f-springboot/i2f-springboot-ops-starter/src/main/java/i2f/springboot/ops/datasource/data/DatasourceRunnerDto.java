@@ -10,8 +10,11 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class DatasourceOperateDto extends DatasourceSelectDto {
+public class DatasourceRunnerDto extends DatasourceSelectDto {
     protected String sql;
-    protected Integer maxCount;
 
+    protected Boolean autoCommit;
+    protected String delimiter;
+    protected Boolean sendFullScript;
+    protected Boolean stopOnError;
 }
