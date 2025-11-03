@@ -1731,6 +1731,8 @@
                         </archive>
                         <includes>
                             <include>META-INF/**/*</include>
+                            <include>static/**/*</include>
+                            <include>public/**/*</include>
                             <include>assets/**/*</include>
                             <include>bundles/**/*</include>
                             <include>**/*.dll</include>
