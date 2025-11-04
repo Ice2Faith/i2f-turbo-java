@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ops - Redis</title>
+  <script src="../lib/vue/vue-2.js"></script>
+  <script src="../lib/moment/moment-2.24.0.js"></script>
+  <script src="../lib/element-ui/element-ui-2.15.10.js"></script>
+  <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10.css"/>
+  <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10-icon.css"/>
+  <link href="../lib/element-ui/fonts/element-icons.ttf"/>
+  <link href="../lib/element-ui/fonts/element-icons.woff"/>
+  <script src="../lib/axios/axios-1.1.3.min.js"></script>
+  <script src="../lib/axios/qs.js"></script>
+  <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm4.js"></script>
+  <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm3.js"></script>
+  <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm2.js"></script>
+  <script src="../lib/base64/Base64.js"></script>
+  <script src="../common/OpsSecureKeyPair.js"></script>
+  <script src="../common/OpsSecureCertPair.js"></script>
+  <script src="../common/OpsSecureDto.js"></script>
+  <script src="../common/OpsSecureHelper.js"></script>
+  <script src="../common/OpsSecureTransfer.js"></script>
+</head>
+<body>
+<div id="app">
+  <el-divider>连接证书</el-divider>
+  <el-input
+          type="textarea"
+          :rows="3"
+          placeholder="请输入连接证书"
+          v-model="metas.cert"
+          @change="onCertChange">
+  </el-input>
+  <el-divider>Redis操作</el-divider>
+
+  <el-row>
+    <el-form inline label-position="left" label-width="80px">
+      <el-form-item>
+        <el-checkbox v-model="form.useScanKeys">Scan键</el-checkbox>
+      </el-form-item>
+      <el-form-item label="过滤表达式">
+        <el-input
+                placeholder="表达式"
+                v-model="form.pattern">
+        </el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button v-loading="metas.keyListLoading" type="primary" @click="doRefreshKeys">
+          刷新
+        </el-button>
+        <el-button @click="doResetData">重置</el-button>
+      </el-form-item>
+    </el-form>
+  </el-row>
+  <el-row type="flex">
+    <el-col :span="10" style="border-right: solid 1px #777;">
+      <el-input
+              placeholder="过滤节点"
+              v-model="metas.filterNodeText">
+      </el-input>
+      <el-row type="flex">
+        <el-tree ref="refKeyTree"
+                 style="width: 100%;"
+                :data="metas.keyTree"
+                show-checkbox
+                 :filter-node-method="filterTreeNode"
+                node-key="path">
+      <span class="extra-tree-node" slot-scope="{ node, data }" @click="onClickTreeNode(node,data)">
+        <span>{{ node.label }}</span>
+        <span style="float: right;">
+          <el-button type="text"
+                     size="mini"
+                     @click="onEditKey(node,data)">
+            编辑
+          </el-button>
+          <el-button type="text" style="color: orangered;"
+                  size="mini"
+                  @click="onDeleteKey(node,data)">
+            删除
+          </el-button>
+        </span>
+      </span>
+        </el-tree>
+      </el-row>
+    </el-col>
+    <el-col :span="14">
+      <el-row>
+          <el-row type="flex">
+            <el-col :span="18">
+                <el-input v-model="form.key">
+                  <template slot="prepend">键</template>
+                  <el-button v-loadinng="metas.valueLoading"
+                             slot="append"
+                             icon="el-icon-search"
+                             @click="onViewKey"></el-button>
+                </el-input>
+            </el-col>
+            <el-col :span="6">
+              <el-input type="number" v-model="form.ttl" >
+                <template slot="prepend">TTL(s)</template>
+              </el-input>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-input type="textarea" :rows="10" v-model="form.value" :min="-1"></el-input>
+          </el-row>
+      </el-row>
+    </el-col>
+  </el-row>
+
+  <el-dialog
+          :title="dialog.textViewer.title"
+          :visible.sync="dialog.textViewer.show"
+          width="60%">
+    <el-input
+            type="textarea"
+            :rows="15"
+            placeholder="文本浏览"
+            v-model="dialog.textViewer.text">
+    </el-input>
+  </el-dialog>
+</div>
+</body>
+<script>
+
+  window.app = new Vue({
+    data() {
+      return this.getDefaultData()
+    },
+    created() {
+      this.initStoreData();
+    },
+    mounted(){
+
+    },
+    watch:{
+      'metas.filterNodeText':{
+        handler: function(val,old){
+            this.$refs.refKeyTree.filter(val);
+        }
+      }
+    },
+    methods: {
+      getDefaultData() {
+        return {
+          storage: {
+
+          },
+          metas: {
+            cert: '',
+            valueLoading: false,
+            deleteLoading: false,
+            filterNodeText: '',
+            keyListLoading: false,
+            keyList: [],
+            keyTree:[]
+          },
+          drawer: {
+
+          },
+          dialog: {
+            textViewer: {
+              show: false,
+              title: '文本浏览',
+              text: ''
+            }
+          },
+          form: {
+            useScanKeys: true,
+            pattern: "*",
+            key: '',
+            ttl: -1,
+            value: '',
+          }
+        }
+      },
+      loadData() {
+        let content = localStorage.getItem('ops:redis:data');
+        if (!content) {
+          return
+        }
+        content = content.trim();
+        if (content.length == 0) {
+          return;
+        }
+        try {
+          let obj = JSON.parse(content);
+          Object.keys(obj).forEach(k => {
+            this.$data[k] = obj[k];
+          });
+        } catch (e) {
+
+        }
+      },
+      storeData() {
+        try {
+          let data = {...this.$data};
+          let json = JSON.stringify(data);
+          let obj = JSON.parse(json);
+          obj.metas.cert = '';
+          let content = JSON.stringify(obj);
+          localStorage.setItem('ops:redis:data', content);
+        } catch (e) {
+          console.log(e)
+        }
+      },
+      initStoreData(){
+        let reset = new URL(window.location.href).searchParams.get('reset');
+        if(reset!='true') {
+          this.loadData();
+        }
+        setInterval(() => {
+          this.storeData();
+        }, 1000);
+      },
+      doResetData() {
+        let newData = this.getDefaultData();
+        Object.keys(newData).forEach(k => {
+          this.$data[k] = newData[k];
+        })
+      },
+      getTransfer() {
+        debugger
+        let certPair = OpsSecureHelper.generateCertPair();
+        let serverTransfer = new OpsSecureTransfer(OpsSecureHelper.deserializeKeyPair(certPair.serverCert))
+        let dto = serverTransfer.send('1234');
+        let clientTransfer = new OpsSecureTransfer(OpsSecureHelper.deserializeKeyPair(certPair.clientCert))
+        let resp = clientTransfer.recv(dto);
+        let cert = this.metas.cert;
+        if (!cert || cert.length == 0) {
+          cert = '';
+        }
+        cert = cert.trim();
+        if (!cert || cert.length == 0) {
+          this.$message.error('请先填写连接证书')
+        }
+        let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
+        return new OpsSecureTransfer(keyPair)
+      },
+      onCertChange() {
+        this.doRefreshKeys();
+      },
+      onViewText(obj, title) {
+        if (title && title.length > 0) {
+          this.dialog.textViewer.title = title;
+        } else {
+          this.dialog.textViewer.title = '文本浏览';
+        }
+        let text = ''
+        if (typeof obj == 'string') {
+          text = obj;
+        } else {
+          text = JSON.stringify(obj, null, '    ');
+        }
+        this.dialog.textViewer.text = text;
+        this.dialog.textViewer.show = true;
+      },
+      doRefreshKeys(){
+        this.metas.keyListLoading = true;
+        try {
+          let useScanKeys=this.form.useScanKeys;
+          let req = {
+            pattern: this.form.pattern,
+          }
+
+          new Promise((resolve, reject)=>{
+            resolve({
+              data:{
+                code: 200,
+                data:[
+                        'auth:login:1001',
+                        'auth:login:1002',
+                        'sys:dict:gender',
+                        'sys:dict:nation',
+                        'job:cron:daily'
+                ]
+              }
+            })
+          })
+          /*
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/'+(useScanKeys?'scan':'keys'),
+            method: 'post',
+            data: transfer.send(req)
+          })*/.then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              //let resp = transfer.recv(res.data.data)
+              let resp = res.data.data
+              console.log(resp)
+              this.metas.keyList = resp;
+              let tree=this.rebuildKeyTree(resp);
+              this.metas.keyTree=tree;
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.metas.keyListLoading = false;
+          })
+        } catch (err) {
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.metas.keyListLoading = false;
+        }
+      },
+      rebuildKeyTree(list){
+        let tree=[];
+        if(!list){
+          return tree;
+        }
+        /*let tree=[{
+          path: 'auth:login',
+          label: 'login',
+          children: []
+        }]*/
+        list.forEach(item=>{
+          let arr=item.split(':');
+          this.appendToTree(arr,0,tree,'');
+        })
+        return tree;
+      },
+      appendToTree(arr,index,tree,parentPath){
+        if(index>=arr.length){
+          return
+        }
+        if(!parentPath){
+          parentPath='';
+        }
+        let label=arr[index];
+        let node=null;
+        for (let i = 0; i < tree.length; i++) {
+          let item=tree[i];
+          if(item.label==label){
+            node=item;
+            break;
+          }
+        }
+        if(!node){
+          node={
+            path: (parentPath=='')?(label):(parentPath+':'+label),
+            label: label,
+            children: null,
+          }
+          tree.push(node);
+        }
+        if(!node.children){
+          node.children=[];
+        }
+        this.appendToTree(arr,index+1,node.children,node.path);
+      },
+      filterTreeNode(value, data) {
+        if (!value) return true;
+        return data.path.indexOf(value) >=0;
+      },
+      onDeleteKey(node,data){
+        let key=data.path;
+        this.$confirm('即将删除键，是否继续？'+key, '删除提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.doDeleteKey([key]);
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
+      doDeleteKey(keys){
+        this.metas.deleteLoading = true;
+        try {
+          let req = {
+            keys: keys,
+          }
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/delete',
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              //let resp = transfer.recv(res.data.data)
+              let resp = res.data.data
+              console.log(resp)
+              this.$message.success('操作成功')
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.metas.deleteLoading = false;
+          })
+        } catch (err) {
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.metas.deleteLoading = false;
+        }
+      },
+      onClickTreeNode(node,data){
+        this.form.key=data.path;
+      },
+      onEditKey(node,data){
+        this.form.key=data.path;
+        this.onViewKey()
+      },
+      onViewKey(){
+        this.metas.valueLoading = true;
+        try {
+          let req = {
+            key: this.form.key,
+          }
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/get',
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              //let resp = transfer.recv(res.data.data)
+              let resp = res.data.data
+              console.log(resp)
+              this.form.key=resp.key;
+              this.form.ttl=resp.ttl || -1;
+              this.form.value=resp.value;
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.metas.valueLoading = false;
+          })
+        } catch (err) {
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.metas.valueLoading = false;
+        }
+      }
+    }
+  })
+  let defaultConfig = {
+    baseURL: './',
+    timeout: 10 * 60 * 1000,
+    responseType: 'json'
+  }
+  let request = axios.create(defaultConfig)
+  window.app.$axios = request
+  window.app.$mount('#app')
+</script>
+<style>
+  .list-item {
+    margin-top: 3px;
+    border-bottom: solid 1px #777;
+  }
+
+  .list-item:hover {
+    background: lightskyblue;
+  }
+
+  .checked-item {
+    background: darkorange;
+  }
+
+  .extra-tree-node {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    padding-right: 8px;
+    border-bottom: solid 1px #777;
+  }
+
+  .extra-tree-node:hover {
+    background: lightskyblue;
+  }
+
+</style>
+</html>
