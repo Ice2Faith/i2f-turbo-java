@@ -224,11 +224,17 @@
                     <el-row>
                         <el-input v-model="drawer.metadata.checkDatabase" placeholder="选中数据库"></el-input>
                     </el-row>
-                    <el-row v-for="(item,index) in drawer.metadata.databases"
-                            :class="'list-item '+(item==drawer.metadata.checkDatabase?'checked-item':'')"
-                            @click.native="onClickDatabaseItem(item)">
-                        {{item}}
+                    <el-row>
+                        <el-input v-model="drawer.metadata.filterDatabase" placeholder="过滤数据库"></el-input>
                     </el-row>
+                    <template v-for="(item,index) in drawer.metadata.databases">
+                        <el-row v-if="(!drawer.metadata.filterDatabase || item.toLowerCase().indexOf(drawer.metadata.filterDatabase.toLowerCase())>=0)"
+                                :class="'list-item '+(item==drawer.metadata.checkDatabase?'checked-item':'')"
+                                @click.native="onClickDatabaseItem(item)">
+                            {{item}}
+                        </el-row>
+                    </template>
+
                 </el-row>
             </el-col>
             <el-col :span="16">
@@ -254,18 +260,24 @@
                             <el-button slot="append" icon="el-icon-search" @click="onViewTableInfo(null)"></el-button>
                         </el-input>
                     </el-row>
-                    <el-row type="flex"
-                            v-for="(item,index) in drawer.metadata.tables"
-                            :class="'list-item '+(item.name==drawer.metadata.checkTable?'checked-item':'')"
-                            @click.native="onClickTableItem(item)">
-                        <el-col :span="12" style="border-right: solid 1px #777;">
-                            <el-tag type="primary" @click="onViewTableInfo(item)">结构</el-tag>
-                            {{item.name}}
-                        </el-col>
-                        <el-col :span="12">
-                            {{item.comment}}
-                        </el-col>
+                    <el-row>
+                        <el-input v-model="drawer.metadata.filterTable" placeholder="过滤表"></el-input>
                     </el-row>
+                    <template v-for="(item,index) in drawer.metadata.tables">
+                        <el-row type="flex"
+                                v-if="(!drawer.metadata.filterTable || item.name.toLowerCase().indexOf(drawer.metadata.filterTable.toLowerCase())>=0)"
+                                :class="'list-item '+(item.name==drawer.metadata.checkTable?'checked-item':'')"
+                                @click.native="onClickTableItem(item)">
+                            <el-col :span="12" style="border-right: solid 1px #777;">
+                                <el-tag type="primary" @click="onViewTableInfo(item)">结构</el-tag>
+                                {{item.name}}
+                            </el-col>
+                            <el-col :span="12">
+                                {{item.comment}}
+                            </el-col>
+                        </el-row>
+                    </template>
+
                 </el-row>
             </el-col>
         </el-row>
@@ -537,52 +549,17 @@
         },
         created() {
            this.initStoreData();
+           this.initCompletionsRefreshInterval();
         },
         mounted(){
             this.initEditor();
         },
         methods: {
-            initEditor(){
-                let dom=this.$refs.refEditor;
-                this.metas.editor = CodeMirror.fromTextArea(dom, {  // 标识到textarea
-                    value : "",  // 文本域默认显示的文本
-                    mode : "sql",  // 模式
-                    theme : "idea",  // CSS样式选择
-                    indentUnit : 2,  // 缩进单位，默认2
-                    smartIndent : true,  // 是否智能缩进
-                    tabSize : 4,  // Tab缩进，默认4
-                    readOnly : false,  // 是否只读，默认false
-                    showCursorWhenSelecting : true,
-                    lineNumbers : true  // 是否显示行号
-                    // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
-                });
-                this.metas.editor.on("keypress",() =>{
-                    //编译器内容更改事件
-                    this.metas.editor.showHint();
-                });
-                this.metas.editor.on('change',()=>{
-                    this.form.sql=this.metas.editor.getValue();
-                    this.onSqlChange();
-                    this.metas.editor.getSelection();
-                })
-            },
-            initStoreData(){
-                let reset = new URL(window.location.href).searchParams.get('reset');
-                if(reset!='true') {
-                    this.loadData();
-                }
-                setInterval(() => {
-                    this.storeData();
-                }, 3000);
-            },
-            doResetData() {
-                let newData = this.getDefaultData();
-                Object.keys(newData).forEach(k => {
-                    this.$data[k] = newData[k];
-                })
-            },
             getDefaultData() {
                 return {
+                    chart: null,
+                    editor: null,
+                    completions:[],
                     storage: {
                         defaultDatasource: '',
                         datasourceList: [],
@@ -605,8 +582,6 @@
                     },
                     metas: {
                         cert: '',
-                        chart: null,
-                        editor: null,
                         datasourceListLoading: false,
                         datasourceList: [],
                         driverListLoading: false,
@@ -670,8 +645,10 @@
                         metadata: {
                             show: false,
                             databasesLoading: false,
+                            filterDatabase: '',
                             checkDatabase: '',
                             databases: [],
+                            filterTable: '',
                             checkTable: '',
                             tablesLoading: false,
                             tables: [],
@@ -743,17 +720,140 @@
             },
             storeData() {
                 try {
-                    let data = this.$data;
+                    let data = {...this.$data};
+                    data.chart = null;
+                    data.editor=null;
                     let json = JSON.stringify(data);
                     let obj = JSON.parse(json);
                     obj.metas.cert = '';
-                    obj.metas.chart = null;
-                    obj.metas.editor=null;
                     let content = JSON.stringify(obj);
                     localStorage.setItem('ops:datasource:data', content);
                 } catch (e) {
-
+                    console.log(e)
                 }
+            },
+            initCompletionsRefreshInterval(){
+                let _this=this;
+                function refresh(){
+                    setTimeout(()=>{
+                        _this.collectCompletionItems()
+                        refresh();
+                    },3000);
+                }
+                refresh();
+            },
+            collectCompletionItems(){
+                //console.log('begin collect completions ...')
+                let items=[];
+                let storageKey=this.getDatasourceStorageKey();
+                let databaseList=this.storage.databaseMap[storageKey]
+                if(databaseList){
+                    items.push(...databaseList);
+                }
+                Object.keys(this.storage.tablesMap).forEach(k=>{
+                    if(!k.startsWith(storageKey+'#') && k!=storageKey){
+                        return;
+                    }
+                    let tableList=this.storage.tablesMap[k];
+                    if(tableList){
+                        items.push(...tableList.map(e=>e.name))
+                    }
+                })
+                Object.keys(this.storage.tableInfoMap).forEach(k=>{
+                    if(!k.startsWith(storageKey+'#') && k!=storageKey){
+                        return;
+                    }
+                    let tableMeta=this.storage.tableInfoMap[k];
+                    if(tableMeta && tableMeta.columns){
+                        items.push(...tableMeta.columns.map(e=>e.name))
+                    }
+                })
+                let completions=[];
+                items.forEach(item=>{
+                    if(!item){
+                        return;
+                    }
+                    item=item.trim();
+                    if(item==''){
+                        return;
+                    }
+                    if(!completions.includes(item)){
+                        completions.push(item);
+                    }
+                })
+                this.completions=items;
+                //console.log('end collect completions .')
+            },
+            editorCompletionItemCollector(prefix){
+                if(!prefix){
+                    prefix='';
+                }
+                prefix=prefix.toLowerCase();
+                return this.completions.filter(e=>e && e.toLowerCase().indexOf(prefix)>=0);
+            },
+            initEditor(){
+                let _this=this;
+                function asyncHint(editor, callback, options) {
+                    let cur = editor.getCursor();
+                    let token = editor.getTokenAt(cur);
+                    let prefix=token.string;
+                    debugger
+                    let items=_this.editorCompletionItemCollector(prefix) || []
+                    let result=CodeMirror.hint.sql(editor,options);
+                    if(result && result.list){
+                        items=[...items,... result.list]
+                    }
+                    callback({
+                        list: items,
+                        from: CodeMirror.Pos(cur.line, token.start),
+                        to: CodeMirror.Pos(cur.line, token.end)
+                    });
+                }
+                asyncHint.async = true;
+                asyncHint.supportsSelection = true;
+
+                let dom=this.$refs.refEditor;
+                this.editor = CodeMirror.fromTextArea(dom, {  // 标识到textarea
+                    value : "",  // 文本域默认显示的文本
+                    mode : "sql",  // 模式
+                    theme : "idea",  // CSS样式选择
+                    indentUnit : 2,  // 缩进单位，默认2
+                    smartIndent : true,  // 是否智能缩进
+                    tabSize : 4,  // Tab缩进，默认4
+                    readOnly : false,  // 是否只读，默认false
+                    showCursorWhenSelecting : true,
+                    hintOptions:{
+                        completeSingle: false,
+                        hint: asyncHint,
+                    },
+                    lineNumbers : true  // 是否显示行号
+                    // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
+                });
+                this.editor.on("keypress",() =>{
+                    //编译器内容更改事件
+                    this.editor.showHint();
+                });
+                this.editor.setValue(this.form.sql||'');
+                this.editor.on('change',()=>{
+                    this.form.sql=this.editor.getValue();
+                    this.onSqlChange();
+                    this.editor.getSelection();
+                })
+            },
+            initStoreData(){
+                let reset = new URL(window.location.href).searchParams.get('reset');
+                if(reset!='true') {
+                    this.loadData();
+                }
+                setInterval(() => {
+                    this.storeData();
+                }, 1000);
+            },
+            doResetData() {
+                let newData = this.getDefaultData();
+                Object.keys(newData).forEach(k => {
+                    this.$data[k] = newData[k];
+                })
             },
             getTransfer() {
                 debugger
@@ -962,16 +1062,6 @@
             },
             onViewMetadata() {
                 this.drawer.metadata.show = true;
-                let storageKey = this.getDatasourceStorageKey();
-                let databaseList = this.storage.databaseMap[storageKey]
-                if (databaseList && databaseList.length > 0) {
-                    this.drawer.metadata.databases = databaseList;
-                }
-                let defaultDatabase = this.storage.defaultDatabaseMap[storageKey];
-                if (defaultDatabase && defaultDatabase.length > 0) {
-                    this.drawer.metadata.checkDatabase = defaultDatabase;
-                    this.onClickDatabaseItem(defaultDatabase)
-                }
 
             },
             onRefreshDatabases() {
@@ -1193,17 +1283,17 @@
             doRenderEcharts() {
                 let option = this.convertAsEChartsOptions(this.metas.resultList, this.dialog.visualChart.config);
                 let dom = this.$refs.refEchartDom;
-                if (this.metas.chart) {
-                    this.metas.chart.dispose();
+                if (this.chart) {
+                    this.chart.dispose();
                 }
-                this.metas.chart = echarts.init(dom, null, {
+                this.chart = echarts.init(dom, null, {
                     renderer: 'canvas',
                     useDirtyRect: false
                 });
                 if (option && typeof option === 'object') {
-                    this.metas.chart.setOption(option);
+                    this.chart.setOption(option);
                 }
-                window.addEventListener('resize', this.metas.chart.resize);
+                window.addEventListener('resize', this.chart.resize);
             },
             convertAsEChartsOptions(dataList, config) {
                 if (!dataList) {
