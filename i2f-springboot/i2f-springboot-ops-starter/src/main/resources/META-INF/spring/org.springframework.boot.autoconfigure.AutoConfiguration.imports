@@ -5,3 +5,5 @@ i2f.springboot.ops.datasource.provider.impl.DefaultDatasourceProvider
 i2f.springboot.ops.datasource.helper.DatasourceOpsHelper
 i2f.springboot.ops.datasource.controller.DatasourceOpsMetadataController
 i2f.springboot.ops.datasource.controller.DatasourceOpsController
+i2f.springboot.ops.host.controller.HostOpsController
+i2f.springboot.ops.redis.controller.RedisOpsController
