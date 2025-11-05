@@ -37,7 +37,13 @@
   <el-row>
     <el-form inline label-position="left" label-width="80px">
       <el-form-item>
-        <el-checkbox v-model="form.useScanKeys">Scan键</el-checkbox>
+        <el-popover
+                placement="top-start"
+                width="200"
+                trigger="hover"
+                content="是否适用scan命令获取键，而不是使用keys命令">
+            <el-checkbox slot="reference" v-model="form.useScanKeys">Scan键</el-checkbox>
+        </el-popover>
       </el-form-item>
       <el-form-item label="过滤">
         <el-input
@@ -56,7 +62,7 @@
   <el-row type="flex">
     <el-col :span="10" style="border-right: solid 1px #777;">
       <el-row>
-        <el-button type="danger" @click="onDeleteCheckedNodes">删除勾选</el-button>
+        <el-button type="danger" @click="onDeleteCheckedNodes" v-loading="metas.deleteLoading">删除勾选</el-button>
       </el-row>
       <el-input
               placeholder="过滤节点"
@@ -73,11 +79,13 @@
         <span>{{ node.label }}</span>
         <span style="float: right;">
           <el-button type="text"
+                     v-loading="metas.getLoading"
                      size="mini"
                      @click="onEditKey(node,data)">
             编辑
           </el-button>
           <el-button type="text" style="color: orangered;"
+                     v-loading="metas.deleteLoading"
                   size="mini"
                   @click="onDeleteNodeKey(node,data)">
             删除
@@ -90,10 +98,16 @@
     <el-col :span="14">
       <el-row>
           <el-row type="flex" justify="end">
-            <el-button v-loadinng="metas.deleteLoading"
+            <el-button v-loading="metas.getLoading"
+                       type="primary"
+                       @click="onViewKey">载入</el-button>
+            <el-button v-loading="metas.setLoading"
                        type="primary"
                        @click="onSetKey">保存</el-button>
-            <el-button v-loadinng="metas.deleteLoading"
+            <el-button v-loading="metas.ttlLoading"
+                       type="primary"
+                       @click="onUpdateTtl">更新TTL</el-button>
+            <el-button v-loading="metas.deleteLoading"
                        type="danger"
                        @click="onDeleteKey">删除</el-button>
           </el-row>
@@ -101,10 +115,6 @@
             <el-col :span="18">
                 <el-input v-model="form.key">
                   <template slot="prepend">键</template>
-                  <el-button v-loadinng="metas.valueLoading"
-                             slot="append"
-                             icon="el-icon-search"
-                             @click="onViewKey"></el-button>
                 </el-input>
             </el-col>
             <el-col :span="6">
@@ -160,8 +170,10 @@
           },
           metas: {
             cert: '',
-            valueLoading: false,
+            getLoading: false,
             deleteLoading: false,
+            setLoading: false,
+            ttlLoading: false,
             filterNodeText: '',
             keyListLoading: false,
             keyList: [],
@@ -250,7 +262,7 @@
         return new OpsSecureTransfer(keyPair)
       },
       onCertChange() {
-        this.doRefreshKeys();
+
       },
       onViewText(obj, title) {
         if (title && title.length > 0) {
@@ -439,7 +451,7 @@
         this.onViewKey()
       },
       onViewKey(){
-        this.metas.valueLoading = true;
+        this.metas.getLoading = true;
         try {
           let req = {
             key: this.form.key,
@@ -463,15 +475,105 @@
           }).catch(err => {
             this.$message.error(err.errorMessage || err.message || '操作失败')
           }).finally(() => {
-            this.metas.valueLoading = false;
+            this.metas.getLoading = false;
           })
         } catch (err) {
           this.$message.error(err.errorMessage || err.message || '操作失败')
-          this.metas.valueLoading = false;
+          this.metas.getLoading = false;
         }
       },
       onSetKey(){
-
+        let key=this.form.key;
+        this.$confirm('即将保存键、值、TTL，是否继续？'+key, '删除提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.doSetKey();
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消操作'
+          });
+        });
+      },
+      doSetKey(){
+        this.metas.setLoading = true;
+        try {
+          let req = {
+            key: this.form.key,
+            ttl: this.form.ttl,
+            value: this.form.value,
+          }
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/set',
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data)
+              console.log(resp)
+              this.$message.success('操作成功')
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.metas.setLoading = false;
+          })
+        } catch (err) {
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.metas.setLoading = false;
+        }
+      },
+      onUpdateTtl(){
+        let key=this.form.key;
+        this.$confirm('即将更新TTL，是否继续？'+key, '删除提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.doUpdateTtl();
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消操作'
+          });
+        });
+      },
+      doUpdateTtl(){
+        this.metas.ttlLoading = true;
+        try {
+          let req = {
+            key: this.form.key,
+            ttl: this.form.ttl
+          }
+          let transfer = this.getTransfer();
+          this.$axios({
+            url: '/ttl',
+            method: 'post',
+            data: transfer.send(req)
+          }).then(res => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              let resp = transfer.recv(res.data.data)
+              console.log(resp)
+              this.$message.success('操作成功')
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }).catch(err => {
+            this.$message.error(err.errorMessage || err.message || '操作失败')
+          }).finally(() => {
+            this.metas.ttlLoading = false;
+          })
+        } catch (err) {
+          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.metas.ttlLoading = false;
+        }
       }
     }
   })

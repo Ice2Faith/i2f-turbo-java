@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.*;
@@ -35,11 +36,16 @@ import java.util.concurrent.TimeUnit;
 @Controller
 @RequestMapping("/ops/redis")
 public class RedisOpsController {
-    @Autowired(required = false)
-    private RedisTemplate redisTemplate;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Autowired
     protected OpsSecureTransfer transfer;
+
+    public RedisTemplate getRedisTemplate(){
+        RedisTemplate bean = applicationContext.getBean(RedisTemplate.class);
+        return bean;
+    }
 
     @PostMapping("/scan")
     @ResponseBody
@@ -57,7 +63,7 @@ public class RedisOpsController {
                 builder.count(count);
             }
             ScanOptions options = builder.build();
-            Cursor<byte[]> cursor = (Cursor<byte[]>) redisTemplate.executeWithStickyConnection((connection) -> {
+            Cursor<byte[]> cursor = (Cursor<byte[]>) getRedisTemplate().executeWithStickyConnection((connection) -> {
                 return connection.scan(options);
             });
             List<String> list=new ArrayList<>(300);
@@ -84,7 +90,7 @@ public class RedisOpsController {
                 pattern="*";
             }
             byte[] rawKey=pattern.getBytes(StandardCharsets.UTF_8);
-            Set<byte[]> rawKeys = (Set<byte[]>)redisTemplate.execute((connection) -> {
+            Set<byte[]> rawKeys = (Set<byte[]>)getRedisTemplate().execute((connection) -> {
                 return connection.keys(rawKey);
             }, true);
             List<String> resp=new ArrayList<>(300);
@@ -110,10 +116,10 @@ public class RedisOpsController {
                 throw new OpsException("missing key");
             }
             byte[] rawKey=key.getBytes(StandardCharsets.UTF_8);
-            byte[] rawValue=(byte[])redisTemplate.execute((connection)->{
+            byte[] rawValue=(byte[])getRedisTemplate().execute((connection)->{
                 return connection.get(rawKey);
             },true);
-            Long ttl= (Long)redisTemplate.execute((connection) -> {
+            Long ttl= (Long)getRedisTemplate().execute((connection) -> {
                 try {
                     return connection.pTtl(rawKey, TimeUnit.SECONDS);
                 } catch (Exception var4) {
@@ -147,7 +153,7 @@ public class RedisOpsController {
             byte[] rawValue=value==null?new byte[0]:value.getBytes(StandardCharsets.UTF_8);
             if(ttl!=null && ttl>=0){
                 long timeout=ttl;
-                redisTemplate.execute(new RedisCallback<Object>() {
+                getRedisTemplate().execute(new RedisCallback<Object>() {
                     @Override
                     public Object doInRedis(RedisConnection connection) throws DataAccessException {
                         this.potentiallyUsePsetEx(connection);
@@ -175,7 +181,7 @@ public class RedisOpsController {
                 }, true);
 
             }else{
-                redisTemplate.execute((connection)->{
+                getRedisTemplate().execute((connection)->{
                     return connection.set(rawKey,rawValue);
                 },true);
             }
@@ -192,7 +198,7 @@ public class RedisOpsController {
         try {
             RedisOperateDto req = transfer.recv(reqDto, RedisOperateDto.class);
             List<String> keys = req.getKeys();
-            Long resp=(Long)redisTemplate.execute((connection)->{
+            Long resp=(Long)getRedisTemplate().execute((connection)->{
                 long ret=0;
                 for (String key : keys) {
                     byte[] rawKey=key.getBytes(StandardCharsets.UTF_8);
@@ -229,7 +235,7 @@ public class RedisOpsController {
                 long timeout=ttl;
                 TimeUnit unit=TimeUnit.SECONDS;
                 long rawTimeout = TimeoutUtils.toMillis(ttl, unit);
-                resp= (Boolean)redisTemplate.execute((connection) -> {
+                resp= (Boolean)getRedisTemplate().execute((connection) -> {
                     try {
                         return connection.pExpire(rawKey, rawTimeout);
                     } catch (Exception var8) {
@@ -237,7 +243,7 @@ public class RedisOpsController {
                     }
                 }, true);
             }else{
-                resp=(Boolean)redisTemplate.execute((connection) -> {
+                resp=(Boolean)getRedisTemplate().execute((connection) -> {
                     return connection.persist(rawKey);
                 }, true);
             }
