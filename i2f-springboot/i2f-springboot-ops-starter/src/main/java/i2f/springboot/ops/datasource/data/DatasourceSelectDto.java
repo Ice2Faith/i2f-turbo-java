@@ -3,6 +3,8 @@ package i2f.springboot.ops.datasource.data;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author Ice2Faith
  * @date 2025/11/3 11:49
@@ -17,4 +19,7 @@ public class DatasourceSelectDto {
     protected String url;
     protected String username;
     protected String password;
+
+    protected Boolean useMultiDatasource;
+    protected List<String> multiDatasourceList;
 }

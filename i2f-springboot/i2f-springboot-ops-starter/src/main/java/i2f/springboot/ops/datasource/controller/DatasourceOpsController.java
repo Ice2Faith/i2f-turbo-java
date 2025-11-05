@@ -94,10 +94,18 @@ public class DatasourceOpsController {
             DatasourceOperateDto req = transfer.recv(reqDto, DatasourceOperateDto.class);
             String sql = req.getSql();
             Integer maxCount = req.getMaxCount();
-            try (Connection conn = datasourceOpsHelper.getConnection(req)) {
-                QueryResult resp = JdbcResolver.query(conn, new BindSql(sql), maxCount == null ? -1 : maxCount);
-                return transfer.success(resp);
+            Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
+            QueryResult resp=new QueryResult();
+            resp.setColumns(new ArrayList<>());
+            resp.setRows(new ArrayList<>(maxCount!=null && maxCount>0?Math.min(maxCount,500):0));
+            for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
+                try (Connection conn = entry.getValue()) {
+                    QueryResult qr= JdbcResolver.query(conn, new BindSql(sql), maxCount == null ? -1 : maxCount);
+                    resp.setColumns(qr.getColumns());
+                    resp.getRows().addAll(qr.getRows());
+                }
             }
+            return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(),e);
             return transfer.error(e.getMessage());
@@ -110,10 +118,15 @@ public class DatasourceOpsController {
         try {
             DatasourceOperateDto req = transfer.recv(reqDto, DatasourceOperateDto.class);
             String sql = req.getSql();
-            try (Connection conn = datasourceOpsHelper.getConnection(req)) {
-                int update = JdbcResolver.update(conn, new BindSql(sql));
-                return transfer.success(update);
+            Map<String,Object> resp=new HashMap<>();
+            Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
+            for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
+                try (Connection conn = entry.getValue()) {
+                    int update = JdbcResolver.update(conn, new BindSql(sql));
+                    resp.put(entry.getKey(), update);
+                }
             }
+            return transfer.success(resp);
         } catch (Exception e) {
             log.warn(e.getMessage(),e);
             return transfer.error(e.getMessage());
@@ -126,32 +139,37 @@ public class DatasourceOpsController {
         try {
             DatasourceRunnerDto req = transfer.recv(reqDto, DatasourceRunnerDto.class);
             String sql = req.getSql();
-            try (Connection conn = datasourceOpsHelper.getConnection(req)) {
-                StringBuilder builder = new StringBuilder();
-                JdbcScriptRunner runner = new JdbcScriptRunner(conn);
-                if (req.getAutoCommit() != null) {
-                    runner.setAutoCommit(req.getAutoCommit());
-                }
-                if (req.getDelimiter() != null && !req.getDelimiter().isEmpty()) {
-                    runner.setDelimiter(req.getDelimiter());
-                }
-                if (req.getSendFullScript() != null) {
-                    runner.setSendFullScript(req.getSendFullScript());
-                }
-                if (req.getStopOnError() != null) {
-                    runner.setStopOnError(req.getStopOnError());
-                }
-                runner.setLogPrinter((o) -> builder.append(o).append("\n"));
-                runner.setLogErrorPrinter((o, e) -> {
-                    builder.append(o).append("\n");
-                    if (e != null) {
-                        builder.append(e.getMessage()).append("\n");
-                        builder.append(e).append("\n");
+            Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
+            StringBuilder builder = new StringBuilder();
+            for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
+                builder.append("-- =============== run on " + entry.getKey() + " ===============\n");
+                try (Connection conn = entry.getValue()) {
+                    JdbcScriptRunner runner = new JdbcScriptRunner(conn);
+                    if (req.getAutoCommit() != null) {
+                        runner.setAutoCommit(req.getAutoCommit());
                     }
-                });
-                runner.runScript(sql);
-                return transfer.success(builder.toString());
+                    if (req.getDelimiter() != null && !req.getDelimiter().isEmpty()) {
+                        runner.setDelimiter(req.getDelimiter());
+                    }
+                    if (req.getSendFullScript() != null) {
+                        runner.setSendFullScript(req.getSendFullScript());
+                    }
+                    if (req.getStopOnError() != null) {
+                        runner.setStopOnError(req.getStopOnError());
+                    }
+                    runner.setLogPrinter((o) -> builder.append(o).append("\n"));
+                    runner.setLogErrorPrinter((o, e) -> {
+                        builder.append(o).append("\n");
+                        if (e != null) {
+                            builder.append(e.getMessage()).append("\n");
+                            builder.append(e).append("\n");
+                        }
+                    });
+                    runner.runScript(sql);
+
+                }
             }
+            return transfer.success(builder.toString());
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
