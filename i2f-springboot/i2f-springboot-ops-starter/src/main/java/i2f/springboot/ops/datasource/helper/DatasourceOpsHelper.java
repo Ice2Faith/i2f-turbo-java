@@ -12,8 +12,7 @@ import org.springframework.util.StringUtils;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.util.Properties;
-import java.util.ServiceLoader;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -29,27 +28,75 @@ public class DatasourceOpsHelper {
     public Connection getConnection(DatasourceSelectDto req) throws Exception {
         Boolean useCustomDatasource = req.getUseCustomDatasource();
         if (useCustomDatasource != null && useCustomDatasource) {
-            ServiceLoader<Driver> drivers = ServiceLoader.load(Driver.class);
-            Driver driver = null;
-            for (Driver item : drivers) {
-                if (item.acceptsURL(req.getUrl())) {
-                    driver = item;
-                }
-            }
-            if (driver == null) {
-                throw new OpsException("not found suitable driver for url");
-            }
-            Properties properties = new Properties();
-            if (req.getUsername() != null) {
-                properties.put("user", req.getUsername());
-            }
-            if (req.getPassword() != null) {
-                properties.put("password", req.getPassword());
-            }
-            Connection conn = driver.connect(req.getUrl(), properties);
+            Connection conn=getCustomConnection(req);
             return conn;
         }
         String datasourceName = req.getDatasource();
+        Connection  conn = getConnectionByName(datasourceName);
+        return conn;
+    }
+
+    public Map<String,Connection> getMultipleConnection(DatasourceSelectDto req) throws Exception {
+        Map<String,Connection> ret = new LinkedHashMap<>();
+        Boolean useCustomDatasource = req.getUseCustomDatasource();
+        if(useCustomDatasource != null && useCustomDatasource) {
+            Connection conn=getCustomConnection(req);
+            ret.put("*custom",conn);
+            return ret;
+        }
+        Boolean useMultiDatasource = req.getUseMultiDatasource();
+        if(useMultiDatasource != null && useMultiDatasource) {
+            List<String> multiDatasourceList = req.getMultiDatasourceList();
+            if(multiDatasourceList==null || multiDatasourceList.isEmpty()) {
+                throw new OpsException("use multi datasource require at least one datasource");
+            }
+            for (String item : multiDatasourceList) {
+                if(item==null || item.isEmpty()) {
+                    continue;
+                }
+                if(ret.containsKey(item)) {
+                    continue;
+                }
+                Connection conn = getConnectionByName(item);
+                ret.put(item,conn);
+            }
+            if(ret.isEmpty()){
+                throw new OpsException("use multi datasource require at least one datasource");
+            }
+            return ret;
+        }
+        String datasourceName = req.getDatasource();
+        if (StringUtils.isEmpty(datasourceName)) {
+            datasourceName = datasourceProvider.getDefaultDataSourceName();
+        }
+        Connection conn = getConnectionByName(datasourceName);
+        ret.put(datasourceName,conn);
+        return ret;
+    }
+
+    public Connection getCustomConnection(DatasourceSelectDto req) throws Exception {
+        ServiceLoader<Driver> drivers = ServiceLoader.load(Driver.class);
+        Driver driver = null;
+        for (Driver item : drivers) {
+            if (item.acceptsURL(req.getUrl())) {
+                driver = item;
+            }
+        }
+        if (driver == null) {
+            throw new OpsException("not found suitable driver for url");
+        }
+        Properties properties = new Properties();
+        if (req.getUsername() != null) {
+            properties.put("user", req.getUsername());
+        }
+        if (req.getPassword() != null) {
+            properties.put("password", req.getPassword());
+        }
+        Connection conn = driver.connect(req.getUrl(), properties);
+        return conn;
+    }
+
+    public Connection getConnectionByName(String datasourceName) throws Exception {
         if (StringUtils.isEmpty(datasourceName)) {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
         }
@@ -60,4 +107,6 @@ public class DatasourceOpsHelper {
         Connection conn = datasource.getConnection();
         return conn;
     }
+
+
 }

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -43,8 +44,16 @@ public class RedisOpsController {
     protected OpsSecureTransfer transfer;
 
     public RedisTemplate getRedisTemplate(){
-        RedisTemplate bean = applicationContext.getBean(RedisTemplate.class);
-        return bean;
+        String[] names = applicationContext.getBeanNamesForType(RedisTemplate.class);
+        if(names!=null && names.length>0){
+            for (String name : names) {
+                RedisTemplate bean = applicationContext.getBean(name, RedisTemplate.class);
+                if(bean!=null){
+                    return bean;
+                }
+            }
+        }
+        throw new OpsException("not found RedisTemplate");
     }
 
     @PostMapping("/scan")

@@ -33,14 +33,17 @@
 </head>
 <body>
 <div id="app">
-    <el-divider>连接证书</el-divider>
-    <el-input
-            type="textarea"
-            :rows="3"
-            placeholder="请输入连接证书"
-            v-model="metas.cert"
-            @change="onCertChange">
-    </el-input>
+    <el-row class="cert-block">
+        <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
+        <el-input
+                type="textarea"
+                :rows="3"
+                placeholder="请输入连接证书"
+                v-model="metas.cert"
+                @change="onCertChange">
+        </el-input>
+    </el-row>
+
     <el-divider>SQL操作</el-divider>
     <!--<el-input ref="refInputSql"
               type="textarea"
@@ -56,6 +59,8 @@
     <el-row>
         <el-form inline label-position="left" label-width="80px">
             <el-row>
+                <el-button size="medium" @click="doResetData">重置</el-button>
+                <el-divider direction="vertical"></el-divider>
                 <el-checkbox v-model="form.useCustomDatasource">自定义数据源</el-checkbox>
                 <template v-if="form.useCustomDatasource">
                     <el-form-item label="驱动">
@@ -67,7 +72,9 @@
                                     :value="item">
                             </el-option>
                         </el-select>
-                        <el-button v-loading="metas.driverListLoading" type="primary" @click="doRefreshDrivers">刷新
+                        <el-button v-loading="metas.driverListLoading" size="medium"
+                                   icon="el-icon-refresh" circle
+                                   @click="doRefreshDrivers">
                         </el-button>
                     </el-form-item>
                     <el-form-item label="JDBC URL">
@@ -90,15 +97,15 @@
                                     :value="item">
                             </el-option>
                         </el-select>
-                        <el-button v-loading="metas.datasourceListLoading" type="primary" @click="doRefreshDatasources">
-                            刷新
+                        <el-button v-loading="metas.datasourceListLoading" size="medium"
+                                   icon="el-icon-refresh" circle
+                                   @click="doRefreshDatasources">
                         </el-button>
                     </el-form-item>
                 </template>
-                <el-button @click="doResetData">重置</el-button>
             </el-row>
             <el-row type="flex">
-                <el-col :span="16">
+                <el-col :span="20">
                     <el-row>
                         <el-form-item label="执行类型">
                             <el-select v-model="metas.operate" placeholder="执行类型">
@@ -108,26 +115,50 @@
                                         :label="item.label"
                                         :value="item.value">
                                 </el-option>
-                                index.html
                             </el-select>
                         </el-form-item>
                         <el-form-item label="结果数">
                             <el-input-number v-model="form.maxCount" :min="-1"></el-input-number>
                         </el-form-item>
                         <el-form-item>
-                            <el-button v-loading="metas.resultLoading" type="primary" @click="onExecute">执行
-                            </el-button>
-                            <el-button type="warning" @click="onExecuteScript">执行脚本</el-button>
+                            <el-checkbox v-model="form.useMultiDatasource" :disabled="form.useCustomDatasource">分发执行</el-checkbox>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-select v-model="form.multiDatasourceList" :disabled="!form.useMultiDatasource || form.useCustomDatasource" multiple placeholder="分发数据源">
+                                <el-option
+                                        v-for="item in metas.datasourceList"
+                                        :key="item"
+                                        :label="item"
+                                        :value="item">
+                                </el-option>
+                            </el-select>
+                            <el-checkbox v-model="form.chkAllMultiDatasource" :disabled="!form.useMultiDatasource || form.useCustomDatasource">全选</el-checkbox>
                         </el-form-item>
                     </el-row>
                 </el-col>
-                <el-col :span="8">
+                <el-col :span="4">
                     <el-row type="flex" justify="end">
                         <el-form-item>
-                            <el-button type="success" @click="onViewMetadata">元数据</el-button>
+                            <el-button type="success" size="medium"
+                                       @click="onViewMetadata">
+                                元数据
+                            </el-button>
                         </el-form-item>
                     </el-row>
                 </el-col>
+            </el-row>
+            <el-row type="flex" justify="center">
+                <el-form-item>
+                    <el-button v-loading="metas.resultLoading" size="medium"
+                               type="primary"
+                               @click="onExecute">
+                        执行
+                    </el-button>
+                    <el-button type="warning" size="medium"
+                               @click="onExecuteScript">
+                        执行脚本
+                    </el-button>
+                </el-form-item>
             </el-row>
 
         </el-form>
@@ -141,10 +172,22 @@
                 :value="item.value">
         </el-option>
     </el-select>
-    <el-button type="success" @click="onViewText(metas.resultList,'数据集')">表格JSON</el-button>
-    <el-button type="warning" @click="onViewText(metas.resultColumns,'表头信息')">表头JSON</el-button>
-    <el-button type="primary" @click="onVisualCharts">可视化图表</el-button>
+    <el-button type="success" size="medium"
+               @click="onViewText(metas.resultList,'数据集')">
+        表格JSON
+    </el-button>
+    <el-button type="warning" size="medium"
+               @click="onViewText(metas.resultColumns,'表头信息')">
+        表头JSON
+    </el-button>
+    <el-button type="primary" size="medium"
+               @click="onVisualCharts">
+        可视化图表
+    </el-button>
     <el-row v-show="metas.resultType=='table'">
+        <el-row style="color: #777;padding-left: 8px;">
+            行数：{{metas.resultList.length}}
+        </el-row>
         <el-table border stripe highlight-current-row
                   :data="metas.resultList"
                   style="width: 100%"
@@ -210,11 +253,13 @@
                         </el-col>
                         <el-col :span="12">
                             <el-row type="flex" justify="end">
-                                <el-button type="success" @click="onViewText(drawer.metadata.databases,'数据库列表')">
+                                <el-button type="success" size="medium"
+                                           @click="onViewText(drawer.metadata.databases,'数据库列表')">
                                     数据库JSON
                                 </el-button>
-                                <el-button v-loading="drawer.metadata.databasesLoading" type="primary"
-                                           @click="onRefreshDatabases">刷新
+                                <el-button v-loading="drawer.metadata.databasesLoading" size="medium"
+                                           icon="el-icon-refresh" circle
+                                           @click="onRefreshDatabases">
                                 </el-button>
                             </el-row>
                         </el-col>
@@ -247,10 +292,13 @@
                         </el-col>
                         <el-col :span="12">
                             <el-row type="flex" justify="end">
-                                <el-button type="success" @click="onViewText(drawer.metadata.tables,'表列表')">表JSON
+                                <el-button type="success" size="medium"
+                                           @click="onViewText(drawer.metadata.tables,'表列表')">
+                                    表JSON
                                 </el-button>
-                                <el-button v-loading="drawer.metadata.tablesLoading" type="primary"
-                                           @click="onRefreshTables">刷新
+                                <el-button v-loading="drawer.metadata.tablesLoading" size="medium"
+                                           icon="el-icon-refresh" circle
+                                           @click="onRefreshTables">
                                 </el-button>
                             </el-row>
                         </el-col>
@@ -293,7 +341,10 @@
             注释：{{dialog.tableInfo.meta.comment}}
         </el-row>
         <el-row>
-            <el-button v-loading="dialog.tableInfo.metaLoading" type="primary" @click="doLoadTableInfo">刷新</el-button>
+            <el-button v-loading="dialog.tableInfo.metaLoading"
+                       icon="el-icon-refresh" circle
+                       @click="doLoadTableInfo">
+            </el-button>
             <el-button type="success" @click="onViewText(dialog.tableInfo.meta,'表结构')">表结构JSON</el-button>
         </el-row>
         <el-row>
@@ -491,7 +542,7 @@
             </el-form>
         </el-row>
         <el-row type="flex" justify="end">
-            <el-button type="primary" @click="doExecuteScript">执行</el-button>
+            <el-button type="primary" @click="onEnsureExecuteScript">执行</el-button>
             <el-button @click="dialog.scriptRunner.show=false">取消</el-button>
         </el-row>
 
@@ -554,6 +605,24 @@
         mounted(){
             this.initEditor();
         },
+        watch:{
+            'form.useCustomDatasource':{
+                handler:function(val,old){
+                    if(val){
+                        this.form.useMultiDatasource=false;
+                    }
+                }
+            },
+            'form.chkAllMultiDatasource':{
+                handler:function(val,old){
+                    if(val){
+                        this.form.multiDatasourceList=[...this.metas.datasourceList]
+                    }else{
+                        this.form.multiDatasourceList=[]
+                    }
+                }
+            }
+        },
         methods: {
             getDefaultData() {
                 return {
@@ -583,7 +652,7 @@
                     metas: {
                         cert: '',
                         datasourceListLoading: false,
-                        datasourceList: [],
+                        datasourceList: ['master','slave'],
                         driverListLoading: false,
                         driverList: [],
                         operate: 'query',
@@ -696,7 +765,10 @@
                         password: '',
                         sql: '',
                         selectSql: '',
-                        maxCount: 300
+                        maxCount: 100,
+                        useMultiDatasource: false,
+                        multiDatasourceList:[],
+                        chkAllMultiDatasource: false,
                     }
                 }
             },
@@ -864,8 +936,19 @@
                 if (!cert || cert.length == 0) {
                     throw new Error('请先填写连接证书')
                 }
-                let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
-                return new OpsSecureTransfer(keyPair)
+                let ex=null;
+                for (let i = 0; i < 3; i++) {
+                    try{
+                        let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
+                        return new OpsSecureTransfer(keyPair)
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(!ex){
+                    ex=new Error('init transfer error')
+                }
+                throw e;
             },
             onCertChange() {
                 this.doRefreshDatasources()
@@ -934,7 +1017,7 @@
                     this.metas.driverListLoading = false;
                 }
             },
-            fillDatasourceForm(req) {
+            fillDatasourceForm(req,supportMultiply) {
                 req.useCustomDatasource = this.form.useCustomDatasource;
                 if (req.useCustomDatasource) {
                     req.useCustomDatasource = this.form.useCustomDatasource;
@@ -942,9 +1025,21 @@
                     req.url = this.form.url;
                     req.username = this.form.username;
                     req.password = this.form.password;
-                } else {
-                    req.datasource = this.form.datasource;
+                    return req;
                 }
+
+                if(supportMultiply){
+                    req.useMultiDatasource=this.form.useMultiDatasource;
+                    if(req.useMultiDatasource){
+                        req.multiDatasourceList=this.form.multiDatasourceList;
+                        if(!req.multiDatasourceList || req.multiDatasourceList.length==0){
+                            throw new Error('使用分发执行时，至少选择一个分发数据源')
+                        }
+                    }
+                    return req;
+                }
+
+                req.datasource = this.form.datasource;
                 return req;
             },
             getDatasourceStorageKey(req) {
@@ -972,13 +1067,30 @@
                 }
             },
             onExecute() {
+                this.$confirm('即将执行语句，是否继续？', '删除提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.doExecute();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doExecute(){
                 this.metas.resultLoading = true;
                 try {
-                    let sql = this.form.sql;
+                    let sql=this.editor.getSelection();
+                    if(!sql || sql=='') {
+                        sql = this.form.sql;
+                    }
                     let req = this.fillDatasourceForm({
                         sql: sql,
                         maxCount: this.form.maxCount,
-                    });
+                    },true);
                     let operate = this.metas.operate;
                     let transfer = this.getTransfer();
                     this.$axios({
@@ -989,9 +1101,9 @@
                         if (res.data.code == 200) {
                             //console.log(res.data)
                             let resp = transfer.recv(res.data.data)
-                           // console.log(resp)
+                            // console.log(resp)
                             if (operate == 'update' && !resp.columns) {
-                                this.metas.resultText = resp + '';
+                                this.metas.resultText = JSON.stringify(resp);
                                 this.metas.resultType = 'text';
                             } else {
                                 this.metas.resultList = resp.rows;
@@ -1014,6 +1126,20 @@
             onExecuteScript() {
                 this.dialog.scriptRunner.show = true;
             },
+            onEnsureExecuteScript(){
+                this.$confirm('即将执行脚本，是否继续？', '删除提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.doExecuteScript();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
             doExecuteScript() {
                 this.dialog.scriptRunner.show = false;
                 this.metas.resultLoading = true;
@@ -1026,7 +1152,7 @@
                         delimiter: this.dialog.scriptRunner.delimiter,
                         sendFullScript: this.dialog.scriptRunner.sendFullScript,
                         stopOnError: this.dialog.scriptRunner.stopOnError,
-                    });
+                    },true);
                     let transfer = this.getTransfer();
                     this.$axios({
                         url: `/runner`,
@@ -1052,6 +1178,7 @@
                     this.metas.resultLoading = false;
                 }
             },
+
             onViewMetadata() {
                 this.drawer.metadata.show = true;
 
@@ -1417,6 +1544,13 @@
     window.app.$mount('#app')
 </script>
 <style>
+    .cert-block {
+        height: 32px;
+        overflow: hidden;
+    }
+    .cert-block:hover{
+        height: unset;
+    }
     .list-item {
         margin-top: 3px;
         border-bottom: solid 1px #777;
@@ -1429,5 +1563,6 @@
     .checked-item {
         background: darkorange;
     }
+
 </style>
 </html>

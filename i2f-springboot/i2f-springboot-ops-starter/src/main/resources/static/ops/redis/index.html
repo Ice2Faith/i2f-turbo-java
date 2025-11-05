@@ -24,18 +24,22 @@
 </head>
 <body>
 <div id="app">
-  <el-divider>连接证书</el-divider>
-  <el-input
-          type="textarea"
-          :rows="3"
-          placeholder="请输入连接证书"
-          v-model="metas.cert"
-          @change="onCertChange">
-  </el-input>
+  <el-row class="cert-block">
+    <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
+    <el-input
+            type="textarea"
+            :rows="3"
+            placeholder="请输入连接证书"
+            v-model="metas.cert"
+            @change="onCertChange">
+    </el-input>
+  </el-row>
   <el-divider>Redis操作</el-divider>
 
   <el-row>
     <el-form inline label-position="left" label-width="80px">
+      <el-button size="medium" @click="doResetData">重置</el-button>
+      <el-divider direction="vertical"></el-divider>
       <el-form-item>
         <el-popover
                 placement="top-start"
@@ -52,17 +56,18 @@
         </el-input>
       </el-form-item>
       <el-form-item>
-        <el-button v-loading="metas.keyListLoading" type="primary" @click="doRefreshKeys">
-          刷新
+        <el-button size="medium" v-loading="metas.keyListLoading"
+                   icon="el-icon-refresh" circle
+                   @click="doRefreshKeys">
         </el-button>
-        <el-button @click="doResetData">重置</el-button>
+
       </el-form-item>
     </el-form>
   </el-row>
   <el-row type="flex">
     <el-col :span="10" style="border-right: solid 1px #777;">
       <el-row>
-        <el-button type="danger" @click="onDeleteCheckedNodes" v-loading="metas.deleteLoading">删除勾选</el-button>
+        <el-button size="medium" type="danger" @click="onDeleteCheckedNodes" v-loading="metas.deleteLoading">删除勾选</el-button>
       </el-row>
       <el-input
               placeholder="过滤节点"
@@ -78,13 +83,14 @@
       <span class="extra-tree-node" slot-scope="{ node, data }" @click="onClickTreeNode(node,data)">
         <span>{{ node.label }}</span>
         <span style="float: right;">
-          <el-button type="text"
+          <el-button type="text" size="medium"
                      v-loading="metas.getLoading"
                      size="mini"
                      @click="onEditKey(node,data)">
             编辑
           </el-button>
-          <el-button type="text" style="color: orangered;"
+          <el-button type="text" size="medium"
+                     style="color: orangered;"
                      v-loading="metas.deleteLoading"
                   size="mini"
                   @click="onDeleteNodeKey(node,data)">
@@ -98,23 +104,31 @@
     <el-col :span="14">
       <el-row>
           <el-row type="flex" justify="end">
-            <el-button v-loading="metas.getLoading"
-                       type="primary"
-                       @click="onViewKey">载入</el-button>
+
             <el-button v-loading="metas.setLoading"
-                       type="primary"
-                       @click="onSetKey">保存</el-button>
+                       type="primary" size="medium"
+                       @click="onSetKey">
+              保存
+            </el-button>
             <el-button v-loading="metas.ttlLoading"
-                       type="primary"
-                       @click="onUpdateTtl">更新TTL</el-button>
+                       type="success" size="medium"
+                       @click="onUpdateTtl">
+              更新TTL
+            </el-button>
             <el-button v-loading="metas.deleteLoading"
-                       type="danger"
-                       @click="onDeleteKey">删除</el-button>
+                       type="danger" size="medium"
+                       @click="onDeleteKey">
+              删除
+            </el-button>
           </el-row>
           <el-row type="flex">
             <el-col :span="18">
                 <el-input v-model="form.key">
                   <template slot="prepend">键</template>
+                  <el-button v-loading="metas.getLoading" size="medium"
+                             slot="append" :icon="metas.getLoading?'el-icon-loading':'el-icon-search'"
+                             @click="onViewKey">
+                  </el-button>
                 </el-input>
             </el-col>
             <el-col :span="6">
@@ -252,8 +266,19 @@
         if (!cert || cert.length == 0) {
           throw new Error('请先填写连接证书')
         }
-        let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
-        return new OpsSecureTransfer(keyPair)
+        let ex=null;
+        for (let i = 0; i < 3; i++) {
+          try{
+            let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
+            return new OpsSecureTransfer(keyPair)
+          }catch (e){
+            ex=e;
+          }
+        }
+        if(!ex){
+          ex=new Error('init transfer error')
+        }
+        throw e;
       },
       onCertChange() {
 
@@ -581,6 +606,14 @@
   window.app.$mount('#app')
 </script>
 <style>
+  .cert-block {
+    height: 32px;
+    overflow: hidden;
+  }
+  .cert-block:hover{
+    height: unset;
+  }
+
   .list-item {
     margin-top: 3px;
     border-bottom: solid 1px #777;
