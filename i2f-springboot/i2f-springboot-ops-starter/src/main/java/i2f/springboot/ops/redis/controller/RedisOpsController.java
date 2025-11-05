@@ -1,5 +1,6 @@
 package i2f.springboot.ops.redis.controller;
 
+import i2f.springboot.ops.common.OpsException;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -8,15 +9,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.Closeable;
+import java.nio.charset.StandardCharsets;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -54,11 +58,16 @@ public class RedisOpsController {
             if(count!=null && count>=0){
                 builder.count(count);
             }
-            Cursor cursor = redisTemplate.scan(builder.build());
+            ScanOptions options = builder.build();
+            Cursor<byte[]> cursor = (Cursor<byte[]>) redisTemplate.executeWithStickyConnection((connection) -> {
+                return connection.scan(options);
+            });
             List<String> list=new ArrayList<>(300);
-            while(cursor.hasNext()){
-                Object item = cursor.next();
-                list.add(String.valueOf(item));
+            if(cursor!=null) {
+                while (cursor.hasNext()) {
+                    byte[] item = cursor.next();
+                    list.add(new String(item, StandardCharsets.UTF_8));
+                }
             }
             return transfer.success(list);
         } catch (Throwable e) {
@@ -76,8 +85,17 @@ public class RedisOpsController {
             if(pattern==null || pattern.isEmpty()) {
                 pattern="*";
             }
-            Set keys = redisTemplate.keys(pattern);
-            return transfer.success(keys);
+            byte[] rawKey=pattern.getBytes(StandardCharsets.UTF_8);
+            Set<byte[]> rawKeys = (Set<byte[]>)redisTemplate.execute((connection) -> {
+                return connection.keys(rawKey);
+            }, true);
+            List<String> resp=new ArrayList<>(300);
+            if(rawKeys!=null) {
+                for (byte[] item : rawKeys) {
+                    resp.add(new String(item, StandardCharsets.UTF_8));
+                }
+            }
+            return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(),e);
             return transfer.error(e.getMessage());
@@ -90,11 +108,23 @@ public class RedisOpsController {
         try {
             RedisOperateDto req = transfer.recv(reqDto, RedisOperateDto.class);
             String key = req.getKey();
-            Object result = redisTemplate.opsForValue().get(key);
-            Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
+            if(key==null){
+                throw new OpsException("missing key");
+            }
+            byte[] rawKey=key.getBytes(StandardCharsets.UTF_8);
+            byte[] rawValue=(byte[])redisTemplate.execute((connection)->{
+                return connection.get(rawKey);
+            },true);
+            Long ttl= (Long)redisTemplate.execute((connection) -> {
+                try {
+                    return connection.pTtl(rawKey, TimeUnit.SECONDS);
+                } catch (Exception var4) {
+                    return connection.ttl(rawKey, TimeUnit.SECONDS);
+                }
+            }, true);
             RedisOperateDto resp=new RedisOperateDto();
             resp.setKey(key);
-            resp.setValue(String.valueOf(result));
+            resp.setValue(rawValue==null?null:new String(rawValue,StandardCharsets.UTF_8));
             resp.setTtl(ttl);
             return transfer.success(resp);
         } catch (Throwable e) {
@@ -111,10 +141,45 @@ public class RedisOpsController {
             String key = req.getKey();
             String value = req.getValue();
             Long ttl = req.getTtl();
+            if(key==null){
+                throw new OpsException("missing key");
+            }
+            TimeUnit unit=TimeUnit.SECONDS;
+            byte[] rawKey=key.getBytes(StandardCharsets.UTF_8);
+            byte[] rawValue=value==null?new byte[0]:value.getBytes(StandardCharsets.UTF_8);
             if(ttl!=null && ttl>=0){
-                redisTemplate.opsForValue().set(key, value, ttl, TimeUnit.SECONDS);
+                long timeout=ttl;
+                redisTemplate.execute(new RedisCallback<Object>() {
+                    @Override
+                    public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                        this.potentiallyUsePsetEx(connection);
+                        return null;
+                    }
+
+                    public void potentiallyUsePsetEx(RedisConnection connection) {
+                        if (!TimeUnit.MILLISECONDS.equals(unit) || !this.failsafeInvokePsetEx(connection)) {
+                            connection.setEx(rawKey, TimeoutUtils.toSeconds(timeout, unit), rawValue);
+                        }
+
+                    }
+
+                    private boolean failsafeInvokePsetEx(RedisConnection connection) {
+                        boolean failed = false;
+
+                        try {
+                            connection.pSetEx(rawKey, timeout, rawValue);
+                        } catch (UnsupportedOperationException var4) {
+                            failed = true;
+                        }
+
+                        return !failed;
+                    }
+                }, true);
+
             }else{
-                redisTemplate.opsForValue().set(key, value);
+                redisTemplate.execute((connection)->{
+                    return connection.set(rawKey,rawValue);
+                },true);
             }
             return transfer.success(true);
         } catch (Throwable e) {
@@ -129,7 +194,19 @@ public class RedisOpsController {
         try {
             RedisOperateDto req = transfer.recv(reqDto, RedisOperateDto.class);
             List<String> keys = req.getKeys();
-            Long resp = redisTemplate.delete(keys);
+            Long resp=(Long)redisTemplate.execute((connection)->{
+                long ret=0;
+                for (String key : keys) {
+                    byte[] rawKey=key.getBytes(StandardCharsets.UTF_8);
+                    Long cnt= connection.del(rawKey);
+                    if(cnt!=null){
+                        ret+=cnt;
+                    }else{
+                        ret++;
+                    }
+                }
+                return ret;
+            },true);
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(),e);
@@ -144,11 +221,27 @@ public class RedisOpsController {
             RedisOperateDto req = transfer.recv(reqDto, RedisOperateDto.class);
             String key = req.getKey();
             Long ttl = req.getTtl();
+            if(key==null){
+                throw new OpsException("missing key");
+            }
+            byte[] rawKey=key.getBytes(StandardCharsets.UTF_8);
+
             Boolean resp=null;
             if(ttl!=null && ttl>=0){
-                resp=redisTemplate.expire(key, ttl, TimeUnit.SECONDS);
+                long timeout=ttl;
+                TimeUnit unit=TimeUnit.SECONDS;
+                long rawTimeout = TimeoutUtils.toMillis(ttl, unit);
+                resp= (Boolean)redisTemplate.execute((connection) -> {
+                    try {
+                        return connection.pExpire(rawKey, rawTimeout);
+                    } catch (Exception var8) {
+                        return connection.expire(rawKey, TimeoutUtils.toSeconds(timeout, unit));
+                    }
+                }, true);
             }else{
-                resp=redisTemplate.persist(key);
+                resp=(Boolean)redisTemplate.execute((connection) -> {
+                    return connection.persist(rawKey);
+                }, true);
             }
             return transfer.success(resp);
         } catch (Throwable e) {
