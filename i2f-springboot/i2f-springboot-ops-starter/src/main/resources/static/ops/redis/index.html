@@ -39,7 +39,7 @@
       <el-form-item>
         <el-checkbox v-model="form.useScanKeys">Scan键</el-checkbox>
       </el-form-item>
-      <el-form-item label="过滤表达式">
+      <el-form-item label="过滤">
         <el-input
                 placeholder="表达式"
                 v-model="form.pattern">
@@ -55,6 +55,9 @@
   </el-row>
   <el-row type="flex">
     <el-col :span="10" style="border-right: solid 1px #777;">
+      <el-row>
+        <el-button type="danger" @click="onDeleteCheckedNodes">删除勾选</el-button>
+      </el-row>
       <el-input
               placeholder="过滤节点"
               v-model="metas.filterNodeText">
@@ -76,7 +79,7 @@
           </el-button>
           <el-button type="text" style="color: orangered;"
                   size="mini"
-                  @click="onDeleteKey(node,data)">
+                  @click="onDeleteNodeKey(node,data)">
             删除
           </el-button>
         </span>
@@ -86,6 +89,14 @@
     </el-col>
     <el-col :span="14">
       <el-row>
+          <el-row type="flex" justify="end">
+            <el-button v-loadinng="metas.deleteLoading"
+                       type="primary"
+                       @click="onSetKey">保存</el-button>
+            <el-button v-loadinng="metas.deleteLoading"
+                       type="danger"
+                       @click="onDeleteKey">删除</el-button>
+          </el-row>
           <el-row type="flex">
             <el-col :span="18">
                 <el-input v-model="form.key">
@@ -264,31 +275,16 @@
             pattern: this.form.pattern,
           }
 
-          new Promise((resolve, reject)=>{
-            resolve({
-              data:{
-                code: 200,
-                data:[
-                        'auth:login:1001',
-                        'auth:login:1002',
-                        'sys:dict:gender',
-                        'sys:dict:nation',
-                        'job:cron:daily'
-                ]
-              }
-            })
-          })
-          /*
+
           let transfer = this.getTransfer();
           this.$axios({
             url: '/'+(useScanKeys?'scan':'keys'),
             method: 'post',
             data: transfer.send(req)
-          })*/.then(res => {
+          }).then(res => {
             if (res.data.code == 200) {
               console.log(res.data)
-              //let resp = transfer.recv(res.data.data)
-              let resp = res.data.data
+              let resp = transfer.recv(res.data.data)
               console.log(resp)
               this.metas.keyList = resp;
               let tree=this.rebuildKeyTree(resp);
@@ -355,8 +351,43 @@
         if (!value) return true;
         return data.path.indexOf(value) >=0;
       },
-      onDeleteKey(node,data){
+      onDeleteNodeKey(node,data){
         let key=data.path;
+        this.$confirm('即将删除键，是否继续？'+key, '删除提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.doDeleteKey([key]);
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
+      onDeleteCheckedNodes(){
+        let nodes=this.$refs.refKeyTree.getCheckedNodes()
+        if(!nodes || nodes.length==0){
+          this.$message.error('未选择节点');
+          return;
+        }
+        let keys=nodes.map(e=>e.path)
+        this.$confirm('即将删除键，是否继续？已选择 '+keys[0]+' 等 '+keys.length +' 个键', '删除提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.doDeleteKey(keys);
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
+      onDeleteKey(){
+        let key=this.form.key;
         this.$confirm('即将删除键，是否继续？'+key, '删除提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -384,8 +415,7 @@
           }).then(res => {
             if (res.data.code == 200) {
               console.log(res.data)
-              //let resp = transfer.recv(res.data.data)
-              let resp = res.data.data
+              let resp = transfer.recv(res.data.data)
               console.log(resp)
               this.$message.success('操作成功')
             } else {
@@ -422,8 +452,7 @@
           }).then(res => {
             if (res.data.code == 200) {
               console.log(res.data)
-              //let resp = transfer.recv(res.data.data)
-              let resp = res.data.data
+              let resp = transfer.recv(res.data.data)
               console.log(resp)
               this.form.key=resp.key;
               this.form.ttl=resp.ttl || -1;
@@ -440,6 +469,9 @@
           this.$message.error(err.errorMessage || err.message || '操作失败')
           this.metas.valueLoading = false;
         }
+      },
+      onSetKey(){
+
       }
     }
   })
