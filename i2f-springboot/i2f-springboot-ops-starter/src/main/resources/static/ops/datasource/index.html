@@ -729,7 +729,7 @@
                     let content = JSON.stringify(obj);
                     localStorage.setItem('ops:datasource:data', content);
                 } catch (e) {
-                    console.log(e)
+                   // console.log(e)
                 }
             },
             initCompletionsRefreshInterval(){
@@ -797,7 +797,7 @@
                     let cur = editor.getCursor();
                     let token = editor.getTokenAt(cur);
                     let prefix=token.string;
-                    debugger
+
                     let items=_this.editorCompletionItemCollector(prefix) || []
                     let result=CodeMirror.hint.sql(editor,options);
                     if(result && result.list){
@@ -856,19 +856,13 @@
                 })
             },
             getTransfer() {
-                debugger
-                let certPair = OpsSecureHelper.generateCertPair();
-                let serverTransfer = new OpsSecureTransfer(OpsSecureHelper.deserializeKeyPair(certPair.serverCert))
-                let dto = serverTransfer.send('1234');
-                let clientTransfer = new OpsSecureTransfer(OpsSecureHelper.deserializeKeyPair(certPair.clientCert))
-                let resp = clientTransfer.recv(dto);
                 let cert = this.metas.cert;
                 if (!cert || cert.length == 0) {
                     cert = '';
                 }
                 cert = cert.trim();
                 if (!cert || cert.length == 0) {
-                    this.$message.error('请先填写连接证书')
+                    throw new Error('请先填写连接证书')
                 }
                 let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
                 return new OpsSecureTransfer(keyPair)
@@ -888,9 +882,9 @@
                         data: transfer.send(timestamp)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            console.log(res.data)
+                            //console.log(res.data)
                             let resp = transfer.recv(res.data.data)
-                            console.log(resp)
+                            //console.log(resp)
                             this.metas.datasourceList = resp.list;
                             this.form.datasource = resp.defaultName;
                             this.storage.defaultDatasource = resp.defaultName;
@@ -919,9 +913,9 @@
                         data: transfer.send(timestamp)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            console.log(res.data)
+                            //console.log(res.data)
                             let resp = transfer.recv(res.data.data)
-                            console.log(resp)
+                            //console.log(resp)
                             this.metas.driverList = resp;
                             if (resp.length > 0 && this.form.driver == '') {
                                 this.form.driver = resp[0];
@@ -978,7 +972,6 @@
                 }
             },
             onExecute() {
-                debugger
                 this.metas.resultLoading = true;
                 try {
                     let sql = this.form.sql;
@@ -994,9 +987,9 @@
                         data: transfer.send(req)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            console.log(res.data)
+                            //console.log(res.data)
                             let resp = transfer.recv(res.data.data)
-                            console.log(resp)
+                           // console.log(resp)
                             if (operate == 'update' && !resp.columns) {
                                 this.metas.resultText = resp + '';
                                 this.metas.resultType = 'text';
@@ -1024,7 +1017,6 @@
             doExecuteScript() {
                 this.dialog.scriptRunner.show = false;
                 this.metas.resultLoading = true;
-                debugger
                 try {
                     let sql = this.form.sql;
 
@@ -1042,9 +1034,9 @@
                         data: transfer.send(req)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            console.log(res.data)
+                            //console.log(res.data)
                             let resp = transfer.recv(res.data.data)
-                            console.log(resp)
+                            //console.log(resp)
                             this.metas.resultText = resp + '';
                             this.metas.resultType = 'text';
                         } else {
@@ -1075,9 +1067,9 @@
                         data: transfer.send(req)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            console.log(res.data)
+                            // console.log(res.data)
                             let resp = transfer.recv(res.data.data)
-                            console.log(resp)
+                            // console.log(resp)
                             this.drawer.metadata.databases = resp.list;
                             this.drawer.metadata.checkDatabase = resp.defaultName;
                             let storageKey = this.getDatasourceStorageKey(req);
@@ -1118,9 +1110,9 @@
                         data: transfer.send(req)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            console.log(res.data)
+                            // console.log(res.data)
                             let resp = transfer.recv(res.data.data) || []
-                            console.log(resp)
+                            // console.log(resp)
                             this.drawer.metadata.tables = resp;
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database;
                             this.storage.tablesMap[storageKey] = resp;
@@ -1141,7 +1133,6 @@
                 this.drawer.metadata.checkTable = item.name;
             },
             onViewTableInfo(item) {
-                debugger
                 if(!item){
                     item={
                         name: this.drawer.metadata.checkTable
@@ -1198,9 +1189,9 @@
                         data: transfer.send(req)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            console.log(res.data)
+                            // console.log(res.data)
                             let resp = transfer.recv(res.data.data) || {};
-                            console.log(resp)
+                            // console.log(resp)
                             this.dialog.tableInfo.meta = resp;
                             this.dialog.tableInfo.title = resp.name;
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table;
@@ -1234,9 +1225,9 @@
                         data: transfer.send(req)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            console.log(res.data)
+                            // console.log(res.data)
                             let resp = transfer.recv(res.data.data);
-                            console.log(resp)
+                            // console.log(resp)
                             this.dialog.tableInfo.tableDdl = resp;
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table + '#' + req.ddlType;
                             this.storage.tableDdlMap[storageKey] = resp;
