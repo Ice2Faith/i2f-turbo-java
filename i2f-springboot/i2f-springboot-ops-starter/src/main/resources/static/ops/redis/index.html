@@ -225,7 +225,7 @@
           let content = JSON.stringify(obj);
           localStorage.setItem('ops:redis:data', content);
         } catch (e) {
-          console.log(e)
+          //console.log(e)
         }
       },
       initStoreData(){
@@ -244,19 +244,13 @@
         })
       },
       getTransfer() {
-        debugger
-        let certPair = OpsSecureHelper.generateCertPair();
-        let serverTransfer = new OpsSecureTransfer(OpsSecureHelper.deserializeKeyPair(certPair.serverCert))
-        let dto = serverTransfer.send('1234');
-        let clientTransfer = new OpsSecureTransfer(OpsSecureHelper.deserializeKeyPair(certPair.clientCert))
-        let resp = clientTransfer.recv(dto);
         let cert = this.metas.cert;
         if (!cert || cert.length == 0) {
           cert = '';
         }
         cert = cert.trim();
         if (!cert || cert.length == 0) {
-          this.$message.error('请先填写连接证书')
+          throw new Error('请先填写连接证书')
         }
         let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
         return new OpsSecureTransfer(keyPair)
@@ -295,9 +289,9 @@
             data: transfer.send(req)
           }).then(res => {
             if (res.data.code == 200) {
-              console.log(res.data)
+              //console.log(res.data)
               let resp = transfer.recv(res.data.data)
-              console.log(resp)
+              //console.log(resp)
               this.metas.keyList = resp;
               let tree=this.rebuildKeyTree(resp);
               this.metas.keyTree=tree;
@@ -426,9 +420,9 @@
             data: transfer.send(req)
           }).then(res => {
             if (res.data.code == 200) {
-              console.log(res.data)
+              //console.log(res.data)
               let resp = transfer.recv(res.data.data)
-              console.log(resp)
+              //console.log(resp)
               this.$message.success('操作成功')
             } else {
               this.$message.error(res.data.msg)
@@ -463,9 +457,9 @@
             data: transfer.send(req)
           }).then(res => {
             if (res.data.code == 200) {
-              console.log(res.data)
+              //console.log(res.data)
               let resp = transfer.recv(res.data.data)
-              console.log(resp)
+              //console.log(resp)
               this.form.key=resp.key;
               this.form.ttl=resp.ttl || -1;
               this.form.value=resp.value;
@@ -512,9 +506,9 @@
             data: transfer.send(req)
           }).then(res => {
             if (res.data.code == 200) {
-              console.log(res.data)
+              //console.log(res.data)
               let resp = transfer.recv(res.data.data)
-              console.log(resp)
+              //console.log(resp)
               this.$message.success('操作成功')
             } else {
               this.$message.error(res.data.msg)
@@ -558,9 +552,9 @@
             data: transfer.send(req)
           }).then(res => {
             if (res.data.code == 200) {
-              console.log(res.data)
+              //console.log(res.data)
               let resp = transfer.recv(res.data.data)
-              console.log(resp)
+              //console.log(resp)
               this.$message.success('操作成功')
             } else {
               this.$message.error(res.data.msg)
