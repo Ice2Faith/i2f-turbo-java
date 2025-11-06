@@ -30,6 +30,9 @@
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/theme/idea.min.css" />
     <script src="../lib/codemirror-6.65.7/mode/sql/sql.min.js"></script>
     <script src="../lib/codemirror-6.65.7/addon/hint/sql-hint.min.js" ></script>
+
+    <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css" />
+    <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -275,13 +278,17 @@
                     <el-row>
                         <el-input v-model="drawer.metadata.filterDatabase" placeholder="过滤数据库"></el-input>
                     </el-row>
-                    <template v-for="(item,index) in drawer.metadata.databases">
-                        <el-row v-if="(!drawer.metadata.filterDatabase || item.toLowerCase().indexOf(drawer.metadata.filterDatabase.toLowerCase())>=0)"
+                    <recycle-scroller :items="computeFilterDatabases"
+                                      class="scroller"
+                                      :item-size="32"
+                                      key-field="name"
+                                      v-slot="{ item }">
+                        <el-row
                                 :class="'list-item '+(item==drawer.metadata.checkDatabase?'checked-item':'')"
                                 @click.native="onClickDatabaseItem(item)">
                             {{item}}
                         </el-row>
-                    </template>
+                    </recycle-scroller>
 
                 </el-row>
             </el-col>
@@ -314,20 +321,24 @@
                     <el-row>
                         <el-input v-model="drawer.metadata.filterTable" placeholder="过滤表"></el-input>
                     </el-row>
-                    <template v-for="(item,index) in drawer.metadata.tables">
-                        <el-row type="flex"
-                                v-if="(!drawer.metadata.filterTable || item.name.toLowerCase().indexOf(drawer.metadata.filterTable.toLowerCase())>=0)"
-                                :class="'list-item '+(item.name==drawer.metadata.checkTable?'checked-item':'')"
-                                @click.native="onClickTableItem(item)">
-                            <el-col :span="12" style="border-right: solid 1px #777;">
-                                <el-tag type="primary" @click="onViewTableInfo(item)">结构</el-tag>
-                                {{item.name}}
-                            </el-col>
-                            <el-col :span="12">
-                                {{item.comment}}
-                            </el-col>
-                        </el-row>
-                    </template>
+                    <recycle-scroller :items="computeFilterTables"
+                                      class="scroller"
+                                      :item-size="32"
+                                      key-field="name"
+                                      v-slot="{ item }">
+                            <el-row type="flex"
+                                    :class="'list-item '+(item.name==drawer.metadata.checkTable?'checked-item':'')"
+                                    @click.native="onClickTableItem(item)">
+                                <el-col :span="12" style="border-right: solid 1px #777;">
+                                    <el-tag type="primary" @click="onViewTableInfo(item)">结构</el-tag>
+                                    {{item.name}}
+                                </el-col>
+                                <el-col :span="12">
+                                    {{item.comment}}
+                                </el-col>
+                            </el-row>
+                    </recycle-scroller>
+
 
                 </el-row>
             </el-col>
@@ -596,8 +607,11 @@
 </div>
 </body>
 <script>
-
+    Vue.use(VueVirtualScroller.default);
     window.app = new Vue({
+        components:{
+
+        },
         data() {
             return this.getDefaultData()
         },
@@ -624,6 +638,20 @@
                         this.form.multiDatasourceList=[]
                     }
                 }
+            }
+        },
+        computed:{
+            computeFilterTables(){
+              let list=this.drawer.metadata.tables || [];
+              return list.filter(item=>{
+                  return (!this.drawer.metadata.filterTable || item.name.toLowerCase().indexOf(this.drawer.metadata.filterTable.toLowerCase())>=0);
+              })
+            },
+            computeFilterDatabases(){
+              let list=this.drawer.metadata.databases || [];
+              return list.filter(item=>{
+                  return (!this.drawer.metadata.filterDatabase || item.toLowerCase().indexOf(this.drawer.metadata.filterDatabase.toLowerCase())>=0)
+              })
             }
         },
         methods: {
@@ -1603,6 +1631,8 @@
     .el-table__cell:hover .table-cell-hidden{
         display: unset;
     }
-
+    .scroller {
+        height: calc(100vh - 200px);
+    }
 </style>
 </html>
