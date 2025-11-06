@@ -15,4 +15,5 @@ public class HostFileItemDto {
     protected String name;
     protected String type; // file,dir
     protected long size;
+    protected String sizeText;
 }

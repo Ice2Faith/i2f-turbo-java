@@ -145,7 +145,7 @@ public class OsUtil {
             return null;
         }
         if (charset == null || charset.isEmpty()) {
-            charset = "UTF-8";
+            charset = getCmdCharset();
         }
         String str = new String(bos.toByteArray(), charset);
         return str;
