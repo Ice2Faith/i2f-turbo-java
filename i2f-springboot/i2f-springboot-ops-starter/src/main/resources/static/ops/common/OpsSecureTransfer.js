@@ -52,7 +52,7 @@ OpsSecureTransfer.prototype.recvJson=function(dto){
     }
     let ts = parseInt(timestamp);
     let cts = Math.round(new Date().getTime()/1000);
-    if((cts-ts)>30+60){
+    if(Math.abs(cts-ts)>12*60*60){
         throw new Error("exceed timestamp!");
     }
     let nonce = dto.nonce;

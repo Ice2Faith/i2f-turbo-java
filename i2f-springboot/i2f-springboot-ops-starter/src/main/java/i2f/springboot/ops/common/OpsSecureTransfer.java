@@ -66,7 +66,7 @@ public class OpsSecureTransfer {
         }
         long ts = Long.parseLong(timestamp);
         long cts = System.currentTimeMillis()/1000;
-        if((cts-ts)>30+60){
+        if(Math.abs(cts-ts)>12*60*60){
             throw new OpsException("exceed timestamp!");
         }
         String nonce = dto.getNonce();
