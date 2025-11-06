@@ -50,7 +50,7 @@ public class TimeCounter {
         long seconds = remainder / 1000;
         long ms = remainder % 1000;
 
-        return String.format("%d:%02d:%02d.%03d", hours, minutes, seconds, ms);
+        return String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, ms);
     }
 
     @Data
