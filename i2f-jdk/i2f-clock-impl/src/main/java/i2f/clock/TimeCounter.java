@@ -72,11 +72,12 @@ public class TimeCounter {
 
         @Override
         public String toString(){
-            return String.format("[%-10s] %s -> %s (%s)",
-                    description==null?"step":description,
+            return String.format("%s -> %s (%s): %s",
                     formatAbsoluteTime(beginTs),
                     formatAbsoluteTime(endTs),
-                    formatDuration(duration()));
+                    formatDuration(duration()),
+                    description==null?"step":description
+            );
         }
     }
 
