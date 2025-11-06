@@ -29,8 +29,6 @@ public class TestClock {
         }
         tcs.end();
         System.out.println("system:" + tcs);
-        System.out.println("rate  :" + tcc.toCompareRateString(tcs));
-        System.out.println("acc   :" + tcs.toCompareRateString(tcc));
     }
 
     public static void main(String[] args) throws InterruptedException {

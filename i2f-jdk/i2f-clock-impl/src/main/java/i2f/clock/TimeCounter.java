@@ -1,6 +1,16 @@
 package i2f.clock;
 
-import java.util.concurrent.atomic.AtomicLong;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Ice2Faith
@@ -8,96 +18,135 @@ import java.util.concurrent.atomic.AtomicLong;
  * @desc
  */
 public class TimeCounter {
-    protected AtomicLong beginTs = new AtomicLong();
-    protected AtomicLong endTs = new AtomicLong();
-    protected AtomicLong sumTs = new AtomicLong();
-    protected AtomicLong count = new AtomicLong();
-    protected AtomicLong maxTs = new AtomicLong();
-    protected AtomicLong minTs = new AtomicLong();
+    public static void main(String[] args) throws Exception {
+        TimeCounter counter = TimeCounter.begin();
+        Thread.sleep(30);
+        System.out.println(counter.end("hot"));
+        Thread.sleep(30);
+        System.out.println(counter.end("running"));
+        Thread.sleep(30);
+        System.out.println(counter.end("finish"));
+        System.out.println(counter.last());
+        System.out.println(counter.sum());
+    }
+    protected volatile long initTs=0;
+    protected volatile long lastTs=0;
+    protected volatile long currTs=0;
+    protected final ReentrantReadWriteLock lock=new ReentrantReadWriteLock();
+    protected final LinkedList<SegmentRecord> records=new LinkedList<>();
 
-    public TimeCounter() {
-        clear();
-        begin();
+    public static final DateTimeFormatter FORMATTER =DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+
+    public static String formatAbsoluteTime(long milliseconds) {
+        LocalDateTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
+        return FORMATTER.format(dt);
     }
 
-    public TimeCounter clear() {
-        beginTs.set(0);
-        endTs.set(0);
-        sumTs.set(0);
-        count.set(0);
-        maxTs.set(Long.MIN_VALUE);
-        minTs.set(Long.MAX_VALUE);
+    public static String formatDuration(long milliseconds) {
+        long hours = milliseconds / 3600000;
+        long remainder = milliseconds % 3600000;
+        long minutes = remainder / 60000;
+        remainder = remainder % 60000;
+        long seconds = remainder / 1000;
+        long ms = remainder % 1000;
+
+        return String.format("%d:%02d:%02d.%03d", hours, minutes, seconds, ms);
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class SegmentRecord{
+        protected long beginTs;
+        protected long endTs;
+        protected String description;
+
+        public SegmentRecord(long beginTs, long endTs, String description) {
+            this.beginTs = beginTs;
+            this.endTs = endTs;
+            this.description = description;
+        }
+
+        public long duration(){
+            return endTs-beginTs;
+        }
+
+        @Override
+        public String toString(){
+            return String.format("[%-10s] %s -> %s (%s)",
+                    description==null?"step":description,
+                    formatAbsoluteTime(beginTs),
+                    formatAbsoluteTime(endTs),
+                    formatDuration(duration()));
+        }
+    }
+
+    public static TimeCounter begin(){
+        return new TimeCounter();
+    }
+
+    public TimeCounter(){
+        reset();
+    }
+
+    public TimeCounter reset(){
+        lock.writeLock().lock();
+        try{
+            initTs=System.currentTimeMillis();
+            lastTs=initTs;
+            currTs=initTs;
+            records.clear();
+        }finally {
+            lock.writeLock().unlock();
+        }
         return this;
     }
 
-    public TimeCounter begin() {
-        long ts = SystemClock.currentTimeMillis();
-        beginTs.set(ts);
-        return this;
-    }
-
-    public long end() {
-        long ts = SystemClock.currentTimeMillis();
-        endTs.set(ts);
-
-        long diff = endTs.get() - beginTs.get();
-        sumTs.getAndAdd(diff);
-        count.incrementAndGet();
-
-        if (diff > maxTs.get()) {
-            maxTs.set(diff);
+    public SegmentRecord end(){
+        lock.writeLock().lock();
+        try{
+            int size = records.size();
+            return end("step-"+(size+1));
+        }finally {
+            lock.writeLock().unlock();
         }
+    }
 
-        if (diff < minTs.get()) {
-            minTs.set(diff);
+    public SegmentRecord end(String description){
+        lock.writeLock().lock();
+        try {
+            long ts=System.currentTimeMillis();
+            SegmentRecord ret = new SegmentRecord(lastTs, ts, description);
+            records.add(ret);
+            lastTs=ts;
+            currTs=ts;
+            return ret;
+        }finally {
+            lock.writeLock().unlock();
         }
-
-        return diff;
     }
 
-    public long diff() {
-        return endTs.get() - beginTs.get();
+    public SegmentRecord last(){
+        lock.readLock().lock();
+        try{
+            SegmentRecord last = records.isEmpty()?new SegmentRecord(lastTs,currTs,"last"):records.getLast();
+            return last;
+        }finally {
+            lock.readLock().unlock();
+        }
     }
 
-    public long sum() {
-        return sumTs.get();
+    public SegmentRecord sum(){
+        return new SegmentRecord(initTs,currTs,"sum");
     }
 
-    public long count() {
-        return count.get();
+    public List<SegmentRecord> records(){
+        lock.readLock().lock();
+        try {
+            return new ArrayList<>(records);
+        }finally {
+            lock.readLock().unlock();
+        }
     }
 
-    public double avg() {
-        return sumTs.get() * 1.0 / count.get();
-    }
 
-    public long max() {
-        return maxTs.get();
-    }
-
-    public long min() {
-        return minTs.get();
-    }
-
-    public String toCompareRateString(TimeCounter counter) {
-        return String.format("(this:other)={diff=%7.2f%%, avg=%7.2f%%, max=%7.2f%%, min=%7.2f%%, sum=%7.2f%%, count=%7.2f%%}",
-                (this.diff() * 1.0 / (counter.diff()) * 100.0),
-                (this.avg() * 1.0 / counter.avg() * 100.0),
-                (this.max() * 1.0 / counter.max() * 100.0),
-                (this.min() * 1.0 / counter.min() * 100.0),
-                (this.sum() * 1.0 / counter.sum() * 100.0),
-                (this.count() * 1.0 / counter.count() * 100.0)
-        );
-    }
-
-    @Override
-    public String toString() {
-        return String.format("TimeCounter{diff=%4d, avg=%7.2f, max=%4d, min=%4d, sum=%6d, count=%3d}",
-                (endTs.get() - beginTs.get()),
-                (sumTs.get() * 1.0 / count.get()),
-                maxTs.get(),
-                minTs.get(),
-                sumTs.get(),
-                count.get());
-    }
 }
