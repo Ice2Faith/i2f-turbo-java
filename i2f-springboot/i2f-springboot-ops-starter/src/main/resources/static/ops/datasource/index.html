@@ -222,7 +222,10 @@
                                  :prop="column.label"
                                  :label="column.label">
                     <template slot-scope="scope">
-                        {{scope.row[column.label]}}
+                            <span class="table-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewTableCellData(scope.row[column.label],scope,column)">值</el-tag>
+                                {{scope.row[column.label]}}
+                            </span>
                     </template>
                 </el-table-column>
             </template>
@@ -909,7 +912,10 @@
                 this.editor.on('change',()=>{
                     this.form.sql=this.editor.getValue();
                     this.onSqlChange();
-                    this.editor.getSelection();
+                });
+                this.editor.on('cursorActivity',()=>{
+                    // 此处主要处理文本选中事件
+                    this.onSqlChange();
                 })
             },
             initStoreData(){
@@ -1053,8 +1059,8 @@
                 return storageKey;
             },
             onSqlChange() {
-                let sql = this.form.sql;
-                if (!sql) {
+                let sql = this.getExecuteSql();
+                if (!sql || sql=='') {
                     return;
                 }
                 sql = sql.trim();
@@ -1066,11 +1072,30 @@
                     this.metas.operate = 'update'
                 }
             },
+            getExecuteSql(){
+                let sql=this.editor.getSelection();
+                if(!sql || sql==''){
+                    sql=this.form.sql;
+                }
+                if(!sql){
+                    sql='';
+                }
+                return sql;
+            },
+            getTipExecuteSql(){
+                let sql=this.getExecuteSql();
+                if(sql.length>30){
+                    sql=sql.substring(0,30)+"...";
+                }
+                return sql;
+            },
             onExecute() {
-                this.$confirm('即将执行语句，是否继续？', '删除提示', {
+                let sql=this.getTipExecuteSql();
+                this.$confirm('即将执行语句，是否继续？<br/>'+sql, '删除提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
-                    type: 'warning'
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
                 }).then(() => {
                     this.doExecute();
                 }).catch(() => {
@@ -1083,10 +1108,7 @@
             doExecute(){
                 this.metas.resultLoading = true;
                 try {
-                    let sql=this.editor.getSelection();
-                    if(!sql || sql=='') {
-                        sql = this.form.sql;
-                    }
+                    let sql=this.getExecuteSql();
                     let req = this.fillDatasourceForm({
                         sql: sql,
                         maxCount: this.form.maxCount,
@@ -1127,10 +1149,12 @@
                 this.dialog.scriptRunner.show = true;
             },
             onEnsureExecuteScript(){
-                this.$confirm('即将执行脚本，是否继续？', '删除提示', {
+                let sql=this.getTipExecuteSql();
+                this.$confirm('即将执行脚本，是否继续？<br/>'+sql, '删除提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
-                    type: 'warning'
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
                 }).then(() => {
                     this.doExecuteScript();
                 }).catch(() => {
@@ -1144,7 +1168,7 @@
                 this.dialog.scriptRunner.show = false;
                 this.metas.resultLoading = true;
                 try {
-                    let sql = this.form.sql;
+                    let sql = this.getExecuteSql();
 
                     let req = this.fillDatasourceForm({
                         sql: sql,
@@ -1395,6 +1419,15 @@
                 this.dialog.textViewer.text = text;
                 this.dialog.textViewer.show = true;
             },
+            onViewTableCellData(value,scope,column){
+                let type=(typeof value);
+                if(value === null){
+                    type='null';
+                }else if(value === undefined){
+                    type='undefined';
+                }
+                this.onViewText(value,'值查看 - type: '+type);
+            },
             onVisualCharts() {
                 this.dialog.visualChart.show = true;
             },
@@ -1562,6 +1595,13 @@
 
     .checked-item {
         background: darkorange;
+    }
+    .el-table__cell .table-cell-hidden{
+        display: none;
+    }
+
+    .el-table__cell:hover .table-cell-hidden{
+        display: unset;
     }
 
 </style>

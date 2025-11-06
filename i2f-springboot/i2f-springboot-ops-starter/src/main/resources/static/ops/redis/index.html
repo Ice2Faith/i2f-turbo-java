@@ -384,10 +384,11 @@
       },
       onDeleteNodeKey(node,data){
         let key=data.path;
-        this.$confirm('即将删除键，是否继续？'+key, '删除提示', {
+        this.$confirm('即将删除键，是否继续？<br/>'+key, '删除提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          type: 'warning'
+          type: 'warning',
+          dangerouslyUseHTMLString: true
         }).then(() => {
           this.doDeleteKey([key]);
         }).catch(() => {
@@ -404,10 +405,11 @@
           return;
         }
         let keys=nodes.map(e=>e.path)
-        this.$confirm('即将删除键，是否继续？已选择 '+keys[0]+' 等 '+keys.length +' 个键', '删除提示', {
+        this.$confirm('即将删除键，是否继续？<br/> 已选择 '+keys[0]+' 等 '+keys.length +' 个键', '删除提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          type: 'warning'
+          type: 'warning',
+          dangerouslyUseHTMLString: true
         }).then(() => {
           this.doDeleteKey(keys);
         }).catch(() => {
@@ -419,10 +421,11 @@
       },
       onDeleteKey(){
         let key=this.form.key;
-        this.$confirm('即将删除键，是否继续？'+key, '删除提示', {
+        this.$confirm('即将删除键，是否继续？<br/>'+key, '删除提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          type: 'warning'
+          type: 'warning',
+          dangerouslyUseHTMLString: true
         }).then(() => {
           this.doDeleteKey([key]);
         }).catch(() => {
@@ -503,10 +506,11 @@
       },
       onSetKey(){
         let key=this.form.key;
-        this.$confirm('即将保存键、值、TTL，是否继续？'+key, '删除提示', {
+        this.$confirm('即将保存键、值、TTL，是否继续？<br/>'+key, '删除提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          type: 'warning'
+          type: 'warning',
+          dangerouslyUseHTMLString: true
         }).then(() => {
           this.doSetKey();
         }).catch(() => {
@@ -550,10 +554,11 @@
       },
       onUpdateTtl(){
         let key=this.form.key;
-        this.$confirm('即将更新TTL，是否继续？'+key, '删除提示', {
+        this.$confirm('即将更新TTL，是否继续？<br/>'+key, '删除提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          type: 'warning'
+          type: 'warning',
+          dangerouslyUseHTMLString: true
         }).then(() => {
           this.doUpdateTtl();
         }).catch(() => {
