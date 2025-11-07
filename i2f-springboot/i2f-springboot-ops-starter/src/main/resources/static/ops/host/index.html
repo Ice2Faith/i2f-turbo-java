@@ -32,6 +32,8 @@
 
     <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css"/>
     <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
+    <script src="../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
+
 </head>
 <body>
 <div id="app">
@@ -108,7 +110,17 @@
                 <el-col :span="16">
                     <el-button type="primary" size="medium" @click="onAddDirectory">新建目录</el-button>
                     <el-button type="primary" size="medium" @click="onAddFile">新建文件</el-button>
-                    <el-button type="success" size="medium" @click="onUploadFile">文件上传</el-button>
+                    <el-upload
+                            ref="upload"
+                            style="display: inline-block;"
+                            action="#"
+                            :file-list="metas.uploadList"
+                            :auto-upload="false"
+                            :on-change="onUploadFileChange"
+                            :show-file-list="false"
+                    >
+                        <el-button slot="trigger" type="success" size="medium" :loading="metas.uploadLoading" type="primary">文件上传</el-button>
+                    </el-upload>
                 </el-col>
                 <el-col :span="8">
                     <el-row type="flex" justify="end">
@@ -185,7 +197,10 @@
             :visible.sync="dialog.fileEditor.show"
             width="80%">
         <el-row type="flex" justify="end">
-            <el-button size="medium" type="primary" @click="onSubmitEditFile">保存修改</el-button>
+            <el-button v-loading="dialog.fileEditor.saveLoading" size="medium" type="primary" @click="onSubmitEditFile">保存修改</el-button>
+        </el-row>
+        <el-row>
+            <el-input v-model="dialog.fileEditor.path" :disabled="!dialog.fileEditor.allowChangePath" placeholder="文件路径"></el-input>
         </el-row>
         <el-input
                 type="textarea"
@@ -195,6 +210,19 @@
         </el-input>
     </el-dialog>
 
+    <el-dialog
+            :title="dialog.createDirectory.title"
+            :visible.sync="dialog.createDirectory.show"
+            width="80%">
+        <el-input
+                placeholder="创建目录"
+                v-model="dialog.createDirectory.text">
+        </el-input>
+        <el-row type="flex" justify="end">
+            <el-button size="medium" @click="dialog.createDirectory.show=false">取消</el-button>
+            <el-button v-loading="dialog.createDirectory.saveLoading" size="medium" type="primary" @click="onSubmitCreateDirectory">提交</el-button>
+        </el-row>
+    </el-dialog>
 
 </div>
 </body>
@@ -232,6 +260,8 @@
                         resultLoading: false,
                         resultText: '',
                         workdirLoading: false,
+                        uploadLoading: false,
+                        uploadList: [],
                     },
                     drawer: {
                         fileList: {
@@ -251,7 +281,15 @@
                             show: false,
                             title: '文件编辑器',
                             text: '',
-                            path: ''
+                            path: '',
+                            allowChangePath: false,
+                            saveLoading: false,
+                        },
+                        createDirectory:{
+                            show:false,
+                            title: '创建目录',
+                            text: '',
+                            saveLoading: false
                         }
                     },
                     form: {
@@ -692,6 +730,7 @@
                             let result = event.target.result;
                             _this.dialog.fileEditor.text=result;
                             _this.dialog.fileEditor.path=item.path;
+                            _this.dialog.fileEditor.allowChangePath=false;
                             _this.dialog.fileEditor.title='编辑文件 - '+item.name;
                             _this.dialog.fileEditor.show=true;
                         };
@@ -759,7 +798,7 @@
                     type: 'warning',
                     dangerouslyUseHTMLString: true
                 }).then(() => {
-                    this.onSubmitEditFile();
+                    this.doSubmitEditFile();
                 }).catch(() => {
                     this.$message({
                         type: 'info',
@@ -774,41 +813,102 @@
                 const blob = new Blob([bytes], { type: 'text/plain' });
                 return blob;
             },
-            onSubmitEditFile(){
-                if(true){
-                    this.$message.error('功能开发中，敬请期待')
-                    return
-                }
-                this.metas.resultLoading = true;
+            md5ForFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader()
+
+                    reader.onload = function(e) {
+                        const resultBuffer = reader.result
+                        const wordArray = CryptoJS.lib.WordArray.create(resultBuffer)
+                        const md5Hash = CryptoJS.MD5(wordArray)
+
+                        resolve(md5Hash.toString())
+                    }
+
+                    reader.onerror = function(e) {
+                        reject(reader.error)
+                    }
+
+                    reader.readAsArrayBuffer(file)
+                })
+            },
+            doSubmitEditFile(){
+                this.dialog.fileEditor.saveLoading = true;
                 try {
                     let text=this.dialog.fileEditor.text;
                     let blob=this.stringToBlob(text);
-                    let form=new FormData();
-                    form.append('file',blob,'content.txt');
+                    this.md5ForFile(blob)
+                        .then(md5=>{
+                            let form=new FormData();
+                            form.append('file',blob,'content.txt');
 
-                    let req={
-                        path: this.dialog.fileEditor.path,
-                        md5: null
-                    }
+                            let req={
+                                path: this.dialog.fileEditor.path,
+                                md5: md5
+                            }
+                            let transfer = this.getTransfer();
+                            let reqData=transfer.send(req);
+                            Object.keys(reqData).forEach(k=>{
+                                form.append(k,reqData[k])
+                            })
+
+                            this.$axios({
+                                url: `/upload`,
+                                method: 'post',
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                },
+                                data: form
+                            }).then(res => {
+                                if (res.data.code == 200) {
+                                    //console.log(res.data)
+                                    let resp = transfer.recv(res.data.data)
+                                    // console.log(resp)
+                                    this.$message.success('操作成功')
+                                    this.dialog.fileEditor.show=false;
+                                    this.onRefreshFiles()
+                                } else {
+                                    this.$message.error(res.data.msg)
+                                }
+                            }).catch(err => {
+                                this.$message.error(err.errorMessage || err.message || '操作失败')
+                            }).finally(() => {
+                                this.dialog.fileEditor.saveLoading = false;
+                            })
+                        }).catch(err => {
+                            this.$message.error(err.errorMessage || err.message || '操作失败')
+                        }).finally(() => {
+                            this.dialog.fileEditor.saveLoading = false;
+                        })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.dialog.fileEditor.saveLoading = false;
+                }
+
+
+            },
+            onAddDirectory(){
+                this.dialog.createDirectory.text=this.form.workdir;
+                this.dialog.createDirectory.show=true;
+            },
+            onSubmitCreateDirectory(){
+                this.dialog.createDirectory.saveLoading = true;
+                try {
+                    let req = {
+                        path: this.dialog.createDirectory.path
+                    };
                     let transfer = this.getTransfer();
-                    let reqData=transfer.send(req);
-                    Object.keys(reqData).forEach(k=>{
-                        form.append(k,reqData[k])
-                    })
-
                     this.$axios({
-                        url: `/upload`,
+                        url: `/mkdirs`,
                         method: 'post',
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        },
-                        data: form
+                        data: transfer.send(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
                             let resp = transfer.recv(res.data.data)
                             // console.log(resp)
                             this.$message.success('操作成功')
+                            this.dialog.createDirectory.show=false;
                             this.onRefreshFiles()
                         } else {
                             this.$message.error(res.data.msg)
@@ -816,23 +916,78 @@
                     }).catch(err => {
                         this.$message.error(err.errorMessage || err.message || '操作失败')
                     }).finally(() => {
-                        this.metas.resultLoading = false;
+                        this.dialog.createDirectory.saveLoading = false;
                     })
                 } catch (err) {
                     this.$message.error(err.errorMessage || err.message || '操作失败')
-                    this.metas.resultLoading = false;
+                    this.dialog.createDirectory.saveLoading = false;
                 }
-
-
-            },
-            onAddDirectory(){
-                this.$message.error('功能开发中，敬请期待')
             },
             onAddFile(){
-                this.$message.error('功能开发中，敬请期待')
+                let separator='/';
+                if(this.form.workdir.indexOf('\\')>=0){
+                    separator='\\';
+                }
+                this.dialog.fileEditor.text='';
+                this.dialog.fileEditor.path=this.form.workdir+separator+'content.txt';
+                this.dialog.fileEditor.allowChangePath=true;
+                this.dialog.fileEditor.title='新建文件';
+                this.dialog.fileEditor.show=true;
             },
-            onUploadFile(){
-                this.$message.error('功能开发中，敬请期待')
+            onUploadFileChange(file){
+                this.metas.uploadList = []
+                this.metas.uploadList.push(file)
+                this.doUploadFile(file)
+            },
+            doUploadFile(file){
+                this.metas.uploadLoading = true;
+                try {
+                    this.md5ForFile(file.raw)
+                        .then(md5=>{
+                            let form=new FormData();
+                            form.append('file',file.raw,file.name);
+
+                            let req={
+                                workdir: this.form.workdir,
+                                md5: md5
+                            }
+                            let transfer = this.getTransfer();
+                            let reqData=transfer.send(req);
+                            Object.keys(reqData).forEach(k=>{
+                                form.append(k,reqData[k])
+                            })
+
+                            this.$axios({
+                                url: `/upload`,
+                                method: 'post',
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                },
+                                data: form
+                            }).then(res => {
+                                if (res.data.code == 200) {
+                                    //console.log(res.data)
+                                    let resp = transfer.recv(res.data.data)
+                                    // console.log(resp)
+                                    this.$message.success('操作成功')
+                                    this.onRefreshFiles()
+                                } else {
+                                    this.$message.error(res.data.msg)
+                                }
+                            }).catch(err => {
+                                this.$message.error(err.errorMessage || err.message || '操作失败')
+                            }).finally(() => {
+                                this.metas.uploadLoading = false;
+                            })
+                        }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.uploadLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.uploadLoading = false;
+                }
             }
 
         }
