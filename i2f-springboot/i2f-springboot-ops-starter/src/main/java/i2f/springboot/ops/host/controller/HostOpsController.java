@@ -22,6 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -313,7 +317,7 @@ public class HostOpsController {
                 if (!calcMd5.equalsIgnoreCase(req.getMd5())) {
                     throw new OpsException("file check sum error");
                 }
-                tmpFile.renameTo(saveFile);
+                Files.move(Paths.get(tmpFile.getAbsolutePath()),Paths.get(saveFile.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
                 return transfer.success(true);
             }finally {
                 if(tmpFile!=null && tmpFile.exists()){
