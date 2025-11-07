@@ -1069,8 +1069,8 @@
                         if(!req.multiDatasourceList || req.multiDatasourceList.length==0){
                             throw new Error('使用分发执行时，至少选择一个分发数据源')
                         }
+                        return req;
                     }
-                    return req;
                 }
 
                 req.datasource = this.form.datasource;
