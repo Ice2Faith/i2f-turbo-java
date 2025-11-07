@@ -7,105 +7,55 @@ import java.sql.Connection;
  * @date 2025/10/5 14:56
  * @desc
  */
-public class ExecContextMethodProvider {
+public interface ExecContextMethodProvider {
 
-    public Connection get_connection(String datasource) {
-        return null;
-    }
+    Connection get_connection(String datasource);
 
-    public Object eval(String script) {
-        return null;
-    }
+    Object eval(String script);
 
-    public Object eval_script(String lang, String script) {
-        return null;
-    }
+    Object eval_script(String lang, String script);
 
-    public String render(String script) {
-        return null;
-    }
+    String render(String script);
 
-    public Object visit(String expression) {
-        return null;
-    }
+    Object visit(String expression);
 
-    public void visit_set(String expression, Object value) {
+    void visit_set(String expression, Object value);
 
-    }
+    void visit_delete(String expression);
 
-    public void visit_delete(String expression) {
+    boolean test(String expression);
 
-    }
+    boolean sql_adapt(String datasource, String databases);
 
-    public boolean test(String expression) {
-        return false;
-    }
+    void sql_trans_begin(String datasource);
 
-    public boolean sql_adapt(String datasource, String databases) {
-        return false;
-    }
+    void sql_trans_commit(String datasource);
 
-    public void sql_trans_begin(String datasource) {
+    void sql_trans_rollback(String datasource);
 
-    }
+    void sql_trans_none(String datasource);
 
-    public void sql_trans_commit(String datasource) {
+    Object sql_query_object(String datasource, String sql, Object... args);
 
-    }
+    Object sql_query_row(String datasource, String sql, Object... args);
 
-    public void sql_trans_rollback(String datasource) {
+    Object sql_query_list(String datasource, String sql, Object... args);
 
-    }
+    Object sql_query_page(String datasource, int offset, int size, String sql, Object... args);
 
-    public void sql_trans_none(String datasource) {
+    Object sql_query_columns(String datasource, String sql, Object... args);
 
-    }
+    Object sql_update(String datasource, String sql, Object... args);
 
-    public Object sql_query_object(String datasource, String sql, Object... args) {
-        return null;
-    }
+    Object sql_script_query_object(String datasource, String sql);
 
-    public Object sql_query_row(String datasource, String sql, Object... args) {
-        return null;
-    }
+    Object sql_script_query_row(String datasource, String sql);
 
-    public Object sql_query_list(String datasource, String sql, Object... args) {
-        return null;
-    }
+    Object sql_script_query_list(String datasource, String sql);
 
-    public Object sql_query_page(String datasource, int offset, int size, String sql, Object... args) {
-        return null;
-    }
+    Object sql_script_query_page(String datasource, int offset, int size, String sql);
 
-    public Object sql_query_columns(String datasource, String sql, Object... args) {
-        return null;
-    }
+    Object sql_script_query_columns(String datasource, String sql);
 
-    public Object sql_update(String datasource, String sql, Object... args) {
-        return null;
-    }
-
-    public Object sql_script_query_object(String datasource, String sql) {
-        return null;
-    }
-
-    public Object sql_script_query_row(String datasource, String sql) {
-        return null;
-    }
-
-    public Object sql_script_query_list(String datasource, String sql) {
-        return null;
-    }
-
-    public Object sql_script_query_page(String datasource, int offset, int size, String sql) {
-        return null;
-    }
-
-    public Object sql_script_query_columns(String datasource, String sql) {
-        return null;
-    }
-
-    public Object sql_script_update(String datasource, String sql) {
-        return null;
-    }
+    Object sql_script_update(String datasource, String sql);
 }

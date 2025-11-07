@@ -9,121 +9,63 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
  * @desc
  */
 
-public class ExecutorMethodProvider {
+public interface ExecutorMethodProvider {
 
-    public Class<?> load_class(String className) {
-        return null;
-    }
+    Class<?> load_class(String className);
 
-    public boolean is_debug() {
-        return false;
-    }
+    boolean is_debug();
 
-    public String env(String property) {
-        return null;
-    }
+    String env(String property);
 
-    public String env(String property, String defaultValue) {
-        return null;
-    }
+    String env(String property, String defaultValue);
 
-    public Integer env_int(String property) {
-        return null;
-    }
+    Integer env_int(String property);
 
-    public Integer env_int(String property, Integer defaultValue) {
-        return null;
-    }
+    Integer env_int(String property, Integer defaultValue);
 
-    public Long env_long(String property) {
-        return null;
-    }
+    Long env_long(String property);
 
-    public Long env_long(String property, Long defaultValue) {
-        return null;
-    }
+    Long env_long(String property, Long defaultValue);
 
-    public Double env_double(String property) {
-        return null;
-    }
+    Double env_double(String property);
 
-    public Double env_double(String property, Double defaultValue) {
-        return null;
-    }
+    Double env_double(String property, Double defaultValue);
 
-    public Boolean env_boolean(String property) {
-        return null;
-    }
+    Boolean env_boolean(String property);
 
-    public Boolean env_boolean(String property, Boolean defaultValue) {
-        return null;
-    }
+    Boolean env_boolean(String property, Boolean defaultValue);
 
-    public Object get_bean(String name) {
-        return null;
-    }
+    Object get_bean(String name);
 
-    public Object get_bean(Class<?> type) {
-        return null;
-    }
+    Object get_bean(Class<?> type);
 
-    public ProcedureMeta get_meta(String procedureId) {
-        return null;
-    }
+    ProcedureMeta get_meta(String procedureId);
 
-    public String trace_location() {
-        return null;
-    }
+    String trace_location();
 
-    public String trace_file() {
-        return null;
-    }
+    String trace_file();
 
-    public int trace_line() {
-        return -1;
-    }
+    int trace_line();
 
-    public XmlNode trace_node() {
-        return null;
-    }
+    XmlNode trace_node();
 
-    public Throwable trace_error() {
-        return null;
-    }
+    Throwable trace_error();
 
-    public String trace_errmsg() {
-        return null;
-    }
+    String trace_errmsg();
 
-    public String tracking_comment() {
-        return null;
-    }
+    String tracking_comment();
 
-    public String tracking_comment(Integer lineNumber) {
-        return null;
-    }
+    String tracking_comment(Integer lineNumber);
 
-    public String tracking_comment(boolean force) {
-        return null;
-    }
+    String tracking_comment(boolean force);
 
-    public String tracking_comment(Integer lineNumber, boolean force) {
-        return null;
-    }
+    String tracking_comment(Integer lineNumber, boolean force);
 
-    public void log_debug(Object obj) {
+    void log_debug(Object obj);
 
-    }
+    void log_info(Object obj);
 
-    public void log_info(Object obj) {
+    void log_warn(Object obj);
 
-    }
-
-    public void log_warn(Object obj) {
-
-    }
-
-    public void log_error(Object obj) {
-
-    }
+    void log_error(Object obj);
 }
