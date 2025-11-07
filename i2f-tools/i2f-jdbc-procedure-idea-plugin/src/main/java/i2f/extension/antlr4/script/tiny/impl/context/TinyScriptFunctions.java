@@ -7,49 +7,108 @@ import java.util.Date;
  * @date 2025/2/25 20:52
  * @desc
  */
-public class TinyScriptFunctions {
+public interface TinyScriptFunctions {
+    Date now();
 
-    public static Date now() {
-        return null;
-    }
+    int rand();
 
-    public static int rand() {
-        return -1;
-    }
+    int rand(int bound);
 
-    public static int rand(int bound) {
-        return -1;
-    }
+    int rand(int min, int max);
 
-    public static double random() {
-        return -1;
-    }
+    double random();
 
-    public static void println(Object... obj) {
+    String uuid();
 
-    }
+    void println(Object... obj);
 
-    public static void exec(String command) {
+    String format(String format, Object... obj);
 
-    }
+    void exec(String command);
 
-    public static Object arrNew(Class<?> elemType, int len) {
-        return null;
-    }
+    void exec(String... commandArray);
 
-    public static boolean isArray(Object arr) {
-        return false;
-    }
+    void system(String command);
 
-    public static int arrLen(Object arr) {
-        return -1;
-    }
+    void system(String... commandArray);
 
-    public static <T> T arrGet(Object arr, int index) {
-        return null;
-    }
+    Object new_array(Class<?> elemType, int len);
 
-    public static void arrSet(Object arr, int index, Object value) {
+    <T> List<T> new_list();
 
-    }
+    <K, V> Map<K, V> new_map();
+
+    <T> Set<T> new_set();
+
+    Collection append(Collection collection, Object... objs);
+
+    Appendable append(Appendable appendable, Object... objs);
+
+    void put(Map map, Object key, Object value);
+
+    int length(Collection collection);
+
+    int length(Map map);
+
+    int length(CharSequence sequence);
+
+    long length(File file);
+
+    long length(Object obj);
+
+    long hashcode(Object obj);
+
+    void sleep(long millis);
+
+    void yield();
+
+    File file(String path);
+
+    boolean is_file(File file);
+
+    boolean file_exists(String path);
+
+    boolean file_exists(File file);
+
+    boolean is_file(String path);
+
+    boolean is_dir(File file);
+
+    boolean is_dir(String path);
+
+    List<File> list_file(String path);
+
+    List<File> list_file(File file);
+
+    boolean is_array(Object arr);
+
+    int arr_len(Object arr);
+
+    <T> T arr_get(Object arr, int index);
+
+    void arr_set(Object arr, int index, Object value);
+
+    <T> List<T> arr_to_list(Object arr, Class<T> elemType, int index, int len);
+
+    <T> List<T> arr_to_list(Object arr, int index, int len);
+
+    <T> List<T> arr_to_list(Object arr, Class<T> elemType, int index);
+
+    <T> List<T> arr_to_list(Object arr, int index);
+
+    <T> List<T> arr_to_list(Object arr, Class<T> elemType);
+
+    <T> List<T> arr_to_list(Object arr);
+
+    <T> T[] list_to_array(Iterable<?> collection, Class<T> elemType, int index, int len);
+
+    <T> T[] list_to_array(Iterable<?> collection, int index, int len);
+
+    <T> T[] list_to_array(Iterable<?> collection, Class<T> elemType, int index);
+
+    <T> T[] list_to_array(Iterable<?> collection, int index);
+
+    <T> T[] list_to_array(Iterable<?> collection, Class<T> elemType);
+
+    <T> T[] list_to_array(Iterable<?> collection);
 }

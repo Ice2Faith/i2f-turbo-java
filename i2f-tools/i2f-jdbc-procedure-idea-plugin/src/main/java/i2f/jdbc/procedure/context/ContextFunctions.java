@@ -13,647 +13,347 @@ import java.util.Map;
  * @date 2025/2/17 16:09
  */
 public interface ContextFunctions {
+    String convertOracleRegexExpression(String regex);
 
-    default String convertOracleRegexExpression(String regex) {
-        return null;
-    }
+    String convertOracleRegexReplacement(String replacement);
 
-    default String convertOracleRegexReplacement(String replacement) {
-        return null;
-    }
+    void print(Object... objs);
 
-    default void print(Object... objs) {
+    void println(Object... objs);
 
-    }
+    String sys_env(String key);
 
-    default void println(Object... objs) {
+    String jvm(String key);
 
-    }
+    void gc();
 
-    default String sys_env(String key) {
-        return null;
-    }
+    void exit(int status);
 
-    default String jvm(String key) {
-        return null;
-    }
+    void yield();
 
-    default void gc() {
+    long thread_id();
 
-    }
+    String thread_name();
 
-    default void exit(int status) {
+    boolean isnull(Object obj);
 
-    }
+    boolean is_empty(Object obj);
 
-    default void yield() {
+    boolean is_blank(Object obj);
 
-    }
+    List<Object> list_of(Object... arr);
 
-    default long thread_id() {
-        return -1;
-    }
+    Map<Object, Object> map_of(Object... arr);
 
-    default String thread_name() {
-        return null;
-    }
+    int index_of(Object oStr, Object oSstr);
 
-    default boolean isnull(Object obj) {
-        return false;
-    }
+    int last_index_of(Object oStr, Object oSstr);
 
-    default boolean is_empty(Object obj) {
-        return false;
-    }
+    String replace(Object str, Object target);
 
-    default boolean is_blank(Object obj) {
-        return false;
-    }
+    String replace(Object oStr, Object oTarget, Object oReplacement);
 
-    default List<Object> list_of(Object... arr) {
-        return null;
-    }
+    String regex_replace(Object str, String regex);
 
-    default Map<Object, Object> map_of(Object... arr) {
-        return null;
-    }
+    String regex_replace(Object str, String regex, Object replacement);
 
-    default int index_of(String str, String sstr) {
-        return -1;
-    }
+    String regex_replace(Object oStr, String regex, Object oReplacement, int occurrence);
 
-    default int last_index_of(String str, String sstr) {
-        return -1;
-    }
+    String regexp_replace(Object str, String regex);
 
-    default String replace(String str, String target) {
-        return null;
-    }
+    String regexp_replace(Object str, String regex, Object replacement);
 
-    default String replace(String str, String target, String replacement) {
-        return null;
-    }
+    String regexp_replace(Object str, String regex, Object replacement, int occurrence);
 
-    default String regex_replace(String str, String regex) {
-        return null;
-    }
+    boolean regex_like(Object oStr, String regex);
 
-    default String regex_replace(String str, String regex, String replacement) {
-        return null;
-    }
+    boolean regexp_like(Object str, String regex);
 
-    default String regex_replace(String str, String regex, String replacement, int occurrence) {
-        return null;
-    }
+    List<String> regex_find(Object oStr, String regex);
 
-    default String regexp_replace(String str, String regex) {
-        return null;
-    }
+    boolean regex_contains(Object oStr, String regex);
 
-    default String regexp_replace(String str, String regex, String replacement) {
-        return null;
-    }
+    boolean regexp_contains(Object str, String regex);
 
-    default String regexp_replace(String str, String regex, String replacement, int occurrence) {
-        return null;
-    }
+    int regex_index(Object oStr, String regex);
 
-    default boolean regex_like(String str, String regex) {
-        return false;
-    }
+    int regexp_index(Object str, String regex);
 
-    default boolean regexp_like(String str, String regex) {
-        return false;
-    }
+    int regex_index_end(Object oStr, String regex);
 
-    default List<String> regex_find(String str, String regex) {
-        return null;
-    }
+    int regexp_index_end(Object str, String regex);
 
-    default boolean regex_contains(String str, String regex) {
-        return false;
-    }
+    String regex_extra(Object oStr, String regex);
 
-    default boolean regexp_contains(String str, String regex) {
-        return false;
-    }
+    String regexp_extra(Object str, String regex);
 
-    default int regex_index(String str, String regex) {
-        return -1;
-    }
+    String regex_find_join(Object str, String regex);
 
-    default int regexp_index(String str, String regex) {
-        return -1;
-    }
+    String regex_find_join(Object str, String regex, Object separator);
 
-    default String regex_extra(String str, String regex) {
-        return null;
-    }
+    String to_camel(String str);
 
-    default String regexp_extra(String str, String regex) {
-        return null;
-    }
+    String to_pascal(String str);
 
-    default String regex_find_join(String str, String regex) {
-        return null;
-    }
+    String to_underscore(String str);
 
-    default String regex_find_join(String str, String regex, Object separator) {
-        return null;
-    }
+    String to_snake(String str);
 
-    default String to_camel(String str) {
-        return null;
-    }
+    String join(Object obj);
 
-    default String to_pascal(String str) {
-        return null;
-    }
+    String join(Object obj, Object separator);
 
-    default String to_underscore(String str) {
-        return null;
-    }
+    String join(Object obj, Object separator, boolean ignoreNull);
 
-    default String to_snake(String str) {
-        return null;
-    }
+    String join(Object obj, Object separator, boolean ignoreNull, boolean ignoreEmpty);
 
-    default String join(Object obj) {
-        return null;
-    }
+    String trim(String str);
 
-    default String join(Object obj, Object separator) {
-        return null;
-    }
+    String upper(String str);
 
-    default String join(Object obj, Object separator, boolean ignoreNull) {
-        return null;
-    }
+    String lower(String str);
 
-    default String join(Object obj, Object separator, boolean ignoreNull, boolean ignoreEmpty) {
-        return null;
-    }
+    String chr(int ascii);
 
-    default String trim(String str) {
-        return null;
-    }
+    int char_code(String str, int index);
 
-    default String upper(String str) {
-        return null;
-    }
+    String rtrim(String str);
 
-    default String lower(String str) {
-        return null;
-    }
+    String rtrim(String str, String substr);
 
-    default String chr(int ascii) {
-        return null;
-    }
+    int length(Object obj);
 
-    default int char_code(String str, int index) {
-        return -1;
-    }
+    int lengthb(Object obj);
 
-    default String rtrim(String str) {
-        return null;
-    }
+    String ltrim(String str);
 
-    default String rtrim(String str, String substr) {
-        return null;
-    }
+    String ltrim(String str, String substr);
 
-    default int length(Object obj) {
-        return -1;
-    }
+    String lpad(Object str, int len);
 
-    default int lengthb(Object obj) {
-        return -1;
-    }
+    String lpad(Object str, int len, Object padStr);
 
-    default String ltrim(String str) {
-        return null;
-    }
+    String rpad(Object str, int len);
 
-    default String ltrim(String str, String substr) {
-        return null;
-    }
+    String rpad(Object str, int len, Object padStr);
 
-    default String lpad(Object str, int len) {
-        return null;
-    }
+    Object nvl(Object v1, Object v2);
 
-    default String lpad(Object str, int len, Object padStr) {
-        return null;
-    }
+    Object ifnull(Object v1, Object v2);
 
-    default String rpad(Object str, int len) {
-        return null;
-    }
+    Object if_empty(Object v1, Object v2);
 
-    default String rpad(Object str, int len, Object padStr) {
-        return null;
-    }
+    Object evl(Object v1, Object v2);
 
-    default Object nvl(Object v1, Object v2) {
-        return null;
-    }
+    Object if_blank(Object v1, Object v2);
 
-    default Object ifnull(Object v1, Object v2) {
-        return null;
-    }
+    Object bvl(Object v1, Object v2);
 
-    default Object if_empty(Object v1, Object v2) {
-        return null;
-    }
+    Object if2(Object cond, Object trueVal, Object falseVal);
 
-    default Object evl(Object v1, Object v2) {
-        return null;
-    }
+    Object nvl2(Object cond, Object trueVal, Object falseVal);
 
-    default Object if_blank(Object v1, Object v2) {
-        return null;
-    }
+    Object decode(Object target, Object... args);
 
-    default Object bvl(Object v1, Object v2) {
-        return null;
-    }
+    Object cast(Object val, Object type);
 
-    default Object if2(Object cond, Object trueVal, Object falseVal) {
-        return null;
-    }
+    Object convert(Object val, Object type);
 
-    default Object nvl2(Object cond, Object trueVal, Object falseVal) {
-        return null;
-    }
+    ChronoUnit chrono_unit(String unit);
 
-    default Object decode(Object target, Object... args) {
-        return null;
-    }
+    Object date_sub(Object date, String unit, long interval);
 
-    default Object cast(Object val, Object type) {
-        return null;
-    }
+    Object date_add(Object date, String unit, long interval);
 
-    default Object convert(Object val, Object type) {
-        return null;
-    }
+    Date to_date(Object obj);
 
-    default ChronoUnit chrono_unit(String unit) {
-        return null;
-    }
+    Date to_date(Object obj, String pattern);
 
-    default Object date_sub(Object date, String unit, long interval) {
-        return null;
-    }
+    String date_format(Object date, String pattern);
 
-    default Object date_add(Object date, String unit, long interval) {
-        return null;
-    }
+    Object last_day(Object date);
 
-    default Date to_date(Object obj) {
-        return null;
-    }
+    String to_char(Object obj);
 
-    default Date to_date(Object obj, String pattern) {
-        return null;
-    }
+    String to_char(Object obj, String pattern);
 
-    default String date_format(Object date, String pattern) {
-        return null;
-    }
+    String to_string(Object obj);
 
-    default Object last_day(Object date) {
-        return null;
-    }
+    String to_string(Object obj, String pattern);
 
-    default String to_char(Object obj) {
-        return null;
-    }
+    String left(Object obj, int len);
 
-    default String to_char(Object obj, String pattern) {
-        return null;
-    }
+    String right(Object obj, int len);
 
-    default String to_string(Object obj) {
-        return null;
-    }
+    String uuid();
 
-    default String to_string(Object obj, String pattern) {
-        return null;
-    }
+    long snowflake_id();
 
-    default String left(Object obj, int len) {
-        return null;
-    }
+    Date sysdate();
 
-    default String right(Object obj, int len) {
-        return null;
-    }
+    Date now();
 
-    default String uuid() {
-        return null;
-    }
+    long timestamp();
 
-    default long snowflake_id() {
-        return -1;
-    }
+    Date timestamp_to_date(Object ts);
 
-    default Date sysdate() {
-        return null;
-    }
+    Long date_to_timestamp(Object date);
 
-    default Date now() {
-        return null;
-    }
+    String reverse(Object str);
 
-    default long timestamp() {
-        return -1;
-    }
+    Object add_months(Object date, long interval);
 
-    default Date timestamp_to_date(Object ts) {
-        return null;
-    }
+    Object add_days(Object date, long interval);
 
-    default Long date_to_timestamp(Object date) {
-        return null;
-    }
+    Object trunc(Object obj);
 
-    default String reverse(Object str) {
-        return null;
-    }
+    Object trunc(Object date, String format);
 
-    default Object add_months(Object date, long interval) {
-        return null;
-    }
+    Object trunc(Object number, Integer precision);
 
-    default Object add_days(Object date, long interval) {
-        return null;
-    }
+    Object round(Object number);
 
-    default Object trunc(Object obj) {
-        return null;
-    }
+    Object round(Object number, Integer precision);
 
-    default Object trunc(Object date, String format) {
-        return null;
-    }
+    String concat(Object... args);
 
-    default Object trunc(Object number, Integer precision) {
-        return null;
-    }
+    String concat(Iterable<?> args);
 
-    default Object round(Object number) {
-        return null;
-    }
+    String join(Object separator, Object... args);
 
-    default Object round(Object number, Integer precision) {
-        return null;
-    }
+    String join(Object separator, Iterable<?> args);
 
-    default String concat(Object... args) {
-        return null;
-    }
+    Object first_day(Object date);
 
-    default String concat(Iterable<?> args) {
-        return null;
-    }
+    int day(Object date);
 
-    default String join(Object separator, Object... args) {
-        return null;
-    }
+    int month(Object date);
 
-    default String join(Object separator, Iterable<?> args) {
-        return null;
-    }
+    int year(Object date);
 
-    default Object first_day(Object date) {
-        return null;
-    }
+    int hour(Object date);
 
-    default int day(Object date) {
-        return -1;
-    }
+    int minute(Object date);
 
-    default int month(Object date) {
-        return -1;
-    }
+    int second(Object date);
 
-    default int year(Object date) {
-        return -1;
-    }
+    int week(Object date);
 
-    default int hour(Object date) {
-        return -1;
-    }
+    int extract(String fmt, Object date);
 
-    default int minute(Object date) {
-        return -1;
-    }
+    BigDecimal to_number(Object obj);
 
-    default int second(Object date) {
-        return -1;
-    }
+    Integer to_int(Object obj);
 
-    default int week(Object date) {
-        return -1;
-    }
+    Long to_long(Object obj);
 
-    default int extract(String fmt, Object date) {
-        return -1;
-    }
+    boolean to_boolean(Object obj);
 
-    default BigDecimal to_number(Object obj) {
-        return null;
-    }
+    void sleep(long seconds);
 
-    default Integer to_int(Object obj) {
-        return null;
-    }
+    int instr(Object obj, Object sub);
 
-    default Long to_long(Object obj) {
-        return null;
-    }
+    String substr(Object obj, int index);
 
-    default boolean to_boolean(Object obj) {
-        return false;
-    }
+    String substr(Object obj, int index, int len);
 
-    default void sleep(long seconds) {
-    }
+    String substrb(Object str, int index);
 
-    default int instr(Object obj, Object sub) {
-        return -1;
-    }
+    String substrb(Object str, int index, int len);
 
-    default String substr(Object obj, int index) {
-        return null;
-    }
+    String substr_index(Object obj, Object substr, int len);
 
-    default String substr(Object obj, int index, int len) {
-        return null;
-    }
+    String substr_index(Object obj, Object substr);
 
-    default String substrb(Object str, int index) {
-        return null;
-    }
+    String substr_index_end(Object obj, Object substr, int len);
 
-    default String substrb(Object str, int index, int len) {
-        return null;
-    }
+    String substr_index_end(Object obj, Object substr);
 
-    default String substr_index(Object obj, String substr, int len) {
-        return null;
-    }
+    String substr_regex_index(Object obj, String substr, int len);
 
-    default ArrayList<String> splitRegex(String str, String regex) {
-        return null;
-    }
+    String substr_regex_index(Object obj, String substr);
 
-    default ArrayList<String> splitRegex(String str, String regex, int limit) {
-        return null;
-    }
+    String substr_regex_index_end(Object obj, String substr, int len);
 
-    default ArrayList<String> splitLiteral(String str, String regex) {
-        return null;
-    }
+    String substr_regex_index_end(Object obj, String substr);
 
-    default ArrayList<String> splitLiteral(String str, String regex, int limit) {
-        return null;
-    }
+    ArrayList<String> regex_split(Object str, String regex);
 
-    default boolean contains(Object obj, Object substr) {
-        return false;
-    }
+    ArrayList<String> regex_split(Object oStr, String regex, int limit);
 
-    default boolean like(Object obj, Object substr) {
-        return false;
-    }
+    ArrayList<String> split_literal(Object str, Object literal);
 
-    default boolean ends(Object obj, Object substr) {
-        return false;
-    }
+    ArrayList<String> split(Object str, Object literal);
 
-    default boolean starts_with(Object obj, Object substr) {
-        return false;
-    }
+    ArrayList<String> split_literal(Object oStr, Object oLiteral, int limit);
 
-    default boolean starts(Object obj, String substr) {
-        return false;
-    }
+    ArrayList<String> split(Object str, Object literal, int limit);
 
-    default boolean ends_with(Object obj, Object substr) {
-        return false;
-    }
+    boolean contains(Object obj, Object substr);
 
-    default Object neg(Object number) {
-        return null;
-    }
+    boolean like(Object obj, Object substr);
 
-    default Object abs(Object number) {
-        return null;
-    }
+    boolean ends(Object obj, Object substr);
 
-    default Object ln(Object number) {
-        return null;
-    }
+    boolean starts_with(Object obj, Object substr);
 
-    default Object add(Object number1, Object number2) {
-        return null;
-    }
+    boolean starts(Object obj, String substr);
 
-    default Object sub(Object number1, Object number2) {
-        return null;
-    }
+    boolean ends_with(Object obj, Object substr);
 
-    default Object mul(Object number1, Object number2) {
-        return null;
-    }
+    Object neg(Object number);
 
-    default Object div(Object number1, Object number2) {
-        return null;
-    }
+    Object abs(Object number);
 
-    default Object mod(Object number1, Object number2) {
-        return null;
-    }
+    Object ln(Object number);
 
-    default Object pow(Object number1, Object number2) {
-        return null;
-    }
+    Object add(Object number1, Object number2);
 
-    default Object sin(Object number1) {
-        return null;
-    }
+    Object sub(Object number1, Object number2);
 
-    default Object cos(Object number1) {
-        return null;
-    }
+    Object mul(Object number1, Object number2);
 
-    default Object tan(Object number1) {
-        return null;
-    }
+    Object div(Object number1, Object number2);
 
-    default Object asin(Object number1) {
-        return null;
-    }
+    Object mod(Object number1, Object number2);
 
-    default Object acos(Object number1) {
-        return null;
-    }
+    Object pow(Object number1, Object number2);
 
-    default Object atan(Object number1) {
-        return null;
-    }
+    Object sin(Object number1);
 
-    default Object sqrt(Object number1) {
-        return null;
-    }
+    Object cos(Object number1);
 
-    default String encode_url(Object obj) {
-        return null;
-    }
+    Object tan(Object number1);
 
-    default String decode_url(Object obj) {
-        return null;
-    }
+    Object asin(Object number1);
 
-    default String encode_base64(Object obj) {
-        return null;
-    }
+    Object acos(Object number1);
 
-    default String decode_base64(Object obj) {
-        return null;
-    }
+    Object atan(Object number1);
 
-    default String md5(Object data) {
-        return null;
-    }
+    Object sqrt(Object number1);
 
-    default String sha1(Object data) {
-        return null;
-    }
+    String encode_url(Object obj);
 
-    default String sha256(Object data) {
-        return null;
-    }
+    String decode_url(Object obj);
 
-    default String sha384(Object data) {
-        return null;
-    }
+    String encode_base64(Object obj);
 
-    default String sha512(Object data) {
-        return null;
-    }
+    String decode_base64(Object obj);
 
-    default String mds(String algorithm, Object data) {
-        return null;
-    }
+    String md5(Object data);
 
-    default String mds(String algorithm, Object data, String format) {
-        return null;
-    }
+    String sha1(Object data);
 
-    default String mds(String algorithm, Object data, String format, String provider) {
-        return null;
-    }
+    String sha256(Object data);
+
+    String sha384(Object data);
+
+    String sha512(Object data);
+
+    String mds(String algorithm, Object data);
+
+    String mds(String algorithm, Object data, String format);
+
+    String mds(String algorithm, Object data, String format, String provider);
 }
