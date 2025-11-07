@@ -72,7 +72,7 @@
 
         <completion.contributor
                 language="any"
-                order="first"
+                order="last"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.AnyHelpXmlCompletionContributor"/>
 
         <!--<completion.contributor
