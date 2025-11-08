@@ -738,6 +738,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 }
                 val = execParams.get(key);
                 params.put(key, val);
+            }else {
+                if (ParamsConsts.GLOBAL.equals(key)) {
+                    if (execParams == null) {
+                        execParams = createParams();
+                    }
+                    Map<String,Object> execGlobal = (Map<String,Object>)execParams.get(key);
+                    Map<String,Object> global = (Map<String,Object>)val;
+                    for (Map.Entry<String, Object> entry : execGlobal.entrySet()) {
+                        global.putIfAbsent(entry.getKey(),entry.getValue());
+                    }
+                }
             }
             if (ParamsConsts.TRACE.equals(key)) {
                 Map<String, Object> trace = (Map<String, Object>) val;
