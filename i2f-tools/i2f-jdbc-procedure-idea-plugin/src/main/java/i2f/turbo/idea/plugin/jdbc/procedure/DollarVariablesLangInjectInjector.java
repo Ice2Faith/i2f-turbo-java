@@ -96,6 +96,7 @@ public class DollarVariablesLangInjectInjector implements MultiHostInjector {
         MarkupModel markupModel = editor.getMarkupModel();
         synchronized (weakHighlighterMap) {
             List<RangeHighlighter> weakList = weakHighlighterMap.get(context);
+
             if (weakList != null) {
                 for (RangeHighlighter highlighter : weakList) {
                     try {
@@ -105,29 +106,32 @@ public class DollarVariablesLangInjectInjector implements MultiHostInjector {
                     }
                 }
             }
+        }
 
-            List<RegexMatchItem> list = RegexUtil.regexFinds(text, "[$#](\\!)?\\{[^\\}]*\\}");
-            for (RegexMatchItem item : list) {
+        List<RegexMatchItem> list = RegexUtil.regexFinds(text, "[$#](\\!)?\\{[^\\}]*\\}");
+        for (RegexMatchItem item : list) {
 //            log.warn("dollar-vars:"+item.matchStr+"["+item.idxStart+","+item.idxEnd+"]");
-                TextAttributesKey key = DefaultLanguageHighlighterColors.NUMBER;
+            TextAttributesKey key = DefaultLanguageHighlighterColors.NUMBER;
 //            if(item.matchStr.startsWith("$")){
 //                key=DefaultLanguageHighlighterColors.METADATA;
 //            }
-                if (item.matchStr.replaceAll("\\s+", "").contains("{}")) {
-                    key = HighlighterColors.BAD_CHARACTER;
-                }
+            if (item.matchStr.replaceAll("\\s+", "").contains("{}")) {
+                key = HighlighterColors.BAD_CHARACTER;
+            }
 
 
-                RangeHighlighter highlighter = markupModel.addRangeHighlighter(
-                        key,
-                        startOffset + item.idxStart,
-                        startOffset + item.idxEnd, layer,
-                        HighlighterTargetArea.EXACT_RANGE
-                );
+            RangeHighlighter highlighter = markupModel.addRangeHighlighter(
+                    key,
+                    startOffset + item.idxStart,
+                    startOffset + item.idxEnd, layer,
+                    HighlighterTargetArea.EXACT_RANGE
+            );
+            synchronized (weakHighlighterMap) {
                 weakHighlighterMap.computeIfAbsent(context, k -> new ArrayList<>())
                         .add(highlighter);
             }
         }
+
 
     }
 }
