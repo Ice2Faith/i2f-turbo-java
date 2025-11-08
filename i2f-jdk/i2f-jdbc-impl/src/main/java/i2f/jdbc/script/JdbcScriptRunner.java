@@ -231,9 +231,11 @@ public class JdbcScriptRunner {
                 sql = sql.replace("\r\n", "\n");
             }
 
+            int updateCount=0;
             try {
-                for (boolean hasResults = statement.execute(sql); hasResults || statement.getUpdateCount() != -1; hasResults = statement.getMoreResults()) {
+                for (boolean hasResults = statement.execute(sql); hasResults || (updateCount=statement.getUpdateCount()) != -1; hasResults = statement.getMoreResults()) {
                     this.checkWarnings(statement);
+                    this.print("update count: " + updateCount+"\n");
                     this.printResults(statement, hasResults);
                 }
             } catch (SQLWarning e) {
