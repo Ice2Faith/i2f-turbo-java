@@ -70,11 +70,14 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        XmlNode beforeNode=ContextHolder.TRACE_NODE.get();
+
         XmlNode.NodeType nodeType = node.getNodeType();
         if (nodeType == XmlNode.NodeType.TEXT
                 || nodeType == XmlNode.NodeType.CDATA) {
             return;
         }
+
         String location = getNodeLocation(node);
         boolean isDebugMode = executor.isDebug();
 
@@ -249,6 +252,10 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 onFinally(pointContext, node, context, executor);
             } catch (Throwable e) {
                 executor.logger().logWarn(() -> e.getMessage(), e);
+            }
+
+            if(beforeNode!=null) {
+                updateTraceInfo(beforeNode, context, executor);
             }
         }
     }
