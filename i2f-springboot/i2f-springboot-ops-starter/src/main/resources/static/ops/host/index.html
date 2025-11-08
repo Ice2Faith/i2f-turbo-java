@@ -394,12 +394,23 @@
                 this.completions = items;
                 //console.log('end collect completions .')
             },
-            editorCompletionItemCollector(prefix) {
-                if (!prefix) {
-                    prefix = '';
+            editorCompletionItemCollector(prefix){
+                if(!prefix){
+                    prefix='';
                 }
-                prefix = prefix.toLowerCase();
-                return this.completions.filter(e => e && e.toLowerCase().indexOf(prefix) >= 0);
+                prefix=prefix.toLowerCase();
+                let ret= [];
+                let count=50;
+                for (const e in this.completions) {
+                    if(e && e.toLowerCase().indexOf(prefix)){
+                        ret.push(e);
+                        count--;
+                        if(count<=0){
+                            break;
+                        }
+                    }
+                }
+                return ret;
             },
             initEditor() {
                 let _this = this;

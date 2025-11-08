@@ -259,9 +259,13 @@
                         </el-col>
                         <el-col :span="12">
                             <el-row type="flex" justify="end">
-                                <el-button type="success" size="medium"
-                                           @click="onViewText(drawer.metadata.databases,'数据库列表')">
+                                <el-button type="success" size="small"
+                                           @click="onViewText(computeFilterDatabases,'数据库列表')">
                                     数据库JSON
+                                </el-button>
+                                <el-button type="success" size="small"
+                                           @click="onViewText(computeFilterDatabases.map(e=>e).join(','),'数据库名')">
+                                    数据库名
                                 </el-button>
                                 <el-button v-loading="drawer.metadata.databasesLoading" size="medium"
                                            icon="el-icon-refresh" circle
@@ -302,9 +306,13 @@
                         </el-col>
                         <el-col :span="12">
                             <el-row type="flex" justify="end">
-                                <el-button type="success" size="medium"
-                                           @click="onViewText(drawer.metadata.tables,'表列表')">
+                                <el-button type="success" size="small"
+                                           @click="onViewText(computeFilterTables,'表列表')">
                                     表JSON
+                                </el-button>
+                                <el-button type="success" size="small"
+                                           @click="onViewText(computeFilterTables.map(e=>e.name).join('\n'),'表列表')">
+                                    表名
                                 </el-button>
                                 <el-button v-loading="drawer.metadata.tablesLoading" size="medium"
                                            icon="el-icon-refresh" circle
@@ -359,7 +367,10 @@
                        icon="el-icon-refresh" circle
                        @click="doLoadTableInfo">
             </el-button>
-            <el-button type="success" @click="onViewText(dialog.tableInfo.meta,'表结构')">表结构JSON</el-button>
+            <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta,'表结构')">表结构JSON</el-button>
+            <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta.columns.map(e=>e.name).join(','),'列名')">列名</el-button>
+            <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta.columns.filter(e=>!e.nullable).map(e=>e.name).join(','),'列名')">非空列名</el-button>
+
         </el-row>
         <el-row>
             <el-table border stripe highlight-current-row
@@ -600,6 +611,32 @@
             <el-form-item>
                 <el-button type="primary" @click="doRenderEcharts">绘制图表</el-button>
             </el-form-item>
+            <el-form-item label="图表变体">
+                <el-checkbox v-if="dialog.visualChart.config.type=='line'"
+                             v-model="dialog.visualChart.config.smooth">
+                    平滑
+                </el-checkbox>
+                <el-checkbox v-if="dialog.visualChart.config.type=='line' || dialog.visualChart.config.type=='bar'"
+                             v-model="dialog.visualChart.config.stack">
+                    堆叠
+                </el-checkbox>
+                <el-checkbox v-if="dialog.visualChart.config.type=='line'"
+                             v-model="dialog.visualChart.config.area">
+                    面积
+                </el-checkbox>
+                <el-checkbox v-if="dialog.visualChart.config.type=='line'"
+                             v-model="dialog.visualChart.config.step">
+                    阶梯
+                </el-checkbox>
+                <el-checkbox v-if="dialog.visualChart.config.type=='pie'"
+                             v-model="dialog.visualChart.config.rose">
+                    玫瑰
+                </el-checkbox>
+                <el-checkbox v-if="dialog.visualChart.config.type=='bar'"
+                             v-model="dialog.visualChart.config.polar">
+                    极坐标
+                </el-checkbox>
+            </el-form-item>
         </el-form>
 
         <div ref="refEchartDom" style="height: 480px;width:100%;"></div>
@@ -736,7 +773,7 @@
                                 label: '柱状图',
                                 value: 'bar',
                             }, {
-                                label: '玫瑰图',
+                                label: '饼图',
                                 value: 'pie',
                             }
                         ]
@@ -782,6 +819,12 @@
                             title: '可视化图表',
                             config: {
                                 type: 'line',
+                                smooth: false, // 平滑曲线，for line
+                                stack: false, // 堆叠，for line,bar
+                                area: false,// 面积图，for line
+                                step: false, // 阶梯， for line
+                                rose: false, // 玫瑰图， for pie
+                                polar: false, // 极坐标，for bar
                                 xAxis: null,
                                 yAxisList: []
                             }
@@ -892,7 +935,18 @@
                     prefix='';
                 }
                 prefix=prefix.toLowerCase();
-                return this.completions.filter(e=>e && e.toLowerCase().indexOf(prefix)>=0);
+                let ret= [];
+                let count=50;
+                for (const e in this.completions) {
+                    if(e && e.toLowerCase().indexOf(prefix)){
+                        ret.push(e);
+                        count--;
+                        if(count<=0){
+                            break;
+                        }
+                    }
+                }
+                return ret;
             },
             initEditor(){
                 let _this=this;
@@ -1153,7 +1207,7 @@
                             let resp = transfer.recv(res.data.data)
                             // console.log(resp)
                             if (operate == 'update' && !resp.columns) {
-                                this.metas.resultText = JSON.stringify(resp);
+                                this.metas.resultText = JSON.stringify(resp,null,'    ');
                                 this.metas.resultType = 'text';
                             } else {
                                 this.metas.resultList = resp.rows;
@@ -1161,6 +1215,8 @@
                                 this.metas.resultType = 'table';
                             }
                         } else {
+                            this.metas.resultText = res.data.msg;
+                            this.metas.resultType = 'text';
                             this.$message.error(res.data.msg)
                         }
                     }).catch(err => {
@@ -1218,6 +1274,8 @@
                             this.metas.resultText = resp + '';
                             this.metas.resultType = 'text';
                         } else {
+                            this.metas.resultText = res.data.msg;
+                            this.metas.resultType = 'text';
                             this.$message.error(res.data.msg)
                         }
                     }).catch(err => {
@@ -1503,9 +1561,8 @@
                             if (config.type == 'pie') {
                                 seriasMap[prop] = Object.assign(seriasMap[prop], {
                                     type: 'pie',
-                                    radius: [25, 160],
+                                    radius: '75%',
                                     center: ['50%', '50%'],
-                                    roseType: 'area',
                                     itemStyle: {
                                         borderRadius: 8
                                     },
@@ -1540,6 +1597,58 @@
                     legendList.push(k)
                 })
 
+                if(config.smooth){
+                    if(config.type=='line'){
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].smooth = true;
+                        }
+                    }
+                }
+
+                if(config.stack){
+                    if(config.type=='line' || config.type=='bar'){
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].stack= 'Total';
+                        }
+                    }
+                }
+
+                if(config.area){
+                    if(config.type=='line'){
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].areaStyle= {};
+                            serias[i].emphasis= {
+                                focus: 'series'
+                            };
+                        }
+                    }
+                }
+
+                if(config.step){
+                    if(config.type=='line') {
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].step = 'start';
+                        }
+                    }
+                }
+
+                if(config.rose){
+                    if(config.type=='pie') {
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].radius = [25, 160];
+                            serias[i].roseType = 'area';
+                        }
+                    }
+                }
+
+                if(config.polar){
+                    if(config.type=='bar') {
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].coordinateSystem= 'polar';
+                        }
+                    }
+                }
+
                 if (config.type == 'pie') {
                     for (let i = 0; i < serias.length; i++) {
                         serias[i].center = [((i + 0.5) * (100.0 / serias.length)) + '%', '50%']
@@ -1558,6 +1667,21 @@
                         },
                         yAxis: {
                             type: 'value'
+                        },
+                    }
+                }
+
+                if(config.type=='bar' && config.polar){
+                    additionalOption={
+                        polar: {
+                            radius: [30, '80%']
+                        },
+                        angleAxis: {
+                            startAngle: 75
+                        },
+                        radiusAxis: {
+                            type: 'category',
+                            data: xAxisList
                         },
                     }
                 }
