@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ops Home</title>
+  <script src="./lib/vue/vue-2.js"></script>
+  <script src="./lib/moment/moment-2.24.0.js"></script>
+  <script src="./lib/element-ui/element-ui-2.15.10.js"></script>
+  <link rel="stylesheet" href="./lib/element-ui/element-ui-2.15.10.css"/>
+  <link rel="stylesheet" href="./lib/element-ui/element-ui-2.15.10-icon.css"/>
+  <link href="./lib/element-ui/fonts/element-icons.ttf"/>
+  <link href="./lib/element-ui/fonts/element-icons.woff"/>
+</head>
+<body>
+    <div id="app">
+      <el-card shadow="never">
+        <div slot="header">
+          <span>Ops Home</span>
+        </div>
+        <el-row :gutter="15">
+          <el-col :span="6" v-for="item in menus">
+            <el-result  :title="item.title" style="border: solid 1px #777; border-radius: 5px;">
+              <template slot="icon">
+                <i :class="item.icon||'el-icon-monitor'" style="font-size: 32px"></i>
+              </template>
+              <template slot="subTitle">
+                <span style="color: #777;">{{item.subTitle}}</span>
+              </template>
+              <template slot="extra">
+                <a :href="item.href" target="_blank">
+                  <el-link type="primary" size="small" @click="onClickMenuItem(item)">访问</el-link>
+                </a>
+              </template>
+            </el-result>
+          </el-col>
+
+        </el-row>
+      </el-card>
+    </div>
+</body>
+
+<script>
+  window.app = new Vue({
+    components: {},
+    data() {
+      return {
+        menus:[
+          {
+            title: '数据源',
+            subTitle: '连接/操作数据库',
+            icon: 'el-icon-coin',
+            href: './datasource/index.html'
+          },
+          {
+            title: 'Redis',
+            subTitle: '连接/操作Redis缓存',
+            icon: 'el-icon-connection',
+            href: './redis/index.html'
+          },
+          {
+            title: 'Host',
+            subTitle: '连接/操作Host主机命令/文件',
+            icon: 'el-icon-monitor',
+            href: './host/index.html'
+          },
+          {
+            title: 'Xxl Job',
+            subTitle: '执行XXL-JOB任务',
+            icon: 'el-icon-timer',
+            href: './xxl-job/index.html'
+          }
+        ]
+      }
+    },
+    created() {
+
+    },
+    mounted() {
+
+    },
+    watch: {},
+    computed: {
+
+    },
+    methods: {
+      onClickMenuItem(item){
+
+      }
+    }
+  })
+  window.app.$mount('#app')
+</script>
+<style>
+
+  .list-item {
+    margin-top: 3px;
+    border-bottom: solid 1px #777;
+  }
+
+  .list-item:hover {
+    background: lightskyblue;
+  }
+
+  .checked-item {
+    background: darkorange;
+  }
+
+  .scroller {
+    height: 260px
+  }
+</style>
+</html>

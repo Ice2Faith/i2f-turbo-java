@@ -415,8 +415,9 @@
                             //console.log(res.data)
                             let resp = transfer.recv(res.data.data)
                             // console.log(resp)
-                            this.metas.resultText = resp || '';
+                            this.metas.resultText = JSON.parse(resp,null,'    ');
                         } else {
+                            this.metas.resultText = res.data.msg;
                             this.$message.error(res.data.msg)
                         }
                     }).catch(err => {
