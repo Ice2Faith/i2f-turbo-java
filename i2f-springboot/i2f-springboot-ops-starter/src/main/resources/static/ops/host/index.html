@@ -401,7 +401,8 @@
                 prefix=prefix.toLowerCase();
                 let ret= [];
                 let count=50;
-                for (const e in this.completions) {
+                for (let i=0;i<this.completions.length;i++) {
+                    let e=this.completions[i];
                     if(e && e.toLowerCase().indexOf(prefix)){
                         ret.push(e);
                         count--;
