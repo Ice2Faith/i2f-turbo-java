@@ -199,6 +199,12 @@
                              label="操作"
                              width="100"
                              fixed="left">
+                <template slot="header" slot-scope="scope">
+                        <span class="table-cell">
+                            <el-tag type="success" class="table-cell-hidden" @click="onViewText(metas.resultColumns.map(e=>e.label).join('\n'),'列名')">列</el-tag>
+                            操作
+                        </span>
+                </template>
                 <template slot-scope="scope">
                     <el-tag type="success" @click="onViewText(scope.row,'数据行')">显示JSON</el-tag>
                 </template>
@@ -224,6 +230,13 @@
                                  sortable
                                  :prop="column.label"
                                  :label="column.label">
+                    <template slot="header" slot-scope="scope">
+                        <span class="table-cell">
+                            <el-tag type="success" class="table-cell-hidden" @click="onViewText(metas.resultList.map(e=>e[column.label]).join('\n'),'列值 - '+column.label)">值</el-tag>
+                            <el-tag type="success" class="table-cell-hidden" @click="onViewText(column,'列 - '+column.label)">列</el-tag>
+                            {{column.label}}
+                        </span>
+                    </template>
                     <template slot-scope="scope">
                             <span class="table-cell">
                                 <el-tag type="success" class="table-cell-hidden" @click="onViewTableCellData(scope.row[column.label],scope,column)">值</el-tag>
@@ -578,26 +591,6 @@
             :visible.sync="dialog.visualChart.show"
             width="80%">
         <el-form :inline="true">
-            <el-form-item label="X轴">
-                <el-select v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
-                    <el-option
-                            v-for="item in metas.resultColumns"
-                            :key="item.label"
-                            :label="item.label"
-                            :value="item.label">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="Y轴">
-                <el-select v-model="dialog.visualChart.config.yAxisList" multiple placeholder="Y轴">
-                    <el-option
-                            v-for="item in metas.resultColumns"
-                            :key="item.label"
-                            :label="item.label"
-                            :value="item.label">
-                    </el-option>
-                </el-select>
-            </el-form-item>
             <el-form-item label="图表形式">
                 <el-select v-model="dialog.visualChart.config.type" placeholder="图表形式">
                     <el-option
@@ -608,34 +601,117 @@
                     </el-option>
                 </el-select>
             </el-form-item>
+            <template v-if="dialog.visualChart.config.type=='graph'">
+                <el-form-item label="起点标签">
+                    <el-select v-model="dialog.visualChart.config.labelProp" placeholder="起点标签">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="起点">
+                    <el-select v-model="dialog.visualChart.config.startProp" placeholder="起点">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="终点">
+                    <el-select v-model="dialog.visualChart.config.endProp" placeholder="终点">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </template>
+            <template v-else-if="dialog.visualChart.config.type=='scatter'">
+                <el-form-item label="X轴">
+                    <el-select v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="Y轴">
+                    <el-select v-model="dialog.visualChart.config.yAxis" placeholder="Y轴">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </template>
+            <template v-else>
+                <el-form-item label="X轴">
+                    <el-select v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="Y轴">
+                    <el-select v-model="dialog.visualChart.config.yAxisList" multiple placeholder="Y轴">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </template>
+
             <el-form-item>
                 <el-button type="primary" @click="doRenderEcharts">绘制图表</el-button>
             </el-form-item>
             <el-form-item label="图表变体">
-                <el-checkbox v-if="dialog.visualChart.config.type=='line'"
-                             v-model="dialog.visualChart.config.smooth">
-                    平滑
-                </el-checkbox>
-                <el-checkbox v-if="dialog.visualChart.config.type=='line' || dialog.visualChart.config.type=='bar'"
-                             v-model="dialog.visualChart.config.stack">
-                    堆叠
-                </el-checkbox>
-                <el-checkbox v-if="dialog.visualChart.config.type=='line'"
-                             v-model="dialog.visualChart.config.area">
-                    面积
-                </el-checkbox>
-                <el-checkbox v-if="dialog.visualChart.config.type=='line'"
-                             v-model="dialog.visualChart.config.step">
-                    阶梯
-                </el-checkbox>
-                <el-checkbox v-if="dialog.visualChart.config.type=='pie'"
-                             v-model="dialog.visualChart.config.rose">
-                    玫瑰
-                </el-checkbox>
-                <el-checkbox v-if="dialog.visualChart.config.type=='bar'"
-                             v-model="dialog.visualChart.config.polar">
-                    极坐标
-                </el-checkbox>
+                <template v-if="dialog.visualChart.config.type=='scatter'">
+
+                </template>
+                <template v-else>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='line'"
+                                 v-model="dialog.visualChart.config.smooth">
+                        平滑
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='line' || dialog.visualChart.config.type=='bar'"
+                                 v-model="dialog.visualChart.config.stack">
+                        堆叠
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='line'"
+                                 v-model="dialog.visualChart.config.area">
+                        面积
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='line'"
+                                 v-model="dialog.visualChart.config.step">
+                        阶梯
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='pie'"
+                                 v-model="dialog.visualChart.config.rose">
+                        玫瑰
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='bar'"
+                                 v-model="dialog.visualChart.config.polar">
+                        极坐标
+                    </el-checkbox>
+                </template>
+
             </el-form-item>
         </el-form>
 
@@ -775,6 +851,12 @@
                             }, {
                                 label: '饼图',
                                 value: 'pie',
+                            }, {
+                                label: '散点图',
+                                value: 'scatter',
+                            }, {
+                                label: '关系图',
+                                value: 'graph',
                             }
                         ]
                     },
@@ -818,7 +900,7 @@
                             show: false,
                             title: '可视化图表',
                             config: {
-                                type: 'line',
+                                type: 'line', // line,bar,pie,scatter
                                 smooth: false, // 平滑曲线，for line
                                 stack: false, // 堆叠，for line,bar
                                 area: false,// 面积图，for line
@@ -826,7 +908,14 @@
                                 rose: false, // 玫瑰图， for pie
                                 polar: false, // 极坐标，for bar
                                 xAxis: null,
-                                yAxisList: []
+                                yAxisList: [],
+
+                                yAxis: null, // for scatter
+
+                                // for graph
+                                labelProp: null,
+                                startProp: null,
+                                endProp: null,
                             }
                         }
                     },
@@ -838,7 +927,6 @@
                         username: '',
                         password: '',
                         sql: '',
-                        selectSql: '',
                         maxCount: 100,
                         useMultiDatasource: false,
                         multiDatasourceList:[],
@@ -939,7 +1027,7 @@
                 let count=50;
                 for (let i=0;i<this.completions.length;i++) {
                     let e=this.completions[i];
-                    if(e && e.toLowerCase().indexOf(prefix)){
+                    if(e && e.toLowerCase().indexOf(prefix)>=0){
                         ret.push(e);
                         count--;
                         if(count<=0){
@@ -1274,6 +1362,7 @@
                             //console.log(resp)
                             this.metas.resultText = resp + '';
                             this.metas.resultType = 'text';
+                            this.form.useMultiDatasource=false;
                         } else {
                             this.metas.resultText = res.data.msg;
                             this.metas.resultType = 'text';
@@ -1519,7 +1608,15 @@
                 this.dialog.visualChart.show = true;
             },
             doRenderEcharts() {
-                let option = this.convertAsEChartsOptions(this.metas.resultList, this.dialog.visualChart.config);
+                let option = {}
+                let chartType=this.dialog.visualChart.config.type;
+                if(chartType=='graph'){
+                    option=this.convertAsEchartsGraphOptions(this.metas.resultList, this.dialog.visualChart.config);
+                } else if(chartType=='scatter'){
+                    option=this.convertAsEchartsScatterOptions(this.metas.resultList, this.dialog.visualChart.config);
+                }else if(chartType=='line' || chartType=='bar' || chartType=='pie'){
+                    option=this.convertAsEChartsOptions(this.metas.resultList, this.dialog.visualChart.config);
+                }
                 let dom = this.$refs.refEchartDom;
                 if (this.chart) {
                     this.chart.dispose();
@@ -1532,6 +1629,206 @@
                     this.chart.setOption(option);
                 }
                 window.addEventListener('resize', this.chart.resize);
+            },
+            convertAsEchartsGraphOptions(dataList,config) {
+                if (!dataList) {
+                    dataList = [];
+                }
+                if (!config) {
+                    config = {
+                        type: 'graph',
+                        labelProp: 'label',
+                        startProp: 'id',
+                        endProp: 'parentId'
+                    };
+                }
+
+                let data = []
+                let links=[]
+
+                dataList.forEach(item => {
+                    data.push({
+                        id: item[config.startProp],
+                        name: item[config.labelProp]
+                    })
+                    links.push({
+                        source: item[config.startProp],
+                        target: item[config.endProp],
+                    })
+                })
+
+                let option={
+                    title: {
+                        text: 'Visual Data'
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            mark: {show: true},
+                            dataView: {show: true, readOnly: false},
+                            restore: {show: true},
+                            saveAsImage: {show: true}
+                        }
+                    },
+                    animationDurationUpdate: 1500,
+                    animationEasingUpdate: 'quinticInOut',
+                    series: [
+                        {
+                            type: 'graph',
+                            layout: 'force',
+                            force: {
+                                repulsion: 100,
+                                edgeLength: 300
+                            },
+                            draggable: true,
+                            symbolSize: 50,
+                            roam: true,
+                            label: {
+                                show: true
+                            },
+                            edgeSymbol: ['circle', 'arrow'],
+                            edgeSymbolSize: [4, 10],
+                            edgeLabel: {
+                                fontSize: 20
+                            },
+
+                            data: data,
+                            // links: [],
+                            links: links,
+                            lineStyle: {
+                                opacity: 0.9,
+                                width: 2,
+                                curveness: 0
+                            }
+                        }
+                    ]
+                }
+
+                return option
+            },
+            convertAsEchartsScatterOptions(dataList,config){
+                if (!dataList) {
+                    dataList = [];
+                }
+                if (!config) {
+                    config = {
+                        type: 'scatter',
+                        xAxis: 'x',
+                        yAxis: 'y'
+                    };
+                }
+
+                let data=[]
+
+                dataList.forEach(item=>{
+                    let coord=[
+                        item[config.xAxis],
+                        item[config.yAxis]
+                    ];
+                    data.push(coord)
+                })
+
+                let option={
+                    title: {
+                        text: 'Visual Data'
+                    },
+                    tooltip: {
+                        showDelay: 0,
+                        axisPointer: {
+                            show: true,
+                            type: 'cross',
+                            lineStyle: {
+                                type: 'dashed',
+                                width: 1
+                            }
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            mark: {show: true},
+                            dataView: {show: true, readOnly: false},
+                            restore: {show: true},
+                            saveAsImage: {show: true}
+                        }
+                    },
+                    xAxis: [
+                        {
+                            type: 'value',
+                            axisLabel: {
+
+                            },
+                            splitLine: {
+                                show: true
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            axisLabel: {
+
+                            },
+                            splitLine: {
+                                show: true
+                            }
+                        }
+                    ],
+                    series: [
+                        {
+                            type: 'scatter',
+                            symbolSize: 20,
+                            data: data,
+                            markArea: {
+                                silent: true,
+                                itemStyle: {
+                                    color: 'transparent',
+                                    borderWidth: 1,
+                                    borderType: 'dashed'
+                                },
+                                data: [
+                                    [
+                                        {
+                                            name: 'Data Range',
+                                            xAxis: 'min',
+                                            yAxis: 'min'
+                                        },
+                                        {
+                                            xAxis: 'max',
+                                            yAxis: 'max'
+                                        }
+                                    ]
+                                ]
+                            },
+                            markPoint: {
+                                data: [
+                                    { type: 'max', name: 'Max' },
+                                    { type: 'min', name: 'Min' }
+                                ]
+                            },
+                            markLine: {
+                                lineStyle: {
+                                    type: 'solid'
+                                },
+                                data: [{ type: 'average', name: 'Avg' }]
+                            }
+                        }
+                    ]
+                }
+
+                return option
             },
             convertAsEChartsOptions(dataList, config) {
                 if (!dataList) {
