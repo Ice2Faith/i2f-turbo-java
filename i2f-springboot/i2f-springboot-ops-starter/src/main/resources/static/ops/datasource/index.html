@@ -1643,14 +1643,21 @@
                     };
                 }
 
+                let nodeMap={
+
+                }
                 let data = []
                 let links=[]
 
                 dataList.forEach(item => {
-                    data.push({
+                    let node={
                         id: item[config.startProp],
                         name: item[config.labelProp]
-                    })
+                    }
+                    if(!nodeMap[node.id]){
+                        data.push(node);
+                    }
+                    nodeMap[node.id]=node;
                     links.push({
                         source: item[config.startProp],
                         target: item[config.endProp],
@@ -1678,17 +1685,26 @@
                     },
                     animationDurationUpdate: 1500,
                     animationEasingUpdate: 'quinticInOut',
+                    thumbnail: {
+                        width: '20%',
+                        height: '20%',
+                        windowStyle: {
+                            color: 'rgba(140, 212, 250, 0.5)',
+                            borderColor: 'rgba(30, 64, 175, 0.7)',
+                            opacity: 1
+                        }
+                    },
                     series: [
                         {
                             type: 'graph',
                             layout: 'force',
                             force: {
-                                repulsion: 100,
-                                edgeLength: 300
+                                edgeLength: 500,
+                                repulsion: 1500,
+                                gravity: 0.01
                             },
                             draggable: true,
                             symbolSize: 50,
-                            roam: true,
                             label: {
                                 show: true
                             },
@@ -1697,15 +1713,24 @@
                             edgeLabel: {
                                 fontSize: 20
                             },
+                            emphasis: {
+                                focus: 'adjacency',
+                                label: {
+                                    position: 'right',
+                                    show: true
+                                }
+                            },
+                            roam: true,
+                            roamTrigger: 'global',
+                            lineStyle: {
+                                width: 0.5,
+                                curveness: 0,
+                                opacity: 0.7
+                            },
 
                             data: data,
                             // links: [],
                             links: links,
-                            lineStyle: {
-                                opacity: 0.9,
-                                width: 2,
-                                curveness: 0
-                            }
                         }
                     ]
                 }
