@@ -1,0 +1,23 @@
+i2f:
+  springboot:
+    limit:
+      aop:
+        enable: true
+      filter:
+        enable: true
+        order: 0
+        pattern: /*
+      app-name: default
+      rule-provider:
+        app-init:
+          enable: true
+        redis-dynamic:
+          enable: true
+        jdbc-dynamic:
+          enable: true
+      rules:
+        - limit-type: ant-path
+          type-key: /login
+          rule:
+            count: 100
+            ttl: 1

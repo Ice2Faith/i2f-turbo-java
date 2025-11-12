@@ -1,0 +1,10 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    i2f.springboot.limit.properties.LimitRuleProperties,\
+    i2f.springboot.limit.core.LimitRedisHolder,\
+    i2f.springboot.limit.core.LimitManager,\
+    i2f.springboot.limit.aop.LimitAop,\
+    i2f.springboot.limit.filter.LimitWebMvcConfigurer,\
+    i2f.springboot.limit.provider.impl.AppInitLimitRuleItemProvider,\
+    i2f.springboot.limit.provider.impl.JdbcDynamicLimitRuleItemProvider,\
+    i2f.springboot.limit.provider.impl.RedisDynamicLimitRuleItemProvider
+
