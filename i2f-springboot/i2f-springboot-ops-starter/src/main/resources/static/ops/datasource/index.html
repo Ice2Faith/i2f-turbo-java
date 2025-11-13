@@ -192,6 +192,7 @@
             行数：{{metas.resultList.length}}
         </el-row>
         <el-table border stripe highlight-current-row
+                  :key="metas.resultListVueKey"
                   :data="metas.resultList"
                   style="width: 100%"
                   max-height="720">
@@ -387,6 +388,7 @@
         </el-row>
         <el-row>
             <el-table border stripe highlight-current-row
+                      :key="dialog.tableInfo.metaVueKey"
                       :data="dialog.tableInfo.meta.columns"
                       style="width: 100%"
                       max-height="720">
@@ -823,6 +825,7 @@
                         resultText: '',
                         resultColumns: [],
                         resultList: [],
+                        resultListVueKey: 0,
                         ddlTypeList: [
                             {
                                 label: 'Auto',
@@ -879,6 +882,7 @@
                             title: '表结构',
                             metaLoading: false,
                             meta: {},
+                            metaVueKey: 0,
                             ddlType: 'auto',
                             tableDdlLoading: false,
                             tableDdl: '',
@@ -1302,6 +1306,7 @@
                                 this.metas.resultList = resp.rows;
                                 this.metas.resultColumns = resp.columns;
                                 this.metas.resultType = 'table';
+                                this.metas.resultListVueKey=new Date().getTime()
                             }
                         } else {
                             this.metas.resultText = res.data.msg;
@@ -1479,6 +1484,7 @@
                 }
                 if (tableMeta && tableMeta.name) {
                     this.dialog.tableInfo.meta = tableMeta;
+                    this.dialog.tableInfo.metaVueKey=new Date().getTime();
                     return;
                 }
                 this.doLoadTableInfo()
@@ -1523,6 +1529,7 @@
                             this.dialog.tableInfo.title = resp.name;
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table;
                             this.storage.tableInfoMap[storageKey] = resp;
+                            this.dialog.tableInfo.metaVueKey=new Date().getTime();
                         } else {
                             this.$message.error(res.data.msg)
                         }
