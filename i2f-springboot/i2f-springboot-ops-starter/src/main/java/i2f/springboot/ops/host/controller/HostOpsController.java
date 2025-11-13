@@ -5,9 +5,10 @@ import i2f.springboot.ops.common.OpsException;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
-import i2f.springboot.ops.host.NetworkUtil;
 import i2f.springboot.ops.host.data.HostFileItemDto;
 import i2f.springboot.ops.host.data.HostOperateDto;
+import i2f.springboot.ops.util.HumanUtil;
+import i2f.springboot.ops.util.NetworkUtil;
 import i2f.web.servlet.ServletFileUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -52,8 +52,8 @@ public class HostOpsController {
     @Autowired
     protected Environment environment;
 
-    protected static AtomicReference<String> hostIpHolder = new AtomicReference<>();
-    protected static AtomicLong hostIpUpdateTs=new  AtomicLong(0L);
+    protected AtomicReference<String> hostIpHolder = new AtomicReference<>();
+    protected AtomicLong hostIpUpdateTs = new AtomicLong(0L);
 
     protected AtomicInteger postHolder=new AtomicInteger(0);
 
@@ -192,7 +192,7 @@ public class HostOpsController {
             resp.addAll(fileList);
 
             for (HostFileItemDto item : resp) {
-                item.setSizeText(humanFileSize(item.getSize()));
+                item.setSizeText(HumanUtil.humanFileSize(item.getSize()));
             }
 
             return transfer.success(resp);
@@ -202,21 +202,6 @@ public class HostOpsController {
         }
     }
 
-    public static String humanFileSize(long size){
-        if(size<1024){
-            return String.format("%dB", size);
-        }
-        if(size<1024*1024){
-            return String.format("%.2fKB", size / 1024.0);
-        }
-        if(size<1024*1024*1024){
-            return String.format("%.2fMB", size / 1024.0 / 1024.0);
-        }
-        if(size<1024L*1024*1024*1024){
-            return String.format("%.2fGB", size / 1024.0 / 1024.0 / 1024.0);
-        }
-        return String.format("%.2fTB", size / 1024.0 / 1024.0 / 1024.0 / 1024.0);
-    }
 
     @PostMapping("/delete")
     @ResponseBody

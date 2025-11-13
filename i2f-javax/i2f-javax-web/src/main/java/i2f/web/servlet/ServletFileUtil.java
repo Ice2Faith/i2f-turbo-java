@@ -196,6 +196,30 @@ public class ServletFileUtil {
      * @throws IOException
      */
     public static void responseAsFileAttachment(InputStream is, boolean closeStream, String virtualFileName, String mimeType, boolean useAttachment, HttpServletResponse response) throws IOException {
+        responseAsFileAttachment((os) -> {
+            StreamUtil.streamCopy(is, os, false);
+            os.close();
+            if (closeStream) {
+                is.close();
+            }
+        }, virtualFileName, mimeType, useAttachment, response);
+    }
+
+    public static interface IOConsumer<T> {
+        void accept(T t) throws IOException;
+    }
+
+    /**
+     * 普通文件直接下载方式
+     *
+     * @param osConsumer      响应输出流回调
+     * @param virtualFileName 虚拟文件名
+     * @param mimeType        响应类型
+     * @param useAttachment   是否附件下载，如果为false就是内联模式
+     * @param response        HTTP响应
+     * @throws IOException
+     */
+    public static void responseAsFileAttachment(IOConsumer<OutputStream> osConsumer, String virtualFileName, String mimeType, boolean useAttachment, HttpServletResponse response) throws IOException {
 //        response.reset();
         if (null != mimeType) {
             response.setContentType(mimeType + ";charset=UTF-8");
@@ -210,12 +234,9 @@ public class ServletFileUtil {
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
 
         OutputStream os = response.getOutputStream();
-        StreamUtil.streamCopy(is, os, false);
+        osConsumer.accept(os);
 
         os.close();
-        if (closeStream) {
-            is.close();
-        }
     }
 
     public static void responseFileAttachment(File filePath, HttpServletResponse response) throws IOException {

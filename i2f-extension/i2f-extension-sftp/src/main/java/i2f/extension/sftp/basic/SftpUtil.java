@@ -5,9 +5,13 @@ import i2f.extension.sftp.basic.data.ISftpMeta;
 import i2f.io.file.FileUtil;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -72,10 +76,26 @@ public class SftpUtil implements Closeable {
         return this;
     }
 
+    public ChannelSftp getChannelSftp() {
+        return channelSftp;
+    }
+
     public ChannelShell getChannelShell() throws JSchException {
         Channel shell = session.openChannel("shell");
         shell.connect();
         return (ChannelShell) shell;
+    }
+
+    public String pwd() throws SftpException {
+        return channelSftp.pwd();
+    }
+
+    public void cd(String path) throws SftpException {
+        channelSftp.cd(path);
+    }
+
+    public String realpath(String path) throws SftpException {
+        return channelSftp.realpath(path);
     }
 
     public SftpUtil mkdirs(String serverPath) throws SftpException {
@@ -123,6 +143,13 @@ public class SftpUtil implements Closeable {
         return this;
     }
 
+    public InputStream download(String serverPath, String serverFileName) throws SftpException {
+        if (serverPath != null && !"".equals(serverPath)) {
+            channelSftp.cd(serverPath);
+        }
+        return channelSftp.get(serverFileName);
+    }
+
     public OutputStream download(String serverPath, String serverFileName, OutputStream os) throws SftpException {
         if (serverPath != null && !"".equals(serverPath)) {
             channelSftp.cd(serverPath);
@@ -165,42 +192,128 @@ public class SftpUtil implements Closeable {
         return this;
     }
 
-    public Vector<?> listFiles(String serverPath) throws SftpException {
+    /**
+     * 递归删除目录/文件
+     *
+     * @param path 要删除的路径
+     * @throws SftpException 如果删除失败
+     */
+    public void recursiveDelete(String path) throws SftpException {
+        // 检查路径是否存在
+        try {
+            boolean isDir = false;
+            Vector<ChannelSftp.LsEntry> entries = channelSftp.ls(path);
+            if (entries != null) {
+                for (ChannelSftp.LsEntry entry : entries) {
+                    isDir = true;
+                    String filename = entry.getFilename();
+
+                    if (".".equals(filename) || "..".equals(filename)) {
+                        continue;
+                    }
+
+                    String fullPath = path.endsWith("/") ? path + filename : path + "/" + filename;
+
+                    if (entry.getAttrs().isDir()) {
+                        recursiveDelete(fullPath);
+                    } else {
+                        channelSftp.rm(fullPath);
+                    }
+                }
+            }
+
+            if (isDir) {
+                channelSftp.rmdir(path);
+            } else {
+                channelSftp.rm(path);
+            }
+
+        } catch (SftpException e) {
+            if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
+                System.out.println("path not exists: " + path);
+            } else {
+                throw e;
+            }
+        }
+
+    }
+
+    public Vector<ChannelSftp.LsEntry> listFiles(String serverPath) throws SftpException {
         return channelSftp.ls(serverPath);
     }
 
     public String exec(String command) throws IOException {
-        ChannelShell channel = null;
-        PrintWriter printWriter = null;
-        BufferedReader input = null;
-        StringBuilder builder = new StringBuilder();
+        return exec(true, -1, command, null, null);
+    }
+
+    public String exec(boolean requireOutput, long waitForMillsSeconds, String cmd, String dir, String charset) throws IOException {
+        StringBuffer builder = new StringBuffer();
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Throwable> exHolder = new AtomicReference<>();
+        Runnable task = () -> {
+
+            ChannelShell channel = null;
+            PrintWriter printWriter = null;
+            BufferedReader input = null;
+
+
+            try {
+                channel = getChannelShell();
+
+                InputStreamReader inputStreamReader = new InputStreamReader(channel.getInputStream(),
+                        ((charset == null || charset.isEmpty()) ? StandardCharsets.UTF_8.name() : charset));
+                input = new BufferedReader(inputStreamReader);
+
+                printWriter = new PrintWriter(channel.getOutputStream());
+                if (dir != null && !dir.isEmpty()) {
+                    printWriter.println("cd " + dir);
+                }
+                printWriter.println(cmd);
+                printWriter.println("exit");
+                printWriter.flush();
+                if (requireOutput) {
+                    String line = null;
+                    while ((line = input.readLine()) != null) {
+                        builder.append(line);
+                        builder.append("\n");
+                    }
+                }
+
+            } catch (Exception e) {
+                exHolder.set(e);
+            } finally {
+                if (printWriter != null) {
+                    printWriter.close();
+                }
+                if (input != null) {
+                    try {
+                        input.close();
+                    } catch (IOException e) {
+
+                    }
+                }
+                if (channel != null) {
+                    channel.disconnect();
+                }
+                latch.countDown();
+            }
+        };
+        new Thread(task).start();
         try {
-            channel = getChannelShell();
+            if (waitForMillsSeconds >= 0) {
+                latch.await(waitForMillsSeconds, TimeUnit.MILLISECONDS);
+            } else {
+                latch.await();
+            }
+        } catch (InterruptedException e) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(channel.getInputStream());
-            input = new BufferedReader(inputStreamReader);
-
-            printWriter = new PrintWriter(channel.getOutputStream());
-            printWriter.println(command);
-            printWriter.println("exit");
-            printWriter.flush();
-            String line = null;
-            while ((line = input.readLine()) != null) {
-                builder.append(line);
-                builder.append("\n");
+        }
+        Throwable ex = exHolder.get();
+        if (ex != null) {
+            if (ex instanceof IOException) {
+                throw (IOException) ex;
             }
-        } catch (JSchException e) {
-            throw new IOException(e.getMessage(), e);
-        } finally {
-            if (printWriter != null) {
-                printWriter.close();
-            }
-            if (input != null) {
-                input.close();
-            }
-            if (channel != null) {
-                channel.disconnect();
-            }
+            throw new IOException(ex.getMessage(), ex);
         }
         return builder.toString();
     }

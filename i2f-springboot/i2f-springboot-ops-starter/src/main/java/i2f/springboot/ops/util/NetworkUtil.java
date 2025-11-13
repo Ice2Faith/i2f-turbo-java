@@ -1,7 +1,6 @@
-package i2f.springboot.ops.host;
+package i2f.springboot.ops.util;
 
 import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.*;

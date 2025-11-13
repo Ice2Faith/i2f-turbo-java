@@ -1266,7 +1266,7 @@
             },
             onExecute() {
                 let sql=this.getTipExecuteSql();
-                this.$confirm('即将执行语句，是否继续？<br/>'+sql, '删除提示', {
+                this.$confirm('即将执行语句，是否继续？<br/>' + sql, '操作提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning',
@@ -1328,7 +1328,7 @@
             },
             onEnsureExecuteScript(){
                 let sql=this.getTipExecuteSql();
-                this.$confirm('即将执行脚本，是否继续？<br/>'+sql, '删除提示', {
+                this.$confirm('即将执行脚本，是否继续？<br/>' + sql, '操作提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning',
