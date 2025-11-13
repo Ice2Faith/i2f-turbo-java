@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,11 +49,30 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HostOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;
+    @Autowired
+    protected Environment environment;
 
     protected static AtomicReference<String> hostIpHolder = new AtomicReference<>();
     protected static AtomicLong hostIpUpdateTs=new  AtomicLong(0L);
 
-    public static String getHostIp(){
+    protected AtomicInteger postHolder=new AtomicInteger(0);
+
+    public int getAppPort(){
+        int port = postHolder.get();
+        if(port>0){
+            return port;
+        }
+        String property = environment.getProperty("server.port", "8080");
+        try {
+            port=Integer.parseInt(property);
+        }catch (Exception e){
+
+        }
+        postHolder.set(port);
+        return port;
+    }
+
+    public String getHostIp(){
         long cts=System.currentTimeMillis();
         if(cts-hostIpUpdateTs.get()<5*60*1000){
             String ret = hostIpHolder.get();
@@ -60,8 +81,16 @@ public class HostOpsController {
             }
         }
         List<Map.Entry<InetAddress, NetworkInterface>> list = NetworkUtil.getUsefulAddresses();
-        Map.Entry<InetAddress, NetworkInterface> entry = list.get(0);
-        String hostIp = entry.getKey().getHostAddress() + "#" + entry.getValue().getName();
+        int port = getAppPort();
+        int count=0;
+        String hostIp =port+"@";
+        for (Map.Entry<InetAddress, NetworkInterface> entry : list) {
+            hostIp+="["+entry.getKey().getHostAddress() + "#" + entry.getValue().getName()+"]";
+            count++;
+            if(count==3){
+                break;
+            }
+        }
         hostIpHolder.set(hostIp);
         hostIpUpdateTs.set(cts);
         return hostIpHolder.get();
