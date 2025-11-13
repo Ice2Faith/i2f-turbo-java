@@ -60,13 +60,47 @@
     </el-card>
 
     <el-row>
-        <el-form inline label-position="left" label-width="80px">
+        <el-form inline label-position="left" label-width="100px">
             <el-row>
                 <el-col :span="16">
                     <el-button size="medium" @click="doResetData">重置</el-button>
                     <el-divider direction="vertical"></el-divider>
                     <el-form-item label="最大等待秒数">
                         <el-input-number v-model="form.waitForSeconds" :min="0" :max="500"></el-input-number>
+                    </el-form-item>
+                    <el-form-item >
+                        <el-popover
+                                placement="top-start"
+                                width="200"
+                                trigger="hover">
+                            <span>
+                                主机锁定，在多实例部署的环境中，可以用来确定需要执行的操作的主机<br/>
+                                如果不是需要执行的主机接收到了请求，将会立即失败，不会执行操作<br/>
+                                这时候重新发起请求进行重试操作，多几次就能够在需要执行的主机上执行！
+                            </span>
+                            <el-checkbox slot="reference" v-model="form.useHostId">主机锁定</el-checkbox>
+                        </el-popover>
+                        <el-select v-model="form.hostId" :disabled="!form.useHostId" placeholder="主机锁定">
+                            <el-option
+                                    v-for="item in metas.hostIdList"
+                                    :key="item"
+                                    :label="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                        <el-popover
+                                placement="top-start"
+                                width="200"
+                                trigger="hover">
+                            <span>
+                                在多实例部署的环境中，就需要通过反复刷新的方式，尽量的获取所有的实例列表<br/>
+                                因此根据实际情况，请多次刷新来获取完整的实例列表
+                            </span>
+                            <el-button slot="reference" v-loading="metas.hostIdLoading" size="medium"
+                                       icon="el-icon-refresh" circle
+                                       @click="doRefreshHostId">
+                            </el-button>
+                        </el-popover>
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
@@ -262,6 +296,8 @@
                         workdirLoading: false,
                         uploadLoading: false,
                         uploadList: [],
+                        hostIdLoading: false,
+                        hostIdList:[]
                     },
                     drawer: {
                         fileList: {
@@ -293,6 +329,8 @@
                         }
                     },
                     form: {
+                        useHostId: false,
+                        hostId: '',
                         workdir: '',
                         cmd: '',
                         runAsFile: false,
@@ -501,17 +539,67 @@
                 throw e;
             },
             onCertChange() {
-                this.doRefreshWorkdir()
+                this.doRefreshWorkdir();
+                this.doRefreshHostId();
+            },
+            assignHostId(req){
+              if(this.form.useHostId){
+                  req.hostId=this.form.hostId;
+                  if(!req.hostId || req.hostId==''){
+                      throw new Error('请选择锁定的主机')
+                  }
+              }else{
+                  req.hostId=null;
+              }
+              return req;
+            },
+            doRefreshHostId(){
+                this.metas.hostIdLoading = true;
+                try {
+                    let req = {
+
+                    }
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/hostId',
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data) || ''
+                            //console.log(resp)
+                            let list=[...this.metas.hostIdList];
+                            if(resp && resp!='') {
+                                if (!list.includes(resp)) {
+                                    list.push(resp);
+                                }
+                            }
+                            this.metas.hostIdList=list;
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.hostIdLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.hostIdLoading = false;
+                }
             },
             doRefreshWorkdir() {
                 this.metas.workdirLoading = true;
                 try {
-                    let timestamp = new Date().getTime();
+                    let req = this.assignHostId({
+
+                    })
                     let transfer = this.getTransfer();
                     this.$axios({
                         url: '/workdir',
                         method: 'post',
-                        data: transfer.send(timestamp)
+                        data: transfer.send(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
@@ -572,12 +660,12 @@
                 this.metas.resultLoading = true;
                 try {
                     let cmd = this.getExecuteCmd();
-                    let req = {
+                    let req = this.assignHostId({
                         workdir: this.form.workdir,
                         cmd: cmd,
                         runAsFile: this.form.runAsFile,
                         waitForSeconds: this.form.waitForSeconds,
-                    };
+                    });
                     let transfer = this.getTransfer();
                     this.$axios({
                         url: `/cmd`,
@@ -609,9 +697,9 @@
             onRefreshFiles() {
                 this.drawer.fileList.filesLoading = true;
                 try {
-                    let req = {
+                    let req = this.assignHostId({
                         workdir: this.form.workdir
-                    };
+                    });
                     let transfer = this.getTransfer();
                     this.$axios({
                         url: '/file-list',
@@ -656,9 +744,9 @@
                 this.onRefreshFiles()
             },
             callDownloadFile(path) {
-                let req = {
+                let req = this.assignHostId({
                     path: path,
-                };
+                });
                 let transfer = this.getTransfer();
                 return this.$axios({
                     url: `/download`,
@@ -775,9 +863,9 @@
             doDeleteFile(path) {
                 this.metas.resultLoading = true;
                 try {
-                    let req = {
+                    let req = this.assignHostId({
                         path: path
-                    };
+                    });
                     let transfer = this.getTransfer();
                     this.$axios({
                         url: `/delete`,
@@ -854,10 +942,10 @@
                             let form=new FormData();
                             form.append('file',blob,'content.txt');
 
-                            let req={
+                            let req=this.assignHostId({
                                 path: this.dialog.fileEditor.path,
                                 md5: md5
-                            }
+                            })
                             let transfer = this.getTransfer();
                             let reqData=transfer.send(req);
                             Object.keys(reqData).forEach(k=>{
@@ -906,9 +994,9 @@
             onSubmitCreateDirectory(){
                 this.dialog.createDirectory.saveLoading = true;
                 try {
-                    let req = {
+                    let req = this.assignHostId({
                         path: this.dialog.createDirectory.path
-                    };
+                    });
                     let transfer = this.getTransfer();
                     this.$axios({
                         url: `/mkdirs`,
@@ -959,10 +1047,10 @@
                             let form=new FormData();
                             form.append('file',file.raw,file.name);
 
-                            let req={
+                            let req=this.assignHostId({
                                 workdir: this.form.workdir,
                                 md5: md5
-                            }
+                            })
                             let transfer = this.getTransfer();
                             let reqData=transfer.send(req);
                             Object.keys(reqData).forEach(k=>{
