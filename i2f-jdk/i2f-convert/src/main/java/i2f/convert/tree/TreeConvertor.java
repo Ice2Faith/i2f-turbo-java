@@ -1,9 +1,10 @@
 package i2f.convert.tree;
 
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -51,6 +52,130 @@ public class TreeConvertor {
             list2TreeFlat(next, provider);
         }
         return ret;
+    }
+
+    public static <T> List<T> list2tree(List<T> list,String keyFieldName,String parentKeyFieldName,String childrenFieldName){
+        AtomicReference<Field> keyField=new AtomicReference<>();
+        AtomicReference<Field> parentKeyField=new AtomicReference<>();
+        AtomicReference<Field> childrenField=new AtomicReference<>();
+        return list2tree(list,(t)->{
+            try {
+                if(t instanceof Map){
+                    Map map = (Map) t;
+                    return map.get(keyFieldName);
+                }
+                Field kf=keyField.get();
+                if(kf==null) {
+                    Class<?> clazz = t.getClass();
+                    kf = getField(clazz,keyFieldName);
+                    kf.setAccessible(true);
+                    keyField.set(kf);
+                }
+                return kf.get(t);
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(),e);
+            }
+        },(t)->{
+            try {
+                if(t instanceof Map){
+                    Map map = (Map) t;
+                    return map.get(parentKeyFieldName);
+                }
+                Field kf=parentKeyField.get();
+                if(kf==null) {
+                    Class<?> clazz = t.getClass();
+                    kf = getField(clazz,parentKeyFieldName);
+                    kf.setAccessible(true);
+                    parentKeyField.set(kf);
+                }
+                return kf.get(t);
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(),e);
+            }
+        },(t,item)->{
+            try {
+                if(t instanceof Map){
+                    Map map = (Map) t;
+                    Collection col = (Collection) map.get(childrenFieldName);
+                    if(col==null){
+                        col=new ArrayList();
+                        map.put(childrenFieldName,col);
+                    }
+                    col.add(item);
+                    return;
+                }
+                Field kf=childrenField.get();
+                if(kf==null) {
+                    Class<?> clazz = t.getClass();
+                    kf = getField(clazz,childrenFieldName);
+                    kf.setAccessible(true);
+                    childrenField.set(kf);
+                }
+                Collection col = (Collection)kf.get(t);
+                if(col==null){
+                    Class<?> type = kf.getType();
+                    if(CopyOnWriteArrayList.class.isAssignableFrom(type)){
+                        col=new CopyOnWriteArrayList();
+                    }else if(LinkedList.class.isAssignableFrom(type)){
+                        col=new LinkedList();
+                    }else if(ArrayList.class.isAssignableFrom(type)){
+                        col=new ArrayList();
+                    }else{
+                        col=new ArrayList<>();
+                    }
+                    kf.set(t,col);
+                }
+                col.add(item);
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(),e);
+            }
+        });
+    }
+
+    public static Field getField(Class<?> clazz,String fieldName){
+        if(clazz==null || fieldName==null){
+            return null;
+        }
+        Field ret = null;
+        try {
+            ret=clazz.getField(fieldName);
+            if(ret!=null){
+                return ret;
+            }
+        } catch (Exception e) {
+
+        }
+        try {
+            ret=clazz.getDeclaredField(fieldName);
+            if(ret!=null){
+                return ret;
+            }
+        } catch (Exception e) {
+
+        }
+        if(Object.class.equals(clazz)){
+            return ret;
+        }
+        Class<?> superclass = clazz.getSuperclass();
+        if(superclass==null){
+            return null;
+        }
+        return getField(superclass, fieldName);
+    }
+
+    public static <T,K> List<T> list2tree(List<T> list,
+                                          Function<T,K> keyExtractor,
+                                          Function<T,K> parentKeyExtractor,
+                                          BiConsumer<T,T> secondAsFirstChildConsumer){
+        return list2Tree(list,(v1,v2)->{
+            K parentKey = parentKeyExtractor.apply(v1);
+            K key = keyExtractor.apply(v2);
+            return Objects.equals(parentKey,key);
+        },(v1,v2)->{
+            K parentKey = parentKeyExtractor.apply(v2);
+            K key = keyExtractor.apply(v1);
+            return Objects.equals(parentKey,key);
+        },secondAsFirstChildConsumer);
     }
 
 
