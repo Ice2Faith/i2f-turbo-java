@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class HostOperateDto {
+    protected String hostId;
+
     protected String workdir;
     protected String path;
 

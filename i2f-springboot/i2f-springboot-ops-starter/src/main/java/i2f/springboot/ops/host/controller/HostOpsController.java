@@ -5,6 +5,7 @@ import i2f.springboot.ops.common.OpsException;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.host.NetworkUtil;
 import i2f.springboot.ops.host.data.HostFileItemDto;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import i2f.web.servlet.ServletFileUtil;
@@ -22,12 +23,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -43,11 +48,54 @@ public class HostOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;
 
+    protected static AtomicReference<String> hostIpHolder = new AtomicReference<>();
+    protected static AtomicLong hostIpUpdateTs=new  AtomicLong(0L);
+
+    public static String getHostIp(){
+        long cts=System.currentTimeMillis();
+        if(cts-hostIpUpdateTs.get()<5*60*1000){
+            String ret = hostIpHolder.get();
+            if(ret!=null){
+                return ret;
+            }
+        }
+        List<Map.Entry<InetAddress, NetworkInterface>> list = NetworkUtil.getUsefulAddresses();
+        Map.Entry<InetAddress, NetworkInterface> entry = list.get(0);
+        String hostIp = entry.getKey().getHostAddress() + "#" + entry.getValue().getName();
+        hostIpHolder.set(hostIp);
+        hostIpUpdateTs.set(cts);
+        return hostIpHolder.get();
+    }
+
+    @PostMapping("/hostId")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> hostId(@RequestBody OpsSecureDto reqDto) throws Exception {
+        try {
+            HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            String hostIp=getHostIp();
+            return transfer.success(hostIp);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(),e);
+            return transfer.error(e.getMessage());
+        }
+    }
+
+    public void assertHostId(HostOperateDto req){
+        String reqHostId = req.getHostId();
+        if(reqHostId!=null && !reqHostId.isEmpty()){
+            String currHostId = getHostIp();
+            if(!Objects.equals(currHostId,reqHostId)){
+                throw new OpsException("request not equals require hostId");
+            }
+        }
+    }
+
     @PostMapping("/workdir")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> workdir(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
-            Long req = transfer.recv(reqDto, Long.class);
+            HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            assertHostId(req);
             HostOperateDto resp=new HostOperateDto();
             File file = new File(".");
             file=new File(file.getAbsolutePath());
@@ -64,6 +112,7 @@ public class HostOpsController {
     public OpsSecureReturn<OpsSecureDto> fileList(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            assertHostId(req);
             String workdir = req.getWorkdir();
             File dir = new File(workdir);
             List<HostFileItemDto> resp=new ArrayList<>();
@@ -145,6 +194,7 @@ public class HostOpsController {
     public OpsSecureReturn<OpsSecureDto> delete(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            assertHostId(req);
             String path = req.getPath();
             File file = new File(path);
             deleteFile(file);
@@ -175,6 +225,7 @@ public class HostOpsController {
     public OpsSecureReturn<OpsSecureDto> mkdirs(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            assertHostId(req);
             String path = req.getPath();
             File file = new File(path);
             boolean resp = file.mkdirs();
@@ -189,6 +240,7 @@ public class HostOpsController {
     public void download(@RequestBody OpsSecureDto reqDto, HttpServletResponse response) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            assertHostId(req);
             String path = req.getPath();
             File file = new File(path);
             ServletFileUtil.responseFileAttachment(file,null,!req.isInline(),response);
@@ -206,6 +258,7 @@ public class HostOpsController {
     public void tail(@RequestBody OpsSecureDto reqDto, HttpServletResponse response) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            assertHostId(req);
             String path = req.getPath();
             int lineCount = req.getLineCount();
             if(lineCount<=0){
@@ -246,6 +299,7 @@ public class HostOpsController {
     public void head(@RequestBody OpsSecureDto reqDto, HttpServletResponse response) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            assertHostId(req);
             String path = req.getPath();
             int lineCount = req.getLineCount();
             if(lineCount<=0){
@@ -282,6 +336,7 @@ public class HostOpsController {
     public OpsSecureReturn<OpsSecureDto> upload(MultipartFile file, OpsSecureDto reqDto) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            assertHostId(req);
             String path = req.getPath();
             File saveFile=null;
             if(path!=null && !path.isEmpty()){
@@ -336,6 +391,7 @@ public class HostOpsController {
     public OpsSecureReturn<OpsSecureDto> cmd(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            assertHostId(req);
             String workdir = req.getWorkdir();
             String cmd = req.getCmd();
             boolean runAsFile = req.isRunAsFile();
