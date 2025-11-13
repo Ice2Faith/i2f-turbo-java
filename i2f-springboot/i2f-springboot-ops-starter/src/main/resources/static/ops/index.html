@@ -19,16 +19,18 @@
         </div>
         <el-row :gutter="15">
           <el-col :span="6" v-for="item in menus">
-            <el-result  :title="item.title" style="border: solid 1px #777; border-radius: 5px;">
+            <el-result  :title="item.title" style="border: solid 1px #777; border-radius: 5px;margin-bottom: 15px;">
               <template slot="icon">
-                <i :class="item.icon||'el-icon-monitor'" style="font-size: 32px"></i>
+                <a :href="item.href" target="_blank">
+                    <i :class="item.icon||'el-icon-monitor'" style="font-size: 32px"></i>
+                </a>
               </template>
               <template slot="subTitle">
                 <span style="color: #777;">{{item.subTitle}}</span>
               </template>
               <template slot="extra">
                 <a :href="item.href" target="_blank">
-                  <el-link type="primary" size="small" @click="onClickMenuItem(item)">访问</el-link>
+                  访问
                 </a>
               </template>
             </el-result>
@@ -66,7 +68,7 @@
           {
             title: 'Ssh',
             subTitle: '连接/操作SSH主机命令/文件',
-            icon: 'el-icon-monitor',
+            icon: 'el-icon-link',
             href: './ssh/index.html'
           },
           {
@@ -114,5 +116,29 @@
   .scroller {
     height: 260px
   }
+
+  a{
+    color: dodgerblue;
+    text-decoration: none;
+  }
+
+  a:link{
+    color: dodgerblue;
+  }
+
+  a:visited{
+    color: dodgerblue;
+  }
+
+  a:hover{
+    color: coral;
+  }
+
+  a:active{
+    color: dodgerblue;
+  }
+
+
+
 </style>
 </html>
