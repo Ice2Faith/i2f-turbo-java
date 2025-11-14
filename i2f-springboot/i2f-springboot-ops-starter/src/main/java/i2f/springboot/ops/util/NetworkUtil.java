@@ -11,14 +11,6 @@ import java.util.*;
  * @desc
  */
 public class NetworkUtil {
-    public static void main(String[] args){
-        List<Map.Entry<InetAddress, NetworkInterface>> list = getUsefulAddresses();
-        for (Map.Entry<InetAddress, NetworkInterface> entry : list) {
-            System.out.println("===========");
-            System.out.println(entry.getKey().getHostAddress());
-            System.out.println(entry.getValue().getName());
-        }
-    }
     public static List<Map .Entry<InetAddress,NetworkInterface>> getUsefulAddresses(){
         List<Map.Entry<InetAddress,NetworkInterface>> ret=new ArrayList<>();
         try {

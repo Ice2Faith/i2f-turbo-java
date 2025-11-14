@@ -75,6 +75,11 @@
         </dependency>
 
         <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-groovy</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
             <scope>provided</scope>
@@ -124,6 +129,14 @@
             <artifactId>jsch</artifactId>
             <version>0.1.55</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>4.0.18</version>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

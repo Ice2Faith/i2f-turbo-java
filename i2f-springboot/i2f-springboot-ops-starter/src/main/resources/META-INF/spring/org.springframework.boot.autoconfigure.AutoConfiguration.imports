@@ -1,6 +1,7 @@
 i2f.springboot.ops.common.OpsSecureTransfer
 i2f.springboot.ops.common.OpsSecureHelper
 i2f.springboot.ops.common.OpsSecureAutoConfiguration
+i2f.springboot.ops.common.HostIdHelper
 i2f.springboot.ops.datasource.provider.impl.DefaultDatasourceProvider
 i2f.springboot.ops.datasource.helper.DatasourceOpsHelper
 i2f.springboot.ops.datasource.controller.DatasourceOpsMetadataController
@@ -8,3 +9,5 @@ i2f.springboot.ops.datasource.controller.DatasourceOpsController
 i2f.springboot.ops.host.controller.HostOpsController
 i2f.springboot.ops.redis.controller.RedisOpsController
 i2f.springboot.ops.xxljob.controller.XxlJobOpsController
+i2f.springboot.ops.app.controller.AppOpsController
+i2f.springboot.ops.ssh.controller.SshOpsController

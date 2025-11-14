@@ -47,10 +47,11 @@ public class SshOpsController {
     public OpsSecureReturn<OpsSecureDto> workdir(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
-            try (SftpUtil util = new SftpUtil(req.getMeta())) {
-                util.login();
+            try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String pwd = util.pwd();
-                return transfer.success(pwd);
+                SshOperateDto resp=new SshOperateDto();
+                resp.setWorkdir(pwd);
+                return transfer.success(resp);
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
@@ -63,7 +64,7 @@ public class SshOpsController {
     public OpsSecureReturn<OpsSecureDto> fileList(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
-            try (SftpUtil util = new SftpUtil(req.getMeta())) {
+            try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String workdir = req.getWorkdir();
                 String dir = util.realpath(workdir);
                 List<HostFileItemDto> resp = new ArrayList<>();
@@ -143,7 +144,7 @@ public class SshOpsController {
     public OpsSecureReturn<OpsSecureDto> delete(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
-            try (SftpUtil util = new SftpUtil(req.getMeta())) {
+            try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String path = req.getPath();
                 util.recursiveDelete(path);
                 return transfer.success(true);
@@ -159,7 +160,7 @@ public class SshOpsController {
     public OpsSecureReturn<OpsSecureDto> mkdirs(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
-            try (SftpUtil util = new SftpUtil(req.getMeta())) {
+            try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String path = req.getPath();
                 util.mkdirs(path);
                 return transfer.success(true);
@@ -174,7 +175,7 @@ public class SshOpsController {
     public void download(@RequestBody OpsSecureDto reqDto, HttpServletResponse response) throws Exception {
         try {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
-            try (SftpUtil util = new SftpUtil(req.getMeta())) {
+            try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String path = req.getPath();
                 File file = new File(path);
                 int idx = path.lastIndexOf("/");
@@ -202,7 +203,7 @@ public class SshOpsController {
     public void tail(@RequestBody OpsSecureDto reqDto, HttpServletResponse response) throws Exception {
         try {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
-            try (SftpUtil util = new SftpUtil(req.getMeta())) {
+            try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String path = req.getPath();
                 File file = new File(path);
                 int idx = path.lastIndexOf("/");
@@ -251,7 +252,7 @@ public class SshOpsController {
     public void head(@RequestBody OpsSecureDto reqDto, HttpServletResponse response) throws Exception {
         try {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
-            try (SftpUtil util = new SftpUtil(req.getMeta())) {
+            try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String path = req.getPath();
                 File file = new File(path);
                 int idx = path.lastIndexOf("/");
@@ -297,7 +298,7 @@ public class SshOpsController {
     public OpsSecureReturn<OpsSecureDto> upload(MultipartFile file, OpsSecureDto reqDto) throws Exception {
         try {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
-            try (SftpUtil util = new SftpUtil(req.getMeta())) {
+            try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String path = req.getPath();
                 String serverPath = null;
                 String serverFileName = path;
@@ -359,7 +360,7 @@ public class SshOpsController {
     public OpsSecureReturn<OpsSecureDto> cmd(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
-            try (SftpUtil util = new SftpUtil(req.getMeta())) {
+            try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String workdir = req.getWorkdir();
                 String cmd = req.getCmd();
                 boolean runAsFile = req.isRunAsFile();
