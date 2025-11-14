@@ -1,10 +1,7 @@
 package i2f.springboot.ops.host.controller;
 
 import i2f.os.OsUtil;
-import i2f.springboot.ops.common.OpsException;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.host.data.HostFileItemDto;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import i2f.springboot.ops.util.HumanUtil;
@@ -49,59 +46,16 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HostOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;
+
     @Autowired
-    protected Environment environment;
-
-    protected AtomicReference<String> hostIpHolder = new AtomicReference<>();
-    protected AtomicLong hostIpUpdateTs = new AtomicLong(0L);
-
-    protected AtomicInteger postHolder=new AtomicInteger(0);
-
-    public int getAppPort(){
-        int port = postHolder.get();
-        if(port>0){
-            return port;
-        }
-        String property = environment.getProperty("server.port", "8080");
-        try {
-            port=Integer.parseInt(property);
-        }catch (Exception e){
-
-        }
-        postHolder.set(port);
-        return port;
-    }
-
-    public String getHostIp(){
-        long cts=System.currentTimeMillis();
-        if(cts-hostIpUpdateTs.get()<5*60*1000){
-            String ret = hostIpHolder.get();
-            if(ret!=null){
-                return ret;
-            }
-        }
-        List<Map.Entry<InetAddress, NetworkInterface>> list = NetworkUtil.getUsefulAddresses();
-        int port = getAppPort();
-        int count=0;
-        String hostIp =port+"@";
-        for (Map.Entry<InetAddress, NetworkInterface> entry : list) {
-            hostIp+="["+entry.getKey().getHostAddress() + "#" + entry.getValue().getName()+"]";
-            count++;
-            if(count==3){
-                break;
-            }
-        }
-        hostIpHolder.set(hostIp);
-        hostIpUpdateTs.set(cts);
-        return hostIpHolder.get();
-    }
+    private HostIdHelper hostIdHelper;
 
     @PostMapping("/hostId")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> hostId(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
-            String hostIp=getHostIp();
+            String hostIp=hostIdHelper.getHostIp();
             return transfer.success(hostIp);
         } catch (Throwable e) {
             log.warn(e.getMessage(),e);
@@ -112,7 +66,7 @@ public class HostOpsController {
     public void assertHostId(HostOperateDto req){
         String reqHostId = req.getHostId();
         if(reqHostId!=null && !reqHostId.isEmpty()){
-            String currHostId = getHostIp();
+            String currHostId = hostIdHelper.getHostIp();
             if(!Objects.equals(currHostId,reqHostId)){
                 throw new OpsException("request not equals require hostId");
             }

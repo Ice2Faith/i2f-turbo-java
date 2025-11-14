@@ -1,11 +1,13 @@
 package i2f.springboot.ops.app.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xxl.job.core.handler.IJobHandler;
+import i2f.extension.groovy.GroovyScript;
 import i2f.springboot.ops.app.data.AppKeyValueItemDto;
+import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.app.data.AppThreadInfoDto;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
+import i2f.springboot.ops.host.data.HostOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +42,28 @@ public class AppOpsController {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private HostIdHelper hostIdHelper;
+
+    public void assertHostId(AppOperationDto req){
+        String reqHostId = req.getHostId();
+        if(reqHostId!=null && !reqHostId.isEmpty()){
+            String currHostId = hostIdHelper.getHostIp();
+            if(!Objects.equals(currHostId,reqHostId)){
+                throw new OpsException("request not equals require hostId");
+            }
+        }
+    }
+
     @PostMapping("/system-properties")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> systemProperties(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
-            Long req = transfer.recv(reqDto, Long.class);
+            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            assertHostId(req);
             List<AppKeyValueItemDto> resp=new ArrayList<>();
             Properties properties = System.getProperties();
             Set<String> set = properties.stringPropertyNames();
@@ -64,7 +83,8 @@ public class AppOpsController {
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> inputArguments(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
-            Long req = transfer.recv(reqDto, Long.class);
+            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            assertHostId(req);
             RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
             List<String> resp = runtimeMXBean.getInputArguments();
             return transfer.success(resp);
@@ -78,7 +98,8 @@ public class AppOpsController {
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> lockedThreads(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
-            Long req = transfer.recv(reqDto, Long.class);
+            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            assertHostId(req);
             List<AppThreadInfoDto> resp = new ArrayList<>();
             ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
             long[] deadlockedThreads = threadMXBean.findDeadlockedThreads();
@@ -88,6 +109,31 @@ public class AppOpsController {
                 resp.add(dto);
             }
             return transfer.success(resp);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(),e);
+            return transfer.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/eval")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> eval(@RequestBody OpsSecureDto reqDto) throws Exception {
+        try {
+            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            assertHostId(req);
+            String script = req.getScript();
+            Map<String,Object> context=new HashMap<>();
+            context.put("context",applicationContext);
+            context.put("env",applicationContext.getEnvironment());
+            Map<String,Object> beanMap=new HashMap<>();
+            String[] names = applicationContext.getBeanDefinitionNames();
+            for (String name : names) {
+                Object bean = applicationContext.getBean(name);
+                beanMap.put(name,bean);
+            }
+            context.put("beanMap",beanMap);
+            Object eval = GroovyScript.eval(script, context);
+            return transfer.success(eval);
         } catch (Throwable e) {
             log.warn(e.getMessage(),e);
             return transfer.error(e.getMessage());
