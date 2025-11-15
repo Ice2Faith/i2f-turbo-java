@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.context;
 
+import i2f.bindsql.BindSql;
 import i2f.invokable.method.IMethod;
 import i2f.invokable.method.impl.jdk.JdkInstanceStaticMethod;
 import i2f.invokable.method.impl.jdk.JdkMethod;
@@ -37,6 +38,9 @@ public class ContextHolder {
     public static final ThreadLocal<String> TRACE_ERRMSG = new ThreadLocal<>();
     public static final ThreadLocal<Throwable> TRACE_ERROR = new ThreadLocal<>();
     public static final ThreadLocal<XmlNode> TRACE_NODE = new ThreadLocal<>();
+    public static final ThreadLocal<BindSql> TRACE_LAST_SQL = new ThreadLocal<>();
+    public static final ThreadLocal<Integer> TRACE_LAST_SQL_EFFECT_COUNT = new ThreadLocal<>();
+    public static final ThreadLocal<Long> TRACE_LAST_SQL_USE_TIME = new ThreadLocal<>();
     public static final ThreadLocal<Boolean> DEBUG_MODE = new ThreadLocal<>();
 
     static {

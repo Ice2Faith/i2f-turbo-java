@@ -32,6 +32,9 @@ public interface ParamsConsts {
     String CALLS = "calls";
     String ERRORS = "errors";
     String ERROR = "error";
+    String LAST_SQL="last_sql";
+    String LAST_SQL_EFFECT_COUNT ="last_sql_effect_count";
+    String LAST_SQL_USE_TIME ="last_sql_use_time";
 
     String TRACE_LOCATION = TRACE + "." + LOCATION;
     String TRACE_FILE = TRACE + "." + FILE;
@@ -43,6 +46,9 @@ public interface ParamsConsts {
     String TRACE_CALLS = TRACE + "." + CALLS;
     String TRACE_ERRORS = TRACE + "." + ERRORS;
     String TRACE_ERROR = TRACE + "." + ERROR;
+    String TRACE_LAST_SQL = TRACE + "." + LAST_SQL;
+    String TRACE_LAST_SQL_EFFECT_COUNT = TRACE + "." + LAST_SQL_EFFECT_COUNT;
+    String TRACE_LAST_SQL_USE_TIME = TRACE + "." + LAST_SQL_USE_TIME;
 
     // 局部工具部分
     String EXECUTOR = "executor";

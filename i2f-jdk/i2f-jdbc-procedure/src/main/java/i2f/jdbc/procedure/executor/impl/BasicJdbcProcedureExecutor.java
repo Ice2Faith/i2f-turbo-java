@@ -1679,7 +1679,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return TypeOf.typeOf(resultType, Map.class) ? (mapTypeColumnNameMapper) : otherTypeColumnNameMapper;
     }
 
-    public void reportSlowSql(long useMillsSeconds, BindSql bql) {
+    public void reportExecSql(int effectCount, long useMillsSeconds, BindSql bql, Map<String,Object> params) {
+        visitSet(params,ParamsConsts.TRACE_LAST_SQL,bql);
+        visitSet(params,ParamsConsts.TRACE_LAST_SQL_EFFECT_COUNT,effectCount);
+        visitSet(params,ParamsConsts.TRACE_LAST_SQL_USE_TIME,useMillsSeconds);
+
+        ContextHolder.TRACE_LAST_SQL.set(bql);
+        ContextHolder.TRACE_LAST_SQL_EFFECT_COUNT.set(effectCount);
+        ContextHolder.TRACE_LAST_SQL_USE_TIME.set(useMillsSeconds);
+
         if (true) {
             SqlExecUseTimeEvent event = new SqlExecUseTimeEvent();
             event.setExecutor(this);
@@ -1703,6 +1711,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
+        int effectCount = 0;
         try {
             Connection conn = getConnection(datasource, params);
             fillDatabaseDialectType(params, conn);
@@ -1710,7 +1719,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
             execBql = bql;
-            List<?> list = JdbcResolver.list(conn, bql, resultType, -1, getColumnNameMapper(resultType));
+            List<?> list = JdbcResolver.list(conn, execBql, resultType, -1, getColumnNameMapper(resultType));
+            effectCount=(list.isEmpty()?0:1);
             if (isDebug()) {
                 logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }
@@ -1724,7 +1734,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportSlowSql(useTs, execBql);
+            reportExecSql(effectCount,useTs, execBql,params);
         }
     }
 
@@ -1732,6 +1742,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public List<QueryColumn> sqlQueryColumns(String datasource, BindSql bql, Map<String, Object> params) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
+        int effectCount=0;
         try {
             Connection conn = getConnection(datasource, params);
             fillDatabaseDialectType(params, conn);
@@ -1739,8 +1750,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 logger().logDebug("sql-query-columns:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
             execBql = bql;
-            QueryResult qr = JdbcResolver.query(conn, bql, 1);
+            QueryResult qr = JdbcResolver.query(conn, execBql, 1);
             List<QueryColumn> list = qr.getColumns();
+            effectCount=(list.isEmpty()?0:1);
             if (isDebug()) {
                 logger().logDebug("sql-query-columns:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }
@@ -1754,7 +1766,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportSlowSql(useTs, execBql);
+            reportExecSql(effectCount,useTs, execBql,params);
         }
     }
 
@@ -1767,6 +1779,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
+        int effectCount=0;
         try {
             Connection conn = getConnection(datasource, params);
             fillDatabaseDialectType(params, conn);
@@ -1774,7 +1787,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 logger().logDebug("sql-query-object:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
             execBql = bql;
-            Object obj = JdbcResolver.get(conn, bql, resultType);
+            Object obj = JdbcResolver.get(conn, execBql, resultType);
+            effectCount=(obj==null?0:1);
             if (isDebug()) {
                 logger().logDebug("sql-query-object:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: " + stringifyWithType(obj));
             }
@@ -1788,7 +1802,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportSlowSql(useTs, execBql);
+            reportExecSql(effectCount,useTs, execBql,params);
         }
     }
 
@@ -1801,6 +1815,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public Object sqlQueryRow(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
+        int effectCount=0;
         try {
             Connection conn = getConnection(datasource, params);
             fillDatabaseDialectType(params, conn);
@@ -1808,7 +1823,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 logger().logDebug("sql-query-row:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
             execBql = bql;
-            Object row = JdbcResolver.find(conn, bql, resultType, getColumnNameMapper(resultType));
+            Object row = JdbcResolver.find(conn, execBql, resultType, getColumnNameMapper(resultType));
+            effectCount=(row==null?0:1);
             if (isDebug()) {
                 logger().logDebug("sql-query-row:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + stringifyWithType(row));
             }
@@ -1822,7 +1838,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportSlowSql(useTs, execBql);
+            reportExecSql(effectCount,useTs, execBql,params);
         }
     }
 
@@ -1830,6 +1846,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public int sqlUpdate(String datasource, BindSql bql, Map<String, Object> params) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
+        int effectCount=0;
         try {
             Connection conn = getConnection(datasource, params);
             fillDatabaseDialectType(params, conn);
@@ -1837,7 +1854,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 logger().logDebug("sql-update:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
             }
             execBql = bql;
-            int num = JdbcResolver.update(conn, bql);
+            int num = JdbcResolver.update(conn, execBql);
+            effectCount=num;
             if (isDebug()) {
                 logger().logDebug("sql-update:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + num);
             }
@@ -1851,7 +1869,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportSlowSql(useTs, execBql);
+            reportExecSql(effectCount,useTs, execBql,params);
         }
     }
 
@@ -2012,6 +2030,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, ApiOffsetSize page) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
+        int effectCount=0;
         try {
             Connection conn = getConnection(datasource, params);
             fillDatabaseDialectType(params, conn);
@@ -2024,7 +2043,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 logger().logDebug("sql-query-page:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + pageBql);
             }
             execBql = pageBql;
-            List<?> list = JdbcResolver.list(conn, pageBql, resultType, -1, getColumnNameMapper(resultType));
+            List<?> list = JdbcResolver.list(conn, execBql, resultType, -1, getColumnNameMapper(resultType));
+            effectCount=(list.isEmpty()?0:1);
             if (isDebug()) {
                 logger().logDebug("sql-query-page:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + pageBql + "\nresult: is-empty:" + list.isEmpty());
             }
@@ -2038,7 +2058,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportSlowSql(useTs, execBql);
+            reportExecSql(effectCount,useTs, execBql,params);
         }
     }
 
