@@ -61,6 +61,19 @@ public class AppOpsController {
         }
     }
 
+    @PostMapping("/hostId")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> hostId(@RequestBody OpsSecureDto reqDto) throws Exception {
+        try {
+            HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            String hostIp=hostIdHelper.getHostIp();
+            return transfer.success(hostIp);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(),e);
+            return transfer.error(e.getMessage());
+        }
+    }
+
     @PostMapping("/system-properties")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> systemProperties(@RequestBody OpsSecureDto reqDto) throws Exception {
@@ -106,10 +119,14 @@ public class AppOpsController {
             List<AppThreadInfoDto> resp = new ArrayList<>();
             ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
             long[] deadlockedThreads = threadMXBean.findDeadlockedThreads();
-            ThreadInfo[] threadInfo = threadMXBean.getThreadInfo(deadlockedThreads);
-            for (ThreadInfo info : threadInfo) {
-                AppThreadInfoDto dto = AppThreadInfoDto.of(info);
-                resp.add(dto);
+            if(deadlockedThreads!=null) {
+                ThreadInfo[] threadInfo = threadMXBean.getThreadInfo(deadlockedThreads);
+                if(threadInfo!=null) {
+                    for (ThreadInfo info : threadInfo) {
+                        AppThreadInfoDto dto = AppThreadInfoDto.of(info);
+                        resp.add(dto);
+                    }
+                }
             }
             return transfer.success(resp);
         } catch (Throwable e) {
@@ -180,6 +197,7 @@ public class AppOpsController {
                     }
                     context.put("beanMap", beanMap);
                     Object eval = GroovyScript.eval(script, context);
+                    refRet.set(eval);
                 }catch (Throwable e){
                     refEx.set(e);
                 }finally {
