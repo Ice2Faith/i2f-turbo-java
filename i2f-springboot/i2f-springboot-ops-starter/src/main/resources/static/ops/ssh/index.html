@@ -634,6 +634,10 @@
                             let resp = transfer.recv(res.data.data)
                             // console.log(resp)
                             this.metas.resultText = resp || '';
+                            try {
+                                // filter out console ascii escape sequence
+                                this.metas.resultText = this.metas.resultText.replace(/\x1B\[[\d;]+m/g, '');
+                            } catch (e){}
                         } else {
                             this.$message.error(res.data.msg)
                         }
