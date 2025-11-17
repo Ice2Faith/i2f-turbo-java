@@ -13,4 +13,5 @@ public class AppOperationDto {
     protected String hostId;
 
     protected String script;
+    protected long waitForSeconds;
 }
