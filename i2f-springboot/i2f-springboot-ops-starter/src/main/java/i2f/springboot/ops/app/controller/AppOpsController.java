@@ -24,6 +24,9 @@ import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -115,6 +118,37 @@ public class AppOpsController {
         }
     }
 
+    @PostMapping("/beans")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> beans(@RequestBody OpsSecureDto reqDto) throws Exception {
+        try {
+            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            assertHostId(req);
+            List<AppKeyValueItemDto> resp=new ArrayList<>();
+            String[] names = applicationContext.getBeanDefinitionNames();
+            for (String name : names) {
+                Object bean = applicationContext.getBean(name);
+                Class<?> clazz = bean.getClass();
+                resp.add(new AppKeyValueItemDto(name,unescapeEnhancerClassName(clazz.getName())));
+            }
+            return transfer.success(resp);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(),e);
+            return transfer.error(e.getMessage());
+        }
+    }
+
+    public static String unescapeEnhancerClassName(String className){
+        if(className==null){
+            return null;
+        }
+        int idx=className.lastIndexOf("$EnhancerBySpring");
+        if(idx>=0){
+            return className.substring(0,idx);
+        }
+        return className;
+    }
+
     @PostMapping("/eval")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> eval(@RequestBody OpsSecureDto reqDto) throws Exception {
@@ -122,18 +156,59 @@ public class AppOpsController {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             assertHostId(req);
             String script = req.getScript();
-            Map<String,Object> context=new HashMap<>();
-            context.put("context",applicationContext);
-            context.put("env",applicationContext.getEnvironment());
-            Map<String,Object> beanMap=new HashMap<>();
-            String[] names = applicationContext.getBeanDefinitionNames();
-            for (String name : names) {
-                Object bean = applicationContext.getBean(name);
-                beanMap.put(name,bean);
+            long waitForSeconds = req.getWaitForSeconds();
+            if (waitForSeconds < 0) {
+                waitForSeconds = 120;
             }
-            context.put("beanMap",beanMap);
-            Object eval = GroovyScript.eval(script, context);
-            return transfer.success(eval);
+            if (waitForSeconds >= 500) {
+                waitForSeconds = 500;
+            }
+            AtomicReference<Object> refRet = new AtomicReference<>();
+            AtomicReference<Throwable> refEx=new AtomicReference<>();
+            CountDownLatch latch = new CountDownLatch(1);
+            Runnable task=()-> {
+                try {
+
+                    Map<String, Object> context = new HashMap<>();
+                    context.put("context", applicationContext);
+                    context.put("env", applicationContext.getEnvironment());
+                    Map<String, Object> beanMap = new HashMap<>();
+                    String[] names = applicationContext.getBeanDefinitionNames();
+                    for (String name : names) {
+                        Object bean = applicationContext.getBean(name);
+                        beanMap.put(name, bean);
+                    }
+                    context.put("beanMap", beanMap);
+                    Object eval = GroovyScript.eval(script, context);
+                }catch (Throwable e){
+                    refEx.set(e);
+                }finally {
+                    latch.countDown();
+                }
+            };
+            new Thread(task).start();
+            try {
+                if (waitForSeconds >= 0) {
+                    latch.await(waitForSeconds, TimeUnit.SECONDS);
+                } else {
+                    latch.await();
+                }
+            } catch (InterruptedException e) {
+
+            }
+            Throwable throwable = refEx.get();
+            if(throwable!=null){
+                throw throwable;
+            }
+
+            Object ret = refRet.get();
+            String resp=null;
+            try{
+                resp=objectMapper.writeValueAsString(ret);
+            }catch(Exception e){
+                resp="response value cannot serialize as json";
+            }
+            return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(),e);
             return transfer.error(e.getMessage());

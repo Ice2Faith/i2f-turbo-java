@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ops - App</title>
+    <script src="../lib/vue/vue-2.js"></script>
+    <script src="../lib/moment/moment-2.24.0.js"></script>
+    <script src="../lib/element-ui/element-ui-2.15.10.js"></script>
+    <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10.css"/>
+    <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10-icon.css"/>
+    <link href="../lib/element-ui/fonts/element-icons.ttf"/>
+    <link href="../lib/element-ui/fonts/element-icons.woff"/>
+    <script src="../lib/axios/axios-1.1.3.min.js"></script>
+    <script src="../lib/axios/qs.js"></script>
+    <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm4.js"></script>
+    <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm3.js"></script>
+    <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm2.js"></script>
+    <script src="../lib/base64/Base64.js"></script>
+    <script src="../common/OpsSecureKeyPair.js"></script>
+    <script src="../common/OpsSecureCertPair.js"></script>
+    <script src="../common/OpsSecureDto.js"></script>
+    <script src="../common/OpsSecureHelper.js"></script>
+    <script src="../common/OpsSecureTransfer.js"></script>
+    <script src="../lib/echarts-5/echarts.min.js"></script>
+    <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
+    <script src="../lib/codemirror-6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="../lib/codemirror-6.65.7/codemirror.min.css"/>
+    <link rel="stylesheet" href="../lib/codemirror-6.65.7/addon/hint/show-hint.min.css"/>
+    <script src="../lib/codemirror-6.65.7/addon/hint/show-hint.min.js"></script>
+    <link rel="stylesheet" href="../lib/codemirror-6.65.7/theme/idea.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/groovy/groovy.min.js" ></script>
+
+    <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css"/>
+    <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
+    <script src="../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
+
+</head>
+<body>
+<div id="app">
+    <el-row class="cert-block">
+        <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
+        <el-input
+                type="textarea"
+                :rows="3"
+                placeholder="请输入连接证书"
+                v-model="metas.cert"
+                @change="onCertChange">
+        </el-input>
+    </el-row>
+
+    <el-divider>App操作</el-divider>
+    <el-card shadow="never">
+        <span>Groovy语法脚本</span>
+        <textarea ref="refEditor"></textarea>
+    </el-card>
+
+    <el-row>
+        <el-form inline label-position="left" label-width="100px">
+            <el-row>
+                <el-col :span="16">
+                    <el-button size="medium" @click="doResetData">重置</el-button>
+                    <el-divider direction="vertical"></el-divider>
+                    <el-form-item label="最大等待秒数">
+                        <el-input-number v-model="form.waitForSeconds" :min="0" :max="500"></el-input-number>
+                    </el-form-item>
+                    <el-form-item >
+                        <el-popover
+                                placement="top-start"
+                                width="200"
+                                trigger="hover">
+                            <span>
+                                主机锁定，在多实例部署的环境中，可以用来确定需要执行的操作的主机<br/>
+                                如果不是需要执行的主机接收到了请求，将会立即失败，不会执行操作<br/>
+                                这时候重新发起请求进行重试操作，多几次就能够在需要执行的主机上执行！
+                            </span>
+                            <el-checkbox slot="reference" v-model="form.useHostId">主机锁定</el-checkbox>
+                        </el-popover>
+                        <el-select v-model="form.hostId" :disabled="!form.useHostId" placeholder="主机锁定">
+                            <el-option
+                                    v-for="item in metas.hostIdList"
+                                    :key="item"
+                                    :label="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                        <el-popover
+                                placement="top-start"
+                                width="200"
+                                trigger="hover">
+                            <span>
+                                在多实例部署的环境中，就需要通过反复刷新的方式，尽量的获取所有的实例列表<br/>
+                                因此根据实际情况，请多次刷新来获取完整的实例列表
+                            </span>
+                            <el-button slot="reference" v-loading="metas.hostIdLoading" size="medium"
+                                       icon="el-icon-refresh" circle
+                                       @click="doRefreshHostId">
+                            </el-button>
+                        </el-popover>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-row type="flex" justify="end">
+                        <el-form-item>
+                            <el-button type="info" size="medium"
+                                       @click="onViewSystemProperties">
+                                属性
+                            </el-button>
+                            <el-button type="warning" size="medium"
+                                       @click="onViewInputArguments">
+                                参数
+                            </el-button>
+                            <el-button type="success" size="medium"
+                                       @click="onViewBeans">
+                                Beans
+                            </el-button>
+                            <el-button type="danger" size="medium"
+                                       @click="onViewFiles">
+                                死锁
+                            </el-button>
+                        </el-form-item>
+                    </el-row>
+                </el-col>
+            </el-row>
+            <el-row type="flex" justify="center">
+                <el-form-item>
+                    <el-button v-loading="metas.resultLoading" size="medium"
+                               type="primary"
+                               @click="onExecute">
+                        执行
+                    </el-button>
+                </el-form-item>
+            </el-row>
+
+        </el-form>
+    </el-row>
+    <el-divider>操作结果</el-divider>
+    <el-input
+            type="textarea"
+            :rows="8"
+            placeholder="执行结果"
+            v-model="metas.resultText">
+    </el-input>
+    <el-drawer
+            title="系统属性"
+            :visible.sync="drawer.systemProperties.show"
+            direction="rtl"
+            size="75%">
+        <el-row style="width: 100%;">
+            <el-row>
+                <el-col :span="16">
+
+                </el-col>
+                <el-col :span="8">
+                    <el-row type="flex" justify="end">
+                        <el-button type="success" size="medium"
+                                   @click="onViewText(drawer.systemProperties.items,'系统属性')">
+                            属性JSON
+                        </el-button>
+                        <el-button v-loading="drawer.systemProperties.refreshLoading" size="medium"
+                                   icon="el-icon-refresh" circle
+                                   @click="onRefreshSystemProperties">
+                        </el-button>
+                    </el-row>
+                </el-col>
+
+            </el-row>
+            <el-row>
+                <el-input v-model="drawer.systemProperties.filterKey" placeholder="过滤属性"></el-input>
+            </el-row>
+            <recycle-scroller :items="computeFilterSystemProperties"
+                              class="scroller"
+                              :item-size="32"
+                              key-field="name"
+                              v-slot="{ item }">
+                <el-row type="flex"
+                        class="list-item">
+                    <el-col :span="9" style="border-right: solid 1px #777;">
+                        {{item.key}}
+                    </el-col>
+                    <el-col :span="9">
+                        {{item.value}}
+                    </el-col>
+                    <el-col :span="6">
+                        <el-row type="flex" justify="end">
+
+                        </el-row>
+                    </el-col>
+                </el-row>
+            </recycle-scroller>
+
+        </el-row>
+    </el-drawer>
+
+    <el-drawer
+            title="启动参数"
+            :visible.sync="drawer.inputArguments.show"
+            direction="rtl"
+            size="75%">
+        <el-row style="width: 100%;">
+            <el-row>
+                <el-col :span="16">
+
+                </el-col>
+                <el-col :span="8">
+                    <el-row type="flex" justify="end">
+                        <el-button type="success" size="medium"
+                                   @click="onViewText(drawer.inputArguments.items,'启动参数')">
+                            参数JSON
+                        </el-button>
+                        <el-button v-loading="drawer.inputArguments.refreshLoading" size="medium"
+                                   icon="el-icon-refresh" circle
+                                   @click="onRefreshInputArguments">
+                        </el-button>
+                    </el-row>
+                </el-col>
+
+            </el-row>
+            <el-row>
+                <el-input v-model="drawer.inputArguments.filterText" placeholder="过滤参数"></el-input>
+            </el-row>
+            <recycle-scroller :items="computeFilterInputArguments"
+                              class="scroller"
+                              :item-size="32"
+                              key-field="name"
+                              v-slot="{ item }">
+                <el-row type="flex"
+                        class="list-item">
+                    <el-col :span="18" style="border-right: solid 1px #777;">
+                        {{item}}
+                    </el-col>
+                    <el-col :span="6">
+                        <el-row type="flex" justify="end">
+
+                        </el-row>
+                    </el-col>
+                </el-row>
+            </recycle-scroller>
+
+        </el-row>
+    </el-drawer>
+
+    <el-drawer
+            title="Beans"
+            :visible.sync="drawer.beans.show"
+            direction="rtl"
+            size="75%">
+        <el-row style="width: 100%;">
+            <el-row>
+                <el-col :span="16">
+
+                </el-col>
+                <el-col :span="8">
+                    <el-row type="flex" justify="end">
+                        <el-button type="success" size="medium"
+                                   @click="onViewText(drawer.beans.items,'beans')">
+                            Beans JSON
+                        </el-button>
+                        <el-button v-loading="drawer.beans.refreshLoading" size="medium"
+                                   icon="el-icon-refresh" circle
+                                   @click="onRefreshBeans">
+                        </el-button>
+                    </el-row>
+                </el-col>
+
+            </el-row>
+            <el-row>
+                <el-input v-model="drawer.beans.filterKey" placeholder="过滤名称"></el-input>
+            </el-row>
+            <recycle-scroller :items="computeFilterBeans"
+                              class="scroller"
+                              :item-size="32"
+                              key-field="name"
+                              v-slot="{ item }">
+                <el-row type="flex"
+                        class="list-item">
+                    <el-col :span="9" style="border-right: solid 1px #777;">
+                        {{item.key}}
+                    </el-col>
+                    <el-col :span="9">
+                        {{item.value}}
+                    </el-col>
+                    <el-col :span="6">
+                        <el-row type="flex" justify="end">
+
+                        </el-row>
+                    </el-col>
+                </el-row>
+            </recycle-scroller>
+
+        </el-row>
+    </el-drawer>
+
+    <el-dialog
+            :title="dialog.textViewer.title"
+            :visible.sync="dialog.textViewer.show"
+            width="80%">
+        <el-input
+                type="textarea"
+                :rows="20"
+                placeholder="文本浏览"
+                v-model="dialog.textViewer.text">
+        </el-input>
+    </el-dialog>
+
+
+</div>
+</body>
+<script>
+    Vue.use(VueVirtualScroller.default);
+    window.app = new Vue({
+        components: {},
+        data() {
+            return this.getDefaultData()
+        },
+        created() {
+            this.initStoreData();
+            this.initCompletionsRefreshInterval();
+        },
+        mounted() {
+            this.initEditor();
+        },
+        watch: {},
+        computed: {
+            computeFilterSystemProperties() {
+                let list = this.drawer.systemProperties.items || [];
+                return list.filter(item => {
+                    return (!this.drawer.systemProperties.filterKey || item.key.toLowerCase().indexOf(this.drawer.systemProperties.filterKey.toLowerCase()) >= 0);
+                })
+            },
+            computeFilterInputArguments() {
+                let list = this.drawer.inputArguments.items || [];
+                return list.filter(item => {
+                    return (!this.drawer.inputArguments.filterText || item.toLowerCase().indexOf(this.drawer.inputArguments.filterText.toLowerCase()) >= 0);
+                })
+            },
+            computeFilterBeans() {
+                let list = this.drawer.beans.items || [];
+                return list.filter(item => {
+                    return (!this.drawer.beans.filterKey || item.key.toLowerCase().indexOf(this.drawer.beans.filterKey.toLowerCase()) >= 0);
+                })
+            },
+        },
+        methods: {
+            getDefaultData() {
+                return {
+                    editor: null,
+                    completions: [],
+                    storage: {},
+                    metas: {
+                        cert: '',
+                        resultLoading: false,
+                        resultText: '',
+                        uploadLoading: false,
+                        uploadList: [],
+                        hostIdLoading: false,
+                        hostIdList:[]
+                    },
+                    drawer: {
+                        systemProperties: {
+                            show: false,
+                            filterKey: '',
+                            refreshLoading: false,
+                            items: [],
+                        },
+                        inputArguments: {
+                            show: false,
+                            filterText: '',
+                            refreshLoading: false,
+                            items: [],
+                        },
+                        beans: {
+                            show: false,
+                            filterKey: '',
+                            refreshLoading: false,
+                            items: [],
+                        },
+                    },
+                    dialog: {
+                        textViewer: {
+                            show: false,
+                            title: '文本浏览',
+                            text: ''
+                        },
+                    },
+                    form: {
+                        useHostId: false,
+                        hostId: '',
+                        script: '',
+                        waitForSeconds: 120,
+                        inline: false,
+                        lineCount: 300
+                    }
+                }
+            },
+            loadData() {
+                let content = localStorage.getItem('ops:app:data');
+                if (!content) {
+                    return
+                }
+                content = content.trim();
+                if (content.length == 0) {
+                    return;
+                }
+                try {
+                    let obj = JSON.parse(content);
+                    Object.keys(obj).forEach(k => {
+                        this.$data[k] = obj[k];
+                    });
+                } catch (e) {
+
+                }
+            },
+            storeData() {
+                try {
+                    let data = {...this.$data};
+                    data.editor = null;
+                    let json = JSON.stringify(data);
+                    let obj = JSON.parse(json);
+                    obj.metas.cert = '';
+                    let content = JSON.stringify(obj);
+                    localStorage.setItem('ops:app:data', content);
+                } catch (e) {
+                    // console.log(e)
+                }
+            },
+            initCompletionsRefreshInterval() {
+                let _this = this;
+
+                function refresh() {
+                    setTimeout(() => {
+                        _this.collectCompletionItems()
+                        refresh();
+                    }, 3000);
+                }
+
+                refresh();
+            },
+            collectCompletionItems() {
+                //console.log('begin collect completions ...')
+                let items = [];
+                let keywords = [
+                    'context', 'env', 'beanMap',
+                    'size','length','isEmpty',
+                ]
+                if (keywords) {
+                    items.push(...keywords);
+                }
+
+                let completions = [];
+                items.forEach(item => {
+                    if (!item) {
+                        return;
+                    }
+                    item = item.trim();
+                    if (item == '') {
+                        return;
+                    }
+                    if (!completions.includes(item)) {
+                        completions.push(item);
+                    }
+                })
+                this.completions = items;
+                //console.log('end collect completions .')
+            },
+            editorCompletionItemCollector(prefix){
+                if(!prefix){
+                    prefix='';
+                }
+                prefix=prefix.toLowerCase();
+                let ret= [];
+                let count=50;
+                for (let i=0;i<this.completions.length;i++) {
+                    let e=this.completions[i];
+                    if(e && e.toLowerCase().indexOf(prefix)>=0){
+                        ret.push(e);
+                        count--;
+                        if(count<=0){
+                            break;
+                        }
+                    }
+                }
+                return ret;
+            },
+            initEditor() {
+                let _this = this;
+
+                function asyncHint(editor, callback, options) {
+                    let cur = editor.getCursor();
+                    let token = editor.getTokenAt(cur);
+                    let prefix = token.string;
+
+                    let items = _this.editorCompletionItemCollector(prefix) || []
+                    let result = []
+                    if (result && result.list) {
+                        items = [...items, ...result.list]
+                    }
+                    callback({
+                        list: items,
+                        from: CodeMirror.Pos(cur.line, token.start),
+                        to: CodeMirror.Pos(cur.line, token.end)
+                    });
+                }
+
+                asyncHint.async = true;
+                asyncHint.supportsSelection = true;
+
+                let dom = this.$refs.refEditor;
+                this.editor = CodeMirror.fromTextArea(dom, {  // 标识到textarea
+                    value: "",  // 文本域默认显示的文本
+                    mode: "groovy",  // 模式
+                    theme: "idea",  // CSS样式选择
+                    indentUnit: 2,  // 缩进单位，默认2
+                    smartIndent: true,  // 是否智能缩进
+                    tabSize: 4,  // Tab缩进，默认4
+                    readOnly: false,  // 是否只读，默认false
+                    showCursorWhenSelecting: true,
+                    hintOptions: {
+                        completeSingle: false,
+                        hint: asyncHint,
+                    },
+                    lineNumbers: true  // 是否显示行号
+                    // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
+                });
+                this.editor.on("keypress", () => {
+                    //编译器内容更改事件
+                    this.editor.showHint();
+                });
+                this.editor.setValue(this.form.script || '');
+                this.editor.on('change', () => {
+                    this.form.script = this.editor.getValue();
+                });
+            },
+            initStoreData() {
+                let reset = new URL(window.location.href).searchParams.get('reset');
+                if (reset != 'true') {
+                    this.loadData();
+                }
+                setInterval(() => {
+                    this.storeData();
+                }, 1000);
+            },
+            doResetData() {
+                let newData = this.getDefaultData();
+                Object.keys(newData).forEach(k => {
+                    this.$data[k] = newData[k];
+                })
+            },
+            getTransfer() {
+                let cert = this.metas.cert;
+                if (!cert || cert.length == 0) {
+                    cert = '';
+                }
+                cert = cert.trim();
+                if (!cert || cert.length == 0) {
+                    throw new Error('请先填写连接证书')
+                }
+                let ex = null;
+                for (let i = 0; i < 3; i++) {
+                    try {
+                        let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
+                        return new OpsSecureTransfer(keyPair)
+                    } catch (e) {
+                        ex = e;
+                    }
+                }
+                if (!ex) {
+                    ex = new Error('init transfer error')
+                }
+                throw e;
+            },
+            onCertChange() {
+                this.doRefreshHostId();
+            },
+            assignHostId(req){
+              if(this.form.useHostId){
+                  req.hostId=this.form.hostId;
+                  if(!req.hostId || req.hostId==''){
+                      throw new Error('请选择锁定的主机')
+                  }
+              }else{
+                  req.hostId=null;
+              }
+              return req;
+            },
+            doRefreshHostId(){
+                this.metas.hostIdLoading = true;
+                try {
+                    let req = {
+
+                    }
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/hostId',
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data) || ''
+                            //console.log(resp)
+                            let list=[...this.metas.hostIdList];
+                            if(resp && resp!='') {
+                                if (!list.includes(resp)) {
+                                    list.push(resp);
+                                }
+                            }
+                            this.metas.hostIdList=list;
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.hostIdLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.hostIdLoading = false;
+                }
+            },
+            getExecuteScript() {
+                let script = this.editor.getSelection();
+                if (!script || script == '') {
+                    script = this.form.script;
+                }
+                if (!script) {
+                    script = '';
+                }
+                return script;
+            },
+            getTipExecuteScript() {
+                let script = this.getExecuteScript();
+                if (script.length > 30) {
+                    script = script.substring(0, 30) + "...";
+                }
+                return script;
+            },
+            onExecute() {
+                let script = this.getTipExecuteScript();
+                this.$confirm('即将执行脚本，是否继续？<br/>' + script, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doExecute();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doExecute() {
+                this.metas.resultLoading = true;
+                try {
+                    let script = this.getExecuteScript();
+                    let req = this.assignHostId({
+                        script: script,
+                        waitForSeconds: this.form.waitForSeconds,
+                    });
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/eval`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            // console.log(resp)
+                            this.metas.resultText = resp || '';
+                            try {
+                                // filter out console ascii escape sequence
+                                this.metas.resultText = this.metas.resultText.replace(/\x1B\[[\d;]+m/g, '');
+                            } catch (e){}
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.resultLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.resultLoading = false;
+                }
+            },
+            onViewText(obj, title) {
+                if (title && title.length > 0) {
+                    this.dialog.textViewer.title = title;
+                } else {
+                    this.dialog.textViewer.title = '文本浏览';
+                }
+                let text = ''
+                if (typeof obj == 'string') {
+                    text = obj;
+                } else {
+                    text = JSON.stringify(obj, null, '    ');
+                }
+                this.dialog.textViewer.text = text;
+                this.dialog.textViewer.show = true;
+            },
+            onViewSystemProperties(){
+                this.drawer.systemProperties.show=true;
+            },
+            onRefreshSystemProperties(){
+                this.drawer.systemProperties.refreshLoading = true;
+                try {
+                    let script = this.getExecuteScript();
+                    let req = this.assignHostId({
+
+                    });
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/system-properties`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            // console.log(resp)
+                            this.drawer.systemProperties.items = resp || [];
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.drawer.systemProperties.refreshLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.drawer.systemProperties.refreshLoading = false;
+                }
+            },
+            onViewInputArguments(){
+                this.drawer.inputArguments.show=true;
+            },
+            onRefreshInputArguments(){
+                this.drawer.inputArguments.refreshLoading = true;
+                try {
+                    let script = this.getExecuteScript();
+                    let req = this.assignHostId({
+
+                    });
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/input-arguments`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            // console.log(resp)
+                            this.drawer.inputArguments.items = resp || [];
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.drawer.inputArguments.refreshLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.drawer.inputArguments.refreshLoading = false;
+                }
+            },
+            onViewBeans(){
+                this.drawer.beans.show=true;
+            },
+            onRefreshBeans(){
+                this.drawer.beans.refreshLoading = true;
+                try {
+                    let script = this.getExecuteScript();
+                    let req = this.assignHostId({
+
+                    });
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/beans`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            // console.log(resp)
+                            this.drawer.beans.items = resp || [];
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.drawer.beans.refreshLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.drawer.beans.refreshLoading = false;
+                }
+            },
+
+        }
+    })
+    let defaultConfig = {
+        baseURL: './',
+        timeout: 10 * 60 * 1000,
+        responseType: 'json'
+    }
+    let request = axios.create(defaultConfig)
+    window.app.$axios = request
+    window.app.$mount('#app')
+</script>
+<style>
+    .cert-block {
+        height: 32px;
+        overflow: hidden;
+    }
+
+    .cert-block:hover {
+        height: unset;
+    }
+
+    .list-item {
+        margin-top: 3px;
+        border-bottom: solid 1px #777;
+    }
+
+    .list-item:hover {
+        background: lightskyblue;
+    }
+
+    .checked-item {
+        background: darkorange;
+    }
+
+    .el-table__cell .table-cell-hidden {
+        display: none;
+    }
+
+    .el-table__cell:hover .table-cell-hidden {
+        display: unset;
+    }
+
+    .scroller {
+        height: calc(100vh - 200px);
+    }
+</style>
+</html>
