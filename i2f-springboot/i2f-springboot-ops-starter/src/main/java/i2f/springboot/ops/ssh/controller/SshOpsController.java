@@ -302,25 +302,24 @@ public class SshOpsController {
                 String path = req.getPath();
                 String serverPath = null;
                 String serverFileName = path;
-                int idx = path.lastIndexOf("/");
-                if (idx >= 0) {
-                    serverPath = path.substring(0, idx);
-                    serverFileName = path.substring(idx + 1);
-                }
-                File saveFile = null;
                 if (path != null && !path.isEmpty()) {
-                    saveFile = new File(path);
+                    int idx = path.lastIndexOf("/");
+                    if (idx >= 0) {
+                        serverPath = path.substring(0, idx);
+                        serverFileName = path.substring(idx + 1);
+                    }
                 } else {
                     String workdir = req.getWorkdir();
-                    File dir = new File(workdir);
                     String originalFilename = file.getOriginalFilename();
                     if (originalFilename == null || originalFilename.isEmpty()) {
                         throw new OpsException("missing origin file name");
                     }
                     File originFile = new File(originalFilename);
-                    saveFile = new File(dir, originFile.getName());
+                    serverPath=workdir;
+                    serverFileName=originFile.getName();
                 }
-                File tmpFile = new File(saveFile.getParentFile(), "upload-" + (UUID.randomUUID().toString().replace("-", "")) + ".tmp");
+
+                File tmpFile =File.createTempFile("upload-" + (UUID.randomUUID().toString().replace("-", "")),".tmp");
                 try {
                     MessageDigest digest = MessageDigest.getInstance("MD5");
                     OutputStream os = new FileOutputStream(tmpFile);
@@ -376,7 +375,7 @@ public class SshOpsController {
                     String resp = null;
                     if (runAsFile) {
                         String suffix = ".sh";
-                        bashFile = new File(workdir, "cmd-" + (UUID.randomUUID().toString().replace("-", "")) + suffix);
+                        bashFile = File.createTempFile("cmd-" + (UUID.randomUUID().toString().replace("-", "")) , suffix);
                         try (FileOutputStream fos = new FileOutputStream(bashFile)) {
                             fos.write(cmd.getBytes(OsUtil.getCmdCharset()));
                         }
