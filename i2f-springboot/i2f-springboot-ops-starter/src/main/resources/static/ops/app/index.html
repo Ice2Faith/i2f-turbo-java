@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/addon/hint/show-hint.min.css"/>
     <script src="../lib/codemirror-6.65.7/addon/hint/show-hint.min.js"></script>
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/theme/idea.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/groovy/groovy.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/mode/groovy/groovy.min.js" ></script>
 
     <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css"/>
     <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
@@ -114,7 +114,7 @@
                                 Beans
                             </el-button>
                             <el-button type="danger" size="medium"
-                                       @click="onViewFiles">
+                                       @click="onViewLockedThreads">
                                 死锁
                             </el-button>
                         </el-form-item>
@@ -170,17 +170,24 @@
             <recycle-scroller :items="computeFilterSystemProperties"
                               class="scroller"
                               :item-size="32"
-                              key-field="name"
+                              key-field="key"
                               v-slot="{ item }">
                 <el-row type="flex"
                         class="list-item">
                     <el-col :span="9" style="border-right: solid 1px #777;">
-                        {{item.key}}
+                        <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.key,'属性名')">值</el-tag>
+                            {{item.key}}
+                        </span>
                     </el-col>
-                    <el-col :span="9">
-                        {{item.value}}
+                    <el-col :span="13">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.value,'属性值')">值</el-tag>
+                              {{item.value}}
+                        </span>
+
                     </el-col>
-                    <el-col :span="6">
+                    <el-col :span="2">
                         <el-row type="flex" justify="end">
 
                         </el-row>
@@ -225,10 +232,13 @@
                               v-slot="{ item }">
                 <el-row type="flex"
                         class="list-item">
-                    <el-col :span="18" style="border-right: solid 1px #777;">
-                        {{item}}
+                    <el-col :span="21" style="border-right: solid 1px #777;">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item,'参数')">值</el-tag>
+                             {{item}}
+                         </span>
                     </el-col>
-                    <el-col :span="6">
+                    <el-col :span="3">
                         <el-row type="flex" justify="end">
 
                         </el-row>
@@ -269,17 +279,110 @@
             <recycle-scroller :items="computeFilterBeans"
                               class="scroller"
                               :item-size="32"
-                              key-field="name"
+                              key-field="key"
                               v-slot="{ item }">
                 <el-row type="flex"
                         class="list-item">
                     <el-col :span="9" style="border-right: solid 1px #777;">
-                        {{item.key}}
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.key,'bean名')">值</el-tag>
+                            {{item.key}}
+                         </span>
                     </el-col>
-                    <el-col :span="9">
-                        {{item.value}}
+                    <el-col :span="12">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.value,'类名')">值</el-tag>
+                            {{item.value}}
+                         </span>
                     </el-col>
-                    <el-col :span="6">
+                    <el-col :span="3">
+                        <el-row type="flex" justify="end">
+
+                        </el-row>
+                    </el-col>
+                </el-row>
+            </recycle-scroller>
+
+        </el-row>
+    </el-drawer>
+
+    <el-drawer
+            title="死锁线程"
+            :visible.sync="drawer.lockedThreads.show"
+            direction="rtl"
+            size="75%">
+        <el-row style="width: 100%;">
+            <el-row>
+                <el-col :span="16">
+
+                </el-col>
+                <el-col :span="8">
+                    <el-row type="flex" justify="end">
+                        <el-button type="success" size="medium"
+                                   @click="onViewText(drawer.lockedThreads.items,'死锁线程')">
+                            线程JSON
+                        </el-button>
+                        <el-button v-loading="drawer.lockedThreads.refreshLoading" size="medium"
+                                   icon="el-icon-refresh" circle
+                                   @click="onRefreshLockedThreads">
+                        </el-button>
+                    </el-row>
+                </el-col>
+
+            </el-row>
+            <el-row>
+                <el-input v-model="drawer.lockedThreads.filterKey" placeholder="过滤名称"></el-input>
+            </el-row>
+            <recycle-scroller :items="computeFilterLockedThreads"
+                              class="scroller"
+                              :item-size="32"
+                              key-field="threadId"
+                              v-slot="{ item }">
+                <el-row type="flex"
+                        class="list-item">
+                    <el-col :span="3" style="border-right: solid 1px #777;">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.threadName,'线程名称')">值</el-tag>
+                            {{item.threadName}}
+                         </span>
+                    </el-col>
+                    <el-col :span="3" style="border-right: solid 1px #777;">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.threadId,'线程ID')">值</el-tag>
+                            {{item.threadId}}
+                         </span>
+                    </el-col>
+                    <el-col :span="3" style="border-right: solid 1px #777;">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.threadState,'线程状态')">值</el-tag>
+                            {{item.threadState}}
+                         </span>
+                    </el-col>
+                    <el-col :span="3" style="border-right: solid 1px #777;">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.lockName,'锁名称')">值</el-tag>
+                            {{item.lockName}}
+                         </span>
+                    </el-col>
+                    <el-col :span="3" style="border-right: solid 1px #777;">
+                          <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.lockOwnerId,'锁持有者ID')">值</el-tag>
+                            {{item.lockOwnerId}}
+                         </span>
+                    </el-col>
+                    <el-col :span="3" style="border-right: solid 1px #777;">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.lockOwnerName,'锁持有者')">值</el-tag>
+                            {{item.lockOwnerName}}
+                         </span>
+                    </el-col>
+                    <el-col :span="3" style="border-right: solid 1px #777;">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.blockedTime,'阻塞时间')">值</el-tag>
+                            {{item.blockedTime}}ms
+                         </span>
+                    </el-col>
+                    <el-col :span="3">
                         <el-row type="flex" justify="end">
 
                         </el-row>
@@ -339,6 +442,12 @@
                     return (!this.drawer.beans.filterKey || item.key.toLowerCase().indexOf(this.drawer.beans.filterKey.toLowerCase()) >= 0);
                 })
             },
+            computeFilterLockedThreads() {
+                let list = this.drawer.lockedThreads.items || [];
+                return list.filter(item => {
+                    return (!this.drawer.lockedThreads.filterKey || item.threadName.toLowerCase().indexOf(this.drawer.lockedThreads.filterKey.toLowerCase()) >= 0);
+                })
+            },
         },
         methods: {
             getDefaultData() {
@@ -369,6 +478,12 @@
                             items: [],
                         },
                         beans: {
+                            show: false,
+                            filterKey: '',
+                            refreshLoading: false,
+                            items: [],
+                        },
+                        lockedThreads: {
                             show: false,
                             filterKey: '',
                             refreshLoading: false,
@@ -804,6 +919,40 @@
                     this.drawer.beans.refreshLoading = false;
                 }
             },
+            onViewLockedThreads(){
+                this.drawer.lockedThreads.show=true;
+            },
+            onRefreshLockedThreads(){
+                this.drawer.lockedThreads.refreshLoading = true;
+                try {
+                    let script = this.getExecuteScript();
+                    let req = this.assignHostId({
+
+                    });
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/locked-threads`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            // console.log(resp)
+                            this.drawer.lockedThreads.items = resp || [];
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.drawer.lockedThreads.refreshLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.drawer.lockedThreads.refreshLoading = false;
+                }
+            },
 
         }
     })
@@ -835,6 +984,13 @@
         background: lightskyblue;
     }
 
+    .list-item-cell{
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: inherit;
+    }
+
     .checked-item {
         background: darkorange;
     }
@@ -844,6 +1000,14 @@
     }
 
     .el-table__cell:hover .table-cell-hidden {
+        display: unset;
+    }
+
+    .list-item-cell .table-cell-hidden {
+        display: none;
+    }
+
+    .list-item-cell:hover .table-cell-hidden {
         display: unset;
     }
 
