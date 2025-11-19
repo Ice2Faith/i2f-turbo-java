@@ -667,8 +667,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     }
 
 
-    @Override
-    public Map<String, Object> createParams() {
+    public Map<String, Object> createParamsInner() {
         Map<String, Object> ret = new LinkedHashMap<>();
         ret.put(ParamsConsts.CONTEXT, getNamingContext());
         ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
@@ -704,6 +703,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         Map<String, Object> retDatasourceMap = (Map<String, Object>) ret.computeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
         retDatasourceMap.putAll(datasourceMap);
 
+        return ret;
+    }
+
+
+    @Override
+    public Map<String, Object> createParams() {
+        Map<String, Object> ret = createParamsInner();
         reportPreparedParamsEvent(ret);
         return ret;
     }
@@ -734,14 +740,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             Object val = params.get(key);
             if (val == null) {
                 if (execParams == null) {
-                    execParams = createParams();
+                    execParams = createParamsInner();
                 }
                 val = execParams.get(key);
                 params.put(key, val);
             }else {
                 if (ParamsConsts.GLOBAL.equals(key)) {
                     if (execParams == null) {
-                        execParams = createParams();
+                        execParams = createParamsInner();
                     }
                     Map<String,Object> execGlobal = (Map<String,Object>)execParams.get(key);
                     Map<String,Object> global = (Map<String,Object>)val;
@@ -774,7 +780,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public Map<String, Object> newParams(Map<String, Object> params) {
         Map<String, Object> ret = new LinkedHashMap<>();
         if (params == null) {
-            return createParams();
+            return createParamsInner();
         }
 
         for (String key : ParamsConsts.KEEP_NAMES) {
