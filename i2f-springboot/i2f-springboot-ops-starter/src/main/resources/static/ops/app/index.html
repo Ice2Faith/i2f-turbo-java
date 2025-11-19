@@ -105,6 +105,10 @@
                                        @click="onViewSystemProperties">
                                 属性
                             </el-button>
+                            <el-button type="info" size="medium"
+                                       @click="onViewSystemEnv">
+                                环境
+                            </el-button>
                             <el-button type="warning" size="medium"
                                        @click="onViewInputArguments">
                                 参数
@@ -168,6 +172,63 @@
                 <el-input v-model="drawer.systemProperties.filterKey" placeholder="过滤属性"></el-input>
             </el-row>
             <recycle-scroller :items="computeFilterSystemProperties"
+                              class="scroller"
+                              :item-size="32"
+                              key-field="key"
+                              v-slot="{ item }">
+                <el-row type="flex"
+                        class="list-item">
+                    <el-col :span="9" style="border-right: solid 1px #777;">
+                        <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.key,'属性名')">值</el-tag>
+                            {{item.key}}
+                        </span>
+                    </el-col>
+                    <el-col :span="13">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.value,'属性值')">值</el-tag>
+                              {{item.value}}
+                        </span>
+
+                    </el-col>
+                    <el-col :span="2">
+                        <el-row type="flex" justify="end">
+
+                        </el-row>
+                    </el-col>
+                </el-row>
+            </recycle-scroller>
+
+        </el-row>
+    </el-drawer>
+    <el-drawer
+            title="环境变量"
+            :visible.sync="drawer.systemEnv.show"
+            direction="rtl"
+            size="75%">
+        <el-row style="width: 100%;">
+            <el-row>
+                <el-col :span="16">
+
+                </el-col>
+                <el-col :span="8">
+                    <el-row type="flex" justify="end">
+                        <el-button type="success" size="medium"
+                                   @click="onViewText(drawer.systemEnv.items,'环境变量')">
+                            环境JSON
+                        </el-button>
+                        <el-button v-loading="drawer.systemEnv.refreshLoading" size="medium"
+                                   icon="el-icon-refresh" circle
+                                   @click="onRefreshSystemEnv">
+                        </el-button>
+                    </el-row>
+                </el-col>
+
+            </el-row>
+            <el-row>
+                <el-input v-model="drawer.systemEnv.filterKey" placeholder="过滤环境"></el-input>
+            </el-row>
+            <recycle-scroller :items="computeFilterSystemEnv"
                               class="scroller"
                               :item-size="32"
                               key-field="key"
@@ -430,6 +491,12 @@
                     return (!this.drawer.systemProperties.filterKey || item.key.toLowerCase().indexOf(this.drawer.systemProperties.filterKey.toLowerCase()) >= 0);
                 })
             },
+            computeFilterSystemEnv() {
+                let list = this.drawer.systemEnv.items || [];
+                return list.filter(item => {
+                    return (!this.drawer.systemEnv.filterKey || item.key.toLowerCase().indexOf(this.drawer.systemEnv.filterKey.toLowerCase()) >= 0);
+                })
+            },
             computeFilterInputArguments() {
                 let list = this.drawer.inputArguments.items || [];
                 return list.filter(item => {
@@ -466,6 +533,12 @@
                     },
                     drawer: {
                         systemProperties: {
+                            show: false,
+                            filterKey: '',
+                            refreshLoading: false,
+                            items: [],
+                        },
+                        systemEnv: {
                             show: false,
                             filterKey: '',
                             refreshLoading: false,
@@ -849,6 +922,40 @@
                 } catch (err) {
                     this.$message.error(err.errorMessage || err.message || '操作失败')
                     this.drawer.systemProperties.refreshLoading = false;
+                }
+            },
+            onViewSystemEnv(){
+                this.drawer.systemEnv.show=true;
+            },
+            onRefreshSystemEnv(){
+                this.drawer.systemEnv.refreshLoading = true;
+                try {
+                    let script = this.getExecuteScript();
+                    let req = this.assignHostId({
+
+                    });
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/system-env`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            // console.log(resp)
+                            this.drawer.systemEnv.items = resp || [];
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.drawer.systemEnv.refreshLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.drawer.systemEnv.refreshLoading = false;
                 }
             },
             onViewInputArguments(){

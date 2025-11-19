@@ -110,6 +110,25 @@ public class AppOpsController {
         }
     }
 
+    @PostMapping("/system-env")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> systemEnv(@RequestBody OpsSecureDto reqDto) throws Exception {
+        try {
+            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            assertHostId(req);
+            List<AppKeyValueItemDto> resp=new ArrayList<>();
+            Map<String, String> envMap = System.getenv();
+            for (Map.Entry<String, String> entry : envMap.entrySet()) {
+                AppKeyValueItemDto dto=new AppKeyValueItemDto(entry.getKey(),entry.getValue());
+                resp.add(dto);
+            }
+            return transfer.success(resp);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(),e);
+            return transfer.error(e.getMessage());
+        }
+    }
+
     @PostMapping("/locked-threads")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> lockedThreads(@RequestBody OpsSecureDto reqDto) throws Exception {
@@ -222,7 +241,7 @@ public class AppOpsController {
             Object ret = refRet.get();
             String resp=null;
             try{
-                resp=objectMapper.writeValueAsString(ret);
+                resp=objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ret);
             }catch(Exception e){
                 resp="response value cannot serialize as json";
             }
