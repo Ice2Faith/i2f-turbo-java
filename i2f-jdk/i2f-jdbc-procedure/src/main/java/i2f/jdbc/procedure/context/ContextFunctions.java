@@ -325,7 +325,7 @@ public interface ContextFunctions {
         return regex_replace(str, regex, replacement, occurrence);
     }
 
-    default boolean regex_like(Object oStr, String regex) {
+    default boolean regex_match(Object oStr, String regex) {
         if (oStr == null) {
             return false;
         }
@@ -337,8 +337,8 @@ public interface ContextFunctions {
         return str.matches(regex);
     }
 
-    default boolean regexp_like(Object str, String regex) {
-        return regex_like(str, regex);
+    default boolean regexp_match(Object str, String regex) {
+        return regex_match(str, regex);
     }
 
     default List<String> regex_find(Object oStr, String regex) {
@@ -373,6 +373,14 @@ public interface ContextFunctions {
     }
 
     default boolean regexp_contains(Object str, String regex) {
+        return regex_contains(str, regex);
+    }
+
+    default boolean regex_like(Object oStr, String regex) {
+        return regex_contains(oStr, regex);
+    }
+
+    default boolean regexp_like(Object str, String regex) {
         return regex_contains(str, regex);
     }
 
