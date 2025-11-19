@@ -580,6 +580,7 @@
                     editor: null,
                     langEditors: {
                         resultEditor: null,
+                        textViewerEditor: null,
                     },
                     completions: [],
                     storage: {},
@@ -679,6 +680,9 @@
                     let data = {...this.$data};
                     data.editor = null;
                     data.langEditors={};
+                    Object.keys(this.$data.langEditors).forEach(k=>{
+                        data.langEditors[k]=null;
+                    })
                     let json = JSON.stringify(data);
                     let obj = JSON.parse(json);
                     obj.metas.cert = '';
