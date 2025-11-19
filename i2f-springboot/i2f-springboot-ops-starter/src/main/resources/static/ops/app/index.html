@@ -21,19 +21,47 @@
     <script src="../common/OpsSecureDto.js"></script>
     <script src="../common/OpsSecureHelper.js"></script>
     <script src="../common/OpsSecureTransfer.js"></script>
-    <script src="../lib/echarts-5/echarts.min.js"></script>
     <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
     <script src="../lib/codemirror-6.65.7/codemirror.min.js"></script>
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/codemirror.min.css"/>
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/addon/hint/show-hint.min.css"/>
     <script src="../lib/codemirror-6.65.7/addon/hint/show-hint.min.js"></script>
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/theme/idea.min.css"/>
+
     <script src="../lib/codemirror-6.65.7/mode/groovy/groovy.min.js" ></script>
 
     <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css"/>
     <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
     <script src="../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
 
+    <script src="../lib/codemirror-6.65.7/mode/yaml/yaml.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/yaml/yaml-lint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/javascript/javascript.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/javascript/javascript-hint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/javascript/javascript-lint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/sql/sql.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/sql/sql-hint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/shell/shell.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/xml/xml.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/xml/xml-fold.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/xml/xml-hint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/addon/lint/html/html-lint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/html/html-hint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/mode/htmlmixed/htmlmixed.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/markdown/markdown.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/markdown/markdown-fold.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/groovy/groovy.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/nginx/nginx.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/python/python.min.js" ></script>
 </head>
 <body>
 <div id="app">
@@ -105,7 +133,7 @@
                                        @click="onViewSystemProperties">
                                 属性
                             </el-button>
-                            <el-button type="info" size="medium"
+                            <el-button  size="medium"
                                        @click="onViewSystemEnv">
                                 环境
                             </el-button>
@@ -138,12 +166,22 @@
         </el-form>
     </el-row>
     <el-divider>操作结果</el-divider>
-    <el-input
-            type="textarea"
-            :rows="8"
-            placeholder="执行结果"
-            v-model="metas.resultText">
-    </el-input>
+    <el-card shadow="never">
+        <el-form inline label-position="left" label-width="100px">
+            <el-form-item label="语言类型">
+                <el-select v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
+                    <el-option
+                            v-for="item in metas.langList"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <textarea ref="refResultEditor"></textarea>
+    </el-card>
+
     <el-drawer
             title="系统属性"
             :visible.sync="drawer.systemProperties.show"
@@ -458,12 +496,21 @@
             :title="dialog.textViewer.title"
             :visible.sync="dialog.textViewer.show"
             width="80%">
-        <el-input
-                type="textarea"
-                :rows="20"
-                placeholder="文本浏览"
-                v-model="dialog.textViewer.text">
-        </el-input>
+        <el-card shadow="never">
+            <el-form inline label-position="left" label-width="100px">
+                <el-form-item label="语言类型">
+                    <el-select v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                        <el-option
+                                v-for="item in metas.langList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <textarea ref="refTextViewerEditor"></textarea>
+        </el-card>
     </el-dialog>
 
 
@@ -482,8 +529,19 @@
         },
         mounted() {
             this.initEditor();
+            this.initResultEditor();
+            this.initTextViewerEditor();
         },
-        watch: {},
+        watch: {
+            'dialog.textViewer.show':{
+                immediate: true,
+                handler:function(val,old){
+                    if(val){
+                        this.initTextViewerEditor()
+                    }
+                }
+            }
+        },
         computed: {
             computeFilterSystemProperties() {
                 let list = this.drawer.systemProperties.items || [];
@@ -520,16 +578,33 @@
             getDefaultData() {
                 return {
                     editor: null,
+                    langEditors: {
+                        resultEditor: null,
+                    },
                     completions: [],
                     storage: {},
                     metas: {
                         cert: '',
                         resultLoading: false,
+                        resultLang: 'javascript',
                         resultText: '',
                         uploadLoading: false,
                         uploadList: [],
                         hostIdLoading: false,
-                        hostIdList:[]
+                        hostIdList:[],
+                        langList:[
+                            {label: 'Text',value:'text'},
+                            {label: 'Yaml',value:'yaml'},
+                            {label: 'Json',value:'javascript'},
+                            {label: 'SQL',value:'sql'},
+                            {label: 'Shell',value:'shell'},
+                            {label: 'Xml',value:'xml'},
+                            {label: 'Html',value:'htmlmixed'},
+                            {label: 'Markdown',value:'markdown'},
+                            {label: 'Groovy',value:'groovy'},
+                            {label: 'Nginx',value:'nginx'},
+                            {label: 'Python',value:'python'},
+                        ]
                     },
                     drawer: {
                         systemProperties: {
@@ -565,9 +640,10 @@
                     },
                     dialog: {
                         textViewer: {
-                            show: false,
+                            show: true,
                             title: '文本浏览',
-                            text: ''
+                            text: '',
+                            lang: 'text'
                         },
                     },
                     form: {
@@ -602,6 +678,7 @@
                 try {
                     let data = {...this.$data};
                     data.editor = null;
+                    data.langEditors={};
                     let json = JSON.stringify(data);
                     let obj = JSON.parse(json);
                     obj.metas.cert = '';
@@ -670,6 +747,15 @@
                 return ret;
             },
             initEditor() {
+                if(this.editor){
+                    try {
+                        this.editor.toTextArea()
+                    }catch (e){
+
+                    }
+                }
+                this.editor=null;
+
                 let _this = this;
 
                 function asyncHint(editor, callback, options) {
@@ -717,6 +803,75 @@
                 this.editor.on('change', () => {
                     this.form.script = this.editor.getValue();
                 });
+            },
+            initLangEditor(editorProp,editorRef,editorLang,afterCallback){
+                let bts=new Date().getTime()
+                let initEditorTask=()=> {
+                    if (this.langEditors[editorProp]) {
+                        try {
+                            this.langEditors[editorProp].toTextArea()
+                        } catch (e) {
+
+                        }
+                    }
+                    this.langEditors[editorProp] = null;
+
+                    let dom = this.$refs[editorRef];
+                    if(!dom){
+                        let cts=new Date().getTime();
+                        if(cts-bts<3000){
+                            setTimeout(initEditorTask,30);
+                        }
+                        return
+                    }
+                    this.langEditors[editorProp] = CodeMirror.fromTextArea(dom, {  // 标识到textarea
+                        value: "",  // 文本域默认显示的文本
+                        mode: editorLang || '',  // 模式
+                        theme: "idea",  // CSS样式选择
+                        indentUnit: 2,  // 缩进单位，默认2
+                        smartIndent: true,  // 是否智能缩进
+                        tabSize: 4,  // Tab缩进，默认4
+                        readOnly: false,  // 是否只读，默认false
+                        showCursorWhenSelecting: true,
+                        hintOptions: {
+                            completeSingle: false,
+                        },
+                        lineNumbers: true  // 是否显示行号
+                        // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
+                    });
+                    this.langEditors[editorProp].on("keypress", () => {
+                        //编译器内容更改事件
+                        this.langEditors[editorProp].showHint();
+                    });
+                    if (afterCallback) {
+                        afterCallback(this.langEditors[editorProp], dom)
+                    }
+                }
+
+                initEditorTask()
+            },
+            initResultEditor() {
+                this.initLangEditor('resultEditor','refResultEditor',this.metas.resultLang,(editor,dom)=>{
+                    editor.setValue(this.metas.resultText || '');
+                    editor.on('change', () => {
+                        this.metas.resultText = editor.getValue();
+                    });
+                })
+
+            },
+            onResultLangChange(){
+              this.initResultEditor();
+            },
+            initTextViewerEditor(){
+                this.initLangEditor('textViewerEditor','refTextViewerEditor',this.dialog.textViewer.lang,(editor,dom)=>{
+                    editor.setValue(this.dialog.textViewer.text || '');
+                    editor.on('change', () => {
+                        this.dialog.textViewer.text = editor.getValue();
+                    });
+                })
+            },
+            onTextViewerLangChange(){
+                this.initTextViewerEditor()
             },
             initStoreData() {
                 let reset = new URL(window.location.href).searchParams.get('reset');
