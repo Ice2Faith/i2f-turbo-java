@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.NodeTime;
@@ -32,6 +33,13 @@ public class LangAsyncNode extends AbstractExecutorNode {
         Long delay = (Long) executor.attrValue(AttrConsts.DELAY, FeatureConsts.LONG, node, context);
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
         TimeUnit delayUnit = NodeTime.getTimeUnit(timeUnit, TimeUnit.SECONDS);
+
+        Map<String,Object> callParams= executor.cloneParams(context);
+        for (Map.Entry<String, Object> entry : context.entrySet()) {
+            if (!ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
+                callParams.put(entry.getKey(),entry.getValue());
+            }
+        }
         CountDownLatch latch = new CountDownLatch(1);
         Thread thread = new Thread(() -> {
             try {
@@ -41,7 +49,7 @@ public class LangAsyncNode extends AbstractExecutorNode {
                     } catch (Exception e) {
                     }
                 }
-                executor.execAsProcedure(node, context, false, false);
+                executor.execAsProcedure(node, callParams, false, false);
             } catch (Throwable e) {
                 executor.logger().logWarn(() -> e.getMessage(), e);
                 e.printStackTrace();
