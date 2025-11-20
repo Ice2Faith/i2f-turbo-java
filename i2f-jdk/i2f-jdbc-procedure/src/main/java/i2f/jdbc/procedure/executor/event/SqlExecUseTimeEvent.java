@@ -17,4 +17,5 @@ public class SqlExecUseTimeEvent implements XProc4jEvent {
     protected long useMillsSeconds;
     protected BindSql bql;
     protected String location;
+    protected String datasource;
 }
