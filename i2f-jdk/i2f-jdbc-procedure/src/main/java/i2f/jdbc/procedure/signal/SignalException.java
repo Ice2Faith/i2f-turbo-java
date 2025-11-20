@@ -35,12 +35,12 @@ public class SignalException extends RuntimeException {
 
     protected SignalException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.message = message + " with cause by " + cause.getClass() + " : " + cause.getMessage();
+        this.message = message + "\n with cause by " + cause.getClass() + " : " + cause.getMessage();
     }
 
     @Override
     public String getMessage() {
-        return (message == null ? super.getMessage() : message) + " , location at " + location;
+        return (message == null ? super.getMessage() : message) + "\n , location at " + location;
     }
 
     public void setMessage(String message) {
