@@ -1580,18 +1580,31 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return script;
     }
 
-    @Override
-    public Connection getConnection(String datasource, Map<String, Object> params) {
+    public String getMappingDatasourceName(String datasource,Map<String,Object> params){
         if (datasource == null || datasource.isEmpty()) {
             datasource = ParamsConsts.DEFAULT_DATASOURCE;
         }
         Map<String, String> datasourcesMapping = (Map<String, String>) params.get(ParamsConsts.DATASOURCES_MAPPING);
         if (datasourcesMapping != null) {
-            String mapping = datasourcesMapping.get(datasource);
-            if (mapping != null && !mapping.isEmpty()) {
-                datasource = mapping;
-            }
+            do {
+                String mapping = datasourcesMapping.get(datasource);
+                if (mapping != null && !mapping.isEmpty()) {
+                    datasource = mapping;
+                }else{
+                    break;
+                }
+            }while(true);
         }
+        return datasource;
+    }
+
+    @Override
+    public Connection getConnection(String datasource, Map<String, Object> params) {
+        return getConnectionEntry(datasource, params).getKey();
+    }
+
+    public Map.Entry<Connection,String> getConnectionEntry(String datasource, Map<String, Object> params) {
+        datasource=getMappingDatasourceName(datasource,params);
 
         Map<String, Connection> connectionMap = (Map<String, Connection>) params.get(ParamsConsts.CONNECTIONS);
         if (connectionMap == null) {
@@ -1608,7 +1621,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     if (isDebug()) {
                         logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] find in map");
                     }
-                    return conn;
+                    return new AbstractMap.SimpleEntry<>(conn,datasource);
                 }
             } catch (Exception e) {
                 logger().logWarn(() -> "connection closed or are invalided:" + e.getMessage(), e);
@@ -1616,7 +1629,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             try {
                 if(!conn.isClosed()){
                     if(!conn.getAutoCommit()){
-                       conn.commit();
+                        conn.commit();
                         if (isDebug()) {
                             logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] commit before close");
                         }
@@ -1662,7 +1675,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             throw new IllegalStateException(XProc4jConsts.NAME + " missing datasource connection: " + newConnDs + " near [" + ContextHolder.traceLocation() + "] ");
         }
 
-        return conn;
+        return new AbstractMap.SimpleEntry<>(conn,datasource);
     }
 
     public void afterNewConnection(String datasource,Connection conn) throws SQLException {
@@ -1721,7 +1734,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         int effectCount = 0;
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
                 logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
@@ -1752,7 +1768,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         int effectCount=0;
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
                 logger().logDebug("sql-query-columns:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
@@ -1789,7 +1808,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         int effectCount=0;
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
                 logger().logDebug("sql-query-object:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
@@ -1825,7 +1847,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         int effectCount=0;
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
                 logger().logDebug("sql-query-row:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
@@ -1856,7 +1881,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         int effectCount=0;
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
                 logger().logDebug("sql-update:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
@@ -1884,7 +1912,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     @Override
     public BindSql sqlWrapPage(String datasource, BindSql bql, ApiOffsetSize page, Map<String, Object> params) {
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             fillDatabaseDialectType(params, conn);
             if (page != null && (page.getOffset() != null || page.getSize() != null)) {
                 IPageWrapper wrapper = PageWrappers.wrapper(conn);
@@ -1907,7 +1938,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     @Override
     public BindSql sqlWrapCount(String datasource, BindSql bql, Map<String, Object> params) {
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             fillDatabaseDialectType(params, conn);
             ICountWrapper wrapper = CountWrappers.wrapper(conn);
             bql = wrapper.apply(bql);
@@ -1933,7 +1967,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (key == null || key.isEmpty()) {
                 return false;
             }
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             List<String> databaseNames = detectDatabaseType(conn);
             String[] arr = key.split(",");
             for (String item : arr) {
@@ -1958,7 +1995,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     @Override
     public BindSql sqlScript(String datasource, List<Map.Entry<String, Object>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page) {
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             Map.Entry<String, BindSql> entry = getDialectSqlScript(dialectScriptList, conn, params);
             fillDatabaseDialectType(params, conn);
             BindSql bql = entry.getValue();
@@ -2040,7 +2080,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         BindSql execBql = null;
         int effectCount=0;
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             fillDatabaseDialectType(params, conn);
             if (page != null && (page.getOffset() != null || page.getSize() != null)) {
                 IPageWrapper wrapper = PageWrappers.wrapper(conn);
@@ -2079,7 +2122,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isolation < 0) {
                 isolation = Connection.TRANSACTION_READ_COMMITTED;
             }
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(isolation);
             if (isDebug()) {
@@ -2096,7 +2142,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             logger().logDebug("sql-trans-commit:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] ");
         }
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             if (checked) {
                 if (!conn.getAutoCommit()) {
                     conn.commit();
@@ -2121,7 +2170,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             logger().logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] ");
         }
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             if (checked) {
                 if (!conn.getAutoCommit()) {
                     conn.rollback();
@@ -2146,7 +2198,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             logger().logDebug("sql-trans-none:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] ");
         }
         try {
-            Connection conn = getConnection(datasource, params);
+            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn=connEntry.getKey();
+            datasource=connEntry.getValue();
+
             if (checked) {
                 if (!conn.getAutoCommit()) {
                     conn.commit();

@@ -159,7 +159,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
             String errorMsg = e.getMessage();
             if (!errorMsg.startsWith(EXCEPTION_MESSAGE_PREFIX)) {
-                errorMsg = EXCEPTION_MESSAGE_PREFIX + location + ", attrs:" + node.getTagAttrMap() + ", message: " + e.getMessage();
+                errorMsg = EXCEPTION_MESSAGE_PREFIX + location + "\n , attrs:" + node.getTagAttrMap() + "\n , message: " + e.getMessage();
                 StringBuilder builder = new StringBuilder();
 
                 int stackSize = traceStack.size();
