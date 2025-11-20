@@ -949,21 +949,6 @@ eval-ts使用TinyScript引擎进行处理
         </lang-lock>
     </script-segment>
 
-    <lang-ai result="" value="" type="">
-
-    </lang-ai>
-    <!-- 举例 -->
-    <script-segment id="demo">
-        <lang-ai result="v_answer" type="spring">
-            你是一个熟悉SQL的数据库DBA，熟悉Oracle数据库。如何重建序列以设置起始值？
-        </lang-ai>
-
-        <lang-render result="v_question">
-            你是一个熟悉SQL的数据库DBA，熟悉Oracle数据库。请专业的回答以下问题：$!{v_user_msg}
-        </lang-render>
-        <lang-ai result="v_answer" value="v_question" type="spring"/>
-    </script-segment>
-
     <!--
     用法类似lang-render
     区别是lang-render的结果是string类型，需要自信处理以避免sql注入
@@ -1438,6 +1423,50 @@ eval-ts使用TinyScript引擎进行处理
 
     </script-segment>
 
+    <!--
+    创建一个线程池
+    使用type指定的线程池类型创建一个count大小的线程池存储到result指定的变量中
+    type可选的值为：forkjoin,fixed; 不指定则为fixed
+    -->
+    <lang-thread-pool result="" type="" count=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-thread-pool result="V_POOL" type="forkjoin" count="30"/>
+    </script-segment>
+
+    <!--
+    提交一个线程到线程池中
+    将标签内部的内容作为线程执行的内容提交给pool指定的线程池执行
+    result接受此线程运行的CountDownLatch变量，可以用于等待此任务运行结束
+    注意，因为是异步任务，因此内部将会使用完全独立的数据库连接
+    允许在此标签上添加其他参数，以作为内部运行的变量，也就是像使用 function-call/procedure-call 等一样进行参数传递
+    -->
+    <lang-thread-pool-submit result="" pool="" aaa="" b="">
+
+    </lang-thread-pool-submit>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-thread-pool result="V_POOL" type="forkjoin" size="30"/>
+
+        <lang-thread-pool-submit result="V_LATCH" pool="V_POOL" IN_TABLE="V_TABLE">
+            <sql-update>
+                truncate table $!{IN_TABLE}
+            </sql-update>
+        </lang-thread-pool-submit>
+    </script-segment>
+
+    <!--
+    销毁一个线程池
+    关闭pool指定的线程池，如果force为true则立即关闭线程池，如果await为true则等待 线程池完全关闭，result返回的是未执行的任务列表
+    实际调用的是 shutdown() 方法进行关闭
+    如果force为true，则调用 shutdownNow() 方法进行关闭
+    如果await为true，则额外调用 awaitTermination() 方法等待完全关闭, 此时可以指定 timeout 和 time-unit 进行等待时长控制，不指定时长则默认无限等待
+    -->
+    <lang-thread-pool-shutdown result="" pool="" force="" await="" timeout="" time-unit=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-thread-pool-shutdown pool="V_POOL" force="true" await="true"/>
+    </script-segment>
 
     <!--
     通过遍历结果集的方式，提供类似游标的操作能力，通过sql-query-list进行查询遍历，

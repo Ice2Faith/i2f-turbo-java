@@ -12,6 +12,8 @@ import java.util.Set;
 public interface ParamsConsts {
 
     // 全局部分
+    String STACK_LOCK ="stack_lock";
+
     String CONTEXT = "context";
     String ENVIRONMENT = "env";
     String BEANS = "beans";
@@ -75,6 +77,8 @@ public interface ParamsConsts {
 
     // 这些值，将会始终保存在上下文中，也就是每个params中都应该存在这些键值
     String[] KEEP_NAMES = {
+            STACK_LOCK,
+
             CONTEXT,
             ENVIRONMENT,
             BEANS,
@@ -94,6 +98,7 @@ public interface ParamsConsts {
             EXECUTOR_LRU,
             STATIC_LRU,
     };
+
 
     Set<String> KEEP_NAME_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(KEEP_NAMES)));
 }
