@@ -790,19 +790,8 @@
         <!ATTLIST lang-lock type.string CDATA #IMPLIED>
         <!ATTLIST lang-lock type.visit CDATA #IMPLIED>
 
-        <!ELEMENT lang-ai (ANY|EMPTY)>
-        <!ATTLIST lang-ai value CDATA #IMPLIED>
-        <!ATTLIST lang-ai result CDATA #IMPLIED>
-        <!ATTLIST lang-ai type CDATA #IMPLIED>
-
-        <!ATTLIST lang-ai value.visit CDATA #IMPLIED>
-        <!ATTLIST lang-ai value.string CDATA #IMPLIED>
-        <!ATTLIST lang-ai value.render CDATA #IMPLIED>
-        <!ATTLIST lang-ai value.body-text CDATA #IMPLIED>
-        <!ATTLIST lang-ai value.body-text.render CDATA #IMPLIED>
-
-        <!ATTLIST lang-ai type.string CDATA #IMPLIED>
-        <!ATTLIST lang-ai type.visit CDATA #IMPLIED>
+        <!ATTLIST lang-lock test.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-lock test.visit CDATA #IMPLIED>
 
         <!ELEMENT sql-query-row (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
@@ -996,6 +985,23 @@
         <!ATTLIST lang-latch-await name CDATA #REQUIRED>
         <!ATTLIST lang-latch-await timeout CDATA #IMPLIED>
         <!ATTLIST lang-latch-await time-unit CDATA #IMPLIED>
+
+        <!ELEMENT lang-thread-pool-shutdown (EMPTY)>
+        <!ATTLIST lang-thread-pool-shutdown result CDATA #IMPLIED>
+        <!ATTLIST lang-thread-pool-shutdown pool CDATA #REQUIRED>
+        <!ATTLIST lang-thread-pool-shutdown force CDATA #IMPLIED>
+        <!ATTLIST lang-thread-pool-shutdown await CDATA #IMPLIED>
+        <!ATTLIST lang-thread-pool-shutdown timeout CDATA #IMPLIED>
+        <!ATTLIST lang-thread-pool-shutdown time-unit CDATA #IMPLIED>
+
+        <!ELEMENT lang-thread-pool-submit (EMPTY|ANY)>
+        <!ATTLIST lang-thread-pool-submit result CDATA #IMPLIED>
+        <!ATTLIST lang-thread-pool-submit pool CDATA #REQUIRED>
+
+        <!ELEMENT lang-thread-pool (EMPTY)>
+        <!ATTLIST lang-thread-pool result CDATA #IMPLIED>
+        <!ATTLIST lang-thread-pool type CDATA #IMPLIED>
+        <!ATTLIST lang-thread-pool count CDATA #REQUIRED>
 
         <!ELEMENT sql-cursor (sql-query-list|lang-body)>
         <!ATTLIST sql-cursor batch-size CDATA #IMPLIED>

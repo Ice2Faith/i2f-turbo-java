@@ -76,8 +76,6 @@ public interface TagConsts {
     String LANG_SYNCHRONIZED = "lang-synchronized";
     String LANG_LOCK = "lang-lock";
 
-    String LANG_AI = "lang-ai";
-
     String LANG_LATCH = "lang-latch";
     String LANG_LATCH_AWAIT = "lang-latch-await";
     String LANG_LATCH_DOWN = "lang-latch-down";
@@ -94,6 +92,10 @@ public interface TagConsts {
 
     String SCRIPT_INCLUDE = "script-include";
     String SCRIPT_SEGMENT = "script-segment";
+
+    String LANG_THREAD_POOL="lang-thread-pool";
+    String LANG_THREAD_POOL_SUBMIT="lang-thread-pool-submit";
+    String LANG_THREAD_POOL_SHUTDOWN="lang-thread-pool-shutdown";
 
     String SQL_CURSOR = "sql-cursor";
 

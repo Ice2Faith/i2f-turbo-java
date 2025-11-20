@@ -27,7 +27,7 @@ public class LangSynchronizedNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object target = executor.attrValue(AttrConsts.TARGET, FeatureConsts.VISIT, node, context);
         if (target == null) {
-            target = executor.visit(ParamsConsts.GLOBAL, context);
+            target = executor.visit(ParamsConsts.STACK_LOCK, context);
         }
         synchronized (target) {
             executor.execAsProcedure(node, context, false, false);

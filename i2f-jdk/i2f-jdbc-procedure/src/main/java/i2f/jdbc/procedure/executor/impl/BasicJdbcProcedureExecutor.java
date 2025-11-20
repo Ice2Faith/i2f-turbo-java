@@ -72,6 +72,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 /**
@@ -190,6 +191,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new LangStringJoinNode());
         ret.add(new LangStringNode());
         ret.add(new LangSynchronizedNode());
+        ret.add(new LangThreadPoolNode());
+        ret.add(new LangThreadPoolShutdownNode());
+        ret.add(new LangThreadPoolSubmitNode());
         ret.add(new LangThrowNode());
         ret.add(new LangTryNode());
         ret.add(new LangWhenNode());
@@ -666,9 +670,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
-
     public Map<String, Object> createParamsInner() {
         Map<String, Object> ret = new LinkedHashMap<>();
+        ret.put(ParamsConsts.STACK_LOCK,new ReentrantLock());
+
         ret.put(ParamsConsts.CONTEXT, getNamingContext());
         ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
 
@@ -792,6 +797,66 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         prepareParams(ret);
 
         return ret;
+    }
+
+    @Override
+    public Map<String,Object> cloneParams(Map<String,Object> context){
+        Map<String,Object> callParams=createParams();
+
+        // clone params
+        callParams.put(ParamsConsts.STACK_LOCK,context.get(ParamsConsts.STACK_LOCK));
+
+        callParams.put(ParamsConsts.CONTEXT,context.get(ParamsConsts.CONTEXT));
+        callParams.put(ParamsConsts.ENVIRONMENT,context.get(ParamsConsts.ENVIRONMENT));
+
+        Map oldBeansMap = (Map)context.get(ParamsConsts.BEANS);
+        Map newBeansMap = (Map)callParams.get(ParamsConsts.BEANS);
+        newBeansMap.putAll(oldBeansMap);
+
+        Map oldDatasourcesMap = (Map)context.get(ParamsConsts.DATASOURCES);
+        Map newDatasourcesMap = (Map)callParams.get(ParamsConsts.DATASOURCES);
+        newDatasourcesMap.putAll(oldDatasourcesMap);
+
+        Map oldDatasourcesMappingMap = (Map)context.get(ParamsConsts.DATASOURCES_MAPPING);
+        Map newDatasourcesMappingMap = (Map)callParams.get(ParamsConsts.DATASOURCES_MAPPING);
+        newDatasourcesMappingMap.putAll(oldDatasourcesMappingMap);
+
+        Map<String, Object> oldGlobalMap = (Map<String, Object>) context.get(ParamsConsts.GLOBAL);
+        Map<String, Object> newGlobalMap = (Map<String, Object>) callParams.get(ParamsConsts.GLOBAL);
+        for (String key : oldGlobalMap.keySet()) {
+            if(ParamsConsts.METAS.equals(key)){
+                Map oldMetaMap = (Map) oldGlobalMap.get(key);
+                HashMap<Object, Object> newMetaMap = new HashMap<>();
+                newGlobalMap.put(key,newMetaMap);
+
+                newMetaMap.putAll(oldMetaMap);
+            }else {
+                newGlobalMap.put(key, oldGlobalMap.get(key));
+            }
+        }
+
+        Map oldTraceMap = (Map)context.get(ParamsConsts.TRACE);
+        Map newTraceMap = (Map)callParams.get(ParamsConsts.TRACE);
+        Stack oldTraceStack = (Stack) oldTraceMap.get(ParamsConsts.STACK);
+        Stack newTraceStack = (Stack) newTraceMap.get(ParamsConsts.STACK);
+        newTraceStack.clear();
+        newTraceStack.addAll(oldTraceStack);
+
+        LinkedList oldTraceCalls = (LinkedList) oldTraceMap.get(ParamsConsts.CALLS);
+        LinkedList newTraceCalls = (LinkedList) newTraceMap.get(ParamsConsts.CALLS);
+        newTraceCalls.clear();
+        newTraceCalls.addAll(oldTraceCalls);
+
+        LinkedList oldTraceErrors = (LinkedList) oldTraceMap.get(ParamsConsts.ERRORS);
+        LinkedList newTraceErrors = (LinkedList) newTraceMap.get(ParamsConsts.ERRORS);
+        newTraceErrors.clear();
+        newTraceErrors.addAll(oldTraceErrors);
+
+        Map oldLruMap = (Map)context.get(ParamsConsts.LRU);
+        Map newLruMap = (Map)callParams.get(ParamsConsts.LRU);
+        newLruMap.putAll(oldLruMap);
+
+        return callParams;
     }
 
     /**
@@ -1629,7 +1694,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             try {
                 if(!conn.isClosed()){
                     if(!conn.getAutoCommit()){
-                        conn.commit();
+                       conn.commit();
                         if (isDebug()) {
                             logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] commit before close");
                         }
