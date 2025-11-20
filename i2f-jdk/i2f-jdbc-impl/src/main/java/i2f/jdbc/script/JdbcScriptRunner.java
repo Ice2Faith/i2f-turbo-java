@@ -20,6 +20,8 @@ public class JdbcScriptRunner {
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String DEFAULT_DELIMITER = ";";
     public static final Pattern DELIMITER_PATTERN = Pattern.compile("^\\s*((--)|(//))?\\s*(//)?\\s*@DELIMITER\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE);
+    public static final Pattern SINGLE_LINE_COMMENT_PATTERN=Pattern.compile("--[^\\n]*(\n|$)");
+    public static final Pattern MULTIPLE_LINE_COMMENT_PATTERN=Pattern.compile("\\/\\*([^*]|(\\*+([^*/])))*\\*+\\/");
     protected Connection connection;
     protected boolean stopOnError = false;
     protected boolean throwWarning = false;
@@ -182,8 +184,19 @@ public class JdbcScriptRunner {
     }
 
     protected void checkForMissingLineTerminator(StringBuilder command) {
-        if (command != null && !command.toString().trim().isEmpty()) {
-            throw new IllegalArgumentException("Line missing end-of-line terminator (" + this.delimiter + ") => " + command);
+        if(command==null){
+            return;
+        }
+        String str = command.toString();
+        try {
+            // resolve only comment segment, ignore it
+            str=MULTIPLE_LINE_COMMENT_PATTERN.matcher(str).replaceAll("");
+            str=SINGLE_LINE_COMMENT_PATTERN.matcher(str).replaceAll("\n");
+        } catch (Exception e) {
+
+        }
+        if (!str.trim().isEmpty()) {
+            throw new IllegalArgumentException("Line missing end-of-line terminator (" + this.delimiter + ") => " + str);
         }
     }
 

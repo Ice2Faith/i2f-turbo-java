@@ -1685,7 +1685,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return TypeOf.typeOf(resultType, Map.class) ? (mapTypeColumnNameMapper) : otherTypeColumnNameMapper;
     }
 
-    public void reportExecSql(int effectCount, long useMillsSeconds, BindSql bql, Map<String,Object> params) {
+    public void reportExecSql(String datasource, int effectCount, long useMillsSeconds, BindSql bql, Map<String,Object> params) {
         visitSet(params,ParamsConsts.TRACE_LAST_SQL,bql);
         visitSet(params,ParamsConsts.TRACE_LAST_SQL_EFFECT_COUNT,effectCount);
         visitSet(params,ParamsConsts.TRACE_LAST_SQL_USE_TIME,useMillsSeconds);
@@ -1700,15 +1700,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             event.setUseMillsSeconds(useMillsSeconds);
             event.setBql(bql);
             event.setLocation(ContextHolder.traceLocation());
+            event.setDatasource(datasource);
             publishEvent(event);
         }
         if (useMillsSeconds >= slowSqlMinMillsSeconds) {
-            logger().logWarn("slow sql, use " + useMillsSeconds + "(ms) : " + bql);
+            logger().logWarn("slow sql, use " + useMillsSeconds + "(ms) ["+datasource+"]: " + bql);
             SlowSqlEvent event = new SlowSqlEvent();
             event.setExecutor(this);
             event.setUseMillsSeconds(useMillsSeconds);
             event.setBql(bql);
             event.setLocation(ContextHolder.traceLocation());
+            event.setDatasource(datasource);
             publishEvent(event);
         }
     }
@@ -1735,12 +1737,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount,useTs, execBql,params);
         }
     }
 
@@ -1767,12 +1769,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount,useTs, execBql,params);
         }
     }
 
@@ -1803,12 +1805,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount,useTs, execBql,params);
         }
     }
 
@@ -1839,12 +1841,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount,useTs, execBql,params);
         }
     }
 
@@ -1870,12 +1872,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount,useTs, execBql,params);
         }
     }
 
@@ -2059,12 +2061,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount,useTs, execBql,params);
         }
     }
 
