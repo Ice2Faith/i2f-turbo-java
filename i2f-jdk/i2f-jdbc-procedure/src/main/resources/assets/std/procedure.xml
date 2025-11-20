@@ -1289,6 +1289,10 @@ eval-ts使用TinyScript引擎进行处理
 
     <!--
     异步执行，await表示是否需要等待执行结束，delay表示延迟多长时间再开始执行
+    内部执行时，根下面的变量都会被复制一份，因此，内部的修改对外是不可见的
+    如果想要在线程内部修改，外部还要继续使用变量，请使用 global 变量
+    global变量是设置为线程安全的，因此跨线程操作没有太大的问题
+    如果想要在多线程环境下进行操作一些线程不安全的变量，可以使用 lang-synchronized/lang-lock 进行互斥
     await默认以boolean访问，等价于 await.boolean
     delay默认以long访问，等价于 delay.long
     time-unit以string访问，不支持修饰符，为TimeUnit的枚举字符串值，不区分大小写
@@ -1324,6 +1328,10 @@ eval-ts使用TinyScript引擎进行处理
 
     <!--
     多个任务并行
+    内部执行时，根下面的变量都会被复制一份，因此，内部的修改对外是不可见的
+    如果想要在线程内部修改，外部还要继续使用变量，请使用 global 变量
+    global变量是设置为线程安全的，因此跨线程操作没有太大的问题
+    如果想要在多线程环境下进行操作一些线程不安全的变量，可以使用 lang-synchronized/lang-lock 进行互斥
     await默认以boolean访问，等价于 await.boolean
     内部子标签（第一层）都会视作一个子任务进行异步运行
     只会视为一般节点运行，不会管节点的类型
@@ -1427,6 +1435,9 @@ eval-ts使用TinyScript引擎进行处理
     创建一个线程池
     使用type指定的线程池类型创建一个count大小的线程池存储到result指定的变量中
     type可选的值为：forkjoin,fixed; 不指定则为fixed
+    result返回的是ExecutorService类型的线程池变量
+    type默认以string进行访问，表示线程池的类型，内部逻辑为：值为forkjoin的时候使用ForkJoinPool,否则使用Executors.newFixedPool()
+    count默认以int进行访问，表示线程池的核心线程数量/并发度
     -->
     <lang-thread-pool result="" type="" count=""/>
     <!-- 举例 -->
@@ -1440,13 +1451,15 @@ eval-ts使用TinyScript引擎进行处理
     result接受此线程运行的CountDownLatch变量，可以用于等待此任务运行结束
     注意，因为是异步任务，因此内部将会使用完全独立的数据库连接
     允许在此标签上添加其他参数，以作为内部运行的变量，也就是像使用 function-call/procedure-call 等一样进行参数传递
+    pool默认以visit进行访问，表示传入的线程池变量，类型需要为ExecutorService类型
+    result返回的是CountDownLatch类型变量
     -->
     <lang-thread-pool-submit result="" pool="" aaa="" b="">
 
     </lang-thread-pool-submit>
     <!-- 举例 -->
     <script-segment id="demo">
-        <lang-thread-pool result="V_POOL" type="forkjoin" size="30"/>
+        <lang-thread-pool result="V_POOL" type="forkjoin" count="30"/>
 
         <lang-thread-pool-submit result="V_LATCH" pool="V_POOL" IN_TABLE="V_TABLE">
             <sql-update>
@@ -1461,6 +1474,12 @@ eval-ts使用TinyScript引擎进行处理
     实际调用的是 shutdown() 方法进行关闭
     如果force为true，则调用 shutdownNow() 方法进行关闭
     如果await为true，则额外调用 awaitTermination() 方法等待完全关闭, 此时可以指定 timeout 和 time-unit 进行等待时长控制，不指定时长则默认无限等待
+    pool默认以visit进行访问，表示传入的线程池变量，类型需要为ExecutorService类型
+    force默认以boolean进行访问，默认为false，表示是否强制关闭，忽略未执行的任务
+    await默认以boolean进行访问，默认为false，表示是否需要等待线程池完全关闭，也就是等待所有任务执行完毕
+    timeout默认以long进行访问，表示等待的时长值，时长单位默认为秒，可以使用time-unit指定时间单位
+    time-unit默认以string进行访问，表示时间单位，值就是 TimeUnit 枚举类的字面值
+    result返回的是还未执行的任务列表List<Runnable>,一般在不进行force关闭的时候，都是返回空列表
     -->
     <lang-thread-pool-shutdown result="" pool="" force="" await="" timeout="" time-unit=""/>
     <!-- 举例 -->

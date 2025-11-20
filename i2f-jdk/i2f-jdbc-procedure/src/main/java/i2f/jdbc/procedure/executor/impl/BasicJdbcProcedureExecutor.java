@@ -150,7 +150,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new EventSendNode());
         ret.add(new FunctionCallNode());
         ret.add(new JavaCallNode());
-        ret.add(new LangAiNode());
         ret.add(new LangAsyncAllNode());
         ret.add(new LangAsyncNode());
         ret.add(new LangBodyNode());
@@ -677,9 +676,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.put(ParamsConsts.CONTEXT, getNamingContext());
         ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
 
-        Map<String, Object> global = new HashMap<>();
-        global.put(ParamsConsts.METAS, new HashMap<>());
-        ret.put(ParamsConsts.GLOBAL, global);
+        ret.put(ParamsConsts.GLOBAL, Collections.synchronizedMap(new HashMap<>()));
+        ret.put(ParamsConsts.METAS, Collections.synchronizedMap(new HashMap<>()));
 
         Map<String, Object> trace = new HashMap<>();
         trace.put(ParamsConsts.STACK, new Stack<>());
@@ -759,6 +757,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     for (Map.Entry<String, Object> entry : execGlobal.entrySet()) {
                         global.putIfAbsent(entry.getKey(),entry.getValue());
                     }
+                    params.put(key,Collections.synchronizedMap(global));
+                }
+                if(ParamsConsts.METAS.equals(key)){
+                    Map<String,ProcedureMeta> metas = (Map<String,ProcedureMeta>)val;
+                    params.put(key,Collections.synchronizedMap(metas));
                 }
             }
             if (ParamsConsts.TRACE.equals(key)) {
@@ -821,19 +824,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         Map newDatasourcesMappingMap = (Map)callParams.get(ParamsConsts.DATASOURCES_MAPPING);
         newDatasourcesMappingMap.putAll(oldDatasourcesMappingMap);
 
-        Map<String, Object> oldGlobalMap = (Map<String, Object>) context.get(ParamsConsts.GLOBAL);
-        Map<String, Object> newGlobalMap = (Map<String, Object>) callParams.get(ParamsConsts.GLOBAL);
-        for (String key : oldGlobalMap.keySet()) {
-            if(ParamsConsts.METAS.equals(key)){
-                Map oldMetaMap = (Map) oldGlobalMap.get(key);
-                HashMap<Object, Object> newMetaMap = new HashMap<>();
-                newGlobalMap.put(key,newMetaMap);
+        callParams.put(ParamsConsts.GLOBAL,context.get(ParamsConsts.GLOBAL));
 
-                newMetaMap.putAll(oldMetaMap);
-            }else {
-                newGlobalMap.put(key, oldGlobalMap.get(key));
-            }
-        }
+        Map oldMetasMap = (Map) context.get(ParamsConsts.METAS);
+        Map newMetasMap = (Map) callParams.get(ParamsConsts.METAS);
+        newMetasMap.putAll(oldMetasMap);
 
         Map oldTraceMap = (Map)context.get(ParamsConsts.TRACE);
         Map newTraceMap = (Map)callParams.get(ParamsConsts.TRACE);

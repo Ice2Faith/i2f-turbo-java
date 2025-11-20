@@ -87,16 +87,14 @@ public interface JdbcProcedureExecutor {
             // resolve segment-script naming, while multiply procedure.xml file has same id
             // avoid segment-script naming fuzzy.
             try {
-                Map<String, Object> global = (Map<String, Object>) context.get(ParamsConsts.GLOBAL);
-                if (global != null) {
-                    Map<String, ProcedureMeta> metas = (Map<String, ProcedureMeta>) global.get(ParamsConsts.METAS);
-                    if (metas != null) {
-                        ProcedureMeta meta = metas.get(procedureId);
-                        if (meta != null) {
-                            return meta;
-                        }
+                Map<String, ProcedureMeta> metas = (Map<String, ProcedureMeta>) context.get(ParamsConsts.METAS);
+                if (metas != null) {
+                    ProcedureMeta meta = metas.get(procedureId);
+                    if (meta != null) {
+                        return meta;
                     }
                 }
+
             } catch (Exception e) {
 
             }

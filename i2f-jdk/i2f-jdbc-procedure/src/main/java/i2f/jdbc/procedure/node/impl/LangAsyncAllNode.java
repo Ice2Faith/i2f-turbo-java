@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -36,13 +37,19 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
         }
         CountDownLatch latch = new CountDownLatch(children.size());
         for (XmlNode item : children) {
+            Map<String,Object> callParams= executor.cloneParams(context);
+            for (Map.Entry<String, Object> entry : context.entrySet()) {
+                if (!ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
+                    callParams.put(entry.getKey(),entry.getValue());
+                }
+            }
             final XmlNode itemNode = item;
             new Thread(() -> {
                 try {
                     if (TagConsts.LANG_ASYNC.equals(node.getTagName())) {
-                        Map<String, Object> map = executor.exec(itemNode, context, false, false);
+                        Map<String, Object> map = executor.exec(itemNode, callParams, false, false);
                     } else {
-                        Map<String, Object> map = executor.execAsProcedure(itemNode, context, false, false);
+                        Map<String, Object> map = executor.execAsProcedure(itemNode, callParams, false, false);
                     }
                 } catch (Throwable e) {
                     e.printStackTrace();
