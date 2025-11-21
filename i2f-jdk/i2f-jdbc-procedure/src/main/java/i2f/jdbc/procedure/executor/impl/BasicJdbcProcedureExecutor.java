@@ -150,6 +150,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new EventSendNode());
         ret.add(new FunctionCallNode());
         ret.add(new JavaCallNode());
+        ret.add(new LangAiNode());
         ret.add(new LangAsyncAllNode());
         ret.add(new LangAsyncNode());
         ret.add(new LangBodyNode());
@@ -757,11 +758,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     for (Map.Entry<String, Object> entry : execGlobal.entrySet()) {
                         global.putIfAbsent(entry.getKey(),entry.getValue());
                     }
-                    params.put(key,Collections.synchronizedMap(global));
+                    if(!TypeOf.isCollectionsSynchronized(global)){
+                        params.put(key,Collections.synchronizedMap(global));
+                    }
+
                 }
                 if(ParamsConsts.METAS.equals(key)){
                     Map<String,ProcedureMeta> metas = (Map<String,ProcedureMeta>)val;
-                    params.put(key,Collections.synchronizedMap(metas));
+                    if(!TypeOf.isCollectionsSynchronized(metas)) {
+                        params.put(key, Collections.synchronizedMap(metas));
+                    }
                 }
             }
             if (ParamsConsts.TRACE.equals(key)) {
