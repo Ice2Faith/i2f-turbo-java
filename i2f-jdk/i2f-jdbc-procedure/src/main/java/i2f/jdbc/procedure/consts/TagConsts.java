@@ -131,4 +131,6 @@ public interface TagConsts {
 
     String EVENT_SEND = "event-send";
     String EVENT_PUBLISH = "event-publish";
+
+    String LANG_AI="lang-ai";
 }

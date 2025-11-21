@@ -188,6 +188,11 @@ public interface DefaultContextJdbcProcedureJavaCaller extends ContextJdbcProced
     }
 
     @Override
+    default Map<String, Object> cloneParams(Map<String, Object> context) {
+        return executor().cloneParams(context);
+    }
+
+    @Override
     default Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params) {
         return executor().attrValue(attr, action, node, params);
     }
