@@ -101,6 +101,18 @@
                                        @click="doRefreshHostId">
                             </el-button>
                         </el-popover>
+                        <el-popover
+                                placement="top-start"
+                                width="200"
+                                trigger="hover">
+                            <span>
+                                进行后端代理转发<br/>
+                                如果后端进行的负载均衡策略不能保证稳定的轮询的情况下<br/>
+                                比如主机粘连、Session粘连、非均匀负载的情况<br/>
+                                这样直接通过后端代理转发的方式，将可以明确的转发到需要执行的机器上
+                            </span>
+                            <el-checkbox slot="reference" v-model="form.proxyHostId">代理转发</el-checkbox>
+                        </el-popover>
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
@@ -331,6 +343,7 @@
                     form: {
                         useHostId: false,
                         hostId: '',
+                        proxyHostId: false,
                         workdir: '',
                         cmd: '',
                         runAsFile: false,
@@ -548,6 +561,7 @@
                   if(!req.hostId || req.hostId==''){
                       throw new Error('请选择锁定的主机')
                   }
+                  req.proxyHostId=this.form.proxyHostId;
               }else{
                   req.hostId=null;
               }

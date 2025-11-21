@@ -124,28 +124,44 @@
                                        @click="doRefreshHostId">
                             </el-button>
                         </el-popover>
+                        <el-popover
+                                placement="top-start"
+                                width="200"
+                                trigger="hover">
+                            <span>
+                                进行后端代理转发<br/>
+                                如果后端进行的负载均衡策略不能保证稳定的轮询的情况下<br/>
+                                比如主机粘连、Session粘连、非均匀负载的情况<br/>
+                                这样直接通过后端代理转发的方式，将可以明确的转发到需要执行的机器上
+                            </span>
+                            <el-checkbox slot="reference" v-model="form.proxyHostId">代理转发</el-checkbox>
+                        </el-popover>
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
                     <el-row type="flex" justify="end">
                         <el-form-item>
-                            <el-button type="info" size="medium"
+                            <el-button type="info" size="small"
                                        @click="onViewSystemProperties">
                                 属性
                             </el-button>
-                            <el-button  size="medium"
+                            <el-button  size="small"
                                        @click="onViewSystemEnv">
                                 环境
                             </el-button>
-                            <el-button type="warning" size="medium"
+                            <el-button type="warning" size="small"
                                        @click="onViewInputArguments">
                                 参数
                             </el-button>
-                            <el-button type="success" size="medium"
+                            <el-button type="success" size="small"
                                        @click="onViewBeans">
                                 Beans
                             </el-button>
-                            <el-button type="danger" size="medium"
+                            <el-button type="primary" size="small"
+                                       @click="onViewServiceInstances">
+                                服务
+                            </el-button>
+                            <el-button type="danger" size="small"
                                        @click="onViewLockedThreads">
                                 死锁
                             </el-button>
@@ -406,6 +422,63 @@
     </el-drawer>
 
     <el-drawer
+            title="服务列表"
+            :visible.sync="drawer.serviceInstances.show"
+            direction="rtl"
+            size="75%">
+        <el-row style="width: 100%;">
+            <el-row>
+                <el-col :span="16">
+
+                </el-col>
+                <el-col :span="8">
+                    <el-row type="flex" justify="end">
+                        <el-button type="success" size="medium"
+                                   @click="onViewText(drawer.serviceInstances.items,'服务列表')">
+                            实例 JSON
+                        </el-button>
+                        <el-button v-loading="drawer.serviceInstances.refreshLoading" size="medium"
+                                   icon="el-icon-refresh" circle
+                                   @click="onRefreshServiceInstances">
+                        </el-button>
+                    </el-row>
+                </el-col>
+
+            </el-row>
+            <el-row>
+                <el-input v-model="drawer.serviceInstances.filterKey" placeholder="过滤名称"></el-input>
+            </el-row>
+            <recycle-scroller :items="computeFilterServiceInstances"
+                              class="scroller"
+                              :item-size="32"
+                              key-field="key"
+                              v-slot="{ item }">
+                <el-row type="flex"
+                        class="list-item">
+                    <el-col :span="9" style="border-right: solid 1px #777;">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.serviceId,'服务名')">值</el-tag>
+                            {{item.serviceId}}
+                         </span>
+                    </el-col>
+                    <el-col :span="12">
+                         <span class="list-item-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewText(item.uri,'地址')">值</el-tag>
+                            {{item.uri}}
+                         </span>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-row type="flex" justify="end">
+
+                        </el-row>
+                    </el-col>
+                </el-row>
+            </recycle-scroller>
+
+        </el-row>
+    </el-drawer>
+
+    <el-drawer
             title="死锁线程"
             :visible.sync="drawer.lockedThreads.show"
             direction="rtl"
@@ -567,6 +640,12 @@
                     return (!this.drawer.beans.filterKey || item.key.toLowerCase().indexOf(this.drawer.beans.filterKey.toLowerCase()) >= 0);
                 })
             },
+            computeFilterServiceInstances() {
+                let list = this.drawer.serviceInstances.items || [];
+                return list.filter(item => {
+                    return (!this.drawer.serviceInstances.filterKey || item.serviceId.toLowerCase().indexOf(this.drawer.serviceInstances.filterKey.toLowerCase()) >= 0);
+                })
+            },
             computeFilterLockedThreads() {
                 let list = this.drawer.lockedThreads.items || [];
                 return list.filter(item => {
@@ -632,6 +711,12 @@
                             refreshLoading: false,
                             items: [],
                         },
+                        serviceInstances: {
+                            show: false,
+                            filterKey: '',
+                            refreshLoading: false,
+                            items: [],
+                        },
                         lockedThreads: {
                             show: false,
                             filterKey: '',
@@ -650,6 +735,7 @@
                     form: {
                         useHostId: false,
                         hostId: '',
+                        proxyHostId: false,
                         script: '',
                         waitForSeconds: 120,
                         inline: false,
@@ -924,6 +1010,7 @@
                   if(!req.hostId || req.hostId==''){
                       throw new Error('请选择锁定的主机')
                   }
+                  req.proxyHostId=this.form.proxyHostId;
               }else{
                   req.hostId=null;
               }
@@ -1183,6 +1270,40 @@
                 } catch (err) {
                     this.$message.error(err.errorMessage || err.message || '操作失败')
                     this.drawer.beans.refreshLoading = false;
+                }
+            },
+            onViewServiceInstances(){
+                this.drawer.serviceInstances.show=true;
+            },
+            onRefreshServiceInstances(){
+                this.drawer.serviceInstances.refreshLoading = true;
+                try {
+                    let script = this.getExecuteScript();
+                    let req = this.assignHostId({
+
+                    });
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/service-instances`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            // console.log(resp)
+                            this.drawer.serviceInstances.items = resp || [];
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.drawer.serviceInstances.refreshLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.drawer.serviceInstances.refreshLoading = false;
                 }
             },
             onViewLockedThreads(){
