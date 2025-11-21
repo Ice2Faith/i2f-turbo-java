@@ -3,9 +3,7 @@ package i2f.typeof;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -147,5 +145,59 @@ public class TypeOf {
         }
         Class<?> clazz = obj.getClass();
         return typeOf(clazz, type);
+    }
+
+    public static final Class<?> CLASS_COLLECTIONS_SYNCHRONIZED_COLLECTION=Collections.synchronizedCollection(new ArrayList<>(1)).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_SYNCHRONIZED_LIST=Collections.synchronizedList(new ArrayList<>(1)).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_SYNCHRONIZED_MAP=Collections.synchronizedMap(new HashMap<>(1)).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_SYNCHRONIZED_NAVIGABLE_MAP=Collections.synchronizedNavigableMap(new TreeMap<>()).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_SYNCHRONIZED_NAVIGABLE_SET=Collections.synchronizedNavigableSet(new TreeSet<>()).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_SYNCHRONIZED_SET=Collections.synchronizedSet(new HashSet<>(1)).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_SYNCHRONIZED_SORTED_MAP=Collections.synchronizedSortedMap(new TreeMap<>()).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_SYNCHRONIZED_SORTED_SET=Collections.synchronizedSortedSet(new TreeSet<>()).getClass();
+    public static final Class<?>[] CLASS_COLLECTIONS_SYNCHRONIZED_ARRAY={
+            CLASS_COLLECTIONS_SYNCHRONIZED_MAP,
+            CLASS_COLLECTIONS_SYNCHRONIZED_LIST,
+            CLASS_COLLECTIONS_SYNCHRONIZED_SET,
+            CLASS_COLLECTIONS_SYNCHRONIZED_COLLECTION,
+            CLASS_COLLECTIONS_SYNCHRONIZED_NAVIGABLE_MAP,
+            CLASS_COLLECTIONS_SYNCHRONIZED_NAVIGABLE_SET,
+            CLASS_COLLECTIONS_SYNCHRONIZED_SORTED_MAP,
+            CLASS_COLLECTIONS_SYNCHRONIZED_SORTED_SET
+    };
+
+    public static boolean isCollectionsSynchronized(Object obj){
+        if(obj==null){
+            return false;
+        }
+        Class<?> clazz = obj.getClass();
+        return typeOfAny(clazz, CLASS_COLLECTIONS_SYNCHRONIZED_ARRAY);
+    }
+
+    public static final Class<?> CLASS_COLLECTIONS_UNMODIFIABLE_COLLECTION=Collections.unmodifiableCollection(new ArrayList<>(1)).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_UNMODIFIABLE_LIST=Collections.unmodifiableList(new ArrayList<>(1)).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_UNMODIFIABLE_MAP=Collections.unmodifiableMap(new HashMap<>(1)).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_UNMODIFIABLE_NAVIGABLE_MAP=Collections.unmodifiableNavigableMap(new TreeMap<>()).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_UNMODIFIABLE_NAVIGABLE_SET=Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_UNMODIFIABLE_SET=Collections.unmodifiableSet(new HashSet<>(1)).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_UNMODIFIABLE_SORTED_MAP=Collections.unmodifiableSortedMap(new TreeMap<>()).getClass();
+    public static final Class<?> CLASS_COLLECTIONS_UNMODIFIABLE_SORTED_SET=Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
+    public static final Class<?>[] CLASS_COLLECTIONS_UNMODIFIABLE_ARRAY={
+            CLASS_COLLECTIONS_UNMODIFIABLE_MAP,
+            CLASS_COLLECTIONS_UNMODIFIABLE_LIST,
+            CLASS_COLLECTIONS_UNMODIFIABLE_SET,
+            CLASS_COLLECTIONS_UNMODIFIABLE_COLLECTION,
+            CLASS_COLLECTIONS_UNMODIFIABLE_NAVIGABLE_MAP,
+            CLASS_COLLECTIONS_UNMODIFIABLE_NAVIGABLE_SET,
+            CLASS_COLLECTIONS_UNMODIFIABLE_SORTED_MAP,
+            CLASS_COLLECTIONS_UNMODIFIABLE_SORTED_SET
+    };
+
+    public static boolean isCollectionsUnmodifiable(Object obj){
+        if(obj==null){
+            return false;
+        }
+        Class<?> clazz = obj.getClass();
+        return typeOfAny(clazz, CLASS_COLLECTIONS_UNMODIFIABLE_ARRAY);
     }
 }
