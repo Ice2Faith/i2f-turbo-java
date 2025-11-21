@@ -14,8 +14,9 @@ import java.lang.management.MonitorInfo;
 @NoArgsConstructor
 public class AppMonitorInfoDto {
     protected String className;
-    protected int    identityHashCode;
-    protected int    lockedStackDepth;
+    protected int identityHashCode;
+    protected int lockedStackDepth;
+
     public static AppMonitorInfoDto of(MonitorInfo info) {
         AppMonitorInfoDto dto = new AppMonitorInfoDto();
         dto.setClassName(info.getClassName());

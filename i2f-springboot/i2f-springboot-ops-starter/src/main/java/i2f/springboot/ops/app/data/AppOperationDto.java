@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AppOperationDto {
     protected String hostId;
+    protected boolean proxyHostId;
 
     protected String script;
     protected long waitForSeconds;

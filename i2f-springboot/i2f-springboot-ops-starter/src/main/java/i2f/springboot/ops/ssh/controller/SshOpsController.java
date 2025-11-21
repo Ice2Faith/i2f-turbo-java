@@ -49,7 +49,7 @@ public class SshOpsController {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
             try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String pwd = util.pwd();
-                SshOperateDto resp=new SshOperateDto();
+                SshOperateDto resp = new SshOperateDto();
                 resp.setWorkdir(pwd);
                 return transfer.success(resp);
             }
@@ -315,11 +315,11 @@ public class SshOpsController {
                         throw new OpsException("missing origin file name");
                     }
                     File originFile = new File(originalFilename);
-                    serverPath=workdir;
-                    serverFileName=originFile.getName();
+                    serverPath = workdir;
+                    serverFileName = originFile.getName();
                 }
 
-                File tmpFile =File.createTempFile("upload-" + (UUID.randomUUID().toString().replace("-", "")),".tmp");
+                File tmpFile = File.createTempFile("upload-" + (UUID.randomUUID().toString().replace("-", "")), ".tmp");
                 try {
                     MessageDigest digest = MessageDigest.getInstance("MD5");
                     OutputStream os = new FileOutputStream(tmpFile);
@@ -375,7 +375,7 @@ public class SshOpsController {
                     String resp = null;
                     if (runAsFile) {
                         String suffix = ".sh";
-                        bashFile = File.createTempFile("cmd-" + (UUID.randomUUID().toString().replace("-", "")) , suffix);
+                        bashFile = File.createTempFile("cmd-" + (UUID.randomUUID().toString().replace("-", "")), suffix);
                         try (FileOutputStream fos = new FileOutputStream(bashFile)) {
                             fos.write(cmd.getBytes(OsUtil.getCmdCharset()));
                         }

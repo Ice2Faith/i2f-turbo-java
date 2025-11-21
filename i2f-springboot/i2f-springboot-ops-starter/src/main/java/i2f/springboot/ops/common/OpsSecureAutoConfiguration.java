@@ -27,14 +27,14 @@ public class OpsSecureAutoConfiguration {
     @Bean
     public OpsSecureKeyPair opsSecureKeyPair() throws Exception {
         String cert = opsSecureProperties.getCert();
-        if(cert==null){
-            cert="";
+        if (cert == null) {
+            cert = "";
         }
-        cert=cert.trim();
-        if(cert.isEmpty()){
+        cert = cert.trim();
+        if (cert.isEmpty()) {
             OpsSecureCertPair certPair = opsSecureHelper.generateCertPair();
-            System.out.println("serverCert:\n"+certPair.getServerCert());
-            System.out.println("clientCert:\n"+certPair.getClientCert());
+            System.out.println("serverCert:\n" + certPair.getServerCert());
+            System.out.println("clientCert:\n" + certPair.getClientCert());
             opsSecureProperties.setCert(certPair.getServerCert());
             test();
         }
@@ -43,13 +43,13 @@ public class OpsSecureAutoConfiguration {
 
     public void test() throws Exception {
         OpsSecureCertPair certPair = opsSecureHelper.generateCertPair();
-        OpsSecureTransfer serverTransfer=new OpsSecureTransfer();
+        OpsSecureTransfer serverTransfer = new OpsSecureTransfer();
         serverTransfer.setOpsSecureKeyPair(opsSecureHelper.deserializeKeyPair(certPair.serverCert));
         serverTransfer.setObjectMapper(new ObjectMapper());
         OpsSecureDto dto = serverTransfer.send("1234");
-        OpsSecureTransfer clientTransfer=new OpsSecureTransfer();
+        OpsSecureTransfer clientTransfer = new OpsSecureTransfer();
         clientTransfer.setOpsSecureKeyPair(opsSecureHelper.deserializeKeyPair(certPair.clientCert));
         clientTransfer.setObjectMapper(new ObjectMapper());
-        String resp = clientTransfer.recv(dto,String.class);
+        String resp = clientTransfer.recv(dto, String.class);
     }
 }

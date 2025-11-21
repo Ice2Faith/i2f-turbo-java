@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HostOperateDto {
     protected String hostId;
+    protected boolean proxyHostId;
 
     protected String workdir;
     protected String path;

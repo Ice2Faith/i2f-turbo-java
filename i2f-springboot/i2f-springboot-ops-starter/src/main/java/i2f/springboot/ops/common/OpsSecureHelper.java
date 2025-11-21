@@ -25,8 +25,8 @@ public class OpsSecureHelper {
     protected ObjectMapper objectMapper;
 
     public OpsSecureKeyPair deserializeKeyPair(String cert) throws Exception {
-        String json=new String(Base64.getDecoder().decode(cert), StandardCharsets.UTF_8);
-        return objectMapper.readValue(json,OpsSecureKeyPair.class);
+        String json = new String(Base64.getDecoder().decode(cert), StandardCharsets.UTF_8);
+        return objectMapper.readValue(json, OpsSecureKeyPair.class);
     }
 
     public String serializeKeyPair(OpsSecureKeyPair keyPair) throws Exception {
@@ -37,7 +37,7 @@ public class OpsSecureHelper {
     public OpsSecureCertPair generateCertPair() throws Exception {
         Keypair serverPair = Sm2.generateKeyPairHex();
         Keypair clientPair = Sm2.generateKeyPairHex();
-        clientPair=serverPair;
+        clientPair = serverPair;
         OpsSecureKeyPair serverKeyPair = new OpsSecureKeyPair(clientPair.getPublicKey(), serverPair.getPrivateKey());
         OpsSecureKeyPair clientKeyPair = new OpsSecureKeyPair(serverKeyPair.getPublicKey(), clientPair.getPrivateKey());
         String serverCert = serializeKeyPair(serverKeyPair);

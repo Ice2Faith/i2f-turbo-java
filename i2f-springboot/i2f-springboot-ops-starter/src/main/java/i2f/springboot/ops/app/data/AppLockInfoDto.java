@@ -14,9 +14,9 @@ import java.lang.management.LockInfo;
 @NoArgsConstructor
 public class AppLockInfoDto {
     protected String className;
-    protected int    identityHashCode;
+    protected int identityHashCode;
 
-    public static AppLockInfoDto of(LockInfo info){
+    public static AppLockInfoDto of(LockInfo info) {
         AppLockInfoDto dto = new AppLockInfoDto();
         dto.setClassName(info.getClassName());
         dto.setIdentityHashCode(info.getIdentityHashCode());

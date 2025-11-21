@@ -5,7 +5,7 @@ package i2f.springboot.ops.common;
  * @date 2025/11/1 22:32
  * @desc
  */
-public class OpsException extends RuntimeException{
+public class OpsException extends RuntimeException {
     public OpsException() {
     }
 
