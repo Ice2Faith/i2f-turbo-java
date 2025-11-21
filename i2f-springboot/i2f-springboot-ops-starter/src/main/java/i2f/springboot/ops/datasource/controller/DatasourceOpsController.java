@@ -72,8 +72,8 @@ public class DatasourceOpsController {
         try {
             Long req = transfer.recv(reqDto, Long.class);
             Map<String, DataSource> datasourceMap = datasourceProvider.getDatasourceMap();
-            DatasourceListRespDto resp=new DatasourceListRespDto();
-            List<String> list=new ArrayList<>();
+            DatasourceListRespDto resp = new DatasourceListRespDto();
+            List<String> list = new ArrayList<>();
             Set<String> set = datasourceMap.keySet();
             list.addAll(set);
             list.sort(String::compareTo);
@@ -82,7 +82,7 @@ public class DatasourceOpsController {
             resp.setDefaultName(defaultDataSourceName);
             return transfer.success(resp);
         } catch (Throwable e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
@@ -95,19 +95,19 @@ public class DatasourceOpsController {
             String sql = req.getSql();
             Integer maxCount = req.getMaxCount();
             Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
-            QueryResult resp=new QueryResult();
+            QueryResult resp = new QueryResult();
             resp.setColumns(new ArrayList<>());
-            resp.setRows(new ArrayList<>(maxCount!=null && maxCount>0?Math.min(maxCount,500):0));
+            resp.setRows(new ArrayList<>(maxCount != null && maxCount > 0 ? Math.min(maxCount, 500) : 0));
             for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
                 try (Connection conn = entry.getValue()) {
-                    QueryResult qr= JdbcResolver.query(conn, new BindSql(sql), maxCount == null ? -1 : maxCount);
+                    QueryResult qr = JdbcResolver.query(conn, new BindSql(sql), maxCount == null ? -1 : maxCount);
                     resp.setColumns(qr.getColumns());
                     resp.getRows().addAll(qr.getRows());
                 }
             }
             return transfer.success(resp);
         } catch (Throwable e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
@@ -118,7 +118,7 @@ public class DatasourceOpsController {
         try {
             DatasourceOperateDto req = transfer.recv(reqDto, DatasourceOperateDto.class);
             String sql = req.getSql();
-            Map<String,Object> resp=new HashMap<>();
+            Map<String, Object> resp = new HashMap<>();
             Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
             for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
                 try (Connection conn = entry.getValue()) {
@@ -128,7 +128,7 @@ public class DatasourceOpsController {
             }
             return transfer.success(resp);
         } catch (Exception e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }

@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class XxlJobOperateDto {
+    protected String hostId;
+    protected boolean proxyHostId;
+
     protected String method;
     protected String param;
 

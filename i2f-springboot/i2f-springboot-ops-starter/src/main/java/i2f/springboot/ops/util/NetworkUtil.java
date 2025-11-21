@@ -11,30 +11,30 @@ import java.util.*;
  * @desc
  */
 public class NetworkUtil {
-    public static List<Map .Entry<InetAddress,NetworkInterface>> getUsefulAddresses(){
-        List<Map.Entry<InetAddress,NetworkInterface>> ret=new ArrayList<>();
+    public static List<Map.Entry<InetAddress, NetworkInterface>> getUsefulAddresses() {
+        List<Map.Entry<InetAddress, NetworkInterface>> ret = new ArrayList<>();
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-            while (networkInterfaces.hasMoreElements()){
+            while (networkInterfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = networkInterfaces.nextElement();
                 try {
-                    if(!networkInterface.isUp()){
+                    if (!networkInterface.isUp()) {
                         continue;
                     }
-                    if(networkInterface.isLoopback()){
+                    if (networkInterface.isLoopback()) {
                         continue;
                     }
                     Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-                    while(inetAddresses.hasMoreElements()){
+                    while (inetAddresses.hasMoreElements()) {
                         InetAddress inetAddress = inetAddresses.nextElement();
                         try {
-                            if(inetAddress.isMulticastAddress()){
+                            if (inetAddress.isMulticastAddress()) {
                                 continue;
                             }
-                            if(inetAddress.isLoopbackAddress()){
+                            if (inetAddress.isLoopbackAddress()) {
                                 continue;
                             }
-                            ret.add(new AbstractMap.SimpleEntry<>(inetAddress,networkInterface));
+                            ret.add(new AbstractMap.SimpleEntry<>(inetAddress, networkInterface));
                         } catch (Exception e) {
 
                         }
@@ -46,24 +46,24 @@ public class NetworkUtil {
         } catch (Exception e) {
 
         }
-        ret.sort((v1,v2)->{
+        ret.sort((v1, v2) -> {
             NetworkInterface n1 = v1.getValue();
             NetworkInterface n2 = v2.getValue();
-            boolean n1Virtual=isVirtualOrSoftwareInterface(n1);
-            boolean n2Virtual=isVirtualOrSoftwareInterface(n2);
-            if(n1Virtual == n2Virtual){
+            boolean n1Virtual = isVirtualOrSoftwareInterface(n1);
+            boolean n2Virtual = isVirtualOrSoftwareInterface(n2);
+            if (n1Virtual == n2Virtual) {
                 InetAddress k1 = v1.getKey();
                 InetAddress k2 = v2.getKey();
-                if(k1 instanceof Inet4Address && k2 instanceof Inet4Address){
+                if (k1 instanceof Inet4Address && k2 instanceof Inet4Address) {
                     return 0;
-                }else if(k1 instanceof Inet4Address){
+                } else if (k1 instanceof Inet4Address) {
                     return -1;
-                }else{
+                } else {
                     return 1;
                 }
-            }else if(n1Virtual){
+            } else if (n1Virtual) {
                 return 1;
-            }else {
+            } else {
                 return -1;
             }
         });
@@ -72,29 +72,29 @@ public class NetworkUtil {
 
     public static boolean isVirtualOrSoftwareInterface(NetworkInterface ni) {
         try {
-            if(ni.isVirtual()){
+            if (ni.isVirtual()) {
                 return true;
             }
 
             String name = ni.getName().toLowerCase();
-            if( name.contains("virtual") ||
+            if (name.contains("virtual") ||
                     name.contains("docker") ||
                     name.contains("loop") ||
-                    name.contains("dummy")||
+                    name.contains("dummy") ||
                     name.contains("vmware") ||
                     name.contains("vmnet") ||
-                    name.contains("veth")){
+                    name.contains("veth")) {
                 return true;
             }
 
             String displayName = ni.getDisplayName().toLowerCase();
-            if( displayName.contains("virtual") ||
+            if (displayName.contains("virtual") ||
                     displayName.contains("docker") ||
                     displayName.contains("loop") ||
-                    displayName.contains("dummy")||
+                    displayName.contains("dummy") ||
                     displayName.contains("vmware") ||
-                    displayName.contains("vmnet")||
-                    displayName.contains("veth")){
+                    displayName.contains("vmnet") ||
+                    displayName.contains("veth")) {
                 return true;
             }
         } catch (Exception e) {

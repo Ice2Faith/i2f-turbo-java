@@ -11,11 +11,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class OpsSecureReturn<T> {
-    public static final int SUCCESS=200;
-    public static final int ERROR=500;
+    public static final int SUCCESS = 200;
+    public static final int ERROR = 500;
     protected int code;
     protected String msg;
     protected T data;
+
     public OpsSecureReturn(int code, String msg, T data) {
         this.code = code;
         this.msg = msg;
@@ -25,6 +26,7 @@ public class OpsSecureReturn<T> {
     public static <T> OpsSecureReturn<T> success(T data) {
         return new OpsSecureReturn<T>(SUCCESS, "success", data);
     }
+
     public static <T> OpsSecureReturn<T> error(String msg) {
         return new OpsSecureReturn<T>(ERROR, msg, null);
     }

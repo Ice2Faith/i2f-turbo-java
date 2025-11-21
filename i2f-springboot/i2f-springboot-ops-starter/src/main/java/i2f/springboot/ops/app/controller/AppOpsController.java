@@ -1,7 +1,6 @@
 package i2f.springboot.ops.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.xxl.job.core.handler.IJobHandler;
 import i2f.extension.groovy.GroovyScript;
 import i2f.springboot.ops.app.data.AppKeyValueItemDto;
 import i2f.springboot.ops.app.data.AppOperationDto;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
@@ -51,13 +51,9 @@ public class AppOpsController {
     @Autowired
     private HostIdHelper hostIdHelper;
 
-    public void assertHostId(AppOperationDto req){
-        String reqHostId = req.getHostId();
-        if(reqHostId!=null && !reqHostId.isEmpty()){
-            String currHostId = hostIdHelper.getHostIp();
-            if(!Objects.equals(currHostId,reqHostId)){
-                throw new OpsException("request not equals require hostId");
-            }
+    public void assertHostId(AppOperationDto req) {
+        if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+            throw new OpsException("request not equals require hostId");
         }
     }
 
@@ -66,81 +62,105 @@ public class AppOpsController {
     public OpsSecureReturn<OpsSecureDto> hostId(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
-            String hostIp=hostIdHelper.getHostIp();
+            String hostIp = hostIdHelper.getHostId();
             return transfer.success(hostIp);
         } catch (Throwable e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
 
     @PostMapping("/system-properties")
     @ResponseBody
-    public OpsSecureReturn<OpsSecureDto> systemProperties(@RequestBody OpsSecureDto reqDto) throws Exception {
+    public OpsSecureReturn<OpsSecureDto> systemProperties(@RequestBody OpsSecureDto reqDto,
+                                                          HttpServletRequest request) throws Exception {
         try {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
             assertHostId(req);
-            List<AppKeyValueItemDto> resp=new ArrayList<>();
+            List<AppKeyValueItemDto> resp = new ArrayList<>();
             Properties properties = System.getProperties();
             Set<String> set = properties.stringPropertyNames();
             for (String key : set) {
                 String value = properties.getProperty(key);
-                AppKeyValueItemDto dto=new AppKeyValueItemDto(key,value);
+                AppKeyValueItemDto dto = new AppKeyValueItemDto(key, value);
                 resp.add(dto);
             }
             return transfer.success(resp);
         } catch (Throwable e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
 
     @PostMapping("/input-arguments")
     @ResponseBody
-    public OpsSecureReturn<OpsSecureDto> inputArguments(@RequestBody OpsSecureDto reqDto) throws Exception {
+    public OpsSecureReturn<OpsSecureDto> inputArguments(@RequestBody OpsSecureDto reqDto,
+                                                        HttpServletRequest request) throws Exception {
         try {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
             assertHostId(req);
             RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
             List<String> resp = runtimeMXBean.getInputArguments();
             return transfer.success(resp);
         } catch (Throwable e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
 
     @PostMapping("/system-env")
     @ResponseBody
-    public OpsSecureReturn<OpsSecureDto> systemEnv(@RequestBody OpsSecureDto reqDto) throws Exception {
+    public OpsSecureReturn<OpsSecureDto> systemEnv(@RequestBody OpsSecureDto reqDto,
+                                                   HttpServletRequest request) throws Exception {
         try {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
             assertHostId(req);
-            List<AppKeyValueItemDto> resp=new ArrayList<>();
+            List<AppKeyValueItemDto> resp = new ArrayList<>();
             Map<String, String> envMap = System.getenv();
             for (Map.Entry<String, String> entry : envMap.entrySet()) {
-                AppKeyValueItemDto dto=new AppKeyValueItemDto(entry.getKey(),entry.getValue());
+                AppKeyValueItemDto dto = new AppKeyValueItemDto(entry.getKey(), entry.getValue());
                 resp.add(dto);
             }
             return transfer.success(resp);
         } catch (Throwable e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
 
     @PostMapping("/locked-threads")
     @ResponseBody
-    public OpsSecureReturn<OpsSecureDto> lockedThreads(@RequestBody OpsSecureDto reqDto) throws Exception {
+    public OpsSecureReturn<OpsSecureDto> lockedThreads(@RequestBody OpsSecureDto reqDto,
+                                                       HttpServletRequest request) throws Exception {
         try {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
             assertHostId(req);
             List<AppThreadInfoDto> resp = new ArrayList<>();
             ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
             long[] deadlockedThreads = threadMXBean.findDeadlockedThreads();
-            if(deadlockedThreads!=null) {
+            if (deadlockedThreads != null) {
                 ThreadInfo[] threadInfo = threadMXBean.getThreadInfo(deadlockedThreads);
-                if(threadInfo!=null) {
+                if (threadInfo != null) {
                     for (ThreadInfo info : threadInfo) {
                         AppThreadInfoDto dto = AppThreadInfoDto.of(info);
                         resp.add(dto);
@@ -149,47 +169,59 @@ public class AppOpsController {
             }
             return transfer.success(resp);
         } catch (Throwable e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
 
     @PostMapping("/beans")
     @ResponseBody
-    public OpsSecureReturn<OpsSecureDto> beans(@RequestBody OpsSecureDto reqDto) throws Exception {
+    public OpsSecureReturn<OpsSecureDto> beans(@RequestBody OpsSecureDto reqDto,
+                                               HttpServletRequest request) throws Exception {
         try {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
             assertHostId(req);
-            List<AppKeyValueItemDto> resp=new ArrayList<>();
+            List<AppKeyValueItemDto> resp = new ArrayList<>();
             String[] names = applicationContext.getBeanDefinitionNames();
             for (String name : names) {
                 Object bean = applicationContext.getBean(name);
                 Class<?> clazz = bean.getClass();
-                resp.add(new AppKeyValueItemDto(name,unescapeEnhancerClassName(clazz.getName())));
+                resp.add(new AppKeyValueItemDto(name, unescapeEnhancerClassName(clazz.getName())));
             }
             return transfer.success(resp);
         } catch (Throwable e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
 
-    public static String unescapeEnhancerClassName(String className){
-        if(className==null){
+    public static String unescapeEnhancerClassName(String className) {
+        if (className == null) {
             return null;
         }
-        int idx=className.lastIndexOf("$EnhancerBySpring");
-        if(idx>=0){
-            return className.substring(0,idx);
+        int idx = className.lastIndexOf("$EnhancerBySpring");
+        if (idx >= 0) {
+            return className.substring(0, idx);
         }
         return className;
     }
 
     @PostMapping("/eval")
     @ResponseBody
-    public OpsSecureReturn<OpsSecureDto> eval(@RequestBody OpsSecureDto reqDto) throws Exception {
+    public OpsSecureReturn<OpsSecureDto> eval(@RequestBody OpsSecureDto reqDto,
+                                              HttpServletRequest request) throws Exception {
         try {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
             assertHostId(req);
             String script = req.getScript();
             long waitForSeconds = req.getWaitForSeconds();
@@ -200,9 +232,9 @@ public class AppOpsController {
                 waitForSeconds = 500;
             }
             AtomicReference<Object> refRet = new AtomicReference<>();
-            AtomicReference<Throwable> refEx=new AtomicReference<>();
+            AtomicReference<Throwable> refEx = new AtomicReference<>();
             CountDownLatch latch = new CountDownLatch(1);
-            Runnable task=()-> {
+            Runnable task = () -> {
                 try {
 
                     Map<String, Object> context = new HashMap<>();
@@ -217,9 +249,9 @@ public class AppOpsController {
                     context.put("beanMap", beanMap);
                     Object eval = GroovyScript.eval(script, context);
                     refRet.set(eval);
-                }catch (Throwable e){
+                } catch (Throwable e) {
                     refEx.set(e);
-                }finally {
+                } finally {
                     latch.countDown();
                 }
             };
@@ -234,20 +266,20 @@ public class AppOpsController {
 
             }
             Throwable throwable = refEx.get();
-            if(throwable!=null){
+            if (throwable != null) {
                 throw throwable;
             }
 
             Object ret = refRet.get();
-            String resp=null;
-            try{
-                resp=objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ret);
-            }catch(Exception e){
-                resp="response value cannot serialize as json";
+            String resp = null;
+            try {
+                resp = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ret);
+            } catch (Exception e) {
+                resp = "response value cannot serialize as json";
             }
             return transfer.success(resp);
         } catch (Throwable e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }

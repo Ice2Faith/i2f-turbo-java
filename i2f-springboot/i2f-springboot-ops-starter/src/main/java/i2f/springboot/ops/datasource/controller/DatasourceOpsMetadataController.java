@@ -55,13 +55,13 @@ public class DatasourceOpsMetadataController {
                 DatabaseMetadataProvider provider = DatabaseMetadataProviders.findProvider(conn);
                 List<String> databases = provider.getDatabases(conn);
                 String defaultDatabase = provider.detectDefaultDatabase(conn);
-                DatasourceListRespDto resp=new DatasourceListRespDto();
+                DatasourceListRespDto resp = new DatasourceListRespDto();
                 resp.setList(databases);
                 resp.setDefaultName(defaultDatabase);
                 return transfer.success(resp);
             }
         } catch (Exception e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
@@ -78,7 +78,7 @@ public class DatasourceOpsMetadataController {
                 return transfer.success(tables);
             }
         } catch (Exception e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
@@ -96,7 +96,7 @@ public class DatasourceOpsMetadataController {
                 return transfer.success(tableMeta);
             }
         } catch (Exception e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }
@@ -111,14 +111,16 @@ public class DatasourceOpsMetadataController {
             try (Connection conn = datasourceOpsHelper.getConnection(req)) {
                 DdlDatabaseReverseEngineer engineer = DdlDatabaseReverseEngineers.getEngineer(conn);
                 String ddlType = req.getDdlType();
-                if("oracle".equalsIgnoreCase(ddlType)){
-                    engineer= OracleDdlDatabaseReverseEngineer.CONVERT;
-                }else if("mysql".equalsIgnoreCase(ddlType)){
-                    engineer= MysqlDdlDatabaseReverseEngineer.CONVERT;
-                }if("postgre".equalsIgnoreCase(ddlType)){
-                    engineer= PostgreDdlDatabaseReverseEngineer.CONVERT;
-                }if("gbase".equalsIgnoreCase(ddlType)){
-                    engineer= GbaseDdlDatabaseReverseEngineer.CONVERT;
+                if ("oracle".equalsIgnoreCase(ddlType)) {
+                    engineer = OracleDdlDatabaseReverseEngineer.CONVERT;
+                } else if ("mysql".equalsIgnoreCase(ddlType)) {
+                    engineer = MysqlDdlDatabaseReverseEngineer.CONVERT;
+                }
+                if ("postgre".equalsIgnoreCase(ddlType)) {
+                    engineer = PostgreDdlDatabaseReverseEngineer.CONVERT;
+                }
+                if ("gbase".equalsIgnoreCase(ddlType)) {
+                    engineer = GbaseDdlDatabaseReverseEngineer.CONVERT;
                 }
                 DatabaseMetadataProvider provider = DatabaseMetadataProviders.findProvider(conn);
                 TableMeta tableMeta = provider.getTableInfo(conn, database, table);
@@ -126,7 +128,7 @@ public class DatasourceOpsMetadataController {
                 return transfer.success(ddl);
             }
         } catch (Exception e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
             return transfer.error(e.getMessage());
         }
     }

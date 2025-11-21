@@ -28,39 +28,39 @@ public class DatasourceOpsHelper {
     public Connection getConnection(DatasourceSelectDto req) throws Exception {
         Boolean useCustomDatasource = req.getUseCustomDatasource();
         if (useCustomDatasource != null && useCustomDatasource) {
-            Connection conn=getCustomConnection(req);
+            Connection conn = getCustomConnection(req);
             return conn;
         }
         String datasourceName = req.getDatasource();
-        Connection  conn = getConnectionByName(datasourceName);
+        Connection conn = getConnectionByName(datasourceName);
         return conn;
     }
 
-    public Map<String,Connection> getMultipleConnection(DatasourceSelectDto req) throws Exception {
-        Map<String,Connection> ret = new LinkedHashMap<>();
+    public Map<String, Connection> getMultipleConnection(DatasourceSelectDto req) throws Exception {
+        Map<String, Connection> ret = new LinkedHashMap<>();
         Boolean useCustomDatasource = req.getUseCustomDatasource();
-        if(useCustomDatasource != null && useCustomDatasource) {
-            Connection conn=getCustomConnection(req);
-            ret.put("*custom",conn);
+        if (useCustomDatasource != null && useCustomDatasource) {
+            Connection conn = getCustomConnection(req);
+            ret.put("*custom", conn);
             return ret;
         }
         Boolean useMultiDatasource = req.getUseMultiDatasource();
-        if(useMultiDatasource != null && useMultiDatasource) {
+        if (useMultiDatasource != null && useMultiDatasource) {
             List<String> multiDatasourceList = req.getMultiDatasourceList();
-            if(multiDatasourceList==null || multiDatasourceList.isEmpty()) {
+            if (multiDatasourceList == null || multiDatasourceList.isEmpty()) {
                 throw new OpsException("use multi datasource require at least one datasource");
             }
             for (String item : multiDatasourceList) {
-                if(item==null || item.isEmpty()) {
+                if (item == null || item.isEmpty()) {
                     continue;
                 }
-                if(ret.containsKey(item)) {
+                if (ret.containsKey(item)) {
                     continue;
                 }
                 Connection conn = getConnectionByName(item);
-                ret.put(item,conn);
+                ret.put(item, conn);
             }
-            if(ret.isEmpty()){
+            if (ret.isEmpty()) {
                 throw new OpsException("use multi datasource require at least one datasource");
             }
             return ret;
@@ -70,7 +70,7 @@ public class DatasourceOpsHelper {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
         }
         Connection conn = getConnectionByName(datasourceName);
-        ret.put(datasourceName,conn);
+        ret.put(datasourceName, conn);
         return ret;
     }
 
