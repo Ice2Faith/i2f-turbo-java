@@ -5,6 +5,7 @@ import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.impl.MethodJobHandler;
 import i2f.springboot.ops.common.*;
+import i2f.springboot.ops.host.data.HostOperateDto;
 import i2f.springboot.ops.xxljob.data.XxlJobOperateDto;
 import i2f.typeof.TypeOf;
 import lombok.Data;
@@ -51,6 +52,19 @@ public class XxlJobOpsController {
 
     @Autowired
     private HostIdHelper hostIdHelper;
+
+    @PostMapping("/hostId")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> hostId(@RequestBody OpsSecureDto reqDto) throws Exception {
+        try {
+            HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
+            String hostIp = hostIdHelper.getHostId();
+            return transfer.success(hostIp);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return transfer.error(e.getMessage());
+        }
+    }
 
     public void assertHostId(XxlJobOperateDto req) {
         if (!hostIdHelper.canAcceptHostId(req.getHostId())) {

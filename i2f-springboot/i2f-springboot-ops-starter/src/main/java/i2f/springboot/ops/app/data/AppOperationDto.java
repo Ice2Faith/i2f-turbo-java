@@ -1,5 +1,6 @@
 package i2f.springboot.ops.app.data;
 
+import i2f.springboot.ops.common.OpsHostIdDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,9 +10,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class AppOperationDto {
-    protected String hostId;
-    protected boolean proxyHostId;
+public class AppOperationDto extends OpsHostIdDto {
 
     protected String script;
     protected long waitForSeconds;

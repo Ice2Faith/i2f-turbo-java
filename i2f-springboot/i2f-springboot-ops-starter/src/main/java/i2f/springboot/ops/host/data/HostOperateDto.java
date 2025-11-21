@@ -1,5 +1,6 @@
 package i2f.springboot.ops.host.data;
 
+import i2f.springboot.ops.common.OpsHostIdDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,9 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class HostOperateDto {
-    protected String hostId;
-    protected boolean proxyHostId;
+public class HostOperateDto extends OpsHostIdDto {
 
     protected String workdir;
     protected String path;

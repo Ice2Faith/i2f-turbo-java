@@ -105,12 +105,62 @@
                 <el-form-item label="最大等待秒数">
                     <el-input-number v-model="form.waitForSeconds" :min="0" :max="500"></el-input-number>
                 </el-form-item>
-                <el-checkbox v-model="form.async">异步执行</el-checkbox>
-                <el-button v-loading="metas.resultLoading" size="medium"
-                           type="primary"
-                           @click="onExecute">
-                    执行
-                </el-button>
+                <el-form-item >
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover">
+                            <span>
+                                主机锁定，在多实例部署的环境中，可以用来确定需要执行的操作的主机<br/>
+                                如果不是需要执行的主机接收到了请求，将会立即失败，不会执行操作<br/>
+                                这时候重新发起请求进行重试操作，多几次就能够在需要执行的主机上执行！
+                            </span>
+                        <el-checkbox slot="reference" v-model="form.useHostId">主机锁定</el-checkbox>
+                    </el-popover>
+                    <el-select v-model="form.hostId" :disabled="!form.useHostId" placeholder="主机锁定">
+                        <el-option
+                                v-for="item in metas.hostIdList"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover">
+                            <span>
+                                在多实例部署的环境中，就需要通过反复刷新的方式，尽量的获取所有的实例列表<br/>
+                                因此根据实际情况，请多次刷新来获取完整的实例列表
+                            </span>
+                        <el-button slot="reference" v-loading="metas.hostIdLoading" size="medium"
+                                   icon="el-icon-refresh" circle
+                                   @click="doRefreshHostId">
+                        </el-button>
+                    </el-popover>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover">
+                            <span>
+                                进行后端代理转发<br/>
+                                如果后端进行的负载均衡策略不能保证稳定的轮询的情况下<br/>
+                                比如主机粘连、Session粘连、非均匀负载的情况<br/>
+                                这样直接通过后端代理转发的方式，将可以明确的转发到需要执行的机器上
+                            </span>
+                        <el-checkbox slot="reference" v-model="form.proxyHostId">代理转发</el-checkbox>
+                    </el-popover>
+                </el-form-item>
+            </el-row>
+            <el-row type="flex" justify="center">
+                <el-form-item>
+                    <el-checkbox v-model="form.async">异步执行</el-checkbox>
+                    <el-button v-loading="metas.resultLoading" size="medium"
+                               type="primary"
+                               @click="onExecute">
+                        执行
+                    </el-button>
+                </el-form-item>
             </el-row>
         </el-form>
     </el-row>
@@ -160,6 +210,8 @@
                         filterJob: '',
                         jobsLoading: false,
                         jobs: [],
+                        hostIdLoading: false,
+                        hostIdList:[]
                     },
                     drawer: {
 
@@ -168,6 +220,9 @@
 
                     },
                     form: {
+                        useHostId: false,
+                        hostId: '',
+                        proxyHostId: false,
                         method: '',
                         param: '',
                         async: false,
@@ -352,16 +407,67 @@
             },
             onCertChange() {
                 this.doRefreshJobs()
+                this.doRefreshHostId();
+            },
+            assignHostId(req){
+                if(this.form.useHostId){
+                    req.hostId=this.form.hostId;
+                    if(!req.hostId || req.hostId==''){
+                        throw new Error('请选择锁定的主机')
+                    }
+                    req.proxyHostId=this.form.proxyHostId;
+                }else{
+                    req.hostId=null;
+                }
+                return req;
+            },
+            doRefreshHostId(){
+                this.metas.hostIdLoading = true;
+                try {
+                    let req = {
+
+                    }
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/hostId',
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data) || ''
+                            //console.log(resp)
+                            let list=[...this.metas.hostIdList];
+                            if(resp && resp!='') {
+                                if (!list.includes(resp)) {
+                                    list.push(resp);
+                                }
+                            }
+                            this.metas.hostIdList=list;
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.hostIdLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.hostIdLoading = false;
+                }
             },
             doRefreshJobs() {
                 this.metas.jobsLoading = true;
                 try {
-                    let timestamp = new Date().getTime();
+                    let req = this.assignHostId({
+
+                    })
                     let transfer = this.getTransfer();
                     this.$axios({
                         url: '/jobs',
                         method: 'post',
-                        data: transfer.send(timestamp)
+                        data: transfer.send(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
@@ -399,12 +505,12 @@
             doExecute() {
                 this.metas.resultLoading = true;
                 try {
-                    let req = {
+                    let req = this.assignHostId({
                         method: this.form.method,
                         param: this.form.param,
                         async: this.form.async,
                         waitForSeconds: this.form.waitForSeconds,
-                    };
+                    });
                     let transfer = this.getTransfer();
                     this.$axios({
                         url: `/run`,

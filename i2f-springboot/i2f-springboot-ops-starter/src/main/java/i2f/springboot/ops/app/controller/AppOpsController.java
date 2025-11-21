@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.groovy.GroovyScript;
 import i2f.springboot.ops.app.data.AppKeyValueItemDto;
 import i2f.springboot.ops.app.data.AppOperationDto;
+import i2f.springboot.ops.app.data.AppServiceInstanceDto;
 import i2f.springboot.ops.app.data.AppThreadInfoDto;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.host.data.HostOperateDto;
@@ -11,6 +12,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -135,6 +138,34 @@ public class AppOpsController {
             for (Map.Entry<String, String> entry : envMap.entrySet()) {
                 AppKeyValueItemDto dto = new AppKeyValueItemDto(entry.getKey(), entry.getValue());
                 resp.add(dto);
+            }
+            return transfer.success(resp);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return transfer.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/service-instances")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> serviceInstances(@RequestBody OpsSecureDto reqDto,
+                                                   HttpServletRequest request) throws Exception {
+        try {
+            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
+            assertHostId(req);
+            List<AppServiceInstanceDto> resp=new ArrayList<>();
+            DiscoveryClient client = applicationContext.getBean(DiscoveryClient.class);
+            List<String> services = client.getServices();
+            for (String service : services) {
+                List<ServiceInstance> instances = client.getInstances(service);
+                for (ServiceInstance instance : instances) {
+                    resp.add(AppServiceInstanceDto.of(instance));
+                }
             }
             return transfer.success(resp);
         } catch (Throwable e) {
