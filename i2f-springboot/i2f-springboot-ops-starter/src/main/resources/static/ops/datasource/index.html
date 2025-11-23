@@ -33,6 +33,36 @@
 
     <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css" />
     <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
+
+
+    <script src="../lib/codemirror-6.65.7/mode/yaml/yaml.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/yaml/yaml-lint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/javascript/javascript.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/javascript/javascript-hint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/javascript/javascript-lint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/sql/sql.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/sql/sql-hint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/shell/shell.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/xml/xml.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/xml/xml-fold.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/xml/xml-hint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/addon/lint/html/html-lint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/html/html-hint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/mode/htmlmixed/htmlmixed.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/markdown/markdown.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/markdown/markdown-fold.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/groovy/groovy.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/nginx/nginx.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/python/python.min.js" ></script>
 </head>
 <body>
 <div id="app">
@@ -176,11 +206,11 @@
         </el-option>
     </el-select>
     <el-button type="success" size="medium"
-               @click="onViewText(metas.resultList,'数据集')">
+               @click="onViewText(metas.resultList,'数据集','json')">
         表格JSON
     </el-button>
     <el-button type="warning" size="medium"
-               @click="onViewText(metas.resultColumns,'表头信息')">
+               @click="onViewText(metas.resultColumns,'表头信息','json')">
         表头JSON
     </el-button>
     <el-button type="primary" size="medium"
@@ -207,7 +237,7 @@
                         </span>
                 </template>
                 <template slot-scope="scope">
-                    <el-tag type="success" @click="onViewText(scope.row,'数据行')">显示JSON</el-tag>
+                    <el-tag type="success" @click="onViewText(scope.row,'数据行','json')">显示JSON</el-tag>
                 </template>
             </el-table-column>
             <el-table-column
@@ -234,7 +264,7 @@
                     <template slot="header" slot-scope="scope">
                         <span class="table-cell">
                             <el-tag type="success" class="table-cell-hidden" @click="onViewText(metas.resultList.map(e=>e[column.label]).join('\n'),'列值 - '+column.label)">值</el-tag>
-                            <el-tag type="success" class="table-cell-hidden" @click="onViewText(column,'列 - '+column.label)">列</el-tag>
+                            <el-tag type="success" class="table-cell-hidden" @click="onViewText(column,'列 - '+column.label,'json')">列</el-tag>
                             {{column.label}}
                         </span>
                     </template>
@@ -250,12 +280,21 @@
         </el-table>
     </el-row>
     <el-row v-show="metas.resultType=='text'">
-        <el-input
-                type="textarea"
-                :rows="8"
-                placeholder="执行结果"
-                v-model="metas.resultText">
-        </el-input>
+        <el-card shadow="never">
+            <el-form inline label-position="left" label-width="100px">
+                <el-form-item label="语言类型">
+                    <el-select v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
+                        <el-option
+                                v-for="item in metas.langList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <textarea ref="refResultEditor"></textarea>
+        </el-card>
     </el-row>
     <el-drawer
             title="元数据"
@@ -274,7 +313,7 @@
                         <el-col :span="12">
                             <el-row type="flex" justify="end">
                                 <el-button type="success" size="small"
-                                           @click="onViewText(computeFilterDatabases,'数据库列表')">
+                                           @click="onViewText(computeFilterDatabases,'数据库列表','json')">
                                     数据库JSON
                                 </el-button>
                                 <el-button type="success" size="small"
@@ -321,7 +360,7 @@
                         <el-col :span="12">
                             <el-row type="flex" justify="end">
                                 <el-button type="success" size="small"
-                                           @click="onViewText(computeFilterTables,'表列表')">
+                                           @click="onViewText(computeFilterTables,'表列表','json')">
                                     表JSON
                                 </el-button>
                                 <el-button type="success" size="small"
@@ -381,7 +420,7 @@
                        icon="el-icon-refresh" circle
                        @click="doLoadTableInfo">
             </el-button>
-            <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta,'表结构')">表结构JSON</el-button>
+            <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta,'表结构','json')">表结构JSON</el-button>
             <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta.columns.map(e=>e.name).join(','),'列名')">列名</el-button>
             <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta.columns.filter(e=>!e.nullable).map(e=>e.name).join(','),'列名')">非空列名</el-button>
 
@@ -397,7 +436,7 @@
                         width="100"
                         fixed="left">
                     <template slot-scope="scope">
-                        <el-tag type="success" @click="onViewText(scope.row,'列信息')">显示JSON</el-tag>
+                        <el-tag type="success" @click="onViewText(scope.row,'列信息','json')">显示JSON</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -514,12 +553,7 @@
                         :value="item.value">
                 </el-option>
             </el-select>
-            <el-input
-                    type="textarea"
-                    :rows="10"
-                    placeholder="DDL"
-                    v-model="dialog.tableInfo.tableDdl">
-            </el-input>
+            <textarea ref="refTableInfoTableDdlEditor"></textarea>
         </el-row>
 
     </el-dialog>
@@ -528,12 +562,20 @@
             :title="dialog.textViewer.title"
             :visible.sync="dialog.textViewer.show"
             width="80%">
-        <el-input
-                type="textarea"
-                :rows="20"
-                placeholder="文本浏览"
-                v-model="dialog.textViewer.text">
-        </el-input>
+        <el-card shadow="never">
+            <el-form inline label-position="left" label-width="100px">
+                <el-form-item label="语言类型">
+                    <el-select v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                        <el-option
+                                v-for="item in metas.langList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <textarea ref="refTextViewerEditor"></textarea>
     </el-dialog>
 
     <el-dialog
@@ -736,6 +778,8 @@
         },
         mounted(){
             this.initEditor();
+            this.initResultEditor();
+            this.initTextViewerEditor();
         },
         watch:{
             'form.useCustomDatasource':{
@@ -774,6 +818,11 @@
                 return {
                     chart: null,
                     editor: null,
+                    langEditors: {
+                        resultEditor: null,
+                        textViewerEditor: null,
+                        tableInfoTableDdlEditor: null,
+                    },
                     completions:[],
                     storage: {
                         defaultDatasource: '',
@@ -822,10 +871,24 @@
                             }
                         ],
                         resultLoading: false,
+                        resultLang: 'text',
                         resultText: '',
                         resultColumns: [],
                         resultList: [],
                         resultListVueKey: 0,
+                        langList:[
+                            {label: 'Text',value:'text'},
+                            {label: 'Yaml',value:'yaml'},
+                            {label: 'Json',value:'javascript'},
+                            {label: 'SQL',value:'sql'},
+                            {label: 'Shell',value:'shell'},
+                            {label: 'Xml',value:'xml'},
+                            {label: 'Html',value:'htmlmixed'},
+                            {label: 'Markdown',value:'markdown'},
+                            {label: 'Groovy',value:'groovy'},
+                            {label: 'Nginx',value:'nginx'},
+                            {label: 'Python',value:'python'},
+                        ],
                         ddlTypeList: [
                             {
                                 label: 'Auto',
@@ -890,7 +953,8 @@
                         textViewer: {
                             show: false,
                             title: '文本浏览',
-                            text: ''
+                            text: '',
+                            lang: 'text'
                         },
                         scriptRunner: {
                             show: false,
@@ -961,6 +1025,10 @@
                     let data = {...this.$data};
                     data.chart = null;
                     data.editor=null;
+                    data.langEditors={};
+                    Object.keys(this.$data.langEditors).forEach(k=>{
+                        data.langEditors[k]=null;
+                    })
                     let json = JSON.stringify(data);
                     let obj = JSON.parse(json);
                     obj.metas.cert = '';
@@ -1092,6 +1160,76 @@
                     // 此处主要处理文本选中事件
                     this.onSqlChange();
                 })
+            },
+            initLangEditor(editorProp,editorRef,editorLang,afterCallback){
+                let bts=new Date().getTime()
+                let initEditorTask=()=> {
+                    if (this.langEditors[editorProp]) {
+                        try {
+                            this.langEditors[editorProp].toTextArea()
+                        } catch (e) {
+
+                        }
+                    }
+                    this.langEditors[editorProp] = null;
+
+                    let dom = this.$refs[editorRef];
+                    if(!dom){
+                        let cts=new Date().getTime();
+                        if(cts-bts<3000){
+                            setTimeout(initEditorTask,30);
+                        }
+                        return
+                    }
+                    this.langEditors[editorProp] = CodeMirror.fromTextArea(dom, {  // 标识到textarea
+                        value: "",  // 文本域默认显示的文本
+                        mode: editorLang || '',  // 模式
+                        theme: "idea",  // CSS样式选择
+                        indentUnit: 2,  // 缩进单位，默认2
+                        smartIndent: true,  // 是否智能缩进
+                        tabSize: 4,  // Tab缩进，默认4
+                        readOnly: false,  // 是否只读，默认false
+                        showCursorWhenSelecting: true,
+                        hintOptions: {
+                            completeSingle: false,
+                        },
+                        lineNumbers: true  // 是否显示行号
+                        // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
+                    });
+                    this.langEditors[editorProp].on("keypress", () => {
+                        //编译器内容更改事件
+                        this.langEditors[editorProp].showHint();
+                    });
+                    if (afterCallback) {
+                        afterCallback(this.langEditors[editorProp], dom)
+                    }
+                }
+
+                initEditorTask()
+            },
+            initResultEditor() {
+                this.initLangEditor('resultEditor','refResultEditor',this.metas.resultLang,(editor,dom)=>{
+                    editor.setValue(this.metas.resultText || '');
+                    editor.on('change', () => {
+                        this.metas.resultText = editor.getValue();
+                    });
+                })
+
+            },
+            onResultLangChange(){
+                this.initResultEditor();
+            },
+            initTextViewerEditor(){
+                this.initLangEditor('textViewerEditor','refTextViewerEditor',this.dialog.textViewer.lang,(editor,dom)=>{
+                    editor.setValue(this.dialog.textViewer.text || '');
+                    editor.on('change', () => {
+                        this.dialog.textViewer.text = editor.getValue();
+                    });
+                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
+                })
+            },
+            onTextViewerLangChange(){
+                this.initTextViewerEditor()
             },
             initStoreData(){
                 let reset = new URL(window.location.href).searchParams.get('reset');
@@ -1302,6 +1440,7 @@
                             if (operate == 'update' && !resp.columns) {
                                 this.metas.resultText = JSON.stringify(resp,null,'    ');
                                 this.metas.resultType = 'text';
+                                this.metas.resultLang='json';
                             } else {
                                 this.metas.resultList = resp.rows;
                                 this.metas.resultColumns = resp.columns;
@@ -1311,8 +1450,12 @@
                         } else {
                             this.metas.resultText = res.data.msg;
                             this.metas.resultType = 'text';
+                            this.metas.resultLang='text';
                             this.$message.error(res.data.msg)
                         }
+                        setTimeout(()=>{
+                            this.initResultEditor();
+                        },200)
                     }).catch(err => {
                         this.$message.error(err.errorMessage || err.message || '操作失败')
                     }).finally(() => {
@@ -1367,12 +1510,17 @@
                             //console.log(resp)
                             this.metas.resultText = resp + '';
                             this.metas.resultType = 'text';
+                            this.metas.resultLang='sql';
                             this.form.useMultiDatasource=false;
                         } else {
                             this.metas.resultText = res.data.msg;
                             this.metas.resultType = 'text';
+                            this.metas.resultLang='text';
                             this.$message.error(res.data.msg)
                         }
+                        setTimeout(()=>{
+                            this.initResultEditor();
+                        },200)
                     }).catch(err => {
                         this.$message.error(err.errorMessage || err.message || '操作失败')
                     }).finally(() => {
@@ -1464,6 +1612,15 @@
             onClickTableItem(item) {
                 this.drawer.metadata.checkTable = item.name;
             },
+            initTableInfoTableDdlEditor(){
+                this.initLangEditor('tableInfoTableDdlEditor','refTableInfoTableDdlEditor','sql',(editor,dom)=>{
+                    editor.setValue(this.dialog.tableInfo.tableDdl || '');
+                    editor.on('change', () => {
+                        this.dialog.tableInfo.tableDdl = editor.getValue();
+                    });
+                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
+                })
+            },
             onViewTableInfo(item) {
                 if(!item){
                     item={
@@ -1474,6 +1631,9 @@
                 this.dialog.tableInfo.title = item.name;
                 this.dialog.tableInfo.show = true;
                 if (this.dialog.tableInfo.meta && this.dialog.tableInfo.meta.name == item.name) {
+                    setTimeout(()=>{
+                        this.initTableInfoTableDdlEditor()
+                    },200)
                     return;
                 }
                 let storageKey = this.getDatasourceStorageKey() + '#' + this.drawer.metadata.checkDatabase + '#' + item.name;
@@ -1485,9 +1645,15 @@
                 if (tableMeta && tableMeta.name) {
                     this.dialog.tableInfo.meta = tableMeta;
                     this.dialog.tableInfo.metaVueKey=new Date().getTime();
+                    setTimeout(()=>{
+                        this.initTableInfoTableDdlEditor()
+                    },200)
                     return;
                 }
                 this.doLoadTableInfo()
+                setTimeout(()=>{
+                    this.initTableInfoTableDdlEditor()
+                },200)
             },
             cleanReqForm(req){
                 if(!req){
@@ -1565,6 +1731,9 @@
                             this.dialog.tableInfo.tableDdl = resp;
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table + '#' + req.ddlType;
                             this.storage.tableDdlMap[storageKey] = resp;
+                            setTimeout(()=>{
+                                this.initTableInfoTableDdlEditor()
+                            },200)
                         } else {
                             this.$message.error(res.data.msg)
                         }
@@ -1586,8 +1755,11 @@
                 if (tableDdl && tableDdl.length > 0) {
                     this.dialog.tableInfo.tableDdl = tableDdl;
                 }
+                setTimeout(()=>{
+                    this.initTableInfoTableDdlEditor()
+                },200)
             },
-            onViewText(obj, title) {
+            onViewText(obj, title,lang) {
                 if (title && title.length > 0) {
                     this.dialog.textViewer.title = title;
                 } else {
@@ -1599,8 +1771,17 @@
                 } else {
                     text = JSON.stringify(obj, null, '    ');
                 }
+                if(lang && lang!=''){
+                    if(lang=='json'){
+                        lang='javascript';
+                    }
+                }
+                this.dialog.textViewer.lang=lang || 'text';
                 this.dialog.textViewer.text = text;
                 this.dialog.textViewer.show = true;
+                setTimeout(()=>{
+                    this.initTextViewerEditor()
+                },200)
             },
             onViewTableCellData(value,scope,column){
                 let type=(typeof value);
