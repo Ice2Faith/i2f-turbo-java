@@ -3,6 +3,46 @@
         <!ELEMENT procedure (ANY|EMPTY)>
         <!ATTLIST procedure id CDATA #IMPLIED>
 
+        <!ELEMENT log-info (ANY|EMPTY)>
+        <!ATTLIST log-info value CDATA #IMPLIED>
+        <!ATTLIST log-info e CDATA #IMPLIED>
+
+        <!ATTLIST log-info value.string CDATA #IMPLIED>
+        <!ATTLIST log-info value.render CDATA #IMPLIED>
+        <!ATTLIST log-info value.body-text CDATA #IMPLIED>
+        <!ATTLIST log-info value.body-text.render CDATA #IMPLIED>
+        <!ATTLIST log-info value.body-text.trim.render CDATA #IMPLIED>
+
+        <!ELEMENT log-debug (ANY|EMPTY)>
+        <!ATTLIST log-debug value CDATA #IMPLIED>
+        <!ATTLIST log-debug e CDATA #IMPLIED>
+
+        <!ATTLIST log-debug value.string CDATA #IMPLIED>
+        <!ATTLIST log-debug value.render CDATA #IMPLIED>
+        <!ATTLIST log-debug value.body-text CDATA #IMPLIED>
+        <!ATTLIST log-debug value.body-text.render CDATA #IMPLIED>
+        <!ATTLIST log-debug value.body-text.trim.render CDATA #IMPLIED>
+
+        <!ELEMENT log-warn (ANY|EMPTY)>
+        <!ATTLIST log-warn value CDATA #IMPLIED>
+        <!ATTLIST log-warn e CDATA #IMPLIED>
+
+        <!ATTLIST log-warn value.string CDATA #IMPLIED>
+        <!ATTLIST log-warn value.render CDATA #IMPLIED>
+        <!ATTLIST log-warn value.body-text CDATA #IMPLIED>
+        <!ATTLIST log-warn value.body-text.render CDATA #IMPLIED>
+        <!ATTLIST log-warn value.body-text.trim.render CDATA #IMPLIED>
+
+        <!ELEMENT log-error (ANY|EMPTY)>
+        <!ATTLIST log-error value CDATA #IMPLIED>
+        <!ATTLIST log-error e CDATA #IMPLIED>
+
+        <!ATTLIST log-error value.string CDATA #IMPLIED>
+        <!ATTLIST log-error value.render CDATA #IMPLIED>
+        <!ATTLIST log-error value.body-text CDATA #IMPLIED>
+        <!ATTLIST log-error value.body-text.render CDATA #IMPLIED>
+        <!ATTLIST log-error value.body-text.trim.render CDATA #IMPLIED>
+
         <!ELEMENT debugger (ANY|EMPTY)>
         <!ATTLIST debugger test CDATA #IMPLIED>
         <!ATTLIST debugger tag CDATA #IMPLIED>

@@ -8,6 +8,11 @@ public interface TagConsts {
 
     String PROCEDURE = "procedure";
 
+    String LOG_DEBUG="log-debug";
+    String LOG_INFO="log-info";
+    String LOG_WARN="log-warn";
+    String LOG_ERROR="log-error";
+
     String DEBUGGER = "debugger";
     String LANG_PRINTF = "lang-printf";
     String LANG_PRINTLN = "lang-println";

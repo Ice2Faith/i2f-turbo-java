@@ -189,6 +189,31 @@ eval-ts使用TinyScript引擎进行处理
 因此也可以直接使用executor进行访问到
  -->
 <procedure id="">
+
+    <!--
+    进行日志输出，value指定为输出的日志的内容，e是可选的Throwable类型的异常
+    也可以允许其他属性参数，也会在日志中进行打印
+    value默认以string进行访问，表示默认的日志输出内容
+    e默认以visit进行访问，表示默认的Throwable异常
+    -->
+    <log-debug value="" e=""/>
+    <log-info value="" e=""/>
+    <log-warn value="" e=""/>
+    <log-error value="" e=""/>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <log-info value.render="begin procedure $!{trace.location}" name="v_name"/>
+
+        <lang-try>
+            <lang-body>
+
+            </lang-body>
+            <lang-catch e="e">
+                <log-warn value.render="error: $!{trace.errmsg}" e="e"/>
+            </lang-catch>
+        </lang-try>
+    </script-segment>
+
     <!--
     调试器，在此处中断执行，等待继续执行
     可用于在此时查看上下文变量

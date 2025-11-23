@@ -40,24 +40,19 @@ public class DefaultJdbcProcedureLogger implements JdbcProcedureLogger {
     }
 
     @Override
-    public void logDebug(Supplier<Object> supplier) {
-        if (isDebug()) {
-            logDebug(supplier.get());
-        }
-    }
-
-    @Override
-    public void logDebug(Object obj) {
-        if (isDebug()) {
-            String location = ContextHolder.traceLocation();
-            System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), "near " + location + ", msg: " + obj));
+    public void logDebug(Supplier<Object> supplier, Throwable e) {
+        String location = ContextHolder.traceLocation();
+        System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "DEBUG", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
+        if (e != null) {
+            JdbcProcedureUtil.purifyStackTrace(e, true);
+            e.printStackTrace();
         }
     }
 
     @Override
     public void logInfo(Supplier<Object> supplier, Throwable e) {
         String location = ContextHolder.traceLocation();
-        System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
+        System.out.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "INFO", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
         if (e != null) {
             JdbcProcedureUtil.purifyStackTrace(e, true);
             e.printStackTrace();
@@ -67,7 +62,7 @@ public class DefaultJdbcProcedureLogger implements JdbcProcedureLogger {
     @Override
     public void logWarn(Supplier<Object> supplier, Throwable e) {
         String location = ContextHolder.traceLocation();
-        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "ERROR", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
+        System.err.println(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), "WARN", Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
         if (e != null) {
             JdbcProcedureUtil.purifyStackTrace(e, true);
             e.printStackTrace();
