@@ -32,6 +32,35 @@
     <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css"/>
     <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
 
+
+    <script src="../lib/codemirror-6.65.7/mode/yaml/yaml.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/yaml/yaml-lint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/javascript/javascript.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/javascript/javascript-hint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/javascript/javascript-lint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/sql/sql.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/sql/sql-hint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/shell/shell.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/xml/xml.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/xml/xml-fold.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/xml/xml-hint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/addon/lint/html/html-lint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/html/html-hint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/mode/htmlmixed/htmlmixed.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/markdown/markdown.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/markdown/markdown-fold.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/groovy/groovy.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/nginx/nginx.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/python/python.min.js" ></script>
 </head>
 <body>
 <div id="app">
@@ -165,12 +194,21 @@
         </el-form>
     </el-row>
     <el-divider>操作结果</el-divider>
-    <el-input
-            type="textarea"
-            :rows="8"
-            placeholder="执行结果"
-            v-model="metas.resultText">
-    </el-input>
+    <el-card shadow="never">
+        <el-form inline label-position="left" label-width="100px">
+            <el-form-item label="语言类型">
+                <el-select v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
+                    <el-option
+                            v-for="item in metas.langList"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <textarea ref="refResultEditor"></textarea>
+    </el-card>
 
 </div>
 </body>
@@ -187,6 +225,7 @@
         },
         mounted() {
             this.initEditor();
+            this.initResultEditor();
         },
         watch: {},
         computed: {
@@ -201,17 +240,34 @@
             getDefaultData() {
                 return {
                     editor: null,
+                    langEditors: {
+                        resultEditor: null,
+                    },
                     completions: [],
                     storage: {},
                     metas: {
                         cert: '',
                         resultLoading: false,
+                        resultLang: 'javascript',
                         resultText: '',
                         filterJob: '',
                         jobsLoading: false,
                         jobs: [],
                         hostIdLoading: false,
-                        hostIdList:[]
+                        hostIdList:[],
+                        langList:[
+                            {label: 'Text',value:'text'},
+                            {label: 'Yaml',value:'yaml'},
+                            {label: 'Json',value:'javascript'},
+                            {label: 'SQL',value:'sql'},
+                            {label: 'Shell',value:'shell'},
+                            {label: 'Xml',value:'xml'},
+                            {label: 'Html',value:'htmlmixed'},
+                            {label: 'Markdown',value:'markdown'},
+                            {label: 'Groovy',value:'groovy'},
+                            {label: 'Nginx',value:'nginx'},
+                            {label: 'Python',value:'python'},
+                        ]
                     },
                     drawer: {
 
@@ -252,6 +308,10 @@
                 try {
                     let data = {...this.$data};
                     data.editor = null;
+                    data.langEditors={};
+                    Object.keys(this.$data.langEditors).forEach(k=>{
+                        data.langEditors[k]=null;
+                    })
                     let json = JSON.stringify(data);
                     let obj = JSON.parse(json);
                     obj.metas.cert = '';
@@ -366,6 +426,64 @@
                 this.editor.on('change', () => {
                     this.form.param = this.editor.getValue();
                 });
+            },
+            initLangEditor(editorProp,editorRef,editorLang,afterCallback){
+                let bts=new Date().getTime()
+                let initEditorTask=()=> {
+                    if (this.langEditors[editorProp]) {
+                        try {
+                            this.langEditors[editorProp].toTextArea()
+                        } catch (e) {
+
+                        }
+                    }
+                    this.langEditors[editorProp] = null;
+
+                    let dom = this.$refs[editorRef];
+                    if(!dom){
+                        let cts=new Date().getTime();
+                        if(cts-bts<3000){
+                            setTimeout(initEditorTask,30);
+                        }
+                        return
+                    }
+                    this.langEditors[editorProp] = CodeMirror.fromTextArea(dom, {  // 标识到textarea
+                        value: "",  // 文本域默认显示的文本
+                        mode: editorLang || '',  // 模式
+                        theme: "idea",  // CSS样式选择
+                        indentUnit: 2,  // 缩进单位，默认2
+                        smartIndent: true,  // 是否智能缩进
+                        tabSize: 4,  // Tab缩进，默认4
+                        readOnly: false,  // 是否只读，默认false
+                        showCursorWhenSelecting: true,
+                        hintOptions: {
+                            completeSingle: false,
+                        },
+                        lineNumbers: true  // 是否显示行号
+                        // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
+                    });
+                    this.langEditors[editorProp].on("keypress", () => {
+                        //编译器内容更改事件
+                        this.langEditors[editorProp].showHint();
+                    });
+                    if (afterCallback) {
+                        afterCallback(this.langEditors[editorProp], dom)
+                    }
+                }
+
+                initEditorTask()
+            },
+            initResultEditor() {
+                this.initLangEditor('resultEditor','refResultEditor',this.metas.resultLang,(editor,dom)=>{
+                    editor.setValue(this.metas.resultText || '');
+                    editor.on('change', () => {
+                        this.metas.resultText = editor.getValue();
+                    });
+                })
+
+            },
+            onResultLangChange(){
+                this.initResultEditor();
             },
             initStoreData() {
                 let reset = new URL(window.location.href).searchParams.get('reset');
@@ -522,10 +640,16 @@
                             let resp = transfer.recv(res.data.data)
                             // console.log(resp)
                             this.metas.resultText = JSON.parse(resp,null,'    ');
+                            this.metas.resultLang='json';
+
                         } else {
                             this.metas.resultText = res.data.msg;
+                            this.metas.resultLang='text';
                             this.$message.error(res.data.msg)
                         }
+                        setTimeout(()=>{
+                            this.initResultEditor();
+                        },200)
                     }).catch(err => {
                         this.$message.error(err.errorMessage || err.message || '操作失败')
                     }).finally(() => {

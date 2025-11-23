@@ -606,14 +606,7 @@
             this.initTextViewerEditor();
         },
         watch: {
-            'dialog.textViewer.show':{
-                immediate: true,
-                handler:function(val,old){
-                    if(val){
-                        this.initTextViewerEditor()
-                    }
-                }
-            }
+
         },
         computed: {
             computeFilterSystemProperties() {
@@ -958,6 +951,7 @@
                     editor.on('change', () => {
                         this.dialog.textViewer.text = editor.getValue();
                     });
+                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
                 })
             },
             onTextViewerLangChange(){
@@ -1108,9 +1102,15 @@
                                 // filter out console ascii escape sequence
                                 this.metas.resultText = this.metas.resultText.replace(/\x1B\[[\d;]+m/g, '');
                             } catch (e){}
+                            this.metas.resultLang='json';
                         } else {
+                            this.metas.resultText = res.data.msg;
+                            this.metas.resultLang='text';
                             this.$message.error(res.data.msg)
                         }
+                        setTimeout(()=>{
+                            this.initResultEditor();
+                        },200)
                     }).catch(err => {
                         this.$message.error(err.errorMessage || err.message || '操作失败')
                     }).finally(() => {
@@ -1121,7 +1121,7 @@
                     this.metas.resultLoading = false;
                 }
             },
-            onViewText(obj, title) {
+            onViewText(obj, title,lang) {
                 if (title && title.length > 0) {
                     this.dialog.textViewer.title = title;
                 } else {
@@ -1133,8 +1133,12 @@
                 } else {
                     text = JSON.stringify(obj, null, '    ');
                 }
+                this.dialog.textViewer.lang=lang || 'text';
                 this.dialog.textViewer.text = text;
                 this.dialog.textViewer.show = true;
+                setTimeout(()=>{
+                    this.initTextViewerEditor()
+                },200)
             },
             onViewSystemProperties(){
                 this.drawer.systemProperties.show=true;
