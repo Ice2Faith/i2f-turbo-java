@@ -226,6 +226,10 @@ public interface ContextFunctions {
     }
 
     default int index_of(Object oStr, Object oSstr) {
+        return index_of(oStr,oSstr,0);
+    }
+
+    default int index_of(Object oStr, Object oSstr,int fromIndex) {
         if (oStr == null) {
             return -1;
         }
@@ -237,7 +241,7 @@ public interface ContextFunctions {
             return 0;
         }
         String str=String.valueOf(oStr);
-        return str.indexOf(sstr);
+        return str.indexOf(sstr,fromIndex);
     }
 
     default int last_index_of(Object oStr, Object oSstr) {
@@ -253,6 +257,21 @@ public interface ContextFunctions {
         }
         String str= String.valueOf(oStr);
         return str.lastIndexOf(sstr);
+    }
+
+    default int last_index_of(Object oStr, Object oSstr,int fromIndex) {
+        if (oStr == null) {
+            return -1;
+        }
+        if (oSstr == null) {
+            return -1;
+        }
+        String sstr=String.valueOf(oSstr);
+        if (sstr.isEmpty()) {
+            return 0;
+        }
+        String str= String.valueOf(oStr);
+        return str.lastIndexOf(sstr,fromIndex);
     }
 
     default String replace(Object str, Object target) {
