@@ -14,17 +14,27 @@ public interface JdbcProcedureLogger {
     boolean isDebug();
 
     default void logDebug(Object obj) {
-        logDebug(() -> obj);
+        logDebug(obj,(Throwable)null);
     }
 
-    void logDebug(Supplier<Object> supplier);
+    default void logDebug(Object obj,Throwable e) {
+        if(isDebug()) {
+            logDebug(() -> obj, e);
+        }
+    }
+
+    default void logDebug(Supplier<Object> supplier){
+        logDebug(supplier,(Throwable)null);
+    }
+
+    void logDebug(Supplier<Object> supplier,Throwable e);
 
     default void logInfo(Object obj) {
-        logInfo(() -> obj);
+        logInfo(() -> obj,(Throwable)null);
     }
 
     default void logInfo(Supplier<Object> supplier) {
-        logInfo(supplier, null);
+        logInfo(supplier, (Throwable) null);
     }
 
     default void logInfo(Object obj, Throwable e) {
@@ -34,11 +44,11 @@ public interface JdbcProcedureLogger {
     void logInfo(Supplier<Object> supplier, Throwable e);
 
     default void logWarn(Object obj) {
-        logWarn(() -> obj);
+        logWarn(() -> obj,(Throwable)null);
     }
 
     default void logWarn(Supplier<Object> supplier) {
-        logWarn(supplier, null);
+        logWarn(supplier, (Throwable) null);
     }
 
     default void logWarn(Object obj, Throwable e) {
@@ -48,11 +58,11 @@ public interface JdbcProcedureLogger {
     void logWarn(Supplier<Object> supplier, Throwable e);
 
     default void logError(Object obj) {
-        logError(() -> obj);
+        logError(() -> obj,(Throwable)null);
     }
 
     default void logError(Supplier<Object> supplier) {
-        logError(supplier, null);
+        logError(supplier, (Throwable) null);
     }
 
     default void logError(Object obj, Throwable e) {

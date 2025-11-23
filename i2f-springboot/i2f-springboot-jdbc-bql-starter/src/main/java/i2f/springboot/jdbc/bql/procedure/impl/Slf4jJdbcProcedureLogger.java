@@ -3,9 +3,12 @@ package i2f.springboot.jdbc.bql.procedure.impl;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.util.JdbcProcedureUtil;
+import i2f.lru.LruMap;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -19,9 +22,24 @@ import java.util.function.Supplier;
 @NoArgsConstructor
 public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
     private volatile AtomicBoolean debug = new AtomicBoolean(false);
+    private final LruMap<String, Logger> cacheLoggerMap=new LruMap<>(1024);
 
     public Slf4jJdbcProcedureLogger(AtomicBoolean debug) {
         this.debug = debug;
+    }
+
+    public Logger getLogger(String name) {
+        return cacheLoggerMap.computeIfAbsent(name,k->{
+            return LoggerFactory.getLogger(name);
+        });
+    }
+
+    public Logger getLogger(Class<?> clazz) {
+        return getLogger(clazz.getName());
+    }
+
+    public Logger getLogger(){
+        return getLogger(ContextHolder.TRACE_FILE.get());
     }
 
     @Override
@@ -39,28 +57,28 @@ public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
     }
 
     @Override
-    public void logDebug(Supplier<Object> supplier) {
+    public void logDebug(Supplier<Object> supplier,Throwable e) {
         if (isDebug()) {
-            logDebug(supplier.get());
+            String location = ContextHolder.traceLocation();
+            String msg = "near " + location + ", msg: " + supplier.get();
+            if(e!=null){
+                JdbcProcedureUtil.purifyStackTrace(e, true);
+                getLogger().debug(msg,e);
+            }else {
+                getLogger().debug(msg);
+            }
         }
     }
 
-    @Override
-    public void logDebug(Object obj) {
-        if (isDebug()) {
-            String location = ContextHolder.traceLocation();
-            log.debug("near " + location + ", msg: " + obj);
-        }
-    }
 
     @Override
     public void logInfo(Supplier<Object> supplier, Throwable e) {
         String location = ContextHolder.traceLocation();
         if (e != null) {
             JdbcProcedureUtil.purifyStackTrace(e, true);
-            log.info("near " + location + ", msg: " + supplier.get(), e);
+            getLogger().info("near " + location + ", msg: " + supplier.get(), e);
         } else {
-            log.info("near " + location + ", msg: " + supplier.get());
+            getLogger().info("near " + location + ", msg: " + supplier.get());
         }
     }
 
@@ -69,9 +87,9 @@ public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
         String location = ContextHolder.traceLocation();
         if (e != null) {
             JdbcProcedureUtil.purifyStackTrace(e, true);
-            log.warn("near " + location + ", msg: " + supplier.get(), e);
+            getLogger().warn("near " + location + ", msg: " + supplier.get(), e);
         } else {
-            log.warn("near " + location + ", msg: " + supplier.get());
+            getLogger().warn("near " + location + ", msg: " + supplier.get());
         }
     }
 
@@ -80,9 +98,9 @@ public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
         String location = ContextHolder.traceLocation();
         if (e != null) {
             JdbcProcedureUtil.purifyStackTrace(e, true);
-            log.error("near " + location + ", msg: " + supplier.get(), e);
+            getLogger().error("near " + location + ", msg: " + supplier.get(), e);
         } else {
-            log.error("near " + location + ", msg: " + supplier.get());
+            getLogger().error("near " + location + ", msg: " + supplier.get());
         }
     }
 
