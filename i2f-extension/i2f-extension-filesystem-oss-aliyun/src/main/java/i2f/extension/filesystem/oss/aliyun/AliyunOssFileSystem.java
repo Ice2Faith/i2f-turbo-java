@@ -10,6 +10,7 @@ import i2f.io.filesystem.abs.AbsFileSystem;
 import i2f.io.stream.StreamUtil;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.*;
 
 public class AliyunOssFileSystem extends AbsFileSystem {
@@ -152,6 +153,15 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         return false;
     }
 
+    public String decodeObjectName(String name){
+        try {
+            return URLDecoder.decode(name,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+
+        }
+        return name;
+    }
+
     @Override
     public List<IFile> listFiles(String path) {
         List<IFile> ret = new LinkedList<>();
@@ -178,7 +188,10 @@ public class AliyunOssFileSystem extends AbsFileSystem {
             List<OSSObjectSummary> iter = listing.getObjectSummaries();
             for (OSSObjectSummary item : iter) {
                 try {
-                    String name = item.getKey();
+                    String name = decodeObjectName(item.getKey());
+                    if(name.endsWith(pathSeparator())){
+                        name=name.substring(0,name.length()-pathSeparator().length());
+                    }
                     ret.add(getFile(pair.getKey(), name));
                 } catch (Throwable e) {
                 }

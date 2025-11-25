@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -118,7 +119,7 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
             List<S3Object> contents = resp.contents();
             for (S3Object item : contents) {
                 try {
-                    String name = item.key();
+                    String name = decodeObjectName(item.key());
                     if (name.endsWith(pathSeparator())) {
                         name = name.substring(0, name.length() - pathSeparator().length());
                     }
@@ -183,6 +184,15 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
         return false;
     }
 
+    public String decodeObjectName(String name){
+        try {
+            return URLDecoder.decode(name,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+
+        }
+        return name;
+    }
+
     @Override
     public List<IFile> listFiles(String path) {
         List<IFile> ret = new LinkedList<>();
@@ -218,7 +228,11 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
             }
             List<S3Object> contents = resp.contents();
             for (S3Object item : contents) {
-                ret.add(getFile(pair.getKey(), item.key()));
+                String name = decodeObjectName(item.key());
+                if(name.endsWith(pathSeparator())){
+                    name=name.substring(0,name.length()-pathSeparator().length());
+                }
+                ret.add(getFile(pathSeparator()+pair.getKey(), name));
             }
             nextMarker.set(resp.nextMarker());
         } while (resp != null && resp.isTruncated());

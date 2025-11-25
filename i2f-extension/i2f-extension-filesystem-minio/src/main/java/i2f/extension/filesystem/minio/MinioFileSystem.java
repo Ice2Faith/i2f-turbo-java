@@ -11,6 +11,7 @@ import io.minio.messages.Bucket;
 import io.minio.messages.Item;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.*;
 
 public class MinioFileSystem extends AbsFileSystem {
@@ -106,7 +107,7 @@ public class MinioFileSystem extends AbsFileSystem {
                 try {
                     Item item = res.get();
                     if (item.isDir()) {
-                        String name = item.objectName();
+                        String name = decodeObjectName(item.objectName());
                         if (name.endsWith(pathSeparator())) {
                             name = name.substring(0, name.length() - pathSeparator().length());
                         }
@@ -168,7 +169,7 @@ public class MinioFileSystem extends AbsFileSystem {
             for (Result<Item> res : iter) {
                 try {
                     Item item = res.get();
-                    String name = item.objectName();
+                    String name = decodeObjectName(item.objectName());
                     if (name.endsWith(pathSeparator())) {
                         name = name.substring(0, name.length() - pathSeparator().length());
                     }
@@ -181,6 +182,15 @@ public class MinioFileSystem extends AbsFileSystem {
         }
 
         return false;
+    }
+
+    public String decodeObjectName(String name){
+        try {
+            return URLDecoder.decode(name,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+
+        }
+        return name;
     }
 
     @Override
@@ -211,7 +221,10 @@ public class MinioFileSystem extends AbsFileSystem {
         for (Result<Item> res : iter) {
             try {
                 Item item = res.get();
-                String name = item.objectName();
+                String name = decodeObjectName(item.objectName());
+                if(name.endsWith(pathSeparator())){
+                    name=name.substring(0,name.length()-pathSeparator().length());
+                }
                 ret.add(getFile(pathSeparator()+pair.getKey(), name));
             } catch (Throwable e) {
             }
