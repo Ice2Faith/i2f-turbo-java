@@ -222,6 +222,7 @@
         created() {
             this.initStoreData();
             this.initCompletionsRefreshInterval();
+            this.initBroadcast();
         },
         mounted() {
             this.initEditor();
@@ -240,6 +241,7 @@
             getDefaultData() {
                 return {
                     editor: null,
+                    opsBroadcastChannel:null,
                     langEditors: {
                         resultEditor: null,
                     },
@@ -286,6 +288,27 @@
                     }
                 }
             },
+            initBroadcast(){
+                this.opsBroadcastChannel = new BroadcastChannel('ops_station_broadcast');
+
+                setInterval(()=>{
+                    this.opsBroadcastChannel.postMessage({
+                        type: 'cert',
+                        data: this.metas.cert
+                    });
+                },3000)
+
+
+                this.opsBroadcastChannel.onmessage = (event) => {
+                    let data=event.data;
+                    if(data.type=='cert'){
+                        if(!this.metas.cert || this.metas.cert==''){
+                            this.metas.cert=data.data;
+                        }
+                    }
+                };
+
+            },
             loadData() {
                 let content = localStorage.getItem('ops:xxl-job:data');
                 if (!content) {
@@ -308,6 +331,7 @@
                 try {
                     let data = {...this.$data};
                     data.editor = null;
+                    data.opsBroadcastChannel=null;
                     data.langEditors={};
                     Object.keys(this.$data.langEditors).forEach(k=>{
                         data.langEditors[k]=null;
