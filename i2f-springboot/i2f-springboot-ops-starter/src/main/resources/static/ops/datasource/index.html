@@ -1445,9 +1445,12 @@
                 });
             },
             doExecute(callback){
+                let sql=this.getExecuteSql();
+                this.doExecuteDelegate(sql,callback)
+            },
+            doExecuteDelegate(sql,callback){
                 this.metas.resultLoading = true;
                 try {
-                    let sql=this.getExecuteSql();
                     let req = this.fillDatasourceForm({
                         sql: sql,
                         maxCount: this.form.maxCount,
@@ -1823,9 +1826,27 @@
                 this.onViewText(value,'值查看 - type: '+type);
             },
             doRefreshChartData(){
-                this.doExecute(()=>{
-                    this.doRenderEcharts()
-                })
+                let sql=this.metas.resultSql;
+                let tipsSql=sql;
+                if(tipsSql && tipsSql.length>27){
+                    tipsSql=tipsSql.substring(0,27)+"...";
+                }
+                this.$confirm('即将执行语句，是否继续？<br/>' + tipsSql, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doExecuteDelegate(sql,()=>{
+                        this.doRenderEcharts()
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+
             },
             onVisualCharts() {
                 this.dialog.visualChart.show = true;

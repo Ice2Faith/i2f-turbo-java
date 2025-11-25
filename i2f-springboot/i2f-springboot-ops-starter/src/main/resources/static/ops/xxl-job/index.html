@@ -664,7 +664,7 @@
                             let resp = transfer.recv(res.data.data)
                             // console.log(resp)
                             this.metas.resultText = JSON.parse(resp,null,'    ');
-                            this.metas.resultLang='json';
+                            this.metas.resultLang='javascript';
 
                         } else {
                             this.metas.resultText = res.data.msg;
