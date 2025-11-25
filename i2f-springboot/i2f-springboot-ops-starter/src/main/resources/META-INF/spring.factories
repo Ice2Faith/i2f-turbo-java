@@ -11,4 +11,6 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.redis.controller.RedisOpsController,\
     i2f.springboot.ops.xxljob.controller.XxlJobOpsController,\
     i2f.springboot.ops.app.controller.AppOpsController,\
-    i2f.springboot.ops.ssh.controller.SshOpsController
+    i2f.springboot.ops.ssh.controller.SshOpsController,\
+    i2f.springboot.ops.minio.controller.MinioOpsController,\
+    i2f.springboot.ops.awss3.controller.AwsS3OpsController

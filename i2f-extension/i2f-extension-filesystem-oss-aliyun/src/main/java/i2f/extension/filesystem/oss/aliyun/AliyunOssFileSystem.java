@@ -85,6 +85,10 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         }
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
+            if("".equals(pair.getKey())){
+                // 根目录，一定是目录
+                return true;
+            }
             try {
                 return getClient().doesBucketExist(pair.getKey());
             } catch (Throwable e) {
@@ -132,6 +136,10 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         }
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
+            // 根目录，一定存在
+            if("".equals(pair.getKey())){
+                return true;
+            }
             try {
                 return getClient().doesBucketExist(pair.getKey());
             } catch (Throwable e) {
@@ -146,9 +154,23 @@ public class AliyunOssFileSystem extends AbsFileSystem {
 
     @Override
     public List<IFile> listFiles(String path) {
+        List<IFile> ret = new LinkedList<>();
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
+        if("".equals(pair.getKey()) && pair.getValue()==null){
+            // 根目录，应该列举bucket
+            try {
+                List<Bucket> buckets = getClient().listBuckets();
+                for (Bucket bucket : buckets) {
+                    String name = bucket.getName();
+                    IFile file = getFile(pathSeparator() + name);
+                    ret.add(file);
+                }
+            } catch (Throwable e) {
+
+            }
+            return ret;
+        }
         String subPath = ensureWithPathSeparator(pair.getValue());
-        List<IFile> ret = new ArrayList<>();
         String nextMarker = null;
         ObjectListing listing = null;
         do {
@@ -300,6 +322,18 @@ public class AliyunOssFileSystem extends AbsFileSystem {
     @Override
     public long length(String path) {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
+        if(pair.getValue()==null){
+            if("".equals(pair.getKey())){
+                // 根目录，直接返回0
+                return 0;
+            }
+            try {
+                boolean ok = getClient().doesBucketExist(pair.getKey());
+                return ok?0:-1;
+            } catch (Throwable e) {
+
+            }
+        }
         try {
             ObjectMetadata metadata = getClient().getObjectMetadata(pair.getKey(), pair.getValue());
             return metadata.getContentLength();

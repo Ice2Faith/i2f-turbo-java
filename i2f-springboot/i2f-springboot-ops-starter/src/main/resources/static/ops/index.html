@@ -18,7 +18,7 @@
           <span>Ops Home</span>
         </div>
         <el-row :gutter="15">
-          <el-col :span="6" v-for="item in menus">
+          <el-col :span="6" v-for="item in displayMenus">
             <el-result  :title="item.title" style="border: solid 1px #777; border-radius: 5px;margin-bottom: 15px;">
               <template slot="icon">
                 <a :href="item.href" target="_blank">
@@ -96,10 +96,18 @@
             href: './minio/index.html'
           },
           {
+            title: 'Aliyun Oss',
+            subTitle: '阿里云 Oss 对象存储管理',
+            icon: 'el-icon-files',
+            href: './aliyun-oss/index.html',
+            disabled: true
+          },
+          {
             title: 'MongoDB',
             subTitle: 'MongoDB 管理',
             icon: 'el-icon-collection',
-            href: './mongodb/index.html'
+            href: './mongodb/index.html',
+            disabled: true
           }
         ]
       }
@@ -112,7 +120,9 @@
     },
     watch: {},
     computed: {
-
+      displayMenus(){
+        return this.menus.filter(e=>!e.disabled)
+      }
     },
     methods: {
       onClickMenuItem(item){

@@ -89,6 +89,10 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
         }
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
+            if("".equals(pair.getKey())){
+                // 根目录，一定是目录
+                return true;
+            }
             try {
                 GetBucketPolicyStatusResponse resp = getClient().getBucketPolicyStatus(e -> {
                     e.bucket(pair.getKey());
@@ -155,6 +159,10 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
         }
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
+            // 根目录，一定存在
+            if("".equals(pair.getKey())){
+                return true;
+            }
             GetBucketPolicyStatusResponse resp = getClient().getBucketPolicyStatus(e -> {
                 e.bucket(pair.getKey());
             });
@@ -177,9 +185,26 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
 
     @Override
     public List<IFile> listFiles(String path) {
+        List<IFile> ret = new LinkedList<>();
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
+        if("".equals(pair.getKey()) && pair.getValue()==null){
+            // 根目录，应该列举bucket
+            try {
+                ListBucketsResponse resp = getClient().listBuckets();
+                if(resp!=null) {
+                    List<Bucket> buckets = resp.buckets();
+                    for (Bucket bucket : buckets) {
+                        String name = bucket.name();
+                        IFile file = getFile(pathSeparator() + name);
+                        ret.add(file);
+                    }
+                }
+            } catch (Throwable e) {
+
+            }
+            return ret;
+        }
         String subPath = ensureWithPathSeparator(pair.getValue());
-        List<IFile> ret = new ArrayList<>();
         ListObjectsResponse resp = null;
         AtomicReference<String> nextMarker = new AtomicReference<>(null);
         do {
@@ -252,7 +277,7 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
     @Override
     public OutputStream getOutputStream(String path) throws IOException {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
-        File tmpFile = File.createTempFile("aliyun-oss-" + UUID.randomUUID().toString(), ".tmp");
+        File tmpFile = File.createTempFile("awss3-oss-" + UUID.randomUUID().toString(), ".tmp");
         FileOutputStream fos = new FileOutputStream(tmpFile);
         return new FilterOutputStream(fos) {
             @Override
@@ -281,7 +306,7 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
 
     @Override
     public OutputStream getAppendOutputStream(String path) throws IOException {
-        throw new UnsupportedOperationException("aliyun-oss not support appendable stream");
+        throw new UnsupportedOperationException("awss3-oss not support appendable stream");
     }
 
     @Override
@@ -364,6 +389,26 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
     @Override
     public long length(String path) {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
+        if(pair.getValue()==null){
+            if("".equals(pair.getKey())){
+                // 根目录，直接返回0
+                return 0;
+            }
+            try {
+                GetBucketPolicyStatusResponse resp = getClient().getBucketPolicyStatus(e -> {
+                    e.bucket(pair.getKey());
+                });
+                if (resp.sdkHttpResponse().isSuccessful()) {
+                    PolicyStatus policyStatus = resp.policyStatus();
+                    if (policyStatus != null) {
+                        return 0;
+                    }
+                }
+                return -1;
+            } catch (Throwable e) {
+
+            }
+        }
         try {
             ResponseInputStream<GetObjectResponse> resp = getClient().getObject(e -> {
                 e.bucket(pair.getKey())
