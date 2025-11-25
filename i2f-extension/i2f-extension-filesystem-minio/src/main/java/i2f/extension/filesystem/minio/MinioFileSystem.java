@@ -38,7 +38,7 @@ public class MinioFileSystem extends AbsFileSystem {
         return super.pathSeparator();
     }
 
-    public Map.Entry<String, String> parseMinioPath(String path) {
+    public Map.Entry<String, String> splitPathAsBucketAndObjectName(String path) {
         String bucketName = null;
         String objectName = null;
         if (path == null) {
@@ -59,7 +59,7 @@ public class MinioFileSystem extends AbsFileSystem {
         return new AbstractMap.SimpleEntry<>(bucketName, objectName);
     }
 
-    public String minioPath(String path) {
+    public String ensureWithPathSeparator(String path) {
         if (path == null) {
             return null;
         }
@@ -84,7 +84,7 @@ public class MinioFileSystem extends AbsFileSystem {
         if (path.endsWith(pathSeparator())) {
             path = path.substring(0, path.length() - pathSeparator().length());
         }
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
             if("".equals(pair.getKey())){
                 // 根目录，一定是目录
@@ -124,7 +124,7 @@ public class MinioFileSystem extends AbsFileSystem {
 
     @Override
     public boolean isFile(String path) {
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
             return false;
         }
@@ -147,7 +147,7 @@ public class MinioFileSystem extends AbsFileSystem {
             path = path.substring(0, path.length() - pathSeparator().length());
         }
 
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
             // 根目录，一定存在
             if("".equals(pair.getKey())){
@@ -186,7 +186,7 @@ public class MinioFileSystem extends AbsFileSystem {
     @Override
     public List<IFile> listFiles(String path) {
         List<IFile> ret = new LinkedList<>();
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if("".equals(pair.getKey()) && pair.getValue()==null){
             // 根目录，应该列举bucket
             try {
@@ -203,7 +203,7 @@ public class MinioFileSystem extends AbsFileSystem {
         }
         Iterable<Result<Item>> iter = getClient().listObjects(ListObjectsArgs.builder()
                 .bucket(pair.getKey())
-                .prefix(minioPath(pair.getValue()))
+                .prefix(ensureWithPathSeparator(pair.getValue()))
                 .recursive(false)
                 .build()
         );
@@ -221,7 +221,7 @@ public class MinioFileSystem extends AbsFileSystem {
 
     @Override
     public void delete(String path) {
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (isFile(path)) {
             try {
                 getClient().removeObject(RemoveObjectArgs.builder()
@@ -254,7 +254,7 @@ public class MinioFileSystem extends AbsFileSystem {
 
     @Override
     public InputStream getInputStream(String path) throws IOException {
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
             return getClient().getObject(GetObjectArgs.builder()
                     .bucket(pair.getKey())
@@ -268,7 +268,7 @@ public class MinioFileSystem extends AbsFileSystem {
 
     @Override
     public OutputStream getOutputStream(String path) throws IOException {
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         File tmpFile = File.createTempFile("minio-" + UUID.randomUUID().toString(), ".tmp");
         FileOutputStream fos = new FileOutputStream(tmpFile);
         return new FilterOutputStream(fos) {
@@ -302,7 +302,7 @@ public class MinioFileSystem extends AbsFileSystem {
 
     @Override
     public void mkdir(String path) {
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
             boolean exBkt = getClient().bucketExists(BucketExistsArgs.builder().bucket(pair.getKey()).build());
             if (!exBkt) {
@@ -323,7 +323,7 @@ public class MinioFileSystem extends AbsFileSystem {
 
     @Override
     public void store(String path, InputStream is) throws IOException {
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         try {
             getClient().putObject(PutObjectArgs.builder()
                     .bucket(pair.getKey())
@@ -337,7 +337,7 @@ public class MinioFileSystem extends AbsFileSystem {
 
     @Override
     public void load(String path, OutputStream os) throws IOException {
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         InputStream is = null;
         try {
             is = getClient().getObject(GetObjectArgs.builder()
@@ -356,7 +356,7 @@ public class MinioFileSystem extends AbsFileSystem {
 
     @Override
     public long length(String path) {
-        Map.Entry<String, String> pair = parseMinioPath(path);
+        Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if(pair.getValue()==null){
             if("".equals(pair.getKey())){
                 // 根目录，直接返回0
