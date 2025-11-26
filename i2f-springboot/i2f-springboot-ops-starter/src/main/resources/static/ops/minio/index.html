@@ -886,7 +886,7 @@
                 this.dialog.createDirectory.saveLoading = true;
                 try {
                     let req = this.assignMinioMeta({
-                        path: this.dialog.createDirectory.path
+                        path: this.dialog.createDirectory.text
                     });
                     let transfer = this.getTransfer();
                     this.$axios({
