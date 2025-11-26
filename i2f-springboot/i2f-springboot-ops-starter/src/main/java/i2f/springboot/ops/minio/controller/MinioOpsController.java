@@ -2,16 +2,10 @@ package i2f.springboot.ops.minio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.filesystem.minio.MinioFileSystem;
-import i2f.extension.groovy.GroovyScript;
 import i2f.io.filesystem.IFile;
 import i2f.io.stream.StreamUtil;
-import i2f.springboot.ops.app.data.AppKeyValueItemDto;
-import i2f.springboot.ops.app.data.AppOperationDto;
-import i2f.springboot.ops.app.data.AppServiceInstanceDto;
-import i2f.springboot.ops.app.data.AppThreadInfoDto;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.host.data.HostFileItemDto;
-import i2f.springboot.ops.host.data.HostOperateDto;
 import i2f.springboot.ops.minio.data.MinioOperateDto;
 import i2f.springboot.ops.util.HumanUtil;
 import i2f.web.servlet.ServletFileUtil;
@@ -19,8 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -33,18 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -77,7 +59,7 @@ public class MinioOpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -145,7 +127,7 @@ public class MinioOpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -163,7 +145,7 @@ public class MinioOpsController {
             return transfer.success(true);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -196,7 +178,7 @@ public class MinioOpsController {
             return transfer.success(true);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -359,7 +341,7 @@ public class MinioOpsController {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 }

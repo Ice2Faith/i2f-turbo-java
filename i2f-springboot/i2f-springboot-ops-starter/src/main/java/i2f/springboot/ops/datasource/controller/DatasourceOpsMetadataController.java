@@ -62,7 +62,7 @@ public class DatasourceOpsMetadataController {
             }
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -79,7 +79,7 @@ public class DatasourceOpsMetadataController {
             }
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -97,7 +97,7 @@ public class DatasourceOpsMetadataController {
             }
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -129,7 +129,7 @@ public class DatasourceOpsMetadataController {
             }
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 }

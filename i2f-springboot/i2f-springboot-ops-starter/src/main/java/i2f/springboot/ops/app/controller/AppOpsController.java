@@ -2,10 +2,11 @@ package i2f.springboot.ops.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.groovy.GroovyScript;
-import i2f.springboot.ops.app.data.AppKeyValueItemDto;
-import i2f.springboot.ops.app.data.AppOperationDto;
-import i2f.springboot.ops.app.data.AppServiceInstanceDto;
-import i2f.springboot.ops.app.data.AppThreadInfoDto;
+import i2f.springboot.ops.app.data.*;
+import i2f.springboot.ops.app.data.metadata.AppClassDto;
+import i2f.springboot.ops.app.data.service.AppServiceInstanceDto;
+import i2f.springboot.ops.app.data.thread.AppThreadInfoDto;
+import i2f.springboot.ops.app.util.AppUtil;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import lombok.Data;
@@ -69,7 +70,7 @@ public class AppOpsController {
             return transfer.success(hostIp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -96,7 +97,7 @@ public class AppOpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -117,7 +118,7 @@ public class AppOpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -142,7 +143,7 @@ public class AppOpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -170,7 +171,34 @@ public class AppOpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+        }
+    }
+
+
+    @PostMapping("/class-metadata")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> classMetadata(@RequestBody OpsSecureDto reqDto,
+                                                          HttpServletRequest request) throws Exception {
+        try {
+            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
+            assertHostId(req);
+            String className = req.getClassName();
+            Class<?> clazz = AppUtil.loadClass(className);
+            if(clazz==null){
+                throw new ClassNotFoundException(className);
+            }
+            AppClassDto resp=AppClassDto.of(clazz);
+
+            return transfer.success(resp);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -201,7 +229,7 @@ public class AppOpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -227,7 +255,7 @@ public class AppOpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -311,7 +339,7 @@ public class AppOpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
