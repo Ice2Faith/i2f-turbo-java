@@ -64,7 +64,7 @@ public class DefaultDatasourceProvider implements DatasourceProvider {
                     }
                     dataSourceMap.put(name, entry.getValue());
                 }
-                defaultDataSourceName.set(detectPrimaryDatasource(dataSourceMap));
+
             }
         } catch (Exception e) {
         }
@@ -72,11 +72,9 @@ public class DefaultDatasourceProvider implements DatasourceProvider {
             DynamicRoutingDataSource bean = applicationContext.getBean(DynamicRoutingDataSource.class);
             Map<String, DataSource> ret = bean.getDataSources();
             dataSourceMap.putAll(ret);
-            defaultDataSourceName.set(detectPrimaryDatasource(dataSourceMap));
         } catch (Exception e) {
         }
         try {
-            Map<String, DataSource> ret = new HashMap<>();
             String[] beanNames = applicationContext.getBeanNamesForType(DataSource.class);
             for (String beanName : beanNames) {
                 DataSource bean = applicationContext.getBean(beanName, DataSource.class);
@@ -89,7 +87,12 @@ public class DefaultDatasourceProvider implements DatasourceProvider {
                 }
                 dataSourceMap.put(name, bean);
             }
-            defaultDataSourceName.set(detectPrimaryDatasource(dataSourceMap));
+        } catch (Exception e) {
+
+        }
+        defaultDataSourceName.set(detectPrimaryDatasource(dataSourceMap));
+        try {
+            dataSourceMap.put(DEFAULT_DATASOURCE_NAME,dataSourceMap.get(defaultDataSourceName.get()));
         } catch (Exception e) {
 
         }
