@@ -2,6 +2,11 @@ package i2f.extension.elasticsearch;
 
 import i2f.page.Page;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -19,11 +24,14 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
+import org.elasticsearch.cluster.health.ClusterHealthStatus;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -32,7 +40,9 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -102,6 +112,46 @@ public class EsManager {
         return client;
     }
 
+    public static BasicCredentialsProvider getCredentialsProvider(String username,String password) {
+        // 认证信息配置
+        BasicCredentialsProvider ret = new BasicCredentialsProvider();
+        ret.setCredentials(
+                AuthScope.ANY,
+                new UsernamePasswordCredentials(username, password) // 用户名密码
+        );
+        return ret;
+    }
+
+    public static RestHighLevelClient getClient(EsMeta meta) throws IOException {
+        List<String> urls = meta.getUrls();
+        String username = meta.getUsername();
+        String password = meta.getPassword();
+        List<HttpHost> hosts = new ArrayList<>();
+        for (String item : urls) {
+            URL url = new URL(item);
+            hosts.add(new HttpHost(url.getHost(), url.getPort(), url.getProtocol()));
+        }
+        RestClientBuilder clientBuilder = RestClient.builder(hosts.toArray(new HttpHost[0]))
+                .setHttpClientConfigCallback(builder -> {
+                            if (meta.getMaxConnTotal() != null && meta.getMaxConnTotal() > 0) {
+                                builder.setMaxConnTotal(meta.getMaxConnTotal());
+                            }
+                            if (meta.getMaxConnPerRoute() != null && meta.getMaxConnPerRoute() > 0) {
+                                builder.setMaxConnPerRoute(meta.getMaxConnPerRoute());
+                            }
+                            if (username != null && !username.isEmpty()) {
+                                if (password != null && !password.isEmpty()) {
+                                    builder.setDefaultCredentialsProvider(getCredentialsProvider(username, password));
+                                }
+                            }
+
+                            return builder;
+                        }
+                );
+
+        return new RestHighLevelClient(clientBuilder);
+    }
+
     public static void closeClient(RestHighLevelClient client) throws IOException {
         if (client != null) {
             client.close();
@@ -122,8 +172,32 @@ public class EsManager {
     }
 
     ////////////////////////////////////////////
+    public List<String> indexListAll() throws IOException {
+        return indexListByPattern("*");
+    }
+
+    public List<String> indexListByPattern(String pattern) throws IOException {
+        GetIndexResponse response = indexSearch(pattern);
+        String[] indices = response.getIndices();
+        return new ArrayList<>(Arrays.asList(indices));
+    }
+
     public boolean indexCreate(String indexName) throws IOException {
+        return indexCreate(indexName,null,null);
+    }
+
+    public boolean indexCreate(String indexName,String mappingJson) throws IOException {
+        return indexCreate(indexName,mappingJson,null);
+    }
+
+    public boolean indexCreate(String indexName,String mappingJson,String settingJson) throws IOException {
         CreateIndexRequest request = new CreateIndexRequest(indexName);
+        if(mappingJson!=null && !mappingJson.isEmpty()){
+            request.mapping(mappingJson,XContentType.JSON);
+        }
+        if(settingJson!=null && !settingJson.isEmpty()){
+            request.settings(settingJson,XContentType.JSON);
+        }
         CreateIndexResponse response = getClient().indices().create(request, RequestOptions.DEFAULT);
         return response.isAcknowledged();
     }
@@ -143,6 +217,12 @@ public class EsManager {
     public boolean indexExists(String indexName) throws IOException {
         GetIndexRequest request = new GetIndexRequest(indexName);
         return getClient().indices().exists(request, RequestOptions.DEFAULT);
+    }
+
+    public ClusterHealthStatus indexHealth(String indexName) throws Exception {
+        ClusterHealthRequest request = new ClusterHealthRequest(indexName);
+        ClusterHealthResponse response = getClient().cluster().health(request, RequestOptions.DEFAULT);
+        return response.getStatus();
     }
 
     ////////////////////////////////////////////
@@ -311,7 +391,6 @@ public class EsManager {
         request.indices(indexName);
 
         request.source(builder);
-
         SearchResponse response = getClient().search(request, RequestOptions.DEFAULT);
         return response;
     }
