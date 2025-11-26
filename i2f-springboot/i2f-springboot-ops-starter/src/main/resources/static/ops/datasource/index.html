@@ -724,7 +724,7 @@
 
             <el-form-item>
                 <el-button type="primary" @click="doRenderEcharts">绘制图表</el-button>
-                <el-button type="success" @click="doRefreshChartData">刷新数据</el-button>
+                <el-button type="success" v-loading="metas.resultLoading" @click="doRefreshChartData">刷新数据</el-button>
             </el-form-item>
             <el-form-item label="图表变体">
                 <template v-if="dialog.visualChart.config.type=='scatter'">
