@@ -111,24 +111,14 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
         } else {
             ListObjectsResponse resp = getClient().listObjects(e -> {
                 e.bucket(pair.getKey())
-                        .prefix(pair.getValue());
+                        .prefix(ensureWithPathSeparator(pair.getValue()));
             });
             if (resp == null) {
                 return false;
             }
             List<S3Object> contents = resp.contents();
             for (S3Object item : contents) {
-                try {
-                    String name = decodeObjectName(item.key());
-                    if (name.endsWith(pathSeparator())) {
-                        name = name.substring(0, name.length() - pathSeparator().length());
-                    }
-                    if (name.equals(pair.getValue())) {
-                        return true;
-                    }
-
-                } catch (Throwable e) {
-                }
+                return true;
             }
         }
 
@@ -175,11 +165,33 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
             }
 
         } else {
-            ResponseInputStream<GetObjectResponse> resp = getClient().getObject(e -> {
-                e.bucket(pair.getKey())
-                        .key(pair.getValue());
-            });
-            return resp != null && resp.response() != null;
+            // 是文件
+            try {
+                ResponseInputStream<GetObjectResponse> resp = getClient().getObject(e -> {
+                    e.bucket(pair.getKey())
+                            .key(pair.getValue());
+                });
+                return resp != null && resp.response() != null;
+            } catch (Exception e) {
+
+            }
+
+            // 是目录
+            try {
+                ListObjectsResponse resp = getClient().listObjects(e -> {
+                    e.bucket(pair.getKey())
+                            .prefix(ensureWithPathSeparator(pair.getValue()));
+                });
+                if (resp == null) {
+                    return false;
+                }
+                List<S3Object> contents = resp.contents();
+                for (S3Object item : contents) {
+                    return true;
+                }
+            } catch (Exception e) {
+
+            }
         }
         return false;
     }
@@ -214,6 +226,10 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
             }
             return ret;
         }
+        String inPath=path;
+        if(inPath.endsWith(pathSeparator())){
+            inPath=inPath.substring(0,inPath.length()-pathSeparator().length());
+        }
         String subPath = ensureWithPathSeparator(pair.getValue());
         ListObjectsResponse resp = null;
         AtomicReference<String> nextMarker = new AtomicReference<>(null);
@@ -232,7 +248,19 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
                 if(name.endsWith(pathSeparator())){
                     name=name.substring(0,name.length()-pathSeparator().length());
                 }
-                ret.add(getFile(pathSeparator()+pair.getKey(), name));
+                if(subPath!=null) {
+                    if(name.startsWith(subPath)) {
+                        String subName = name.substring(subPath.length());
+                        if (subName.contains(pathSeparator())) {
+                            continue;
+                        }
+                    }
+                }
+                IFile file = getFile(pathSeparator() + pair.getKey(), name);
+                if(Objects.equals(file.getPath(),inPath)){
+                    continue;
+                }
+                ret.add(file);
             }
             nextMarker.set(resp.nextMarker());
         } while (resp != null && resp.isTruncated());
@@ -433,8 +461,9 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
             resp.close();
             return ret;
         } catch (Throwable e) {
-            throw new IllegalStateException(e.getMessage(), e);
+
         }
+        return -1;
     }
 
     @Override

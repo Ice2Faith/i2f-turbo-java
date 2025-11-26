@@ -1,7 +1,9 @@
 package i2f.extension.filesystem.oss.aliyun;
 
 
+import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.*;
 import i2f.extension.oss.aliyun.AliyunOssMeta;
 import i2f.extension.oss.aliyun.AliyunOssUtil;
@@ -96,20 +98,10 @@ public class AliyunOssFileSystem extends AbsFileSystem {
 
             }
         } else {
-            ObjectListing listing = getClient().listObjects(pair.getKey(), pair.getValue());
+            ObjectListing listing = getClient().listObjects(pair.getKey(), ensureWithPathSeparator(pair.getValue()));
             List<OSSObjectSummary> iter = listing.getObjectSummaries();
             for (OSSObjectSummary item : iter) {
-                try {
-                    String name = item.getKey();
-                    if (name.endsWith(pathSeparator())) {
-                        name = name.substring(0, name.length() - pathSeparator().length());
-                    }
-                    if (name.equals(pair.getValue())) {
-                        return true;
-                    }
-
-                } catch (Throwable e) {
-                }
+                return true;
             }
         }
 
@@ -147,7 +139,26 @@ public class AliyunOssFileSystem extends AbsFileSystem {
 
             }
         } else {
-            return getClient().doesObjectExist(pair.getKey(), pair.getValue());
+            // 是文件
+            try {
+                boolean ok= getClient().doesObjectExist(pair.getKey(), pair.getValue());
+                if(ok){
+                    return true;
+                }
+            } catch (Exception e) {
+
+            }
+
+            // 是目录
+            try {
+                ObjectListing listing = getClient().listObjects(pair.getKey(), ensureWithPathSeparator(pair.getValue()));
+                List<OSSObjectSummary> iter = listing.getObjectSummaries();
+                for (OSSObjectSummary item : iter) {
+                    return true;
+                }
+            } catch (Exception e) {
+
+            }
         }
 
         return false;
@@ -180,6 +191,10 @@ public class AliyunOssFileSystem extends AbsFileSystem {
             }
             return ret;
         }
+        String inPath=path;
+        if(inPath.endsWith(pathSeparator())){
+            inPath=inPath.substring(0,inPath.length()-pathSeparator().length());
+        }
         String subPath = ensureWithPathSeparator(pair.getValue());
         String nextMarker = null;
         ObjectListing listing = null;
@@ -192,7 +207,19 @@ public class AliyunOssFileSystem extends AbsFileSystem {
                     if(name.endsWith(pathSeparator())){
                         name=name.substring(0,name.length()-pathSeparator().length());
                     }
-                    ret.add(getFile(pair.getKey(), name));
+                    if(subPath!=null) {
+                        if(name.startsWith(subPath)) {
+                            String subName = name.substring(subPath.length());
+                            if (subName.contains(pathSeparator())) {
+                                continue;
+                            }
+                        }
+                    }
+                    IFile file = getFile(pathSeparator() + pair.getKey(), name);
+                    if(Objects.equals(file.getPath(),inPath)){
+                        continue;
+                    }
+                    ret.add(file);
                 } catch (Throwable e) {
                 }
             }
@@ -351,8 +378,9 @@ public class AliyunOssFileSystem extends AbsFileSystem {
             ObjectMetadata metadata = getClient().getObjectMetadata(pair.getKey(), pair.getValue());
             return metadata.getContentLength();
         } catch (Throwable e) {
-            throw new IllegalStateException(e.getMessage(), e);
+
         }
+        return -1;
     }
 
     @Override
