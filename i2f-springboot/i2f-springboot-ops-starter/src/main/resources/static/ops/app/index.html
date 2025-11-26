@@ -813,9 +813,20 @@
                 let keywords = [
                     'context', 'env', 'beanMap',
                     'size','length','isEmpty',
+                    'new',
+                    'Date','System','Thread',
+                    'HashMap','HashSet','ArrayList',
+                    'if','for','while','do',
+                    'else'
                 ]
                 if (keywords) {
                     items.push(...keywords);
+                }
+
+                if(this.metas.beans && this.metas.beans.length>0) {
+                    this.metas.beans.forEach(item => {
+                        items.push(item.key);
+                    })
                 }
 
                 let completions = [];

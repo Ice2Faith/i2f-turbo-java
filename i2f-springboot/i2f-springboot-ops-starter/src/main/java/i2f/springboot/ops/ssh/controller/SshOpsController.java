@@ -55,7 +55,7 @@ public class SshOpsController {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -135,7 +135,7 @@ public class SshOpsController {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -151,7 +151,7 @@ public class SshOpsController {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -167,7 +167,7 @@ public class SshOpsController {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -350,7 +350,7 @@ public class SshOpsController {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -401,7 +401,7 @@ public class SshOpsController {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 

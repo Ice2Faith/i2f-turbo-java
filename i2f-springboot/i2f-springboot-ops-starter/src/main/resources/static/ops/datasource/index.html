@@ -1077,6 +1077,46 @@
             collectCompletionItems(){
                 //console.log('begin collect completions ...')
                 let items=[];
+                let keywords = [
+                    'with',
+                    'select','as','count',
+                    'case','when','then','else','end',
+                    'from','inner','left','right','outer','on',
+                    'where','and','or','in','not','exists',
+                    'like',
+                    'having',
+                    'group','by',
+                    'order',
+                    'limit','offset',
+                    'start','with',
+                    'insert','into','values',
+                    'update','set',
+                    'delete',
+                    'create',
+                    'table','view','sequence','function','procedure','type','package','body','index',
+                    'replace',
+                    'int','tinyint','smallint','bigint','number',
+                    'date','datetime','timestamp','time',
+                    'varchar','varchar2',
+                    'text','long','blob','clob',
+                    'decimal','double','float',
+                    'comment','table','column',
+                    'drop','add','modify','rename','to','remove',
+                    'grant','all','schema',
+                    'primary','key',
+                    'foreign','references',
+                    'unique',
+                    'partition','subpartition',
+                    'instr','concat','auto_increment',
+                    'substr',
+                    'hash','list',
+                    'interval','sysdate','now',
+                    'default','is','null',
+                    'nextval','dual'
+                ]
+                if (keywords) {
+                    items.push(...keywords);
+                }
                 let storageKey=this.getDatasourceStorageKey();
                 let databaseList=this.storage.databaseMap[storageKey]
                 if(databaseList){

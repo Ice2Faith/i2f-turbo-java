@@ -1,4 +1,4 @@
-package i2f.springboot.ops.app.data;
+package i2f.springboot.ops.app.data.service;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

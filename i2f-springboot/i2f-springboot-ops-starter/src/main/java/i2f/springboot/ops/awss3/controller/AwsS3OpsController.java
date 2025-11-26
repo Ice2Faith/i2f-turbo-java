@@ -65,7 +65,7 @@ public class AwsS3OpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -133,7 +133,7 @@ public class AwsS3OpsController {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -151,7 +151,7 @@ public class AwsS3OpsController {
             return transfer.success(true);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -184,7 +184,7 @@ public class AwsS3OpsController {
             return transfer.success(true);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
@@ -347,7 +347,7 @@ public class AwsS3OpsController {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getMessage());
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 }

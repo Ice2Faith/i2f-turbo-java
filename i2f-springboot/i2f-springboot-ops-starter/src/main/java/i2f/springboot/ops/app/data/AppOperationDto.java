@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class AppOperationDto extends OpsHostIdDto {
+    protected String className;
 
     protected String script;
     protected long waitForSeconds;
