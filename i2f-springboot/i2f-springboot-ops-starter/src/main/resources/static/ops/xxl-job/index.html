@@ -78,7 +78,7 @@
     <el-divider>Xxl Job 操作</el-divider>
     <el-card shadow="never">
         <el-row type="flex">
-            <el-col :span="12">
+            <el-col :span="16">
                 <el-card shadow="never">
                     <el-row type="flex">
                         <el-col :span="12">
@@ -104,17 +104,34 @@
                     <recycle-scroller :items="computeFilterJobs"
                                       class="scroller"
                                       :item-size="32"
-                                      key-field="name"
+                                      key-field="executorHandler"
                                       v-slot="{ item }">
                         <el-row type="flex"
                                 :class="'list-item '+(item==form.method?'checked-item':'')"
                                 @click.native="onClickJobItem(item)">
-                            {{item}}
+                            <el-col :span="12" style="border-right: solid 1px #777;">
+                                <el-tooltip class="item" effect="dark" :content="item.executorHandler" placement="top-start">
+                                    <span class="list-item-cell">{{item.executorHandler}}</span>
+                                </el-tooltip>
+                            </el-col>
+                            <el-col :span="8" style="border-right: solid 1px #777;">
+                                <el-tooltip class="item" effect="dark" :content="item.jobDesc" placement="top-start">
+                                    <span class="list-item-cell">{{item.jobDesc}}</span>
+                                </el-tooltip>
+                            </el-col>
+                            <el-col :span="4">
+                                <el-tooltip class="item" effect="dark" :content="item.scheduleConf" placement="top-start">
+                                    <span class="list-item-cell" style="display: inline-block;width: 100%;height: 100%;">
+                                        <el-tag type="success" class="table-cell-hidden" @click.stop="onViewText(item,'任务详情','javascript')">更多</el-tag>
+                                        {{item.scheduleConf}}
+                                    </span>
+                                </el-tooltip>
+                            </el-col>
                         </el-row>
                     </recycle-scroller>
                 </el-card>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
                 <el-card shadow="never">
                     <el-row>
                         调度参数
@@ -210,6 +227,26 @@
         <textarea ref="refResultEditor"></textarea>
     </el-card>
 
+    <el-dialog
+            :title="dialog.textViewer.title"
+            :visible.sync="dialog.textViewer.show"
+            width="80%">
+        <el-card shadow="never">
+            <el-form inline label-position="left" label-width="100px">
+                <el-form-item label="语言类型">
+                    <el-select v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                        <el-option
+                                v-for="item in metas.langList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <textarea ref="refTextViewerEditor"></textarea>
+        </el-card>
+    </el-dialog>
 </div>
 </body>
 <script>
@@ -227,13 +264,14 @@
         mounted() {
             this.initEditor();
             this.initResultEditor();
+            this.initTextViewerEditor();
         },
         watch: {},
         computed: {
             computeFilterJobs() {
                 let list = this.metas.jobs || [];
                 return list.filter(item => {
-                    return (!this.metas.filterJob || item.toLowerCase().indexOf(this.metas.filterJob.toLowerCase()) >= 0);
+                    return (!this.metas.filterJob || item.executorHandler.toLowerCase().indexOf(this.metas.filterJob.toLowerCase()) >= 0);
                 })
             }
         },
@@ -244,6 +282,7 @@
                     opsBroadcastChannel:null,
                     langEditors: {
                         resultEditor: null,
+                        textViewerEditor: null,
                     },
                     completions: [],
                     storage: {},
@@ -275,7 +314,12 @@
 
                     },
                     dialog: {
-
+                        textViewer: {
+                            show: false,
+                            title: '文本浏览',
+                            text: '',
+                            lang: 'text'
+                        },
                     },
                     form: {
                         useHostId: false,
@@ -509,6 +553,37 @@
             onResultLangChange(){
                 this.initResultEditor();
             },
+            initTextViewerEditor(){
+                this.initLangEditor('textViewerEditor','refTextViewerEditor',this.dialog.textViewer.lang,(editor,dom)=>{
+                    editor.setValue(this.dialog.textViewer.text || '');
+                    editor.on('change', () => {
+                        this.dialog.textViewer.text = editor.getValue();
+                    });
+                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
+                })
+            },
+            onTextViewerLangChange(){
+                this.initTextViewerEditor()
+            },
+            onViewText(obj, title,lang) {
+                if (title && title.length > 0) {
+                    this.dialog.textViewer.title = title;
+                } else {
+                    this.dialog.textViewer.title = '文本浏览';
+                }
+                let text = ''
+                if (typeof obj == 'string') {
+                    text = obj;
+                } else {
+                    text = JSON.stringify(obj, null, '    ');
+                }
+                this.dialog.textViewer.lang=lang || 'text';
+                this.dialog.textViewer.text = text;
+                this.dialog.textViewer.show = true;
+                setTimeout(()=>{
+                    this.initTextViewerEditor()
+                },200)
+            },
             initStoreData() {
                 let reset = new URL(window.location.href).searchParams.get('reset');
                 if (reset != 'true') {
@@ -685,8 +760,8 @@
                 }
             },
             onClickJobItem(item){
-                this.form.method=item;
-            }
+                this.form.method=item.executorHandler;
+            },
         }
     })
     let defaultConfig = {
@@ -715,6 +790,22 @@
 
     .list-item:hover {
         background: lightskyblue;
+    }
+
+    .list-item-cell{
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: inherit;
+    }
+
+
+    .list-item-cell .table-cell-hidden {
+        display: none;
+    }
+
+    .list-item-cell:hover .table-cell-hidden {
+        display: unset;
     }
 
     .checked-item {
