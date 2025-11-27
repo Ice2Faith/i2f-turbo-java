@@ -256,21 +256,30 @@ public class SftpUtil implements Closeable {
             PrintWriter printWriter = null;
             BufferedReader input = null;
 
-
             try {
                 channel = getChannelShell();
 
-                InputStreamReader inputStreamReader = new InputStreamReader(channel.getInputStream(),
-                        ((charset == null || charset.isEmpty()) ? StandardCharsets.UTF_8.name() : charset));
-                input = new BufferedReader(inputStreamReader);
+                input = new BufferedReader(new InputStreamReader(channel.getInputStream(),
+                        ((charset == null || charset.isEmpty()) ? StandardCharsets.UTF_8.name() : charset)));
 
-                printWriter = new PrintWriter(channel.getOutputStream());
+                printWriter = new PrintWriter(channel.getOutputStream(),true);
                 if (dir != null && !dir.isEmpty()) {
                     printWriter.println("cd " + dir);
+                    printWriter.flush();
                 }
                 printWriter.println(cmd);
-                printWriter.println("exit");
                 printWriter.flush();
+
+                PrintWriter finalWriter=printWriter;
+                new Thread(()->{
+                    try {
+                        Thread.sleep(300);
+                        finalWriter.println("exit");
+                        finalWriter.flush();
+                    } catch (InterruptedException e) {
+
+                    }
+                }).start();
                 if (requireOutput) {
                     String line = null;
                     while ((line = input.readLine()) != null) {
@@ -279,6 +288,8 @@ public class SftpUtil implements Closeable {
                     }
                 }
 
+                int exitStatus = channel.getExitStatus();
+                builder.append("exit status: ").append(exitStatus).append("\n");
             } catch (Exception e) {
                 exHolder.set(e);
             } finally {
