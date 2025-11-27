@@ -761,6 +761,11 @@
             },
             onClickJobItem(item){
                 this.form.method=item.executorHandler;
+                let param=item.executorParam;
+                if(!this.form.param || this.form.param.trim().length==0) {
+                    this.form.param=param || '';
+                    this.editor.setValue(this.form.param || '');
+                }
             },
         }
     })
