@@ -226,22 +226,22 @@ public interface ContextFunctions {
     }
 
     default int index_of(Object oStr, Object oSstr) {
-        return index_of(oStr,oSstr,0);
+        return index_of(oStr, oSstr, 0);
     }
 
-    default int index_of(Object oStr, Object oSstr,int fromIndex) {
+    default int index_of(Object oStr, Object oSstr, int fromIndex) {
         if (oStr == null) {
             return -1;
         }
         if (oSstr == null) {
             return -1;
         }
-        String sstr=String.valueOf(oSstr);
+        String sstr = String.valueOf(oSstr);
         if (sstr.isEmpty()) {
             return 0;
         }
-        String str=String.valueOf(oStr);
-        return str.indexOf(sstr,fromIndex);
+        String str = String.valueOf(oStr);
+        return str.indexOf(sstr, fromIndex);
     }
 
     default int last_index_of(Object oStr, Object oSstr) {
@@ -251,27 +251,27 @@ public interface ContextFunctions {
         if (oSstr == null) {
             return -1;
         }
-        String sstr=String.valueOf(oSstr);
+        String sstr = String.valueOf(oSstr);
         if (sstr.isEmpty()) {
             return 0;
         }
-        String str= String.valueOf(oStr);
+        String str = String.valueOf(oStr);
         return str.lastIndexOf(sstr);
     }
 
-    default int last_index_of(Object oStr, Object oSstr,int fromIndex) {
+    default int last_index_of(Object oStr, Object oSstr, int fromIndex) {
         if (oStr == null) {
             return -1;
         }
         if (oSstr == null) {
             return -1;
         }
-        String sstr=String.valueOf(oSstr);
+        String sstr = String.valueOf(oSstr);
         if (sstr.isEmpty()) {
             return 0;
         }
-        String str= String.valueOf(oStr);
-        return str.lastIndexOf(sstr,fromIndex);
+        String str = String.valueOf(oStr);
+        return str.lastIndexOf(sstr, fromIndex);
     }
 
     default String replace(Object str, Object target) {
@@ -282,15 +282,15 @@ public interface ContextFunctions {
         if (oStr == null) {
             return null;
         }
-        String str=String.valueOf(oStr);
+        String str = String.valueOf(oStr);
         if (oTarget == null) {
             return str;
         }
         if (oReplacement == null) {
             oReplacement = "";
         }
-        String target=String.valueOf(oTarget);
-        String replacement=String.valueOf(oReplacement);
+        String target = String.valueOf(oTarget);
+        String replacement = String.valueOf(oReplacement);
         return str.replace(target, replacement);
     }
 
@@ -312,8 +312,8 @@ public interface ContextFunctions {
         if (oReplacement == null) {
             oReplacement = "";
         }
-        String str=String.valueOf(oStr);
-        String replacement=String.valueOf(oReplacement);
+        String str = String.valueOf(oStr);
+        String replacement = String.valueOf(oReplacement);
         regex = convertOracleRegexExpression(regex);
         replacement = convertOracleRegexReplacement(replacement);
         if (occurrence <= 0) {
@@ -351,7 +351,7 @@ public interface ContextFunctions {
         if (regex == null) {
             return false;
         }
-        String str= String.valueOf(oStr);
+        String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
         return str.matches(regex);
     }
@@ -367,8 +367,8 @@ public interface ContextFunctions {
         if (regex == null) {
             return new ArrayList<>();
         }
-        String str=String.valueOf(oStr);
-        regex=convertOracleRegexExpression(regex);
+        String str = String.valueOf(oStr);
+        regex = convertOracleRegexExpression(regex);
         return RegexUtil.regexFinds(str, regex)
                 .stream()
                 .map(e -> e.getMatchStr())
@@ -382,9 +382,9 @@ public interface ContextFunctions {
         if (regex == null) {
             return false;
         }
-        String str=String.valueOf(oStr);
+        String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
-        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex,1);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex, 1);
         if (!list.isEmpty()) {
             return true;
         }
@@ -410,9 +410,9 @@ public interface ContextFunctions {
         if (regex == null) {
             return -1;
         }
-        String str=String.valueOf(oStr);
+        String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
-        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex,1);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex, 1);
         if (!list.isEmpty()) {
             RegexMatchItem item = list.get(0);
             return item.getIdxStart();
@@ -431,9 +431,9 @@ public interface ContextFunctions {
         if (regex == null) {
             return -1;
         }
-        String str=String.valueOf(oStr);
+        String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
-        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex,1);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex, 1);
         if (!list.isEmpty()) {
             RegexMatchItem item = list.get(0);
             return item.getIdxEnd();
@@ -452,9 +452,9 @@ public interface ContextFunctions {
         if (regex == null) {
             return null;
         }
-        String str=String.valueOf(oStr);
+        String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
-        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex,1);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex, 1);
         if (!list.isEmpty()) {
             RegexMatchItem item = list.get(0);
             return item.getMatchStr();
@@ -1497,6 +1497,31 @@ public interface ContextFunctions {
         }
     }
 
+    default String substring(Object obj, int beginIndex) {
+        return substring(obj, beginIndex, -1);
+    }
+
+    default String substring(Object obj, int beginIndex, int endIndex) {
+        String str = null;
+        if (obj != null) {
+            str = String.valueOf(obj);
+        }
+        if (str == null) {
+            return str;
+        }
+        if (beginIndex >= str.length()) {
+            return "";
+        }
+        if (endIndex >= 0) {
+            if (endIndex >= str.length()) {
+                return str.substring(beginIndex);
+            }
+            return str.substring(beginIndex, endIndex);
+        } else {
+            return str.substring(beginIndex);
+        }
+    }
+
     default String substrb(Object str, int index) {
         return substrb(str, index, -1);
     }
@@ -1531,19 +1556,69 @@ public interface ContextFunctions {
         return builder.toString();
     }
 
+    default int substr_count(Object obj, Object substr) {
+        if (obj == null || substr == null) {
+            return -1;
+        }
+        String str = String.valueOf(obj);
+        String sstr = String.valueOf(obj);
+        ArrayList<String> arr = split_literal(str, sstr);
+        return arr.size() - 1;
+    }
+
+    default String substr2_index(Object obj, Object substr) {
+        return substr2_index(obj, substr, 0);
+    }
+
+    default String substr2_index(Object obj, Object substr, int beginIndex) {
+        if (obj == null) {
+            return null;
+        }
+        int endIndex = instr(obj, substr);
+        if (beginIndex < 0) {
+            beginIndex = 0;
+        }
+        if (endIndex < beginIndex) {
+            endIndex = -1;
+        }
+        return substring(obj, beginIndex, endIndex);
+    }
+
+    default String substr2_index_end(Object obj, Object substr) {
+        return substr2_index_end(obj, substr, 0);
+    }
+
+    default String substr2_index_end(Object obj, Object substr, int beginIndex) {
+        if (obj == null) {
+            return null;
+        }
+        int endIndex = instr(obj, substr);
+        if (endIndex < 0) {
+            return "";
+        }
+        if (beginIndex < 0) {
+            beginIndex = 0;
+        }
+        if (endIndex < beginIndex) {
+            endIndex = -1;
+        }
+        String ret = substring(obj, beginIndex, endIndex);
+        return ret + substr;
+    }
+
     default String substr_index(Object obj, Object substr, int len) {
         int idx = instr(obj, substr);
         if (idx < 0) {
             return "";
         }
-        if(len<0){
-            return substr(obj,idx);
+        if (len < 0) {
+            return substr(obj, idx);
         }
         return substr(obj, idx, len);
     }
 
     default String substr_index(Object obj, Object substr) {
-        return substr_index(obj,substr,-1);
+        return substr_index(obj, substr, -1);
     }
 
     default String substr_index_end(Object obj, Object substr, int len) {
@@ -1551,15 +1626,15 @@ public interface ContextFunctions {
         if (idx < 0) {
             return "";
         }
-        int l=length(substr);
-        if(len<0){
-            return substr(obj,idx+len);
+        int l = length(substr);
+        if (len < 0) {
+            return substr(obj, idx + l);
         }
-        return substr(obj, idx+len, len);
+        return substr(obj, idx + l, len);
     }
 
     default String substr_index_end(Object obj, Object substr) {
-        return substr_index_end(obj,substr,-1);
+        return substr_index_end(obj, substr, -1);
     }
 
     default String substr_regex_index(Object obj, String substr, int len) {
@@ -1567,29 +1642,29 @@ public interface ContextFunctions {
         if (idx < 0) {
             return "";
         }
-        if(len<0){
-            return substr(obj,idx);
+        if (len < 0) {
+            return substr(obj, idx);
         }
         return substr(obj, idx, len);
     }
 
     default String substr_regex_index(Object obj, String substr) {
-        return substr_regex_index(obj,substr,-1);
+        return substr_regex_index(obj, substr, -1);
     }
 
     default String substr_regex_index_end(Object obj, String substr, int len) {
-        int idx =regex_index_end(obj, substr);
+        int idx = regex_index_end(obj, substr);
         if (idx < 0) {
             return "";
         }
-        if(len<0){
-            return substr(obj,idx);
+        if (len < 0) {
+            return substr(obj, idx);
         }
         return substr(obj, idx, len);
     }
 
     default String substr_regex_index_end(Object obj, String substr) {
-        return substr_regex_index_end(obj,substr,-1);
+        return substr_regex_index_end(obj, substr, -1);
     }
 
     default ArrayList<String> regex_split(Object str, String regex) {
@@ -1600,11 +1675,11 @@ public interface ContextFunctions {
         if (oStr == null) {
             return new ArrayList<>();
         }
-        String str=String.valueOf(oStr);
+        String str = String.valueOf(oStr);
         if (regex == null) {
             return new ArrayList<>(Collections.singletonList(str));
         }
-        regex=convertOracleRegexExpression(regex);
+        regex = convertOracleRegexExpression(regex);
         String[] arr = RegexUtil.getPattern(regex).split(str, limit);
         return new ArrayList<>(Arrays.asList(arr));
     }
@@ -1613,26 +1688,27 @@ public interface ContextFunctions {
         return split_literal(str, literal, -1);
     }
 
-    default ArrayList<String> split(Object str, Object literal){
-        return split_literal(str,literal);
+    default ArrayList<String> split(Object str, Object literal) {
+        return split_literal(str, literal);
     }
 
     default ArrayList<String> split_literal(Object oStr, Object oLiteral, int limit) {
         if (oStr == null) {
             return new ArrayList<>();
         }
-        String str=String.valueOf(oStr);
+        String str = String.valueOf(oStr);
         if (oLiteral == null) {
             return new ArrayList<>(Collections.singletonList(str));
         }
-        String literal=String.valueOf(oLiteral);
+        String literal = String.valueOf(oLiteral);
         String[] arr = RegexUtil.getPattern(literal, Pattern.LITERAL).split(str, limit);
         return new ArrayList<>(Arrays.asList(arr));
     }
 
-    default ArrayList<String> split(Object str, Object literal, int limit){
-        return split_literal(str,literal,limit);
+    default ArrayList<String> split(Object str, Object literal, int limit) {
+        return split_literal(str, literal, limit);
     }
+
     default boolean contains(Object obj, Object substr) {
         if (obj == null || substr == null) {
             return false;
