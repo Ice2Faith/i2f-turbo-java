@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ops - ElasticSearch</title>
+    <script src="../lib/vue/vue-2.js"></script>
+    <script src="../lib/moment/moment-2.24.0.js"></script>
+    <script src="../lib/element-ui/element-ui-2.15.10.js"></script>
+    <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10.css"/>
+    <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10-icon.css"/>
+    <link href="../lib/element-ui/fonts/element-icons.ttf"/>
+    <link href="../lib/element-ui/fonts/element-icons.woff"/>
+    <script src="../lib/axios/axios-1.1.3.min.js"></script>
+    <script src="../lib/axios/qs.js"></script>
+    <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm4.js"></script>
+    <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm3.js"></script>
+    <script src="../lib/sm-crypto-0.3.2.1-RELEASE/sm2.js"></script>
+    <script src="../lib/base64/Base64.js"></script>
+    <script src="../common/OpsSecureKeyPair.js"></script>
+    <script src="../common/OpsSecureCertPair.js"></script>
+    <script src="../common/OpsSecureDto.js"></script>
+    <script src="../common/OpsSecureHelper.js"></script>
+    <script src="../common/OpsSecureTransfer.js"></script>
+    <script src="../lib/echarts-5/echarts.min.js"></script>
+    <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
+    <script src="../lib/codemirror-6.65.7/codemirror.min.js" ></script>
+    <link rel="stylesheet" href="../lib/codemirror-6.65.7/codemirror.min.css" />
+    <link rel="stylesheet" href="../lib/codemirror-6.65.7/addon/hint/show-hint.min.css" />
+    <script src="../lib/codemirror-6.65.7/addon/hint/show-hint.min.js" ></script>
+    <link rel="stylesheet" href="../lib/codemirror-6.65.7/theme/idea.min.css" />
+    <script src="../lib/codemirror-6.65.7/mode/sql/sql.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/sql/sql-hint.min.js" ></script>
+
+    <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css" />
+    <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
+
+
+    <script src="../lib/codemirror-6.65.7/mode/yaml/yaml.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/yaml/yaml-lint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/javascript/javascript.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/javascript/javascript-hint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/javascript/javascript-lint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/sql/sql.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/sql/sql-hint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/shell/shell.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/xml/xml.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/xml/xml-fold.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/xml/xml-hint.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/addon/lint/html/html-lint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/html/html-hint.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/mode/htmlmixed/htmlmixed.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/markdown/markdown.min.js" ></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/markdown/markdown-fold.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/groovy/groovy.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/nginx/nginx.min.js" ></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/python/python.min.js" ></script>
+</head>
+<body>
+<div id="app">
+    <el-row class="cert-block">
+        <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
+        <el-input
+                type="textarea"
+                :rows="3"
+                placeholder="请输入连接证书"
+                v-model="metas.cert"
+                @change="onCertChange">
+        </el-input>
+    </el-row>
+
+    <el-divider>ES 操作</el-divider>
+    <el-card shadow="never">
+        <textarea ref="refEditor" ></textarea>
+    </el-card>
+
+    <el-row>
+        <el-form inline label-position="left" label-width="80px">
+            <el-row>
+                <el-button size="medium" @click="doResetData">重置</el-button>
+                <el-divider direction="vertical"></el-divider>
+                <el-checkbox v-model="form.useCustomMeta">自定义连接</el-checkbox>
+                <template v-if="form.useCustomMeta">
+                    <el-form-item label="URL">
+                        <el-input v-model="form.url" placeholder="http://localhost:9200"></el-input>
+                    </el-form-item>
+                    <el-form-item label="用户名">
+                        <el-input v-model="form.username" placeholder="root"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码">
+                        <el-input v-model="form.password" placeholder="123456"></el-input>
+                    </el-form-item>
+                </template>
+            </el-row>
+            <el-row type="flex">
+                <el-col :span="20">
+                    <el-row>
+                        <el-form-item label="执行类型">
+                            <el-select v-model="metas.operate" placeholder="执行类型">
+                                <el-option
+                                        v-for="item in metas.operateList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="结果数">
+                            <el-input-number v-model="form.maxCount" :min="-1"></el-input-number>
+                        </el-form-item>
+                    </el-row>
+                </el-col>
+                <el-col :span="4">
+                    <el-row type="flex" justify="end">
+                        <el-form-item>
+                            <el-button type="success" size="medium"
+                                       @click="onViewMetadata">
+                                元数据
+                            </el-button>
+                        </el-form-item>
+                    </el-row>
+                </el-col>
+            </el-row>
+            <el-row type="flex" justify="center">
+                <el-form-item>
+                    <el-button v-loading="metas.resultLoading" size="medium"
+                               type="primary"
+                               @click="onExecute">
+                        执行
+                    </el-button>
+                </el-form-item>
+            </el-row>
+
+        </el-form>
+    </el-row>
+    <el-divider>操作结果</el-divider>
+    <el-select v-model="metas.resultType" placeholder="结果类型">
+        <el-option
+                v-for="item in metas.resultTypeList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+        </el-option>
+    </el-select>
+    <el-button type="success" size="medium"
+               @click="onViewText(metas.resultList,'数据集','json')">
+        表格JSON
+    </el-button>
+    <el-button type="warning" size="medium"
+               @click="onViewText(metas.resultColumns,'表头信息','json')">
+        表头JSON
+    </el-button>
+    <el-button type="primary" size="medium"
+               @click="onVisualCharts">
+        可视化图表
+    </el-button>
+    <el-row v-show="metas.resultType=='table'">
+        <el-row style="color: #777;padding-left: 8px;">
+            行数：{{metas.resultList.length}}
+        </el-row>
+        <el-table border stripe highlight-current-row
+                  :key="metas.resultListVueKey"
+                  :data="metas.resultList"
+                  style="width: 100%"
+                  max-height="720">
+            <el-table-column show-overflow-tooltip
+                             label="操作"
+                             width="100"
+                             fixed="left">
+                <template slot="header" slot-scope="scope">
+                        <span class="table-cell">
+                            <el-tag type="success" class="table-cell-hidden" @click="onViewText(metas.resultColumns.map(e=>e.label).join('\n'),'列名')">列</el-tag>
+                            操作
+                        </span>
+                </template>
+                <template slot-scope="scope">
+                    <el-tag type="success" @click="onViewText(scope.row,'数据行','json')">显示JSON</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    type="index"
+                    label="序号"
+                    width="80"
+                    fixed="left">
+            </el-table-column>
+            <el-table-column type="expand">
+                <template slot-scope="scope">
+                    <el-descriptions title="行详情" :column="2" size="small">
+                        <template v-for="column in metas.resultColumns">
+                            <el-descriptions-item :label="column.label">{{ scope.row[column.label] }}
+                            </el-descriptions-item>
+                        </template>
+                    </el-descriptions>
+                </template>
+            </el-table-column>
+            <template v-for="column in metas.resultColumns">
+                <el-table-column show-overflow-tooltip
+                                 sortable
+                                 :prop="column.label"
+                                 :label="column.label">
+                    <template slot="header" slot-scope="scope">
+                        <span class="table-cell">
+                            <el-tag type="success" class="table-cell-hidden" @click="onViewText(metas.resultList.map(e=>e[column.label]).join('\n'),'列值 - '+column.label)">值</el-tag>
+                            <el-tag type="success" class="table-cell-hidden" @click="onViewText(column,'列 - '+column.label,'json')">列</el-tag>
+                            {{column.label}}
+                        </span>
+                    </template>
+                    <template slot-scope="scope">
+                            <span class="table-cell">
+                                <el-tag type="success" class="table-cell-hidden" @click="onViewTableCellData(scope.row[column.label],scope,column)">值</el-tag>
+                                {{scope.row[column.label]}}
+                            </span>
+                    </template>
+                </el-table-column>
+            </template>
+
+        </el-table>
+    </el-row>
+    <el-row v-show="metas.resultType=='text'">
+        <el-card shadow="never">
+            <el-form inline label-position="left" label-width="100px">
+                <el-form-item label="语言类型">
+                    <el-select v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
+                        <el-option
+                                v-for="item in metas.langList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <textarea ref="refResultEditor"></textarea>
+        </el-card>
+    </el-row>
+    <el-drawer
+            title="元数据"
+            :visible.sync="drawer.metadata.show"
+            direction="rtl"
+            size="75%">
+        <el-row type="flex">
+            <el-col :span="8" style="border-right: solid 1px #777;">
+                <el-row style="width: 100%;">
+                    <el-row type="flex">
+                        <el-col :span="12">
+                            <el-row>
+                                数据库
+                            </el-row>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-row type="flex" justify="end">
+                                <el-button type="success" size="small"
+                                           @click="onViewText(computeFilterDatabases,'数据库列表','json')">
+                                    数据库JSON
+                                </el-button>
+                                <el-button type="success" size="small"
+                                           @click="onViewText(computeFilterDatabases.map(e=>e).join(','),'数据库名')">
+                                    数据库名
+                                </el-button>
+                                <el-button v-loading="drawer.metadata.databasesLoading" size="medium"
+                                           icon="el-icon-refresh" circle
+                                           @click="onRefreshDatabases">
+                                </el-button>
+                            </el-row>
+                        </el-col>
+
+
+                    </el-row>
+                    <el-row>
+                        <el-input v-model="drawer.metadata.checkDatabase" placeholder="选中数据库"></el-input>
+                    </el-row>
+                    <el-row>
+                        <el-input v-model="drawer.metadata.filterDatabase" placeholder="过滤数据库"></el-input>
+                    </el-row>
+                    <recycle-scroller :items="computeFilterDatabases"
+                                      class="scroller"
+                                      :item-size="32"
+                                      key-field="name"
+                                      v-slot="{ item }">
+                        <el-row
+                                :class="'list-item '+(item==drawer.metadata.checkDatabase?'checked-item':'')"
+                                @click.native="onClickDatabaseItem(item)">
+                            {{item}}
+                        </el-row>
+                    </recycle-scroller>
+
+                </el-row>
+            </el-col>
+            <el-col :span="16">
+                <el-row style="width: 100%;">
+                    <el-row type="flex">
+                        <el-col :span="12">
+                            <el-row>
+                                表
+                            </el-row>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-row type="flex" justify="end">
+                                <el-button type="success" size="small"
+                                           @click="onViewText(computeFilterTables,'表列表','json')">
+                                    表JSON
+                                </el-button>
+                                <el-button type="success" size="small"
+                                           @click="onViewText(computeFilterTables.map(e=>e.name).join('\n'),'表列表')">
+                                    表名
+                                </el-button>
+                                <el-button v-loading="drawer.metadata.tablesLoading" size="medium"
+                                           icon="el-icon-refresh" circle
+                                           @click="onRefreshTables">
+                                </el-button>
+                            </el-row>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-input v-model="drawer.metadata.checkTable" placeholder="选中表">
+                            <el-button slot="append" icon="el-icon-search" @click="onViewTableInfo(null)"></el-button>
+                        </el-input>
+                    </el-row>
+                    <el-row>
+                        <el-input v-model="drawer.metadata.filterTable" placeholder="过滤表"></el-input>
+                    </el-row>
+                    <recycle-scroller :items="computeFilterTables"
+                                      class="scroller"
+                                      :item-size="32"
+                                      key-field="name"
+                                      v-slot="{ item }">
+                            <el-row type="flex"
+                                    :class="'list-item '+(item.name==drawer.metadata.checkTable?'checked-item':'')"
+                                    @click.native="onClickTableItem(item)">
+                                <el-col :span="12" style="border-right: solid 1px #777;">
+                                    <el-tag type="primary" @click="onViewTableInfo(item)">结构</el-tag>
+                                    {{item.name}}
+                                </el-col>
+                                <el-col :span="12">
+                                    {{item.comment}}
+                                </el-col>
+                            </el-row>
+                    </recycle-scroller>
+
+
+                </el-row>
+            </el-col>
+        </el-row>
+    </el-drawer>
+    <el-dialog
+            :title="dialog.tableInfo.title"
+            :visible.sync="dialog.tableInfo.show"
+            width="75%">
+        <el-row>
+            表名：{{dialog.tableInfo.meta.name}}
+        </el-row>
+        <el-row>
+            注释：{{dialog.tableInfo.meta.comment}}
+        </el-row>
+        <el-row>
+            <el-button v-loading="dialog.tableInfo.metaLoading"
+                       icon="el-icon-refresh" circle
+                       @click="doLoadTableInfo">
+            </el-button>
+            <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta,'表结构','json')">表结构JSON</el-button>
+            <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta.columns.map(e=>e.name).join(','),'列名')">列名</el-button>
+            <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta.columns.filter(e=>!e.nullable).map(e=>e.name).join(','),'列名')">非空列名</el-button>
+
+        </el-row>
+        <el-row>
+            <el-table border stripe highlight-current-row
+                      :key="dialog.tableInfo.metaVueKey"
+                      :data="dialog.tableInfo.meta.columns"
+                      style="width: 100%"
+                      max-height="720">
+                <el-table-column
+                        label="操作"
+                        width="100"
+                        fixed="left">
+                    <template slot-scope="scope">
+                        <el-tag type="success" @click="onViewText(scope.row,'列信息','json')">显示JSON</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        prop="index"
+                        label="序号"
+                        width="80"
+                        fixed="left">
+                </el-table-column>
+                <el-table-column show-overflow-tooltip
+                                 sortable
+                                 prop="name"
+                                 label="列名">
+                </el-table-column>
+                <el-table-column show-overflow-tooltip
+                                 sortable
+                                 prop="columnType"
+                                 width="150"
+                                 label="类型">
+                </el-table-column>
+                <el-table-column show-overflow-tooltip
+                                 sortable
+                                 width="80"
+                                 prop="primaryKey"
+                                 label="主键">
+                    <template slot-scope="scope">
+                        {{scope.row.primaryKey?'是':''}}
+                    </template>
+                </el-table-column>
+                <el-table-column show-overflow-tooltip
+                                 sortable
+                                 width="80"
+                                 prop="uniqueKey"
+                                 label="唯一">
+                    <template slot-scope="scope">
+                        {{scope.row.uniqueKey?'是':''}}
+                    </template>
+                </el-table-column>
+                <el-table-column show-overflow-tooltip
+                                 sortable
+                                 width="80"
+                                 prop="nullable"
+                                 label="非空">
+                    <template slot-scope="scope">
+                        {{scope.row.nullable?'':'是'}}
+                    </template>
+                </el-table-column>
+                <el-table-column show-overflow-tooltip
+                                 sortable
+                                 prop="comment"
+                                 label="注释">
+                </el-table-column>
+            </el-table>
+        </el-row>
+
+        <el-row style="margin-top: 3px;border-bottom: solid 1px #777;">
+            主键：
+            <el-row v-if="dialog.tableInfo.meta.primary">
+                <el-row>
+                    键名：{{dialog.tableInfo.meta.primary.name}}
+                </el-row>
+                <el-row>
+                    列：
+                    <template v-for="(item,index) in dialog.tableInfo.meta.primary.columns">
+                        {{index>0?',':''}} {{item.name}} {{item.desc?'desc':'asc'}}
+                    </template>
+                </el-row>
+            </el-row>
+        </el-row>
+
+
+        <el-row style="margin-top: 3px;border-bottom: solid 1px #777;">
+            唯一索引：
+            <el-row v-if="dialog.tableInfo.meta.uniqueIndexes">
+                <el-row v-for="tableIndex in dialog.tableInfo.meta.uniqueIndexes">
+                    <el-row>
+                        键名：{{tableIndex.name}}
+                    </el-row>
+                    <el-row>
+                        列：
+                        <template v-for="(item,index) in tableIndex.columns">
+                            {{index>0?',':''}} {{item.name}} {{item.desc?'desc':'asc'}}
+                        </template>
+                    </el-row>
+                </el-row>
+            </el-row>
+        </el-row>
+
+        <el-row style="margin-top: 3px;border-bottom: solid 1px #777;">
+            普通索引：
+            <el-row v-if="dialog.tableInfo.meta.indexes">
+                <el-row v-for="tableIndex in dialog.tableInfo.meta.indexes">
+                    <el-row>
+                        键名：{{tableIndex.name}}
+                    </el-row>
+                    <el-row>
+                        列：
+                        <template v-for="(item,index) in tableIndex.columns">
+                            {{index>0?',':''}} {{item.name}} {{item.desc?'desc':'asc'}}
+                        </template>
+                    </el-row>
+                </el-row>
+            </el-row>
+        </el-row>
+
+        <el-row>
+            DDL:
+            <el-button v-loading="dialog.tableInfo.tableDdlLoading" type="primary" @click="onLoadTableDdl">加载DDL
+            </el-button>
+            <el-select v-model="dialog.tableInfo.ddlType" placeholder="DDL方言" @change="onChangeDdlType">
+                <el-option
+                        v-for="item in metas.ddlTypeList"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                </el-option>
+            </el-select>
+            <textarea ref="refTableInfoTableDdlEditor"></textarea>
+        </el-row>
+
+    </el-dialog>
+
+    <el-dialog
+            :title="dialog.textViewer.title"
+            :visible.sync="dialog.textViewer.show"
+            width="80%">
+        <el-card shadow="never">
+            <el-form inline label-position="left" label-width="100px">
+                <el-form-item label="语言类型">
+                    <el-select v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                        <el-option
+                                v-for="item in metas.langList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <textarea ref="refTextViewerEditor"></textarea>
+    </el-dialog>
+
+    <el-dialog
+            :title="dialog.scriptRunner.title"
+            :visible.sync="dialog.scriptRunner.show"
+            width="60%">
+        <el-row>
+            <el-form :inline="true" label-width="80px">
+                <el-form-item>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover"
+                            content="不开启自动提交就是以事务方式运行">
+                        <el-checkbox slot="reference" v-model="dialog.scriptRunner.autoCommit">自动提交</el-checkbox>
+                    </el-popover>
+
+                </el-form-item>
+                <el-form-item>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover"
+                            content="是否让驱动完整发送整个脚本给数据库执行，在对代码段、函数、过程等编译时常常有用">
+                        <el-checkbox slot="reference" v-model="dialog.scriptRunner.sendFullScript">完整发送
+                        </el-checkbox>
+                    </el-popover>
+
+                </el-form-item>
+                <el-form-item>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover"
+                            content="在执行过程中，发生错误之后是否停止往下继续执行">
+                        <el-checkbox slot="reference" v-model="dialog.scriptRunner.stopOnError">错误停止</el-checkbox>
+                    </el-popover>
+
+                </el-form-item>
+                <el-form-item label="分隔符">
+                    <el-input
+                            placeholder="分隔符"
+                            v-model="dialog.scriptRunner.delimiter">
+                    </el-input>
+                </el-form-item>
+            </el-form>
+        </el-row>
+        <el-row type="flex" justify="end">
+            <el-button type="primary" @click="onEnsureExecuteScript">执行</el-button>
+            <el-button @click="dialog.scriptRunner.show=false">取消</el-button>
+        </el-row>
+
+    </el-dialog>
+
+    <el-dialog
+            :title="dialog.visualChart.title"
+            :visible.sync="dialog.visualChart.show"
+            width="80%">
+        <el-form :inline="true">
+            <el-form-item label="图表形式">
+                <el-select v-model="dialog.visualChart.config.type" placeholder="图表形式">
+                    <el-option
+                            v-for="item in metas.echartsTypeList"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <template v-if="dialog.visualChart.config.type=='graph'">
+                <el-form-item label="起点标签">
+                    <el-select v-model="dialog.visualChart.config.labelProp" placeholder="起点标签">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="起点">
+                    <el-select v-model="dialog.visualChart.config.startProp" placeholder="起点">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="终点">
+                    <el-select v-model="dialog.visualChart.config.endProp" placeholder="终点">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </template>
+            <template v-else-if="dialog.visualChart.config.type=='scatter'">
+                <el-form-item label="X轴">
+                    <el-select v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="Y轴">
+                    <el-select v-model="dialog.visualChart.config.yAxis" placeholder="Y轴">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </template>
+            <template v-else>
+                <el-form-item label="X轴">
+                    <el-select v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="Y轴">
+                    <el-select v-model="dialog.visualChart.config.yAxisList" multiple placeholder="Y轴">
+                        <el-option
+                                v-for="item in metas.resultColumns"
+                                :key="item.label"
+                                :label="item.label"
+                                :value="item.label">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </template>
+
+            <el-form-item>
+                <el-button type="primary" @click="doRenderEcharts">绘制图表</el-button>
+                <el-button type="success" v-loading="metas.resultLoading" @click="doRefreshChartData">刷新数据</el-button>
+            </el-form-item>
+            <el-form-item label="图表变体">
+                <template v-if="dialog.visualChart.config.type=='scatter'">
+
+                </template>
+                <template v-else>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='line'"
+                                 v-model="dialog.visualChart.config.smooth">
+                        平滑
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='line' || dialog.visualChart.config.type=='bar'"
+                                 v-model="dialog.visualChart.config.stack">
+                        堆叠
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='line'"
+                                 v-model="dialog.visualChart.config.area">
+                        面积
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='line'"
+                                 v-model="dialog.visualChart.config.step">
+                        阶梯
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='pie'"
+                                 v-model="dialog.visualChart.config.rose">
+                        玫瑰
+                    </el-checkbox>
+                    <el-checkbox v-if="dialog.visualChart.config.type=='bar'"
+                                 v-model="dialog.visualChart.config.polar">
+                        极坐标
+                    </el-checkbox>
+                </template>
+
+            </el-form-item>
+        </el-form>
+
+        <div ref="refEchartDom" style="height: 480px;width:100%;"></div>
+    </el-dialog>
+</div>
+</body>
+<script>
+    Vue.use(VueVirtualScroller.default);
+    window.app = new Vue({
+        components:{
+
+        },
+        data() {
+            return this.getDefaultData()
+        },
+        created() {
+           this.initStoreData();
+           this.initCompletionsRefreshInterval();
+           this.initBroadcast();
+        },
+        mounted(){
+            this.initEditor();
+            this.initResultEditor();
+            this.initTextViewerEditor();
+        },
+        watch:{
+
+        },
+        computed:{
+            computeFilterTables(){
+              let list=this.drawer.metadata.tables || [];
+              return list.filter(item=>{
+                  return (!this.drawer.metadata.filterTable || item.name.toLowerCase().indexOf(this.drawer.metadata.filterTable.toLowerCase())>=0);
+              })
+            },
+            computeFilterDatabases(){
+              let list=this.drawer.metadata.databases || [];
+              return list.filter(item=>{
+                  return (!this.drawer.metadata.filterDatabase || item.toLowerCase().indexOf(this.drawer.metadata.filterDatabase.toLowerCase())>=0)
+              })
+            }
+        },
+        methods: {
+            getDefaultData() {
+                return {
+                    opsBroadcastChannel: null,
+                    chart: null,
+                    editor: null,
+                    langEditors: {
+                        resultEditor: null,
+                        textViewerEditor: null,
+                        tableInfoTableDdlEditor: null,
+                    },
+                    completions:[],
+                    storage: {
+                        defaultDatasource: '',
+                        datasourceList: [],
+                        driverList: [],
+                        defaultDatabaseMap: {
+                            // key: #datasource, value: defaultDatabaseName
+                        },
+                        databaseMap: {
+                            // key: #datasource, value: databaseList
+                        },
+                        tablesMap: {
+                            // key: #datasource#database, value: tableList
+                        },
+                        tableInfoMap: {
+                            // key: #datasource#database#table, value: tableMeta
+                        },
+                        tableDdlMap: {
+                            // key: #datasource#database#table#ddlType, value: ddlText
+                        }
+                    },
+                    metas: {
+                        cert: '',
+                        datasourceListLoading: false,
+                        datasourceList: ['master','slave'],
+                        driverListLoading: false,
+                        driverList: [],
+                        operate: 'query',
+                        operateList: [
+                            {
+                                label: '查询',
+                                value: 'query'
+                            }, {
+                                label: '更新',
+                                value: 'update'
+                            }
+                        ],
+                        resultType: 'table',
+                        resultTypeList: [
+                            {
+                                label: '表格',
+                                value: 'table'
+                            }, {
+                                label: '文本',
+                                value: 'text'
+                            }
+                        ],
+                        resultLoading: false,
+                        resultSql: '',
+                        resultLang: 'text',
+                        resultText: '',
+                        resultColumns: [],
+                        resultList: [],
+                        resultListVueKey: 0,
+                        langList:[
+                            {label: 'Text',value:'text'},
+                            {label: 'Yaml',value:'yaml'},
+                            {label: 'Json',value:'javascript'},
+                            {label: 'SQL',value:'sql'},
+                            {label: 'Shell',value:'shell'},
+                            {label: 'Xml',value:'xml'},
+                            {label: 'Html',value:'htmlmixed'},
+                            {label: 'Markdown',value:'markdown'},
+                            {label: 'Groovy',value:'groovy'},
+                            {label: 'Nginx',value:'nginx'},
+                            {label: 'Python',value:'python'},
+                        ],
+                        ddlTypeList: [
+                            {
+                                label: 'Auto',
+                                value: 'auto',
+                            }, {
+                                label: 'Oracle',
+                                value: 'oracle',
+                            }, {
+                                label: 'MySQL',
+                                value: 'mysql',
+                            }, {
+                                label: 'PostgreSQL',
+                                value: 'postgre',
+                            }, {
+                                label: 'Gbase',
+                                value: 'gbase',
+                            }
+                        ],
+                        echartsTypeList: [
+                            {
+                                label: '折线图',
+                                value: 'line',
+                            }, {
+                                label: '柱状图',
+                                value: 'bar',
+                            }, {
+                                label: '饼图',
+                                value: 'pie',
+                            }, {
+                                label: '散点图',
+                                value: 'scatter',
+                            }, {
+                                label: '关系图',
+                                value: 'graph',
+                            }
+                        ]
+                    },
+                    drawer: {
+                        metadata: {
+                            show: false,
+                            databasesLoading: false,
+                            filterDatabase: '',
+                            checkDatabase: '',
+                            databases: [],
+                            filterTable: '',
+                            checkTable: '',
+                            tablesLoading: false,
+                            tables: [],
+                        }
+                    },
+                    dialog: {
+                        tableInfo: {
+                            show: false,
+                            title: '表结构',
+                            metaLoading: false,
+                            meta: {},
+                            metaVueKey: 0,
+                            ddlType: 'auto',
+                            tableDdlLoading: false,
+                            tableDdl: '',
+                        },
+                        textViewer: {
+                            show: false,
+                            title: '文本浏览',
+                            text: '',
+                            lang: 'text'
+                        },
+                        scriptRunner: {
+                            show: false,
+                            title: '执行脚本',
+                            autoCommit: false,
+                            delimiter: ';',
+                            sendFullScript: false,
+                            stopOnError: true
+                        },
+                        visualChart: {
+                            show: false,
+                            title: '可视化图表',
+                            config: {
+                                type: 'line', // line,bar,pie,scatter
+                                smooth: false, // 平滑曲线，for line
+                                stack: false, // 堆叠，for line,bar
+                                area: false,// 面积图，for line
+                                step: false, // 阶梯， for line
+                                rose: false, // 玫瑰图， for pie
+                                polar: false, // 极坐标，for bar
+                                xAxis: null,
+                                yAxisList: [],
+
+                                yAxis: null, // for scatter
+
+                                // for graph
+                                labelProp: null,
+                                startProp: null,
+                                endProp: null,
+                            }
+                        }
+                    },
+                    form: {
+                        useCustomMeta: false,
+                        meta:{
+                            url: '',
+                            username: '',
+                            password: '',
+                        },
+                        pattern: '*',
+                        indexName: '',
+                        id: '',
+                        jsonDsl: '',
+                        maxCount: 100,
+                        mappingJson: '',
+                        settingJson: ''
+                    }
+                }
+            },
+            initBroadcast(){
+                this.opsBroadcastChannel = new BroadcastChannel('ops_station_broadcast');
+
+                setInterval(()=>{
+                    this.opsBroadcastChannel.postMessage({
+                        type: 'cert',
+                        data: this.metas.cert
+                    });
+                },3000)
+
+
+                this.opsBroadcastChannel.onmessage = (event) => {
+                    let data=event.data;
+                    if(data.type=='cert'){
+                        if(!this.metas.cert || this.metas.cert==''){
+                            this.metas.cert=data.data;
+                        }
+                    }
+                };
+
+            },
+            loadData() {
+                let content = localStorage.getItem('ops:elasticsearch:data');
+                if (!content) {
+                    return
+                }
+                content = content.trim();
+                if (content.length == 0) {
+                    return;
+                }
+                try {
+                    let obj = JSON.parse(content);
+                    Object.keys(obj).forEach(k => {
+                        this.$data[k] = obj[k];
+                    });
+                } catch (e) {
+
+                }
+            },
+            storeData() {
+                try {
+                    let data = {...this.$data};
+                    data.chart = null;
+                    data.editor=null;
+                    data.opsBroadcastChannel=null;
+                    data.langEditors={};
+                    Object.keys(this.$data.langEditors).forEach(k=>{
+                        data.langEditors[k]=null;
+                    })
+                    let json = JSON.stringify(data);
+                    let obj = JSON.parse(json);
+                    obj.metas.cert = '';
+                    obj.form.meta.password='';
+                    let content = JSON.stringify(obj);
+                    localStorage.setItem('ops:elasticsearch:data', content);
+                } catch (e) {
+                   // console.log(e)
+                }
+            },
+            initCompletionsRefreshInterval(){
+                let _this=this;
+                function refresh(){
+                    setTimeout(()=>{
+                        _this.collectCompletionItems()
+                        refresh();
+                    },3000);
+                }
+                refresh();
+            },
+            collectCompletionItems(){
+                //console.log('begin collect completions ...')
+                let items=[];
+                let keywords = [
+
+                ]
+                if (keywords) {
+                    items.push(...keywords);
+                }
+                let storageKey=this.getDatasourceStorageKey();
+                let databaseList=this.storage.databaseMap[storageKey]
+                if(databaseList){
+                    items.push(...databaseList);
+                }
+                Object.keys(this.storage.tablesMap).forEach(k=>{
+                    if(!k.startsWith(storageKey+'#') && k!=storageKey){
+                        return;
+                    }
+                    let tableList=this.storage.tablesMap[k];
+                    if(tableList){
+                        items.push(...tableList.map(e=>e.name))
+                    }
+                })
+                Object.keys(this.storage.tableInfoMap).forEach(k=>{
+                    if(!k.startsWith(storageKey+'#') && k!=storageKey){
+                        return;
+                    }
+                    let tableMeta=this.storage.tableInfoMap[k];
+                    if(tableMeta && tableMeta.columns){
+                        items.push(...tableMeta.columns.map(e=>e.name))
+                    }
+                })
+                let completions=[];
+                items.forEach(item=>{
+                    if(!item){
+                        return;
+                    }
+                    item=item.trim();
+                    if(item==''){
+                        return;
+                    }
+                    if(!completions.includes(item)){
+                        completions.push(item);
+                    }
+                })
+                this.completions=items;
+                //console.log('end collect completions .')
+            },
+            editorCompletionItemCollector(prefix){
+                if(!prefix){
+                    prefix='';
+                }
+                prefix=prefix.toLowerCase();
+                let ret= [];
+                let count=50;
+                for (let i=0;i<this.completions.length;i++) {
+                    let e=this.completions[i];
+                    if(e && e.toLowerCase().indexOf(prefix)>=0){
+                        ret.push(e);
+                        count--;
+                        if(count<=0){
+                            break;
+                        }
+                    }
+                }
+                return ret;
+            },
+            initEditor(){
+                let _this=this;
+                function asyncHint(editor, callback, options) {
+                    let cur = editor.getCursor();
+                    let token = editor.getTokenAt(cur);
+                    let prefix=token.string;
+
+                    let items=_this.editorCompletionItemCollector(prefix) || []
+                    let result=CodeMirror.hint.sql(editor,options);
+                    if(result && result.list){
+                        items=[...items,... result.list]
+                    }
+                    callback({
+                        list: items,
+                        from: CodeMirror.Pos(cur.line, token.start),
+                        to: CodeMirror.Pos(cur.line, token.end)
+                    });
+                }
+                asyncHint.async = true;
+                asyncHint.supportsSelection = true;
+
+                let dom=this.$refs.refEditor;
+                this.editor = CodeMirror.fromTextArea(dom, {  // 标识到textarea
+                    value : "",  // 文本域默认显示的文本
+                    mode : "sql",  // 模式
+                    theme : "idea",  // CSS样式选择
+                    indentUnit : 2,  // 缩进单位，默认2
+                    smartIndent : true,  // 是否智能缩进
+                    tabSize : 4,  // Tab缩进，默认4
+                    readOnly : false,  // 是否只读，默认false
+                    showCursorWhenSelecting : true,
+                    hintOptions:{
+                        completeSingle: false,
+                        hint: asyncHint,
+                    },
+                    lineNumbers : true  // 是否显示行号
+                    // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
+                });
+                this.editor.on("keypress",() =>{
+                    //编译器内容更改事件
+                    this.editor.showHint();
+                });
+                this.editor.setValue(this.form.sql||'');
+                this.editor.on('change',()=>{
+                    this.form.sql=this.editor.getValue();
+                    this.onSqlChange();
+                });
+                this.editor.on('cursorActivity',()=>{
+                    // 此处主要处理文本选中事件
+                    this.onSqlChange();
+                })
+            },
+            initLangEditor(editorProp,editorRef,editorLang,afterCallback){
+                let bts=new Date().getTime()
+                let initEditorTask=()=> {
+                    if (this.langEditors[editorProp]) {
+                        try {
+                            this.langEditors[editorProp].toTextArea()
+                        } catch (e) {
+
+                        }
+                    }
+                    this.langEditors[editorProp] = null;
+
+                    let dom = this.$refs[editorRef];
+                    if(!dom){
+                        let cts=new Date().getTime();
+                        if(cts-bts<3000){
+                            setTimeout(initEditorTask,30);
+                        }
+                        return
+                    }
+                    this.langEditors[editorProp] = CodeMirror.fromTextArea(dom, {  // 标识到textarea
+                        value: "",  // 文本域默认显示的文本
+                        mode: editorLang || '',  // 模式
+                        theme: "idea",  // CSS样式选择
+                        indentUnit: 2,  // 缩进单位，默认2
+                        smartIndent: true,  // 是否智能缩进
+                        tabSize: 4,  // Tab缩进，默认4
+                        readOnly: false,  // 是否只读，默认false
+                        showCursorWhenSelecting: true,
+                        hintOptions: {
+                            completeSingle: false,
+                        },
+                        lineNumbers: true  // 是否显示行号
+                        // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
+                    });
+                    this.langEditors[editorProp].on("keypress", () => {
+                        //编译器内容更改事件
+                        this.langEditors[editorProp].showHint();
+                    });
+                    if (afterCallback) {
+                        afterCallback(this.langEditors[editorProp], dom)
+                    }
+                }
+
+                initEditorTask()
+            },
+            initResultEditor() {
+                this.initLangEditor('resultEditor','refResultEditor',this.metas.resultLang,(editor,dom)=>{
+                    editor.setValue(this.metas.resultText || '');
+                    editor.on('change', () => {
+                        this.metas.resultText = editor.getValue();
+                    });
+                })
+
+            },
+            onResultLangChange(){
+                this.initResultEditor();
+            },
+            initTextViewerEditor(){
+                this.initLangEditor('textViewerEditor','refTextViewerEditor',this.dialog.textViewer.lang,(editor,dom)=>{
+                    editor.setValue(this.dialog.textViewer.text || '');
+                    editor.on('change', () => {
+                        this.dialog.textViewer.text = editor.getValue();
+                    });
+                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
+                })
+            },
+            onTextViewerLangChange(){
+                this.initTextViewerEditor()
+            },
+            initStoreData(){
+                let reset = new URL(window.location.href).searchParams.get('reset');
+                if(reset!='true') {
+                    this.loadData();
+                }
+                setInterval(() => {
+                    this.storeData();
+                }, 1000);
+            },
+            doResetData() {
+                let newData = this.getDefaultData();
+                Object.keys(newData).forEach(k => {
+                    this.$data[k] = newData[k];
+                })
+            },
+            getTransfer() {
+                let cert = this.metas.cert;
+                if (!cert || cert.length == 0) {
+                    cert = '';
+                }
+                cert = cert.trim();
+                if (!cert || cert.length == 0) {
+                    throw new Error('请先填写连接证书')
+                }
+                let ex=null;
+                for (let i = 0; i < 3; i++) {
+                    try{
+                        let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
+                        return new OpsSecureTransfer(keyPair)
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(!ex){
+                    ex=new Error('init transfer error')
+                }
+                throw e;
+            },
+            onCertChange() {
+                this.doRefreshDatasources()
+                this.doRefreshDrivers()
+            },
+            doRefreshDatasources() {
+                this.metas.datasourceListLoading = true;
+                try {
+                    let timestamp = new Date().getTime();
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/datasources',
+                        method: 'post',
+                        data: transfer.send(timestamp)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            //console.log(resp)
+                            this.metas.datasourceList = resp.list;
+                            this.form.datasource = resp.defaultName;
+                            this.storage.defaultDatasource = resp.defaultName;
+                            this.storage.datasourceList = resp.list;
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.datasourceListLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.datasourceListLoading = false;
+                }
+            },
+            doRefreshDrivers() {
+                this.metas.driverListLoading = true;
+                try {
+                    let timestamp = new Date().getTime();
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/drivers',
+                        method: 'post',
+                        data: transfer.send(timestamp)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            //console.log(resp)
+                            this.metas.driverList = resp;
+                            if (resp.length > 0 && this.form.driver == '') {
+                                this.form.driver = resp[0];
+                            }
+                            this.storage.driverList = resp;
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || '操作失败')
+                    }).finally(() => {
+                        this.metas.driverListLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.driverListLoading = false;
+                }
+            },
+            fillDatasourceForm(req,supportMultiply) {
+                req.useCustomMeta = this.form.useCustomMeta;
+                if (req.useCustomMeta) {
+                    req.meta={
+                        urls: this.form.meta.url.split(/(\s+|,|;)/).map(e=>e.trim()).filter(e=>e && e!=''),
+                        username: this.form.meta.username,
+                        password: this.form.meta.password
+                    }
+                }
+
+                return req;
+            },
+            getDatasourceStorageKey(req) {
+                if (!req) {
+                    req = this.fillDatasourceForm({});
+                }
+                let storageKey = '#' + req.datasource;
+                if (req.useCustomMeta) {
+                    storageKey = '#$' + Base64.encode(req.urls + '#' + req.username);
+                }
+                return storageKey;
+            },
+            onSqlChange() {
+                let sql = this.getExecuteSql();
+                if (!sql || sql=='') {
+                    return;
+                }
+                sql = sql.trim();
+                let arr = sql.split(/\s+/, 2);
+                let key = arr[0].toLowerCase();
+                if (['select', 'with'].some(e => e == key)) {
+                    this.metas.operate = 'query'
+                } else {
+                    this.metas.operate = 'update'
+                }
+            },
+            getExecuteSql(){
+                let sql=this.editor.getSelection();
+                if(!sql || sql==''){
+                    sql=this.form.sql;
+                }
+                if(!sql){
+                    sql='';
+                }
+                return sql;
+            },
+            getTipExecuteSql(){
+                let sql=this.getExecuteSql();
+                if(sql.length>30){
+                    sql=sql.substring(0,30)+"...";
+                }
+                return sql;
+            },
+            onExecute() {
+                let sql=this.getTipExecuteSql();
+                this.$confirm('即将执行语句，是否继续？<br/>' + sql, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doExecute();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doExecute(callback){
+                let sql=this.getExecuteSql();
+                this.doExecuteDelegate(sql,callback)
+            },
+            doExecuteDelegate(sql,callback){
+                this.metas.resultLoading = true;
+                try {
+                    let req = this.fillDatasourceForm({
+                        sql: sql,
+                        maxCount: this.form.maxCount,
+                    },true);
+                    let operate = this.metas.operate;
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/${operate}`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            this.metas.resultSql=sql;
+                            // console.log(resp)
+                            if (operate == 'update' && !resp.columns) {
+                                this.metas.resultText = JSON.stringify(resp,null,'    ');
+                                this.metas.resultType = 'text';
+                                this.metas.resultLang='javascript';
+                            } else {
+                                this.metas.resultList = resp.rows;
+                                this.metas.resultColumns = resp.columns;
+                                this.metas.resultType = 'table';
+                                this.metas.resultListVueKey=new Date().getTime()
+                            }
+                            if(callback){
+                                callback(resp)
+                            }
+                        } else {
+                            this.metas.resultText = res.data.msg;
+                            this.metas.resultType = 'text';
+                            this.metas.resultLang='text';
+                            this.$message.error(res.data.msg)
+                        }
+                        setTimeout(()=>{
+                            this.initResultEditor();
+                        },200)
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.resultLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.resultLoading = false;
+                }
+            },
+            onExecuteScript() {
+                this.dialog.scriptRunner.show = true;
+            },
+            onEnsureExecuteScript(){
+                let sql=this.getTipExecuteSql();
+                this.$confirm('即将执行脚本，是否继续？<br/>' + sql, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doExecuteScript();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doExecuteScript() {
+                this.dialog.scriptRunner.show = false;
+                this.metas.resultLoading = true;
+                try {
+                    let sql = this.getExecuteSql();
+
+                    let req = this.fillDatasourceForm({
+                        sql: sql,
+                        autoCommit: this.dialog.scriptRunner.autoCommit,
+                        delimiter: this.dialog.scriptRunner.delimiter,
+                        sendFullScript: this.dialog.scriptRunner.sendFullScript,
+                        stopOnError: this.dialog.scriptRunner.stopOnError,
+                    },true);
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/runner`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            //console.log(resp)
+                            this.metas.resultText = resp + '';
+                            this.metas.resultType = 'text';
+                            this.metas.resultLang='sql';
+                            this.form.useMultiDatasource=false;
+                        } else {
+                            this.metas.resultText = res.data.msg;
+                            this.metas.resultType = 'text';
+                            this.metas.resultLang='text';
+                            this.$message.error(res.data.msg)
+                        }
+                        setTimeout(()=>{
+                            this.initResultEditor();
+                        },200)
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.resultLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.resultLoading = false;
+                }
+            },
+
+            onViewMetadata() {
+                this.drawer.metadata.show = true;
+
+            },
+            onRefreshDatabases() {
+                this.drawer.metadata.databasesLoading = true;
+                try {
+                    let req = this.fillDatasourceForm({});
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/metadata/databases',
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            // console.log(res.data)
+                            let resp = transfer.recv(res.data.data)
+                            // console.log(resp)
+                            this.drawer.metadata.databases = resp.list;
+                            this.drawer.metadata.checkDatabase = resp.defaultName;
+                            let storageKey = this.getDatasourceStorageKey(req);
+                            this.storage.defaultDatabaseMap[storageKey] = resp.defaultName;
+                            this.storage.databaseMap[storageKey] = resp.list;
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.drawer.metadata.databasesLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.drawer.metadata.databasesLoading = false;
+                }
+            },
+            onClickDatabaseItem(database) {
+                this.drawer.metadata.checkDatabase = database;
+                let storageKey = this.getDatasourceStorageKey() + '#' + database;
+                let tableList = this.storage.tablesMap[storageKey];
+                if (tableList && tableList.length >= 0) {
+                    this.drawer.metadata.tables = tableList;
+                }
+            },
+            onRefreshTables() {
+                this.drawer.metadata.tablesLoading = true;
+                try {
+                    let req = this.fillDatasourceForm({
+                        database: this.drawer.metadata.checkDatabase,
+                    });
+                    req=this.cleanReqForm(req);
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/metadata/tables',
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            // console.log(res.data)
+                            let resp = transfer.recv(res.data.data) || []
+                            // console.log(resp)
+                            this.drawer.metadata.tables = resp;
+                            let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database;
+                            this.storage.tablesMap[storageKey] = resp;
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.drawer.metadata.tablesLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.drawer.metadata.tablesLoading = false;
+                }
+            },
+            onClickTableItem(item) {
+                this.drawer.metadata.checkTable = item.name;
+            },
+            initTableInfoTableDdlEditor(){
+                this.initLangEditor('tableInfoTableDdlEditor','refTableInfoTableDdlEditor','sql',(editor,dom)=>{
+                    editor.setValue(this.dialog.tableInfo.tableDdl || '');
+                    editor.on('change', () => {
+                        this.dialog.tableInfo.tableDdl = editor.getValue();
+                    });
+                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
+                })
+            },
+            onViewTableInfo(item) {
+                if(!item){
+                    item={
+                        name: this.drawer.metadata.checkTable
+                    }
+                }
+                this.drawer.metadata.checkTable = item.name;
+                this.dialog.tableInfo.title = item.name;
+                this.dialog.tableInfo.show = true;
+                if (this.dialog.tableInfo.meta && this.dialog.tableInfo.meta.name == item.name) {
+                    setTimeout(()=>{
+                        this.initTableInfoTableDdlEditor()
+                    },200)
+                    return;
+                }
+                let storageKey = this.getDatasourceStorageKey() + '#' + this.drawer.metadata.checkDatabase + '#' + item.name;
+                let tableMeta = this.storage.tableInfoMap[storageKey];
+                let tableDdl = this.storage.tableDdlMap[storageKey + '#' + this.dialog.tableInfo.ddlType]
+                if (tableDdl && tableDdl.length > 0) {
+                    this.dialog.tableInfo.tableDdl = tableDdl;
+                }
+                if (tableMeta && tableMeta.name) {
+                    this.dialog.tableInfo.meta = tableMeta;
+                    this.dialog.tableInfo.metaVueKey=new Date().getTime();
+                    setTimeout(()=>{
+                        this.initTableInfoTableDdlEditor()
+                    },200)
+                    return;
+                }
+                this.doLoadTableInfo()
+                setTimeout(()=>{
+                    this.initTableInfoTableDdlEditor()
+                },200)
+            },
+            cleanReqForm(req){
+                if(!req){
+                    return;
+                }
+                if(req.database && req.database!=''){
+                    req.database=req.database.trim();
+                }
+                if(req.database==''){
+                    req.database=null;
+                }
+                if(req.table && req.table!=''){
+                    req.table=req.table.trim();
+                }
+                if(req.table==''){
+                    req.table=null;
+                }
+                return req;
+            },
+            doLoadTableInfo() {
+                this.dialog.tableInfo.metaLoading = true;
+                try {
+                    let req = this.fillDatasourceForm({
+                        database: this.drawer.metadata.checkDatabase,
+                        table: this.drawer.metadata.checkTable
+                    });
+                    req=this.cleanReqForm(req);
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/metadata/table/info',
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            // console.log(res.data)
+                            let resp = transfer.recv(res.data.data) || {};
+                            // console.log(resp)
+                            this.dialog.tableInfo.meta = resp;
+                            this.dialog.tableInfo.title = resp.name;
+                            let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table;
+                            this.storage.tableInfoMap[storageKey] = resp;
+                            this.dialog.tableInfo.metaVueKey=new Date().getTime();
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.dialog.tableInfo.metaLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.dialog.tableInfo.metaLoading = false;
+                }
+            },
+            onLoadTableDdl() {
+                this.dialog.tableInfo.tableDdlLoading = true;
+                try {
+                    let req = this.fillDatasourceForm({
+                        database: this.drawer.metadata.checkDatabase,
+                        table: this.drawer.metadata.checkTable,
+                        ddlType: this.dialog.tableInfo.ddlType
+                    });
+                    req=this.cleanReqForm(req);
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/metadata/table/ddl',
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            // console.log(res.data)
+                            let resp = transfer.recv(res.data.data);
+                            // console.log(resp)
+                            this.dialog.tableInfo.tableDdl = resp;
+                            let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table + '#' + req.ddlType;
+                            this.storage.tableDdlMap[storageKey] = resp;
+                            setTimeout(()=>{
+                                this.initTableInfoTableDdlEditor()
+                            },200)
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.dialog.tableInfo.tableDdlLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.dialog.tableInfo.tableDdlLoading = false;
+                }
+            },
+            onChangeDdlType() {
+                let tableName = this.drawer.metadata.checkTable;
+                let ddlType = this.dialog.tableInfo.ddlType;
+                let storageKey = this.getDatasourceStorageKey() + '#' + this.drawer.metadata.checkDatabase + '#' + tableName;
+                let tableDdl = this.storage.tableDdlMap[storageKey + '#' + ddlType]
+                if (tableDdl && tableDdl.length > 0) {
+                    this.dialog.tableInfo.tableDdl = tableDdl;
+                }
+                setTimeout(()=>{
+                    this.initTableInfoTableDdlEditor()
+                },200)
+            },
+            onViewText(obj, title,lang) {
+                if (title && title.length > 0) {
+                    this.dialog.textViewer.title = title;
+                } else {
+                    this.dialog.textViewer.title = '文本浏览';
+                }
+                let text = ''
+                if (typeof obj == 'string') {
+                    text = obj;
+                } else {
+                    text = JSON.stringify(obj, null, '    ');
+                }
+                if(lang && lang!=''){
+                    if(lang=='json'){
+                        lang='javascript';
+                    }
+                }
+                this.dialog.textViewer.lang=lang || 'text';
+                this.dialog.textViewer.text = text;
+                this.dialog.textViewer.show = true;
+                setTimeout(()=>{
+                    this.initTextViewerEditor()
+                },200)
+            },
+            onViewTableCellData(value,scope,column){
+                let type=(typeof value);
+                if(value === null){
+                    type='null';
+                }else if(value === undefined){
+                    type='undefined';
+                }
+                this.onViewText(value,'值查看 - type: '+type);
+            },
+            doRefreshChartData(){
+                let sql=this.metas.resultSql;
+                let tipsSql=sql;
+                if(tipsSql && tipsSql.length>27){
+                    tipsSql=tipsSql.substring(0,27)+"...";
+                }
+                this.$confirm('即将执行语句，是否继续？<br/>' + tipsSql, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doExecuteDelegate(sql,()=>{
+                        this.doRenderEcharts()
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+
+            },
+            onVisualCharts() {
+                this.dialog.visualChart.show = true;
+            },
+            doRenderEcharts() {
+                let option = {}
+                let chartType=this.dialog.visualChart.config.type;
+                if(chartType=='graph'){
+                    option=this.convertAsEchartsGraphOptions(this.metas.resultList, this.dialog.visualChart.config);
+                } else if(chartType=='scatter'){
+                    option=this.convertAsEchartsScatterOptions(this.metas.resultList, this.dialog.visualChart.config);
+                }else if(chartType=='line' || chartType=='bar' || chartType=='pie'){
+                    option=this.convertAsEChartsOptions(this.metas.resultList, this.dialog.visualChart.config);
+                }
+                let dom = this.$refs.refEchartDom;
+                if (this.chart) {
+                    this.chart.dispose();
+                }
+                this.chart = echarts.init(dom, null, {
+                    renderer: 'canvas',
+                    useDirtyRect: false
+                });
+                if (option && typeof option === 'object') {
+                    this.chart.setOption(option);
+                }
+                window.addEventListener('resize', this.chart.resize);
+            },
+            convertAsEchartsGraphOptions(dataList,config) {
+                if (!dataList) {
+                    dataList = [];
+                }
+                if (!config) {
+                    config = {
+                        type: 'graph',
+                        labelProp: 'label',
+                        startProp: 'id',
+                        endProp: 'parentId'
+                    };
+                }
+
+                let nodeMap={
+
+                }
+                let data = []
+                let links=[]
+
+                dataList.forEach(item => {
+                    let node={
+                        id: item[config.startProp],
+                        name: item[config.labelProp]
+                    }
+                    if(!nodeMap[node.id]){
+                        data.push(node);
+                    }
+                    nodeMap[node.id]=node;
+                    links.push({
+                        source: item[config.startProp],
+                        target: item[config.endProp],
+                    })
+                })
+
+                let option={
+                    title: {
+                        text: 'Visual Data'
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            mark: {show: true},
+                            dataView: {show: true, readOnly: false},
+                            restore: {show: true},
+                            saveAsImage: {show: true}
+                        }
+                    },
+                    animationDurationUpdate: 1500,
+                    animationEasingUpdate: 'quinticInOut',
+                    thumbnail: {
+                        width: '20%',
+                        height: '20%',
+                        windowStyle: {
+                            color: 'rgba(140, 212, 250, 0.5)',
+                            borderColor: 'rgba(30, 64, 175, 0.7)',
+                            opacity: 1
+                        }
+                    },
+                    series: [
+                        {
+                            type: 'graph',
+                            layout: 'force',
+                            force: {
+                                edgeLength: 500,
+                                repulsion: 1500,
+                                gravity: 0.01
+                            },
+                            draggable: true,
+                            symbolSize: 50,
+                            label: {
+                                show: true
+                            },
+                            edgeSymbol: ['circle', 'arrow'],
+                            edgeSymbolSize: [4, 10],
+                            edgeLabel: {
+                                fontSize: 20
+                            },
+                            emphasis: {
+                                focus: 'adjacency',
+                                label: {
+                                    position: 'right',
+                                    show: true
+                                }
+                            },
+                            roam: true,
+                            roamTrigger: 'global',
+                            lineStyle: {
+                                width: 0.5,
+                                curveness: 0,
+                                opacity: 0.7
+                            },
+
+                            data: data,
+                            // links: [],
+                            links: links,
+                        }
+                    ]
+                }
+
+                return option
+            },
+            convertAsEchartsScatterOptions(dataList,config){
+                if (!dataList) {
+                    dataList = [];
+                }
+                if (!config) {
+                    config = {
+                        type: 'scatter',
+                        xAxis: 'x',
+                        yAxis: 'y'
+                    };
+                }
+
+                let data=[]
+
+                dataList.forEach(item=>{
+                    let coord=[
+                        item[config.xAxis],
+                        item[config.yAxis]
+                    ];
+                    data.push(coord)
+                })
+
+                let option={
+                    title: {
+                        text: 'Visual Data'
+                    },
+                    tooltip: {
+                        showDelay: 0,
+                        axisPointer: {
+                            show: true,
+                            type: 'cross',
+                            lineStyle: {
+                                type: 'dashed',
+                                width: 1
+                            }
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            mark: {show: true},
+                            dataView: {show: true, readOnly: false},
+                            restore: {show: true},
+                            saveAsImage: {show: true}
+                        }
+                    },
+                    xAxis: [
+                        {
+                            type: 'value',
+                            axisLabel: {
+
+                            },
+                            splitLine: {
+                                show: true
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            axisLabel: {
+
+                            },
+                            splitLine: {
+                                show: true
+                            }
+                        }
+                    ],
+                    series: [
+                        {
+                            type: 'scatter',
+                            symbolSize: 20,
+                            data: data,
+                            markArea: {
+                                silent: true,
+                                itemStyle: {
+                                    color: 'transparent',
+                                    borderWidth: 1,
+                                    borderType: 'dashed'
+                                },
+                                data: [
+                                    [
+                                        {
+                                            name: 'Data Range',
+                                            xAxis: 'min',
+                                            yAxis: 'min'
+                                        },
+                                        {
+                                            xAxis: 'max',
+                                            yAxis: 'max'
+                                        }
+                                    ]
+                                ]
+                            },
+                            markPoint: {
+                                data: [
+                                    { type: 'max', name: 'Max' },
+                                    { type: 'min', name: 'Min' }
+                                ]
+                            },
+                            markLine: {
+                                lineStyle: {
+                                    type: 'solid'
+                                },
+                                data: [{ type: 'average', name: 'Avg' }]
+                            }
+                        }
+                    ]
+                }
+
+                return option
+            },
+            convertAsEChartsOptions(dataList, config) {
+                if (!dataList) {
+                    dataList = [];
+                }
+                if (!config) {
+                    config = {
+                        type: 'line',
+                        xAxis: 'label',
+                        yAxisList: ['value']
+                    };
+                }
+                let xAxisList = [];
+                let seriasMap = {};
+                dataList.forEach(item => {
+
+                    let name = item[config.xAxis]
+                    xAxisList.push(name)
+
+                    for (let i = 0; i < config.yAxisList.length; i++) {
+                        let prop = config.yAxisList[i];
+                        if (!seriasMap[prop]) {
+                            seriasMap[prop] = {
+                                name: prop,
+                                type: config.type, // line,bar,pie
+                                data: [],
+                            }
+                            if (config.type == 'pie') {
+                                seriasMap[prop] = Object.assign(seriasMap[prop], {
+                                    type: 'pie',
+                                    radius: '75%',
+                                    center: ['50%', '50%'],
+                                    itemStyle: {
+                                        borderRadius: 8
+                                    },
+                                })
+                            } else if (config.type == 'line' || config.type == 'bar') {
+
+                                seriasMap[prop] = Object.assign(seriasMap[prop], {
+                                    markPoint: {
+                                        data: [
+                                            {type: 'max', name: '最大值'},
+                                            {type: 'min', name: '最小值'}
+                                        ]
+                                    },
+                                    markLine: {
+                                        data: [{type: 'average', name: '平均值'}]
+                                    }
+                                })
+                            }
+                        }
+                        seriasMap[prop].data.push({
+                            value: item[prop],
+                            name: name
+                        })
+                    }
+
+                })
+
+                let serias = []
+                let legendList = []
+                Object.keys(seriasMap).forEach(k => {
+                    serias.push(seriasMap[k])
+                    legendList.push(k)
+                })
+
+                if(config.smooth){
+                    if(config.type=='line'){
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].smooth = true;
+                        }
+                    }
+                }
+
+                if(config.stack){
+                    if(config.type=='line' || config.type=='bar'){
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].stack= 'Total';
+                        }
+                    }
+                }
+
+                if(config.area){
+                    if(config.type=='line'){
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].areaStyle= {};
+                            serias[i].emphasis= {
+                                focus: 'series'
+                            };
+                        }
+                    }
+                }
+
+                if(config.step){
+                    if(config.type=='line') {
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].step = 'start';
+                        }
+                    }
+                }
+
+                if(config.rose){
+                    if(config.type=='pie') {
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].radius = [25, 160];
+                            serias[i].roseType = 'area';
+                        }
+                    }
+                }
+
+                if(config.polar){
+                    if(config.type=='bar') {
+                        for (let i = 0; i < serias.length; i++) {
+                            serias[i].coordinateSystem= 'polar';
+                        }
+                    }
+                }
+
+                if (config.type == 'pie') {
+                    for (let i = 0; i < serias.length; i++) {
+                        serias[i].center = [((i + 0.5) * (100.0 / serias.length)) + '%', '50%']
+                    }
+                }
+
+                let additionalOption = {}
+                if (config.type == 'pie') {
+
+                } else if (config.type == 'line' || config.type == 'bar') {
+                    additionalOption = {
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: xAxisList
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                    }
+                }
+
+                if(config.type=='bar' && config.polar){
+                    additionalOption={
+                        polar: {
+                            radius: [30, '80%']
+                        },
+                        angleAxis: {
+                            startAngle: 75
+                        },
+                        radiusAxis: {
+                            type: 'category',
+                            data: xAxisList
+                        },
+                    }
+                }
+
+                let option = Object.assign(additionalOption, {
+                    title: {
+                        text: 'Visual Data'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: legendList,
+                        top: 'bottom'
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            mark: {show: true},
+                            dataView: {show: true, readOnly: false},
+                            restore: {show: true},
+                            saveAsImage: {show: true}
+                        }
+                    },
+
+                    series: serias
+                });
+                return option;
+            }
+        }
+    })
+    let defaultConfig = {
+        baseURL: './',
+        timeout: 10 * 60 * 1000,
+        responseType: 'json'
+    }
+    let request = axios.create(defaultConfig)
+    window.app.$axios = request
+    window.app.$mount('#app')
+</script>
+<style>
+    .cert-block {
+        height: 32px;
+        overflow: hidden;
+    }
+    .cert-block:hover{
+        height: unset;
+    }
+    .list-item {
+        margin-top: 3px;
+        border-bottom: solid 1px #777;
+    }
+
+    .list-item:hover {
+        background: lightskyblue;
+    }
+
+    .checked-item {
+        background: darkorange;
+    }
+    .el-table__cell .table-cell-hidden{
+        display: none;
+    }
+
+    .el-table__cell:hover .table-cell-hidden{
+        display: unset;
+    }
+    .scroller {
+        height: calc(100vh - 200px);
+    }
+</style>
+</html>

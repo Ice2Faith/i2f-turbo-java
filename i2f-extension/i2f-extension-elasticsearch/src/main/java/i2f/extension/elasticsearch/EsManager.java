@@ -31,8 +31,8 @@ import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.common.xcontent.*;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
@@ -393,6 +393,21 @@ public class EsManager {
         request.source(builder);
         SearchResponse response = getClient().search(request, RequestOptions.DEFAULT);
         return response;
+    }
+
+    public SearchResponse search(String indexName,String jsonDsl) throws IOException {
+        SearchSourceBuilder builder = searchSourceBuilderFromJsonDsl(jsonDsl);
+
+        return search(indexName,builder);
+    }
+
+    public static SearchSourceBuilder searchSourceBuilderFromJsonDsl(String jsonDsl) throws IOException {
+        SearchSourceBuilder builder=new SearchSourceBuilder();
+
+        try(XContentParser xContentParser = JsonXContent.jsonXContent.createParser(NamedXContentRegistry.EMPTY, DeprecationHandler.THROW_UNSUPPORTED_OPERATION, jsonDsl)) {
+            builder.parseXContent(xContentParser);
+            return builder;
+        }
     }
 
     public SearchHits searchHits(String indexName, SearchSourceBuilder builder) throws IOException {
