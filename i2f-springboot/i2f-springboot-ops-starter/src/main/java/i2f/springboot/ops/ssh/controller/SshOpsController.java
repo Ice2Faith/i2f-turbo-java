@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -33,6 +35,7 @@ import java.util.*;
  * @date 2025/11/13 20:57
  * @desc
  */
+@ConditionalOnClass(ChannelSftp.class)
 @Slf4j
 @Data
 @NoArgsConstructor
@@ -41,6 +44,11 @@ import java.util.*;
 public class SshOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;
+
+    @RequestMapping("/")
+    public RedirectView index() {
+        return new RedirectView("./index.html");
+    }
 
     @PostMapping("/workdir")
     @ResponseBody

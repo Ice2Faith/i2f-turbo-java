@@ -1,14 +1,12 @@
 package i2f.springboot.ops.xxljob.controller;
 
 import com.xxl.job.core.context.XxlJobContext;
-import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.impl.MethodJobHandler;
 import i2f.database.metadata.impl.DatabaseMetadataProviders;
 import i2f.database.metadata.std.DatabaseMetadataProvider;
 import i2f.jdbc.JdbcResolver;
-import i2f.lru.LruMap;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.datasource.provider.DatasourceProvider;
 import i2f.springboot.ops.host.data.HostOperateDto;
@@ -19,12 +17,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2025/11/8 16:37
  * @desc
  */
+@ConditionalOnClass(XxlJobExecutor.class)
 @Slf4j
 @Data
 @NoArgsConstructor
@@ -66,32 +67,32 @@ public class XxlJobOpsController {
     @Autowired(required = false)
     private DatasourceProvider datasourceProvider;
 
-    private AtomicReference<String> metaDatasource=new AtomicReference<>();
-    private AtomicReference<String> metaDatabase=new AtomicReference<>();
+    private AtomicReference<String> metaDatasource = new AtomicReference<>();
+    private AtomicReference<String> metaDatabase = new AtomicReference<>();
 
-    public List<XxlJobInfoMeta> getPossibleJobMeta(){
-        List<XxlJobInfoMeta> ret=new ArrayList<>();
+    public List<XxlJobInfoMeta> getPossibleJobMeta() {
+        List<XxlJobInfoMeta> ret = new ArrayList<>();
         try {
-            if(datasourceProvider==null){
+            if (datasourceProvider == null) {
                 return ret;
             }
             String datasource = metaDatasource.get();
-            if(datasource!=null){
+            if (datasource != null) {
                 DataSource ds = datasourceProvider.getDatasource(datasource);
-                try(Connection conn = ds.getConnection()){
+                try (Connection conn = ds.getConnection()) {
                     List<XxlJobInfoMeta> list = loadMeta(conn);
-                    if(list!=null &&!list.isEmpty()){
+                    if (list != null && !list.isEmpty()) {
                         metaDatasource.set(datasource);
                     }
                     return list;
                 }
-            }else{
+            } else {
                 for (Map.Entry<String, DataSource> entry : datasourceProvider.getDatasourceMap().entrySet()) {
                     String key = entry.getKey();
                     DataSource ds = entry.getValue();
-                    try(Connection conn = ds.getConnection()){
+                    try (Connection conn = ds.getConnection()) {
                         List<XxlJobInfoMeta> list = loadMeta(conn);
-                        if(list!=null &&!list.isEmpty()){
+                        if (list != null && !list.isEmpty()) {
                             metaDatasource.set(key);
                         }
                         return list;
@@ -106,14 +107,14 @@ public class XxlJobOpsController {
     }
 
     public List<XxlJobInfoMeta> loadMeta(Connection conn) throws SQLException {
-        if(conn==null){
+        if (conn == null) {
             return new ArrayList<>();
         }
         String database = metaDatabase.get();
-        if(database!=null){
+        if (database != null) {
             try {
-                List<XxlJobInfoMeta> list = JdbcResolver.list(conn, "select * from "+database+".xxl_job_info", new ArrayList<>(), XxlJobInfoMeta.class);
-                if(!list.isEmpty()) {
+                List<XxlJobInfoMeta> list = JdbcResolver.list(conn, "select * from " + database + ".xxl_job_info", new ArrayList<>(), XxlJobInfoMeta.class);
+                if (!list.isEmpty()) {
                     return list;
                 }
             } catch (Exception e) {
@@ -122,22 +123,22 @@ public class XxlJobOpsController {
         }
         try {
             List<XxlJobInfoMeta> list = JdbcResolver.list(conn, "select * from xxl_job_info", new ArrayList<>(), XxlJobInfoMeta.class);
-            if(!list.isEmpty()) {
+            if (!list.isEmpty()) {
                 return list;
             }
         } catch (Exception e) {
 
         }
         DatabaseMetadataProvider provider = DatabaseMetadataProviders.getProvider(conn);
-        if(provider==null){
+        if (provider == null) {
             return new ArrayList<>();
         }
         List<String> databases = provider.getDatabases(conn);
-        if(databases!=null){
+        if (databases != null) {
             for (String item : databases) {
                 try {
-                    List<XxlJobInfoMeta> list = JdbcResolver.list(conn, "select * from "+item+".xxl_job_info", new ArrayList<>(), XxlJobInfoMeta.class);
-                    if(!list.isEmpty()) {
+                    List<XxlJobInfoMeta> list = JdbcResolver.list(conn, "select * from " + item + ".xxl_job_info", new ArrayList<>(), XxlJobInfoMeta.class);
+                    if (!list.isEmpty()) {
                         metaDatabase.set(item);
                         return list;
                     }
@@ -147,6 +148,11 @@ public class XxlJobOpsController {
             }
         }
         return new ArrayList<>();
+    }
+
+    @RequestMapping("/")
+    public RedirectView index() {
+        return new RedirectView("./index.html");
     }
 
     @PostMapping("/hostId")
@@ -225,18 +231,18 @@ public class XxlJobOpsController {
             List<XxlJobInfoMeta> metaList = getPossibleJobMeta();
             List<XxlJobInfoMeta> resp = new ArrayList<>();
 
-            Map<String,XxlJobInfoMeta> metaMap=new LinkedHashMap<>();
+            Map<String, XxlJobInfoMeta> metaMap = new LinkedHashMap<>();
             for (XxlJobInfoMeta item : metaList) {
                 String executorHandler = item.getExecutorHandler();
-                if(executorHandler==null){
+                if (executorHandler == null) {
                     continue;
                 }
-                metaMap.put(executorHandler,item);
+                metaMap.put(executorHandler, item);
             }
             for (String item : map.keySet()) {
                 XxlJobInfoMeta meta = metaMap.get(item);
-                if(meta==null){
-                    meta=new XxlJobInfoMeta();
+                if (meta == null) {
+                    meta = new XxlJobInfoMeta();
                     meta.setExecutorHandler(item);
                 }
                 resp.add(meta);

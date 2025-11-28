@@ -269,22 +269,20 @@ public class SftpUtil implements Closeable {
                 }
                 printWriter.println(cmd);
                 printWriter.flush();
+                printWriter.println("exit");
+                printWriter.flush();
 
-                PrintWriter finalWriter=printWriter;
-                new Thread(()->{
-                    try {
-                        Thread.sleep(300);
-                        finalWriter.println("exit");
-                        finalWriter.flush();
-                    } catch (InterruptedException e) {
-
-                    }
-                }).start();
                 if (requireOutput) {
-                    String line = null;
-                    while ((line = input.readLine()) != null) {
-                        builder.append(line);
-                        builder.append("\n");
+                    while(true) {
+                        String line = null;
+                        while ((line = input.readLine()) != null) {
+                            builder.append(line);
+                            builder.append("\n");
+                        }
+                        if(channel.isClosed()){
+                            break;
+                        }
+                        Thread.sleep(30);
                     }
                 }
 

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2025/11/1 23:18
  * @desc
  */
+@ConditionalOnClass(RedisTemplate.class)
 @Slf4j
 @Data
 @NoArgsConstructor
@@ -41,6 +44,11 @@ public class RedisOpsController {
 
     @Autowired
     protected OpsSecureTransfer transfer;
+
+    @RequestMapping("/")
+    public RedirectView index() {
+        return new RedirectView("./index.html");
+    }
 
     public RedisTemplate getRedisTemplate() {
         String[] names = applicationContext.getBeanNamesForType(RedisTemplate.class);

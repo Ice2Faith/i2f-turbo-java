@@ -22,15 +22,15 @@ public class AppClassDto {
     protected List<AppClassNameDto> interfaceList;
     protected AppClassNameDto superClass;
 
-    public static AppClassDto of(Class<?> clazz){
-        AppClassDto ret=new AppClassDto();
-        ret.modifiers= AppUtil.resolveModifier(clazz.getModifiers());
-        ret.fieldList=new ArrayList<>();
-        ret.methodList=new ArrayList<>();
-        ret.interfaceList=new ArrayList<>();
+    public static AppClassDto of(Class<?> clazz) {
+        AppClassDto ret = new AppClassDto();
+        ret.modifiers = AppUtil.resolveModifier(clazz.getModifiers());
+        ret.fieldList = new ArrayList<>();
+        ret.methodList = new ArrayList<>();
+        ret.interfaceList = new ArrayList<>();
         Class<?> superclass = clazz.getSuperclass();
-        ret.superClass=AppClassNameDto.of(superclass==null? Void.class: superclass);
-        Set<Field> fields=new LinkedHashSet<>();
+        ret.superClass = AppClassNameDto.of(superclass == null ? Void.class : superclass);
+        Set<Field> fields = new LinkedHashSet<>();
         try {
             fields.addAll(Arrays.asList(clazz.getFields()));
         } catch (Exception e) {
@@ -44,7 +44,7 @@ public class AppClassDto {
         for (Field field : fields) {
             ret.fieldList.add(AppFieldDto.of(field));
         }
-        Set<Method> methods=new LinkedHashSet<>();
+        Set<Method> methods = new LinkedHashSet<>();
         try {
             methods.addAll(Arrays.asList(clazz.getMethods()));
         } catch (Exception e) {
@@ -59,7 +59,7 @@ public class AppClassDto {
             ret.methodList.add(AppMethodDto.of(method));
         }
         Class<?>[] interfaces = clazz.getInterfaces();
-        if(interfaces!=null){
+        if (interfaces != null) {
             for (Class<?> item : interfaces) {
                 ret.interfaceList.add(AppClassNameDto.of(item));
             }

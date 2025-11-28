@@ -14,16 +14,16 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class AppServiceInstanceDto {
-    protected  String instanceId;
-    protected  String serviceId;
-    protected  String uri;
-    protected  String scheme;
-    protected  String host;
-    protected  int port;
-    protected  Map<String, String> metadata=new HashMap<>();
+    protected String instanceId;
+    protected String serviceId;
+    protected String uri;
+    protected String scheme;
+    protected String host;
+    protected int port;
+    protected Map<String, String> metadata = new HashMap<>();
 
-    public static AppServiceInstanceDto of(ServiceInstance instance){
-        AppServiceInstanceDto ret=new AppServiceInstanceDto();
+    public static AppServiceInstanceDto of(ServiceInstance instance) {
+        AppServiceInstanceDto ret = new AppServiceInstanceDto();
         ret.setServiceId(instance.getServiceId());
         ret.setInstanceId(instance.getInstanceId());
         ret.setUri(instance.getUri().toString());

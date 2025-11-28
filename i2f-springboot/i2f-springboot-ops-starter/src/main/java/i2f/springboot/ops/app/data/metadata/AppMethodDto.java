@@ -25,15 +25,15 @@ public class AppMethodDto {
 
     public static AppMethodDto of(Method method) {
         AppMethodDto dto = new AppMethodDto();
-        dto.modifiers= AppUtil.resolveModifier(method.getModifiers());
-        dto.returns=AppClassNameDto.of(method.getReturnType());
-        dto.name=method.getName();
-        dto.parameterList=new ArrayList<>();
+        dto.modifiers = AppUtil.resolveModifier(method.getModifiers());
+        dto.returns = AppClassNameDto.of(method.getReturnType());
+        dto.name = method.getName();
+        dto.parameterList = new ArrayList<>();
         Parameter[] parameters = method.getParameters();
         for (Parameter parameter : parameters) {
             dto.parameterList.add(AppFieldDto.of(parameter));
         }
-        dto.declareClass=AppClassNameDto.of(method.getDeclaringClass());
+        dto.declareClass = AppClassNameDto.of(method.getDeclaringClass());
         return dto;
     }
 

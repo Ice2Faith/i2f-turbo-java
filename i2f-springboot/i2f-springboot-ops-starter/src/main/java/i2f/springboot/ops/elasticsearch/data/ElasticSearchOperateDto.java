@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ElasticSearchOperateDto {
-    protected boolean useCustomMeta=false;
+    protected boolean useCustomMeta = false;
     protected EsMeta meta;
 
     protected String pattern;

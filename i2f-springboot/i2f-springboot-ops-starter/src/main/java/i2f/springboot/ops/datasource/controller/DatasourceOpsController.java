@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -47,6 +48,11 @@ public class DatasourceOpsController {
 
     @Autowired
     protected OpsSecureTransfer transfer;
+
+    @RequestMapping("/")
+    public RedirectView index() {
+        return new RedirectView("./index.html");
+    }
 
     @PostMapping("/drivers")
     @ResponseBody

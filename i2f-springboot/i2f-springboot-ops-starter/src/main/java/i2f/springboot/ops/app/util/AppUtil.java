@@ -10,24 +10,24 @@ import java.util.List;
  * @desc
  */
 public class AppUtil {
-    public static Class<?> findClass(String className){
-        if(className==null){
+    public static Class<?> findClass(String className) {
+        if (className == null) {
             return null;
         }
-        try{
+        try {
             Class<?> clazz = Class.forName(className);
-            if(clazz!=null){
+            if (clazz != null) {
                 return clazz;
             }
-        }catch(Throwable e){
+        } catch (Throwable e) {
 
         }
-        try{
+        try {
             Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-            if(clazz!=null){
+            if (clazz != null) {
                 return clazz;
             }
-        }catch(Throwable e){
+        } catch (Throwable e) {
 
         }
         return null;
@@ -35,45 +35,45 @@ public class AppUtil {
 
     public static Class<?> loadClass(String className) throws Exception {
         Class<?> clazz = findClass(className);
-        if(clazz!=null){
+        if (clazz != null) {
             return clazz;
         }
-        return findClass(className.replace("$","."));
+        return findClass(className.replace("$", "."));
     }
 
-    public static List<String> resolveModifier(int mod){
-        List<String> ret=new ArrayList<>();
-        if(Modifier.isPublic(mod)){
+    public static List<String> resolveModifier(int mod) {
+        List<String> ret = new ArrayList<>();
+        if (Modifier.isPublic(mod)) {
             ret.add("public");
         }
-        if(Modifier.isProtected(mod)){
+        if (Modifier.isProtected(mod)) {
             ret.add("protected");
         }
-        if(Modifier.isPrivate(mod)){
+        if (Modifier.isPrivate(mod)) {
             ret.add("private");
         }
-        if(Modifier.isStatic(mod)){
+        if (Modifier.isStatic(mod)) {
             ret.add("static");
         }
-        if(Modifier.isFinal(mod)){
+        if (Modifier.isFinal(mod)) {
             ret.add("final");
         }
-        if(Modifier.isAbstract(mod)){
+        if (Modifier.isAbstract(mod)) {
             ret.add("abstract");
         }
-        if(Modifier.isInterface(mod)){
+        if (Modifier.isInterface(mod)) {
             ret.add("interface");
         }
-        if(Modifier.isNative(mod)){
+        if (Modifier.isNative(mod)) {
             ret.add("native");
         }
-        if(Modifier.isSynchronized(mod)){
+        if (Modifier.isSynchronized(mod)) {
             ret.add("synchronized");
         }
-        if(Modifier.isTransient(mod)){
+        if (Modifier.isTransient(mod)) {
             ret.add("transient");
         }
-        if(Modifier.isVolatile(mod)){
+        if (Modifier.isVolatile(mod)) {
             ret.add("volatile");
         }
         return ret;

@@ -2,7 +2,8 @@ package i2f.springboot.ops.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.groovy.GroovyScript;
-import i2f.springboot.ops.app.data.*;
+import i2f.springboot.ops.app.data.AppKeyValueItemDto;
+import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.app.data.metadata.AppClassDto;
 import i2f.springboot.ops.app.data.service.AppServiceInstanceDto;
 import i2f.springboot.ops.app.data.thread.AppThreadInfoDto;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.management.ManagementFactory;
@@ -59,6 +61,11 @@ public class AppOpsController {
         if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
             throw new OpsException("request not equals require hostId");
         }
+    }
+
+    @RequestMapping("/")
+    public RedirectView index() {
+        return new RedirectView("./index.html");
     }
 
     @PostMapping("/hostId")
@@ -150,7 +157,7 @@ public class AppOpsController {
     @PostMapping("/service-instances")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> serviceInstances(@RequestBody OpsSecureDto reqDto,
-                                                   HttpServletRequest request) throws Exception {
+                                                          HttpServletRequest request) throws Exception {
         try {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
@@ -159,7 +166,7 @@ public class AppOpsController {
                 }
             }
             assertHostId(req);
-            List<AppServiceInstanceDto> resp=new ArrayList<>();
+            List<AppServiceInstanceDto> resp = new ArrayList<>();
             DiscoveryClient client = applicationContext.getBean(DiscoveryClient.class);
             List<String> services = client.getServices();
             for (String service : services) {
@@ -179,7 +186,7 @@ public class AppOpsController {
     @PostMapping("/class-metadata")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> classMetadata(@RequestBody OpsSecureDto reqDto,
-                                                          HttpServletRequest request) throws Exception {
+                                                       HttpServletRequest request) throws Exception {
         try {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
@@ -190,10 +197,10 @@ public class AppOpsController {
             assertHostId(req);
             String className = req.getClassName();
             Class<?> clazz = AppUtil.loadClass(className);
-            if(clazz==null){
+            if (clazz == null) {
                 throw new ClassNotFoundException(className);
             }
-            AppClassDto resp=AppClassDto.of(clazz);
+            AppClassDto resp = AppClassDto.of(clazz);
 
             return transfer.success(resp);
         } catch (Throwable e) {
@@ -332,18 +339,18 @@ public class AppOpsController {
             Object ret = refRet.get();
             String resp = null;
             try {
-                if(ret instanceof CharSequence
-                || ret instanceof Appendable
-                || ret instanceof Number){
-                    resp=String.valueOf(ret);
-                }else {
+                if (ret instanceof CharSequence
+                        || ret instanceof Appendable
+                        || ret instanceof Number) {
+                    resp = String.valueOf(ret);
+                } else {
                     resp = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ret);
                 }
             } catch (Exception e) {
                 try {
-                    resp=String.valueOf(ret);
-                }catch (Exception ex) {
-                    resp = "response value cannot serialize as json: "+(ret.getClass().getName());
+                    resp = String.valueOf(ret);
+                } catch (Exception ex) {
+                    resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }
             return transfer.success(resp);

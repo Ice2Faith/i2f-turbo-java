@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +47,11 @@ public class HostOpsController {
 
     @Autowired
     private HostIdHelper hostIdHelper;
+
+    @RequestMapping("/")
+    public RedirectView index() {
+        return new RedirectView("./index.html");
+    }
 
     @PostMapping("/hostId")
     @ResponseBody
