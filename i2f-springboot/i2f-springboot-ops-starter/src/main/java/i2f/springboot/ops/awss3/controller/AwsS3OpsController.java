@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,6 +54,11 @@ public class AwsS3OpsController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @RequestMapping("/")
+    public RedirectView index() {
+        return new RedirectView("./index.html");
+    }
 
     @PostMapping("/workdir")
     @ResponseBody
@@ -92,7 +98,7 @@ public class AwsS3OpsController {
                         if (file.isDirectory()) {
                             item.setType("dir");
                             dirList.add(item);
-                        } else{
+                        } else {
                             item.setType("file");
                             fileList.add(item);
                         }
@@ -107,7 +113,7 @@ public class AwsS3OpsController {
                 HostFileItemDto item = new HostFileItemDto();
                 item.setName("..");
                 String path = dir.getAbsolutePath();
-                IFile parentFile=fs.getDirectory(path);
+                IFile parentFile = fs.getDirectory(path);
                 item.setPath(parentFile != null ? parentFile.getAbsolutePath() : "/");
                 item.setSize(0);
                 item.setType("dir");
@@ -199,7 +205,7 @@ public class AwsS3OpsController {
             String path = req.getPath();
             IFile file = fs.getFile(path);
 
-            ServletFileUtil.responseAsFileAttachment(file.getInputStream(),true,file.getName(), null, !req.isInline(), response);
+            ServletFileUtil.responseAsFileAttachment(file.getInputStream(), true, file.getName(), null, !req.isInline(), response);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -316,7 +322,7 @@ public class AwsS3OpsController {
                 File originFile = new File(originalFilename);
                 saveFile = fs.getFile(workdir, originFile.getName());
             }
-            File tmpFile = File.createTempFile("upload-" + (UUID.randomUUID().toString().replace("-", "")) , ".tmp");
+            File tmpFile = File.createTempFile("upload-" + (UUID.randomUUID().toString().replace("-", "")), ".tmp");
             try {
                 MessageDigest digest = MessageDigest.getInstance("MD5");
                 OutputStream os = new FileOutputStream(tmpFile);
@@ -338,7 +344,7 @@ public class AwsS3OpsController {
                     throw new OpsException("file check sum error");
                 }
                 OutputStream sos = saveFile.getOutputStream();
-                StreamUtil.streamCopy(new FileInputStream(tmpFile),sos,true);
+                StreamUtil.streamCopy(new FileInputStream(tmpFile), sos, true);
                 return transfer.success(true);
             } finally {
                 if (tmpFile != null && tmpFile.exists()) {

@@ -10,30 +10,25 @@ import i2f.springboot.ops.elasticsearch.helper.ElasticSearchOpsHelper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.search.TotalHits;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.GetIndexResponse;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.view.RedirectView;
 
-import java.sql.Driver;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 /**
  * @author Ice2Faith
  * @date 2025/11/27 11:15
  */
+@ConditionalOnClass(RestHighLevelClient.class)
 @Slf4j
 @Data
 @NoArgsConstructor
@@ -47,27 +42,32 @@ public class ElasticSearchOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;
 
+    @RequestMapping("/")
+    public RedirectView index() {
+        return new RedirectView("./index.html");
+    }
+
     @PostMapping("/index/list")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> indexList(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             ElasticSearchOperateDto req = transfer.recv(reqDto, ElasticSearchOperateDto.class);
-            RestHighLevelClient client=null;
-            try{
-                client=elasticSearchOpsHelper.getClient(req);
+            RestHighLevelClient client = null;
+            try {
+                client = elasticSearchOpsHelper.getClient(req);
                 EsManager esManager = new EsManager(client);
 
                 String pattern = req.getPattern();
-                if(pattern==null || pattern.isEmpty()){
-                    pattern="*";
+                if (pattern == null || pattern.isEmpty()) {
+                    pattern = "*";
                 }
 
                 List<String> resp = esManager.indexListByPattern(pattern);
 
                 return transfer.success(resp);
-            }finally {
-                if(req.isUseCustomMeta()){
-                    if(client!=null){
+            } finally {
+                if (req.isUseCustomMeta()) {
+                    if (client != null) {
                         client.close();
                     }
                 }
@@ -83,18 +83,18 @@ public class ElasticSearchOpsController {
     public OpsSecureReturn<OpsSecureDto> indexAdd(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             ElasticSearchOperateDto req = transfer.recv(reqDto, ElasticSearchOperateDto.class);
-            RestHighLevelClient client=null;
-            try{
-                client=elasticSearchOpsHelper.getClient(req);
+            RestHighLevelClient client = null;
+            try {
+                client = elasticSearchOpsHelper.getClient(req);
                 EsManager esManager = new EsManager(client);
 
 
-                boolean resp = esManager.indexCreate(req.getIndexName(),req.getMappingJson(),req.getSettingJson());
+                boolean resp = esManager.indexCreate(req.getIndexName(), req.getMappingJson(), req.getSettingJson());
 
                 return transfer.success(resp);
-            }finally {
-                if(req.isUseCustomMeta()){
-                    if(client!=null){
+            } finally {
+                if (req.isUseCustomMeta()) {
+                    if (client != null) {
                         client.close();
                     }
                 }
@@ -110,17 +110,17 @@ public class ElasticSearchOpsController {
     public OpsSecureReturn<OpsSecureDto> indexDelete(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             ElasticSearchOperateDto req = transfer.recv(reqDto, ElasticSearchOperateDto.class);
-            RestHighLevelClient client=null;
-            try{
-                client=elasticSearchOpsHelper.getClient(req);
+            RestHighLevelClient client = null;
+            try {
+                client = elasticSearchOpsHelper.getClient(req);
                 EsManager esManager = new EsManager(client);
 
                 boolean resp = esManager.indexDelete(req.getIndexName());
 
                 return transfer.success(resp);
-            }finally {
-                if(req.isUseCustomMeta()){
-                    if(client!=null){
+            } finally {
+                if (req.isUseCustomMeta()) {
+                    if (client != null) {
                         client.close();
                     }
                 }
@@ -136,17 +136,17 @@ public class ElasticSearchOpsController {
     public OpsSecureReturn<OpsSecureDto> documentAdd(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             ElasticSearchOperateDto req = transfer.recv(reqDto, ElasticSearchOperateDto.class);
-            RestHighLevelClient client=null;
-            try{
-                client=elasticSearchOpsHelper.getClient(req);
+            RestHighLevelClient client = null;
+            try {
+                client = elasticSearchOpsHelper.getClient(req);
                 EsManager esManager = new EsManager(client);
 
-                boolean resp=esManager.recordsInsert(req.getIndexName(),req.getId(),req.getJsonDsl());
+                boolean resp = esManager.recordsInsert(req.getIndexName(), req.getId(), req.getJsonDsl());
 
                 return transfer.success(resp);
-            }finally {
-                if(req.isUseCustomMeta()){
-                    if(client!=null){
+            } finally {
+                if (req.isUseCustomMeta()) {
+                    if (client != null) {
                         client.close();
                     }
                 }
@@ -162,17 +162,17 @@ public class ElasticSearchOpsController {
     public OpsSecureReturn<OpsSecureDto> documentUpdate(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             ElasticSearchOperateDto req = transfer.recv(reqDto, ElasticSearchOperateDto.class);
-            RestHighLevelClient client=null;
-            try{
-                client=elasticSearchOpsHelper.getClient(req);
+            RestHighLevelClient client = null;
+            try {
+                client = elasticSearchOpsHelper.getClient(req);
                 EsManager esManager = new EsManager(client);
 
-                boolean resp=esManager.recordsUpdate(req.getIndexName(),req.getId(),req.getJsonDsl());
+                boolean resp = esManager.recordsUpdate(req.getIndexName(), req.getId(), req.getJsonDsl());
 
                 return transfer.success(resp);
-            }finally {
-                if(req.isUseCustomMeta()){
-                    if(client!=null){
+            } finally {
+                if (req.isUseCustomMeta()) {
+                    if (client != null) {
                         client.close();
                     }
                 }
@@ -188,17 +188,17 @@ public class ElasticSearchOpsController {
     public OpsSecureReturn<OpsSecureDto> documentDelete(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             ElasticSearchOperateDto req = transfer.recv(reqDto, ElasticSearchOperateDto.class);
-            RestHighLevelClient client=null;
-            try{
-                client=elasticSearchOpsHelper.getClient(req);
+            RestHighLevelClient client = null;
+            try {
+                client = elasticSearchOpsHelper.getClient(req);
                 EsManager esManager = new EsManager(client);
 
-                boolean resp=esManager.recordsDelete(req.getIndexName(),req.getId());
+                boolean resp = esManager.recordsDelete(req.getIndexName(), req.getId());
 
                 return transfer.success(resp);
-            }finally {
-                if(req.isUseCustomMeta()){
-                    if(client!=null){
+            } finally {
+                if (req.isUseCustomMeta()) {
+                    if (client != null) {
                         client.close();
                     }
                 }
@@ -215,22 +215,22 @@ public class ElasticSearchOpsController {
     public OpsSecureReturn<OpsSecureDto> documentSearch(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             ElasticSearchOperateDto req = transfer.recv(reqDto, ElasticSearchOperateDto.class);
-            RestHighLevelClient client=null;
-            try{
-                client=elasticSearchOpsHelper.getClient(req);
+            RestHighLevelClient client = null;
+            try {
+                client = elasticSearchOpsHelper.getClient(req);
                 EsManager esManager = new EsManager(client);
 
                 SearchSourceBuilder builder = EsManager.searchSourceBuilderFromJsonDsl(req.getJsonDsl());
-                if(req.getMaxCount()!=null && req.getMaxCount()>=0){
+                if (req.getMaxCount() != null && req.getMaxCount() >= 0) {
                     builder.from(0);
                     builder.size(req.getMaxCount());
                 }
                 Page<Map<String, Object>> resp = esManager.searchAsMap(req.getIndexName(), builder);
 
                 return transfer.success(resp);
-            }finally {
-                if(req.isUseCustomMeta()){
-                    if(client!=null){
+            } finally {
+                if (req.isUseCustomMeta()) {
+                    if (client != null) {
                         client.close();
                     }
                 }

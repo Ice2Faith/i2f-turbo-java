@@ -1,17 +1,15 @@
 package i2f.springboot.ops.datasource.provider.impl;
 
-import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
+import i2f.springboot.ops.datasource.provider.DatasourceCollector;
 import i2f.springboot.ops.datasource.provider.DatasourceProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,45 +52,23 @@ public class DefaultDatasourceProvider implements DatasourceProvider {
 
     public void refresh() {
         try {
-            AbstractRoutingDataSource bean = applicationContext.getBean(AbstractRoutingDataSource.class);
-            if (bean != null) {
-                Map<Object, DataSource> dataSources = bean.getResolvedDataSources();
-                for (Map.Entry<Object, DataSource> entry : dataSources.entrySet()) {
-                    String name = String.valueOf(entry.getKey());
-                    if (name.toLowerCase().endsWith("datasource")) {
-                        name = name.substring(0, name.length() - "datasource".length());
-                    }
-                    dataSourceMap.put(name, entry.getValue());
-                }
+            String[] names = applicationContext.getBeanNamesForType(DatasourceCollector.class);
+            for (String name : names) {
+                try {
+                    DatasourceCollector collector = applicationContext.getBean(name, DatasourceCollector.class);
+                    Map<String, DataSource> map = collector.collect();
+                    dataSourceMap.putAll(map);
+                } catch (Exception e) {
 
-            }
-        } catch (Exception e) {
-        }
-        try {
-            DynamicRoutingDataSource bean = applicationContext.getBean(DynamicRoutingDataSource.class);
-            Map<String, DataSource> ret = bean.getDataSources();
-            dataSourceMap.putAll(ret);
-        } catch (Exception e) {
-        }
-        try {
-            String[] beanNames = applicationContext.getBeanNamesForType(DataSource.class);
-            for (String beanName : beanNames) {
-                DataSource bean = applicationContext.getBean(beanName, DataSource.class);
-                String name = beanName;
-                if (name.toLowerCase().endsWith("datasource")) {
-                    name = name.substring(0, name.length() - "datasource".length());
                 }
-                if (name.isEmpty()) {
-                    name = beanName;
-                }
-                dataSourceMap.put(name, bean);
             }
         } catch (Exception e) {
 
         }
+
         defaultDataSourceName.set(detectPrimaryDatasource(dataSourceMap));
         try {
-            dataSourceMap.put(DEFAULT_DATASOURCE_NAME,dataSourceMap.get(defaultDataSourceName.get()));
+            dataSourceMap.put(DEFAULT_DATASOURCE_NAME, dataSourceMap.get(defaultDataSourceName.get()));
         } catch (Exception e) {
 
         }
