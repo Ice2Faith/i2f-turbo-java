@@ -2,6 +2,8 @@ package i2f.springboot.ops.host.controller;
 
 import i2f.os.OsUtil;
 import i2f.springboot.ops.common.*;
+import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostFileItemDto;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import i2f.springboot.ops.util.HumanUtil;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,10 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -41,16 +39,31 @@ import java.util.UUID;
 @NoArgsConstructor
 @Controller
 @RequestMapping("/ops/host")
-public class HostOpsController {
+public class HostOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;
 
     @Autowired
     private HostIdHelper hostIdHelper;
 
-    @RequestMapping("/")
-    public RedirectView index() {
-        return new RedirectView("./index.html");
+    @Override
+    public List<OpsHomeMenuDto> getMenus() {
+        return Collections.singletonList(new OpsHomeMenuDto()
+                .title("Host")
+                .subTitle("连接/操作Host主机命令/文件")
+                .icon("el-icon-monitor")
+                .href("./host/index.html")
+        );
+    }
+
+    @RequestMapping({"/", ""})
+    public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String requestURI = request.getRequestURI();
+        if (!requestURI.endsWith("/")) {
+            request.getRequestDispatcher(requestURI + "/index.html").forward(request, response);
+        } else {
+            request.getRequestDispatcher("./index.html").forward(request, response);
+        }
     }
 
     @PostMapping("/hostId")

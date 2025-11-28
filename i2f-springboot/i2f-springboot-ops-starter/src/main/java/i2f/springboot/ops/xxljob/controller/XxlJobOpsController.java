@@ -9,6 +9,8 @@ import i2f.database.metadata.std.DatabaseMetadataProvider;
 import i2f.jdbc.JdbcResolver;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.datasource.provider.DatasourceProvider;
+import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import i2f.springboot.ops.xxljob.data.XxlJobInfoMeta;
 import i2f.springboot.ops.xxljob.data.XxlJobOperateDto;
@@ -24,19 +26,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @NoArgsConstructor
 @Controller
 @RequestMapping("/ops/xxl-job")
-public class XxlJobOpsController {
+public class XxlJobOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;
 
@@ -150,9 +149,24 @@ public class XxlJobOpsController {
         return new ArrayList<>();
     }
 
-    @RequestMapping("/")
-    public RedirectView index() {
-        return new RedirectView("./index.html");
+    @Override
+    public List<OpsHomeMenuDto> getMenus() {
+        return Collections.singletonList(new OpsHomeMenuDto()
+                .title("Xxl Job")
+                .subTitle("执行XXL-JOB任务")
+                .icon("el-icon-timer")
+                .href("./xxl-job/index.html")
+        );
+    }
+
+    @RequestMapping({"/", ""})
+    public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String requestURI = request.getRequestURI();
+        if (!requestURI.endsWith("/")) {
+            request.getRequestDispatcher(requestURI + "/index.html").forward(request, response);
+        } else {
+            request.getRequestDispatcher("./index.html").forward(request, response);
+        }
     }
 
     @PostMapping("/hostId")

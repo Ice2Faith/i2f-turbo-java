@@ -1,38 +1,33 @@
 package i2f.springboot.ops.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import i2f.extension.groovy.GroovyScript;
 import i2f.springboot.ops.app.data.AppKeyValueItemDto;
 import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.app.data.metadata.AppClassDto;
-import i2f.springboot.ops.app.data.service.AppServiceInstanceDto;
 import i2f.springboot.ops.app.data.thread.AppThreadInfoDto;
 import i2f.springboot.ops.app.util.AppUtil;
 import i2f.springboot.ops.common.*;
+import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -44,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @NoArgsConstructor
 @Controller
 @RequestMapping("/ops/app")
-public class AppOpsController {
+public class AppOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;
 
@@ -57,15 +52,30 @@ public class AppOpsController {
     @Autowired
     private HostIdHelper hostIdHelper;
 
+    @Override
+    public List<OpsHomeMenuDto> getMenus() {
+        return Collections.singletonList(new OpsHomeMenuDto()
+                .title("Application")
+                .subTitle("获取应用信息与执行表达式脚本")
+                .icon("el-icon-mobile")
+                .href("./app/index.html")
+        );
+    }
+
     public void assertHostId(AppOperationDto req) {
         if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
             throw new OpsException("request not equals require hostId");
         }
     }
 
-    @RequestMapping("/")
-    public RedirectView index() {
-        return new RedirectView("./index.html");
+    @RequestMapping({"/", ""})
+    public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String requestURI = request.getRequestURI();
+        if (!requestURI.endsWith("/")) {
+            request.getRequestDispatcher(requestURI + "/index.html").forward(request, response);
+        } else {
+            request.getRequestDispatcher("./index.html").forward(request, response);
+        }
     }
 
     @PostMapping("/hostId")
