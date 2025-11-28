@@ -154,35 +154,6 @@ public class AppOpsController {
         }
     }
 
-    @PostMapping("/service-instances")
-    @ResponseBody
-    public OpsSecureReturn<OpsSecureDto> serviceInstances(@RequestBody OpsSecureDto reqDto,
-                                                          HttpServletRequest request) throws Exception {
-        try {
-            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
-            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
-                if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
-                }
-            }
-            assertHostId(req);
-            List<AppServiceInstanceDto> resp = new ArrayList<>();
-            DiscoveryClient client = applicationContext.getBean(DiscoveryClient.class);
-            List<String> services = client.getServices();
-            for (String service : services) {
-                List<ServiceInstance> instances = client.getInstances(service);
-                for (ServiceInstance instance : instances) {
-                    resp.add(AppServiceInstanceDto.of(instance));
-                }
-            }
-            return transfer.success(resp);
-        } catch (Throwable e) {
-            log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
-        }
-    }
-
-
     @PostMapping("/class-metadata")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> classMetadata(@RequestBody OpsSecureDto reqDto,
@@ -275,89 +246,6 @@ public class AppOpsController {
             return className.substring(0, idx);
         }
         return className;
-    }
-
-    @PostMapping("/eval")
-    @ResponseBody
-    public OpsSecureReturn<OpsSecureDto> eval(@RequestBody OpsSecureDto reqDto,
-                                              HttpServletRequest request) throws Exception {
-        try {
-            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
-            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
-                if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
-                }
-            }
-            assertHostId(req);
-            String script = req.getScript();
-            long waitForSeconds = req.getWaitForSeconds();
-            if (waitForSeconds < 0) {
-                waitForSeconds = 120;
-            }
-            if (waitForSeconds >= 500) {
-                waitForSeconds = 500;
-            }
-            AtomicReference<Object> refRet = new AtomicReference<>();
-            AtomicReference<Throwable> refEx = new AtomicReference<>();
-            CountDownLatch latch = new CountDownLatch(1);
-            Runnable task = () -> {
-                try {
-
-                    Map<String, Object> context = new HashMap<>();
-                    context.put("context", applicationContext);
-                    context.put("env", applicationContext.getEnvironment());
-                    Map<String, Object> beanMap = new HashMap<>();
-                    String[] names = applicationContext.getBeanDefinitionNames();
-                    for (String name : names) {
-                        Object bean = applicationContext.getBean(name);
-                        beanMap.put(name, bean);
-                    }
-                    context.put("beanMap", beanMap);
-                    Object eval = GroovyScript.eval(script, context);
-                    refRet.set(eval);
-                } catch (Throwable e) {
-                    refEx.set(e);
-                } finally {
-                    latch.countDown();
-                }
-            };
-            new Thread(task).start();
-            try {
-                if (waitForSeconds >= 0) {
-                    latch.await(waitForSeconds, TimeUnit.SECONDS);
-                } else {
-                    latch.await();
-                }
-            } catch (InterruptedException e) {
-
-            }
-            Throwable throwable = refEx.get();
-            if (throwable != null) {
-                throw throwable;
-            }
-
-            Object ret = refRet.get();
-            String resp = null;
-            try {
-                if (ret instanceof CharSequence
-                        || ret instanceof Appendable
-                        || ret instanceof Number) {
-                    resp = String.valueOf(ret);
-                } else {
-                    resp = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ret);
-                }
-            } catch (Exception e) {
-                try {
-                    resp = String.valueOf(ret);
-                } catch (Exception ex) {
-                    resp = "response value cannot serialize as json: " + (ret.getClass().getName());
-                }
-            }
-            return transfer.success(resp);
-        } catch (Throwable e) {
-            log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
-        }
     }
 
 }
