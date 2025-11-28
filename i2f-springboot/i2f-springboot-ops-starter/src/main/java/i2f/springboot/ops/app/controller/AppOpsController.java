@@ -3,6 +3,7 @@ package i2f.springboot.ops.app.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.ops.app.data.AppKeyValueItemDto;
 import i2f.springboot.ops.app.data.AppOperationDto;
+import i2f.springboot.ops.app.data.logging.AppLoggingDto;
 import i2f.springboot.ops.app.data.metadata.AppClassDto;
 import i2f.springboot.ops.app.data.thread.AppThreadInfoDto;
 import i2f.springboot.ops.app.util.AppUtil;
@@ -14,6 +15,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggerConfiguration;
+import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -80,6 +84,43 @@ public class AppOpsController implements IOpsProvider {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
             String hostIp = hostIdHelper.getHostId();
             return transfer.success(hostIp);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/logging-level/set")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> loggingLevelSet(@RequestBody OpsSecureDto reqDto,
+                                                         HttpServletRequest request) throws Exception {
+        try {
+            AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
+            assertHostId(req);
+            AppLoggingDto conf = req.getLogging();
+
+            LogLevel level=null;
+            for (LogLevel item : LogLevel.values()) {
+                if(item.name().equalsIgnoreCase(conf.getLevel())){
+                    level=item;
+                    break;
+                }
+            }
+            LoggingSystem bean = applicationContext.getBean(LoggingSystem.class);
+            bean.setLogLevel(conf.getLocation(),level);
+            LoggerConfiguration cfg = bean.getLoggerConfiguration(conf.getLocation());
+            AppLoggingDto resp = new AppLoggingDto();
+            if(cfg!=null) {
+                resp.setLocation(cfg.getName());
+                resp.setLevel(String.valueOf(cfg.getConfiguredLevel()));
+                resp.setEffectLevel(String.valueOf(cfg.getEffectiveLevel()));
+            }
+            return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
             return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
