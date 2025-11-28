@@ -61,12 +61,12 @@ public class AwsS3OpsController implements IOpsProvider {
         return Collections.singletonList(new OpsHomeMenuDto()
                 .title("Aws S3")
                 .subTitle("Aws S3 Oss 对象存储管理")
-                .icon("l-icon-files")
+                .icon("el-icon-files")
                 .href("./aws-s3/index.html")
         );
     }
 
-    @RequestMapping({"/", ""})
+    @RequestMapping("/")
     public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String requestURI = request.getRequestURI();
         if (!requestURI.endsWith("/")) {

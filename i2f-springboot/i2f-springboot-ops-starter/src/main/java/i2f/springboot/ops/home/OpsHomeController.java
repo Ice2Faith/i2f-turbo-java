@@ -33,7 +33,7 @@ public class OpsHomeController {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @RequestMapping({"/", ""})
+    @RequestMapping("/")
     public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String requestURI = request.getRequestURI();
         if (!requestURI.endsWith("/")) {
@@ -57,6 +57,9 @@ public class OpsHomeController {
 
                 }
             }
+            resp.sort((v1,v2)->{
+                return String.CASE_INSENSITIVE_ORDER.compare(v1.getTitle(),v2.getTitle());
+            });
             return OpsSecureReturn.success(resp);
         } catch (Exception e) {
             return OpsSecureReturn.error("Internal Server Error!");

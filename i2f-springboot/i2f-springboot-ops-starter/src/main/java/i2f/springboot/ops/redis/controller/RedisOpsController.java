@@ -59,7 +59,7 @@ public class RedisOpsController implements IOpsProvider {
         );
     }
 
-    @RequestMapping({"/", ""})
+    @RequestMapping("/")
     public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String requestURI = request.getRequestURI();
         if (!requestURI.endsWith("/")) {
