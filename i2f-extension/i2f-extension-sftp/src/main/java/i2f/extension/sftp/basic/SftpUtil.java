@@ -80,10 +80,28 @@ public class SftpUtil implements Closeable {
         return channelSftp;
     }
 
+    /**
+     * 获取交互式终端，输入输出是异步的
+     * @return
+     * @throws JSchException
+     */
     public ChannelShell getChannelShell() throws JSchException {
         Channel shell = session.openChannel("shell");
         shell.connect();
         return (ChannelShell) shell;
+    }
+
+    /**
+     * 获取命令执行通道，用于有序执行一份命令，可以阻塞式获取输出
+     * @param command
+     * @return
+     * @throws JSchException
+     */
+    public ChannelExec getChannelExec(String command) throws JSchException {
+        ChannelExec shell = (ChannelExec)session.openChannel("exec");
+        shell.setCommand(command);
+        shell.connect();
+        return shell;
     }
 
     public String pwd() throws SftpException {
@@ -252,55 +270,37 @@ public class SftpUtil implements Closeable {
         AtomicReference<Throwable> exHolder = new AtomicReference<>();
         Runnable task = () -> {
 
-            ChannelShell channel = null;
-            PrintWriter printWriter = null;
+            ChannelExec channel = null;
             BufferedReader input = null;
 
             try {
-                channel = getChannelShell();
+                StringBuilder commandBuilder=new StringBuilder();
+                if (dir != null && !dir.isEmpty()) {
+                    commandBuilder.append("cd ").append(dir).append("\n");
+                }
+                commandBuilder.append(cmd).append("\n");
+                commandBuilder.append("exit").append("\n");
+
+                channel = getChannelExec(commandBuilder.toString());
+
 
                 input = new BufferedReader(new InputStreamReader(channel.getInputStream(),
                         ((charset == null || charset.isEmpty()) ? StandardCharsets.UTF_8.name() : charset)));
 
-                printWriter = new PrintWriter(channel.getOutputStream(),true);
-                if (dir != null && !dir.isEmpty()) {
-                    printWriter.println("cd " + dir);
-                    printWriter.flush();
-                }
-                printWriter.println(cmd);
-                printWriter.flush();
 
                 if (requireOutput) {
-                    int idleCount=0;
-                    while(true) {
-                        String line = null;
-                        while ((line = input.readLine()) != null) {
-                            builder.append(line);
-                            builder.append("\n");
-                            idleCount=0;
-                        }
-                        if(channel.isClosed()){
-                            break;
-                        }
-                        idleCount++;
-                        if(idleCount>100){
-                            break;
-                        }
-                        Thread.sleep(30);
+                    String line = null;
+                    while ((line = input.readLine()) != null) {
+                        builder.append(line);
+                        builder.append("\n");
                     }
                 }
-
-                printWriter.println("exit");
-                printWriter.flush();
 
                 int exitStatus = channel.getExitStatus();
                 builder.append("exit status: ").append(exitStatus).append("\n");
             } catch (Exception e) {
                 exHolder.set(e);
             } finally {
-                if (printWriter != null) {
-                    printWriter.close();
-                }
                 if (input != null) {
                     try {
                         input.close();
