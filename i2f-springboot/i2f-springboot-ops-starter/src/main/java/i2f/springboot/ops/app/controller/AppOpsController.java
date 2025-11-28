@@ -332,9 +332,19 @@ public class AppOpsController {
             Object ret = refRet.get();
             String resp = null;
             try {
-                resp = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ret);
+                if(ret instanceof CharSequence
+                || ret instanceof Appendable
+                || ret instanceof Number){
+                    resp=String.valueOf(ret);
+                }else {
+                    resp = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ret);
+                }
             } catch (Exception e) {
-                resp = "response value cannot serialize as json";
+                try {
+                    resp=String.valueOf(ret);
+                }catch (Exception ex) {
+                    resp = "response value cannot serialize as json: "+(ret.getClass().getName());
+                }
             }
             return transfer.success(resp);
         } catch (Throwable e) {
