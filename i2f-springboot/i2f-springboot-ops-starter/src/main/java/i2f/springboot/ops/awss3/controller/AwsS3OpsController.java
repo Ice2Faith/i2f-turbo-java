@@ -68,12 +68,7 @@ public class AwsS3OpsController implements IOpsProvider {
 
     @RequestMapping("/")
     public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String requestURI = request.getRequestURI();
-        if (!requestURI.endsWith("/")) {
-            request.getRequestDispatcher(requestURI + "/index.html").forward(request, response);
-        } else {
-            request.getRequestDispatcher("./index.html").forward(request, response);
-        }
+        request.getRequestDispatcher("./index.html").forward(request, response);
     }
 
     @PostMapping("/workdir")
