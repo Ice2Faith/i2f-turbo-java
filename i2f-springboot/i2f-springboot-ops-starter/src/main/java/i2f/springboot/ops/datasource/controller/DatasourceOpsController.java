@@ -12,17 +12,21 @@ import i2f.springboot.ops.datasource.data.DatasourceOperateDto;
 import i2f.springboot.ops.datasource.data.DatasourceRunnerDto;
 import i2f.springboot.ops.datasource.helper.DatasourceOpsHelper;
 import i2f.springboot.ops.datasource.provider.DatasourceProvider;
+import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.provider.IOpsProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -33,12 +37,13 @@ import java.util.*;
  * @date 2025/11/1 21:44
  * @desc
  */
+@ConditionalOnClass(DataSource.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
 @RequestMapping("/ops/datasource")
-public class DatasourceOpsController {
+public class DatasourceOpsController implements IOpsProvider {
 
     @Autowired
     protected DatasourceProvider datasourceProvider;
@@ -49,9 +54,24 @@ public class DatasourceOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;
 
-    @RequestMapping("/")
-    public RedirectView index() {
-        return new RedirectView("./index.html");
+    @Override
+    public List<OpsHomeMenuDto> getMenus() {
+        return Collections.singletonList(new OpsHomeMenuDto()
+                .title("Database")
+                .subTitle("连接/操作数据库")
+                .icon("el-icon-coin")
+                .href("./datasource/index.html")
+        );
+    }
+
+    @RequestMapping({"/", ""})
+    public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String requestURI = request.getRequestURI();
+        if (!requestURI.endsWith("/")) {
+            request.getRequestDispatcher(requestURI + "/index.html").forward(request, response);
+        } else {
+            request.getRequestDispatcher("./index.html").forward(request, response);
+        }
     }
 
     @PostMapping("/drivers")

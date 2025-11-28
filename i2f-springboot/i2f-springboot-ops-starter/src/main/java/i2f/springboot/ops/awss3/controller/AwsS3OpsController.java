@@ -9,6 +9,8 @@ import i2f.springboot.ops.common.OpsException;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostFileItemDto;
 import i2f.springboot.ops.util.HumanUtil;
 import i2f.web.servlet.ServletFileUtil;
@@ -16,6 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -24,28 +27,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.view.RedirectView;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Ice2Faith
  * @date 2025/11/8 17:55
  * @desc
  */
+@ConditionalOnClass(S3Client.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
 @RequestMapping("/ops/aws-s3")
-public class AwsS3OpsController {
+public class AwsS3OpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;
 
@@ -55,9 +56,24 @@ public class AwsS3OpsController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @RequestMapping("/")
-    public RedirectView index() {
-        return new RedirectView("./index.html");
+    @Override
+    public List<OpsHomeMenuDto> getMenus() {
+        return Collections.singletonList(new OpsHomeMenuDto()
+                .title("Aws S3")
+                .subTitle("Aws S3 Oss 对象存储管理")
+                .icon("l-icon-files")
+                .href("./aws-s3/index.html")
+        );
+    }
+
+    @RequestMapping({"/", ""})
+    public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String requestURI = request.getRequestURI();
+        if (!requestURI.endsWith("/")) {
+            request.getRequestDispatcher(requestURI + "/index.html").forward(request, response);
+        } else {
+            request.getRequestDispatcher("./index.html").forward(request, response);
+        }
     }
 
     @PostMapping("/workdir")

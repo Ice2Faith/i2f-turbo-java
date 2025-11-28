@@ -4,6 +4,8 @@ import i2f.springboot.ops.common.OpsException;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.redis.data.RedisOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,10 +21,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -38,16 +42,31 @@ import java.util.concurrent.TimeUnit;
 @NoArgsConstructor
 @Controller
 @RequestMapping("/ops/redis")
-public class RedisOpsController {
+public class RedisOpsController implements IOpsProvider {
     @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
     protected OpsSecureTransfer transfer;
 
-    @RequestMapping("/")
-    public RedirectView index() {
-        return new RedirectView("./index.html");
+    @Override
+    public List<OpsHomeMenuDto> getMenus() {
+        return Collections.singletonList(new OpsHomeMenuDto()
+                .title("Redis")
+                .subTitle("连接/操作Redis缓存")
+                .icon("el-icon-connection")
+                .href("./redis/index.html")
+        );
+    }
+
+    @RequestMapping({"/", ""})
+    public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String requestURI = request.getRequestURI();
+        if (!requestURI.endsWith("/")) {
+            request.getRequestDispatcher(requestURI + "/index.html").forward(request, response);
+        } else {
+            request.getRequestDispatcher("./index.html").forward(request, response);
+        }
     }
 
     public RedisTemplate getRedisTemplate() {

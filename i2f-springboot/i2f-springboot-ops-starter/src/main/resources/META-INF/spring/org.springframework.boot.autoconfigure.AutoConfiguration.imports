@@ -1,3 +1,4 @@
+i2f.springboot.ops.home.OpsHomeController
 i2f.springboot.ops.common.OpsSecureTransfer
 i2f.springboot.ops.common.OpsSecureHelper
 i2f.springboot.ops.common.OpsSecureAutoConfiguration

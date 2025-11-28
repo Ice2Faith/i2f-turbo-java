@@ -7,6 +7,8 @@ import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.elasticsearch.data.ElasticSearchOperateDto;
 import i2f.springboot.ops.elasticsearch.helper.ElasticSearchOpsHelper;
+import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.provider.IOpsProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +21,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +38,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Controller
 @RequestMapping("/ops/elasticsearch")
-public class ElasticSearchOpsController {
+public class ElasticSearchOpsController implements IOpsProvider {
 
     @Autowired
     protected ElasticSearchOpsHelper elasticSearchOpsHelper;
@@ -42,9 +46,25 @@ public class ElasticSearchOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;
 
-    @RequestMapping("/")
-    public RedirectView index() {
-        return new RedirectView("./index.html");
+    @Override
+    public List<OpsHomeMenuDto> getMenus() {
+        return Collections.singletonList(new OpsHomeMenuDto()
+                .title("ElasticSearch")
+                .subTitle("ElasticSearch 搜索引擎管理")
+                .icon("el-icon-search")
+                .href("./elasticsearch/index.html")
+                .disabled(true)
+        );
+    }
+
+    @RequestMapping({"/", ""})
+    public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String requestURI = request.getRequestURI();
+        if (!requestURI.endsWith("/")) {
+            request.getRequestDispatcher(requestURI + "/index.html").forward(request, response);
+        } else {
+            request.getRequestDispatcher("./index.html").forward(request, response);
+        }
     }
 
     @PostMapping("/index/list")
