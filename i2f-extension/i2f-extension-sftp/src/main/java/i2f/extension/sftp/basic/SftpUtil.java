@@ -44,6 +44,9 @@ public class SftpUtil implements Closeable {
         }
 
         Properties config = new Properties();
+        // 优先使用 password 验证 注：session.connect()性能低，使用password验证可跳过gssapi认证，提升连接服务器速度
+        config.put("PreferredAuthentications", "password");
+        // 不强制校验主机密钥
         config.put("StrictHostKeyChecking", "no");
 
         Properties cusConfig = meta.getConfig();
