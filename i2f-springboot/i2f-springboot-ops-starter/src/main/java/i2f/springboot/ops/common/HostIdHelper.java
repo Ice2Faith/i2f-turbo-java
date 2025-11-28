@@ -131,7 +131,7 @@ public class HostIdHelper {
         String[] addrs = arr[1].split("\\|");
         int count = 0;
         for (String addr : addrs) {
-            addr = addr.substring(0, addr.length() - 1);
+            addr = addr.substring(1, addr.length() - 1);
             addr = addr.split("#", 2)[0];
             if (addr.contains(":")) {
                 // ipv6
