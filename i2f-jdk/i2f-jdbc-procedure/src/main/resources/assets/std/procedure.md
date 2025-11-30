@@ -48,6 +48,10 @@
 - 你可以通过查看 procedure.xml 中的注释
 - 获取节点定义以及功能的详细描述
 
+```shell
+./procedure.xml
+```
+
 ### 3.1 Ognl 对象图表达式语言快速入门
 
 - 在本框架中，Ognl 被用作 if 等条件分的 test 属性判断，以及在SQL中用作取值使用
@@ -475,6 +479,8 @@ Object feature(Object obj);
 .boolean 布尔型
 ```
 
+- 更多属性修饰符，可以查看 procedure.xml 中的描述
+
 - 比如，要定义一个值
 
 ```xml
@@ -709,25 +715,32 @@ public class FuncIsTestJavaCaller implements JdbcProcedureJavaCaller {
 ```sql
 v_begin_time DATE;
 V_CITY_CODE VARCHAR2(64) := '101010';
+v_num number(10,0) := 12;
 ```
 
 - 转换方式1
 - 直接使用XML标签进行赋值
+- 这种方式就要求灵活的使用修饰符feature来确定数据类型
 
 ```xml
 
 <lang-set result="V_BEGIN_TIME" value.null=""/>
 <lang-set result="V_CITY_CODE" value.string="101010"/>
+<lang-set result="V_NUM" value.int="12"/>
 ```
 
 - 转换方式2
 - 使用TinyScript进行转换
+- 这种方式 ，对于大批量的变量赋值来说是友好的
 
 ```xml
 
 <lang-eval-ts>
     V_BEGIN_TIME=null; // 此句实际上没什么意义
-    V_CITY_CODE='101010';
+    V_CITY_CODE='101010'; 
+    // TinyScript 支持使用单引号和双引号两种模式进行定义字符串，都是可行的，
+    // 单引号的字符串类的双引号不用转义，同样双引号内的单引号也是不用转义的
+    V_NUM=12;
     // TinyScript默认会返回最后一条语句执行的结果
     // 因此可以不用return语句
 </lang-eval-ts>
@@ -741,6 +754,7 @@ V_CITY_CODE VARCHAR2(64) := '101010';
 <lang-eval-java>
     params.put("V_BEGIN_TIME",null);
     params.put("V_CITY_CODE","101010");
+    params.put("V_NUM",12);
     return null;
     // 因为Java脚本实际上会被编译为一个Class运行，这一段会作为函数体
     // 因此需要使用return语句进行返回
@@ -755,6 +769,7 @@ V_CITY_CODE VARCHAR2(64) := '101010';
 <lang-eval-groovy>
     params.V_BEGIN_TIME=null;
     params.V_CITY_CODE="101010";
+    params.V_NUM=12;
     // groovy脚本默认会返回最后执行的一条语句的结果，因此可以不用return语句
 </lang-eval-groovy>
 ```
@@ -767,6 +782,7 @@ V_CITY_CODE VARCHAR2(64) := '101010';
 <lang-eval-javascript>
     params.put('V_BEGIN_TIME',null);
     params.put("V_CITY_CODE",'101010');
+    params.put("V_NUM",12);
 </lang-eval-javascript>
 ```
 
@@ -778,8 +794,10 @@ V_CITY_CODE VARCHAR2(64) := '101010';
 - 这里就少写几种转换方式了
 
 ```sql
-v_begin_time:=sysdate;
-V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里
+v_begin_time:=sysdate; -- 当前时间赋值
+v_end_time:=v_begin_time; -- 变量赋值
+V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里进行字符串拼接
+V_SQL:='select * from '||V_TABLE||' where '||V_WHERE;
 ```
 
 - 转换方式1
@@ -788,11 +806,38 @@ V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里
 ```xml
 
 <lang-set result="V_BEGIN_TIME" value.date-now=""/>
+<lang-set result="V_END_TIME" value="V_BEGIN_TIME"/>
 <lang-set result="V_CITY_CODE" value.render="${IN_CITY_CODE}00"/>
         <!-- 这里字符串拼接，使用render修饰符进行字符串模板渲染 -->
 
 <lang-set result="V_CITY_CODE" value.render="$!{IN_CITY_CODE}00"/>
         <!-- 如果原来是Oracle的情况，则需要使用$!{}来定义占位符，以处理NULL变量的情况 -->
+
+<lang-render result="V_CITY_CODE">$!{IN_CITY_CODE}00</lang-render>
+    <!-- 这里也可以使用 lang-render 来渲染字符串，
+    但是原来的内容是前后没有空格的，因此内部就是紧贴着XML标签的
+    也就是需要注意，XML标签内部的内容是除了标签的部分都包含的
+     -->
+
+<lang-render result.trim="V_CITY_CODE">
+  $!{IN_CITY_CODE}00
+</lang-render>
+        <!-- 这里如果使用 lang-render 来渲染字符串，
+        但是内部进行了换行，这样的话，变量实际得到的内容就有前后的换行以及前后的空格
+        这时候，就可以借助 trim 修饰符对结果进行 trim ，从而达到相同的目的
+         -->
+
+<lang-render result="V_SQL" _lang="sql">
+    select * 
+   from $!{V_TABLE}
+  where $!{V_WHERE}
+</lang-render>
+    <!-- 
+        对于这种拼接SQL的情况，SQL没有要求必须严格的前后空格或者换行的要求
+        而且语句相对较长的情况，就可以直接使用 lang-render 进行字符串渲染
+        这里多了一个属性 _lang="sql" 这句话其实是给插件用的
+        用于辅助插件，指明此块内容的类型其实是一个SQL语句，这样插件就能够为其注入SQL语言的语法高亮和补全能力
+    -->
 ```
 
 - 转换方式2
@@ -801,12 +846,17 @@ V_CITY_CODE:=IN_CITY_CODE||'00'; -- 这里
 ```xml
 
 <lang-eval-ts>
-    V_BEGIN_TIME=new Date();
+    V_BEGIN_TIME=now(); // 提供了内建的 now() 和 sysdate() 函数
+    V_END_TIME=${V_BEGIN_TIME}; // 记住一个技巧，除了声明变量之外（也就是变量名在等号左侧），变量都应该被${}包裹
+    // 注意，在进行变量赋值的情况下，如果不涉及字符串拼接，建议不要使用 $!{} , 否则可能改变语义
     V_CITY_CODE=${IN_CITY_CODE}+'00'; // 字符串拼接可以直接使用+号连接，取变量则使用${}包裹
     // V_CITY_CODE=R"${IN_CITY_CODE}00"; // 或者也可以使用模板字符串语法
+    V_SQL='select * from '+$!{V_FROM}+' where '+$!{V_WHERE};
+   // V_SQL=R'select * from $!{V_FROM} where $!{V_WHERE}';
 
    V_BEGIN_TIME=sysdate(); // 提供了sysdate()函数和now()函数
    V_CITY_CODE=$!{IN_CITY_CODE}+'00'; // 如果原来是Oracle，则建议使用$!{}进行包裹，以处理NULL变量
+    // $!{}是特殊的，含义为，如果变量为 null，则替换为 '' 空字符串，而不是默认的 'null'
    // V_CITY_CODE=R"$!{IN_CITY_CODE}00"; // 或者也可以使用模板字符串语法
 </lang-eval-ts>
 ```
@@ -944,6 +994,8 @@ end if;
 - 其次，XML中使用的是OGNL表达式，因此，字符串使用双引号
 - in操作符在OGNL中是使用{}花括号表示的
 - 针对like这种场景，则使用java的方法进行转换，startsWith,endsWith,contains进行表达
+- 在OGNL环境中，当发生字符串与数值类型进行比较的时候，会自动进行隐式类型转换为数值类型进行比较
+- 但是，如果明确的知道类型的情况下，还是建议使用同类型进行比较运算
 
 ```xml
 
@@ -980,6 +1032,18 @@ end if;
 - 第二个就是字符串不区分单双引号，都认为是字符串
 - in操作符，是和JSON一样的表达，使用[]中括号进行表示的
 - 对于like的处理，和OGNL的表达一样，直接使用java的方法进行表示
+- 在TinyScript环境中，当字符串与数值类型进行比较运算的时候，会饮食转换为数值进行比较
+- 但是在明确知道类型的情况下，建议使用同类型进行比较
+- 具体规则如下，规则从上至下顺序进行优先匹配：
+- 当类型相同时，如果是 Comparable 类型的，则直接进行比较
+- 当双方均为可转换的Number类型时，按照Number类型进行比较
+- 当双方均为可转换Date类型时，按照Date类型进行比较
+- 当一方类型为Number 类型时，将另一方尝试转换为Number类型进行比较
+- 当一方类型为Boolean类型时，将另一方尝试转换为Boolean类型比较
+- 当一方类型为String类型时，将另一方尝试转换为String类型比较
+- 当一方为Comparable类型时，按照Comparable进行比较
+- 以上规则都不满足，按照对象的hashcode进行比较
+- 这个规则使用于普通比较运算符，以及in/notin运算符
 
 ```xml
 
