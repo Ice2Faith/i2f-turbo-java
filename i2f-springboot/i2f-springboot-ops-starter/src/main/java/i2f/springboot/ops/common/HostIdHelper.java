@@ -42,7 +42,6 @@ public class HostIdHelper {
     @Autowired
     protected Environment environment;
 
-    @Autowired(required = false)
     private RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
