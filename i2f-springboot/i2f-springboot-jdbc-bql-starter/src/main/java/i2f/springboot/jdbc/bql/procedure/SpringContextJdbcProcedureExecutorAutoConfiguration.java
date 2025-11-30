@@ -1,5 +1,6 @@
 package i2f.springboot.jdbc.bql.procedure;
 
+import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import i2f.context.std.INamingContext;
 import i2f.environment.std.IEnvironment;
 import i2f.jdbc.procedure.consts.XProc4jConsts;
@@ -10,6 +11,7 @@ import i2f.jdbc.procedure.context.impl.ProcedureMetaMapGrammarReporterListener;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.node.event.XmlNodeExecInvokeLogListener;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -22,15 +24,17 @@ import i2f.jdbc.procedure.registry.impl.ContextJdbcProcedureMetaProviderRegistry
 import i2f.resources.ResourceUtil;
 import i2f.spring.core.SpringContext;
 import i2f.spring.enviroment.SpringEnvironment;
+import i2f.springboot.jdbc.bql.procedure.impl.BaomidouDynamicRoutingDatasourceProvider;
 import i2f.springboot.jdbc.bql.procedure.impl.Slf4jJdbcProcedureLogger;
-import i2f.springboot.jdbc.bql.procedure.impl.SpringContextJdbcProcedureExecutor;
 import i2f.springboot.jdbc.bql.procedure.impl.SpringJdbcProcedureXmlNodeMetaCacheProvider;
+import i2f.springboot.jdbc.bql.procedure.impl.SpringRoutingDataSourceProvider;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -38,6 +42,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 import java.io.File;
 import java.util.Arrays;
@@ -102,6 +107,26 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     public XProc4jEventHandler xProc4jEventHandler(INamingContext namingContext) {
         log.info(XProc4jConsts.NAME + " config " + ContextXProc4jEventHandler.class.getSimpleName() + " ...");
         ContextXProc4jEventHandler ret = new ContextXProc4jEventHandler(namingContext);
+        return ret;
+    }
+
+    @ConditionalOnClass(DynamicRoutingDataSource.class)
+    @ConditionalOnExpression("${xproc4j.baomidou-routing-datasource.enable:true}")
+    @ConditionalOnMissingBean(BaomidouDynamicRoutingDatasourceProvider.class)
+    @Bean
+    public BaomidouDynamicRoutingDatasourceProvider baomidouDynamicRoutingDatasourceProvider(INamingContext namingContext) {
+        log.info(XProc4jConsts.NAME + " config " + BaomidouDynamicRoutingDatasourceProvider.class.getSimpleName() + " ...");
+        BaomidouDynamicRoutingDatasourceProvider ret = new BaomidouDynamicRoutingDatasourceProvider(namingContext);
+        return ret;
+    }
+
+    @ConditionalOnClass(AbstractRoutingDataSource.class)
+    @ConditionalOnExpression("${xproc4j.spring-routring-datasource.enable:true}")
+    @ConditionalOnMissingBean(SpringRoutingDataSourceProvider.class)
+    @Bean
+    public SpringRoutingDataSourceProvider springRoutingDataSourceProvider(INamingContext namingContext) {
+        log.info(XProc4jConsts.NAME + " config " + SpringRoutingDataSourceProvider.class.getSimpleName() + " ...");
+        SpringRoutingDataSourceProvider ret = new SpringRoutingDataSourceProvider(namingContext);
         return ret;
     }
 
@@ -232,8 +257,8 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
                                                        @Autowired(required = false) XProc4jEventHandler eventHandler,
                                                        @Autowired(required = false) JdbcProcedureLogger jdbcProcedureLogger
     ) {
-        log.info(XProc4jConsts.NAME + " config " + SpringContextJdbcProcedureExecutor.class.getSimpleName() + " ...");
-        SpringContextJdbcProcedureExecutor ret = new SpringContextJdbcProcedureExecutor(context, iEnvironment, namingContext);
+        log.info(XProc4jConsts.NAME + " config " + DefaultJdbcProcedureExecutor.class.getSimpleName() + " ...");
+        DefaultJdbcProcedureExecutor ret = new DefaultJdbcProcedureExecutor(context, iEnvironment, namingContext);
         if (eventHandler != null) {
             ret.setEventHandler(eventHandler);
         }
