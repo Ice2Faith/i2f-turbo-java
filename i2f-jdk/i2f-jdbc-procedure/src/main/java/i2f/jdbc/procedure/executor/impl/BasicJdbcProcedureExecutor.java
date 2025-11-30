@@ -21,6 +21,8 @@ import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
+import i2f.jdbc.procedure.datasource.DataSourceProvider;
+import i2f.jdbc.procedure.datasource.impl.NamingContextDataSourceProvider;
 import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;
@@ -235,6 +237,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return tag;
     }
 
+    @Override
     public void registryExecutorNode(ExecutorNode node) {
         if (node == null) {
             return;
@@ -388,11 +391,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 ILockProvider provider = (ILockProvider) bean;
                 registryLockProvider(provider);
             }
-            handleNamingContextCompnentBean(bean);
+            handleNamingContextComponentBean(bean);
         }
     }
 
-    public void handleNamingContextCompnentBean(Object bean) {
+    public void handleNamingContextComponentBean(Object bean) {
 
     }
 
@@ -724,15 +727,34 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     public Map<String, DataSource> getDatasourceMap() {
         try {
-            Map<String, DataSource> ret = new HashMap<>();
-            Map<String, DataSource> dataSources = getNamingContext().getBeansMap(DataSource.class);
-            for (Map.Entry<String, DataSource> entry : dataSources.entrySet()) {
-                String name = entry.getKey();
-                if (name.toLowerCase().endsWith("datasource")) {
-                    name = name.substring(0, name.length() - "datasource".length());
+            List<DataSourceProvider> beans = getNamingContext().getBeans(DataSourceProvider.class);
+            if(!beans.isEmpty()) {
+                List<DataSourceProvider> list = new ArrayList<>(beans);
+                list.sort((v1, v2) -> Integer.compare(v2.getOrder(), v1.getOrder()));
+                for (DataSourceProvider provider : list) {
+                    try {
+                        Map<String, DataSource> ret = new HashMap<>();
+                        Map<String, DataSource> map = provider.getDataSources();
+                        if(map.isEmpty()){
+                            continue;
+                        }
+                        ret.putAll(map);
+                        detectPrimaryDatasource(ret);
+                        return ret;
+                    } catch (Exception e) {
+
+                    }
                 }
-                ret.put(name, entry.getValue());
             }
+        } catch (Exception e) {
+
+        }
+
+        try {
+            Map<String, DataSource> ret = new HashMap<>();
+            NamingContextDataSourceProvider provider = new NamingContextDataSourceProvider(getNamingContext());
+            Map<String, DataSource> map = provider.getDataSources();
+            ret.putAll(map);
             detectPrimaryDatasource(ret);
             return ret;
         } catch (Exception e) {
