@@ -17,10 +17,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -455,6 +452,36 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             BigDecimal bl = new BigDecimal(String.valueOf(left));
             BigDecimal br = new BigDecimal(String.valueOf(right));
             return bl.compareTo(br);
+        }
+        if (ObjectConvertor.isDateType(left.getClass())
+                && ObjectConvertor.isDateType(right.getClass())) {
+            try {
+                Date bl = (Date)ObjectConvertor.tryConvertAsType(left,Date.class);
+                Date br = (Date)ObjectConvertor.tryConvertAsType(right,Date.class);
+                return bl.compareTo(br);
+            } catch (Exception e) {
+
+            }
+        }
+        if(ObjectConvertor.isNumericType(left.getClass())
+        ||ObjectConvertor.isNumericType(right.getClass())){
+            try{
+                BigDecimal bl = new BigDecimal(String.valueOf(left));
+                BigDecimal br = new BigDecimal(String.valueOf(right));
+                return bl.compareTo(br);
+            }catch(Exception e){
+
+            }
+        }
+        if(ObjectConvertor.isBooleanType(left.getClass())
+        ||ObjectConvertor.isBooleanType(right.getClass())){
+            try{
+                Boolean bl =ObjectConvertor.toBoolean(left);
+                Boolean br =ObjectConvertor.toBoolean(right);
+                return bl.compareTo(br);
+            }catch(Exception e){
+
+            }
         }
         if (TypeOf.typeOfAny(left.getClass(), String.class, CharSequence.class, Appendable.class)
                 || TypeOf.typeOfAny(right.getClass(), String.class, CharSequence.class, Appendable.class)) {
