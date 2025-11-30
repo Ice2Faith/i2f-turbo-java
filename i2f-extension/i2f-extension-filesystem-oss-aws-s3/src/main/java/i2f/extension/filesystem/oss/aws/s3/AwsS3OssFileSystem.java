@@ -255,6 +255,14 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
                             continue;
                         }
                     }
+                }else{
+                    String subName=name;
+                    if(subName.startsWith(pathSeparator())){
+                        subName=subName.substring(pathSeparator().length());
+                    }
+                    if (subName.contains(pathSeparator())) {
+                        continue;
+                    }
                 }
                 IFile file = getFile(pathSeparator() + pair.getKey(), name);
                 if(Objects.equals(file.getPath(),inPath)){

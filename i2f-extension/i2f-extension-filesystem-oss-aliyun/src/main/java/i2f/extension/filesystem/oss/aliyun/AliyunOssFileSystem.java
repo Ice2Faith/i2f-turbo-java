@@ -1,9 +1,7 @@
 package i2f.extension.filesystem.oss.aliyun;
 
 
-import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.*;
 import i2f.extension.oss.aliyun.AliyunOssMeta;
 import i2f.extension.oss.aliyun.AliyunOssUtil;
@@ -213,6 +211,14 @@ public class AliyunOssFileSystem extends AbsFileSystem {
                             if (subName.contains(pathSeparator())) {
                                 continue;
                             }
+                        }
+                    }else{
+                        String subName=name;
+                        if(subName.startsWith(pathSeparator())){
+                            subName=subName.substring(pathSeparator().length());
+                        }
+                        if (subName.contains(pathSeparator())) {
+                            continue;
                         }
                     }
                     IFile file = getFile(pathSeparator() + pair.getKey(), name);
