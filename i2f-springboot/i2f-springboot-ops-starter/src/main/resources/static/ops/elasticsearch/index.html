@@ -70,9 +70,9 @@
 <div id="app">
     <el-row class="cert-block">
         <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
-        <el-input
+        <el-input clearable
                 type="textarea"
-                :rows="3"
+                :rows="3" clearable
                 placeholder="请输入连接证书"
                 v-model="metas.cert"
                 @change="onCertChange">
@@ -92,13 +92,13 @@
                 <el-checkbox v-model="form.useCustomMeta">自定义连接</el-checkbox>
                 <template v-if="form.useCustomMeta">
                     <el-form-item label="URL">
-                        <el-input v-model="form.url" placeholder="http://localhost:9200"></el-input>
+                        <el-input clearable v-model="form.url" clearable placeholder="http://localhost:9200"></el-input>
                     </el-form-item>
                     <el-form-item label="用户名">
-                        <el-input v-model="form.username" placeholder="root"></el-input>
+                        <el-input clearable v-model="form.username" placeholder="root"></el-input>
                     </el-form-item>
                     <el-form-item label="密码">
-                        <el-input v-model="form.password" placeholder="123456"></el-input>
+                        <el-input clearable v-model="form.password" placeholder="123456"></el-input>
                     </el-form-item>
                 </template>
             </el-row>
@@ -106,7 +106,7 @@
                 <el-col :span="20">
                     <el-row>
                         <el-form-item label="执行类型">
-                            <el-select v-model="metas.operate" placeholder="执行类型">
+                            <el-select clearable v-model="metas.operate" placeholder="执行类型">
                                 <el-option
                                         v-for="item in metas.operateList"
                                         :key="item.value"
@@ -144,7 +144,7 @@
         </el-form>
     </el-row>
     <el-divider>操作结果</el-divider>
-    <el-select v-model="metas.resultType" placeholder="结果类型">
+    <el-select clearable v-model="metas.resultType" placeholder="结果类型">
         <el-option
                 v-for="item in metas.resultTypeList"
                 :key="item.value"
@@ -230,7 +230,7 @@
         <el-card shadow="never">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
-                    <el-select v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
+                    <el-select clearable v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
                         <el-option
                                 v-for="item in metas.langList"
                                 :key="item.value"
@@ -277,10 +277,10 @@
 
                     </el-row>
                     <el-row>
-                        <el-input v-model="drawer.metadata.checkDatabase" placeholder="选中数据库"></el-input>
+                        <el-input clearable v-model="drawer.metadata.checkDatabase" placeholder="选中数据库"></el-input>
                     </el-row>
                     <el-row>
-                        <el-input v-model="drawer.metadata.filterDatabase" placeholder="过滤数据库"></el-input>
+                        <el-input clearable v-model="drawer.metadata.filterDatabase" placeholder="过滤数据库"></el-input>
                     </el-row>
                     <recycle-scroller :items="computeFilterDatabases"
                                       class="scroller"
@@ -322,12 +322,12 @@
                         </el-col>
                     </el-row>
                     <el-row>
-                        <el-input v-model="drawer.metadata.checkTable" placeholder="选中表">
+                        <el-input clearable v-model="drawer.metadata.checkTable" placeholder="选中表">
                             <el-button slot="append" icon="el-icon-search" @click="onViewTableInfo(null)"></el-button>
                         </el-input>
                     </el-row>
                     <el-row>
-                        <el-input v-model="drawer.metadata.filterTable" placeholder="过滤表"></el-input>
+                        <el-input clearable v-model="drawer.metadata.filterTable" placeholder="过滤表"></el-input>
                     </el-row>
                     <recycle-scroller :items="computeFilterTables"
                                       class="scroller"
@@ -492,7 +492,7 @@
             DDL:
             <el-button v-loading="dialog.tableInfo.tableDdlLoading" type="primary" @click="onLoadTableDdl">加载DDL
             </el-button>
-            <el-select v-model="dialog.tableInfo.ddlType" placeholder="DDL方言" @change="onChangeDdlType">
+            <el-select clearable v-model="dialog.tableInfo.ddlType" placeholder="DDL方言" @change="onChangeDdlType">
                 <el-option
                         v-for="item in metas.ddlTypeList"
                         :key="item.value"
@@ -512,7 +512,7 @@
         <el-card shadow="never">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
-                    <el-select v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                    <el-select clearable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
                         <el-option
                                 v-for="item in metas.langList"
                                 :key="item.value"
@@ -563,7 +563,7 @@
 
                 </el-form-item>
                 <el-form-item label="分隔符">
-                    <el-input
+                    <el-input clearable
                             placeholder="分隔符"
                             v-model="dialog.scriptRunner.delimiter">
                     </el-input>
@@ -583,7 +583,7 @@
             width="80%">
         <el-form :inline="true">
             <el-form-item label="图表形式">
-                <el-select v-model="dialog.visualChart.config.type" placeholder="图表形式">
+                <el-select clearable v-model="dialog.visualChart.config.type" placeholder="图表形式">
                     <el-option
                             v-for="item in metas.echartsTypeList"
                             :key="item.value"
@@ -594,7 +594,7 @@
             </el-form-item>
             <template v-if="dialog.visualChart.config.type=='graph'">
                 <el-form-item label="起点标签">
-                    <el-select v-model="dialog.visualChart.config.labelProp" placeholder="起点标签">
+                    <el-select clearable v-model="dialog.visualChart.config.labelProp" placeholder="起点标签">
                         <el-option
                                 v-for="item in metas.resultColumns"
                                 :key="item.label"
@@ -604,7 +604,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="起点">
-                    <el-select v-model="dialog.visualChart.config.startProp" placeholder="起点">
+                    <el-select clearable v-model="dialog.visualChart.config.startProp" placeholder="起点">
                         <el-option
                                 v-for="item in metas.resultColumns"
                                 :key="item.label"
@@ -614,7 +614,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="终点">
-                    <el-select v-model="dialog.visualChart.config.endProp" placeholder="终点">
+                    <el-select clearable v-model="dialog.visualChart.config.endProp" placeholder="终点">
                         <el-option
                                 v-for="item in metas.resultColumns"
                                 :key="item.label"
@@ -626,7 +626,7 @@
             </template>
             <template v-else-if="dialog.visualChart.config.type=='scatter'">
                 <el-form-item label="X轴">
-                    <el-select v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
+                    <el-select clearable v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
                         <el-option
                                 v-for="item in metas.resultColumns"
                                 :key="item.label"
@@ -636,7 +636,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="Y轴">
-                    <el-select v-model="dialog.visualChart.config.yAxis" placeholder="Y轴">
+                    <el-select clearable v-model="dialog.visualChart.config.yAxis" placeholder="Y轴">
                         <el-option
                                 v-for="item in metas.resultColumns"
                                 :key="item.label"
@@ -648,7 +648,7 @@
             </template>
             <template v-else>
                 <el-form-item label="X轴">
-                    <el-select v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
+                    <el-select clearable v-model="dialog.visualChart.config.xAxis" placeholder="X轴">
                         <el-option
                                 v-for="item in metas.resultColumns"
                                 :key="item.label"
@@ -658,7 +658,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="Y轴">
-                    <el-select v-model="dialog.visualChart.config.yAxisList" multiple placeholder="Y轴">
+                    <el-select clearable v-model="dialog.visualChart.config.yAxisList" multiple collapse-tags placeholder="Y轴">
                         <el-option
                                 v-for="item in metas.resultColumns"
                                 :key="item.label"

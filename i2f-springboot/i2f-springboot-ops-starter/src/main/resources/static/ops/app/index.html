@@ -71,7 +71,7 @@
         <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
         <el-input
                 type="textarea"
-                :rows="3"
+                :rows="3" clearable
                 placeholder="请输入连接证书"
                 v-model="metas.cert"
                 @change="onCertChange">
@@ -105,7 +105,7 @@
                             </span>
                             <el-checkbox slot="reference" v-model="form.useHostId">主机锁定</el-checkbox>
                         </el-popover>
-                        <el-select v-model="form.hostId" :disabled="!form.useHostId" placeholder="主机锁定">
+                        <el-select v-model="form.hostId" clearable :disabled="!form.useHostId" placeholder="主机锁定">
                             <el-option
                                     v-for="item in metas.hostIdList"
                                     :key="item"
@@ -187,7 +187,7 @@
     <el-card shadow="never">
         <el-form inline label-position="left" label-width="100px">
             <el-form-item label="语言类型">
-                <el-select v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
+                <el-select v-model="metas.resultLang" clearable  placeholder="语言类型" @change="onResultLangChange">
                     <el-option
                             v-for="item in metas.langList"
                             :key="item.value"
@@ -225,7 +225,7 @@
 
             </el-row>
             <el-row>
-                <el-input v-model="drawer.systemProperties.filterKey" placeholder="过滤属性"></el-input>
+                <el-input clearable v-model="drawer.systemProperties.filterKey" placeholder="过滤属性"></el-input>
             </el-row>
             <recycle-scroller :items="computeFilterSystemProperties"
                               class="scroller"
@@ -282,7 +282,7 @@
 
             </el-row>
             <el-row>
-                <el-input v-model="drawer.systemEnv.filterKey" placeholder="过滤环境"></el-input>
+                <el-input  clearable v-model="drawer.systemEnv.filterKey" placeholder="过滤环境"></el-input>
             </el-row>
             <recycle-scroller :items="computeFilterSystemEnv"
                               class="scroller"
@@ -340,7 +340,7 @@
 
             </el-row>
             <el-row>
-                <el-input v-model="drawer.inputArguments.filterText" placeholder="过滤参数"></el-input>
+                <el-input clearable v-model="drawer.inputArguments.filterText" placeholder="过滤参数"></el-input>
             </el-row>
             <recycle-scroller :items="computeFilterInputArguments"
                               class="scroller"
@@ -391,7 +391,7 @@
 
             </el-row>
             <el-row>
-                <el-input v-model="drawer.beans.filterKey" placeholder="过滤名称"></el-input>
+                <el-input clearable v-model="drawer.beans.filterKey" placeholder="过滤名称"></el-input>
             </el-row>
             <recycle-scroller :items="computeFilterBeans"
                               class="scroller"
@@ -448,7 +448,7 @@
 
             </el-row>
             <el-row>
-                <el-input v-model="drawer.serviceInstances.filterKey" placeholder="过滤名称"></el-input>
+                <el-input clearable v-model="drawer.serviceInstances.filterKey" placeholder="过滤名称"></el-input>
             </el-row>
             <recycle-scroller :items="computeFilterServiceInstances"
                               class="scroller"
@@ -505,7 +505,7 @@
 
             </el-row>
             <el-row>
-                <el-input v-model="drawer.lockedThreads.filterKey" placeholder="过滤名称"></el-input>
+                <el-input clearable v-model="drawer.lockedThreads.filterKey" placeholder="过滤名称"></el-input>
             </el-row>
             <recycle-scroller :items="computeFilterLockedThreads"
                               class="scroller"
@@ -574,7 +574,7 @@
         <el-card shadow="never">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
-                    <el-select v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                    <el-select clearable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
                         <el-option
                                 v-for="item in metas.langList"
                                 :key="item.value"

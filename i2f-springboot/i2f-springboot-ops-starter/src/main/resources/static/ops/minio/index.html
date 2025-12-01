@@ -69,7 +69,7 @@
 <div id="app">
     <el-row class="cert-block">
         <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
-        <el-input
+        <el-input clearable
                 type="textarea"
                 :rows="3"
                 placeholder="请输入连接证书"
@@ -81,17 +81,17 @@
         <el-divider>Minio 操作<i class="el-icon-d-caret"></i></el-divider>
         <el-form inline label-position="left" label-width="80px">
             <el-form-item label="url">
-                <el-input v-model="form.meta.url" placeholder="服务URL"></el-input>
+                <el-input clearable v-model="form.meta.url" placeholder="服务URL"></el-input>
             </el-form-item>
             <el-form-item label="用户名">
-                <el-input v-model="form.meta.accessKey" placeholder="用户名"></el-input>
+                <el-input clearable v-model="form.meta.accessKey" placeholder="用户名"></el-input>
             </el-form-item>
             <el-form-item label="密码">
-                <el-input type="password" v-model="form.meta.secretKey" placeholder="密码"></el-input>
+                <el-input clearable type="password" v-model="form.meta.secretKey" placeholder="密码"></el-input>
             </el-form-item>
         </el-form>
     </el-row>
-    <el-input placeholder="请输入工作路径"
+    <el-input clearable placeholder="请输入工作路径"
               v-model="form.workdir">
         <el-button v-loading="metas.workdirLoading" size="medium"
                    slot="append" :icon="metas.workdirLoading?'el-icon-loading':'el-icon-search'"
@@ -131,7 +131,7 @@
 
             </el-row>
             <el-row>
-                <el-input v-model="metas.fileList.filterFile" placeholder="过滤文件"></el-input>
+                <el-input clearable v-model="metas.fileList.filterFile" placeholder="过滤文件"></el-input>
             </el-row>
             <recycle-scroller :items="computeFilterFiles"
                               class="scroller"
@@ -182,7 +182,7 @@
         <el-card shadow="never">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
-                    <el-select v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                    <el-select clearable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
                         <el-option
                                 v-for="item in metas.langList"
                                 :key="item.value"
@@ -204,12 +204,12 @@
             <el-button v-loading="dialog.fileEditor.saveLoading" size="medium" type="primary" @click="onSubmitEditFile">保存修改</el-button>
         </el-row>
         <el-row>
-            <el-input v-model="dialog.fileEditor.path" :disabled="!dialog.fileEditor.allowChangePath" placeholder="文件路径"></el-input>
+            <el-input clearable v-model="dialog.fileEditor.path" :disabled="!dialog.fileEditor.allowChangePath" placeholder="文件路径"></el-input>
         </el-row>
         <el-card shadow="never">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
-                    <el-select v-model="dialog.fileEditor.lang"  placeholder="语言类型" @change="onFileEditorLangChange">
+                    <el-select clearable v-model="dialog.fileEditor.lang"  placeholder="语言类型" @change="onFileEditorLangChange">
                         <el-option
                                 v-for="item in metas.langList"
                                 :key="item.value"
@@ -227,7 +227,7 @@
             :title="dialog.createDirectory.title"
             :visible.sync="dialog.createDirectory.show"
             width="80%">
-        <el-input
+        <el-input clearable
                 placeholder="创建目录"
                 v-model="dialog.createDirectory.text">
         </el-input>

@@ -89,7 +89,7 @@
     <div id="app">
       <el-form inline label-position="left" label-width="100px">
         <el-form-item label="语言类型">
-          <el-select v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
+          <el-select v-model="metas.resultLang" clearable  placeholder="语言类型" @change="onResultLangChange">
             <el-option
                     v-for="item in metas.langList"
                     :key="item.value"
@@ -99,7 +99,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="主题">
-          <el-select v-model="metas.resultTheme"  placeholder="主题" @change="onResultThemeChange">
+          <el-select v-model="metas.resultTheme"  clearable placeholder="主题" @change="onResultThemeChange">
             <el-option
                     v-for="item in metas.themeList"
                     :key="item.value"

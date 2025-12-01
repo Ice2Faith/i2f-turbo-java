@@ -66,7 +66,7 @@
 <div id="app">
   <el-row class="cert-block">
     <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
-    <el-input
+    <el-input clearable
             type="textarea"
             :rows="3"
             placeholder="请输入连接证书"
@@ -90,7 +90,7 @@
         </el-popover>
       </el-form-item>
       <el-form-item label="过滤">
-        <el-input
+        <el-input clearable
                 placeholder="表达式"
                 v-model="form.pattern">
         </el-input>
@@ -109,7 +109,7 @@
       <el-row>
         <el-button size="medium" type="danger" @click="onDeleteCheckedNodes" v-loading="metas.deleteLoading">删除勾选</el-button>
       </el-row>
-      <el-input
+      <el-input clearable
               placeholder="过滤节点"
               v-model="metas.filterNodeText">
       </el-input>
@@ -163,7 +163,7 @@
           </el-row>
           <el-row type="flex">
             <el-col :span="18">
-                <el-input v-model="form.key">
+                <el-input clearable v-model="form.key">
                   <template slot="prepend">键</template>
                   <el-button v-loading="metas.getLoading" size="medium"
                              slot="append" :icon="metas.getLoading?'el-icon-loading':'el-icon-search'"
@@ -172,13 +172,13 @@
                 </el-input>
             </el-col>
             <el-col :span="6">
-              <el-input type="number" v-model="form.ttl" >
+              <el-input clearable type="number" v-model="form.ttl" >
                 <template slot="prepend">TTL(s)</template>
               </el-input>
             </el-col>
           </el-row>
           <el-row>
-            <el-input type="textarea" :rows="10" v-model="form.value" :min="-1"></el-input>
+            <el-input clearable type="textarea" :rows="10" v-model="form.value" :min="-1"></el-input>
           </el-row>
       </el-row>
     </el-col>
@@ -191,7 +191,7 @@
     <el-card shadow="never">
       <el-form inline label-position="left" label-width="100px">
         <el-form-item label="语言类型">
-          <el-select v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+          <el-select clearable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
             <el-option
                     v-for="item in metas.langList"
                     :key="item.value"
