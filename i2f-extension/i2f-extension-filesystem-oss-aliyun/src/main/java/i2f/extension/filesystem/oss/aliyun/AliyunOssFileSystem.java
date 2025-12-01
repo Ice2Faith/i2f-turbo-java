@@ -193,6 +193,7 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         if(inPath.endsWith(pathSeparator())){
             inPath=inPath.substring(0,inPath.length()-pathSeparator().length());
         }
+        Set<String> savePathSet=new LinkedHashSet<>();
         String subPath = ensureWithPathSeparator(pair.getValue());
         String nextMarker = null;
         ObjectListing listing = null;
@@ -205,26 +206,22 @@ public class AliyunOssFileSystem extends AbsFileSystem {
                     if(name.endsWith(pathSeparator())){
                         name=name.substring(0,name.length()-pathSeparator().length());
                     }
-                    if(subPath!=null) {
-                        if(name.startsWith(subPath)) {
-                            String subName = name.substring(subPath.length());
-                            if (subName.contains(pathSeparator())) {
-                                continue;
-                            }
-                        }
-                    }else{
-                        String subName=name;
-                        if(subName.startsWith(pathSeparator())){
-                            subName=subName.substring(pathSeparator().length());
-                        }
-                        if (subName.contains(pathSeparator())) {
-                            continue;
-                        }
+                    if(name.startsWith(pathSeparator())){
+                        name=name.substring(pathSeparator().length());
+                    }
+                    int idx=name.indexOf(pathSeparator());
+                    if(idx>=0){
+                        name=name.substring(0,idx);
                     }
                     IFile file = getFile(pathSeparator() + pair.getKey(), name);
-                    if(Objects.equals(file.getPath(),inPath)){
+                    String savePath = file.getPath();
+                    if(Objects.equals(savePath,inPath)){
                         continue;
                     }
+                    if(savePathSet.contains(savePath)){
+                        continue;
+                    }
+                    savePathSet.add(savePath);
                     ret.add(file);
                 } catch (Throwable e) {
                 }
