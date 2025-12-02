@@ -2,8 +2,13 @@ package i2f.springboot.ops.datasource.controller;
 
 import i2f.bindsql.BindSql;
 import i2f.jdbc.JdbcResolver;
+import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.script.JdbcScriptRunner;
+import i2f.rowset.impl.CsvMapRowSetWriter;
+import i2f.rowset.std.IRowHeader;
+import i2f.rowset.std.impl.SimpleIteratorRowSet;
+import i2f.rowset.std.impl.SimpleRowHeader;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -14,11 +19,13 @@ import i2f.springboot.ops.datasource.helper.DatasourceOpsHelper;
 import i2f.springboot.ops.datasource.provider.DatasourceProvider;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.provider.IOpsProvider;
+import i2f.web.servlet.ServletFileUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,8 +35,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -114,14 +124,14 @@ public class DatasourceOpsController implements IOpsProvider {
         try {
             DatasourceOperateDto req = transfer.recv(reqDto, DatasourceOperateDto.class);
             String sql = req.getSql();
-            Integer maxCount = req.getMaxCount();
+            int maxCount = req.getMaxCount()==null?-1:req.getMaxCount();
             Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
             QueryResult resp = new QueryResult();
             resp.setColumns(new ArrayList<>());
-            resp.setRows(new ArrayList<>(maxCount != null && maxCount > 0 ? Math.min(maxCount, 500) : 0));
+            resp.setRows(new ArrayList<>(maxCount > 0 ? Math.min(maxCount, 500) : 0));
             for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
                 try (Connection conn = entry.getValue()) {
-                    QueryResult qr = JdbcResolver.query(conn, new BindSql(sql), maxCount == null ? -1 : maxCount);
+                    QueryResult qr = JdbcResolver.query(conn, new BindSql(sql), maxCount);
                     resp.setColumns(qr.getColumns());
                     resp.getRows().addAll(qr.getRows());
                 }
@@ -130,6 +140,77 @@ public class DatasourceOpsController implements IOpsProvider {
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
             return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/export")
+    @ResponseBody
+    public void export(@RequestBody OpsSecureDto reqDto,HttpServletResponse response) throws Exception {
+        try {
+            DatasourceOperateDto req = transfer.recv(reqDto, DatasourceOperateDto.class);
+            String sql = req.getSql();
+            int maxCount = req.getMaxCount()==null?-1:req.getMaxCount();
+            Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
+            File ret=File.createTempFile("export-"+(UUID.randomUUID().toString().replace("-","")),".csv");
+            try(OutputStream os=new FileOutputStream(ret)) {
+                for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
+                    try (Connection conn = entry.getValue()) {
+                        QueryResult qr = JdbcResolver.query(conn, new BindSql(sql), maxCount);
+                        JdbcResolver.query(conn, new BindSql(sql), (rs -> {
+
+                            ResultSetMetaData metaData = rs.getMetaData();
+                            List<QueryColumn> columns = JdbcResolver.parseResultSetColumns(metaData);
+
+                            Iterator<Map<String, Object>> iterator = new Iterator<Map<String, Object>>() {
+                                private int currCount = 0;
+
+                                @Override
+                                public boolean hasNext() {
+                                    try {
+                                        return (!(maxCount >= 0 && currCount >= maxCount)) && rs.next();
+                                    } catch (SQLException e) {
+                                        throw new RuntimeException(e.getMessage(), e);
+                                    }
+                                }
+
+                                @Override
+                                public Map<String, Object> next() {
+                                    try {
+                                        Map<String, Object> map = JdbcResolver.convertResultSetRowAsMap(columns, rs);
+                                        currCount++;
+                                        return map;
+                                    } catch (SQLException e) {
+                                        throw new RuntimeException(e.getMessage(), e);
+                                    }
+                                }
+                            };
+
+                            List<IRowHeader> headers = new ArrayList<>();
+                            for (QueryColumn column : columns) {
+                                headers.add(new SimpleRowHeader(column.getName()));
+                            }
+
+                            SimpleIteratorRowSet<Map<String, Object>> rowSet = new SimpleIteratorRowSet<>(headers, iterator);
+                            CsvMapRowSetWriter<Map<String, Object>> writer = new CsvMapRowSetWriter<>();
+                            try {
+                                writer.write(rowSet, os);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e.getMessage(), e);
+                            }
+
+                            return ret;
+                        }));
+                    }
+                }
+            }
+            ServletFileUtil.responseFileAttachment(ret,response);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            PrintWriter writer = response.getWriter();
+            writer.write("Internal Server Error");
+            writer.flush();
+            return;
         }
     }
 

@@ -193,6 +193,11 @@
                                @click="onExecuteScript">
                         执行脚本
                     </el-button>
+                    <el-button v-if="metas.operate=='query'" v-loading="metas.resultLoading" size="medium"
+                               type="primary"
+                               @click="onExport">
+                        导出
+                    </el-button>
                 </el-form-item>
             </el-row>
 
@@ -1532,6 +1537,98 @@
                         setTimeout(()=>{
                             this.initResultEditor();
                         },200)
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.resultLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.resultLoading = false;
+                }
+            },
+            onExport() {
+                let sql=this.getTipExecuteSql();
+                this.$confirm('即将导出语句，是否继续？<br/>' + sql, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doExport();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doExport(callback){
+                let sql=this.getExecuteSql();
+                this.doExportDelegate(sql,callback)
+            },
+            doExportDelegate(sql,callback){
+                this.metas.resultLoading = true;
+                try {
+                    let req = this.fillDatasourceForm({
+                        sql: sql,
+                        maxCount: this.form.maxCount,
+                    },true);
+                    let operate = this.metas.operate;
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: `/export`,
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        let contentDisposition = ''
+                        let contentType = ''
+
+                        Object.keys(res.headers).forEach(k => {
+                            if ('content-disposition' == k.toLowerCase()) {
+                                contentDisposition = res.headers[k]
+                            }
+                            if ('content-type' == k.toLowerCase()) {
+                                contentType = res.headers[k]
+                            }
+                        })
+
+                        let fileName = 'download.data'
+                        if (contentDisposition && contentDisposition != '') {
+                            let arr = contentDisposition.split(';');
+                            arr.forEach(item => {
+                                item = item.trim();
+                                let pair = item.split("=", 2);
+                                let key = pair[0].trim();
+                                if ('filename' == key.toLowerCase()) {
+                                    if (pair.length == 2) {
+                                        let val = decodeURIComponent(pair[1].trim());
+                                        fileName = val;
+                                    }
+                                }
+                            })
+                        }
+
+                        if (!contentType || contentType == '') {
+                            contentType = 'application/octet-stream'
+                        }
+
+                        return {
+                            fileName: fileName,
+                            data: res.data,
+                            contentType: contentType
+                        }
+                    }).then(res => {
+                        const blob = new Blob([res.data], {type: res.contentType})
+                        const dom = document.createElement('a')
+                        const downUrl = window.URL.createObjectURL(blob)
+                        dom.href = downUrl
+                        dom.download = decodeURIComponent(res.fileName)
+                        dom.style.display = 'none'
+                        document.body.appendChild(dom)
+                        dom.click()
+                        dom.parentNode.removeChild(dom)
+                        window.URL.revokeObjectURL(downUrl)
                     }).catch(err => {
                         this.$message.error(err.errorMessage || err.message || '操作失败')
                     }).finally(() => {

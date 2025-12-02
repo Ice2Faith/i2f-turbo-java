@@ -169,6 +169,7 @@
         <module>i2f-swl-std</module>
         <module>i2f-match-std</module>
         <module>i2f-ai-std</module>
+        <module>i2f-rowset</module>
 
 
     </modules>
