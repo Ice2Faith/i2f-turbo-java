@@ -1188,11 +1188,12 @@
             },
             initTextViewerEditor(){
                 this.initLangEditor('textViewerEditor','refTextViewerEditor',this.dialog.textViewer.lang,(editor,dom)=>{
+                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
                     editor.setValue(this.dialog.textViewer.text || '');
                     editor.on('change', () => {
                         this.dialog.textViewer.text = editor.getValue();
                     });
-                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
+
                 })
             },
             onTextViewerLangChange(){
@@ -1575,11 +1576,12 @@
             },
             initTableInfoTableDdlEditor(){
                 this.initLangEditor('tableInfoTableDdlEditor','refTableInfoTableDdlEditor','sql',(editor,dom)=>{
+                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
                     editor.setValue(this.dialog.tableInfo.tableDdl || '');
                     editor.on('change', () => {
                         this.dialog.tableInfo.tableDdl = editor.getValue();
                     });
-                    editor.display.wrapper.style.height=Math.max(Math.round(window.innerHeight*0.85-270),320)+'px';
+
                 })
             },
             onViewTableInfo(item) {

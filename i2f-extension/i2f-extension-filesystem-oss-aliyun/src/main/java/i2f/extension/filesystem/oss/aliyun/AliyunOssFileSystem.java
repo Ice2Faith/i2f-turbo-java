@@ -203,19 +203,29 @@ public class AliyunOssFileSystem extends AbsFileSystem {
             for (OSSObjectSummary item : iter) {
                 try {
                     String name = decodeObjectName(item.getKey());
-                    if(name.endsWith(pathSeparator())){
-                        name=name.substring(0,name.length()-pathSeparator().length());
+                    if (name.endsWith(this.pathSeparator())) {
+                        name = name.substring(0, name.length() - this.pathSeparator().length());
                     }
-                    if(name.startsWith(pathSeparator())){
-                        name=name.substring(pathSeparator().length());
+
+                    if (name.startsWith(this.pathSeparator())) {
+                        name = name.substring(this.pathSeparator().length());
                     }
-                    int idx=name.indexOf(pathSeparator());
-                    if(idx>=0){
-                        name=name.substring(0,idx);
+
+                    String subName=name;
+                    if(subPath!=null){
+                        if(subName.startsWith(subPath)){
+                            subName=subName.substring(subPath.length());
+                        }
                     }
-                    IFile file = getFile(pathSeparator() + pair.getKey(), name);
+
+                    int idx = subName.indexOf(this.pathSeparator());
+                    if (idx >= 0) {
+                        subName = subName.substring(0, idx);
+                    }
+
+                    IFile file = this.getFile(this.pathSeparator() + (String)pair.getKey(), subPath + subName);
                     String savePath = file.getPath();
-                    if(Objects.equals(savePath,inPath)){
+                    if(Objects.equals(savePath, inPath)){
                         continue;
                     }
                     if(savePathSet.contains(savePath)){

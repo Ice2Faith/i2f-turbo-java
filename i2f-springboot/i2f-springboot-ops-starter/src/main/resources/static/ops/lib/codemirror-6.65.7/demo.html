@@ -265,12 +265,13 @@
           //编译器内容更改事件
           this.editor.showHint();
         });
+        this.editor.display.wrapper.style.height='480px'
         this.editor.setValue(this.form.script || '');
         this.editor.on('change', () => {
           this.form.script = this.editor.getValue();
         });
 
-        this.editor.display.wrapper.style.height='480px'
+
       },
       onResultLangChange(){
         this.initEditor()
