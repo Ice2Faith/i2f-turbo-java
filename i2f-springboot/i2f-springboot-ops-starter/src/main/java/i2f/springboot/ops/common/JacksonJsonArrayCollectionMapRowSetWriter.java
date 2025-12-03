@@ -2,6 +2,7 @@ package i2f.springboot.ops.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.rowset.impl.AbsJsonArrayMapRowSetWriter;
 import i2f.rowset.impl.AbsJsonlMapRowSetWriter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,10 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class JacksonJsonlCollectionMapRowSetWriter<M extends Map<String,Object>> extends AbsJsonlMapRowSetWriter<M> {
+public class JacksonJsonArrayCollectionMapRowSetWriter<M extends Map<String,Object>> extends AbsJsonArrayMapRowSetWriter<M> {
     protected ObjectMapper mapper;
 
-    public JacksonJsonlCollectionMapRowSetWriter(ObjectMapper mapper) {
+    public JacksonJsonArrayCollectionMapRowSetWriter(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 

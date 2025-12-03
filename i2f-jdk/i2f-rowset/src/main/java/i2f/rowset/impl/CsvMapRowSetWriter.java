@@ -26,7 +26,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 public class CsvMapRowSetWriter<M extends Map<String,Object>> implements IRowSetWriter<M> {
-    protected boolean writeHeaders = true;
+    protected boolean withHeaders = true;
     protected Charset charset = StandardCharsets.UTF_8;
     protected boolean nullAsEmpty = true;
     protected boolean escapeSpaces = false;
@@ -43,7 +43,7 @@ public class CsvMapRowSetWriter<M extends Map<String,Object>> implements IRowSet
     public void write(IRowSet<M> rowSet, OutputStream os) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(os, charset);
         List<IRowHeader> headers = rowSet.getHeaders();
-        if(writeHeaders) {
+        if(withHeaders) {
             boolean first = true;
             for (IRowHeader header : headers) {
                 String name = header.getName();

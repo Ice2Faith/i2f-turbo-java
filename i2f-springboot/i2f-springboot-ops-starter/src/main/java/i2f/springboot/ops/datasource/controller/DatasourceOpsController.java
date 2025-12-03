@@ -152,58 +152,64 @@ public class DatasourceOpsController implements IOpsProvider {
             int maxCount = req.getMaxCount()==null?-1:req.getMaxCount();
             Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
             File ret=File.createTempFile("export-"+(UUID.randomUUID().toString().replace("-","")),".csv");
-            try(OutputStream os=new FileOutputStream(ret)) {
-                for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
-                    try (Connection conn = entry.getValue()) {
-                        QueryResult qr = JdbcResolver.query(conn, new BindSql(sql), maxCount);
-                        JdbcResolver.query(conn, new BindSql(sql), (rs -> {
+            try {
+                try (OutputStream os = new FileOutputStream(ret)) {
+                    for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
+                        try (Connection conn = entry.getValue()) {
+                            QueryResult qr = JdbcResolver.query(conn, new BindSql(sql), maxCount);
+                            JdbcResolver.query(conn, new BindSql(sql), (rs -> {
 
-                            ResultSetMetaData metaData = rs.getMetaData();
-                            List<QueryColumn> columns = JdbcResolver.parseResultSetColumns(metaData);
+                                ResultSetMetaData metaData = rs.getMetaData();
+                                List<QueryColumn> columns = JdbcResolver.parseResultSetColumns(metaData);
 
-                            Iterator<Map<String, Object>> iterator = new Iterator<Map<String, Object>>() {
-                                private int currCount = 0;
+                                Iterator<Map<String, Object>> iterator = new Iterator<Map<String, Object>>() {
+                                    private int currCount = 0;
 
-                                @Override
-                                public boolean hasNext() {
-                                    try {
-                                        return (!(maxCount >= 0 && currCount >= maxCount)) && rs.next();
-                                    } catch (SQLException e) {
-                                        throw new RuntimeException(e.getMessage(), e);
+                                    @Override
+                                    public boolean hasNext() {
+                                        try {
+                                            return (!(maxCount >= 0 && currCount >= maxCount)) && rs.next();
+                                        } catch (SQLException e) {
+                                            throw new RuntimeException(e.getMessage(), e);
+                                        }
                                     }
+
+                                    @Override
+                                    public Map<String, Object> next() {
+                                        try {
+                                            Map<String, Object> map = JdbcResolver.convertResultSetRowAsMap(columns, rs);
+                                            currCount++;
+                                            return map;
+                                        } catch (SQLException e) {
+                                            throw new RuntimeException(e.getMessage(), e);
+                                        }
+                                    }
+                                };
+
+                                List<IRowHeader> headers = new ArrayList<>();
+                                for (QueryColumn column : columns) {
+                                    headers.add(new SimpleRowHeader(column.getName()));
                                 }
 
-                                @Override
-                                public Map<String, Object> next() {
-                                    try {
-                                        Map<String, Object> map = JdbcResolver.convertResultSetRowAsMap(columns, rs);
-                                        currCount++;
-                                        return map;
-                                    } catch (SQLException e) {
-                                        throw new RuntimeException(e.getMessage(), e);
-                                    }
+                                SimpleIteratorRowSet<Map<String, Object>> rowSet = new SimpleIteratorRowSet<>(headers, iterator);
+                                CsvMapRowSetWriter<Map<String, Object>> writer = new CsvMapRowSetWriter<>();
+                                try {
+                                    writer.write(rowSet, os);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e.getMessage(), e);
                                 }
-                            };
 
-                            List<IRowHeader> headers = new ArrayList<>();
-                            for (QueryColumn column : columns) {
-                                headers.add(new SimpleRowHeader(column.getName()));
-                            }
-
-                            SimpleIteratorRowSet<Map<String, Object>> rowSet = new SimpleIteratorRowSet<>(headers, iterator);
-                            CsvMapRowSetWriter<Map<String, Object>> writer = new CsvMapRowSetWriter<>();
-                            try {
-                                writer.write(rowSet, os);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e.getMessage(), e);
-                            }
-
-                            return ret;
-                        }));
+                                return ret;
+                            }));
+                        }
                     }
                 }
+                ServletFileUtil.responseFileAttachment(ret, response);
+            }finally {
+                if(ret!=null && ret.exists()){
+                    ret.delete();
+                }
             }
-            ServletFileUtil.responseFileAttachment(ret,response);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
