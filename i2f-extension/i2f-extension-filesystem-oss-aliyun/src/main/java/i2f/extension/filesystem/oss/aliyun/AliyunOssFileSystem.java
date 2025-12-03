@@ -203,12 +203,22 @@ public class AliyunOssFileSystem extends AbsFileSystem {
             for (OSSObjectSummary item : iter) {
                 try {
                     String name = decodeObjectName(item.getKey());
+                    if (name.startsWith(this.pathSeparator())) {
+                        name = name.substring(this.pathSeparator().length());
+                    }
+                    if(subPath!=null){
+                        if(subPath.equals(name)){
+                            continue;
+                        }
+                    }
+
                     if (name.endsWith(this.pathSeparator())) {
                         name = name.substring(0, name.length() - this.pathSeparator().length());
                     }
-
-                    if (name.startsWith(this.pathSeparator())) {
-                        name = name.substring(this.pathSeparator().length());
+                    if(subPath!=null){
+                        if(subPath.equals(name)){
+                            continue;
+                        }
                     }
 
                     String subName=name;
