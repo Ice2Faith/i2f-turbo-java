@@ -266,7 +266,7 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
                     subName = subName.substring(0, idx);
                 }
 
-                IFile file = this.getFile(this.pathSeparator() + (String)pair.getKey(), subPath + subName);
+                IFile file = this.getFile(this.pathSeparator() + (String)pair.getKey(), (subPath==null?this.pathSeparator():subPath) + subName);
                 String savePath = file.getPath();
                 if(Objects.equals(savePath, inPath)){
                     continue;
