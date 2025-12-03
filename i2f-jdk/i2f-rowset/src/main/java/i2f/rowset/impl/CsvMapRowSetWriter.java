@@ -29,7 +29,7 @@ public class CsvMapRowSetWriter<M extends Map<String,Object>> implements IRowSet
     protected boolean writeHeaders = true;
     protected Charset charset = StandardCharsets.UTF_8;
     protected boolean nullAsEmpty = true;
-    protected boolean escapeSpaces = true;
+    protected boolean escapeSpaces = false;
     protected boolean bigNumberToString=true;
     protected String dateTimeFormat="yyyy-MM-dd HH:mm:ss";
     protected String dateFormat="yyyy-MM-dd";

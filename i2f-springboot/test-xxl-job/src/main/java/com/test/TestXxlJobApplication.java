@@ -1,6 +1,6 @@
 package com.test;
 
-//import i2f.extension.agent.javassist.context.AgentContextHolder;
+import i2f.extension.agent.javassist.context.AgentContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,10 +15,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class TestXxlJobApplication {
 
     public static void main(String[] args) {
-//        AgentContextHolder.THROWABLE_LISTENER.add(0, (thr) -> {
-//            log.error("=== " + thr.hashCode() + "@" + thr, thr);
-//            return false;
-//        });
+        AgentContextHolder.THROWABLE_LISTENER.add(0, (thr) -> {
+            log.error("=== " + thr.hashCode() + "@" + thr, thr);
+            return false;
+        });
         SpringApplication.run(TestXxlJobApplication.class, args);
     }
 }
