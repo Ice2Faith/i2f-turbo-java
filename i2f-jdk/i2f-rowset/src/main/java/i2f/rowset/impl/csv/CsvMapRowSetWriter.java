@@ -1,4 +1,4 @@
-package i2f.rowset.impl;
+package i2f.rowset.impl.csv;
 
 import i2f.rowset.std.IRowHeader;
 import i2f.rowset.std.IRowSet;

@@ -1,4 +1,4 @@
-package i2f.rowset.impl;
+package i2f.rowset.impl.json;
 
 import i2f.rowset.std.IRowHeader;
 import i2f.rowset.std.IRowSet;
@@ -18,7 +18,7 @@ import java.util.Map;
  * @date 2025/12/2 22:56
  * @desc
  */
-public abstract class AbsJsonArrayMapRowSetWriter<M extends Map<String,Object>> implements IRowSetWriter<M> {
+public abstract class AbsJsonlMapRowSetWriter<M extends Map<String,Object>> implements IRowSetWriter<M> {
     protected boolean withHeaders = true;
     protected Charset charset = StandardCharsets.UTF_8;
 
@@ -36,18 +36,12 @@ public abstract class AbsJsonArrayMapRowSetWriter<M extends Map<String,Object>> 
             writer.write(escapeSpaces(json));
             writer.write("\n");
         }
-        List<Object> row=new ArrayList<>();
         while(rowSet.hasNext()) {
             M map = rowSet.next();
             if(map==null){
                 continue;
             }
-            row.clear();
-            for (IRowHeader header : headers) {
-                String name = header.getName();
-                row.add(map.get(name));
-            }
-            String json=toJson(row);
+            String json=toJson(map);
             writer.write(escapeSpaces(json));
             writer.write("\n");
         }

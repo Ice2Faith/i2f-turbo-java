@@ -5,7 +5,7 @@ import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.script.JdbcScriptRunner;
-import i2f.rowset.impl.CsvMapRowSetWriter;
+import i2f.rowset.impl.csv.CsvMapRowSetWriter;
 import i2f.rowset.std.IRowHeader;
 import i2f.rowset.std.impl.SimpleIteratorRowSet;
 import i2f.rowset.std.impl.SimpleRowHeader;
