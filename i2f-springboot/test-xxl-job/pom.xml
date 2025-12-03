@@ -40,13 +40,13 @@
             <version>2.4.1</version>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-tools-agent-package</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${pom.basedir}/../../i2f-tools/i2f-tools-agent/i2f-tools-agent.jar</systemPath>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
