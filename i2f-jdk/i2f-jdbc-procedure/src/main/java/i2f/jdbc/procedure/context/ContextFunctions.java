@@ -27,6 +27,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
@@ -1156,6 +1157,7 @@ public interface ContextFunctions {
         }
         LocalDateTime obj = (LocalDateTime) time;
         if ("dd".equalsIgnoreCase(format)
+                || "d".equalsIgnoreCase(format)
                 || "day".equalsIgnoreCase(format)
                 || "days".equalsIgnoreCase(format)) {
             obj = obj.withNano(0)
@@ -1172,6 +1174,7 @@ public interface ContextFunctions {
                     .withHour(0)
                     .withDayOfMonth(1);
         } else if ("yyyy".equalsIgnoreCase(format)
+                || "yy".equalsIgnoreCase(format)
                 || "year".equalsIgnoreCase(format)
                 || "years".equalsIgnoreCase(format)) {
             obj = obj.withNano(0)
@@ -1180,7 +1183,9 @@ public interface ContextFunctions {
                     .withHour(0)
                     .withDayOfMonth(1)
                     .withMonth(1);
-        } else if ("HH".equalsIgnoreCase(format) || "hh24".equalsIgnoreCase(format)
+        } else if ("HH".equalsIgnoreCase(format)
+                || "hh24".equalsIgnoreCase(format)
+                || "hh12".equalsIgnoreCase(format)
                 || "hour".equalsIgnoreCase(format)
                 || "hours".equalsIgnoreCase(format)) {
             obj = obj.withNano(0)
@@ -1207,7 +1212,17 @@ public interface ContextFunctions {
             DayOfWeek week = obj.getDayOfWeek();
             int day = week.getValue();
             obj = obj.plusDays(day - 1);
-        } else {
+        } else if ("quarter".equalsIgnoreCase(format)
+                || "q".equalsIgnoreCase(format)) {
+            Month month = obj.getMonth();
+            Month quarterFirstMonth=Month.of(((month.getValue() - 1) / 3) * 3 + 1);
+            obj = obj.withNano(0)
+                    .withSecond(0)
+                    .withMinute(0)
+                    .withHour(0)
+                    .withDayOfMonth(1)
+                    .withMonth(quarterFirstMonth.getValue());
+        }else {
             throw new IllegalArgumentException("un-support date trunc format :" + format);
         }
 
