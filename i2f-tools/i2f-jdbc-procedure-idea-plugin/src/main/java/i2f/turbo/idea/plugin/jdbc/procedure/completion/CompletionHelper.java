@@ -139,12 +139,13 @@ public class CompletionHelper {
                         boolean isFirst = true;
                         for (PsiParameter parameter : parameters) {
                             PsiType parameterType = parameter.getType();
+                            String parameterName = parameter.getName();
                             String paramText = parameterType == null ? "?" : parameterType.getPresentableText();
                             if (!isFirst) {
                                 signatureBuilder.append(", ");
                                 completionBuilder.append(", ");
                             }
-                            signatureBuilder.append(paramText);
+                            signatureBuilder.append(paramText).append(" ").append(parameterName);
                             completionBuilder.append("");
                             isFirst = false;
                         }
@@ -200,12 +201,13 @@ public class CompletionHelper {
                 boolean isFirst = true;
                 for (Parameter parameter : parameters) {
                     Class<?> parameterType = parameter.getType();
+                    String parameterName = parameter.getName();
                     String paramText = parameterType == null ? "?" : parameterType.getSimpleName();
                     if (!isFirst) {
                         signatureBuilder.append(", ");
                         completionBuilder.append(", ");
                     }
-                    signatureBuilder.append(paramText);
+                    signatureBuilder.append(paramText).append(" ").append(parameterName);
                     completionBuilder.append("");
                     isFirst = false;
                 }
