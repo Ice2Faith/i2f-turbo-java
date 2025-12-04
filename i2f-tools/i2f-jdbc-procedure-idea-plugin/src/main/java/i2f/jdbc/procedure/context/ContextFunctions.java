@@ -47,7 +47,11 @@ public interface ContextFunctions {
 
     int index_of(Object oStr, Object oSstr);
 
+    int index_of(Object oStr, Object oSstr, int fromIndex);
+
     int last_index_of(Object oStr, Object oSstr);
+
+    int last_index_of(Object oStr, Object oSstr, int fromIndex);
 
     String replace(Object str, Object target);
 
@@ -65,15 +69,19 @@ public interface ContextFunctions {
 
     String regexp_replace(Object str, String regex, Object replacement, int occurrence);
 
-    boolean regex_like(Object oStr, String regex);
+    boolean regex_match(Object oStr, String regex);
 
-    boolean regexp_like(Object str, String regex);
+    boolean regexp_match(Object str, String regex);
 
     List<String> regex_find(Object oStr, String regex);
 
     boolean regex_contains(Object oStr, String regex);
 
     boolean regexp_contains(Object str, String regex);
+
+    boolean regex_like(Object oStr, String regex);
+
+    boolean regexp_like(Object str, String regex);
 
     int regex_index(Object oStr, String regex);
 
@@ -257,9 +265,23 @@ public interface ContextFunctions {
 
     String substr(Object obj, int index, int len);
 
+    String substring(Object obj, int beginIndex);
+
+    String substring(Object obj, int beginIndex, int endIndex);
+
     String substrb(Object str, int index);
 
     String substrb(Object str, int index, int len);
+
+    int substr_count(Object obj, Object substr);
+
+    String substr2_index(Object obj, Object substr);
+
+    String substr2_index(Object obj, Object substr, int beginIndex);
+
+    String substr2_index_end(Object obj, Object substr);
+
+    String substr2_index_end(Object obj, Object substr, int beginIndex);
 
     String substr_index(Object obj, Object substr, int len);
 
