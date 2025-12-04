@@ -42,10 +42,6 @@
         <!-- 定义文件类型 -->
 <!--        <fileType name="XProc4J" implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jFileType"/>-->
 
-        <multiHostInjector
-                order="first"
-                implementation="i2f.turbo.idea.plugin.jdbc.procedure.DollarVariablesLangInjectInjector"/>
-
         <!-- 添加文件模板组 -->
         <fileTemplateGroup implementation="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jFileTemplateGroupDescriptorFactory"/>
 
