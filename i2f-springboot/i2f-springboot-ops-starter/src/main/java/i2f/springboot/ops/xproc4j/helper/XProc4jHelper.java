@@ -8,11 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,13 +31,16 @@ public class XProc4jHelper {
     public static final String METHOD_GET_META_MAP = "getMetaMap";
     public static final String METHOD_CALL = "call";
     public static final String METHOD_EVAL_SCRIPT = "evalScript";
+    public static final String METHOD_CREATE_PARAMS="createParams";
+
+    public static String DATASOURCES = "datasources";
 
     private final AtomicBoolean hasInitHolder=new AtomicBoolean(false);
     private final AtomicReference<Object> executorHolder=new AtomicReference<>();
     private final AtomicReference<Method> metasMapMethodHolder=new AtomicReference<>();
     private final AtomicReference<Method> callByIdMethodHolder =new AtomicReference<>();
     private final AtomicReference<Method> evalScriptMethodHolder=new AtomicReference<>();
-
+    private final AtomicReference<Method> createParamsMethodHolder=new AtomicReference<>();
 
     public void initHolder(){
         if(hasInitHolder.getAndSet(true)){
@@ -85,6 +86,14 @@ public class XProc4jHelper {
 
                 Method evalScript = clazz.getMethod(METHOD_EVAL_SCRIPT, String.class, String.class, Map.class);
                 evalScriptMethodHolder.set(evalScript);
+            } catch (Exception e) {
+
+            }
+
+            try {
+
+                Method createParams = clazz.getMethod(METHOD_CREATE_PARAMS);
+                createParamsMethodHolder.set(createParams);
             } catch (Exception e) {
 
             }
@@ -138,6 +147,23 @@ public class XProc4jHelper {
         }
         Object ret =method.invoke(executor, lang,script, params);
         return ret;
+    }
+
+    public Map<String,Object> createParams() throws Exception {
+        initHolder();
+        Object executor = executorHolder.get();
+        Method method = createParamsMethodHolder.get();
+        if(method==null){
+            throw new OpsException("not found method:"+METHOD_CREATE_PARAMS);
+        }
+        Map<String,Object> ret =(Map<String, Object>) method.invoke(executor);
+        return ret;
+    }
+
+    public List<String> getDatasources() throws Exception {
+        Map<String, Object> params = createParams();
+        Map<String, DataSource> datasourceMap = (Map<String, DataSource>) params.get(DATASOURCES);
+        return new ArrayList<>(datasourceMap.keySet());
     }
 
     public Map trimContextParams(Map params){

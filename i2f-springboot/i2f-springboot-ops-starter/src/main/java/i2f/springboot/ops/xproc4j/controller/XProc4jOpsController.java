@@ -88,6 +88,26 @@ public class XProc4jOpsController implements IOpsProvider {
         }
     }
 
+    @PostMapping({"/datasources"})
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> datasources(@RequestBody OpsSecureDto reqDto,
+                                               HttpServletRequest request) throws Exception {
+        try {
+            XProc4jOperateDto req = this.transfer.recv(reqDto, XProc4jOperateDto.class);
+            if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
+                if (req.isProxyHostId()) {
+                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                }
+            }
+            assertHostId(req);
+            List<String> list = xProc4jHelper.getDatasources();
+            return this.transfer.success(list);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return this.transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+        }
+    }
+
     @PostMapping({"/metas"})
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> metas(@RequestBody OpsSecureDto reqDto,

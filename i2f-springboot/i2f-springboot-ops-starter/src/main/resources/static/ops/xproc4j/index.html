@@ -169,8 +169,18 @@
             </el-col>
             <el-col :span="8">
                 <el-card shadow="never">
-                    <el-row>
-                        调度参数
+                    <el-row type="flex">
+                        <el-col :span="16">
+                            调度参数
+                        </el-col>
+                        <el-col :span="8">
+                            <el-row type="flex" justify="end">
+                                <el-button  size="medium"
+                                           icon="el-icon-reading" circle
+                                           @click="onFillParams">
+                                </el-button>
+                            </el-row>
+                        </el-col>
                     </el-row>
                     <el-divider></el-divider>
                     <textarea ref="refEditor"></textarea>
@@ -186,6 +196,30 @@
                 <el-divider direction="vertical"></el-divider>
                 <el-form-item label="最大等待秒数">
                     <el-input-number v-model="form.waitForSeconds" :min="0" :max="500"></el-input-number>
+                </el-form-item>
+                <el-form-item>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover">
+                            <span>
+                                一个XProc4j过程会使用一个默认的数据源进行执行<br/>
+                                如果默认的数据源不满足运行要求<br/>
+                                则可以在此处选择以更改 datasourcesMapping 以进行数据源映射
+                            </span>
+                        <el-select slot="reference" clearable v-model="form.datasource" placeholder="数据源">
+                            <el-option
+                                    v-for="item in metas.datasources"
+                                    :key="item"
+                                    :label="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                    </el-popover>
+                    <el-button v-loading="metas.datasourcesLoading" size="medium"
+                               icon="el-icon-refresh" circle
+                               @click="doRefreshDatasources">
+                    </el-button>
                 </el-form-item>
                 <el-form-item >
                     <el-popover
@@ -330,6 +364,8 @@
                         resultLang: 'javascript',
                         resultText: '',
                         filterMeta: '',
+                        datasourcesLoading: false,
+                        datasources: ['master'],
                         metasLoading: false,
                         metas: [],
                         hostIdLoading: false,
@@ -354,7 +390,7 @@
                             {label: 'JavaScript',value:'javascript',editorLang: 'javascript'},
                             {label: 'Ognl',value:'ognl',editorLang: 'javascript'},
                             {label: 'Java',value:'java',editorLang: 'groovy'},
-                        ]
+                        ],
                     },
                     drawer: {
 
@@ -372,8 +408,14 @@
                         hostId: '',
                         proxyHostId: false,
                         enableEvalScript: false,
+                        datasource: '',
                         procedureId: '',
-                        params: '{\n\n}',
+                        params: JSON.stringify({
+                            global: {},
+                            datasourcesMapping: {
+                                primary: null,
+                            },
+                        },null,'    '),
                         lang: 'xproc4j',
                         script: '',
                         async: false,
@@ -454,7 +496,7 @@
                 //console.log('begin collect completions ...')
                 let items = [];
                 let keywords = [
-
+                    'global','datasourcesMapping','primary'
                 ]
                 if (keywords) {
                     items.push(...keywords);
@@ -545,7 +587,7 @@
                     this.form.params = this.editor.getValue();
                 });
             },
-            initLangEditor(editorProp,editorRef,editorLang,afterCallback){
+            initLangEditor(editorProp,editorRef,editorLang,afterCallback,optionCallback){
                 let bts=new Date().getTime()
                 let initEditorTask=()=> {
                     if (this.langEditors[editorProp]) {
@@ -565,7 +607,12 @@
                         }
                         return
                     }
-                    this.langEditors[editorProp] = CodeMirror.fromTextArea(dom, {  // 标识到textarea
+                    if(!optionCallback){
+                        optionCallback=function(option){
+                            return option
+                        }
+                    }
+                    this.langEditors[editorProp] = CodeMirror.fromTextArea(dom, optionCallback({  // 标识到textarea
                         value: "",  // 文本域默认显示的文本
                         mode: editorLang || '',  // 模式
                         theme: "idea",  // CSS样式选择
@@ -579,7 +626,7 @@
                         },
                         lineNumbers: true  // 是否显示行号
                         // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
-                    });
+                    }));
                     this.langEditors[editorProp].on("keypress", () => {
                         //编译器内容更改事件
                         this.langEditors[editorProp].showHint();
@@ -604,6 +651,7 @@
                 this.initResultEditor();
             },
             initEvalScriptEditor(){
+                let _this=this;
                 let lang='xml'
                 for (let i = 0; i < this.metas.evalLangList; i++) {
                     let item=this.metas.evalLangList[i];
@@ -619,6 +667,305 @@
                         this.form.script = editor.getValue();
                     });
 
+                },(option)=>{
+                    function completionItemCollector(prefix){
+                        let completions=[]
+                        if(lang=='xml'){
+                            // tags
+                            completions.push(...[
+                                "procedure",
+                                "log-debug",
+                                "log-info",
+                                "log-warn",
+                                "log-error",
+                                "debugger",
+                                "lang-printf",
+                                "lang-println",
+                                "lang-string",
+                                "lang-render",
+                                "lang-string-join",
+                                "lang-set",
+                                "lang-format-date",
+                                "lang-format",
+                                "lang-invoke",
+                                "lang-shell",
+                                "lang-file-exists",
+                                "lang-file-mkdirs",
+                                "lang-file-delete",
+                                "lang-file-list",
+                                "lang-file-tree",
+                                "lang-file-read-text",
+                                "lang-file-write-text",
+                                "lang-body",
+                                "lang-eval",
+                                "lang-eval-java",
+                                "lang-java-import",
+                                "lang-java-member",
+                                "lang-java-body",
+                                "lang-eval-groovy",
+                                "lang-eval-javascript",
+                                "lang-eval-js",
+                                "lang-eval-tinyscript",
+                                "lang-eval-ts",
+                                "lang-if",
+                                "lang-choose",
+                                "lang-when",
+                                "lang-otherwise",
+                                "lang-while",
+                                "lang-foreach",
+                                "lang-fori",
+                                "lang-break",
+                                "lang-continue",
+                                "lang-try",
+                                "lang-catch",
+                                "lang-finally",
+                                "lang-retry",
+                                "lang-throw",
+                                "lang-async-all",
+                                "lang-async",
+                                "lang-synchronized",
+                                "lang-lock",
+                                "lang-latch",
+                                "lang-latch-await",
+                                "lang-latch-down",
+                                "lang-sleep",
+                                "lang-new-params",
+                                "procedure-call",
+                                "function-call",
+                                "java-call",
+                                "lang-return",
+                                "script-include",
+                                "script-segment",
+                                "lang-thread-pool",
+                                "lang-thread-pool-submit",
+                                "lang-thread-pool-shutdown",
+                                "sql-cursor",
+                                "sql-etl",
+                                "etl-extra",
+                                "etl-transform",
+                                "etl-load",
+                                "etl-before",
+                                "etl-after",
+                                "sql-query-list",
+                                "sql-query-object",
+                                "sql-query-row",
+                                "sql-update",
+                                "sql-query-columns",
+                                "sql-dialect",
+                                "sql-scope",
+                                "sql-script",
+                                "sql-trans-begin",
+                                "sql-trans-commit",
+                                "sql-trans-none",
+                                "sql-trans-rollback",
+                                "sql-transactional",
+                                "sql-runner",
+                                "context-convert-method-class",
+                                "context-invoke-method-class",
+                                "context-load-package",
+                                "event-send",
+                                "event-publish",
+                                "lang-ai",
+                            ])
+                            // attrs
+                            completions.push(...[
+                                "id",
+                                "value",
+                                "result",
+                                "radix",
+                                "pattern",
+                                "await",
+                                "delay",
+                                "time-unit",
+                                "test",
+                                "collection",
+                                "item",
+                                "first",
+                                "index",
+                                "begin",
+                                "end",
+                                "incr",
+                                "method",
+                                "target",
+                                "arg",
+                                "timeout",
+                                "name",
+                                "count",
+                                "tag",
+                                "separator",
+                                "type",
+                                "e",
+                                "cause",
+                                "force",
+                                "pool",
+                                "jdbc-type",
+                                "refid",
+                                "params",
+                                "params-share",
+                                "batch-size",
+                                "accept-batch",
+                                "use-cursor",
+                                "sync",
+                                "async",
+                                "databases",
+                                "script",
+                                "datasource",
+                                "result-type",
+                                "offset",
+                                "limit",
+                                "limited",
+                                "propagation",
+                                "isolation",
+                                "read-only",
+                                "rollback-for",
+                                "no-rollback-for",
+                                "datasources",
+                                "read-batch-size",
+                                "write-batch-size",
+                                "before-truncate",
+                                "commit-size",
+                                "exclude",
+                                "include",
+                                "external",
+                                "source",
+                                "table",
+                                "jump-error",
+                                "full-send",
+                                "package",
+                                "class",
+                                "run-as-file",
+                                "workdir",
+                                "envp",
+                                "file",
+                                "charset",
+                                "content",
+                                "event-type",
+                            ])
+
+                        }
+
+                        // features
+                        completions.push(...[
+                            "in",
+                            "out",
+                            "int",
+                            "double",
+                            "float",
+                            "string",
+                            "long",
+                            "short",
+                            "char",
+                            "byte",
+                            "boolean",
+                            "null",
+                            "date",
+                            "render",
+                            "trim",
+                            "align",
+                            "body-text",
+                            "body-xml",
+                            "location-file",
+                            "location-line",
+                            "location-tag",
+                            "location",
+                            "spacing-left",
+                            "spacing-right",
+                            "spacing",
+                            "lower",
+                            "upper",
+                            "hashcode",
+                            "visit",
+                            "eval",
+                            "test",
+                            "context",
+                            "executor",
+                            "node",
+                            "eval-java",
+                            "eval-js",
+                            "eval-tinyscript",
+                            "eval-ts",
+                            "eval-groovy",
+                            "class",
+                            "not",
+                            "dialect",
+                            "is-null",
+                            "is-not-null",
+                            "is-empty",
+                            "is-not-empty",
+                            "date-now",
+                            "uuid",
+                            "current-time-millis",
+                            "snow-uid",
+                            "new-map",
+                            "new-list",
+                            "new-set",
+                            "cause-first",
+                            "cause-last",
+                            "cause-raw",
+                            "cause-root",
+                        ])
+                        // params
+                        completions.push(...[
+                            "stack_lock",
+                            "context",
+                            "env",
+                            "beans",
+                            "datasources",
+                            "datasourcesMapping",
+                            "global",
+                            "trace",
+                            "location",
+                            "file",
+                            "line",
+                            "tag",
+                            "errmsg",
+                            "node",
+                            "stack",
+                            "calls",
+                            "errors",
+                            "error",
+                            "last_sql",
+                            "last_sql_effect_count",
+                            "last_sql_use_time",
+                            "executor",
+                            "lru",
+                            "executorLru",
+                            "staticLru",
+                            "connections",
+                            "primary",
+                            "return",
+                            "metas",
+                        ])
+
+                        return completions.filter(e=>e && e!='').filter(e=>e.toLowerCase().indexOf(prefix.toLowerCase())>=0)
+                    }
+                    function asyncHint(editor, callback, options) {
+                        debugger
+                        let cur = editor.getCursor();
+                        let token = editor.getTokenAt(cur);
+                        let prefix = token.string;
+
+                        let items = completionItemCollector(prefix) || []
+                        let result = []
+                        if (result && result.list) {
+                            items = [...items, ...result.list]
+                        }
+                        callback({
+                            list: items,
+                            from: CodeMirror.Pos(cur.line, token.start),
+                            to: CodeMirror.Pos(cur.line, token.end)
+                        });
+                    }
+
+                    asyncHint.async = true;
+                    asyncHint.supportsSelection = true;
+
+                    option.hintOptions= {
+                        completeSingle: false,
+                        hint: asyncHint,
+                    }
+
+                    return option
                 })
             },
             onEvalLangChange(){
@@ -697,7 +1044,8 @@
                 throw e;
             },
             onCertChange() {
-                this.doRefreshMetas()
+                this.doRefreshMetas();
+                this.doRefreshDatasources();
                 this.doRefreshHostId();
             },
             assignHostId(req){
@@ -778,6 +1126,36 @@
                     this.metas.metasLoading = false;
                 }
             },
+            doRefreshDatasources() {
+                this.metas.datasourcesLoading = true;
+                try {
+                    let req = this.assignHostId({
+
+                    })
+                    let transfer = this.getTransfer();
+                    this.$axios({
+                        url: '/datasources',
+                        method: 'post',
+                        data: transfer.send(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = transfer.recv(res.data.data) || {}
+                            //console.log(resp)
+                            this.metas.datasources = resp;
+                        } else {
+                            this.$message.error(res.data.msg)
+                        }
+                    }).catch(err => {
+                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                    }).finally(() => {
+                        this.metas.datasourcesLoading = false;
+                    })
+                } catch (err) {
+                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.metas.datasourcesLoading = false;
+                }
+            },
             onExecute() {
                 let tips='即将执行过程，是否继续？<br/>' + this.form.procedureId;
                 if(this.form.enableEvalScript){
@@ -852,6 +1230,34 @@
             onClickMetaItem(item){
                 this.form.procedureId=item.name;
             },
+            onFillParams(){
+                let params={
+                    global: {},
+                    datasourcesMapping:{
+                        primary: null,
+                    },
+                }
+                if(this.form.datasource && this.form.datasource!=''){
+                    params.datasourcesMapping.primary=this.form.datasource;
+                }
+                if(this.form.procedureId && this.form.procedureId!=''){
+                    let metas=this.metas.metas;
+                    if(metas){
+                        metas.forEach((item)=>{
+                            if(item.name==this.form.procedureId){
+                                let arguments=item.arguments;
+                                if(arguments){
+                                    arguments.forEach(key=>{
+                                        params[key]=null;
+                                    })
+                                }
+                            }
+                        })
+                    }
+                }
+                this.form.params=JSON.stringify(params,null,'    ');
+                this.editor.setValue(this.form.params);
+            }
         }
     })
     let defaultConfig = {
