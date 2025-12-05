@@ -940,7 +940,6 @@
                         return completions.filter(e=>e && e!='').filter(e=>e.toLowerCase().indexOf(prefix.toLowerCase())>=0)
                     }
                     function asyncHint(editor, callback, options) {
-                        debugger
                         let cur = editor.getCursor();
                         let token = editor.getTokenAt(cur);
                         let prefix = token.string;
