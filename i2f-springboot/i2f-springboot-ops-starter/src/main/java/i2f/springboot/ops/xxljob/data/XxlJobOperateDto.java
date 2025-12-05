@@ -1,5 +1,6 @@
 package i2f.springboot.ops.xxljob.data;
 
+import i2f.springboot.ops.common.OpsHostIdDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,9 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class XxlJobOperateDto {
-    protected String hostId;
-    protected boolean proxyHostId;
+public class XxlJobOperateDto extends OpsHostIdDto {
 
     protected String method;
     protected String param;

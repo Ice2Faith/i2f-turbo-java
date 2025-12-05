@@ -244,11 +244,11 @@ public class DatasourceOpsController implements IOpsProvider {
     @PostMapping("/runner")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> runner(@RequestBody OpsSecureDto reqDto) throws Exception {
+        StringBuilder builder = new StringBuilder();
         try {
             DatasourceRunnerDto req = transfer.recv(reqDto, DatasourceRunnerDto.class);
             String sql = req.getSql();
             Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
-            StringBuilder builder = new StringBuilder();
             for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
                 builder.append("-- =============== run on " + entry.getKey() + " ===============\n");
                 try (Connection conn = entry.getValue()) {
@@ -280,7 +280,7 @@ public class DatasourceOpsController implements IOpsProvider {
             return transfer.success(builder.toString());
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(builder.toString()+"\n"+e.getClass().getSimpleName() + ":" + e.getMessage());
         }
     }
 
