@@ -41,6 +41,51 @@ public class CompletionHelper {
 
     public static final Logger log = Logger.getInstance(CompletionHelper.class);
 
+    public static String[] STATIC_EMBED_VARIABLES={
+            "stack_lock",
+            "context",
+            "env",
+            "beans",
+            "datasources",
+            "datasourcesMapping",
+            "global",
+            "trace",
+            "location",
+            "trace.location",
+            "file",
+            "trace.file",
+            "line",
+            "trace.line",
+            "tag",
+            "trace.tag",
+            "errmsg",
+            "trace.errmsg",
+            "node",
+            "trace.node",
+            "stack",
+            "trace.stack",
+            "calls",
+            "trace.calls",
+            "errors",
+            "trace.errors",
+            "error",
+            "trace.error",
+            "last_sql",
+            "trace.last_sql",
+            "last_sql_effect_count",
+            "trace.last_sql_effect_count",
+            "last_sql_use_time",
+            "trace.last_sql_use_time",
+            "executor",
+            "lru",
+            "executorLru",
+            "staticLru",
+            "connections",
+            "primary",
+            "return",
+            "metas",
+    };
+
     public static Map<String, LookupElement> getXmlFileFunctionsFast(PsiElement position) {
         Project project = position.getProject();
         synchronized (xmlFileFunctionsHolder) {
@@ -289,6 +334,8 @@ public class CompletionHelper {
     }
 
     public static void getXmlFileVariables(PsiElement elem, Set<String> variables, Set<String> sqlIdentifiers) {
+        Set<String> embedVariables = getStaticEmbedVariables();
+        variables.addAll(embedVariables);
         if (elem == null) {
             return;
         }
@@ -424,6 +471,10 @@ public class CompletionHelper {
         }
 
 
+    }
+
+    public static Set<String> getStaticEmbedVariables(){
+        return new LinkedHashSet<>(Arrays.asList(STATIC_EMBED_VARIABLES));
     }
 
     public static void getDolarVaraibles(String text, Set<String> variables) {
