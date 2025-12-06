@@ -19,7 +19,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -190,10 +193,10 @@ public class XProc4jOpsController implements IOpsProvider {
                 } else {
                     resp = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ret);
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 try {
                     resp = String.valueOf(ret);
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }

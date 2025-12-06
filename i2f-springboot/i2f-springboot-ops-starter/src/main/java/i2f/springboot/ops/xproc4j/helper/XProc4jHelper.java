@@ -9,6 +9,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,6 +46,33 @@ public class XProc4jHelper {
     private final AtomicReference<Method> evalScriptMethodHolder=new AtomicReference<>();
     private final AtomicReference<Method> createParamsMethodHolder=new AtomicReference<>();
 
+    protected boolean isExecutorClass(Class<?> clazz){
+        String simpleName = clazz.getSimpleName();
+        if(!simpleName.contains(EXECUTOR_CLASS_NAME)){
+            return false;
+        }
+        if(simpleName.equals(EXECUTOR_CLASS_NAME)){
+            return true;
+        }
+        Class<?> superclass = clazz.getSuperclass();
+        if(superclass!=null){
+            boolean ok = isExecutorClass(superclass);
+            if(ok){
+                return true;
+            }
+        }
+        Class<?>[] interfaces = clazz.getInterfaces();
+        if(interfaces!=null){
+            for (Class<?> item : interfaces) {
+                boolean ok = isExecutorClass(item);
+                if(ok){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void initHolder(){
         if(hasInitHolder.getAndSet(true)){
             return;
@@ -51,12 +82,7 @@ public class XProc4jHelper {
             for (String name : names) {
                 try {
                     Object bean = applicationContext.getBean(name);
-                    String simpleName = bean.getClass().getSimpleName();
-                    int idx=simpleName.lastIndexOf("$$EnhancerBySpring");
-                    if(idx>=0){
-                        simpleName=simpleName.substring(0,idx);
-                    }
-                    if(simpleName.equals(EXECUTOR_CLASS_NAME)){
+                    if(isExecutorClass(bean.getClass())){
                         executorHolder.set(bean);
                         break;
                     }
@@ -182,12 +208,42 @@ public class XProc4jHelper {
                 "executorLru",
                 "staticLru",
                 "connections",
-                "metas"
+                "metas",
+                "_vm"
         };
         for (String key : trimKeys) {
             params.remove(key);
         }
+        if(!params.isEmpty()){
+            trimUnSerializeValues(params);
+        }
+        Object global = params.get("global");
+        if(global!=null && global instanceof Map){
+            Map<?, ?> map = (Map<?, ?>) global;
+            trimUnSerializeValues(map);
+        }
         return params;
+    }
+
+    public void trimUnSerializeValues(Map map){
+        ArrayList<?> keys = new ArrayList<>(map.keySet());
+        for (Object key : keys) {
+            Object value = map.get(key);
+            if(value==null){
+                continue;
+            }
+            String name = value.getClass().getName();
+            if(name.contains("$$EnhancerBySpring")){
+                map.remove(key);
+            }
+            if(value instanceof InputStream
+            || value instanceof OutputStream
+            || value instanceof Reader
+            || value instanceof Writer){
+                map.remove(key);
+            }
+
+        }
     }
 
 }

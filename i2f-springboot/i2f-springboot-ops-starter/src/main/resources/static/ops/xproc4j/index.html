@@ -103,7 +103,7 @@
                         </el-col>
                     </el-row>
                     <el-row>
-                        <el-input clearable v-model="form.method" placeholder="选中过程"></el-input>
+                        <el-input clearable v-model="form.procedureId" placeholder="选中过程"></el-input>
                     </el-row>
                     <el-row>
                         <el-input clearable v-model="metas.filterMeta" placeholder="过滤过程"></el-input>
@@ -121,16 +121,16 @@
                                     <span class="list-item-cell">{{item.name}}</span>
                                 </el-tooltip>
                             </el-col>
-                            <el-col :span="8" style="border-right: solid 1px #777;">
+                            <el-col :span="4" style="border-right: solid 1px #777;">
                                 <el-tooltip class="item" effect="dark" :content="item.type" placement="top-start">
                                     <span class="list-item-cell">{{item.type}}</span>
                                 </el-tooltip>
                             </el-col>
-                            <el-col :span="4">
-                                <el-tooltip class="item" effect="dark" :content="item.arguments" placement="top-start">
+                            <el-col :span="8">
+                                <el-tooltip class="item" effect="dark" :content="(item.arguments||[]).filter(e=>e!='id' && e!='return').join(',')" placement="top-start">
                                     <span class="list-item-cell" style="display: inline-block;width: 100%;height: 100%;">
                                         <el-tag type="success" class="table-cell-hidden" @click.stop="onViewText(item,'过程详情','javascript')">更多</el-tag>
-                                        {{item.arguments}}
+                                        {{(item.arguments||[]).filter(e=>e!='id' && e!='return').join(',')}}
                                     </span>
                                 </el-tooltip>
                             </el-col>
@@ -365,7 +365,7 @@
                         resultText: '',
                         filterMeta: '',
                         datasourcesLoading: false,
-                        datasources: ['master'],
+                        datasources: [],
                         metasLoading: false,
                         metas: [],
                         hostIdLoading: false,
@@ -1183,7 +1183,7 @@
                 try {
                     let req = this.assignHostId({
                         procedureId: this.form.procedureId,
-                        params: this.form.params,
+                        params: JSON.parse(this.form.params),
                         async: this.form.async,
                         waitForSeconds: this.form.waitForSeconds,
                     });
@@ -1205,7 +1205,7 @@
                             //console.log(res.data)
                             let resp = transfer.recv(res.data.data)
                             // console.log(resp)
-                            this.metas.resultText = JSON.parse(resp,null,'    ');
+                            this.metas.resultText = JSON.stringify(resp,null,'');
                             this.metas.resultLang='javascript';
 
                         } else {
@@ -1247,6 +1247,9 @@
                                 let arguments=item.arguments;
                                 if(arguments){
                                     arguments.forEach(key=>{
+                                        if(key=='id' || key=='return'){
+                                            return
+                                        }
                                         params[key]=null;
                                     })
                                 }
