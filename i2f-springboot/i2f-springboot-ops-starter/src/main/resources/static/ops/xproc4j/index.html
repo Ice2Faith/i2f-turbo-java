@@ -1205,7 +1205,13 @@
                             //console.log(res.data)
                             let resp = transfer.recv(res.data.data)
                             // console.log(resp)
-                            this.metas.resultText = JSON.stringify(resp,null,'');
+                            resp=resp+'';
+                            try{
+                                resp=JSON.stringify(JSON.parse(resp),null,'    ')
+                            }catch (e){
+
+                            }
+                            this.metas.resultText = resp;
                             this.metas.resultLang='javascript';
 
                         } else {

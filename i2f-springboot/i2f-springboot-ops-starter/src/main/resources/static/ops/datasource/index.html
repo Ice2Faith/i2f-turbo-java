@@ -1516,7 +1516,13 @@
                             this.metas.resultSql=sql;
                             // console.log(resp)
                             if (operate == 'update' && !resp.columns) {
-                                this.metas.resultText = JSON.stringify(resp,null,'    ');
+                                resp=resp+'';
+                                try{
+                                    resp=JSON.stringify(JSON.parse(resp),null,'    ')
+                                }catch (e){
+
+                                }
+                                this.metas.resultText = resp;
                                 this.metas.resultType = 'text';
                                 this.metas.resultLang='javascript';
                             } else {
