@@ -2,6 +2,17 @@
     <function-call refid="TEST">
 
     </function-call>
+    <lang-render>
+        select * from ${V_TABLE}
+    </lang-render>
+    <lang-string>
+        select * from ${V_TABLE}
+    </lang-string>
+    <lang-set result="V_TABLE" value.string="select * from ${V_TABLE}"/>
+    <sql-update>
+        select * from ${V_TABLE} where name=#{STATUS}
+    </sql-update>
+    <!-- $user abc -->
     <lang-eval-ts>
 
         // //////////////////////////////////////////////////////////////////////////////////////
