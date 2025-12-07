@@ -14,9 +14,7 @@ import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ListableJdbcProcedureMetaProviderRegistry;
 import lombok.Data;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -110,7 +108,8 @@ public class DefaultJdbcProcedureContext
 
         JdbcProcedureMetaMapRefreshedEvent event = new JdbcProcedureMetaMapRefreshedEvent();
         event.setContext(this);
-        event.setMetaMap(metaMap);
+        event.setEffectKeys(new LinkedHashSet<>(metaMap.keySet()));
+        event.setMetaMap(new LinkedHashMap<>(cache));
         eventHandler.publish(event);
 
     }

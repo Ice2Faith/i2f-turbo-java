@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -53,10 +54,20 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
             executor.logger().logInfo(() -> XProc4jConsts.NAME + " script-preload begin...");
         }
         long beginTs = System.currentTimeMillis();
+        Set<String> effectKeys = evt.getEffectKeys();
         Map<String, ProcedureMeta> metaMap = evt.getMetaMap();
         if (metaMap != null) {
-            for (Map.Entry<String, ProcedureMeta> entry : metaMap.entrySet()) {
-                ProcedureMeta value = entry.getValue();
+            if(effectKeys==null || effectKeys.isEmpty()){
+                effectKeys = metaMap.keySet();
+            }
+            for (String key : effectKeys) {
+                if(key==null){
+                    continue;
+                }
+                ProcedureMeta value = metaMap.get(key);
+                if(value==null){
+                    continue;
+                }
                 if (value.getType() == ProcedureMeta.Type.XML) {
                     XmlNode node = (XmlNode) value.getTarget();
                     preloadNodeScript(node, executor);

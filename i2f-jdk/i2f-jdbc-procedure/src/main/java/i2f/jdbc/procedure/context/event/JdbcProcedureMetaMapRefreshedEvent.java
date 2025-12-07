@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -16,5 +17,6 @@ import java.util.Map;
 @NoArgsConstructor
 public class JdbcProcedureMetaMapRefreshedEvent implements XProc4jEvent {
     protected JdbcProcedureContext context;
+    protected Set<String> effectKeys;
     protected Map<String, ProcedureMeta> metaMap;
 }

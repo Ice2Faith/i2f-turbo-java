@@ -46,22 +46,35 @@ public class GrammarReporter {
     public static final AtomicBoolean checkOutputArgument=new AtomicBoolean(false);
 
     public static void reportGrammar(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
+        reportGrammar(executor,null,metaMap,warnPoster);
+    }
+
+    public static void reportGrammar(JdbcProcedureExecutor executor,Set<String> validMetaKeys, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
         if (metaMap == null) {
             return;
+        }
+        if(validMetaKeys==null || validMetaKeys.isEmpty()){
+            validMetaKeys=new LinkedHashSet<>(metaMap.keySet());
         }
         warnPoster.accept(XProc4jConsts.NAME + " report xml grammar running ...");
         long bts = System.currentTimeMillis();
         AtomicInteger allReportCount = new AtomicInteger(0);
         AtomicInteger allNodeCount = new AtomicInteger(0);
         try {
-            int mapSize = metaMap.size();
+            int mapSize = validMetaKeys.size();
             CountDownLatch latch = new CountDownLatch(mapSize);
             AtomicInteger reportSize = new AtomicInteger(0);
-            for (Map.Entry<String, ProcedureMeta> entry : metaMap.entrySet()) {
+            for (String key : validMetaKeys) {
+                if(key==null){
+                    continue;
+                }
+                ProcedureMeta meta  = metaMap.get(key);
+                if(meta==null){
+                    continue;
+                }
                 pool.submit(() -> {
                     try {
                         reportSize.incrementAndGet();
-                        ProcedureMeta meta = entry.getValue();
                         if (meta.getType() == ProcedureMeta.Type.XML) {
                             XmlNode node = (XmlNode) meta.getTarget();
                             if (executor.isDebug()) {
