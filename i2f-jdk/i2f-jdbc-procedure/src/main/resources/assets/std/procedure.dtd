@@ -847,6 +847,11 @@
         <!ATTLIST lang-ai type.string CDATA #IMPLIED>
         <!ATTLIST lang-ai type.visit CDATA #IMPLIED>
 
+        <!ELEMENT lang-listener (ANY|EMPTY)>
+        <!ATTLIST lang-listener name CDATA #IMPLIED>
+        <!ATTLIST lang-listener type CDATA #IMPLIED>
+        <!ATTLIST lang-listener target CDATA #IMPLIED>
+
         <!ELEMENT sql-query-row (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
                 )>

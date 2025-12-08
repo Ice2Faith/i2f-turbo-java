@@ -974,7 +974,11 @@ eval-ts使用TinyScript引擎进行处理
         </lang-lock>
     </script-segment>
 
-
+    <!--
+    调用type指定类型的AI工具，传入的提示词为value，大模型输出的结果保存到result中
+    value默认以visit访问，期待的值为string类型的提示词
+    type默认以string访问，为大模型的类型
+    -->
     <lang-ai result="" value="" type="">
 
     </lang-ai>
@@ -988,6 +992,22 @@ eval-ts使用TinyScript引擎进行处理
             你是一个熟悉SQL的数据库DBA，熟悉Oracle数据库。请专业的回答以下问题：$!{v_user_msg}
         </lang-render>
         <lang-ai result="v_answer" value="v_question" type="spring"/>
+    </script-segment>
+
+    <!--
+    注册一个名为name的事件监听器，监听的事件类型为type指定，事件对象保存到target指定的变量中
+    name默认以string进行访问，表示监听器的名称，同名的监听器重复注册会被覆盖
+    type默认以string进行访问，表示接受的事件类型
+    target默认以string进下访问，表示事件对象存放的变量名
+    -->
+    <lang-listener name="" type="" target="">
+
+    </lang-listener>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-listener name="sqlExecListener" type="SqlExecUseTimeEvent" target="event">
+
+        </lang-listener>
     </script-segment>
 
     <!--

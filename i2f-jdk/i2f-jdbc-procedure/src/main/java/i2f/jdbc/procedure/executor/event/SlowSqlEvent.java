@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class SlowSqlEvent implements XProc4jEvent {
-    protected JdbcProcedureExecutor executor;
+public class SlowSqlEvent extends ExecutorContextEvent {
     protected long useMillsSeconds;
     protected BindSql bql;
     protected String location;
     protected String datasource;
+    protected Throwable ex;
 }

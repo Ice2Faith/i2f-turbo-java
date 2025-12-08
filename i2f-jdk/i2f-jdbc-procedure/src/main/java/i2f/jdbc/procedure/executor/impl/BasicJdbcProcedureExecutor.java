@@ -25,10 +25,12 @@ import i2f.jdbc.procedure.datasource.DataSourceProvider;
 import i2f.jdbc.procedure.datasource.impl.NamingContextDataSourceProvider;
 import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
+import i2f.jdbc.procedure.event.XProc4jEventListener;
 import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.FeatureFunction;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
+import i2f.jdbc.procedure.executor.event.ExecutorContextEvent;
 import i2f.jdbc.procedure.executor.event.PreparedParamsEvent;
 import i2f.jdbc.procedure.executor.event.SlowSqlEvent;
 import i2f.jdbc.procedure.executor.event.SqlExecUseTimeEvent;
@@ -102,7 +104,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected volatile long slowSqlMinMillsSeconds = TimeUnit.SECONDS.toMillis(5);
     protected volatile long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(30);
     protected volatile long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
-    protected final AtomicBoolean defaultTransactionalConnection=new AtomicBoolean(true);
+    protected final AtomicBoolean defaultTransactionalConnection = new AtomicBoolean(true);
 
     protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
     protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
@@ -180,6 +182,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new LangLatchAwaitNode());
         ret.add(new LangLatchDownNode());
         ret.add(new LangLatchNode());
+        ret.add(new LangListenerNode());
         ret.add(new LangLockNode());
         ret.add(new LangNewParamsNode());
         ret.add(new LangPrintfNode());
@@ -258,6 +261,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     @Override
     public void sendEvent(XProc4jEvent event) {
+        dispatchInnerContextEvent(event);
         XProc4jEventHandler handler = getEventHandler();
         if (handler != null) {
             handler.send(event);
@@ -266,6 +270,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     @Override
     public void publishEvent(XProc4jEvent event) {
+        dispatchInnerContextEvent(event);
         if (event instanceof XmlExecUseTimeEvent) {
             XmlExecUseTimeEvent evt = (XmlExecUseTimeEvent) event;
             XmlNode node = evt.getNode();
@@ -290,6 +295,25 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (handler != null) {
             handler.publish(event);
         }
+    }
+
+    public void dispatchInnerContextEvent(XProc4jEvent event) {
+        if (event instanceof ExecutorContextEvent) {
+            ExecutorContextEvent evt = (ExecutorContextEvent) event;
+            Map<String, Object> ctx = evt.getContext();
+            JdbcProcedureExecutor executor = evt.getExecutor();
+            Map<String, XProc4jEventListener> map = executor.visitAs(ParamsConsts.LISTENERS, ctx);
+            if (map == null) {
+                return;
+            }
+            for (Map.Entry<String, XProc4jEventListener> entry : map.entrySet()) {
+                XProc4jEventListener listener = entry.getValue();
+                if (listener.support(event)) {
+                    listener.handle(event);
+                }
+            }
+        }
+
     }
 
     @Override
@@ -524,14 +548,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     if (isDebug()) {
                         logger().logDebug("close connection : " + entry.getKey());
                     }
-                    if(!conn.isClosed()) {
+                    if (!conn.isClosed()) {
                         if (!conn.getAutoCommit()) {
                             conn.commit();
                         }
                     }
                 } catch (SQLException e) {
                     logger().logWarn(e.getMessage(), e);
-                }finally {
+                } finally {
                     try {
                         conn.close();
                     } catch (SQLException e) {
@@ -679,13 +703,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     public Map<String, Object> createParamsInner() {
         Map<String, Object> ret = new LinkedHashMap<>();
-        ret.put(ParamsConsts.STACK_LOCK,new ReentrantLock());
+        ret.put(ParamsConsts.STACK_LOCK, new ReentrantLock());
 
         ret.put(ParamsConsts.CONTEXT, getNamingContext());
         ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
 
         ret.put(ParamsConsts.GLOBAL, Collections.synchronizedMap(new HashMap<>()));
         ret.put(ParamsConsts.METAS, Collections.synchronizedMap(new HashMap<>()));
+        ret.put(ParamsConsts.LISTENERS, Collections.synchronizedMap(new HashMap<>()));
 
         Map<String, Object> trace = new HashMap<>();
         trace.put(ParamsConsts.STACK, new Stack<>());
@@ -728,14 +753,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public Map<String, DataSource> getDatasourceMap() {
         try {
             List<DataSourceProvider> beans = getNamingContext().getBeans(DataSourceProvider.class);
-            if(!beans.isEmpty()) {
+            if (!beans.isEmpty()) {
                 List<DataSourceProvider> list = new ArrayList<>(beans);
                 list.sort((v1, v2) -> Integer.compare(v2.getOrder(), v1.getOrder()));
                 for (DataSourceProvider provider : list) {
                     try {
                         Map<String, DataSource> ret = new HashMap<>();
                         Map<String, DataSource> map = provider.getDataSources();
-                        if(map.isEmpty()){
+                        if (map.isEmpty()) {
                             continue;
                         }
                         ret.putAll(map);
@@ -774,25 +799,31 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 }
                 val = execParams.get(key);
                 params.put(key, val);
-            }else {
+            } else {
                 if (ParamsConsts.GLOBAL.equals(key)) {
                     if (execParams == null) {
                         execParams = createParamsInner();
                     }
-                    Map<String,Object> execGlobal = (Map<String,Object>)execParams.get(key);
-                    Map<String,Object> global = (Map<String,Object>)val;
+                    Map<String, Object> execGlobal = (Map<String, Object>) execParams.get(key);
+                    Map<String, Object> global = (Map<String, Object>) val;
                     for (Map.Entry<String, Object> entry : execGlobal.entrySet()) {
-                        global.putIfAbsent(entry.getKey(),entry.getValue());
+                        global.putIfAbsent(entry.getKey(), entry.getValue());
                     }
-                    if(!TypeOf.isCollectionsSynchronized(global)){
-                        params.put(key,Collections.synchronizedMap(global));
+                    if (!TypeOf.isCollectionsSynchronized(global)) {
+                        params.put(key, Collections.synchronizedMap(global));
                     }
 
                 }
-                if(ParamsConsts.METAS.equals(key)){
-                    Map<String,ProcedureMeta> metas = (Map<String,ProcedureMeta>)val;
-                    if(!TypeOf.isCollectionsSynchronized(metas)) {
+                if (ParamsConsts.METAS.equals(key)) {
+                    Map<String, ProcedureMeta> metas = (Map<String, ProcedureMeta>) val;
+                    if (!TypeOf.isCollectionsSynchronized(metas)) {
                         params.put(key, Collections.synchronizedMap(metas));
+                    }
+                }
+                if (ParamsConsts.LISTENERS.equals(key)) {
+                    Map<String, XProc4jEventListener> listeners = (Map<String, XProc4jEventListener>) val;
+                    if (!TypeOf.isCollectionsSynchronized(listeners)) {
+                        params.put(key, Collections.synchronizedMap(listeners));
                     }
                 }
             }
@@ -835,35 +866,39 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     }
 
     @Override
-    public Map<String,Object> cloneParams(Map<String,Object> context){
-        Map<String,Object> callParams=createParams();
+    public Map<String, Object> cloneParams(Map<String, Object> context) {
+        Map<String, Object> callParams = createParams();
 
         // clone params
-        callParams.put(ParamsConsts.STACK_LOCK,context.get(ParamsConsts.STACK_LOCK));
+        callParams.put(ParamsConsts.STACK_LOCK, context.get(ParamsConsts.STACK_LOCK));
 
-        callParams.put(ParamsConsts.CONTEXT,context.get(ParamsConsts.CONTEXT));
-        callParams.put(ParamsConsts.ENVIRONMENT,context.get(ParamsConsts.ENVIRONMENT));
+        callParams.put(ParamsConsts.CONTEXT, context.get(ParamsConsts.CONTEXT));
+        callParams.put(ParamsConsts.ENVIRONMENT, context.get(ParamsConsts.ENVIRONMENT));
 
-        Map oldBeansMap = (Map)context.get(ParamsConsts.BEANS);
-        Map newBeansMap = (Map)callParams.get(ParamsConsts.BEANS);
+        Map oldBeansMap = (Map) context.get(ParamsConsts.BEANS);
+        Map newBeansMap = (Map) callParams.get(ParamsConsts.BEANS);
         newBeansMap.putAll(oldBeansMap);
 
-        Map oldDatasourcesMap = (Map)context.get(ParamsConsts.DATASOURCES);
-        Map newDatasourcesMap = (Map)callParams.get(ParamsConsts.DATASOURCES);
+        Map oldDatasourcesMap = (Map) context.get(ParamsConsts.DATASOURCES);
+        Map newDatasourcesMap = (Map) callParams.get(ParamsConsts.DATASOURCES);
         newDatasourcesMap.putAll(oldDatasourcesMap);
 
-        Map oldDatasourcesMappingMap = (Map)context.get(ParamsConsts.DATASOURCES_MAPPING);
-        Map newDatasourcesMappingMap = (Map)callParams.get(ParamsConsts.DATASOURCES_MAPPING);
+        Map oldDatasourcesMappingMap = (Map) context.get(ParamsConsts.DATASOURCES_MAPPING);
+        Map newDatasourcesMappingMap = (Map) callParams.get(ParamsConsts.DATASOURCES_MAPPING);
         newDatasourcesMappingMap.putAll(oldDatasourcesMappingMap);
 
-        callParams.put(ParamsConsts.GLOBAL,context.get(ParamsConsts.GLOBAL));
+        callParams.put(ParamsConsts.GLOBAL, context.get(ParamsConsts.GLOBAL));
 
         Map oldMetasMap = (Map) context.get(ParamsConsts.METAS);
         Map newMetasMap = (Map) callParams.get(ParamsConsts.METAS);
         newMetasMap.putAll(oldMetasMap);
 
-        Map oldTraceMap = (Map)context.get(ParamsConsts.TRACE);
-        Map newTraceMap = (Map)callParams.get(ParamsConsts.TRACE);
+        Map oldListenersMap = (Map) context.get(ParamsConsts.LISTENERS);
+        Map newListenersMap = (Map) callParams.get(ParamsConsts.LISTENERS);
+        newListenersMap.putAll(oldListenersMap);
+
+        Map oldTraceMap = (Map) context.get(ParamsConsts.TRACE);
+        Map newTraceMap = (Map) callParams.get(ParamsConsts.TRACE);
         Stack oldTraceStack = (Stack) oldTraceMap.get(ParamsConsts.STACK);
         Stack newTraceStack = (Stack) newTraceMap.get(ParamsConsts.STACK);
         newTraceStack.clear();
@@ -879,8 +914,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         newTraceErrors.clear();
         newTraceErrors.addAll(oldTraceErrors);
 
-        Map oldLruMap = (Map)context.get(ParamsConsts.LRU);
-        Map newLruMap = (Map)callParams.get(ParamsConsts.LRU);
+        Map oldLruMap = (Map) context.get(ParamsConsts.LRU);
+        Map newLruMap = (Map) callParams.get(ParamsConsts.LRU);
         newLruMap.putAll(oldLruMap);
 
         return callParams;
@@ -976,7 +1011,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
         Reference<Object> constVal = constAttrValueOptimize(attr, action, node);
 
-        Object value = constVal.isValue() ? constVal.get() :attrScript;
+        Object value = constVal.isValue() ? constVal.get() : attrScript;
 
         String radixText = node.getTagAttrMap().get(AttrConsts.RADIX);
         if (radixText != null && !radixText.isEmpty()) {
@@ -1672,7 +1707,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return script;
     }
 
-    public String getMappingDatasourceName(String datasource,Map<String,Object> params){
+    public String getMappingDatasourceName(String datasource, Map<String, Object> params) {
         if (datasource == null || datasource.isEmpty()) {
             datasource = ParamsConsts.DEFAULT_DATASOURCE;
         }
@@ -1682,10 +1717,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 String mapping = datasourcesMapping.get(datasource);
                 if (mapping != null && !mapping.isEmpty()) {
                     datasource = mapping;
-                }else{
+                } else {
                     break;
                 }
-            }while(true);
+            } while (true);
         }
         return datasource;
     }
@@ -1695,8 +1730,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return getConnectionEntry(datasource, params).getKey();
     }
 
-    public Map.Entry<Connection,String> getConnectionEntry(String datasource, Map<String, Object> params) {
-        datasource=getMappingDatasourceName(datasource,params);
+    public Map.Entry<Connection, String> getConnectionEntry(String datasource, Map<String, Object> params) {
+        datasource = getMappingDatasourceName(datasource, params);
 
         Map<String, Connection> connectionMap = (Map<String, Connection>) params.get(ParamsConsts.CONNECTIONS);
         if (connectionMap == null) {
@@ -1713,15 +1748,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     if (isDebug()) {
                         logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] find in map");
                     }
-                    return new AbstractMap.SimpleEntry<>(conn,datasource);
+                    return new AbstractMap.SimpleEntry<>(conn, datasource);
                 }
             } catch (Exception e) {
                 logger().logWarn(() -> "connection closed or are invalided:" + e.getMessage(), e);
             }
             try {
-                if(!conn.isClosed()){
-                    if(!conn.getAutoCommit()){
-                       conn.commit();
+                if (!conn.isClosed()) {
+                    if (!conn.getAutoCommit()) {
+                        conn.commit();
                         if (isDebug()) {
                             logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] commit before close");
                         }
@@ -1729,7 +1764,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 }
             } catch (SQLException e) {
                 logger().logWarn(e.getMessage(), e);
-            }finally {
+            } finally {
                 try {
                     conn.close();
                     if (isDebug()) {
@@ -1749,7 +1784,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 if (isDebug()) {
                     logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] new connection from datasource");
                 }
-                afterNewConnection(datasource,conn);
+                afterNewConnection(datasource, conn);
             } catch (SQLException e) {
                 throw new ThrowSignalException(e.getMessage(), e);
             }
@@ -1767,11 +1802,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             throw new IllegalStateException(XProc4jConsts.NAME + " missing datasource connection: " + newConnDs + " near [" + ContextHolder.traceLocation() + "] ");
         }
 
-        return new AbstractMap.SimpleEntry<>(conn,datasource);
+        return new AbstractMap.SimpleEntry<>(conn, datasource);
     }
 
-    public void afterNewConnection(String datasource,Connection conn) throws SQLException {
-        if(defaultTransactionalConnection.get()) {
+    public void afterNewConnection(String datasource, Connection conn) throws SQLException {
+        if (defaultTransactionalConnection.get()) {
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 //            conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
@@ -1790,10 +1825,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return TypeOf.typeOf(resultType, Map.class) ? (mapTypeColumnNameMapper) : otherTypeColumnNameMapper;
     }
 
-    public void reportExecSql(String datasource, int effectCount, long useMillsSeconds, BindSql bql, Map<String,Object> params) {
-        visitSet(params,ParamsConsts.TRACE_LAST_SQL,bql);
-        visitSet(params,ParamsConsts.TRACE_LAST_SQL_EFFECT_COUNT,effectCount);
-        visitSet(params,ParamsConsts.TRACE_LAST_SQL_USE_TIME,useMillsSeconds);
+    public void reportExecSql(String datasource, int effectCount, long useMillsSeconds, BindSql bql, Throwable ex, Map<String, Object> params) {
+        visitSet(params, ParamsConsts.TRACE_LAST_SQL, bql);
+        visitSet(params, ParamsConsts.TRACE_LAST_SQL_EFFECT_COUNT, effectCount);
+        visitSet(params, ParamsConsts.TRACE_LAST_SQL_USE_TIME, useMillsSeconds);
 
         ContextHolder.TRACE_LAST_SQL.set(bql);
         ContextHolder.TRACE_LAST_SQL_EFFECT_COUNT.set(effectCount);
@@ -1802,20 +1837,24 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (true) {
             SqlExecUseTimeEvent event = new SqlExecUseTimeEvent();
             event.setExecutor(this);
+            event.setContext(params);
             event.setUseMillsSeconds(useMillsSeconds);
             event.setBql(bql);
             event.setLocation(ContextHolder.traceLocation());
             event.setDatasource(datasource);
+            event.setEx(ex);
             publishEvent(event);
         }
         if (useMillsSeconds >= slowSqlMinMillsSeconds) {
-            logger().logWarn("slow sql, use " + useMillsSeconds + "(ms) ["+datasource+"]: " + bql);
+            logger().logWarn("slow sql, use " + useMillsSeconds + "(ms) [" + datasource + "]: " + bql);
             SlowSqlEvent event = new SlowSqlEvent();
             event.setExecutor(this);
+            event.setContext(params);
             event.setUseMillsSeconds(useMillsSeconds);
             event.setBql(bql);
             event.setLocation(ContextHolder.traceLocation());
             event.setDatasource(datasource);
+            event.setEx(ex);
             publishEvent(event);
         }
     }
@@ -1825,10 +1864,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
         int effectCount = 0;
+        Throwable ex = null;
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
@@ -1836,21 +1876,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             execBql = bql;
             List<?> list = JdbcResolver.list(conn, execBql, resultType, -1, getColumnNameMapper(resultType));
-            effectCount=(list.isEmpty()?0:1);
+            effectCount = (list.isEmpty() ? 0 : 1);
             if (isDebug()) {
                 logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }
             return list;
         } catch (Exception e) {
+            ex = e;
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource=" + datasource + "\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(datasource, effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount, useTs, execBql, ex, params);
         }
     }
 
@@ -1858,11 +1899,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public List<QueryColumn> sqlQueryColumns(String datasource, BindSql bql, Map<String, Object> params) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
-        int effectCount=0;
+        int effectCount = 0;
+        Throwable ex = null;
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
@@ -1871,21 +1913,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             execBql = bql;
             QueryResult qr = JdbcResolver.query(conn, execBql, 1);
             List<QueryColumn> list = qr.getColumns();
-            effectCount=(list.isEmpty()?0:1);
+            effectCount = (list.isEmpty() ? 0 : 1);
             if (isDebug()) {
                 logger().logDebug("sql-query-columns:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }
             return list;
         } catch (Exception e) {
+            ex = null;
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource=" + datasource + "\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(datasource, effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount, useTs, execBql, ex, params);
         }
     }
 
@@ -1898,11 +1941,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
-        int effectCount=0;
+        int effectCount = 0;
+        Throwable ex = null;
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
@@ -1910,21 +1954,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             execBql = bql;
             Object obj = JdbcResolver.get(conn, execBql, resultType);
-            effectCount=(obj==null?0:1);
+            effectCount = (obj == null ? 0 : 1);
             if (isDebug()) {
                 logger().logDebug("sql-query-object:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: " + stringifyWithType(obj));
             }
             return obj;
         } catch (Exception e) {
+            ex = e;
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource=" + datasource + "\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(datasource, effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount, useTs, execBql, ex, params);
         }
     }
 
@@ -1937,11 +1982,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public Object sqlQueryRow(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
-        int effectCount=0;
+        int effectCount = 0;
+        Throwable ex = null;
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
@@ -1949,21 +1995,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             execBql = bql;
             Object row = JdbcResolver.find(conn, execBql, resultType, getColumnNameMapper(resultType));
-            effectCount=(row==null?0:1);
+            effectCount = (row == null ? 0 : 1);
             if (isDebug()) {
                 logger().logDebug("sql-query-row:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + stringifyWithType(row));
             }
             return row;
         } catch (Exception e) {
+            ex = e;
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource=" + datasource + "\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(datasource, effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount, useTs, execBql, ex, params);
         }
     }
 
@@ -1971,11 +2018,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public int sqlUpdate(String datasource, BindSql bql, Map<String, Object> params) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
-        int effectCount=0;
+        int effectCount = 0;
+        Throwable ex = null;
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             fillDatabaseDialectType(params, conn);
             if (isDebug()) {
@@ -1983,30 +2031,31 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             execBql = bql;
             int num = JdbcResolver.update(conn, execBql);
-            effectCount=num;
+            effectCount = num;
             if (isDebug()) {
                 logger().logDebug("sql-update:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + num);
             }
             return num;
         } catch (Exception e) {
+            ex = e;
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource=" + datasource + "\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(datasource, effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount, useTs, execBql, ex, params);
         }
     }
 
     @Override
     public BindSql sqlWrapPage(String datasource, BindSql bql, ApiOffsetSize page, Map<String, Object> params) {
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             fillDatabaseDialectType(params, conn);
             if (page != null && (page.getOffset() != null || page.getSize() != null)) {
@@ -2030,9 +2079,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     @Override
     public BindSql sqlWrapCount(String datasource, BindSql bql, Map<String, Object> params) {
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             fillDatabaseDialectType(params, conn);
             ICountWrapper wrapper = CountWrappers.wrapper(conn);
@@ -2059,9 +2108,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (key == null || key.isEmpty()) {
                 return false;
             }
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             List<String> databaseNames = detectDatabaseType(conn);
             String[] arr = key.split(",");
@@ -2087,9 +2136,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     @Override
     public BindSql sqlScript(String datasource, List<Map.Entry<String, Object>> dialectScriptList, Map<String, Object> params, ApiOffsetSize page) {
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             Map.Entry<String, BindSql> entry = getDialectSqlScript(dialectScriptList, conn, params);
             fillDatabaseDialectType(params, conn);
@@ -2170,11 +2219,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public List<?> sqlQueryPage(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType, ApiOffsetSize page) {
         long bts = SystemClock.currentTimeMillis();
         BindSql execBql = null;
-        int effectCount=0;
+        int effectCount = 0;
+        Throwable ex = null;
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             fillDatabaseDialectType(params, conn);
             if (page != null && (page.getOffset() != null || page.getSize() != null)) {
@@ -2187,21 +2237,22 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             execBql = pageBql;
             List<?> list = JdbcResolver.list(conn, execBql, resultType, -1, getColumnNameMapper(resultType));
-            effectCount=(list.isEmpty()?0:1);
+            effectCount = (list.isEmpty() ? 0 : 1);
             if (isDebug()) {
                 logger().logDebug("sql-query-page:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + pageBql + "\nresult: is-empty:" + list.isEmpty());
             }
             return list;
         } catch (Exception e) {
+            ex = e;
             if (e instanceof SignalException) {
                 throw (SignalException) e;
             } else {
-                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource="+datasource+"\n" + execBql) : e.getMessage(), e);
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource=" + datasource + "\n" + execBql) : e.getMessage(), e);
             }
         } finally {
             long ets = SystemClock.currentTimeMillis();
             long useTs = ets - bts;
-            reportExecSql(datasource, effectCount,useTs, execBql,params);
+            reportExecSql(datasource, effectCount, useTs, execBql, ex, params);
         }
     }
 
@@ -2214,9 +2265,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isolation < 0) {
                 isolation = Connection.TRANSACTION_READ_COMMITTED;
             }
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(isolation);
@@ -2234,9 +2285,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             logger().logDebug("sql-trans-commit:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] ");
         }
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             if (checked) {
                 if (!conn.getAutoCommit()) {
@@ -2262,9 +2313,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             logger().logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] ");
         }
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             if (checked) {
                 if (!conn.getAutoCommit()) {
@@ -2290,9 +2341,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             logger().logDebug("sql-trans-none:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] ");
         }
         try {
-            Map.Entry<Connection,String> connEntry = getConnectionEntry(datasource, params);
-            Connection conn=connEntry.getKey();
-            datasource=connEntry.getValue();
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
 
             if (checked) {
                 if (!conn.getAutoCommit()) {

@@ -74,6 +74,9 @@ public interface ParamsConsts {
     // 动态节点/局部节点
     String METAS = "metas";
 
+    // 事件监听器
+    String LISTENERS="listeners";
+
     // 这些值，将会始终保存在上下文中，也就是每个params中都应该存在这些键值
     String[] KEEP_NAMES = {
             STACK_LOCK,
@@ -89,6 +92,7 @@ public interface ParamsConsts {
 
             GLOBAL,
             METAS,
+            LISTENERS,
 
             TRACE,
 

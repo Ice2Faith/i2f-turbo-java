@@ -102,6 +102,8 @@ public interface TagConsts {
     String LANG_THREAD_POOL_SUBMIT="lang-thread-pool-submit";
     String LANG_THREAD_POOL_SHUTDOWN="lang-thread-pool-shutdown";
 
+    String LANG_LISTENER="lang-listener";
+
     String SQL_CURSOR = "sql-cursor";
 
     String SQL_ETL = "sql-etl";

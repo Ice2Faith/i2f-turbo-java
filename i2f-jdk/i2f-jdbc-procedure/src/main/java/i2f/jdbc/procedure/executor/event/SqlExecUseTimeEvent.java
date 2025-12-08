@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class SqlExecUseTimeEvent implements XProc4jEvent {
-    protected JdbcProcedureExecutor executor;
+public class SqlExecUseTimeEvent extends ExecutorContextEvent {
     protected long useMillsSeconds;
     protected BindSql bql;
     protected String location;
     protected String datasource;
+    protected Throwable ex;
 }
