@@ -21,6 +21,7 @@ import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
 import i2f.jdbc.procedure.provider.types.xml.impl.DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider;
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ContextJdbcProcedureMetaProviderRegistry;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.resources.ResourceUtil;
 import i2f.spring.core.SpringContext;
 import i2f.spring.enviroment.SpringEnvironment;
@@ -304,6 +305,12 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         log.info(XProc4jConsts.NAME + " config " + ProcedureMetaMapGrammarReporterListener.class.getSimpleName() + " ...");
         ProcedureMetaMapGrammarReporterListener ret = new ProcedureMetaMapGrammarReporterListener(executor);
         ret.getReportOnBoot().set(jdbcProcedureProperties.isReportOnBoot());
+        GrammarReporter.checkDoubleSingleQuote.set(jdbcProcedureProperties.getReportOptions().isCheckDoubleSingleQuote());
+        GrammarReporter.checkDoublePipe.set(jdbcProcedureProperties.getReportOptions().isCheckDoublePipe());
+        GrammarReporter.checkEnclosedChar.set(jdbcProcedureProperties.getReportOptions().isCheckEnclosedChar());
+        GrammarReporter.checkCallResult.set(jdbcProcedureProperties.getReportOptions().isCheckCallResult());
+        GrammarReporter.checkBlankAttribute.set(jdbcProcedureProperties.getReportOptions().isCheckBlankAttribute());
+        GrammarReporter.checkOutputArgument.set(jdbcProcedureProperties.getReportOptions().isCheckOutputArgument());
         return ret;
     }
 
