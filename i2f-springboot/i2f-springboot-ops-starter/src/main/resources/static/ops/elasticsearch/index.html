@@ -1397,13 +1397,7 @@
                             this.metas.resultSql=sql;
                             // console.log(resp)
                             if (operate == 'update' && !resp.columns) {
-                                resp=resp+'';
-                                try{
-                                    resp=JSON.stringify(JSON.parse(resp),null,'    ')
-                                }catch (e){
-
-                                }
-                                this.metas.resultText = resp;
+                                this.metas.resultText = JSON.stringify(resp,null,'    ');
                                 this.metas.resultType = 'text';
                                 this.metas.resultLang='javascript';
                             } else {
