@@ -52,7 +52,7 @@ public class LangListenerNode extends AbstractExecutorNode {
                 if(typeClass!=null) {
                     return TypeOf.typeOf(event.getClass(), typeClass);
                 }else{
-                    return event.getClass().getName().equals(typeName);
+                    return event.getClass().getSimpleName().equals(typeName);
                 }
             }
 
@@ -63,7 +63,7 @@ public class LangListenerNode extends AbstractExecutorNode {
                         ExecutorContextEvent evt = (ExecutorContextEvent) event;
                         JdbcProcedureExecutor evtExecutor = evt.getExecutor();
                         Map<String, Object> evtContext = evt.getContext();
-                        Map<String, Object> callParams = evtExecutor.newParams(evtContext);
+                        Map<String, Object> callParams = evtExecutor.cloneParams(evtContext);
                         evtExecutor.visitSet(callParams, targetName, evt);
                         evtExecutor.execAsProcedure(node, callParams);
                     } else {

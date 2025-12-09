@@ -308,6 +308,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             for (Map.Entry<String, XProc4jEventListener> entry : map.entrySet()) {
                 XProc4jEventListener listener = entry.getValue();
+                if(listener==null){
+                    continue;
+                }
                 if (listener.support(event)) {
                     listener.handle(event);
                 }
