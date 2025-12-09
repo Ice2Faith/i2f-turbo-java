@@ -401,9 +401,9 @@ public class SshOpsController implements IOpsProvider {
                         }
                         util.upload(workdir, bashFile.getName(), new FileInputStream(bashFile));
                         util.cd(workdir);
-                        resp = util.exec(true, waitForSeconds, "sh -c " + bashFile.getName(), workdir, null);
+                        resp = util.exec(true, waitForSeconds*1000, "sh -c " + bashFile.getName(), workdir, null);
                     } else {
-                        resp = util.exec(true, waitForSeconds, cmd, workdir, null);
+                        resp = util.exec(true, waitForSeconds*1000, cmd, workdir, null);
                     }
                     return transfer.success(resp);
                 } finally {

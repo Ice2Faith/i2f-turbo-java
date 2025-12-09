@@ -466,9 +466,9 @@ public class HostOpsController implements IOpsProvider {
                     if (OsUtil.isWindows()) {
                         cmdArr = new String[]{"cmd.exe", "/c", bashFile.getName()};
                     }
-                    resp = OsUtil.execCmd(true, waitForSeconds, cmdArr, null, new File(workdir), null);
+                    resp = OsUtil.execCmd(true, waitForSeconds*1000, cmdArr, null, new File(workdir), null);
                 } else {
-                    resp = OsUtil.execCmd(true, waitForSeconds, cmd, null, new File(workdir), null);
+                    resp = OsUtil.execCmd(true, waitForSeconds*1000, cmd, null, new File(workdir), null);
                 }
                 return transfer.success(resp);
             } finally {
