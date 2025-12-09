@@ -10,6 +10,9 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.event.ExecutorContextEvent;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.SignalException;
+import i2f.jdbc.procedure.signal.impl.ControlSignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.typeof.TypeOf;
 
 import java.util.Map;
@@ -55,17 +58,27 @@ public class LangListenerNode extends AbstractExecutorNode {
 
             @Override
             public boolean handle(XProc4jEvent event) {
-                if(event instanceof ExecutorContextEvent){
-                    ExecutorContextEvent evt = (ExecutorContextEvent) event;
-                    JdbcProcedureExecutor evtExecutor = evt.getExecutor();
-                    Map<String, Object> evtContext = evt.getContext();
-                    Map<String, Object> callParams = evtExecutor.newParams(evtContext);
-                    evtExecutor.visitSet(callParams,targetName,evt);
-                    evtExecutor.execAsProcedure(node,callParams);
-                }else{
-                    Map<String, Object> callParams = executor.createParams();
-                    executor.visitSet(callParams,targetName,event);
-                    executor.execAsProcedure(node,callParams);
+                try {
+                    if (event instanceof ExecutorContextEvent) {
+                        ExecutorContextEvent evt = (ExecutorContextEvent) event;
+                        JdbcProcedureExecutor evtExecutor = evt.getExecutor();
+                        Map<String, Object> evtContext = evt.getContext();
+                        Map<String, Object> callParams = evtExecutor.newParams(evtContext);
+                        evtExecutor.visitSet(callParams, targetName, evt);
+                        evtExecutor.execAsProcedure(node, callParams);
+                    } else {
+                        Map<String, Object> callParams = executor.createParams();
+                        executor.visitSet(callParams, targetName, event);
+                        executor.execAsProcedure(node, callParams);
+                    }
+                } catch (Throwable e) {
+                    if(e instanceof ControlSignalException){
+                        return false;
+                    }
+                    if(e instanceof SignalException){
+                        throw (SignalException)e;
+                    }
+                    throw new ThrowSignalException(e.getMessage(),e);
                 }
                 return false;
             }
