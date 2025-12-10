@@ -1845,6 +1845,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             event.setBql(bql);
             event.setLocation(ContextHolder.traceLocation());
             event.setDatasource(datasource);
+            event.setEffectCount(effectCount);
             event.setEx(ex);
             publishEvent(event);
         }
@@ -1857,6 +1858,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             event.setBql(bql);
             event.setLocation(ContextHolder.traceLocation());
             event.setDatasource(datasource);
+            event.setEffectCount(effectCount);
             event.setEx(ex);
             publishEvent(event);
         }

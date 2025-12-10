@@ -1,8 +1,6 @@
 package i2f.jdbc.procedure.executor.event;
 
 import i2f.bindsql.BindSql;
-import i2f.jdbc.procedure.event.XProc4jEvent;
-import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,5 +15,6 @@ public class SqlExecUseTimeEvent extends ExecutorContextEvent {
     protected BindSql bql;
     protected String location;
     protected String datasource;
+    protected long effectCount=-1;
     protected Throwable ex;
 }
