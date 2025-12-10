@@ -209,7 +209,8 @@ public class XProc4jHelper {
                 "staticLru",
                 "connections",
                 "metas",
-                "_vm"
+                "_vm",
+                "listeners"
         };
         for (String key : trimKeys) {
             params.remove(key);
