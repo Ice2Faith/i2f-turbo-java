@@ -392,7 +392,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (node == null) {
             throw new IllegalArgumentException(LangConsts.XPROC4J + " lang accept xml format script, script format maybe wrong!");
         }
-        return executor.exec(node, params, false, false);
+        return executor.exec(node, params);
     }
 
     @Override
