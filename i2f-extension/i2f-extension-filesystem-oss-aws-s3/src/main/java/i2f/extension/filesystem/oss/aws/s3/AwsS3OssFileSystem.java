@@ -199,7 +199,7 @@ public class AwsS3OssFileSystem extends AbsFileSystem {
     public String decodeObjectName(String name){
         try {
             return URLDecoder.decode(name,"UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (Exception e) {
 
         }
         return name;
