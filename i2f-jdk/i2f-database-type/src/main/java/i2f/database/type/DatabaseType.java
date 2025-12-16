@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 
@@ -186,6 +188,8 @@ public enum DatabaseType {
 
     public static final String DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX ="database-type-mapping-url-";
 
+    public static final ConcurrentHashMap<String,DatabaseType> JDBC_URL_TYPE_MAPPING=new ConcurrentHashMap<>();
+
     public String db() {
         return this.db;
     }
@@ -286,14 +290,22 @@ public enum DatabaseType {
                 }
             }
         }
-        String url = jdbcUrl.toLowerCase();
-        String prop = System.getProperty(DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX + url);
-        if(prop!=null){
-            DatabaseType databaseType = DatabaseType.typeOfName(prop);
-            if(isValid(databaseType)){
-                return databaseType;
+        if(jdbcUrl!=null) {
+            DatabaseType type = JDBC_URL_TYPE_MAPPING.get(jdbcUrl);
+            if (isValid(type)) {
+                return type;
             }
         }
+        if(jdbcUrl!=null) {
+            String prop = System.getProperty(DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX + jdbcUrl);
+            if (prop != null) {
+                DatabaseType databaseType = DatabaseType.typeOfName(prop);
+                if (isValid(databaseType)) {
+                    return databaseType;
+                }
+            }
+        }
+        String url = jdbcUrl.toLowerCase();
         if (url.contains(":mysql:") || url.contains(":cobar:")) {
             return DatabaseType.MYSQL;
         } else if (url.contains(":mariadb:")) {
