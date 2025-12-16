@@ -36,10 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.*;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -129,9 +126,18 @@ public class DatasourceOpsController implements IOpsProvider {
             QueryResult resp = new QueryResult();
             resp.setColumns(new ArrayList<>());
             resp.setRows(new ArrayList<>(maxCount > 0 ? Math.min(maxCount, 500) : 0));
+            int connMapCount=connMap.size();
+            QueryColumn datasourceColumn=new QueryColumn();
+            if(connMapCount>1){
+                fillDatasourceColumn(datasourceColumn);
+            }
             for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
                 try (Connection conn = entry.getValue()) {
                     QueryResult qr = JdbcResolver.query(conn, new BindSql(sql), maxCount);
+                    if(connMapCount>1){
+                        qr.getColumns().add(0,datasourceColumn);
+                        qr.getRows().forEach(e->e.put(datasourceColumn.getName(),entry.getKey()));
+                    }
                     resp.setColumns(qr.getColumns());
                     resp.getRows().addAll(qr.getRows());
                 }
@@ -151,6 +157,11 @@ public class DatasourceOpsController implements IOpsProvider {
             String sql = req.getSql();
             int maxCount = req.getMaxCount()==null?-1:req.getMaxCount();
             Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
+            int connMapCount=connMap.size();
+            QueryColumn datasourceColumn=new QueryColumn();
+            if(connMapCount>1){
+                fillDatasourceColumn(datasourceColumn);
+            }
             File ret=File.createTempFile("export-"+(UUID.randomUUID().toString().replace("-","")),".csv");
             try {
                 try (OutputStream os = new FileOutputStream(ret)) {
@@ -161,6 +172,9 @@ public class DatasourceOpsController implements IOpsProvider {
 
                                 ResultSetMetaData metaData = rs.getMetaData();
                                 List<QueryColumn> columns = JdbcResolver.parseResultSetColumns(metaData);
+                                if(connMapCount>1){
+                                    columns.add(0,datasourceColumn);
+                                }
 
                                 Iterator<Map<String, Object>> iterator = new Iterator<Map<String, Object>>() {
                                     private int currCount = 0;
@@ -178,6 +192,9 @@ public class DatasourceOpsController implements IOpsProvider {
                                     public Map<String, Object> next() {
                                         try {
                                             Map<String, Object> map = JdbcResolver.convertResultSetRowAsMap(columns, rs);
+                                            if(connMapCount>1){
+                                                map.put(datasourceColumn.getName(),entry.getKey());
+                                            }
                                             currCount++;
                                             return map;
                                         } catch (SQLException e) {
@@ -218,6 +235,33 @@ public class DatasourceOpsController implements IOpsProvider {
             writer.flush();
             return;
         }
+    }
+
+    public static void fillDatasourceColumn(QueryColumn column) {
+        column.setIndex(-1);
+        column.setName("_datasource");
+        column.setOriginName(column.getName());
+        column.setCatalog("virtual");
+        column.setClazzName(String.class.getName());
+        column.setClazz(String.class);
+        column.setDisplaySize(20);
+        column.setLabel(column.getName());
+        column.setType(Types.VARCHAR);
+        column.setJdbcType(JDBCType.VARCHAR);
+        column.setTypeName(JDBCType.VARCHAR.name());
+        column.setPrecision(20);
+        column.setScale(0);
+        column.setSchema("virtual");
+        column.setTable("virtual");
+        column.setNullable(true);
+        column.setAutoIncrement(false);
+        column.setReadonly(true);
+        column.setWritable(false);
+        column.setCaseSensitive(true);
+        column.setCurrency(false);
+        column.setDefinitelyWritable(false);
+        column.setSearchable(false);
+        column.setSigned(false);
     }
 
     @PostMapping("/update")

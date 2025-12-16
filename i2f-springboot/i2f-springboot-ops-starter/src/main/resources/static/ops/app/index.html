@@ -1095,7 +1095,7 @@
                 return script;
             },
             getTipExecuteScript() {
-                let script = this.getExecuteScript();
+                let script = this.getExecuteScript().trim();
                 if (script.length > 30) {
                     script = script.substring(0, 30) + "...";
                 }

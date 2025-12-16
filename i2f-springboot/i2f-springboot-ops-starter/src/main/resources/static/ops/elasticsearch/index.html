@@ -1351,7 +1351,7 @@
                 return sql;
             },
             getTipExecuteSql(){
-                let sql=this.getExecuteSql();
+                let sql=this.getExecuteSql().trim();
                 if(sql.length>30){
                     sql=sql.substring(0,30)+"...";
                 }
@@ -1757,9 +1757,9 @@
             },
             doRefreshChartData(){
                 let sql=this.metas.resultSql;
-                let tipsSql=sql;
-                if(tipsSql && tipsSql.length>27){
-                    tipsSql=tipsSql.substring(0,27)+"...";
+                let tipsSql=sql.trim();
+                if(tipsSql && tipsSql.length>30){
+                    tipsSql=tipsSql.substring(0,30)+"...";
                 }
                 this.$confirm('即将执行语句，是否继续？<br/>' + tipsSql, '操作提示', {
                     confirmButtonText: '确定',

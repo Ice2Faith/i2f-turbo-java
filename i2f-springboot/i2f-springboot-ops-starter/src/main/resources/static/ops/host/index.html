@@ -837,7 +837,7 @@
                 return cmd;
             },
             getTipExecuteCmd() {
-                let cmd = this.getExecuteCmd();
+                let cmd = this.getExecuteCmd().trim();
                 if (cmd.length > 30) {
                     cmd = cmd.substring(0, 30) + "...";
                 }

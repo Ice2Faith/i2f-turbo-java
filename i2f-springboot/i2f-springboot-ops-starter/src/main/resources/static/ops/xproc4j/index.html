@@ -1158,9 +1158,9 @@
             onExecute() {
                 let tips='即将执行过程，是否继续？<br/>' + this.form.procedureId;
                 if(this.form.enableEvalScript){
-                    let script=this.form.script;
-                    if(script.length>27){
-                        script=script.substring(0,27)+'...';
+                    let script=this.form.script.trim();
+                    if(script.length>30){
+                        script=script.substring(0,30)+'...';
                     }
                     tips='即将执行脚本，是否继续？<br/>' + script
                 }
