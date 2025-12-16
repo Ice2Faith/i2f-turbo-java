@@ -244,27 +244,34 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
         return map;
     }
 
-    public ResultSet getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getTables(null, database, table, null);
+    public QueryResult getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getTables(null, database, table, null);
+        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        return ret;
     }
 
-    public ResultSet getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getColumns(null, database, table, null);
+    public QueryResult getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getColumns(null, database, table, null);
+        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        return ret;
     }
 
-    public ResultSet getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getPrimaryKeys(null, database, table);
+    public QueryResult getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getPrimaryKeys(null, database, table);
+        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        return ret;
     }
 
-    public ResultSet getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getIndexInfo(null, database, table, false, false);
+    public QueryResult getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getIndexInfo(null, database, table, false, false);
+        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        return ret;
     }
 
     @Override
     public TableMeta getTableInfo(Connection conn, String database, String table) throws SQLException {
         DatabaseMetaData metaData = conn.getMetaData();
-        ResultSet rs = getTableInfo(metaData, database, table);
-        QueryResult result = JdbcResolver.parseResultSet(rs);
+        QueryResult result = getTableInfo(metaData, database, table);
         List<Map<String, Object>> rows = result.getRows();
         if (rows.isEmpty()) {
             return null;
@@ -282,8 +289,7 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
             }
         }
 
-        rs = getColumns(metaData, ret.getDatabase(), ret.getName());
-        result = JdbcResolver.parseResultSet(rs);
+        result = getColumns(metaData, ret.getDatabase(), ret.getName());
 
         List<ColumnMeta> columns = new ArrayList<>();
         ret.setColumns(columns);
@@ -355,8 +361,7 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
     }
 
     public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-        ResultSet rs = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
-        QueryResult result = JdbcResolver.parseResultSet(rs);
+        QueryResult result = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
         IndexMeta primary = null;
         for (Map<String, Object> row : result.getRows()) {
             if (primary == null) {
@@ -378,8 +383,7 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
     }
 
     public void parseIndexes(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-        ResultSet rs = getIndexInfo(metaData, ret.getDatabase(), ret.getName());
-        QueryResult result = JdbcResolver.parseResultSet(rs);
+        QueryResult result = getIndexInfo(metaData, ret.getDatabase(), ret.getName());
 
         Map<String, IndexMeta> indexMap = new LinkedHashMap<>();
         for (Map<String, Object> row : result.getRows()) {

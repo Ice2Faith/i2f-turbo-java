@@ -184,6 +184,8 @@ public enum DatabaseType {
      */
     private final String desc;
 
+    public static final String DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX ="database-type-mapping-url-";
+
     public String db() {
         return this.db;
     }
@@ -213,7 +215,8 @@ public enum DatabaseType {
      */
     public static DatabaseType typeOfName(String dbType) {
         for (DatabaseType type : DatabaseType.values()) {
-            if (type.db.equalsIgnoreCase(dbType)) {
+            if (type.name().equalsIgnoreCase(dbType)
+            ||type.db.equalsIgnoreCase(dbType)) {
                 return type;
             }
         }
@@ -284,6 +287,13 @@ public enum DatabaseType {
             }
         }
         String url = jdbcUrl.toLowerCase();
+        String prop = System.getProperty(DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX + url);
+        if(prop!=null){
+            DatabaseType databaseType = DatabaseType.typeOfName(prop);
+            if(isValid(databaseType)){
+                return databaseType;
+            }
+        }
         if (url.contains(":mysql:") || url.contains(":cobar:")) {
             return DatabaseType.MYSQL;
         } else if (url.contains(":mariadb:")) {

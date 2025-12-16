@@ -95,23 +95,59 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
     }
 
     @Override
-    public ResultSet getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getTables(database, null, table, null);
+    public QueryResult getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getTables(database, null, table, null);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getTables(database, null, table.toLowerCase(), null);
+            ret = JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
     @Override
-    public ResultSet getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getColumns(database, null, table, null);
+    public QueryResult getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getColumns(database, null, table, null);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getColumns(database, null, table.toLowerCase(), null);
+            ret = JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
     @Override
-    public ResultSet getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getPrimaryKeys(database, null, table);
+    public QueryResult getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getPrimaryKeys(database, null, table);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getPrimaryKeys(database, null, table.toLowerCase());
+            ret = JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
     @Override
-    public ResultSet getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getIndexInfo(database, null, table, false, false);
+    public QueryResult getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getIndexInfo(database, null, table, false, false);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getIndexInfo(database, null, table, false, false);
+            ret = JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
 
@@ -211,8 +247,7 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
 
     @Override
     public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-        ResultSet rs = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
-        QueryResult result = JdbcResolver.parseResultSet(rs);
+        QueryResult result = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
         IndexMeta primary = null;
         for (Map<String, Object> row : result.getRows()) {
             if (primary == null) {
@@ -236,9 +271,7 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
 
     @Override
     public void parseIndexes(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-        ResultSet rs = getIndexInfo(metaData, ret.getDatabase(), ret.getName());
-        QueryResult result = JdbcResolver.parseResultSet(rs);
-
+        QueryResult result = getIndexInfo(metaData, ret.getDatabase(), ret.getName());
 
         Map<String, IndexMeta> indexMap = new LinkedHashMap<>();
         for (Map<String, Object> row : result.getRows()) {

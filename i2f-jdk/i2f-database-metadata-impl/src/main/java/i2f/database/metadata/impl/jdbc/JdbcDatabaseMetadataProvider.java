@@ -99,23 +99,31 @@ public class JdbcDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
 
 
     @Override
-    public ResultSet getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getTables(null, null, table, null);
+    public QueryResult getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getTables(null, null, table, null);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        return ret;
     }
 
     @Override
-    public ResultSet getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getColumns(null, null, table, null);
+    public QueryResult getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getColumns(null, null, table, null);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        return ret;
     }
 
     @Override
-    public ResultSet getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getPrimaryKeys(null, null, table);
+    public QueryResult getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getPrimaryKeys(null, null, table);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        return ret;
     }
 
     @Override
-    public ResultSet getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getIndexInfo(null, null, table, false, false);
+    public QueryResult getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getIndexInfo(null, null, table, false, false);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        return ret;
     }
 
     @Override
@@ -217,8 +225,7 @@ public class JdbcDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
 
     @Override
     public void parsePrimaryKey(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-        ResultSet rs = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
-        QueryResult result = JdbcResolver.parseResultSet(rs);
+        QueryResult result = getPrimaryKeys(metaData, ret.getDatabase(), ret.getName());
         IndexMeta primary = null;
         for (Map<String, Object> row : result.getRows()) {
             if (primary == null) {
@@ -249,8 +256,7 @@ public class JdbcDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
 
     @Override
     public void parseIndexes(DatabaseMetaData metaData, TableMeta ret) throws SQLException {
-        ResultSet rs = getIndexInfo(metaData, ret.getDatabase(), ret.getName());
-        QueryResult result = JdbcResolver.parseResultSet(rs);
+        QueryResult result = getIndexInfo(metaData, ret.getDatabase(), ret.getName());
         Map<String, String> upperColumnNameMap = new HashMap<>();
         for (QueryColumn column : result.getColumns()) {
             upperColumnNameMap.put(column.getName().toUpperCase(), column.getName());

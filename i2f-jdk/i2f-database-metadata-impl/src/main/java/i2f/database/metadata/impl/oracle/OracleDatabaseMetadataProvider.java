@@ -118,23 +118,59 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
     }
 
     @Override
-    public ResultSet getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getTables(null, database, table, null);
+    public QueryResult getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getTables(null, database, table, null);
+        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getTables(null, database, table.toUpperCase(), null);
+            ret=JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
     @Override
-    public ResultSet getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getColumns(null, database, table, null);
+    public QueryResult getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getColumns(null, database, table, null);
+        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getColumns(null, database, table.toUpperCase(), null);
+            ret=JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
     @Override
-    public ResultSet getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getPrimaryKeys(null, database, table);
+    public QueryResult getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getPrimaryKeys(null, database, table);
+        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getPrimaryKeys(null, database, table.toUpperCase());
+            ret=JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
     @Override
-    public ResultSet getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getIndexInfo(null, database, table, false, false);
+    public QueryResult getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getIndexInfo(null, database, table, false, false);
+        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            metaData.getIndexInfo(null, database, table.toUpperCase(), false, false);
+            ret=JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
 
@@ -256,8 +292,7 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
 
     public QueryResult queryPrimaryKeyResult(DatabaseMetaData metaData, String database, String table) throws SQLException {
         try {
-            ResultSet rs = getPrimaryKeys(metaData, database, table);
-            QueryResult result = JdbcResolver.parseResultSet(rs);
+            QueryResult result = getPrimaryKeys(metaData, database, table);
             return result;
         } catch (Throwable e) {
             List<Object> args = new ArrayList<>();
@@ -303,8 +338,7 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
 
     public QueryResult queryIndexesResult(DatabaseMetaData metaData, String database, String table) throws SQLException {
         try {
-            ResultSet rs = getIndexInfo(metaData, database, table);
-            QueryResult result = JdbcResolver.parseResultSet(rs);
+            QueryResult result = getIndexInfo(metaData, database, table);
             return result;
         } catch (Throwable e) {
             List<Object> args = new ArrayList<>();

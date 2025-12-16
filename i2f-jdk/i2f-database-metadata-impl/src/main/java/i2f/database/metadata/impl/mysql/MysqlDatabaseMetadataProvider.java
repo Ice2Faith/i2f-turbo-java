@@ -93,23 +93,62 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
     }
 
     @Override
-    public ResultSet getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getTables(database, null, table, null);
+    public QueryResult getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getTables(database, null, table, null);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null) {
+            rs = metaData.getTables(database, null, table.toLowerCase(), null);
+            ret = JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
     @Override
-    public ResultSet getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getColumns(database, null, table, null);
+    public QueryResult getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getColumns(database, null, table, null);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getColumns(database, null, table.toLowerCase(), null);
+            ret = JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
     @Override
-    public ResultSet getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getPrimaryKeys(database, null, table);
+    public QueryResult getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getPrimaryKeys(database, null, table);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getPrimaryKeys(database, null, table.toLowerCase());
+            ret = JdbcResolver.parseResultSet(rs);
+        }
+        return ret;
     }
 
     @Override
-    public ResultSet getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
-        return metaData.getIndexInfo(database, null, table, false, false);
+    public QueryResult getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
+        ResultSet rs = metaData.getIndexInfo(database, null, table, false, false);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
+        if(!ret.getRows().isEmpty()){
+            return ret;
+        }
+        if(table!=null){
+            rs = metaData.getIndexInfo(database, null, table.toLowerCase(), false, false);
+            ret = JdbcResolver.parseResultSet(rs);
+            if(!ret.getRows().isEmpty()){
+                return ret;
+            }
+        }
+        return ret;
     }
 
     @Override
@@ -203,8 +242,7 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
 
     public QueryResult queryPrimaryKeyResult(DatabaseMetaData metaData, String database, String table) throws SQLException {
         try {
-            ResultSet rs = getPrimaryKeys(metaData, database, table);
-            QueryResult result = JdbcResolver.parseResultSet(rs);
+            QueryResult result = getPrimaryKeys(metaData, database, table);
             return result;
         } catch (Throwable e) {
             List<Object> args = new ArrayList<>();
@@ -254,8 +292,7 @@ public class MysqlDatabaseMetadataProvider extends BaseDatabaseMetadataProvider 
 
     public QueryResult queryIndexesResult(DatabaseMetaData metaData, String database, String table) throws SQLException {
         try {
-            ResultSet rs = getIndexInfo(metaData, database, table);
-            QueryResult result = JdbcResolver.parseResultSet(rs);
+            QueryResult result = getIndexInfo(metaData, database, table);
             return result;
         } catch (Throwable e) {
             List<Object> args = new ArrayList<>();
