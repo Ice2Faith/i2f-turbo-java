@@ -233,6 +233,9 @@ public class XProc4jHelper {
             if (value == null) {
                 continue;
             }
+            if(value instanceof Map){
+                trimContextParams((Map)value);
+            }
             String name = value.getClass().getName();
             if (name.contains("$$EnhancerBySpring")) {
                 map.remove(key);
