@@ -173,7 +173,7 @@ public class XxlJobOpsController implements IOpsProvider {
             return transfer.success(hostIp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -260,7 +260,7 @@ public class XxlJobOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -381,7 +381,7 @@ public class XxlJobOpsController implements IOpsProvider {
             return transfer.success(refRet.get());
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 

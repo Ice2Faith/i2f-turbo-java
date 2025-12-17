@@ -89,7 +89,7 @@ public class ElasticSearchOpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -116,7 +116,7 @@ public class ElasticSearchOpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -142,7 +142,7 @@ public class ElasticSearchOpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -168,7 +168,7 @@ public class ElasticSearchOpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -194,7 +194,7 @@ public class ElasticSearchOpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -220,7 +220,7 @@ public class ElasticSearchOpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -252,7 +252,7 @@ public class ElasticSearchOpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 }

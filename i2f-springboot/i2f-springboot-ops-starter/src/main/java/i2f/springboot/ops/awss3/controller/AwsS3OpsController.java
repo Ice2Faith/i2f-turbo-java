@@ -82,7 +82,7 @@ public class AwsS3OpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -150,7 +150,7 @@ public class AwsS3OpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -168,7 +168,7 @@ public class AwsS3OpsController implements IOpsProvider {
             return transfer.success(true);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -201,7 +201,7 @@ public class AwsS3OpsController implements IOpsProvider {
             return transfer.success(true);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -364,7 +364,7 @@ public class AwsS3OpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 }

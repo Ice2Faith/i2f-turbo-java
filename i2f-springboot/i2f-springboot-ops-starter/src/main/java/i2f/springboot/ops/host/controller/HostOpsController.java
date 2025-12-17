@@ -70,7 +70,7 @@ public class HostOpsController implements IOpsProvider {
             return transfer.success(hostIp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -99,7 +99,7 @@ public class HostOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -171,7 +171,7 @@ public class HostOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -194,7 +194,7 @@ public class HostOpsController implements IOpsProvider {
             return transfer.success(true);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -231,7 +231,7 @@ public class HostOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -423,7 +423,7 @@ public class HostOpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -466,9 +466,9 @@ public class HostOpsController implements IOpsProvider {
                     if (OsUtil.isWindows()) {
                         cmdArr = new String[]{"cmd.exe", "/c", bashFile.getName()};
                     }
-                    resp = OsUtil.execCmd(true, waitForSeconds*1000, cmdArr, null, new File(workdir), null);
+                    resp = OsUtil.execCmd(true, waitForSeconds * 1000, cmdArr, null, new File(workdir), null);
                 } else {
-                    resp = OsUtil.execCmd(true, waitForSeconds*1000, cmd, null, new File(workdir), null);
+                    resp = OsUtil.execCmd(true, waitForSeconds * 1000, cmd, null, new File(workdir), null);
                 }
                 return transfer.success(resp);
             } finally {
@@ -478,7 +478,7 @@ public class HostOpsController implements IOpsProvider {
             }
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 }

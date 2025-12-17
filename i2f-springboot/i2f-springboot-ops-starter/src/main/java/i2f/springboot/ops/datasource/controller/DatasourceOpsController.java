@@ -90,7 +90,7 @@ public class DatasourceOpsController implements IOpsProvider {
             return transfer.success(list);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -111,7 +111,7 @@ public class DatasourceOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -121,22 +121,22 @@ public class DatasourceOpsController implements IOpsProvider {
         try {
             DatasourceOperateDto req = transfer.recv(reqDto, DatasourceOperateDto.class);
             String sql = req.getSql();
-            int maxCount = req.getMaxCount()==null?-1:req.getMaxCount();
+            int maxCount = req.getMaxCount() == null ? -1 : req.getMaxCount();
             Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
             QueryResult resp = new QueryResult();
             resp.setColumns(new ArrayList<>());
             resp.setRows(new ArrayList<>(maxCount > 0 ? Math.min(maxCount, 500) : 0));
-            int connMapCount=connMap.size();
-            QueryColumn datasourceColumn=new QueryColumn();
-            if(connMapCount>1){
+            int connMapCount = connMap.size();
+            QueryColumn datasourceColumn = new QueryColumn();
+            if (connMapCount > 1) {
                 fillDatasourceColumn(datasourceColumn);
             }
             for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
                 try (Connection conn = entry.getValue()) {
                     QueryResult qr = JdbcResolver.query(conn, new BindSql(sql), maxCount);
-                    if(connMapCount>1){
-                        qr.getColumns().add(0,datasourceColumn);
-                        qr.getRows().forEach(e->e.put(datasourceColumn.getName(),entry.getKey()));
+                    if (connMapCount > 1) {
+                        qr.getColumns().add(0, datasourceColumn);
+                        qr.getRows().forEach(e -> e.put(datasourceColumn.getName(), entry.getKey()));
                     }
                     resp.setColumns(qr.getColumns());
                     resp.getRows().addAll(qr.getRows());
@@ -145,24 +145,24 @@ public class DatasourceOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
     @PostMapping("/export")
     @ResponseBody
-    public void export(@RequestBody OpsSecureDto reqDto,HttpServletResponse response) throws Exception {
+    public void export(@RequestBody OpsSecureDto reqDto, HttpServletResponse response) throws Exception {
         try {
             DatasourceOperateDto req = transfer.recv(reqDto, DatasourceOperateDto.class);
             String sql = req.getSql();
-            int maxCount = req.getMaxCount()==null?-1:req.getMaxCount();
+            int maxCount = req.getMaxCount() == null ? -1 : req.getMaxCount();
             Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
-            int connMapCount=connMap.size();
-            QueryColumn datasourceColumn=new QueryColumn();
-            if(connMapCount>1){
+            int connMapCount = connMap.size();
+            QueryColumn datasourceColumn = new QueryColumn();
+            if (connMapCount > 1) {
                 fillDatasourceColumn(datasourceColumn);
             }
-            File ret=File.createTempFile("export-"+(UUID.randomUUID().toString().replace("-","")),".csv");
+            File ret = File.createTempFile("export-" + (UUID.randomUUID().toString().replace("-", "")), ".csv");
             try {
                 try (OutputStream os = new FileOutputStream(ret)) {
                     for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
@@ -172,8 +172,8 @@ public class DatasourceOpsController implements IOpsProvider {
 
                                 ResultSetMetaData metaData = rs.getMetaData();
                                 List<QueryColumn> columns = JdbcResolver.parseResultSetColumns(metaData);
-                                if(connMapCount>1){
-                                    columns.add(0,datasourceColumn);
+                                if (connMapCount > 1) {
+                                    columns.add(0, datasourceColumn);
                                 }
 
                                 Iterator<Map<String, Object>> iterator = new Iterator<Map<String, Object>>() {
@@ -192,8 +192,8 @@ public class DatasourceOpsController implements IOpsProvider {
                                     public Map<String, Object> next() {
                                         try {
                                             Map<String, Object> map = JdbcResolver.convertResultSetRowAsMap(columns, rs);
-                                            if(connMapCount>1){
-                                                map.put(datasourceColumn.getName(),entry.getKey());
+                                            if (connMapCount > 1) {
+                                                map.put(datasourceColumn.getName(), entry.getKey());
                                             }
                                             currCount++;
                                             return map;
@@ -222,8 +222,8 @@ public class DatasourceOpsController implements IOpsProvider {
                     }
                 }
                 ServletFileUtil.responseFileAttachment(ret, response);
-            }finally {
-                if(ret!=null && ret.exists()){
+            } finally {
+                if (ret != null && ret.exists()) {
                     ret.delete();
                 }
             }
@@ -281,7 +281,7 @@ public class DatasourceOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -324,7 +324,7 @@ public class DatasourceOpsController implements IOpsProvider {
             return transfer.success(builder.toString());
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(builder.toString()+"\n"+e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(builder.toString(), e);
         }
     }
 

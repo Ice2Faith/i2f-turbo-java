@@ -15,7 +15,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class JacksonJsonArrayCollectionMapRowSetWriter<M extends Map<String,Object>> extends AbsJsonArrayMapRowSetWriter<M> {
+public class JacksonJsonArrayCollectionMapRowSetWriter<M extends Map<String, Object>> extends AbsJsonArrayMapRowSetWriter<M> {
     protected ObjectMapper mapper;
 
     public JacksonJsonArrayCollectionMapRowSetWriter(ObjectMapper mapper) {

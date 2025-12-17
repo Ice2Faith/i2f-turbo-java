@@ -86,7 +86,7 @@ public class AppOpsController implements IOpsProvider {
             return transfer.success(hostIp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -104,18 +104,18 @@ public class AppOpsController implements IOpsProvider {
             assertHostId(req);
             AppLoggingDto conf = req.getLogging();
 
-            LogLevel level=null;
+            LogLevel level = null;
             for (LogLevel item : LogLevel.values()) {
-                if(item.name().equalsIgnoreCase(conf.getLevel())){
-                    level=item;
+                if (item.name().equalsIgnoreCase(conf.getLevel())) {
+                    level = item;
                     break;
                 }
             }
             LoggingSystem bean = applicationContext.getBean(LoggingSystem.class);
-            bean.setLogLevel(conf.getLocation(),level);
+            bean.setLogLevel(conf.getLocation(), level);
             LoggerConfiguration cfg = bean.getLoggerConfiguration(conf.getLocation());
             AppLoggingDto resp = new AppLoggingDto();
-            if(cfg!=null) {
+            if (cfg != null) {
                 resp.setLocation(cfg.getName());
                 resp.setLevel(String.valueOf(cfg.getConfiguredLevel()));
                 resp.setEffectLevel(String.valueOf(cfg.getEffectiveLevel()));
@@ -123,7 +123,7 @@ public class AppOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -150,7 +150,7 @@ public class AppOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -171,7 +171,7 @@ public class AppOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -196,7 +196,7 @@ public class AppOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -222,7 +222,7 @@ public class AppOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -253,7 +253,7 @@ public class AppOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -279,7 +279,7 @@ public class AppOpsController implements IOpsProvider {
             return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 

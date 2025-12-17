@@ -55,7 +55,7 @@ public class XProc4jOpsController implements IOpsProvider {
     public List<OpsHomeMenuDto> getMenus() {
         xProc4jHelper.initHolder();
         Object bean = xProc4jHelper.getExecutorHolder().get();
-        if(bean!=null){
+        if (bean != null) {
             return Collections.singletonList(new OpsHomeMenuDto()
                     .title("XProc4J")
                     .subTitle("执行 XProc4J 脚本")
@@ -81,7 +81,7 @@ public class XProc4jOpsController implements IOpsProvider {
             return transfer.success(hostIp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -94,9 +94,9 @@ public class XProc4jOpsController implements IOpsProvider {
     @PostMapping({"/datasources"})
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> datasources(@RequestBody OpsSecureDto reqDto,
-                                               HttpServletRequest request) throws Exception {
+                                                     HttpServletRequest request) throws Exception {
         try {
-            XProc4jOperateDto req = this.transfer.recv(reqDto, XProc4jOperateDto.class);
+            XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
                     return hostIdHelper.proxyHostId(req, req.getHostId(), request);
@@ -104,10 +104,10 @@ public class XProc4jOpsController implements IOpsProvider {
             }
             assertHostId(req);
             List<String> list = xProc4jHelper.getDatasources();
-            return this.transfer.success(list);
+            return transfer.success(list);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return this.transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -116,7 +116,7 @@ public class XProc4jOpsController implements IOpsProvider {
     public OpsSecureReturn<OpsSecureDto> metas(@RequestBody OpsSecureDto reqDto,
                                                HttpServletRequest request) throws Exception {
         try {
-            XProc4jOperateDto req = this.transfer.recv(reqDto, XProc4jOperateDto.class);
+            XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
                     return hostIdHelper.proxyHostId(req, req.getHostId(), request);
@@ -124,14 +124,14 @@ public class XProc4jOpsController implements IOpsProvider {
             }
             assertHostId(req);
             Map<String, Map<String, Object>> metasMap = xProc4jHelper.getMetasMap();
-            List<Map<String,Object>> list=new ArrayList<>();
+            List<Map<String, Object>> list = new ArrayList<>();
             for (String key : metasMap.keySet()) {
                 list.add(metasMap.get(key));
             }
-            return this.transfer.success(list);
+            return transfer.success(list);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return this.transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -140,7 +140,7 @@ public class XProc4jOpsController implements IOpsProvider {
     public OpsSecureReturn<OpsSecureDto> call(@RequestBody OpsSecureDto reqDto,
                                               HttpServletRequest request) throws Exception {
         try {
-            XProc4jOperateDto req = this.transfer.recv(reqDto, XProc4jOperateDto.class);
+            XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
                     return hostIdHelper.proxyHostId(req, req.getHostId(), request);
@@ -155,19 +155,19 @@ public class XProc4jOpsController implements IOpsProvider {
             if (maxAwaitSeconds == null) {
                 maxAwaitSeconds = -1L;
             }
-            AtomicReference<Object> refRet=new AtomicReference<>();
-            AtomicReference<Throwable> refEx=new AtomicReference<>();
-            CountDownLatch latch=new CountDownLatch(1);
-            Runnable task=()->{
+            AtomicReference<Object> refRet = new AtomicReference<>();
+            AtomicReference<Throwable> refEx = new AtomicReference<>();
+            CountDownLatch latch = new CountDownLatch(1);
+            Runnable task = () -> {
                 try {
                     String procedureId = req.getProcedureId();
                     Map<String, Object> params = req.getParams();
                     Map<String, Object> map = xProc4jHelper.call(procedureId, params);
                     xProc4jHelper.trimContextParams(map);
                     refRet.set(map);
-                }catch (Throwable e){
+                } catch (Throwable e) {
                     refEx.set(e);
-                }finally {
+                } finally {
                     latch.countDown();
                 }
             };
@@ -183,7 +183,7 @@ public class XProc4jOpsController implements IOpsProvider {
             if (throwable != null) {
                 throw throwable;
             }
-            Object ret=refRet.get();
+            Object ret = refRet.get();
             String resp = null;
             try {
                 if (ret instanceof CharSequence
@@ -200,10 +200,10 @@ public class XProc4jOpsController implements IOpsProvider {
                     resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }
-            return this.transfer.success(resp);
+            return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return this.transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 
@@ -212,7 +212,7 @@ public class XProc4jOpsController implements IOpsProvider {
     public OpsSecureReturn<OpsSecureDto> evalScript(@RequestBody OpsSecureDto reqDto,
                                                     HttpServletRequest request) throws Exception {
         try {
-            XProc4jOperateDto req = this.transfer.recv(reqDto, XProc4jOperateDto.class);
+            XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
                     return hostIdHelper.proxyHostId(req, req.getHostId(), request);
@@ -227,19 +227,19 @@ public class XProc4jOpsController implements IOpsProvider {
             if (maxAwaitSeconds == null) {
                 maxAwaitSeconds = -1L;
             }
-            AtomicReference<Object> refRet=new AtomicReference<>();
-            AtomicReference<Throwable> refEx=new AtomicReference<>();
-            CountDownLatch latch=new CountDownLatch(1);
-            Runnable task=()->{
+            AtomicReference<Object> refRet = new AtomicReference<>();
+            AtomicReference<Throwable> refEx = new AtomicReference<>();
+            CountDownLatch latch = new CountDownLatch(1);
+            Runnable task = () -> {
                 try {
                     String lang = req.getLang();
                     String script = req.getScript();
                     Map<String, Object> params = req.getParams();
-                    Object obj = xProc4jHelper.evalScript(lang,script, params);
+                    Object obj = xProc4jHelper.evalScript(lang, script, params);
                     refRet.set(obj);
-                }catch (Throwable e){
+                } catch (Throwable e) {
                     refEx.set(e);
-                }finally {
+                } finally {
                     latch.countDown();
                 }
             };
@@ -255,8 +255,8 @@ public class XProc4jOpsController implements IOpsProvider {
             if (throwable != null) {
                 throw throwable;
             }
-            Object ret=refRet.get();
-            if(ret instanceof Map) {
+            Object ret = refRet.get();
+            if (ret instanceof Map) {
                 Map<?, ?> map = (Map<?, ?>) ret;
                 xProc4jHelper.trimContextParams(map);
             }
@@ -269,17 +269,17 @@ public class XProc4jOpsController implements IOpsProvider {
                 } else {
                     resp = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ret);
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 try {
                     resp = String.valueOf(ret);
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }
-            return this.transfer.success(resp);
+            return transfer.success(resp);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return this.transfer.error(e.getClass().getSimpleName() + ":" + e.getMessage());
+            return transfer.error(e);
         }
     }
 }

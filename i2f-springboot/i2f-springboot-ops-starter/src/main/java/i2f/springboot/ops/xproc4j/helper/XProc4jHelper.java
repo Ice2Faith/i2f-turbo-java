@@ -31,41 +31,41 @@ public class XProc4jHelper {
     @Autowired
     private ApplicationContext applicationContext;
 
-    public static final String EXECUTOR_CLASS_NAME="JdbcProcedureExecutor";
+    public static final String EXECUTOR_CLASS_NAME = "JdbcProcedureExecutor";
     public static final String METHOD_GET_META_MAP = "getMetaMap";
     public static final String METHOD_CALL = "call";
     public static final String METHOD_EVAL_SCRIPT = "evalScript";
-    public static final String METHOD_CREATE_PARAMS="createParams";
+    public static final String METHOD_CREATE_PARAMS = "createParams";
 
     public static String DATASOURCES = "datasources";
 
-    private final AtomicBoolean hasInitHolder=new AtomicBoolean(false);
-    private final AtomicReference<Object> executorHolder=new AtomicReference<>();
-    private final AtomicReference<Method> metasMapMethodHolder=new AtomicReference<>();
-    private final AtomicReference<Method> callByIdMethodHolder =new AtomicReference<>();
-    private final AtomicReference<Method> evalScriptMethodHolder=new AtomicReference<>();
-    private final AtomicReference<Method> createParamsMethodHolder=new AtomicReference<>();
+    private final AtomicBoolean hasInitHolder = new AtomicBoolean(false);
+    private final AtomicReference<Object> executorHolder = new AtomicReference<>();
+    private final AtomicReference<Method> metasMapMethodHolder = new AtomicReference<>();
+    private final AtomicReference<Method> callByIdMethodHolder = new AtomicReference<>();
+    private final AtomicReference<Method> evalScriptMethodHolder = new AtomicReference<>();
+    private final AtomicReference<Method> createParamsMethodHolder = new AtomicReference<>();
 
-    protected boolean isExecutorClass(Class<?> clazz){
+    protected boolean isExecutorClass(Class<?> clazz) {
         String simpleName = clazz.getSimpleName();
-        if(!simpleName.contains(EXECUTOR_CLASS_NAME)){
+        if (!simpleName.contains(EXECUTOR_CLASS_NAME)) {
             return false;
         }
-        if(simpleName.equals(EXECUTOR_CLASS_NAME)){
+        if (simpleName.equals(EXECUTOR_CLASS_NAME)) {
             return true;
         }
         Class<?> superclass = clazz.getSuperclass();
-        if(superclass!=null){
+        if (superclass != null) {
             boolean ok = isExecutorClass(superclass);
-            if(ok){
+            if (ok) {
                 return true;
             }
         }
         Class<?>[] interfaces = clazz.getInterfaces();
-        if(interfaces!=null){
+        if (interfaces != null) {
             for (Class<?> item : interfaces) {
                 boolean ok = isExecutorClass(item);
-                if(ok){
+                if (ok) {
                     return true;
                 }
             }
@@ -73,8 +73,8 @@ public class XProc4jHelper {
         return false;
     }
 
-    public void initHolder(){
-        if(hasInitHolder.getAndSet(true)){
+    public void initHolder() {
+        if (hasInitHolder.getAndSet(true)) {
             return;
         }
         try {
@@ -82,7 +82,7 @@ public class XProc4jHelper {
             for (String name : names) {
                 try {
                     Object bean = applicationContext.getBean(name);
-                    if(isExecutorClass(bean.getClass())){
+                    if (isExecutorClass(bean.getClass())) {
                         executorHolder.set(bean);
                         break;
                     }
@@ -128,61 +128,61 @@ public class XProc4jHelper {
         }
     }
 
-    public Map<String,Map<String,Object>> getMetasMap() throws Exception {
+    public Map<String, Map<String, Object>> getMetasMap() throws Exception {
         initHolder();
         Object executor = executorHolder.get();
         Method method = metasMapMethodHolder.get();
-        if(method==null){
-            throw new OpsException("not found method:"+METHOD_GET_META_MAP);
+        if (method == null) {
+            throw new OpsException("not found method:" + METHOD_GET_META_MAP);
         }
-        Map<String,Map<String,Object>> ret=new TreeMap<>();
+        Map<String, Map<String, Object>> ret = new TreeMap<>();
         Map map = (Map) method.invoke(executor);
         for (Object rawKey : map.keySet()) {
-            String key=String.valueOf(rawKey);
+            String key = String.valueOf(rawKey);
             Object rawValue = map.get(rawKey);
             LinkedHashMap<String, Object> value = ReflectResolver.bean2map(rawValue, new LinkedHashMap<>());
-            value.put("target",null);
-            ret.put(key,value);
+            value.put("target", null);
+            ret.put(key, value);
         }
         return ret;
     }
 
-    public Map<String, Object> call(String procedureId, Map<String,Object> params) throws Exception {
-        if(params==null){
-            params=new HashMap<>();
+    public Map<String, Object> call(String procedureId, Map<String, Object> params) throws Exception {
+        if (params == null) {
+            params = new HashMap<>();
         }
         initHolder();
         Object executor = executorHolder.get();
         Method method = callByIdMethodHolder.get();
-        if(method==null){
-            throw new OpsException("not found method:"+ METHOD_CALL);
+        if (method == null) {
+            throw new OpsException("not found method:" + METHOD_CALL);
         }
-        Map<String, Object> ret = (Map<String, Object>)method.invoke(executor, procedureId, params);
+        Map<String, Object> ret = (Map<String, Object>) method.invoke(executor, procedureId, params);
         return ret;
     }
 
     public Object evalScript(String lang, String script, Map<String, Object> params) throws Exception {
-        if(params==null){
-            params=new HashMap<>();
+        if (params == null) {
+            params = new HashMap<>();
         }
         initHolder();
         Object executor = executorHolder.get();
         Method method = evalScriptMethodHolder.get();
-        if(method==null){
-            throw new OpsException("not found method:"+METHOD_EVAL_SCRIPT);
+        if (method == null) {
+            throw new OpsException("not found method:" + METHOD_EVAL_SCRIPT);
         }
-        Object ret =method.invoke(executor, lang,script, params);
+        Object ret = method.invoke(executor, lang, script, params);
         return ret;
     }
 
-    public Map<String,Object> createParams() throws Exception {
+    public Map<String, Object> createParams() throws Exception {
         initHolder();
         Object executor = executorHolder.get();
         Method method = createParamsMethodHolder.get();
-        if(method==null){
-            throw new OpsException("not found method:"+METHOD_CREATE_PARAMS);
+        if (method == null) {
+            throw new OpsException("not found method:" + METHOD_CREATE_PARAMS);
         }
-        Map<String,Object> ret =(Map<String, Object>) method.invoke(executor);
+        Map<String, Object> ret = (Map<String, Object>) method.invoke(executor);
         return ret;
     }
 
@@ -192,11 +192,11 @@ public class XProc4jHelper {
         return new ArrayList<>(datasourceMap.keySet());
     }
 
-    public Map trimContextParams(Map params){
-        if(params==null){
+    public Map trimContextParams(Map params) {
+        if (params == null) {
             return params;
         }
-        String[] trimKeys={
+        String[] trimKeys = {
                 "stack_lock",
                 "context",
                 "env",
@@ -215,32 +215,32 @@ public class XProc4jHelper {
         for (String key : trimKeys) {
             params.remove(key);
         }
-        if(!params.isEmpty()){
+        if (!params.isEmpty()) {
             trimUnSerializeValues(params);
         }
         Object global = params.get("global");
-        if(global!=null && global instanceof Map){
+        if (global != null && global instanceof Map) {
             Map<?, ?> map = (Map<?, ?>) global;
             trimUnSerializeValues(map);
         }
         return params;
     }
 
-    public void trimUnSerializeValues(Map map){
+    public void trimUnSerializeValues(Map map) {
         ArrayList<?> keys = new ArrayList<>(map.keySet());
         for (Object key : keys) {
             Object value = map.get(key);
-            if(value==null){
+            if (value == null) {
                 continue;
             }
             String name = value.getClass().getName();
-            if(name.contains("$$EnhancerBySpring")){
+            if (name.contains("$$EnhancerBySpring")) {
                 map.remove(key);
             }
-            if(value instanceof InputStream
-            || value instanceof OutputStream
-            || value instanceof Reader
-            || value instanceof Writer){
+            if (value instanceof InputStream
+                    || value instanceof OutputStream
+                    || value instanceof Reader
+                    || value instanceof Writer) {
                 map.remove(key);
             }
 

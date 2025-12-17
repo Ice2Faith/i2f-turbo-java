@@ -15,7 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class XProc4jOperateDto extends OpsHostIdDto {
     protected String procedureId;
-    protected Map<String,Object> params;
+    protected Map<String, Object> params;
 
     protected String lang;
     protected String script;

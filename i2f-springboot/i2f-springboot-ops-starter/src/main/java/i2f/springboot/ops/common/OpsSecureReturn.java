@@ -3,6 +3,9 @@ package i2f.springboot.ops.common;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 /**
  * @author Ice2Faith
  * @date 2025/11/2 22:02
@@ -29,5 +32,23 @@ public class OpsSecureReturn<T> {
 
     public static <T> OpsSecureReturn<T> error(String msg) {
         return new OpsSecureReturn<T>(ERROR, msg, null);
+    }
+
+    public static <T> OpsSecureReturn<T> error(String msg, Throwable e) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(bos);
+        e.printStackTrace(ps);
+        ps.flush();
+        String errmsg = new String(bos.toByteArray());
+        return error((msg == null ? "" : (msg + "\n")) + errmsg);
+    }
+
+    public static <T> OpsSecureReturn<T> error(Throwable e) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(bos);
+        e.printStackTrace(ps);
+        ps.flush();
+        String errmsg = new String(bos.toByteArray());
+        return error(errmsg);
     }
 }

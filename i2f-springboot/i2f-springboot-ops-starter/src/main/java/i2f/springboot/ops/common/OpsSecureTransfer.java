@@ -37,6 +37,14 @@ public class OpsSecureTransfer {
         return OpsSecureReturn.error(msg);
     }
 
+    public OpsSecureReturn<OpsSecureDto> error(String msg, Throwable e) throws Exception {
+        return OpsSecureReturn.error(msg, e);
+    }
+
+    public OpsSecureReturn<OpsSecureDto> error(Throwable e) throws Exception {
+        return OpsSecureReturn.error(e);
+    }
+
     public OpsSecureDto send(Object obj) throws Exception {
         OpsSecureDto ret = new OpsSecureDto();
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);

@@ -52,8 +52,8 @@ public class OpsHomeController {
 
                 }
             }
-            resp.sort((v1,v2)->{
-                return String.CASE_INSENSITIVE_ORDER.compare(v1.getTitle(),v2.getTitle());
+            resp.sort((v1, v2) -> {
+                return String.CASE_INSENSITIVE_ORDER.compare(v1.getTitle(), v2.getTitle());
             });
             return OpsSecureReturn.success(resp);
         } catch (Exception e) {
