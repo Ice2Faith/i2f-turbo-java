@@ -3,6 +3,8 @@ i2f.springboot.ops.common.OpsSecureTransfer
 i2f.springboot.ops.common.OpsSecureHelper
 i2f.springboot.ops.common.OpsSecureAutoConfiguration
 i2f.springboot.ops.common.HostIdHelper
+i2f.springboot.ops.datasource.configuration.DatasourceAutoConfiguration
+i2f.springboot.ops.datasource.provider.impl.StaticDatasourceCollector
 i2f.springboot.ops.datasource.provider.impl.BaomidouDynamicDatasourceCollector
 i2f.springboot.ops.datasource.provider.impl.DefaultDatasourceCollector
 i2f.springboot.ops.datasource.provider.impl.DefaultDatasourceProvider

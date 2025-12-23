@@ -1033,6 +1033,15 @@
                 }
                 throw e;
             },
+            messageError(msg,limit){
+                window._lastError=msg;
+                if(limit && limit>=0) {
+                    if (msg && msg.length > limit) {
+                        msg = msg.substring(0, limit) + '...'
+                    }
+                }
+                this.$message.error(msg)
+            },
             onCertChange() {
                 this.doRefreshHostId();
             },
@@ -1072,15 +1081,15 @@
                             }
                             this.metas.hostIdList=list;
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.hostIdLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.hostIdLoading = false;
                 }
             },
@@ -1144,18 +1153,18 @@
                         } else {
                             this.metas.resultText = res.data.msg;
                             this.metas.resultLang='text';
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                         setTimeout(()=>{
                             this.initResultEditor();
                         },200)
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.resultLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
                 }
             },
@@ -1200,15 +1209,15 @@
                             // console.log(resp)
                             this.drawer.systemProperties.items = resp || [];
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.drawer.systemProperties.refreshLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.drawer.systemProperties.refreshLoading = false;
                 }
             },
@@ -1234,15 +1243,15 @@
                             // console.log(resp)
                             this.drawer.systemEnv.items = resp || [];
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.drawer.systemEnv.refreshLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.drawer.systemEnv.refreshLoading = false;
                 }
             },
@@ -1268,15 +1277,15 @@
                             // console.log(resp)
                             this.drawer.inputArguments.items = resp || [];
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.drawer.inputArguments.refreshLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.drawer.inputArguments.refreshLoading = false;
                 }
             },
@@ -1302,15 +1311,15 @@
                             // console.log(resp)
                             this.drawer.beans.items = resp || [];
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.drawer.beans.refreshLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.drawer.beans.refreshLoading = false;
                 }
             },
@@ -1336,15 +1345,15 @@
                             // console.log(resp)
                             this.drawer.serviceInstances.items = resp || [];
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.drawer.serviceInstances.refreshLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.drawer.serviceInstances.refreshLoading = false;
                 }
             },
@@ -1370,15 +1379,15 @@
                             // console.log(resp)
                             this.drawer.lockedThreads.items = resp || [];
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.drawer.lockedThreads.refreshLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.drawer.lockedThreads.refreshLoading = false;
                 }
             },

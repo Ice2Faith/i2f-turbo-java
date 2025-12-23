@@ -375,6 +375,15 @@
         }
         throw e;
       },
+      messageError(msg,limit){
+        window._lastError=msg;
+        if(limit && limit>=0) {
+          if (msg && msg.length > limit) {
+            msg = msg.substring(0, limit) + '...'
+          }
+        }
+        this.$message.error(msg)
+      },
       onCertChange() {
 
       },
@@ -479,15 +488,15 @@
               let tree=this.rebuildKeyTree(resp);
               this.metas.keyTree=tree;
             } else {
-              this.$message.error(res.data.msg)
+              this.messageError(res.data.msg,300)
             }
           }).catch(err => {
-            this.$message.error(err.errorMessage || err.message || '操作失败')
+            this.messageError(err.errorMessage || err.message || '操作失败',300)
           }).finally(() => {
             this.metas.keyListLoading = false;
           })
         } catch (err) {
-          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.messageError(err.errorMessage || err.message || '操作失败',300)
           this.metas.keyListLoading = false;
         }
       },
@@ -611,15 +620,15 @@
               //console.log(resp)
               this.$message.success('操作成功')
             } else {
-              this.$message.error(res.data.msg)
+              this.messageError(res.data.msg,300)
             }
           }).catch(err => {
-            this.$message.error(err.errorMessage || err.message || '操作失败')
+            this.messageError(err.errorMessage || err.message || '操作失败',300)
           }).finally(() => {
             this.metas.deleteLoading = false;
           })
         } catch (err) {
-          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.messageError(err.errorMessage || err.message || '操作失败',300)
           this.metas.deleteLoading = false;
         }
       },
@@ -650,15 +659,15 @@
               this.form.ttl=resp.ttl || -1;
               this.form.value=resp.value;
             } else {
-              this.$message.error(res.data.msg)
+              this.messageError(res.data.msg,300)
             }
           }).catch(err => {
-            this.$message.error(err.errorMessage || err.message || '操作失败')
+            this.messageError(err.errorMessage || err.message || '操作失败',300)
           }).finally(() => {
             this.metas.getLoading = false;
           })
         } catch (err) {
-          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.messageError(err.errorMessage || err.message || '操作失败',300)
           this.metas.getLoading = false;
         }
       },
@@ -698,15 +707,15 @@
               //console.log(resp)
               this.$message.success('操作成功')
             } else {
-              this.$message.error(res.data.msg)
+              this.messageError(res.data.msg,300)
             }
           }).catch(err => {
-            this.$message.error(err.errorMessage || err.message || '操作失败')
+            this.messageError(err.errorMessage || err.message || '操作失败',300)
           }).finally(() => {
             this.metas.setLoading = false;
           })
         } catch (err) {
-          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.messageError(err.errorMessage || err.message || '操作失败',300)
           this.metas.setLoading = false;
         }
       },
@@ -745,15 +754,15 @@
               //console.log(resp)
               this.$message.success('操作成功')
             } else {
-              this.$message.error(res.data.msg)
+              this.messageError(res.data.msg,300)
             }
           }).catch(err => {
-            this.$message.error(err.errorMessage || err.message || '操作失败')
+            this.messageError(err.errorMessage || err.message || '操作失败',300)
           }).finally(() => {
             this.metas.ttlLoading = false;
           })
         } catch (err) {
-          this.$message.error(err.errorMessage || err.message || '操作失败')
+          this.messageError(err.errorMessage || err.message || '操作失败',300)
           this.metas.ttlLoading = false;
         }
       }

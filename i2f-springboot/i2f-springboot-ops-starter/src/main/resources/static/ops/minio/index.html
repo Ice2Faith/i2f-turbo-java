@@ -504,6 +504,15 @@
                 }
                 throw e;
             },
+            messageError(msg,limit){
+                window._lastError=msg;
+                if(limit && limit>=0) {
+                    if (msg && msg.length > limit) {
+                        msg = msg.substring(0, limit) + '...'
+                    }
+                }
+                this.$message.error(msg)
+            },
             onCertChange() {
                 this.doRefreshWorkdir();
             },
@@ -529,15 +538,15 @@
                             //console.log(resp)
                             this.form.workdir = resp.workdir;
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.workdirLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.workdirLoading = false;
                 }
             },
@@ -559,15 +568,15 @@
                             // console.log(resp)
                             this.metas.fileList.files = resp;
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.fileList.filesLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.fileList.filesLoading = false;
                 }
             },
@@ -660,12 +669,12 @@
                         dom.parentNode.removeChild(dom)
                         window.URL.revokeObjectURL(downUrl)
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.resultLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
                 }
             },
@@ -731,12 +740,12 @@
                         };
                         reader.readAsText(blob, 'utf-8');
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.resultLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
                 }
             },
@@ -774,15 +783,15 @@
                             this.$message.success('操作成功')
                             this.onRefreshFiles()
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.resultLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
                 }
             },
@@ -863,20 +872,20 @@
                                     this.dialog.fileEditor.show=false;
                                     this.onRefreshFiles()
                                 } else {
-                                    this.$message.error(res.data.msg)
+                                    this.messageError(res.data.msg,300)
                                 }
                             }).catch(err => {
-                                this.$message.error(err.errorMessage || err.message || '操作失败')
+                                this.messageError(err.errorMessage || err.message || '操作失败',300)
                             }).finally(() => {
                                 this.dialog.fileEditor.saveLoading = false;
                             })
                         }).catch(err => {
-                            this.$message.error(err.errorMessage || err.message || '操作失败')
+                            this.messageError(err.errorMessage || err.message || '操作失败',300)
                         }).finally(() => {
                             this.dialog.fileEditor.saveLoading = false;
                         })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.dialog.fileEditor.saveLoading = false;
                 }
 
@@ -906,15 +915,15 @@
                             this.dialog.createDirectory.show=false;
                             this.onRefreshFiles()
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.dialog.createDirectory.saveLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.dialog.createDirectory.saveLoading = false;
                 }
             },
@@ -983,20 +992,20 @@
                                     this.$message.success('操作成功')
                                     this.onRefreshFiles()
                                 } else {
-                                    this.$message.error(res.data.msg)
+                                    this.messageError(res.data.msg,300)
                                 }
                             }).catch(err => {
-                                this.$message.error(err.errorMessage || err.message || '操作失败')
+                                this.messageError(err.errorMessage || err.message || '操作失败',300)
                             }).finally(() => {
                                 this.metas.uploadLoading = false;
                             })
                         }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.uploadLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.uploadLoading = false;
                 }
             }

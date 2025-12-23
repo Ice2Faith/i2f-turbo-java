@@ -163,7 +163,7 @@
             // console.log(resp)
             this.menus=[...resp,...this.additionalMenus]
           } else {
-            this.$message.error(res.data.msg)
+            this.messageError(res.data.msg,300)
           }
         }).catch(err => {
           this.$message.error(err.errorMessage || err.message || '菜单获取失败')

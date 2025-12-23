@@ -625,6 +625,15 @@
                 }
                 throw e;
             },
+            messageError(msg,limit){
+                window._lastError=msg;
+                if(limit && limit>=0) {
+                    if (msg && msg.length > limit) {
+                        msg = msg.substring(0, limit) + '...'
+                    }
+                }
+                this.$message.error(msg)
+            },
             onCertChange() {
                 this.doRefreshJobs()
                 this.doRefreshHostId();
@@ -665,15 +674,15 @@
                             }
                             this.metas.hostIdList=list;
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.hostIdLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.hostIdLoading = false;
                 }
             },
@@ -695,15 +704,15 @@
                             //console.log(resp)
                             this.metas.jobs = resp;
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.jobsLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.jobsLoading = false;
                 }
             },
@@ -747,18 +756,18 @@
                         } else {
                             this.metas.resultText = res.data.msg;
                             this.metas.resultLang='text';
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                         setTimeout(()=>{
                             this.initResultEditor();
                         },200)
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.resultLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
                 }
             },

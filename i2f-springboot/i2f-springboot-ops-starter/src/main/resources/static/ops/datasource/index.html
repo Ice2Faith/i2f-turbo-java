@@ -1343,6 +1343,15 @@
                 }
                 throw e;
             },
+            messageError(msg,limit){
+                window._lastError=msg;
+                if(limit && limit>=0) {
+                    if (msg && msg.length > limit) {
+                        msg = msg.substring(0, limit) + '...'
+                    }
+                }
+                this.$message.error(msg)
+            },
             onCertChange() {
                 this.doRefreshDatasources()
                 this.doRefreshDrivers()
@@ -1366,15 +1375,15 @@
                             this.storage.defaultDatasource = resp.defaultName;
                             this.storage.datasourceList = resp.list;
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.datasourceListLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.datasourceListLoading = false;
                 }
             },
@@ -1398,7 +1407,7 @@
                             }
                             this.storage.driverList = resp;
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
                         this.$message.error(err.errorMessage || '操作失败')
@@ -1406,7 +1415,7 @@
                         this.metas.driverListLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.driverListLoading = false;
                 }
             },
@@ -1532,18 +1541,18 @@
                             this.metas.resultText = res.data.msg;
                             this.metas.resultType = 'text';
                             this.metas.resultLang='text';
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                         setTimeout(()=>{
                             this.initResultEditor();
                         },200)
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.resultLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
                 }
             },
@@ -1630,12 +1639,12 @@
                         dom.parentNode.removeChild(dom)
                         window.URL.revokeObjectURL(downUrl)
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.resultLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
                 }
             },
@@ -1689,18 +1698,18 @@
                             this.metas.resultText = res.data.msg;
                             this.metas.resultType = 'text';
                             this.metas.resultLang='text';
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                         setTimeout(()=>{
                             this.initResultEditor();
                         },200)
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.resultLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
                 }
             },
@@ -1729,15 +1738,15 @@
                             this.storage.defaultDatabaseMap[storageKey] = resp.defaultName;
                             this.storage.databaseMap[storageKey] = resp.list;
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.drawer.metadata.databasesLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.drawer.metadata.databasesLoading = false;
                 }
             },
@@ -1770,15 +1779,15 @@
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database;
                             this.storage.tablesMap[storageKey] = resp;
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.drawer.metadata.tablesLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.drawer.metadata.tablesLoading = false;
                 }
             },
@@ -1871,15 +1880,15 @@
                             this.storage.tableInfoMap[storageKey] = resp;
                             this.dialog.tableInfo.metaVueKey=new Date().getTime();
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.dialog.tableInfo.metaLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.dialog.tableInfo.metaLoading = false;
                 }
             },
@@ -1909,15 +1918,15 @@
                                 this.initTableInfoTableDdlEditor()
                             },200)
                         } else {
-                            this.$message.error(res.data.msg)
+                            this.messageError(res.data.msg,300)
                         }
                     }).catch(err => {
-                        this.$message.error(err.errorMessage || err.message || '操作失败')
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.dialog.tableInfo.tableDdlLoading = false;
                     })
                 } catch (err) {
-                    this.$message.error(err.errorMessage || err.message || '操作失败')
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.dialog.tableInfo.tableDdlLoading = false;
                 }
             },
