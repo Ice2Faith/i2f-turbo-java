@@ -61,6 +61,7 @@ import i2f.uid.SnowflakeLongUid;
 import lombok.Data;
 
 import javax.sql.DataSource;
+import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -791,8 +792,21 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return new HashMap<>();
     }
 
+    protected static final ThreadLocal<WeakReference<Map<String,Object>>> LOCAL_PREPARE_PARAM=new ThreadLocal<>();
+
     @Override
     public Map<String, Object> prepareParams(Map<String, Object> params) {
+        WeakReference<Map<String, Object>> ref = LOCAL_PREPARE_PARAM.get();
+        if(ref!=null){
+            // 判断是否已经prepared，如果已经prepared,则不需要再进行prepared浪费性能
+            Map<String, Object> refMap = ref.get();
+            if(refMap!=null){
+                if(refMap==params){
+                    // 这里必须使用 == 判断是否是同一个对象，不能使用equals
+                    return params;
+                }
+            }
+        }
         Map<String, Object> execParams = null;
         for (String key : ParamsConsts.KEEP_NAMES) {
             Object val = params.get(key);
@@ -847,6 +861,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         params.put(ParamsConsts.EXECUTOR, this);
 
         reportPreparedParamsEvent(params);
+
+        LOCAL_PREPARE_PARAM.set(new WeakReference<>(params));
         return params;
     }
 
