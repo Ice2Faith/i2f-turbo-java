@@ -7,6 +7,8 @@ import i2f.reflect.vistor.Visitor;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 
 
 /**
@@ -132,6 +134,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class VisitorParser {
     protected static final LruMap<String, List<String>> CACHE_SPLIT_TOKENS = new LruMap<>(4096);
     protected static final LruMap<String, List<String>> CACHE_SPLIT_PARAMETERS = new LruMap<>(4096);
+    protected static final LruMap<String, Pattern> CACHE_PATTERN = new LruMap<>(300);
+
+    public static Pattern getPattern(String regex) {
+        return CACHE_PATTERN.computeIfAbsent(regex, k -> Pattern.compile(k));
+    }
+
+    public static boolean matches(String str, String regex) {
+        return getPattern(regex).matcher(str).matches();
+    }
 
     public static Visitor visit(String expression, Object rootObj) {
         return visit(expression, rootObj, rootObj, rootObj);
@@ -162,37 +173,92 @@ public class VisitorParser {
         List<String> tokens = splitTokens(expression);
 
         for (String token : tokens) {
-            if ("$root".equals(token) || "__root".equals(token)) {
-                ret = new ConstVisitor(rootObj);
-            } else if ("$param".equals(token) || "__param".equals(token)) {
-                ret = new ConstVisitor(paramObj);
-            } else if ("$node".equals(token) || "__node".equals(token)) {
-                ret = new ConstVisitor(nodeObj);
-            } else if ("$true".equals(token)) {
-                ret = new ConstVisitor(true);
-            } else if ("$false".equals(token)) {
-                ret = new ConstVisitor(false);
-            } else if (token.matches("\\$\\d+\\.\\d+")) {
-                ret = new ConstVisitor(Double.parseDouble(token.substring(1)));
-            } else if (token.matches("\\$f\\d+\\.\\d+")) {
-                ret = new ConstVisitor(Float.parseFloat(token.substring(2)));
-            } else if (token.matches("\\$[1-9]([0-9]+)?")) {
-                ret = new ConstVisitor(Integer.parseInt(token.substring(1), 10));
-            } else if (token.matches("\\$(0x|0X)[a-fA-F0-9]+")) {
-                ret = new ConstVisitor(Integer.parseInt(token.substring(3), 16));
-            } else if (token.matches("\\$0([0-9]+)?")) {
-                ret = new ConstVisitor(Integer.parseInt(token.substring(2), 8));
-            } else if (token.matches("\\$(0b|0B)[0-1]+")) {
-                ret = new ConstVisitor(Integer.parseInt(token.substring(3), 2));
-            } else if (token.matches("\\$l[1-9]([0-9]+)?")) {
-                ret = new ConstVisitor(Long.parseLong(token.substring(2), 10));
-            } else if (token.matches("\\$l(0x|0X)[a-fA-F0-9]+")) {
-                ret = new ConstVisitor(Long.parseLong(token.substring(4), 16));
-            } else if (token.matches("\\$l0([0-9]+)?")) {
-                ret = new ConstVisitor(Long.parseLong(token.substring(3), 8));
-            } else if (token.matches("\\$l(0b|0B)[0-1]+")) {
-                ret = new ConstVisitor(Long.parseLong(token.substring(4), 2));
-            } else if (token.startsWith("#")) {
+            // 优先处理Map存在键的情况，因为visitor的目的主要就是处理多层或者直接使用Map的情况
+            if (ret != null) {
+                Object currRet = ret.get();
+                if (currRet instanceof Map) {
+                    Map<?, ?> map = (Map<?, ?>) currRet;
+                    Function<String,Object> keyConvertor=foundMapKeyConvertor(map);
+                    Object realKey=token;
+                    if(keyConvertor!=null){
+                        try {
+                            realKey=keyConvertor.apply(token);
+                        } catch (Exception e) {
+
+                        }
+                    }
+                    if(map.containsKey(realKey)){
+                        ret=new MapVisitor(map,realKey);
+                        continue;
+                    }
+                }
+            }
+            // 处理内建常量
+            if (token.startsWith("__")) {
+                boolean resolved = true;
+                if ("__root".equals(token)) {
+                    ret = new ConstVisitor(rootObj);
+                } else if ("__param".equals(token)) {
+                    ret = new ConstVisitor(paramObj);
+                } else if ("__node".equals(token)) {
+                    ret = new ConstVisitor(nodeObj);
+                } else {
+                    resolved = false;
+                }
+                if (resolved) {
+                    continue;
+                }
+            }
+            if (token.startsWith("$")) {
+                boolean resolved = true;
+                if ("$root".equals(token) || "__root".equals(token)) {
+                    ret = new ConstVisitor(rootObj);
+                } else if ("$param".equals(token) || "__param".equals(token)) {
+                    ret = new ConstVisitor(paramObj);
+                } else if ("$node".equals(token) || "__node".equals(token)) {
+                    ret = new ConstVisitor(nodeObj);
+                } else if ("$true".equals(token)) {
+                    ret = new ConstVisitor(true);
+                } else if ("$false".equals(token)) {
+                    ret = new ConstVisitor(false);
+                } else if ("$null".equals(token)) {
+                    ret = new ConstVisitor(null);
+                } else if ("$length".equals(token) && ret != null && ReflectResolver.isArray(ret.get())) {
+                    ret = new ConstVisitor(Array.getLength(ret.get()));
+                } else if ("$length".equals(token) && ret != null && (ret.get() instanceof CharSequence)) {
+                    ret = new ConstVisitor(((CharSequence) (ret.get())).length());
+                } else if ("$size".equals(token) && ret != null && (ret.get() instanceof Map)) {
+                    ret = new ConstVisitor(((Map) (ret.get())).size());
+                } else if ("$size".equals(token) && ret != null && (ret.get() instanceof Collection)) {
+                    ret = new ConstVisitor(((Collection) (ret.get())).size());
+                } else if (matches(token, "\\$\\d+\\.\\d+")) {
+                    ret = new ConstVisitor(Double.parseDouble(token.substring(1)));
+                } else if (matches(token, "\\$f\\d+\\.\\d+")) {
+                    ret = new ConstVisitor(Float.parseFloat(token.substring(2)));
+                } else if (matches(token, "\\$[1-9]([0-9]+)?")) {
+                    ret = new ConstVisitor(Integer.parseInt(token.substring(1), 10));
+                } else if (matches(token, "\\$(0x|0X)[a-fA-F0-9]+")) {
+                    ret = new ConstVisitor(Integer.parseInt(token.substring(3), 16));
+                } else if (matches(token, "\\$0([0-9]+)?")) {
+                    ret = new ConstVisitor(Integer.parseInt(token.substring(2), 8));
+                } else if (matches(token, "\\$(0b|0B)[0-1]+")) {
+                    ret = new ConstVisitor(Integer.parseInt(token.substring(3), 2));
+                } else if (matches(token, "\\$l[1-9]([0-9]+)?")) {
+                    ret = new ConstVisitor(Long.parseLong(token.substring(2), 10));
+                } else if (matches(token, "\\$l(0x|0X)[a-fA-F0-9]+")) {
+                    ret = new ConstVisitor(Long.parseLong(token.substring(4), 16));
+                } else if (matches(token, "\\$l0([0-9]+)?")) {
+                    ret = new ConstVisitor(Long.parseLong(token.substring(3), 8));
+                } else if (matches(token, "\\$l(0b|0B)[0-1]+")) {
+                    ret = new ConstVisitor(Long.parseLong(token.substring(4), 2));
+                } else {
+                    resolved = false;
+                }
+                if (resolved) {
+                    continue;
+                }
+            }
+            if (token.startsWith("#")) {
                 String nextExpression = token.substring(2, token.length() - 1);
                 ret = visit(nextExpression, rootObj, paramObj, paramObj);
             } else if (token.startsWith("[")) {
@@ -271,7 +337,17 @@ public class VisitorParser {
                     return null;
                 }
                 if (currRet instanceof Map) {
-                    ret = new MapVisitor((Map) currRet, token);
+                    Map<?, ?> map = (Map<?, ?>) currRet;
+                    Function<String,Object> keyConvertor=foundMapKeyConvertor(map);
+                    Object realKey=token;
+                    if(keyConvertor!=null){
+                        try {
+                            realKey=keyConvertor.apply(token);
+                        } catch (Exception e) {
+
+                        }
+                    }
+                    ret = new MapVisitor((Map) currRet, realKey);
                 } else if (ReflectResolver.isArray(currRet)
                         && "length".equals(token)) {
                     int len = Array.getLength(currRet);
@@ -308,6 +384,69 @@ public class VisitorParser {
         }
 
         return ret;
+    }
+
+    public static Function<String,Object> foundMapKeyConvertor(Map map){
+        if(map==null){
+            return null;
+        }
+        Function<String,Object> keyConvertor=null;
+        // 尝试推断Map的Key类型
+        for (Object key : map.keySet()) {
+            if(key==null){
+                continue;
+            }
+            try {
+                if (key instanceof CharSequence) {
+                    keyConvertor = String::valueOf;
+                    break;
+                }
+            } catch (Exception e) {
+
+            }
+            try {
+                if (key instanceof Integer) {
+                    keyConvertor = Integer::parseInt;
+                    break;
+                }
+            } catch (Exception e) {
+
+            }
+            try {
+                if (key instanceof Long) {
+                    keyConvertor = Long::parseLong;
+                    break;
+                }
+            } catch (Exception e) {
+
+            }
+            try {
+                if (key instanceof Short) {
+                    keyConvertor = Short::parseShort;
+                    break;
+                }
+            } catch (Exception e) {
+
+            }
+            try {
+                if (key instanceof Float) {
+                    keyConvertor = Float::parseFloat;
+                    break;
+                }
+            } catch (Exception e) {
+
+            }
+            try {
+                if (key instanceof Double) {
+                    keyConvertor = Double::parseDouble;
+                    break;
+                }
+            } catch (Exception e) {
+
+            }
+            break;
+        }
+        return keyConvertor;
     }
 
     public static List<String> splitParameters(String expression) {
@@ -435,7 +574,7 @@ public class VisitorParser {
                 }
             } else if (ch == '.') {
                 String tmp = expression.substring(index.get() - 1, index.get() + 2);
-                if (tmp.matches("\\d\\.\\d") && !curr.contains(".")) {
+                if (matches(tmp, "\\d\\.\\d") && !curr.contains(".")) {
                     curr += ".";
                 } else {
                     if (!curr.isEmpty()) {
