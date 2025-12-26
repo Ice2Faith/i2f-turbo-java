@@ -155,7 +155,7 @@
                         </el-col>
                         <el-col :span="12">
                             <el-row type="flex" justify="end">
-                                <el-select clearable v-model="form.lang"  placeholder="脚本类型" @change="onEvalLangChange">
+                                <el-select  clearable filterable v-model="form.lang"  placeholder="脚本类型" @change="onEvalLangChange">
                                     <el-option
                                             v-for="item in metas.evalLangList"
                                             :key="item.value"
@@ -212,7 +212,7 @@
                                 如果默认的数据源不满足运行要求<br/>
                                 则可以在此处选择以更改 datasourcesMapping 以进行数据源映射
                             </span>
-                        <el-select slot="reference" clearable v-model="form.datasource" placeholder="数据源">
+                        <el-select slot="reference"  clearable filterable v-model="form.datasource" placeholder="数据源">
                             <el-option
                                     v-for="item in metas.datasources"
                                     :key="item"
@@ -238,7 +238,7 @@
                             </span>
                         <el-checkbox slot="reference" v-model="form.useHostId">主机锁定</el-checkbox>
                     </el-popover>
-                    <el-select clearable v-model="form.hostId" :disabled="!form.useHostId" placeholder="主机锁定">
+                    <el-select  clearable filterable v-model="form.hostId" :disabled="!form.useHostId" placeholder="主机锁定">
                         <el-option
                                 v-for="item in metas.hostIdList"
                                 :key="item"
@@ -289,7 +289,7 @@
     <el-card shadow="never">
         <el-form inline label-position="left" label-width="100px">
             <el-form-item label="语言类型">
-                <el-select clearable v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
+                <el-select  clearable filterable v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
                     <el-option
                             v-for="item in metas.langList"
                             :key="item.value"
@@ -309,7 +309,7 @@
         <el-card shadow="never">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
-                    <el-select clearable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                    <el-select  clearable filterable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
                         <el-option
                                 v-for="item in metas.langList"
                                 :key="item.value"

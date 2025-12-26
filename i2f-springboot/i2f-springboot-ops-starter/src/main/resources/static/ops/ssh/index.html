@@ -152,7 +152,7 @@
     <el-card shadow="never">
         <el-form inline label-position="left" label-width="100px">
             <el-form-item label="语言类型">
-                <el-select clearable v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
+                <el-select  clearable filterable v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
                     <el-option
                             v-for="item in metas.langList"
                             :key="item.value"
@@ -253,7 +253,7 @@
         <el-card shadow="never">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
-                    <el-select clearable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                    <el-select  clearable filterable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
                         <el-option
                                 v-for="item in metas.langList"
                                 :key="item.value"
@@ -283,7 +283,7 @@
         <el-card shadow="never">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
-                    <el-select clearable v-model="dialog.fileEditor.lang"  placeholder="语言类型" @change="onFileEditorLangChange">
+                    <el-select  clearable filterable v-model="dialog.fileEditor.lang"  placeholder="语言类型" @change="onFileEditorLangChange">
                         <el-option
                                 v-for="item in metas.langList"
                                 :key="item.value"

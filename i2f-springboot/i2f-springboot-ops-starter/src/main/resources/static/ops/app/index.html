@@ -110,7 +110,7 @@
                             </span>
                             <el-checkbox slot="reference" v-model="form.useHostId">主机锁定</el-checkbox>
                         </el-popover>
-                        <el-select v-model="form.hostId" clearable :disabled="!form.useHostId" placeholder="主机锁定">
+                        <el-select  v-model="form.hostId" clearable filterable :disabled="!form.useHostId" placeholder="主机锁定">
                             <el-option
                                     v-for="item in metas.hostIdList"
                                     :key="item"
@@ -192,7 +192,7 @@
     <el-card shadow="never">
         <el-form inline label-position="left" label-width="100px">
             <el-form-item label="语言类型">
-                <el-select v-model="metas.resultLang" clearable  placeholder="语言类型" @change="onResultLangChange">
+                <el-select v-model="metas.resultLang" clearable filterable  placeholder="语言类型" @change="onResultLangChange">
                     <el-option
                             v-for="item in metas.langList"
                             :key="item.value"
@@ -579,7 +579,7 @@
         <el-card shadow="never">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
-                    <el-select clearable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
+                    <el-select clearable filterable v-model="dialog.textViewer.lang"  placeholder="语言类型" @change="onTextViewerLangChange">
                         <el-option
                                 v-for="item in metas.langList"
                                 :key="item.value"
