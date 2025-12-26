@@ -69,10 +69,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -109,6 +106,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
     protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
+
+    protected final AtomicBoolean enablePrepareParamCache=new AtomicBoolean(true);
+    protected final AtomicInteger prepareParamL2CacheSize=new AtomicInteger(30);
+    protected static final ThreadLocal<WeakReference<Map<String,Object>>> LOCAL_PREPARE_PARAM_L1 =new ThreadLocal<>();
+    protected static final ThreadLocal<LinkedList<WeakReference<Map<String,Object>>>> LOCAL_PREPARE_PARAM_L2 =new ThreadLocal<>();
+    protected static final ThreadLocalRandom RANDOM=ThreadLocalRandom.current();
 
     {
         List<ExecutorNode> list = defaultExecutorNodes();
@@ -792,18 +795,48 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return new HashMap<>();
     }
 
-    protected static final ThreadLocal<WeakReference<Map<String,Object>>> LOCAL_PREPARE_PARAM=new ThreadLocal<>();
-
     @Override
     public Map<String, Object> prepareParams(Map<String, Object> params) {
-        WeakReference<Map<String, Object>> ref = LOCAL_PREPARE_PARAM.get();
-        if(ref!=null){
-            // 判断是否已经prepared，如果已经prepared,则不需要再进行prepared浪费性能
-            Map<String, Object> refMap = ref.get();
-            if(refMap!=null){
-                if(refMap==params){
-                    // 这里必须使用 == 判断是否是同一个对象，不能使用equals
-                    return params;
+        if(enablePrepareParamCache.get()) {
+            if(enablePrepareParamCache.get()) {
+                WeakReference<Map<String, Object>> ref = LOCAL_PREPARE_PARAM_L1.get();
+                if(ref!=null){
+                    Map<String, Object> refMap = ref.get();
+                    if(refMap!=null){
+                        if(refMap==params){
+                            // 这里必须使用 == 判断是否是同一个对象，不能使用equals
+                            return params;
+                        }
+                    }
+                }
+            }
+            if(enablePrepareParamCache.get()) {
+                LinkedList<WeakReference<Map<String, Object>>> localList = LOCAL_PREPARE_PARAM_L2.get();
+                if (localList != null) {
+                    Iterator<WeakReference<Map<String, Object>>> iterator = localList.iterator();
+                    while (iterator.hasNext()) {
+                        WeakReference<Map<String, Object>> ref = iterator.next();
+                        if (ref == null) {
+                            iterator.remove();
+                            continue;
+                        }
+                        // 判断是否已经prepared，如果已经prepared,则不需要再进行prepared浪费性能
+                        Map<String, Object> refMap = ref.get();
+                        if (refMap == null) {
+                            iterator.remove();
+                            continue;
+                        }
+                        if (refMap == params) {
+                            // 这里必须使用 == 判断是否是同一个对象，不能使用equals
+                            if (RANDOM.nextDouble() < 0.3) {
+                                iterator.remove();
+                                localList.addFirst(ref);
+                            }
+                            return params;
+                        }
+
+                    }
+
                 }
             }
         }
@@ -862,7 +895,31 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
         reportPreparedParamsEvent(params);
 
-        LOCAL_PREPARE_PARAM.set(new WeakReference<>(params));
+        if(enablePrepareParamCache.get()) {
+            WeakReference<Map<String, Object>> refCache = new WeakReference<>(params);
+            if(enablePrepareParamCache.get()){
+                LOCAL_PREPARE_PARAM_L1.set(refCache);
+            }
+
+            if(enablePrepareParamCache.get()) {
+                LinkedList<WeakReference<Map<String, Object>>> localList = LOCAL_PREPARE_PARAM_L2.get();
+                if (localList == null) {
+                    localList = new LinkedList<>();
+                }
+                Iterator<WeakReference<Map<String, Object>>> localIterator = localList.iterator();
+                while (localIterator.hasNext()) {
+                    WeakReference<Map<String, Object>> ref = localIterator.next();
+                    if (ref == null || ref.get() == null) {
+                        localIterator.remove();
+                    }
+                }
+                while (localList.size() > prepareParamL2CacheSize.get()) {
+                    localList.removeLast();
+                }
+                localList.addFirst(refCache);
+                LOCAL_PREPARE_PARAM_L2.set(localList);
+            }
+        }
         return params;
     }
 
