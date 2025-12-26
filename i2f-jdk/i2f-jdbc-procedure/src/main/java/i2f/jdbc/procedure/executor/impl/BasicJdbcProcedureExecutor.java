@@ -1789,14 +1789,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
         Map<String, String> datasourcesMapping = (Map<String, String>) params.get(ParamsConsts.DATASOURCES_MAPPING);
         if (datasourcesMapping != null) {
-            do {
-                String mapping = datasourcesMapping.get(datasource);
-                if (mapping != null && !mapping.isEmpty()) {
-                    datasource = mapping;
-                } else {
-                    break;
-                }
-            } while (true);
+            String mapping = datasourcesMapping.get(datasource);
+            if (mapping != null && !mapping.isEmpty()) {
+                datasource = mapping;
+            }
         }
         return datasource;
     }
