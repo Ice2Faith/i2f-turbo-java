@@ -1674,12 +1674,8 @@
                                 <Root-Link-Github>${root.link.github}</Root-Link-Github>
                                 <Root-Link-Gitee>${root.link.gitee}</Root-Link-Gitee>
 
-                                <Java-Source-Version>$ {
-                                    java.source.version
-                                }</Java-Source-Version>
-                                <Java-Target-Version>$ {
-                                    java.target.version
-                                }</Java-Target-Version>
+                                <Java-Source-Version>${java.source.version}</Java-Source-Version>
+                                <Java-Target-Version>${java.target.version}</Java-Target-Version>
                             </manifestEntries>
                         </archive>
                         <includes>
@@ -1740,12 +1736,8 @@
                                 <Root-Link-Github>${root.link.github}</Root-Link-Github>
                                 <Root-Link-Gitee>${root.link.gitee}</Root-Link-Gitee>
 
-                                <Java-Source-Version>$ {
-                                    java.source.version
-                                }</Java-Source-Version>
-                                <Java-Target-Version>$ {
-                                    java.target.version
-                                }</Java-Target-Version>
+                                <Java-Source-Version>${java.source.version}</Java-Source-Version>
+                                <Java-Target-Version>${java.target.version}</Java-Target-Version>
                             </manifestEntries>
                         </archive>
                         <descriptorRefs>

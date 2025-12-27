@@ -235,7 +235,7 @@ public class SecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
             http.formLogin()
                     .loginProcessingUrl(loginUrl)
                     .usernameParameter(loginUsername)
-                    .passwordParameter(loginUsername)
+                    .passwordParameter(loginPassword)
                     .successHandler(authenticationSuccessHandler)
                     .failureHandler(authenticationFailureHandler);
             log.info("SecurityConfig customer config form-login config.");
