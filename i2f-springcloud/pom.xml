@@ -31,10 +31,7 @@
         <module>i2f-springcloud-netflix-hystrix-starter</module>
         <module>i2f-springcloud-netflix-openfeign-starter</module>
         <module>i2f-springcloud-netflix-ribbon-starter</module>
-        <module>i2f-springcloud-netflix-zuul-starter</module>
         <module>i2f-springcloud-refresh-starter</module>
-        <module>i2f-springcloud-sleuth-starter</module>
-        <module>i2f-springcloud-zipkin-starter</module>
 
         <module>test-gateway-swl</module>
     </modules>

@@ -1,0 +1,85 @@
+spring:
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@192.1.x.x:1521/orcl
+    username: ai_dev
+    password: xxxxxx
+  application:
+    name: spring-ai-chat
+  ai:
+    model:
+      chat: openai
+    ollama:
+      chat:
+        enabled: true
+      base-url: http://localhost:11434
+      options:
+        model: deepseek-r1:1.5b
+        format: json
+        keep_alive: 5m
+        temperature: 0.7
+      init:
+        pull-model-strategy: never
+        timeout: 5m
+        max-retries: 0
+        chat:
+          include: true
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/
+      api-key: xxx
+      chat:
+        options:
+          model: qwen-plus
+          temperature: 0.7
+    mcp:
+      client:
+        sse:
+          connections:
+            demo-server:
+              url: http://localhost:6600
+i2f:
+  ai:
+    chat:
+      tools:
+        database-metadata:
+          enable: false
+      tool-callback:
+        spring-bean-provider:
+          enable: true
+      enable: true
+      chat-client:
+        enable: true
+      chat-memory:
+        enable: true
+        impl:
+          in-memory:
+            enable: true
+      session-repository:
+        enable: true
+      auth-provider:
+        enable: true
+      default-system: 你是一个资深数据库工程师，现在根据系统中的表结构信息，根据用户的提问，首先查询系统中有哪些表，根据表注释确定要使用哪些表，然后查询要使用的表的表结构信息，最后根据表结构信息，编写响应的SQL语句进行回答
+      default-system-resource: ''
+      api:
+        chat:
+          enable: true
+        history:
+          enable: true
+        session:
+          enable: true
+      cors:
+        enable: true
+      web-ui:
+        enable: true
+        allow-redirect-root-url: false
+      allow-auto-create-session-id: true
+      allow-cookie-session-id: true
+      support-tools: true
+      tool-classes:
+        - i2f.spring.ai.chat.tools.FileSystemTools
+      tool-names:
+        - baiduSearchTools
+
+logging:
+  level:
+    org.springframework.ai: trace

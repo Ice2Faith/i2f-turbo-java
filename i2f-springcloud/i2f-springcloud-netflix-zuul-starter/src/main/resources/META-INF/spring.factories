@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    i2f.springcloud.netflix.zuul.filter.ZuulResponseCharsetFilter,\
-    i2f.springcloud.netflix.zuul.ZuulAutoConfiguration

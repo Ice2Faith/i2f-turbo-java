@@ -2,8 +2,8 @@
 echo collect begin ...
 
 set src_path=..
-set dst_path=.\deploy-jdk8
-set bak_path=.\backup-jdk8
+set dst_path=.\deploy-jdk17
+set bak_path=.\backup-jdk17
 set target_dir=target
 
 :: 脚本功能

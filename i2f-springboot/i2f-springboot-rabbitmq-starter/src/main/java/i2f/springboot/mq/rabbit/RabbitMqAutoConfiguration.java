@@ -42,7 +42,7 @@ public class RabbitMqAutoConfiguration {
         }
 
         if (logReturnCallback) {
-            rabbitTemplate.setReturnCallback(new RabbitReturnCallbackLogImpl());
+            rabbitTemplate.setReturnsCallback(new RabbitReturnCallbackLogImpl());
         }
 
         return rabbitTemplate;

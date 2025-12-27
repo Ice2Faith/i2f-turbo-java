@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>i2f.turbo</groupId>
+        <artifactId>i2f-turbo-java</artifactId>
+        <version>1.0-jdk17</version>
+    </parent>
+
+    <artifactId>i2f-spring-ai</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>i2f-spring-ai-chat-starter</module>
+        <module>i2f-spring-ai-sse-mcp-server</module>
+        <module>i2f-spring-ai-tool</module>
+        <module>test-spring-ai-chat</module>
+    </modules>
+
+    <properties>
+        <spring-ai.version>1.0.0</spring-ai.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-spring-ai-tool</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

@@ -13,17 +13,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -43,7 +45,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 @ControllerAdvice
 @ConfigurationProperties(prefix = "i2f.springboot.config.security")
-public class SecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityAutoConfiguration {
 
     @Value("${i2f.springboot.config.security.csrf.enable:false}")
     private boolean enableCsrf = false;
@@ -100,70 +102,85 @@ public class SecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired(required = false)
     private ISecurityConfigListener securityConfigListener;
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @ConditionalOnMissingBean(WebSecurityCustomizer.class)
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer(){
+        return customizer->{
+            if (securityConfigListener != null) {
+                boolean next = securityConfigListener.onBeforeWebConfig(customizer, this);
+                if (!next) {
+                    return;
+                }
+            }
+            if (ignoreList != null && !"".equals(ignoreList)) {
+                customizer.ignoring().
+                        requestMatchers(ignoreList.split(","));
+                log.info("SecurityConfig ignore list:" + ignoreList);
+            }
+            if (securityConfigListener != null) {
+                securityConfigListener.onAfterWebConfig(customizer, this);
+            }
+        };
+    }
+
+    @ConditionalOnMissingBean(AuthenticationManager.class)
+    @Bean
+    protected AuthenticationManager authenticationManager(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder);
         log.info("SecurityConfig userDetailsService,passwordEncoder done.");
+        return auth.build();
     }
 
-    @Override
-    public void init(WebSecurity web) throws Exception {
-        super.init(web);
-    }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        if (securityConfigListener != null) {
-            boolean next = securityConfigListener.onBeforeWebConfig(web, this);
-            if (!next) {
-                return;
-            }
-        }
-        if (ignoreList != null && !"".equals(ignoreList)) {
-            web.ignoring()
-                    .antMatchers(ignoreList.split(","));
-            log.info("SecurityConfig ignore list:" + ignoreList);
-        } else {
-            super.configure(web);
-        }
-        if (securityConfigListener != null) {
-            securityConfigListener.onAfterWebConfig(web, this);
-        }
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @ConditionalOnMissingBean(SecurityFilterChain.class)
+    @Bean
+    public SecurityFilterChain securityFilterChain(@Autowired HttpSecurity http,
+                                                   @Autowired AuthenticationManager authenticationManager) throws Exception {
         if (securityConfigListener != null) {
             boolean next = securityConfigListener.onBeforeHttpConfig(http, this);
             if (!next) {
-                return;
+                return http.build();
             }
         }
 
         // 配置跨域
         if (enableCors) {
-            http.cors();
+            http.cors(configurer->{
+
+            });
             log.info("SecurityConfig enable cors.");
         } else {
-            http.cors().disable();
+            http.cors(configurer->{
+                configurer.disable();
+            });
             log.info("SecurityConfig disabled cors.");
         }
         // 配置csrf
         if (enableCsrf) {
-            http.csrf();
+            http.csrf(configurer->{
+
+            });
             log.info("SecurityConfig enable csrf.");
         } else {
-            http.csrf().disable();
+            http.csrf(configurer->{
+                configurer.disable();
+            });
             log.info("SecurityConfig disable csrf.");
         }
 
         // 配置httpBasic
         if (enableHttpBasic) {
-            http.httpBasic();
+            http.httpBasic(configurer->{
+
+            });
             log.info("SecurityConfig enable http-basic.");
         } else {
-            http.httpBasic().disable();
+            http.httpBasic(configurer->{
+                configurer.disable();
+            });
             log.info("SecurityConfig disable http-basic.");
         }
 
@@ -174,24 +191,30 @@ public class SecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
         // 配置静态资源访问
         if (staticResourceList != null && !"".equals(staticResourceList)) {
-            http.authorizeRequests()
-                    .antMatchers(HttpMethod.GET,
-                            staticResourceList.split(","))
-                    .permitAll();
+            http.authorizeHttpRequests(registry -> {
+                registry.requestMatchers(HttpMethod.GET,
+                                staticResourceList.split(","))
+                        .permitAll();
+                    });
+
             log.info("SecurityConfig static resource config:" + staticResourceList);
         }
 
         // 配置用户定义匿名访问白名单
         if (anonymousList != null && !"".equals(anonymousList)) {
-            http.authorizeRequests()
-                    .antMatchers(anonymousList.split(",")).anonymous();
+            http.authorizeHttpRequests(registry -> {
+                registry.requestMatchers(anonymousList.split(","))
+                        .anonymous();
+            });
             log.info("SecurityConfig customer anonymous list:" + anonymousList);
         }
 
         // 配置用户定义完全访问白名单
         if (permitAllList != null && !"".equals(permitAllList)) {
-            http.authorizeRequests()
-                    .antMatchers(permitAllList.split(",")).permitAll();
+            http.authorizeHttpRequests(registry -> {
+                registry.requestMatchers(permitAllList.split(","))
+                        .permitAll();
+            });
             log.info("SecurityConfig customer permit-all list:" + permitAllList);
         }
 
@@ -208,12 +231,16 @@ public class SecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
             } else if (String.valueOf(SessionCreationPolicy.IF_REQUIRED).equals(sessionCreationPolicy)) {
                 policy = SessionCreationPolicy.IF_REQUIRED;
             }
-            http.sessionManagement()
-                    .sessionCreationPolicy(policy);
+            SessionCreationPolicy sessionPolicy=policy;
+            http.sessionManagement(configurer->{
+                configurer.sessionCreationPolicy(sessionPolicy);
+            });
             log.info("SecurityConfig customer session policy:" + policy);
         } else {
             // 配置默认无状态Session方式
-            http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            http.sessionManagement(configurer->{
+                configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            });
             log.info("SecurityConfig default session policy:" + SessionCreationPolicy.STATELESS);
         }
 
@@ -232,17 +259,19 @@ public class SecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
         if (enableFormLogin) {
             // 配置登录URL
-            http.formLogin()
-                    .loginProcessingUrl(loginUrl)
-                    .usernameParameter(loginUsername)
-                    .passwordParameter(loginUsername)
-                    .successHandler(authenticationSuccessHandler)
-                    .failureHandler(authenticationFailureHandler);
+            http.formLogin(configurer->{
+                configurer.loginProcessingUrl(loginUrl)
+                        .usernameParameter(loginUsername)
+                        .passwordParameter(loginPassword)
+                        .successHandler(authenticationSuccessHandler)
+                        .failureHandler(authenticationFailureHandler);
+            });
             log.info("SecurityConfig customer config form-login config.");
         } else {
             // 禁用formLogin,也就不会再进入 UsernamePasswordAuthenticationFilter
-            http.formLogin()
-                    .disable();
+            http.formLogin(configurer->{
+                configurer.disable();
+            });
             log.info("SecurityConfig disable form-login.");
         }
 
@@ -250,34 +279,37 @@ public class SecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
         // 使用自定义方式时，需要注意参数需要自己补充进去
         if (enableJsonLogin) {
             http.addFilterAt(new JsonSupportUsernamePasswordAuthenticationFilter()
-                            .buildAuthenticationManager(authenticationManagerBean())
+                            .buildAuthenticationManager(authenticationManager)
                             .buildAuthenticationSuccessHandler(authenticationSuccessHandler)
                             .buildAuthenticationFailureHandler(authenticationFailureHandler)
                             .buildLoginPath(loginUrl)
                             .buildParameterUsername(loginUsername)
                             .buildParameterPassword(loginPassword)
                             .buildLoginPasswordDecoder(loginPasswordDecoder)
-                            .buildApplicationContext(getApplicationContext())
+                            .buildApplicationContext(applicationContext)
                     ,
                     UsernamePasswordAuthenticationFilter.class);
             log.info("SecurityConfig customer json support username-password auth filter.");
         }
 
         // 配置登录URL允许匿名访问
-        http.authorizeRequests()
-                .antMatchers(loginUrl)
-                .anonymous();
+        http.authorizeHttpRequests(registry->{
+            registry.requestMatchers(loginUrl)
+                    .anonymous();
+        });
 
         if (logoutUrl == null || "".equals(logoutUrl)) {
             logoutUrl = "/logout";
         }
 
         // 配置登出处理器
-        http.logout()
-                .logoutUrl(logoutUrl);
+        http.logout(configurer->{
+            configurer.logoutUrl(logoutUrl);
+        });
         if (logoutSuccessHandler != null) {
-            http.logout()
-                    .logoutSuccessHandler(logoutSuccessHandler);
+            http.logout(configurer->{
+                configurer.logoutSuccessHandler(logoutSuccessHandler);
+            });
             log.info("SecurityConfig customer logout success handler.");
         }
 
@@ -293,8 +325,9 @@ public class SecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
         // 配置认证失败处理类
         if (authorizeExceptionHandler != null) {
-            http.exceptionHandling()
-                    .authenticationEntryPoint(authorizeExceptionHandler);
+            http.exceptionHandling(configurer->{
+                configurer.authenticationEntryPoint(authorizeExceptionHandler);
+            });
             log.info("SecurityConfig customer unauthorized handler config.");
         }
 
@@ -303,16 +336,15 @@ public class SecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
         }
 
         // 配置除了白名单的都需要鉴权
-        http.authorizeRequests()
-                .anyRequest().authenticated();
+        http.authorizeHttpRequests(registry -> {
+            registry.anyRequest()
+                    .authenticated();
+        });
+
+        return http.build();
 
     }
 
-    @ConditionalOnMissingBean(AuthenticationManager.class)
-    @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
+
 
 }

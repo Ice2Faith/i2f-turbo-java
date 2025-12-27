@@ -2,6 +2,7 @@ package i2f.springboot.mq.rabbit.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.ReturnedMessage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
@@ -10,9 +11,13 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @desc
  */
 @Slf4j
-public class RabbitReturnCallbackLogImpl implements RabbitTemplate.ReturnCallback {
+public class RabbitReturnCallbackLogImpl implements RabbitTemplate.ReturnsCallback {
     @Override
-    public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
+    public void returnedMessage(ReturnedMessage msg) {
+        call(msg.getMessage(),msg.getReplyCode(),msg.getReplyText(),msg.getExchange(),msg.getRoutingKey());
+    }
+
+    public void call(Message message, int replyCode, String replyText, String exchange, String routingKey) {
         log.info("ReturnCallback:     " + "消息：" + message);
         log.info("ReturnCallback:     " + "回应码：" + replyCode);
         log.info("ReturnCallback:     " + "回应信息：" + replyText);

@@ -15,6 +15,7 @@
         <module>i2f-jdk-ext</module>
         <module>i2f-extension</module>
         <module>i2f-spring</module>
+        <module>i2f-spring-ai</module>
         <module>i2f-springboot</module>
         <module>i2f-springcloud</module>
         <module>i2f-tools</module>
@@ -45,7 +46,7 @@
 
         <!-- spring 体系 -->
         <spring.version>6.2.15</spring.version>
-        <spring.security.version>>6.4.13</spring.security.version>
+        <spring.security.version>6.4.13</spring.security.version>
         <spring-boot.version>3.4.13</spring-boot.version>
         <spring-cloud.version>2024.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
@@ -871,6 +872,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-ai-langchain4j</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-all</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -1156,6 +1162,11 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-sqlparser</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-swl</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -1311,6 +1322,11 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-nginx-rtmp-auth-server-starter</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-springboot-openapi-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
@@ -1493,22 +1509,24 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-springcloud-netflix-zuul-starter</artifactId>
-                <version>${i2f.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-refresh-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
+
+            <!-- ############################################################ -->
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-springcloud-sleuth-starter</artifactId>
+                <artifactId>i2f-spring-ai-chat-starter</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-springcloud-zipkin-starter</artifactId>
+                <artifactId>i2f-spring-ai-sse-mcp-server</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-spring-ai-tool</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
         </dependencies>

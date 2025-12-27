@@ -4,7 +4,7 @@ import i2f.reflect.ReflectResolver;
 import i2f.typeof.TypeOf;
 import io.swagger.annotations.*;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -379,7 +379,7 @@ public class ApiMethodResolver {
 
     public static String[] getParameterNames(Method method) {
         if (springCoreSupport()) {
-            String[] names = new LocalVariableTableParameterNameDiscoverer().getParameterNames(method);
+            String[] names = new DefaultParameterNameDiscoverer().getParameterNames(method);
             if (names != null) {
                 return names;
             }

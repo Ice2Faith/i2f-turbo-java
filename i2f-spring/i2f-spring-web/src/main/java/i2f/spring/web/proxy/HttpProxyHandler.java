@@ -74,7 +74,7 @@ public class HttpProxyHandler {
         URI newUri = new URI(target);
         // 执行代理查询
         String methodName = request.getMethod();
-        HttpMethod httpMethod = HttpMethod.resolve(methodName);
+        HttpMethod httpMethod = HttpMethod.valueOf(methodName.toUpperCase());
         if (httpMethod == null) {
             return;
         }
