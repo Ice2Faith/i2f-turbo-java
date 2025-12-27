@@ -1,8 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  i2f.spring.ai.chat.configuration.ChatAiAutoConfiguration,\
-  i2f.spring.ai.chat.controller.ChatAiController,\
-  i2f.spring.ai.chat.controller.ChatAiHistoryController,\
-  i2f.spring.ai.chat.controller.ChatAiSessionController,\
-  i2f.spring.ai.chat.configuration.CorsWebConfiguration,\
-  i2f.spring.ai.chat.configuration.CorsWebfluxConfiguration,\
-  i2f.spring.ai.chat.configuration.WebUiConfiguration

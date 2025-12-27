@@ -7,7 +7,7 @@
 <dependency>
     <groupId>i2f.turbo</groupId>
     <artifactId>i2f-extension-reverse-engineer-generator</artifactId>
-    <version>1.0</version>
+    <version>1.0-jdk8</version>
     <scope>system</scope>
     <systemPath>${pom.basedir}/lib/i2f-extension-reverse-engineer-generator-1.0.jar</systemPath>
 </dependency>
@@ -15,7 +15,7 @@
 <dependency>
 <groupId>i2f.turbo</groupId>
 <artifactId>translate-en2zh</artifactId>
-<version>1.0</version>
+<version>1.0-jdk8</version>
 <scope>system</scope>
 <systemPath>${pom.basedir}/lib/i2f-translate-en2zh-1.0.jar</systemPath>
 </dependency>

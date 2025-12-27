@@ -6,7 +6,7 @@
     <parent>
         <groupId>i2f.turbo</groupId>
         <artifactId>i2f-springcloud</artifactId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
 
     <artifactId>i2f-springcloud-loadbalancer-starter</artifactId>

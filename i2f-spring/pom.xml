@@ -6,7 +6,7 @@
     <parent>
         <artifactId>i2f-turbo-java</artifactId>
         <groupId>i2f.turbo</groupId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
 
     <artifactId>i2f-spring</artifactId>
@@ -14,14 +14,14 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>i2f-spring-core</module>
         <module>i2f-spring-all</module>
-        <module>i2f-spring-web</module>
-        <module>i2f-spring-security</module>
-        <module>i2f-spring-redis</module>
         <module>i2f-spring-authentication</module>
+        <module>i2f-spring-core</module>
         <module>i2f-spring-mvc-metadata</module>
+        <module>i2f-spring-redis</module>
+        <module>i2f-spring-security</module>
         <module>i2f-spring-swl</module>
+        <module>i2f-spring-web</module>
     </modules>
 
 

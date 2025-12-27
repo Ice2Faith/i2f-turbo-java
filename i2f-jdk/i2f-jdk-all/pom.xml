@@ -5,16 +5,25 @@
     <parent>
         <artifactId>i2f-jdk</artifactId>
         <groupId>i2f.turbo</groupId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>i2f-jdk-all</artifactId>
 
     <dependencies>
+        <!-- <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jdk-all</artifactId>
+        </dependency> -->
+
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-ai-std</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -466,6 +475,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-rowset</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-script</artifactId>
         </dependency>
         <dependency>
@@ -528,10 +541,10 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-translate</artifactId>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-translate-en2zh</artifactId>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-translate-zh2pinyin</artifactId>
@@ -572,6 +585,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-xml</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>

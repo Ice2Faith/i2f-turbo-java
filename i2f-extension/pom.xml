@@ -5,7 +5,7 @@
     <parent>
         <artifactId>i2f-turbo-java</artifactId>
         <groupId>i2f.turbo</groupId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,81 +14,79 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>i2f-extension-7zip</module>
+        <module>i2f-extension-agent-javassist</module>
         <module>i2f-extension-all</module>
-        <module>i2f-extension-jce-sm-antherd</module>
-        <module>i2f-extension-jce-bc</module>
-        <module>i2f-extension-velocity</module>
-        <module>i2f-extension-velocity-bindsql</module>
-        <module>i2f-extension-jackson</module>
-        <module>i2f-extension-slf4j</module>
-        <module>i2f-extension-cglib</module>
+        <module>i2f-extension-antlr4</module>
         <module>i2f-extension-aspectj</module>
+        <module>i2f-extension-asr-vosk</module>
+        <module>i2f-extension-browser-selenium</module>
+        <module>i2f-extension-canal</module>
+        <module>i2f-extension-cglib</module>
+        <module>i2f-extension-compress</module>
         <module>i2f-extension-cron</module>
+        <module>i2f-extension-document</module>
+        <module>i2f-extension-easyexcel</module>
+        <module>i2f-extension-elasticsearch</module>
         <module>i2f-extension-email</module>
-        <module>i2f-extension-qrcode</module>
-        <module>test-extension</module>
-        <module>i2f-extension-gson</module>
+        <module>i2f-extension-fastexcel</module>
         <module>i2f-extension-fastjson</module>
         <module>i2f-extension-fastjson2</module>
-        <module>i2f-extension-verifycode</module>
+        <module>i2f-extension-filesystem-ftp</module>
+        <module>i2f-extension-filesystem-hdfs</module>
+        <module>i2f-extension-filesystem-minio</module>
+        <module>i2f-extension-filesystem-oss-aliyun</module>
+        <module>i2f-extension-filesystem-oss-aws-s3</module>
+        <module>i2f-extension-filesystem-sftp</module>
         <module>i2f-extension-ftp</module>
-        <module>i2f-extension-sftp</module>
-        <module>i2f-extension-hdfs</module>
         <module>i2f-extension-gif</module>
-        <module>i2f-extension-minio</module>
-        <module>i2f-extension-easyexcel</module>
-        <module>i2f-extension-document</module>
+        <module>i2f-extension-groovy</module>
+        <module>i2f-extension-gson</module>
+        <module>i2f-extension-hazelcast</module>
+        <module>i2f-extension-hdfs</module>
+        <module>i2f-extension-httpclient</module>
+        <module>i2f-extension-image-metadata</module>
+        <module>i2f-extension-jackson</module>
+        <module>i2f-extension-javassist</module>
+        <module>i2f-extension-jce-bc</module>
+        <module>i2f-extension-jce-sm-antherd</module>
+        <module>i2f-extension-jdbc-procedure-datax</module>
+        <module>i2f-extension-jdbc-procedure-flink</module>
         <module>i2f-extension-jedis</module>
+        <module>i2f-extension-log-slf4j</module>
+        <module>i2f-extension-minio</module>
+        <module>i2f-extension-mongodb</module>
+        <module>i2f-extension-mybatis</module>
+        <module>i2f-extension-netty</module>
+        <module>i2f-extension-ocr-tesseract</module>
+        <module>i2f-extension-ognl</module>
+        <module>i2f-extension-opencv</module>
+        <module>i2f-extension-opencv-data</module>
+        <module>i2f-extension-opencv-javacv</module>
+        <module>i2f-extension-oss-aliyun</module>
+        <module>i2f-extension-oss-aws-s3</module>
+        <module>i2f-extension-qrcode</module>
+        <module>i2f-extension-quartz</module>
         <module>i2f-extension-redis-api</module>
         <module>i2f-extension-redis-cache</module>
-        <module>i2f-extension-compress</module>
-        <module>i2f-extension-zip4j</module>
-        <module>i2f-extension-7zip</module>
-        <module>i2f-extension-httpclient</module>
-        <module>i2f-extension-netty</module>
-        <module>i2f-extension-quartz</module>
-        <module>i2f-extension-zookeeper</module>
-        <module>i2f-extension-filesystem-hdfs</module>
-        <module>i2f-extension-filesystem-ftp</module>
-        <module>i2f-extension-filesystem-minio</module>
-        <module>i2f-extension-filesystem-sftp</module>
-        <module>i2f-extension-log-slf4j</module>
-        <module>i2f-extension-swl</module>
+        <module>i2f-extension-reverse-engineer-generator</module>
+        <module>i2f-extension-sftp</module>
+        <module>i2f-extension-slf4j</module>
         <module>i2f-extension-slf4j-log</module>
+        <module>i2f-extension-swl</module>
+        <module>i2f-extension-tokenlization-ansj</module>
+        <module>i2f-extension-tokenlization-hanlp</module>
+        <module>i2f-extension-tokenlization-jcseg</module>
+        <module>i2f-extension-tokenlization-jieba</module>
         <module>i2f-extension-tts-espeak</module>
         <module>i2f-extension-tts-jacob</module>
-        <module>i2f-extension-asr-vosk</module>
-        <module>i2f-extension-ocr-tesseract</module>
-        <module>i2f-extension-opencv</module>
-        <module>i2f-extension-opencv-javacv</module>
-        <module>i2f-extension-opencv-data</module>
-        <module>i2f-extension-agent-javassist</module>
-        <module>i2f-extension-javassist</module>
-        <module>i2f-extension-mybatis</module>
-        <module>i2f-extension-ognl</module>
-        <module>i2f-extension-elasticsearch</module>
-        <module>i2f-extension-canal</module>
-        <module>i2f-extension-reverse-engineer-generator</module>
-        <module>i2f-extension-antlr4</module>
-        <module>i2f-extension-image-metadata</module>
-        <module>i2f-extension-fastexcel</module>
-        <module>i2f-extension-groovy</module>
-        <module>i2f-extension-tokenlization-jcseg</module>
-        <module>i2f-extension-tokenlization-ansj</module>
-        <module>i2f-extension-tokenlization-jieba</module>
-        <module>i2f-extension-tokenlization-hanlp</module>
-        <module>i2f-extension-ai-langchain4j</module>
-        <module>i2f-extension-browser-selenium</module>
-        <module>i2f-extension-oss-aliyun</module>
-        <module>i2f-extension-filesystem-oss-aliyun</module>
-        <module>i2f-extension-sqlparser</module>
-        <module>i2f-extension-oss-aws-s3</module>
+        <module>i2f-extension-velocity</module>
+        <module>i2f-extension-velocity-bindsql</module>
+        <module>i2f-extension-verifycode</module>
+        <module>i2f-extension-zip4j</module>
+        <module>i2f-extension-zookeeper</module>
+        <module>test-extension</module>
         <module>test-flink</module>
-        <module>i2f-extension-mongodb</module>
-        <module>i2f-extension-hazelcast</module>
-        <module>i2f-extension-filesystem-oss-aws-s3</module>
-        <module>i2f-extension-jdbc-procedure-flink</module>
-        <module>i2f-extension-jdbc-procedure-datax</module>
     </modules>
 
 

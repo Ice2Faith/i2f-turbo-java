@@ -6,7 +6,7 @@
     <parent>
         <groupId>i2f.turbo</groupId>
         <artifactId>i2f-spring</artifactId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
 
     <artifactId>i2f-spring-web</artifactId>
@@ -55,7 +55,7 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-javax-web</artifactId>
+            <artifactId>i2f-jdk-ext-web</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>

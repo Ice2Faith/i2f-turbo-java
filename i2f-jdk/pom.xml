@@ -5,7 +5,7 @@
     <parent>
         <artifactId>i2f-turbo-java</artifactId>
         <groupId>i2f.turbo</groupId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -24,154 +24,151 @@
     </properties>
 
     <modules>
-        <module>i2f-enums</module>
-
+        <module>i2f-agent</module>
+        <module>i2f-ai-std</module>
+        <module>i2f-algo</module>
+        <module>i2f-annotations</module>
+        <module>i2f-annotations-api</module>
         <module>i2f-annotations-core</module>
         <module>i2f-annotations-db</module>
-        <module>i2f-annotations-api</module>
         <module>i2f-annotations-ext</module>
-        <module>i2f-annotations</module>
-
-        <module>i2f-jdk-all</module>
-        <module>i2f-tuple-impl</module>
-        <module>i2f-streaming</module>
-        <module>i2f-clock-impl</module>
-        <module>i2f-bql</module>
-        <module>i2f-check</module>
-        <module>i2f-container</module>
-        <module>i2f-database</module>
-        <module>i2f-functional</module>
-        <module>i2f-crypto-impl</module>
-        <module>i2f-lambda</module>
-        <module>i2f-network</module>
-        <module>i2f-packet</module>
-        <module>i2f-reflect</module>
-        <module>i2f-trace</module>
-        <module>i2f-functional-lambda</module>
-        <module>i2f-exception</module>
-        <module>i2f-resources</module>
-        <module>i2f-lru-map</module>
-        <module>i2f-uid-impl</module>
-        <module>i2f-atomic</module>
         <module>i2f-array</module>
-        <module>i2f-container-builder</module>
+        <module>i2f-atomic</module>
+        <module>i2f-authentication</module>
         <module>i2f-bindsql</module>
-        <module>i2f-jdbc-impl</module>
-        <module>i2f-convert</module>
-        <module>i2f-typeof</module>
-        <module>i2f-unsafe</module>
-        <module>i2f-thread</module>
         <module>i2f-bindsql-page</module>
-        <module>i2f-database-type</module>
-        <module>i2f-page</module>
-        <module>i2f-proxy</module>
-        <module>i2f-spi</module>
-        <module>i2f-image-impl</module>
+        <module>i2f-bindsql-stringify</module>
+        <module>i2f-bql</module>
+        <module>i2f-bytes</module>
+        <module>i2f-cache</module>
+        <module>i2f-cache-std</module>
+        <module>i2f-check</module>
+        <module>i2f-check-filter</module>
+        <module>i2f-clock-impl</module>
+        <module>i2f-clock-std</module>
+        <module>i2f-code</module>
+        <module>i2f-codec-impl</module>
+        <module>i2f-codec-std</module>
         <module>i2f-color</module>
-        <module>i2f-math</module>
+        <module>i2f-comparator</module>
+        <module>i2f-compiler</module>
+        <module>i2f-compress-impl</module>
+        <module>i2f-compress-std</module>
+        <module>i2f-console-color</module>
+        <module>i2f-container</module>
+        <module>i2f-container-builder</module>
+        <module>i2f-context-impl</module>
+        <module>i2f-context-std</module>
+        <module>i2f-convert</module>
+        <module>i2f-crypto-impl</module>
+        <module>i2f-crypto-std</module>
+        <module>i2f-data-processor</module>
+        <module>i2f-database</module>
+        <module>i2f-database-dialect</module>
+        <module>i2f-database-metadata-bean</module>
+        <module>i2f-database-metadata-data</module>
+        <module>i2f-database-metadata-impl</module>
+        <module>i2f-database-metadata-std</module>
+        <module>i2f-database-type</module>
+        <module>i2f-datetime</module>
+        <module>i2f-detegate</module>
+        <module>i2f-dict</module>
+        <module>i2f-enums</module>
+        <module>i2f-environment-impl</module>
+        <module>i2f-environment-std</module>
+        <module>i2f-event</module>
+        <module>i2f-exception</module>
+        <module>i2f-features</module>
+        <module>i2f-firewall</module>
+        <module>i2f-form</module>
+        <module>i2f-form-url-encoded</module>
+        <module>i2f-functional</module>
+        <module>i2f-functional-lambda</module>
+        <module>i2f-geo</module>
+        <module>i2f-graphics</module>
         <module>i2f-graphics-2d</module>
         <module>i2f-graphics-3d</module>
-        <module>i2f-graphics</module>
-        <module>i2f-geo</module>
-        <module>i2f-codec-impl</module>
-        <module>i2f-io-stream</module>
-        <module>i2f-match</module>
-        <module>i2f-iterator</module>
-        <module>i2f-reference</module>
-        <module>i2f-comparator</module>
-        <module>i2f-serialize-impl</module>
-        <module>i2f-os</module>
-        <module>i2f-robot</module>
-        <module>i2f-native-windows</module>
-        <module>i2f-native-core</module>
-        <module>i2f-native-windows-easyx</module>
-        <module>i2f-jdbc-proxy</module>
-        <module>i2f-jdbc-bql</module>
-        <module>i2f-text</module>
-        <module>i2f-xml</module>
-        <module>i2f-io-file</module>
-        <module>i2f-otpauth</module>
-        <module>i2f-bytes</module>
-        <module>test-features</module>
-        <module>i2f-compiler</module>
-        <module>i2f-detegate</module>
-        <module>i2f-cache</module>
-        <module>i2f-lru-cache</module>
-        <module>i2f-features</module>
-        <module>i2f-compress-impl</module>
-        <module>i2f-http-proxy</module>
-        <module>i2f-lock</module>
-        <module>i2f-io-filesystem</module>
-        <module>i2f-log</module>
-        <module>i2f-properties</module>
-        <module>i2f-form-url-encoded</module>
-        <module>i2f-code</module>
-        <module>i2f-resp</module>
-        <module>i2f-swl</module>
-        <module>i2f-console-color</module>
-        <module>i2f-agent</module>
-        <module>i2f-jvm</module>
-        <module>i2f-script</module>
-        <module>i2f-limit</module>
-        <module>i2f-pool</module>
-        <module>i2f-context-impl</module>
-        <module>i2f-environment-impl</module>
-        <module>i2f-event</module>
-        <module>i2f-i18n</module>
-        <module>i2f-jdbc-proxy-xml</module>
-        <module>i2f-algo</module>
-        <module>i2f-dict</module>
-        <module>i2f-check-filter</module>
         <module>i2f-hash</module>
-        <module>i2f-data-processor</module>
-        <module>i2f-lifecycle</module>
-        <module>i2f-template-render</module>
-        <module>i2f-number-idcard</module>
-        <module>i2f-datetime</module>
-        <module>i2f-search</module>
-        <module>i2f-verifycode</module>
-        <module>i2f-authentication</module>
-        <module>i2f-launcher</module>
-        <module>i2f-database-metadata-data</module>
-        <module>i2f-database-metadata-std</module>
-        <module>i2f-database-metadata-impl</module>
-        <module>i2f-database-metadata-bean</module>
+        <module>i2f-http-proxy</module>
+        <module>i2f-i18n</module>
+        <module>i2f-image-impl</module>
+        <module>i2f-image-std</module>
+        <module>i2f-invokable</module>
+        <module>i2f-io-file</module>
+        <module>i2f-io-filesystem</module>
+        <module>i2f-io-stream</module>
+        <module>i2f-iterator</module>
         <module>i2f-javacode-graph</module>
+        <module>i2f-jdbc-bql</module>
+        <module>i2f-jdbc-data</module>
+        <module>i2f-jdbc-impl</module>
+        <module>i2f-jdbc-procedure</module>
+        <module>i2f-jdbc-proxy</module>
+        <module>i2f-jdbc-proxy-xml</module>
+        <module>i2f-jdbc-std</module>
+        <module>i2f-jdk-all</module>
+        <module>i2f-jvm</module>
+        <module>i2f-lambda</module>
+        <module>i2f-launcher</module>
+        <module>i2f-lifecycle</module>
+        <module>i2f-limit</module>
+        <module>i2f-lock</module>
+        <module>i2f-log</module>
+        <module>i2f-log-std</module>
+        <module>i2f-lru-cache</module>
+        <module>i2f-lru-map</module>
+        <module>i2f-match</module>
+        <module>i2f-match-std</module>
+        <module>i2f-math</module>
+        <module>i2f-native-core</module>
+        <module>i2f-native-windows</module>
+        <module>i2f-native-windows-easyx</module>
+        <module>i2f-network</module>
+        <module>i2f-number-idcard</module>
+        <module>i2f-os</module>
+        <module>i2f-otpauth</module>
+        <module>i2f-packet</module>
+        <module>i2f-page</module>
+        <module>i2f-pool</module>
+        <module>i2f-properties</module>
+        <module>i2f-proxy</module>
+        <module>i2f-proxy-handlers</module>
+        <module>i2f-proxy-std</module>
+        <module>i2f-reference</module>
+        <module>i2f-reflect</module>
+        <module>i2f-resources</module>
+        <module>i2f-resp</module>
+        <module>i2f-robot</module>
+        <module>i2f-rowset</module>
+        <module>i2f-script</module>
+        <module>i2f-search</module>
+        <module>i2f-serialize-impl</module>
+        <module>i2f-serialize-std</module>
+        <module>i2f-sm-crypto</module>
+        <module>i2f-sm-crypto-swl</module>
+        <module>i2f-spi</module>
+        <module>i2f-std-const</module>
+        <module>i2f-streaming</module>
+        <module>i2f-swl</module>
+        <module>i2f-swl-std</module>
+        <module>i2f-template-render</module>
+        <module>i2f-text</module>
+        <module>i2f-thread</module>
+        <module>i2f-trace</module>
         <module>i2f-translate</module>
         <module>i2f-translate-en2zh</module>
         <module>i2f-translate-zh2pinyin</module>
-        <module>i2f-firewall</module>
-        <module>i2f-jdbc-data</module>
-        <module>i2f-jdbc-std</module>
-        <module>i2f-codec-std</module>
-        <module>i2f-serialize-std</module>
+        <module>i2f-tuple-impl</module>
         <module>i2f-tuple-std</module>
-        <module>i2f-clock-std</module>
+        <module>i2f-typeof</module>
+        <module>i2f-uid-impl</module>
         <module>i2f-uid-std</module>
-        <module>i2f-compress-std</module>
-        <module>i2f-context-std</module>
-        <module>i2f-environment-std</module>
-        <module>i2f-crypto-std</module>
-        <module>i2f-image-std</module>
-        <module>i2f-jdbc-procedure</module>
-        <module>i2f-invokable</module>
-        <module>i2f-bindsql-stringify</module>
-        <module>i2f-form</module>
-        <module>i2f-database-dialect</module>
-        <module>i2f-proxy-std</module>
-        <module>i2f-log-std</module>
-        <module>i2f-proxy-handlers</module>
-        <module>i2f-cache-std</module>
-        <module>i2f-std-const</module>
+        <module>i2f-unsafe</module>
+        <module>i2f-verifycode</module>
         <module>i2f-workflow</module>
-        <module>i2f-sm-crypto</module>
-        <module>i2f-sm-crypto-swl</module>
-        <module>i2f-swl-std</module>
-        <module>i2f-match-std</module>
-        <module>i2f-ai-std</module>
-        <module>i2f-rowset</module>
+        <module>i2f-xml</module>
 
-
+        <module>test-features</module>
     </modules>
 
 

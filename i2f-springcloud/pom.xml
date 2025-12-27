@@ -6,36 +6,37 @@
     <parent>
         <groupId>i2f.turbo</groupId>
         <artifactId>i2f-turbo-java</artifactId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
 
     <artifactId>i2f-springcloud</artifactId>
 
     <packaging>pom</packaging>
     <modules>
-        <module>i2f-springcloud-refresh-starter</module>
-        <module>i2f-springcloud-discovery-starter</module>
-        <module>i2f-springcloud-gateway-starter</module>
-        <module>i2f-springcloud-gateway-swl-starter</module>
-        <module>test-gateway-swl</module>
+        <module>i2f-springcloud-actuator-admin-starter</module>
+        <module>i2f-springcloud-actuator-starter</module>
         <module>i2f-springcloud-alibaba-nacos-starter</module>
         <module>i2f-springcloud-alibaba-seata-starter</module>
         <module>i2f-springcloud-alibaba-sentinel-starter</module>
-        <module>i2f-springcloud-netflix-eureka-server-starter</module>
-        <module>i2f-springcloud-netflix-eureka-client-starter</module>
-        <module>i2f-springcloud-netflix-openfeign-starter</module>
-        <module>i2f-springcloud-netflix-hystrix-starter</module>
-        <module>i2f-springcloud-netflix-ribbon-starter</module>
-        <module>i2f-springcloud-netflix-zuul-starter</module>
-        <module>i2f-springcloud-actuator-admin-starter</module>
-        <module>i2f-springcloud-actuator-starter</module>
-        <module>i2f-springcloud-config-server-starter</module>
         <module>i2f-springcloud-config-client-starter</module>
-        <module>i2f-springcloud-loadbalancer-starter</module>
-        <module>i2f-springcloud-sleuth-starter</module>
-        <module>i2f-springcloud-zipkin-starter</module>
+        <module>i2f-springcloud-config-server-starter</module>
         <module>i2f-springcloud-consul-starter</module>
         <module>i2f-springcloud-discovery-server-starter</module>
+        <module>i2f-springcloud-discovery-starter</module>
+        <module>i2f-springcloud-gateway-starter</module>
+        <module>i2f-springcloud-gateway-swl-starter</module>
+        <module>i2f-springcloud-loadbalancer-starter</module>
+        <module>i2f-springcloud-netflix-eureka-client-starter</module>
+        <module>i2f-springcloud-netflix-eureka-server-starter</module>
+        <module>i2f-springcloud-netflix-hystrix-starter</module>
+        <module>i2f-springcloud-netflix-openfeign-starter</module>
+        <module>i2f-springcloud-netflix-ribbon-starter</module>
+        <module>i2f-springcloud-netflix-zuul-starter</module>
+        <module>i2f-springcloud-refresh-starter</module>
+        <module>i2f-springcloud-sleuth-starter</module>
+        <module>i2f-springcloud-zipkin-starter</module>
+
+        <module>test-gateway-swl</module>
     </modules>
 
 

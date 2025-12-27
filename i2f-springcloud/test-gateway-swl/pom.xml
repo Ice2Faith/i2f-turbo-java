@@ -6,7 +6,7 @@
     <parent>
         <groupId>i2f.turbo</groupId>
         <artifactId>i2f-springcloud</artifactId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
 
     <artifactId>test-gateway-swl</artifactId>
@@ -57,13 +57,13 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springcloud-gateway-starter</artifactId>
-            <version>1.0</version>
+            <version>1.0-jdk8</version>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springcloud-gateway-swl-starter</artifactId>
-            <version>1.0</version>
+            <version>1.0-jdk8</version>
         </dependency>
     </dependencies>
 

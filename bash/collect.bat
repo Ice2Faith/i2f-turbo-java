@@ -2,7 +2,8 @@
 echo collect begin ...
 
 set src_path=..
-set dst_path=.\deploy
+set dst_path=.\deploy-jdk8
+set bak_path=.\backup-jdk8
 set target_dir=target
 
 :: 脚本功能
@@ -10,10 +11,10 @@ set target_dir=target
 :: 也就是说，deploy 是最新的打包结果，backup 是上一次打包结果
 
 mkdir %dst_path%
-mkdir .\backup
+mkdir %bak_path%
 
-rd /q /s .\backup
-move /Y %dst_path% .\backup
+rd /q /s %bak_path%
+move /Y %dst_path% %bak_path%
 
 rd /q /s %dst_path%
 mkdir %dst_path%

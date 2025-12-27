@@ -6,7 +6,7 @@
     <parent>
         <artifactId>i2f-springboot</artifactId>
         <groupId>i2f.turbo</groupId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
 
     <artifactId>i2f-springboot-dynamic-datasource-starter</artifactId>

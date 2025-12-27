@@ -6,12 +6,17 @@
     <parent>
         <groupId>i2f.turbo</groupId>
         <artifactId>i2f-spring</artifactId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
 
     <artifactId>i2f-spring-all</artifactId>
 
     <dependencies>
+       <!-- <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-spring-all</artifactId>
+        </dependency> -->
+
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-authentication</artifactId>
@@ -40,7 +45,6 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-web</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>i2f-turbo-java</artifactId>
         <groupId>i2f.turbo</groupId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,38 +13,39 @@
 
     <packaging>pom</packaging>
     <modules>
+        <module>i2f-springboot-activity-starter</module>
+        <module>i2f-springboot-dubbo-starter</module>
         <module>i2f-springboot-dynamic-datasource-starter</module>
-        <module>i2f-springboot-jdbc-bql-starter</module>
-        <module>test-springboot</module>
-        <module>i2f-springboot-spring-starter</module>
-        <module>i2f-springboot-xxl-job-starter</module>
-        <module>i2f-springboot-swagger2-starter</module>
-        <module>i2f-springboot-redisson-starter</module>
         <module>i2f-springboot-encrypt-property-starter</module>
-        <module>i2f-springboot-jackson-sensible-starter</module>
-        <module>i2f-springboot-redis-starter</module>
-        <module>i2f-springboot-totp-starter</module>
         <module>i2f-springboot-http-proxy-starter</module>
-        <module>i2f-springboot-zookeeper-starter</module>
+        <module>i2f-springboot-jackson-sensible-starter</module>
+        <module>i2f-springboot-jdbc-bql-starter</module>
+        <module>i2f-springboot-kafka-starter</module>
+        <module>i2f-springboot-limit-starter</module>
+<!--        <module>i2f-springboot-maven-project</module>-->
+        <module>i2f-springboot-mybatis-starter</module>
+        <module>i2f-springboot-nginx-rtmp-auth-server-starter</module>
+        <module>i2f-springboot-ops-starter</module>
+        <module>i2f-springboot-oss-minio-starter</module>
+        <module>i2f-springboot-quartz-starter</module>
+        <module>i2f-springboot-rabbitmq-starter</module>
+        <module>i2f-springboot-redis-starter</module>
+        <module>i2f-springboot-redisson-starter</module>
+        <module>i2f-springboot-security-starter</module>
+        <module>i2f-springboot-shiro-starter</module>
+        <module>i2f-springboot-spring-starter</module>
+        <module>i2f-springboot-ssh-tunnel-starter</module>
+        <module>i2f-springboot-swagger2-starter</module>
         <module>i2f-springboot-swl-starter</module>
+        <module>i2f-springboot-totp-starter</module>
+        <module>i2f-springboot-trace-mdc-starter</module>
+        <module>i2f-springboot-websocket-starter</module>
+        <module>i2f-springboot-xxl-job-starter</module>
+        <module>i2f-springboot-zookeeper-starter</module>
+
+        <module>test-springboot</module>
         <module>test-swl-starter</module>
         <module>test-xxl-job</module>
-        <module>i2f-springboot-mybatis-starter</module>
-        <module>i2f-springboot-trace-mdc-starter</module>
-        <module>i2f-springboot-oss-minio-starter</module>
-        <module>i2f-springboot-shiro-starter</module>
-        <module>i2f-springboot-security-starter</module>
-        <module>i2f-springboot-activity-starter</module>
-        <module>i2f-springboot-kafka-starter</module>
-        <module>i2f-springboot-rabbitmq-starter</module>
-        <module>i2f-springboot-quartz-starter</module>
-        <module>i2f-springboot-dubbo-starter</module>
-        <module>i2f-springboot-websocket-starter</module>
-        <module>i2f-springboot-nginx-rtmp-auth-server-starter</module>
-        <module>i2f-springboot-ssh-tunnel-starter</module>
-        <module>i2f-springboot-ops-starter</module>
-        <module>i2f-springboot-limit-starter</module>
-        <!--        <module>i2f-springboot-maven-project</module>-->
     </modules>
 
 

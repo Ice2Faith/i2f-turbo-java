@@ -6,18 +6,17 @@
     <parent>
         <groupId>i2f.turbo</groupId>
         <artifactId>i2f-turbo-java</artifactId>
-        <version>1.0</version>
+        <version>1.0-jdk8</version>
     </parent>
 
     <artifactId>i2f-tools</artifactId>
 
     <packaging>pom</packaging>
     <modules>
-
-        <module>i2f-tools-source-copier</module>
-<!--        <module>i2f-tools-face-recognizer</module>-->
 <!--        <module>i2f-tools-agent</module>-->
 <!--        <module>i2f-tools-encrypt</module>-->
+<!--        <module>i2f-tools-face-recognizer</module>-->
+        <module>i2f-tools-source-copier</module>
     </modules>
 
     <properties>
