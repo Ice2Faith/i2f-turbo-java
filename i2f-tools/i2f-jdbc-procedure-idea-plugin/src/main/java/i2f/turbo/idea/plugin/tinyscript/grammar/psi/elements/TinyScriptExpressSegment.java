@@ -2,66 +2,67 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
+
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptExpressSegment extends PsiElement {
 
-  @Nullable
-  TinyScriptConstValue getConstValue();
+    @Nullable
+    TinyScriptConstValue getConstValue();
 
-  @Nullable
-  TinyScriptControlSegment getControlSegment();
+    @Nullable
+    TinyScriptControlSegment getControlSegment();
 
-  @Nullable
-  TinyScriptDebuggerSegment getDebuggerSegment();
+    @Nullable
+    TinyScriptDebuggerSegment getDebuggerSegment();
 
-  @Nullable
-  TinyScriptDeclareFunction getDeclareFunction();
+    @Nullable
+    TinyScriptDeclareFunction getDeclareFunction();
 
-  @Nullable
-  TinyScriptEqualValue getEqualValue();
+    @Nullable
+    TinyScriptEqualValue getEqualValue();
 
-  @Nullable
-  TinyScriptForSegment getForSegment();
+    @Nullable
+    TinyScriptForSegment getForSegment();
 
-  @Nullable
-  TinyScriptForeachSegment getForeachSegment();
+    @Nullable
+    TinyScriptForeachSegment getForeachSegment();
 
-  @Nullable
-  TinyScriptIfSegment getIfSegment();
+    @Nullable
+    TinyScriptIfSegment getIfSegment();
 
-  @Nullable
-  TinyScriptInvokeFunction getInvokeFunction();
+    @Nullable
+    TinyScriptInvokeFunction getInvokeFunction();
 
-  @Nullable
-  TinyScriptJsonValue getJsonValue();
+    @Nullable
+    TinyScriptJsonValue getJsonValue();
 
-  @Nullable
-  TinyScriptNegtiveSegment getNegtiveSegment();
+    @Nullable
+    TinyScriptNegtiveSegment getNegtiveSegment();
 
-  @Nullable
-  TinyScriptNewInstance getNewInstance();
+    @Nullable
+    TinyScriptNewInstance getNewInstance();
 
-  @Nullable
-  TinyScriptParenSegment getParenSegment();
+    @Nullable
+    TinyScriptParenSegment getParenSegment();
 
-  @Nullable
-  TinyScriptPrefixOperatorSegment getPrefixOperatorSegment();
+    @Nullable
+    TinyScriptPrefixOperatorSegment getPrefixOperatorSegment();
 
-  @Nullable
-  TinyScriptRefValue getRefValue();
+    @Nullable
+    TinyScriptRefValue getRefValue();
 
-  @Nullable
-  TinyScriptStaticEnumValue getStaticEnumValue();
+    @Nullable
+    TinyScriptStaticEnumValue getStaticEnumValue();
 
-  @Nullable
-  TinyScriptThrowSegment getThrowSegment();
+    @Nullable
+    TinyScriptThrowSegment getThrowSegment();
 
-  @Nullable
-  TinyScriptTrySegment getTrySegment();
+    @Nullable
+    TinyScriptTrySegment getTrySegment();
 
-  @Nullable
-  TinyScriptWhileSegment getWhileSegment();
+    @Nullable
+    TinyScriptWhileSegment getWhileSegment();
 
 }

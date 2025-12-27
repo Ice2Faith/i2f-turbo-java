@@ -1,10 +1,10 @@
 package i2f.springboot.shiro.handler;
 
-import org.apache.shiro.authc.AuthenticationException;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.shiro.authc.AuthenticationException;
+
 import java.io.IOException;
 
 /**

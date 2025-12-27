@@ -1,10 +1,9 @@
 package i2f.springboot.websocket;
 
+import jakarta.websocket.server.ServerEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-
-import jakarta.websocket.server.ServerEndpoint;
 
 /**
  * @author Ice2Faith

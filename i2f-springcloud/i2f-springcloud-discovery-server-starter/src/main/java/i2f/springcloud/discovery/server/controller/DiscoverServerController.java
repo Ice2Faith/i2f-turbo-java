@@ -2,6 +2,7 @@ package i2f.springcloud.discovery.server.controller;
 
 import i2f.springcloud.discovery.server.manager.IServiceInstanceManager;
 import i2f.springcloud.discovery.server.properties.DiscoveryServerProperties;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Duration;

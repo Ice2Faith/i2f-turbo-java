@@ -1,11 +1,10 @@
 package i2f.springboot.spring.web.trace;
 
 import i2f.web.filter.TraceFilter;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 
 /**
  * @author Ice2Faith

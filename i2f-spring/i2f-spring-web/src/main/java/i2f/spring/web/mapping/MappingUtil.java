@@ -1,5 +1,6 @@
 package i2f.spring.web.mapping;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import org.springframework.http.server.RequestPath;
 import org.springframework.web.method.HandlerMethod;
@@ -9,7 +10,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPattern;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.Collections;

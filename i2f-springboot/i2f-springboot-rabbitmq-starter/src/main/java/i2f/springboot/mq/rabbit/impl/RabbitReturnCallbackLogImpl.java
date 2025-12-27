@@ -14,7 +14,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 public class RabbitReturnCallbackLogImpl implements RabbitTemplate.ReturnsCallback {
     @Override
     public void returnedMessage(ReturnedMessage msg) {
-        call(msg.getMessage(),msg.getReplyCode(),msg.getReplyText(),msg.getExchange(),msg.getRoutingKey());
+        call(msg.getMessage(), msg.getReplyCode(), msg.getReplyText(), msg.getExchange(), msg.getRoutingKey());
     }
 
     public void call(Message message, int replyCode, String replyText, String exchange, String routingKey) {

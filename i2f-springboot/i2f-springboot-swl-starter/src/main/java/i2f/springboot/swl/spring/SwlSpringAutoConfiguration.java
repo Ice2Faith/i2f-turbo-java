@@ -11,6 +11,7 @@ import i2f.swl.std.ISwlMessageDigester;
 import i2f.swl.std.ISwlObfuscator;
 import i2f.swl.std.supplier.ISwlAsymmetricEncryptorSupplier;
 import i2f.swl.std.supplier.ISwlSymmetricEncryptorSupplier;
+import jakarta.servlet.DispatcherType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.BeanFactory;
@@ -21,7 +22,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 
-import jakarta.servlet.DispatcherType;
 import java.util.concurrent.TimeUnit;
 
 /**

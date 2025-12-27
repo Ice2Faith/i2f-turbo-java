@@ -13,6 +13,7 @@ import i2f.springboot.shiro.handler.ILogoutHandler;
 import i2f.springboot.shiro.impl.UsernamePasswordRealm;
 import i2f.springboot.shiro.token.AbstractShiroTokenHolder;
 import i2f.springboot.shiro.token.CustomerTokenRealm;
+import jakarta.servlet.Filter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
-import jakarta.servlet.Filter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

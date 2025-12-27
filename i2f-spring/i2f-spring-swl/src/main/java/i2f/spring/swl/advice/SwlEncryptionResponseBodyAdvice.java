@@ -8,6 +8,7 @@ import i2f.swl.cert.data.SwlCert;
 import i2f.swl.cert.impl.SwlResourceCertManager;
 import i2f.swl.core.exchanger.SwlExchanger;
 import i2f.swl.data.SwlData;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.Order;
@@ -21,7 +22,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 

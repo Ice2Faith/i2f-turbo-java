@@ -17,7 +17,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -107,8 +106,8 @@ public class SecurityAutoConfiguration {
 
     @ConditionalOnMissingBean(WebSecurityCustomizer.class)
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer(){
-        return customizer->{
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return customizer -> {
             if (securityConfigListener != null) {
                 boolean next = securityConfigListener.onBeforeWebConfig(customizer, this);
                 if (!next) {
@@ -148,24 +147,24 @@ public class SecurityAutoConfiguration {
 
         // 配置跨域
         if (enableCors) {
-            http.cors(configurer->{
+            http.cors(configurer -> {
 
             });
             log.info("SecurityConfig enable cors.");
         } else {
-            http.cors(configurer->{
+            http.cors(configurer -> {
                 configurer.disable();
             });
             log.info("SecurityConfig disabled cors.");
         }
         // 配置csrf
         if (enableCsrf) {
-            http.csrf(configurer->{
+            http.csrf(configurer -> {
 
             });
             log.info("SecurityConfig enable csrf.");
         } else {
-            http.csrf(configurer->{
+            http.csrf(configurer -> {
                 configurer.disable();
             });
             log.info("SecurityConfig disable csrf.");
@@ -173,12 +172,12 @@ public class SecurityAutoConfiguration {
 
         // 配置httpBasic
         if (enableHttpBasic) {
-            http.httpBasic(configurer->{
+            http.httpBasic(configurer -> {
 
             });
             log.info("SecurityConfig enable http-basic.");
         } else {
-            http.httpBasic(configurer->{
+            http.httpBasic(configurer -> {
                 configurer.disable();
             });
             log.info("SecurityConfig disable http-basic.");
@@ -195,7 +194,7 @@ public class SecurityAutoConfiguration {
                 registry.requestMatchers(HttpMethod.GET,
                                 staticResourceList.split(","))
                         .permitAll();
-                    });
+            });
 
             log.info("SecurityConfig static resource config:" + staticResourceList);
         }
@@ -231,14 +230,14 @@ public class SecurityAutoConfiguration {
             } else if (String.valueOf(SessionCreationPolicy.IF_REQUIRED).equals(sessionCreationPolicy)) {
                 policy = SessionCreationPolicy.IF_REQUIRED;
             }
-            SessionCreationPolicy sessionPolicy=policy;
-            http.sessionManagement(configurer->{
+            SessionCreationPolicy sessionPolicy = policy;
+            http.sessionManagement(configurer -> {
                 configurer.sessionCreationPolicy(sessionPolicy);
             });
             log.info("SecurityConfig customer session policy:" + policy);
         } else {
             // 配置默认无状态Session方式
-            http.sessionManagement(configurer->{
+            http.sessionManagement(configurer -> {
                 configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
             });
             log.info("SecurityConfig default session policy:" + SessionCreationPolicy.STATELESS);
@@ -259,7 +258,7 @@ public class SecurityAutoConfiguration {
 
         if (enableFormLogin) {
             // 配置登录URL
-            http.formLogin(configurer->{
+            http.formLogin(configurer -> {
                 configurer.loginProcessingUrl(loginUrl)
                         .usernameParameter(loginUsername)
                         .passwordParameter(loginPassword)
@@ -269,7 +268,7 @@ public class SecurityAutoConfiguration {
             log.info("SecurityConfig customer config form-login config.");
         } else {
             // 禁用formLogin,也就不会再进入 UsernamePasswordAuthenticationFilter
-            http.formLogin(configurer->{
+            http.formLogin(configurer -> {
                 configurer.disable();
             });
             log.info("SecurityConfig disable form-login.");
@@ -293,7 +292,7 @@ public class SecurityAutoConfiguration {
         }
 
         // 配置登录URL允许匿名访问
-        http.authorizeHttpRequests(registry->{
+        http.authorizeHttpRequests(registry -> {
             registry.requestMatchers(loginUrl)
                     .anonymous();
         });
@@ -303,11 +302,11 @@ public class SecurityAutoConfiguration {
         }
 
         // 配置登出处理器
-        http.logout(configurer->{
+        http.logout(configurer -> {
             configurer.logoutUrl(logoutUrl);
         });
         if (logoutSuccessHandler != null) {
-            http.logout(configurer->{
+            http.logout(configurer -> {
                 configurer.logoutSuccessHandler(logoutSuccessHandler);
             });
             log.info("SecurityConfig customer logout success handler.");
@@ -325,7 +324,7 @@ public class SecurityAutoConfiguration {
 
         // 配置认证失败处理类
         if (authorizeExceptionHandler != null) {
-            http.exceptionHandling(configurer->{
+            http.exceptionHandling(configurer -> {
                 configurer.authenticationEntryPoint(authorizeExceptionHandler);
             });
             log.info("SecurityConfig customer unauthorized handler config.");
@@ -344,7 +343,6 @@ public class SecurityAutoConfiguration {
         return http.build();
 
     }
-
 
 
 }

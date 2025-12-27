@@ -9,6 +9,7 @@ import i2f.jdbc.data.QueryResult;
 import i2f.page.ApiPage;
 import i2f.page.Page;
 import i2f.springboot.dynamic.datasource.aop.DataSource;
+import jakarta.annotation.Resource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -17,7 +18,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 /**

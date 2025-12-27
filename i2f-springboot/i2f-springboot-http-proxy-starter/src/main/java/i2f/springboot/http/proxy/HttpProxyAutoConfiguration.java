@@ -3,6 +3,7 @@ package i2f.springboot.http.proxy;
 
 import i2f.spring.web.proxy.HttpProxyFilter;
 import i2f.spring.web.proxy.HttpProxyHandler;
+import jakarta.servlet.DispatcherType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringUtils;
 
-import jakarta.servlet.DispatcherType;
 import java.util.List;
 
 /**

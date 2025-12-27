@@ -2,15 +2,16 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
+
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptInvokeFunction extends PsiElement {
 
-  @NotNull
-  List<TinyScriptFunctionCall> getFunctionCallList();
+    @NotNull
+    List<TinyScriptFunctionCall> getFunctionCallList();
 
-  @Nullable
-  TinyScriptRefCall getRefCall();
+    @Nullable
+    TinyScriptRefCall getRefCall();
 
 }

@@ -2,14 +2,13 @@ package i2f.springboot.security.def.token;
 
 import i2f.springboot.security.impl.token.AbstractAuthenticationTokenFilter;
 import i2f.springboot.security.impl.token.AuthenticationTokenFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @author Ice2Faith

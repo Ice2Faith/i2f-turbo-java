@@ -3,10 +3,9 @@ package i2f.spring.authentication.forward;
 
 import i2f.resp.ApiResp;
 import i2f.web.servlet.ServletContextUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Ice2Faith
