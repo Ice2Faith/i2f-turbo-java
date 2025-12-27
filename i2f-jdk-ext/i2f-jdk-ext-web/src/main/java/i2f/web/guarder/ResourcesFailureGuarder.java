@@ -4,7 +4,7 @@ import i2f.cache.std.expire.IExpireCache;
 import i2f.web.servlet.ServletContextUtil;
 import lombok.Data;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.concurrent.TimeUnit;
 
 /**

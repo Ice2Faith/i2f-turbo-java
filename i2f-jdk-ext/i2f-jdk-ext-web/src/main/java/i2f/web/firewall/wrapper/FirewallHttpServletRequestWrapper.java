@@ -5,10 +5,10 @@ import i2f.firewall.exception.FirewallException;
 import i2f.web.firewall.context.FirewallContext;
 import i2f.web.firewall.util.FirewallUtils;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.Part;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.Part;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Enumeration;

@@ -1,6 +1,6 @@
 package i2f.springboot.nginx.rtmp.auth.server;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
