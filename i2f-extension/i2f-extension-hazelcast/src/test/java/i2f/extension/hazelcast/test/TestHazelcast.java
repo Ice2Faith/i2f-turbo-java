@@ -12,13 +12,13 @@ import i2f.extension.hazelcast.HazelcastUtil;
  */
 public class TestHazelcast {
     public static void main(String[] args) throws Exception {
-        ClientConfig config=new ClientConfig();
+        ClientConfig config = new ClientConfig();
         config.setClusterName("demo");
 
         HazelcastInstance client = HazelcastUtil.getDefaultInstance("demo");
         IMap<Object, Object> map = client.getMap("map");
 
-        map.put("1","m1");
+        map.put("1", "m1");
 
         Object obj = map.get("1");
         System.out.println(obj);

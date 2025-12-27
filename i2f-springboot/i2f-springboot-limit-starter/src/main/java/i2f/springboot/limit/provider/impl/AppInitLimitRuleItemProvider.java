@@ -32,6 +32,6 @@ public class AppInitLimitRuleItemProvider implements LimitRuleItemProvider {
     @Override
     public List<LimitRuleItem> getRules(String appName) {
         List<LimitRuleItem> rules = properties.getRules();
-        return rules==null?new ArrayList<>():rules;
+        return rules == null ? new ArrayList<>() : rules;
     }
 }

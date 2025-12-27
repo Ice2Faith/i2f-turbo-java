@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MongoDbMeta {
     private String host;
-    private int port=27017;
+    private int port = 27017;
     private String source;
     private String username;
     private String password;
-    private int connectTimeout=30000;
+    private int connectTimeout = 30000;
 }

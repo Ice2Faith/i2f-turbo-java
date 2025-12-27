@@ -23,57 +23,58 @@ public class MongoDbUtil {
     protected MongoClient mongoClient;
     protected MongoDatabase database;
     protected MongoCollection<Document> collection;
-    public MongoDbUtil(MongoClient mongoClient){
-        this.mongoClient=mongoClient;
+
+    public MongoDbUtil(MongoClient mongoClient) {
+        this.mongoClient = mongoClient;
     }
 
-    public MongoDbUtil(MongoDbMeta meta){
-        this.mongoClient=getClient(meta);
+    public MongoDbUtil(MongoDbMeta meta) {
+        this.mongoClient = getClient(meta);
     }
 
-    public static MongoClient getClient(MongoDbMeta meta){
-        MongoCredential credential=MongoCredential.createPlainCredential(meta.getUsername(),meta.getSource(),meta.getPassword().toCharArray());
-        MongoClient client=new MongoClient(
-                new ServerAddress(meta.getHost(),meta.getPort()),
+    public static MongoClient getClient(MongoDbMeta meta) {
+        MongoCredential credential = MongoCredential.createPlainCredential(meta.getUsername(), meta.getSource(), meta.getPassword().toCharArray());
+        MongoClient client = new MongoClient(
+                new ServerAddress(meta.getHost(), meta.getPort()),
                 credential,
                 MongoClientOptions.builder()
-                .connectTimeout(meta.getConnectTimeout()).build());
+                        .connectTimeout(meta.getConnectTimeout()).build());
         return client;
     }
 
-    public MongoDatabase getDatabase(String database){
-        this.database=mongoClient.getDatabase(database);
+    public MongoDatabase getDatabase(String database) {
+        this.database = mongoClient.getDatabase(database);
         return this.database;
     }
 
-    public MongoCollection<Document> getCollection(String collection){
-        this.collection=database.getCollection(collection);
+    public MongoCollection<Document> getCollection(String collection) {
+        this.collection = database.getCollection(collection);
         return this.collection;
     }
 
-    public void insert(Document doc){
+    public void insert(Document doc) {
         this.collection.insertOne(doc);
     }
 
-    public void insert(Map<String,Object> map){
-        Document doc=new Document(map);
+    public void insert(Map<String, Object> map) {
+        Document doc = new Document(map);
         insert(doc);
     }
 
-    public void insert(Object bean){
-        Map<String,Object> map=new HashMap<>();
-        ReflectResolver.bean2map(bean,map);
+    public void insert(Object bean) {
+        Map<String, Object> map = new HashMap<>();
+        ReflectResolver.bean2map(bean, map);
         insert(map);
     }
 
-    public void insertBatch(List<Document> list){
+    public void insertBatch(List<Document> list) {
         this.collection.insertMany(list);
     }
 
-    public void insertBatchMap(List<Map<String,Object>> list){
-        List<Document> docs=new ArrayList<>(list.size());
-        for(Map<String,Object> item : list){
-            Document doc=new Document(item);
+    public void insertBatchMap(List<Map<String, Object>> list) {
+        List<Document> docs = new ArrayList<>(list.size());
+        for (Map<String, Object> item : list) {
+            Document doc = new Document(item);
             docs.add(doc);
         }
         insertBatch(docs);

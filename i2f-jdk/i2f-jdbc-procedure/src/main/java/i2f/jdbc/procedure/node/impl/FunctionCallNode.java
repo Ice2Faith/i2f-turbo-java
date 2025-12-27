@@ -28,7 +28,6 @@ public class FunctionCallNode extends AbstractExecutorNode {
     }
 
 
-
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);

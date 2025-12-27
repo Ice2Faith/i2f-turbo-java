@@ -107,11 +107,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
     protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
 
-    protected final AtomicBoolean enablePrepareParamCache=new AtomicBoolean(true);
-    protected final AtomicInteger prepareParamL2CacheSize=new AtomicInteger(30);
-    protected static final ThreadLocal<WeakReference<Map<String,Object>>> LOCAL_PREPARE_PARAM_L1 =new ThreadLocal<>();
-    protected static final ThreadLocal<LinkedList<WeakReference<Map<String,Object>>>> LOCAL_PREPARE_PARAM_L2 =new ThreadLocal<>();
-    protected static final ThreadLocalRandom RANDOM=ThreadLocalRandom.current();
+    protected final AtomicBoolean enablePrepareParamCache = new AtomicBoolean(true);
+    protected final AtomicInteger prepareParamL2CacheSize = new AtomicInteger(30);
+    protected static final ThreadLocal<WeakReference<Map<String, Object>>> LOCAL_PREPARE_PARAM_L1 = new ThreadLocal<>();
+    protected static final ThreadLocal<LinkedList<WeakReference<Map<String, Object>>>> LOCAL_PREPARE_PARAM_L2 = new ThreadLocal<>();
+    protected static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
 
     {
         List<ExecutorNode> list = defaultExecutorNodes();
@@ -312,7 +312,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             for (Map.Entry<String, XProc4jEventListener> entry : map.entrySet()) {
                 XProc4jEventListener listener = entry.getValue();
-                if(listener==null){
+                if (listener == null) {
                     continue;
                 }
                 if (listener.support(event)) {
@@ -797,20 +797,20 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     @Override
     public Map<String, Object> prepareParams(Map<String, Object> params) {
-        if(enablePrepareParamCache.get()) {
-            if(enablePrepareParamCache.get()) {
+        if (enablePrepareParamCache.get()) {
+            if (enablePrepareParamCache.get()) {
                 WeakReference<Map<String, Object>> ref = LOCAL_PREPARE_PARAM_L1.get();
-                if(ref!=null){
+                if (ref != null) {
                     Map<String, Object> refMap = ref.get();
-                    if(refMap!=null){
-                        if(refMap==params){
+                    if (refMap != null) {
+                        if (refMap == params) {
                             // 这里必须使用 == 判断是否是同一个对象，不能使用equals
                             return params;
                         }
                     }
                 }
             }
-            if(enablePrepareParamCache.get()) {
+            if (enablePrepareParamCache.get()) {
                 LinkedList<WeakReference<Map<String, Object>>> localList = LOCAL_PREPARE_PARAM_L2.get();
                 if (localList != null) {
                     Iterator<WeakReference<Map<String, Object>>> iterator = localList.iterator();
@@ -895,13 +895,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
         reportPreparedParamsEvent(params);
 
-        if(enablePrepareParamCache.get()) {
+        if (enablePrepareParamCache.get()) {
             WeakReference<Map<String, Object>> refCache = new WeakReference<>(params);
-            if(enablePrepareParamCache.get()){
+            if (enablePrepareParamCache.get()) {
                 LOCAL_PREPARE_PARAM_L1.set(refCache);
             }
 
-            if(enablePrepareParamCache.get()) {
+            if (enablePrepareParamCache.get()) {
                 LinkedList<WeakReference<Map<String, Object>>> localList = LOCAL_PREPARE_PARAM_L2.get();
                 if (localList == null) {
                     localList = new LinkedList<>();

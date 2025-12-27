@@ -8,7 +8,7 @@ import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
@@ -67,9 +67,9 @@ public class LangThreadPoolSubmitNode extends AbstractExecutorNode {
             if (result != null) {
                 executor.visitSet(context, result, latch);
             }
-        }catch (Throwable e){
+        } catch (Throwable e) {
             e.printStackTrace();
-            throw new ThrowSignalException(e.getMessage(),e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 

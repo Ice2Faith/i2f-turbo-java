@@ -27,14 +27,14 @@ public class FlinkExecuteNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        StreamExecutionEnvironment execEnv = (StreamExecutionEnvironment)executor.attrValue(FlinkAttrConsts.EXEC_ENV, FeatureConsts.VISIT, node, context);
-        String jobName=executor.convertAs(executor.attrValue(AttrConsts.NAME,FeatureConsts.STRING,node,context),String.class);
+        StreamExecutionEnvironment execEnv = (StreamExecutionEnvironment) executor.attrValue(FlinkAttrConsts.EXEC_ENV, FeatureConsts.VISIT, node, context);
+        String jobName = executor.convertAs(executor.attrValue(AttrConsts.NAME, FeatureConsts.STRING, node, context), String.class);
         try {
             JobExecutionResult res = null;
-            if(jobName!=null && !jobName.isEmpty()){
-                res=execEnv.execute(jobName);
-            }else{
-                res=execEnv.execute();
+            if (jobName != null && !jobName.isEmpty()) {
+                res = execEnv.execute(jobName);
+            } else {
+                res = execEnv.execute();
             }
             String result = node.getTagAttrMap().get(AttrConsts.RESULT);
             if (result != null) {
@@ -42,7 +42,7 @@ public class FlinkExecuteNode extends AbstractExecutorNode {
                 executor.visitSet(context, result, val);
             }
         } catch (Exception e) {
-            throw new ThrowSignalException(e.getMessage(),e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 }

@@ -70,7 +70,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
 
     @Override
     public void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        XmlNode beforeNode=ContextHolder.TRACE_NODE.get();
+        XmlNode beforeNode = ContextHolder.TRACE_NODE.get();
 
         XmlNode.NodeType nodeType = node.getNodeType();
         if (nodeType == XmlNode.NodeType.TEXT
@@ -254,7 +254,7 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 executor.logger().logWarn(() -> e.getMessage(), e);
             }
 
-            if(beforeNode!=null) {
+            if (beforeNode != null) {
                 updateTraceInfo(beforeNode, context, executor);
             }
         }

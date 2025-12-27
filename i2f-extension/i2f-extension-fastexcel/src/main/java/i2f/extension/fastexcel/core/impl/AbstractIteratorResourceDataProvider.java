@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class AbstractIteratorResourceDataProvider<T> implements IDataProvider, Closeable {
     protected Class<T> elemClass;
 
-    protected final AtomicBoolean hasInit=new AtomicBoolean(false);
+    protected final AtomicBoolean hasInit = new AtomicBoolean(false);
     protected transient Iterator<T> iterator;
 
     public AbstractIteratorResourceDataProvider(Class<T> elemClass) {
@@ -30,11 +30,11 @@ public abstract class AbstractIteratorResourceDataProvider<T> implements IDataPr
         return true;
     }
 
-    public Iterator<T> getIterator(){
-        if(hasInit.getAndSet(true)){
+    public Iterator<T> getIterator() {
+        if (hasInit.getAndSet(true)) {
             return this.iterator;
         }
-        this.iterator= initIterator();
+        this.iterator = initIterator();
         return this.iterator;
     }
 
@@ -42,18 +42,18 @@ public abstract class AbstractIteratorResourceDataProvider<T> implements IDataPr
 
     @Override
     public List<?> getData(ExcelExportPage page) {
-        List<T> ret=new LinkedList<>();
+        List<T> ret = new LinkedList<>();
         Iterator<T> iterator = getIterator();
-        if(iterator==null){
+        if (iterator == null) {
             return ret;
         }
-        int count=0;
-        while(count<page.getSize() && iterator.hasNext()){
+        int count = 0;
+        while (count < page.getSize() && iterator.hasNext()) {
             T next = iterator.next();
             ret.add(next);
             count++;
         }
-        if(count<page.getSize()){
+        if (count < page.getSize()) {
             try {
                 close();
             } catch (IOException e) {
@@ -75,7 +75,7 @@ public abstract class AbstractIteratorResourceDataProvider<T> implements IDataPr
         } catch (Exception e) {
 
         }
-        this.iterator=null;
+        this.iterator = null;
     }
 
     public abstract void releaseResource(Iterator<T> iterator) throws Exception;

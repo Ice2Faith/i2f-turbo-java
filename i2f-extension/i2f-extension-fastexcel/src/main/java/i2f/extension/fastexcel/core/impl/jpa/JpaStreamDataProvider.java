@@ -18,13 +18,13 @@ public class JpaStreamDataProvider<T> extends IteratorResourceDataProvider<JdbcT
 
     public JpaStreamDataProvider(DataSource dataSource, Class<T> elemClass, Function<JdbcTemplate, Stream<T>> supplier) {
         super(elemClass);
-        this.supplier=(ctx)->{
-            this.jdbcTemplate=new JdbcTemplate(dataSource);
+        this.supplier = (ctx) -> {
+            this.jdbcTemplate = new JdbcTemplate(dataSource);
             this.stream = supplier.apply(jdbcTemplate);
             return this.stream.iterator();
         };
-        this.finisher=(iter,ctx)->{
-            this.stream=null;
+        this.finisher = (iter, ctx) -> {
+            this.stream = null;
         };
     }
 }

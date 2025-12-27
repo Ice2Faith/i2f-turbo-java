@@ -34,9 +34,9 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "i2f.springboot.config.spring-kafka")
 public class SpringKafkaConfiguration {
 
-    private String txPrefix="tx";
-    private boolean batchListener=false;
-    private int concurrency=1;
+    private String txPrefix = "tx";
+    private boolean batchListener = false;
+    private int concurrency = 1;
 
     @Autowired
     private KafkaConfigProperties configProvider;

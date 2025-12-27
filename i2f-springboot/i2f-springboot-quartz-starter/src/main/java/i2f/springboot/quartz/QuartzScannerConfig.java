@@ -44,29 +44,29 @@ public class QuartzScannerConfig implements ApplicationListener<ContextRefreshed
     private String basePackages;
 
     public void scanSchedules() throws Exception {
-        if(basePackages==null || "".equals(basePackages)){
+        if (basePackages == null || "".equals(basePackages)) {
             log.info("QuartzScannerConfig no schedule base packages find.");
             return;
         }
-        List<QuartzJobMeta> metaList= QuartzScanner.scanBasePackage(basePackages.split(","));
-        for(QuartzJobMeta item : metaList){
-            log.info("QuartzScannerConfig schedule:"+item.getGroup()+"(group),"+item.getName()+"(name),"+item.getRunClassName()+"."+item.getRunMethodName()+"(method)");
-            Class clazz=item.getRunClass();
-            Map<String,Object> beans=applicationContext.getBeansOfType(clazz);
-            if(beans.size()==1){
-                String key=beans.keySet().iterator().next();
-                Object obj=beans.get(key);
-                log.info("QuartzScannerConfig use context bean:"+key+" for job:"+item.getRunClassName()+"."+item.getRunMethodName());
+        List<QuartzJobMeta> metaList = QuartzScanner.scanBasePackage(basePackages.split(","));
+        for (QuartzJobMeta item : metaList) {
+            log.info("QuartzScannerConfig schedule:" + item.getGroup() + "(group)," + item.getName() + "(name)," + item.getRunClassName() + "." + item.getRunMethodName() + "(method)");
+            Class clazz = item.getRunClass();
+            Map<String, Object> beans = applicationContext.getBeansOfType(clazz);
+            if (beans.size() == 1) {
+                String key = beans.keySet().iterator().next();
+                Object obj = beans.get(key);
+                log.info("QuartzScannerConfig use context bean:" + key + " for job:" + item.getRunClassName() + "." + item.getRunMethodName());
                 item.setInvokeObj(obj);
             }
-            QuartzScanner.makeSchedule(scheduler,item);
+            QuartzScanner.makeSchedule(scheduler, item);
         }
-        log.info("QuartzScannerConfig find schedule config done of count:"+metaList.size());
+        log.info("QuartzScannerConfig find schedule config done of count:" + metaList.size());
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext=applicationContext;
+        this.applicationContext = applicationContext;
     }
 
     @SneakyThrows

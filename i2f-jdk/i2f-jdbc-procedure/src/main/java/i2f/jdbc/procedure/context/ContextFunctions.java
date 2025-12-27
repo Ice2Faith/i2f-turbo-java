@@ -1215,14 +1215,14 @@ public interface ContextFunctions {
         } else if ("quarter".equalsIgnoreCase(format)
                 || "q".equalsIgnoreCase(format)) {
             Month month = obj.getMonth();
-            Month quarterFirstMonth=Month.of(((month.getValue() - 1) / 3) * 3 + 1);
+            Month quarterFirstMonth = Month.of(((month.getValue() - 1) / 3) * 3 + 1);
             obj = obj.withNano(0)
                     .withSecond(0)
                     .withMinute(0)
                     .withHour(0)
                     .withDayOfMonth(1)
                     .withMonth(quarterFirstMonth.getValue());
-        }else {
+        } else {
             throw new IllegalArgumentException("un-support date trunc format :" + format);
         }
 

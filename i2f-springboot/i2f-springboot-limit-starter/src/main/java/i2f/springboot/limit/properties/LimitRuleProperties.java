@@ -1,7 +1,6 @@
 package i2f.springboot.limit.properties;
 
 import i2f.springboot.limit.core.LimitConsts;
-import i2f.springboot.limit.data.LimitRule;
 import i2f.springboot.limit.data.LimitRuleItem;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,14 +19,14 @@ import java.util.List;
 @Configuration
 @ConfigurationProperties(prefix = "i2f.springboot.limit")
 public class LimitRuleProperties {
-    protected String appName= LimitConsts.DEFAULT_APP_NAME;
-    protected FilterProperties filter=new FilterProperties();
-    protected List<LimitRuleItem> rules=new ArrayList<>();
+    protected String appName = LimitConsts.DEFAULT_APP_NAME;
+    protected FilterProperties filter = new FilterProperties();
+    protected List<LimitRuleItem> rules = new ArrayList<>();
 
     @Data
     @NoArgsConstructor
-    public static class FilterProperties{
-        int order=0;
-        String pattern="/*";
+    public static class FilterProperties {
+        int order = 0;
+        String pattern = "/*";
     }
 }

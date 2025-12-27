@@ -17,8 +17,8 @@ import java.util.Locale;
  */
 public class Slf4jPrintStream extends PrintStream {
 
-    public static interface LoggerProxyConsumer{
-        void accept(Logger logger,Slf4jLevel level,Object ... content);
+    public static interface LoggerProxyConsumer {
+        void accept(Logger logger, Slf4jLevel level, Object... content);
     }
 
     public enum Slf4jLevel {
@@ -45,7 +45,7 @@ public class Slf4jPrintStream extends PrintStream {
     // 但是，如果项目中已经使用了大量的System.out都能够正常运行，那么替换之后的性能代价也可以忽略
     protected boolean useTrace = true;
     protected boolean logbackEnv = false;
-    public static final ThreadLocal<LoggerProxyConsumer> THREAD_CONSUMER =new ThreadLocal<>();
+    public static final ThreadLocal<LoggerProxyConsumer> THREAD_CONSUMER = new ThreadLocal<>();
 
     public Slf4jPrintStream(Slf4jLevel level, PrintStream target, String targetName, boolean keepConsole, boolean useTrace) {
         super((OutputStream) new ByteArrayOutputStream());
@@ -180,8 +180,8 @@ public class Slf4jPrintStream extends PrintStream {
             logger.error(Slf4jPrintStream::serializeVals, vals);
         }
         LoggerProxyConsumer consumer = THREAD_CONSUMER.get();
-        if(consumer!=null){
-            consumer.accept(log,level,vals);
+        if (consumer != null) {
+            consumer.accept(log, level, vals);
         }
     }
 
@@ -466,7 +466,6 @@ public class Slf4jPrintStream extends PrintStream {
         }
         return this;
     }
-
 
 
 }

@@ -10,8 +10,9 @@ import java.lang.annotation.Target;
  * @date 2025/11/11 17:56
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD })
+@Target({ElementType.METHOD})
 public @interface Limited {
     int count();
+
     long ttl() default 1;
 }

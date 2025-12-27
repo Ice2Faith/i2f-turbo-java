@@ -16,7 +16,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -25,29 +27,29 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class CsvMapRowSetWriter<M extends Map<String,Object>> implements IRowSetWriter<M> {
+public class CsvMapRowSetWriter<M extends Map<String, Object>> implements IRowSetWriter<M> {
     protected boolean withHeaders = true;
     protected Charset charset = StandardCharsets.UTF_8;
     protected boolean nullAsEmpty = true;
     protected boolean escapeSpaces = false;
-    protected boolean bigNumberToString=true;
-    protected String dateTimeFormat="yyyy-MM-dd HH:mm:ss";
-    protected String dateFormat="yyyy-MM-dd";
-    protected String timeFormat="HH:mm:ss";
-    protected static ThreadLocal<SimpleDateFormat> SDF=new ThreadLocal<>();
-    protected static ThreadLocal<DateTimeFormatter> DATETIME_FORMATTER=new ThreadLocal<>();
-    protected static ThreadLocal<DateTimeFormatter> DATE_FORMATTER=new ThreadLocal<>();
-    protected static ThreadLocal<DateTimeFormatter> TIME_FORMATTER=new ThreadLocal<>();
+    protected boolean bigNumberToString = true;
+    protected String dateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+    protected String dateFormat = "yyyy-MM-dd";
+    protected String timeFormat = "HH:mm:ss";
+    protected static ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<>();
+    protected static ThreadLocal<DateTimeFormatter> DATETIME_FORMATTER = new ThreadLocal<>();
+    protected static ThreadLocal<DateTimeFormatter> DATE_FORMATTER = new ThreadLocal<>();
+    protected static ThreadLocal<DateTimeFormatter> TIME_FORMATTER = new ThreadLocal<>();
 
     @Override
     public void write(IRowSet<M> rowSet, OutputStream os) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(os, charset);
         List<IRowHeader> headers = rowSet.getHeaders();
-        if(withHeaders) {
+        if (withHeaders) {
             boolean first = true;
             for (IRowHeader header : headers) {
                 String name = header.getName();
-                if(!first){
+                if (!first) {
                     writer.write(",");
                 }
                 writer.write(toCellContent(name));
@@ -55,15 +57,15 @@ public class CsvMapRowSetWriter<M extends Map<String,Object>> implements IRowSet
             }
             writer.write("\n");
         }
-        while(rowSet.hasNext()) {
+        while (rowSet.hasNext()) {
             M map = rowSet.next();
-            if(map==null){
+            if (map == null) {
                 continue;
             }
             boolean first = true;
             for (IRowHeader header : headers) {
                 String name = header.getName();
-                if(!first){
+                if (!first) {
                     writer.write(",");
                 }
                 writer.write(toCellContent(map.get(name)));
@@ -75,51 +77,51 @@ public class CsvMapRowSetWriter<M extends Map<String,Object>> implements IRowSet
         writer.flush();
     }
 
-    public String toCellContent(Object value){
-        if(value==null){
+    public String toCellContent(Object value) {
+        if (value == null) {
             return nullString(value);
         }
-        if(value instanceof String
-        || value instanceof CharSequence
-        || value instanceof Appendable){
-            String str=String.valueOf(value);
+        if (value instanceof String
+                || value instanceof CharSequence
+                || value instanceof Appendable) {
+            String str = String.valueOf(value);
             return escapeString(str);
-        }else if(value instanceof Number){
-            String str=String.valueOf(value);
-            if(bigNumberToString) {
+        } else if (value instanceof Number) {
+            String str = String.valueOf(value);
+            if (bigNumberToString) {
                 if (str.length() > 8) {
                     str = escapeString(str);
                 }
             }
             return str;
-        }else if(value instanceof Date){
+        } else if (value instanceof Date) {
             SimpleDateFormat fmt = SDF.get();
-            if(fmt==null){
-                fmt=new SimpleDateFormat(dateTimeFormat);
+            if (fmt == null) {
+                fmt = new SimpleDateFormat(dateTimeFormat);
                 SDF.set(fmt);
             }
             String str = fmt.format((Date) value);
             return escapeString(str);
-        }else if(value instanceof LocalDateTime){
+        } else if (value instanceof LocalDateTime) {
             DateTimeFormatter fmt = DATETIME_FORMATTER.get();
-            if(fmt==null){
-                fmt=DateTimeFormatter.ofPattern(dateTimeFormat);
+            if (fmt == null) {
+                fmt = DateTimeFormatter.ofPattern(dateTimeFormat);
                 DATETIME_FORMATTER.set(fmt);
             }
             String str = fmt.format((LocalDateTime) value);
             return escapeString(str);
-        }else if(value instanceof LocalDate){
+        } else if (value instanceof LocalDate) {
             DateTimeFormatter fmt = DATE_FORMATTER.get();
-            if(fmt==null){
-                fmt=DateTimeFormatter.ofPattern(dateFormat);
+            if (fmt == null) {
+                fmt = DateTimeFormatter.ofPattern(dateFormat);
                 DATE_FORMATTER.set(fmt);
             }
             String str = fmt.format((LocalDate) value);
             return escapeString(str);
-        }else if(value instanceof LocalTime){
+        } else if (value instanceof LocalTime) {
             DateTimeFormatter fmt = TIME_FORMATTER.get();
-            if(fmt==null){
-                fmt=DateTimeFormatter.ofPattern(timeFormat);
+            if (fmt == null) {
+                fmt = DateTimeFormatter.ofPattern(timeFormat);
                 TIME_FORMATTER.set(fmt);
             }
             String str = fmt.format((LocalTime) value);
@@ -129,23 +131,23 @@ public class CsvMapRowSetWriter<M extends Map<String,Object>> implements IRowSet
         return escapeString(String.valueOf(value));
     }
 
-    public String nullString(Object value){
-        if(nullAsEmpty){
+    public String nullString(Object value) {
+        if (nullAsEmpty) {
             return "";
         }
         return "null";
     }
 
-    public String escapeString(String str){
-        if(str==null){
+    public String escapeString(String str) {
+        if (str == null) {
             return nullString(str);
         }
-        str=str.replace("\"","\"\"");
-        if(escapeSpaces){
-            str=str.replace("\t","\\t");
-            str=str.replace("\n","\\n");
-            str=str.replace("\r","\\r");
+        str = str.replace("\"", "\"\"");
+        if (escapeSpaces) {
+            str = str.replace("\t", "\\t");
+            str = str.replace("\n", "\\n");
+            str = str.replace("\r", "\\r");
         }
-        return "\""+str+"\"";
+        return "\"" + str + "\"";
     }
 }

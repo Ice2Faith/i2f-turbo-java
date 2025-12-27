@@ -25,11 +25,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @Configuration
 @ConfigurationProperties(prefix = "i2f.springboot.config.mybatis")
-@MapperScan(basePackages = {"com.**.mapper","com.**.dao"})
+@MapperScan(basePackages = {"com.**.mapper", "com.**.dao"})
 public class MybatisAutoConfiguration implements InitializingBean {
 
 
-    private boolean enablePaginationInterceptor=false;
+    private boolean enablePaginationInterceptor = false;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -38,12 +38,12 @@ public class MybatisAutoConfiguration implements InitializingBean {
 
     @ConditionalOnExpression("${i2f.springboot.config.mybatis.interceptor.enable:true}")
     @Bean
-    public ConfigurationCustomizer mybatisConfigurationCustomizer(){
+    public ConfigurationCustomizer mybatisConfigurationCustomizer() {
         return new ConfigurationCustomizer() {
             @Override
             public void customize(org.apache.ibatis.session.Configuration configuration) {
                 log.info("MybatisConfig interceptors config");
-                if(enablePaginationInterceptor){
+                if (enablePaginationInterceptor) {
                     log.info("MybatisConfig pagination interceptor config");
                     configuration.addInterceptor(new MybaisPaginationInterceptor());
                 }

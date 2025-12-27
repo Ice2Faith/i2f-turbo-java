@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SimpleRowHeader implements IRowHeader {
     protected String name;
+
     public SimpleRowHeader(String name) {
         this.name = name;
     }

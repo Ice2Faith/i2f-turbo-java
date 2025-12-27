@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class EsMeta {
-    protected List<String> urls=new ArrayList<>();
+    protected List<String> urls = new ArrayList<>();
     protected String username;
     protected String password;
     protected Integer maxConnTotal;

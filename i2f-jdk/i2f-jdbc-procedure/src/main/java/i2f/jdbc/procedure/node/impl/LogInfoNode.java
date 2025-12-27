@@ -24,7 +24,6 @@ public class LogInfoNode extends AbstractExecutorNode {
     }
 
 
-
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
 
@@ -36,13 +35,13 @@ public class LogInfoNode extends AbstractExecutorNode {
         String value = (String) executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
         Throwable e = (Throwable) executor.attrValue(AttrConsts.E, FeatureConsts.VISIT, node, context);
 
-        executor.logger().logInfo(()->{
+        executor.logger().logInfo(() -> {
 
             StringBuilder builder = new StringBuilder();
-            boolean isFirst=true;
-            if(value!=null) {
+            boolean isFirst = true;
+            if (value != null) {
                 builder.append(value);
-                isFirst=false;
+                isFirst = false;
             }
             for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
                 String name = entry.getKey();
@@ -54,15 +53,15 @@ public class LogInfoNode extends AbstractExecutorNode {
                 }
                 String script = entry.getValue();
                 Object val = executor.attrValue(name, FeatureConsts.VISIT, node, context);
-                if(!isFirst){
+                if (!isFirst) {
                     builder.append(", ");
                 }
-                builder.append(val).append("(").append(val==null?"null":val.getClass().getSimpleName()).append(")");
-                isFirst=false;
+                builder.append(val).append("(").append(val == null ? "null" : val.getClass().getSimpleName()).append(")");
+                isFirst = false;
             }
 
             return builder.toString();
-        },e);
+        }, e);
     }
 
 }

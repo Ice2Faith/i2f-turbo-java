@@ -193,7 +193,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
                 }
 
                 wrapper.setContentLength(body.length);
-                wrapper.setAttachHeader("Content-Length",String.valueOf(body.length));
+                wrapper.setAttachHeader("Content-Length", String.valueOf(body.length));
 
                 // 替换请求为包装请求
                 nextRequest = wrapper;

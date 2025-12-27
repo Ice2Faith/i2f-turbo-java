@@ -78,17 +78,17 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
 //        log.warn("xml-jump-source document:"+document);
         VirtualFile editorFile = FileDocumentManager.getInstance().getFile(document);
 //        log.warn("xml-jump-source editorFile:"+editorFile);
-        if(editorFile==null){
+        if (editorFile == null) {
             return null;
         }
         PsiFile editorPisFile = PsiManager.getInstance(project).findFile(editorFile);
 //        log.warn("xml-jump-source editorPsiFile:"+editorPisFile);
-        if(editorPisFile==null){
+        if (editorPisFile == null) {
             return null;
         }
         XmlAttributeValue element = PsiTreeUtil.findElementOfClassAtOffset(editorPisFile, offset, XmlAttributeValue.class, false);
 
-        if(element==null){
+        if (element == null) {
             return null;
         }
 

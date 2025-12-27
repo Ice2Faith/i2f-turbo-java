@@ -57,15 +57,15 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
         Set<String> effectKeys = evt.getEffectKeys();
         Map<String, ProcedureMeta> metaMap = evt.getMetaMap();
         if (metaMap != null) {
-            if(effectKeys==null || effectKeys.isEmpty()){
+            if (effectKeys == null || effectKeys.isEmpty()) {
                 effectKeys = metaMap.keySet();
             }
             for (String key : effectKeys) {
-                if(key==null){
+                if (key == null) {
                     continue;
                 }
                 ProcedureMeta value = metaMap.get(key);
-                if(value==null){
+                if (value == null) {
                     continue;
                 }
                 if (value.getType() == ProcedureMeta.Type.XML) {

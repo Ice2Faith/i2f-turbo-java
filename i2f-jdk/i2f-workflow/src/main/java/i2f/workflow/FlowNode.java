@@ -63,7 +63,7 @@ public class FlowNode {
         return done;
     }
 
-    public void setDone(ConcurrentHashMap<String,  Optional<Throwable>> done) {
+    public void setDone(ConcurrentHashMap<String, Optional<Throwable>> done) {
         this.done = done;
     }
 

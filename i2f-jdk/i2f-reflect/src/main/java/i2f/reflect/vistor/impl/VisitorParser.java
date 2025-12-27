@@ -178,17 +178,17 @@ public class VisitorParser {
                 Object currRet = ret.get();
                 if (currRet instanceof Map) {
                     Map<?, ?> map = (Map<?, ?>) currRet;
-                    Function<String,Object> keyConvertor=foundMapKeyConvertor(map);
-                    Object realKey=token;
-                    if(keyConvertor!=null){
+                    Function<String, Object> keyConvertor = foundMapKeyConvertor(map);
+                    Object realKey = token;
+                    if (keyConvertor != null) {
                         try {
-                            realKey=keyConvertor.apply(token);
+                            realKey = keyConvertor.apply(token);
                         } catch (Exception e) {
 
                         }
                     }
-                    if(map.containsKey(realKey)){
-                        ret=new MapVisitor(map,realKey);
+                    if (map.containsKey(realKey)) {
+                        ret = new MapVisitor(map, realKey);
                         continue;
                     }
                 }
@@ -338,11 +338,11 @@ public class VisitorParser {
                 }
                 if (currRet instanceof Map) {
                     Map<?, ?> map = (Map<?, ?>) currRet;
-                    Function<String,Object> keyConvertor=foundMapKeyConvertor(map);
-                    Object realKey=token;
-                    if(keyConvertor!=null){
+                    Function<String, Object> keyConvertor = foundMapKeyConvertor(map);
+                    Object realKey = token;
+                    if (keyConvertor != null) {
                         try {
-                            realKey=keyConvertor.apply(token);
+                            realKey = keyConvertor.apply(token);
                         } catch (Exception e) {
 
                         }
@@ -386,14 +386,14 @@ public class VisitorParser {
         return ret;
     }
 
-    public static Function<String,Object> foundMapKeyConvertor(Map map){
-        if(map==null){
+    public static Function<String, Object> foundMapKeyConvertor(Map map) {
+        if (map == null) {
             return null;
         }
-        Function<String,Object> keyConvertor=null;
+        Function<String, Object> keyConvertor = null;
         // 尝试推断Map的Key类型
         for (Object key : map.keySet()) {
-            if(key==null){
+            if (key == null) {
                 continue;
             }
             try {

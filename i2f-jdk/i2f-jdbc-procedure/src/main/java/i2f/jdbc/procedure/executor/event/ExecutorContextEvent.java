@@ -18,5 +18,5 @@ import java.util.Map;
 public class ExecutorContextEvent implements XProc4jEvent {
     protected Map<String, Object> context;
     protected JdbcProcedureExecutor executor;
-    protected XmlNode node= ContextHolder.TRACE_NODE.get();
+    protected XmlNode node = ContextHolder.TRACE_NODE.get();
 }

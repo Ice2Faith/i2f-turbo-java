@@ -13,8 +13,8 @@ import javax.websocket.server.ServerEndpoint;
  */
 @Slf4j
 @ConditionalOnExpression("${i2f.springboot.websocket.default-endpoint.enable:true}")
-@ServerEndpoint(value="${i2f.springboot.websocket.default-endpoint.path:/default/broadcast}")
+@ServerEndpoint(value = "${i2f.springboot.websocket.default-endpoint.path:/default/broadcast}")
 @Component
-public class DefaultWebsocketEndpointHandler extends BasicWebsocketEndpointHandler{
+public class DefaultWebsocketEndpointHandler extends BasicWebsocketEndpointHandler {
 
 }

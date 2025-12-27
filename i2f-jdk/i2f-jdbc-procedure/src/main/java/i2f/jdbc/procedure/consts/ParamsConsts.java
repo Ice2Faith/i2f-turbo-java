@@ -12,7 +12,7 @@ import java.util.Set;
 public interface ParamsConsts {
 
     // 全局部分
-    String STACK_LOCK ="stack_lock";
+    String STACK_LOCK = "stack_lock";
 
     String CONTEXT = "context";
     String ENVIRONMENT = "env";
@@ -34,9 +34,9 @@ public interface ParamsConsts {
     String CALLS = "calls";
     String ERRORS = "errors";
     String ERROR = "error";
-    String LAST_SQL="last_sql";
-    String LAST_SQL_EFFECT_COUNT ="last_sql_effect_count";
-    String LAST_SQL_USE_TIME ="last_sql_use_time";
+    String LAST_SQL = "last_sql";
+    String LAST_SQL_EFFECT_COUNT = "last_sql_effect_count";
+    String LAST_SQL_USE_TIME = "last_sql_use_time";
 
     String TRACE_LOCATION = TRACE + "." + LOCATION;
     String TRACE_FILE = TRACE + "." + FILE;
@@ -75,7 +75,7 @@ public interface ParamsConsts {
     String METAS = "metas";
 
     // 事件监听器
-    String LISTENERS="listeners";
+    String LISTENERS = "listeners";
 
     // 这些值，将会始终保存在上下文中，也就是每个params中都应该存在这些键值
     String[] KEEP_NAMES = {

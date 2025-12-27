@@ -13,8 +13,8 @@ public class JdbcLimitRuleItem {
     protected String appName;
     protected String limitType;
     protected String typeKey;
-    protected Integer limitCount=-1;
-    protected Long limitTtl=-1L;
-    protected Integer limitOrder=Integer.MAX_VALUE;
+    protected Integer limitCount = -1;
+    protected Long limitTtl = -1L;
+    protected Integer limitOrder = Integer.MAX_VALUE;
     protected Integer status;
 }

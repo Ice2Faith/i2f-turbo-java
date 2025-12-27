@@ -10,5 +10,6 @@ import java.util.List;
  */
 public interface LimitRuleItemProvider {
     boolean isDynamic();
+
     List<LimitRuleItem> getRules(String appName);
 }

@@ -843,8 +843,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         XmlTag tag = attr.getParent();
         String tagName = tag.getName();
         String attrName = attr.getName();
-        if(attrName==null){
-            attrName="";
+        if (attrName == null) {
+            attrName = "";
         }
         if ("lang-set".equals(tagName)) {
             if ("radix".equals(attrName)) {
@@ -859,7 +859,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-            if("value".equals(attrName) || attrName.startsWith("value.")) {
+            if ("value".equals(attrName) || attrName.startsWith("value.")) {
                 Language lang = detectXmlTagLangAttribute(tag);
                 if (lang != null) {
                     registrar.startInjecting(lang)

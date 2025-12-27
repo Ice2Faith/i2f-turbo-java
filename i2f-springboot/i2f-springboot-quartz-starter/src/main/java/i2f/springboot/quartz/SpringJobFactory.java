@@ -19,7 +19,7 @@ public class SpringJobFactory extends AdaptableJobFactory {
 
     @Override
     protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
-        Object ins=super.createJobInstance(bundle);
+        Object ins = super.createJobInstance(bundle);
         autowireCapableBeanFactory.autowireBean(ins);
         return ins;
     }

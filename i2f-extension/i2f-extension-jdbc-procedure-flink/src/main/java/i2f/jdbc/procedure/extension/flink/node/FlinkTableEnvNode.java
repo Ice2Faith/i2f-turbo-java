@@ -27,7 +27,7 @@ public class FlinkTableEnvNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        StreamExecutionEnvironment execEnv = (StreamExecutionEnvironment)executor.attrValue(FlinkAttrConsts.EXEC_ENV, FeatureConsts.VISIT, node, context);
+        StreamExecutionEnvironment execEnv = (StreamExecutionEnvironment) executor.attrValue(FlinkAttrConsts.EXEC_ENV, FeatureConsts.VISIT, node, context);
         StreamTableEnvironment tabEnv = StreamTableEnvironment.create(execEnv);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {

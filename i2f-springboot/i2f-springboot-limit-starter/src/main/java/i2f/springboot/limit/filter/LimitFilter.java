@@ -36,11 +36,11 @@ import java.util.Map;
 public class LimitFilter extends OncePerRequestFilter {
     private LimitManager manager;
     private MappingUtil mappingUtil;
-    private AntPathMatcher antPathMatcher=new AntPathMatcher("/");
+    private AntPathMatcher antPathMatcher = new AntPathMatcher("/");
 
     public LimitFilter(LimitManager manager, MappingUtil mappingUtil) {
         this.manager = manager;
-        this.mappingUtil=mappingUtil;
+        this.mappingUtil = mappingUtil;
     }
 
     @Override
@@ -58,111 +58,111 @@ public class LimitFilter extends OncePerRequestFilter {
 
             assertLimitUser(request);
         } catch (Exception e) {
-            if(e instanceof LimitException){
+            if (e instanceof LimitException) {
                 throw e;
-            }else{
-               log.warn(e.getMessage(),e);
+            } else {
+                log.warn(e.getMessage(), e);
             }
         }
 
-        chain.doFilter(request,response);
+        chain.doFilter(request, response);
     }
 
-    public void assertLimitGlobal(HttpServletRequest request){
+    public void assertLimitGlobal(HttpServletRequest request) {
         boolean limited = manager.isLimited(LimitType.GLOBAL, "default");
-        if(limited){
+        if (limited) {
             throw new LimitException("your request has been limited by website global rule!");
         }
     }
 
-    public void assertLimitPath(HttpServletRequest request){
+    public void assertLimitPath(HttpServletRequest request) {
         String path = getRequestPath(request);
-        if(path==null || path.isEmpty()){
+        if (path == null || path.isEmpty()) {
             return;
         }
         boolean limited = manager.isLimited(LimitType.PATH, path);
-        if(limited){
+        if (limited) {
             throw new LimitException("your request has been limited by request path rule!");
         }
     }
 
-    public String getRequestPath(HttpServletRequest request){
+    public String getRequestPath(HttpServletRequest request) {
         RequestPath requestPath = ServletRequestPathUtils.parseAndCache(request);
         return requestPath.value();
     }
 
-    public void assertLimitIp(HttpServletRequest request){
+    public void assertLimitIp(HttpServletRequest request) {
         String ip = getRequestIp(request);
-        if(ip==null || ip.isEmpty()){
+        if (ip == null || ip.isEmpty()) {
             return;
         }
         boolean limited = manager.isLimited(LimitType.IP, ip);
-        if(limited){
+        if (limited) {
             throw new LimitException("your request has been limited by request ip rule!");
         }
     }
 
-    public String getRequestIp(HttpServletRequest request){
+    public String getRequestIp(HttpServletRequest request) {
         return request.getRemoteAddr();
     }
 
-    public void assertLimitApi(HttpServletRequest request){
+    public void assertLimitApi(HttpServletRequest request) {
         Map.Entry<RequestMappingInfo, HandlerMethod> entry = mappingUtil.getRequestMapping(request);
-        if(entry==null){
+        if (entry == null) {
             return;
         }
         HandlerMethod value = entry.getValue();
-        if(value==null){
+        if (value == null) {
             return;
         }
         Method method = value.getMethod();
-        String signature= LimitUtil.getMethodSignature(method);
+        String signature = LimitUtil.getMethodSignature(method);
         boolean limited = manager.isLimited(LimitType.API, signature);
-        if(limited){
+        if (limited) {
             throw new LimitException("your request has been limited by request api rule!");
         }
     }
 
-    public void assertLimitAntPath(HttpServletRequest request){
+    public void assertLimitAntPath(HttpServletRequest request) {
         String path = getRequestPath(request);
-        if(path==null || path.isEmpty()){
+        if (path == null || path.isEmpty()) {
             return;
         }
         List<LimitRuleItem> rules = manager.getRules(LimitType.ANT_PATH);
-        String typeKey=null;
+        String typeKey = null;
         for (LimitRuleItem rule : rules) {
             String pattern = rule.getTypeKey();
-            if(antPathMatcher.match(pattern,path)){
-                typeKey=pattern;
+            if (antPathMatcher.match(pattern, path)) {
+                typeKey = pattern;
             }
         }
-        if(typeKey==null){
+        if (typeKey == null) {
             return;
         }
         boolean limited = manager.isLimited(LimitType.ANT_PATH, typeKey);
-        if(limited){
+        if (limited) {
             throw new LimitException("your request has been limited by request ant-path rule!");
         }
     }
 
-    public void assertLimitUser(HttpServletRequest request){
+    public void assertLimitUser(HttpServletRequest request) {
         String user = getRequestUser(request);
-        if(user==null || user.isEmpty()){
+        if (user == null || user.isEmpty()) {
             return;
         }
         boolean limited = manager.isLimited(LimitType.USER, user);
-        if(limited){
+        if (limited) {
             throw new LimitException("your request has been limited by request user rule!");
         }
     }
 
-    public String getRequestUser(HttpServletRequest request){
+    public String getRequestUser(HttpServletRequest request) {
         Object user = request.getAttribute(LimitConsts.LIMIT_REQUEST_USER_ID);
-        if(user==null){
+        if (user == null) {
             return null;
         }
-        String ret=String.valueOf(user);
-        if(ret.isEmpty()){
+        String ret = String.valueOf(user);
+        if (ret.isEmpty()) {
             return null;
         }
         return ret;

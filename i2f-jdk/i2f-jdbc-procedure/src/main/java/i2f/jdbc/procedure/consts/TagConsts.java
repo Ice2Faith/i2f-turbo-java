@@ -8,10 +8,10 @@ public interface TagConsts {
 
     String PROCEDURE = "procedure";
 
-    String LOG_DEBUG="log-debug";
-    String LOG_INFO="log-info";
-    String LOG_WARN="log-warn";
-    String LOG_ERROR="log-error";
+    String LOG_DEBUG = "log-debug";
+    String LOG_INFO = "log-info";
+    String LOG_WARN = "log-warn";
+    String LOG_ERROR = "log-error";
 
     String DEBUGGER = "debugger";
     String LANG_PRINTF = "lang-printf";
@@ -98,11 +98,11 @@ public interface TagConsts {
     String SCRIPT_INCLUDE = "script-include";
     String SCRIPT_SEGMENT = "script-segment";
 
-    String LANG_THREAD_POOL="lang-thread-pool";
-    String LANG_THREAD_POOL_SUBMIT="lang-thread-pool-submit";
-    String LANG_THREAD_POOL_SHUTDOWN="lang-thread-pool-shutdown";
+    String LANG_THREAD_POOL = "lang-thread-pool";
+    String LANG_THREAD_POOL_SUBMIT = "lang-thread-pool-submit";
+    String LANG_THREAD_POOL_SHUTDOWN = "lang-thread-pool-shutdown";
 
-    String LANG_LISTENER="lang-listener";
+    String LANG_LISTENER = "lang-listener";
 
     String SQL_CURSOR = "sql-cursor";
 
@@ -139,5 +139,5 @@ public interface TagConsts {
     String EVENT_SEND = "event-send";
     String EVENT_PUBLISH = "event-publish";
 
-    String LANG_AI="lang-ai";
+    String LANG_AI = "lang-ai";
 }

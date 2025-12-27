@@ -32,9 +32,9 @@ public class KafkaAutoConfiguration {
     @ConditionalOnMissingBean(AdminClient.class)
     // 配置管理Bean
     @Bean
-    public AdminClient kafkaAdminClient(){
-        Map<String,Object> config=new HashMap<>();
-        config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,configProvider.getServerAddress());
+    public AdminClient kafkaAdminClient() {
+        Map<String, Object> config = new HashMap<>();
+        config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, configProvider.getServerAddress());
         log.info("AdminClient config done.");
         return AdminClient.create(config);
     }

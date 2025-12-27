@@ -10,13 +10,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class JedisMeta {
-    protected String host="127.0.0.1";
-    protected int port=6379;
+    protected String host = "127.0.0.1";
+    protected int port = 6379;
     protected String password;
-    protected int database=0;
+    protected int database = 0;
 
-    protected int timeout=3000;
-    protected boolean ssl=false;
+    protected int timeout = 3000;
+    protected boolean ssl = false;
 
     public JedisMeta(String host, int database) {
         this.host = host;

@@ -86,7 +86,7 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         }
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
-            if("".equals(pair.getKey())){
+            if ("".equals(pair.getKey())) {
                 // 根目录，一定是目录
                 return true;
             }
@@ -128,7 +128,7 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
             // 根目录，一定存在
-            if("".equals(pair.getKey())){
+            if ("".equals(pair.getKey())) {
                 return true;
             }
             try {
@@ -139,8 +139,8 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         } else {
             // 是文件
             try {
-                boolean ok= getClient().doesObjectExist(pair.getKey(), pair.getValue());
-                if(ok){
+                boolean ok = getClient().doesObjectExist(pair.getKey(), pair.getValue());
+                if (ok) {
                     return true;
                 }
             } catch (Exception e) {
@@ -162,9 +162,9 @@ public class AliyunOssFileSystem extends AbsFileSystem {
         return false;
     }
 
-    public String decodeObjectName(String name){
+    public String decodeObjectName(String name) {
         try {
-            return URLDecoder.decode(name,"UTF-8");
+            return URLDecoder.decode(name, "UTF-8");
         } catch (Exception e) {
 
         }
@@ -175,7 +175,7 @@ public class AliyunOssFileSystem extends AbsFileSystem {
     public List<IFile> listFiles(String path) {
         List<IFile> ret = new LinkedList<>();
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
-        if("".equals(pair.getKey()) && pair.getValue()==null){
+        if ("".equals(pair.getKey()) && pair.getValue() == null) {
             // 根目录，应该列举bucket
             try {
                 List<Bucket> buckets = getClient().listBuckets();
@@ -189,11 +189,11 @@ public class AliyunOssFileSystem extends AbsFileSystem {
             }
             return ret;
         }
-        String inPath=path;
-        if(inPath.endsWith(pathSeparator())){
-            inPath=inPath.substring(0,inPath.length()-pathSeparator().length());
+        String inPath = path;
+        if (inPath.endsWith(pathSeparator())) {
+            inPath = inPath.substring(0, inPath.length() - pathSeparator().length());
         }
-        Set<String> savePathSet=new LinkedHashSet<>();
+        Set<String> savePathSet = new LinkedHashSet<>();
         String subPath = ensureWithPathSeparator(pair.getValue());
         String nextMarker = null;
         ObjectListing listing = null;
@@ -206,8 +206,8 @@ public class AliyunOssFileSystem extends AbsFileSystem {
                     if (name.startsWith(this.pathSeparator())) {
                         name = name.substring(this.pathSeparator().length());
                     }
-                    if(subPath!=null){
-                        if(subPath.equals(name)){
+                    if (subPath != null) {
+                        if (subPath.equals(name)) {
                             continue;
                         }
                     }
@@ -215,16 +215,16 @@ public class AliyunOssFileSystem extends AbsFileSystem {
                     if (name.endsWith(this.pathSeparator())) {
                         name = name.substring(0, name.length() - this.pathSeparator().length());
                     }
-                    if(subPath!=null){
-                        if(subPath.equals(name)){
+                    if (subPath != null) {
+                        if (subPath.equals(name)) {
                             continue;
                         }
                     }
 
-                    String subName=name;
-                    if(subPath!=null){
-                        if(subName.startsWith(subPath)){
-                            subName=subName.substring(subPath.length());
+                    String subName = name;
+                    if (subPath != null) {
+                        if (subName.startsWith(subPath)) {
+                            subName = subName.substring(subPath.length());
                         }
                     }
 
@@ -233,12 +233,12 @@ public class AliyunOssFileSystem extends AbsFileSystem {
                         subName = subName.substring(0, idx);
                     }
 
-                    IFile file = this.getFile(this.pathSeparator() + (String)pair.getKey(), (subPath==null?this.pathSeparator():subPath) + subName);
+                    IFile file = this.getFile(this.pathSeparator() + (String) pair.getKey(), (subPath == null ? this.pathSeparator() : subPath) + subName);
                     String savePath = file.getPath();
-                    if(Objects.equals(savePath, inPath)){
+                    if (Objects.equals(savePath, inPath)) {
                         continue;
                     }
-                    if(savePathSet.contains(savePath)){
+                    if (savePathSet.contains(savePath)) {
                         continue;
                     }
                     savePathSet.add(savePath);
@@ -385,14 +385,14 @@ public class AliyunOssFileSystem extends AbsFileSystem {
     @Override
     public long length(String path) {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
-        if(pair.getValue()==null){
-            if("".equals(pair.getKey())){
+        if (pair.getValue() == null) {
+            if ("".equals(pair.getKey())) {
                 // 根目录，直接返回0
                 return 0;
             }
             try {
                 boolean ok = getClient().doesBucketExist(pair.getKey());
-                return ok?0:-1;
+                return ok ? 0 : -1;
             } catch (Throwable e) {
 
             }

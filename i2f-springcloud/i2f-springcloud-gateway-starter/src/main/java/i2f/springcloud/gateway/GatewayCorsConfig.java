@@ -41,7 +41,7 @@ public class GatewayCorsConfig {
         List<String> originList = Arrays.asList(allowOrigins.split(",|;"));
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedMethods(Arrays.asList(allowMethods.split(",|;")));
-        config.setAllowedOrigins(originList.stream().filter(e->!e.contains("*")).collect(Collectors.toList()));
+        config.setAllowedOrigins(originList.stream().filter(e -> !e.contains("*")).collect(Collectors.toList()));
         config.setAllowedHeaders(Arrays.asList(allowHeaders.split(",|;")));
         config.setExposedHeaders(Arrays.asList(exposedHeaders.split(",|;")));
         for (String item : originList) {

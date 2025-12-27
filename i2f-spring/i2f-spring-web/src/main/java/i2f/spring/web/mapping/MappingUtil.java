@@ -1,6 +1,5 @@
 package i2f.spring.web.mapping;
 
-import javax.servlet.http.HttpServletRequest;
 import lombok.Data;
 import org.springframework.http.server.RequestPath;
 import org.springframework.web.method.HandlerMethod;
@@ -10,6 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPattern;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -42,14 +42,14 @@ public class MappingUtil {
             RequestMappingInfo key = item.getKey();
             HandlerMethod value = item.getValue();
             PathPatternsRequestCondition patternsCondition = key.getPathPatternsCondition();
-            if(patternsCondition==null){
+            if (patternsCondition == null) {
                 continue;
             }
             Set<PathPattern> pathPatterns = patternsCondition.getPatterns();
-            if(pathPatterns==null){
+            if (pathPatterns == null) {
                 continue;
             }
-            Set<String> patterns = pathPatterns.stream().map(e->e.getPatternString()).collect(Collectors.toSet());
+            Set<String> patterns = pathPatterns.stream().map(e -> e.getPatternString()).collect(Collectors.toSet());
             for (String patten : patterns) {
                 if (!ret.containsKey(patten)) {
                     ret.put(patten, new ConcurrentHashMap<>());
@@ -72,22 +72,22 @@ public class MappingUtil {
         RequestPath requestPath = ServletRequestPathUtils.parseAndCache(request);
         String path = requestPath.value();
         Map<RequestMappingInfo, HandlerMethod> fastMap = fastMapping.get(path);
-        if(fastMap!=null){
+        if (fastMap != null) {
             Map.Entry<RequestMappingInfo, HandlerMethod> ret = matchRequestMapping(request, fastMap);
-            if(ret!=null){
+            if (ret != null) {
                 return ret;
             }
         }
         Map<RequestMappingInfo, HandlerMethod> handlerMethods = requestMappingHandlerMapping.getHandlerMethods();
-       return matchRequestMapping(request,handlerMethods);
+        return matchRequestMapping(request, handlerMethods);
     }
 
-    public Map.Entry<RequestMappingInfo, HandlerMethod> matchRequestMapping(HttpServletRequest request,Map<RequestMappingInfo, HandlerMethod> handlerMethods){
+    public Map.Entry<RequestMappingInfo, HandlerMethod> matchRequestMapping(HttpServletRequest request, Map<RequestMappingInfo, HandlerMethod> handlerMethods) {
         for (Map.Entry<RequestMappingInfo, HandlerMethod> item : handlerMethods.entrySet()) {
             RequestMappingInfo key = item.getKey();
             HandlerMethod value = item.getValue();
             try {
-                if(!ServletRequestPathUtils.hasParsedRequestPath(request)){
+                if (!ServletRequestPathUtils.hasParsedRequestPath(request)) {
                     ServletRequestPathUtils.parseAndCache(request);
                 }
                 RequestMappingInfo cond = key.getMatchingCondition(request);

@@ -48,7 +48,7 @@ public class JdbcProcedureParser {
         }
         String str = removeProcedureDtd(xml);
         ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes("UTF-8"));
-        return parse("xml_"+Long.toHexString(Math.abs(xml.hashCode())),bis);
+        return parse("xml_" + Long.toHexString(Math.abs(xml.hashCode())), bis);
     }
 
     public static XmlNode parse(URL url) throws Exception {
@@ -79,12 +79,12 @@ public class JdbcProcedureParser {
     }
 
     public static XmlNode parse(InputStream is) throws Exception {
-        return parse("unknown_"+Long.toHexString(Math.abs(is.hashCode())), is);
+        return parse("unknown_" + Long.toHexString(Math.abs(is.hashCode())), is);
     }
 
     public static XmlNode parse(String fileName, InputStream is) throws Exception {
-        if(fileName==null){
-            fileName="unknown_"+Long.toHexString(Math.abs(is.hashCode()));
+        if (fileName == null) {
+            fileName = "unknown_" + Long.toHexString(Math.abs(is.hashCode()));
         }
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         StreamUtil.streamCopy(is, bos);

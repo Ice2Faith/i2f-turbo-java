@@ -47,10 +47,10 @@ public class ProcedureMetaMapGrammarReporterListener
         Set<String> effectKeys = evt.getEffectKeys();
         Map<String, ProcedureMeta> metaMap = evt.getMetaMap();
         if (reportOnBoot.getAndSet(false)) {
-            GrammarReporter.reportGrammar(executor, effectKeys,new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
+            GrammarReporter.reportGrammar(executor, effectKeys, new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
         } else {
             reportPool.submit(() -> {
-                GrammarReporter.reportGrammar(executor, effectKeys,new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
+                GrammarReporter.reportGrammar(executor, effectKeys, new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
             });
         }
         return false;

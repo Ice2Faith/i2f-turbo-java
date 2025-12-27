@@ -13,10 +13,12 @@ public enum LimitType {
     USER("user");
 
     private String value;
-    private LimitType(String value){
-        this.value=value;
+
+    private LimitType(String value) {
+        this.value = value;
     }
-    public String value(){
+
+    public String value() {
         return this.value;
     }
 }

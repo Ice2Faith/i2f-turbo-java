@@ -8,10 +8,10 @@ import org.springframework.util.AntPathMatcher;
  * @date 2025/9/20 17:13
  */
 public class SpringAntPathMatcher implements IPriorMatcher {
-    public static final SpringAntPathMatcher PATH=new SpringAntPathMatcher("/");
-    public static final SpringAntPathMatcher PKG=new SpringAntPathMatcher(".");
+    public static final SpringAntPathMatcher PATH = new SpringAntPathMatcher("/");
+    public static final SpringAntPathMatcher PKG = new SpringAntPathMatcher(".");
 
-    private AntPathMatcher matcher=new AntPathMatcher("/");
+    private AntPathMatcher matcher = new AntPathMatcher("/");
 
     public SpringAntPathMatcher() {
     }
@@ -26,14 +26,14 @@ public class SpringAntPathMatcher implements IPriorMatcher {
 
     @Override
     public boolean matches(String str, String patten) {
-        if(str==null){
+        if (str == null) {
             return false;
         }
-        if(patten==null){
+        if (patten == null) {
             return false;
         }
-        boolean ok= matcher.match(patten,str);
-        if(!ok){
+        boolean ok = matcher.match(patten, str);
+        if (!ok) {
             return false;
         }
         return true;
@@ -41,28 +41,28 @@ public class SpringAntPathMatcher implements IPriorMatcher {
 
     @Override
     public double matchRate(String str, String patten) {
-        if(str==null){
+        if (str == null) {
             return MATCH_FAILURE_VALUE;
         }
-        if(patten==null){
+        if (patten == null) {
             return MATCH_FAILURE_VALUE;
         }
-        boolean ok= matcher.match(patten,str);
-        if(!ok){
+        boolean ok = matcher.match(patten, str);
+        if (!ok) {
             return MATCH_FAILURE_VALUE;
         }
-        String[] arr={
+        String[] arr = {
                 "**", "*"
         };
-        String iter=patten;
+        String iter = patten;
         for (String item : arr) {
-            iter=iter.replace(item,"");
-            if(iter.isEmpty()){
+            iter = iter.replace(item, "");
+            if (iter.isEmpty()) {
                 break;
             }
         }
         int plen = iter.length();
 
-        return calcMatchRate(str.length(),patten.length(),str.length(),patten.length(),Math.min(plen,str.length()));
+        return calcMatchRate(str.length(), patten.length(), str.length(), patten.length(), Math.min(plen, str.length()));
     }
 }

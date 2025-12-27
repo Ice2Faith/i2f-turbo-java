@@ -42,7 +42,7 @@ public class SpringCorsAutoConfiguration {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         OriginPattenCorsConfiguration config = new OriginPattenCorsConfiguration();
         config.setAllowedMethods(Arrays.asList(allowMethods.split(",|;")));
-        config.setAllowedOrigins(originList.stream().filter(e->!e.contains("*")).collect(Collectors.toList()));
+        config.setAllowedOrigins(originList.stream().filter(e -> !e.contains("*")).collect(Collectors.toList()));
         config.setAllowedHeaders(Arrays.asList(allowHeaders.split(",|;")));
         config.setExposedHeaders(Arrays.asList(exposedHeaders.split(",|;")));
         config.setAllowedOriginPatterns(originList);

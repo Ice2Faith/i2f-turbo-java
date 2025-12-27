@@ -12,7 +12,8 @@ import java.io.InputStream;
  */
 public interface IRowSetReader<T> {
     IRowSet<T> read(InputStream is) throws IOException;
-    default IRowSet<T> read(File file) throws IOException{
+
+    default IRowSet<T> read(File file) throws IOException {
         return read(new FileInputStream(file));
     }
 }

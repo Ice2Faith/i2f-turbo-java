@@ -32,17 +32,17 @@ public class TunnelAutoConfiguration {
 
     @Data
     @NoArgsConstructor
-    public static class SshTunnelManager{
-        public static List<SshTunnelUtil> servers=new ArrayList<>();
+    public static class SshTunnelManager {
+        public static List<SshTunnelUtil> servers = new ArrayList<>();
     }
 
     @Bean
     public SshTunnelManager sshTunnelManager() throws Exception {
-        SshTunnelManager manager=new SshTunnelManager();
+        SshTunnelManager manager = new SshTunnelManager();
         List<TunnelProperties.Server> servers = tunnelProperties.getServers();
-        if(servers!=null) {
+        if (servers != null) {
             for (TunnelProperties.Server server : servers) {
-                log.info("jump server "+server.getName()+" tunnels:");
+                log.info("jump server " + server.getName() + " tunnels:");
 
                 TunnelProperties.SshProperties ssh = server.getSsh();
                 SshTunnelUtil ret = new SshTunnelUtil(ssh.getHost(), ssh.getPort(), ssh.getUsername(), ssh.getPassword());

@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  * @author Ice2Faith
  * @date 2025/8/3 18:36
  */
-public class HazelcastCache<K,V> implements IExpireContainerCache<K,V> {
+public class HazelcastCache<K, V> implements IExpireContainerCache<K, V> {
     private HazelcastInstance client;
     private String cacheName;
 
@@ -21,7 +21,7 @@ public class HazelcastCache<K,V> implements IExpireContainerCache<K,V> {
         this.cacheName = cacheName;
     }
 
-    public IMap<K,V> getMap(){
+    public IMap<K, V> getMap() {
         return client.getMap(cacheName);
     }
 
@@ -37,7 +37,7 @@ public class HazelcastCache<K,V> implements IExpireContainerCache<K,V> {
 
     @Override
     public void set(K key, V value, long time, TimeUnit timeUnit) {
-        getMap().put(key,value,time,timeUnit);
+        getMap().put(key, value, time, timeUnit);
     }
 
     @Override
@@ -48,11 +48,11 @@ public class HazelcastCache<K,V> implements IExpireContainerCache<K,V> {
     @Override
     public Long getExpire(K key, TimeUnit timeUnit) {
         EntryView<K, V> view = getMap().getEntryView(key);
-        if(view==null){
+        if (view == null) {
             return null;
         }
         long ts = view.getTtl();
-        return timeUnit.convert(ts,TimeUnit.MILLISECONDS);
+        return timeUnit.convert(ts, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class HazelcastCache<K,V> implements IExpireContainerCache<K,V> {
 
     @Override
     public void set(K key, V value) {
-        getMap().put(key,value);
+        getMap().put(key, value);
     }
 
     @Override

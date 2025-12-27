@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 
@@ -186,9 +185,9 @@ public enum DatabaseType {
      */
     private final String desc;
 
-    public static final String DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX ="database-type-mapping-url-";
+    public static final String DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX = "database-type-mapping-url-";
 
-    public static final ConcurrentHashMap<String,DatabaseType> JDBC_URL_TYPE_MAPPING=new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, DatabaseType> JDBC_URL_TYPE_MAPPING = new ConcurrentHashMap<>();
 
     public String db() {
         return this.db;
@@ -220,7 +219,7 @@ public enum DatabaseType {
     public static DatabaseType typeOfName(String dbType) {
         for (DatabaseType type : DatabaseType.values()) {
             if (type.name().equalsIgnoreCase(dbType)
-            ||type.db.equalsIgnoreCase(dbType)) {
+                    || type.db.equalsIgnoreCase(dbType)) {
                 return type;
             }
         }
@@ -290,13 +289,13 @@ public enum DatabaseType {
                 }
             }
         }
-        if(jdbcUrl!=null) {
+        if (jdbcUrl != null) {
             DatabaseType type = JDBC_URL_TYPE_MAPPING.get(jdbcUrl);
             if (isValid(type)) {
                 return type;
             }
         }
-        if(jdbcUrl!=null) {
+        if (jdbcUrl != null) {
             String prop = System.getProperty(DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX + jdbcUrl);
             if (prop != null) {
                 DatabaseType databaseType = DatabaseType.typeOfName(prop);

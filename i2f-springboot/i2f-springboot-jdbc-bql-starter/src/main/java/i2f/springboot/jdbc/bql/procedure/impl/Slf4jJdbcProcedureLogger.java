@@ -22,14 +22,14 @@ import java.util.function.Supplier;
 @NoArgsConstructor
 public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
     private volatile AtomicBoolean debug = new AtomicBoolean(false);
-    private final LruMap<String, Logger> cacheLoggerMap=new LruMap<>(1024);
+    private final LruMap<String, Logger> cacheLoggerMap = new LruMap<>(1024);
 
     public Slf4jJdbcProcedureLogger(AtomicBoolean debug) {
         this.debug = debug;
     }
 
     public Logger getLogger(String name) {
-        return cacheLoggerMap.computeIfAbsent(name,k->{
+        return cacheLoggerMap.computeIfAbsent(name, k -> {
             return LoggerFactory.getLogger(name);
         });
     }
@@ -38,7 +38,7 @@ public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
         return getLogger(clazz.getName());
     }
 
-    public Logger getLogger(){
+    public Logger getLogger() {
         return getLogger(ContextHolder.TRACE_FILE.get());
     }
 
@@ -57,14 +57,14 @@ public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
     }
 
     @Override
-    public void logDebug(Supplier<Object> supplier,Throwable e) {
+    public void logDebug(Supplier<Object> supplier, Throwable e) {
         if (isDebug()) {
             String location = ContextHolder.traceLocation();
             String msg = "near " + location + ", msg: " + supplier.get();
-            if(e!=null){
+            if (e != null) {
                 JdbcProcedureUtil.purifyStackTrace(e, true);
-                getLogger().debug(msg,e);
-            }else {
+                getLogger().debug(msg, e);
+            } else {
                 getLogger().debug(msg);
             }
         }

@@ -8,8 +8,8 @@ import java.lang.reflect.Parameter;
  * @date 2025/11/12 10:23
  */
 public class LimitUtil {
-    public static String getMethodSignature(Method method){
-        StringBuilder builder=new StringBuilder();
+    public static String getMethodSignature(Method method) {
+        StringBuilder builder = new StringBuilder();
         builder.append(method.getReturnType().getSimpleName());
         builder.append(" ");
         builder.append(method.getDeclaringClass().getSimpleName());
@@ -18,7 +18,7 @@ public class LimitUtil {
         builder.append("(");
         Parameter[] arr = method.getParameters();
         for (int i = 0; i < arr.length; i++) {
-            if(i>0){
+            if (i > 0) {
                 builder.append(",");
             }
             builder.append(arr[i].getType().getSimpleName());

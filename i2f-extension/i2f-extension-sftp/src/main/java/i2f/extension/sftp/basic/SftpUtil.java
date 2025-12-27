@@ -85,6 +85,7 @@ public class SftpUtil implements Closeable {
 
     /**
      * 获取交互式终端，输入输出是异步的
+     *
      * @return
      * @throws JSchException
      */
@@ -96,12 +97,13 @@ public class SftpUtil implements Closeable {
 
     /**
      * 获取命令执行通道，用于有序执行一份命令，可以阻塞式获取输出
+     *
      * @param command
      * @return
      * @throws JSchException
      */
     public ChannelExec getChannelExec(String command) throws JSchException {
-        ChannelExec shell = (ChannelExec)session.openChannel("exec");
+        ChannelExec shell = (ChannelExec) session.openChannel("exec");
         shell.setCommand(command);
         shell.connect();
         return shell;
@@ -277,7 +279,7 @@ public class SftpUtil implements Closeable {
             BufferedReader input = null;
 
             try {
-                StringBuilder commandBuilder=new StringBuilder();
+                StringBuilder commandBuilder = new StringBuilder();
                 if (dir != null && !dir.isEmpty()) {
                     commandBuilder.append("cd ").append(dir).append("\n");
                 }

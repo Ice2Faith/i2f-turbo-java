@@ -568,7 +568,7 @@ public class ExcelExportTask implements Runnable, Callable<File> {
 
             if (!hasData) {
                 // 如果没有任何数据导出，此处依旧调用，避免导出没有表头或者格式错误问题
-                List<?> data=new ArrayList<>();
+                List<?> data = new ArrayList<>();
                 updateWriteHandler(data, clazz, sheetContext, currSheetIndex, 0, workbookContext);
                 if (useTemplate) {
                     excelWriter.fill(data, writeSheet);

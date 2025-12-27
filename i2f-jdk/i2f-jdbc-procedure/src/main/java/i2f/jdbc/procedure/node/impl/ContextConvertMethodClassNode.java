@@ -23,7 +23,6 @@ public class ContextConvertMethodClassNode extends AbstractExecutorNode {
     }
 
 
-
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String clazz = node.getTagAttrMap().get(AttrConsts.CLASS);

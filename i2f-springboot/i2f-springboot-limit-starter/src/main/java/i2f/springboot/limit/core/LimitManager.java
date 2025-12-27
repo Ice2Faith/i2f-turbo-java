@@ -52,19 +52,19 @@ public class LimitManager implements ApplicationRunner {
     }
 
 
-    public void startScanRuleThread(){
+    public void startScanRuleThread() {
         Thread thread = new Thread(() -> {
-            while(true){
-                try{
+            while (true) {
+                try {
                     Map<String, Map<String, LimitRule>> map = scanRule();
                     applyRule(map);
-                }catch(Throwable e){
+                } catch (Throwable e) {
 
                 }
 
-                try{
+                try {
                     Thread.sleep(5000);
-                }catch(Throwable e){
+                } catch (Throwable e) {
                 }
             }
         });
@@ -73,77 +73,77 @@ public class LimitManager implements ApplicationRunner {
         thread.start();
     }
 
-    public void applyRule(Map<String,Map<String,LimitRule>> map){
-        if(map==null){
+    public void applyRule(Map<String, Map<String, LimitRule>> map) {
+        if (map == null) {
             return;
         }
         for (Map.Entry<String, Map<String, LimitRule>> entry : map.entrySet()) {
             String limitType = entry.getKey();
-            if(limitType==null){
+            if (limitType == null) {
                 continue;
             }
             Map<String, LimitRule> value = entry.getValue();
-            if(value==null){
+            if (value == null) {
                 continue;
             }
             ConcurrentHashMap<String, LimitRule> keyMap = ruleHolder.computeIfAbsent(limitType, k -> new ConcurrentHashMap<>());
             for (Map.Entry<String, LimitRule> ruleEntry : value.entrySet()) {
                 String typeKey = ruleEntry.getKey();
-                if(typeKey==null){
+                if (typeKey == null) {
                     continue;
                 }
                 LimitRule rule = ruleEntry.getValue();
-                if(rule==null){
+                if (rule == null) {
                     continue;
                 }
-                keyMap.put(typeKey,rule);
+                keyMap.put(typeKey, rule);
             }
         }
     }
 
-    public String getAppName(){
+    public String getAppName() {
         String ret = properties.getAppName();
-        if(ret==null || ret.isEmpty()){
+        if (ret == null || ret.isEmpty()) {
             return LimitConsts.DEFAULT_APP_NAME;
         }
         return ret;
     }
 
-    public Map<String, Map<String,LimitRule>> scanRule(){
-        Map<String, Map<String,LimitRule>> ret=new LinkedHashMap<>();
+    public Map<String, Map<String, LimitRule>> scanRule() {
+        Map<String, Map<String, LimitRule>> ret = new LinkedHashMap<>();
         String[] names = applicationContext.getBeanNamesForType(LimitRuleItemProvider.class);
         for (String name : names) {
             LimitRuleItemProvider provider = applicationContext.getBean(name, LimitRuleItemProvider.class);
             List<LimitRuleItem> rules = provider.getRules(getAppName());
             for (LimitRuleItem rule : rules) {
-                if(provider.isDynamic()){
-                    saveRule(rule.getLimitType(),rule.getTypeKey(),rule.getRule());
-                }else{
-                    registryIfAbsentRule(rule.getLimitType(),rule.getTypeKey(),rule.getRule());
+                if (provider.isDynamic()) {
+                    saveRule(rule.getLimitType(), rule.getTypeKey(), rule.getRule());
+                } else {
+                    registryIfAbsentRule(rule.getLimitType(), rule.getTypeKey(), rule.getRule());
                 }
             }
         }
         return ret;
     }
 
-    public int registryIfAbsentRule(LimitType limitType,String typeKey,LimitRule rule){
-        return registryIfAbsentRule(limitType.value(),typeKey,rule);
+    public int registryIfAbsentRule(LimitType limitType, String typeKey, LimitRule rule) {
+        return registryIfAbsentRule(limitType.value(), typeKey, rule);
     }
 
-    public int registryIfAbsentRule(String limitType,String typeKey,LimitRule rule){
-        if(rule==null){
+    public int registryIfAbsentRule(String limitType, String typeKey, LimitRule rule) {
+        if (rule == null) {
             return -1;
         }
-        if(limitType==null){
+        if (limitType == null) {
             return -1;
         }
-        if(typeKey==null){
+        if (typeKey == null) {
             return -1;
         }
         ConcurrentHashMap<String, LimitRule> keyMap = ruleHolder.get(limitType);
-        if(keyMap!=null){
+        if (keyMap != null) {
             LimitRule exRule = keyMap.get(typeKey);
-            if(exRule!=null){
+            if (exRule != null) {
                 return 0;
             }
         }
@@ -153,66 +153,66 @@ public class LimitManager implements ApplicationRunner {
         return 1;
     }
 
-    public boolean saveRule(LimitType limitType, String typeKey, LimitRule rule){
-        return saveRule(limitType.value(),typeKey,rule);
+    public boolean saveRule(LimitType limitType, String typeKey, LimitRule rule) {
+        return saveRule(limitType.value(), typeKey, rule);
     }
 
-    public boolean saveRule(String limitType, String typeKey, LimitRule rule){
-        if(rule==null){
+    public boolean saveRule(String limitType, String typeKey, LimitRule rule) {
+        if (rule == null) {
             return false;
         }
-        if(limitType==null){
+        if (limitType == null) {
             return false;
         }
-        if(typeKey==null){
+        if (typeKey == null) {
             return false;
         }
-        String key=LimitConsts.KEY_RULE+getAppName()+":"+limitType+":"+typeKey;
+        String key = LimitConsts.KEY_RULE + getAppName() + ":" + limitType + ":" + typeKey;
         RedisTemplate redisTemplate = redisHolder.getRedisTemplate();
-        redisTemplate.execute((conn)->{
-            byte[] rawKey=key.getBytes(StandardCharsets.UTF_8);
-            byte[] rawValue=conn.get(rawKey);
-            if(rawValue==null || rawValue.length==0){
+        redisTemplate.execute((conn) -> {
+            byte[] rawKey = key.getBytes(StandardCharsets.UTF_8);
+            byte[] rawValue = conn.get(rawKey);
+            if (rawValue == null || rawValue.length == 0) {
                 try {
                     String json = objectMapper.writeValueAsString(rule);
-                    rawValue=json.getBytes(StandardCharsets.UTF_8);
-                    conn.set(rawKey,rawValue);
+                    rawValue = json.getBytes(StandardCharsets.UTF_8);
+                    conn.set(rawKey, rawValue);
                 } catch (JsonProcessingException e) {
-                    throw new IllegalArgumentException(e.getMessage(),e);
+                    throw new IllegalArgumentException(e.getMessage(), e);
                 }
             }
             return rawValue;
-        },true);
+        }, true);
 
-        ruleHolder.computeIfAbsent(limitType,k->new ConcurrentHashMap<>())
-                .put(typeKey,rule);
+        ruleHolder.computeIfAbsent(limitType, k -> new ConcurrentHashMap<>())
+                .put(typeKey, rule);
         return true;
     }
 
-    public List<LimitRuleItem> getRules(LimitType limitType){
+    public List<LimitRuleItem> getRules(LimitType limitType) {
         return getRules(limitType.value());
     }
 
-    public List<LimitRuleItem> getRules(String limitType){
-        List<LimitRuleItem> ret=new ArrayList<>();
-        if(limitType==null){
+    public List<LimitRuleItem> getRules(String limitType) {
+        List<LimitRuleItem> ret = new ArrayList<>();
+        if (limitType == null) {
             return ret;
         }
         ConcurrentHashMap<String, LimitRule> keyMap = ruleHolder.get(limitType);
-        if(keyMap==null){
+        if (keyMap == null) {
             return ret;
         }
         for (Map.Entry<String, LimitRule> entry : keyMap.entrySet()) {
-            ret.add(new LimitRuleItem(limitType,entry.getKey(),entry.getValue()));
+            ret.add(new LimitRuleItem(limitType, entry.getKey(), entry.getValue()));
         }
-        ret.sort((v1,v2)->{
-            return Integer.compare(v1.getRule().getOrder(),v2.getRule().getOrder());
+        ret.sort((v1, v2) -> {
+            return Integer.compare(v1.getRule().getOrder(), v2.getRule().getOrder());
         });
         return ret;
     }
 
-    public boolean isLimited(LimitType limitType,String typeKey){
-        return isLimited(limitType.value(),typeKey);
+    public boolean isLimited(LimitType limitType, String typeKey) {
+        return isLimited(limitType.value(), typeKey);
     }
 
     public boolean isLimited(String limitType, String typeKey) {
@@ -224,16 +224,16 @@ public class LimitManager implements ApplicationRunner {
         if (rule == null) {
             return false;
         }
-        return isLimited(limitType,typeKey,rule);
+        return isLimited(limitType, typeKey, rule);
     }
 
-    public boolean isLimited(LimitType limitType, String typeKey,LimitRule rule) {
-        return isLimited(limitType.value(),typeKey,rule);
+    public boolean isLimited(LimitType limitType, String typeKey, LimitRule rule) {
+        return isLimited(limitType.value(), typeKey, rule);
     }
 
-    public boolean isLimited(String limitType, String typeKey,LimitRule rule) {
+    public boolean isLimited(String limitType, String typeKey, LimitRule rule) {
         int count = rule.getCount();
-        if(count<0){
+        if (count < 0) {
             return false;
         }
         RedisTemplate redisTemplate = redisHolder.getRedisTemplate();
@@ -241,7 +241,7 @@ public class LimitManager implements ApplicationRunner {
             String key = LimitConsts.KEY_TARGET + getAppName() + ":" + limitType + ":" + typeKey;
             byte[] rawKey = key.getBytes(StandardCharsets.UTF_8);
             Long cnt = conn.incr(rawKey);
-            if (cnt <= 1 && rule.getTtl()>=0) {
+            if (cnt <= 1 && rule.getTtl() >= 0) {
                 conn.expire(rawKey, rule.getTtl());
             }
             return cnt;

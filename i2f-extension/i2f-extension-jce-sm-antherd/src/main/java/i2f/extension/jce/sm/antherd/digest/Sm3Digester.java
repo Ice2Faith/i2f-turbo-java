@@ -50,7 +50,7 @@ public class Sm3Digester implements IMessageDigester {
         try {
             return Sm3.sm3(str);
         } catch (ScriptException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
@@ -59,7 +59,7 @@ public class Sm3Digester implements IMessageDigester {
             String hash = Sm3.sm3(str);
             return hash.equalsIgnoreCase(sign);
         } catch (ScriptException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 

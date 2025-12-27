@@ -16,52 +16,52 @@ import java.util.concurrent.atomic.AtomicInteger;
 //@Component
 public class BasicWebsocketEndpointHandler {
 
-    protected AtomicInteger onlineCount=new AtomicInteger();
+    protected AtomicInteger onlineCount = new AtomicInteger();
 
-    protected ConcurrentHashMap<String, Session> clients=new ConcurrentHashMap<>();
+    protected ConcurrentHashMap<String, Session> clients = new ConcurrentHashMap<>();
 
     @OnOpen
-    public void onOpen(Session session){
+    public void onOpen(Session session) {
         onlineCount.incrementAndGet();
         clients.put(session.getId(), session);
-        log.info("websocket client accept:"+session.getId()+" count:"+onlineCount.get());
+        log.info("websocket client accept:" + session.getId() + " count:" + onlineCount.get());
     }
 
     @OnClose
-    public void onClose(Session session){
+    public void onClose(Session session) {
         onlineCount.decrementAndGet();
         clients.remove(session.getId());
-        log.info("websocket client close:"+session.getId()+" count:"+onlineCount.get());
+        log.info("websocket client close:" + session.getId() + " count:" + onlineCount.get());
     }
 
     @OnMessage
-    public void onMessage(String message,Session session){
-        log.info("websocket client:"+session.getId()+" message:"+message);
-        sendMessage("echo:"+message,session);
+    public void onMessage(String message, Session session) {
+        log.info("websocket client:" + session.getId() + " message:" + message);
+        sendMessage("echo:" + message, session);
     }
 
     @OnError
-    public void onError(Session session,Throwable error){
-        log.error("websocket client:"+session.getId()+" error:"+error.getMessage());
+    public void onError(Session session, Throwable error) {
+        log.error("websocket client:" + session.getId() + " error:" + error.getMessage());
         error.printStackTrace();
     }
 
-    public void sendMessage(String message,Session session){
+    public void sendMessage(String message, Session session) {
         session.getAsyncRemote().sendText(message);
     }
 
-    public void broadcastMessage(String message){
-        for(Session item : clients.values()){
-            sendMessage(message,item);
+    public void broadcastMessage(String message) {
+        for (Session item : clients.values()) {
+            sendMessage(message, item);
         }
     }
 
-    public void broadcastMessageToOthers(String message,Session send){
-        for(Session item : clients.values()){
-            if(item.getId().equals(send.getId())){
+    public void broadcastMessageToOthers(String message, Session send) {
+        for (Session item : clients.values()) {
+            if (item.getId().equals(send.getId())) {
                 continue;
             }
-            sendMessage(message,item);
+            sendMessage(message, item);
         }
     }
 }

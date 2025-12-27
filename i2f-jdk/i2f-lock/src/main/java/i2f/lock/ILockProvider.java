@@ -6,5 +6,6 @@ package i2f.lock;
  */
 public interface ILockProvider {
     String name();
+
     ILock getLock(String key);
 }

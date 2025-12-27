@@ -11,13 +11,14 @@ import java.security.SecureRandom;
  * @desc
  */
 public class TestTask implements FlowTask {
-    protected static SecureRandom random=new SecureRandom();
+    protected static SecureRandom random = new SecureRandom();
+
     @Override
     public boolean trigger(FlowNode node) {
-        if(node.getPrev().isEmpty()){
+        if (node.getPrev().isEmpty()) {
             return true;
         }
-        return node.getPrev().size()==node.getDone().size();
+        return node.getPrev().size() == node.getDone().size();
     }
 
     @Override
@@ -25,9 +26,9 @@ public class TestTask implements FlowTask {
 
 //        Thread.sleep(random.nextInt(300));
 
-        System.out.println(String.format("run(%s:%s)",node.getId(),node.getName()));
+        System.out.println(String.format("run(%s:%s)", node.getId(), node.getName()));
 
-        if(random.nextDouble()<0.2){
+        if (random.nextDouble() < 0.2) {
             throw new IllegalStateException("运行失败");
         }
     }

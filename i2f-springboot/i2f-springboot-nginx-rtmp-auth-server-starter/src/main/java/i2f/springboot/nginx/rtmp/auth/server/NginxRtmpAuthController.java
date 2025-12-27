@@ -2,8 +2,6 @@ package i2f.springboot.nginx.rtmp.auth.server;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,7 +51,7 @@ public class NginxRtmpAuthController {
         log.info("nginxData:" + nginxData);
         log.info("token:" + token);
         try {
-            if (!validator.validate(request,token,nginxData)) {
+            if (!validator.validate(request, token, nginxData)) {
                 log.error("auth failure!");
                 response.setStatus(500);
                 return "{\"code\":500,\"detail\":\"ERROR\"}";

@@ -23,7 +23,6 @@ public class ContextLoadPackageNode extends AbstractExecutorNode {
     }
 
 
-
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String pkg = node.getTagAttrMap().get(AttrConsts.PACKAGE);

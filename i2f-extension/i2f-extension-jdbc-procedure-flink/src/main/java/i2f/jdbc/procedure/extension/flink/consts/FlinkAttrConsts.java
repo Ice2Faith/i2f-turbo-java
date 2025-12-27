@@ -5,6 +5,6 @@ package i2f.jdbc.procedure.extension.flink.consts;
  * @date 2025/9/23 14:19
  */
 public interface FlinkAttrConsts {
-    String EXEC_ENV="exec-env";
-    String TAB_ENV="tab-env";
+    String EXEC_ENV = "exec-env";
+    String TAB_ENV = "tab-env";
 }

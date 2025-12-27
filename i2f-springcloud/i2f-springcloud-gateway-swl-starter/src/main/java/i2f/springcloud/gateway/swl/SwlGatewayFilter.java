@@ -235,7 +235,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                             headers.set(HttpHeaders.CONTENT_TYPE, realContentType);
                         }
 
-                        headers.set(HttpHeaders.CONTENT_LENGTH,String.valueOf(body.length));
+                        headers.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(body.length));
 
 
                         // 替换请求为包装请求
@@ -426,7 +426,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         }
                     }
 
-                    MediaType responseMediaType = MediaType.parseMediaType(MediaType.TEXT_PLAIN_VALUE+";charset=" + responseCharset);
+                    MediaType responseMediaType = MediaType.parseMediaType(MediaType.TEXT_PLAIN_VALUE + ";charset=" + responseCharset);
                     delegateResponse.getHeaders().setContentType(responseMediaType);
 
                     // 响应数据

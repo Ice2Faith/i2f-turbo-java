@@ -171,7 +171,7 @@ public class DatasourceOpsController implements IOpsProvider {
 
                                 ResultSetMetaData metaData = rs.getMetaData();
                                 List<QueryColumn> columns = JdbcResolver.parseResultSetColumns(metaData);
-                                List<QueryColumn> parseColumns=new ArrayList<>(columns);
+                                List<QueryColumn> parseColumns = new ArrayList<>(columns);
                                 if (connMapCount > 1) {
                                     columns.add(0, datasourceColumn);
                                 }

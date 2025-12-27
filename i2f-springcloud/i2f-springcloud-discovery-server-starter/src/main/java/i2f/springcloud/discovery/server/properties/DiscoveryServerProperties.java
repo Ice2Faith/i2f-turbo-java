@@ -15,11 +15,11 @@ public class DiscoveryServerProperties {
     private String secretKey = "123456";
     private long keepaliveSeconds = 30;
 
-    private RedisManagerProperties redisManager=new RedisManagerProperties();
+    private RedisManagerProperties redisManager = new RedisManagerProperties();
 
     @Data
     @NoArgsConstructor
-    public static class RedisManagerProperties{
-        private String prefix="";
+    public static class RedisManagerProperties {
+        private String prefix = "";
     }
 }

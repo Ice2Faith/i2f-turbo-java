@@ -33,28 +33,28 @@ public class GrammarReporter {
     protected static ExecutorService exprPool = new ForkJoinPool(Math.min(32, Runtime.getRuntime().availableProcessors()) * 2);
 
     // 双单引号('')，可能是错误的转义
-    public static final AtomicBoolean checkDoubleSingleQuote=new AtomicBoolean(false);
+    public static final AtomicBoolean checkDoubleSingleQuote = new AtomicBoolean(false);
     // 双管道符(||)，可能是错误使用
-    public static final AtomicBoolean checkDoublePipe=new AtomicBoolean(false);
+    public static final AtomicBoolean checkDoublePipe = new AtomicBoolean(false);
     // 括号、引号，占位符的花括号等封闭语义符号是否封闭，没封闭可能是错误
-    public static final AtomicBoolean checkEnclosedChar=new AtomicBoolean(false);
+    public static final AtomicBoolean checkEnclosedChar = new AtomicBoolean(false);
     // 对调用其他过程时，未接受返回值的情况，可能导致返回值丢失
-    public static final AtomicBoolean checkCallResult=new AtomicBoolean(false);
+    public static final AtomicBoolean checkCallResult = new AtomicBoolean(false);
     // 入参值为空白字符串时，可能是忘记写入参
-    public static final AtomicBoolean checkBlankAttribute=new AtomicBoolean(false);
+    public static final AtomicBoolean checkBlankAttribute = new AtomicBoolean(false);
     // 是否允许调用子过程时忽略出参，虽然大多数情况下忽略也可以，但是如果既是入参也是出参的时候，如果忽略可能导致缺少入参
-    public static final AtomicBoolean checkOutputArgument=new AtomicBoolean(false);
+    public static final AtomicBoolean checkOutputArgument = new AtomicBoolean(false);
 
     public static void reportGrammar(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
-        reportGrammar(executor,null,metaMap,warnPoster);
+        reportGrammar(executor, null, metaMap, warnPoster);
     }
 
-    public static void reportGrammar(JdbcProcedureExecutor executor,Set<String> validMetaKeys, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
+    public static void reportGrammar(JdbcProcedureExecutor executor, Set<String> validMetaKeys, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
         if (metaMap == null) {
             return;
         }
-        if(validMetaKeys==null || validMetaKeys.isEmpty()){
-            validMetaKeys=new LinkedHashSet<>(metaMap.keySet());
+        if (validMetaKeys == null || validMetaKeys.isEmpty()) {
+            validMetaKeys = new LinkedHashSet<>(metaMap.keySet());
         }
         warnPoster.accept(XProc4jConsts.NAME + " report xml grammar running ...");
         long bts = System.currentTimeMillis();
@@ -65,11 +65,11 @@ public class GrammarReporter {
             CountDownLatch latch = new CountDownLatch(mapSize);
             AtomicInteger reportSize = new AtomicInteger(0);
             for (String key : validMetaKeys) {
-                if(key==null){
+                if (key == null) {
                     continue;
                 }
-                ProcedureMeta meta  = metaMap.get(key);
-                if(meta==null){
+                ProcedureMeta meta = metaMap.get(key);
+                if (meta == null) {
                     continue;
                 }
                 pool.submit(() -> {
@@ -143,11 +143,11 @@ public class GrammarReporter {
                 "#}",
                 "$ {",
                 "# {"
-                ));
-        if(checkDoubleSingleQuote.get()){
+        ));
+        if (checkDoubleSingleQuote.get()) {
             INVALID_STR_ARR.add("''");
         }
-        if(checkDoublePipe.get()){
+        if (checkDoublePipe.get()) {
             INVALID_STR_ARR.add("||");
         }
         if (Arrays.asList(
@@ -241,12 +241,12 @@ public class GrammarReporter {
                 }
             }
             ProcedureMeta meta = metaMap.get(refid);
-            if(meta==null){
-                String subId="."+refid;
+            if (meta == null) {
+                String subId = "." + refid;
                 for (Map.Entry<String, ProcedureMeta> entry : metaMap.entrySet()) {
                     String key = entry.getKey();
-                    if(key.endsWith(subId)){
-                        meta=entry.getValue();
+                    if (key.endsWith(subId)) {
+                        meta = entry.getValue();
                         break;
                     }
                 }
@@ -279,15 +279,15 @@ public class GrammarReporter {
                     }
                 }
             } else if (refid != null && !refid.isEmpty()) {
-                boolean reportFlag=true;
+                boolean reportFlag = true;
                 List<String> features = node.getAttrFeatureMap().get(AttrConsts.REFID);
-                if(features!=null && !features.isEmpty()){
+                if (features != null && !features.isEmpty()) {
                     String feature = features.get(0);
-                    if(!FeatureConsts.STRING.equals(feature)){
-                        reportFlag=false;
+                    if (!FeatureConsts.STRING.equals(feature)) {
+                        reportFlag = false;
                     }
                 }
-                if(reportFlag) {
+                if (reportFlag) {
                     if (reportCount != null) {
                         reportCount.incrementAndGet();
                     }
@@ -325,7 +325,7 @@ public class GrammarReporter {
     }
 
     public static void reportEnclosedCharString(String body, XmlNode node, Consumer<String> warnPoster) {
-        if(!checkEnclosedChar.get()){
+        if (!checkEnclosedChar.get()) {
             return;
         }
         body = body.trim();

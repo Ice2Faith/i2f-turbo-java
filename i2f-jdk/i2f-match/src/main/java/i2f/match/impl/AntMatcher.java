@@ -18,8 +18,8 @@ import i2f.match.std.IPriorMatcher;
  * 因此\\就是\\，而不是\
  */
 public class AntMatcher implements IPriorMatcher {
-    public static final AntMatcher PATH=new AntMatcher("/");
-    public static final AntMatcher PKG=new AntMatcher(".");
+    public static final AntMatcher PATH = new AntMatcher("/");
+    public static final AntMatcher PKG = new AntMatcher(".");
 
     protected String sep;
 
@@ -47,13 +47,13 @@ public class AntMatcher implements IPriorMatcher {
         int slen = str.length();
         int mlen = 0;
         while (pi < plen) {
-            String cpattern=patten.substring(pi);
-            String cstr=str.substring(si);
+            String cpattern = patten.substring(pi);
+            String cstr = str.substring(si);
             if (si >= slen) {
                 String leftPattern = patten.substring(pi);
-                if("*".equals(leftPattern)
-                || "**".equals(leftPattern)){
-                    pi+=leftPattern.length();
+                if ("*".equals(leftPattern)
+                        || "**".equals(leftPattern)) {
+                    pi += leftPattern.length();
                     break;
                 }
                 return MATCH_FAILURE_VALUE;

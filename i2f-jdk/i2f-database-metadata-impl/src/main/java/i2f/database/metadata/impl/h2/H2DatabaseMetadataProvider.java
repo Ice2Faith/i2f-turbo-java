@@ -101,10 +101,10 @@ public class H2DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
     public QueryResult getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
         ResultSet rs = metaData.getTables(null, database, table, null);
         QueryResult ret = JdbcResolver.parseResultSet(rs);
-        if(!ret.getRows().isEmpty()){
+        if (!ret.getRows().isEmpty()) {
             return ret;
         }
-        if(table!=null){
+        if (table != null) {
             rs = metaData.getTables(null, database, table.toLowerCase(), null);
             ret = JdbcResolver.parseResultSet(rs);
         }
@@ -115,10 +115,10 @@ public class H2DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
     public QueryResult getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
         ResultSet rs = metaData.getColumns(null, database, table, null);
         QueryResult ret = JdbcResolver.parseResultSet(rs);
-        if(!ret.getRows().isEmpty()){
+        if (!ret.getRows().isEmpty()) {
             return ret;
         }
-        if(table!=null){
+        if (table != null) {
             metaData.getColumns(null, database, table.toLowerCase(), null);
             ret = JdbcResolver.parseResultSet(rs);
         }
@@ -129,10 +129,10 @@ public class H2DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
     public QueryResult getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
         ResultSet rs = metaData.getPrimaryKeys(null, database, table);
         QueryResult ret = JdbcResolver.parseResultSet(rs);
-        if(!ret.getRows().isEmpty()){
+        if (!ret.getRows().isEmpty()) {
             return ret;
         }
-        if(table!=null){
+        if (table != null) {
             rs = metaData.getPrimaryKeys(null, database, table.toLowerCase());
             ret = JdbcResolver.parseResultSet(rs);
         }
@@ -143,10 +143,10 @@ public class H2DatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
     public QueryResult getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
         ResultSet rs = metaData.getIndexInfo(null, database, table, false, false);
         QueryResult ret = JdbcResolver.parseResultSet(rs);
-        if(!ret.getRows().isEmpty()){
+        if (!ret.getRows().isEmpty()) {
             return ret;
         }
-        if(table!=null){
+        if (table != null) {
             rs = metaData.getIndexInfo(null, database, table.toLowerCase(), false, false);
             ret = JdbcResolver.parseResultSet(rs);
         }

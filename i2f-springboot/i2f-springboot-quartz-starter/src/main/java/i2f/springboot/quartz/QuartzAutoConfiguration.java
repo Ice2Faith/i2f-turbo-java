@@ -29,43 +29,43 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 @ConfigurationProperties(prefix = "i2f.springboot.config.quartz")
 public class QuartzAutoConfiguration implements InitializingBean {
 
-    private boolean overwriteExistingJobs=true;
-    private int startupDelay=1;
-    private String configLocation="/quartz.properties";
+    private boolean overwriteExistingJobs = true;
+    private int startupDelay = 1;
+    private String configLocation = "/quartz.properties";
 
     @Autowired
     private SpringJobFactory jobFactory;
 
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(){
-        SchedulerFactoryBean factoryBean=new SchedulerFactoryBean();
+    public SchedulerFactoryBean schedulerFactoryBean() {
+        SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();
         factoryBean.setJobFactory(jobFactory);
         // 集群时，更新已存在的job
         factoryBean.setOverwriteExistingJobs(overwriteExistingJobs);
         factoryBean.setStartupDelay(startupDelay);
 
-        Resource rs=null;
-        String[] configFinds={
+        Resource rs = null;
+        String[] configFinds = {
                 configLocation,
                 "/application-quartz.properties",
                 "/application.properties"
         };
-        for(String item : configFinds){
-            if(item==null || "".equals(item)){
+        for (String item : configFinds) {
+            if (item == null || "".equals(item)) {
                 continue;
             }
-            try{
-                rs=new ClassPathResource(item);
-                if(rs!=null){
-                    log.info("QuartzConfig find config location:"+item);
+            try {
+                rs = new ClassPathResource(item);
+                if (rs != null) {
+                    log.info("QuartzConfig find config location:" + item);
                     break;
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
         }
 
-        if(rs!=null){
+        if (rs != null) {
             log.info("QuartzConfig find config location as quartz properties");
             factoryBean.setConfigLocation(rs);
         }
@@ -75,7 +75,7 @@ public class QuartzAutoConfiguration implements InitializingBean {
 
 
     @Bean
-    public Scheduler scheduler(){
+    public Scheduler scheduler() {
         log.info("QuartzConfig scheduler config done.");
         return schedulerFactoryBean().getScheduler();
     }

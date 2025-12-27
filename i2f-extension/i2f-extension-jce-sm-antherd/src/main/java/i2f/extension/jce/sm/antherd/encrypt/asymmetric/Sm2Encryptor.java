@@ -62,7 +62,7 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
         try {
             return Sm2.generateKeyPairHex();
         } catch (ScriptException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
@@ -73,7 +73,7 @@ public class Sm2Encryptor implements IAsymmetricEncryptor {
             return new KeyPair(new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(keypair.getPublicKey())),
                     new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(keypair.getPrivateKey())));
         } catch (ScriptException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 

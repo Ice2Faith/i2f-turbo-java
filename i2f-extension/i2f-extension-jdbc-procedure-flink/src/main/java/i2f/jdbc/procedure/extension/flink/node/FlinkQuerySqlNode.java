@@ -26,13 +26,13 @@ public class FlinkQuerySqlNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        StreamTableEnvironment tabEnv = (StreamTableEnvironment)executor.attrValue(FlinkAttrConsts.TAB_ENV, FeatureConsts.VISIT, node, context);
-        String script=executor.convertAs(executor.attrValue(AttrConsts.SCRIPT,FeatureConsts.VISIT,node,context),String.class);
-        if(script!=null){
-            script=script.trim();
+        StreamTableEnvironment tabEnv = (StreamTableEnvironment) executor.attrValue(FlinkAttrConsts.TAB_ENV, FeatureConsts.VISIT, node, context);
+        String script = executor.convertAs(executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, node, context), String.class);
+        if (script != null) {
+            script = script.trim();
         }
-        if(script==null || script.isEmpty()){
-            script=node.getTextBody();
+        if (script == null || script.isEmpty()) {
+            script = node.getTextBody();
         }
         Table res = tabEnv.sqlQuery(script);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);

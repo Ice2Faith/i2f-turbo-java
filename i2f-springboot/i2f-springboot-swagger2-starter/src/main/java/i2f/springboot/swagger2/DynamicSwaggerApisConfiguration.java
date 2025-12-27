@@ -17,7 +17,8 @@ import org.springframework.context.annotation.Configuration;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spring.web.plugins.Docket;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -35,11 +36,11 @@ public class DynamicSwaggerApisConfiguration implements InitializingBean, Applic
 
     private ApplicationContext applicationContext;
 
-    private Map<String,GroupItemProperties> group=new LinkedHashMap<>();
+    private Map<String, GroupItemProperties> group = new LinkedHashMap<>();
 
     @Data
     @NoArgsConstructor
-    public static class GroupItemProperties{
+    public static class GroupItemProperties {
         private String group;
         private String basePackage;
         private String antPath;
@@ -47,39 +48,39 @@ public class DynamicSwaggerApisConfiguration implements InitializingBean, Applic
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext=applicationContext;
+        this.applicationContext = applicationContext;
     }
 
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        for(Map.Entry<String,GroupItemProperties> entry : group.entrySet()){
-            String name=entry.getKey();
-            name=name+"Docket";
-            GroupItemProperties item=entry.getValue();
-            if(applicationContext.containsBean(name)){
-                log.warn("context has contains bean with name:"+name);
+        for (Map.Entry<String, GroupItemProperties> entry : group.entrySet()) {
+            String name = entry.getKey();
+            name = name + "Docket";
+            GroupItemProperties item = entry.getValue();
+            if (applicationContext.containsBean(name)) {
+                log.warn("context has contains bean with name:" + name);
                 continue;
             }
 
-            String groupName=item.getGroup();
-            String basePackage=item.getBasePackage();
-            String antPath=item.getAntPath();
+            String groupName = item.getGroup();
+            String basePackage = item.getBasePackage();
+            String antPath = item.getAntPath();
 
-            if(groupName==null || "".equals(groupName)){
+            if (groupName == null || "".equals(groupName)) {
                 log.warn("swagger registry docket bad group.");
                 continue;
             }
 
-            if(basePackage==null || "".equals(basePackage)){
+            if (basePackage == null || "".equals(basePackage)) {
                 log.warn("swagger registrt docket bad base-package.");
                 continue;
             }
 
-            if(antPath==null || "".equals(antPath)){
+            if (antPath == null || "".equals(antPath)) {
                 log.warn("swagger registry bad ant-path be replace to /**");
-                antPath="/**";
+                antPath = "/**";
             }
 
             //获取BeanFactory
@@ -87,16 +88,16 @@ public class DynamicSwaggerApisConfiguration implements InitializingBean, Applic
             //创建bean信息.
             BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(DocketFactoryBean.class);
-            beanDefinitionBuilder.addPropertyValue("apiInfo",apiInfo)
-                    .addPropertyValue("groupName",groupName)
-                    .addPropertyValue("basePackage",basePackage)
-                    .addPropertyValue("antPath",antPath);
+            beanDefinitionBuilder.addPropertyValue("apiInfo", apiInfo)
+                    .addPropertyValue("groupName", groupName)
+                    .addPropertyValue("basePackage", basePackage)
+                    .addPropertyValue("antPath", antPath);
             //动态注册bean.
             defaultListableBeanFactory.registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
-            log.info("swagger registry docket name is:"+name);
+            log.info("swagger registry docket name is:" + name);
 
-            Docket dock=(Docket)applicationContext.getBean(name);
-            log.info("swagger dock is:"+dock);
+            Docket dock = (Docket) applicationContext.getBean(name);
+            log.info("swagger dock is:" + dock);
         }
     }
 

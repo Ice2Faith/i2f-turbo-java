@@ -2,9 +2,9 @@ package i2f.springboot.limit.provider.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.limit.core.LimitConsts;
-import i2f.springboot.limit.data.LimitRuleItem;
 import i2f.springboot.limit.core.LimitRedisHolder;
 import i2f.springboot.limit.data.LimitRule;
+import i2f.springboot.limit.data.LimitRuleItem;
 import i2f.springboot.limit.provider.LimitRuleItemProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,40 +41,40 @@ public class RedisDynamicLimitRuleItemProvider implements LimitRuleItemProvider 
 
     @Override
     public List<LimitRuleItem> getRules(String appName) {
-        List<LimitRuleItem> ret=new ArrayList<>();
+        List<LimitRuleItem> ret = new ArrayList<>();
         RedisTemplate redisTemplate = redisHolder.getRedisTemplate();
-        String prefix= LimitConsts.KEY_RULE +appName+":";
-        String pattern=prefix+"*";
-        byte[] rawPattern=pattern.getBytes(StandardCharsets.UTF_8);
+        String prefix = LimitConsts.KEY_RULE + appName + ":";
+        String pattern = prefix + "*";
+        byte[] rawPattern = pattern.getBytes(StandardCharsets.UTF_8);
         ScanOptions options = ScanOptions.scanOptions()
                 .match(rawPattern)
                 .build();
-        Cursor<byte[]> cursor = (Cursor<byte[]>)redisTemplate.executeWithStickyConnection((conn) -> {
+        Cursor<byte[]> cursor = (Cursor<byte[]>) redisTemplate.executeWithStickyConnection((conn) -> {
             return conn.scan(options);
         });
-        while(cursor.hasNext()){
+        while (cursor.hasNext()) {
             byte[] next = cursor.next();
-            String key=new String(next,StandardCharsets.UTF_8);
-            String str=key.substring(prefix.length());
+            String key = new String(next, StandardCharsets.UTF_8);
+            String str = key.substring(prefix.length());
             String[] arr = str.split(":", 2);
-            if(arr.length!=2){
+            if (arr.length != 2) {
                 continue;
             }
-            String limitType=arr[0];
-            String typeKey=arr[1];
-            byte[] jsonBytes=(byte[])redisTemplate.execute((conn)->{
+            String limitType = arr[0];
+            String typeKey = arr[1];
+            byte[] jsonBytes = (byte[]) redisTemplate.execute((conn) -> {
                 return conn.get(next);
-            },true);
-            if(jsonBytes==null){
+            }, true);
+            if (jsonBytes == null) {
                 continue;
             }
             LimitRule rule = null;
             try {
                 rule = objectMapper.readValue(jsonBytes, LimitRule.class);
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
-            if(rule==null){
+            if (rule == null) {
                 continue;
             }
 

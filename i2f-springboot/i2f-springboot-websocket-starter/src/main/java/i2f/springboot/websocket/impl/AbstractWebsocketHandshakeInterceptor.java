@@ -18,16 +18,16 @@ public class AbstractWebsocketHandshakeInterceptor implements HandshakeIntercept
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler, Map<String, Object> attributes) throws Exception {
         // 在此处可以在map中设置属性，以达到绑定用户信息
-        String username="user_"+System.currentTimeMillis();
-        attributes.put("username",username);
+        String username = "user_" + System.currentTimeMillis();
+        attributes.put("username", username);
         return true;
     }
 
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler, Exception e) {
         log.info("websocket handshake done.");
-        if(e!=null){
-            log.error("websocket handshake error:"+e.getMessage());
+        if (e != null) {
+            log.error("websocket handshake error:" + e.getMessage());
             e.printStackTrace();
         }
     }

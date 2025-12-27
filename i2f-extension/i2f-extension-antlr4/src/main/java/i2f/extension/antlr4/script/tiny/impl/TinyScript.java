@@ -24,7 +24,7 @@ import java.util.function.Predicate;
  * @date 2025/1/10 22:07
  */
 public class TinyScript {
-    public static final ThreadLocal<Object> FUNCTION_CALL_CONTEXT=new ThreadLocal<>();
+    public static final ThreadLocal<Object> FUNCTION_CALL_CONTEXT = new ThreadLocal<>();
 
     public static final ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> BUILTIN_METHOD = new ConcurrentHashMap<>();
     public static final LruMap<String, TinyScriptParser.ScriptContext> TREE_MAP = new LruMap<>(4096);

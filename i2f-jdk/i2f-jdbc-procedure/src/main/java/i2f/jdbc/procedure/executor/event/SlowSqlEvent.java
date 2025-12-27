@@ -15,6 +15,6 @@ public class SlowSqlEvent extends ExecutorContextEvent {
     protected BindSql bql;
     protected String location;
     protected String datasource;
-    protected long effectCount=-1;
+    protected long effectCount = -1;
     protected Throwable ex;
 }

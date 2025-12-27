@@ -20,8 +20,8 @@ public class JdbcScriptRunner {
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String DEFAULT_DELIMITER = ";";
     public static final Pattern DELIMITER_PATTERN = Pattern.compile("^\\s*((--)|(//))?\\s*(//)?\\s*@DELIMITER\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE);
-    public static final Pattern SINGLE_LINE_COMMENT_PATTERN=Pattern.compile("--[^\\n]*(\n|$)");
-    public static final Pattern MULTIPLE_LINE_COMMENT_PATTERN=Pattern.compile("\\/\\*([^*]|(\\*+([^*/])))*\\*+\\/");
+    public static final Pattern SINGLE_LINE_COMMENT_PATTERN = Pattern.compile("--[^\\n]*(\n|$)");
+    public static final Pattern MULTIPLE_LINE_COMMENT_PATTERN = Pattern.compile("\\/\\*([^*]|(\\*+([^*/])))*\\*+\\/");
     protected Connection connection;
     protected boolean stopOnError = false;
     protected boolean throwWarning = false;
@@ -31,8 +31,8 @@ public class JdbcScriptRunner {
     protected boolean escapeProcessing = true;
     protected String delimiter = DEFAULT_DELIMITER;
     protected boolean fullLineDelimiter = false;
-    protected Consumer<Object> logPrinter=System.out::println;
-    protected BiConsumer<Object,Throwable> logErrorPrinter=(obj,err)->{
+    protected Consumer<Object> logPrinter = System.out::println;
+    protected BiConsumer<Object, Throwable> logErrorPrinter = (obj, err) -> {
         System.err.println(obj);
         if (err != null) {
             err.printStackTrace(System.err);
@@ -184,14 +184,14 @@ public class JdbcScriptRunner {
     }
 
     protected void checkForMissingLineTerminator(StringBuilder command) {
-        if(command==null){
+        if (command == null) {
             return;
         }
         String str = command.toString();
         try {
             // resolve only comment segment, ignore it
-            str=MULTIPLE_LINE_COMMENT_PATTERN.matcher(str).replaceAll("");
-            str=SINGLE_LINE_COMMENT_PATTERN.matcher(str).replaceAll("\n");
+            str = MULTIPLE_LINE_COMMENT_PATTERN.matcher(str).replaceAll("");
+            str = SINGLE_LINE_COMMENT_PATTERN.matcher(str).replaceAll("\n");
         } catch (Exception e) {
 
         }
@@ -244,11 +244,11 @@ public class JdbcScriptRunner {
                 sql = sql.replace("\r\n", "\n");
             }
 
-            int updateCount=0;
+            int updateCount = 0;
             try {
-                for (boolean hasResults = statement.execute(sql); hasResults || (updateCount=statement.getUpdateCount()) != -1; hasResults = statement.getMoreResults()) {
+                for (boolean hasResults = statement.execute(sql); hasResults || (updateCount = statement.getUpdateCount()) != -1; hasResults = statement.getMoreResults()) {
                     this.checkWarnings(statement);
-                    this.print("update count: " + updateCount+"\n");
+                    this.print("update count: " + updateCount + "\n");
                     this.printResults(statement, hasResults);
                 }
             } catch (SQLWarning e) {
@@ -342,14 +342,14 @@ public class JdbcScriptRunner {
     }
 
     protected void print(Object o) {
-        if(logPrinter!=null){
+        if (logPrinter != null) {
             logPrinter.accept(o);
         }
     }
 
     protected void printlnError(Object o, Throwable e) {
-        if(logErrorPrinter!=null){
-            logErrorPrinter.accept(o,e);
+        if (logErrorPrinter != null) {
+            logErrorPrinter.accept(o, e);
         }
     }
 }

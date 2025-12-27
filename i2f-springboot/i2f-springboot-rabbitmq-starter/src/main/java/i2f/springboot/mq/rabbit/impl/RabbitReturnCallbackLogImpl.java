@@ -3,9 +3,6 @@ package i2f.springboot.mq.rabbit.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Ice2Faith
@@ -13,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @desc
  */
 @Slf4j
-public class RabbitReturnCallbackLogImpl implements RabbitTemplate.ReturnCallback{
+public class RabbitReturnCallbackLogImpl implements RabbitTemplate.ReturnCallback {
     @Override
     public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
         log.info("ReturnCallback:     " + "消息：" + message);

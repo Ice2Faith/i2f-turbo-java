@@ -48,8 +48,8 @@ public interface AttrConsts {
     String E = "e";
     String CAUSE = "cause";
 
-    String FORCE="force";
-    String POOL="pool";
+    String FORCE = "force";
+    String POOL = "pool";
 
     String JDBC_TYPE = "jdbc-type";
 
@@ -94,8 +94,8 @@ public interface AttrConsts {
     String SOURCE = "source";
     String TABLE = "table";
 
-    String JUMP_ERROR="jump-error";
-    String FULL_SEND="full-send";
+    String JUMP_ERROR = "jump-error";
+    String FULL_SEND = "full-send";
 
     String PACKAGE = "package";
     String CLASS = "class";

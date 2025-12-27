@@ -302,7 +302,7 @@ public interface JdbcProcedureExecutor {
 
     Map<String, Object> newParams(Map<String, Object> params);
 
-    Map<String,Object> cloneParams(Map<String,Object> context);
+    Map<String, Object> cloneParams(Map<String, Object> context);
 
     Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params);
 

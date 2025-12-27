@@ -25,7 +25,7 @@ public class FlinkPrintDataStreamNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        DataStream<?> ds = (DataStream<?>)executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
+        DataStream<?> ds = (DataStream<?>) executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
         DataStreamSink<?> res = ds.print();
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {

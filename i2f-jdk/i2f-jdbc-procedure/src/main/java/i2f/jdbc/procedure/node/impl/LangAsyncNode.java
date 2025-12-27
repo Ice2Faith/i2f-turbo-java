@@ -34,10 +34,10 @@ public class LangAsyncNode extends AbstractExecutorNode {
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
         TimeUnit delayUnit = NodeTime.getTimeUnit(timeUnit, TimeUnit.SECONDS);
 
-        Map<String,Object> callParams= executor.cloneParams(context);
+        Map<String, Object> callParams = executor.cloneParams(context);
         for (Map.Entry<String, Object> entry : context.entrySet()) {
             if (!ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
-                callParams.put(entry.getKey(),entry.getValue());
+                callParams.put(entry.getKey(), entry.getValue());
             }
         }
         CountDownLatch latch = new CountDownLatch(1);

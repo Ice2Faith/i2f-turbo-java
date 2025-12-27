@@ -456,30 +456,30 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         if (ObjectConvertor.isDateType(left.getClass())
                 && ObjectConvertor.isDateType(right.getClass())) {
             try {
-                Date bl = (Date)ObjectConvertor.tryConvertAsType(left,Date.class);
-                Date br = (Date)ObjectConvertor.tryConvertAsType(right,Date.class);
+                Date bl = (Date) ObjectConvertor.tryConvertAsType(left, Date.class);
+                Date br = (Date) ObjectConvertor.tryConvertAsType(right, Date.class);
                 return bl.compareTo(br);
             } catch (Exception e) {
 
             }
         }
-        if(ObjectConvertor.isNumericType(left.getClass())
-        ||ObjectConvertor.isNumericType(right.getClass())){
-            try{
+        if (ObjectConvertor.isNumericType(left.getClass())
+                || ObjectConvertor.isNumericType(right.getClass())) {
+            try {
                 BigDecimal bl = new BigDecimal(String.valueOf(left));
                 BigDecimal br = new BigDecimal(String.valueOf(right));
                 return bl.compareTo(br);
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
-        if(ObjectConvertor.isBooleanType(left.getClass())
-        ||ObjectConvertor.isBooleanType(right.getClass())){
-            try{
-                Boolean bl =ObjectConvertor.toBoolean(left);
-                Boolean br =ObjectConvertor.toBoolean(right);
+        if (ObjectConvertor.isBooleanType(left.getClass())
+                || ObjectConvertor.isBooleanType(right.getClass())) {
+            try {
+                Boolean bl = ObjectConvertor.toBoolean(left);
+                Boolean br = ObjectConvertor.toBoolean(right);
                 return bl.compareTo(br);
-            }catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
@@ -539,8 +539,8 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
 
-    public Object getFunctionCallContext(Object context, Object target, boolean isNew, String naming, List<Object> argList){
-        DefaultFunctionCallContext ret=new DefaultFunctionCallContext();
+    public Object getFunctionCallContext(Object context, Object target, boolean isNew, String naming, List<Object> argList) {
+        DefaultFunctionCallContext ret = new DefaultFunctionCallContext();
         ret.setResolver(this);
         ret.setContext(context);
         ret.setTarget(target);

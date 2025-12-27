@@ -21,7 +21,6 @@ public class LangBreakNode extends AbstractExecutorNode {
     }
 
 
-
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         throw new BreakSignalException();

@@ -9,8 +9,8 @@ import com.hazelcast.core.HazelcastInstance;
  * @date 2025/8/3 18:28
  */
 public class HazelcastUtil {
-    public static HazelcastInstance getDefaultInstance(String clusterName){
-        ClientConfig config=new ClientConfig();
+    public static HazelcastInstance getDefaultInstance(String clusterName) {
+        ClientConfig config = new ClientConfig();
         config.setClusterName(clusterName);
 
         HazelcastInstance client = HazelcastClient.newHazelcastClient(config);

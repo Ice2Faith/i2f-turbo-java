@@ -16,7 +16,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "i2f.springboot.ssh.tunnel")
 public class TunnelProperties {
 
-    protected List<Server> servers=new ArrayList<>();
+    protected List<Server> servers = new ArrayList<>();
 
     @Data
     @NoArgsConstructor
@@ -25,21 +25,21 @@ public class TunnelProperties {
 
         protected SshProperties ssh;
 
-        protected List<TunnelItemProperties> tunnels=new ArrayList<>();
+        protected List<TunnelItemProperties> tunnels = new ArrayList<>();
     }
 
     @Data
     @NoArgsConstructor
-    public static class SshProperties{
+    public static class SshProperties {
         protected String host;
-        protected int port=22;
+        protected int port = 22;
         protected String username;
         protected String password;
     }
 
     @Data
     @NoArgsConstructor
-    public static class TunnelItemProperties{
+    public static class TunnelItemProperties {
         protected String name;
         protected int localPort;
         protected String remoteHost;

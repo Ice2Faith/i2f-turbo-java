@@ -7,15 +7,15 @@ package i2f.authentication.password;
 public interface IPasswordEncoder {
     String encode(String rawPassword);
 
-    default boolean matches(String rawPassword, String encodedPassword){
-        if(rawPassword==null){
+    default boolean matches(String rawPassword, String encodedPassword) {
+        if (rawPassword == null) {
             return false;
         }
-        if(encodedPassword==null){
+        if (encodedPassword == null) {
             return false;
         }
         String encPassword = encode(rawPassword);
-        if(!encodedPassword.equals(encPassword)){
+        if (!encodedPassword.equals(encPassword)) {
             return false;
         }
         return true;

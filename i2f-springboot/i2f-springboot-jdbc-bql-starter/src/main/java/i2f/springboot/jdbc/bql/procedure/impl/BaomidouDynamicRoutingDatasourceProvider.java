@@ -15,7 +15,7 @@ import java.util.Map;
  * @date 2025/11/30 14:54
  */
 public class BaomidouDynamicRoutingDatasourceProvider implements DataSourceProvider {
-    public static final int ORDER=200;
+    public static final int ORDER = 200;
     protected INamingContext namingContext;
 
     public BaomidouDynamicRoutingDatasourceProvider(INamingContext namingContext) {

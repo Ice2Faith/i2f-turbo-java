@@ -47,11 +47,11 @@ public class OsUtil {
     }
 
     public static void startCmd(String cmd) {
-         runCmd(cmd, getCmdCharset());
+        runCmd(cmd, getCmdCharset());
     }
 
     public static void startCmd(String cmd, String charset) {
-         startCmd(cmd, null, null, charset);
+        startCmd(cmd, null, null, charset);
     }
 
     public static void startCmd(String cmd, String[] envp, File dir, String charset) {
@@ -75,7 +75,7 @@ public class OsUtil {
             Runtime runtime = Runtime.getRuntime();
 
             Process process = runtime.exec(cmd, envp, dir);
-            return getProcessStdout(requireOutput,waitForMillsSeconds, process, charset);
+            return getProcessStdout(requireOutput, waitForMillsSeconds, process, charset);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -111,15 +111,15 @@ public class OsUtil {
             Runtime runtime = Runtime.getRuntime();
 
             Process process = runtime.exec(cmdArr, envp, dir);
-            return getProcessStdout(requireOutput,waitForMillsSeconds, process, charset);
+            return getProcessStdout(requireOutput, waitForMillsSeconds, process, charset);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
-    public static String getProcessStdout(boolean requireOutput,long waitForMillsSeconds, Process process, String charset) throws IOException, InterruptedException {
+    public static String getProcessStdout(boolean requireOutput, long waitForMillsSeconds, Process process, String charset) throws IOException, InterruptedException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        if(requireOutput) {
+        if (requireOutput) {
             InputStream is = process.getInputStream();
             byte[] buf = new byte[4096];
             int len = 0;
@@ -141,7 +141,7 @@ public class OsUtil {
             process.waitFor();
         }
 
-        if(!requireOutput){
+        if (!requireOutput) {
             return null;
         }
         if (charset == null || charset.isEmpty()) {

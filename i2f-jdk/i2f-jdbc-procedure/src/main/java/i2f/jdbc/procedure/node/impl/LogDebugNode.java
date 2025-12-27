@@ -3,14 +3,10 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
-import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.signal.SignalException;
-import i2f.jdbc.procedure.signal.impl.ControlSignalException;
-import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -28,7 +24,6 @@ public class LogDebugNode extends AbstractExecutorNode {
     }
 
 
-
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
 
@@ -36,20 +31,20 @@ public class LogDebugNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        if(!executor.logger().isDebug()){
+        if (!executor.logger().isDebug()) {
             return;
         }
 
         String value = (String) executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
         Throwable e = (Throwable) executor.attrValue(AttrConsts.E, FeatureConsts.VISIT, node, context);
 
-        executor.logger().logDebug(()->{
+        executor.logger().logDebug(() -> {
 
             StringBuilder builder = new StringBuilder();
-            boolean isFirst=true;
-            if(value!=null) {
+            boolean isFirst = true;
+            if (value != null) {
                 builder.append(value);
-                isFirst=false;
+                isFirst = false;
             }
             for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
                 String name = entry.getKey();
@@ -61,15 +56,15 @@ public class LogDebugNode extends AbstractExecutorNode {
                 }
                 String script = entry.getValue();
                 Object val = executor.attrValue(name, FeatureConsts.VISIT, node, context);
-                if(!isFirst){
+                if (!isFirst) {
                     builder.append(", ");
                 }
-                builder.append(val).append("(").append(val==null?"null":val.getClass().getSimpleName()).append(")");
-                isFirst=false;
+                builder.append(val).append("(").append(val == null ? "null" : val.getClass().getSimpleName()).append(")");
+                isFirst = false;
             }
 
             return builder.toString();
-        },e);
+        }, e);
     }
 
 }

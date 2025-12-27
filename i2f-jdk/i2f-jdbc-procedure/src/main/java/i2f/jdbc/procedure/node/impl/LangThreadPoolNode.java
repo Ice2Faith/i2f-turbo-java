@@ -38,11 +38,11 @@ public class LangThreadPoolNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         int count = executor.convertAs(executor.attrValue(AttrConsts.COUNT, FeatureConsts.INT, node, context), Integer.class);
         String type = executor.convertAs(executor.attrValue(AttrConsts.TYPE, FeatureConsts.STRING, node, context), String.class);
-        ExecutorService pool=null;
-        if("forkjoin".equalsIgnoreCase(type)){
-            pool=new ForkJoinPool(count);
-        }else{
-            pool= Executors.newFixedThreadPool(count);
+        ExecutorService pool = null;
+        if ("forkjoin".equalsIgnoreCase(type)) {
+            pool = new ForkJoinPool(count);
+        } else {
+            pool = Executors.newFixedThreadPool(count);
         }
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {

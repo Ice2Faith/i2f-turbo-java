@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -24,11 +23,11 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "i2f.springboot.config.rabbit")
 public class RabbitMqAutoConfiguration {
 
-    private boolean mandatory=true;
+    private boolean mandatory = true;
 
-    private boolean logConfirmCallback=false;
+    private boolean logConfirmCallback = false;
 
-    private boolean logReturnCallback=false;
+    private boolean logReturnCallback = false;
 
     @ConditionalOnMissingBean(RabbitTemplate.class)
     @Bean
@@ -38,11 +37,11 @@ public class RabbitMqAutoConfiguration {
         //设置开启Mandatory,才能触发回调函数,无论消息推送结果怎么样都强制调用回调函数
         rabbitTemplate.setMandatory(mandatory);
 
-        if(logConfirmCallback) {
+        if (logConfirmCallback) {
             rabbitTemplate.setConfirmCallback(new RabbitConfirmCallbackLogImpl());
         }
 
-        if(logReturnCallback) {
+        if (logReturnCallback) {
             rabbitTemplate.setReturnCallback(new RabbitReturnCallbackLogImpl());
         }
 

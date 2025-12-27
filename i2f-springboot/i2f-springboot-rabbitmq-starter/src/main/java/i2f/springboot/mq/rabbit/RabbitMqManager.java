@@ -13,7 +13,7 @@ public class RabbitMqManager {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    public void send(String exchange,String routing,Object msg){
+    public void send(String exchange, String routing, Object msg) {
         rabbitTemplate.convertAndSend(exchange, routing, msg);
     }
 }

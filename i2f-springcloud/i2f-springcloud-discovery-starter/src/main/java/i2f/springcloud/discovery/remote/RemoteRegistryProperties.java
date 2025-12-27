@@ -12,11 +12,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @NoArgsConstructor
 public class RemoteRegistryProperties {
-    private String baseUrl="http://localhost:9999";
-    private String registryPath="/api/registry";
-    private String pullPath="/api/services";
-    private String secretKey="123456";
-    private long heartBeatSeconds=10;
-    private long pullServiceSeconds=30;
-    private int order=0;
+    private String baseUrl = "http://localhost:9999";
+    private String registryPath = "/api/registry";
+    private String pullPath = "/api/services";
+    private String secretKey = "123456";
+    private long heartBeatSeconds = 10;
+    private long pullServiceSeconds = 30;
+    private int order = 0;
 }

@@ -33,7 +33,7 @@ public class RedisServiceInstanceManager implements IServiceInstanceManager {
     private RedisTemplate<Object, Object> redisTemplate;
 
     public String keyPrefix() {
-        String prefix=discoveryServerProperties.getRedisManager().getPrefix();
+        String prefix = discoveryServerProperties.getRedisManager().getPrefix();
         if (prefix == null || prefix.isEmpty()) {
             return "default:";
         }

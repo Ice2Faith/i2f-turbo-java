@@ -41,7 +41,7 @@ public class CompletionHelper {
 
     public static final Logger log = Logger.getInstance(CompletionHelper.class);
 
-    public static String[] STATIC_EMBED_VARIABLES={
+    public static String[] STATIC_EMBED_VARIABLES = {
             "stack_lock",
             "context",
             "env",
@@ -91,26 +91,27 @@ public class CompletionHelper {
         synchronized (xmlFileFunctionsHolder) {
             xmlFileFunctionsQueue.add(project);
             String projectFilePath = project.getProjectFilePath();
-            return xmlFileFunctionsHolder.computeIfAbsent(projectFilePath,k->new LinkedHashMap<>());
+            return xmlFileFunctionsHolder.computeIfAbsent(projectFilePath, k -> new LinkedHashMap<>());
         }
     }
 
-    public static final LinkedBlockingQueue<Project> xmlFileFunctionsQueue=new LinkedBlockingQueue<>();
-    public static final LruMap<String,Map<String,LookupElement>> xmlFileFunctionsHolder=new LruMap<>(10);
-    static{
-        Thread thread = new Thread(()->{
-            while(true){
+    public static final LinkedBlockingQueue<Project> xmlFileFunctionsQueue = new LinkedBlockingQueue<>();
+    public static final LruMap<String, Map<String, LookupElement>> xmlFileFunctionsHolder = new LruMap<>(10);
+
+    static {
+        Thread thread = new Thread(() -> {
+            while (true) {
                 try {
-                    ApplicationUtil.tryRunReadAction(()->{
+                    ApplicationUtil.tryRunReadAction(() -> {
                         scanXmlFileFunctions();
                         return null;
                     });
-                }catch (Throwable e){
-                    log.warn(e.getMessage(),e);
+                } catch (Throwable e) {
+                    log.warn(e.getMessage(), e);
                 }
                 try {
                     Thread.sleep(5000);
-                }catch (Throwable e){
+                } catch (Throwable e) {
 
                 }
             }
@@ -119,33 +120,35 @@ public class CompletionHelper {
         thread.setDaemon(true);
         thread.start();
     }
-    public static void scanXmlFileFunctions(){
-        Set<String> updatePath=new LinkedHashSet<>();
-        while(true){
+
+    public static void scanXmlFileFunctions() {
+        Set<String> updatePath = new LinkedHashSet<>();
+        while (true) {
             Project poll = xmlFileFunctionsQueue.poll();
-            if(poll==null){
+            if (poll == null) {
                 break;
             }
             String projectFilePath = poll.getProjectFilePath();
-            if(updatePath.contains(projectFilePath)){
+            if (updatePath.contains(projectFilePath)) {
                 continue;
             }
             Map<String, LookupElement> map = getXmlFileFunctions(poll);
-            synchronized (xmlFileFunctionsHolder){
-                xmlFileFunctionsHolder.put(projectFilePath,map);
+            synchronized (xmlFileFunctionsHolder) {
+                xmlFileFunctionsHolder.put(projectFilePath, map);
             }
             updatePath.add(projectFilePath);
             try {
                 Thread.sleep(30);
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
         }
     }
-    public static Map<String,LookupElement> getXmlFileFunctions(Project project){
+
+    public static Map<String, LookupElement> getXmlFileFunctions(Project project) {
         Map<String, LookupElement> ret = new LinkedHashMap<>();
         GlobalSearchScope searchScope = GlobalSearchScope.everythingScope(project);
-        PsiShortNamesCache shortNamesCache=PsiShortNamesCache.getInstance(project);
+        PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(project);
         Set<String> processClassNameSet = new HashSet<>();
         String[] classNames = {
                 "ContextFunctions",
@@ -155,8 +158,8 @@ public class CompletionHelper {
         };
         for (String className : classNames) {
             PsiClass[] psiClassArr = shortNamesCache.getClassesByName(className, searchScope);
-            PsiClass psiClass=null;
-            if(psiClassArr!=null && psiClassArr.length>0) {
+            PsiClass psiClass = null;
+            if (psiClassArr != null && psiClassArr.length > 0) {
                 psiClass = psiClassArr[0];
             }
 //            log.warn("any-help find-class: " + psiClass);
@@ -310,7 +313,7 @@ public class CompletionHelper {
     }
 
     public static Set<String> getXmlFileVariablesFast(PsiElement position) {
-        if(position==null){
+        if (position == null) {
             return lastVariables.get();
         }
         long cts = System.currentTimeMillis();
@@ -325,7 +328,7 @@ public class CompletionHelper {
             if (root == null) {
                 root = position.getContainingFile();
             }
-            getXmlFileVariables(root,  variables, sqlIdentifiers);
+            getXmlFileVariables(root, variables, sqlIdentifiers);
             lastSqlIdentifiers.set(sqlIdentifiers);
             return variables;
         });
@@ -473,7 +476,7 @@ public class CompletionHelper {
 
     }
 
-    public static Set<String> getStaticEmbedVariables(){
+    public static Set<String> getStaticEmbedVariables() {
         return new LinkedHashSet<>(Arrays.asList(STATIC_EMBED_VARIABLES));
     }
 
@@ -492,9 +495,9 @@ public class CompletionHelper {
 
     public static Set<CompletionScope> completionTypes(PsiElement elem) {
         Set<CompletionScope> result = new HashSet<>();
-        AtomicBoolean stop=new AtomicBoolean(false);
+        AtomicBoolean stop = new AtomicBoolean(false);
 //        log.warn("any-help type-next-start:" + elem.getClass());
-        completionTypesNext(elem,stop, result, 0);
+        completionTypesNext(elem, stop, result, 0);
         return result;
     }
 
@@ -502,14 +505,14 @@ public class CompletionHelper {
         if (elem == null) {
             return;
         }
-        if(stop.get()){
+        if (stop.get()) {
             return;
         }
 //        log.warn("any-help type-next:" + elem.getClass());
         if (level >= 10) {
             PsiFile psiFile = elem.getContainingFile();
-            completionTypesByPsiFile(psiFile,stop, result);
-            if(stop.get()){
+            completionTypesByPsiFile(psiFile, stop, result);
+            if (stop.get()) {
                 return;
             }
             return;
@@ -550,14 +553,14 @@ public class CompletionHelper {
         }
         if (elem instanceof XmlTag) {
             XmlTag tag = (XmlTag) elem;
-            boolean ok=detectXmlTagCompletionScope(tag,result);
-            if(ok){
+            boolean ok = detectXmlTagCompletionScope(tag, result);
+            if (ok) {
                 stop.set(true);
                 return;
             }
         }
 
-        if(elem instanceof XmlAttribute){
+        if (elem instanceof XmlAttribute) {
             result.clear();
             stop.set(true);
             return;
@@ -569,23 +572,23 @@ public class CompletionHelper {
 
         if (elem instanceof PsiFile) {
             PsiFile psiFile = (PsiFile) elem;
-            completionTypesByPsiFile(psiFile,stop, result);
-            if(stop.get()){
+            completionTypesByPsiFile(psiFile, stop, result);
+            if (stop.get()) {
                 return;
             }
         }
         PsiElement parent = elem.getParent();
         if (parent != null) {
-            completionTypesNext(parent,stop, result, level + 1);
-            if(stop.get()){
+            completionTypesNext(parent, stop, result, level + 1);
+            if (stop.get()) {
                 return;
             }
         } else {
             PsiElement context = elem.getContext();
             if (context != null) {
                 log.warn("any-help elem-context:" + context.getClass());
-                completionTypesNext(context,stop, result, level + 1);
-                if(stop.get()){
+                completionTypesNext(context, stop, result, level + 1);
+                if (stop.get()) {
                     return;
                 }
             }
@@ -594,7 +597,7 @@ public class CompletionHelper {
 
     }
 
-    public static void completionTypesByPsiFile(PsiFile psiFile,AtomicBoolean stop, Set<CompletionScope> result) {
+    public static void completionTypesByPsiFile(PsiFile psiFile, AtomicBoolean stop, Set<CompletionScope> result) {
         if (psiFile == null) {
             return;
         }
@@ -609,7 +612,7 @@ public class CompletionHelper {
                 result.add(CompletionScope.SQL_IDENTIFIER);
                 stop.set(true);
                 return;
-            }else if("TinyScript".equals(language.getID())){
+            } else if ("TinyScript".equals(language.getID())) {
                 result.add(CompletionScope.FUNCTIONS);
                 result.add(CompletionScope.SQL_IDENTIFIER);
                 result.add(CompletionScope.VARIABLES);
@@ -624,7 +627,7 @@ public class CompletionHelper {
             String extension = virtualFile.getExtension();
             if ("xml".equalsIgnoreCase(extension)
                     || ".xml".equalsIgnoreCase(extension)) {
-                    result.add(CompletionScope.VARIABLES);
+                result.add(CompletionScope.VARIABLES);
                 stop.set(true);
                 return;
             } else if ("sql".equalsIgnoreCase(extension)
@@ -684,8 +687,8 @@ public class CompletionHelper {
                 result.add(CompletionScope.SQL);
                 return true;
             }
-            if(Arrays.asList("txt","text","shell",
-                    "vtl","velocity","tpl").contains(lang)) {
+            if (Arrays.asList("txt", "text", "shell",
+                    "vtl", "velocity", "tpl").contains(lang)) {
                 result.add(CompletionScope.VARIABLES);
                 return true;
             }
@@ -709,14 +712,13 @@ public class CompletionHelper {
             return true;
         }
 
-        if(name.equals("lang-string")
+        if (name.equals("lang-string")
                 || name.equals("lang-render")) {
             result.add(CompletionScope.VARIABLES);
             return true;
         }
         return false;
     }
-
 
 
     public static <T extends PsiElement> T getParentElement(PsiElement element, Class<T> searchType) {
@@ -729,7 +731,7 @@ public class CompletionHelper {
         if (element == null) {
             return;
         }
-        if(result.get()!=null){
+        if (result.get() != null) {
             return;
         }
         if (searchType != null) {

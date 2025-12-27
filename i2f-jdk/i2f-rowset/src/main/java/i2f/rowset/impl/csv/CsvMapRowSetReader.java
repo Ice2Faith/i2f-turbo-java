@@ -14,7 +14,10 @@ import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -31,7 +34,7 @@ public class CsvMapRowSetReader implements IRowSetReader<Map<String, Object>> {
     protected boolean escapeSpaces = false;
 
     protected boolean tryConvertAutoType = true;
-    protected String[] fmtPatterns=new String[]{
+    protected String[] fmtPatterns = new String[]{
             "yyyy-MM-dd HH:mm:ss.SSS",
             "yyyy-MM-dd HH:mm:ss",
             "yyyy-MM-dd",
@@ -130,13 +133,13 @@ public class CsvMapRowSetReader implements IRowSetReader<Map<String, Object>> {
         } catch (Exception e) {
 
         }
-        if("null".equals(str)){
+        if ("null".equals(str)) {
             return null;
         }
-        if("true".equals(str)){
+        if ("true".equals(str)) {
             return true;
         }
-        if("false".equals(str)){
+        if ("false".equals(str)) {
             return str;
         }
         try {

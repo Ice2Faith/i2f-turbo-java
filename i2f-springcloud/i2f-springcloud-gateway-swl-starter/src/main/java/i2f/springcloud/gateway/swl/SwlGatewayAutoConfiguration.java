@@ -162,7 +162,7 @@ public class SwlGatewayAutoConfiguration {
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("swl_api_route", r -> r.path(SwlGatewayApiFilter.KEY_PATH,SwlGatewayApiFilter.KEY_SWAP_PATH)
+                .route("swl_api_route", r -> r.path(SwlGatewayApiFilter.KEY_PATH, SwlGatewayApiFilter.KEY_SWAP_PATH)
                         .uri("http://localhost:80"))
                 .build();
     }

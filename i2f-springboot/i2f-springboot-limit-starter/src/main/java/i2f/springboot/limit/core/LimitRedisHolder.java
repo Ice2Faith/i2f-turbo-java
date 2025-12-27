@@ -21,11 +21,11 @@ public class LimitRedisHolder {
     @Autowired
     private ApplicationContext applicationContext;
 
-    private final AtomicReference<RedisTemplate> redisHolder=new AtomicReference<>();
+    private final AtomicReference<RedisTemplate> redisHolder = new AtomicReference<>();
 
     public RedisTemplate getRedisTemplate() {
         RedisTemplate ret = redisHolder.get();
-        if(ret!=null){
+        if (ret != null) {
             return ret;
         }
         try {
@@ -38,7 +38,7 @@ public class LimitRedisHolder {
                 }
             }
         } catch (Exception e) {
-            log.warn(e.getMessage(),e);
+            log.warn(e.getMessage(), e);
         }
         throw new IllegalStateException("missing redis template!");
     }

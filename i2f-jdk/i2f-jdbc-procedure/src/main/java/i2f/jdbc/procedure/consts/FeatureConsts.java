@@ -7,8 +7,8 @@ package i2f.jdbc.procedure.consts;
 public interface FeatureConsts {
     // 注解类组
     // 进出参
-    String IN="in";
-    String OUT="out";
+    String IN = "in";
+    String OUT = "out";
 
     // 基础类型组
     String INT = "int";

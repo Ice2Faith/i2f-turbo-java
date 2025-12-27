@@ -23,7 +23,8 @@ import java.util.Map;
  * @desc
  */
 public class LangListenerNode extends AbstractExecutorNode {
-    public static final String TAG_NAME= TagConsts.LANG_LISTENER;
+    public static final String TAG_NAME = TagConsts.LANG_LISTENER;
+
     @Override
     public String tag() {
         return TAG_NAME;
@@ -31,27 +32,27 @@ public class LangListenerNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        String name = executor.convertAs(executor.attrValue(AttrConsts.NAME, FeatureConsts.STRING, node, context),String.class);
+        String name = executor.convertAs(executor.attrValue(AttrConsts.NAME, FeatureConsts.STRING, node, context), String.class);
         String type = executor.convertAs(executor.attrValue(AttrConsts.TYPE, FeatureConsts.STRING, node, context), String.class);
-        String target=executor.convertAs(executor.attrValue(AttrConsts.TARGET,FeatureConsts.STRING,node,context),String.class);
+        String target = executor.convertAs(executor.attrValue(AttrConsts.TARGET, FeatureConsts.STRING, node, context), String.class);
 
-        if(type==null || type.isEmpty()){
-            type= XProc4jEvent.class.getName();
+        if (type == null || type.isEmpty()) {
+            type = XProc4jEvent.class.getName();
         }
-        if(target==null||target.isEmpty()){
-            target="target";
+        if (target == null || target.isEmpty()) {
+            target = "target";
         }
-        Class<?> typeClass=executor.loadClass(type);
+        Class<?> typeClass = executor.loadClass(type);
 
-        String typeName=type;
-        String targetName=target;
+        String typeName = type;
+        String targetName = target;
         Map<String, XProc4jEventListener> listeners = executor.visitAs(ParamsConsts.LISTENERS, context);
         listeners.put(name, new XProc4jEventListener() {
             @Override
             public boolean support(XProc4jEvent event) {
-                if(typeClass!=null) {
+                if (typeClass != null) {
                     return TypeOf.typeOf(event.getClass(), typeClass);
-                }else{
+                } else {
                     return event.getClass().getSimpleName().equals(typeName);
                 }
             }
@@ -72,19 +73,18 @@ public class LangListenerNode extends AbstractExecutorNode {
                         executor.execAsProcedure(node, callParams);
                     }
                 } catch (Throwable e) {
-                    if(e instanceof ControlSignalException){
+                    if (e instanceof ControlSignalException) {
                         return false;
                     }
-                    if(e instanceof SignalException){
-                        throw (SignalException)e;
+                    if (e instanceof SignalException) {
+                        throw (SignalException) e;
                     }
-                    throw new ThrowSignalException(e.getMessage(),e);
+                    throw new ThrowSignalException(e.getMessage(), e);
                 }
                 return false;
             }
         });
     }
-
 
 
 }

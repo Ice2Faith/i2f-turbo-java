@@ -28,8 +28,8 @@ public class FlinkToChangelogStreamNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        StreamTableEnvironment tabEnv = (StreamTableEnvironment)executor.attrValue(FlinkAttrConsts.TAB_ENV, FeatureConsts.VISIT, node, context);
-        Table table = (Table)executor.attrValue(AttrConsts.TABLE, FeatureConsts.VISIT, node, context);
+        StreamTableEnvironment tabEnv = (StreamTableEnvironment) executor.attrValue(FlinkAttrConsts.TAB_ENV, FeatureConsts.VISIT, node, context);
+        Table table = (Table) executor.attrValue(AttrConsts.TABLE, FeatureConsts.VISIT, node, context);
         DataStream<Row> res = tabEnv.toChangelogStream(table);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {

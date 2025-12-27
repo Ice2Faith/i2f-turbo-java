@@ -10,7 +10,8 @@ import java.util.Map;
 @FunctionalInterface
 public interface DataSourceProvider {
     Map<String, DataSource> getDataSources();
-    default int getOrder(){
+
+    default int getOrder() {
         return 0;
     }
 }

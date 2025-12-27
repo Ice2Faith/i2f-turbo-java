@@ -4,7 +4,7 @@ package i2f.springboot.limit.exception;
  * @author Ice2Faith
  * @date 2025/11/11 17:30
  */
-public class LimitException extends RuntimeException{
+public class LimitException extends RuntimeException {
     public LimitException() {
     }
 

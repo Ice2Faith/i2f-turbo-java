@@ -105,7 +105,7 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
         try {
             return Sm4.encrypt(data, keyHex);
         } catch (ScriptException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
@@ -113,7 +113,7 @@ public class Sm4Encryptor implements ISymmetricEncryptor {
         try {
             return Sm4.decrypt(data, keyHex);
         } catch (ScriptException e) {
-            throw new IllegalStateException(e.getMessage(),e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 

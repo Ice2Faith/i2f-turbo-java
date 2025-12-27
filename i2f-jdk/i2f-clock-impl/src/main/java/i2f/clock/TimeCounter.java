@@ -29,13 +29,14 @@ public class TimeCounter {
         System.out.println(counter.last());
         System.out.println(counter.sum());
     }
-    protected volatile long initTs=0;
-    protected volatile long lastTs=0;
-    protected volatile long currTs=0;
-    protected final ReentrantReadWriteLock lock=new ReentrantReadWriteLock();
-    protected final LinkedList<SegmentRecord> records=new LinkedList<>();
 
-    public static final DateTimeFormatter FORMATTER =DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+    protected volatile long initTs = 0;
+    protected volatile long lastTs = 0;
+    protected volatile long currTs = 0;
+    protected final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    protected final LinkedList<SegmentRecord> records = new LinkedList<>();
+
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
     public static String formatAbsoluteTime(long milliseconds) {
         LocalDateTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
@@ -55,7 +56,7 @@ public class TimeCounter {
 
     @Data
     @NoArgsConstructor
-    public static class SegmentRecord{
+    public static class SegmentRecord {
         protected long beginTs;
         protected long endTs;
         protected String description;
@@ -66,85 +67,85 @@ public class TimeCounter {
             this.description = description;
         }
 
-        public long duration(){
-            return endTs-beginTs;
+        public long duration() {
+            return endTs - beginTs;
         }
 
         @Override
-        public String toString(){
+        public String toString() {
             return String.format("%s -> %s (%s): %s",
                     formatAbsoluteTime(beginTs),
                     formatAbsoluteTime(endTs),
                     formatDuration(duration()),
-                    description==null?"step":description
+                    description == null ? "step" : description
             );
         }
     }
 
-    public static TimeCounter begin(){
+    public static TimeCounter begin() {
         return new TimeCounter();
     }
 
-    public TimeCounter(){
+    public TimeCounter() {
         reset();
     }
 
-    public TimeCounter reset(){
+    public TimeCounter reset() {
         lock.writeLock().lock();
-        try{
-            initTs=System.currentTimeMillis();
-            lastTs=initTs;
-            currTs=initTs;
+        try {
+            initTs = System.currentTimeMillis();
+            lastTs = initTs;
+            currTs = initTs;
             records.clear();
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
         return this;
     }
 
-    public SegmentRecord end(){
-        lock.writeLock().lock();
-        try{
-            int size = records.size();
-            return end("step-"+(size+1));
-        }finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    public SegmentRecord end(String description){
+    public SegmentRecord end() {
         lock.writeLock().lock();
         try {
-            long ts=System.currentTimeMillis();
-            SegmentRecord ret = new SegmentRecord(lastTs, ts, description);
-            records.add(ret);
-            lastTs=ts;
-            currTs=ts;
-            return ret;
-        }finally {
+            int size = records.size();
+            return end("step-" + (size + 1));
+        } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public SegmentRecord last(){
+    public SegmentRecord end(String description) {
+        lock.writeLock().lock();
+        try {
+            long ts = System.currentTimeMillis();
+            SegmentRecord ret = new SegmentRecord(lastTs, ts, description);
+            records.add(ret);
+            lastTs = ts;
+            currTs = ts;
+            return ret;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public SegmentRecord last() {
         lock.readLock().lock();
-        try{
-            SegmentRecord last = records.isEmpty()?new SegmentRecord(lastTs,currTs,"last"):records.getLast();
+        try {
+            SegmentRecord last = records.isEmpty() ? new SegmentRecord(lastTs, currTs, "last") : records.getLast();
             return last;
-        }finally {
+        } finally {
             lock.readLock().unlock();
         }
     }
 
-    public SegmentRecord sum(){
-        return new SegmentRecord(initTs,currTs,"sum");
+    public SegmentRecord sum() {
+        return new SegmentRecord(initTs, currTs, "sum");
     }
 
-    public List<SegmentRecord> records(){
+    public List<SegmentRecord> records() {
         lock.readLock().lock();
         try {
             return new ArrayList<>(records);
-        }finally {
+        } finally {
             lock.readLock().unlock();
         }
     }

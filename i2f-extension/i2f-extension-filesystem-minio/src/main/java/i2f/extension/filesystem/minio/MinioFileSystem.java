@@ -87,7 +87,7 @@ public class MinioFileSystem extends AbsFileSystem {
         }
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
-            if("".equals(pair.getKey())){
+            if ("".equals(pair.getKey())) {
                 // 根目录，一定是目录
                 return true;
             }
@@ -151,7 +151,7 @@ public class MinioFileSystem extends AbsFileSystem {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
         if (pair.getValue() == null) {
             // 根目录，一定存在
-            if("".equals(pair.getKey())){
+            if ("".equals(pair.getKey())) {
                 return true;
             }
             try {
@@ -184,9 +184,9 @@ public class MinioFileSystem extends AbsFileSystem {
         return false;
     }
 
-    public String decodeObjectName(String name){
+    public String decodeObjectName(String name) {
         try {
-            return URLDecoder.decode(name,"UTF-8");
+            return URLDecoder.decode(name, "UTF-8");
         } catch (UnsupportedEncodingException e) {
 
         }
@@ -197,7 +197,7 @@ public class MinioFileSystem extends AbsFileSystem {
     public List<IFile> listFiles(String path) {
         List<IFile> ret = new LinkedList<>();
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
-        if("".equals(pair.getKey()) && pair.getValue()==null){
+        if ("".equals(pair.getKey()) && pair.getValue() == null) {
             // 根目录，应该列举bucket
             try {
                 List<Bucket> buckets = getClient().listBuckets();
@@ -222,10 +222,10 @@ public class MinioFileSystem extends AbsFileSystem {
             try {
                 Item item = res.get();
                 String name = decodeObjectName(item.objectName());
-                if(name.endsWith(pathSeparator())){
-                    name=name.substring(0,name.length()-pathSeparator().length());
+                if (name.endsWith(pathSeparator())) {
+                    name = name.substring(0, name.length() - pathSeparator().length());
                 }
-                ret.add(getFile(pathSeparator()+pair.getKey(), name));
+                ret.add(getFile(pathSeparator() + pair.getKey(), name));
             } catch (Throwable e) {
             }
         }
@@ -370,8 +370,8 @@ public class MinioFileSystem extends AbsFileSystem {
     @Override
     public long length(String path) {
         Map.Entry<String, String> pair = splitPathAsBucketAndObjectName(path);
-        if(pair.getValue()==null){
-            if("".equals(pair.getKey())){
+        if (pair.getValue() == null) {
+            if ("".equals(pair.getKey())) {
                 // 根目录，直接返回0
                 return 0;
             }
@@ -379,7 +379,7 @@ public class MinioFileSystem extends AbsFileSystem {
                 boolean ok = getClient().bucketExists(BucketExistsArgs.builder()
                         .bucket(pair.getKey())
                         .build());
-                return ok?0:-1;
+                return ok ? 0 : -1;
             } catch (Throwable e) {
 
             }

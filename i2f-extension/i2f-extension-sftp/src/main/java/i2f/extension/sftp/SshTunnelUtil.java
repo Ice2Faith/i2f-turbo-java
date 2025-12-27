@@ -1,4 +1,5 @@
 package i2f.extension.sftp;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -26,9 +27,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * ------------------------------------
  * 使用案例
  * SshTunnelUtil tunnel = new SshTunnelUtil("10.12.x.1", "web", "123xxxx")
- *                     .createTunnel(3306, "10.4.x.7", 3306)
- *                     .createTunnel(16379, "10.8.x.3", 6379)
- *                     .setup();
+ * .createTunnel(3306, "10.4.x.7", 3306)
+ * .createTunnel(16379, "10.8.x.3", 6379)
+ * .setup();
  * 在这个例子中
  * 我们以 10.12.x.1 机器作为隧道跳板机
  * 然后，在 10.12.x.1 机器上，能够访问到 10.4.x.7:3306 这个Mysql服务
@@ -54,19 +55,19 @@ public class SshTunnelUtil {
     protected transient Session session;
 
     protected String sshHost;
-    protected int sshPort=22;
+    protected int sshPort = 22;
     protected String sshUser;
     protected String sshPassword;
     protected String knownHostFilePath;
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    protected transient final ConcurrentHashMap<Integer, Map.Entry<String,Integer>> tunnels=new ConcurrentHashMap<>();
+    protected transient final ConcurrentHashMap<Integer, Map.Entry<String, Integer>> tunnels = new ConcurrentHashMap<>();
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    protected transient final AtomicBoolean setup =new AtomicBoolean(false);
+    protected transient final AtomicBoolean setup = new AtomicBoolean(false);
 
-    protected final AtomicInteger keepaliveSeconds=new AtomicInteger(15);
+    protected final AtomicInteger keepaliveSeconds = new AtomicInteger(15);
 
     public SshTunnelUtil(String sshHost, String sshUser, String sshPassword) {
         this.sshHost = sshHost;
@@ -81,8 +82,8 @@ public class SshTunnelUtil {
         this.sshPassword = sshPassword;
     }
 
-    public SshTunnelUtil setup(){
-        if(setup.getAndSet(true)){
+    public SshTunnelUtil setup() {
+        if (setup.getAndSet(true)) {
             return this;
         }
         Thread thread = new Thread(() -> {
@@ -103,7 +104,7 @@ public class SshTunnelUtil {
         thread.setName("ssh-tunnel");
         thread.start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(()->{
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 closeTunnel();
             } catch (Exception e) {
@@ -113,14 +114,14 @@ public class SshTunnelUtil {
         return this;
     }
 
-    public boolean isInvalidSession(){
+    public boolean isInvalidSession() {
         return this.session == null || !this.session.isConnected();
     }
 
-    public Session getSession()  {
-        if(isInvalidSession()){
+    public Session getSession() {
+        if (isInvalidSession()) {
             synchronized (this) {
-                if(isInvalidSession()) {
+                if (isInvalidSession()) {
                     try {
                         JSch jSch = new JSch();
                         if (knownHostFilePath != null && !knownHostFilePath.isEmpty()) {
@@ -133,7 +134,7 @@ public class SshTunnelUtil {
 
                         session.connect();
                     } catch (JSchException e) {
-                        throw new IllegalStateException(e.getMessage(),e);
+                        throw new IllegalStateException(e.getMessage(), e);
                     }
                 }
             }
@@ -141,22 +142,22 @@ public class SshTunnelUtil {
         return session;
     }
 
-    public synchronized SshTunnelUtil createTunnel(int localPort,String remoteHost,int remotePort) throws Exception {
+    public synchronized SshTunnelUtil createTunnel(int localPort, String remoteHost, int remotePort) throws Exception {
         Session session = getSession();
-        if(tunnels.containsKey(localPort)){
+        if (tunnels.containsKey(localPort)) {
             try {
                 session.delPortForwardingL(localPort);
             } catch (JSchException e) {
 
             }
         }
-        tunnels.put(localPort,new AbstractMap.SimpleEntry<>(remoteHost,remotePort));
+        tunnels.put(localPort, new AbstractMap.SimpleEntry<>(remoteHost, remotePort));
         session.setPortForwardingL(localPort, remoteHost, remotePort);
         return this;
     }
 
     public synchronized void closeTunnel() throws Exception {
-        if(isInvalidSession()){
+        if (isInvalidSession()) {
             return;
         }
         for (Map.Entry<Integer, Map.Entry<String, Integer>> entry : tunnels.entrySet()) {
@@ -171,14 +172,14 @@ public class SshTunnelUtil {
     }
 
     public SshTunnelUtil keepaliveTunnels() throws Exception {
-        if(tunnels.isEmpty()){
+        if (tunnels.isEmpty()) {
             return this;
         }
-        if(!isInvalidSession()){
+        if (!isInvalidSession()) {
             return this;
         }
         for (Map.Entry<Integer, Map.Entry<String, Integer>> entry : tunnels.entrySet()) {
-            createTunnel(entry.getKey(),entry.getValue().getKey(),entry.getValue().getValue());
+            createTunnel(entry.getKey(), entry.getValue().getKey(), entry.getValue().getValue());
         }
         return this;
     }

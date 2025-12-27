@@ -18,7 +18,7 @@ public class HttpServletRequestProxyWrapper extends HttpServletRequestWrapper {
     protected String queryString;
     protected Map<String, List<String>> parameterMap;
     protected String contentType;
-    protected long contentLength=-1;
+    protected long contentLength = -1;
 
     public HttpServletRequestProxyWrapper(HttpServletRequest request) throws IOException {
         super(request);
@@ -74,15 +74,15 @@ public class HttpServletRequestProxyWrapper extends HttpServletRequestWrapper {
 
     @Override
     public int getContentLength() {
-        if(contentLength>=0){
-            return (int)contentLength;
+        if (contentLength >= 0) {
+            return (int) contentLength;
         }
         return super.getContentLength();
     }
 
     @Override
     public long getContentLengthLong() {
-        if(contentLength>=0){
+        if (contentLength >= 0) {
             return contentLength;
         }
         return super.getContentLengthLong();

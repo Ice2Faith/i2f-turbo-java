@@ -9,12 +9,12 @@ import java.util.function.Function;
  * @date 2025/12/18 8:30
  * @desc
  */
-public class IteratorResourceDataProvider<C,T> extends AbstractIteratorResourceDataProvider<T> {
+public class IteratorResourceDataProvider<C, T> extends AbstractIteratorResourceDataProvider<T> {
     protected C context;
-    protected Function<C,Iterator<T>> supplier;
-    protected BiConsumer<Iterator<T>,C> finisher;
+    protected Function<C, Iterator<T>> supplier;
+    protected BiConsumer<Iterator<T>, C> finisher;
 
-    public IteratorResourceDataProvider(Class<T> elemClass){
+    public IteratorResourceDataProvider(Class<T> elemClass) {
         super(elemClass);
     }
 
@@ -27,13 +27,13 @@ public class IteratorResourceDataProvider<C,T> extends AbstractIteratorResourceD
     }
 
     @Override
-    public Iterator<T> initIterator(){
+    public Iterator<T> initIterator() {
         return supplier.apply(context);
     }
 
     @Override
     public void releaseResource(Iterator<T> iterator) throws Exception {
-        finisher.accept(iterator,context);
+        finisher.accept(iterator, context);
     }
 
 }

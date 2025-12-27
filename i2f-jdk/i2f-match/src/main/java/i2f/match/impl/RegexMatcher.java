@@ -11,26 +11,27 @@ import java.util.regex.Pattern;
  * @date 2025/9/20 16:25
  */
 public class RegexMatcher implements IPriorMatcher {
-    protected LruMap<String, Pattern> cache=new LruMap<>(1024);
-    public Pattern patternOf(String pattern){
-        if(pattern==null){
+    protected LruMap<String, Pattern> cache = new LruMap<>(1024);
+
+    public Pattern patternOf(String pattern) {
+        if (pattern == null) {
             return null;
         }
         Pattern ret = cache.get(pattern);
-        if(ret!=null){
+        if (ret != null) {
             return ret;
         }
-        ret=Pattern.compile(pattern);
-        cache.put(pattern,ret);
+        ret = Pattern.compile(pattern);
+        cache.put(pattern, ret);
         return ret;
     }
 
     @Override
     public boolean matches(String str, String patten) {
-        if(str==null){
+        if (str == null) {
             return false;
         }
-        if(patten==null){
+        if (patten == null) {
             return false;
         }
         Pattern regex = patternOf(patten);
@@ -40,19 +41,19 @@ public class RegexMatcher implements IPriorMatcher {
 
     @Override
     public double matchRate(String str, String patten) {
-        if(str==null){
+        if (str == null) {
             return MATCH_FAILURE_VALUE;
         }
-        if(patten==null){
+        if (patten == null) {
             return MATCH_FAILURE_VALUE;
         }
         Pattern regex = patternOf(patten);
         Matcher matcher = regex.matcher(str);
         boolean ok = matcher.matches();
-        if(!ok){
+        if (!ok) {
             return MATCH_FAILURE_VALUE;
         }
-        String[] arr={
+        String[] arr = {
                 ".+", ".*",
                 "\\d+", "\\s+", "\\w+",
                 "\\D+", "\\S+", "\\W+",
@@ -62,16 +63,16 @@ public class RegexMatcher implements IPriorMatcher {
                 "\\D", "\\S", "\\W",
                 "?:", "?=", "?!",
         };
-        String iter=patten;
+        String iter = patten;
         for (String item : arr) {
-            iter=iter.replace(item,"");
-            if(iter.isEmpty()){
+            iter = iter.replace(item, "");
+            if (iter.isEmpty()) {
                 break;
             }
         }
         int plen = iter.length();
 
-        return calcMatchRate(str.length(),patten.length(),str.length(),patten.length(),Math.min(plen,str.length()));
+        return calcMatchRate(str.length(), patten.length(), str.length(), patten.length(), Math.min(plen, str.length()));
     }
 
 }

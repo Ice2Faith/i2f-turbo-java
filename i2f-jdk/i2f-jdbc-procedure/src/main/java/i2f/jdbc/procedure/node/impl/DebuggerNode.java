@@ -24,7 +24,6 @@ public class DebuggerNode extends AbstractExecutorNode {
     }
 
 
-
     @Override
     public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
         String test = node.getTagAttrMap().get(AttrConsts.TEST);

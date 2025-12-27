@@ -45,16 +45,16 @@ public class RemoteDiscoveryClientProvider implements DiscoveryClient {
     @Autowired
     private Environment environment;
 
-    private ScheduledExecutorService pool= Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService pool = Executors.newScheduledThreadPool(2);
 
     @Autowired
     private RemoteRegistryProperties remoteRegistryProperties;
 
     @Autowired(required = false)
-    private RestTemplate restTemplate=new RestTemplate();
+    private RestTemplate restTemplate = new RestTemplate();
 
     @Autowired(required = false)
-    private ObjectMapper objectMapper=new ObjectMapper(){
+    private ObjectMapper objectMapper = new ObjectMapper() {
         {
             setTimeZone(TimeZone.getTimeZone(ZoneId.of("GMT+8")));
             setLocale(Locale.CHINA);
@@ -88,16 +88,16 @@ public class RemoteDiscoveryClientProvider implements DiscoveryClient {
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         try {
             sendHearBeat();
         } catch (Exception e) {
-            log.error(e.getMessage(),e);
+            log.error(e.getMessage(), e);
         }
         try {
             pullServiceInstances();
         } catch (Exception e) {
-            log.error(e.getMessage(),e);
+            log.error(e.getMessage(), e);
         }
         startHeartBeatThread();
         startServicePullThread();
@@ -119,84 +119,86 @@ public class RemoteDiscoveryClientProvider implements DiscoveryClient {
 
     public String makeSign(String payload) throws Exception {
         String secretKey = remoteRegistryProperties.getSecretKey();
-        String content=secretKey+"#"+payload;
-        MessageDigest digest=MessageDigest.getInstance("SHA-256");
+        String content = secretKey + "#" + payload;
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] arr = digest.digest(content.getBytes(StandardCharsets.UTF_8));
-        StringBuilder builder=new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         for (byte bt : arr) {
-            builder.append(String.format("%02x",(int)(bt&0x0ff)));
+            builder.append(String.format("%02x", (int) (bt & 0x0ff)));
         }
         return builder.toString();
     }
 
-    public String uuid(){
-        return UUID.randomUUID().toString().replace("-","");
+    public String uuid() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public String combineUrl(String baseUrl,String path){
-        if(baseUrl.endsWith("/")){
-            baseUrl=baseUrl.substring(0,baseUrl.length()-1);
+    public String combineUrl(String baseUrl, String path) {
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
-        if(!path.startsWith("/")){
-            path="/"+path;
+        if (!path.startsWith("/")) {
+            path = "/" + path;
         }
-        return baseUrl+path;
+        return baseUrl + path;
     }
 
-    protected void startHeartBeatThread(){
-        pool.scheduleAtFixedRate(()->{
+    protected void startHeartBeatThread() {
+        pool.scheduleAtFixedRate(() -> {
             try {
                 sendHearBeat();
             } catch (Exception e) {
-                log.warn(e.getMessage(),e);
+                log.warn(e.getMessage(), e);
             }
-        },0,remoteRegistryProperties.getHeartBeatSeconds(), TimeUnit.SECONDS);
+        }, 0, remoteRegistryProperties.getHeartBeatSeconds(), TimeUnit.SECONDS);
     }
 
     public void sendHearBeat() throws Exception {
-        String url=combineUrl(remoteRegistryProperties.getBaseUrl(), remoteRegistryProperties.getRegistryPath());
+        String url = combineUrl(remoteRegistryProperties.getBaseUrl(), remoteRegistryProperties.getRegistryPath());
         String serviceId = environment.getProperty("spring.application.name", "application");
-        int port=findPort();
-        Map<String,Object> req=new HashMap<>();
-        req.put("serviceId",serviceId);
-        req.put("port",port);
-        String uid=uuid();
-        req.put("uid",uid);
+        int port = findPort();
+        Map<String, Object> req = new HashMap<>();
+        req.put("serviceId", serviceId);
+        req.put("port", port);
+        String uid = uuid();
+        req.put("uid", uid);
         req.put("sign", makeSign(uid));
         String json = restTemplate.postForObject(url, req, String.class);
-        Map<String,Object> resp=objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
-        String selfUrl = (String)resp.get("url");
+        Map<String, Object> resp = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
+        });
+        String selfUrl = (String) resp.get("url");
     }
 
-    protected void startServicePullThread(){
-        pool.scheduleAtFixedRate(()->{
+    protected void startServicePullThread() {
+        pool.scheduleAtFixedRate(() -> {
             try {
                 pullServiceInstances();
             } catch (Exception e) {
-                log.warn(e.getMessage(),e);
+                log.warn(e.getMessage(), e);
             }
-        },0,remoteRegistryProperties.getPullServiceSeconds(), TimeUnit.SECONDS);
+        }, 0, remoteRegistryProperties.getPullServiceSeconds(), TimeUnit.SECONDS);
     }
 
     public void pullServiceInstances() throws Exception {
-        String url=combineUrl(remoteRegistryProperties.getBaseUrl(), remoteRegistryProperties.getPullPath());
-        Map<String,Object> req=new HashMap<>();
-        String uid=uuid();
-        req.put("uid",uid);
+        String url = combineUrl(remoteRegistryProperties.getBaseUrl(), remoteRegistryProperties.getPullPath());
+        Map<String, Object> req = new HashMap<>();
+        String uid = uuid();
+        req.put("uid", uid);
         req.put("sign", makeSign(uid));
         String json = restTemplate.postForObject(url, req, String.class);
-        Map<String,List<String>> resp=objectMapper.readValue(json, new TypeReference<Map<String, List<String>>>() {});
+        Map<String, List<String>> resp = objectMapper.readValue(json, new TypeReference<Map<String, List<String>>>() {
+        });
 
         for (Map.Entry<String, List<String>> entry : resp.entrySet()) {
             List<String> value = entry.getValue();
-            List<ServiceInstance> list=new CopyOnWriteArrayList<>();
+            List<ServiceInstance> list = new CopyOnWriteArrayList<>();
             for (String item : value) {
-                DiscoveryServiceInstance inst=new DiscoveryServiceInstance();
+                DiscoveryServiceInstance inst = new DiscoveryServiceInstance();
                 inst.setServiceId(entry.getKey());
                 inst.setUri(new URI(item));
                 list.add(inst);
             }
-            holder.put(entry.getKey(),list);
+            holder.put(entry.getKey(), list);
         }
     }
 }

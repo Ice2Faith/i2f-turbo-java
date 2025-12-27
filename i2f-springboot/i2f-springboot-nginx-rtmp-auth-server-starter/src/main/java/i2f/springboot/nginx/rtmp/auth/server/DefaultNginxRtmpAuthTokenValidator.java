@@ -17,7 +17,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "i2f.springboot.nginx.rtmp.auth.default-validator")
 @Slf4j
 @Component
-public class DefaultNginxRtmpAuthTokenValidator implements NginxRtmpAuthTokenValidator{
+public class DefaultNginxRtmpAuthTokenValidator implements NginxRtmpAuthTokenValidator {
     private String accessToken;
 
     @Override

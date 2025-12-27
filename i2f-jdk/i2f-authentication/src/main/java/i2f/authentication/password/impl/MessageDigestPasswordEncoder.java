@@ -10,11 +10,11 @@ import java.security.MessageDigest;
  * @date 2025/9/20 17:26
  */
 public class MessageDigestPasswordEncoder implements IPasswordEncoder {
-    public static final MessageDigestPasswordEncoder SHA_1=new MessageDigestPasswordEncoder("SHA-1");
-    private String algorithm="SHA-1";
+    public static final MessageDigestPasswordEncoder SHA_1 = new MessageDigestPasswordEncoder("SHA-1");
+    private String algorithm = "SHA-1";
     private String provider;
-    private String salt="";
-    private int repeat=0;
+    private String salt = "";
+    private int repeat = 0;
 
     public MessageDigestPasswordEncoder() {
     }
@@ -42,7 +42,7 @@ public class MessageDigestPasswordEncoder implements IPasswordEncoder {
     }
 
     public MessageDigest getDigester() throws Exception {
-        if(provider==null || provider.isEmpty()){
+        if (provider == null || provider.isEmpty()) {
             return MessageDigest.getInstance(algorithm);
         }
         return MessageDigest.getInstance(algorithm, provider);
@@ -50,19 +50,19 @@ public class MessageDigestPasswordEncoder implements IPasswordEncoder {
 
     @Override
     public String encode(String rawPassword) {
-        if(rawPassword==null){
+        if (rawPassword == null) {
             return null;
         }
         try {
-            MessageDigest digester=getDigester();
-            byte[] input=((salt==null || salt.isEmpty()?"":salt)+rawPassword).getBytes(StandardCharsets.UTF_8);
-            byte[] output=digester.digest(input);
+            MessageDigest digester = getDigester();
+            byte[] input = ((salt == null || salt.isEmpty() ? "" : salt) + rawPassword).getBytes(StandardCharsets.UTF_8);
+            byte[] output = digester.digest(input);
             for (int i = 0; i < repeat; i++) {
-                output= digester.digest(output);
+                output = digester.digest(output);
             }
-            StringBuilder builder=new StringBuilder();
+            StringBuilder builder = new StringBuilder();
             for (byte bt : output) {
-                builder.append(String.format("%02x",(int)(bt&0x0ff)));
+                builder.append(String.format("%02x", (int) (bt & 0x0ff)));
             }
             return builder.toString();
         } catch (Exception e) {

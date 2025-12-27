@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 @ConfigurationProperties(prefix = "i2f.springcloud.zuul.response-charset-filter")
 @Component
 public class ZuulResponseCharsetFilter extends ZuulFilter {
-    private String charset ="UTF-8";
+    private String charset = "UTF-8";
 
     @Override
     public String filterType() {
@@ -39,9 +39,9 @@ public class ZuulResponseCharsetFilter extends ZuulFilter {
 
     @Override
     public Object run() throws ZuulException {
-        RequestContext ctx= RequestContext.getCurrentContext();
-        HttpServletRequest request= ctx.getRequest();
-        HttpServletResponse response= ctx.getResponse();
+        RequestContext ctx = RequestContext.getCurrentContext();
+        HttpServletRequest request = ctx.getRequest();
+        HttpServletResponse response = ctx.getResponse();
 
         response.setCharacterEncoding(charset);
 

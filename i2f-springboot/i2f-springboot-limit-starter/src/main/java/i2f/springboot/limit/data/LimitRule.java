@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class LimitRule {
-    protected int count=-1;
-    protected long ttl=-1;
-    protected int order=Integer.MAX_VALUE;
+    protected int count = -1;
+    protected long ttl = -1;
+    protected int order = Integer.MAX_VALUE;
 
     public LimitRule(int count, long ttl) {
         this.count = count;

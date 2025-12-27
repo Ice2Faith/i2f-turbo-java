@@ -31,7 +31,10 @@ import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
-import org.elasticsearch.common.xcontent.*;
+import org.elasticsearch.common.xcontent.DeprecationHandler;
+import org.elasticsearch.common.xcontent.NamedXContentRegistry;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -112,7 +115,7 @@ public class EsManager {
         return client;
     }
 
-    public static BasicCredentialsProvider getCredentialsProvider(String username,String password) {
+    public static BasicCredentialsProvider getCredentialsProvider(String username, String password) {
         // 认证信息配置
         BasicCredentialsProvider ret = new BasicCredentialsProvider();
         ret.setCredentials(
@@ -183,20 +186,20 @@ public class EsManager {
     }
 
     public boolean indexCreate(String indexName) throws IOException {
-        return indexCreate(indexName,null,null);
+        return indexCreate(indexName, null, null);
     }
 
-    public boolean indexCreate(String indexName,String mappingJson) throws IOException {
-        return indexCreate(indexName,mappingJson,null);
+    public boolean indexCreate(String indexName, String mappingJson) throws IOException {
+        return indexCreate(indexName, mappingJson, null);
     }
 
-    public boolean indexCreate(String indexName,String mappingJson,String settingJson) throws IOException {
+    public boolean indexCreate(String indexName, String mappingJson, String settingJson) throws IOException {
         CreateIndexRequest request = new CreateIndexRequest(indexName);
-        if(mappingJson!=null && !mappingJson.isEmpty()){
-            request.mapping(mappingJson,XContentType.JSON);
+        if (mappingJson != null && !mappingJson.isEmpty()) {
+            request.mapping(mappingJson, XContentType.JSON);
         }
-        if(settingJson!=null && !settingJson.isEmpty()){
-            request.settings(settingJson,XContentType.JSON);
+        if (settingJson != null && !settingJson.isEmpty()) {
+            request.settings(settingJson, XContentType.JSON);
         }
         CreateIndexResponse response = getClient().indices().create(request, RequestOptions.DEFAULT);
         return response.isAcknowledged();
@@ -395,16 +398,16 @@ public class EsManager {
         return response;
     }
 
-    public SearchResponse search(String indexName,String jsonDsl) throws IOException {
+    public SearchResponse search(String indexName, String jsonDsl) throws IOException {
         SearchSourceBuilder builder = searchSourceBuilderFromJsonDsl(jsonDsl);
 
-        return search(indexName,builder);
+        return search(indexName, builder);
     }
 
     public static SearchSourceBuilder searchSourceBuilderFromJsonDsl(String jsonDsl) throws IOException {
-        SearchSourceBuilder builder=new SearchSourceBuilder();
+        SearchSourceBuilder builder = new SearchSourceBuilder();
 
-        try(XContentParser xContentParser = JsonXContent.jsonXContent.createParser(NamedXContentRegistry.EMPTY, DeprecationHandler.THROW_UNSUPPORTED_OPERATION, jsonDsl)) {
+        try (XContentParser xContentParser = JsonXContent.jsonXContent.createParser(NamedXContentRegistry.EMPTY, DeprecationHandler.THROW_UNSUPPORTED_OPERATION, jsonDsl)) {
             builder.parseXContent(xContentParser);
             return builder;
         }

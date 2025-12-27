@@ -19,7 +19,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
  * @date 2024/6/27 9:35
  * @desc
  */
-@AutoConfigureAfter({RedisAutoConfiguration.class,RedisTemplateAutoConfiguration.class})
+@AutoConfigureAfter({RedisAutoConfiguration.class, RedisTemplateAutoConfiguration.class})
 @ConditionalOnExpression("${i2f.spring.redis.redis-cache.enable:true}")
 @Slf4j
 @Data

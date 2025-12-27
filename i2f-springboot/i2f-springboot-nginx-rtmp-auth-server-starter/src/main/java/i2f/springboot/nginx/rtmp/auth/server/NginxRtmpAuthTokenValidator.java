@@ -1,7 +1,5 @@
 package i2f.springboot.nginx.rtmp.auth.server;
 
-import org.springframework.web.bind.annotation.RequestParam;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
@@ -11,5 +9,5 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface NginxRtmpAuthTokenValidator {
-    boolean validate(HttpServletRequest request,String token,Map<String, Object> nginxData);
+    boolean validate(HttpServletRequest request, String token, Map<String, Object> nginxData);
 }

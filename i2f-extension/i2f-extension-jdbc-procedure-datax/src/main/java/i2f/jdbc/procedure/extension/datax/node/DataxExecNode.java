@@ -31,33 +31,33 @@ public class DataxExecNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        String commandFilePath=executor.convertAs(executor.attrValue(DataxAttrConsts.COMMAND,FeatureConsts.STRING,node,context),String.class);
-        String script=executor.convertAs(executor.attrValue(AttrConsts.SCRIPT,FeatureConsts.VISIT,node,context),String.class);
-        if(script!=null){
-            script=script.trim();
+        String commandFilePath = executor.convertAs(executor.attrValue(DataxAttrConsts.COMMAND, FeatureConsts.STRING, node, context), String.class);
+        String script = executor.convertAs(executor.attrValue(AttrConsts.SCRIPT, FeatureConsts.VISIT, node, context), String.class);
+        if (script != null) {
+            script = script.trim();
         }
-        if(script==null || script.isEmpty()){
-            script=node.getTextBody();
+        if (script == null || script.isEmpty()) {
+            script = node.getTextBody();
         }
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
-        Boolean await=executor.convertAs(executor.attrValue(AttrConsts.AWAIT,FeatureConsts.BOOLEAN,node,context),Boolean.class);
+        Boolean await = executor.convertAs(executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context), Boolean.class);
 
-        File jobFile=null;
+        File jobFile = null;
         try {
-            jobFile=File.createTempFile("datax-job-"+(UUID.randomUUID().toString().replace("-","")),".json");
-            StreamUtil.writeString(script, StandardCharsets.UTF_8,jobFile);
-            String jobFilePath=jobFile.getAbsolutePath();
+            jobFile = File.createTempFile("datax-job-" + (UUID.randomUUID().toString().replace("-", "")), ".json");
+            StreamUtil.writeString(script, StandardCharsets.UTF_8, jobFile);
+            String jobFilePath = jobFile.getAbsolutePath();
 
-            String res = OsUtil.execCmd((result!=null),(await==null || await)?-1L:1L,new String[]{commandFilePath,jobFilePath},null,null,null);
+            String res = OsUtil.execCmd((result != null), (await == null || await) ? -1L : 1L, new String[]{commandFilePath, jobFilePath}, null, null, null);
 
             if (result != null) {
                 Object val = executor.resultValue(res, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
                 executor.visitSet(context, result, val);
             }
         } catch (IOException e) {
-            throw new ThrowSignalException(e.getMessage(),e);
-        }finally {
-            if(jobFile!=null && jobFile.exists()){
+            throw new ThrowSignalException(e.getMessage(), e);
+        } finally {
+            if (jobFile != null && jobFile.exists()) {
                 jobFile.delete();
             }
         }

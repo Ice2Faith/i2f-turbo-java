@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,12 +31,12 @@ public class StaticDatasourceCollector implements DatasourceCollector {
     @Autowired
     protected DatasourceAutoConfiguration configuration;
 
-    protected ConcurrentHashMap<String,DataSource> dataSourceMap = new ConcurrentHashMap<>();
+    protected ConcurrentHashMap<String, DataSource> dataSourceMap = new ConcurrentHashMap<>();
     protected AtomicBoolean initialized = new AtomicBoolean(false);
 
     @Override
     public Map<String, DataSource> collect() {
-        if(!initialized.getAndSet(true)) {
+        if (!initialized.getAndSet(true)) {
             Map<String, DatasourceItemDto> map = configuration.getDatasourceMap();
             for (Map.Entry<String, DatasourceItemDto> entry : map.entrySet()) {
                 String key = entry.getKey();
@@ -49,7 +48,7 @@ public class StaticDatasourceCollector implements DatasourceCollector {
                     });
                     dataSourceMap.put(key, ds);
                 } catch (Exception e) {
-                    log.warn("init static datasource ["+key+"] failed: "+e.getMessage(), e);
+                    log.warn("init static datasource [" + key + "] failed: " + e.getMessage(), e);
                 }
             }
         }

@@ -29,41 +29,41 @@ public class KafkaConfigProperties implements EnvironmentAware {
 
     private String serverAddress;
 
-    private int retries=3;
-    private String acks="all";
-    private long maxBlockMs=6000;
-    private long batchSize=4096;
-    private long lingerMs=1000;
-    private long bufferMemorySize=33554432;
-    private long maxRequestSize=1048576;
+    private int retries = 3;
+    private String acks = "all";
+    private long maxBlockMs = 6000;
+    private long batchSize = 4096;
+    private long lingerMs = 1000;
+    private long bufferMemorySize = 33554432;
+    private long maxRequestSize = 1048576;
     private String clientId; // 默认spring.application.name
-    private String keySerializerClass= StringSerializer.class.getName();
-    private String valueSerializerClass=StringSerializer.class.getName();
-    private String compressionType="gzip";
+    private String keySerializerClass = StringSerializer.class.getName();
+    private String valueSerializerClass = StringSerializer.class.getName();
+    private String compressionType = "gzip";
     private String partitionerClass; // 默认无
 
-    private boolean enableAutoCommit=false;
-    private long autoCommitIntervalMs=1000;
-    private long maxPollRecords=100;
+    private boolean enableAutoCommit = false;
+    private long autoCommitIntervalMs = 1000;
+    private long maxPollRecords = 100;
     private String groupId; // 默认spring.application.name
-    private long sessionTimeoutMs=120000;
-    private long requestTimeoutMs=120000;
-    private String keyDeserializerClass=StringDeserializer.class.getName();
-    private String valueDeserializerClass=StringDeserializer.class.getName();
-    private String autoOffsetReset="latest";
+    private long sessionTimeoutMs = 120000;
+    private long requestTimeoutMs = 120000;
+    private String keyDeserializerClass = StringDeserializer.class.getName();
+    private String valueDeserializerClass = StringDeserializer.class.getName();
+    private String autoOffsetReset = "latest";
     private String interceptorClass; // 默认无
 
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.env=environment;
+        this.env = environment;
     }
 
 
     // 配置生产工厂
     public Map<String, Object> producerConfig() {
-        if(clientId==null || "".equals(clientId)){
-            clientId=env.getProperty("spring.application.name");
+        if (clientId == null || "".equals(clientId)) {
+            clientId = env.getProperty("spring.application.name");
         }
 
         Map<String, Object> props = new HashMap<>();
@@ -94,7 +94,7 @@ public class KafkaConfigProperties implements EnvironmentAware {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializerClass);
         //消息压缩：none、lz4、gzip、snappy，默认为 none。
         props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, compressionType);
-        if(partitionerClass!=null && !"".equals(partitionerClass)){
+        if (partitionerClass != null && !"".equals(partitionerClass)) {
             //自定义分区器
             props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, partitionerClass);
         }
@@ -102,8 +102,8 @@ public class KafkaConfigProperties implements EnvironmentAware {
     }
 
     public Map<String, Object> consumerConfig() {
-        if(groupId==null || "".equals(groupId)){
-            groupId=env.getProperty("spring.application.name");
+        if (groupId == null || "".equals(groupId)) {
+            groupId = env.getProperty("spring.application.name");
         }
 
         Map<String, Object> props = new HashMap<>();
@@ -131,7 +131,7 @@ public class KafkaConfigProperties implements EnvironmentAware {
         //none:只要有一个分区不存在已提交的offset,就抛出异常
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
         //设置Consumer拦截器
-        if(interceptorClass!=null && !"".equals(interceptorClass)) {
+        if (interceptorClass != null && !"".equals(interceptorClass)) {
             props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, interceptorClass);
         }
         return props;

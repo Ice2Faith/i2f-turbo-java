@@ -9,9 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * @date 2025/9/20 17:38
  */
 public class SpringPasswordEncoder implements IPasswordEncoder {
-    public static final SpringPasswordEncoder BC=new SpringPasswordEncoder(new BCryptPasswordEncoder());
+    public static final SpringPasswordEncoder BC = new SpringPasswordEncoder(new BCryptPasswordEncoder());
 
-    protected PasswordEncoder encoder=new BCryptPasswordEncoder();
+    protected PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public SpringPasswordEncoder() {
     }
@@ -27,6 +27,6 @@ public class SpringPasswordEncoder implements IPasswordEncoder {
 
     @Override
     public boolean matches(String rawPassword, String encodedPassword) {
-        return encoder.matches(rawPassword,encodedPassword);
+        return encoder.matches(rawPassword, encodedPassword);
     }
 }

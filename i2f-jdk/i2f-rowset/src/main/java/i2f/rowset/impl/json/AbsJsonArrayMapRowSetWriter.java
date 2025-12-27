@@ -18,7 +18,7 @@ import java.util.Map;
  * @date 2025/12/2 22:56
  * @desc
  */
-public abstract class AbsJsonArrayMapRowSetWriter<M extends Map<String,Object>> implements IRowSetWriter<M> {
+public abstract class AbsJsonArrayMapRowSetWriter<M extends Map<String, Object>> implements IRowSetWriter<M> {
     protected boolean withHeaders = true;
     protected Charset charset = StandardCharsets.UTF_8;
 
@@ -26,20 +26,20 @@ public abstract class AbsJsonArrayMapRowSetWriter<M extends Map<String,Object>> 
     public void write(IRowSet<M> rowSet, OutputStream os) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(os, charset);
         List<IRowHeader> headers = rowSet.getHeaders();
-        if(withHeaders) {
-            List<String> row=new ArrayList<>();
+        if (withHeaders) {
+            List<String> row = new ArrayList<>();
             for (IRowHeader header : headers) {
                 String name = header.getName();
                 row.add(name);
             }
-            String json=toJson(row);
+            String json = toJson(row);
             writer.write(escapeSpaces(json));
             writer.write("\n");
         }
-        List<Object> row=new ArrayList<>();
-        while(rowSet.hasNext()) {
+        List<Object> row = new ArrayList<>();
+        while (rowSet.hasNext()) {
             M map = rowSet.next();
-            if(map==null){
+            if (map == null) {
                 continue;
             }
             row.clear();
@@ -47,7 +47,7 @@ public abstract class AbsJsonArrayMapRowSetWriter<M extends Map<String,Object>> 
                 String name = header.getName();
                 row.add(map.get(name));
             }
-            String json=toJson(row);
+            String json = toJson(row);
             writer.write(escapeSpaces(json));
             writer.write("\n");
         }
@@ -55,13 +55,13 @@ public abstract class AbsJsonArrayMapRowSetWriter<M extends Map<String,Object>> 
         writer.flush();
     }
 
-    public String escapeSpaces(String str){
-        if(str==null){
+    public String escapeSpaces(String str) {
+        if (str == null) {
             return null;
         }
-        str=str.replace("\t","\\t");
-        str=str.replace("\n","\\n");
-        str=str.replace("\r","\\r");
+        str = str.replace("\t", "\\t");
+        str = str.replace("\n", "\\n");
+        str = str.replace("\r", "\\r");
         return str;
     }
 

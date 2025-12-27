@@ -39,7 +39,7 @@ public class LangThreadPoolShutdownNode extends AbstractExecutorNode {
 
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
-        ExecutorService pool=(ExecutorService)executor.attrValue(AttrConsts.POOL, FeatureConsts.VISIT, node, context);
+        ExecutorService pool = (ExecutorService) executor.attrValue(AttrConsts.POOL, FeatureConsts.VISIT, node, context);
         boolean force = executor.convertAs(executor.attrValue(AttrConsts.FORCE, FeatureConsts.BOOLEAN, node, context), Boolean.class);
         boolean await = executor.convertAs(executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context), Boolean.class);
         long timeout = -1;
@@ -49,24 +49,24 @@ public class LangThreadPoolShutdownNode extends AbstractExecutorNode {
         }
         String timeUnit = node.getTagAttrMap().get(AttrConsts.TIME_UNIT);
 
-        List<Runnable> tasks=new ArrayList<>();
-       if(force){
-           tasks = pool.shutdownNow();
-       }else{
-           pool.shutdown();
-       }
-       if(await){
-           try {
-               if (timeout >= 0) {
-                   TimeUnit unit = NodeTime.getTimeUnit(timeUnit, TimeUnit.SECONDS);
-                   pool.awaitTermination(timeout, unit);
-               } else {
-                   pool.awaitTermination(Long.MAX_VALUE,TimeUnit.MILLISECONDS);
-               }
-           } catch (InterruptedException e) {
-               throw new ThrowSignalException(e.getMessage(),e);
-           }
-       }
+        List<Runnable> tasks = new ArrayList<>();
+        if (force) {
+            tasks = pool.shutdownNow();
+        } else {
+            pool.shutdown();
+        }
+        if (await) {
+            try {
+                if (timeout >= 0) {
+                    TimeUnit unit = NodeTime.getTimeUnit(timeUnit, TimeUnit.SECONDS);
+                    pool.awaitTermination(timeout, unit);
+                } else {
+                    pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+                }
+            } catch (InterruptedException e) {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
+        }
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {
             executor.visitSet(context, result, tasks);

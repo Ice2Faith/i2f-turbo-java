@@ -246,25 +246,25 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
 
     public QueryResult getTableInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
         ResultSet rs = metaData.getTables(null, database, table, null);
-        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
         return ret;
     }
 
     public QueryResult getColumns(DatabaseMetaData metaData, String database, String table) throws SQLException {
         ResultSet rs = metaData.getColumns(null, database, table, null);
-        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
         return ret;
     }
 
     public QueryResult getPrimaryKeys(DatabaseMetaData metaData, String database, String table) throws SQLException {
         ResultSet rs = metaData.getPrimaryKeys(null, database, table);
-        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
         return ret;
     }
 
     public QueryResult getIndexInfo(DatabaseMetaData metaData, String database, String table) throws SQLException {
         ResultSet rs = metaData.getIndexInfo(null, database, table, false, false);
-        QueryResult ret=JdbcResolver.parseResultSet(rs);
+        QueryResult ret = JdbcResolver.parseResultSet(rs);
         return ret;
     }
 

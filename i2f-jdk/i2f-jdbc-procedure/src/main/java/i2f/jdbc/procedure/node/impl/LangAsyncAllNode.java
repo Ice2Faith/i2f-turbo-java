@@ -26,7 +26,6 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
     }
 
 
-
     @Override
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         boolean await = executor.toBoolean(executor.attrValue(AttrConsts.AWAIT, FeatureConsts.BOOLEAN, node, context));
@@ -37,10 +36,10 @@ public class LangAsyncAllNode extends AbstractExecutorNode {
         }
         CountDownLatch latch = new CountDownLatch(children.size());
         for (XmlNode item : children) {
-            Map<String,Object> callParams= executor.cloneParams(context);
+            Map<String, Object> callParams = executor.cloneParams(context);
             for (Map.Entry<String, Object> entry : context.entrySet()) {
                 if (!ParamsConsts.KEEP_NAME_SET.contains(entry.getKey())) {
-                    callParams.put(entry.getKey(),entry.getValue());
+                    callParams.put(entry.getKey(), entry.getValue());
                 }
             }
             final XmlNode itemNode = item;

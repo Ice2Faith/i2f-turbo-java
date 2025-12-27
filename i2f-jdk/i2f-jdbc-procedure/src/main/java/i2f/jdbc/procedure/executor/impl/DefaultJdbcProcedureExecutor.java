@@ -25,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
     protected volatile MybatisMapperInflater mybatisMapperInflater;
+
     public DefaultJdbcProcedureExecutor() {
     }
 

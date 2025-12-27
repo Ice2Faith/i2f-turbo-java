@@ -20,7 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @Data
 @NoArgsConstructor
 @Configuration
-public class LimitWebMvcConfigurer  {
+public class LimitWebMvcConfigurer {
     @Autowired
     private LimitManager limitManager;
     @Autowired
@@ -29,15 +29,15 @@ public class LimitWebMvcConfigurer  {
     private LimitRuleProperties properties;
 
     @Bean
-    public FilterRegistrationBean<LimitFilter> limitFilterFilterRegistrationBean(){
-        FilterRegistrationBean<LimitFilter> bean=new FilterRegistrationBean<>();
-        String pattern=properties.getFilter().getPattern();
-        if(pattern==null){
-            pattern="";
+    public FilterRegistrationBean<LimitFilter> limitFilterFilterRegistrationBean() {
+        FilterRegistrationBean<LimitFilter> bean = new FilterRegistrationBean<>();
+        String pattern = properties.getFilter().getPattern();
+        if (pattern == null) {
+            pattern = "";
         }
-        pattern=pattern.trim();
-        if(pattern.isEmpty()){
-            pattern="/*";
+        pattern = pattern.trim();
+        if (pattern.isEmpty()) {
+            pattern = "/*";
         }
         properties.getFilter().setPattern(pattern);
         bean.addUrlPatterns(pattern);
