@@ -6,7 +6,7 @@
 
     <groupId>i2f.turbo</groupId>
     <artifactId>i2f-turbo-java</artifactId>
-    <version>1.0-jdk8</version>
+    <version>1.0-jdk17</version>
 
     <packaging>pom</packaging>
 
@@ -21,7 +21,7 @@
     </modules>
 
     <properties>
-        <i2f.version>1.0-jdk8</i2f.version>
+        <i2f.version>1.0-jdk17</i2f.version>
 
         <root.maven.group>i2f.turbo</root.maven.group>
         <root.maven.artifact>i2f-turbo-java</root.maven.artifact>

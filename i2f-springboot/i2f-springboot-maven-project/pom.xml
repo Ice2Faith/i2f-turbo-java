@@ -7,7 +7,7 @@
     <parent>
         <groupId>i2f.turbo</groupId>
         <artifactId>i2f-springboot</artifactId>
-        <version>1.0-jdk8</version>
+        <version>1.0-jdk17</version>
     </parent>
     <!--
 
@@ -20,7 +20,7 @@
 
     <!--    <groupId>i2f.turbo</groupId>-->
     <artifactId>i2f-springboot-maven-project</artifactId>
-    <!--    <version>1.0-jdk8</version>-->
+    <!--    <version>1.0-jdk17</version>-->
 
     <packaging>jar</packaging>
 
@@ -145,7 +145,7 @@
         <dependency>
             <groupId>com.mavem</groupId>
             <artifactId>res-lib</artifactId>
-            <version>1.0-jdk8</version>
+            <version>1.0-jdk17</version>
             <scope>system</scope>
             <systemPath>${pom.basedir}/src/main/resources/lib/res-lib-1.0.jar</systemPath>
         </dependency>
@@ -153,7 +153,7 @@
         <dependency>
             <groupId>com.mavem</groupId>
             <artifactId>pom-lib</artifactId>
-            <version>1.0-jdk8</version>
+            <version>1.0-jdk17</version>
             <scope>system</scope>
             <systemPath>${pom.basedir}/lib/pom-lib-1.0.jar</systemPath>
         </dependency>
