@@ -8,6 +8,7 @@ import i2f.environment.std.IEnvironment;
 import i2f.form.dialog.DialogBoxes;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.event.XProc4jEvent;
@@ -302,7 +303,7 @@ public interface JdbcProcedureExecutor {
 
     Map<String, Object> newParams(Map<String, Object> params);
 
-    Map<String, Object> cloneParams(Map<String, Object> context);
+    Map<String,Object> cloneParams(Map<String,Object> context);
 
     Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params);
 
@@ -312,9 +313,15 @@ public interface JdbcProcedureExecutor {
 
     void debug(boolean enable);
 
+    default void debugThread(Boolean enable){
+        ContextHolder.DEBUG_MODE.set(enable);
+    }
+
     boolean isDebug();
 
     void openDebugger(String tag, Object context, String conditionExpression);
+
+    Consumer<String> applyThreadLogAppender(Consumer<String> consumer);
 
     JdbcProcedureLogger logger();
 

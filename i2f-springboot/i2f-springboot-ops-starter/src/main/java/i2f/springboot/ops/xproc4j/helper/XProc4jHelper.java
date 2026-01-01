@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -36,6 +37,8 @@ public class XProc4jHelper {
     public static final String METHOD_CALL = "call";
     public static final String METHOD_EVAL_SCRIPT = "evalScript";
     public static final String METHOD_CREATE_PARAMS = "createParams";
+    public static final String METHOD_APPLY_THREAD_LOG_APPENDER="applyThreadLogAppender";
+    public static final String METHOD_DEBUG_THREAD="debugThread";
 
     public static String DATASOURCES = "datasources";
 
@@ -45,6 +48,8 @@ public class XProc4jHelper {
     private final AtomicReference<Method> callByIdMethodHolder = new AtomicReference<>();
     private final AtomicReference<Method> evalScriptMethodHolder = new AtomicReference<>();
     private final AtomicReference<Method> createParamsMethodHolder = new AtomicReference<>();
+    private final AtomicReference<Method> applyThreadLogAppenderMethodHolder=new AtomicReference<>();
+    private final AtomicReference<Method> debugThreadMethodHolder=new AtomicReference<>();
 
     protected boolean isExecutorClass(Class<?> clazz) {
         String simpleName = clazz.getSimpleName();
@@ -123,9 +128,30 @@ public class XProc4jHelper {
             } catch (Exception e) {
 
             }
+
+            try {
+
+                Method createParams = clazz.getMethod(METHOD_APPLY_THREAD_LOG_APPENDER, Consumer.class);
+                applyThreadLogAppenderMethodHolder.set(createParams);
+            } catch (Exception e) {
+
+            }
+
+            try {
+
+                Method createParams = clazz.getMethod(METHOD_DEBUG_THREAD, Boolean.class);
+                debugThreadMethodHolder.set(createParams);
+            } catch (Exception e) {
+
+            }
         } catch (Exception e) {
 
         }
+    }
+
+    public Object getExecutor() throws Exception {
+        initHolder();
+        return executorHolder.get();
     }
 
     public Map<String, Map<String, Object>> getMetasMap() throws Exception {
@@ -190,6 +216,27 @@ public class XProc4jHelper {
         Map<String, Object> params = createParams();
         Map<String, DataSource> datasourceMap = (Map<String, DataSource>) params.get(DATASOURCES);
         return new ArrayList<>(datasourceMap.keySet());
+    }
+
+    public Consumer<String> applyThreadLogAppender(Consumer<String> consumer) throws Exception {
+        initHolder();
+        Object executor = executorHolder.get();
+        Method method = applyThreadLogAppenderMethodHolder.get();
+        if (method == null) {
+            throw new OpsException("not found method:" + METHOD_APPLY_THREAD_LOG_APPENDER);
+        }
+        Object ret = method.invoke(executor, consumer);
+        return (Consumer<String>) ret;
+    }
+
+    public void debugThread(Boolean enable) throws Exception {
+        initHolder();
+        Object executor = executorHolder.get();
+        Method method = debugThreadMethodHolder.get();
+        if (method == null) {
+            throw new OpsException("not found method:" + METHOD_DEBUG_THREAD);
+        }
+        method.invoke(executor, enable);
     }
 
     public Map trimContextParams(Map params) {
