@@ -74,7 +74,15 @@ public class DatasourceOpsMetadataController {
             String database = req.getDatabase();
             try (Connection conn = datasourceOpsHelper.getConnection(req)) {
                 DatabaseMetadataProvider provider = DatabaseMetadataProviders.findProvider(conn);
-                List<TableMeta> tables = provider.getTables(conn, database);
+                String tablePattern=req.getTable();
+                if(tablePattern==null){
+                    tablePattern="";
+                }
+                tablePattern=tablePattern.trim();
+                if(tablePattern.isEmpty()){
+                    tablePattern=null;
+                }
+                List<TableMeta> tables = provider.getTables(conn, database,tablePattern);
                 return transfer.success(tables);
             }
         } catch (Exception e) {
@@ -115,11 +123,9 @@ public class DatasourceOpsMetadataController {
                     engineer = OracleDdlDatabaseReverseEngineer.CONVERT;
                 } else if ("mysql".equalsIgnoreCase(ddlType)) {
                     engineer = MysqlDdlDatabaseReverseEngineer.CONVERT;
-                }
-                if ("postgre".equalsIgnoreCase(ddlType)) {
+                }else if ("postgre".equalsIgnoreCase(ddlType)) {
                     engineer = PostgreDdlDatabaseReverseEngineer.CONVERT;
-                }
-                if ("gbase".equalsIgnoreCase(ddlType)) {
+                }else if ("gbase".equalsIgnoreCase(ddlType)) {
                     engineer = GbaseDdlDatabaseReverseEngineer.CONVERT;
                 }
                 DatabaseMetadataProvider provider = DatabaseMetadataProviders.findProvider(conn);

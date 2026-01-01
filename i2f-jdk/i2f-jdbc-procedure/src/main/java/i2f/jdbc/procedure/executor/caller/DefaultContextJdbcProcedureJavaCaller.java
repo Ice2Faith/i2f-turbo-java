@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -228,6 +229,11 @@ public interface DefaultContextJdbcProcedureJavaCaller extends ContextJdbcProced
     @Override
     default void openDebugger(String tag, Object context, String conditionExpression) {
         executor().openDebugger(tag, context, conditionExpression);
+    }
+
+    @Override
+    default Consumer<String> applyThreadLogAppender(Consumer<String> consumer) {
+        return executor().applyThreadLogAppender(consumer);
     }
 
     @Override

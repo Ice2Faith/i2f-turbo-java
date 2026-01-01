@@ -67,7 +67,11 @@ public interface DatabaseMetadataProvider {
 
     List<String> getDatabases(Connection conn) throws SQLException;
 
-    List<TableMeta> getTables(Connection conn, String database) throws SQLException;
+    default List<TableMeta> getTables(Connection conn, String database) throws SQLException{
+        return getTables(conn,database,null);
+    }
+
+    List<TableMeta> getTables(Connection conn, String database,String tablePattern) throws SQLException;
 
     TableMeta getTableInfo(Connection conn, String database, String table) throws SQLException;
 

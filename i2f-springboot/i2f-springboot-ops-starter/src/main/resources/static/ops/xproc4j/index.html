@@ -272,6 +272,11 @@
                         <el-checkbox slot="reference" v-model="form.proxyHostId">代理转发</el-checkbox>
                     </el-popover>
                 </el-form-item>
+                <el-divider direction="vertical"></el-divider>
+                <el-form-item>
+                    <el-checkbox v-model="form.enableDebug">开启Debug</el-checkbox>
+                    <el-checkbox v-model="form.enableLog">捕获日志</el-checkbox>
+                </el-form-item>
             </el-row>
             <el-row type="flex" justify="center">
                 <el-form-item>
@@ -297,6 +302,9 @@
                             :value="item.value">
                     </el-option>
                 </el-select>
+            </el-form-item>
+            <el-form-item v-if="metas.logList && metas.logList.length>0">
+                <el-button type="waring" size="small" @click="onViewLogList">查看日志</el-button>
             </el-form-item>
         </el-form>
         <textarea ref="refResultEditor"></textarea>
@@ -368,6 +376,7 @@
                         resultLoading: false,
                         resultLang: 'javascript',
                         resultText: '',
+                        logList:[],
                         filterMeta: '',
                         datasourcesLoading: false,
                         datasources: [],
@@ -425,6 +434,8 @@
                         script: '',
                         async: false,
                         waitForSeconds: 60,
+                        enableDebug: false,
+                        enableLog: false
                     }
                 }
             },
@@ -1235,6 +1246,8 @@
                                 params: params,
                                 async: this.form.async,
                                 waitForSeconds: this.form.waitForSeconds,
+                                enableDebug: this.form.enableDebug,
+                                enableLog: this.form.enableLog
                             });
                             let url='/call'
                             if(this.form.enableEvalScript){
@@ -1250,6 +1263,7 @@
                                 method: 'post',
                                 data: transfer.send(req)
                             }).then(res => {
+                                this.metas.logList=(res.data.attrs)?(res.data.attrs.log || []):([]);
                                 if (res.data.code == 200) {
                                     //console.log(res.data)
                                     let resp = transfer.recv(res.data.data)
@@ -1277,11 +1291,10 @@
                                 this.metas.resultLoading = false;
                             })
                         }).catch(err => {
-                            this.messageError(err.errorMessage || err.message || '操作失败',300)
-                        }).finally(() => {
-                            this.metas.resultLoading = false;
-                        })
-
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
+                    }).finally(() => {
+                        this.metas.resultLoading = false;
+                    })
                 } catch (err) {
                     this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
@@ -1320,6 +1333,10 @@
                 }
                 this.form.params=JSON.stringify(params,null,'    ');
                 this.editor.setValue(this.form.params);
+            },
+            onViewLogList(){
+                let text=this.metas.logList.join('\n')
+                this.onViewText(text,'执行日志','text')
             }
         }
     })
@@ -1334,12 +1351,11 @@
 </script>
 <style>
     .cert-block {
-        height: 32px;
+        max-height: 32px;
         overflow: hidden;
     }
-
-    .cert-block:hover {
-        height: unset;
+    .cert-block:hover{
+        max-height: 280px;
     }
 
     .list-item {
@@ -1359,12 +1375,12 @@
     }
 
 
-    .list-item-cell .table-cell-hidden {
+    .list-item-cell .table-cell-hidden{
         display: none;
     }
 
-    .list-item-cell:hover .table-cell-hidden {
-        display: unset;
+    .list-item-cell:hover .table-cell-hidden{
+        display: inline-block;
     }
 
     .checked-item {

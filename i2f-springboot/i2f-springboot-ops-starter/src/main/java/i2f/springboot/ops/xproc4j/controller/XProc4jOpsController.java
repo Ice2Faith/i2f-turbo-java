@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -39,6 +40,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @Controller
 @RequestMapping("/ops/xproc4j")
 public class XProc4jOpsController implements IOpsProvider {
+    public static final String ATTR_LOG="log";
+
     @Autowired
     private XProc4jHelper xProc4jHelper;
 
@@ -53,15 +56,18 @@ public class XProc4jOpsController implements IOpsProvider {
 
     @Override
     public List<OpsHomeMenuDto> getMenus() {
-        xProc4jHelper.initHolder();
-        Object bean = xProc4jHelper.getExecutorHolder().get();
-        if (bean != null) {
-            return Collections.singletonList(new OpsHomeMenuDto()
-                    .title("XProc4J")
-                    .subTitle("执行 XProc4J 脚本")
-                    .icon("el-icon-table-lamp")
-                    .href("./xproc4j/index.html")
-            );
+        try {
+            Object bean = xProc4jHelper.getExecutor();
+            if (bean != null) {
+                return Collections.singletonList(new OpsHomeMenuDto()
+                        .title("XProc4J")
+                        .subTitle("执行 XProc4J 脚本")
+                        .icon("el-icon-table-lamp")
+                        .href("./xproc4j/index.html")
+                );
+            }
+        } catch (Exception e) {
+
         }
         return Collections.emptyList();
     }
@@ -139,6 +145,7 @@ public class XProc4jOpsController implements IOpsProvider {
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> call(@RequestBody OpsSecureDto reqDto,
                                               HttpServletRequest request) throws Exception {
+        LinkedBlockingQueue<String> buffer=new LinkedBlockingQueue<>();
         try {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
@@ -160,6 +167,19 @@ public class XProc4jOpsController implements IOpsProvider {
             CountDownLatch latch = new CountDownLatch(1);
             Runnable task = () -> {
                 try {
+                    xProc4jHelper.debugThread(req.getEnableDebug());
+                    if(req.getEnableLog()!=null && req.getEnableLog()){
+                        xProc4jHelper.applyThreadLogAppender((str)->{
+                            try {
+                                buffer.add(str);
+                                while(buffer.size()>1000){
+                                    buffer.take();
+                                }
+                            } catch (InterruptedException e) {
+
+                            }
+                        });
+                    }
                     String procedureId = req.getProcedureId();
                     Map<String, Object> params = req.getParams();
                     Map<String, Object> map = xProc4jHelper.call(procedureId, params);
@@ -168,6 +188,12 @@ public class XProc4jOpsController implements IOpsProvider {
                 } catch (Throwable e) {
                     refEx.set(e);
                 } finally {
+                    try {
+                        xProc4jHelper.debugThread(null);
+                        xProc4jHelper.applyThreadLogAppender(null);
+                    } catch (Exception e) {
+
+                    }
                     latch.countDown();
                 }
             };
@@ -200,10 +226,10 @@ public class XProc4jOpsController implements IOpsProvider {
                     resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }
-            return transfer.success(resp);
+            return transfer.success(resp).withAttr(ATTR_LOG,new ArrayList<>(buffer));
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e);
+            return transfer.error(e).withAttr(ATTR_LOG,new ArrayList<>(buffer));
         }
     }
 
@@ -211,6 +237,7 @@ public class XProc4jOpsController implements IOpsProvider {
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> evalScript(@RequestBody OpsSecureDto reqDto,
                                                     HttpServletRequest request) throws Exception {
+        LinkedBlockingQueue<String> buffer=new LinkedBlockingQueue<String>();
         try {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
@@ -232,6 +259,19 @@ public class XProc4jOpsController implements IOpsProvider {
             CountDownLatch latch = new CountDownLatch(1);
             Runnable task = () -> {
                 try {
+                    xProc4jHelper.debugThread(req.getEnableDebug());
+                    if(req.getEnableLog()!=null && req.getEnableLog()){
+                        xProc4jHelper.applyThreadLogAppender((str)->{
+                            try {
+                                buffer.add(str);
+                                while(buffer.size()>1000){
+                                    buffer.take();
+                                }
+                            } catch (InterruptedException e) {
+
+                            }
+                        });
+                    }
                     String lang = req.getLang();
                     String script = req.getScript();
                     Map<String, Object> params = req.getParams();
@@ -240,6 +280,12 @@ public class XProc4jOpsController implements IOpsProvider {
                 } catch (Throwable e) {
                     refEx.set(e);
                 } finally {
+                    try {
+                        xProc4jHelper.debugThread(null);
+                        xProc4jHelper.applyThreadLogAppender(null);
+                    } catch (Exception e) {
+
+                    }
                     latch.countDown();
                 }
             };
@@ -276,10 +322,10 @@ public class XProc4jOpsController implements IOpsProvider {
                     resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }
-            return transfer.success(resp);
+            return transfer.success(resp).withAttr(ATTR_LOG,new ArrayList<>(buffer));
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e);
+            return transfer.error(e).withAttr(ATTR_LOG,new ArrayList<>(buffer));
         }
     }
 }

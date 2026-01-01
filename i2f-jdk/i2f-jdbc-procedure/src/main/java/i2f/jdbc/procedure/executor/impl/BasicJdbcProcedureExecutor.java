@@ -46,6 +46,7 @@ import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.jdbc.procedure.util.JdbcProcedureUtil;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
@@ -61,6 +62,8 @@ import i2f.uid.SnowflakeLongUid;
 import lombok.Data;
 
 import javax.sql.DataSource;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -68,6 +71,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -75,7 +79,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -107,11 +113,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
     protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
 
-    protected final AtomicBoolean enablePrepareParamCache = new AtomicBoolean(true);
-    protected final AtomicInteger prepareParamL2CacheSize = new AtomicInteger(30);
-    protected static final ThreadLocal<WeakReference<Map<String, Object>>> LOCAL_PREPARE_PARAM_L1 = new ThreadLocal<>();
-    protected static final ThreadLocal<LinkedList<WeakReference<Map<String, Object>>>> LOCAL_PREPARE_PARAM_L2 = new ThreadLocal<>();
-    protected static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
+
+    protected final AtomicBoolean enablePrepareParamCache=new AtomicBoolean(true);
+    protected final AtomicInteger prepareParamL2CacheSize=new AtomicInteger(30);
+    protected static final ThreadLocal<WeakReference<Map<String,Object>>> LOCAL_PREPARE_PARAM_L1 =new ThreadLocal<>();
+    protected static final ThreadLocal<LinkedList<WeakReference<Map<String,Object>>>> LOCAL_PREPARE_PARAM_L2 =new ThreadLocal<>();
+    protected static final ThreadLocalRandom RANDOM=ThreadLocalRandom.current();
 
     {
         List<ExecutorNode> list = defaultExecutorNodes();
@@ -312,7 +319,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             for (Map.Entry<String, XProc4jEventListener> entry : map.entrySet()) {
                 XProc4jEventListener listener = entry.getValue();
-                if (listener == null) {
+                if(listener==null){
                     continue;
                 }
                 if (listener.support(event)) {
@@ -797,20 +804,20 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     @Override
     public Map<String, Object> prepareParams(Map<String, Object> params) {
-        if (enablePrepareParamCache.get()) {
-            if (enablePrepareParamCache.get()) {
+        if(enablePrepareParamCache.get()) {
+            if(enablePrepareParamCache.get()) {
                 WeakReference<Map<String, Object>> ref = LOCAL_PREPARE_PARAM_L1.get();
-                if (ref != null) {
+                if(ref!=null){
                     Map<String, Object> refMap = ref.get();
-                    if (refMap != null) {
-                        if (refMap == params) {
+                    if(refMap!=null){
+                        if(refMap==params){
                             // 这里必须使用 == 判断是否是同一个对象，不能使用equals
                             return params;
                         }
                     }
                 }
             }
-            if (enablePrepareParamCache.get()) {
+            if(enablePrepareParamCache.get()) {
                 LinkedList<WeakReference<Map<String, Object>>> localList = LOCAL_PREPARE_PARAM_L2.get();
                 if (localList != null) {
                     Iterator<WeakReference<Map<String, Object>>> iterator = localList.iterator();
@@ -895,13 +902,13 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
         reportPreparedParamsEvent(params);
 
-        if (enablePrepareParamCache.get()) {
+        if(enablePrepareParamCache.get()) {
             WeakReference<Map<String, Object>> refCache = new WeakReference<>(params);
-            if (enablePrepareParamCache.get()) {
+            if(enablePrepareParamCache.get()){
                 LOCAL_PREPARE_PARAM_L1.set(refCache);
             }
 
-            if (enablePrepareParamCache.get()) {
+            if(enablePrepareParamCache.get()) {
                 LinkedList<WeakReference<Map<String, Object>>> localList = LOCAL_PREPARE_PARAM_L2.get();
                 if (localList == null) {
                     localList = new LinkedList<>();
@@ -1449,9 +1456,91 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
+    protected static final InheritableThreadLocal<Consumer<String>> threadLogAppender=new InheritableThreadLocal<>();
+
+    // 添加一个内部类，专门用于实现对日志的线程级别分发
+    protected class ThreadAppenderJdbcProcedureLogger implements JdbcProcedureLogger {
+        protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
+
+        public InheritableThreadLocal<Consumer<String>> getThreadLocal(){
+            return threadLogAppender;
+        }
+
+        public JdbcProcedureLogger logger(){
+            return BasicJdbcProcedureExecutor.this.logger;
+        }
+
+        @Override
+        public void debug(boolean enable) {
+            BasicJdbcProcedureExecutor.this.logger.debug(enable);
+        }
+
+        @Override
+        public boolean isDebug() {
+            return BasicJdbcProcedureExecutor.this.logger.isDebug();
+        }
+
+        @Override
+        public void logDebug(Supplier<Object> supplier, Throwable e) {
+            if(isDebug()){
+                BasicJdbcProcedureExecutor.this.logger.logDebug(supplier,e);
+                proxy("DEBUG",supplier,e);
+            }
+        }
+
+        @Override
+        public void logInfo(Supplier<Object> supplier, Throwable e) {
+            BasicJdbcProcedureExecutor.this.logger.logInfo(supplier,e);
+            proxy("INFO",supplier,e);
+        }
+
+        @Override
+        public void logWarn(Supplier<Object> supplier, Throwable e) {
+            BasicJdbcProcedureExecutor.this.logger.logWarn(supplier,e);
+            proxy("WARN",supplier,e);
+        }
+
+        @Override
+        public void logError(Supplier<Object> supplier, Throwable e) {
+            BasicJdbcProcedureExecutor.this.logger.logError(supplier,e);
+            proxy("ERROR",supplier,e);
+        }
+
+        public void proxy(String logLevel,Supplier<Object> supplier,Throwable e){
+            Consumer<String> consumer = threadLogAppender.get();
+            if(consumer==null) {
+                return;
+            }
+            try {
+                String location = ContextHolder.traceLocation();
+                consumer.accept(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), logLevel, Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
+                if (e != null) {
+                    JdbcProcedureUtil.purifyStackTrace(e, true);
+                    ByteArrayOutputStream bos=new ByteArrayOutputStream();
+                    PrintStream ps=new PrintStream(bos);
+                    e.printStackTrace(ps);
+                    ps.flush();
+                    String err=new String(bos.toByteArray());
+                    consumer.accept(err);
+                }
+            } catch (Throwable ex) {
+
+            }
+        }
+    }
+
+    private final JdbcProcedureLogger threadAppenderLogger=new ThreadAppenderJdbcProcedureLogger();
+
+    @Override
+    public Consumer<String> applyThreadLogAppender(Consumer<String> consumer){
+        Consumer<String> ret = threadLogAppender.get();
+        threadLogAppender.set(consumer);
+        return ret;
+    }
+
     @Override
     public JdbcProcedureLogger logger() {
-        return this.logger;
+        return this.threadAppenderLogger;
     }
 
     protected LruMap<String, Class<?>> cacheLoadClass = new LruMap<>(512);

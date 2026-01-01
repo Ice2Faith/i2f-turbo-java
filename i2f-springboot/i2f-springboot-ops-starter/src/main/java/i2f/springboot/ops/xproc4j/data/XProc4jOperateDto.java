@@ -22,4 +22,7 @@ public class XProc4jOperateDto extends OpsHostIdDto {
 
     protected Boolean async;
     protected Long waitForSeconds;
+
+    protected Boolean enableDebug;
+    protected Boolean enableLog;
 }
