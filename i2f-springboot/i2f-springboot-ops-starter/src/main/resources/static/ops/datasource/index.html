@@ -71,6 +71,8 @@
     <script src="../lib/codemirror-6.65.7/mode/nginx/nginx.min.js" ></script>
 
     <script src="../lib/codemirror-6.65.7/mode/python/python.min.js" ></script>
+
+    <script src="../lib/sql-formatter/15.6.9/sql-formatter.min.js" ></script>
 </head>
 <body>
 <div id="app">
@@ -180,6 +182,10 @@
                 <el-col :span="4">
                     <el-row type="flex" justify="end">
                         <el-form-item>
+                            <el-button type="primary" size="medium"
+                                       @click="onSqlFormat">
+                                美化SQL
+                            </el-button>
                             <el-button type="success" size="medium"
                                        @click="onViewMetadata">
                                 元数据
@@ -587,6 +593,10 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-button type="primary" size="medium"
+                           @click="onTextViewerSqlFormat">
+                    美化SQL
+                </el-button>
             </el-form>
             <textarea ref="refTextViewerEditor"></textarea>
     </el-dialog>
@@ -2440,6 +2450,43 @@
                     series: serias
                 });
                 return option;
+            },
+            onSqlFormat(){
+                let text = this.editor.getSelection();
+                if(text && text!='') {
+                    this.editor.replaceSelection(this.formatSql(text))
+                }else{
+                    text=this.editor.getValue();
+                    this.editor.setValue(this.formatSql(text))
+                }
+            },
+            formatSql(sql){
+                if(!sql){
+                    return sql;
+                }
+
+                // 设置选项
+                const options = {
+                    keywordCase: 'lower',
+                    indent: '\t'
+                };
+
+                // 格式化SQL
+                const formatted = sqlFormatter.format(sql, options);
+                return formatted;
+            },
+            onTextViewerSqlFormat(){
+                let editor=this.langEditors['textViewerEditor']
+                if(!editor){
+                    return
+                }
+                let text = editor.getSelection();
+                if(text && text!='') {
+                    editor.replaceSelection(this.formatSql(text))
+                }else{
+                    text=editor.getValue();
+                    editor.setValue(this.formatSql(text))
+                }
             }
         }
     })
@@ -2454,11 +2501,11 @@
 </script>
 <style>
     .cert-block {
-        height: 32px;
+        max-height: 32px;
         overflow: hidden;
     }
     .cert-block:hover{
-        height: unset;
+        max-height: 280px;
     }
     .list-item {
         margin-top: 3px;
@@ -2477,7 +2524,7 @@
     }
 
     .el-table__cell:hover .table-cell-hidden{
-        display: unset;
+        display: inline-block;
     }
     .scroller {
         height: calc(100vh - 200px);

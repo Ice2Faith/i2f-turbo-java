@@ -1311,12 +1311,11 @@
 </script>
 <style>
     .cert-block {
-        height: 32px;
+        max-height: 32px;
         overflow: hidden;
     }
-
-    .cert-block:hover {
-        height: unset;
+    .cert-block:hover{
+        max-height: 280px;
     }
 
     .list-item {
@@ -1336,12 +1335,12 @@
     }
 
 
-    .list-item-cell .table-cell-hidden {
+    .list-item-cell .table-cell-hidden{
         display: none;
     }
 
-    .list-item-cell:hover .table-cell-hidden {
-        display: unset;
+    .list-item-cell:hover .table-cell-hidden{
+        display: inline-block;
     }
 
     .checked-item {
