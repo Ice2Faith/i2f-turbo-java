@@ -1058,6 +1058,39 @@
                 }
                 throw e;
             },
+            evalWorker(){
+                if (!window.worker) {
+                    window.worker = new Worker(URL.createObjectURL(new Blob([`
+                        self.onmessage = function(e) {
+                            try {
+                                // 使用 Function 构造函数替代 eval，避免闭包污染
+                                const func = new Function(e.data);
+                                const result = func();
+                                postMessage({ success: true, data: result });
+                            } catch (err) {
+                                postMessage({ success: false, error: err.toString() });
+                            }
+                        };
+                    `], {type: 'text/javascript'})));
+                }
+                return window.worker;
+            },
+            eval(code){
+                return new Promise((resolve, reject)=>{
+                    const worker = this.evalWorker();
+
+                    worker.postMessage(code); // 发送代码到 Worker
+
+                    worker.onmessage = function(e) {
+                        const { success, data, error } = e.data;
+                        if (success) {
+                            resolve(data)
+                        } else {
+                            reject(error);
+                        }
+                    };
+                })
+            },
             messageError(msg,limit){
                 window._lastError=msg;
                 if(limit && limit>=0) {
@@ -1206,51 +1239,58 @@
             doExecute() {
                 this.metas.resultLoading = true;
                 try {
-                    let req = this.assignHostId({
-                        procedureId: this.form.procedureId,
-                        params: JSON.parse(this.form.params),
-                        async: this.form.async,
-                        waitForSeconds: this.form.waitForSeconds,
-                        enableDebug: this.form.enableDebug,
-                        enableLog: this.form.enableLog
-                    });
-                    let url='/call'
-                    if(this.form.enableEvalScript){
-                        req.procedureId=null;
-                        req.lang=this.form.lang;
-                        req.script=this.form.script
+                    this.eval('return '+this.form.params)
+                        .then(params=>{
+                            let req = this.assignHostId({
+                                procedureId: this.form.procedureId,
+                                params: params,
+                                async: this.form.async,
+                                waitForSeconds: this.form.waitForSeconds,
+                                enableDebug: this.form.enableDebug,
+                                enableLog: this.form.enableLog
+                            });
+                            let url='/call'
+                            if(this.form.enableEvalScript){
+                                req.procedureId=null;
+                                req.lang=this.form.lang;
+                                req.script=this.form.script
 
-                        url='/eval-script'
-                    }
-                    let transfer = this.getTransfer();
-                    this.$axios({
-                        url: url,
-                        method: 'post',
-                        data: transfer.send(req)
-                    }).then(res => {
-                        this.metas.logList=(res.data.attrs)?(res.data.attrs.log || []):([]);
-                        if (res.data.code == 200) {
-                            //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
-                            // console.log(resp)
-                            resp=resp+'';
-                            try{
-                                resp=JSON.stringify(JSON.parse(resp),null,'    ')
-                            }catch (e){
-
+                                url='/eval-script'
                             }
-                            this.metas.resultText = resp;
-                            this.metas.resultLang='javascript';
+                            let transfer = this.getTransfer();
+                            this.$axios({
+                                url: url,
+                                method: 'post',
+                                data: transfer.send(req)
+                            }).then(res => {
+                                this.metas.logList=(res.data.attrs)?(res.data.attrs.log || []):([]);
+                                if (res.data.code == 200) {
+                                    //console.log(res.data)
+                                    let resp = transfer.recv(res.data.data)
+                                    // console.log(resp)
+                                    resp=resp+'';
+                                    try{
+                                        resp=JSON.stringify(JSON.parse(resp),null,'    ')
+                                    }catch (e){
 
-                        } else {
-                            this.metas.resultText = res.data.msg;
-                            this.metas.resultLang='text';
-                            this.messageError(res.data.msg,300)
-                        }
-                        setTimeout(()=>{
-                            this.initResultEditor();
-                        },200)
-                    }).catch(err => {
+                                    }
+                                    this.metas.resultText = resp;
+                                    this.metas.resultLang='javascript';
+
+                                } else {
+                                    this.metas.resultText = res.data.msg;
+                                    this.metas.resultLang='text';
+                                    this.messageError(res.data.msg,300)
+                                }
+                                setTimeout(()=>{
+                                    this.initResultEditor();
+                                },200)
+                            }).catch(err => {
+                                this.messageError(err.errorMessage || err.message || '操作失败',300)
+                            }).finally(() => {
+                                this.metas.resultLoading = false;
+                            })
+                        }).catch(err => {
                         this.messageError(err.errorMessage || err.message || '操作失败',300)
                     }).finally(() => {
                         this.metas.resultLoading = false;
