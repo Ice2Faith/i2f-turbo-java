@@ -86,8 +86,8 @@ public class OracleDatabaseMetadataProvider extends BaseDatabaseMetadataProvider
     }
 
     @Override
-    public ResultSet getTables(DatabaseMetaData metaData, String database) throws SQLException {
-        return metaData.getTables(null, database, null, null);
+    public ResultSet getTables(DatabaseMetaData metaData, String database,String tablePattern) throws SQLException {
+        return metaData.getTables(null, database, tablePattern, null);
     }
 
     @Override

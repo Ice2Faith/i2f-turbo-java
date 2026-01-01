@@ -93,8 +93,8 @@ public class JdbcDatabaseMetadataProvider extends BaseDatabaseMetadataProvider {
     }
 
     @Override
-    public ResultSet getTables(DatabaseMetaData metaData, String database) throws SQLException {
-        return metaData.getTables(null, null, null, null);
+    public ResultSet getTables(DatabaseMetaData metaData, String database,String tablePattern) throws SQLException {
+        return metaData.getTables(null, null, tablePattern, null);
     }
 
 

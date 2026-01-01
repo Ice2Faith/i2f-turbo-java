@@ -1769,6 +1769,7 @@
                 try {
                     let req = this.fillDatasourceForm({
                         database: this.drawer.metadata.checkDatabase,
+                        table: this.drawer.metadata.filterTable,
                     });
                     req=this.cleanReqForm(req);
                     let transfer = this.getTransfer();

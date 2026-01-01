@@ -137,11 +137,11 @@ public class DelegateDatabaseMetadataProvider implements DatabaseMetadataProvide
     }
 
     @Override
-    public List<TableMeta> getTables(Connection conn, String database) throws SQLException {
+    public List<TableMeta> getTables(Connection conn, String database,String tablePattern) throws SQLException {
         Throwable ex = null;
         for (DatabaseMetadataProvider provider : providers) {
             try {
-                return provider.getTables(conn, database);
+                return provider.getTables(conn, database,tablePattern);
             } catch (Throwable e) {
                 ex = e;
             }
