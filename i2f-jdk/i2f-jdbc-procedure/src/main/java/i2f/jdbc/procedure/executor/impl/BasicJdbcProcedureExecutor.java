@@ -98,6 +98,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected final ConcurrentHashMap<String, ILockProvider> lockProviders = new ConcurrentHashMap<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected volatile JdbcProcedureLogger logger = new DefaultJdbcProcedureLogger(debug);
+    private final JdbcProcedureLogger threadAppenderLogger=new ThreadAppenderJdbcProcedureLogger();
     public volatile Function<String, String> mapTypeColumnNameMapper = StringUtils::toUpper;
     public volatile Function<String, String> otherTypeColumnNameMapper = null;
     protected volatile JdbcProcedureContext context = new DefaultJdbcProcedureContext();
@@ -1529,7 +1530,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
-    private final JdbcProcedureLogger threadAppenderLogger=new ThreadAppenderJdbcProcedureLogger();
 
     @Override
     public Consumer<String> applyThreadLogAppender(Consumer<String> consumer){
