@@ -1291,10 +1291,9 @@
                                 this.metas.resultLoading = false;
                             })
                         }).catch(err => {
-                        this.messageError(err.errorMessage || err.message || '操作失败',300)
-                    }).finally(() => {
-                        this.metas.resultLoading = false;
-                    })
+                            this.messageError(err.errorMessage || err.message || '操作失败',300)
+                            this.metas.resultLoading = false;
+                        })
                 } catch (err) {
                     this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;
