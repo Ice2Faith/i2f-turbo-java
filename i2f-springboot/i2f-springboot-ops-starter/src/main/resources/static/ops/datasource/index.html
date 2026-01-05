@@ -1777,9 +1777,16 @@
             onRefreshTables() {
                 this.drawer.metadata.tablesLoading = true;
                 try {
+                    let tablePattern=this.drawer.metadata.filterTable;
+                    if(tablePattern){
+                        tablePattern=tablePattern.trim();
+                    }
+                    if(tablePattern && tablePattern!=''){
+                        tablePattern='%'+tablePattern+'%';
+                    }
                     let req = this.fillDatasourceForm({
                         database: this.drawer.metadata.checkDatabase,
-                        table: this.drawer.metadata.filterTable,
+                        table: tablePattern,
                     });
                     req=this.cleanReqForm(req);
                     let transfer = this.getTransfer();
