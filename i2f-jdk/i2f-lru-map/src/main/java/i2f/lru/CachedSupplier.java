@@ -1,10 +1,12 @@
 package i2f.lru;
 
+import i2f.clock.SystemClock;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 
 /**
@@ -18,6 +20,7 @@ import java.util.function.Supplier;
  */
 @Data
 public class CachedSupplier<T> implements Supplier<T> {
+    protected final ReentrantReadWriteLock lock=new ReentrantReadWriteLock();
     protected volatile Supplier<T> supplier;
     protected volatile long timeoutMillSeconds = -1;
     protected volatile boolean cacheNull = true;
@@ -25,7 +28,6 @@ public class CachedSupplier<T> implements Supplier<T> {
     protected volatile long expireTs = -1;
     @Getter(value = AccessLevel.NONE)
     protected volatile AtomicReference<T> value;
-
 
     public CachedSupplier(Supplier<T> supplier) {
         this(supplier, -1);
@@ -37,11 +39,19 @@ public class CachedSupplier<T> implements Supplier<T> {
         this.timeoutMillSeconds = timeoutMillSeconds;
     }
 
+    public CachedSupplier(Supplier<T> supplier, long timeoutMillSeconds, boolean cacheNull) {
+        assert supplier != null;
+        this.supplier = supplier;
+        this.timeoutMillSeconds = timeoutMillSeconds;
+        this.cacheNull=cacheNull;
+    }
+
     @Override
     public T get() {
-        synchronized (this) {
+        lock.readLock().lock();
+        try {
             if (this.value != null) {
-                if (expireTs < 0 || System.currentTimeMillis() < expireTs) {
+                if (expireTs < 0 || SystemClock.currentTimeMillis() < expireTs) {
                     T ret = this.value.get();
                     if (cacheNull) {
                         return ret;
@@ -51,14 +61,21 @@ public class CachedSupplier<T> implements Supplier<T> {
                     }
                 }
             }
+        }finally {
+            lock.readLock().unlock();
+        }
+        lock.writeLock().lock();
+        try {
             AtomicReference<T> ref = new AtomicReference<>();
             ref.set(supplier.get());
             this.expireTs = -1;
             if (timeoutMillSeconds >= 0) {
-                this.expireTs = System.currentTimeMillis() + timeoutMillSeconds;
+                this.expireTs = SystemClock.currentTimeMillis() + timeoutMillSeconds;
             }
             this.value = ref;
             return this.value.get();
+        }finally {
+            lock.writeLock().unlock();
         }
     }
 
