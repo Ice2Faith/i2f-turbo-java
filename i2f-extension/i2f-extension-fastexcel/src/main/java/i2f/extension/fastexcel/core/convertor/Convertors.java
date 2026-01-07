@@ -7,6 +7,9 @@ import i2f.extension.fastexcel.core.convertor.atomics.AtomicIntegerNumberConvert
 import i2f.extension.fastexcel.core.convertor.atomics.AtomicLongNumberConvertor;
 import i2f.extension.fastexcel.core.convertor.json.collection.*;
 import i2f.extension.fastexcel.core.convertor.json.map.*;
+import i2f.extension.fastexcel.core.convertor.sql.SqlDateStringConvertor;
+import i2f.extension.fastexcel.core.convertor.sql.SqlTimeStringConvertor;
+import i2f.extension.fastexcel.core.convertor.sql.SqlTimestampStringConvertor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,9 @@ public class Convertors {
     public static final CopyOnWriteArrayList<Converter<?>> CONVERTERS = new CopyOnWriteArrayList<>();
 
     static {
+        CONVERTERS.add(new SqlTimestampStringConvertor());
+        CONVERTERS.add(new SqlDateStringConvertor());
+        CONVERTERS.add(new SqlTimeStringConvertor());
         CONVERTERS.add(new AtomicBooleanBooleanConvertor());
         CONVERTERS.add(new AtomicBooleanNumberConvertor());
         CONVERTERS.add(new AtomicIntegerNumberConvertor());
