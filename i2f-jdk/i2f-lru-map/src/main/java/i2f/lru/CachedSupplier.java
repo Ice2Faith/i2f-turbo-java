@@ -1,12 +1,10 @@
 package i2f.lru;
 
-import i2f.clock.SystemClock;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 
 /**
@@ -18,65 +16,70 @@ import java.util.function.Supplier;
  * 能够有效改善获取的开销
  * 比如，获取一些JVM参数，操作系统参数等这些不变量
  */
-@Data
 public class CachedSupplier<T> implements Supplier<T> {
-    protected final ReentrantReadWriteLock lock=new ReentrantReadWriteLock();
-    protected volatile Supplier<T> supplier;
-    protected volatile long timeoutMillSeconds = -1;
-    protected volatile boolean cacheNull = true;
-    @Getter(value = AccessLevel.NONE)
-    protected volatile long expireTs = -1;
-    @Getter(value = AccessLevel.NONE)
-    protected volatile AtomicReference<T> value;
+    protected final AtomicReference<Map.Entry<T,Long>> holder=new AtomicReference<>();
+    protected Supplier<T> supplier;
+    protected final AtomicLong expireMillSeconds =new AtomicLong(-1);
+    protected final AtomicBoolean allowCacheNull =new AtomicBoolean(true);
 
-    public CachedSupplier(Supplier<T> supplier) {
-        this(supplier, -1);
+    public CachedSupplier(Supplier<T> supplier){
+        this.supplier=supplier;
+    }
+    public CachedSupplier(Supplier<T> supplier,long expireMillSeconds){
+        this.supplier=supplier;
+        this.expireMillSeconds.set(expireMillSeconds);
+    }
+    public CachedSupplier(Supplier<T> supplier, long expireMillSeconds, boolean allowCacheNull){
+        this.supplier=supplier;
+        this.expireMillSeconds.set(expireMillSeconds);
+        this.allowCacheNull.set(allowCacheNull);
     }
 
-    public CachedSupplier(Supplier<T> supplier, long timeoutMillSeconds) {
-        assert supplier != null;
-        this.supplier = supplier;
-        this.timeoutMillSeconds = timeoutMillSeconds;
+    public static<T> CachedSupplier<T> of(Supplier<T> supplier){
+        return new CachedSupplier<>(supplier);
     }
 
-    public CachedSupplier(Supplier<T> supplier, long timeoutMillSeconds, boolean cacheNull) {
-        assert supplier != null;
-        this.supplier = supplier;
-        this.timeoutMillSeconds = timeoutMillSeconds;
-        this.cacheNull=cacheNull;
+    public static<T> CachedSupplier<T> of(Supplier<T> supplier,long expireMillSeconds){
+        return new CachedSupplier<>(supplier,expireMillSeconds);
+    }
+
+    public static<T> CachedSupplier<T> of(Supplier<T> supplier,long expireMillSeconds,boolean allowCacheNull){
+        return new CachedSupplier<>(supplier,expireMillSeconds,allowCacheNull);
+    }
+
+    protected Map.Entry<T,Long> innerGet(){
+        Map.Entry<T,Long> ref = holder.get();
+        if(ref!=null){
+            if(expireMillSeconds.get()<0 || System.currentTimeMillis()<=ref.getValue()) {
+                T ret=ref.getKey();
+                if(allowCacheNull.get() || ret!=null){
+                    return ref;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void invalidate(){
+        holder.set(null);
     }
 
     @Override
     public T get() {
-        lock.readLock().lock();
-        try {
-            if (this.value != null) {
-                if (expireTs < 0 || SystemClock.currentTimeMillis() < expireTs) {
-                    T ret = this.value.get();
-                    if (cacheNull) {
-                        return ret;
-                    }
-                    if (ret != null) {
-                        return ret;
-                    }
-                }
-            }
-        }finally {
-            lock.readLock().unlock();
+        Map.Entry<T, Long> ref = innerGet();
+        if(ref!=null){
+            return ref.getKey();
         }
-        lock.writeLock().lock();
-        try {
-            AtomicReference<T> ref = new AtomicReference<>();
-            ref.set(supplier.get());
-            this.expireTs = -1;
-            if (timeoutMillSeconds >= 0) {
-                this.expireTs = SystemClock.currentTimeMillis() + timeoutMillSeconds;
+        return holder.updateAndGet(v->{
+            Map.Entry<T, Long> cv = innerGet();
+            if(cv!=null){
+                return cv;
             }
-            this.value = ref;
-            return this.value.get();
-        }finally {
-            lock.writeLock().unlock();
-        }
+            T value = supplier.get();
+            long d = expireMillSeconds.get();
+            long ts = (d>=0)?(System.currentTimeMillis()+d):(-1);
+            return new AbstractMap.SimpleEntry<>(value,ts);
+        }).getKey();
     }
 
 }
