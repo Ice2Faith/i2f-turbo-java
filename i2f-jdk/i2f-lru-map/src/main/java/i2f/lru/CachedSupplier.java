@@ -1,5 +1,6 @@
 package i2f.lru;
 
+import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,17 +48,19 @@ public class CachedSupplier<T> implements Supplier<T> {
         return new CachedSupplier<>(supplier,expireMillSeconds,allowCacheNull);
     }
 
-    protected Map.Entry<T,Long> innerGet(){
-        Map.Entry<T,Long> ref = holder.get();
-        if(ref!=null){
-            if(expireMillSeconds.get()<0 || System.currentTimeMillis()<=ref.getValue()) {
-                T ret=ref.getKey();
-                if(allowCacheNull.get() || ret!=null){
-                    return ref;
-                }
-            }
-        }
-        return null;
+    public CachedSupplier<T> withExpireMillSeconds(long expireMillSeconds){
+        this.expireMillSeconds.set(expireMillSeconds);
+        return this;
+    }
+
+    public CachedSupplier<T> withExpireDuration(Duration duration){
+        this.expireMillSeconds.set(duration.toMillis());
+        return this;
+    }
+
+    public CachedSupplier<T> withAllowCacheNull(boolean allowCacheNull){
+        this.allowCacheNull.set(allowCacheNull);
+        return this;
     }
 
     public void invalidate(){
@@ -82,4 +85,17 @@ public class CachedSupplier<T> implements Supplier<T> {
         }).getKey();
     }
 
+
+    protected Map.Entry<T,Long> innerGet(){
+        Map.Entry<T,Long> ref = holder.get();
+        if(ref!=null){
+            if(expireMillSeconds.get()<0 || System.currentTimeMillis()<=ref.getValue()) {
+                T ret=ref.getKey();
+                if(allowCacheNull.get() || ret!=null){
+                    return ref;
+                }
+            }
+        }
+        return null;
+    }
 }
