@@ -1,5 +1,7 @@
 package i2f.lru;
 
+import i2f.clock.SystemClock;
+
 import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.Map;
@@ -80,7 +82,7 @@ public class CachedSupplier<T> implements Supplier<T> {
             }
             T value = supplier.get();
             long d = expireMillSeconds.get();
-            long ts = (d>=0)?(System.currentTimeMillis()+d):(-1);
+            long ts = (d>=0)?(SystemClock.currentTimeMillis()+d):(-1);
             return new AbstractMap.SimpleEntry<>(value,ts);
         }).getKey();
     }
@@ -89,7 +91,7 @@ public class CachedSupplier<T> implements Supplier<T> {
     protected Map.Entry<T,Long> innerGet(){
         Map.Entry<T,Long> ref = holder.get();
         if(ref!=null){
-            if(expireMillSeconds.get()<0 || System.currentTimeMillis()<=ref.getValue()) {
+            if(expireMillSeconds.get()<0 || SystemClock.currentTimeMillis()<=ref.getValue()) {
                 T ret=ref.getKey();
                 if(allowCacheNull.get() || ret!=null){
                     return ref;
