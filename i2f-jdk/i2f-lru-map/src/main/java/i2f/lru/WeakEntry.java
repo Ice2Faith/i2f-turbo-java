@@ -10,21 +10,21 @@ import java.util.Map;
  * @date 2026/1/8 13:58
  * @desc
  */
-public class WeakEntry<K,V> extends WeakReference<Object> implements Map.Entry<K,V> {
-    protected static ReferenceQueue<Object> queue=new ReferenceQueue<>();
+public class WeakEntry<K, V> extends WeakReference<Object> implements Map.Entry<K, V> {
+    protected static ReferenceQueue<Object> queue = new ReferenceQueue<>();
     protected volatile V value;
 
-    static{
-        Thread thread = new Thread(()->{
-            while(true) {
+    static {
+        Thread thread = new Thread(() -> {
+            while (true) {
                 Reference<?> poll = queue.poll();
                 if (poll != null) {
                     // 如果能读取到，则可能有多个，直接进行循环
                     do {
                         WeakEntry entry = (WeakEntry) poll;
-                        entry.value=null;
-                    }while((poll= queue.poll())!=null);
-                }else{
+                        entry.value = null;
+                    } while ((poll = queue.poll()) != null);
+                } else {
                     // 如果读取不到，当前轮空，进行随眠等到
                     try {
                         Thread.sleep(30);
@@ -39,17 +39,17 @@ public class WeakEntry<K,V> extends WeakReference<Object> implements Map.Entry<K
         thread.start();
     }
 
-    public WeakEntry(K key,V value) {
-        super(key,queue);
+    public WeakEntry(K key, V value) {
+        super(key, queue);
         this.value = value;
     }
 
-    protected K key(){
+    protected K key() {
         Object k = get();
-        if(k==null){
-            this.value=null;
+        if (k == null) {
+            this.value = null;
         }
-        return (K)k;
+        return (K) k;
     }
 
     @Override
@@ -65,17 +65,17 @@ public class WeakEntry<K,V> extends WeakReference<Object> implements Map.Entry<K
 
     @Override
     public V setValue(V value) {
-        V ret=this.value;
-        if(key()==null){
+        V ret = this.value;
+        if (key() == null) {
             return ret;
         }
-        this.value=value;
+        this.value = value;
         return ret;
     }
 
     @Override
-    public void clear(){
+    public void clear() {
         super.clear();
-        this.value=null;
+        this.value = null;
     }
 }
