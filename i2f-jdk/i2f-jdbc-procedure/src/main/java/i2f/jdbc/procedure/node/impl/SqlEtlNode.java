@@ -258,13 +258,13 @@ public class SqlEtlNode extends AbstractExecutorNode {
                     List<?> list = null;
                     JdbcCursor<?> cursor = taskCursor.get();
                     if (useCursor) {
-                        if (!cursor.hasRow()) {
+                        list = cursor.nextCount(taskReadBatchSize);
+                        if (list.isEmpty()) {
                             if (executor.isDebug()) {
                                 executor.logger().logDebug("etl-read no data found! at " + getNodeLocation(node));
                             }
                             return false;
                         }
-                        list = cursor.nextCount(taskReadBatchSize);
                     } else {
                         list = executor.sqlQueryPage(taskExtraDatasource, taskBql, context, taskResultType, new ApiPage(pageIndex.get(), taskReadBatchSize));
                         if (list.isEmpty()) {

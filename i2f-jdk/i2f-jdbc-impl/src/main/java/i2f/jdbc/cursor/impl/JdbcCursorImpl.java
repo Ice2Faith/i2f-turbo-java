@@ -1,79 +1,40 @@
 package i2f.jdbc.cursor.impl;
 
-import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.cursor.JdbcCursor;
-import i2f.jdbc.data.QueryColumn;
+import i2f.jdbc.std.func.SQLBiFunction;
+import i2f.jdbc.std.func.SQLFunction;
 
-import java.io.Closeable;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Ice2Faith
  * @date 2025/6/25 16:10
  */
-public class JdbcCursorImpl<E> implements JdbcCursor<E>, Closeable, Iterable<E> {
+public class JdbcCursorImpl<E, CTX> implements JdbcCursor<E> {
     protected Statement stat;
     protected ResultSet rs;
-    protected ResultSetMetaData metaData;
-    protected List<QueryColumn> columns;
-    protected Function<Map<String, Object>, E> rowConvertor;
-    protected boolean hasMore = false;
+    protected SQLFunction<ResultSet, CTX> contextInitializer;
+    protected SQLBiFunction<CTX, ResultSet, E> rowConvertor;
+    protected final AtomicReference<AtomicReference<CTX>> contextHolder = new AtomicReference<>();
+    protected final AtomicReference<AtomicReference<E>> rowHolder = new AtomicReference<>();
+    protected ReentrantLock lock = new ReentrantLock();
 
-    public JdbcCursorImpl(Statement stat, ResultSet rs,
-                          ResultSetMetaData metaData,
-                          List<QueryColumn> columns,
-                          Function<Map<String, Object>, E> rowConvertor) {
+    public JdbcCursorImpl(Statement stat, ResultSet rs, SQLBiFunction<CTX, ResultSet, E> rowConvertor, SQLFunction<ResultSet, CTX> contextInitializer) {
         this.stat = stat;
         this.rs = rs;
-        this.metaData = metaData;
-        this.columns = columns;
+        this.contextInitializer = contextInitializer;
         this.rowConvertor = rowConvertor;
     }
 
-    public JdbcCursorImpl(Statement stat, ResultSet rs,
-                          Class<E> beanClass,
-                          Function<String, String> columnNameMapper) throws SQLException {
-        this.stat = stat;
-        this.rs = rs;
-        this.metaData = rs.getMetaData();
-        this.columns = JdbcResolver.parseResultSetColumns(metaData, columnNameMapper);
-        this.rowConvertor = JdbcResolver.createDefaultRowConvertor(columns, beanClass);
-    }
 
-    public JdbcCursorImpl(Statement stat, ResultSet rs,
-                          Function<String, String> columnNameMapper,
-                          Function<Map<String, Object>, E> rowConvertor) throws SQLException {
-        this.stat = stat;
-        this.rs = rs;
-        this.metaData = rs.getMetaData();
-        this.columns = JdbcResolver.parseResultSetColumns(metaData, columnNameMapper);
-        this.rowConvertor = rowConvertor;
-    }
-
-    public JdbcCursorImpl(Statement stat, ResultSet rs,
-                          Class<E> beanClass,
-                          Function<String, String> columnNameMapper,
-                          BiFunction<List<QueryColumn>, Class<E>, Function<Map<String, Object>, E>> rowConvertorBuilder) throws SQLException {
-        this.stat = stat;
-        this.rs = rs;
-        this.metaData = rs.getMetaData();
-        this.columns = JdbcResolver.parseResultSetColumns(metaData, columnNameMapper);
-        this.rowConvertor = rowConvertorBuilder.apply(columns, beanClass);
-    }
-
-    @Override
     public Statement getStatement() {
         return stat;
     }
 
-    @Override
     public ResultSet getResultSet() {
         return rs;
     }
@@ -84,40 +45,94 @@ public class JdbcCursorImpl<E> implements JdbcCursor<E>, Closeable, Iterable<E> 
         dispose();
     }
 
-
     @Override
     public void dispose() throws SQLException {
-        if (rs != null && !rs.isClosed()) {
-            rs.close();
-            rs = null;
+        lock.lock();
+        try {
+            if (rs != null && !rs.isClosed()) {
+                rs.close();
+                rs = null;
+            }
+            if (stat != null && !stat.isClosed()) {
+                stat.close();
+                stat = null;
+            }
+            rowHolder.set(null);
+            contextHolder.set(null);
+        } finally {
+            lock.unlock();
         }
-        if (stat != null && !stat.isClosed()) {
-            stat.close();
-            stat = null;
+    }
+
+    protected CTX getRequiredContext() throws SQLException {
+        AtomicReference<CTX> ref = contextHolder.get();
+        if (ref != null) {
+            return ref.get();
+        }
+        CTX ctx = contextInitializer.apply(rs);
+        contextHolder.set(new AtomicReference<>(ctx));
+        return ctx;
+
+    }
+
+    protected void fetchNextRow() throws SQLException {
+        AtomicReference<E> ref = rowHolder.get();
+        if (ref == null) {
+            if (rs.next()) {
+                E ret = rowConvertor.apply(getRequiredContext(), rs);
+                rowHolder.set(new AtomicReference<>(ret));
+            }
+        }
+        if (rowHolder.get() == null) {
+            dispose();
         }
     }
 
     @Override
     public boolean hasRow() throws SQLException {
-        if (rs == null) {
-            return false;
+        lock.lock();
+        try {
+            if (rs == null) {
+                return false;
+            }
+            if (rs.isClosed()) {
+                return false;
+            }
+            fetchNextRow();
+            if (rowHolder.get() == null) {
+                return false;
+            }
+            return true;
+        } finally {
+            lock.unlock();
         }
-        if (rs.isClosed()) {
-            return false;
-        }
-        if (!hasMore) {
-            hasMore = rs.next();
-        }
-        return hasMore;
     }
 
     @Override
     public E nextRow() throws SQLException {
-        Map<String, Object> map = JdbcResolver.convertResultSetRowAsMap(columns, rs);
-        E ret = rowConvertor.apply(map);
-        hasMore = false;
-        return ret;
+        lock.lock();
+        try {
+            AtomicReference<E> ref = rowHolder.get();
+            if (ref != null) {
+                rowHolder.set(null);
+                return ref.get();
+            }
+            if (rs == null) {
+                throw new SQLException("ResultSet has been consumed!");
+            }
+            if (rs.isClosed()) {
+                throw new SQLException("ResultSet has been closed!");
+            }
+            fetchNextRow();
+            ref = rowHolder.get();
+            if (ref != null) {
+                rowHolder.set(null);
+                return ref.get();
+            }
+            throw new SQLException("Cursor internal error!");
+        } finally {
+            lock.unlock();
+        }
     }
-
 
 }

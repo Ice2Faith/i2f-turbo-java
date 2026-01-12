@@ -142,13 +142,13 @@ public class SqlCursorNode extends AbstractExecutorNode {
                 List<?> list = null;
                 if (useCursor) {
                     try {
-                        if (!cursor.hasRow()) {
+                        list = cursor.nextCount(batchSize);
+                        if (list.isEmpty()) {
                             if (executor.isDebug()) {
                                 executor.logger().logDebug("no data found! at " + getNodeLocation(node));
                             }
                             break;
                         }
-                        list = cursor.nextCount(batchSize);
                     } catch (SQLException e) {
                         throw new IllegalStateException(e.getMessage(), e);
                     }
