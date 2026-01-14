@@ -71,7 +71,7 @@ public class StringUtils {
         }
         int len = str.length();
         for (int i = 0; i < len; i++) {
-            if (!Character.isWhitespace(str.charAt(str.charAt(i)))) {
+            if (!Character.isWhitespace(str.charAt(i))) {
                 return true;
             }
         }
