@@ -41,23 +41,25 @@ public class SqlRunnerNode extends AbstractExecutorNode {
 
         Connection conn = executor.getConnection(datasource, context);
 
-        String script = null;
-        if (scriptObj instanceof BindSql) {
-            try {
-                BindSqlStringifier stringifier = BindSqlStringifiers.of(conn);
-                script = stringifier.stringify((BindSql) scriptObj);
-            } catch (SQLException e) {
-                executor.logger().logWarn("stringify BindSql error! " + e.getMessage(), e);
+        String script=null;
+        if(scriptObj!=null) {
+            if (scriptObj instanceof BindSql) {
+                try {
+                    BindSqlStringifier stringifier = BindSqlStringifiers.of(conn);
+                    script = stringifier.stringify((BindSql) scriptObj);
+                } catch (SQLException e) {
+                    executor.logger().logWarn("stringify BindSql error! " + e.getMessage(), e);
+                }
+            }
+            if (script == null) {
+                script = String.valueOf(scriptObj);
             }
         }
-        if (script == null) {
-            script = String.valueOf(scriptObj);
+        if(script!=null){
+            script=script.trim();
         }
-        if (script != null) {
-            script = script.trim();
-        }
-        if (script == null || script.isEmpty()) {
-            script = node.getTextBody();
+        if(script==null || script.isEmpty()){
+            script=node.getTextBody();
         }
 
         if (executor.isDebug()) {
@@ -68,42 +70,42 @@ public class SqlRunnerNode extends AbstractExecutorNode {
             executor.logger().logDebug("sql-runner:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tscript:\n" + script);
         }
 
-        StringBuffer resultBuffer = new StringBuffer();
+        StringBuffer resultBuffer=new StringBuffer();
 
-        JdbcScriptRunner runner = new JdbcScriptRunner(conn);
+        JdbcScriptRunner runner=new JdbcScriptRunner(conn);
         runner.setStopOnError(true);
-        if (jumpError != null && jumpError) {
+        if(jumpError!=null && jumpError){
             runner.setStopOnError(false);
         }
         try {
             runner.setAutoCommit(conn.getAutoCommit());
         } catch (SQLException e) {
-            throw new ThrowSignalException(e.getMessage(), e);
+            throw new ThrowSignalException(e.getMessage(),e);
         }
         runner.setSendFullScript(false);
-        if (fullSend != null) {
+        if(fullSend!=null){
             runner.setSendFullScript(fullSend);
         }
-        if (separator != null && !separator.isEmpty()) {
+        if(separator!=null && !separator.isEmpty()) {
             runner.setDelimiter(separator);
         }
-        runner.setLogPrinter((o) -> {
-            String s = String.valueOf(o);
+        runner.setLogPrinter((o)->{
+            String s=String.valueOf(o);
             resultBuffer.append(o);
-            if (executor.isDebug()) {
+            if(executor.isDebug()){
                 executor.logger().logDebug(s);
             }
         });
-        runner.setLogErrorPrinter((o, e) -> {
-            if (e != null) {
+        runner.setLogErrorPrinter((o,e)->{
+            if(e!=null) {
                 executor.logger().logError(o, e);
-            } else {
+            }else{
                 executor.logger().logError(o);
             }
         });
         runner.runScript(script);
 
-        String row = resultBuffer.toString();
+        String row=resultBuffer.toString();
         if (result != null) {
             Object val = executor.resultValue(row, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
             executor.visitSet(context, result, val);
