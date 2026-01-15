@@ -115,6 +115,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected volatile long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(30);
     protected volatile long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
     protected final AtomicBoolean defaultTransactionalConnection = new AtomicBoolean(true);
+    protected final AtomicBoolean defaultTransactionalExceptionRollbackOnClose = new AtomicBoolean(false);
 
     protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
     protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
@@ -549,10 +550,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
-    public void closeConnections(Map<String, Object> params) {
+    public void closeConnections(Map<String, Object> params,Throwable ex) {
         if (params == null) {
             return;
         }
+        boolean rollbackOnException = defaultTransactionalExceptionRollbackOnClose.get();
         Map<String, Connection> closeConnections = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
         for (Map.Entry<String, Connection> entry : closeConnections.entrySet()) {
             Connection conn = entry.getValue();
@@ -563,7 +565,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     }
                     if (!conn.isClosed()) {
                         if (!conn.getAutoCommit()) {
-                            conn.commit();
+                            if(ex!=null && rollbackOnException){
+                               conn.rollback();
+                            }else {
+                                conn.commit();
+                            }
                         }
                     }
                 } catch (SQLException e) {
@@ -591,15 +597,19 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (beforeNewConnection) {
             visitSet(params, ParamsConsts.CONNECTIONS, new HashMap<>());
         }
+        Throwable ex=null;
         try {
             task.exec(params, args);
+        } catch (Throwable e) {
+            ex=e;
+            throw e;
         } finally {
             if (beforeNewConnection) {
-                closeConnections(params);
+                closeConnections(params,ex);
                 visitSet(params, ParamsConsts.CONNECTIONS, bakConnection);
             }
             if (afterCloseConnection) {
-                closeConnections(params);
+                closeConnections(params,ex);
             }
         }
     }

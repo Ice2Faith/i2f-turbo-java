@@ -40,37 +40,42 @@ public class LangThrowNode extends AbstractExecutorNode {
         String exceptionType = node.getTagAttrMap().get(AttrConsts.TYPE);
         String cause = node.getTagAttrMap().get(AttrConsts.CAUSE);
         Throwable ex = (Throwable) executor.visit(cause, context);
+
+        if(exceptionType==null || exceptionType.isEmpty()){
+            exceptionType=RuntimeException.class.getName();
+        }
+
         Class<?> clazz = executor.loadClass(exceptionType);
 
         try {
             Constructor<?> constructor = null;
-            try {
-                constructor = clazz.getConstructor(String.class, Throwable.class);
-                if (constructor != null) {
-                    Throwable obj = (Throwable) constructor.newInstance(message, ex);
-                    throw obj;
-                }
-            } catch (ReflectiveOperationException e) {
-
+            if(message!=null && ex!=null) {
+                    constructor = clazz.getConstructor(String.class, Throwable.class);
+                    if (constructor != null) {
+                        Throwable obj = (Throwable) constructor.newInstance(message, ex);
+                        throw obj;
+                    }
             }
 
-            try {
-                constructor = clazz.getConstructor(String.class);
-                if (constructor != null) {
-                    Throwable obj = (Throwable) constructor.newInstance(message);
-                    throw obj;
-                }
-            } catch (ReflectiveOperationException e) {
-            }
-
-            try {
+            if(ex!=null) {
                 constructor = clazz.getConstructor(Throwable.class);
                 if (constructor != null) {
                     Throwable obj = (Throwable) constructor.newInstance(ex);
                     throw obj;
                 }
-            } catch (ReflectiveOperationException e) {
+
             }
+
+            if(message==null){
+                message="error at "+getNodeLocation(node);
+            }
+
+            constructor = clazz.getConstructor(String.class);
+            if (constructor != null) {
+                Throwable obj = (Throwable) constructor.newInstance(message);
+                throw obj;
+            }
+
         } catch (Throwable e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
