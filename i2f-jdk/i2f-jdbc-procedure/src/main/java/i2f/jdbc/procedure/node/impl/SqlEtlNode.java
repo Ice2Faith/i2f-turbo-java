@@ -153,7 +153,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
         Integer commitSize = executor.convertAs(executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context), Integer.class);
         String itemName = executor.convertAs(executor.attrValue(AttrConsts.ITEM, FeatureConsts.STRING, node, context), String.class);
         if (readBatchSize == null) {
-            readBatchSize = 2000;
+            readBatchSize = 5000;
         }
         if (writeBatchSize == null) {
             writeBatchSize = 500;

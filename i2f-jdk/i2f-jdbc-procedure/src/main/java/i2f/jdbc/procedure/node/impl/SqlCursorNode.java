@@ -121,7 +121,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
 
         int pageIndex = 0;
         if (batchSize == null || batchSize <= 0) {
-            batchSize = 2000;
+            batchSize = 5000;
         }
         Map<String, Object> bakParams = new LinkedHashMap<>();
         bakParams.put(item, executor.visit(item, context));
