@@ -78,6 +78,7 @@ public class LangRetryNode extends AbstractExecutorNode {
                 break;
             }
             tryCount++;
+            ex=null;
             try {
                 executor.execAsProcedure(node, context, false, false);
                 break;
