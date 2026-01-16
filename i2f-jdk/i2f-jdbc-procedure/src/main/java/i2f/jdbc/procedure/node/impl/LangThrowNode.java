@@ -50,18 +50,26 @@ public class LangThrowNode extends AbstractExecutorNode {
         try {
             Constructor<?> constructor = null;
             if(message!=null && ex!=null) {
+                try {
                     constructor = clazz.getConstructor(String.class, Throwable.class);
                     if (constructor != null) {
                         Throwable obj = (Throwable) constructor.newInstance(message, ex);
                         throw obj;
                     }
+                } catch (ReflectiveOperationException e) {
+
+                }
             }
 
             if(ex!=null) {
-                constructor = clazz.getConstructor(Throwable.class);
-                if (constructor != null) {
-                    Throwable obj = (Throwable) constructor.newInstance(ex);
-                    throw obj;
+                try {
+                    constructor = clazz.getConstructor(Throwable.class);
+                    if (constructor != null) {
+                        Throwable obj = (Throwable) constructor.newInstance(ex);
+                        throw obj;
+                    }
+                } catch (ReflectiveOperationException e) {
+
                 }
 
             }
@@ -70,10 +78,14 @@ public class LangThrowNode extends AbstractExecutorNode {
                 message="error at "+getNodeLocation(node);
             }
 
-            constructor = clazz.getConstructor(String.class);
-            if (constructor != null) {
-                Throwable obj = (Throwable) constructor.newInstance(message);
-                throw obj;
+            try {
+                constructor = clazz.getConstructor(String.class);
+                if (constructor != null) {
+                    Throwable obj = (Throwable) constructor.newInstance(message);
+                    throw obj;
+                }
+            } catch (ReflectiveOperationException e) {
+
             }
 
         } catch (Throwable e) {
