@@ -42,6 +42,10 @@
         <!-- 定义文件类型 -->
 <!--        <fileType name="XProc4J" implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jFileType"/>-->
 
+        <!-- XML标签名跳转到节点实现类 -->
+        <psi.referenceContributor language="XML"
+                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.reference.XmlTagReferenceContributor"/>
+
         <editorFactoryListener implementation="i2f.turbo.idea.plugin.jdbc.procedure.dollar.DollarVariablesEditorFactoryListener"/>
 
         <!-- 添加文件模板组 -->
