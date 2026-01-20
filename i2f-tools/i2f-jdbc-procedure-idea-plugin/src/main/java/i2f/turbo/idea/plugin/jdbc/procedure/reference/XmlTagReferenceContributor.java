@@ -18,7 +18,8 @@ public class XmlTagReferenceContributor extends PsiReferenceContributor {
     @Override
     public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
         registrar.registerReferenceProvider(
-                PlatformPatterns.psiElement().withParent(PlatformPatterns.psiElement(XmlTag.class)),
+                PlatformPatterns.psiElement()
+                        .withParent(PlatformPatterns.psiElement(XmlTag.class)),
                 new PsiReferenceProvider() {
                     @Override
                     public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element,
