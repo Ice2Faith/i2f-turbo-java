@@ -46,6 +46,7 @@
         <psi.referenceContributor language="XML"
                                   implementation="i2f.turbo.idea.plugin.jdbc.procedure.reference.XmlTagReferenceContributor"/>
 
+        <!-- 文件中的$占位符变量进行颜色高亮 -->
         <editorFactoryListener implementation="i2f.turbo.idea.plugin.jdbc.procedure.dollar.DollarVariablesEditorFactoryListener"/>
 
         <!-- 添加文件模板组 -->
