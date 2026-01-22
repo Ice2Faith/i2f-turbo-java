@@ -15,6 +15,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.page.ApiPage;
 
@@ -718,6 +719,10 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
             executor.sqlTransCommit(loadDatasource, context);
         } catch (Throwable e) {
+            if(e instanceof ControlSignalException){
+                executor.sqlTransCommit(loadDatasource, context);
+                throw (ControlSignalException)e;
+            }
             executor.sqlTransRollback(loadDatasource, context);
             throw new ThrowSignalException(e.getMessage(), e);
         } finally {

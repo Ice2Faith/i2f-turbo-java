@@ -6,6 +6,7 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.Map;
@@ -67,9 +68,12 @@ public class LangThreadPoolSubmitNode extends AbstractExecutorNode {
             if (result != null) {
                 executor.visitSet(context, result, latch);
             }
-        } catch (Throwable e) {
+        }catch (Throwable e){
             e.printStackTrace();
-            throw new ThrowSignalException(e.getMessage(), e);
+            if(e instanceof SignalException){
+                throw (SignalException)e;
+            }
+            throw new ThrowSignalException(e.getMessage(),e);
         }
     }
 
