@@ -46,6 +46,10 @@
         <psi.referenceContributor language="XML"
                                   implementation="i2f.turbo.idea.plugin.jdbc.procedure.reference.XmlTagReferenceContributor"/>
 
+        <!-- XML的ID跳转 -->
+        <psi.referenceContributor language="XML"
+                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.reference.XmlIdRefReferenceContributor"/>
+
         <!-- 文件中的$占位符变量进行颜色高亮 -->
         <editorFactoryListener implementation="i2f.turbo.idea.plugin.jdbc.procedure.dollar.DollarVariablesEditorFactoryListener"/>
 

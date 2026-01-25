@@ -1,10 +1,11 @@
 package i2f.turbo.idea.plugin.jdbc.procedure.reference;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.patterns.XmlPatterns;
 import com.intellij.psi.*;
-import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
-import com.intellij.psi.xml.XmlToken;
+import com.intellij.psi.xml.XmlFile;
+import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
  * @desc
  */
 public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
+    public static final Logger log = Logger.getInstance(XmlIdRefReferenceContributor.class);
+
     @Override
     public void registerReferenceProviders(PsiReferenceRegistrar registrar) {
         // 处理 refid -> id 的跳转
@@ -27,7 +30,25 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                         if (!(element instanceof XmlAttributeValue)) {
                             return PsiReference.EMPTY_ARRAY;
                         }
-                        return new PsiReference[]{new XmlIdRefReference((XmlAttributeValue) element)};
+//                        String text = element.getText();
+//                        log.warn("xml-refid:" + " : " + element.getClass() + text);
+
+                        boolean isSupport = true;
+                        PsiFile containingFile = element.getContainingFile();
+                        if (containingFile instanceof XmlFile) {
+                            XmlFile xmlFile = (XmlFile) containingFile;
+                            XmlTag rootTag = xmlFile.getRootTag();
+                            if (rootTag != null) {
+                                String name = rootTag.getName();
+                                if (!"procedure".equals(name)) {
+                                    isSupport = false;
+                                }
+                            }
+                        }
+                        if(isSupport) {
+                            return new PsiReference[]{new XmlIdRefReference((XmlAttributeValue) element)};
+                        }
+                        return PsiReference.EMPTY_ARRAY;
                     }
                 }
         );
@@ -43,7 +64,24 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                         if (!(element instanceof XmlAttributeValue)) {
                             return PsiReference.EMPTY_ARRAY;
                         }
-                        return new PsiReference[]{new XmlIdRefReference((XmlAttributeValue) element)};
+//                        String text = element.getText();
+//                        log.warn("xml-id:" + " : " + element.getClass() + text);
+                        boolean isSupport = true;
+                        PsiFile containingFile = element.getContainingFile();
+                        if (containingFile instanceof XmlFile) {
+                            XmlFile xmlFile = (XmlFile) containingFile;
+                            XmlTag rootTag = xmlFile.getRootTag();
+                            if (rootTag != null) {
+                                String name = rootTag.getName();
+                                if (!"procedure".equals(name)) {
+                                    isSupport = false;
+                                }
+                            }
+                        }
+                        if(isSupport) {
+                            return new PsiReference[]{new XmlIdRefReference((XmlAttributeValue) element)};
+                        }
+                        return PsiReference.EMPTY_ARRAY;
                     }
                 }
         );

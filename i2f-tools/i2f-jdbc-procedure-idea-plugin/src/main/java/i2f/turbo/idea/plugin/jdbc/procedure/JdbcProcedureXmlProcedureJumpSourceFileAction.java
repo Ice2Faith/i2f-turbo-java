@@ -112,7 +112,7 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         return getProcedureFileByProcedureId(value);
     }
 
-    public Map.Entry<VirtualFile, Integer> getProcedureFileByProcedureId(String value) {
+    public static Map.Entry<VirtualFile, Integer> getProcedureFileByProcedureId(String value) {
         if (value == null) {
             return null;
         }

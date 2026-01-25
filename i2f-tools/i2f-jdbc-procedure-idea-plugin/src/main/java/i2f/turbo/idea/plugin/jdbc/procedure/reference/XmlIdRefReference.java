@@ -1,83 +1,106 @@
 package i2f.turbo.idea.plugin.jdbc.procedure.reference;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlFile;
-import com.intellij.util.indexing.FileBasedIndex;
-import com.intellij.util.indexing.ID;
+import i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlProcedureJumpSourceFileAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import javax.print.attribute.standard.PageRanges;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
  * @date 2026/1/20 10:32
  * @desc
  */
-public class XmlIdRefReference extends PsiReferenceBase<PsiElement> implements PsiPolyVariantReference {
-
-    private static final ID<String, Void> ID_INDEX = ID.create("XmlIdRef.id");
-    private static final ID<String, Void> REFID_INDEX = ID.create("XmlIdRef.refid");
+public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> implements PsiPolyVariantReference {
+    public static final Logger log = Logger.getInstance(XmlIdRefReference.class);
 
     public XmlIdRefReference(@NotNull XmlAttributeValue element) {
-        super(element, TextRange.from(1, element.getValue().length() - 2)); // skip quotes
+        super(element, TextRange.from(1, element.getValue().length())); // skip quotes
     }
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        String value = getValue();
-        if (value == null) {
+        PsiElement parent = myElement.getParent();
+        if(!(parent instanceof XmlAttribute)){
+            return ResolveResult.EMPTY_ARRAY;
+        }
+        XmlAttribute xmlAttribute = (XmlAttribute) parent;
+        if(!"refid".equals(xmlAttribute.getName())) {
             return new ResolveResult[0];
         }
-        List<ResolveResult> results = new ArrayList<>();
 
-        // 搜索所有 XML 文件中的 id 属性值匹配
-        GlobalSearchScope scope = GlobalSearchScope.projectScope(myElement.getProject());
-        Collection<VirtualFile> files = FileBasedIndex.getInstance().getContainingFiles(ID_INDEX, value, scope);
+        String value = getValue();
 
-        for (VirtualFile file : files) {
-            PsiFile psiFile = PsiManager.getInstance(myElement.getProject()).findFile(file);
-            if (!(psiFile instanceof XmlFile)) continue;
+//        log.warn("xml-id-ref:"+value);
 
-            // 查找该文件中 id=value 的属性
-            XmlAttribute target = findIdAttributeInFile((XmlFile) psiFile, value);
-            if (target != null) {
-                results.add(new PsiElementResolveResult(target));
-            }
+        Map.Entry<VirtualFile, Integer> entry = JdbcProcedureXmlProcedureJumpSourceFileAction.getProcedureFileByProcedureId(value);
+        if (entry == null) {
+            return new ResolveResult[0];
         }
 
-        return results.toArray(new ResolveResult[0]);
+        VirtualFile virtualFile = entry.getKey();
+
+//        log.warn("xml-id-vfile:"+virtualFile);
+
+        PsiFile psiFile = PsiManager.getInstance(myElement.getProject()).findFile(virtualFile);
+
+//        log.warn("xml-id-pfile:"+psiFile);
+        if (!(psiFile instanceof XmlFile)) {
+            return new ResolveResult[0];
+        }
+
+        XmlFile xmlFile = (XmlFile) psiFile;
+
+        // 查找该文件中 id=value 的属性
+        XmlAttribute target = findIdAttributeInFile(xmlFile, value);
+//        log.warn("xml-id-target:"+target);
+        if (target != null) {
+            return new ResolveResult[]{new PsiElementResolveResult(target)};
+        }
+
+        return new ResolveResult[0];
     }
 
     @Nullable
     private XmlAttribute findIdAttributeInFile(XmlFile xmlFile, String idValue) {
         // 简化：遍历所有元素的 id 属性
-        return PsiTreeUtil.processElements(xmlFile, element -> {
-            if (element instanceof XmlAttribute attr && "id".equals(attr.getName()) && idValue.equals(attr.getValue())) {
-                return false; // stop and return
+        AtomicReference<XmlAttribute> ref = new AtomicReference<>();
+        PsiTreeUtil.processElements(xmlFile, element -> {
+            if (element instanceof XmlAttribute) {
+                XmlAttribute attribute = (XmlAttribute) element;
+                String name = attribute.getName();
+                if ("id".equals(name)) {
+                    if (Objects.equals(idValue, attribute.getValue())) {
+                        ref.set(attribute);
+                        return false;
+                    }
+                }
             }
             return true;
-        }) ? null : // 如果没找到返回 null
-                // 实际需自定义查找逻辑，这里简化
-                null;
+        });
+        return ref.get();
     }
-
-    // 更健壮的做法：使用 PsiRecursiveElementWalkingVisitor
-    // 此处为简化，实际建议用 visitor 遍历
 
     @Override
     public @Nullable PsiElement resolve() {
         ResolveResult[] results = multiResolve(false);
         return results.length == 1 ? results[0].getElement() : null;
+    }
+
+    @Override
+    public boolean isSoft() {
+        return true; // 软引用，找不到引用也不要报红色提示
     }
 
     @Override
@@ -88,7 +111,16 @@ public class XmlIdRefReference extends PsiReferenceBase<PsiElement> implements P
     // 支持 Find Usages：当点击 id 时，查找所有 refid 引用
     @Override
     public boolean isReferenceTo(PsiElement element) {
-        if (!(element instanceof XmlAttribute attr) || !"id".equals(attr.getName())) {
+        if (!(element instanceof XmlAttributeValue)) {
+            return false;
+        }
+        XmlAttributeValue attributeValue = (XmlAttributeValue) element;
+        PsiElement parent = attributeValue.getParent();
+        if(!(parent instanceof XmlAttribute)) {
+            return false;
+        }
+        XmlAttribute attr = (XmlAttribute) parent;
+        if (!"id".equals(attr.getName())) {
             return false;
         }
         String targetId = attr.getValue();
