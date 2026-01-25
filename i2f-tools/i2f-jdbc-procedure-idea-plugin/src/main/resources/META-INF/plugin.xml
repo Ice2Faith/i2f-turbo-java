@@ -108,6 +108,14 @@
         <colorSettingsPage
                 implementation="i2f.turbo.idea.plugin.tinyscript.lang.highlighter.TinyScriptColorSettingsPage"/>
 
+        <!-- 注释处理器 -->
+        <lang.commenter language="TinyScript"
+                        implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.comment.TinyScriptCommenter"/>
+
+        <!-- 括号代码块配对高亮 -->
+        <lang.braceMatcher language="TinyScript"
+                           implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.bracket.TinyScriptPairedBraceMatcher"/>
+
         <!-- 定义引用跳转定义 -->
         <!--        <psi.referenceContributor language="XML"-->
         <!--                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlPsiReferenceContributor"/>-->
