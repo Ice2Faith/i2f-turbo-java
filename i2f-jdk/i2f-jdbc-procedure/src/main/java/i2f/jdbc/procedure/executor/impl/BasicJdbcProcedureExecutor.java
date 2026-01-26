@@ -38,6 +38,7 @@ import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
@@ -382,10 +383,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     @Override
     public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
         XmlNode node = null;
+        Exception parseEx = null;
         try {
             node = JdbcProcedureParser.parse(script);
         } catch (Exception e) {
-
+            parseEx = e;
+            if (isDebug()) {
+                logger().logDebug("eval script parse error: " + e.getMessage());
+            }
         }
         if (node == null) {
             try {
@@ -394,11 +399,32 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                         "</procedure>\n";
                 node = JdbcProcedureParser.parse(script);
             } catch (Exception e) {
-
+                parseEx = e;
+                if (isDebug()) {
+                    logger().logDebug("eval script parse (wrapper) error: " + e.getMessage());
+                }
             }
         }
         if (node == null) {
-            throw new IllegalArgumentException(LangConsts.XPROC4J + " lang accept xml format script, script format maybe wrong!");
+            if (isDebug()) {
+                logger().logDebug("eval script parse error", parseEx);
+            }
+            throw new IllegalArgumentException(LangConsts.XPROC4J + " lang accept xml format script, script format maybe wrong!", parseEx);
+        }
+        if (isDebug()) {
+            if (isDebug()) {
+                logger().logDebug("eval script begin report grammar ... ");
+            }
+            Map<String, ProcedureMeta> metaMap = new LinkedHashMap<>(getMetaMap());
+            String validKey = UUID.randomUUID().toString();
+            metaMap.put(validKey, ProcedureMeta.ofMeta(validKey, node));
+            Set<String> validKeySet = new HashSet<>();
+            validKeySet.add(validKey);
+            GrammarReporter.reportGrammar(this, validKeySet, metaMap, (str) -> logger().logDebug(str));
+
+            if (isDebug()) {
+                logger().logDebug("eval script begin report grammar finished. ");
+            }
         }
         return executor.exec(node, params);
     }
