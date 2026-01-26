@@ -50,6 +50,11 @@
         <psi.referenceContributor language="XML"
                                   implementation="i2f.turbo.idea.plugin.jdbc.procedure.reference.XmlIdRefReferenceContributor"/>
 
+        <!-- XML的tinyscript函数跳转 -->
+        <psi.referenceContributor language="TinyScript"
+                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.reference.XmlFunctionReferenceContributor"/>
+
+
         <!-- 文件中的$占位符变量进行颜色高亮 -->
         <editorFactoryListener implementation="i2f.turbo.idea.plugin.jdbc.procedure.dollar.DollarVariablesEditorFactoryListener"/>
 

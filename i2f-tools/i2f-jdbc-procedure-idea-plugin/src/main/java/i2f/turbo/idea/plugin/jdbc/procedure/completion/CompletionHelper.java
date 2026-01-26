@@ -10,10 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
-import com.intellij.psi.xml.XmlAttribute;
-import com.intellij.psi.xml.XmlAttributeValue;
-import com.intellij.psi.xml.XmlElement;
-import com.intellij.psi.xml.XmlTag;
+import com.intellij.psi.xml.*;
 import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
 import i2f.jdbc.procedure.context.ContextFunctions;
 import i2f.jdbc.procedure.context.ProcedureMeta;
@@ -95,8 +92,18 @@ public class CompletionHelper {
         }
     }
 
+    public static List<PsiElement> getXmlFileFunctionsPsiElementsFast(Project project,String functionName) {
+        synchronized (xmlFileFunctionsHolder) {
+            xmlFileFunctionsQueue.add(project);
+            String projectFilePath = project.getProjectFilePath();
+            Map<String, List<PsiElement>> map = xmlFileFunctionsPsiElementHolder.computeIfAbsent(projectFilePath, k -> new LinkedHashMap<>());
+            return map.get(functionName);
+        }
+    }
+
     public static final LinkedBlockingQueue<Project> xmlFileFunctionsQueue = new LinkedBlockingQueue<>();
     public static final LruMap<String, Map<String, LookupElement>> xmlFileFunctionsHolder = new LruMap<>(10);
+    public static final LruMap<String, Map<String, List<PsiElement>>> xmlFileFunctionsPsiElementHolder = new LruMap<>(10);
 
     static {
         Thread thread = new Thread(() -> {
@@ -132,9 +139,34 @@ public class CompletionHelper {
             if (updatePath.contains(projectFilePath)) {
                 continue;
             }
-            Map<String, LookupElement> map = getXmlFileFunctions(poll);
+            Map<String, Map.Entry<LookupElement,PsiElement>> map = getXmlFileFunctions(poll);
             synchronized (xmlFileFunctionsHolder) {
-                xmlFileFunctionsHolder.put(projectFilePath, map);
+                Map<String,LookupElement> functionMap=new LinkedHashMap<>();
+                Map<String,List<PsiElement>> psiElementMap=new LinkedHashMap<>();
+                for (Map.Entry<String, Map.Entry<LookupElement, PsiElement>> entry : map.entrySet()) {
+                    String signature = entry.getKey();
+                    Map.Entry<LookupElement, PsiElement> value = entry.getValue();
+                    LookupElement lookup = value.getKey();
+                    PsiElement psiElem = value.getValue();
+                    functionMap.put(signature,lookup);
+                    if(psiElem!=null){
+                        if(psiElem instanceof PsiMethod){
+                            PsiMethod method = (PsiMethod) psiElem;
+                            String name = method.getName();
+                            List<PsiElement> list = psiElementMap.computeIfAbsent(name, k -> new LinkedList<>());
+                            list.add(method);
+                        }else if(psiElem instanceof XmlTag){
+                            XmlTag tag = (XmlTag) psiElem;
+                            String id = tag.getAttributeValue("id");
+                            if(id!=null){
+                                List<PsiElement> list = psiElementMap.computeIfAbsent(id, k -> new LinkedList<>());
+                                list.add(tag);
+                            }
+                        }
+                    }
+                }
+                xmlFileFunctionsHolder.put(projectFilePath, functionMap);
+                xmlFileFunctionsPsiElementHolder.put(projectFilePath,psiElementMap);
             }
             updatePath.add(projectFilePath);
             try {
@@ -145,8 +177,8 @@ public class CompletionHelper {
         }
     }
 
-    public static Map<String, LookupElement> getXmlFileFunctions(Project project) {
-        Map<String, LookupElement> ret = new LinkedHashMap<>();
+    public static Map<String, Map.Entry<LookupElement,PsiElement>> getXmlFileFunctions(Project project) {
+        Map<String, Map.Entry<LookupElement,PsiElement>> ret = new LinkedHashMap<>();
         GlobalSearchScope searchScope = GlobalSearchScope.everythingScope(project);
         PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(project);
         Set<String> processClassNameSet = new HashSet<>();
@@ -205,7 +237,7 @@ public class CompletionHelper {
                                 .withTailText(simpleName)
                                 .withIcon(XProc4jConsts.ICON)
                                 .withItemTextItalic(true);
-                        ret.put(signature, elem);
+                        ret.put(signature, new AbstractMap.SimpleEntry<>(elem,item));
                     }
                 }
             }
@@ -268,7 +300,7 @@ public class CompletionHelper {
                         .withTailText(clazz.getSimpleName())
                         .withIcon(XProc4jConsts.ICON)
                         .withItemTextItalic(true);
-                ret.put(signature, elem);
+                ret.put(signature, new AbstractMap.SimpleEntry<>(elem,null));
             }
         }
 
@@ -297,7 +329,19 @@ public class CompletionHelper {
                     .withPresentableText(signature)
                     .withIcon(XProc4jConsts.ICON)
                     .withItemTextItalic(true);
-            ret.put(signature, elem);
+
+            XmlTag rootTag =null;
+            try {
+                VirtualFile file = (VirtualFile) meta.getTarget();
+                PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
+                if(psiFile instanceof XmlFile) {
+                    XmlFile xmlFile = (XmlFile) psiFile;
+                    rootTag = xmlFile.getRootTag();
+                }
+            } catch (Exception e) {
+
+            }
+            ret.put(signature, new AbstractMap.SimpleEntry<>(elem,rootTag));
         }
         return ret;
     }
