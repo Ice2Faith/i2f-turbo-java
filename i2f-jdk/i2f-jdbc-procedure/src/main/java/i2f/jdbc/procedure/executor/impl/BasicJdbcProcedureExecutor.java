@@ -16,6 +16,8 @@ import i2f.invokable.method.IMethod;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
+import i2f.jdbc.procedure.annotations.JdbcProcedureComponent;
+import i2f.jdbc.procedure.annotations.JdbcProcedureFunction;
 import i2f.jdbc.procedure.consts.*;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
@@ -27,13 +29,8 @@ import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.XProc4jEventListener;
 import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;
-import i2f.jdbc.procedure.executor.FeatureFunction;
-import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
-import i2f.jdbc.procedure.executor.event.ExecutorContextEvent;
-import i2f.jdbc.procedure.executor.event.PreparedParamsEvent;
-import i2f.jdbc.procedure.executor.event.SlowSqlEvent;
-import i2f.jdbc.procedure.executor.event.SqlExecUseTimeEvent;
+import i2f.jdbc.procedure.executor.*;
+import i2f.jdbc.procedure.executor.event.*;
 import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.log.impl.DefaultJdbcProcedureLogger;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -416,6 +413,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             return;
         }
         List<Object> beansList = getNamingContext().getAllBeans();
+        List<JdbcProcedureInitializer> initializers = new ArrayList<>();
         for (Object bean : beansList) {
             if (bean instanceof ExecutorNode) {
                 ExecutorNode eNode = (ExecutorNode) bean;
@@ -429,8 +427,45 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 ILockProvider provider = (ILockProvider) bean;
                 registryLockProvider(provider);
             }
+
+            Class<?> clazz = bean.getClass();
+            JdbcProcedureComponent ann = ReflectResolver.getAnnotation(clazz, JdbcProcedureComponent.class);
+            if (ann == null) {
+                return;
+            }
+            ContextHolder.registryInvokeMethodByInstanceMethod(bean, method -> {
+                JdbcProcedureFunction funcAnn = ReflectResolver.getAnnotation(method, JdbcProcedureFunction.class);
+                return funcAnn != null;
+            });
+
+            if (bean instanceof FeatureFunctionProvider) {
+                FeatureFunctionProvider provider = (FeatureFunctionProvider) bean;
+                Map<String, FeatureFunction> map = provider.getFeatures();
+                if (map != null) {
+                    for (Map.Entry<String, FeatureFunction> entry : map.entrySet()) {
+                        FeatureFunction value = entry.getValue();
+                        if (value == null) {
+                            continue;
+                        }
+                        featuresMap.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+
+            if (bean instanceof JdbcProcedureInitializer) {
+                JdbcProcedureInitializer initializer = (JdbcProcedureInitializer) bean;
+                initializers.add(initializer);
+            }
+
             handleNamingContextComponentBean(bean);
         }
+
+        for (JdbcProcedureInitializer initializer : initializers) {
+            initializer.initialize(this);
+        }
+
+        ExecutorInitializeEvent event = new ExecutorInitializeEvent(this);
+        sendEvent(event);
     }
 
     public void handleNamingContextComponentBean(Object bean) {

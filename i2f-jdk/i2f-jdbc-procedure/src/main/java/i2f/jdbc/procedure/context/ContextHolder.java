@@ -2,9 +2,12 @@ package i2f.jdbc.procedure.context;
 
 import i2f.bindsql.BindSql;
 import i2f.invokable.method.IMethod;
+import i2f.invokable.method.impl.DecorateNameMethod;
 import i2f.invokable.method.impl.jdk.JdkInstanceStaticMethod;
 import i2f.invokable.method.impl.jdk.JdkMethod;
+import i2f.jdbc.procedure.annotations.JdbcProcedureFunction;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.reflect.ReflectResolver;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -96,6 +99,11 @@ public class ContextHolder {
             String name = method.getName();
             CopyOnWriteArrayList<IMethod> list = INVOKE_METHOD_MAP.computeIfAbsent(name, (key) -> new CopyOnWriteArrayList<>());
             list.add(new JdkMethod(method));
+            JdbcProcedureFunction ann = ReflectResolver.getAnnotation(method, JdbcProcedureFunction.class);
+            if (ann != null && ann.value() != null && !ann.value().isEmpty()) {
+                list = INVOKE_METHOD_MAP.computeIfAbsent(ann.value(), (key) -> new CopyOnWriteArrayList<>());
+                list.add(new DecorateNameMethod(new JdkMethod(method), v -> ann.value()));
+            }
         }
     }
 
@@ -145,6 +153,10 @@ public class ContextHolder {
                 continue;
             }
             CONVERT_METHOD_MAP.put(name, new JdkMethod(method));
+            JdbcProcedureFunction ann = ReflectResolver.getAnnotation(method, JdbcProcedureFunction.class);
+            if (ann != null && ann.value() != null && !ann.value().isEmpty()) {
+                CONVERT_METHOD_MAP.put(ann.value(), new DecorateNameMethod(new JdkMethod(method), v -> ann.value()));
+            }
         }
     }
 
@@ -197,10 +209,17 @@ public class ContextHolder {
                 continue;
             }
             if (filter == null || filter.test(method)) {
+                JdbcProcedureFunction ann = method.getDeclaredAnnotation(JdbcProcedureFunction.class);
                 if (Modifier.isStatic(mod)) {
                     registryInvokeMethod(method);
+                    if (ann != null && ann.value() != null && !ann.value().isEmpty()) {
+                        registryInvokeMethod(new DecorateNameMethod(new JdkMethod(method), (v) -> ann.value()));
+                    }
                 } else {
                     registryInvokeMethod(new JdkInstanceStaticMethod(object, method));
+                    if (ann != null && ann.value() != null && !ann.value().isEmpty()) {
+                        registryInvokeMethod(new DecorateNameMethod(new JdkInstanceStaticMethod(object, method), (v) -> ann.value()));
+                    }
                 }
             }
         }
