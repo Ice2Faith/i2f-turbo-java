@@ -44,7 +44,7 @@ public class ContextHolder {
     public static final ThreadLocal<BindSql> TRACE_LAST_SQL = new ThreadLocal<>();
     public static final ThreadLocal<Integer> TRACE_LAST_SQL_EFFECT_COUNT = new ThreadLocal<>();
     public static final ThreadLocal<Long> TRACE_LAST_SQL_USE_TIME = new ThreadLocal<>();
-    public static final ThreadLocal<Boolean> DEBUG_MODE = new ThreadLocal<>();
+    public static final InheritableThreadLocal<Boolean> DEBUG_MODE = new InheritableThreadLocal<>();
 
     static {
         registryInvokeMethodByInstanceMethod(ContextFunctions.INSTANCE);
