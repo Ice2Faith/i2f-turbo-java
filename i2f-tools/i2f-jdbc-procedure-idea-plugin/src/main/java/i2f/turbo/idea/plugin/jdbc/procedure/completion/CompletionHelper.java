@@ -21,11 +21,16 @@ import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexMatchItem;
 import i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureProjectMetaHolder;
 import i2f.turbo.idea.plugin.jdbc.procedure.XProc4jConsts;
+import i2f.xml.XmlUtil;
+import i2f.xml.data.Xml;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -92,7 +97,7 @@ public class CompletionHelper {
         }
     }
 
-    public static List<PsiElement> getXmlFileFunctionsPsiElementsFast(Project project,String functionName) {
+    public static List<PsiElement> getXmlFileFunctionsPsiElementsFast(Project project, String functionName) {
         synchronized (xmlFileFunctionsHolder) {
             xmlFileFunctionsQueue.add(project);
             String projectFilePath = project.getProjectFilePath();
@@ -139,26 +144,26 @@ public class CompletionHelper {
             if (updatePath.contains(projectFilePath)) {
                 continue;
             }
-            Map<String, Map.Entry<LookupElement,PsiElement>> map = getXmlFileFunctions(poll);
+            Map<String, Map.Entry<LookupElement, PsiElement>> map = getXmlFileFunctions(poll);
             synchronized (xmlFileFunctionsHolder) {
-                Map<String,LookupElement> functionMap=new LinkedHashMap<>();
-                Map<String,List<PsiElement>> psiElementMap=new LinkedHashMap<>();
+                Map<String, LookupElement> functionMap = new LinkedHashMap<>();
+                Map<String, List<PsiElement>> psiElementMap = new LinkedHashMap<>();
                 for (Map.Entry<String, Map.Entry<LookupElement, PsiElement>> entry : map.entrySet()) {
                     String signature = entry.getKey();
                     Map.Entry<LookupElement, PsiElement> value = entry.getValue();
                     LookupElement lookup = value.getKey();
                     PsiElement psiElem = value.getValue();
-                    functionMap.put(signature,lookup);
-                    if(psiElem!=null){
-                        if(psiElem instanceof PsiMethod){
+                    functionMap.put(signature, lookup);
+                    if (psiElem != null) {
+                        if (psiElem instanceof PsiMethod) {
                             PsiMethod method = (PsiMethod) psiElem;
                             String name = method.getName();
                             List<PsiElement> list = psiElementMap.computeIfAbsent(name, k -> new LinkedList<>());
                             list.add(method);
-                        }else if(psiElem instanceof XmlTag){
+                        } else if (psiElem instanceof XmlTag) {
                             XmlTag tag = (XmlTag) psiElem;
                             String id = tag.getAttributeValue("id");
-                            if(id!=null){
+                            if (id != null) {
                                 List<PsiElement> list = psiElementMap.computeIfAbsent(id, k -> new LinkedList<>());
                                 list.add(tag);
                             }
@@ -166,7 +171,7 @@ public class CompletionHelper {
                     }
                 }
                 xmlFileFunctionsHolder.put(projectFilePath, functionMap);
-                xmlFileFunctionsPsiElementHolder.put(projectFilePath,psiElementMap);
+                xmlFileFunctionsPsiElementHolder.put(projectFilePath, psiElementMap);
             }
             updatePath.add(projectFilePath);
             try {
@@ -177,17 +182,166 @@ public class CompletionHelper {
         }
     }
 
-    public static Map<String, Map.Entry<LookupElement,PsiElement>> getXmlFileFunctions(Project project) {
-        Map<String, Map.Entry<LookupElement,PsiElement>> ret = new LinkedHashMap<>();
+    public static String getPsiMethodSignature(PsiMethod item) {
+        StringBuilder signatureBuilder = new StringBuilder();
+        PsiType returnType = item.getReturnType();
+        String returnText = returnType == null ? "?" : returnType.getPresentableText();
+        signatureBuilder.append(returnText).append(" ").append(item.getName()).append("(");
+        PsiParameterList parameterList = item.getParameterList();
+        PsiParameter[] parameters = parameterList.getParameters();
+        boolean isFirst = true;
+        for (PsiParameter parameter : parameters) {
+            PsiType parameterType = parameter.getType();
+            String parameterName = parameter.getName();
+            String paramText = parameterType == null ? "?" : parameterType.getPresentableText();
+            if (!isFirst) {
+                signatureBuilder.append(", ");
+            }
+            signatureBuilder.append(paramText).append(" ").append(parameterName);
+            isFirst = false;
+        }
+        signatureBuilder.append(")");
+        String signature = signatureBuilder.toString();
+        return signature;
+    }
+
+    public static String getPsiMethodCompletion(PsiMethod item) {
+        StringBuilder completionBuilder = new StringBuilder();
+        completionBuilder.append(item.getName()).append("(");
+        PsiParameterList parameterList = item.getParameterList();
+        PsiParameter[] parameters = parameterList.getParameters();
+        boolean isFirst = true;
+        for (PsiParameter parameter : parameters) {
+            if (!isFirst) {
+                completionBuilder.append(", ");
+            }
+            completionBuilder.append("");
+            isFirst = false;
+        }
+        completionBuilder.append(")");
+        return completionBuilder.toString();
+    }
+
+    public static String getProcedureMetaSignature(ProcedureMeta meta) {
+        StringBuilder signatureBuilder = new StringBuilder();
+        signatureBuilder.append(meta.getName()).append("(");
+        List<String> parameters = meta.getArguments();
+        boolean isFirst = true;
+        for (String parameter : parameters) {
+            if (!isFirst) {
+                signatureBuilder.append(", ");
+            }
+            signatureBuilder.append(parameter);
+            isFirst = false;
+        }
+        signatureBuilder.append(")");
+        String signature = signatureBuilder.toString();
+        return signature;
+    }
+
+    public static String getProcedureMetaCompletion(ProcedureMeta meta) {
+        StringBuilder completionBuilder = new StringBuilder();
+        completionBuilder.append(meta.getName()).append("(");
+        List<String> parameters = meta.getArguments();
+        boolean isFirst = true;
+        for (String parameter : parameters) {
+            if (!isFirst) {
+                completionBuilder.append(", ");
+            }
+            completionBuilder.append(parameter).append(": ");
+            isFirst = false;
+        }
+        completionBuilder.append(")");
+        String completion = completionBuilder.toString();
+        return completion;
+    }
+
+
+    public static Xml getProjectConfigXml(Project project) {
+        String projectFilePath = project.getProjectFilePath();
+        return getProjectConfigXml(projectFilePath);
+    }
+
+    private static final ConcurrentHashMap<String, Map.Entry<Xml, Long>> cacheProjectConfig = new ConcurrentHashMap<>();
+
+    public static Xml getProjectConfigXml(String projectFilePath) {
+        Map.Entry<Xml, Long> entry = cacheProjectConfig.get(projectFilePath);
+        if (entry != null) {
+            Long expireTs = entry.getValue();
+            if (expireTs <= System.currentTimeMillis()) {
+                return entry.getKey();
+            }
+        }
+        File file = new File(projectFilePath);
+        String absolutePath = file.getAbsolutePath();
+        int idx = absolutePath.lastIndexOf(".idea");
+        if (idx >= 0) {
+            file = new File(absolutePath.substring(0, idx));
+        }
+        file = new File(file, "xproc4j.xml");
+        Xml xml = null;
+        if (file.exists() && file.isFile()) {
+            try {
+                xml = XmlUtil.parseXmlSax(file);
+            } catch (Exception e) {
+
+            }
+        }
+        cacheProjectConfig.put(projectFilePath, new AbstractMap.SimpleEntry<>(xml, System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(15)));
+        return null;
+    }
+
+    public static List<Map<String, String>> getProjectConfig(Project project, String tagName) {
+        Xml xml = getProjectConfigXml(project);
+        return getConfig(xml, tagName);
+    }
+
+    public static List<Map<String, String>> getConfig(Xml xml, String tagName) {
+        List<Map<String, String>> ret = new ArrayList<>();
+        if (xml == null || tagName == null) {
+            return ret;
+        }
+        XmlUtil.walkXml(xml, node -> {
+            if (Objects.equals(node.getName(), tagName)) {
+                List<Xml> attributes = node.getAttributes();
+                if (attributes != null) {
+                    Map<String, String> map = new LinkedHashMap<>();
+                    for (Xml attribute : attributes) {
+                        String name = attribute.getName();
+                        String value = attribute.getValue();
+                        map.put(name, value);
+                    }
+                    ret.add(map);
+                }
+            }
+        });
+        return ret;
+    }
+
+    public static Map<String, Map.Entry<LookupElement, PsiElement>> getXmlFileFunctions(Project project) {
+        Map<String, Map.Entry<LookupElement, PsiElement>> ret = new LinkedHashMap<>();
         GlobalSearchScope searchScope = GlobalSearchScope.everythingScope(project);
         PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(project);
         Set<String> processClassNameSet = new HashSet<>();
-        String[] classNames = {
+        Set<String> classNames = new LinkedHashSet<>(Arrays.asList(
                 "ContextFunctions",
                 "TinyScriptFunctions",
                 "ExecContextMethodProvider",
                 "ExecutorMethodProvider"
-        };
+        ));
+        List<Map<String, String>> functions = getProjectConfig(project, "functions");
+        for (Map<String, String> map : functions) {
+            String className = map.get("class");
+            if (className == null) {
+                continue;
+            }
+            int idx = className.lastIndexOf(".");
+            if (idx >= 0) {
+                className = className.substring(idx + 1);
+            }
+            classNames.add(className);
+        }
+
         for (String className : classNames) {
             PsiClass[] psiClassArr = shortNamesCache.getClassesByName(className, searchScope);
             PsiClass psiClass = null;
@@ -208,36 +362,15 @@ public class CompletionHelper {
                         if (name.contains("$")) {
                             continue;
                         }
-                        StringBuilder completionBuilder = new StringBuilder();
-                        StringBuilder signatureBuilder = new StringBuilder();
-                        PsiType returnType = item.getReturnType();
-                        String returnText = returnType == null ? "?" : returnType.getPresentableText();
-                        signatureBuilder.append(returnText).append(" ").append(name).append("(");
-                        completionBuilder.append(name).append("(");
-                        PsiParameterList parameterList = item.getParameterList();
-                        PsiParameter[] parameters = parameterList.getParameters();
-                        boolean isFirst = true;
-                        for (PsiParameter parameter : parameters) {
-                            PsiType parameterType = parameter.getType();
-                            String parameterName = parameter.getName();
-                            String paramText = parameterType == null ? "?" : parameterType.getPresentableText();
-                            if (!isFirst) {
-                                signatureBuilder.append(", ");
-                                completionBuilder.append(", ");
-                            }
-                            signatureBuilder.append(paramText).append(" ").append(parameterName);
-                            completionBuilder.append("");
-                            isFirst = false;
-                        }
-                        signatureBuilder.append(")");
-                        String signature = signatureBuilder.toString();
-                        LookupElement elem = LookupElementBuilder.create(completionBuilder.toString())
+                        String signature = getPsiMethodSignature(item);
+                        String completion = getPsiMethodCompletion(item);
+                        LookupElement elem = LookupElementBuilder.create(completion)
                                 .withTypeText("Functions")
                                 .withPresentableText(signature)
                                 .withTailText(simpleName)
                                 .withIcon(XProc4jConsts.ICON)
                                 .withItemTextItalic(true);
-                        ret.put(signature, new AbstractMap.SimpleEntry<>(elem,item));
+                        ret.put(signature, new AbstractMap.SimpleEntry<>(elem, item));
                     }
                 }
             }
@@ -300,48 +433,32 @@ public class CompletionHelper {
                         .withTailText(clazz.getSimpleName())
                         .withIcon(XProc4jConsts.ICON)
                         .withItemTextItalic(true);
-                ret.put(signature, new AbstractMap.SimpleEntry<>(elem,null));
+                ret.put(signature, new AbstractMap.SimpleEntry<>(elem, null));
             }
         }
 
         for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.entrySet()) {
             ProcedureMeta meta = entry.getValue();
-            StringBuilder completionBuilder = new StringBuilder();
-            StringBuilder signatureBuilder = new StringBuilder();
-            signatureBuilder.append(meta.getName()).append("(");
-            completionBuilder.append(meta.getName()).append("(");
-            List<String> parameters = meta.getArguments();
-            boolean isFirst = true;
-            for (String parameter : parameters) {
-                if (!isFirst) {
-                    signatureBuilder.append(", ");
-                    completionBuilder.append(", ");
-                }
-                signatureBuilder.append(parameter);
-                completionBuilder.append(parameter).append(": ");
-                isFirst = false;
-            }
-            signatureBuilder.append(")");
-            completionBuilder.append(")");
-            String signature = signatureBuilder.toString();
-            LookupElement elem = LookupElementBuilder.create(completionBuilder.toString())
+            String completion = getProcedureMetaCompletion(meta);
+            String signature = getProcedureMetaSignature(meta);
+            LookupElement elem = LookupElementBuilder.create(completion)
                     .withTypeText("Procedures")
                     .withPresentableText(signature)
                     .withIcon(XProc4jConsts.ICON)
                     .withItemTextItalic(true);
 
-            XmlTag rootTag =null;
+            XmlTag rootTag = null;
             try {
                 VirtualFile file = (VirtualFile) meta.getTarget();
                 PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
-                if(psiFile instanceof XmlFile) {
+                if (psiFile instanceof XmlFile) {
                     XmlFile xmlFile = (XmlFile) psiFile;
                     rootTag = xmlFile.getRootTag();
                 }
             } catch (Exception e) {
 
             }
-            ret.put(signature, new AbstractMap.SimpleEntry<>(elem,rootTag));
+            ret.put(signature, new AbstractMap.SimpleEntry<>(elem, rootTag));
         }
         return ret;
     }
