@@ -29,10 +29,19 @@ public class WrappedBindSqlStringifier implements BindSqlStringifier {
     @Override
     public String stringify(BindSql bql) {
         Iterator<Object> iterator = bql.getArgs().iterator();
-        return RegexUtil.regexFindAndReplace(bql.getSql(), "\\?", (str) -> {
-            Object obj = iterator.next();
-            return paramToString(obj);
-        });
+        return RegexUtil.regexFindAndReplace(bql.getSql(), "('[^']*')" + // 字符串，保持不变
+                        "|(--[^\\n]*($|\\n))" + // 单行注释，不变
+                        "|(/\\*[^*]*\\*/)" + // 多行注释，不变
+                        "|(\\?)" // 占位符
+                , (str) -> {
+                    if (str.startsWith("'")
+                            || str.startsWith("--")
+                            || str.startsWith("/*")) {
+                        return str;
+                    }
+                    Object obj = iterator.next();
+                    return paramToString(obj);
+                });
     }
 
 

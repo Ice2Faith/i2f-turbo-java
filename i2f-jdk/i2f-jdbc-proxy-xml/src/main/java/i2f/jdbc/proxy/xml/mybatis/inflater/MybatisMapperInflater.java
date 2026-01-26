@@ -457,13 +457,6 @@ public class MybatisMapperInflater {
         return new BindSql(builder.toString(), args);
     }
 
-
-    public static void main(String[] args) {
-        String expression = " user.name.replace(\"a,b,c\",\"cba\"), jdbcType = VARCHAR, handler= java.util.DateHandler ";
-
-        System.out.println("ok");
-    }
-
     public static final String EXPRESS_KEY = "$expression";
     public static final String JDBC_TYPE_KEY = "jdbcType";
     public static final String JAVA_TYPE_KEY = "javaType";
@@ -514,116 +507,123 @@ public class MybatisMapperInflater {
         // !的含义，如果取到的值为null,则替换为''空字符串
         // 一般只使用在${}中，避免拼接null
         // 一般不在#{}中使用，因为这样使用的占位符没什么意义，除非实在需要这样做
-        String str = RegexUtil.regexFindAndReplace(sql, "[\\$|#](\\!)?\\{\\s*[^}]+\\s*\\}", (patten) -> {
-            boolean isDolar = patten.startsWith("$");
-            patten = patten.substring(2, patten.length() - 1);
-            boolean emptyFlag = false;
-            if (patten.startsWith("{")) {
-                patten = patten.substring(1);
-                emptyFlag = true;
-            }
-            String expression = patten.trim();
-            if (isDolar) {
-                Object obj = evalExpression(expression, workParam);
-                if (obj instanceof BindSql) {
-                    BindSql bql = (BindSql) obj;
-                    args.addAll(bql.getArgs());
-                    return bql.getSql();
-                }
-                if (obj == null) {
-                    if (emptyFlag) {
-                        obj = "";
+        String str = RegexUtil.regexFindAndReplace(sql, "(--[^\\n]*($|\\n))" + // 单行注释，不变
+                        "|(/\\*[^*]*\\*/)" + // 多行注释，不变
+                        "|([\\$|#](\\!)?\\{\\s*[^}]+\\s*\\})"
+                , (patten) -> {
+                    if (patten.startsWith("--")
+                            || patten.startsWith("/*")) {
+                        return patten;
                     }
-                }
-                return obj == null ? "" : String.valueOf(obj);
-            } else {
-                Object obj = null;
-                if (expression.contains("=")) {
-                    // TODO resolve jdbcType=,handler=,javaType=
-                    Map<String, String> parameters = resolvePlaceHolderExpressionParts(expression);
-                    String expr = parameters.get(EXPRESS_KEY);
-                    obj = evalExpression(expr, workParam);
-                    if (obj instanceof BindSql) {
-                        BindSql bql = (BindSql) obj;
-                        args.addAll(bql.getArgs());
-                        return bql.getSql();
+                    boolean isDolar = patten.startsWith("$");
+                    patten = patten.substring(2, patten.length() - 1);
+                    boolean emptyFlag = false;
+                    if (patten.startsWith("{")) {
+                        patten = patten.substring(1);
+                        emptyFlag = true;
                     }
-                    if (obj == null) {
-                        if (emptyFlag) {
-                            obj = "";
+                    String expression = patten.trim();
+                    if (isDolar) {
+                        Object obj = evalExpression(expression, workParam);
+                        if (obj instanceof BindSql) {
+                            BindSql bql = (BindSql) obj;
+                            args.addAll(bql.getArgs());
+                            return bql.getSql();
                         }
-                    }
-                    String handlerName = parameters.get(HANDLER_KEY);
-                    String javaTypeName = parameters.get(JAVA_TYPE_KEY);
-                    String jdbcTypeName = parameters.get(JDBC_TYPE_KEY);
-
-                    if (handlerName != null && !handlerName.isEmpty()) {
-                        try {
-                            Class<?> handlerClass = ReflectResolver.loadClass(handlerName);
-                            if (handlerClass != null) {
-                                ArgumentTypeHandler handler = (ArgumentTypeHandler) ReflectResolver.getInstance(handlerClass);
-                                if (handler != null) {
-                                    obj = new TypedArgument(obj, handler);
-                                    args.add(obj);
-                                    return "?";
+                        if (obj == null) {
+                            if (emptyFlag) {
+                                obj = "";
+                            }
+                        }
+                        return obj == null ? "" : String.valueOf(obj);
+                    } else {
+                        Object obj = null;
+                        if (expression.contains("=")) {
+                            // TODO resolve jdbcType=,handler=,javaType=
+                            Map<String, String> parameters = resolvePlaceHolderExpressionParts(expression);
+                            String expr = parameters.get(EXPRESS_KEY);
+                            obj = evalExpression(expr, workParam);
+                            if (obj instanceof BindSql) {
+                                BindSql bql = (BindSql) obj;
+                                args.addAll(bql.getArgs());
+                                return bql.getSql();
+                            }
+                            if (obj == null) {
+                                if (emptyFlag) {
+                                    obj = "";
                                 }
                             }
-                        } catch (Throwable e) {
+                            String handlerName = parameters.get(HANDLER_KEY);
+                            String javaTypeName = parameters.get(JAVA_TYPE_KEY);
+                            String jdbcTypeName = parameters.get(JDBC_TYPE_KEY);
 
-                        }
-                    }
+                            if (handlerName != null && !handlerName.isEmpty()) {
+                                try {
+                                    Class<?> handlerClass = ReflectResolver.loadClass(handlerName);
+                                    if (handlerClass != null) {
+                                        ArgumentTypeHandler handler = (ArgumentTypeHandler) ReflectResolver.getInstance(handlerClass);
+                                        if (handler != null) {
+                                            obj = new TypedArgument(obj, handler);
+                                            args.add(obj);
+                                            return "?";
+                                        }
+                                    }
+                                } catch (Throwable e) {
 
-
-                    if (javaTypeName != null && !javaTypeName.isEmpty()) {
-                        try {
-                            Class<?> javaType = ReflectResolver.loadClass(handlerName);
-                            if (javaType != null) {
-                                obj = new TypedArgument(javaType, obj);
-                                args.add(obj);
-                                return "?";
-                            }
-                        } catch (Throwable e) {
-
-                        }
-                    }
-
-                    if (jdbcTypeName != null && !jdbcTypeName.isEmpty()) {
-                        try {
-                            JDBCType jdbcType = null;
-                            JDBCType[] values = JDBCType.values();
-                            for (JDBCType item : values) {
-                                if (jdbcTypeName.equalsIgnoreCase(item.name())) {
-                                    jdbcType = item;
-                                    break;
                                 }
                             }
-                            if (jdbcType != null) {
-                                obj = new TypedArgument(jdbcType, obj);
-                                args.add(obj);
-                                return "?";
+
+
+                            if (javaTypeName != null && !javaTypeName.isEmpty()) {
+                                try {
+                                    Class<?> javaType = ReflectResolver.loadClass(handlerName);
+                                    if (javaType != null) {
+                                        obj = new TypedArgument(javaType, obj);
+                                        args.add(obj);
+                                        return "?";
+                                    }
+                                } catch (Throwable e) {
+
+                                }
                             }
-                        } catch (Throwable e) {
 
+                            if (jdbcTypeName != null && !jdbcTypeName.isEmpty()) {
+                                try {
+                                    JDBCType jdbcType = null;
+                                    JDBCType[] values = JDBCType.values();
+                                    for (JDBCType item : values) {
+                                        if (jdbcTypeName.equalsIgnoreCase(item.name())) {
+                                            jdbcType = item;
+                                            break;
+                                        }
+                                    }
+                                    if (jdbcType != null) {
+                                        obj = new TypedArgument(jdbcType, obj);
+                                        args.add(obj);
+                                        return "?";
+                                    }
+                                } catch (Throwable e) {
+
+                                }
+                            }
+
+                        } else {
+                            obj = evalExpression(expression, workParam);
                         }
+                        if (obj instanceof BindSql) {
+                            BindSql bql = (BindSql) obj;
+                            args.addAll(bql.getArgs());
+                            return bql.getSql();
+                        }
+                        if (obj == null) {
+                            if (emptyFlag) {
+                                obj = "";
+                            }
+                        }
+                        args.add(obj);
+                        return "?";
                     }
-
-                } else {
-                    obj = evalExpression(expression, workParam);
-                }
-                if (obj instanceof BindSql) {
-                    BindSql bql = (BindSql) obj;
-                    args.addAll(bql.getArgs());
-                    return bql.getSql();
-                }
-                if (obj == null) {
-                    if (emptyFlag) {
-                        obj = "";
-                    }
-                }
-                args.add(obj);
-                return "?";
-            }
-        });
+                });
         return new BindSql(str, args);
     }
 

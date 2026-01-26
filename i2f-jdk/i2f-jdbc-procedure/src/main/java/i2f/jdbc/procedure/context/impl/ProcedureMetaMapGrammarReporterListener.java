@@ -10,7 +10,6 @@ import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -44,13 +43,12 @@ public class ProcedureMetaMapGrammarReporterListener
     @Override
     public boolean handle(XProc4jEvent event) {
         JdbcProcedureMetaMapRefreshedEvent evt = (JdbcProcedureMetaMapRefreshedEvent) event;
-        Set<String> effectKeys = evt.getEffectKeys();
         Map<String, ProcedureMeta> metaMap = evt.getMetaMap();
         if (reportOnBoot.getAndSet(false)) {
-            GrammarReporter.reportGrammar(executor, effectKeys, new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
+            GrammarReporter.reportGrammar(executor, evt.getEffectKeys(), new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
         } else {
             reportPool.submit(() -> {
-                GrammarReporter.reportGrammar(executor, effectKeys, new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
+                GrammarReporter.reportGrammar(executor, evt.getEffectKeys(), new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
             });
         }
         return false;

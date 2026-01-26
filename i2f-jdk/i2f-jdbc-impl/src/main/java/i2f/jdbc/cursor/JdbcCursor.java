@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -27,14 +27,15 @@ public interface JdbcCursor<E> extends Closeable, Iterable<E> {
     E nextRow() throws SQLException;
 
     default List<E> nextCount(int maxCount) throws SQLException {
-        return nextCount(maxCount, new ArrayList<>());
+        return nextCount(maxCount, new LinkedList<>());
     }
 
     default <C extends Collection<E>> C nextCount(int maxCount, C collection) throws SQLException {
-        while ((maxCount < 0 || maxCount > 0) && hasRow()) {
+        int count=0;
+        while ((maxCount<0 || count<maxCount) && hasRow()) {
             E elem = nextRow();
             collection.add(elem);
-            maxCount--;
+            count++;
         }
 
         return collection;

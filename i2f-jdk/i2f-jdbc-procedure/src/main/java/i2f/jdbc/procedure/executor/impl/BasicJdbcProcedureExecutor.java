@@ -16,6 +16,8 @@ import i2f.invokable.method.IMethod;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
+import i2f.jdbc.procedure.annotations.JdbcProcedureComponent;
+import i2f.jdbc.procedure.annotations.JdbcProcedureFunction;
 import i2f.jdbc.procedure.consts.*;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
@@ -27,13 +29,8 @@ import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.XProc4jEventListener;
 import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;
-import i2f.jdbc.procedure.executor.FeatureFunction;
-import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.executor.JdbcProcedureJavaCaller;
-import i2f.jdbc.procedure.executor.event.ExecutorContextEvent;
-import i2f.jdbc.procedure.executor.event.PreparedParamsEvent;
-import i2f.jdbc.procedure.executor.event.SlowSqlEvent;
-import i2f.jdbc.procedure.executor.event.SqlExecUseTimeEvent;
+import i2f.jdbc.procedure.executor.*;
+import i2f.jdbc.procedure.executor.event.*;
 import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.log.impl.DefaultJdbcProcedureLogger;
 import i2f.jdbc.procedure.node.ExecutorNode;
@@ -41,6 +38,7 @@ import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
@@ -51,7 +49,9 @@ import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;
 import i2f.lock.ILockProvider;
+import i2f.lru.CachedSupplier;
 import i2f.lru.LruMap;
+import i2f.lru.WeakStackRetrieveCacheProvider;
 import i2f.page.ApiOffsetSize;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
@@ -64,16 +64,19 @@ import lombok.Data;
 import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -98,6 +101,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected final ConcurrentHashMap<String, ILockProvider> lockProviders = new ConcurrentHashMap<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected volatile JdbcProcedureLogger logger = new DefaultJdbcProcedureLogger(debug);
+    private final JdbcProcedureLogger threadAppenderLogger = new ThreadAppenderJdbcProcedureLogger();
     public volatile Function<String, String> mapTypeColumnNameMapper = StringUtils::toUpper;
     public volatile Function<String, String> otherTypeColumnNameMapper = null;
     protected volatile JdbcProcedureContext context = new DefaultJdbcProcedureContext();
@@ -109,16 +113,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected volatile long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(30);
     protected volatile long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
     protected final AtomicBoolean defaultTransactionalConnection = new AtomicBoolean(true);
+    protected final AtomicBoolean defaultTransactionalExceptionRollbackOnClose = new AtomicBoolean(false);
 
     protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
     protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
-
-
-    protected final AtomicBoolean enablePrepareParamCache=new AtomicBoolean(true);
-    protected final AtomicInteger prepareParamL2CacheSize=new AtomicInteger(30);
-    protected static final ThreadLocal<WeakReference<Map<String,Object>>> LOCAL_PREPARE_PARAM_L1 =new ThreadLocal<>();
-    protected static final ThreadLocal<LinkedList<WeakReference<Map<String,Object>>>> LOCAL_PREPARE_PARAM_L2 =new ThreadLocal<>();
-    protected static final ThreadLocalRandom RANDOM=ThreadLocalRandom.current();
 
     {
         List<ExecutorNode> list = defaultExecutorNodes();
@@ -319,7 +317,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             }
             for (Map.Entry<String, XProc4jEventListener> entry : map.entrySet()) {
                 XProc4jEventListener listener = entry.getValue();
-                if(listener==null){
+                if (listener == null) {
                     continue;
                 }
                 if (listener.support(event)) {
@@ -385,10 +383,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     @Override
     public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
         XmlNode node = null;
+        Exception parseEx = null;
         try {
             node = JdbcProcedureParser.parse(script);
         } catch (Exception e) {
-
+            parseEx = e;
+            if (isDebug()) {
+                logger().logDebug("eval script parse error: " + e.getMessage());
+            }
         }
         if (node == null) {
             try {
@@ -397,11 +399,32 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                         "</procedure>\n";
                 node = JdbcProcedureParser.parse(script);
             } catch (Exception e) {
-
+                parseEx = e;
+                if (isDebug()) {
+                    logger().logDebug("eval script parse (wrapper) error: " + e.getMessage());
+                }
             }
         }
         if (node == null) {
-            throw new IllegalArgumentException(LangConsts.XPROC4J + " lang accept xml format script, script format maybe wrong!");
+            if (isDebug()) {
+                logger().logDebug("eval script parse error", parseEx);
+            }
+            throw new IllegalArgumentException(LangConsts.XPROC4J + " lang accept xml format script, script format maybe wrong!", parseEx);
+        }
+        if (isDebug()) {
+            if (isDebug()) {
+                logger().logDebug("eval script begin report grammar ... ");
+            }
+            Map<String, ProcedureMeta> metaMap = new LinkedHashMap<>(getMetaMap());
+            String validKey = UUID.randomUUID().toString();
+            metaMap.put(validKey, ProcedureMeta.ofMeta(validKey, node));
+            Set<String> validKeySet = new HashSet<>();
+            validKeySet.add(validKey);
+            GrammarReporter.reportGrammar(this, validKeySet, metaMap, (str) -> logger().logDebug(str));
+
+            if (isDebug()) {
+                logger().logDebug("eval script begin report grammar finished. ");
+            }
         }
         return executor.exec(node, params);
     }
@@ -416,6 +439,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             return;
         }
         List<Object> beansList = getNamingContext().getAllBeans();
+        List<JdbcProcedureInitializer> initializers = new ArrayList<>();
         for (Object bean : beansList) {
             if (bean instanceof ExecutorNode) {
                 ExecutorNode eNode = (ExecutorNode) bean;
@@ -429,8 +453,45 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 ILockProvider provider = (ILockProvider) bean;
                 registryLockProvider(provider);
             }
+
+            Class<?> clazz = bean.getClass();
+            JdbcProcedureComponent ann = ReflectResolver.getAnnotation(clazz, JdbcProcedureComponent.class);
+            if (ann == null) {
+                return;
+            }
+            ContextHolder.registryInvokeMethodByInstanceMethod(bean, method -> {
+                JdbcProcedureFunction funcAnn = ReflectResolver.getAnnotation(method, JdbcProcedureFunction.class);
+                return funcAnn != null;
+            });
+
+            if (bean instanceof FeatureFunctionProvider) {
+                FeatureFunctionProvider provider = (FeatureFunctionProvider) bean;
+                Map<String, FeatureFunction> map = provider.getFeatures();
+                if (map != null) {
+                    for (Map.Entry<String, FeatureFunction> entry : map.entrySet()) {
+                        FeatureFunction value = entry.getValue();
+                        if (value == null) {
+                            continue;
+                        }
+                        featuresMap.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+
+            if (bean instanceof JdbcProcedureInitializer) {
+                JdbcProcedureInitializer initializer = (JdbcProcedureInitializer) bean;
+                initializers.add(initializer);
+            }
+
             handleNamingContextComponentBean(bean);
         }
+
+        for (JdbcProcedureInitializer initializer : initializers) {
+            initializer.initialize(this);
+        }
+
+        ExecutorInitializeEvent event = new ExecutorInitializeEvent(this);
+        sendEvent(event);
     }
 
     public void handleNamingContextComponentBean(Object bean) {
@@ -550,10 +611,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
-    public void closeConnections(Map<String, Object> params) {
+    public void closeConnections(Map<String, Object> params,Throwable ex) {
         if (params == null) {
             return;
         }
+        boolean rollbackOnException = defaultTransactionalExceptionRollbackOnClose.get();
         Map<String, Connection> closeConnections = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
         for (Map.Entry<String, Connection> entry : closeConnections.entrySet()) {
             Connection conn = entry.getValue();
@@ -564,7 +626,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     }
                     if (!conn.isClosed()) {
                         if (!conn.getAutoCommit()) {
-                            conn.commit();
+                            if(ex!=null && rollbackOnException){
+                               conn.rollback();
+                            }else {
+                                conn.commit();
+                            }
                         }
                     }
                 } catch (SQLException e) {
@@ -592,15 +658,19 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (beforeNewConnection) {
             visitSet(params, ParamsConsts.CONNECTIONS, new HashMap<>());
         }
+        Throwable ex=null;
         try {
             task.exec(params, args);
+        } catch (Throwable e) {
+            ex=e;
+            throw e;
         } finally {
             if (beforeNewConnection) {
-                closeConnections(params);
+                closeConnections(params,ex);
                 visitSet(params, ParamsConsts.CONNECTIONS, bakConnection);
             }
             if (afterCloseConnection) {
-                closeConnections(params);
+                closeConnections(params,ex);
             }
         }
     }
@@ -715,6 +785,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
+    protected CachedSupplier<Map<String, DataSource>> cacheDatasourceMapSupplier = CachedSupplier.of(() -> getDatasourceMap(), Duration.ofSeconds(15));
+    protected CachedSupplier<Map<String, Object>> cacheAllBeansMapSupplier = CachedSupplier.of(() -> getNamingContext().getAllBeansMap(), Duration.ofSeconds(15));
+
     public Map<String, Object> createParamsInner() {
         Map<String, Object> ret = new LinkedHashMap<>();
         ret.put(ParamsConsts.STACK_LOCK, new ReentrantLock());
@@ -745,11 +818,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
         ret.put(ParamsConsts.EXECUTOR, this);
 
-        Map<String, Object> beanMap = getNamingContext().getAllBeansMap();
+        Map<String, Object> beanMap = cacheAllBeansMapSupplier.get();
         Map<String, Object> retBeanMap = (Map<String, Object>) ret.computeIfAbsent(ParamsConsts.BEANS, (key) -> new HashMap<>());
         retBeanMap.putAll(beanMap);
 
-        Map<String, DataSource> datasourceMap = getDatasourceMap();
+        Map<String, DataSource> datasourceMap = cacheDatasourceMapSupplier.get();
         Map<String, Object> retDatasourceMap = (Map<String, Object>) ret.computeIfAbsent(ParamsConsts.DATASOURCES, (key) -> new HashMap<>());
         retDatasourceMap.putAll(datasourceMap);
 
@@ -802,51 +875,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return new HashMap<>();
     }
 
-    @Override
-    public Map<String, Object> prepareParams(Map<String, Object> params) {
-        if(enablePrepareParamCache.get()) {
-            if(enablePrepareParamCache.get()) {
-                WeakReference<Map<String, Object>> ref = LOCAL_PREPARE_PARAM_L1.get();
-                if(ref!=null){
-                    Map<String, Object> refMap = ref.get();
-                    if(refMap!=null){
-                        if(refMap==params){
-                            // 这里必须使用 == 判断是否是同一个对象，不能使用equals
-                            return params;
-                        }
-                    }
-                }
-            }
-            if(enablePrepareParamCache.get()) {
-                LinkedList<WeakReference<Map<String, Object>>> localList = LOCAL_PREPARE_PARAM_L2.get();
-                if (localList != null) {
-                    Iterator<WeakReference<Map<String, Object>>> iterator = localList.iterator();
-                    while (iterator.hasNext()) {
-                        WeakReference<Map<String, Object>> ref = iterator.next();
-                        if (ref == null) {
-                            iterator.remove();
-                            continue;
-                        }
-                        // 判断是否已经prepared，如果已经prepared,则不需要再进行prepared浪费性能
-                        Map<String, Object> refMap = ref.get();
-                        if (refMap == null) {
-                            iterator.remove();
-                            continue;
-                        }
-                        if (refMap == params) {
-                            // 这里必须使用 == 判断是否是同一个对象，不能使用equals
-                            if (RANDOM.nextDouble() < 0.3) {
-                                iterator.remove();
-                                localList.addFirst(ref);
-                            }
-                            return params;
-                        }
-
-                    }
-
-                }
-            }
-        }
+    protected Consumer<Map<String, Object>> prepareParamsProvider = WeakStackRetrieveCacheProvider.of(params -> {
         Map<String, Object> execParams = null;
         for (String key : ParamsConsts.KEEP_NAMES) {
             Object val = params.get(key);
@@ -902,31 +931,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
         reportPreparedParamsEvent(params);
 
-        if(enablePrepareParamCache.get()) {
-            WeakReference<Map<String, Object>> refCache = new WeakReference<>(params);
-            if(enablePrepareParamCache.get()){
-                LOCAL_PREPARE_PARAM_L1.set(refCache);
-            }
+    });
 
-            if(enablePrepareParamCache.get()) {
-                LinkedList<WeakReference<Map<String, Object>>> localList = LOCAL_PREPARE_PARAM_L2.get();
-                if (localList == null) {
-                    localList = new LinkedList<>();
-                }
-                Iterator<WeakReference<Map<String, Object>>> localIterator = localList.iterator();
-                while (localIterator.hasNext()) {
-                    WeakReference<Map<String, Object>> ref = localIterator.next();
-                    if (ref == null || ref.get() == null) {
-                        localIterator.remove();
-                    }
-                }
-                while (localList.size() > prepareParamL2CacheSize.get()) {
-                    localList.removeLast();
-                }
-                localList.addFirst(refCache);
-                LOCAL_PREPARE_PARAM_L2.set(localList);
-            }
-        }
+    @Override
+    public Map<String, Object> prepareParams(Map<String, Object> params) {
+        prepareParamsProvider.accept(params);
         return params;
     }
 
@@ -1456,17 +1465,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
-    protected static final InheritableThreadLocal<Consumer<String>> threadLogAppender=new InheritableThreadLocal<>();
+    protected static final InheritableThreadLocal<Consumer<String>> threadLogAppender = new InheritableThreadLocal<>();
 
     // 添加一个内部类，专门用于实现对日志的线程级别分发
     protected class ThreadAppenderJdbcProcedureLogger implements JdbcProcedureLogger {
         protected final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
 
-        public InheritableThreadLocal<Consumer<String>> getThreadLocal(){
+        public InheritableThreadLocal<Consumer<String>> getThreadLocal() {
             return threadLogAppender;
         }
 
-        public JdbcProcedureLogger logger(){
+        public JdbcProcedureLogger logger() {
             return BasicJdbcProcedureExecutor.this.logger;
         }
 
@@ -1482,33 +1491,33 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
         @Override
         public void logDebug(Supplier<Object> supplier, Throwable e) {
-            if(isDebug()){
-                BasicJdbcProcedureExecutor.this.logger.logDebug(supplier,e);
-                proxy("DEBUG",supplier,e);
+            if (isDebug()) {
+                BasicJdbcProcedureExecutor.this.logger.logDebug(supplier, e);
+                proxy("DEBUG", supplier, e);
             }
         }
 
         @Override
         public void logInfo(Supplier<Object> supplier, Throwable e) {
-            BasicJdbcProcedureExecutor.this.logger.logInfo(supplier,e);
-            proxy("INFO",supplier,e);
+            BasicJdbcProcedureExecutor.this.logger.logInfo(supplier, e);
+            proxy("INFO", supplier, e);
         }
 
         @Override
         public void logWarn(Supplier<Object> supplier, Throwable e) {
-            BasicJdbcProcedureExecutor.this.logger.logWarn(supplier,e);
-            proxy("WARN",supplier,e);
+            BasicJdbcProcedureExecutor.this.logger.logWarn(supplier, e);
+            proxy("WARN", supplier, e);
         }
 
         @Override
         public void logError(Supplier<Object> supplier, Throwable e) {
-            BasicJdbcProcedureExecutor.this.logger.logError(supplier,e);
-            proxy("ERROR",supplier,e);
+            BasicJdbcProcedureExecutor.this.logger.logError(supplier, e);
+            proxy("ERROR", supplier, e);
         }
 
-        public void proxy(String logLevel,Supplier<Object> supplier,Throwable e){
+        public void proxy(String logLevel, Supplier<Object> supplier, Throwable e) {
             Consumer<String> consumer = threadLogAppender.get();
-            if(consumer==null) {
+            if (consumer == null) {
                 return;
             }
             try {
@@ -1516,11 +1525,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 consumer.accept(String.format("%s [%5s] [%10s] : %s", logTimeFormatter.format(LocalDateTime.now()), logLevel, Thread.currentThread().getName(), "near " + location + ", msg: " + supplier.get()));
                 if (e != null) {
                     JdbcProcedureUtil.purifyStackTrace(e, true);
-                    ByteArrayOutputStream bos=new ByteArrayOutputStream();
-                    PrintStream ps=new PrintStream(bos);
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    PrintStream ps = new PrintStream(bos);
                     e.printStackTrace(ps);
                     ps.flush();
-                    String err=new String(bos.toByteArray());
+                    String err = new String(bos.toByteArray());
                     consumer.accept(err);
                 }
             } catch (Throwable ex) {
@@ -1529,10 +1538,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
-    private final JdbcProcedureLogger threadAppenderLogger=new ThreadAppenderJdbcProcedureLogger();
 
     @Override
-    public Consumer<String> applyThreadLogAppender(Consumer<String> consumer){
+    public Consumer<String> applyThreadLogAppender(Consumer<String> consumer) {
         Consumer<String> ret = threadLogAppender.get();
         threadLogAppender.set(consumer);
         return ret;

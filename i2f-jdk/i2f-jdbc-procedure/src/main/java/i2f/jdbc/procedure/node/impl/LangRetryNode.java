@@ -8,7 +8,8 @@ import i2f.jdbc.procedure.node.base.MatchException;
 import i2f.jdbc.procedure.node.base.NodeTime;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.jdbc.procedure.signal.SignalException;
+import i2f.jdbc.procedure.signal.impl.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,10 +79,22 @@ public class LangRetryNode extends AbstractExecutorNode {
                 break;
             }
             tryCount++;
+            ex=null;
             try {
                 executor.execAsProcedure(node, context, false, false);
                 break;
             } catch (Throwable e) {
+                if(e instanceof ControlSignalException){
+                    if(e instanceof ContinueSignalException){
+                        continue;
+                    }
+                    if(e instanceof BreakSignalException){
+                        break;
+                    }
+                    if(e instanceof ReturnSignalException){
+                        throw e;
+                    }
+                }
                 ex = e;
                 Map.Entry<Throwable, Boolean> matched = MatchException.matchException(e, node.getAttrFeatureMap().get(AttrConsts.TYPE), catchClasses);
                 if (!matched.getValue()) {
@@ -103,6 +116,9 @@ public class LangRetryNode extends AbstractExecutorNode {
         }
 
         if (ex != null) {
+            if(ex instanceof SignalException){
+                throw (SignalException)ex;
+            }
             throw new ThrowSignalException(ex);
         }
 

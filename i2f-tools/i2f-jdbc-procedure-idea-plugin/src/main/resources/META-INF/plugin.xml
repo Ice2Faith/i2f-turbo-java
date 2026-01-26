@@ -42,6 +42,15 @@
         <!-- 定义文件类型 -->
 <!--        <fileType name="XProc4J" implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jFileType"/>-->
 
+        <!-- XML标签名跳转到节点实现类 -->
+        <psi.referenceContributor language="XML"
+                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.reference.XmlTagReferenceContributor"/>
+
+        <!-- XML的ID跳转 -->
+        <psi.referenceContributor language="XML"
+                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.reference.XmlIdRefReferenceContributor"/>
+
+        <!-- 文件中的$占位符变量进行颜色高亮 -->
         <editorFactoryListener implementation="i2f.turbo.idea.plugin.jdbc.procedure.dollar.DollarVariablesEditorFactoryListener"/>
 
         <!-- 添加文件模板组 -->
@@ -98,6 +107,14 @@
         <!-- 定义颜色配置页 -->
         <colorSettingsPage
                 implementation="i2f.turbo.idea.plugin.tinyscript.lang.highlighter.TinyScriptColorSettingsPage"/>
+
+        <!-- 注释处理器 -->
+        <lang.commenter language="TinyScript"
+                        implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.comment.TinyScriptCommenter"/>
+
+        <!-- 括号代码块配对高亮 -->
+        <lang.braceMatcher language="TinyScript"
+                           implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.bracket.TinyScriptPairedBraceMatcher"/>
 
         <!-- 定义引用跳转定义 -->
         <!--        <psi.referenceContributor language="XML"-->

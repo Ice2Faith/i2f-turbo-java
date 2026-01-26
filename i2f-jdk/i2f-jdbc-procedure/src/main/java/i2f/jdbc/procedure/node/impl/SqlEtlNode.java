@@ -15,6 +15,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.page.ApiPage;
 
@@ -153,7 +154,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
         Integer commitSize = executor.convertAs(executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context), Integer.class);
         String itemName = executor.convertAs(executor.attrValue(AttrConsts.ITEM, FeatureConsts.STRING, node, context), String.class);
         if (readBatchSize == null) {
-            readBatchSize = 2000;
+            readBatchSize = 5000;
         }
         if (writeBatchSize == null) {
             writeBatchSize = 500;
@@ -258,13 +259,13 @@ public class SqlEtlNode extends AbstractExecutorNode {
                     List<?> list = null;
                     JdbcCursor<?> cursor = taskCursor.get();
                     if (useCursor) {
-                        if (!cursor.hasRow()) {
+                        list = cursor.nextCount(taskReadBatchSize);
+                        if (list.isEmpty()) {
                             if (executor.isDebug()) {
                                 executor.logger().logDebug("etl-read no data found! at " + getNodeLocation(node));
                             }
                             return false;
                         }
-                        list = cursor.nextCount(taskReadBatchSize);
                     } else {
                         list = executor.sqlQueryPage(taskExtraDatasource, taskBql, context, taskResultType, new ApiPage(pageIndex.get(), taskReadBatchSize));
                         if (list.isEmpty()) {
@@ -718,6 +719,10 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
             executor.sqlTransCommit(loadDatasource, context);
         } catch (Throwable e) {
+            if(e instanceof ControlSignalException){
+                executor.sqlTransCommit(loadDatasource, context);
+                throw (ControlSignalException)e;
+            }
             executor.sqlTransRollback(loadDatasource, context);
             throw new ThrowSignalException(e.getMessage(), e);
         } finally {

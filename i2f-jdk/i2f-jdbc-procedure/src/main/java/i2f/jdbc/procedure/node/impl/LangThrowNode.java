@@ -40,18 +40,42 @@ public class LangThrowNode extends AbstractExecutorNode {
         String exceptionType = node.getTagAttrMap().get(AttrConsts.TYPE);
         String cause = node.getTagAttrMap().get(AttrConsts.CAUSE);
         Throwable ex = (Throwable) executor.visit(cause, context);
+
+        if(exceptionType==null || exceptionType.isEmpty()){
+            exceptionType=RuntimeException.class.getName();
+        }
+
         Class<?> clazz = executor.loadClass(exceptionType);
 
         try {
             Constructor<?> constructor = null;
-            try {
-                constructor = clazz.getConstructor(String.class, Throwable.class);
-                if (constructor != null) {
-                    Throwable obj = (Throwable) constructor.newInstance(message, ex);
-                    throw obj;
-                }
-            } catch (ReflectiveOperationException e) {
+            if(message!=null && ex!=null) {
+                try {
+                    constructor = clazz.getConstructor(String.class, Throwable.class);
+                    if (constructor != null) {
+                        Throwable obj = (Throwable) constructor.newInstance(message, ex);
+                        throw obj;
+                    }
+                } catch (ReflectiveOperationException e) {
 
+                }
+            }
+
+            if(ex!=null) {
+                try {
+                    constructor = clazz.getConstructor(Throwable.class);
+                    if (constructor != null) {
+                        Throwable obj = (Throwable) constructor.newInstance(ex);
+                        throw obj;
+                    }
+                } catch (ReflectiveOperationException e) {
+
+                }
+
+            }
+
+            if(message==null){
+                message="error at "+getNodeLocation(node);
             }
 
             try {
@@ -61,16 +85,9 @@ public class LangThrowNode extends AbstractExecutorNode {
                     throw obj;
                 }
             } catch (ReflectiveOperationException e) {
+
             }
 
-            try {
-                constructor = clazz.getConstructor(Throwable.class);
-                if (constructor != null) {
-                    Throwable obj = (Throwable) constructor.newInstance(ex);
-                    throw obj;
-                }
-            } catch (ReflectiveOperationException e) {
-            }
         } catch (Throwable e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;

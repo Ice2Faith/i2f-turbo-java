@@ -4,9 +4,11 @@ import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.XProc4jEventListener;
+import i2f.lru.CachedSupplier;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.concurrent.ExecutorService;
@@ -46,13 +48,16 @@ public abstract class AbsXProc4jEventHandler implements XProc4jEventHandler {
             try {
                 XProc4jEvent event = queue.poll();
                 if (event != null) {
-                    if (dispatchPool != null) {
-                        dispatchPool.submit(() -> dispatch(event));
-                    } else {
-                        dispatch(event);
-                    }
+                    do {
+                        if (dispatchPool != null) {
+                            XProc4jEvent pollEvent = event;
+                            dispatchPool.submit(() -> dispatch(pollEvent));
+                        } else {
+                            dispatch(event);
+                        }
+                    } while ((event = queue.poll()) != null);
                 } else {
-                    Thread.sleep(1);
+                    Thread.sleep(10);
                 }
             } catch (Throwable e) {
                 e.printStackTrace();
@@ -71,8 +76,15 @@ public abstract class AbsXProc4jEventHandler implements XProc4jEventHandler {
         queue.push(event);
     }
 
+    private CachedSupplier<Collection<XProc4jEventListener>> listenerSupplier = CachedSupplier.of(() -> {
+        return getListeners();
+    }, Duration.ofSeconds(1));
+
     protected void dispatch(XProc4jEvent event) {
-        Collection<XProc4jEventListener> listeners = getListeners();
+        Collection<XProc4jEventListener> listeners = listenerSupplier.get();
+        if (listeners == null) {
+            return;
+        }
         for (XProc4jEventListener listener : listeners) {
             if (listener == null) {
                 continue;

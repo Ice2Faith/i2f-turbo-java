@@ -14,6 +14,7 @@ import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -67,6 +68,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         }
         return " /* tracking at " + getNodeLocation(node, lineNumber) + " */ ";
     }
+
+    private static final ThreadLocal<WeakReference<Throwable>> handledError = new ThreadLocal<>();
 
     @Override
     public void exec(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
@@ -136,6 +139,13 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
         } catch (Throwable e) {
             updateTraceInfo(node, context, executor);
 
+            Throwable refEx = null;
+            WeakReference<Throwable> ref = handledError.get();
+            if (ref != null) {
+                refEx = ref.get();
+            }
+            handledError.set(new WeakReference<>(e));
+
             if (e instanceof ControlSignalException) {
                 try {
                     onThrowing(e, pointContext, node, context, executor);
@@ -158,24 +168,26 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             }
 
             String errorMsg = e.getMessage();
-            if (!errorMsg.startsWith(EXCEPTION_MESSAGE_PREFIX)) {
-                errorMsg = EXCEPTION_MESSAGE_PREFIX + location + "\n , attrs:" + node.getTagAttrMap() + "\n , message: " + e.getMessage();
-                StringBuilder builder = new StringBuilder();
+            if (refEx != e) {
+                if (!errorMsg.startsWith(EXCEPTION_MESSAGE_PREFIX)) {
+                    errorMsg = EXCEPTION_MESSAGE_PREFIX + location + "\n , attrs:" + node.getTagAttrMap() + "\n , message: " + e.getMessage();
+                    StringBuilder builder = new StringBuilder();
 
-                int stackSize = traceStack.size();
-                int printStackSize = 50;
-                ListIterator<String> iterator = traceStack.listIterator(stackSize);
-                for (int i = 0; i < printStackSize; i++) {
-                    if (!iterator.hasPrevious()) {
-                        break;
+                    int stackSize = traceStack.size();
+                    int printStackSize = 50;
+                    ListIterator<String> iterator = traceStack.listIterator(stackSize);
+                    for (int i = 0; i < printStackSize; i++) {
+                        if (!iterator.hasPrevious()) {
+                            break;
+                        }
+                        builder.append("\tat node ").append(iterator.previous()).append("\n");
                     }
-                    builder.append("\tat node ").append(iterator.previous()).append("\n");
-                }
-                if (iterator.hasPrevious()) {
-                    builder.append("\t... ").append(stackSize - printStackSize).append(" common frames omitted\n");
-                }
+                    if (iterator.hasPrevious()) {
+                        builder.append("\t... ").append(stackSize - printStackSize).append(" common frames omitted\n");
+                    }
 
-                errorMsg = errorMsg + "\n node trace:\n" + builder;
+                    errorMsg = errorMsg + "\n node trace:\n" + builder;
+                }
             }
 
             String traceErrMsg = e.getClass().getName() + ": " + errorMsg;
@@ -185,38 +197,44 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             RuntimeException re = null;
             if (e instanceof SignalException) {
                 SignalException se = (SignalException) e;
-                se.setMessage(errorMsg);
+                if (refEx != se) {
+                    se.setMessage(errorMsg);
+                }
                 re = se;
             } else {
                 ThrowSignalException se = new ThrowSignalException(errorMsg, e);
                 re = se;
             }
 
-            if (re instanceof SignalException) {
-                SignalException se = (SignalException) re;
+            if (refEx != re) {
+                if (re instanceof SignalException) {
+                    SignalException se = (SignalException) re;
 
-                if (se.getCause() == null || !se.hasLogout()) {
-                    executor.logger().logError(() -> se.getMessage(), se);
-                    se.setHasLogout(true);
+                    if (se.getCause() == null || !se.hasLogout()) {
+                        executor.logger().logError(() -> se.getMessage(), se);
+                        se.setHasLogout(true);
+                    }
                 }
             }
 
-            LinkedList<Throwable> traceErrors = executor.visitAs(ParamsConsts.TRACE_ERRORS, context);
-            if (traceErrors == null) {
-                traceErrors = new LinkedList<>();
-                executor.visitSet(context, ParamsConsts.TRACE_ERRORS, traceErrors);
-            }
+            if (refEx != re) {
+                LinkedList<Throwable> traceErrors = executor.visitAs(ParamsConsts.TRACE_ERRORS, context);
+                if (traceErrors == null) {
+                    traceErrors = new LinkedList<>();
+                    executor.visitSet(context, ParamsConsts.TRACE_ERRORS, traceErrors);
+                }
 
-            if (traceErrors.isEmpty()) {
-                traceErrors.add(re);
-            } else {
-                if (!traceErrors.contains(re)) {
+                if (traceErrors.isEmpty()) {
                     traceErrors.add(re);
-                }
-                int size = traceErrors.size();
-                while (size > 10) {
-                    traceErrors.removeFirst();
-                    size--;
+                } else {
+                    if (!traceErrors.contains(re)) {
+                        traceErrors.add(re);
+                    }
+                    int size = traceErrors.size();
+                    while (size > 10) {
+                        traceErrors.removeFirst();
+                        size--;
+                    }
                 }
             }
 
@@ -228,6 +246,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             } catch (Throwable ex) {
                 executor.logger().logWarn(() -> ex.getMessage(), ex);
             }
+
+            handledError.set(new WeakReference<>(re));
 
             throw re;
         } finally {
