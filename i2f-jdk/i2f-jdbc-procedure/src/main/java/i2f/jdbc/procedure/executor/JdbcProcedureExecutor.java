@@ -303,7 +303,7 @@ public interface JdbcProcedureExecutor {
 
     Map<String, Object> newParams(Map<String, Object> params);
 
-    Map<String,Object> cloneParams(Map<String,Object> context);
+    Map<String, Object> cloneParams(Map<String, Object> context);
 
     Object attrValue(String attr, String action, XmlNode node, Map<String, Object> params);
 
@@ -313,7 +313,7 @@ public interface JdbcProcedureExecutor {
 
     void debug(boolean enable);
 
-    default void debugThread(Boolean enable){
+    default void debugThread(Boolean enable) {
         ContextHolder.DEBUG_MODE.set(enable);
     }
 
@@ -354,6 +354,8 @@ public interface JdbcProcedureExecutor {
     String render(String script, Object params);
 
     Connection getConnection(String datasource, Map<String, Object> params);
+
+    void closeConnection(Connection conn, String datasource, Boolean rollbackOnException, Throwable ex);
 
     List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType);
 

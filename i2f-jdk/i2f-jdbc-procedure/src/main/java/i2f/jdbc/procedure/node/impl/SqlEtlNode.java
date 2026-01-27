@@ -15,7 +15,6 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.page.ApiPage;
 
@@ -565,6 +564,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                         break;
                     }
                 }
+                executor.sqlTransCommit(loadDatasource, context);
             } else {
                 Runnable readTask = () -> {
                     try {
@@ -684,7 +684,9 @@ public class SqlEtlNode extends AbstractExecutorNode {
                             }
 
                         }
+                        executor.sqlTransCommit(loadDatasource, context);
                     } catch (Throwable e) {
+                        executor.sqlTransRollback(loadDatasource, context);
                         throwWriteTask.set(e);
                         executor.logger().logError("etl write task error: " + e.getMessage(), e);
                     } finally {
@@ -719,10 +721,6 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
             executor.sqlTransCommit(loadDatasource, context);
         } catch (Throwable e) {
-            if(e instanceof ControlSignalException){
-                executor.sqlTransCommit(loadDatasource, context);
-                throw (ControlSignalException)e;
-            }
             executor.sqlTransRollback(loadDatasource, context);
             throw new ThrowSignalException(e.getMessage(), e);
         } finally {
@@ -741,14 +739,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
             Map<String, Connection> conns = (Map<String, Connection>) context.get(ParamsConsts.CONNECTIONS);
             for (Map.Entry<String, Connection> entry : conns.entrySet()) {
                 Connection conn = entry.getValue();
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        executor.logger().logWarn(() -> e.getMessage(), e);
-                        e.printStackTrace();
-                    }
-                }
+                executor.closeConnection(conn, entry.getKey(), false, null);
             }
 
             executor.visitSet(context, ParamsConsts.CONNECTIONS, bakConn);
