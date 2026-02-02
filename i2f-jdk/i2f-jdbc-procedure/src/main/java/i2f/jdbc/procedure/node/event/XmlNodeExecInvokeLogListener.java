@@ -59,7 +59,7 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
             if (isDebugMode) {
                 String tagName = node.getTagName();
                 if (tagName != null) {
-                    if (TagConsts.PROCEDURE.equals(tagName)) {
+                    if (TagConsts.PROCEDURE.equals(tagName) || TagConsts.SCRIPT_SEGMENT.equals(tagName)) {
                         String id = node.getTagAttrMap().get(AttrConsts.ID);
                         if (id != null && !id.isEmpty()) {
 
@@ -83,7 +83,7 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
 
                 String tagName = node.getTagName();
                 if (tagName != null) {
-                    if (TagConsts.PROCEDURE.equals(tagName)) {
+                    if (TagConsts.PROCEDURE.equals(tagName) || TagConsts.SCRIPT_SEGMENT.equals(tagName)) {
                         String id = node.getTagAttrMap().get(AttrConsts.ID);
                         if (id != null && !id.isEmpty()) {
                             String callSnapshot = getCallSnapshot(node, context, executor);
@@ -110,7 +110,7 @@ public class XmlNodeExecInvokeLogListener implements XProc4jEventListener {
                     if (e instanceof ReturnSignalException) {
                         String tagName = node.getTagName();
                         if (tagName != null) {
-                            if (TagConsts.PROCEDURE.equals(tagName)) {
+                            if (TagConsts.PROCEDURE.equals(tagName) || TagConsts.SCRIPT_SEGMENT.equals(tagName)) {
                                 String id = node.getTagAttrMap().get(AttrConsts.ID);
                                 if (id != null && !id.isEmpty()) {
                                     String callSnapshot = getCallSnapshot(node, context, executor);
