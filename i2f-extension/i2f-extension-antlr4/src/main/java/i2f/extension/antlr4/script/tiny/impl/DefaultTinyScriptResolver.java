@@ -442,9 +442,9 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                     return 0;
                 }
                 if (ret > 0) {
-                    return -1;
+                    return 1;
                 }
-                return 1;
+                return -1;
             }
         }
         if (ObjectConvertor.isNumericType(left.getClass())
@@ -499,9 +499,9 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                     return 0;
                 }
                 if (ret > 0) {
-                    return -1;
+                    return 1;
                 }
-                return 1;
+                return -1;
             }
         } catch (Exception e) {
 
