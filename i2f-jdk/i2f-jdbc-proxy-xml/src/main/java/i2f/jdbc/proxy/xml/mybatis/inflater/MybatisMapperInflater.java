@@ -8,6 +8,7 @@ import i2f.jdbc.data.TypedArgument;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.parameter.ParameterConvertor;
 import i2f.jdbc.proxy.xml.mybatis.parameter.ParameterProvider;
+import i2f.jdbc.proxy.xml.mybatis.parameter.impl.*;
 import i2f.lru.LruMap;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexFindPartMeta;
@@ -513,6 +514,15 @@ public class MybatisMapperInflater {
     public static final ConcurrentHashMap<String, ParameterConvertor> registryParameterConvertors = new ConcurrentHashMap<>();
     public static final ConcurrentHashMap<String, ParameterProvider> registryParameterProviders = new ConcurrentHashMap<>();
 
+    static {
+        registryParameterConvertors.put(SqlIdentifierParameterConvertor.NAME, SqlIdentifierParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(SqlValsParameterConvertor.NAME, SqlValsParameterConvertor.INSTANCE);
+
+        registryParameterProviders.put(SystemEnviromentParameterProvider.NAME, SystemEnviromentParameterProvider.INSTANCE);
+        registryParameterProviders.put(SystemPropertiesParameterProvider.NAME, SystemPropertiesParameterProvider.INSTANCE);
+        registryParameterProviders.put(ThreadLocalParameterProvider.NAME, ThreadLocalParameterProvider.INSTANCE);
+    }
+
     private final LruMap<String, ArgumentTypeHandler> cachedHandlers = new LruMap<>(300);
     private final LruMap<String, ParameterConvertor> cachedConvertors = new LruMap<>(300);
     private final LruMap<String, ParameterProvider> cachedProviders = new LruMap<>(300);
@@ -566,7 +576,6 @@ public class MybatisMapperInflater {
      * 也就是，如果有 provider 优先使用 provider
      * 然后，如果指定了 convertor 则对参数进行转换
      * 最后，根据 handler > javaType > jdbcType 三者优先级设置参数化的类型处理方式
-     *
      * @param sql
      * @param workParam
      * @return
@@ -585,7 +594,7 @@ public class MybatisMapperInflater {
                             || patten.startsWith("/*")) {
                         return patten;
                     }
-                    boolean isDolar = patten.startsWith("$");
+                    boolean isDollar = patten.startsWith("$");
                     patten = patten.substring(2, patten.length() - 1);
                     boolean emptyFlag = false;
                     if (patten.startsWith("{")) {
@@ -593,7 +602,7 @@ public class MybatisMapperInflater {
                         emptyFlag = true;
                     }
                     String expression = patten.trim();
-                    if (isDolar) {
+                    if (isDollar) {
                         Object obj = null;
                         if (expression.contains("=")) {
                             // TODO resolve jdbcType=,handler=,javaType=,convertor=
@@ -604,7 +613,7 @@ public class MybatisMapperInflater {
                             if (providerName != null && !providerName.isEmpty()) {
                                 ParameterProvider handler = getCachedParameterProvider(providerName);
                                 if (handler != null) {
-                                    obj = handler.apply(expr, workParam);
+                                    obj = handler.apply(expr, workParam, isDollar);
                                     hasGotParameter = true;
                                 }
                             }
@@ -615,7 +624,7 @@ public class MybatisMapperInflater {
                             if (convertorName != null && !convertorName.isEmpty()) {
                                 ParameterConvertor handler = getCachedParameterConvertor(convertorName);
                                 if (handler != null) {
-                                    obj = handler.convert(obj);
+                                    obj = handler.convert(obj, expr, isDollar);
                                 }
                             }
                         } else {
@@ -644,7 +653,7 @@ public class MybatisMapperInflater {
                             if (providerName != null && !providerName.isEmpty()) {
                                 ParameterProvider handler = getCachedParameterProvider(providerName);
                                 if (handler != null) {
-                                    obj = handler.apply(expr, workParam);
+                                    obj = handler.apply(expr, workParam, isDollar);
                                     hasGotParameter = true;
                                 }
                             }
@@ -655,7 +664,7 @@ public class MybatisMapperInflater {
                             if (convertorName != null && !convertorName.isEmpty()) {
                                 ParameterConvertor handler = getCachedParameterConvertor(convertorName);
                                 if (handler != null) {
-                                    obj = handler.convert(obj);
+                                    obj = handler.convert(obj, expr, isDollar);
                                 }
                             }
                             if (obj instanceof BindSql) {

@@ -9,5 +9,5 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface ParameterProvider {
-    Object apply(String expression, Map<String, Object> params);
+    Object apply(String expression, Map<String, Object> params, boolean isDollar);
 }

@@ -7,5 +7,5 @@ package i2f.jdbc.proxy.xml.mybatis.parameter;
  */
 @FunctionalInterface
 public interface ParameterConvertor {
-    Object convert(Object obj);
+    Object convert(Object obj, String expr, boolean isDollar);
 }
