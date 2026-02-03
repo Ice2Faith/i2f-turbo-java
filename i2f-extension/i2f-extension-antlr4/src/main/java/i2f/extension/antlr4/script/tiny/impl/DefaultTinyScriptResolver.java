@@ -437,14 +437,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         }
         if (TypeOf.typeOf(left.getClass(), right.getClass())) {
             if (left instanceof Comparable<?>) {
-                int ret = ((Comparable) left).compareTo(right);
-                if (ret == 0) {
-                    return 0;
-                }
-                if (ret > 0) {
-                    return 1;
-                }
-                return -1;
+                return ((Comparable) left).compareTo(right);
             }
         }
         if (ObjectConvertor.isNumericType(left.getClass())
@@ -458,16 +451,6 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
             try {
                 Date bl = (Date) ObjectConvertor.tryConvertAsType(left, Date.class);
                 Date br = (Date) ObjectConvertor.tryConvertAsType(right, Date.class);
-                return bl.compareTo(br);
-            } catch (Exception e) {
-
-            }
-        }
-        if (ObjectConvertor.isNumericType(left.getClass())
-                || ObjectConvertor.isNumericType(right.getClass())) {
-            try {
-                BigDecimal bl = new BigDecimal(String.valueOf(left));
-                BigDecimal br = new BigDecimal(String.valueOf(right));
                 return bl.compareTo(br);
             } catch (Exception e) {
 
@@ -499,9 +482,9 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                     return 0;
                 }
                 if (ret > 0) {
-                    return 1;
+                    return -1;
                 }
-                return -1;
+                return 1;
             }
         } catch (Exception e) {
 
