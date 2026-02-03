@@ -444,6 +444,15 @@ public class MybatisMapperInflater {
                 args.addAll(next.getArgs());
                 continue;
             }
+            if ("bind".equalsIgnoreCase(tagName)) {
+                String value = Optional.ofNullable(child.getAttributes().get("value")).orElse("");
+                Object rs = evalExpression(value, params);
+                String name = child.getAttributes().get("name");
+                if (name != null && !name.isEmpty()) {
+                    Visitor.visit(name, params).set(rs);
+                }
+                continue;
+            }
             if ("script".equalsIgnoreCase(tagName)) {
                 String lang = Optional.ofNullable(child.getAttributes().get("_lang")).orElse("");
                 String script = child.getTextContent();
