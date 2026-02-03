@@ -527,6 +527,11 @@ public class MybatisMapperInflater {
         registryParameterConvertors.put(SqlIdentifierParameterConvertor.NAME, SqlIdentifierParameterConvertor.INSTANCE);
         registryParameterConvertors.put(SqlValsParameterConvertor.NAME, SqlValsParameterConvertor.INSTANCE);
 
+        registryParameterConvertors.put(ValLikeParameterConvertor.NAME, ValLikeParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(ValEndsParameterConvertor.NAME, ValEndsParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(ValStartsParameterConvertor.NAME, ValStartsParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(ValValsParameterConvertor.NAME, ValValsParameterConvertor.INSTANCE);
+
         registryParameterProviders.put(SystemEnviromentParameterProvider.NAME, SystemEnviromentParameterProvider.INSTANCE);
         registryParameterProviders.put(SystemPropertiesParameterProvider.NAME, SystemPropertiesParameterProvider.INSTANCE);
         registryParameterProviders.put(ThreadLocalParameterProvider.NAME, ThreadLocalParameterProvider.INSTANCE);
@@ -585,6 +590,7 @@ public class MybatisMapperInflater {
      * 也就是，如果有 provider 优先使用 provider
      * 然后，如果指定了 convertor 则对参数进行转换
      * 最后，根据 handler > javaType > jdbcType 三者优先级设置参数化的类型处理方式
+     * 同时，converter支持多个，使用逗号或者分好分割，多个时按照顺序进行处理链处理
      * @param sql
      * @param workParam
      * @return
@@ -614,7 +620,7 @@ public class MybatisMapperInflater {
                     if (isDollar) {
                         Object obj = null;
                         if (expression.contains("=")) {
-                            // TODO resolve jdbcType=,handler=,javaType=,convertor=
+                            // TODO resolve jdbcType=,handler=,javaType=,convertor=,provider=
                             Map<String, String> parameters = resolvePlaceHolderExpressionParts(expression);
                             String expr = parameters.get(EXPRESS_KEY);
                             boolean hasGotParameter = false;
@@ -631,9 +637,16 @@ public class MybatisMapperInflater {
                             }
                             String convertorName = parameters.get(CONVERTOR_KEY);
                             if (convertorName != null && !convertorName.isEmpty()) {
-                                ParameterConvertor handler = getCachedParameterConvertor(convertorName);
-                                if (handler != null) {
-                                    obj = handler.convert(obj, expr, isDollar);
+                                String[] arr = convertorName.split(",|;");
+                                for (String name : arr) {
+                                    name=name.trim();
+                                    if(name.isEmpty()){
+                                        continue;
+                                    }
+                                    ParameterConvertor handler = getCachedParameterConvertor(name);
+                                    if (handler != null) {
+                                        obj = handler.convert(obj, expr, isDollar);
+                                    }
                                 }
                             }
                         } else {
@@ -654,7 +667,7 @@ public class MybatisMapperInflater {
                     } else {
                         Object obj = null;
                         if (expression.contains("=")) {
-                            // TODO resolve jdbcType=,handler=,javaType=,convertor=
+                            // TODO resolve jdbcType=,handler=,javaType=,convertor=,provider=
                             Map<String, String> parameters = resolvePlaceHolderExpressionParts(expression);
                             String expr = parameters.get(EXPRESS_KEY);
                             boolean hasGotParameter = false;
@@ -671,9 +684,16 @@ public class MybatisMapperInflater {
                             }
                             String convertorName = parameters.get(CONVERTOR_KEY);
                             if (convertorName != null && !convertorName.isEmpty()) {
-                                ParameterConvertor handler = getCachedParameterConvertor(convertorName);
-                                if (handler != null) {
-                                    obj = handler.convert(obj, expr, isDollar);
+                                String[] arr = convertorName.split(",|;");
+                                for (String name : arr) {
+                                    name=name.trim();
+                                    if(name.isEmpty()){
+                                        continue;
+                                    }
+                                    ParameterConvertor handler = getCachedParameterConvertor(name);
+                                    if (handler != null) {
+                                        obj = handler.convert(obj, expr, isDollar);
+                                    }
                                 }
                             }
                             if (obj instanceof BindSql) {
