@@ -2028,6 +2028,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
+    public void afterSqlActionHook(Connection conn, String datasource, SqlActionType type, BindSql bql) {
+        SqlActionHookEvent event = new SqlActionHookEvent();
+        event.setExecutor(this);
+        event.setConnection(conn);
+        event.setDatasource(datasource);
+        event.setType(type);
+        event.setBql(bql);
+        sendEvent(event);
+    }
+
     @Override
     public List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         long bts = SystemClock.currentTimeMillis();
@@ -2049,6 +2059,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_LIST, execBql);
             return list;
         } catch (Exception e) {
             ex = e;
@@ -2086,6 +2097,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-columns:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_COLUMNS, execBql);
             return list;
         } catch (Exception e) {
             ex = null;
@@ -2127,6 +2139,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-object:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: " + stringifyWithType(obj));
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_OBJECT, execBql);
             return obj;
         } catch (Exception e) {
             ex = e;
@@ -2168,6 +2181,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-row:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + stringifyWithType(row));
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_ROW, execBql);
             return row;
         } catch (Exception e) {
             ex = e;
@@ -2204,6 +2218,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-update:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + num);
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.UPDATE, execBql);
             return num;
         } catch (Exception e) {
             ex = e;
@@ -2410,6 +2425,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-page:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + pageBql + "\nresult: is-empty:" + list.isEmpty());
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_PAGE, execBql);
             return list;
         } catch (Exception e) {
             ex = e;
@@ -2443,6 +2459,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-trans-begin:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] no-auto-commit");
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.TRANS_BEGIN, null);
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
@@ -2476,6 +2493,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     logger().logDebug("sql-trans-commit:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] direct commit");
                 }
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.TRANS_COMMIT, null);
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
@@ -2509,6 +2527,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     logger().logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] direct rollback");
                 }
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.TRANS_ROLLBACK, null);
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
@@ -2536,6 +2555,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-trans-none:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] auto-commit");
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.TRANS_NONE, null);
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
