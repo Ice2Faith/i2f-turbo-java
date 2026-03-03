@@ -15,6 +15,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.page.ApiPage;
 
@@ -153,10 +154,10 @@ public class SqlEtlNode extends AbstractExecutorNode {
         Integer commitSize = executor.convertAs(executor.attrValue(AttrConsts.COMMIT_SIZE, FeatureConsts.INT, node, context), Integer.class);
         String itemName = executor.convertAs(executor.attrValue(AttrConsts.ITEM, FeatureConsts.STRING, node, context), String.class);
         if (readBatchSize == null) {
-            readBatchSize = 5000;
+            readBatchSize = 50000;
         }
         if (writeBatchSize == null) {
-            writeBatchSize = 500;
+            writeBatchSize = 10000;
         }
 
         if (commitSize == null) {
@@ -191,7 +192,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
 
         Map<String, Connection> bakConn = (Map<String, Connection>) context.computeIfAbsent(ParamsConsts.CONNECTIONS, (key -> new HashMap<>()));
-        executor.visitSet(context, ParamsConsts.CONNECTIONS, new HashMap<>());
+//        executor.visitSet(context, ParamsConsts.CONNECTIONS, new HashMap<>());
 
         // 备份堆栈
         Object bakItem = executor.visit(itemName, context);
@@ -199,8 +200,8 @@ public class SqlEtlNode extends AbstractExecutorNode {
         AtomicReference<JdbcCursor<?>> taskCursor = new AtomicReference<>();
 
         try {
-            executor.sqlTransNone(extraDatasource, context);
-            executor.sqlTransBegin(loadDatasource, Connection.TRANSACTION_READ_COMMITTED, context);
+//            executor.sqlTransNone(extraDatasource, context);
+//            executor.sqlTransBegin(loadDatasource, Connection.TRANSACTION_READ_COMMITTED, context);
             Connection loadConn = executor.getConnection(loadDatasource, context);
 
             if (beforeNode != null) {
@@ -556,7 +557,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                         if (executor.isDebug()) {
                             executor.logger().logDebug("etl-write commit once! at " + getNodeLocation(node));
                         }
-                        executor.sqlTransCommit(loadDatasource, context);
+//                        executor.sqlTransCommit(loadDatasource, context);
                         commitCount = 0;
                     }
 
@@ -564,7 +565,7 @@ public class SqlEtlNode extends AbstractExecutorNode {
                         break;
                     }
                 }
-                executor.sqlTransCommit(loadDatasource, context);
+//                executor.sqlTransCommit(loadDatasource, context);
             } else {
                 Runnable readTask = () -> {
                     try {
@@ -679,14 +680,14 @@ public class SqlEtlNode extends AbstractExecutorNode {
                                 if (executor.isDebug()) {
                                     executor.logger().logDebug("etl-write commit once! at " + getNodeLocation(node));
                                 }
-                                executor.sqlTransCommit(loadDatasource, context);
+//                                executor.sqlTransCommit(loadDatasource, context);
                                 commitCount = 0;
                             }
 
                         }
-                        executor.sqlTransCommit(loadDatasource, context);
+//                        executor.sqlTransCommit(loadDatasource, context);
                     } catch (Throwable e) {
-                        executor.sqlTransRollback(loadDatasource, context);
+//                        executor.sqlTransRollback(loadDatasource, context);
                         throwWriteTask.set(e);
                         executor.logger().logError("etl write task error: " + e.getMessage(), e);
                     } finally {
@@ -713,15 +714,19 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 }
             }
 
-            executor.sqlTransCommit(loadDatasource, context);
+//            executor.sqlTransCommit(loadDatasource, context);
 
             if (afterNode != null) {
                 executor.execAsProcedure(afterNode, context, false, false);
             }
 
-            executor.sqlTransCommit(loadDatasource, context);
+//            executor.sqlTransCommit(loadDatasource, context);
         } catch (Throwable e) {
-            executor.sqlTransRollback(loadDatasource, context);
+            if(e instanceof ControlSignalException){
+                executor.sqlTransCommit(loadDatasource, context);
+                throw (ControlSignalException)e;
+            }
+//            executor.sqlTransRollback(loadDatasource, context);
             throw new ThrowSignalException(e.getMessage(), e);
         } finally {
             // 还原堆栈
@@ -736,11 +741,11 @@ public class SqlEtlNode extends AbstractExecutorNode {
                 }
             }
 
-            Map<String, Connection> conns = (Map<String, Connection>) context.get(ParamsConsts.CONNECTIONS);
-            for (Map.Entry<String, Connection> entry : conns.entrySet()) {
-                Connection conn = entry.getValue();
-                executor.closeConnection(conn, entry.getKey(), false, null);
-            }
+//            Map<String, Connection> conns = (Map<String, Connection>) context.get(ParamsConsts.CONNECTIONS);
+//            for (Map.Entry<String, Connection> entry : conns.entrySet()) {
+//                Connection conn = entry.getValue();
+//                executor.closeConnection(conn, entry.getKey(), false, null);
+//            }
 
             executor.visitSet(context, ParamsConsts.CONNECTIONS, bakConn);
         }
