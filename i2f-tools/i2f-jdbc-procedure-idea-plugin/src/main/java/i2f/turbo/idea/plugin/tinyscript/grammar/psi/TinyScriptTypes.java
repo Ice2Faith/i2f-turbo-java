@@ -6,7 +6,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptElementType;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptTokenType;
-import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.impl.*;
 
 public interface TinyScriptTypes {
 

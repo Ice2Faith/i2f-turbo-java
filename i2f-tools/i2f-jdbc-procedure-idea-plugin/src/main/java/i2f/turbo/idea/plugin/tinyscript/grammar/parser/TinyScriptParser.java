@@ -4,9 +4,6 @@ package i2f.turbo.idea.plugin.tinyscript.grammar.parser;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 
-import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
-import static i2f.turbo.idea.plugin.tinyscript.lang.parser.TinyScriptParserUtil.*;
-
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;

@@ -8,7 +8,6 @@ import com.intellij.psi.tree.IElementType;
 
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
 import static com.intellij.psi.TokenType.WHITE_SPACE;
-import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
 
 
 public class _TinyScriptLexer implements FlexLexer {

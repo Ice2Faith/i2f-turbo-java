@@ -9,10 +9,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 
-import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
-
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptPsiElement;
-import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.*;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.impl.TinyScriptPsiImplUtil;
 
 public class TinyScriptJsonMapValueImpl extends TinyScriptPsiElement implements TinyScriptJsonMapValue {
