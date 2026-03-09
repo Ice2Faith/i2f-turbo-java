@@ -16,6 +16,7 @@
         <module>i2f-spring-ai-sse-mcp-server</module>
         <module>i2f-spring-ai-tool</module>
         <module>test-spring-ai-chat</module>
+        <module>i2f-spring-ai-alibaba-starter</module>
     </modules>
 
     <properties>
