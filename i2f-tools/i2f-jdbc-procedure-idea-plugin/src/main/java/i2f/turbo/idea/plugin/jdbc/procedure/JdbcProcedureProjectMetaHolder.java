@@ -11,6 +11,7 @@ import i2f.xml.XmlUtil;
 import i2f.xml.data.Xml;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +24,7 @@ public class JdbcProcedureProjectMetaHolder {
     public static final Logger log = Logger.getInstance(JdbcProcedureProjectMetaHolder.class);
 
     public static final ConcurrentMap<String, VirtualFile> XML_FILE_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<String,String> XML_FILE_META_KEY_MAP=new ConcurrentHashMap<>();
     public static final ConcurrentMap<String, ProcedureMeta> PROCEDURE_META_MAP = new ConcurrentHashMap<>();
     public static final List<String> FEATURES = Arrays.asList(
             // 进出参
@@ -155,6 +157,15 @@ public class JdbcProcedureProjectMetaHolder {
 
     public static void collectProcedureMeta() {
         for (Map.Entry<String, VirtualFile> entry : XML_FILE_MAP.entrySet()) {
+            File file=new File(entry.getKey());
+            // 文件未发生变动，不重新解析更新
+            String metaKey=file.length()+"#"+file.lastModified();
+            String exKey = XML_FILE_META_KEY_MAP.get(entry.getKey());
+            if(Objects.equals(metaKey,exKey)){
+                continue;
+            }
+            XML_FILE_META_KEY_MAP.put(entry.getKey(),metaKey);
+
             VirtualFile value = entry.getValue();
             try (InputStream is = value.getInputStream()) {
                 Xml xml = XmlUtil.parseXmlSax(value.getName(), is);

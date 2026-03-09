@@ -68,7 +68,7 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
                 String projectFilePath = project.getProjectFilePath();
                 Map<String, PsiClass[]> map = xmlTagRefImplHolder.computeIfAbsent(projectFilePath, k -> new LinkedHashMap<>());
                 PsiClass[] classes = map.get(className);
-                if (classes == null || RANDOM.nextDouble() < 0.05) {
+                if (classes == null) {
                     classes = getXmlTagRefImpl(className, project);
                 }
                 map.put(className, classes);
@@ -92,27 +92,35 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
 
     public XmlTagReference(@NotNull XmlTag element) {
         super(element, TextRange.from(1, element.getName().length()));
-        xmlTagRefImplQueue.add(new AbstractMap.SimpleEntry<>(convertToClassName(element), element.getProject()));
+        getCachedAndEnqueue(element);
     }
 
-    @Override
-    public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-//        log.warn("xml-tag-ref-elem:"+myElement);
-        String tagName = myElement.getName();
+    public PsiClass[] getCachedAndEnqueue(XmlTag tag){
+        //        log.warn("xml-tag-ref-elem:"+tag);
+        String tagName = tag.getName();
         String className = convertToClassName(tagName);
 //        log.warn("xml-tag-ref-className:"+className);
 
-        Project project = myElement.getProject();
+        Project project = tag.getProject();
         String projectFilePath = project.getProjectFilePath();
 //        log.warn("xml-tag-ref-project-path:"+projectFilePath);
         PsiClass[] classes =null;
         synchronized (xmlTagRefImplHolder) {
             Map<String, PsiClass[]> map = xmlTagRefImplHolder.computeIfAbsent(projectFilePath, k -> new LinkedHashMap<>());
-             classes=map.get(className);
+            classes=map.get(className);
         }
 //        log.warn("xml-tag-ref-cache1:"+(classes==null || classes.length==0?null:(classes.length+":"+classes[0])));
         if (classes == null) {
             xmlTagRefImplQueue.add(new AbstractMap.SimpleEntry<>(className, project));
+        }
+        return classes;
+    }
+
+    @Override
+    public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
+        PsiClass[] classes =getCachedAndEnqueue(myElement);
+//        log.warn("xml-tag-ref-cache1:"+(classes==null || classes.length==0?null:(classes.length+":"+classes[0])));
+        if (classes == null) {
             return new ResolveResult[0];
         }
 

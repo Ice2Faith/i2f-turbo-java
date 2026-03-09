@@ -25,7 +25,7 @@ public class MybatisMapperParser {
     public static final String[] SCRIPT_ELEMENT_TAG_NAME = {
             "if", "dialect", "choose", "when", "otherwise",
             "dialect-choose", "dialect-when", "dialect-otherwise",
-            "foreach", "trim", "set", "where", "include",
+            "foreach", "trim", "set", "where", "include","bind",
             "script"
     };
     public static final Set<String> SCRIPT_ELEMENT_TAG_NAME_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(SCRIPT_ELEMENT_TAG_NAME)));

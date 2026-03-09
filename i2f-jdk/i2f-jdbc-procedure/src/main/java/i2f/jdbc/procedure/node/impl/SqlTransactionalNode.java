@@ -242,11 +242,7 @@ public class SqlTransactionalNode extends AbstractExecutorNode {
                 Connection conn = work.getValue();
                 Connection old = oldConnectMap.get(key);
                 if (old == null || old == conn) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-
-                    }
+                    executor.closeConnection(conn, key, false, null);
                 }
             }
 

@@ -6,6 +6,10 @@ import i2f.database.type.DatabaseType;
 import i2f.jdbc.data.ArgumentTypeHandler;
 import i2f.jdbc.data.TypedArgument;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
+import i2f.jdbc.proxy.xml.mybatis.parameter.ParameterConvertor;
+import i2f.jdbc.proxy.xml.mybatis.parameter.ParameterProvider;
+import i2f.jdbc.proxy.xml.mybatis.parameter.impl.*;
+import i2f.lru.LruMap;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexFindPartMeta;
 import i2f.reflect.ReflectResolver;
@@ -17,6 +21,7 @@ import java.sql.Connection;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Ice2Faith
@@ -439,6 +444,15 @@ public class MybatisMapperInflater {
                 args.addAll(next.getArgs());
                 continue;
             }
+            if ("bind".equalsIgnoreCase(tagName)) {
+                String value = Optional.ofNullable(child.getAttributes().get("value")).orElse("");
+                Object rs = evalExpression(value, params);
+                String name = child.getAttributes().get("name");
+                if (name != null && !name.isEmpty()) {
+                    Visitor.visit(name, params).set(rs);
+                }
+                continue;
+            }
             if ("script".equalsIgnoreCase(tagName)) {
                 String lang = Optional.ofNullable(child.getAttributes().get("_lang")).orElse("");
                 String script = child.getTextContent();
@@ -461,15 +475,19 @@ public class MybatisMapperInflater {
     public static final String JDBC_TYPE_KEY = "jdbcType";
     public static final String JAVA_TYPE_KEY = "javaType";
     public static final String HANDLER_KEY = "handler";
+    public static final String CONVERTOR_KEY = "convertor";
+    public static final String PROVIDER_KEY = "provider";
 
     /**
      * expression:
-     * user.name.replace("a,b,c","cba"), jdbcType = VARCHAR, handler= java.util.DateHandler
+     * user.name.replace("a,b,c","cba"), jdbcType = VARCHAR, handler= java.util.DateHandler, convertor=java.util.DateConvertor, provider=java.util.DateProvider
      * return:
      * {
      * EXPRESS_KEY: user.name.replace("a,b,c","cba"),
      * jdbcType: VARCHAR,
-     * handler: java.util.DateHandler
+     * handler: java.util.DateHandler,
+     * convertor: java.util.DateConvertor
+     * provider: java.util.DateProvider
      * }
      *
      * @param expression
@@ -501,6 +519,82 @@ public class MybatisMapperInflater {
         return parameters;
     }
 
+    public static final ConcurrentHashMap<String, ArgumentTypeHandler> registryArgumentTypeHandlers = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, ParameterConvertor> registryParameterConvertors = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, ParameterProvider> registryParameterProviders = new ConcurrentHashMap<>();
+
+    static {
+        registryParameterConvertors.put(SqlIdentifierParameterConvertor.NAME, SqlIdentifierParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(SqlValsParameterConvertor.NAME, SqlValsParameterConvertor.INSTANCE);
+
+        registryParameterConvertors.put(ValLikeParameterConvertor.NAME, ValLikeParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(ValEndsParameterConvertor.NAME, ValEndsParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(ValStartsParameterConvertor.NAME, ValStartsParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(ValValsParameterConvertor.NAME, ValValsParameterConvertor.INSTANCE);
+
+        registryParameterProviders.put(SystemEnviromentParameterProvider.NAME, SystemEnviromentParameterProvider.INSTANCE);
+        registryParameterProviders.put(SystemPropertiesParameterProvider.NAME, SystemPropertiesParameterProvider.INSTANCE);
+        registryParameterProviders.put(ThreadLocalParameterProvider.NAME, ThreadLocalParameterProvider.INSTANCE);
+    }
+
+    private final LruMap<String, ArgumentTypeHandler> cachedHandlers = new LruMap<>(300);
+    private final LruMap<String, ParameterConvertor> cachedConvertors = new LruMap<>(300);
+    private final LruMap<String, ParameterProvider> cachedProviders = new LruMap<>(300);
+
+    protected <T> T getCachedObject(String className, Map<String, T> registryObjectMap, Map<String, T> cachedObjectMap) {
+        T ret = registryObjectMap.get(className);
+        if (ret != null) {
+            return ret;
+        }
+        ret = cachedObjectMap.get(className);
+        if (ret != null) {
+            return ret;
+        }
+        try {
+            Class<?> clazz = ReflectResolver.loadClass(className);
+            if (clazz != null) {
+                ret = (T) ReflectResolver.getInstance(clazz);
+            }
+        } catch (Throwable e) {
+
+        }
+        if (ret != null) {
+            cachedObjectMap.put(className, ret);
+        }
+        return ret;
+    }
+
+    public ArgumentTypeHandler getCachedArgumentTypeHandler(String className) {
+        return getCachedObject(className, registryArgumentTypeHandlers, cachedHandlers);
+    }
+
+    public ParameterConvertor getCachedParameterConvertor(String className) {
+        return getCachedObject(className, registryParameterConvertors, cachedConvertors);
+    }
+
+    public ParameterProvider getCachedParameterProvider(String className) {
+        return getCachedObject(className, registryParameterProviders, cachedProviders);
+    }
+
+    /**
+     * 对 sql 中的 ${} / $!{} / #{} / #!{} 占位符进行替换为参数化绑定的SQL对象返回
+     * 完整参数形式：$!{user.name,handler=java.util.DateHandler,jdbcType=DATE,javaType=java.util.Date,convertor=java.util.DateConvertor,provider=java.util.DateProvider}
+     * $ 引导的，进行字符串直接替换，不会处理为参数化占位符
+     * # 引导的，进行参数化占位符替换，进行参数化处理
+     * ! 引导的，表示如果值为 null 替换为 "" 空字符串
+     * 允许使用 handler 制定一个 ArgumentTypeHandler 类型的参数处理器
+     * 允许使用 convertor 制定一个 ParameterConvertor 用于在设置参数之前进行预处理参数，比如格式校验，或者类型转换等
+     * 允许使用 provider 制定一个 ParameterProvider 用于自行处理参数的来源，可以用于加载外部或者全局的参数作为参数，例如环境变量等
+     * 处理优先级：
+     * provider -> convertor -> (handler > javaType > jdbcType)
+     * 也就是，如果有 provider 优先使用 provider
+     * 然后，如果指定了 convertor 则对参数进行转换
+     * 最后，根据 handler > javaType > jdbcType 三者优先级设置参数化的类型处理方式
+     * 同时，converter支持多个，使用逗号或者分好分割，多个时按照顺序进行处理链处理
+     * @param sql
+     * @param workParam
+     * @return
+     */
     public BindSql replaceParameters(String sql, Map<String, Object> workParam) {
         List<Object> args = new ArrayList<>();
         // ${aaa} #{bbb} $!{aaa} #!{bbb}
@@ -515,7 +609,7 @@ public class MybatisMapperInflater {
                             || patten.startsWith("/*")) {
                         return patten;
                     }
-                    boolean isDolar = patten.startsWith("$");
+                    boolean isDollar = patten.startsWith("$");
                     patten = patten.substring(2, patten.length() - 1);
                     boolean emptyFlag = false;
                     if (patten.startsWith("{")) {
@@ -523,8 +617,42 @@ public class MybatisMapperInflater {
                         emptyFlag = true;
                     }
                     String expression = patten.trim();
-                    if (isDolar) {
-                        Object obj = evalExpression(expression, workParam);
+                    if (isDollar) {
+                        Object obj = null;
+                        if (expression.contains("=")) {
+                            // TODO resolve jdbcType=,handler=,javaType=,convertor=,provider=
+                            Map<String, String> parameters = resolvePlaceHolderExpressionParts(expression);
+                            String expr = parameters.get(EXPRESS_KEY);
+                            boolean hasGotParameter = false;
+                            String providerName = parameters.get(PROVIDER_KEY);
+                            if (providerName != null && !providerName.isEmpty()) {
+                                ParameterProvider handler = getCachedParameterProvider(providerName);
+                                if (handler != null) {
+                                    obj = handler.apply(expr, workParam, isDollar);
+                                    hasGotParameter = true;
+                                }
+                            }
+                            if (!hasGotParameter) {
+                                obj = evalExpression(expr, workParam);
+                            }
+                            String convertorName = parameters.get(CONVERTOR_KEY);
+                            if (convertorName != null && !convertorName.isEmpty()) {
+                                String[] arr = convertorName.split(",|;");
+                                for (String name : arr) {
+                                    name=name.trim();
+                                    if(name.isEmpty()){
+                                        continue;
+                                    }
+                                    ParameterConvertor handler = getCachedParameterConvertor(name);
+                                    if (handler != null) {
+                                        obj = handler.convert(obj, expr, isDollar);
+                                    }
+                                }
+                            }
+                        } else {
+                            obj = evalExpression(expression, workParam);
+                        }
+
                         if (obj instanceof BindSql) {
                             BindSql bql = (BindSql) obj;
                             args.addAll(bql.getArgs());
@@ -539,10 +667,35 @@ public class MybatisMapperInflater {
                     } else {
                         Object obj = null;
                         if (expression.contains("=")) {
-                            // TODO resolve jdbcType=,handler=,javaType=
+                            // TODO resolve jdbcType=,handler=,javaType=,convertor=,provider=
                             Map<String, String> parameters = resolvePlaceHolderExpressionParts(expression);
                             String expr = parameters.get(EXPRESS_KEY);
-                            obj = evalExpression(expr, workParam);
+                            boolean hasGotParameter = false;
+                            String providerName = parameters.get(PROVIDER_KEY);
+                            if (providerName != null && !providerName.isEmpty()) {
+                                ParameterProvider handler = getCachedParameterProvider(providerName);
+                                if (handler != null) {
+                                    obj = handler.apply(expr, workParam, isDollar);
+                                    hasGotParameter = true;
+                                }
+                            }
+                            if (!hasGotParameter) {
+                                obj = evalExpression(expr, workParam);
+                            }
+                            String convertorName = parameters.get(CONVERTOR_KEY);
+                            if (convertorName != null && !convertorName.isEmpty()) {
+                                String[] arr = convertorName.split(",|;");
+                                for (String name : arr) {
+                                    name=name.trim();
+                                    if(name.isEmpty()){
+                                        continue;
+                                    }
+                                    ParameterConvertor handler = getCachedParameterConvertor(name);
+                                    if (handler != null) {
+                                        obj = handler.convert(obj, expr, isDollar);
+                                    }
+                                }
+                            }
                             if (obj instanceof BindSql) {
                                 BindSql bql = (BindSql) obj;
                                 args.addAll(bql.getArgs());
@@ -559,14 +712,11 @@ public class MybatisMapperInflater {
 
                             if (handlerName != null && !handlerName.isEmpty()) {
                                 try {
-                                    Class<?> handlerClass = ReflectResolver.loadClass(handlerName);
-                                    if (handlerClass != null) {
-                                        ArgumentTypeHandler handler = (ArgumentTypeHandler) ReflectResolver.getInstance(handlerClass);
-                                        if (handler != null) {
-                                            obj = new TypedArgument(obj, handler);
-                                            args.add(obj);
-                                            return "?";
-                                        }
+                                    ArgumentTypeHandler handler = getCachedArgumentTypeHandler(handlerName);
+                                    if (handler != null) {
+                                        obj = new TypedArgument(obj, handler);
+                                        args.add(obj);
+                                        return "?";
                                     }
                                 } catch (Throwable e) {
 

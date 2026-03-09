@@ -1,6 +1,7 @@
 package i2f.extension.antlr4.script.tiny.impl.context;
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.extension.antlr4.script.tiny.impl.DefaultTinyScriptResolver;
 
 import java.io.File;
 import java.io.IOException;
@@ -173,6 +174,34 @@ public interface TinyScriptFunctions {
 
     default void yield() {
         Thread.yield();
+    }
+
+    default int compare(Object v1, Object v2) {
+        return DefaultTinyScriptResolver.compare(v1, v2);
+    }
+
+    default boolean cmp_eq(Object v1, Object v2) {
+        return compare(v1, v2) == 0;
+    }
+
+    default boolean cmp_neq(Object v1, Object v2) {
+        return compare(v1, v2) != 0;
+    }
+
+    default boolean cmp_gt(Object v1, Object v2) {
+        return compare(v1, v2) > 0;
+    }
+
+    default boolean cmp_lt(Object v1, Object v2) {
+        return compare(v1, v2) < 0;
+    }
+
+    default boolean cmp_gte(Object v1, Object v2) {
+        return compare(v1, v2) >= 0;
+    }
+
+    default boolean cmp_lte(Object v1, Object v2) {
+        return compare(v1, v2) <= 0;
     }
 
     default File file(String path) {

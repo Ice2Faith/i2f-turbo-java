@@ -6,10 +6,10 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -61,19 +61,19 @@ public class SqlScopeNode extends AbstractExecutorNode {
             originConnMap.remove(name);
         }
 
+        Throwable ex = null;
         try {
             executor.execAsProcedure(node, context, false, false);
+        } catch (Throwable e) {
+            ex = e;
+            throw e;
         } finally {
+            if (ex instanceof ControlSignalException) {
+                ex = null;
+            }
             for (String name : targets) {
                 Connection conn = originConnMap.get(name);
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        executor.logger().logWarn(() -> e.getMessage(), e);
-                        e.printStackTrace();
-                    }
-                }
+                executor.closeConnection(conn, name, null, ex);
                 originConnMap.remove(name);
             }
             originConnMap.putAll(bakConnMap);

@@ -611,7 +611,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
-    public void closeConnections(Map<String, Object> params,Throwable ex) {
+    public void closeConnections(Map<String, Object> params, Throwable ex) {
         if (params == null) {
             return;
         }
@@ -619,32 +619,41 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         Map<String, Connection> closeConnections = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, (key) -> new HashMap<>());
         for (Map.Entry<String, Connection> entry : closeConnections.entrySet()) {
             Connection conn = entry.getValue();
-            if (conn != null) {
-                try {
-                    if (isDebug()) {
-                        logger().logDebug("close connection : " + entry.getKey());
-                    }
-                    if (!conn.isClosed()) {
-                        if (!conn.getAutoCommit()) {
-                            if(ex!=null && rollbackOnException){
-                               conn.rollback();
-                            }else {
-                                conn.commit();
-                            }
-                        }
-                    }
-                } catch (SQLException e) {
-                    logger().logWarn(e.getMessage(), e);
-                } finally {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        logger().logWarn(e.getMessage(), e);
+            closeConnection(conn, entry.getKey(), rollbackOnException, ex);
+        }
+        visitSet(params, ParamsConsts.CONNECTIONS, new HashMap<>());
+    }
+
+    @Override
+    public void closeConnection(Connection conn, String datasource, Boolean rollbackOnException, Throwable ex) {
+        if (conn == null) {
+            return;
+        }
+        if (rollbackOnException == null) {
+            rollbackOnException = defaultTransactionalExceptionRollbackOnClose.get();
+        }
+        try {
+            if (isDebug()) {
+                logger().logDebug("close connection : " + datasource);
+            }
+            if (!conn.isClosed()) {
+                if (!conn.getAutoCommit()) {
+                    if (ex != null && rollbackOnException) {
+                        conn.rollback();
+                    } else {
+                        conn.commit();
                     }
                 }
             }
+        } catch (SQLException e) {
+            logger().logWarn(e.getMessage(), e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                logger().logWarn(e.getMessage(), e);
+            }
         }
-        visitSet(params, ParamsConsts.CONNECTIONS, new HashMap<>());
     }
 
     public void execDelegate(ExecDelegateTask task,
@@ -658,19 +667,19 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         if (beforeNewConnection) {
             visitSet(params, ParamsConsts.CONNECTIONS, new HashMap<>());
         }
-        Throwable ex=null;
+        Throwable ex = null;
         try {
             task.exec(params, args);
         } catch (Throwable e) {
-            ex=e;
+            ex = e;
             throw e;
         } finally {
             if (beforeNewConnection) {
-                closeConnections(params,ex);
+                closeConnections(params, ex);
                 visitSet(params, ParamsConsts.CONNECTIONS, bakConnection);
             }
             if (afterCloseConnection) {
-                closeConnections(params,ex);
+                closeConnections(params, ex);
             }
         }
     }
@@ -1900,6 +1909,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     }
 
     public Map.Entry<Connection, String> getConnectionEntry(String datasource, Map<String, Object> params) {
+        return getConnectionEntry(datasource, params, true);
+    }
+
+    public Map.Entry<Connection, String> getConnectionEntry(String datasource, Map<String, Object> params, boolean require) {
         datasource = getMappingDatasourceName(datasource, params);
 
         Map<String, Connection> connectionMap = (Map<String, Connection>) params.get(ParamsConsts.CONNECTIONS);
@@ -1922,27 +1935,11 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             } catch (Exception e) {
                 logger().logWarn(() -> "connection closed or are invalided:" + e.getMessage(), e);
             }
-            try {
-                if (!conn.isClosed()) {
-                    if (!conn.getAutoCommit()) {
-                        conn.commit();
-                        if (isDebug()) {
-                            logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] commit before close");
-                        }
-                    }
-                }
-            } catch (SQLException e) {
-                logger().logWarn(e.getMessage(), e);
-            } finally {
-                try {
-                    conn.close();
-                    if (isDebug()) {
-                        logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] close");
-                    }
-                } catch (SQLException e) {
-                    logger().logWarn(() -> e.getMessage(), e);
-                }
-            }
+            closeConnection(conn, datasource, false, null);
+        }
+
+        if (!require) {
+            return new AbstractMap.SimpleEntry<>(null, datasource);
         }
 
         Map<String, DataSource> datasourceMap = (Map<String, DataSource>) params.get(ParamsConsts.DATASOURCES);
@@ -1973,6 +1970,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
         return new AbstractMap.SimpleEntry<>(conn, datasource);
     }
+
 
     public void afterNewConnection(String datasource, Connection conn) throws SQLException {
         if (defaultTransactionalConnection.get()) {
@@ -2030,6 +2028,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
     }
 
+    public void afterSqlActionHook(Connection conn, String datasource, SqlActionType type, BindSql bql) {
+        SqlActionHookEvent event = new SqlActionHookEvent();
+        event.setExecutor(this);
+        event.setConnection(conn);
+        event.setDatasource(datasource);
+        event.setType(type);
+        event.setBql(bql);
+        sendEvent(event);
+    }
+
     @Override
     public List<?> sqlQueryList(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
         long bts = SystemClock.currentTimeMillis();
@@ -2051,6 +2059,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-list:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_LIST, execBql);
             return list;
         } catch (Exception e) {
             ex = e;
@@ -2088,6 +2097,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-columns:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: is-empty:" + list.isEmpty());
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_COLUMNS, execBql);
             return list;
         } catch (Exception e) {
             ex = null;
@@ -2129,6 +2139,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-object:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult: " + stringifyWithType(obj));
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_OBJECT, execBql);
             return obj;
         } catch (Exception e) {
             ex = e;
@@ -2170,6 +2181,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-row:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + stringifyWithType(row));
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_ROW, execBql);
             return row;
         } catch (Exception e) {
             ex = e;
@@ -2206,6 +2218,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-update:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + num);
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.UPDATE, execBql);
             return num;
         } catch (Exception e) {
             ex = e;
@@ -2412,6 +2425,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-query-page:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + pageBql + "\nresult: is-empty:" + list.isEmpty());
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.QUERY_PAGE, execBql);
             return list;
         } catch (Exception e) {
             ex = e;
@@ -2445,6 +2459,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-trans-begin:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] no-auto-commit");
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.TRANS_BEGIN, null);
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
@@ -2456,10 +2471,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             logger().logDebug("sql-trans-commit:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] ");
         }
         try {
-            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params, false);
             Connection conn = connEntry.getKey();
             datasource = connEntry.getValue();
-
+            if (conn == null) {
+                if (isDebug()) {
+                    logger().logDebug("sql-trans-commit:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] not initialized or invalid!");
+                }
+                return;
+            }
             if (checked) {
                 if (!conn.getAutoCommit()) {
                     conn.commit();
@@ -2473,6 +2493,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     logger().logDebug("sql-trans-commit:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] direct commit");
                 }
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.TRANS_COMMIT, null);
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
@@ -2484,10 +2505,15 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             logger().logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] ");
         }
         try {
-            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params, false);
             Connection conn = connEntry.getKey();
             datasource = connEntry.getValue();
-
+            if (conn == null) {
+                if (isDebug()) {
+                    logger().logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] not initialized or invalid!");
+                }
+                return;
+            }
             if (checked) {
                 if (!conn.getAutoCommit()) {
                     conn.rollback();
@@ -2501,6 +2527,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                     logger().logDebug("sql-trans-rollback:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] direct rollback");
                 }
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.TRANS_ROLLBACK, null);
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }
@@ -2528,6 +2555,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             if (isDebug()) {
                 logger().logDebug("sql-trans-none:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] auto-commit");
             }
+            afterSqlActionHook(conn, datasource, SqlActionType.TRANS_NONE, null);
         } catch (SQLException e) {
             throw new ThrowSignalException(e.getMessage(), e);
         }

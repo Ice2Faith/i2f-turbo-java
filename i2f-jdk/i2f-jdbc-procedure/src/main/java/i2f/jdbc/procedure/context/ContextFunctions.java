@@ -448,6 +448,10 @@ public interface ContextFunctions {
     }
 
     default String regex_extra(Object oStr, String regex) {
+        return regex_extra(oStr, regex, 0);
+    }
+
+    default String regex_extra(Object oStr, String regex, int index) {
         if (oStr == null) {
             return null;
         }
@@ -456,16 +460,26 @@ public interface ContextFunctions {
         }
         String str = String.valueOf(oStr);
         regex = convertOracleRegexExpression(regex);
-        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex, 1);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(str, regex, index >= 0 ? index + 1 : -1);
         if (!list.isEmpty()) {
-            RegexMatchItem item = list.get(0);
-            return item.getMatchStr();
+            int size = list.size();
+            if (index < 0) {
+                index = size - index;
+            }
+            if (index >= 0 && index < size) {
+                RegexMatchItem item = list.get(index);
+                return item.getMatchStr();
+            }
         }
         return null;
     }
 
     default String regexp_extra(Object str, String regex) {
-        return regex_extra(str, regex);
+        return regex_extra(str, regex, 0);
+    }
+
+    default String regexp_extra(Object str, String regex, int index) {
+        return regex_extra(str, regex, index);
     }
 
     default String regex_find_join(Object str, String regex) {
@@ -641,6 +655,51 @@ public interface ContextFunctions {
             return str;
         }
         return str.trim();
+    }
+
+    default String trim_empty_lines(String str) {
+        if (str == null) {
+            return str;
+        }
+        String[] lines = str.split("\n");
+        StringBuilder builder = new StringBuilder();
+        for (String line : lines) {
+            if (line.trim().isEmpty()) {
+                continue;
+            }
+            builder.append(line).append("\n");
+        }
+        return builder.toString();
+    }
+
+    default String init_capital(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        String str = String.valueOf(obj);
+        return RegexUtil.regexFindAndReplace(str, "[a-zA-Z0-9\\$@']", s -> {
+            return first_upper(s);
+        });
+    }
+
+    default String first_upper(String str) {
+        if (str == null) {
+            return str;
+        }
+        if (str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+    default String first_lower(String str) {
+        if (str == null) {
+            return str;
+        }
+        if (str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toLowerCase() + str.substring(1);
     }
 
     default String upper(String str) {
@@ -832,6 +891,39 @@ public interface ContextFunctions {
         return v1 != null ? v1 : v2;
     }
 
+    default Object nullif(Object v1, Object v2) {
+        if (v1 == v2) {
+            return null;
+        }
+        if (v1 == null || v2 == null) {
+            return v1;
+        }
+        if (v1.equals(v2) || v2.equals(v1)) {
+            return null;
+        }
+        if ((v1 instanceof CharSequence)
+                && (v2 instanceof CharSequence)) {
+            return String.valueOf(v1).equals(String.valueOf(v2));
+        }
+        if (ObjectConvertor.isNumericType(v1.getClass())
+                && ObjectConvertor.isNumericType(v2.getClass())) {
+            BigDecimal n1 = (BigDecimal) ObjectConvertor.tryConvertAsType(v1, BigDecimal.class);
+            BigDecimal n2 = (BigDecimal) ObjectConvertor.tryConvertAsType(v2, BigDecimal.class);
+            if (n1.compareTo(n2) == 0) {
+                return null;
+            }
+        }
+        if ((v1 instanceof Comparable)
+                && (v2 instanceof Comparable)) {
+            Comparable c1 = (Comparable) v1;
+            Comparable c2 = (Comparable) v2;
+            if (c1.compareTo(c2) == 0) {
+                return null;
+            }
+        }
+        return v1;
+    }
+
     default Object if_empty(Object v1, Object v2) {
         return is_empty(v1) ? v2 : v1;
     }
@@ -866,6 +958,48 @@ public interface ContextFunctions {
 
     default Object nvl2(Object cond, Object trueVal, Object falseVal) {
         return if2(cond, trueVal, falseVal);
+    }
+
+    default Object nvl_args(Object value, Object... values) {
+        return coalesce(value, values);
+    }
+
+    default Object coalesce(Object value, Object... values) {
+        if (value != null) {
+            return value;
+        }
+        if (values == null || values.length == 0) {
+            return value;
+        }
+        Object last = value;
+        for (Object item : values) {
+            last = item;
+            if (item != null) {
+                return item;
+            }
+        }
+        return last;
+    }
+
+    default Object evl_args(Object value, Object... values) {
+        return coalesce_empty(value, values);
+    }
+
+    default Object coalesce_empty(Object value, Object... values) {
+        if (!is_empty(value)) {
+            return value;
+        }
+        if (values == null || values.length == 0) {
+            return value;
+        }
+        Object last = value;
+        for (Object item : values) {
+            last = item;
+            if (!is_empty(item)) {
+                return item;
+            }
+        }
+        return last;
     }
 
     default Object decode(Object target, Object... args) {
@@ -988,6 +1122,14 @@ public interface ContextFunctions {
         }
     }
 
+    default Date str_to_date(Object obj) {
+        return to_date(obj);
+    }
+
+    default Date str_to_date(Object obj, String pattern) {
+        return to_date(obj, pattern);
+    }
+
     default String date_format(Object date, String pattern) {
         if (date == null) {
             return null;
@@ -1030,9 +1172,67 @@ public interface ContextFunctions {
             return date_format(obj, pattern);
         } else if (ObjectConvertor.isNumericType(clazz)) {
             BigDecimal num = (BigDecimal) ObjectConvertor.tryConvertAsType(obj, BigDecimal.class);
-            return String.format(pattern, num.doubleValue());
+            if (pattern.contains("%")) {
+                return String.format(pattern, num.doubleValue());
+            } else if (RegexUtil.getPattern("(?i)(fm)?([09]+)(\\.[09]+)?").matcher(pattern).matches()) {
+                // oracle dialect of regex pattern: (fm)?([09]+)(\.[09]+)?
+                // such: 99999.99
+                boolean isTrim = false;
+                pattern = pattern.toLowerCase();
+                if (pattern.startsWith("fm")) {
+                    pattern = pattern.substring(2);
+                    isTrim = true;
+                }
+
+                String[] arr = pattern.split("\\.", 2);
+                String intPattern = arr[0];
+                String facPattern = arr.length > 1 ? arr[1] : null;
+
+                boolean isNeg = num.compareTo(BigDecimal.ZERO) < 0;
+                num = num.abs();
+                if (facPattern != null) {
+                    num = (BigDecimal) round(num, facPattern.length());
+                }
+
+                String text = num.toPlainString();
+                arr = text.split("\\.", 2);
+                String intNum = arr[0];
+                String facNum = arr.length > 1 ? arr[1] : null;
+                if (intNum.length() > intPattern.length()) {
+                    // overflow
+                    return repeat("#", intPattern.length()) + (facPattern == null ? "" : repeat("#", facPattern.length()));
+                }
+                String ret = (isNeg ? "-" : "")
+                        + repeat((isTrim ? "" : (intPattern.startsWith("0") ? "0" : " ")), intPattern.length() - intNum.length())
+                        + intNum;
+                if (facPattern != null) {
+                    if (facNum == null) {
+                        if (!isTrim) {
+                            ret += "." + repeat("0", facPattern.length());
+                        }
+                    } else {
+                        ret += "."
+                                + facNum
+                                + repeat((isTrim ? "" : "0"), facPattern.length() - facNum.length());
+                    }
+                }
+                return ret;
+            } else {
+                return String.format(pattern, num.doubleValue());
+            }
         }
         return String.valueOf(obj);
+    }
+
+    default String repeat(CharSequence str, int count) {
+        if (count <= 0) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            builder.append(str);
+        }
+        return builder.toString();
     }
 
     default String to_string(Object obj) {
@@ -1041,6 +1241,24 @@ public interface ContextFunctions {
 
     default String to_string(Object obj, String pattern) {
         return to_char(obj, pattern);
+    }
+
+    default String escape_sql_string(Object obj) {
+        if (obj == null) {
+            return "''";
+        }
+        return "'" + String.valueOf(obj).replace("'", "''") + "'";
+    }
+
+    default String descape_sql_string(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        String str = String.valueOf(obj);
+        if (str.startsWith("'")) {
+            str = str.substring(1, str.length() - 1);
+        }
+        return str.replace("''", "'");
     }
 
     default String left(Object obj, int len) {
@@ -1216,14 +1434,14 @@ public interface ContextFunctions {
         } else if ("quarter".equalsIgnoreCase(format)
                 || "q".equalsIgnoreCase(format)) {
             Month month = obj.getMonth();
-            Month quarterFirstMonth=Month.of(((month.getValue() - 1) / 3) * 3 + 1);
+            Month quarterFirstMonth = Month.of(((month.getValue() - 1) / 3) * 3 + 1);
             obj = obj.withNano(0)
                     .withSecond(0)
                     .withMinute(0)
                     .withHour(0)
                     .withDayOfMonth(1)
                     .withMonth(quarterFirstMonth.getValue());
-        }else {
+        } else {
             throw new IllegalArgumentException("un-support date trunc format :" + format);
         }
 
@@ -1301,17 +1519,39 @@ public interface ContextFunctions {
     }
 
     default String concat(Object... args) {
+        return concat_ws(null, args);
+    }
+
+    default String concat(Iterable<?> args) {
+        return concat_ws(null, args);
+    }
+
+    default String concat_ws(Object separator, Object... args) {
         StringBuilder builder = new StringBuilder();
+        boolean isFirst = true;
         for (Object item : args) {
+            if (!isFirst) {
+                if (separator != null) {
+                    builder.append(separator);
+                }
+            }
             builder.append(item);
+            isFirst = false;
         }
         return builder.toString();
     }
 
-    default String concat(Iterable<?> args) {
+    default String concat_ws(Object separator, Iterable<Object> args) {
         StringBuilder builder = new StringBuilder();
+        boolean isFirst = true;
         for (Object item : args) {
+            if (!isFirst) {
+                if (separator != null) {
+                    builder.append(separator);
+                }
+            }
             builder.append(item);
+            isFirst = false;
         }
         return builder.toString();
     }
