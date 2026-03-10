@@ -54,6 +54,12 @@ public class TinyScriptExpressSegmentImpl extends TinyScriptPsiElement implement
 
   @Override
   @Nullable
+  public TinyScriptDoWhileSegment getDoWhileSegment() {
+    return findChildByClass(TinyScriptDoWhileSegment.class);
+  }
+
+  @Override
+  @Nullable
   public TinyScriptEqualValue getEqualValue() {
     return findChildByClass(TinyScriptEqualValue.class);
   }

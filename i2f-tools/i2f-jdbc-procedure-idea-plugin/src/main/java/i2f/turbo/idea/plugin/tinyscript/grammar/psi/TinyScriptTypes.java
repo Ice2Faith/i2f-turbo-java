@@ -29,6 +29,7 @@ public interface TinyScriptTypes {
   IElementType DEBUGGER_SEGMENT = new TinyScriptElementType("DEBUGGER_SEGMENT");
   IElementType DECLARE_FUNCTION = new TinyScriptElementType("DECLARE_FUNCTION");
   IElementType DEC_NUMBER = new TinyScriptElementType("DEC_NUMBER");
+  IElementType DO_WHILE_SEGMENT = new TinyScriptElementType("DO_WHILE_SEGMENT");
   IElementType EQUAL_VALUE = new TinyScriptElementType("EQUAL_VALUE");
   IElementType EXPRESS = new TinyScriptElementType("EXPRESS");
   IElementType EXPRESS_SEGMENT = new TinyScriptElementType("EXPRESS_SEGMENT");
@@ -73,6 +74,7 @@ public interface TinyScriptTypes {
   IElementType KEY_CLASS = new TinyScriptTokenType("class");
   IElementType KEY_CONTINUE = new TinyScriptTokenType("continue");
   IElementType KEY_DEBUGGER = new TinyScriptTokenType("debugger");
+  IElementType KEY_DO = new TinyScriptTokenType("do");
   IElementType KEY_ELIF = new TinyScriptTokenType("KEY_ELIF");
   IElementType KEY_ELSE = new TinyScriptTokenType("else");
   IElementType KEY_FINALLY = new TinyScriptTokenType("finally");
@@ -222,6 +224,9 @@ public interface TinyScriptTypes {
       }
       else if (type == DEC_NUMBER) {
         return new TinyScriptDecNumberImpl(node);
+      }
+      else if (type == DO_WHILE_SEGMENT) {
+        return new TinyScriptDoWhileSegmentImpl(node);
       }
       else if (type == EQUAL_VALUE) {
         return new TinyScriptEqualValueImpl(node);

@@ -20,6 +20,9 @@ public interface TinyScriptExpressSegment extends PsiElement {
   TinyScriptDeclareFunction getDeclareFunction();
 
   @Nullable
+  TinyScriptDoWhileSegment getDoWhileSegment();
+
+  @Nullable
   TinyScriptEqualValue getEqualValue();
 
   @Nullable

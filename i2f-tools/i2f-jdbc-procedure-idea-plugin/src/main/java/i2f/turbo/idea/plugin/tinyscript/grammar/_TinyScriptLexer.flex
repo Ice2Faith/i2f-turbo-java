@@ -119,6 +119,7 @@ WS=[ \t\r\n]+
   "continue"                                { return KEY_CONTINUE; }
   "return"                                  { return KEY_RETURN; }
   "while"                                   { return KEY_WHILE; }
+  "do"                                      { return KEY_DO; }
   "for"                                     { return KEY_FOR; }
   "foreach"                                 { return KEY_FOREACH; }
   "if"                                      { return KEY_IF; }
