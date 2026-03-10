@@ -138,6 +138,7 @@ express:
     | ifSegment
     | foreachSegment
     | forSegment
+    | doWhileSegment
     | whileSegment
     | controlSegment
     | trySegment
@@ -151,6 +152,7 @@ express:
     | constValue
     | refValue
     | jsonValue
+    | express '[' express ']'
     | express ('%')
     | express ( 'as' | 'cast'  | 'is' | 'instanceof' | 'typeof') express
     | express ('*' | '/' | '%') express
@@ -159,6 +161,7 @@ express:
     | express ('&&' | 'and' | '||' | 'or') express
     | negtiveSegment
     | express '?' express ':' express
+    | express (',' express) +
     ;
 
 declareFunction:
@@ -215,6 +218,10 @@ controlSegment:
 
 whileSegment:
     'while' TERM_PAREN_L conditionBlock TERM_PAREN_R scriptBlock
+    ;
+
+doWhileSegment:
+    'do' scriptBlock 'while' TERM_PAREN_L conditionBlock TERM_PAREN_R
     ;
 
 forSegment:

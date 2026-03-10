@@ -497,6 +497,53 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
         return ReflectResolver.loadClass(className);
     }
 
+    @Override
+    public Object getValueBySquareBracketExpression(Object leftValue, Object rightValue) {
+        // leftValue[rightValue] 括号表达式
+        Class<?> rightClass = null;
+        if (rightValue != null) {
+            rightClass = rightValue.getClass();
+        }
+        if (leftValue == null) {
+            throw new NullPointerException("a[b] expression expect a not null");
+        }
+        if (leftValue instanceof List) {
+            Object r = ObjectConvertor.tryConvertAsType(rightValue, Integer.class);
+            if (!(r instanceof Integer)) {
+                throw new IllegalArgumentException("a[b] a is List, require b can convert as int, but accept type: " + rightClass);
+            }
+            return ((List) leftValue).get((Integer) r);
+        } else if (leftValue instanceof Map) {
+            return ((Map) leftValue).get(rightValue);
+        } else if (leftValue instanceof Iterable) {
+            Object r = ObjectConvertor.tryConvertAsType(rightValue, Integer.class);
+            if (!(r instanceof Integer)) {
+                throw new IllegalArgumentException("a[b] a is List, require b can convert as int, but accept type: " + rightClass);
+            }
+            Iterable<?> value = (Iterable<?>) leftValue;
+            Iterator<?> iterator = value.iterator();
+            int i = 0;
+            while (iterator.hasNext()) {
+                Object v = iterator.next();
+                if (i == (Integer) r) {
+                    return v;
+                }
+                i++;
+            }
+            throw new IllegalArgumentException("a[b] a is Iterable, require b index at range, but out of range, index is: " + r);
+        } else if (leftValue.getClass().isArray()) {
+            Object r = ObjectConvertor.tryConvertAsType(rightValue, Integer.class);
+            if (!(r instanceof Integer)) {
+                throw new IllegalArgumentException("a[b] a is Array, require b can convert as int, but accept type: " + rightClass);
+            }
+            return Array.get(leftValue, (Integer) r);
+        } else if (!TypeOf.isBaseType(leftValue.getClass())) {
+            return getValue(leftValue, String.valueOf(rightValue));
+        } else {
+            throw new IllegalArgumentException("a[b] expression not support a type is: " + leftValue.getClass());
+        }
+    }
+
     public IMethod findMethod(Object context, String naming, List<Object> args) {
         CopyOnWriteArrayList<IMethod> methods = TinyScript.BUILTIN_METHOD.get(naming);
         if (methods != null && !methods.isEmpty()) {
@@ -606,13 +653,14 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     @Override
-    public String multilineString(Object context, String text, List<String> features) {
+    public Object multilineString(Object context, String text, List<String> features) {
+        Object ret = text;
         for (String feature : features) {
             if ("trim".equals(feature)) {
-                text = text.trim();
+                ret = String.valueOf(ret).trim();
             } else if ("align".equals(feature)) {
                 StringBuilder builder = new StringBuilder();
-                String[] arr = text.split("\n");
+                String[] arr = String.valueOf(ret).split("\n");
                 for (String item : arr) {
                     int idx = item.indexOf("|");
                     if (idx >= 0) {
@@ -622,11 +670,17 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                     }
                     builder.append("\n");
                 }
-                text = builder.toString();
+                ret = builder.toString();
             } else if ("render".equals(feature)) {
-                text = renderString(context, text);
+                ret = renderString(context, String.valueOf(ret));
+            } else {
+                ret = dispatchMultilineFeature(ret, feature);
             }
         }
-        return text;
+        return ret;
+    }
+
+    public Object dispatchMultilineFeature(Object value, String feature) {
+        return value;
     }
 }
