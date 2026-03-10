@@ -193,13 +193,13 @@ commentSegment::=
     ;
 
 operatorSegment::=
-     OP_MOD
-     | TERM_BRACKET_SQUARE_L express TERM_BRACKET_SQUARE_R
+     TERM_BRACKET_SQUARE_L express TERM_BRACKET_SQUARE_R
     | ( OP_AS | OP_CAST  | OP_IS | OP_INSTANCE_OF | OP_TYPE_OF) express
     |  (OP_MUL | OP_DIV | OP_MOD) express
     | (OP_ADD | OP_SUB) express
     | (OP_IN | OP_NOT_IN| OP_GTE | OP_GTE_STR | OP_LTE | OP_LTE_STR | OP_NE | OP_NE_STR | OP_NEQ | OP_NEQ_STR | OP_EQ | OP_EQ_STR | OP_GT | OP_GT_STR | OP_LT | OP_LT_STR) express
     | (OP_AND | OP_AND_STR | OP_OR | OP_OR_STR) express
+    | OP_MOD
     | TERM_QUESTION express TERM_COLON express
     | (TERM_COMMA express)+
         ;
