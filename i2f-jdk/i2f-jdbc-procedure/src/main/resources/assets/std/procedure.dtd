@@ -520,6 +520,19 @@
         <!ATTLIST lang-while datasource.visit CDATA #IMPLIED>
         <!ATTLIST lang-while datasource.visit.string CDATA #IMPLIED>
 
+        <!ELEMENT lang-do-while (ANY|EMPTY)>
+        <!ATTLIST lang-do-while first CDATA #IMPLIED>
+        <!ATTLIST lang-do-while index CDATA #IMPLIED>
+        <!ATTLIST lang-do-while test CDATA #IMPLIED>
+        <!ATTLIST lang-do-while datasource CDATA #IMPLIED>
+
+        <!ATTLIST lang-do-while test.boolean CDATA #IMPLIED>
+        <!ATTLIST lang-do-while test.dialect CDATA #IMPLIED>
+        <!ATTLIST lang-do-while test.eval-ts CDATA #IMPLIED>
+
+        <!ATTLIST lang-do-while datasource.visit CDATA #IMPLIED>
+        <!ATTLIST lang-do-while datasource.visit.string CDATA #IMPLIED>
+
         <!ELEMENT lang-continue (EMPTY)>
 
         <!ELEMENT lang-break (EMPTY)>

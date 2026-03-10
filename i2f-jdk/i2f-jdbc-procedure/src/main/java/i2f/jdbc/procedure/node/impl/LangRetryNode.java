@@ -86,6 +86,12 @@ public class LangRetryNode extends AbstractExecutorNode {
             } catch (Throwable e) {
                 if(e instanceof ControlSignalException){
                     if(e instanceof ContinueSignalException){
+                        try {
+                            Thread.sleep((long) sleepTime);
+                        } catch (InterruptedException ie) {
+
+                        }
+                        sleepTime = sleepTime * incr;
                         continue;
                     }
                     if(e instanceof BreakSignalException){
@@ -103,7 +109,7 @@ public class LangRetryNode extends AbstractExecutorNode {
             }
             try {
                 Thread.sleep((long) sleepTime);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ie) {
 
             }
             sleepTime = sleepTime * incr;

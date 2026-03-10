@@ -663,6 +663,34 @@ eval-ts使用TinyScript引擎进行处理
         </lang-while>
     </script-segment>
 
+
+    <!--
+    对应一个do-while语句，test表示循环条件的判断语句
+    first默认值为first，可缺省
+    index默认值为index，可缺省
+    test默认以test访问，等价于 test.test
+    first以string访问，不支持修饰符
+    index以string访问，不支持修饰符
+     -->
+    <lang-do-while test="" first="" index="">
+        <!-- 对应continue-->
+        <lang-continue/>
+        <!-- 对应break -->
+        <lang-break/>
+    </lang-do-while>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-do-while test="v_i>0">
+            <lang-if test="v_i==10">
+                <lang-continue/>
+            </lang-if>
+            <lang-if test="v_i &lt; v_cnt">
+                <lang-break/>
+            </lang-if>
+            <lang-set result="v_i" value.eval="v_i-1"/>
+        </lang-do-while>
+    </script-segment>
+
     <!--
     调用函数，在target指定的对象上调用method方法，并传入argx参数
     当指定target时，method不用指定类名

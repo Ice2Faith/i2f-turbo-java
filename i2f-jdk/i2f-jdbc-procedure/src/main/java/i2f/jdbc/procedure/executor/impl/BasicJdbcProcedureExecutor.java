@@ -170,6 +170,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new LangBreakNode());
         ret.add(new LangChooseNode());
         ret.add(new LangContinueNode());
+        ret.add(new LangDoWhileNode());
         ret.add(new LangEvalGroovyNode());
         ret.add(new LangEvalJavaNode());
         ret.add(new LangEvalJavascriptNode());
