@@ -310,7 +310,7 @@ public class MybatisMapperInflater {
                             builder.append(separator);
                         }
                         builder.append(next.getSql());
-                        builder.append(next.getArgs());
+                        args.addAll(next.getArgs());
                         isFirst = false;
                         idx++;
                     }
@@ -335,7 +335,7 @@ public class MybatisMapperInflater {
                             builder.append(separator);
                         }
                         builder.append(next.getSql());
-                        builder.append(next.getArgs());
+                        args.addAll(next.getArgs());
                         isFirst = false;
                         idx++;
                     }
@@ -359,7 +359,7 @@ public class MybatisMapperInflater {
                             builder.append(separator);
                         }
                         builder.append(next.getSql());
-                        builder.append(next.getArgs());
+                        args.addAll(next.getArgs());
                         isFirst = false;
                     }
                     if (!isFirst) {
@@ -586,11 +586,6 @@ public class MybatisMapperInflater {
         registryParameterConvertors.put(SqlIdentifierParameterConvertor.NAME, SqlIdentifierParameterConvertor.INSTANCE);
         registryParameterConvertors.put(SqlValsParameterConvertor.NAME, SqlValsParameterConvertor.INSTANCE);
 
-        registryParameterConvertors.put(ValLikeParameterConvertor.NAME, ValLikeParameterConvertor.INSTANCE);
-        registryParameterConvertors.put(ValEndsParameterConvertor.NAME, ValEndsParameterConvertor.INSTANCE);
-        registryParameterConvertors.put(ValStartsParameterConvertor.NAME, ValStartsParameterConvertor.INSTANCE);
-        registryParameterConvertors.put(ValValsParameterConvertor.NAME, ValValsParameterConvertor.INSTANCE);
-
         registryParameterProviders.put(SystemEnviromentParameterProvider.NAME, SystemEnviromentParameterProvider.INSTANCE);
         registryParameterProviders.put(SystemPropertiesParameterProvider.NAME, SystemPropertiesParameterProvider.INSTANCE);
         registryParameterProviders.put(ThreadLocalParameterProvider.NAME, ThreadLocalParameterProvider.INSTANCE);
@@ -712,7 +707,6 @@ public class MybatisMapperInflater {
      * 形如：user.name,handler=java.util.DateHandler,jdbcType=DATE,javaType=java.util.Date,convertor=java.util.DateConvertor,provider=java.util.DateProvider
      * 其实就是去掉占位符的外层包裹
      * return 返回值，有两种 BindSql ,  其他
-     *
      * @param workParam
      * @param expression
      * @param isDollar
