@@ -795,7 +795,7 @@ public class MybatisMapperInflater {
 
         if (javaTypeName != null && !javaTypeName.isEmpty()) {
             try {
-                Class<?> javaType = ReflectResolver.loadClass(handlerName);
+                Class<?> javaType = ReflectResolver.loadClass(javaTypeName);
                 if (javaType != null) {
                     ret = new TypedArgument(javaType, ret);
                     return BindSql.of("?", ret);
