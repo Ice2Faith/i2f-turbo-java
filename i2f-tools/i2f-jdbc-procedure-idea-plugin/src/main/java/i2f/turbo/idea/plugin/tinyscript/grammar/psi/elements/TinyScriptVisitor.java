@@ -191,6 +191,10 @@ public class TinyScriptVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitPipelineFunctionSegment(@NotNull TinyScriptPipelineFunctionSegment o) {
+    visitPsiElement(o);
+  }
+
   public void visitPrefixOperatorSegment(@NotNull TinyScriptPrefixOperatorSegment o) {
     visitPsiElement(o);
   }

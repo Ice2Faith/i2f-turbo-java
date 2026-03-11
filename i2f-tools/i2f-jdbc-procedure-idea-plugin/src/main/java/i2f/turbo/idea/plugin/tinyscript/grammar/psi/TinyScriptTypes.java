@@ -56,6 +56,7 @@ public interface TinyScriptTypes {
   IElementType OTC_NUMBER = new TinyScriptElementType("OTC_NUMBER");
   IElementType PARAMETER_LIST = new TinyScriptElementType("PARAMETER_LIST");
   IElementType PAREN_SEGMENT = new TinyScriptElementType("PAREN_SEGMENT");
+  IElementType PIPELINE_FUNCTION_SEGMENT = new TinyScriptElementType("PIPELINE_FUNCTION_SEGMENT");
   IElementType PREFIX_OPERATOR_SEGMENT = new TinyScriptElementType("PREFIX_OPERATOR_SEGMENT");
   IElementType REF_CALL = new TinyScriptElementType("REF_CALL");
   IElementType REF_VALUE = new TinyScriptElementType("REF_VALUE");
@@ -124,6 +125,8 @@ public interface TinyScriptTypes {
   IElementType OP_NOT_IN = new TinyScriptTokenType("notin");
   IElementType OP_OR = new TinyScriptTokenType("||");
   IElementType OP_OR_STR = new TinyScriptTokenType("or");
+  IElementType OP_PIPELINE = new TinyScriptTokenType("|>");
+  IElementType OP_SELF_PIPE = new TinyScriptTokenType("::");
   IElementType OP_SUB = new TinyScriptTokenType("-");
   IElementType OP_TYPE_OF = new TinyScriptTokenType("typeof");
   IElementType OP_VERTICAL_BAR = new TinyScriptTokenType("|");
@@ -305,6 +308,9 @@ public interface TinyScriptTypes {
       }
       else if (type == PAREN_SEGMENT) {
         return new TinyScriptParenSegmentImpl(node);
+      }
+      else if (type == PIPELINE_FUNCTION_SEGMENT) {
+        return new TinyScriptPipelineFunctionSegmentImpl(node);
       }
       else if (type == PREFIX_OPERATOR_SEGMENT) {
         return new TinyScriptPrefixOperatorSegmentImpl(node);

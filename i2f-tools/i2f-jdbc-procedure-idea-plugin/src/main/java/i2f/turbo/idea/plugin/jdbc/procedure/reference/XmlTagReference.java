@@ -117,7 +117,7 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
     }
 
     @Override
-    public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
+    public @NotNull ResolveResult[] multiResolve(boolean incompleteCode) {
         PsiClass[] classes =getCachedAndEnqueue(myElement);
 //        log.warn("xml-tag-ref-cache1:"+(classes==null || classes.length==0?null:(classes.length+":"+classes[0])));
         if (classes == null) {

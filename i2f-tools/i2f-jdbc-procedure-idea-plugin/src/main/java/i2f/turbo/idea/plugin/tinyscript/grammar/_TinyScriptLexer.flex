@@ -109,6 +109,8 @@ WS=[ \t\r\n]+
   "/="                                      { return OP_ASSIGN_DIV; }
   "%="                                      { return OP_ASSIGN_MOD; }
   "|"                                       { return OP_VERTICAL_BAR; }
+  "|>"                                      { return OP_PIPELINE; }
+  "::"                                      { return OP_SELF_PIPE; }
   "class"                                   { return KEY_CLASS; }
   "debugger"                                { return KEY_DEBUGGER; }
   "try"                                     { return KEY_TRY; }

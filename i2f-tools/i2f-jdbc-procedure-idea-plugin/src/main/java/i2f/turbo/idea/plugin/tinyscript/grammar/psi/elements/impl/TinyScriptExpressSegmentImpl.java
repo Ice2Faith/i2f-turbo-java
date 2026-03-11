@@ -126,6 +126,12 @@ public class TinyScriptExpressSegmentImpl extends TinyScriptPsiElement implement
 
   @Override
   @Nullable
+  public TinyScriptScriptBlock getScriptBlock() {
+    return findChildByClass(TinyScriptScriptBlock.class);
+  }
+
+  @Override
+  @Nullable
   public TinyScriptStaticEnumValue getStaticEnumValue() {
     return findChildByClass(TinyScriptStaticEnumValue.class);
   }

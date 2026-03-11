@@ -527,6 +527,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   //         | refValue
   //         | jsonValue
   //         | negtiveSegment
+  //         | scriptBlock
   public static boolean expressSegment(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "expressSegment")) return false;
     boolean r;
@@ -551,6 +552,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     if (!r) r = refValue(b, l + 1);
     if (!r) r = jsonValue(b, l + 1);
     if (!r) r = negtiveSegment(b, l + 1);
+    if (!r) r = scriptBlock(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
@@ -1090,7 +1092,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   //     | (OP_AND | OP_AND_STR | OP_OR | OP_OR_STR) express
   //     | OP_MOD
   //     | TERM_QUESTION express TERM_COLON express
-  //     | (TERM_COMMA express)+
+  //     | pipelineFunctionSegment +
   public static boolean operatorSegment(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "operatorSegment")) return false;
     boolean r;
@@ -1253,28 +1255,17 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (TERM_COMMA express)+
+  // pipelineFunctionSegment +
   private static boolean operatorSegment_8(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "operatorSegment_8")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = operatorSegment_8_0(b, l + 1);
+    r = pipelineFunctionSegment(b, l + 1);
     while (r) {
       int c = current_position_(b);
-      if (!operatorSegment_8_0(b, l + 1)) break;
+      if (!pipelineFunctionSegment(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "operatorSegment_8", c)) break;
     }
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // TERM_COMMA express
-  private static boolean operatorSegment_8_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "operatorSegment_8_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, TERM_COMMA);
-    r = r && express(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -1337,6 +1328,27 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     r = r && consumeToken(b, TERM_PAREN_R);
     exit_section_(b, m, PAREN_SEGMENT, r);
     return r;
+  }
+
+  /* ********************************************************** */
+  // OP_PIPELINE OP_SELF_PIPE ? functionCall
+  public static boolean pipelineFunctionSegment(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "pipelineFunctionSegment")) return false;
+    if (!nextTokenIs(b, OP_PIPELINE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, OP_PIPELINE);
+    r = r && pipelineFunctionSegment_1(b, l + 1);
+    r = r && functionCall(b, l + 1);
+    exit_section_(b, m, PIPELINE_FUNCTION_SEGMENT, r);
+    return r;
+  }
+
+  // OP_SELF_PIPE ?
+  private static boolean pipelineFunctionSegment_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "pipelineFunctionSegment_1")) return false;
+    consumeToken(b, OP_SELF_PIPE);
+    return true;
   }
 
   /* ********************************************************** */

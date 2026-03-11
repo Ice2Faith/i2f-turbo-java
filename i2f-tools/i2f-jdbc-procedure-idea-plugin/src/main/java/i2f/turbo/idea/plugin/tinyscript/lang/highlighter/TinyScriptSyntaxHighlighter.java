@@ -105,6 +105,8 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(TinyScriptTypes.OP_OR_STR)
                 || tokenType.equals(TinyScriptTypes.OP_SUB)
                 || tokenType.equals(TinyScriptTypes.OP_TYPE_OF)
+                || tokenType.equals(TinyScriptTypes.OP_PIPELINE)
+                || tokenType.equals(TinyScriptTypes.OP_SELF_PIPE)
                 || tokenType.equals(TinyScriptTypes.TERM_SHARP)
                 || tokenType.equals(TinyScriptTypes.TERM_AT)
         ) {

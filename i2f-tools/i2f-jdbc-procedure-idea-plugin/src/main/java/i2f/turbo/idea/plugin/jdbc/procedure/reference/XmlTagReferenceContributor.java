@@ -22,7 +22,7 @@ public class XmlTagReferenceContributor extends PsiReferenceContributor {
                 XmlPatterns.xmlTag(),
                 new PsiReferenceProvider() {
                     @Override
-                    public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element,
+                    public @NotNull PsiReference[] getReferencesByElement(@NotNull PsiElement element,
                                                                            @NotNull ProcessingContext context) {
 //                         String text = element.getText();
 //                        log.warn("xml-tag:"+" : "+element.getClass()+text);
