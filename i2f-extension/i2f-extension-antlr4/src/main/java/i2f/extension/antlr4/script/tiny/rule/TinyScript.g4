@@ -161,8 +161,13 @@ express:
     | express ('&&' | 'and' | '||' | 'or') express
     | negtiveSegment
     | express '?' express ':' express
-    | express (',' express) +
+    | express pipelineFunctionSegment+
+    | scriptBlock
     ;
+
+pipelineFunctionSegment:
+    '|>' '::'? functionCall
+;
 
 declareFunction:
     'func' NAMING TERM_PAREN_L parameterList? TERM_PAREN_R scriptBlock

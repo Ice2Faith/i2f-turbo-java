@@ -40,933 +40,741 @@ public class TinyScriptBaseListener implements TinyScriptListener {
 	@Override
 	public void enterSegments(TinyScriptParser.SegmentsContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitSegments(TinyScriptParser.SegmentsContext ctx) {
-	}
-
+	public void exitSegments(TinyScriptParser.SegmentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterExpress(TinyScriptParser.ExpressContext ctx) {
-	}
-
+	public void enterExpress(TinyScriptParser.ExpressContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitExpress(TinyScriptParser.ExpressContext ctx) {
-	}
-
+	public void exitExpress(TinyScriptParser.ExpressContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx) {
-	}
-
+	public void enterPipelineFunctionSegment(TinyScriptParser.PipelineFunctionSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx) {
-	}
-
+	public void exitPipelineFunctionSegment(TinyScriptParser.PipelineFunctionSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterParameterList(TinyScriptParser.ParameterListContext ctx) {
-	}
-
+	public void enterDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitParameterList(TinyScriptParser.ParameterListContext ctx) {
-	}
-
+	public void exitDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx) {
-	}
-
+	public void enterParameterList(TinyScriptParser.ParameterListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx) {
-	}
-
+	public void exitParameterList(TinyScriptParser.ParameterListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterDebuggerSegment(TinyScriptParser.DebuggerSegmentContext ctx) {
-	}
-
+	public void enterNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitDebuggerSegment(TinyScriptParser.DebuggerSegmentContext ctx) {
-	}
-
+	public void exitNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterTrySegment(TinyScriptParser.TrySegmentContext ctx) {
-	}
-
+	public void enterDebuggerSegment(TinyScriptParser.DebuggerSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitTrySegment(TinyScriptParser.TrySegmentContext ctx) {
-	}
-
+	public void exitDebuggerSegment(TinyScriptParser.DebuggerSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterThrowSegment(TinyScriptParser.ThrowSegmentContext ctx) {
-	}
-
+	public void enterTrySegment(TinyScriptParser.TrySegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitThrowSegment(TinyScriptParser.ThrowSegmentContext ctx) {
-	}
-
+	public void exitTrySegment(TinyScriptParser.TrySegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterTryBodyBlock(TinyScriptParser.TryBodyBlockContext ctx) {
-	}
-
+	public void enterThrowSegment(TinyScriptParser.ThrowSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitTryBodyBlock(TinyScriptParser.TryBodyBlockContext ctx) {
-	}
-
+	public void exitThrowSegment(TinyScriptParser.ThrowSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterCatchBodyBlock(TinyScriptParser.CatchBodyBlockContext ctx) {
-	}
-
+	public void enterTryBodyBlock(TinyScriptParser.TryBodyBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitCatchBodyBlock(TinyScriptParser.CatchBodyBlockContext ctx) {
-	}
-
+	public void exitTryBodyBlock(TinyScriptParser.TryBodyBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterFinallyBodyBlock(TinyScriptParser.FinallyBodyBlockContext ctx) {
-	}
-
+	public void enterCatchBodyBlock(TinyScriptParser.CatchBodyBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitFinallyBodyBlock(TinyScriptParser.FinallyBodyBlockContext ctx) {
-	}
-
+	public void exitCatchBodyBlock(TinyScriptParser.CatchBodyBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterClassNameBlock(TinyScriptParser.ClassNameBlockContext ctx) {
-	}
-
+	public void enterFinallyBodyBlock(TinyScriptParser.FinallyBodyBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitClassNameBlock(TinyScriptParser.ClassNameBlockContext ctx) {
-	}
-
+	public void exitFinallyBodyBlock(TinyScriptParser.FinallyBodyBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterParenSegment(TinyScriptParser.ParenSegmentContext ctx) {
-	}
-
+	public void enterClassNameBlock(TinyScriptParser.ClassNameBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitParenSegment(TinyScriptParser.ParenSegmentContext ctx) {
-	}
-
+	public void exitClassNameBlock(TinyScriptParser.ClassNameBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterControlSegment(TinyScriptParser.ControlSegmentContext ctx) {
-	}
-
+	public void enterParenSegment(TinyScriptParser.ParenSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitControlSegment(TinyScriptParser.ControlSegmentContext ctx) {
-	}
-
+	public void exitParenSegment(TinyScriptParser.ParenSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterWhileSegment(TinyScriptParser.WhileSegmentContext ctx) {
-	}
-
+	public void enterControlSegment(TinyScriptParser.ControlSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitWhileSegment(TinyScriptParser.WhileSegmentContext ctx) {
-	}
-
+	public void exitControlSegment(TinyScriptParser.ControlSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterDoWhileSegment(TinyScriptParser.DoWhileSegmentContext ctx) {
-	}
-
+	public void enterWhileSegment(TinyScriptParser.WhileSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitDoWhileSegment(TinyScriptParser.DoWhileSegmentContext ctx) {
-	}
-
+	public void exitWhileSegment(TinyScriptParser.WhileSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterForSegment(TinyScriptParser.ForSegmentContext ctx) {
-	}
-
+	public void enterDoWhileSegment(TinyScriptParser.DoWhileSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitForSegment(TinyScriptParser.ForSegmentContext ctx) {
-	}
-
+	public void exitDoWhileSegment(TinyScriptParser.DoWhileSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterForeachSegment(TinyScriptParser.ForeachSegmentContext ctx) {
-	}
-
+	public void enterForSegment(TinyScriptParser.ForSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitForeachSegment(TinyScriptParser.ForeachSegmentContext ctx) {
-	}
-
+	public void exitForSegment(TinyScriptParser.ForSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterNamingBlock(TinyScriptParser.NamingBlockContext ctx) {
-	}
-
+	public void enterForeachSegment(TinyScriptParser.ForeachSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitNamingBlock(TinyScriptParser.NamingBlockContext ctx) {
-	}
-
+	public void exitForeachSegment(TinyScriptParser.ForeachSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterIfSegment(TinyScriptParser.IfSegmentContext ctx) {
-	}
-
+	public void enterNamingBlock(TinyScriptParser.NamingBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitIfSegment(TinyScriptParser.IfSegmentContext ctx) {
-	}
-
+	public void exitNamingBlock(TinyScriptParser.NamingBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterConditionBlock(TinyScriptParser.ConditionBlockContext ctx) {
-	}
-
+	public void enterIfSegment(TinyScriptParser.IfSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitConditionBlock(TinyScriptParser.ConditionBlockContext ctx) {
-	}
-
+	public void exitIfSegment(TinyScriptParser.IfSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterScriptBlock(TinyScriptParser.ScriptBlockContext ctx) {
-	}
-
+	public void enterConditionBlock(TinyScriptParser.ConditionBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitScriptBlock(TinyScriptParser.ScriptBlockContext ctx) {
-	}
-
+	public void exitConditionBlock(TinyScriptParser.ConditionBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterEqualValue(TinyScriptParser.EqualValueContext ctx) {
-	}
-
+	public void enterScriptBlock(TinyScriptParser.ScriptBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitEqualValue(TinyScriptParser.EqualValueContext ctx) {
-	}
-
+	public void exitScriptBlock(TinyScriptParser.ScriptBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterExtractExpress(TinyScriptParser.ExtractExpressContext ctx) {
-	}
-
+	public void enterEqualValue(TinyScriptParser.EqualValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitExtractExpress(TinyScriptParser.ExtractExpressContext ctx) {
-	}
-
+	public void exitEqualValue(TinyScriptParser.EqualValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterExtractPairs(TinyScriptParser.ExtractPairsContext ctx) {
-	}
-
+	public void enterExtractExpress(TinyScriptParser.ExtractExpressContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitExtractPairs(TinyScriptParser.ExtractPairsContext ctx) {
-	}
-
+	public void exitExtractExpress(TinyScriptParser.ExtractExpressContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterExtractPair(TinyScriptParser.ExtractPairContext ctx) {
-	}
-
+	public void enterExtractPairs(TinyScriptParser.ExtractPairsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitExtractPair(TinyScriptParser.ExtractPairContext ctx) {
-	}
-
+	public void exitExtractPairs(TinyScriptParser.ExtractPairsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx) {
-	}
-
+	public void enterExtractPair(TinyScriptParser.ExtractPairContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx) {
-	}
-
+	public void exitExtractPair(TinyScriptParser.ExtractPairContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterNewInstance(TinyScriptParser.NewInstanceContext ctx) {
-	}
-
+	public void enterStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitNewInstance(TinyScriptParser.NewInstanceContext ctx) {
-	}
-
+	public void exitStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterInvokeFunction(TinyScriptParser.InvokeFunctionContext ctx) {
-	}
-
+	public void enterNewInstance(TinyScriptParser.NewInstanceContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitInvokeFunction(TinyScriptParser.InvokeFunctionContext ctx) {
-	}
-
+	public void exitNewInstance(TinyScriptParser.NewInstanceContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterFunctionCall(TinyScriptParser.FunctionCallContext ctx) {
-	}
-
+	public void enterInvokeFunction(TinyScriptParser.InvokeFunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitFunctionCall(TinyScriptParser.FunctionCallContext ctx) {
-	}
-
+	public void exitInvokeFunction(TinyScriptParser.InvokeFunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterRefCall(TinyScriptParser.RefCallContext ctx) {
-	}
-
+	public void enterFunctionCall(TinyScriptParser.FunctionCallContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitRefCall(TinyScriptParser.RefCallContext ctx) {
-	}
-
+	public void exitFunctionCall(TinyScriptParser.FunctionCallContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterArgumentList(TinyScriptParser.ArgumentListContext ctx) {
-	}
-
+	public void enterRefCall(TinyScriptParser.RefCallContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitArgumentList(TinyScriptParser.ArgumentListContext ctx) {
-	}
-
+	public void exitRefCall(TinyScriptParser.RefCallContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterArgument(TinyScriptParser.ArgumentContext ctx) {
-	}
-
+	public void enterArgumentList(TinyScriptParser.ArgumentListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitArgument(TinyScriptParser.ArgumentContext ctx) {
-	}
-
+	public void exitArgumentList(TinyScriptParser.ArgumentListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterArgumentValue(TinyScriptParser.ArgumentValueContext ctx) {
-	}
-
+	public void enterArgument(TinyScriptParser.ArgumentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitArgumentValue(TinyScriptParser.ArgumentValueContext ctx) {
-	}
-
+	public void exitArgument(TinyScriptParser.ArgumentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterConstValue(TinyScriptParser.ConstValueContext ctx) {
-	}
-
+	public void enterArgumentValue(TinyScriptParser.ArgumentValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitConstValue(TinyScriptParser.ConstValueContext ctx) {
-	}
-
+	public void exitArgumentValue(TinyScriptParser.ArgumentValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterRefValue(TinyScriptParser.RefValueContext ctx) {
-	}
-
+	public void enterConstValue(TinyScriptParser.ConstValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitRefValue(TinyScriptParser.RefValueContext ctx) {
-	}
-
+	public void exitConstValue(TinyScriptParser.ConstValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterConstBool(TinyScriptParser.ConstBoolContext ctx) {
-	}
-
+	public void enterRefValue(TinyScriptParser.RefValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitConstBool(TinyScriptParser.ConstBoolContext ctx) {
-	}
-
+	public void exitRefValue(TinyScriptParser.RefValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterConstNull(TinyScriptParser.ConstNullContext ctx) {
-	}
-
+	public void enterConstBool(TinyScriptParser.ConstBoolContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitConstNull(TinyScriptParser.ConstNullContext ctx) {
-	}
-
+	public void exitConstBool(TinyScriptParser.ConstBoolContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterConstClass(TinyScriptParser.ConstClassContext ctx) {
-	}
-
+	public void enterConstNull(TinyScriptParser.ConstNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitConstClass(TinyScriptParser.ConstClassContext ctx) {
-	}
-
+	public void exitConstNull(TinyScriptParser.ConstNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterConstString(TinyScriptParser.ConstStringContext ctx) {
-	}
-
+	public void enterConstClass(TinyScriptParser.ConstClassContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitConstString(TinyScriptParser.ConstStringContext ctx) {
-	}
-
+	public void exitConstClass(TinyScriptParser.ConstClassContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx) {
-	}
-
+	public void enterConstString(TinyScriptParser.ConstStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx) {
-	}
-
+	public void exitConstString(TinyScriptParser.ConstStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterConstRenderString(TinyScriptParser.ConstRenderStringContext ctx) {
-	}
-
+	public void enterConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitConstRenderString(TinyScriptParser.ConstRenderStringContext ctx) {
-	}
-
+	public void exitConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterDecNumber(TinyScriptParser.DecNumberContext ctx) {
-	}
-
+	public void enterConstRenderString(TinyScriptParser.ConstRenderStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitDecNumber(TinyScriptParser.DecNumberContext ctx) {
-	}
-
+	public void exitConstRenderString(TinyScriptParser.ConstRenderStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterHexNumber(TinyScriptParser.HexNumberContext ctx) {
-	}
-
+	public void enterDecNumber(TinyScriptParser.DecNumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitHexNumber(TinyScriptParser.HexNumberContext ctx) {
-	}
-
+	public void exitDecNumber(TinyScriptParser.DecNumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterOtcNumber(TinyScriptParser.OtcNumberContext ctx) {
-	}
-
+	public void enterHexNumber(TinyScriptParser.HexNumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitOtcNumber(TinyScriptParser.OtcNumberContext ctx) {
-	}
-
+	public void exitHexNumber(TinyScriptParser.HexNumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterBinNumber(TinyScriptParser.BinNumberContext ctx) {
-	}
-
+	public void enterOtcNumber(TinyScriptParser.OtcNumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitBinNumber(TinyScriptParser.BinNumberContext ctx) {
-	}
-
+	public void exitOtcNumber(TinyScriptParser.OtcNumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterJsonValue(TinyScriptParser.JsonValueContext ctx) {
-	}
-
+	public void enterBinNumber(TinyScriptParser.BinNumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitJsonValue(TinyScriptParser.JsonValueContext ctx) {
-	}
-
+	public void exitBinNumber(TinyScriptParser.BinNumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterJsonMapValue(TinyScriptParser.JsonMapValueContext ctx) {
-	}
-
+	public void enterJsonValue(TinyScriptParser.JsonValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitJsonMapValue(TinyScriptParser.JsonMapValueContext ctx) {
-	}
-
+	public void exitJsonValue(TinyScriptParser.JsonValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterJsonPairs(TinyScriptParser.JsonPairsContext ctx) {
-	}
-
+	public void enterJsonMapValue(TinyScriptParser.JsonMapValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitJsonPairs(TinyScriptParser.JsonPairsContext ctx) {
-	}
-
+	public void exitJsonMapValue(TinyScriptParser.JsonMapValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterJsonPair(TinyScriptParser.JsonPairContext ctx) {
-	}
-
+	public void enterJsonPairs(TinyScriptParser.JsonPairsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitJsonPair(TinyScriptParser.JsonPairContext ctx) {
-	}
-
+	public void exitJsonPairs(TinyScriptParser.JsonPairsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterJsonArrayValue(TinyScriptParser.JsonArrayValueContext ctx) {
-	}
-
+	public void enterJsonPair(TinyScriptParser.JsonPairContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitJsonArrayValue(TinyScriptParser.JsonArrayValueContext ctx) {
-	}
-
+	public void exitJsonPair(TinyScriptParser.JsonPairContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void enterJsonItemList(TinyScriptParser.JsonItemListContext ctx) {
-	}
-
+	public void enterJsonArrayValue(TinyScriptParser.JsonArrayValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override
-	public void exitJsonItemList(TinyScriptParser.JsonItemListContext ctx) {
-	}
+	public void exitJsonArrayValue(TinyScriptParser.JsonArrayValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override
+	public void enterJsonItemList(TinyScriptParser.JsonItemListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override
+	public void exitJsonItemList(TinyScriptParser.JsonItemListContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

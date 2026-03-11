@@ -1,7 +1,7 @@
 package i2f.extension.antlr4.script.tiny.test;
 
-import com.newland.bi3.extension.antlr4.script.tiny.TinyScriptParser;
-import com.newland.bi3.extension.antlr4.script.tiny.impl.TinyScript;
+import i2f.extension.antlr4.script.tiny.TinyScriptParser;
+import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.io.BufferedReader;
@@ -21,27 +21,74 @@ public class TestTinyScript {
 
     public static JDBCType type = JDBCType.INTEGER;
 
-    public static void main(String[] args) throws Exception {
+    public static class LoginUser {
+        public User user = new User();
+
+        public User user() {
+            return this.user;
+        }
+    }
+
+    public static class User {
+        public String name = " zhang ";
+
+        public String name() {
+            return this.name;
+        }
+    }
+
+    public static String trim(String str) {
+        return str == null ? null : str.trim();
+    }
+
+    public static String substr(String str, int index, int len) {
+        if (str == null) {
+            return str;
+        }
+        return str.substring(index, index + len);
+    }
+
+    public static void registryMethods() {
 
         TinyScript.registryBuiltMethodByStaticMethod(TestTinyScript.class, (method) -> {
             return method.getName().startsWith("regex");
         });
 
-        Map<String, Object> ctx = new HashMap<>();
-        String className = TestTinyScript.class.getName();
-        TinyScript.script("jdbcType1=@java.sql.JDBCType.VARCHAR;" +
-                "jdbcType2=java.sql.JDBCType@VARCHAR;" +
-                "type1=@java.sql.Types.VARCHAR;" +
-                "type2=java.sql.Types@VARCHAR;" +
-                "static1=@" + className + ".type;" +
-                "static2=" + className + "@type;" +
-                "@" + className + ".type=java.sql.JDBCType@VARCHAR;" +
-                "static3=@" + className + ".type;" +
-                "" + className + "@type=java.sql.JDBCType@BIGINT;" +
-                "static4=@" + className + ".type;" +
-                "", ctx);
+        TinyScript.registryBuiltMethodByStaticMethod(TestTinyScript.class);
 
-        File file = new File("jdbc-procedure-starter/src/main/java/com/newland/bi3/extension/antlr4/script/tiny/test/test.ts.txt");
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        registryMethods();
+
+        // ///////////////////////////////
+
+        testPipeline();
+
+//        testFileScript();
+
+//        testEnumConst();
+
+//        testImpl();
+
+//        testRaw();
+    }
+
+    public static void testPipeline() {
+        Map<String, Object> ctx = new HashMap<>();
+        ctx.put("a", new LoginUser());
+        //substr(trim(a.user().name()),0,2)
+        Object ret = TinyScript.script("${a} \n" +
+                "|> ::user() \n" +
+                "|> ::name() \n" +
+                "|> trim() \n" +
+                "|> substr(0, 2);", ctx);
+        System.out.println("ret:" + ret);
+    }
+
+    public static void testFileScript() throws Exception {
+        File file = new File("i2f-extension/i2f-extension-antlr4/src/test/java/i2f/extension/antlr4/script/tiny/test/test.ts.txt");
         StringBuilder builder = new StringBuilder();
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
         String line = null;
@@ -56,12 +103,24 @@ public class TestTinyScript {
         params.put("IN_FORMUAL_CONTEN", "a.username, a.age, a.username");
 
         Object ret = TinyScript.script(script, params);
-        System.out.println("ok");
+        System.out.println("ret:" + ret);
+    }
 
-
-//        testImpl();
-
-//        testRaw();
+    public static void testEnumConst() {
+        Map<String, Object> ctx = new HashMap<>();
+        String className = TestTinyScript.class.getName();
+        Object ret = TinyScript.script("jdbcType1=@java.sql.JDBCType.VARCHAR;" +
+                "jdbcType2=java.sql.JDBCType@VARCHAR;" +
+                "type1=@java.sql.Types.VARCHAR;" +
+                "type2=java.sql.Types@VARCHAR;" +
+                "static1=@" + className + ".type;" +
+                "static2=" + className + "@type;" +
+                "@" + className + ".type=java.sql.JDBCType@VARCHAR;" +
+                "static3=@" + className + ".type;" +
+                "" + className + "@type=java.sql.JDBCType@BIGINT;" +
+                "static4=@" + className + ".type;" +
+                "", ctx);
+        System.out.println("ret:" + ret);
     }
 
     public static boolean regexLike(String str, String regex) {

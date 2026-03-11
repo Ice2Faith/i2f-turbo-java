@@ -24,7 +24,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitScript(TinyScriptParser.ScriptContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -35,7 +34,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitSegments(TinyScriptParser.SegmentsContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -46,7 +44,16 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitExpress(TinyScriptParser.ExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override
+	public T visitPipelineFunctionSegment(TinyScriptParser.PipelineFunctionSegmentContext ctx) {
+		return visitChildren(ctx);
+	}
 	/**
 	 * {@inheritDoc}
 	 *
@@ -57,7 +64,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -68,7 +74,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitParameterList(TinyScriptParser.ParameterListContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -79,7 +84,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -90,7 +94,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitDebuggerSegment(TinyScriptParser.DebuggerSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -101,7 +104,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitTrySegment(TinyScriptParser.TrySegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -112,7 +114,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitThrowSegment(TinyScriptParser.ThrowSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -123,7 +124,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitTryBodyBlock(TinyScriptParser.TryBodyBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -134,7 +134,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitCatchBodyBlock(TinyScriptParser.CatchBodyBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -145,7 +144,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitFinallyBodyBlock(TinyScriptParser.FinallyBodyBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -156,7 +154,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitClassNameBlock(TinyScriptParser.ClassNameBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -167,7 +164,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitParenSegment(TinyScriptParser.ParenSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -178,7 +174,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitControlSegment(TinyScriptParser.ControlSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -189,7 +184,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitWhileSegment(TinyScriptParser.WhileSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -200,7 +194,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitDoWhileSegment(TinyScriptParser.DoWhileSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -211,7 +204,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitForSegment(TinyScriptParser.ForSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -222,7 +214,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitForeachSegment(TinyScriptParser.ForeachSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -233,7 +224,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitNamingBlock(TinyScriptParser.NamingBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -244,7 +234,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitIfSegment(TinyScriptParser.IfSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -255,7 +244,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitConditionBlock(TinyScriptParser.ConditionBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -266,7 +254,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitScriptBlock(TinyScriptParser.ScriptBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -277,7 +264,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitEqualValue(TinyScriptParser.EqualValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -288,7 +274,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitExtractExpress(TinyScriptParser.ExtractExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -299,7 +284,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitExtractPairs(TinyScriptParser.ExtractPairsContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -310,7 +294,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitExtractPair(TinyScriptParser.ExtractPairContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -321,7 +304,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitStaticEnumValue(TinyScriptParser.StaticEnumValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -332,7 +314,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitNewInstance(TinyScriptParser.NewInstanceContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -343,7 +324,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitInvokeFunction(TinyScriptParser.InvokeFunctionContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -354,7 +334,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitFunctionCall(TinyScriptParser.FunctionCallContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -365,7 +344,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitRefCall(TinyScriptParser.RefCallContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -376,7 +354,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitArgumentList(TinyScriptParser.ArgumentListContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -387,7 +364,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitArgument(TinyScriptParser.ArgumentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -398,7 +374,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitArgumentValue(TinyScriptParser.ArgumentValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -409,7 +384,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitConstValue(TinyScriptParser.ConstValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -420,7 +394,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitRefValue(TinyScriptParser.RefValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -431,7 +404,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitConstBool(TinyScriptParser.ConstBoolContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -442,7 +414,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitConstNull(TinyScriptParser.ConstNullContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -453,7 +424,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitConstClass(TinyScriptParser.ConstClassContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -464,7 +434,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitConstString(TinyScriptParser.ConstStringContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -475,7 +444,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitConstMultilineString(TinyScriptParser.ConstMultilineStringContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -486,7 +454,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitConstRenderString(TinyScriptParser.ConstRenderStringContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -497,7 +464,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitDecNumber(TinyScriptParser.DecNumberContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -508,7 +474,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitHexNumber(TinyScriptParser.HexNumberContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -519,7 +484,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitOtcNumber(TinyScriptParser.OtcNumberContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -530,7 +494,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitBinNumber(TinyScriptParser.BinNumberContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -541,7 +504,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitJsonValue(TinyScriptParser.JsonValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -552,7 +514,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitJsonMapValue(TinyScriptParser.JsonMapValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -563,7 +524,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitJsonPairs(TinyScriptParser.JsonPairsContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -574,7 +534,6 @@ public class TinyScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	public T visitJsonPair(TinyScriptParser.JsonPairContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
