@@ -28,21 +28,31 @@ public class OpsSecureTransfer {
     private OpsSecureKeyPair opsSecureKeyPair;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private HostIdHelper hostIdHelper;
 
     public OpsSecureReturn<OpsSecureDto> success(Object obj) throws Exception {
-        return OpsSecureReturn.success(send(obj));
+        long ms = OpsTimeCounter.end();
+        OpsSecureReturn<OpsSecureDto> ret = OpsSecureReturn.success(send(obj));
+        return ret.withUseMillSeconds(ms).withHostId(hostIdHelper.getHostId());
     }
 
     public OpsSecureReturn<OpsSecureDto> error(String msg) throws Exception {
-        return OpsSecureReturn.error(msg);
+        long ms = OpsTimeCounter.end();
+        OpsSecureReturn<OpsSecureDto> ret = OpsSecureReturn.error(msg);
+        return ret.withUseMillSeconds(ms).withHostId(hostIdHelper.getHostId());
     }
 
     public OpsSecureReturn<OpsSecureDto> error(String msg, Throwable e) throws Exception {
-        return OpsSecureReturn.error(msg, e);
+        long ms = OpsTimeCounter.end();
+        OpsSecureReturn<OpsSecureDto> ret = OpsSecureReturn.error(msg, e);
+        return ret.withUseMillSeconds(ms).withHostId(hostIdHelper.getHostId());
     }
 
     public OpsSecureReturn<OpsSecureDto> error(Throwable e) throws Exception {
-        return OpsSecureReturn.error(e);
+        long ms = OpsTimeCounter.end();
+        OpsSecureReturn<OpsSecureDto> ret = OpsSecureReturn.error(e);
+        return ret.withUseMillSeconds(ms).withHostId(hostIdHelper.getHostId());
     }
 
     public OpsSecureDto send(Object obj) throws Exception {
@@ -117,12 +127,18 @@ public class OpsSecureTransfer {
     }
 
     public <T> T recv(OpsSecureDto dto, Class<T> type) throws Exception {
+        OpsTimeCounter.begin();
         String json = recvJson(dto);
-        return objectMapper.readValue(json, type);
+        T ret = objectMapper.readValue(json, type);
+        OpsTimeCounter.begin();
+        return ret;
     }
 
     public <T> T recv(OpsSecureDto dto, TypeReference<T> type) throws Exception {
+        OpsTimeCounter.begin();
         String json = recvJson(dto);
-        return objectMapper.readValue(json, type);
+        T ret = objectMapper.readValue(json, type);
+        OpsTimeCounter.begin();
+        return ret;
     }
 }
