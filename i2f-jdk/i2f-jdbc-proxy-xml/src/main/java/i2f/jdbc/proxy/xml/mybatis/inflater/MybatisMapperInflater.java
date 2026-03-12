@@ -116,7 +116,7 @@ public class MybatisMapperInflater {
 
     @Data
     @NoArgsConstructor
-    public static class SimpleMapEntry<K, V> implements Map.Entry<K, V> {
+    public static class SimpleMapEntry<K, V> {
         protected K key;
         protected V value;
 
