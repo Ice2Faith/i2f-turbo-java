@@ -15,6 +15,10 @@ repositories {
     }
 }
 
+dependencies {
+    implementation("org.antlr:antlr4-runtime:4.13.2")
+}
+
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
     options.compilerArgs.addAll(listOf("-parameters"))
