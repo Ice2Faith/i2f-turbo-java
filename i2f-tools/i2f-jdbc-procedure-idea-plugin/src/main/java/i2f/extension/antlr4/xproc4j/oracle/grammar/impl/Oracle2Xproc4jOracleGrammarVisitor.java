@@ -17,7 +17,7 @@ import java.util.*;
  */
 public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<String> {
 
-    protected ConvertType type=ConvertType.XPROC4J;
+    protected ConvertType mode=ConvertType.XPROC4J;
 
     public Oracle2Xproc4jOracleGrammarVisitor(){
 
@@ -25,7 +25,7 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
 
     public Oracle2Xproc4jOracleGrammarVisitor(ConvertType type){
         if(type!=null) {
-            this.type = type;
+            this.mode = type;
         }
     }
 
@@ -308,9 +308,17 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 }
                 operatorText = operatorText.replace("<", "&lt;");
                 if ("like".equals(operatorText)) {
-                    builder.append("like(").append(leftText).append(", ").append(rightText).append(")");
+                    if(mode==ConvertType.OGNL){
+                        builder.append(unescapeSqlIdentifier(leftText)).append(".contains(").append(unescapeSqlIdentifier(rightText)).append(")");
+                    }else {
+                        builder.append("like(").append(leftText).append(", ").append(rightText).append(")");
+                    }
                 } else {
-                    builder.append(leftText).append(" ").append(operatorText).append(" ").append(rightText);
+                    if(mode==ConvertType.OGNL){
+                        builder.append(unescapeSqlIdentifier(leftText)).append(" ").append(operatorText).append(" ").append(unescapeSqlIdentifier(rightText));
+                    }else {
+                        builder.append(leftText).append(" ").append(operatorText).append(" ").append(rightText);
+                    }
                 }
             }
         } else if (count == 1) {
@@ -362,7 +370,11 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 vars = nextText;
             }
         }
-        builder.append(name).append(" ").append("in").append(" [").append(vars).append("]");
+        if(mode==ConvertType.OGNL) {
+            builder.append(unescapeSqlIdentifier(name)).append(" ").append("in").append(" {").append(vars).append("}");
+        }else{
+            builder.append(name).append(" ").append("in").append(" [").append(vars).append("]");
+        }
         return builder.toString();
     }
 
@@ -384,7 +396,11 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 vars = nextText;
             }
         }
-        builder.append(name).append(" ").append("notin").append(" [").append(vars).append("]");
+        if(mode==ConvertType.OGNL){
+            builder.append(unescapeSqlIdentifier(name)).append(" ").append("not in").append(" {").append(vars).append("}");
+        }else {
+            builder.append(name).append(" ").append("notin").append(" [").append(vars).append("]");
+        }
         return builder.toString();
     }
 
@@ -439,7 +455,11 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 list.add(nextText);
             }
         }
-        builder.append("!like(").append(list.get(0)).append(", ").append(list.get(1)).append(")");
+        if(mode==ConvertType.OGNL){
+            builder.append("!").append(unescapeSqlIdentifier(list.get(0))).append(".contains(").append(unescapeSqlIdentifier(list.get(1))).append(")");
+        }else {
+            builder.append("!like(").append(list.get(0)).append(", ").append(list.get(1)).append(")");
+        }
         return builder.toString();
     }
 
@@ -456,7 +476,14 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 list.add(nextText);
             }
         }
-        builder.append("!evl(").append(list.get(0)).append(")");
+        if(mode==ConvertType.OGNL){
+            builder.append("(")
+                    .append(unescapeSqlIdentifier(list.get(0))).append("==null")
+                    .append(" or ").append(unescapeSqlIdentifier(list.get(0))).append("==''")
+                    .append(")");
+        }else {
+            builder.append("!evl(").append(list.get(0)).append(")");
+        }
         return builder.toString();
     }
 
@@ -473,7 +500,14 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 list.add(nextText);
             }
         }
-        builder.append("evl(").append(list.get(0)).append(")");
+        if(mode==ConvertType.OGNL){
+            builder.append("(")
+                    .append(unescapeSqlIdentifier(list.get(0))).append("==null")
+                    .append(" or ").append(unescapeSqlIdentifier(list.get(0))).append("==''")
+                    .append(")");
+        }else {
+            builder.append("evl(").append(list.get(0)).append(")");
+        }
         return builder.toString();
     }
 
@@ -518,20 +552,43 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 }
             }
         }
-        builder.append("<lang-choose>").append("\n");
-        for (int i = 0; i < list.size(); i++) {
-            Map.Entry<String, String> entry = list.get(i);
-            if (entry.getKey() != null) {
-                builder.append("<lang-when test.eval-ts=\"").append(entry.getKey()).append("\">").append("\n")
-                        .append(entry.getValue()).append("\n")
-                        .append("</lang-when>").append("\n");
-            } else {
-                builder.append("<lang-otherwise>").append("\n")
-                        .append(entry.getValue()).append("\n")
-                        .append("</lang-otherwise>").append("\n");
+        if(mode==ConvertType.TINY_SCRIPT){
+            builder.append("<lang-eval-ts>").append("\n");
+            for (int i = 0; i < list.size(); i++) {
+                Map.Entry<String, String> entry = list.get(i);
+                if (entry.getKey() != null) {
+                    if(i!=0){
+                        builder.append("\nelse ");
+                    }
+                    builder.append(" if (").append(entry.getKey()).append(" ) {").append("\n")
+                                    .append(entry.getValue()).append("\n")
+                                    .append("} ");
+                } else {
+                    builder.append(" else {").append("\n")
+                            .append(entry.getValue()).append("\n")
+                            .append("} ");
+                }
+                if(i==list.size()-1){
+                    builder.append(";").append("\n");
+                }
             }
+            builder.append("</lang-eval-ts>").append("\n");
+        }else {
+            builder.append("<lang-choose>").append("\n");
+            for (int i = 0; i < list.size(); i++) {
+                Map.Entry<String, String> entry = list.get(i);
+                if (entry.getKey() != null) {
+                    builder.append("<lang-when test").append(mode==ConvertType.OGNL?"":".eval-ts").append("=\"").append(entry.getKey()).append("\">").append("\n")
+                            .append(entry.getValue()).append("\n")
+                            .append("</lang-when>").append("\n");
+                } else {
+                    builder.append("<lang-otherwise>").append("\n")
+                            .append(entry.getValue()).append("\n")
+                            .append("</lang-otherwise>").append("\n");
+                }
+            }
+            builder.append("</lang-choose>").append("\n");
         }
-        builder.append("</lang-choose>").append("\n");
         return builder.toString();
     }
 
@@ -742,13 +799,41 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
             }
         }
         if (value.contains("$!{")) {
-            builder.append("<lang-render result=\"").append(name.toUpperCase()).append("\"").append(" _lang=\"sql\">\n")
-                    .append(escapeXmlString(value)).append("\n")
-                    .append("</lang-render>").append("");
+            value = escapeXmlString(value);
+            if(mode==ConvertType.TINY_SCRIPT){
+                builder.append("<lang-eval-ts>").append("\n");
+                builder.append(name.toUpperCase()).append("=").append("R\"").append(value).append("\"").append(";").append("\n");
+                builder.append("</lang-eval-ts>");
+            }else{
+                if(value.contains("\n") || value.length()>100){
+                    builder.append("<lang-render result=\"").append(name.toUpperCase()).append("\"").append(" _lang=\"sql\">\n")
+                            .append(value).append("\n")
+                            .append("</lang-render>").append("");
+                }else{
+                    builder.append("<lang-set result=\"").append(name.toUpperCase()).append("\"")
+                            .append(" value.render=\"").append(value).append("\"")
+                            .append(" _lang=\"sql\"/>\n");
+                }
+            }
+
+
         } else if (isSqlString(value)) {
-            builder.append("<lang-string result=\"").append(name.toUpperCase()).append("\"").append(" _lang=\"sql\">\n")
-                    .append(escapeXmlString(unescapeSqlString(value))).append("\n")
-                    .append("</lang-string>").append("");
+            value = escapeXmlString(unescapeSqlString(value));
+            if(mode==ConvertType.TINY_SCRIPT){
+                builder.append("<lang-eval-ts>").append("\n");
+                builder.append(name.toUpperCase()).append("=").append("\"").append(value).append("\"").append(";").append("\n");
+                builder.append("</lang-eval-ts>");
+            }else{
+                if(value.contains("\n") || value.length()>100){
+                    builder.append("<lang-string result=\"").append(name.toUpperCase()).append("\"").append(" _lang=\"sql\">\n")
+                            .append(value).append("\n")
+                            .append("</lang-string>").append("");
+                }else{
+                    builder.append("<lang-set result=\"").append(name.toUpperCase()).append("\"")
+                            .append(" value.string=\"").append(value).append("\"")
+                            .append(" _lang=\"sql\"/>\n");
+                }
+            }
         } else {
             builder.append("<lang-eval-ts>").append("\n");
             builder.append(name.toUpperCase()).append("=").append(value).append(";").append("\n");
