@@ -40,6 +40,7 @@ KEY_OR: [oO][rR];
 KEY_IF: [iI][fF];
 KEY_THEN: [tT][hH][eE][nN];
 KEY_ELSE: [eE][lL][sS][eE];
+KEY_ELSIF: [eE][lL][sS][iI][fF];
 KEY_END: [eE][nN][dD];
 KEY_COMMIT:[cC][oO][mM][mM][iI][tT];
 KEY_ROLLBACK:[rR][oO][lL][lL][bB][aA][cC][kK];
@@ -80,7 +81,6 @@ segment:
     |declareProcedureSegment
     |declareVariableSegment
     | assignSegment
-    | functionSegment
     | ifElseSegment
     | commitSegment
     | rollbackSegment
@@ -152,7 +152,7 @@ conditionCompositeSegment:
 ;
 
 ifElseSegment:
-    KEY_IF conditionCompositeSegment KEY_THEN script (KEY_ELSE KEY_IF conditionCompositeSegment KEY_THEN script)* (KEY_ELSE script)? KEY_END KEY_IF?
+    KEY_IF conditionCompositeSegment KEY_THEN script ((KEY_ELSE KEY_IF | KEY_ELSIF) conditionCompositeSegment KEY_THEN script)* (KEY_ELSE script)? KEY_END KEY_IF?
 ;
 
 variableSegment:
@@ -161,6 +161,7 @@ variableSegment:
     | sqlNumber
     | sqlNull
     | sqlIdentifier
+    | functionSegment
 ;
 
 functionSegment:

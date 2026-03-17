@@ -13,14 +13,21 @@ import org.antlr.v4.runtime.CommonTokenStream;
  */
 public class Oracle2Xproc4j {
 
-
     public static String convert(String formula) {
+        return convert(formula, null);
+    }
+
+    public static String convert(String formula, ConvertType type) {
         OracleGrammarParser.ScriptContext tree = parse(formula);
-        return convert(tree);
+        return convert(tree, type);
     }
 
     public static String convert(OracleGrammarParser.ScriptContext tree) {
-        OracleGrammarVisitor<String> visitor = new Oracle2Xproc4jOracleGrammarVisitor();
+        return convert(tree, null);
+    }
+
+    public static String convert(OracleGrammarParser.ScriptContext tree, ConvertType type) {
+        OracleGrammarVisitor<String> visitor = new Oracle2Xproc4jOracleGrammarVisitor(type);
         String ret = visitor.visit(tree);
         return ret;
     }

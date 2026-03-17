@@ -16,6 +16,19 @@ import java.util.*;
  * @desc
  */
 public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<String> {
+
+    protected ConvertType type=ConvertType.XPROC4J;
+
+    public Oracle2Xproc4jOracleGrammarVisitor(){
+
+    }
+
+    public Oracle2Xproc4jOracleGrammarVisitor(ConvertType type){
+        if(type!=null) {
+            this.type = type;
+        }
+    }
+
     @Override
     public String visitConvert(OracleGrammarParser.ConvertContext ctx) {
         StringBuilder builder = new StringBuilder();
@@ -87,10 +100,6 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
             } else if (child instanceof OracleGrammarParser.AssignSegmentContext) {
                 OracleGrammarParser.AssignSegmentContext nextCtx = (OracleGrammarParser.AssignSegmentContext) child;
                 String nextText = visitAssignSegment(nextCtx);
-                builder.append(nextText);
-            } else if (child instanceof OracleGrammarParser.FunctionSegmentContext) {
-                OracleGrammarParser.FunctionSegmentContext nextCtx = (OracleGrammarParser.FunctionSegmentContext) child;
-                String nextText = visitFunctionSegment(nextCtx);
                 builder.append(nextText);
             } else if (child instanceof OracleGrammarParser.IfElseSegmentContext) {
                 OracleGrammarParser.IfElseSegmentContext nextCtx = (OracleGrammarParser.IfElseSegmentContext) child;
@@ -548,6 +557,10 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 OracleGrammarParser.SqlIdentifierContext nextCtx = (OracleGrammarParser.SqlIdentifierContext) child;
                 String nextText = visitSqlIdentifier(nextCtx);
                 builder.append(nextText.toUpperCase());
+            } else if (child instanceof OracleGrammarParser.FunctionSegmentContext) {
+                OracleGrammarParser.FunctionSegmentContext nextCtx = (OracleGrammarParser.FunctionSegmentContext) child;
+                String nextText = visitFunctionSegment(nextCtx);
+                builder.append(nextText);
             }
         } else {
             for (int i = 0; i < count; i++) {

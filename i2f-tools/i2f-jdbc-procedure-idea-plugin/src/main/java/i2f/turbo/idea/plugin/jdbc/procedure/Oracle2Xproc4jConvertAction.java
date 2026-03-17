@@ -8,13 +8,17 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.ConvertType;
 import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.Oracle2Xproc4j;
+import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.Oracle2Xproc4jOracleGrammarVisitor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class Oracle2Xproc4jConvertAction extends AnAction {
     public static final Logger log = Logger.getInstance(Oracle2Xproc4jConvertAction.class);
@@ -164,15 +168,15 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             try {
                 // 调用你定义的转换函数
                 // 注意：如果 convert 方法是静态的，直接调用；如果是实例方法，需要实例化
-                if(type==ConvertType.XPROC4J) {
-                    String result = Oracle2Xproc4j.convert(sourceText);
-                    outputArea.setText(result);
-                }else{
-                    outputArea.setText("current un-support this type: " + type);
-                }
+                String result = Oracle2Xproc4j.convert(sourceText,type);
+                outputArea.setText(result);
             } catch (Exception ex) {
-                outputArea.setText("convert error: " + ex.getMessage());
-                ex.printStackTrace();
+                StringWriter writer=new StringWriter();
+                PrintWriter pw=new PrintWriter(writer);
+                pw.println("convert error "+ex.getClass()+" : " + ex.getMessage());
+                ex.printStackTrace(pw);
+                pw.flush();
+                outputArea.setText(writer.toString());
             }
         }
 
@@ -186,11 +190,7 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             return ConvertType.XPROC4J; // 默认
         }
 
-        public enum ConvertType{
-            XPROC4J,
-            TINY_SCRIPT,
-            OGNL
-        }
+
 
     }
 }
