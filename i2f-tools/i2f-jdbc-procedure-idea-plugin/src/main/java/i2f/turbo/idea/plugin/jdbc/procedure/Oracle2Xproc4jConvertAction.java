@@ -10,7 +10,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.ConvertType;
 import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.Oracle2Xproc4j;
-import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.Oracle2Xproc4jOracleGrammarVisitor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
