@@ -85,7 +85,7 @@ segment:
     | commitSegment
     | rollbackSegment
     | variableSegment
-    | conditionSegment
+    | conditionCompositeSegment
 ;
 
 declareProcedureSegment:
@@ -148,7 +148,9 @@ conditionIsNullSegment:
 
 
 conditionCompositeSegment:
-    conditionSegment (KEY_AND|KEY_OR conditionSegment)*
+    '(' conditionCompositeSegment ')'
+    | conditionCompositeSegment (KEY_AND|KEY_OR) conditionCompositeSegment
+    | conditionSegment
 ;
 
 ifElseSegment:
@@ -156,12 +158,15 @@ ifElseSegment:
 ;
 
 variableSegment:
-    variableSegment ('||' variableSegment)+
+    '(' variableSegment ')'
+    | variableSegment ('||' variableSegment)+
+    | variableSegment ('*' | '/') variableSegment
+    | variableSegment ('+' | '-') variableSegment
+    | functionSegment
     | sqlString
     | sqlNumber
     | sqlNull
     | sqlIdentifier
-    | functionSegment
 ;
 
 functionSegment:

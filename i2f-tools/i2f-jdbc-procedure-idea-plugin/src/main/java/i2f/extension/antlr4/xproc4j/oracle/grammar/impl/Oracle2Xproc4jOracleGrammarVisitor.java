@@ -117,9 +117,9 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 OracleGrammarParser.VariableSegmentContext nextCtx = (OracleGrammarParser.VariableSegmentContext) child;
                 String nextText = visitVariableSegment(nextCtx);
                 builder.append(nextText);
-            } else if (child instanceof OracleGrammarParser.ConditionSegmentContext) {
-                OracleGrammarParser.ConditionSegmentContext nextCtx = (OracleGrammarParser.ConditionSegmentContext) child;
-                String nextText = visitConditionSegment(nextCtx);
+            } else if (child instanceof OracleGrammarParser.ConditionCompositeSegmentContext) {
+                OracleGrammarParser.ConditionCompositeSegmentContext nextCtx = (OracleGrammarParser.ConditionCompositeSegmentContext) child;
+                String nextText = visitConditionCompositeSegment(nextCtx);
                 builder.append(nextText);
             } else {
                 throw new IllegalStateException("un-support segment branch: " + child.getClass());
@@ -514,17 +514,38 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
     @Override
     public String visitConditionCompositeSegment(OracleGrammarParser.ConditionCompositeSegmentContext ctx) {
         StringBuilder builder = new StringBuilder();
-        int count = ctx.getChildCount();
-        for (int i = 0; i < count; i++) {
-            ParseTree child = ctx.getChild(i);
-            if (child instanceof OracleGrammarParser.ConditionSegmentContext) {
-                OracleGrammarParser.ConditionSegmentContext nextCtx = (OracleGrammarParser.ConditionSegmentContext) child;
-                String nextText = visitConditionSegment(nextCtx);
-                builder.append(nextText);
-            } else if (child instanceof TerminalNode) {
-                TerminalNode nextCtx = (TerminalNode) child;
-                String nextText = visitTerminal(nextCtx).toLowerCase();
-                builder.append(" ").append(nextText).append(" ");
+        ParseTree item = ctx.getChild(0);
+        if(item instanceof TerminalNode){ // ( conditionCompositeSegment )
+            int count = ctx.getChildCount();
+            for (int i = 0; i < count; i++) {
+                ParseTree child = ctx.getChild(i);
+                if (child instanceof OracleGrammarParser.ConditionCompositeSegmentContext) {
+                    OracleGrammarParser.ConditionCompositeSegmentContext nextCtx = (OracleGrammarParser.ConditionCompositeSegmentContext) child;
+                    String nextText = visitConditionCompositeSegment(nextCtx);
+                    builder.append(nextText);
+                } else if (child instanceof TerminalNode) {
+                    TerminalNode nextCtx = (TerminalNode) child;
+                    String nextText = visitTerminal(nextCtx).toLowerCase();
+                    builder.append(" ").append(nextText).append(" ");
+                }
+            }
+        }else if(item instanceof OracleGrammarParser.ConditionSegmentContext){ // conditionSegment
+            OracleGrammarParser.ConditionSegmentContext nextCtx = (OracleGrammarParser.ConditionSegmentContext) item;
+            String nextText = visitConditionSegment(nextCtx);
+            builder.append(nextText);
+        }else if(item instanceof OracleGrammarParser.ConditionCompositeSegmentContext) { // conditionCompositeSegment (KEY_AND|KEY_OR) conditionCompositeSegment
+            int count = ctx.getChildCount();
+            for (int i = 0; i < count; i++) {
+                ParseTree child = ctx.getChild(i);
+                if (child instanceof OracleGrammarParser.ConditionCompositeSegmentContext) {
+                    OracleGrammarParser.ConditionCompositeSegmentContext nextCtx = (OracleGrammarParser.ConditionCompositeSegmentContext) child;
+                    String nextText = visitConditionCompositeSegment(nextCtx);
+                    builder.append(nextText);
+                } else if (child instanceof TerminalNode) {
+                    TerminalNode nextCtx = (TerminalNode) child;
+                    String nextText = visitTerminal(nextCtx).toLowerCase();
+                    builder.append(" ").append(nextText).append(" ");
+                }
             }
         }
         return builder.toString();
@@ -598,42 +619,79 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
         int count = ctx.getChildCount();
         if (count == 1) {
             ParseTree child = ctx.getChild(0);
-            if (child instanceof OracleGrammarParser.SqlStringContext) {
+            if (child instanceof OracleGrammarParser.SqlStringContext) { // sqlString
                 OracleGrammarParser.SqlStringContext nextCtx = (OracleGrammarParser.SqlStringContext) child;
                 String nextText = visitSqlString(nextCtx);
                 builder.append(nextText);
-            } else if (child instanceof OracleGrammarParser.SqlNumberContext) {
+            } else if (child instanceof OracleGrammarParser.SqlNumberContext) { // sqlNumber
                 OracleGrammarParser.SqlNumberContext nextCtx = (OracleGrammarParser.SqlNumberContext) child;
                 String nextText = visitSqlNumber(nextCtx);
                 builder.append(nextText);
-            } else if (child instanceof OracleGrammarParser.SqlNullContext) {
+            } else if (child instanceof OracleGrammarParser.SqlNullContext) { // sqlNull
                 OracleGrammarParser.SqlNullContext nextCtx = (OracleGrammarParser.SqlNullContext) child;
                 String nextText = visitSqlNull(nextCtx);
                 builder.append(nextText);
-            } else if (child instanceof OracleGrammarParser.SqlIdentifierContext) {
+            } else if (child instanceof OracleGrammarParser.SqlIdentifierContext) { // sqlIdentifier
                 OracleGrammarParser.SqlIdentifierContext nextCtx = (OracleGrammarParser.SqlIdentifierContext) child;
                 String nextText = visitSqlIdentifier(nextCtx);
                 builder.append(nextText.toUpperCase());
-            } else if (child instanceof OracleGrammarParser.FunctionSegmentContext) {
+            } else if (child instanceof OracleGrammarParser.FunctionSegmentContext) { // functionSegment
                 OracleGrammarParser.FunctionSegmentContext nextCtx = (OracleGrammarParser.FunctionSegmentContext) child;
                 String nextText = visitFunctionSegment(nextCtx);
                 builder.append(nextText);
             }
-        } else {
-            for (int i = 0; i < count; i++) {
-                ParseTree child = ctx.getChild(i);
-                if (child instanceof OracleGrammarParser.VariableSegmentContext) {
-                    OracleGrammarParser.VariableSegmentContext nextCtx = (OracleGrammarParser.VariableSegmentContext) child;
-                    String nextText = visitVariableSegment(nextCtx);
-                    if (isSqlIdentifier(nextText)) {
-                        builder.append(nextText.replace("${", "$!{"));
-                    } else if (isSqlString(nextText)) {
-                        builder.append(unescapeSqlString(nextText));
-                    } else {
+        } else if(count>=3) {
+            ParseTree first = ctx.getChild(0);
+            if(first instanceof TerminalNode){ // '(' variableSegment ')'
+                for (int i = 0; i < count; i++) {
+                    ParseTree child = ctx.getChild(i);
+                    if (child instanceof OracleGrammarParser.VariableSegmentContext) {
+                        OracleGrammarParser.VariableSegmentContext nextCtx = (OracleGrammarParser.VariableSegmentContext) child;
+                        String nextText = visitVariableSegment(nextCtx);
                         builder.append(nextText);
+                    }else if(child instanceof TerminalNode){
+                        TerminalNode nextCtx = (TerminalNode) child;
+                        String nextText = visitTerminal(nextCtx);
+                        builder.append(" ").append(nextText).append(" ");
+                    }
+                }
+            }else{
+                ParseTree second = ctx.getChild(1);
+                if(second instanceof TerminalNode){
+                    TerminalNode sepCtx = (TerminalNode) second;
+                    String separator = visitTerminal(sepCtx);
+                    if("||".equals(separator)){ // variableSegment ('||' variableSegment)+
+                        for (int i = 0; i < count; i++) {
+                            ParseTree child = ctx.getChild(i);
+                            if (child instanceof OracleGrammarParser.VariableSegmentContext) {
+                                OracleGrammarParser.VariableSegmentContext nextCtx = (OracleGrammarParser.VariableSegmentContext) child;
+                                String nextText = visitVariableSegment(nextCtx);
+                                if (isSqlIdentifier(nextText)) {
+                                    builder.append(nextText.replace("${", "$!{"));
+                                } else if (isSqlString(nextText)) {
+                                    builder.append(unescapeSqlString(nextText));
+                                } else {
+                                    builder.append(nextText);
+                                }
+                            }
+                        }
+                    }else{ // variableSegment ('*' | '/' | '+' | '-') variableSegment
+                        for (int i = 0; i < count; i++) {
+                            ParseTree child = ctx.getChild(i);
+                            if (child instanceof OracleGrammarParser.VariableSegmentContext) {
+                                OracleGrammarParser.VariableSegmentContext nextCtx = (OracleGrammarParser.VariableSegmentContext) child;
+                                String nextText = visitVariableSegment(nextCtx);
+                                builder.append(nextText);
+                            }else if(child instanceof TerminalNode){
+                                TerminalNode nextCtx = (TerminalNode) child;
+                                String nextText = visitTerminal(nextCtx);
+                                builder.append(" ").append(nextText).append(" ");
+                            }
+                        }
                     }
                 }
             }
+
         }
         return builder.toString();
     }
