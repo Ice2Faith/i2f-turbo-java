@@ -59,6 +59,7 @@ KEY_FUNCTION: [fF][uU][nN][cC][tT][iI][oO][nN];
 KEY_PROCEDURE: [pP][rR][oO][cC][eE][dD][uU][rR][eE];
 KEY_IN: [iI][nN];
 KEY_OUT: [oO][uU][tT];
+KEY_RETURN: [rR][eE][tT][uU][rR][nN];
 
 fragment TERM_DIGIT:[0-9]; // 数字
 fragment CH_E: [eE] ('-')?;
@@ -85,11 +86,16 @@ segment:
     | commitSegment
     | rollbackSegment
     | variableSegment
+    | returnSegment
     | conditionCompositeSegment
 ;
 
+returnSegment:
+    KEY_RETURN (variableSegment)?
+;
+
 declareProcedureSegment:
-    KEY_CREATE (KEY_OR KEY_REPLACE) (KEY_FUNCTION|KEY_PROCEDURE) IDENTIFIER '(' argumentDeclareListSegment? ')'
+    (KEY_CREATE (KEY_OR KEY_REPLACE)?)? (KEY_FUNCTION|KEY_PROCEDURE) IDENTIFIER '(' argumentDeclareListSegment? ')' (KEY_RETURN IDENTIFIER)?
     ;
 
 argumentDeclareListSegment:
@@ -101,7 +107,7 @@ argumentDeclareSegment:
 ;
 
 declareVariableSegment:
-    sqlIdentifier sqlDataType (KEY_DEFAULT variableSegment)?
+    sqlIdentifier sqlDataType ((KEY_DEFAULT| ':=' | '=' ) variableSegment)?
 ;
 
 sqlDataType:
@@ -162,6 +168,7 @@ variableSegment:
     | variableSegment ('||' variableSegment)+
     | variableSegment ('*' | '/') variableSegment
     | variableSegment ('+' | '-') variableSegment
+    | '-' variableSegment
     | functionSegment
     | sqlString
     | sqlNumber
@@ -186,7 +193,7 @@ rollbackSegment:
     ;
 
 executeImmediadeVariableSegment:
-    KEY_EXECUTE KEY_IMMEDIATE IDENTIFIER (KEY_INTO IDENTIFIER)?
+    KEY_EXECUTE KEY_IMMEDIATE (IDENTIFIER|sqlString) (KEY_INTO IDENTIFIER)?
 ;
 
 assignSegment:

@@ -135,7 +135,8 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
         List<String> terminalList = new ArrayList<>();
         String arguments = null;
         String name = null;
-        String type = "procedure";
+        String declareType = "procedure";
+        String returnType=null;
         for (int i = 0; i < count; i++) {
             ParseTree child = ctx.getChild(i);
             if (child instanceof TerminalNode) {
@@ -143,7 +144,7 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 String text = visitTerminal(nextCtx);
                 if ("(".equals(text)) {
                     name = terminalList.get(terminalList.size() - 1);
-                    type = terminalList.get(terminalList.size() - 2).toLowerCase();
+                    declareType = terminalList.get(terminalList.size() - 2).toLowerCase();
                 }
                 terminalList.add(text);
             } else if (child instanceof OracleGrammarParser.ArgumentDeclareListSegmentContext) {
@@ -152,9 +153,18 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 arguments = nextText;
             }
         }
+        if(terminalList.size()>=3){
+            String bracket = terminalList.get(terminalList.size() - 3);
+            if(")".equals(bracket)){
+                returnType=terminalList.get(terminalList.size()-1).toLowerCase();
+            }
+        }
+        if(returnType!=null){
+            returnType=castAsXproc4jType(returnType);
+        }
         builder.append("<procedure id=\"").append(name.toUpperCase()).append("\"").append("\n")
                 .append(arguments == null ? "" : "\t" + arguments.replace("\n", "\n\t")).append("\n")
-                .append("function".equals(type) ? "return.out=\"\"\n" : "")
+                .append("function".equals(declareType) ? "return"+(returnType!=null?"."+returnType:"")+".out=\"\"\n" : "")
                 .append(">").append("\n")
                 .append("\n")
                 .append("</procedure>").append("\n");
@@ -205,17 +215,35 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 break;
             }
         }
+        type=castAsXproc4jType(type);
+
+        builder.append(name).append(".").append(type).append(isOut ? ".out" : "").append("=\"\"");
+        return builder.toString();
+    }
+
+    public String castAsXproc4jType(String type){
+        if(type==null){
+            return "string";
+        }
+        type=type.toUpperCase();
+        int idx=type.indexOf("(");
+        if(idx>=0){
+            type=type.substring(0,idx);
+        }
         if (Arrays.asList("INT", "SMALLINT", "TINYINT").contains(type)) {
             type = "int";
         } else if (Arrays.asList("BIGINT", "LONG").contains(type)) {
             type = "long";
         } else if (Arrays.asList("FLOAT", "DOUBLE", "REAL", "NUMBER", "DECIMAL").contains(type)) {
             type = "double";
-        } else {
+        }  else if (Arrays.asList("DATE", "TIME", "DATETIME", "TIMESTAMP").contains(type)) {
+            type = "date";
+        } else if (Arrays.asList("VARCHAR", "VARCHAR2", "CHAR", "CHAR2","LONGCHAR","LONGCHAR2","TEXT").contains(type)) {
+            type = "string";
+        }else {
             type = "string";
         }
-        builder.append(name).append(".").append(type).append(isOut ? ".out" : "").append("=\"\"");
-        return builder.toString();
+        return type;
     }
 
     @Override
@@ -644,6 +672,16 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 String nextText = visitFunctionSegment(nextCtx);
                 builder.append(nextText);
             }
+        } else if(count==2){
+            ParseTree first = ctx.getChild(0);
+            if(first instanceof TerminalNode){ // '-' variableSegment
+                ParseTree child = ctx.getChild(1);
+                if(child instanceof OracleGrammarParser.VariableSegmentContext){
+                    OracleGrammarParser.VariableSegmentContext nextCtx = (OracleGrammarParser.VariableSegmentContext) child;
+                    String nextText = visitVariableSegment(nextCtx);
+                    builder.append("-").append(nextText);
+                }
+            }
         } else if (count >= 3) {
             ParseTree first = ctx.getChild(0);
             if (first instanceof TerminalNode) { // '(' variableSegment ')'
@@ -711,6 +749,47 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
         return builder.toString();
     }
 
+    @Override
+    public String visitReturnSegment(OracleGrammarParser.ReturnSegmentContext ctx) {
+        StringBuilder builder = new StringBuilder();
+        int count = ctx.getChildCount();
+        String returnValue=null;
+        for (int i = 0; i < count; i++) {
+            ParseTree child = ctx.getChild(i);
+            if (child instanceof OracleGrammarParser.VariableSegmentContext) {
+                OracleGrammarParser.VariableSegmentContext nextCtx = (OracleGrammarParser.VariableSegmentContext) child;
+                String nextText = visitVariableSegment(nextCtx);
+                returnValue=nextText;
+            }
+        }
+        if(returnValue==null){
+            if(mode==ConvertType.TINY_SCRIPT){
+                builder.append("return;");
+            }else{
+                builder.append("<lang-return/>");
+            }
+        }else{
+            if(mode==ConvertType.TINY_SCRIPT){
+                builder.append("return ").append(returnValue).append(";");
+            }else{
+                String feature="";
+                if(isSqlIdentifier(returnValue)){
+                    returnValue=unescapeSqlIdentifier(returnValue);
+                }else if(isSqlString(returnValue)){
+                    returnValue=unescapeSqlString(returnValue);
+                    feature=".string";
+                }else{
+                    builder.append("<lang-eval-ts>").append("\n")
+                            .append("_return_=").append(returnValue).append(";").append("\n")
+                            .append("</lang-eval-ts>").append("\n");
+                    returnValue="_return_";
+                }
+                builder.append("<lang-return value").append(feature).append("=\"").append(returnValue).append("\"/>");
+            }
+        }
+        return builder.toString();
+    }
+
     public boolean isSqlIdentifier(String text) {
         if (text == null) {
             return false;
@@ -773,7 +852,7 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
         return text;
     }
 
-    protected String functionName;
+    protected String functionName=null;
 
     @Override
     public String visitFunctionSegment(OracleGrammarParser.FunctionSegmentContext ctx) {
@@ -781,6 +860,7 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
         String name = null;
         String arguments = null;
         int count = ctx.getChildCount();
+        String bakFunctionName=functionName;
         for (int i = 0; i < count; i++) {
             ParseTree child = ctx.getChild(i);
             if (child instanceof OracleGrammarParser.SqlIdentifierContext) {
@@ -798,7 +878,7 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 arguments = nextText;
             }
         }
-        functionName = null;
+        functionName = bakFunctionName;
 
         if ("nvl".equals(name)) {
             name = "evl";
@@ -874,15 +954,34 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
             if (child instanceof TerminalNode) {
                 TerminalNode nextCtx = (TerminalNode) child;
                 String nextText = visitTerminal(nextCtx);
+                list.add(nextText.toUpperCase());
+            }else if(child instanceof OracleGrammarParser.SqlStringContext){
+                OracleGrammarParser.SqlStringContext nextCtx = (OracleGrammarParser.SqlStringContext) child;
+                String nextText = visitSqlString(nextCtx);
                 list.add(nextText);
             }
         }
+        String script = list.get(2);
+        boolean isSql=isSqlString(script);
         if (list.size() == 3) {
-            builder.append("<sql-update script=\"").append(list.get(2)).append("\"/>").append("\n");
+            if(!isSql) {
+                builder.append("<sql-update script=\"").append(script).append("\"/>").append("\n");
+            }else{
+                builder.append("<sql-update>").append("\n")
+                        .append(unescapeSqlString(script)).append("\n")
+                        .append("</sql-update>");
+            }
         } else if (list.size() == 5) {
-            builder.append("<sql-update")
-                    .append(" result=\"").append(list.get(4)).append("\"")
-                    .append(" script=\"").append(list.get(2)).append("\"/>").append("\n");
+            if(!isSql) {
+                builder.append("<sql-query-object")
+                        .append(" result=\"").append(list.get(4)).append("\"")
+                        .append(" script=\"").append(list.get(2)).append("\"/>").append("\n");
+            }else{
+                builder.append("<sql-query-object")
+                        .append(" result=\"").append(list.get(4)).append("\">").append("\n")
+                        .append(unescapeSqlString(script)).append("\n")
+                        .append("</sql-query-object>");
+            }
         }
         return builder.toString();
     }

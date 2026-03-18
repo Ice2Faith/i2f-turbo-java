@@ -55,6 +55,18 @@ public class OracleGrammarBaseListener implements OracleGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterReturnSegment(OracleGrammarParser.ReturnSegmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReturnSegment(OracleGrammarParser.ReturnSegmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDeclareProcedureSegment(OracleGrammarParser.DeclareProcedureSegmentContext ctx) { }
 	/**
 	 * {@inheritDoc}

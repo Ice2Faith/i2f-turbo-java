@@ -40,6 +40,16 @@ public interface OracleGrammarListener extends ParseTreeListener {
 	 */
 	void exitSegment(OracleGrammarParser.SegmentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link OracleGrammarParser#returnSegment}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturnSegment(OracleGrammarParser.ReturnSegmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OracleGrammarParser#returnSegment}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturnSegment(OracleGrammarParser.ReturnSegmentContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link OracleGrammarParser#declareProcedureSegment}.
 	 * @param ctx the parse tree
 	 */

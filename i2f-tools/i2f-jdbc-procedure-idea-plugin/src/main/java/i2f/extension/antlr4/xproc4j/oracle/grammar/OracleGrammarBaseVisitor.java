@@ -41,6 +41,13 @@ public class OracleGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> imp
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitReturnSegment(OracleGrammarParser.ReturnSegmentContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitDeclareProcedureSegment(OracleGrammarParser.DeclareProcedureSegmentContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

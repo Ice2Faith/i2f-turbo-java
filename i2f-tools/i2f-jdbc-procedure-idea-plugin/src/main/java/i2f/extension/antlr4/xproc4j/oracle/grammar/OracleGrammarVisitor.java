@@ -31,6 +31,12 @@ public interface OracleGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSegment(OracleGrammarParser.SegmentContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link OracleGrammarParser#returnSegment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReturnSegment(OracleGrammarParser.ReturnSegmentContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link OracleGrammarParser#declareProcedureSegment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
