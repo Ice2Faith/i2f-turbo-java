@@ -909,7 +909,7 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
             value = escapeXmlString(value);
             if (mode == ConvertType.TINY_SCRIPT) {
                 builder.append("<lang-eval-ts>").append("\n");
-                builder.append(name.toUpperCase()).append("=").append("R\"").append(value).append("\"").append(";").append("\n");
+                builder.append(name.toUpperCase()).append("=").append(value).append(";").append("\n");
                 builder.append("</lang-eval-ts>");
             } else {
                 if (value.contains("\n") || value.length() > 100) {
