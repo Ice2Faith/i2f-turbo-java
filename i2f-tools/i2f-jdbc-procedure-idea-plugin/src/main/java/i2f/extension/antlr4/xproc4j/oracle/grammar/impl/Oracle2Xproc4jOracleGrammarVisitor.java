@@ -787,7 +787,7 @@ public class Oracle2Xproc4jOracleGrammarVisitor implements OracleGrammarVisitor<
                 OracleGrammarParser.SqlIdentifierContext nextCtx = (OracleGrammarParser.SqlIdentifierContext) child;
                 String nextText = visitSqlIdentifier(nextCtx);
                 name = unescapeSqlIdentifier(nextText);
-                name = name.toUpperCase();
+                name = name.toLowerCase();
                 functionName = name;
             } else if (child instanceof OracleGrammarParser.ArgumentListSegmentContext) {
                 OracleGrammarParser.ArgumentListSegmentContext nextCtx = (OracleGrammarParser.ArgumentListSegmentContext) child;
