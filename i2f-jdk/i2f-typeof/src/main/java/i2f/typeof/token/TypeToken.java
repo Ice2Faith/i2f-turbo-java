@@ -2,10 +2,7 @@ package i2f.typeof.token;
 
 import i2f.typeof.token.data.TypeNode;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 
 /**
@@ -100,6 +97,15 @@ public abstract class TypeToken<T> {
 
     public static Type[] getGenericsFieldTypes(Field field) {
         Type genType = field.getGenericType();
+        return getGenericsTypes(genType);
+    }
+
+    public static <E> Class<E> getGenericsParameterType(Parameter field) {
+        return (Class<E>) rawType(getGenericsParameterTypes(field)[0]);
+    }
+
+    public static Type[] getGenericsParameterTypes(Parameter field) {
+        Type genType = field.getParameterizedType();
         return getGenericsTypes(genType);
     }
 

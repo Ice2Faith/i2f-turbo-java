@@ -109,4 +109,6 @@ public interface AttrConsts {
     String CONTENT = "content";
 
     String EVENT_TYPE = "event-type";
+
+    String ROLE = "role";
 }

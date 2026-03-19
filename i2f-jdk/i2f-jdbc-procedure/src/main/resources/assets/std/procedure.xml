@@ -1018,10 +1018,15 @@ eval-ts使用TinyScript引擎进行处理
 
     <!--
     调用type指定类型的AI工具，传入的提示词为value，大模型输出的结果保存到result中
+    允许使用role指定系统提示词，也就是基本的角色设定
+    type实际上是需要对应一个 ChatAiProvider 类型的bean在上下文namingContext中
+    当有指定role的情况下，type对应的就应该是 RoleChatAiProvider 类型的bean
+    type的值就是这些AiProvider的name()函数返回值
+    你可以添加很多的AiProvider，可以是不同的模型，或者负责不同的职能
     value默认以visit访问，期待的值为string类型的提示词
     type默认以string访问，为大模型的类型
     -->
-    <lang-ai result="" value="" type="">
+    <lang-ai result="" value="" type="" role="">
 
     </lang-ai>
     <!-- 举例 -->

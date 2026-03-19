@@ -7,6 +7,7 @@
         <!ATTLIST log-info value CDATA #IMPLIED>
         <!ATTLIST log-info e CDATA #IMPLIED>
 
+        <!ATTLIST log-info value.visit CDATA #IMPLIED>
         <!ATTLIST log-info value.string CDATA #IMPLIED>
         <!ATTLIST log-info value.render CDATA #IMPLIED>
         <!ATTLIST log-info value.body-text CDATA #IMPLIED>
@@ -17,6 +18,7 @@
         <!ATTLIST log-debug value CDATA #IMPLIED>
         <!ATTLIST log-debug e CDATA #IMPLIED>
 
+        <!ATTLIST log-debug value.visit CDATA #IMPLIED>
         <!ATTLIST log-debug value.string CDATA #IMPLIED>
         <!ATTLIST log-debug value.render CDATA #IMPLIED>
         <!ATTLIST log-debug value.body-text CDATA #IMPLIED>
@@ -27,6 +29,7 @@
         <!ATTLIST log-warn value CDATA #IMPLIED>
         <!ATTLIST log-warn e CDATA #IMPLIED>
 
+        <!ATTLIST log-warn value.visit CDATA #IMPLIED>
         <!ATTLIST log-warn value.string CDATA #IMPLIED>
         <!ATTLIST log-warn value.render CDATA #IMPLIED>
         <!ATTLIST log-warn value.body-text CDATA #IMPLIED>
@@ -37,6 +40,7 @@
         <!ATTLIST log-error value CDATA #IMPLIED>
         <!ATTLIST log-error e CDATA #IMPLIED>
 
+        <!ATTLIST log-error value.visit CDATA #IMPLIED>
         <!ATTLIST log-error value.string CDATA #IMPLIED>
         <!ATTLIST log-error value.render CDATA #IMPLIED>
         <!ATTLIST log-error value.body-text CDATA #IMPLIED>
@@ -850,6 +854,7 @@
         <!ATTLIST lang-ai value CDATA #IMPLIED>
         <!ATTLIST lang-ai result CDATA #IMPLIED>
         <!ATTLIST lang-ai type CDATA #IMPLIED>
+        <!ATTLIST lang-ai role CDATA #IMPLIED>
 
         <!ATTLIST lang-ai value.visit CDATA #IMPLIED>
         <!ATTLIST lang-ai value.string CDATA #IMPLIED>
@@ -859,6 +864,10 @@
 
         <!ATTLIST lang-ai type.string CDATA #IMPLIED>
         <!ATTLIST lang-ai type.visit CDATA #IMPLIED>
+
+        <!ATTLIST lang-ai role.string CDATA #IMPLIED>
+        <!ATTLIST lang-ai role.render CDATA #IMPLIED>
+        <!ATTLIST lang-ai role.visit CDATA #IMPLIED>
 
         <!ELEMENT lang-listener (ANY|EMPTY)>
         <!ATTLIST lang-listener name CDATA #IMPLIED>
