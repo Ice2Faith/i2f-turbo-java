@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Ice2Faith
@@ -44,6 +46,7 @@ public class DashScopeAi {
     protected GenResponseFormat responseFormat = GenResponseFormat.TEXT;
     protected String respJsonAdditionalUserMessage = DEFAULT_RESP_JSON_ADDITIONAL_MESSAGE;
     protected Map<String, DashScopeToolDefinition> toolDefinitionMap = new LinkedHashMap<>();
+    protected Map<String, AtomicInteger> toolCallCounter = new ConcurrentHashMap<>();
 
     protected LinkedList<Message> historyMessageList = new LinkedList<>();
 
@@ -102,6 +105,7 @@ public class DashScopeAi {
                     .content(question)
                     .build();
             historyMessageList.clear();
+            toolCallCounter.clear();
             if (systemMsg != null) {
                 historyMessageList.add(systemMsg);
             }
@@ -153,6 +157,12 @@ public class DashScopeAi {
                                     DashScopeToolDefinition definition = toolMap.get(name);
                                     Method bindMethod = definition.getBindMethod();
                                     String arguments = function.getArguments();
+                                    String callCounterKey = name + "#" + arguments;
+                                    AtomicInteger counter = toolCallCounter.computeIfAbsent(callCounterKey, k -> new AtomicInteger());
+                                    int count = counter.incrementAndGet();
+                                    if (count > 10) {
+                                        throw new IllegalStateException("tool [" + name + "] execute count exceed limit, execute reject!");
+                                    }
                                     Map<String, Object> map = JsonUtils.fromJson(arguments, new TypeToken<Map<String, Object>>() {
                                     }.getType());
                                     Object[] args = new Object[definition.getFunctionParameterNames().size()];

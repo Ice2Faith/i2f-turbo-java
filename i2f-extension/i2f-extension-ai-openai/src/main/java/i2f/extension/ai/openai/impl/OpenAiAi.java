@@ -17,6 +17,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Ice2Faith
@@ -42,6 +44,7 @@ public class OpenAiAi {
     protected String model = DEFAULT_MODEL;
     protected String respJsonAdditionalUserMessage = DEFAULT_RESP_JSON_ADDITIONAL_MESSAGE;
     protected Map<String, OpenAiToolDefinition> toolDefinitionMap = new LinkedHashMap<>();
+    protected Map<String, AtomicInteger> toolCallCounter = new ConcurrentHashMap<>();
 
     protected LinkedList<ChatCompletionMessageParam> historyMessageList = new LinkedList<>();
 
@@ -78,6 +81,9 @@ public class OpenAiAi {
                 builder.baseUrl(baseUrl);
             }
             OpenAIClient client = builder.build();
+
+            historyMessageList.clear();
+            toolCallCounter.clear();
 
             if (system != null && !system.isEmpty()) {
                 historyMessageList.add(ChatCompletionMessageParam.ofSystem(ChatCompletionSystemMessageParam.builder()
@@ -137,6 +143,12 @@ public class OpenAiAi {
                                     OpenAiToolDefinition definition = toolMap.get(name);
                                     Method bindMethod = definition.getBindMethod();
                                     String arguments = function.arguments();
+                                    String callCounterKey = name + "#" + arguments;
+                                    AtomicInteger counter = toolCallCounter.computeIfAbsent(callCounterKey, k -> new AtomicInteger());
+                                    int count = counter.incrementAndGet();
+                                    if (count > 10) {
+                                        throw new IllegalStateException("tool [" + name + "] execute count exceed limit, execute reject!");
+                                    }
                                     Map<String, Object> map = fromJson(arguments, new TypeReference<Map<String, Object>>() {
                                     });
                                     Object[] args = new Object[definition.getFunctionParameterNames().size()];
