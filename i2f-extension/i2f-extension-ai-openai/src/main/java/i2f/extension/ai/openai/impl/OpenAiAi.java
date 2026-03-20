@@ -27,6 +27,7 @@ import java.util.*;
 @NoArgsConstructor
 public class OpenAiAi {
     public static final String API_KEY_NAME = "OPENAI_AI_API_KEY";
+    public static final String BASE_URL_NAME = "OPENAI_AI_BASE_URL";
     public static final String DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1";
 
     public static final String DEFAULT_MODEL = "qwen-plus";
@@ -288,5 +289,23 @@ public class OpenAiAi {
             apiKey = System.getProperty(API_KEY_NAME);
         }
         return apiKey;
+    }
+
+    public static String getPossibleBaseUrl(String baseUrl) {
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = getPossibleBaseUrl();
+        }
+        return baseUrl;
+    }
+
+    public static String getPossibleBaseUrl() {
+        String baseUrl = null;
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv(BASE_URL_NAME);
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty(BASE_URL_NAME);
+        }
+        return baseUrl;
     }
 }
