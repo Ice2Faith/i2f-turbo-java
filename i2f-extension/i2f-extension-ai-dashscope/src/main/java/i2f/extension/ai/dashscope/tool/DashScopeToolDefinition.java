@@ -17,7 +17,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class ToolDefinition {
+public class DashScopeToolDefinition {
     protected ToolFunction function;
     protected String functionName;
     protected List<String> functionParameterNames;
@@ -25,15 +25,15 @@ public class ToolDefinition {
     protected Class<?> bindClass;
     protected Object bindTarget;
 
-    public static Map<String, ToolDefinition> parseTools(IContext context) {
-        return ToolHelper.parseTools(context);
+    public static Map<String, DashScopeToolDefinition> parseTools(IContext context) {
+        return DashScopeToolHelper.parseTools(context);
     }
 
-    public static Map<String, ToolDefinition> parseTools(Collection<Object> beans) {
-        return ToolHelper.parseTools(beans);
+    public static Map<String, DashScopeToolDefinition> parseTools(Collection<Object> beans) {
+        return DashScopeToolHelper.parseTools(beans);
     }
 
-    public static Map<String, ToolDefinition> parseTools(Object... beans) {
-        return ToolHelper.parseTools(beans);
+    public static Map<String, DashScopeToolDefinition> parseTools(Object... beans) {
+        return DashScopeToolHelper.parseTools(beans);
     }
 }

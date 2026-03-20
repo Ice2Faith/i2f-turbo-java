@@ -10,8 +10,8 @@ import com.alibaba.dashscope.tools.ToolCallFunction;
 import com.alibaba.dashscope.utils.JsonUtils;
 import com.google.gson.reflect.TypeToken;
 import i2f.convert.obj.ObjectConvertor;
-import i2f.extension.ai.dashscope.tool.ToolDefinition;
-import i2f.extension.ai.dashscope.tool.ToolHelper;
+import i2f.extension.ai.dashscope.tool.DashScopeToolDefinition;
+import i2f.extension.ai.dashscope.tool.DashScopeToolHelper;
 import i2f.typeof.TypeOf;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,7 +43,7 @@ public class DashScopeAi {
     protected GenResultFormat resultFormat = GenResultFormat.TEXT;
     protected GenResponseFormat responseFormat = GenResponseFormat.TEXT;
     protected String respJsonAdditionalUserMessage = DEFAULT_RESP_JSON_ADDITIONAL_MESSAGE;
-    protected Map<String, ToolDefinition> toolDefinitionMap = new LinkedHashMap<>();
+    protected Map<String, DashScopeToolDefinition> toolDefinitionMap = new LinkedHashMap<>();
 
     protected LinkedList<Message> historyMessageList = new LinkedList<>();
 
@@ -106,7 +106,7 @@ public class DashScopeAi {
                 historyMessageList.add(systemMsg);
             }
             historyMessageList.add(userMsg);
-            Map<String, ToolDefinition> toolMap = new HashMap<>();
+            Map<String, DashScopeToolDefinition> toolMap = new HashMap<>();
             if (toolDefinitionMap != null) {
                 toolMap.putAll(toolDefinitionMap);
             }
@@ -122,7 +122,7 @@ public class DashScopeAi {
                         .messages(historyMessageList)
                         .resultFormat(result.text())
                         .responseFormat(ResponseFormat.from(responseFormat.text()))
-                        .tools(ToolHelper.convertTools(toolMap))
+                        .tools(DashScopeToolHelper.convertTools(toolMap))
                         .build();
                 GenerationResult call = gen.call(param);
                 List<GenerationOutput.Choice> choices = call.getOutput().getChoices();
@@ -150,7 +150,7 @@ public class DashScopeAi {
                                 String callResult = null;
                                 Throwable callEx = null;
                                 try {
-                                    ToolDefinition definition = toolMap.get(name);
+                                    DashScopeToolDefinition definition = toolMap.get(name);
                                     Method bindMethod = definition.getBindMethod();
                                     String arguments = function.getArguments();
                                     Map<String, Object> map = JsonUtils.fromJson(arguments, new TypeToken<Map<String, Object>>() {

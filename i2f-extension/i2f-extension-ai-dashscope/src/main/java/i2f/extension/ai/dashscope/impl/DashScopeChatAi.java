@@ -1,7 +1,7 @@
 package i2f.extension.ai.dashscope.impl;
 
 import i2f.ai.std.ChatAi;
-import i2f.extension.ai.dashscope.tool.ToolDefinition;
+import i2f.extension.ai.dashscope.tool.DashScopeToolDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,7 +22,7 @@ public class DashScopeChatAi implements ChatAi {
     protected DashScopeAi.GenResultFormat resultFormat = DashScopeAi.GenResultFormat.TEXT;
     protected DashScopeAi.GenResponseFormat responseFormat = DashScopeAi.GenResponseFormat.TEXT;
     protected String respJsonAdditionalUserMessage = DashScopeAi.DEFAULT_RESP_JSON_ADDITIONAL_MESSAGE;
-    protected Map<String, ToolDefinition> toolDefinitionMap = new LinkedHashMap<>();
+    protected Map<String, DashScopeToolDefinition> toolDefinitionMap = new LinkedHashMap<>();
 
     @Override
     public String chat(String question) {

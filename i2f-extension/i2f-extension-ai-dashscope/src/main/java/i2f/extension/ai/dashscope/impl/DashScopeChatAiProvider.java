@@ -4,8 +4,8 @@ import i2f.ai.std.ChatAi;
 import i2f.ai.std.ChatAiProvider;
 import i2f.context.impl.ListableContext;
 import i2f.context.std.IContext;
-import i2f.extension.ai.dashscope.tool.ToolDefinition;
-import i2f.extension.ai.dashscope.tool.ToolHelper;
+import i2f.extension.ai.dashscope.tool.DashScopeToolDefinition;
+import i2f.extension.ai.dashscope.tool.DashScopeToolHelper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -50,7 +50,7 @@ public class DashScopeChatAiProvider implements ChatAiProvider {
             ret.setRespJsonAdditionalUserMessage(respJsonAdditionalUserMessage);
         }
         if (context != null) {
-            Map<String, ToolDefinition> map = ToolHelper.parseTools(context);
+            Map<String, DashScopeToolDefinition> map = DashScopeToolHelper.parseTools(context);
             ret.setToolDefinitionMap(map);
         }
         return ret;
