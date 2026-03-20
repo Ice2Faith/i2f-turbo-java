@@ -1,4 +1,4 @@
-package i2f.extension.ai.dashscope.tool;
+package i2f.ai.std.tool.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

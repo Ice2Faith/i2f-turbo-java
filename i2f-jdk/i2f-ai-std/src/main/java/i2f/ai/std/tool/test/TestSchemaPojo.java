@@ -1,6 +1,4 @@
-package i2f.extension.ai.dashscope.test;
-
-import i2f.extension.ai.dashscope.impl.DashScopeAi;
+package i2f.ai.std.tool.test;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -15,10 +13,14 @@ public class TestSchemaPojo {
     private String name;
     private int age;
     private SubSchemaPojo sub;
-    private DashScopeAi.GenResponseFormat responseFormat;
+    private SubEnum responseFormat;
     private int[] position;
     private List<String> nickNames;
     private Date createTime;
+
+    public static enum SubEnum {
+        SUCCESS, FAILURE, WARNING
+    }
 
     public static class SubSchemaPojo {
         private String name;

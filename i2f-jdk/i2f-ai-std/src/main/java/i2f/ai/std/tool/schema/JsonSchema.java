@@ -1,7 +1,7 @@
-package i2f.extension.ai.dashscope.schema;
+package i2f.ai.std.tool.schema;
 
-import i2f.extension.ai.dashscope.tool.Tool;
-import i2f.extension.ai.dashscope.tool.ToolParam;
+import i2f.ai.std.tool.annotations.Tool;
+import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.typeof.TypeOf;
 import i2f.typeof.token.TypeToken;
 

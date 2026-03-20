@@ -1,4 +1,4 @@
-package i2f.extension.ai.dashscope.tool;
+package i2f.ai.std.tool;
 
 import java.util.List;
 
@@ -8,6 +8,6 @@ import java.util.List;
  * @desc
  */
 @FunctionalInterface
-public interface ToolsProvider {
-    List<ToolDefinition> getTools();
+public interface ToolRawDefinitionsProvider {
+    List<ToolRawDefinition> getTools();
 }

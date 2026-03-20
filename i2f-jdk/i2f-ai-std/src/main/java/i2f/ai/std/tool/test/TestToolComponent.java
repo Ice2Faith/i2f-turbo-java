@@ -1,8 +1,8 @@
-package i2f.extension.ai.dashscope.test;
+package i2f.ai.std.tool.test;
 
-import i2f.extension.ai.dashscope.tool.Tool;
-import i2f.extension.ai.dashscope.tool.ToolParam;
-import i2f.extension.ai.dashscope.tool.Tools;
+import i2f.ai.std.tool.annotations.Tool;
+import i2f.ai.std.tool.annotations.ToolParam;
+import i2f.ai.std.tool.annotations.Tools;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
