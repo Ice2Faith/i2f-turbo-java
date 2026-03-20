@@ -1,0 +1,94 @@
+package i2f.extension.ai.openai.tool;
+
+
+import com.openai.core.JsonValue;
+import com.openai.models.FunctionDefinition;
+import com.openai.models.chat.completions.ChatCompletionFunctionTool;
+import com.openai.models.chat.completions.ChatCompletionTool;
+import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.ai.std.tool.ToolRawHelper;
+import i2f.context.std.IContext;
+
+import java.util.*;
+
+/**
+ * @author Ice2Faith
+ * @date 2026/3/19 19:43
+ * @desc
+ */
+public class OpenAiToolHelper {
+
+
+    public static Map<String, OpenAiToolDefinition> parseTools(IContext context) {
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(context);
+        Map<String, OpenAiToolDefinition> ret = new LinkedHashMap<>();
+        for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
+            ret.put(entry.getKey(), fromRaw(entry.getValue()));
+        }
+        return ret;
+    }
+
+    public static Map<String, OpenAiToolDefinition> parseTools(Collection<Object> beans) {
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, OpenAiToolDefinition> ret = new LinkedHashMap<>();
+        for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
+            ret.put(entry.getKey(), fromRaw(entry.getValue()));
+        }
+        return ret;
+    }
+
+    public static Map<String, OpenAiToolDefinition> parseTools(Object... beans) {
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, OpenAiToolDefinition> ret = new LinkedHashMap<>();
+        for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
+            ret.put(entry.getKey(), fromRaw(entry.getValue()));
+        }
+        return ret;
+    }
+
+
+    public static List<ChatCompletionTool> convertTools(Map<String, OpenAiToolDefinition> list) {
+        List<ChatCompletionTool> ret = new ArrayList<>();
+        for (Map.Entry<String, OpenAiToolDefinition> entry : list.entrySet()) {
+            OpenAiToolDefinition definition = entry.getValue();
+            ret.add(definition.getFunction());
+        }
+        return ret;
+    }
+
+    public static List<ChatCompletionTool> convertTools(Collection<OpenAiToolDefinition> list) {
+        List<ChatCompletionTool> ret = new ArrayList<>();
+        for (OpenAiToolDefinition definition : list) {
+            ret.add(definition.getFunction());
+        }
+        return ret;
+    }
+
+
+    public static OpenAiToolDefinition fromRaw(ToolRawDefinition definition) {
+        OpenAiToolDefinition ret = new OpenAiToolDefinition();
+
+        Map<String, Object> functionSchema = definition.getFunctionJsonSchema();
+
+        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get("parameters");
+
+        ChatCompletionTool tool = ChatCompletionTool.ofFunction(ChatCompletionFunctionTool.builder()
+                .function(FunctionDefinition.builder()
+                        .name(definition.getFunctionName())
+                        .description(definition.getFunctionDescription())
+                        .parameters(JsonValue.from(parametersSchema)) // 将 Map 转为 JsonValue
+                        .build()
+                )
+                .build());
+
+        ret.setFunction(tool);
+        ret.setFunctionName(definition.getFunctionName());
+        ret.setFunctionParameterNames(definition.getFunctionParameterNames());
+        ret.setBindMethod(definition.getBindMethod());
+        ret.setBindClass(definition.getBindClass());
+        ret.setBindTarget(definition.getBindTarget());
+
+        return ret;
+    }
+
+}
