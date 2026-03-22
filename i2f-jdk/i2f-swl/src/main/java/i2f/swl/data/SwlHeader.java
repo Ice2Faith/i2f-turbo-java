@@ -32,14 +32,10 @@ public class SwlHeader {
      */
     public String digital;
     /**
-     * 服务端非对称签名
+     * 证书ID
      */
-    public String remoteAsymSign;
+    public String certId;
 
-    /**
-     * 客户端非对称签名
-     */
-    public String localAsymSign;
 
     public static SwlHeader copy(SwlHeader src, SwlHeader dst) {
         dst.setTimestamp(src.getTimestamp());
@@ -47,8 +43,7 @@ public class SwlHeader {
         dst.setRandomKey(src.getRandomKey());
         dst.setSign(src.getSign());
         dst.setDigital(src.getDigital());
-        dst.setLocalAsymSign(src.getLocalAsymSign());
-        dst.setRemoteAsymSign(src.getRemoteAsymSign());
+        dst.setCertId(src.getCertId());
         return dst;
     }
 }

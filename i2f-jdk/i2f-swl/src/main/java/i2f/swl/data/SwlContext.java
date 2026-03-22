@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class SwlContext {
+    private String certId;
+
     private String remotePublicKey;
-    private String remoteAsymSign;
 
     private String selfPrivateKey;
-    private String selfAsymSign;
 
     private String timestamp;
     private String nonce;

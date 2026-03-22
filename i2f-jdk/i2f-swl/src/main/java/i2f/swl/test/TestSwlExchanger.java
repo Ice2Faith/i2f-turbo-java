@@ -82,14 +82,14 @@ public class TestSwlExchanger {
 
 
         AsymKeyPair serverKeyPair = clientTransfer.generateKeyPair();
-        String serverAsymSign = "server";
+        String certId = "test";
 
         AsymKeyPair clientKeyPair = clientTransfer.generateKeyPair();
-        String clientAsymSign = "client";
 
 
-        SwlData clientSendData = clientTransfer.sendByRaw(serverKeyPair.getPublicKey(), serverAsymSign,
-                clientKeyPair.getPrivateKey(), clientAsymSign,
+        SwlData clientSendData = clientTransfer.sendByRaw(certId,
+                serverKeyPair.getPublicKey(),
+                clientKeyPair.getPrivateKey(),
                 Arrays.asList("body:123456", "query:user=admin"));
 
 
@@ -99,8 +99,9 @@ public class TestSwlExchanger {
                 clientKeyPair.getPublicKey(),
                 serverKeyPair.getPrivateKey());
 
-        SwlData serverResponseData = serverTransfer.sendByRaw(clientKeyPair.getPublicKey(), clientAsymSign,
-                serverKeyPair.getPrivateKey(), serverAsymSign
+        SwlData serverResponseData = serverTransfer.sendByRaw(certId,
+                clientKeyPair.getPublicKey(),
+                serverKeyPair.getPrivateKey()
                 , Arrays.asList("echo:ok", "data:ok"));
 
         String serverId = "server";

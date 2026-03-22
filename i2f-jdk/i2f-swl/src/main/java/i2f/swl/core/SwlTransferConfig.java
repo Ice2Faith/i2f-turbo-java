@@ -1,5 +1,6 @@
 package i2f.swl.core;
 
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,8 +21,8 @@ public class SwlTransferConfig {
 
     private boolean enableRefreshSelfKey = true;
 
-    private long selfKeyExpireSeconds = TimeUnit.HOURS.toSeconds(24);
-    private int selfKeyMaxCount = 3;
-    private long otherKeyExpireSeconds = TimeUnit.HOURS.toSeconds(24);
+    private long channelExpireSeconds = TimeUnit.MINUTES.toSeconds(30);
+
+    private AsymKeyPair swapKeyPair;
 
 }
