@@ -28,6 +28,7 @@ import TestSwlCertTransfer from "@/i2f-turbo-web/i2f-swl/test/TestSwlCertExchang
 import TestSwlKeyExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlKeyExchanger";
 import TestSwlTtlKeyExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlTtlKeyExchanger";
 import TestSwlTransferRefactor from "@/i2f-turbo-web/i2f-swl/test/TestSwlTransferRefactor";
+import CodeUtil from "@/i2f-turbo-web/i2f-core/util/CodeUtil";
 
 export default {
   name: 'HelloWorld',
@@ -66,15 +67,34 @@ export default {
     },
     testSwapKey(){
       debugger
-      let transfer=this.$axios.$filter.transfer
-      let selfSwapKey = transfer.getSelfSwapKey()
+      let clientTransfer=this.$axios.$filter.transfer
+      let swapKeyPair = clientTransfer.getSelfSwapKey();
+
+      let clientKeyPair = clientTransfer.generateKeyPair();
+
+      let payload = CodeUtil.makeCheckCode(32,false);
+      let reqHandleShake = clientTransfer.sendByRaw("swap",
+          swapKeyPair.getPublicKey(),
+          clientKeyPair.getPrivateKey(),
+          [payload],
+          [clientTransfer.obfuscateEncode(clientKeyPair.getPublicKey())]
+      );
+      reqHandleShake.context=null;
+
       this.$axios({
         url: 'swl/swapKey',
         method: 'post',
-        data: selfSwapKey,
+        data: reqHandleShake,
       }).then(({data}) => {
         debugger
-        transfer.acceptOtherSwapKey(data)
+        let respHandleShake=data;
+
+        let recvRespHandleShake = clientTransfer.receiveByRaw("swap", respHandleShake, swapKeyPair.getPublicKey(), clientKeyPair.getPrivateKey());
+
+        let serverPublicKey = recvRespHandleShake.parts[0];
+
+        let clientCertId = clientTransfer.acceptOtherPublicKeyRaw(recvRespHandleShake.header.certId, clientKeyPair, serverPublicKey);
+
         console.log('echo', data)
       })
     },
