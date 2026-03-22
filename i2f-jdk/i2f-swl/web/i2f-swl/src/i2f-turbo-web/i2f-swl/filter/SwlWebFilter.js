@@ -38,7 +38,6 @@ function SwlWebFilter(transfer = new SwlTransfer(), config = new SwlWebConfig())
  */
 SwlWebFilter.prototype.requestFilter = function (res) {
     let certId=this.transfer.getOtherCertIdDefault();
-    let selfPublicKey = this.transfer.getSelfPublicKey(certId);
     res.headers[this.config.certIdName]=certId
     let ctrl = SwlWebFilter.parseCtrl(res,this.config);
     if(!ctrl.enableOut){

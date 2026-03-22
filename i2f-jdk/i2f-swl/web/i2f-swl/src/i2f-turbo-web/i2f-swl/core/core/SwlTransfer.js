@@ -11,6 +11,7 @@ import SwlException from "../exception/SwlException";
 import SwlCode from "../consts/SwlCode";
 import SwlCertUtil from "../cert/SwlCertUtil";
 import CodeUtil from "../../../i2f-core/util/CodeUtil";
+import SwlCert from "../cert/data/SwlCert";
 
 /**
  * @return SwlTransfer
@@ -98,7 +99,7 @@ SwlTransfer.prototype.certKey=function(certId) {
 SwlTransfer.prototype.getCert=function( certId) {
     let obj = this.cache.get(this.cacheKey(this.certKey(certId)));
     if (!obj) {
-        throw new SwlException(SwlCode.CERT_ID_MISSING_EXCEPTION.code(), "cert id missing or not built channel");
+        throw new SwlException(SwlCode.CERT_ID_MISSING_EXCEPTION(), "cert id missing or not built channel");
     }
     let cert = SwlCertUtil.deserialize(obj);
     cert.certId=certId;

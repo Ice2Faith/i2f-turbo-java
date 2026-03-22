@@ -25,9 +25,6 @@ import AntMatcher from "@/i2f-turbo-web/i2f-core/match/impl/AntMatcher";
 import Random from "@/i2f-turbo-web/i2f-core/util/Random";
 import TestSwlExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlExchanger";
 import TestSwlCertTransfer from "@/i2f-turbo-web/i2f-swl/test/TestSwlCertExchanger";
-import TestSwlKeyExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlKeyExchanger";
-import TestSwlTtlKeyExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlTtlKeyExchanger";
-import TestSwlTransferRefactor from "@/i2f-turbo-web/i2f-swl/test/TestSwlTransferRefactor";
 import CodeUtil from "@/i2f-turbo-web/i2f-core/util/CodeUtil";
 
 export default {
@@ -42,12 +39,9 @@ export default {
   },
   methods: {
     testTransfer() {
-      // TestSwlTransfer.main();
+      TestSwlTransfer.main();
       // TestSwlExchanger.main();
       // TestSwlCertTransfer.main();
-      // TestSwlKeyExchanger.main();
-      // TestSwlTtlKeyExchanger.main()
-      TestSwlTransferRefactor.main()
     },
     testMatcher(){
       let matcher=new AntMatcher()

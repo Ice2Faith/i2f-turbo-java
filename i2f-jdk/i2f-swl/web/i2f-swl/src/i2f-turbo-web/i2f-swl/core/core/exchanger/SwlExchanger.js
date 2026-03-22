@@ -312,14 +312,14 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
 
     if(this.enableTimestamp) {
         if (Math.abs(currentTimestamp - ts) > window) {
-            throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION.code(), "timestamp is exceed allow window seconds!");
+            throw new SwlException(SwlCode.NONCE_TIMESTAMP_EXCEED_EXCEPTION(), "timestamp is exceed allow window seconds!");
         }
     }
 
     let nonce = ret.header.nonce;
     ret.context.nonce=nonce;
     if (!nonce || nonce=='') {
-        throw new SwlException(SwlCode.NONCE_MISSING_EXCEPTION.code(), "nonce cannot is empty!");
+        throw new SwlException(SwlCode.NONCE_MISSING_EXCEPTION(), "nonce cannot is empty!");
     }
 
     if(this.enableNonce) {
@@ -330,7 +330,7 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
             }
             ret.context.nonceKey = nonceKey;
             if (this.nonceManager.contains(nonceKey)) {
-                throw new SwlException(SwlCode.NONCE_ALREADY_EXISTS_EXCEPTION.code(), "nonce key already exists!");
+                throw new SwlException(SwlCode.NONCE_ALREADY_EXISTS_EXCEPTION(), "nonce key already exists!");
             }
 
             this.nonceManager.set(nonceKey, this.nonceTimeoutSeconds);
@@ -340,7 +340,7 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
     let sign = ret.header.sign;
     ret.context.sign=sign;
     if (!sign || sign=='') {
-        throw new SwlException(SwlCode.SIGN_MISSING_EXCEPTION.code(), "sign cannot be empty!");
+        throw new SwlException(SwlCode.SIGN_MISSING_EXCEPTION(), "sign cannot be empty!");
     }
 
     let builder = '';
@@ -370,30 +370,30 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
     let randomKey = ret.header.randomKey;
     ret.context.randomKey=randomKey;
     if (!randomKey || randomKey=='') {
-        throw new SwlException(SwlCode.RANDOM_KEY_MISSING_EXCEPTION.code(), "random key cannot be empty!");
+        throw new SwlException(SwlCode.RANDOM_KEY_MISSING_EXCEPTION(), "random key cannot be empty!");
     }
 
     let certId = ret.header.certId;
     ret.context.certId=certId;
     if (!certId || certId=='') {
-        throw new SwlException(SwlCode.CERT_ID_MISSING_EXCEPTION.code(), "certId cannot be empty!");
+        throw new SwlException(SwlCode.CERT_ID_MISSING_EXCEPTION(), "certId cannot be empty!");
     }
 
     let signOk = this.messageDigester.verify(sign, data + randomKey + timestamp + nonce + certId);
     ret.context.signOk=signOk;
     if (!signOk) {
-        throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "verify sign failure!");
+        throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION(), "verify sign failure!");
     }
 
     let digital = ret.header.digital;
     ret.context.digital=digital;
     if (!digital || digital=='') {
-        throw new SwlException(SwlCode.DIGITAL_MISSING_EXCEPTION.code(), "digital cannot be empty!");
+        throw new SwlException(SwlCode.DIGITAL_MISSING_EXCEPTION(), "digital cannot be empty!");
     }
 
     ret.context.remotePublicKey=remotePublicKey;
     if (!remotePublicKey || remotePublicKey=='') {
-        throw new SwlException(SwlCode.CLIENT_ASYM_KEY_NOT_FOUND_EXCEPTION.code(), "remote key not found!");
+        throw new SwlException(SwlCode.CLIENT_ASYM_KEY_NOT_FOUND_EXCEPTION(), "remote key not found!");
     }
 
     let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
@@ -403,20 +403,20 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
         let digitalOk = asymmetricEncryptor.verify(digital, sign);
         ret.context.digitalOk = digitalOk;
         if (!digitalOk) {
-            throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION.code(), "verify digital failure!");
+            throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION(), "verify digital failure!");
         }
     }
 
     ret.context.selfPrivateKey=selfPrivateKey;
     if (!selfPrivateKey || selfPrivateKey=='') {
-        throw new SwlException(SwlCode.SERVER_ASYM_KEY_NOT_FOUND_EXCEPTION.code(), "server key not found!");
+        throw new SwlException(SwlCode.SERVER_ASYM_KEY_NOT_FOUND_EXCEPTION(), "server key not found!");
     }
 
     asymmetricEncryptor.setPrivateKey(selfPrivateKey);
     let key = asymmetricEncryptor.decrypt(randomKey);
     ret.context.key=key;
     if (!key  || key=='') {
-        throw new SwlException(SwlCode.RANDOM_KEY_INVALID_EXCEPTION.code(), "random key is invalid!");
+        throw new SwlException(SwlCode.RANDOM_KEY_INVALID_EXCEPTION(), "random key is invalid!");
     }
 
 
