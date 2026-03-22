@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class SwlTransfer extends SwlExchanger {
 
     public static final String CERT_PREFIX_KEY = "swl:key:cert:";
+    public static final String OTHER_KEY_PUBLIC_DEFAULT = "swl:key:other:default";
 
     private IExpireCache<String, String> cache = new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));
     private SwlTransferConfig config = new SwlTransferConfig();
@@ -42,8 +43,8 @@ public class SwlTransfer extends SwlExchanger {
         return cacheKeyPrefix + ":" + key;
     }
 
-    public String certKey(String channelId) {
-        return CERT_PREFIX_KEY + channelId;
+    public String certKey(String certId) {
+        return CERT_PREFIX_KEY + certId;
     }
 
 
@@ -72,8 +73,8 @@ public class SwlTransfer extends SwlExchanger {
         return keyPair.getPrivateKey();
     }
 
-    public String getOtherPublicKey(String channelId) {
-        SwlCert cert = getCert(channelId);
+    public String getOtherPublicKey(String certId) {
+        SwlCert cert = getCert(certId);
         return cert.getRemotePublicKey();
     }
 
@@ -82,6 +83,7 @@ public class SwlTransfer extends SwlExchanger {
         String text = SwlCertUtil.serialize(cert);
         String key = certKey(certId);
         cache.set(cacheKey(key), text, config.getCertExpireSeconds(), TimeUnit.SECONDS);
+        cache.set(cacheKey(OTHER_KEY_PUBLIC_DEFAULT),certId);
     }
 
     public SwlCert removeCert(String certId) {
@@ -101,16 +103,16 @@ public class SwlTransfer extends SwlExchanger {
 
     public String acceptOtherPublicKey(String otherPublicKey) {
         String certId = UUID.randomUUID().toString().replace("-", "");
-        return acceptOtherPublicKey(certId, otherPublicKey);
+        return acceptOtherPublicKeyWithId(certId, otherPublicKey);
     }
 
-    public String acceptOtherPublicKey(String certId, String otherPublicKey) {
+    public String acceptOtherPublicKeyWithId(String certId, String otherPublicKey) {
         ISwlAsymmetricEncryptor asymmetricEncryptor = asymmetricEncryptorSupplier.get();
         AsymKeyPair selfKeyPair = asymmetricEncryptor.generateKeyPair();
-        return acceptOtherPublicKey(certId, selfKeyPair, otherPublicKey);
+        return acceptOtherPublicKeyRaw(certId, selfKeyPair, otherPublicKey);
     }
 
-    public String acceptOtherPublicKey(String certId, AsymKeyPair selfKeyPair, String otherPublicKey) {
+    public String acceptOtherPublicKeyRaw(String certId, AsymKeyPair selfKeyPair, String otherPublicKey) {
         buildCert(certId, selfKeyPair, otherPublicKey);
         return certId;
     }
@@ -141,6 +143,15 @@ public class SwlTransfer extends SwlExchanger {
         String certId = request.getHeader().getCertId();
         SwlCert cert = getCert(certId);
         return receiveByRaw(clientId, request, cert.getRemotePublicKey(), cert.getPrivateKey());
+    }
+
+    public String getOtherCertIdDefault(){
+        return cache.get(cacheKey(OTHER_KEY_PUBLIC_DEFAULT));
+    }
+
+    public SwlData sendDefault(List<String> parts, List<String> attaches) {
+        String certId = getOtherCertIdDefault();
+        return send(certId, parts, attaches);
     }
 
     public SwlData response(String certId, List<String> parts, List<String> attaches) {

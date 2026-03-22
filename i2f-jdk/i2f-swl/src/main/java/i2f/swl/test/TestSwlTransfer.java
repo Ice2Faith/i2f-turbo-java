@@ -76,7 +76,7 @@ public class TestSwlTransfer {
 
         String serverPublicKey = recvRespHandleShake.getParts().get(0);
 
-        String clientCertId = clientTransfer.acceptOtherPublicKey(recvRespHandleShake.getHeader().getCertId(), clientKeyPair, serverPublicKey);
+        String clientCertId = clientTransfer.acceptOtherPublicKeyRaw(recvRespHandleShake.getHeader().getCertId(), clientKeyPair, serverPublicKey);
 
         // ************************客户端发起业务请求*******************************
         SwlData reqBiz = clientTransfer.send(clientCertId, Arrays.asList("hello"));
@@ -114,8 +114,8 @@ public class TestSwlTransfer {
 
         String certId = UUID.randomUUID().toString().replace("-", "");
 
-        serverTransfer.acceptOtherPublicKey(certId, serverKeyPair, clientKeyPair.getPublicKey());
-        clientTransfer.acceptOtherPublicKey(certId, clientKeyPair, serverKeyPair.getPublicKey());
+        serverTransfer.acceptOtherPublicKeyRaw(certId, serverKeyPair, clientKeyPair.getPublicKey());
+        clientTransfer.acceptOtherPublicKeyRaw(certId, clientKeyPair, serverKeyPair.getPublicKey());
 
         SwlData clientSendData = clientTransfer.send(certId, Arrays.asList("body:123456", "query:user=admin"));
 
