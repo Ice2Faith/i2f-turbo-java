@@ -14,15 +14,19 @@ import java.util.concurrent.TimeUnit;
 @Data
 @NoArgsConstructor
 public class SwlTransferConfig {
+    /**
+     * 默认RSA交换秘钥
+     */
+    public static final String DEFAULT_SWAP_PUBLIC_KEY="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCnhyhaYnyql1Vt0CFroJqDKNcQAvcHyigtjTijXwg5h4841Zlt8xl98HX7a8YZmUTIAnNeKF5tMX6OAYGl/GteUXuL8QFbj7nNSo9cDdT7ZEfK+rs+d/Pz7zxbuMI1UbUs+OFXIICLqOT+Ze1KJoBlm9r42qqvwMEYntKG8KI4bwIDAQAB";
+    public static final String DEFAULT_SWAP_PRIVATE_KEY="MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAKeHKFpifKqXVW3QIWugmoMo1xAC9wfKKC2NOKNfCDmHjzjVmW3zGX3wdftrxhmZRMgCc14oXm0xfo4BgaX8a15Re4vxAVuPuc1Kj1wN1PtkR8r6uz538/PvPFu4wjVRtSz44VcggIuo5P5l7UomgGWb2vjaqq/AwRie0obwojhvAgMBAAECgYBRxxzwLiZsAc6uecxupOn3/54oD0J2V30Qa2EMAu5ZYu6LkF1Cukol25VEQ4Ji6ZoVRnj5rBwYEnKUMHEQzSy9hD2noFfLEKQq5LBYeSBbXzuQfGzI0NWHp2w2lRGT+E4YmyMtcF5XJ5WB2MZLc2XGwKgkFyUNyPiuq0VfM/gDNQJBAO4/natq9B0zWIUyDqk6Q7zJmPwcLnaBEMz9Bmds2f0/Y/OlhxTgXxMSFAFZlXI/wd5CfgCS4P8/vanEHrdTfz0CQQC0ApvMRZ2IxO61X9JaPzmgyaVE8iN/daDI1zi5TsllZmr5PX0PGrfxX/pFVeZPztkipLBsgr+kxyYSUt+e79EbAkBqDL8uMml/Jf/dKi8EfP7x5frHHfRAo6rK1EYpe3Z9F95x8dhzHnyzjHSDNVEkjeTJ/mb/8mFcvQ67pqTVjcExAkAyADd+eifUAb+8qa0oXD+Jpfk+OXQax3Wt0/pxnqzaeaRlLus58tX9OgeukrmymWY+9Tf8LCVHg/nTRSnQYBTZAkASxUAldEWu7y5dZFMpEPnlw/OYM8EizKYjKa5rYXVVIRWDqSskz4k6ePwX4ajsZCeWPcs7usq2U0I83r5ChZ+w";
+
     private String cacheKeyPrefix;
 
     private long timestampExpireWindowSeconds = TimeUnit.MINUTES.toSeconds(30);
     private long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
 
-    private boolean enableRefreshSelfKey = true;
+    private long certExpireSeconds = TimeUnit.MINUTES.toSeconds(30);
 
-    private long channelExpireSeconds = TimeUnit.MINUTES.toSeconds(30);
-
-    private AsymKeyPair swapKeyPair;
+    private AsymKeyPair swapKeyPair=new AsymKeyPair(null,DEFAULT_SWAP_PRIVATE_KEY);
 
 }

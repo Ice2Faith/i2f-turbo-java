@@ -81,7 +81,7 @@ public class SwlTransfer extends SwlExchanger {
         SwlCert cert = new SwlCert(certId, selfKeyPair.getPublicKey(), selfKeyPair.getPrivateKey(), otherPublicKey);
         String text = SwlCertUtil.serialize(cert);
         String key = certKey(certId);
-        cache.set(cacheKey(key), text, config.getChannelExpireSeconds(), TimeUnit.SECONDS);
+        cache.set(cacheKey(key), text, config.getCertExpireSeconds(), TimeUnit.SECONDS);
     }
 
     public SwlCert removeCert(String certId) {
@@ -96,7 +96,7 @@ public class SwlTransfer extends SwlExchanger {
 
     public void resetCertExpire(String certId) {
         String key = certKey(certId);
-        cache.expire(cacheKey(key), config.getChannelExpireSeconds(), TimeUnit.SECONDS);
+        cache.expire(cacheKey(key), config.getCertExpireSeconds(), TimeUnit.SECONDS);
     }
 
     public String acceptOtherPublicKey(String otherPublicKey) {
