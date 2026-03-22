@@ -40,7 +40,7 @@ public class SwlSpringController {
 
         // ************************服务端接收握手并响应*******************************
         String obfuscateClientPublicKey = reqHandleShake.getAttaches().get(0);
-        String clientPublicKey =swlTransfer.obfuscateDecode(obfuscateClientPublicKey);
+        String clientPublicKey = swlTransfer.obfuscateDecode(obfuscateClientPublicKey);
 
         SwlData recvReqHandleShake = swlTransfer.receiveByRaw("swap", reqHandleShake,
                 clientPublicKey,

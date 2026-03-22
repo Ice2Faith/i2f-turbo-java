@@ -25,7 +25,7 @@ public class TestSwlTransfer {
 //        test();
     }
 
-    public static void testMock(){
+    public static void testMock() {
         SwlTransfer clientTransfer = new SwlTransfer();
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
@@ -49,13 +49,13 @@ public class TestSwlTransfer {
                 swapKeyPair.getPublicKey(),
                 clientKeyPair.getPrivateKey(),
                 new ArrayList<>(Collections.singletonList(payload)),
-                new ArrayList<>(Collections.singletonList(clientTransfer.obfuscateEncode( clientKeyPair.getPublicKey())))
+                new ArrayList<>(Collections.singletonList(clientTransfer.obfuscateEncode(clientKeyPair.getPublicKey())))
         );
         reqHandleShake.setContext(null);
 
         // ************************服务端接收握手并响应*******************************
         String obfuscateClientPublicKey = reqHandleShake.getAttaches().get(0);
-        String clientPublicKey =serverTransfer.obfuscateDecode(obfuscateClientPublicKey);
+        String clientPublicKey = serverTransfer.obfuscateDecode(obfuscateClientPublicKey);
 
         SwlData recvReqHandleShake = serverTransfer.receiveByRaw("swap", reqHandleShake,
                 clientPublicKey,
@@ -82,7 +82,7 @@ public class TestSwlTransfer {
         SwlData reqBiz = clientTransfer.send(clientCertId, Arrays.asList("hello"));
 
         // ************************服务端接收业务请求并响应*******************************
-        String clientId="127.0.0.1";
+        String clientId = "127.0.0.1";
         SwlData recvReqBiz = serverTransfer.receive(clientId, reqBiz);
 
         String bizBody = recvReqBiz.getParts().get(0);
@@ -90,13 +90,13 @@ public class TestSwlTransfer {
         SwlData respBiz = serverTransfer.response(recvReqBiz.getHeader().getCertId(), Arrays.asList("echo:" + bizBody));
 
         // ************************客户端接收业务响应*******************************
-        String serverId="server";
+        String serverId = "server";
         SwlData recvRespBiz = clientTransfer.receive(serverId, respBiz);
 
         System.out.println("ok");
     }
 
-    public static void test(){
+    public static void test() {
         SwlTransfer clientTransfer = new SwlTransfer();
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
