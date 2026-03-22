@@ -1,8 +1,10 @@
 package i2f.springcloud.gateway.swl;
 
+import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.core.SwlTransfer;
+import i2f.swl.data.SwlData;
 import i2f.swl.exception.SwlException;
 import i2f.web.swl.filter.SwlWebConfig;
 import lombok.Data;
@@ -27,6 +29,8 @@ import reactor.core.publisher.Mono;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * @author Ice2Faith
@@ -39,7 +43,6 @@ import java.nio.charset.StandardCharsets;
 @Data
 public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
 
-    public static final String KEY_PATH = "/swl/key";
     public static final String KEY_SWAP_PATH = "/swl/swapKey";
 
     @Autowired
@@ -63,17 +66,7 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        if (KEY_PATH.equals(path)) {
-            String selfSwapKey = transfer.getSelfSwapKey();
-            selfSwapKey = jsonSerializer.serialize(selfSwapKey);
-            byte[] bytes = null;
-            try {
-                bytes = selfSwapKey.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new SwlException(SwlCode.INTERNAL_EXCEPTION.code(), e.getMessage(), e);
-            }
-            return responseContent(response, 200, "application/json;charset=UTF-8", bytes);
-        } else if (KEY_SWAP_PATH.equals(path)) {
+        if (KEY_SWAP_PATH.equals(path)) {
             // 获取请求体
             return request.getBody()
                     .defaultIfEmpty(new DefaultDataBufferFactory().allocateBuffer(0))
@@ -95,21 +88,36 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
                             charset = StandardCharsets.UTF_8;
                         }
 
-                        String clientSwapKey = new String(dataBytes, charset);
-
+                        String reqJson = new String(dataBytes, charset);
+                        SwlData req = null;
                         try {
-                            clientSwapKey = (String) jsonSerializer.deserialize(clientSwapKey);
+                            req = (SwlData) jsonSerializer.deserialize(reqJson, SwlData.class);
                         } catch (Exception e) {
                         }
 
-                        transfer.acceptOtherSwapKey(clientSwapKey);
+                        String clientPublicKey = req.getAttaches().get(0);
 
-                        String selfSwapKey = transfer.getSelfSwapKey();
-                        selfSwapKey = jsonSerializer.serialize(selfSwapKey);
+                        AsymKeyPair swapKeyPair = transfer.getSelfSwapKey();
+
+                        transfer.receiveByRaw("swap", req,
+                                clientPublicKey,
+                                swapKeyPair.getPrivateKey());
+
+                        String certId = transfer.acceptOtherSwapKey(clientPublicKey);
+                        String selfPublicKey = transfer.getSelfPublicKey(certId);
+
+                        SwlData resp = transfer.sendByRaw(certId,
+                                clientPublicKey,
+                                swapKeyPair.getPrivateKey(),
+                                new ArrayList<>(Collections.singletonList(selfPublicKey))
+                        );
+                        resp.setContext(null);
+
+                        String respJson = jsonSerializer.serialize(resp);
 
                         byte[] bytes = null;
                         try {
-                            bytes = selfSwapKey.getBytes("UTF-8");
+                            bytes = respJson.getBytes("UTF-8");
                         } catch (UnsupportedEncodingException e) {
                             throw new SwlException(SwlCode.INTERNAL_EXCEPTION.code(), e.getMessage(), e);
                         }

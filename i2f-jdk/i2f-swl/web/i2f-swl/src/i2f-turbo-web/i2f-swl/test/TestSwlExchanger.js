@@ -1,4 +1,3 @@
-import SwlTransfer from "../core/core/SwlTransfer";
 import SwlRsaAsymmetricEncryptorSupplier from "../core/impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
 import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
 import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
@@ -74,14 +73,14 @@ TestSwlExchanger.testRaw=function(){
 
 
     let serverKeyPair = clientTransfer.generateKeyPair();
-    let serverAsymSign = "server";
+    let certId = "test";
 
     let clientKeyPair = clientTransfer.generateKeyPair();
-    let clientAsymSign = "client";
 
 
-    let clientSendData = clientTransfer.sendByRaw(serverKeyPair.getPublicKey(), serverAsymSign,
-        clientKeyPair.getPrivateKey(), clientAsymSign,
+    let clientSendData = clientTransfer.sendByRaw(certId,
+        serverKeyPair.getPublicKey(),
+        clientKeyPair.getPrivateKey(),
         ["body:123456", "query:user=admin"]);
 
 
@@ -91,9 +90,10 @@ TestSwlExchanger.testRaw=function(){
         clientKeyPair.getPublicKey(),
         serverKeyPair.getPrivateKey());
 
-    let serverResponseData = serverTransfer.sendByRaw(clientKeyPair.getPublicKey(), clientAsymSign,
-        serverKeyPair.getPrivateKey(), serverAsymSign
-        , ["echo:ok", "data:ok"]);
+    let serverResponseData = serverTransfer.sendByRaw(certId,
+        clientKeyPair.getPublicKey(),
+        serverKeyPair.getPrivateKey(),
+         ["echo:ok", "data:ok"]);
 
     let serverId = "server";
     let clientReceiveData = clientTransfer.receiveByRaw(serverId,

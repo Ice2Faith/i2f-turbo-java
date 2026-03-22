@@ -32,9 +32,9 @@ public interface TinyScriptResolver {
 
     String renderString(Object context, String text);
 
-    String multilineString(Object context, String text, List<String> features);
+    Object multilineString(Object context, String text, List<String> features);
 
     Class<?> loadClass(Object context, String className);
 
-
+    Object getValueBySquareBracketExpression(Object leftValue, Object rightValue);
 }

@@ -3,7 +3,8 @@ package i2f.turbo.idea.plugin.tinyscript.grammar.parser;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-
+import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
+import static i2f.turbo.idea.plugin.tinyscript.lang.parser.TinyScriptParserUtil.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
@@ -207,8 +208,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     //     |TERM_CONST_STRING_MULTILINE_QUOTE
     public static boolean constMultilineString(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "constMultilineString")) return false;
-        if (!nextTokenIs(b, "<const multiline string>", TERM_CONST_STRING_MULTILINE, TERM_CONST_STRING_MULTILINE_QUOTE))
-            return false;
+        if (!nextTokenIs(b, "<const multiline string>", TERM_CONST_STRING_MULTILINE, TERM_CONST_STRING_MULTILINE_QUOTE)) return false;
         boolean r;
         Marker m = enter_section_(b, l, _NONE_, CONST_MULTILINE_STRING, "<const multiline string>");
         r = consumeToken(b, TERM_CONST_STRING_MULTILINE);
@@ -234,8 +234,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     //     |TERM_CONST_STRING_RENDER_SINGLE
     public static boolean constRenderString(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "constRenderString")) return false;
-        if (!nextTokenIs(b, "<const render string>", TERM_CONST_STRING_RENDER, TERM_CONST_STRING_RENDER_SINGLE))
-            return false;
+        if (!nextTokenIs(b, "<const render string>", TERM_CONST_STRING_RENDER, TERM_CONST_STRING_RENDER_SINGLE)) return false;
         boolean r;
         Marker m = enter_section_(b, l, _NONE_, CONST_RENDER_STRING, "<const render string>");
         r = consumeToken(b, TERM_CONST_STRING_RENDER);
@@ -422,6 +421,22 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     }
 
     /* ********************************************************** */
+    // KEY_DO scriptBlock KEY_WHILE TERM_PAREN_L conditionBlock TERM_PAREN_R
+    public static boolean doWhileSegment(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "doWhileSegment")) return false;
+        if (!nextTokenIs(b, KEY_DO)) return false;
+        boolean r;
+        Marker m = enter_section_(b);
+        r = consumeToken(b, KEY_DO);
+        r = r && scriptBlock(b, l + 1);
+        r = r && consumeTokens(b, 0, KEY_WHILE, TERM_PAREN_L);
+        r = r && conditionBlock(b, l + 1);
+        r = r && consumeToken(b, TERM_PAREN_R);
+        exit_section_(b, m, DO_WHILE_SEGMENT, r);
+        return r;
+    }
+
+    /* ********************************************************** */
     // (ROUTE_NAMING|NAMING|extractExpress|staticEnumValue) (OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN) express
     public static boolean equalValue(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "equalValue")) return false;
@@ -497,6 +512,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     //         | ifSegment
     //         | foreachSegment
     //         | forSegment
+    //         | doWhileSegment
     //         | whileSegment
     //         | controlSegment
     //         | trySegment
@@ -511,6 +527,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     //         | refValue
     //         | jsonValue
     //         | negtiveSegment
+    //         | scriptBlock
     public static boolean expressSegment(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "expressSegment")) return false;
         boolean r;
@@ -520,6 +537,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
         if (!r) r = ifSegment(b, l + 1);
         if (!r) r = foreachSegment(b, l + 1);
         if (!r) r = forSegment(b, l + 1);
+        if (!r) r = doWhileSegment(b, l + 1);
         if (!r) r = whileSegment(b, l + 1);
         if (!r) r = controlSegment(b, l + 1);
         if (!r) r = trySegment(b, l + 1);
@@ -534,6 +552,7 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
         if (!r) r = refValue(b, l + 1);
         if (!r) r = jsonValue(b, l + 1);
         if (!r) r = negtiveSegment(b, l + 1);
+        if (!r) r = scriptBlock(b, l + 1);
         exit_section_(b, l, m, r, false, null);
         return r;
     }
@@ -1065,13 +1084,15 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     }
 
     /* ********************************************************** */
-    // ( OP_AS | OP_CAST  | OP_IS | OP_INSTANCE_OF | OP_TYPE_OF) express
+    // TERM_BRACKET_SQUARE_L express TERM_BRACKET_SQUARE_R
+    //     | ( OP_AS | OP_CAST  | OP_IS | OP_INSTANCE_OF | OP_TYPE_OF) express
     //     |  (OP_MUL | OP_DIV | OP_MOD) express
     //     | (OP_ADD | OP_SUB) express
     //     | (OP_IN | OP_NOT_IN| OP_GTE | OP_GTE_STR | OP_LTE | OP_LTE_STR | OP_NE | OP_NE_STR | OP_NEQ | OP_NEQ_STR | OP_EQ | OP_EQ_STR | OP_GT | OP_GT_STR | OP_LT | OP_LT_STR) express
     //     | (OP_AND | OP_AND_STR | OP_OR | OP_OR_STR) express
     //     | OP_MOD
     //     | TERM_QUESTION express TERM_COLON express
+    //     | pipelineFunctionSegment +
     public static boolean operatorSegment(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "operatorSegment")) return false;
         boolean r;
@@ -1081,36 +1102,27 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
         if (!r) r = operatorSegment_2(b, l + 1);
         if (!r) r = operatorSegment_3(b, l + 1);
         if (!r) r = operatorSegment_4(b, l + 1);
+        if (!r) r = operatorSegment_5(b, l + 1);
         if (!r) r = consumeToken(b, OP_MOD);
-        if (!r) r = operatorSegment_6(b, l + 1);
+        if (!r) r = operatorSegment_7(b, l + 1);
+        if (!r) r = operatorSegment_8(b, l + 1);
         exit_section_(b, l, m, r, false, null);
         return r;
     }
 
-    // ( OP_AS | OP_CAST  | OP_IS | OP_INSTANCE_OF | OP_TYPE_OF) express
+    // TERM_BRACKET_SQUARE_L express TERM_BRACKET_SQUARE_R
     private static boolean operatorSegment_0(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "operatorSegment_0")) return false;
         boolean r;
         Marker m = enter_section_(b);
-        r = operatorSegment_0_0(b, l + 1);
+        r = consumeToken(b, TERM_BRACKET_SQUARE_L);
         r = r && express(b, l + 1);
+        r = r && consumeToken(b, TERM_BRACKET_SQUARE_R);
         exit_section_(b, m, null, r);
         return r;
     }
 
-    // OP_AS | OP_CAST  | OP_IS | OP_INSTANCE_OF | OP_TYPE_OF
-    private static boolean operatorSegment_0_0(PsiBuilder b, int l) {
-        if (!recursion_guard_(b, l, "operatorSegment_0_0")) return false;
-        boolean r;
-        r = consumeToken(b, OP_AS);
-        if (!r) r = consumeToken(b, OP_CAST);
-        if (!r) r = consumeToken(b, OP_IS);
-        if (!r) r = consumeToken(b, OP_INSTANCE_OF);
-        if (!r) r = consumeToken(b, OP_TYPE_OF);
-        return r;
-    }
-
-    // (OP_MUL | OP_DIV | OP_MOD) express
+    // ( OP_AS | OP_CAST  | OP_IS | OP_INSTANCE_OF | OP_TYPE_OF) express
     private static boolean operatorSegment_1(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "operatorSegment_1")) return false;
         boolean r;
@@ -1121,17 +1133,19 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
         return r;
     }
 
-    // OP_MUL | OP_DIV | OP_MOD
+    // OP_AS | OP_CAST  | OP_IS | OP_INSTANCE_OF | OP_TYPE_OF
     private static boolean operatorSegment_1_0(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "operatorSegment_1_0")) return false;
         boolean r;
-        r = consumeToken(b, OP_MUL);
-        if (!r) r = consumeToken(b, OP_DIV);
-        if (!r) r = consumeToken(b, OP_MOD);
+        r = consumeToken(b, OP_AS);
+        if (!r) r = consumeToken(b, OP_CAST);
+        if (!r) r = consumeToken(b, OP_IS);
+        if (!r) r = consumeToken(b, OP_INSTANCE_OF);
+        if (!r) r = consumeToken(b, OP_TYPE_OF);
         return r;
     }
 
-    // (OP_ADD | OP_SUB) express
+    // (OP_MUL | OP_DIV | OP_MOD) express
     private static boolean operatorSegment_2(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "operatorSegment_2")) return false;
         boolean r;
@@ -1142,16 +1156,17 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
         return r;
     }
 
-    // OP_ADD | OP_SUB
+    // OP_MUL | OP_DIV | OP_MOD
     private static boolean operatorSegment_2_0(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "operatorSegment_2_0")) return false;
         boolean r;
-        r = consumeToken(b, OP_ADD);
-        if (!r) r = consumeToken(b, OP_SUB);
+        r = consumeToken(b, OP_MUL);
+        if (!r) r = consumeToken(b, OP_DIV);
+        if (!r) r = consumeToken(b, OP_MOD);
         return r;
     }
 
-    // (OP_IN | OP_NOT_IN| OP_GTE | OP_GTE_STR | OP_LTE | OP_LTE_STR | OP_NE | OP_NE_STR | OP_NEQ | OP_NEQ_STR | OP_EQ | OP_EQ_STR | OP_GT | OP_GT_STR | OP_LT | OP_LT_STR) express
+    // (OP_ADD | OP_SUB) express
     private static boolean operatorSegment_3(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "operatorSegment_3")) return false;
         boolean r;
@@ -1162,9 +1177,29 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
         return r;
     }
 
-    // OP_IN | OP_NOT_IN| OP_GTE | OP_GTE_STR | OP_LTE | OP_LTE_STR | OP_NE | OP_NE_STR | OP_NEQ | OP_NEQ_STR | OP_EQ | OP_EQ_STR | OP_GT | OP_GT_STR | OP_LT | OP_LT_STR
+    // OP_ADD | OP_SUB
     private static boolean operatorSegment_3_0(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "operatorSegment_3_0")) return false;
+        boolean r;
+        r = consumeToken(b, OP_ADD);
+        if (!r) r = consumeToken(b, OP_SUB);
+        return r;
+    }
+
+    // (OP_IN | OP_NOT_IN| OP_GTE | OP_GTE_STR | OP_LTE | OP_LTE_STR | OP_NE | OP_NE_STR | OP_NEQ | OP_NEQ_STR | OP_EQ | OP_EQ_STR | OP_GT | OP_GT_STR | OP_LT | OP_LT_STR) express
+    private static boolean operatorSegment_4(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "operatorSegment_4")) return false;
+        boolean r;
+        Marker m = enter_section_(b);
+        r = operatorSegment_4_0(b, l + 1);
+        r = r && express(b, l + 1);
+        exit_section_(b, m, null, r);
+        return r;
+    }
+
+    // OP_IN | OP_NOT_IN| OP_GTE | OP_GTE_STR | OP_LTE | OP_LTE_STR | OP_NE | OP_NE_STR | OP_NEQ | OP_NEQ_STR | OP_EQ | OP_EQ_STR | OP_GT | OP_GT_STR | OP_LT | OP_LT_STR
+    private static boolean operatorSegment_4_0(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "operatorSegment_4_0")) return false;
         boolean r;
         r = consumeToken(b, OP_IN);
         if (!r) r = consumeToken(b, OP_NOT_IN);
@@ -1186,19 +1221,19 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     }
 
     // (OP_AND | OP_AND_STR | OP_OR | OP_OR_STR) express
-    private static boolean operatorSegment_4(PsiBuilder b, int l) {
-        if (!recursion_guard_(b, l, "operatorSegment_4")) return false;
+    private static boolean operatorSegment_5(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "operatorSegment_5")) return false;
         boolean r;
         Marker m = enter_section_(b);
-        r = operatorSegment_4_0(b, l + 1);
+        r = operatorSegment_5_0(b, l + 1);
         r = r && express(b, l + 1);
         exit_section_(b, m, null, r);
         return r;
     }
 
     // OP_AND | OP_AND_STR | OP_OR | OP_OR_STR
-    private static boolean operatorSegment_4_0(PsiBuilder b, int l) {
-        if (!recursion_guard_(b, l, "operatorSegment_4_0")) return false;
+    private static boolean operatorSegment_5_0(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "operatorSegment_5_0")) return false;
         boolean r;
         r = consumeToken(b, OP_AND);
         if (!r) r = consumeToken(b, OP_AND_STR);
@@ -1208,14 +1243,29 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     }
 
     // TERM_QUESTION express TERM_COLON express
-    private static boolean operatorSegment_6(PsiBuilder b, int l) {
-        if (!recursion_guard_(b, l, "operatorSegment_6")) return false;
+    private static boolean operatorSegment_7(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "operatorSegment_7")) return false;
         boolean r;
         Marker m = enter_section_(b);
         r = consumeToken(b, TERM_QUESTION);
         r = r && express(b, l + 1);
         r = r && consumeToken(b, TERM_COLON);
         r = r && express(b, l + 1);
+        exit_section_(b, m, null, r);
+        return r;
+    }
+
+    // pipelineFunctionSegment +
+    private static boolean operatorSegment_8(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "operatorSegment_8")) return false;
+        boolean r;
+        Marker m = enter_section_(b);
+        r = pipelineFunctionSegment(b, l + 1);
+        while (r) {
+            int c = current_position_(b);
+            if (!pipelineFunctionSegment(b, l + 1)) break;
+            if (!empty_element_parsed_guard_(b, "operatorSegment_8", c)) break;
+        }
         exit_section_(b, m, null, r);
         return r;
     }
@@ -1278,6 +1328,27 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
         r = r && consumeToken(b, TERM_PAREN_R);
         exit_section_(b, m, PAREN_SEGMENT, r);
         return r;
+    }
+
+    /* ********************************************************** */
+    // OP_PIPELINE OP_SELF_PIPE ? functionCall
+    public static boolean pipelineFunctionSegment(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "pipelineFunctionSegment")) return false;
+        if (!nextTokenIs(b, OP_PIPELINE)) return false;
+        boolean r;
+        Marker m = enter_section_(b);
+        r = consumeToken(b, OP_PIPELINE);
+        r = r && pipelineFunctionSegment_1(b, l + 1);
+        r = r && functionCall(b, l + 1);
+        exit_section_(b, m, PIPELINE_FUNCTION_SEGMENT, r);
+        return r;
+    }
+
+    // OP_SELF_PIPE ?
+    private static boolean pipelineFunctionSegment_1(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "pipelineFunctionSegment_1")) return false;
+        consumeToken(b, OP_SELF_PIPE);
+        return true;
     }
 
     /* ********************************************************** */

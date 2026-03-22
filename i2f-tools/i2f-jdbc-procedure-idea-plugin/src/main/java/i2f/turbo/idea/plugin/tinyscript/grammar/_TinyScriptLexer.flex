@@ -109,6 +109,8 @@ WS=[ \t\r\n]+
   "/="                                      { return OP_ASSIGN_DIV; }
   "%="                                      { return OP_ASSIGN_MOD; }
   "|"                                       { return OP_VERTICAL_BAR; }
+  "|>"                                      { return OP_PIPELINE; }
+  "::"                                      { return OP_SELF_PIPE; }
   "class"                                   { return KEY_CLASS; }
   "debugger"                                { return KEY_DEBUGGER; }
   "try"                                     { return KEY_TRY; }
@@ -119,6 +121,7 @@ WS=[ \t\r\n]+
   "continue"                                { return KEY_CONTINUE; }
   "return"                                  { return KEY_RETURN; }
   "while"                                   { return KEY_WHILE; }
+  "do"                                      { return KEY_DO; }
   "for"                                     { return KEY_FOR; }
   "foreach"                                 { return KEY_FOREACH; }
   "if"                                      { return KEY_IF; }

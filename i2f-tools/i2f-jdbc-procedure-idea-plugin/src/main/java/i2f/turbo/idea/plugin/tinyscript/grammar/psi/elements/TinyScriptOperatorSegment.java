@@ -11,4 +11,7 @@ public interface TinyScriptOperatorSegment extends PsiElement {
     @Nullable
     TinyScriptExpress getExpress();
 
+  @NotNull
+  List<TinyScriptPipelineFunctionSegment> getPipelineFunctionSegmentList();
+
 }

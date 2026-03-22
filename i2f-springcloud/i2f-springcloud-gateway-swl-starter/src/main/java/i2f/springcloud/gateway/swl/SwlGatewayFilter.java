@@ -128,10 +128,9 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
         // 获取原始请求的非对称秘钥签名
         // 用于响应时使用，以配对请求
-        AtomicReference<String> clientAsymSign = new AtomicReference<>(request.getHeaders().getFirst(config.getRemoteAsymSignHeaderName()));
-        AtomicReference<String> serverAsymSign = new AtomicReference<>(null);
+        AtomicReference<String> certId = new AtomicReference<>(null);
 
-        ServerHttpResponse nextResponse = getNextResponse(response, ctrl, clientAsymSign, serverAsymSign);
+        ServerHttpResponse nextResponse = getNextResponse(response, ctrl, certId);
 
         if (ctrl.isIn()) {
 
@@ -203,9 +202,9 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
                         // 保存请求时的非对称公钥签名
                         // 此时还没有进行receive，因此local还是客户端的值，remote是服务端的值
-                        clientAsymSign.set(receiveData.getHeader().getRemoteAsymSign());
-                        serverAsymSign.set(receiveData.getHeader().getLocalAsymSign());
+                        certId.set(receiveData.getHeader().getCertId());
 
+                        transfer.resetCertExpire(certId.get());
 
                         // 获取解密后的数据
                         srcText = receiveData.getParts().get(0);
@@ -300,11 +299,10 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
     public ServerHttpResponse getNextResponse(ServerHttpResponse response,
                                               SwlWebCtrl ctrl,
-                                              AtomicReference<String> clientAsymSign,
-                                              AtomicReference<String> serverAsymSign
+                                              AtomicReference<String> certId
     ) {
         if (ctrl.isOut()) {
-            return wrapperServerHttpResponse(response, clientAsymSign, serverAsymSign);
+            return wrapperServerHttpResponse(response, certId);
         }
 
         return response;
@@ -312,8 +310,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
 
     public ServerHttpResponse wrapperServerHttpResponse(ServerHttpResponse response,
-                                                        AtomicReference<String> clientAsymSign,
-                                                        AtomicReference<String> serverAsymSign) {
+                                                        AtomicReference<String> certId) {
         return new ServerHttpResponseDecorator(response) {
             @Override
             public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
@@ -400,10 +397,10 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                     List<String> parts = new ArrayList<>();
                     parts.add(responseText);
 
-                    SwlData responseData = transfer.response(clientAsymSign.get(), parts);
+                    SwlData responseData = transfer.response(certId.get(), parts);
                     String responseSwlh = serializeHeader(responseData.getHeader());
                     delegateResponse.getHeaders().set(config.getHeaderName(), responseSwlh);
-                    delegateResponse.getHeaders().set(config.getRemoteAsymSignHeaderName(), responseData.getContext().getSelfAsymSign());
+                    delegateResponse.getHeaders().set(config.getCertIdName(), responseData.getContext().getCertId());
 
                     responseText = responseData.getParts().get(0);
                     try {
@@ -417,14 +414,6 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         responseContentType = MediaType.APPLICATION_JSON;
                     }
                     delegateResponse.getHeaders().set(config.getRealContentTypeHeaderName(), responseContentType.toString());
-
-                    String selfPublicKey = transfer.getSelfPublicKey();
-                    String selfAsymSign = transfer.calcKeySign(selfPublicKey);
-                    if (serverAsymSign.get() != null) {
-                        if (!selfAsymSign.equalsIgnoreCase(serverAsymSign.get())) {
-                            delegateResponse.getHeaders().set(config.getCurrentAsymKeyHeaderName(), transfer.obfuscateEncode(selfPublicKey));
-                        }
-                    }
 
                     MediaType responseMediaType = MediaType.parseMediaType(MediaType.TEXT_PLAIN_VALUE + ";charset=" + responseCharset);
                     delegateResponse.getHeaders().setContentType(responseMediaType);
@@ -473,8 +462,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             }
         }
         headers.add(config.getHeaderName());
-        headers.add(config.getRemoteAsymSignHeaderName());
-        headers.add(config.getCurrentAsymKeyHeaderName());
+        headers.add(config.getCertIdName());
         headers.add(config.getRealContentTypeHeaderName());
         response.getHeaders().set(SwlWebConsts.ACCESS_CONTROL_EXPOSE_HEADERS, toCommaDelimitedString(headers));
     }

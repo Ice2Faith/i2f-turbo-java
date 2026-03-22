@@ -663,6 +663,34 @@ eval-ts使用TinyScript引擎进行处理
         </lang-while>
     </script-segment>
 
+
+    <!--
+    对应一个do-while语句，test表示循环条件的判断语句
+    first默认值为first，可缺省
+    index默认值为index，可缺省
+    test默认以test访问，等价于 test.test
+    first以string访问，不支持修饰符
+    index以string访问，不支持修饰符
+     -->
+    <lang-do-while test="" first="" index="">
+        <!-- 对应continue-->
+        <lang-continue/>
+        <!-- 对应break -->
+        <lang-break/>
+    </lang-do-while>
+    <!-- 举例 -->
+    <script-segment id="demo">
+        <lang-do-while test="v_i>0">
+            <lang-if test="v_i==10">
+                <lang-continue/>
+            </lang-if>
+            <lang-if test="v_i &lt; v_cnt">
+                <lang-break/>
+            </lang-if>
+            <lang-set result="v_i" value.eval="v_i-1"/>
+        </lang-do-while>
+    </script-segment>
+
     <!--
     调用函数，在target指定的对象上调用method方法，并传入argx参数
     当指定target时，method不用指定类名
@@ -990,10 +1018,15 @@ eval-ts使用TinyScript引擎进行处理
 
     <!--
     调用type指定类型的AI工具，传入的提示词为value，大模型输出的结果保存到result中
+    允许使用role指定系统提示词，也就是基本的角色设定
+    type实际上是需要对应一个 ChatAiProvider 类型的bean在上下文namingContext中
+    当有指定role的情况下，type对应的就应该是 RoleChatAiProvider 类型的bean
+    type的值就是这些AiProvider的name()函数返回值
+    你可以添加很多的AiProvider，可以是不同的模型，或者负责不同的职能
     value默认以visit访问，期待的值为string类型的提示词
     type默认以string访问，为大模型的类型
     -->
-    <lang-ai result="" value="" type="">
+    <lang-ai result="" value="" type="" role="">
 
     </lang-ai>
     <!-- 举例 -->

@@ -34,4 +34,10 @@ public class TinyScriptOperatorSegmentImpl extends TinyScriptPsiElement implemen
         return findChildByClass(TinyScriptExpress.class);
     }
 
+  @Override
+  @NotNull
+  public List<TinyScriptPipelineFunctionSegment> getPipelineFunctionSegmentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, TinyScriptPipelineFunctionSegment.class);
+  }
+
 }

@@ -1,4 +1,3 @@
-import AsymKeyPair from "../../../i2f-core/crypto/asymmetric/AsymKeyPair";
 
 /**
  * @reutrn {SwlContext}
@@ -8,19 +7,15 @@ function SwlContext() {
     /**
      * @type {String}
      */
-    this.remotePublicKey = null
+    this.certId = null
     /**
-     * @type {AsymKeyPair}
+     * @type {String}
      */
-    this.remoteAsymSign = null
+    this.remotePublicKey = null
     /**
      * @type {String}
      */
     this.selfPrivateKey = null
-    /**
-     * @type {String}
-     */
-    this.selfAsymSign = null
     /**
      * @type {String}
      */

@@ -25,7 +25,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                         .withParent(XmlPatterns.xmlAttribute("refid")),
                 new PsiReferenceProvider() {
                     @Override
-                    public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element,
+                    public @NotNull PsiReference[] getReferencesByElement(@NotNull PsiElement element,
                                                                            @NotNull ProcessingContext context) {
                         if (!(element instanceof XmlAttributeValue)) {
                             return PsiReference.EMPTY_ARRAY;
@@ -59,7 +59,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                         .withParent(XmlPatterns.xmlAttribute("id")),
                 new PsiReferenceProvider() {
                     @Override
-                    public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element,
+                    public @NotNull PsiReference[] getReferencesByElement(@NotNull PsiElement element,
                                                                            @NotNull ProcessingContext context) {
                         if (!(element instanceof XmlAttributeValue)) {
                             return PsiReference.EMPTY_ARRAY;

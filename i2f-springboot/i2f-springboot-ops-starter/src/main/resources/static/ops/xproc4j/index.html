@@ -1056,7 +1056,7 @@
                 if (!ex) {
                     ex = new Error('init transfer error')
                 }
-                throw e;
+                throw ex;
             },
             evalWorker(){
                 if (!window.worker) {

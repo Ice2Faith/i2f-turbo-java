@@ -146,21 +146,25 @@ public class SwlExchanger {
     public SwlData sendByCert(SwlCert cert,
                               List<String> parts,
                               List<String> attaches) {
-        return sendByRaw(cert.getRemotePublicKey(), cert.getCertId(),
-                cert.getPrivateKey(), cert.getCertId(),
+        return sendByRaw(cert.getCertId(),
+                cert.getRemotePublicKey(),
+                cert.getPrivateKey(),
                 parts, attaches);
     }
 
-    public SwlData sendByRaw(String remotePublicKey, String remoteAsymSign,
-                             String selfPrivateKey, String selfAsymSign,
+    public SwlData sendByRaw(String certId,
+                             String remotePublicKey,
+                             String selfPrivateKey,
                              List<String> parts) {
-        return sendByRaw(remotePublicKey, remoteAsymSign,
-                selfPrivateKey, selfAsymSign,
+        return sendByRaw(certId,
+                remotePublicKey,
+                selfPrivateKey,
                 parts, null);
     }
 
-    public SwlData sendByRaw(String remotePublicKey, String remoteAsymSign,
-                             String selfPrivateKey, String selfAsymSign,
+    public SwlData sendByRaw(String certId,
+                             String remotePublicKey,
+                             String selfPrivateKey,
                              List<String> parts,
                              List<String> attaches) {
         SwlData ret = new SwlData();
@@ -170,13 +174,11 @@ public class SwlExchanger {
         ret.setContext(new SwlContext());
 
         ret.getContext().setRemotePublicKey(remotePublicKey);
-        ret.getHeader().setRemoteAsymSign(remoteAsymSign);
-        ret.getContext().setRemoteAsymSign(remoteAsymSign);
+        ret.getHeader().setCertId(certId);
+        ret.getContext().setCertId(certId);
 
 
         ret.getContext().setSelfPrivateKey(selfPrivateKey);
-        ret.getHeader().setLocalAsymSign(selfAsymSign);
-        ret.getContext().setSelfAsymSign(selfAsymSign);
 
 
         String timestamp = String.valueOf(SystemClock.currentTimeMillis() / 1000);
@@ -223,7 +225,7 @@ public class SwlExchanger {
         String data = builder.toString();
         ret.getContext().setData(data);
 
-        String sign = messageDigester.digest(data + randomKey + timestamp + nonce + selfAsymSign + remoteAsymSign);
+        String sign = messageDigester.digest(data + randomKey + timestamp + nonce + certId);
         ret.getHeader().setSign(sign);
         ret.getContext().setSign(sign);
 
@@ -258,12 +260,6 @@ public class SwlExchanger {
         return header;
     }
 
-    public SwlHeader swap(SwlHeader header) {
-        String str = header.getLocalAsymSign();
-        header.setLocalAsymSign(header.getRemoteAsymSign());
-        header.setRemoteAsymSign(str);
-        return header;
-    }
 
     public SwlData receiveByCert(SwlData request,
                                  SwlCert cert) {
@@ -289,8 +285,6 @@ public class SwlExchanger {
         ret.setContext(new SwlContext());
 
         decode(ret.getHeader());
-
-        swap(ret.getHeader());
 
         ret.getContext().setClientId(clientId);
 
@@ -365,19 +359,14 @@ public class SwlExchanger {
             throw new SwlException(SwlCode.RANDOM_KEY_MISSING_EXCEPTION.code(), "random key cannot be empty!");
         }
 
-        String remoteAsymSign = ret.getHeader().getRemoteAsymSign();
-        ret.getContext().setRemoteAsymSign(remoteAsymSign);
-        if (remoteAsymSign == null || remoteAsymSign.isEmpty()) {
-            throw new SwlException(SwlCode.CLIENT_ASYM_KEY_SIGN_MISSING_EXCEPTION.code(), "remote asym sign cannot be empty!");
+        String certId = ret.getHeader().getCertId();
+        ret.getContext().setCertId(certId);
+        if (certId == null || certId.isEmpty()) {
+            throw new SwlException(SwlCode.CERT_ID_MISSING_EXCEPTION.code(), "certId cannot be empty!");
         }
 
-        String localAsymSign = ret.getHeader().getLocalAsymSign();
-        ret.getContext().setSelfAsymSign(localAsymSign);
-        if (localAsymSign == null || localAsymSign.isEmpty()) {
-            throw new SwlException(SwlCode.SERVER_ASYM_KEY_SIGN_MISSING_EXCEPTION.code(), "local asym sign cannot be empty!");
-        }
 
-        boolean signOk = messageDigester.verify(sign, data + randomKey + timestamp + nonce + remoteAsymSign + localAsymSign);
+        boolean signOk = messageDigester.verify(sign, data + randomKey + timestamp + nonce + certId);
         ret.getContext().setSignOk(signOk);
         if (!signOk) {
             throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "verify sign failure!");

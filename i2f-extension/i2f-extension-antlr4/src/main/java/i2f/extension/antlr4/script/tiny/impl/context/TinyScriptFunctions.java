@@ -2,6 +2,7 @@ package i2f.extension.antlr4.script.tiny.impl.context;
 
 import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.tiny.impl.DefaultTinyScriptResolver;
+import i2f.reflect.vistor.Visitor;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +21,18 @@ public interface TinyScriptFunctions {
 
     SecureRandom RANDOM = new SecureRandom();
 
+    ThreadLocal<Map<String, Object>> LOCAL = ThreadLocal.withInitial(HashMap::new);
+
     default Date now() {
         return new Date();
+    }
+
+    default long current_time_millis() {
+        return System.currentTimeMillis();
+    }
+
+    default long current_time_seconds() {
+        return System.currentTimeMillis() / 1000;
     }
 
     default int rand() {
@@ -121,6 +132,109 @@ public interface TinyScriptFunctions {
 
     default void put(Map map, Object key, Object value) {
         map.put(key, value);
+    }
+
+    default Object map_get(Map map, Object key) {
+        return map.get(key);
+    }
+
+    default boolean map_contains(Map map, Object key) {
+        return map.containsKey(key);
+    }
+
+    default Object map_remove(Map map, Object key) {
+        return map.remove(key);
+    }
+
+    default Object list_get(List list, int index) {
+        return list.get(index);
+    }
+
+    default boolean collection_contains(Collection collection, Object elem) {
+        return collection.contains(elem);
+    }
+
+    default boolean collection_remove(Collection collection, Object elem) {
+        return collection.remove(elem);
+    }
+
+    default Object list_remove(List list, int index) {
+        return list.remove(index);
+    }
+
+    default Object visit_get(Object obj, String expression) {
+        return Visitor.visit(expression, obj).get();
+    }
+
+    default void visit_set(Object obj, String expression, Object value) {
+        Visitor.visit(expression, obj).set(value);
+    }
+
+    default void visit_del(Object obj, String expression) {
+        Visitor.visit(expression, obj).delete();
+    }
+
+    default boolean iterator_has(Iterator iterator) {
+        return iterator.hasNext();
+    }
+
+    default Object iterator_next(Iterator iterator) {
+        return iterator.next();
+    }
+
+    default boolean enumeration_has(Enumeration enumeration) {
+        return enumeration.hasMoreElements();
+    }
+
+    default Object enumeration_next(Enumeration enumeration) {
+        return enumeration.nextElement();
+    }
+
+    default void clear(Collection collection) {
+        if (collection == null) {
+            return;
+        }
+        collection.clear();
+    }
+
+    default void clear(Map map) {
+        if (map == null) {
+            return;
+        }
+        map.clear();
+    }
+
+    default Map<String, Object> local_map() {
+        Map<String, Object> map = LOCAL.get();
+        if (map == null) {
+            map = new HashMap<>();
+            LOCAL.set(map);
+        }
+        return map;
+    }
+
+    default Object local_get(String key) {
+        return local_map().get(key);
+    }
+
+    default void local_set(String key, Object value) {
+        local_map().put(key, value);
+    }
+
+    default void local_remove(String key) {
+        local_map().remove(key);
+    }
+
+    default boolean local_contains(String key) {
+        return local_map().containsKey(key);
+    }
+
+    default void local_reset() {
+        LOCAL.set(new HashMap<>());
+    }
+
+    default void local_clear() {
+        local_map().clear();
     }
 
     default int length(Collection collection) {

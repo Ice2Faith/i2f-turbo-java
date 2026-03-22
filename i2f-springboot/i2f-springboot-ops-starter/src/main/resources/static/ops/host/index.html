@@ -748,7 +748,7 @@
                 if (!ex) {
                     ex = new Error('init transfer error')
                 }
-                throw e;
+                throw ex;
             },
             messageError(msg,limit){
                 window._lastError=msg;

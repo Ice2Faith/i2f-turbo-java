@@ -14,11 +14,6 @@
 
     <packaging>pom</packaging>
 
-
-    <properties>
-
-    </properties>
-
     <modules>
         <module>i2f-agent</module>
         <module>i2f-ai-std</module>

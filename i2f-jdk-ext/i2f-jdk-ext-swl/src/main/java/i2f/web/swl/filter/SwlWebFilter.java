@@ -97,8 +97,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
         // 获取原始请求的非对称秘钥签名
         // 用于响应时使用，以配对请求
-        String clientAsymSign = request.getHeader(config.getRemoteAsymSignHeaderName());
-        String serverAsymSign = null;
+        String certId = request.getHeader(config.getCertIdName());
 
         // 判断是否已经被解密过
         Object decrypted = request.getAttribute(SwlWebConsts.SWL_REQUEST_DECRYPT_ATTR_KEY);
@@ -151,8 +150,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
                 // 保存请求时的非对称公钥签名
                 // 此时还没有进行receive，因此local还是客户端的值，remote是服务端的值
-                clientAsymSign = receiveData.getHeader().getRemoteAsymSign();
-                serverAsymSign = receiveData.getHeader().getLocalAsymSign();
+                certId = receiveData.getHeader().getCertId();
 
 
                 // 保存解密后的头
@@ -209,6 +207,10 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
             // 设置为已被解密
             nextRequest.setAttribute(SwlWebConsts.SWL_REQUEST_DECRYPT_ATTR_KEY, true);
 
+        }
+
+        if (certId != null) {
+            transfer.resetCertExpire(certId);
         }
 
         // 如果需要加密输出，则需要对输出进行包装
@@ -297,10 +299,10 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         List<String> parts = new ArrayList<>();
         parts.add(responseText);
 
-        SwlData responseData = transfer.response(clientAsymSign, parts);
+        SwlData responseData = transfer.response(certId, parts);
         String responseSwlh = serializeHeader(responseData.getHeader());
         response.setHeader(config.getHeaderName(), responseSwlh);
-        response.setHeader(config.getRemoteAsymSignHeaderName(), responseData.getContext().getSelfAsymSign());
+        response.setHeader(config.getCertIdName(), responseData.getContext().getCertId());
 
         responseText = responseData.getParts().get(0);
         responseBody = responseText.getBytes("UTF-8");
@@ -308,13 +310,6 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         String responseContentType = responseWrapper.getContentType();
         response.setHeader(config.getRealContentTypeHeaderName(), responseContentType);
 
-        String selfPublicKey = transfer.getSelfPublicKey();
-        String selfAsymSign = transfer.calcKeySign(selfPublicKey);
-        if (serverAsymSign != null) {
-            if (!selfAsymSign.equalsIgnoreCase(serverAsymSign)) {
-                response.setHeader(config.getCurrentAsymKeyHeaderName(), transfer.obfuscateEncode(selfPublicKey));
-            }
-        }
         response.setContentType("text/plain");
         response.setContentLengthLong(responseBody.length);
 
@@ -360,8 +355,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
             }
         }
         headers.add(config.getHeaderName());
-        headers.add(config.getRemoteAsymSignHeaderName());
-        headers.add(config.getCurrentAsymKeyHeaderName());
+        headers.add(config.getCertIdName());
         headers.add(config.getRealContentTypeHeaderName());
         response.setHeader(SwlWebConsts.ACCESS_CONTROL_EXPOSE_HEADERS, toCommaDelimitedString(headers));
     }

@@ -83,6 +83,10 @@ public class TinyScriptVisitor extends PsiElementVisitor {
         visitPsiElement(o);
     }
 
+    public void visitDoWhileSegment(@NotNull TinyScriptDoWhileSegment o) {
+        visitPsiElement(o);
+    }
+
     public void visitEqualValue(@NotNull TinyScriptEqualValue o) {
         visitPsiElement(o);
     }
@@ -184,6 +188,10 @@ public class TinyScriptVisitor extends PsiElementVisitor {
     }
 
     public void visitParenSegment(@NotNull TinyScriptParenSegment o) {
+        visitPsiElement(o);
+    }
+
+    public void visitPipelineFunctionSegment(@NotNull TinyScriptPipelineFunctionSegment o) {
         visitPsiElement(o);
     }
 

@@ -2,6 +2,8 @@ package i2f.jdbc.procedure.node.impl;
 
 import i2f.ai.std.ChatAi;
 import i2f.ai.std.ChatAiProvider;
+import i2f.ai.std.RoleChatAi;
+import i2f.ai.std.RoleChatAiProvider;
 import i2f.context.std.INamingContext;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.FeatureConsts;
@@ -31,6 +33,7 @@ public class LangAiNode extends AbstractExecutorNode {
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object value = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
         String type = (String) executor.attrValue(AttrConsts.TYPE, FeatureConsts.STRING, node, context);
+        Object role = executor.attrValue(AttrConsts.ROLE, FeatureConsts.VISIT, node, context);
 
         if (value == null) {
             value = "";
@@ -39,31 +42,59 @@ public class LangAiNode extends AbstractExecutorNode {
         if (question == null || question.isEmpty()) {
             question = node.getTextBody();
         }
+        String system = null;
+        if (role != null) {
+            system = String.valueOf(role);
+        }
 
         INamingContext namingContext = executor.getNamingContext();
         if (namingContext == null) {
             throw new ThrowSignalException("missing naming context to find chat ai providers");
         }
-        List<ChatAiProvider> providers = namingContext.getBeans(ChatAiProvider.class);
-        if (providers == null || providers.isEmpty()) {
-            throw new ThrowSignalException("not found any chat ai providers");
-        }
-        ChatAiProvider provider = null;
-        for (ChatAiProvider item : providers) {
-            if (Objects.equals(item.name(), type)) {
-                provider = item;
-                break;
+        String answer = null;
+        if (system == null) {
+            List<ChatAiProvider> providers = namingContext.getBeans(ChatAiProvider.class);
+            if (providers == null || providers.isEmpty()) {
+                throw new ThrowSignalException("not found any chat ai providers");
             }
-        }
-        if (provider == null) {
-            provider = providers.get(0);
-        }
+            ChatAiProvider provider = null;
+            for (ChatAiProvider item : providers) {
+                if (Objects.equals(item.name(), type)) {
+                    provider = item;
+                    break;
+                }
+            }
+            if (provider == null) {
+                provider = providers.get(0);
+            }
 
-        ChatAi chatAi = provider.getChatAi();
-        if (chatAi == null) {
-            throw new ThrowSignalException("provider cannot got an chat ai");
+            ChatAi chatAi = provider.getChatAi();
+            if (chatAi == null) {
+                throw new ThrowSignalException("provider cannot got an chat ai");
+            }
+            answer = chatAi.chat(question);
+        } else {
+            List<RoleChatAiProvider> providers = namingContext.getBeans(RoleChatAiProvider.class);
+            if (providers == null || providers.isEmpty()) {
+                throw new ThrowSignalException("not found any chat ai providers");
+            }
+            RoleChatAiProvider provider = null;
+            for (RoleChatAiProvider item : providers) {
+                if (Objects.equals(item.name(), type)) {
+                    provider = item;
+                    break;
+                }
+            }
+            if (provider == null) {
+                provider = providers.get(0);
+            }
+
+            RoleChatAi chatAi = provider.getChatAi();
+            if (chatAi == null) {
+                throw new ThrowSignalException("provider cannot got an chat ai");
+            }
+            answer = chatAi.chat(system, question);
         }
-        String answer = chatAi.chat(question);
 
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         if (result != null) {

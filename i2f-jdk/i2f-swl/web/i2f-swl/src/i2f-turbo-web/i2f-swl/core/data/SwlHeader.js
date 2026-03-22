@@ -30,16 +30,11 @@ function SwlHeader() {
     this.digital = null;
 
     /**
-     * 服务端非对称签名
+     * 证书ID
      * @type {String}
      */
-    this.remoteAsymSign = null;
+    this.certId = null;
 
-    /**
-     * 客户端非对称签名
-     * @type {String}
-     */
-    this.localAsymSign = null;
 }
 
 /**
@@ -54,8 +49,7 @@ SwlHeader.copy = function (src, dst) {
     dst.randomKey = src.randomKey;
     dst.sign = src.sign;
     dst.digital = src.digital;
-    dst.localAsymSign = src.localAsymSign;
-    dst.remoteAsymSign = src.remoteAsymSign;
+    dst.certId = src.certId;
     return dst;
 }
 

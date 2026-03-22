@@ -1,0 +1,76 @@
+{
+  "type": "function",
+  "function": {
+    "name": "create_order",
+    "description": "为用户创建一个新的订单。当用户想要购买商品并提供了地址时使用。",
+    "strict": true,
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "用户的唯一标识符，例如 'user_123'。"
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY",
+            "USD",
+            "EUR"
+          ],
+          "description": "订单的货币单位。"
+        },
+        "shipping_address": {
+          "type": "object",
+          "description": "用户的收货地址信息。",
+          "properties": {
+            "city": {
+              "type": "string",
+              "description": "城市名称，例如 '北京'。"
+            },
+            "street": {
+              "type": "string",
+              "description": "街道地址，例如 '朝阳区建国路88号'。"
+            },
+            "zip_code": {
+              "type": "string",
+              "description": "邮政编码。"
+            }
+          },
+          "required": [
+            "city",
+            "street"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "description": "购买的商品列表。",
+          "items": {
+            "type": "object",
+            "properties": {
+              "product_id": {
+                "type": "string",
+                "description": "商品ID。"
+              },
+              "quantity": {
+                "type": "integer",
+                "description": "购买数量。"
+              }
+            },
+            "required": [
+              "product_id",
+              "quantity"
+            ]
+          }
+        }
+      },
+      "required": [
+        "user_id",
+        "shipping_address",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

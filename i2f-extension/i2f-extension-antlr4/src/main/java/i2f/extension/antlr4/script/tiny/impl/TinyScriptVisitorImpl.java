@@ -225,6 +225,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.TrySegmentContext) {
                 TinyScriptParser.TrySegmentContext nextCtx = (TinyScriptParser.TrySegmentContext) item;
                 return visitTrySegment(nextCtx);
+            } else if (item instanceof TinyScriptParser.ScriptBlockContext) {
+                TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) item;
+                return visitScriptBlock(nextCtx);
             } else if (item instanceof TerminalNode) {
                 if (count == 2) {
                     TerminalNode termNode = (TerminalNode) ctx.getChild(0);
@@ -239,7 +242,25 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     return resolver.resolvePrefixOperator(context, prefixOperator, value);
                 }
             } else if (item instanceof TinyScriptParser.ExpressContext) {
-                if (count == 2) {
+                boolean isPipelineCall = true;
+                List<TinyScriptParser.PipelineFunctionSegmentContext> pipelineList = new ArrayList<>();
+                for (int i = 1; i < count; i++) {
+                    ParseTree node = ctx.getChild(i);
+                    if (node instanceof TinyScriptParser.PipelineFunctionSegmentContext) {
+                        pipelineList.add((TinyScriptParser.PipelineFunctionSegmentContext) node);
+                    } else {
+                        isPipelineCall = false;
+                        break;
+                    }
+                }
+                if (isPipelineCall) { // a |> ::getName() |> trim() |> substr(0,2)
+                    TinyScriptParser.ExpressContext startCtx = (TinyScriptParser.ExpressContext) item;
+                    Object ret = visitExpress(startCtx);
+                    for (TinyScriptParser.PipelineFunctionSegmentContext nextCtx : pipelineList) {
+                        ret = visitPipelineFunctionSegment(new PipelineFunctionSegmentContextImpl(nextCtx, ret));
+                    }
+                    return ret;
+                } else if (count == 2) { // - a
                     ParseTree leftNode = item;
                     ParseTree operatorNode = ctx.getChild(1);
                     if (!(leftNode instanceof TinyScriptParser.ExpressContext)) {
@@ -254,7 +275,7 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     Object left = visitExpress(leftCtx);
                     String operator = (String) visitTerminal(operatorCtx);
                     return resolver.resolveSuffixOperator(context, left, operator);
-                } else if (count == 3) {
+                } else if (count == 3) { // a * b
                     ParseTree leftNode = item;
                     ParseTree operatorNode = ctx.getChild(1);
                     ParseTree rightNode = ctx.getChild(2);
@@ -274,7 +295,42 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     Supplier<Object> rightSupplier = () -> visitExpress(rightCtx);
                     String operator = (String) visitTerminal(operatorCtx);
                     return resolver.resolveDoubleOperator(context, leftSupplier, operator, rightSupplier);
-                } else if (count == 5) {
+                } else if (count == 4) { // a[b]
+                    ParseTree leftNode = item;
+                    ParseTree termLeftNode = ctx.getChild(1);
+                    ParseTree rightNode = ctx.getChild(2);
+                    ParseTree termRightNode = ctx.getChild(3);
+                    if (!(leftNode instanceof TinyScriptParser.ExpressContext)) {
+                        throw new IllegalArgumentException("invalid square-bracket-expression left value node, expect express, but found type: " + leftNode.getClass());
+                    }
+                    if (!(termLeftNode instanceof TerminalNode)) {
+                        throw new IllegalArgumentException("invalid square-bracket-expression '[' terminal node, expect operator, but found type: " + termLeftNode.getClass());
+                    }
+                    if (!(rightNode instanceof TinyScriptParser.ExpressContext)) {
+                        throw new IllegalArgumentException("invalid square-bracket-expression right value node, expect express, but found type: " + rightNode.getClass());
+                    }
+                    if (!(termRightNode instanceof TerminalNode)) {
+                        throw new IllegalArgumentException("invalid square-bracket-expression ']' terminal node, expect operator, but found type: " + termRightNode.getClass());
+                    }
+                    TinyScriptParser.ExpressContext leftCtx = (TinyScriptParser.ExpressContext) leftNode;
+                    TerminalNode termLeftCtx = (TerminalNode) termLeftNode;
+                    TinyScriptParser.ExpressContext rightCtx = (TinyScriptParser.ExpressContext) rightNode;
+                    TerminalNode termRightCtx = (TerminalNode) termRightNode;
+                    String leftTerm = (String) visitTerminal(termLeftCtx);
+                    if (!"[".equals(leftTerm)) {
+                        throw new IllegalArgumentException("invalid  square-bracket-expression operator, expect '[' but found '" + leftTerm + "'!");
+                    }
+                    String rightTerm = (String) visitTerminal(termRightCtx);
+                    if (!"]".equals(rightTerm)) {
+                        throw new IllegalArgumentException("invalid  square-bracket-expression operator, expect ']' but found '" + rightTerm + "'!");
+                    }
+                    Object leftValue = visitExpress(leftCtx);
+                    Object rightValue = visitExpress(rightCtx);
+                    if (leftValue == null) {
+                        throw new NullPointerException("a[b] expression expect a not null, occur on " + leftCtx.getText());
+                    }
+                    return resolver.getValueBySquareBracketExpression(leftValue, rightValue);
+                } else if (count == 5) { // a?b:c
                     ParseTree condNode = item;
                     ParseTree questionNode = ctx.getChild(1);
                     ParseTree trueNode = ctx.getChild(2);
@@ -355,6 +411,9 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.DeclareFunctionContext) {
                 TinyScriptParser.DeclareFunctionContext nextCtx = (TinyScriptParser.DeclareFunctionContext) item;
                 return visitDeclareFunction(nextCtx);
+            } else if (item instanceof TinyScriptParser.DoWhileSegmentContext) {
+                TinyScriptParser.DoWhileSegmentContext nextCtx = (TinyScriptParser.DoWhileSegmentContext) item;
+                return visitDoWhileSegment(nextCtx);
             }
             throw new IllegalArgumentException("un-support express found : " + ctx.getText());
         } catch (Throwable e) {
@@ -853,6 +912,62 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     break;
                 } catch (TinyScriptContinueException e) {
                     continue;
+                }
+            }
+            return lastValue;
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Object visitDoWhileSegment(TinyScriptParser.DoWhileSegmentContext ctx) {
+        try {
+            debugNode(ctx);
+            int count = ctx.getChildCount();
+            if (count < 1) {
+                throw new IllegalArgumentException("missing do-while segment!");
+            }
+            TinyScriptParser.ConditionBlockContext contitionCtx = null;
+            TinyScriptParser.ScriptBlockContext scriptCtx = null;
+            for (int i = 0; i < count; i++) {
+                ParseTree item = ctx.getChild(i);
+                if (item instanceof TinyScriptParser.ConditionBlockContext) {
+                    contitionCtx = (TinyScriptParser.ConditionBlockContext) item;
+                } else if (item instanceof TinyScriptParser.ScriptBlockContext) {
+                    scriptCtx = (TinyScriptParser.ScriptBlockContext) item;
+                } else {
+                    if (!(item instanceof TerminalNode)) {
+                        throw new IllegalArgumentException("invalid while segment node type: " + item.getClass());
+                    }
+                    TerminalNode terminalNode = (TerminalNode) item;
+                    String term = (String) visitTerminal(terminalNode);
+                    if (!Arrays.asList("do", "while", "(", ")").contains(term)) {
+                        throw new IllegalArgumentException("invalid while segment node , expect '(/)' , but found '" + term + "'!");
+                    }
+                }
+            }
+            if (contitionCtx == null) {
+                throw new IllegalArgumentException("invalid while segment, missing condition node!");
+            }
+            if (scriptCtx == null) {
+                throw new IllegalArgumentException("invalid while segment, missing script node!");
+            }
+            Object lastValue = null;
+            while (true) {
+                try {
+                    lastValue = visitScriptBlock(scriptCtx);
+                } catch (TinyScriptBreakException e) {
+                    break;
+                } catch (TinyScriptContinueException e) {
+                    continue;
+                }
+                boolean ok = (Boolean) visitConditionBlock(contitionCtx);
+                if (!ok) {
+                    break;
                 }
             }
             return lastValue;
@@ -1509,17 +1624,80 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         }
     }
 
+    public static class PipelineFunctionSegmentContextImpl extends TinyScriptParser.PipelineFunctionSegmentContext {
+        public TinyScriptParser.PipelineFunctionSegmentContext target;
+        public Object pipeValue;
+
+        public PipelineFunctionSegmentContextImpl(TinyScriptParser.PipelineFunctionSegmentContext target, Object pipeValue) {
+            super(null, 0);
+            this.target = target;
+            this.pipeValue = pipeValue;
+        }
+    }
+
+    @Override
+    public Object visitPipelineFunctionSegment(TinyScriptParser.PipelineFunctionSegmentContext ctx) {
+        try {
+            debugNode(ctx);
+            Object callValue = null;
+            if (ctx instanceof PipelineFunctionSegmentContextImpl) {
+                PipelineFunctionSegmentContextImpl realCtx = (PipelineFunctionSegmentContextImpl) ctx;
+                ctx = realCtx.target;
+                callValue = realCtx.pipeValue;
+            }
+            int count = ctx.getChildCount();
+            if (count != 2 && count != 3) {
+                throw new IllegalArgumentException("missing pipeline function call, expect 2/3 parts, but found " + count + " !");
+            }
+            boolean isSelfCall = false;
+            ParseTree pipeNode = ctx.getChild(0);
+            ParseTree selfNode = null;
+            ParseTree funcNode = null;
+            if (count == 2) {
+                funcNode = ctx.getChild(1);
+            } else {
+                selfNode = ctx.getChild(1);
+                funcNode = ctx.getChild(2);
+            }
+            TerminalNode pipeCtx = (TerminalNode) pipeNode;
+            TerminalNode selfCtx = (TerminalNode) selfNode;
+            TinyScriptParser.FunctionCallContext funcCtx = (TinyScriptParser.FunctionCallContext) funcNode;
+            String pipe = (String) visitTerminal(pipeCtx);
+            if (!"|>".equals(pipe)) {
+                throw new IllegalArgumentException("invalid pipeline function value, expect '|>', but found '" + pipe + "'!");
+            }
+            if (selfCtx != null) {
+                String self = (String) visitTerminal(selfCtx);
+                if (!"::".equals(self)) {
+                    throw new IllegalArgumentException("invalid pipeline function value, expect '::', but found '" + self + "'!");
+                }
+                isSelfCall = true;
+            }
+            return visitFunctionCall(new FunctionCallContextImpl(funcCtx, callValue, false)
+                    .pipeline(true).selfPipe(isSelfCall));
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
+        }
+    }
+
     @Override
     public Object visitFunctionCall(TinyScriptParser.FunctionCallContext ctx) {
         try {
             debugNode(ctx);
             boolean isNew = false;
             Object value = null;
+            boolean isPipeline = false;
+            boolean isSelfPipe = false;
             if (ctx instanceof FunctionCallContextImpl) {
                 FunctionCallContextImpl implCtx = (FunctionCallContextImpl) ctx;
                 isNew = implCtx.isNew;
                 ctx = implCtx.target;
                 value = implCtx.value;
+                isPipeline = implCtx.isPipeline;
+                isSelfPipe = implCtx.selfPipe;
             }
             int count = ctx.getChildCount();
             if (count != 3 && count != 4) {
@@ -1591,6 +1769,13 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     }
                 }
 
+            }
+            if (isPipeline) {
+                if (!isSelfPipe) {
+                    // 是管道，并且非自身调用，那就要作为第一个参数
+                    args.add(0, value);
+                    value = null;
+                }
             }
             return resolver.resolveFunctionCall(context, value, isNew, naming, args);
         } catch (Throwable e) {
@@ -2168,8 +2353,8 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
                     }
                     featuresList.add(feature);
                 }
-                term = resolver.multilineString(context, builder.toString(), featuresList);
-                return term;
+                Object obj = resolver.multilineString(context, builder.toString(), featuresList);
+                return obj;
             }
             throw new IllegalArgumentException("un-support const multiline string found : " + ctx.getText());
         } catch (Throwable e) {
@@ -2804,6 +2989,12 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.ParameterListContext) {
                 TinyScriptParser.ParameterListContext nextCtx = (TinyScriptParser.ParameterListContext) tree;
                 return visitParameterList(nextCtx);
+            } else if (tree instanceof TinyScriptParser.PipelineFunctionSegmentContext) {
+                TinyScriptParser.PipelineFunctionSegmentContext nextCtx = (TinyScriptParser.PipelineFunctionSegmentContext) tree;
+                return visitPipelineFunctionSegment(nextCtx);
+            } else if (tree instanceof TinyScriptParser.ScriptBlockContext) {
+                TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) tree;
+                return visitScriptBlock(nextCtx);
             }
         } catch (TinyScriptBreakException e) {
 
@@ -2865,6 +3056,8 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         public TinyScriptParser.FunctionCallContext target;
         public Object value;
         public boolean isNew;
+        public boolean isPipeline;
+        public boolean selfPipe;
 
         public FunctionCallContextImpl(TinyScriptParser.FunctionCallContext target, Object value, boolean isNew) {
             super(null, 0);
@@ -2872,5 +3065,16 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             this.value = value;
             this.isNew = isNew;
         }
+
+        public FunctionCallContextImpl pipeline(boolean enable) {
+            this.isPipeline = enable;
+            return this;
+        }
+
+        public FunctionCallContextImpl selfPipe(boolean enable) {
+            this.selfPipe = enable;
+            return this;
+        }
+
     }
 }

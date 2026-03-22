@@ -15,8 +15,7 @@ import java.util.List;
 public class SwlWebConfig {
     protected SwlWebCtrl defaultCtrl = new SwlWebCtrl(true, true);
     protected String headerName = "swlh";
-    protected String remoteAsymSignHeaderName = "swlras";
-    protected String currentAsymKeyHeaderName = "swlcak";
+    protected String certIdName = "swlci";
     protected String realContentTypeHeaderName = "swlct";
     protected String parameterName = "swlp";
     protected String responseCharset = "UTF-8";

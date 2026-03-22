@@ -7,7 +7,7 @@ axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 
 const SwlAxios = axios.create({
     // axios中请求配置有baseURL选项，表示请求URL公共部分
-    baseURL: 'http://localhost:8082/app/',
+    baseURL: '/api',
     // 超时
     timeout: 30 * 60 * 1000
 })
@@ -19,9 +19,6 @@ SwlAxios.$filter=swlFilter
 
 // request拦截器
 SwlAxios.interceptors.request.use(res => {
-    res.headers['Host'] = window.location.host
-    res.headers['Origin'] = window.location.origin
-    res.headers['User-Agent'] = navigator.userAgent
     debugger
     res = swlFilter.requestFilter(res)
     return res

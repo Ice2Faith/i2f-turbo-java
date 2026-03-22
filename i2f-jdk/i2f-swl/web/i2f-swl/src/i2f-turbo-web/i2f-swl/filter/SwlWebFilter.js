@@ -37,9 +37,8 @@ function SwlWebFilter(transfer = new SwlTransfer(), config = new SwlWebConfig())
  * @return {SwlWebRes}
  */
 SwlWebFilter.prototype.requestFilter = function (res) {
-    let selfPublicKey = this.transfer.getSelfPublicKey();
-    let localAsymSign=this.transfer.calcKeySign(selfPublicKey)
-    res.headers[this.config.remoteAsymSignHeaderName]=localAsymSign
+    let certId=this.transfer.getOtherCertIdDefault();
+    res.headers[this.config.certIdName]=certId
     let ctrl = SwlWebFilter.parseCtrl(res,this.config);
     if(!ctrl.enableOut){
         return res
@@ -116,13 +115,8 @@ SwlWebFilter.prototype.responseFilter = function (res) {
 
     let ctrl = SwlWebFilter.parseCtrl(res.config,this.config);
     let swlh=res.headers[this.config.headerName]
-    let remoteAsymSign=res.headers[this.config.remoteAsymSignHeaderName]
+    let certId=res.headers[this.config.certIdName]
     let realContentType=res.headers[this.config.realContentTypeHeaderName]
-    let currentPublicKey=res.headers[this.config.currentAsymKeyHeaderName]
-    if(currentPublicKey && currentPublicKey!=""){
-        currentPublicKey=this.transfer.obfuscateDecode(currentPublicKey)
-        this.transfer.acceptOtherPublicKey(currentPublicKey)
-    }
     if(swlh && swlh!=""){
         ctrl.enableIn=true
     }else{

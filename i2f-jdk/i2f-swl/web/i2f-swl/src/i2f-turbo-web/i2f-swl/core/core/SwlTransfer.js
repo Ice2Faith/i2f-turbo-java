@@ -7,6 +7,11 @@ import SwlTransferConfig from "./SwlTransferConfig";
 import Random from "../../../i2f-core/util/Random";
 import AsymKeyPair from "../../../i2f-core/crypto/asymmetric/AsymKeyPair";
 import SwlExchanger from "./exchanger/SwlExchanger";
+import SwlException from "../exception/SwlException";
+import SwlCode from "../consts/SwlCode";
+import SwlCertUtil from "../cert/SwlCertUtil";
+import CodeUtil from "../../../i2f-core/util/CodeUtil";
+import SwlCert from "../cert/data/SwlCert";
 
 /**
  * @return SwlTransfer
@@ -50,64 +55,20 @@ function SwlTransfer() {
      * @type Random
      */
     this.random = new Random()
-    /**
-     *
-     * @type {boolean}
-     */
-    this.refreshing = false
-    /**
-     *
-     * @type {number}
-     */
-    this.schedulePool = null
+
 }
 
 // 继承
 SwlTransfer.prototype = Object.create(SwlExchanger.prototype)
 SwlTransfer.prototype.constructor = SwlTransfer
 
+SwlTransfer.CERT_PREFIX_KEY = function () {
+    return "swl:key:cert:"
+};
 
-SwlTransfer.SELF_KEY_PAIR_CURRENT_KEY = function () {
-    return "swl:key:self:current"
-
-};
-SwlTransfer.SELF_KEY_PAIR_HISTORY_KEY_PREFIX = function () {
-    return "swl:key:self:history:"
-};
-SwlTransfer.OTHER_KEY_PUBLIC_KEY_PREFIX = function () {
-    return "swl:key:other:keys:"
-};
 SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT = function () {
     return "swl:key:other:default"
 };
-SwlTransfer.KEYPAIR_SEPARATOR = function () {
-    return "\n==========\n"
-};
-
-/**
- * @return {void}
- */
-SwlTransfer.prototype.initialRefreshingThread = function () {
-    if (this.refreshing) {
-        return
-    }
-    this.refreshing = true
-    let timeout = this.config.selfKeyExpireSeconds - 10;
-    if (timeout <= 0) {
-        timeout = this.config.selfKeyExpireSeconds;
-    }
-    let _this = this
-    this.schedulePool = setInterval(() => {
-        _this.resetSelfKeyPair()
-    }, timeout)
-
-    window.onclose = function () {
-        if (_this.schedulePool) {
-            clearInterval(_this.schedulePool)
-            _this.schedulePool = null
-        }
-    }
-}
 
 /**
  *
@@ -124,148 +85,152 @@ SwlTransfer.prototype.cacheKey = function (key) {
 
 /**
  *
- * @return {AsymKeyPair}
+ * @param certId {String}
+ * @return {String}
  */
-SwlTransfer.prototype.getSelfKeyPair = function () {
-    let obj = this.cache.get(this.cacheKey(SwlTransfer.SELF_KEY_PAIR_CURRENT_KEY()));
-    if (!obj) {
-        return this.resetSelfKeyPair();
-    }
-    let key = SwlTransfer.SELF_KEY_PAIR_HISTORY_KEY_PREFIX() + obj;
-    obj = this.cache.get(this.cacheKey(key));
-    if (!obj) {
-        return this.resetSelfKeyPair();
-    }
-
-    let arr = obj.split(SwlTransfer.KEYPAIR_SEPARATOR(), 2);
-    let ret = new AsymKeyPair();
-    ret.setPublicKey(this.obfuscateDecode(arr[0]));
-    ret.setPrivateKey(this.obfuscateDecode(arr[1]));
-    return ret;
+SwlTransfer.prototype.certKey=function(certId) {
+    return SwlTransfer.CERT_PREFIX_KEY() + certId;
 }
 
 /**
+ * @param certId {String}
+ * @return {SwlCert}
+ */
+SwlTransfer.prototype.getCert=function( certId) {
+    let obj = this.cache.get(this.cacheKey(this.certKey(certId)));
+    if (!obj) {
+        throw new SwlException(SwlCode.CERT_ID_MISSING_EXCEPTION(), "cert id missing or not built channel");
+    }
+    let cert = SwlCertUtil.deserialize(obj);
+    cert.certId=certId;
+    return cert;
+}
+
+/**
+ *
+ * @param certId {String}
+ * @return {AsymKeyPair}
+ */
+SwlTransfer.prototype.getSelfKeyPair=function( certId) {
+    let cert = this.getCert(certId);
+    return new AsymKeyPair(cert.publicKey, cert.privateKey);
+}
+
+/**
+ * @param certId {String}
  * @return {String}
  */
-SwlTransfer.prototype.getSelfPublicKey = function () {
-    let keyPair = this.getSelfKeyPair();
+SwlTransfer.prototype.getSelfPublicKey = function (certId) {
+    let keyPair = this.getSelfKeyPair(certId);
     return keyPair.getPublicKey();
 }
 
 /**
- *
- * @param publicKey String
+ * @param certId {String}
  * @return {String}
  */
-SwlTransfer.prototype.calcKeySign = function (publicKey) {
-    return this.messageDigester.digest(publicKey);
+SwlTransfer.prototype.getSelfPrivateKey = function (certId) {
+    let keyPair = this.getSelfKeyPair(certId);
+    return keyPair.getPrivateKey();
+}
+
+/**
+ * @param certId {String}
+ * @return {String}
+ */
+SwlTransfer.prototype.getOtherPublicKey = function (certId) {
+    let cert = this.getCert(certId);
+    return cert.remotePublicKey;
 }
 
 /**
  *
- * @param selfAsymSign {String}
+ * @param certId {String}
  * @param selfKeyPair {AsymKeyPair}
+ * @param otherPublicKey {String}
  * @return {void}
  */
-SwlTransfer.prototype.setSelfKeyPair = function (selfAsymSign, selfKeyPair) {
-    let key = SwlTransfer.SELF_KEY_PAIR_HISTORY_KEY_PREFIX() + selfAsymSign;
-    let keyPair = new AsymKeyPair(
-        this.obfuscateEncode(selfKeyPair.getPublicKey()),
-        this.obfuscateEncode(selfKeyPair.getPrivateKey())
-    );
-    let text = keyPair.getPublicKey() + SwlTransfer.KEYPAIR_SEPARATOR() + keyPair.getPrivateKey();
-    this.cache.setWith(this.cacheKey(key), text, this.config.selfKeyMaxCount * this.config.selfKeyExpireSeconds);
-    this.cache.set(this.cacheKey(SwlTransfer.SELF_KEY_PAIR_CURRENT_KEY()), selfAsymSign);
+SwlTransfer.prototype.buildCert=function(certId, selfKeyPair, otherPublicKey) {
+    let cert = new SwlCert(certId, selfKeyPair.getPublicKey(), selfKeyPair.getPrivateKey(), otherPublicKey);
+    let text = SwlCertUtil.serialize(cert);
+    let key = this.certKey(certId);
+    this.cache.setWith(this.cacheKey(key), text, this.config.certExpireSeconds);
+    this.cache.set(this.cacheKey(SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT()),certId);
 }
 
 /**
  *
- * @param selfAsymSign {String}
- * @return {String|null}
+ * @param certId {String}
+ * @returns {SwlCert|null}
  */
-SwlTransfer.prototype.getSelfPrivateKey = function (selfAsymSign) {
-    let key = SwlTransfer.SELF_KEY_PAIR_HISTORY_KEY_PREFIX() + selfAsymSign;
-    let obj = this.cache.get(this.cacheKey(key));
-    if (!obj) {
-        return null;
+SwlTransfer.prototype.removeCert=function(certId) {
+    let key = this.certKey(certId);
+    let text = this.cache.get(this.cacheKey(key));
+    if (text != null) {
+        return SwlCertUtil.deserialize(text);
     }
-    let arr = obj.split(SwlTransfer.KEYPAIR_SEPARATOR(), 2);
-    return this.obfuscateDecode(arr[1]);
+    this.cache.remove(this.cacheKey(key));
+    return null;
 }
 
 /**
  *
- * @param otherAsymSign {String}
- * @return {String|null}
- */
-SwlTransfer.prototype.getOtherPublicKey = function (otherAsymSign) {
-    let key = SwlTransfer.OTHER_KEY_PUBLIC_KEY_PREFIX() + otherAsymSign;
-    let obj = this.cache.get(this.cacheKey(key));
-    if (!obj) {
-        return null;
-    }
-    return this.obfuscateDecode(obj);
-}
-
-/**
- *
- * @return {String|null}
- */
-SwlTransfer.prototype.getOtherPublicKeyDefault = function () {
-    let obj = this.cache.get(this.cacheKey(SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT()));
-    if (!obj) {
-        return null;
-    }
-    let otherAsymSign = obj;
-    return this.getOtherPublicKey(otherAsymSign);
-}
-
-/**
- *
- * @param otherAsymSign {String}
- * @param publicKey {String}
+ * @param certId {String}
  * @return {void}
  */
-SwlTransfer.prototype.setOtherPublicKey = function (otherAsymSign, publicKey) {
-    let key = SwlTransfer.OTHER_KEY_PUBLIC_KEY_PREFIX() + otherAsymSign;
-    this.cache.setWith(this.cacheKey(key), this.obfuscateEncode(publicKey), this.config.otherKeyExpireSeconds);
-    this.cache.set(this.cacheKey(SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT()), otherAsymSign);
-}
-
-/**
- *
- * @param otherAsymSign {String}
- * @return {void}
- */
-SwlTransfer.prototype.refreshOtherPublicKeyExpire = function (otherAsymSign) {
-    let key = SwlTransfer.OTHER_KEY_PUBLIC_KEY_PREFIX() + otherAsymSign;
-    this.cache.expire(this.cacheKey(key), this.config.otherKeyExpireSeconds);
+SwlTransfer.prototype.resetCertExpire=function(certId) {
+    let key = this.certKey(certId);
+    this.cache.expire(this.cacheKey(key), this.config.certExpireSeconds);
 }
 
 
 /**
  *
  * @param otherPublicKey {String}
- * @return {void}
+ * @return {String}
  */
 SwlTransfer.prototype.acceptOtherPublicKey = function (otherPublicKey) {
-    let otherAsymSign = this.messageDigester.digest(otherPublicKey);
-    this.setOtherPublicKey(otherAsymSign, otherPublicKey);
+    let certId=CodeUtil.makeCheckCode(32,false);
+    return this.acceptOtherPublicKeyWithId(certId, otherPublicKey);
 }
 
 /**
  *
+ * @param certId {String}
+ * @param otherPublicKey {String}
  * @return {String}
  */
+SwlTransfer.prototype.acceptOtherPublicKeyWithId=function(certId, otherPublicKey) {
+    let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
+    let selfKeyPair = asymmetricEncryptor.generateKeyPair();
+    return this.acceptOtherPublicKeyRaw(certId, selfKeyPair, otherPublicKey);
+}
+
+/**
+ *
+ * @param certId {String}
+ * @param selfKeyPair {AsymKeyPair}
+ * @param otherPublicKey {String}
+ * @return {String}
+ */
+SwlTransfer.prototype.acceptOtherPublicKeyRaw=function(certId, selfKeyPair, otherPublicKey) {
+    this.buildCert(certId, selfKeyPair, otherPublicKey);
+    return certId;
+}
+
+/**
+ *
+ * @return {AsymKeyPair}
+ */
 SwlTransfer.prototype.getSelfSwapKey = function () {
-    let selfPublicKey = this.getSelfPublicKey();
-    return this.obfuscateEncode(selfPublicKey);
+    let swapKeyPair = this.config.swapKeyPair;
+    return swapKeyPair;
 }
 
 /**
  *
  * @param otherSwapKey {String}
- * @return {void}
+ * @return {String}
  */
 SwlTransfer.prototype.acceptOtherSwapKey = function (otherSwapKey) {
     let otherPublicKey = this.obfuscateDecode(otherSwapKey);
@@ -274,27 +239,16 @@ SwlTransfer.prototype.acceptOtherSwapKey = function (otherSwapKey) {
 
 /**
  *
- * @return {AsymKeyPair}
- */
-SwlTransfer.prototype.resetSelfKeyPair = function () {
-    let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
-    let asymKeyPair = asymmetricEncryptor.generateKeyPair();
-    let selfAsymSign = this.messageDigester.digest(asymKeyPair.getPublicKey());
-    this.setSelfKeyPair(selfAsymSign, asymKeyPair);
-    return asymKeyPair;
-}
-
-/**
- *
- * @param remotePublicKey {String}
+ * @param certId {String}
  * @param parts {string[]}
  * @param attaches {string[]|null}
  * @return {SwlData}
  */
-SwlTransfer.prototype.send = function (remotePublicKey, parts, attaches = null) {
-    let keyPair = this.getSelfKeyPair();
-    return this.sendByRaw(remotePublicKey, this.calcKeySign(remotePublicKey),
-        keyPair.getPrivateKey(), this.calcKeySign(keyPair.getPublicKey()),
+SwlTransfer.prototype.send = function (certId, parts, attaches = null) {
+    let cert = this.getCert(certId);
+    return this.sendByRaw(certId,
+        cert.remotePublicKey,
+        cert.privateKey,
         parts, attaches);
 }
 
@@ -305,11 +259,17 @@ SwlTransfer.prototype.send = function (remotePublicKey, parts, attaches = null) 
  * @return {SwlData}
  */
 SwlTransfer.prototype.receive = function (clientId, request) {
-    let selfAsymSign = request.header.remoteAsymSign;
-    let otherAsymSign = request.header.localAsymSign;
-    let otherPublicKey = this.getOtherPublicKey(otherAsymSign);
-    let selfPrivateKey = this.getSelfPrivateKey(selfAsymSign);
-    return this.receiveByRaw(clientId, request, otherPublicKey, selfPrivateKey);
+    let certId = request.header.certId;
+    let cert=this.getCert(certId);
+    return this.receiveByRaw(clientId, request, cert.remotePublicKey, cert.privateKey);
+}
+
+/**
+ *
+ * @return {String}
+ */
+SwlTransfer.prototype.getOtherCertIdDefault=function(){
+    return this.cache.get(this.cacheKey(SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT()));
 }
 
 /**
@@ -318,21 +278,20 @@ SwlTransfer.prototype.receive = function (clientId, request) {
  * @param attaches {string[]|null}
  * @return {SwlData}
  */
-SwlTransfer.prototype.sendDefault = function (parts, attaches = null) {
-    let otherPublicKey = this.getOtherPublicKeyDefault();
-    return this.send(otherPublicKey, parts, attaches);
+SwlTransfer.prototype.sendDefault=function(parts, attaches) {
+    let certId = this.getOtherCertIdDefault();
+    return this.send(certId, parts, attaches);
 }
 
 /**
  *
- * @param remoteAsymSign {String}
+ * @param certId {String}
  * @param parts {string[]}
  * @param attaches {string[]|null}
  * @return {SwlData}
  */
-SwlTransfer.prototype.response = function (remoteAsymSign, parts, attaches = null) {
-    let otherPublicKey = this.getOtherPublicKey(remoteAsymSign);
-    return this.send(otherPublicKey, parts, attaches);
+SwlTransfer.prototype.response = function (certId, parts, attaches = null) {
+    return this.send(certId, parts, attaches);
 }
 
 export default SwlTransfer

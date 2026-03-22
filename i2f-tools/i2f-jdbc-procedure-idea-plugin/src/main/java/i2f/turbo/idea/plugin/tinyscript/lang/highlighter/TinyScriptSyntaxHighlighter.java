@@ -64,6 +64,7 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(TinyScriptTypes.KEY_THROW)
                 || tokenType.equals(TinyScriptTypes.KEY_TRY)
                 || tokenType.equals(TinyScriptTypes.KEY_WHILE)
+                || tokenType.equals(TinyScriptTypes.KEY_DO)
                 || tokenType.equals(TinyScriptTypes.KEY_FUNC)
                 || tokenType.equals(TinyScriptTypes.OP_ADD)
                 || tokenType.equals(TinyScriptTypes.OP_AND)
@@ -104,6 +105,8 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(TinyScriptTypes.OP_OR_STR)
                 || tokenType.equals(TinyScriptTypes.OP_SUB)
                 || tokenType.equals(TinyScriptTypes.OP_TYPE_OF)
+                || tokenType.equals(TinyScriptTypes.OP_PIPELINE)
+                || tokenType.equals(TinyScriptTypes.OP_SELF_PIPE)
                 || tokenType.equals(TinyScriptTypes.TERM_SHARP)
                 || tokenType.equals(TinyScriptTypes.TERM_AT)
         ) {

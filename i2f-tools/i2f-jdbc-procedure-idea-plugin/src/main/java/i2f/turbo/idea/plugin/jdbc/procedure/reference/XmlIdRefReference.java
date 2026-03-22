@@ -30,7 +30,7 @@ public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> imple
     }
 
     @Override
-    public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
+    public @NotNull ResolveResult[] multiResolve(boolean incompleteCode) {
         PsiElement parent = myElement.getParent();
         if(!(parent instanceof XmlAttribute)){
             return ResolveResult.EMPTY_ARRAY;
@@ -104,7 +104,7 @@ public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> imple
     }
 
     @Override
-    public @NotNull Object @NotNull [] getVariants() {
+    public @NotNull Object[] getVariants() {
         return new Object[0];
     }
 

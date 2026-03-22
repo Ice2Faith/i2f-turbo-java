@@ -61,6 +61,7 @@ public interface TagConsts {
     String LANG_OTHERWISE = "lang-otherwise";
 
     String LANG_WHILE = "lang-while";
+    String LANG_DO_WHILE = "lang-do-while";
     String LANG_FOREACH = "lang-foreach";
     String LANG_FORI = "lang-fori";
 

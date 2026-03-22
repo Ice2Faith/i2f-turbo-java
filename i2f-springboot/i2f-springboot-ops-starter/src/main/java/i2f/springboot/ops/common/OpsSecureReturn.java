@@ -18,6 +18,10 @@ import java.util.Map;
 public class OpsSecureReturn<T> {
     public static final int SUCCESS = 200;
     public static final int ERROR = 500;
+
+    public static final String ATTR_USE_MILL_SECONDS = "useMillSeconds";
+    public static final String ATTR_HOST_ID = "hostId";
+
     protected int code;
     protected String msg;
     protected T data;
@@ -35,6 +39,14 @@ public class OpsSecureReturn<T> {
         }
         attrs.put(key,value);
         return this;
+    }
+
+    public OpsSecureReturn<T> withUseMillSeconds(long ms) {
+        return withAttr(ATTR_USE_MILL_SECONDS, ms);
+    }
+
+    public OpsSecureReturn<T> withHostId(String hostId) {
+        return withAttr(ATTR_HOST_ID, hostId);
     }
 
     public static <T> OpsSecureReturn<T> success(T data) {

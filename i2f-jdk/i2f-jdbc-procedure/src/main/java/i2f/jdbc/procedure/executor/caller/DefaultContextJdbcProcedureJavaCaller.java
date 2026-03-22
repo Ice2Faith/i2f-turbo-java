@@ -549,6 +549,10 @@ public interface DefaultContextJdbcProcedureJavaCaller extends ContextJdbcProced
         return sqlScript(datasource, dialectScriptList, params());
     }
 
+    @Override
+    default void closeConnection(Connection conn, String datasource, Boolean rollbackOnException, Throwable ex) {
+        executor().closeConnection(conn, datasource, rollbackOnException, ex);
+    }
 
     default void sqlTransCommit(String datasource) {
         sqlTransCommit(datasource, params());

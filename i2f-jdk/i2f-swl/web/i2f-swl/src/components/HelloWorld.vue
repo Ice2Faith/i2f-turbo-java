@@ -25,9 +25,9 @@ import AntMatcher from "@/i2f-turbo-web/i2f-core/match/impl/AntMatcher";
 import Random from "@/i2f-turbo-web/i2f-core/util/Random";
 import TestSwlExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlExchanger";
 import TestSwlCertTransfer from "@/i2f-turbo-web/i2f-swl/test/TestSwlCertExchanger";
-import TestSwlKeyExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlKeyExchanger";
-import TestSwlTtlKeyExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlTtlKeyExchanger";
-import TestSwlTransferRefactor from "@/i2f-turbo-web/i2f-swl/test/TestSwlTransferRefactor";
+import CodeUtil from "@/i2f-turbo-web/i2f-core/util/CodeUtil";
+import Base64Util from "@/i2f-turbo-web/i2f-core/codec/Base64Util";
+import SwlDto from "@/i2f-turbo-web/i2f-swl/core/data/SwlDto";
 
 export default {
   name: 'HelloWorld',
@@ -41,12 +41,9 @@ export default {
   },
   methods: {
     testTransfer() {
-      // TestSwlTransfer.main();
+      TestSwlTransfer.main();
       // TestSwlExchanger.main();
       // TestSwlCertTransfer.main();
-      // TestSwlKeyExchanger.main();
-      // TestSwlTtlKeyExchanger.main()
-      TestSwlTransferRefactor.main()
     },
     testMatcher(){
       let matcher=new AntMatcher()
@@ -66,15 +63,44 @@ export default {
     },
     testSwapKey(){
       debugger
-      let transfer=this.$axios.$filter.transfer
-      let selfSwapKey = transfer.getSelfSwapKey()
+      let clientTransfer=this.$axios.$filter.transfer
+      let swapKeyPair = clientTransfer.getSelfSwapKey();
+
+      let clientKeyPair = clientTransfer.generateKeyPair();
+
+      let payload = CodeUtil.makeCheckCode(32,false);
+      let reqHandleShake = clientTransfer.sendByRaw("swap",
+          swapKeyPair.getPublicKey(),
+          clientKeyPair.getPrivateKey(),
+          [payload],
+          [clientTransfer.obfuscateEncode(clientKeyPair.getPublicKey())]
+      );
+      reqHandleShake.context=null;
+
+      let reqJson = JSON.stringify(reqHandleShake);
+      let reqPayload=Base64Util.encrypt(reqJson);
+      let reqData=new SwlDto();
+      reqData.payload=reqPayload;
       this.$axios({
         url: 'swl/swapKey',
         method: 'post',
-        data: selfSwapKey,
+        data: reqData,
       }).then(({data}) => {
         debugger
-        transfer.acceptOtherSwapKey(data)
+        /**
+         * @type {SwlDto}
+         */
+        let respDto=data;
+        let respPayload=respDto.payload;
+        let respJson=Base64Util.decrypt(respPayload);
+        let respHandleShake=JSON.parse(respJson);
+
+        let recvRespHandleShake = clientTransfer.receiveByRaw("swap", respHandleShake, swapKeyPair.getPublicKey(), clientKeyPair.getPrivateKey());
+
+        let serverPublicKey = recvRespHandleShake.parts[0];
+
+        let clientCertId = clientTransfer.acceptOtherPublicKeyRaw(recvRespHandleShake.header.certId, clientKeyPair, serverPublicKey);
+
         console.log('echo', data)
       })
     },

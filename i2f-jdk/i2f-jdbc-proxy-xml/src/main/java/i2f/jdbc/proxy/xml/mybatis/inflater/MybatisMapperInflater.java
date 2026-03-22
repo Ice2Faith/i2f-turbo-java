@@ -8,12 +8,15 @@ import i2f.jdbc.data.TypedArgument;
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
 import i2f.jdbc.proxy.xml.mybatis.parameter.ParameterConvertor;
 import i2f.jdbc.proxy.xml.mybatis.parameter.ParameterProvider;
+import i2f.jdbc.proxy.xml.mybatis.parameter.SpiParameterInitializer;
 import i2f.jdbc.proxy.xml.mybatis.parameter.impl.*;
 import i2f.lru.LruMap;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexFindPartMeta;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.w3c.dom.Node;
 
 import java.lang.reflect.Array;
@@ -109,6 +112,18 @@ public class MybatisMapperInflater {
     public BindSql inflateSqlNode(DatabaseType databaseType, MybatisMapperNode node, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) {
         params.put(DATABASE_TYPE, databaseType);
         return inflateSqlNode(node, params, nodeMap);
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class SimpleMapEntry<K, V> {
+        protected K key;
+        protected V value;
+
+        public SimpleMapEntry(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
     }
 
     public BindSql inflateSqlNode(MybatisMapperNode node, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) {
@@ -217,6 +232,7 @@ public class MybatisMapperInflater {
             if ("foreach".equalsIgnoreCase(tagName)) {
                 String collection = Optional.ofNullable(child.getAttributes().get("collection")).orElse("");
                 String item = Optional.ofNullable(child.getAttributes().get("item")).orElse("");
+                String index = Optional.ofNullable(child.getAttributes().get("index")).orElse("");
                 String open = Optional.ofNullable(child.getAttributes().get("open")).orElse("");
                 String separator = Optional.ofNullable(child.getAttributes().get("separator")).orElse("");
                 String close = Optional.ofNullable(child.getAttributes().get("close")).orElse("");
@@ -230,8 +246,12 @@ public class MybatisMapperInflater {
                 if (col instanceof Iterable) {
                     Iterable<?> iter = (Iterable<?>) col;
                     boolean isFirst = true;
+                    int idx = 0;
                     for (Object obj : iter) {
                         iterParam.put(item, obj);
+                        if (index != null && !index.isEmpty()) {
+                            iterParam.put(index, idx);
+                        }
                         BindSql next = inflateSqlNode(child, iterParam, nodeMap);
                         if (isFirst) {
                             builder.append(open);
@@ -242,16 +262,21 @@ public class MybatisMapperInflater {
                         builder.append(next.getSql());
                         args.addAll(next.getArgs());
                         isFirst = false;
+                        idx++;
                     }
                     if (!isFirst) {
                         builder.append(close);
                     }
-                }
-                if (col instanceof Map) {
+                } else if (col instanceof Map) {
                     Map<?, ?> iter = (Map<?, ?>) col;
                     boolean isFirst = true;
-                    for (Object obj : iter.entrySet()) {
-                        iterParam.put(item, obj);
+                    int idx = 0;
+                    for (Map.Entry<?, ?> obj : iter.entrySet()) {
+                        SimpleMapEntry<?, ?> entry = new SimpleMapEntry<>(obj.getKey(), obj.getValue());
+                        iterParam.put(item, entry);
+                        if (index != null && !index.isEmpty()) {
+                            iterParam.put(index, idx);
+                        }
                         BindSql next = inflateSqlNode(child, iterParam, nodeMap);
                         if (isFirst) {
                             builder.append(open);
@@ -262,6 +287,7 @@ public class MybatisMapperInflater {
                         builder.append(next.getSql());
                         args.addAll(next.getArgs());
                         isFirst = false;
+                        idx++;
                     }
                     if (!isFirst) {
                         builder.append(close);
@@ -269,9 +295,13 @@ public class MybatisMapperInflater {
                 } else if (col instanceof Iterator) {
                     Iterator<?> iter = (Iterator<?>) col;
                     boolean isFirst = true;
+                    int idx = 0;
                     while (iter.hasNext()) {
                         Object obj = iter.next();
                         iterParam.put(item, obj);
+                        if (index != null && !index.isEmpty()) {
+                            iterParam.put(index, idx);
+                        }
                         BindSql next = inflateSqlNode(child, iterParam, nodeMap);
                         if (isFirst) {
                             builder.append(open);
@@ -280,8 +310,9 @@ public class MybatisMapperInflater {
                             builder.append(separator);
                         }
                         builder.append(next.getSql());
-                        builder.append(next.getArgs());
+                        args.addAll(next.getArgs());
                         isFirst = false;
+                        idx++;
                     }
                     if (!isFirst) {
                         builder.append(close);
@@ -289,9 +320,13 @@ public class MybatisMapperInflater {
                 } else if (col instanceof Enumeration) {
                     Enumeration<?> iter = (Enumeration<?>) col;
                     boolean isFirst = true;
+                    int idx = 0;
                     while (iter.hasMoreElements()) {
                         Object obj = iter.nextElement();
                         iterParam.put(item, obj);
+                        if (index != null && !index.isEmpty()) {
+                            iterParam.put(index, idx);
+                        }
                         BindSql next = inflateSqlNode(child, iterParam, nodeMap);
                         if (isFirst) {
                             builder.append(open);
@@ -300,8 +335,9 @@ public class MybatisMapperInflater {
                             builder.append(separator);
                         }
                         builder.append(next.getSql());
-                        builder.append(next.getArgs());
+                        args.addAll(next.getArgs());
                         isFirst = false;
+                        idx++;
                     }
                     if (!isFirst) {
                         builder.append(close);
@@ -312,6 +348,9 @@ public class MybatisMapperInflater {
                     for (int i = 0; i < len; i++) {
                         Object obj = Array.get(col, i);
                         iterParam.put(item, obj);
+                        if (index != null && !index.isEmpty()) {
+                            iterParam.put(index, i);
+                        }
                         BindSql next = inflateSqlNode(child, iterParam, nodeMap);
                         if (isFirst) {
                             builder.append(open);
@@ -320,12 +359,14 @@ public class MybatisMapperInflater {
                             builder.append(separator);
                         }
                         builder.append(next.getSql());
-                        builder.append(next.getArgs());
+                        args.addAll(next.getArgs());
                         isFirst = false;
                     }
                     if (!isFirst) {
                         builder.append(close);
                     }
+                } else {
+                    throw new IllegalArgumentException("foreach expect iterable object, but found: " + clazz);
                 }
 
                 continue;
@@ -478,6 +519,7 @@ public class MybatisMapperInflater {
     public static final String CONVERTOR_KEY = "convertor";
     public static final String PROVIDER_KEY = "provider";
 
+    private static final LruMap<String, Map<String, String>> CACHE_EXPRESSION_PARTS = new LruMap<>(500);
     /**
      * expression:
      * user.name.replace("a,b,c","cba"), jdbcType = VARCHAR, handler= java.util.DateHandler, convertor=java.util.DateConvertor, provider=java.util.DateProvider
@@ -494,6 +536,10 @@ public class MybatisMapperInflater {
      * @return
      */
     public static Map<String, String> resolvePlaceHolderExpressionParts(String expression) {
+        Map<String, String> cached = CACHE_EXPRESSION_PARTS.get(expression);
+        if (cached != null) {
+            return new LinkedHashMap<>(cached);
+        }
         List<RegexFindPartMeta> parts = RegexUtil.regexFindParts(expression, "\\s*,\\s*[a-zA-Z0-9_]+\\s*=\\s*");
 
         Map<String, String> parameters = new LinkedHashMap<>();
@@ -516,6 +562,8 @@ public class MybatisMapperInflater {
                 key = null;
             }
         }
+
+        CACHE_EXPRESSION_PARTS.put(expression, new LinkedHashMap<>(parameters));
         return parameters;
     }
 
@@ -524,17 +572,30 @@ public class MybatisMapperInflater {
     public static final ConcurrentHashMap<String, ParameterProvider> registryParameterProviders = new ConcurrentHashMap<>();
 
     static {
+        registryParameterConvertors.put(EscapeTextParameterConvertor.NAME, EscapeTextParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(UnescapeTextParameterConvertor.NAME, UnescapeTextParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(SqlTextParameterConvertor.NAME, SqlTextParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(TrimTextParameterConvertor.NAME, TrimTextParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(LowerTextParameterConvertor.NAME, LowerTextParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(UpperTextParameterConvertor.NAME, UpperTextParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(E2nTextParameterConvertor.NAME, E2nTextParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(N2eObjectParameterConvertor.NAME, N2eObjectParameterConvertor.INSTANCE);
+        registryParameterConvertors.put(N2zObjectParameterConvertor.NAME, N2zObjectParameterConvertor.INSTANCE);
+
+
         registryParameterConvertors.put(SqlIdentifierParameterConvertor.NAME, SqlIdentifierParameterConvertor.INSTANCE);
         registryParameterConvertors.put(SqlValsParameterConvertor.NAME, SqlValsParameterConvertor.INSTANCE);
-
-        registryParameterConvertors.put(ValLikeParameterConvertor.NAME, ValLikeParameterConvertor.INSTANCE);
-        registryParameterConvertors.put(ValEndsParameterConvertor.NAME, ValEndsParameterConvertor.INSTANCE);
-        registryParameterConvertors.put(ValStartsParameterConvertor.NAME, ValStartsParameterConvertor.INSTANCE);
-        registryParameterConvertors.put(ValValsParameterConvertor.NAME, ValValsParameterConvertor.INSTANCE);
 
         registryParameterProviders.put(SystemEnviromentParameterProvider.NAME, SystemEnviromentParameterProvider.INSTANCE);
         registryParameterProviders.put(SystemPropertiesParameterProvider.NAME, SystemPropertiesParameterProvider.INSTANCE);
         registryParameterProviders.put(ThreadLocalParameterProvider.NAME, ThreadLocalParameterProvider.INSTANCE);
+
+        // 从SPI加载初始化组件，逐渐就可以通过静态注册以上这些组件了
+        // 因为SPI是后执行，因此也可以进行同名覆盖，实现更改默认行为
+        ServiceLoader<SpiParameterInitializer> load = ServiceLoader.load(SpiParameterInitializer.class);
+        for (SpiParameterInitializer item : load) {
+            item.initialize();
+        }
     }
 
     private final LruMap<String, ArgumentTypeHandler> cachedHandlers = new LruMap<>(300);
@@ -617,164 +678,147 @@ public class MybatisMapperInflater {
                         emptyFlag = true;
                     }
                     String expression = patten.trim();
-                    if (isDollar) {
-                        Object obj = null;
-                        if (expression.contains("=")) {
-                            // TODO resolve jdbcType=,handler=,javaType=,convertor=,provider=
-                            Map<String, String> parameters = resolvePlaceHolderExpressionParts(expression);
-                            String expr = parameters.get(EXPRESS_KEY);
-                            boolean hasGotParameter = false;
-                            String providerName = parameters.get(PROVIDER_KEY);
-                            if (providerName != null && !providerName.isEmpty()) {
-                                ParameterProvider handler = getCachedParameterProvider(providerName);
-                                if (handler != null) {
-                                    obj = handler.apply(expr, workParam, isDollar);
-                                    hasGotParameter = true;
-                                }
-                            }
-                            if (!hasGotParameter) {
-                                obj = evalExpression(expr, workParam);
-                            }
-                            String convertorName = parameters.get(CONVERTOR_KEY);
-                            if (convertorName != null && !convertorName.isEmpty()) {
-                                String[] arr = convertorName.split(",|;");
-                                for (String name : arr) {
-                                    name=name.trim();
-                                    if(name.isEmpty()){
-                                        continue;
-                                    }
-                                    ParameterConvertor handler = getCachedParameterConvertor(name);
-                                    if (handler != null) {
-                                        obj = handler.convert(obj, expr, isDollar);
-                                    }
-                                }
-                            }
-                        } else {
-                            obj = evalExpression(expression, workParam);
-                        }
 
-                        if (obj instanceof BindSql) {
-                            BindSql bql = (BindSql) obj;
-                            args.addAll(bql.getArgs());
-                            return bql.getSql();
+                    Object obj = getPlaceholderParameterObject(workParam, expression, isDollar);
+
+                    if (obj instanceof BindSql) {
+                        BindSql bql = (BindSql) obj;
+                        args.addAll(bql.getArgs());
+                        return bql.getSql();
+                    }
+                    if (obj == null) {
+                        if (emptyFlag) {
+                            obj = "";
                         }
-                        if (obj == null) {
-                            if (emptyFlag) {
-                                obj = "";
-                            }
-                        }
+                    }
+
+                    if (isDollar) {
                         return obj == null ? "" : String.valueOf(obj);
                     } else {
-                        Object obj = null;
-                        if (expression.contains("=")) {
-                            // TODO resolve jdbcType=,handler=,javaType=,convertor=,provider=
-                            Map<String, String> parameters = resolvePlaceHolderExpressionParts(expression);
-                            String expr = parameters.get(EXPRESS_KEY);
-                            boolean hasGotParameter = false;
-                            String providerName = parameters.get(PROVIDER_KEY);
-                            if (providerName != null && !providerName.isEmpty()) {
-                                ParameterProvider handler = getCachedParameterProvider(providerName);
-                                if (handler != null) {
-                                    obj = handler.apply(expr, workParam, isDollar);
-                                    hasGotParameter = true;
-                                }
-                            }
-                            if (!hasGotParameter) {
-                                obj = evalExpression(expr, workParam);
-                            }
-                            String convertorName = parameters.get(CONVERTOR_KEY);
-                            if (convertorName != null && !convertorName.isEmpty()) {
-                                String[] arr = convertorName.split(",|;");
-                                for (String name : arr) {
-                                    name=name.trim();
-                                    if(name.isEmpty()){
-                                        continue;
-                                    }
-                                    ParameterConvertor handler = getCachedParameterConvertor(name);
-                                    if (handler != null) {
-                                        obj = handler.convert(obj, expr, isDollar);
-                                    }
-                                }
-                            }
-                            if (obj instanceof BindSql) {
-                                BindSql bql = (BindSql) obj;
-                                args.addAll(bql.getArgs());
-                                return bql.getSql();
-                            }
-                            if (obj == null) {
-                                if (emptyFlag) {
-                                    obj = "";
-                                }
-                            }
-                            String handlerName = parameters.get(HANDLER_KEY);
-                            String javaTypeName = parameters.get(JAVA_TYPE_KEY);
-                            String jdbcTypeName = parameters.get(JDBC_TYPE_KEY);
-
-                            if (handlerName != null && !handlerName.isEmpty()) {
-                                try {
-                                    ArgumentTypeHandler handler = getCachedArgumentTypeHandler(handlerName);
-                                    if (handler != null) {
-                                        obj = new TypedArgument(obj, handler);
-                                        args.add(obj);
-                                        return "?";
-                                    }
-                                } catch (Throwable e) {
-
-                                }
-                            }
-
-
-                            if (javaTypeName != null && !javaTypeName.isEmpty()) {
-                                try {
-                                    Class<?> javaType = ReflectResolver.loadClass(handlerName);
-                                    if (javaType != null) {
-                                        obj = new TypedArgument(javaType, obj);
-                                        args.add(obj);
-                                        return "?";
-                                    }
-                                } catch (Throwable e) {
-
-                                }
-                            }
-
-                            if (jdbcTypeName != null && !jdbcTypeName.isEmpty()) {
-                                try {
-                                    JDBCType jdbcType = null;
-                                    JDBCType[] values = JDBCType.values();
-                                    for (JDBCType item : values) {
-                                        if (jdbcTypeName.equalsIgnoreCase(item.name())) {
-                                            jdbcType = item;
-                                            break;
-                                        }
-                                    }
-                                    if (jdbcType != null) {
-                                        obj = new TypedArgument(jdbcType, obj);
-                                        args.add(obj);
-                                        return "?";
-                                    }
-                                } catch (Throwable e) {
-
-                                }
-                            }
-
-                        } else {
-                            obj = evalExpression(expression, workParam);
-                        }
-                        if (obj instanceof BindSql) {
-                            BindSql bql = (BindSql) obj;
-                            args.addAll(bql.getArgs());
-                            return bql.getSql();
-                        }
-                        if (obj == null) {
-                            if (emptyFlag) {
-                                obj = "";
-                            }
-                        }
                         args.add(obj);
                         return "?";
                     }
                 });
         return new BindSql(str, args);
+    }
+
+    /**
+     * expression 其实就是一个逗号分隔的多元组
+     * 形如：user.name,handler=java.util.DateHandler,jdbcType=DATE,javaType=java.util.Date,convertor=java.util.DateConvertor,provider=java.util.DateProvider
+     * 其实就是去掉占位符的外层包裹
+     * return 返回值，有两种 BindSql ,  其他
+     * @param workParam
+     * @param expression
+     * @param isDollar
+     * @return
+     */
+    public Object getPlaceholderParameterObject(Map<String, Object> workParam, String expression, boolean isDollar) {
+        Object ret = null;
+        Map<String, String> parameters = new HashMap<>();
+        // 这里其实没必要判断是否有 = 号，都按照有 = 处理也是一样的
+        if (expression.contains("=")) {
+            // TODO resolve jdbcType=,handler=,javaType=,convertor=,provider=
+            parameters = resolvePlaceHolderExpressionParts(expression);
+        } else {
+            parameters.put(EXPRESS_KEY, expression);
+        }
+
+        String expr = parameters.get(EXPRESS_KEY);
+        boolean hasGotParameter = false;
+        // 从参数提供器 provider 获取参数
+        String providerName = parameters.get(PROVIDER_KEY);
+        if (providerName != null && !providerName.isEmpty()) {
+            ParameterProvider handler = getCachedParameterProvider(providerName);
+            if (handler != null) {
+                ret = handler.apply(expr, workParam, isDollar);
+                hasGotParameter = true;
+            }
+        }
+        // 没获取到，按照默认方式获取
+        if (!hasGotParameter) {
+            ret = evalExpression(expr, workParam);
+        }
+        // 判断是否还有参数转换器 convertor
+        String convertorName = parameters.get(CONVERTOR_KEY);
+        if (convertorName != null && !convertorName.isEmpty()) {
+            String[] arr = convertorName.split(",|;");
+            for (String name : arr) {
+                name = name.trim();
+                if (name.isEmpty()) {
+                    continue;
+                }
+                ParameterConvertor handler = getCachedParameterConvertor(name);
+                if (handler != null) {
+                    ret = handler.convert(ret, expr, isDollar);
+                }
+            }
+        }
+
+        // 经过转换之后，已经是BindSql了，那就直接返回了
+        if (ret instanceof BindSql) {
+            return ret;
+        }
+
+        // 如果是 $ 占位符，不需要后面的处理了，直接返回
+        if (isDollar) {
+            return ret;
+        }
+
+        // 如果已经是一个含类型的参数，直接包装返回
+        if (ret instanceof TypedArgument) {
+            return BindSql.of("?", ret);
+        }
+
+        // 其他默认参数，就需要处理 handler,jdbcType,javaType 了
+        String handlerName = parameters.get(HANDLER_KEY);
+        String javaTypeName = parameters.get(JAVA_TYPE_KEY);
+        String jdbcTypeName = parameters.get(JDBC_TYPE_KEY);
+
+        if (handlerName != null && !handlerName.isEmpty()) {
+            try {
+                ArgumentTypeHandler handler = getCachedArgumentTypeHandler(handlerName);
+                if (handler != null) {
+                    ret = new TypedArgument(ret, handler);
+                    return BindSql.of("?", ret);
+                }
+            } catch (Throwable e) {
+
+            }
+        }
+
+
+        if (javaTypeName != null && !javaTypeName.isEmpty()) {
+            try {
+                Class<?> javaType = ReflectResolver.loadClass(javaTypeName);
+                if (javaType != null) {
+                    ret = new TypedArgument(javaType, ret);
+                    return BindSql.of("?", ret);
+                }
+            } catch (Throwable e) {
+
+            }
+        }
+
+        if (jdbcTypeName != null && !jdbcTypeName.isEmpty()) {
+            try {
+                JDBCType jdbcType = null;
+                JDBCType[] values = JDBCType.values();
+                for (JDBCType item : values) {
+                    if (jdbcTypeName.equalsIgnoreCase(item.name())) {
+                        jdbcType = item;
+                        break;
+                    }
+                }
+                if (jdbcType != null) {
+                    ret = new TypedArgument(jdbcType, ret);
+                    return BindSql.of("?", ret);
+                }
+            } catch (Throwable e) {
+
+            }
+        }
+
+        return ret;
     }
 
     public boolean supportDatabases(Object databaseType, String databases) {

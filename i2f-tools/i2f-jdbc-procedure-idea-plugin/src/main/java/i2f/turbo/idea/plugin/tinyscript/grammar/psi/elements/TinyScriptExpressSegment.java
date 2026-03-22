@@ -2,7 +2,6 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
-
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
@@ -19,6 +18,9 @@ public interface TinyScriptExpressSegment extends PsiElement {
 
     @Nullable
     TinyScriptDeclareFunction getDeclareFunction();
+
+    @Nullable
+    TinyScriptDoWhileSegment getDoWhileSegment();
 
     @Nullable
     TinyScriptEqualValue getEqualValue();
@@ -52,6 +54,9 @@ public interface TinyScriptExpressSegment extends PsiElement {
 
     @Nullable
     TinyScriptRefValue getRefValue();
+
+    @Nullable
+    TinyScriptScriptBlock getScriptBlock();
 
     @Nullable
     TinyScriptStaticEnumValue getStaticEnumValue();
