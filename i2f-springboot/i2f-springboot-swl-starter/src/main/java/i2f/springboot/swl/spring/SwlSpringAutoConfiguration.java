@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -56,6 +57,11 @@ public class SwlSpringAutoConfiguration {
     @Autowired
     private BeanFactory beanFactory;
 
+    @Value("${i2f.swl.filter.order:-10}")
+    private int filterOrder=-10;
+
+    @Value("${i2f.swl.filter.url-pattern:/*}")
+    private String filterUrlPattern="/*";
 
     public <T> T getBeanByTypeOrNewInstance(Class<T> clazz) {
         try {
@@ -166,8 +172,8 @@ public class SwlSpringAutoConfiguration {
         filter.setJsonSerializer(jsonSerializer);
 
         ret.setFilter(filter);
-        ret.addUrlPatterns("/*");
-        ret.setOrder(-1);
+        ret.addUrlPatterns(filterUrlPattern);
+        ret.setOrder(filterOrder);
         ret.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.FORWARD);
         return ret;
     }
