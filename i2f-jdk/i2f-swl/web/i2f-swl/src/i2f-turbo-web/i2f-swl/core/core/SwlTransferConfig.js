@@ -1,3 +1,5 @@
+import AsymKeyPair from "../../../i2f-core/crypto/asymmetric/AsymKeyPair";
+
 /**
  * @return {SwlTransferConfig}
  * @constructor
@@ -18,23 +20,22 @@ function SwlTransferConfig() {
      */
     this.nonceTimeoutSeconds = 1800;
     /**
-     * @type {boolean}
-     */
-    this.enableRefreshSelfKey = true;
-    /**
-     * default 24 hours
+     * default 30 minute
      * @type {int}
      */
-    this.selfKeyExpireSeconds = 86400;
+    this.certExpireSeconds = 1800;
     /**
-     * @type {int}
+     * @type {AsymKeyPair}
      */
-    this.selfKeyMaxCount = 3;
-    /**
-     * default 24 hours
-     * @type {int}
-     */
-    this.otherKeyExpireSeconds = 86400;
+    this.swapKeyPair = new AsymKeyPair(SwlTransferConfig.DEFAULT_SWAP_PUBLIC_KEY(),null);
+}
+
+/**
+ * 默认RSA交换公钥
+ * @return {String}
+ */
+SwlTransferConfig.DEFAULT_SWAP_PUBLIC_KEY=function(){
+    return "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCnhyhaYnyql1Vt0CFroJqDKNcQAvcHyigtjTijXwg5h4841Zlt8xl98HX7a8YZmUTIAnNeKF5tMX6OAYGl/GteUXuL8QFbj7nNSo9cDdT7ZEfK+rs+d/Pz7zxbuMI1UbUs+OFXIICLqOT+Ze1KJoBlm9r42qqvwMEYntKG8KI4bwIDAQAB";
 }
 
 export default SwlTransferConfig

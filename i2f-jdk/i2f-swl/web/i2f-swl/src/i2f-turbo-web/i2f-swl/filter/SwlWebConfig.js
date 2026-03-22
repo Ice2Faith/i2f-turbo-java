@@ -20,11 +20,7 @@ function SwlWebConfig() {
     /**
      * @type {String}
      */
-    this.remoteAsymSignHeaderName = "swlras";
-    /**
-     * @type {String}
-     */
-    this.currentAsymKeyHeaderName = "swlcak";
+    this.certIdName = "swlci";
     /**
      * @type {String}
      */

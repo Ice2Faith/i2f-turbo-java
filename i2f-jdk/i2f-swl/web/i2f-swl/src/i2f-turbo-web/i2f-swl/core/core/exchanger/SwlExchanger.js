@@ -140,23 +140,23 @@ SwlExchanger.prototype.obfuscateDecode=function(data) {
  * @return {SwlData}
  */
 SwlExchanger.prototype.sendByCert=function(cert, parts, attaches=[]) {
-    return this.sendByRaw(cert.remotePublicKey, cert.certId,
-        cert.privateKey, cert.certId,
+    return this.sendByRaw(cert.certId,
+        cert.remotePublicKey,
+        cert.privateKey,
         parts, attaches);
 }
 
 /**
- *
+ * @param certId {String}
  * @param remotePublicKey {String}
- * @param remoteAsymSign {String}
  * @param selfPrivateKey {String}
- * @param selfAsymSign {String}
  * @param parts {String[]}
  * @param attaches {String[]|null}
  * @return {SwlData}
  */
-SwlExchanger.prototype.sendByRaw=function(remotePublicKey,remoteAsymSign,
-                                          selfPrivateKey,selfAsymSign,
+SwlExchanger.prototype.sendByRaw=function(certId,
+                                          remotePublicKey,
+                                          selfPrivateKey,
                                            parts, attaches=[]) {
     let ret = new SwlData();
     ret.parts=[]
@@ -165,13 +165,11 @@ SwlExchanger.prototype.sendByRaw=function(remotePublicKey,remoteAsymSign,
     ret.context=new SwlContext();
 
     ret.context.remotePublicKey=remotePublicKey;
-    ret.header.remoteAsymSign=remoteAsymSign;
-    ret.context.remoteAsymSign=remoteAsymSign;
+    ret.header.certId=certId;
+    ret.context.certId=certId;
 
 
     ret.context.selfPrivateKey=selfPrivateKey;
-    ret.header.localAsymSign=selfAsymSign;
-    ret.context.selfAsymSign=selfAsymSign;
 
 
     let timestamp = ''+Math.floor(SystemClock.currentTimeMillis() / 1000);
@@ -218,7 +216,7 @@ SwlExchanger.prototype.sendByRaw=function(remotePublicKey,remoteAsymSign,
     let data = builder;
     ret.context.data=data;
 
-    let sign = this.messageDigester.digest(data + randomKey + timestamp + nonce + selfAsymSign + remoteAsymSign);
+    let sign = this.messageDigester.digest(data + randomKey + timestamp + nonce + certId);
     ret.header.sign=sign;
     ret.context.sign=sign;
 
@@ -265,18 +263,6 @@ SwlExchanger.prototype.decode=function(header) {
 
 /**
  *
- * @param header {SwlHeader}
- * @return {SwlHeader}
- */
-SwlExchanger.prototype.swap=function(header) {
-    let str=header.localAsymSign
-    header.localAsymSign=header.remoteAsymSign
-    header.remoteAsymSign=str
-    return header;
-}
-
-/**
- *
  * @param request {SwlData}
  * @param cert {SwlCert}
  * @param clientId {String|null}
@@ -311,8 +297,6 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
     ret.context=new SwlContext();
 
     this.decode(ret.header);
-
-    this.swap(ret.header);
 
     ret.context.clientId=clientId;
 
@@ -389,19 +373,13 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
         throw new SwlException(SwlCode.RANDOM_KEY_MISSING_EXCEPTION.code(), "random key cannot be empty!");
     }
 
-    let remoteAsymSign = ret.header.remoteAsymSign;
-    ret.context.remoteAsymSign=remoteAsymSign;
-    if (!remoteAsymSign || remoteAsymSign=='') {
-        throw new SwlException(SwlCode.CLIENT_ASYM_KEY_SIGN_MISSING_EXCEPTION.code(), "remote asym sign cannot be empty!");
+    let certId = ret.header.certId;
+    ret.context.certId=certId;
+    if (!certId || certId=='') {
+        throw new SwlException(SwlCode.CERT_ID_MISSING_EXCEPTION.code(), "certId cannot be empty!");
     }
 
-    let localAsymSign = ret.header.localAsymSign;
-    ret.context.selfAsymSign=localAsymSign;
-    if (!localAsymSign || localAsymSign=='') {
-        throw new SwlException(SwlCode.SERVER_ASYM_KEY_SIGN_MISSING_EXCEPTION.code(), "local asym sign cannot be empty!");
-    }
-
-    let signOk = this.messageDigester.verify(sign, data + randomKey + timestamp + nonce + remoteAsymSign + localAsymSign);
+    let signOk = this.messageDigester.verify(sign, data + randomKey + timestamp + nonce + certId);
     ret.context.signOk=signOk;
     if (!signOk) {
         throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "verify sign failure!");
