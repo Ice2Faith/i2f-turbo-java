@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.UUID;
 
 /**
  * @author Ice2Faith
@@ -33,51 +32,30 @@ public class SwlSpringController {
     @Autowired
     private SwlTransfer swlTransfer;
 
-    /**
-     * 客户端发起公钥交换请求
-     * 明文传递公钥，并且使用私钥进行签名
-     * 密文是一个随机字符串，仅用于进行签名使用
-     *
-     * @return
-     */
-    public SwlData client() {
-        AsymKeyPair swapKeyPair = swlTransfer.getSelfSwapKey();
-
-        AsymKeyPair customKeyPair = swlTransfer.generateKeyPair();
-
-        String payload = UUID.randomUUID().toString().replace("-", "");
-        SwlData req = swlTransfer.sendByRaw("swap",
-                swapKeyPair.getPublicKey(),
-                customKeyPair.getPrivateKey(),
-                new ArrayList<>(Collections.singletonList(payload)),
-                new ArrayList<>(Collections.singletonList(customKeyPair.getPublicKey()))
-        );
-        req.setContext(null);
-        return req;
-    }
-
 
     @SecureParams(in = false, out = false)
     @PostMapping("swapKey")
-    public SwlData swapKey(@RequestBody SwlData req) throws Exception {
-        String clientPublicKey = req.getAttaches().get(0);
-
+    public SwlData swapKey(@RequestBody SwlData reqHandleShake) throws Exception {
         AsymKeyPair swapKeyPair = swlTransfer.getSelfSwapKey();
 
-        swlTransfer.receiveByRaw("swap", req,
+        // ************************服务端接收握手并响应*******************************
+        String obfuscateClientPublicKey = reqHandleShake.getAttaches().get(0);
+        String clientPublicKey =swlTransfer.obfuscateDecode(obfuscateClientPublicKey);
+
+        SwlData recvReqHandleShake = swlTransfer.receiveByRaw("swap", reqHandleShake,
                 clientPublicKey,
                 swapKeyPair.getPrivateKey());
 
-        String certId = swlTransfer.acceptOtherSwapKey(clientPublicKey);
-        String selfPublicKey = swlTransfer.getSelfPublicKey(certId);
+        String serverCertId = swlTransfer.acceptOtherSwapKey(obfuscateClientPublicKey);
+        String selfPublicKey = swlTransfer.getSelfPublicKey(serverCertId);
 
-        SwlData resp = swlTransfer.sendByRaw(certId,
+        SwlData respHandleShake = swlTransfer.sendByRaw(serverCertId,
                 clientPublicKey,
                 swapKeyPair.getPrivateKey(),
                 new ArrayList<>(Collections.singletonList(selfPublicKey))
         );
-        resp.setContext(null);
+        respHandleShake.setContext(null);
 
-        return resp;
+        return respHandleShake;
     }
 }
