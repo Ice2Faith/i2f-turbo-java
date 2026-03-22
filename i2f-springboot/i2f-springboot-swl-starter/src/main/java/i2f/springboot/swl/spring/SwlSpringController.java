@@ -1,10 +1,13 @@
 package i2f.springboot.swl.spring;
 
 
+import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.swl.annotation.SecureParams;
 import i2f.swl.core.SwlTransfer;
 import i2f.swl.data.SwlData;
+import i2f.swl.data.SwlDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -32,10 +35,16 @@ public class SwlSpringController {
     @Autowired
     private SwlTransfer swlTransfer;
 
+    @Autowired
+    private IJsonSerializer jsonSerializer;
 
     @SecureParams(in = false, out = false)
     @PostMapping("swapKey")
-    public SwlData swapKey(@RequestBody SwlData reqHandleShake) throws Exception {
+    public SwlDto swapKey(@RequestBody SwlDto dto) throws Exception {
+        String reqPayload = dto.getPayload();
+        String reqJson = new String(Base64StringByteCodec.INSTANCE.decode(reqPayload),"UTF-8");
+        SwlData reqHandleShake = (SwlData)jsonSerializer.deserialize(reqJson, SwlData.class);
+
         AsymKeyPair swapKeyPair = swlTransfer.getSelfSwapKey();
 
         // ************************服务端接收握手并响应*******************************
@@ -56,6 +65,10 @@ public class SwlSpringController {
         );
         respHandleShake.setContext(null);
 
-        return respHandleShake;
+        SwlDto ret=new SwlDto();
+        String retJson=jsonSerializer.serialize(respHandleShake);
+        String retPayload=Base64StringByteCodec.INSTANCE.encode(retJson.getBytes("UTF-8"));
+        ret.setPayload(retPayload);
+        return ret;
     }
 }

@@ -26,6 +26,7 @@ import Random from "@/i2f-turbo-web/i2f-core/util/Random";
 import TestSwlExchanger from "@/i2f-turbo-web/i2f-swl/test/TestSwlExchanger";
 import TestSwlCertTransfer from "@/i2f-turbo-web/i2f-swl/test/TestSwlCertExchanger";
 import CodeUtil from "@/i2f-turbo-web/i2f-core/util/CodeUtil";
+import Base64Util from "@/i2f-turbo-web/i2f-core/codec/Base64Util";
 
 export default {
   name: 'HelloWorld',
@@ -75,13 +76,19 @@ export default {
       );
       reqHandleShake.context=null;
 
+      let reqJson = JSON.stringify(reqHandleShake);
+      let reqPayload=Base64Util.encrypt(reqJson);
       this.$axios({
         url: 'swl/swapKey',
         method: 'post',
-        data: reqHandleShake,
+        data: {
+          payload: reqPayload
+        },
       }).then(({data}) => {
         debugger
-        let respHandleShake=data;
+        let respPayload=data.payload;
+        let respJson=Base64Util.decrypt(respPayload);
+        let respHandleShake=JSON.parse(respJson);
 
         let recvRespHandleShake = clientTransfer.receiveByRaw("swap", respHandleShake, swapKeyPair.getPublicKey(), clientKeyPair.getPrivateKey());
 
