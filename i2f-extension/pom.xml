@@ -17,6 +17,7 @@
         <module>i2f-extension-7zip</module>
         <module>i2f-extension-agent-javassist</module>
         <module>i2f-extension-ai-dashscope</module>
+        <module>i2f-extension-ai-langchain4j8</module>
         <module>i2f-extension-ai-openai</module>
         <module>i2f-extension-all</module>
         <module>i2f-extension-antlr4</module>
