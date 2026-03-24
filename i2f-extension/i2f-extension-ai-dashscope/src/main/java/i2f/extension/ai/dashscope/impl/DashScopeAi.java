@@ -155,6 +155,9 @@ public class DashScopeAi {
                                 Throwable callEx = null;
                                 try {
                                     DashScopeToolDefinition definition = toolMap.get(name);
+                                    if(definition==null){
+                                        throw new IllegalArgumentException("not found this tool ["+name+"], please try others.");
+                                    }
                                     Method bindMethod = definition.getBindMethod();
                                     String arguments = function.getArguments();
                                     String callCounterKey = name + "#" + arguments;
@@ -214,8 +217,12 @@ public class DashScopeAi {
                                         }
                                     }
                                     Object ret = bindMethod.invoke(target, args);
-                                    String json = JsonUtils.toJson(ret);
-                                    callResult = json;
+                                    if(ret instanceof CharSequence){
+                                        callResult = String.valueOf(ret);
+                                    }else{
+                                        String json = JsonUtils.toJson(ret);
+                                        callResult = json;
+                                    }
                                 } catch (Throwable e) {
                                     callEx = e;
                                 }
@@ -224,11 +231,13 @@ public class DashScopeAi {
                                         InvocationTargetException ite = (InvocationTargetException) callEx;
                                         callEx = ite.getTargetException();
                                     }
+                                    callEx.printStackTrace();
                                     callResult = "tool [" + name + "] invoke failure! cause by " + callEx.getClass() + ": " + callEx.getMessage();
                                 }
                                 Message toolMsg = Message.builder()
                                         .role(Role.TOOL.getValue())
                                         .content(callResult)
+                                        .toolCallId(callFunction.getId())
                                         .build();
                                 historyMessageList.add(toolMsg);
                                 isToolCall = true;

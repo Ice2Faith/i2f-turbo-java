@@ -141,6 +141,9 @@ public class OpenAiAi {
                                 Throwable callEx = null;
                                 try {
                                     OpenAiToolDefinition definition = toolMap.get(name);
+                                    if(definition==null){
+                                        throw new IllegalArgumentException("not found this tool ["+name+"], please try others.");
+                                    }
                                     Method bindMethod = definition.getBindMethod();
                                     String arguments = function.arguments();
                                     String callCounterKey = name + "#" + arguments;
@@ -200,8 +203,12 @@ public class OpenAiAi {
                                         }
                                     }
                                     Object ret = bindMethod.invoke(target, args);
-                                    String json = toJson(ret);
-                                    callResult = json;
+                                    if(ret instanceof CharSequence){
+                                        callResult = String.valueOf(ret);
+                                    }else{
+                                        String json = toJson(ret);
+                                        callResult = json;
+                                    }
                                 } catch (Throwable e) {
                                     callEx = e;
                                 }
@@ -210,6 +217,7 @@ public class OpenAiAi {
                                         InvocationTargetException ite = (InvocationTargetException) callEx;
                                         callEx = ite.getTargetException();
                                     }
+                                    callEx.printStackTrace();
                                     callResult = "tool [" + name + "] invoke failure! cause by " + callEx.getClass() + ": " + callEx.getMessage();
                                 }
                                 historyMessageList.add(ChatCompletionMessageParam.ofTool(ChatCompletionToolMessageParam.builder()
