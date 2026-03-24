@@ -4,6 +4,7 @@ package i2f.extension.ai.openai.test;
 import i2f.ai.std.ChatAi;
 import i2f.ai.std.skill.SkillDefinition;
 import i2f.ai.std.skill.SkillsHelper;
+import i2f.ai.std.skill.SkillsTools;
 import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.ai.std.tool.test.TestSchemaPojo;
 import i2f.ai.std.tool.test.TestToolComponent;
@@ -31,6 +32,7 @@ public class TestOpenAi {
         provider.setApiKey(System.getenv("DASHSCOPE_AI_API_KEY"));
         ListableContext context = new ListableContext();
         context.addBean(new TestToolComponent());
+        context.addBean(new SkillsTools());
         provider.setContext(context);
 
         Map<String, SkillDefinition> skillMap = SkillsHelper.scanFileSystemSkills();
