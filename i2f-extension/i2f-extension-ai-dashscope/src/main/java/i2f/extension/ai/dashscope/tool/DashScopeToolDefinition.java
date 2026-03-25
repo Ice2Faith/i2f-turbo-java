@@ -1,6 +1,7 @@
 package i2f.extension.ai.dashscope.tool;
 
 import com.alibaba.dashscope.tools.ToolFunction;
+import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.context.std.IContext;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,11 +20,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class DashScopeToolDefinition {
     protected ToolFunction function;
-    protected String functionName;
-    protected List<String> functionParameterNames;
-    protected Method bindMethod;
-    protected Class<?> bindClass;
-    protected Object bindTarget;
+    protected ToolRawDefinition rawDefinition;
 
     public static Map<String, DashScopeToolDefinition> parseTools(IContext context) {
         return DashScopeToolHelper.parseTools(context);

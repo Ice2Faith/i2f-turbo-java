@@ -1,6 +1,7 @@
 package i2f.extension.ai.openai.tool;
 
 import com.openai.models.chat.completions.ChatCompletionTool;
+import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.context.std.IContext;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,11 +20,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class OpenAiToolDefinition {
     protected ChatCompletionTool function;
-    protected String functionName;
-    protected List<String> functionParameterNames;
-    protected Method bindMethod;
-    protected Class<?> bindClass;
-    protected Object bindTarget;
+    protected ToolRawDefinition rawDefinition;
 
     public static Map<String, OpenAiToolDefinition> parseTools(IContext context) {
         return OpenAiToolHelper.parseTools(context);

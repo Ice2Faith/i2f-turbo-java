@@ -4,9 +4,14 @@ import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.context.std.IContext;
+import i2f.convert.obj.ObjectConvertor;
+import i2f.reflect.RichConverter;
+import i2f.typeof.TypeOf;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Function;
 
@@ -165,6 +170,67 @@ public class ToolRawHelper {
         definition.setBindClass(method.getDeclaringClass());
         definition.setBindTarget(null);
         return definition;
+    }
+
+    public static Object invokeTool(ToolRawDefinition rawDefinition, Map<String, Object> argumentsMap) throws Throwable {
+        try {
+            Method bindMethod = rawDefinition.getBindMethod();
+            Object[] args = new Object[rawDefinition.getFunctionParameterNames().size()];
+            for (int i = 0; i < args.length; i++) {
+                Parameter[] parameters = bindMethod.getParameters();
+                Object value = argumentsMap.get(rawDefinition.getFunctionParameterNames().get(i));
+                if (i <= parameters.length) {
+                    if (!TypeOf.instanceOf(value, parameters[i].getType())) {
+                        if (ObjectConvertor.isDateType(parameters[i].getType())) {
+                            Date date = ObjectConvertor.tryParseDate(String.valueOf(value));
+                            if (date != null) {
+                                value = ObjectConvertor.tryConvertAsType(value, parameters[i].getType());
+                            }
+                        }
+                    }
+                    if (!TypeOf.instanceOf(value, parameters[i].getType())) {
+                        try {
+                            // 尝试转换类型为复杂POJO对象
+                            Class<?> parameterType = parameters[i].getType();
+                            if (!TypeOf.isBaseType(parameterType)) {
+                                value = RichConverter.convert(value, parameterType);
+                            }
+                        } catch (Throwable e) {
+
+                        }
+                    }
+
+                    if (!TypeOf.instanceOf(value, parameters[i].getType())) {
+                        try {
+                            value = ObjectConvertor.tryConvertAsType(value, parameters[i].getType());
+                            if (TypeOf.instanceOf(value, parameters[i].getType())) {
+                            }
+                        } catch (Exception e) {
+
+                        }
+                    }
+
+                }
+                args[i] = value;
+            }
+
+            Object target = rawDefinition.getBindTarget();
+            if (Modifier.isStatic(bindMethod.getModifiers())) {
+                target = null;
+            } else {
+                if (target == null) {
+                    target = rawDefinition.getBindClass().newInstance();
+                }
+            }
+            Object ret = bindMethod.invoke(target, args);
+            return ret;
+        } catch (InvocationTargetException e) {
+            Throwable ex = e.getTargetException();
+            if (ex != null) {
+                throw ex;
+            }
+            throw e;
+        }
     }
 
 }

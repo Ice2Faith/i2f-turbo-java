@@ -1,5 +1,6 @@
 package i2f.extension.ai.langchain4j8.tool;
 
+import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.context.std.IContext;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import lombok.Data;
@@ -19,11 +20,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class Langchain4j8ToolDefinition {
     protected ToolSpecification function;
-    protected String functionName;
-    protected List<String> functionParameterNames;
-    protected Method bindMethod;
-    protected Class<?> bindClass;
-    protected Object bindTarget;
+    protected ToolRawDefinition rawDefinition;
 
     public static Map<String, Langchain4j8ToolDefinition> parseTools(IContext context) {
         return Langchain4j8ToolHelper.parseTools(context);

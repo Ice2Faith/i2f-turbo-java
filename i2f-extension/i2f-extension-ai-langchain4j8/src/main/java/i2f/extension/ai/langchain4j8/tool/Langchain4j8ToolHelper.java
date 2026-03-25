@@ -77,11 +77,7 @@ public class Langchain4j8ToolHelper {
                 .build();
 
         ret.setFunction(function);
-        ret.setFunctionName(definition.getFunctionName());
-        ret.setFunctionParameterNames(definition.getFunctionParameterNames());
-        ret.setBindMethod(definition.getBindMethod());
-        ret.setBindClass(definition.getBindClass());
-        ret.setBindTarget(definition.getBindTarget());
+        ret.setRawDefinition(definition);
 
         return ret;
     }
