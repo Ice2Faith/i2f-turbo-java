@@ -29,9 +29,9 @@ public class SkillsTools {
         for (String fileName : SkillsHelper.POSSIBLE_SKILL_FILE_NAME) {
             url = SkillsHelper.getSkillResource("skills/" + skillName + "/" + fileName);
             if (url != null) {
-                if("file".equalsIgnoreCase(url.getProtocol())){
+                if ("file".equalsIgnoreCase(url.getProtocol())) {
                     File file = new File(url.toURI());
-                    if(file.exists() && file.isFile()){
+                    if (file.exists() && file.isFile()) {
                         break;
                     }
                 }
@@ -57,12 +57,12 @@ public class SkillsTools {
         if (url == null) {
             throw new IllegalStateException("skill [" + skillName + "] asset [" + resourcePath + "] not found");
         }
-        if("file".equalsIgnoreCase(url.getProtocol())){
+        if ("file".equalsIgnoreCase(url.getProtocol())) {
             File file = new File(url.toURI());
-            if(!file.exists()){
+            if (!file.exists()) {
                 throw new IllegalStateException("skill [" + skillName + "] asset file [" + resourcePath + "] not found");
             }
-            if(!file.isFile()){
+            if (!file.isFile()) {
                 throw new IllegalStateException("skill [" + skillName + "] asset file [" + resourcePath + "] not is file");
             }
         }
@@ -87,10 +87,10 @@ public class SkillsTools {
             throw new IllegalStateException("skill [" + skillName + "] script asset [" + scriptPath + "] not found");
         }
         File scriptFile = new File(url.toURI());
-        if(!scriptFile.exists()){
+        if (!scriptFile.exists()) {
             throw new IllegalStateException("skill [" + skillName + "] script file [" + scriptPath + "] not found");
         }
-        if(!scriptFile.isFile()){
+        if (!scriptFile.isFile()) {
             throw new IllegalStateException("skill [" + skillName + "] script file [" + scriptPath + "] not is file");
         }
         String name = scriptFile.getName();

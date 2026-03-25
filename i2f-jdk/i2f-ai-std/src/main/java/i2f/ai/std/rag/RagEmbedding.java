@@ -18,7 +18,7 @@ public class RagEmbedding {
     protected RagVector vector;
     protected String content;
     protected double score;
-    protected Map<String, Object> metadata=new LinkedHashMap<>();
+    protected Map<String, Object> metadata = new LinkedHashMap<>();
 
     public static int compareByScoreDesc(RagEmbedding v1, RagEmbedding v2) {
         return Double.compare(v2.getScore(), v1.getScore());

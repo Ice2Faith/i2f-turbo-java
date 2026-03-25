@@ -16,12 +16,12 @@ import java.util.List;
 public class RagVector {
     protected double[] array;
 
-    public RagVector(double[] arr){
-        this.array=arr;
+    public RagVector(double[] arr) {
+        this.array = arr;
     }
 
-    public RagVector(int dimension){
-        this.array=new double[dimension];
+    public RagVector(int dimension) {
+        this.array = new double[dimension];
     }
 
     public static RagVector fromArray(double[] vector) {
@@ -95,7 +95,7 @@ public class RagVector {
         return ret;
     }
 
-    public int dimension(){
+    public int dimension() {
         return array.length;
     }
 

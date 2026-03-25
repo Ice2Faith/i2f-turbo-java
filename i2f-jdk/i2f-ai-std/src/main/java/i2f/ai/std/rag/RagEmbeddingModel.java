@@ -10,8 +10,8 @@ import java.util.UUID;
 public interface RagEmbeddingModel {
     RagVector embedAsVector(String content);
 
-    default RagEmbedding embed(String content){
-        return embed(null,content);
+    default RagEmbedding embed(String content) {
+        return embed(null, content);
     }
 
     default RagEmbedding embed(String id, String content) {

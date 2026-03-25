@@ -54,9 +54,9 @@ public class SkillsHelper {
                 continue;
             }
             String text = null;
-            try{
-                text=StreamUtil.readString(mainFile);
-            }catch(Exception e){
+            try {
+                text = StreamUtil.readString(mainFile);
+            } catch (Exception e) {
                 continue;
             }
             String[] arr = text.split("[\\-]{3,}", 3);

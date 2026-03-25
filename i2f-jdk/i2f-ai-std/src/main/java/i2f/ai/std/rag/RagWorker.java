@@ -21,21 +21,21 @@ public class RagWorker {
         this.store = store;
     }
 
-    public RagEmbedding store(String content){
-        RagEmbedding embedding = model.embed(null,content);
+    public RagEmbedding store(String content) {
+        RagEmbedding embedding = model.embed(null, content);
         String sid = store.store(embedding);
         embedding.setId(sid);
         return embedding;
     }
 
-    public RagEmbedding store(String id, String content){
+    public RagEmbedding store(String id, String content) {
         RagEmbedding embedding = model.embed(id, content);
         String sid = store.store(embedding);
         embedding.setId(sid);
         return embedding;
     }
 
-    public List<RagEmbedding> similar(String content, int topN){
+    public List<RagEmbedding> similar(String content, int topN) {
         RagEmbedding embedding = model.embed(content);
         return store.similar(embedding, topN);
     }
