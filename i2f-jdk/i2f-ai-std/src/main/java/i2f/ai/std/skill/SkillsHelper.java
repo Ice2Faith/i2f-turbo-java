@@ -19,7 +19,7 @@ public class SkillsHelper {
             "README.md", "readme.md",
     };
 
-    public static Map<String, SkillDefinition> scanFileSystemSkills() throws Exception {
+    public static Map<String, SkillDefinition> scanFileSystemSkills() {
         Map<String, SkillDefinition> ret = new LinkedHashMap<>();
         File dir = new File("./skills");
         File[] files = dir.listFiles();
@@ -53,7 +53,12 @@ public class SkillsHelper {
             if (mainFile == null) {
                 continue;
             }
-            String text = StreamUtil.readString(mainFile);
+            String text = null;
+            try{
+                text=StreamUtil.readString(mainFile);
+            }catch(Exception e){
+                continue;
+            }
             String[] arr = text.split("[\\-]{3,}", 3);
             SkillDefinition definition = new SkillDefinition();
             for (String block : arr) {
