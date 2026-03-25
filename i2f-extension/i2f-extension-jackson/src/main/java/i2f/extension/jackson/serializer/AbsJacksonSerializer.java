@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import i2f.serialize.std.exception.SerializeException;
 import i2f.serialize.std.str.IStringObjectSerializer;
 
+import java.lang.reflect.Type;
+import java.util.Map;
+
 
 public abstract class AbsJacksonSerializer implements IStringObjectSerializer {
 
@@ -55,5 +58,10 @@ public abstract class AbsJacksonSerializer implements IStringObjectSerializer {
         } catch (Exception e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public Map<String, Object> deserializeAsMap(String text) {
+        return deserialize(text, new TypeReference<Map<String, Object>>() {});
     }
 }
