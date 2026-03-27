@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -194,6 +195,16 @@ public class JsonSchema {
 
     public static String convertAsJsonSchemaType(Class<?> type) {
         if (TypeOf.isBaseType(type)) {
+            if(TypeOf.typeOfAny(type,Long.class,long.class,
+                    Integer.class,int.class,
+                    Short.class,short.class,
+                    BigInteger.class)){
+                return "integer";
+            }else if(TypeOf.typeOfAny(type,Boolean.class,boolean.class)){
+                return "boolean";
+            }else if(TypeOf.typeOfAny(type,Number.class)){
+                return "number";
+            }
             return type.getSimpleName().toLowerCase();
         }
         if (TypeOf.typeOf(type, CharSequence.class)) {
