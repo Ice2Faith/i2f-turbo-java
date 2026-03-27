@@ -18,6 +18,7 @@ import java.util.Map;
 public class AiAgentResponse {
     protected List<AiMessage> messageList;
     protected Map<String, ToolRawDefinition> toolMap;
+    protected AiAgentContext context;
 
     public AiMessage last(){
         if(messageList==null || messageList.isEmpty()){

@@ -85,10 +85,15 @@ public class AiAgent {
         return generate(request, context);
     }
 
+    public AiAgentResponse generate(AiRequest request) {
+        return generate(request, null);
+    }
+
     public AiAgentResponse generate(AiRequest request, AiAgentContext ctx) {
         AiAgentContext context = ctx == null ? new AiAgentContext() : ctx;
 
         AiAgentResponse ret = new AiAgentResponse();
+        ret.setContext(context);
         ret.setMessageList(new ArrayList<>(request.getMessageList()));
         ret.setToolMap(new ConcurrentHashMap<>());
         if (request.getToolMap() != null) {
@@ -151,9 +156,8 @@ public class AiAgent {
                 }
             }
         }
-        List<AiMessage> list = ret.getMessageList();
         int firstUserMessageIndex = 0;
-        for (AiMessage item : list) {
+        for (AiMessage item : messageList) {
             if (item instanceof UserMessage) {
                 break;
             }
@@ -165,22 +169,22 @@ public class AiAgent {
         while (true) {
             if (context.getCompressHistoryMessage().get()) {
                 List<AiMessage> tmpList = new ArrayList<>();
-                while (list.size() >= context.getCompressHistoryCount().get()) {
-                    tmpList.add(list.remove(firstUserMessageIndex));
+                while (messageList.size() >= context.getCompressHistoryCount().get()) {
+                    tmpList.add(messageList.remove(firstUserMessageIndex));
                 }
                 if (!tmpList.isEmpty()) {
                     tmpList.add(new UserMessage("总结上述对话内容"));
                     AiRequest tmpReq = new AiRequest();
                     tmpReq.setMessageList(tmpList);
                     AssistantMessage result = model.generate(tmpReq);
-                    list.add(result);
+                    messageList.add(result);
                 }
             }
-            while (list.size() > context.getMaxKeepMessageCount().get()) {
-                list.remove(context.getKeepFirstUserMessage().get() ? firstUserMessageIndex + 1 : firstUserMessageIndex);
+            while (messageList.size() > context.getMaxKeepMessageCount().get()) {
+                messageList.remove(context.getKeepFirstUserMessage().get() ? firstUserMessageIndex + 1 : firstUserMessageIndex);
             }
             AiRequest modelReq = new AiRequest();
-            modelReq.setMessageList(new ArrayList<>(ret.getMessageList()));
+            modelReq.setMessageList(new ArrayList<>(messageList));
             modelReq.setToolMap(new TreeMap<>(ret.getToolMap()));
             AssistantMessage resp = model.generate(modelReq);
             messageList.add(resp);
@@ -248,7 +252,7 @@ public class AiAgent {
                                 } catch (Throwable e) {
                                     callEx = e;
                                     failureCounter.incrementAndGet();
-                                }finally {
+                                } finally {
                                     AiAgentContext.CONTEXT.remove();
                                 }
                                 if (callEx != null) {
@@ -287,7 +291,7 @@ public class AiAgent {
 
                     }
                     if (!toolMsgList.isEmpty()) {
-                        list.addAll(toolMsgList);
+                        messageList.addAll(toolMsgList);
                     }
                 }
             }
