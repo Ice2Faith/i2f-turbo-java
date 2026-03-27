@@ -4,6 +4,7 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
 import i2f.ai.std.model.AiModel;
@@ -36,6 +37,40 @@ public class Langchain4j8Model implements AiModel {
 
     public Langchain4j8Model(ChatLanguageModel chatModel) {
         this.chatModel = chatModel;
+    }
+
+    public static class OpenAiBuilder {
+        protected OpenAiChatModel.OpenAiChatModelBuilder inner = OpenAiChatModel.builder();
+
+        public OpenAiBuilder baseUrl(String baseUrl) {
+            if (baseUrl != null && !baseUrl.isEmpty()) {
+                inner.baseUrl(baseUrl);
+            }
+            return this;
+        }
+
+        public OpenAiBuilder apiKey(String apikey) {
+            if (apikey != null && !apikey.isEmpty()) {
+                inner.apiKey(apikey);
+            }
+            return this;
+        }
+
+        public OpenAiBuilder model(String model) {
+            if (model != null && !model.isEmpty()) {
+                inner.modelName(model);
+            }
+            return this;
+        }
+
+
+        public Langchain4j8Model build() {
+            return new Langchain4j8Model(inner.build());
+        }
+    }
+
+    public static OpenAiBuilder openai() {
+        return new OpenAiBuilder();
     }
 
     @Override
@@ -84,11 +119,16 @@ public class Langchain4j8Model implements AiModel {
                     List<ToolExecutionRequest> toolExecList = new ArrayList<>();
                     if (rawToolCallList != null && !rawToolCallList.isEmpty()) {
                         for (ToolCallRequest rawCall : rawToolCallList) {
-                            ToolExecutionRequest request = ToolExecutionRequest.builder()
-                                    .id(rawCall.getId())
-                                    .name(rawCall.getName())
-                                    .arguments(rawCall.getArguments())
-                                    .build();
+                            ToolExecutionRequest request = null;
+                            if (rawCall.getRawRequest() instanceof ToolExecutionRequest) {
+                                request = (ToolExecutionRequest) rawCall.getRawRequest();
+                            } else {
+                                request = ToolExecutionRequest.builder()
+                                        .id(rawCall.getId())
+                                        .name(rawCall.getName())
+                                        .arguments(rawCall.getArguments())
+                                        .build();
+                            }
                             rawCall.setRawRequest(request);
                             toolExecList.add(request);
                         }
@@ -128,15 +168,18 @@ public class Langchain4j8Model implements AiModel {
         ret.setText(message.text());
 
         List<ToolExecutionRequest> toolExecutionRequests = message.toolExecutionRequests();
-        List<ToolCallRequest> list = new ArrayList<>();
-        for (ToolExecutionRequest item : toolExecutionRequests) {
-            ToolCallRequest vo = new ToolCallRequest();
-            vo.setId(item.id());
-            vo.setName(item.name());
-            vo.setArguments(item.arguments());
-            list.add(vo);
+        if (toolExecutionRequests != null && !toolExecutionRequests.isEmpty()) {
+            List<ToolCallRequest> list = new ArrayList<>();
+            for (ToolExecutionRequest item : toolExecutionRequests) {
+                ToolCallRequest vo = new ToolCallRequest();
+                vo.setId(item.id());
+                vo.setName(item.name());
+                vo.setArguments(item.arguments());
+                vo.setRawRequest(item);
+                list.add(vo);
+            }
+            ret.setToolCallRequestList(list);
         }
-        ret.setToolCallRequestList(list);
 
         return ret;
     }
