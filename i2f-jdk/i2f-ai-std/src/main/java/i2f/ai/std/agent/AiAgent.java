@@ -37,11 +37,30 @@ import java.util.concurrent.atomic.AtomicInteger;
 @NoArgsConstructor
 public class AiAgent {
     public static final ExecutorService DEFAULT_TOOL_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors() * 2);
-    ;
     protected volatile AiModel model;
     protected volatile RagWorker ragWorker;
     protected volatile IJsonSerializer jsonSerializer;
     protected volatile ExecutorService toolExecPool = DEFAULT_TOOL_POOL;
+
+    public AiAgent model(AiModel model) {
+        this.model = model;
+        return this;
+    }
+
+    public AiAgent ragWorker(RagWorker ragWorker) {
+        this.ragWorker = ragWorker;
+        return this;
+    }
+
+    public AiAgent jsonSerializer(IJsonSerializer jsonSerializer) {
+        this.jsonSerializer = jsonSerializer;
+        return this;
+    }
+
+    public AiAgent toolExecPool(ExecutorService toolExecPool) {
+        this.toolExecPool = toolExecPool;
+        return this;
+    }
 
     public AiAgentResponse generate(String user) {
         return generate(null, user, null);

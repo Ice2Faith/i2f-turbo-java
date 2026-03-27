@@ -21,6 +21,16 @@ public class RagWorker {
         this.store = store;
     }
 
+    public RagWorker model(RagEmbeddingModel model) {
+        this.model = model;
+        return this;
+    }
+
+    public RagWorker store(RagEmbeddingStore store) {
+        this.store = store;
+        return this;
+    }
+
     public RagEmbedding store(String content) {
         RagEmbedding embedding = model.embed(null, content);
         String sid = store.store(embedding);

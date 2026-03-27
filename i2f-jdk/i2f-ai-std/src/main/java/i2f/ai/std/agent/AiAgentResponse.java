@@ -19,4 +19,10 @@ public class AiAgentResponse {
     protected List<AiMessage> messageList;
     protected Map<String, ToolRawDefinition> toolMap;
 
+    public AiMessage last(){
+        if(messageList==null || messageList.isEmpty()){
+            return null;
+        }
+        return messageList.get(messageList.size()-1);
+    }
 }
