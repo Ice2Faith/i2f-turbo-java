@@ -20,7 +20,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -31,9 +36,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 @NoArgsConstructor
 public class AiAgent {
-    protected AiModel model;
-    protected RagWorker ragWorker;
-    protected IJsonSerializer jsonSerializer;
+    public static final ExecutorService DEFAULT_TOOL_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors() * 2);
+    ;
+    protected volatile AiModel model;
+    protected volatile RagWorker ragWorker;
+    protected volatile IJsonSerializer jsonSerializer;
+    protected volatile ExecutorService toolExecPool = DEFAULT_TOOL_POOL;
 
     public AiAgentResponse generate(String user) {
         return generate(null, user, null);
@@ -58,17 +66,16 @@ public class AiAgent {
         return generate(request, context);
     }
 
-    public AiAgentResponse generate(AiRequest request, AiAgentContext context) {
+    public AiAgentResponse generate(AiRequest request, AiAgentContext ctx) {
+        AiAgentContext context = ctx == null ? new AiAgentContext() : ctx;
+
         AiAgentResponse ret = new AiAgentResponse();
         ret.setMessageList(new ArrayList<>(request.getMessageList()));
-        ret.setToolMap(new TreeMap<>());
+        ret.setToolMap(new ConcurrentHashMap<>());
         if (request.getToolMap() != null) {
             ret.getToolMap().putAll(request.getToolMap());
         }
 
-        if (context == null) {
-            context = new AiAgentContext();
-        }
         List<AiMessage> messageList = ret.getMessageList();
 
         Map<String, ToolRawDefinition> toolMap = ret.getToolMap();
@@ -134,8 +141,8 @@ public class AiAgent {
             firstUserMessageIndex++;
         }
         AtomicInteger allToolCallCount = new AtomicInteger(0);
-        Map<String, AtomicInteger> singleToolCallCount = new HashMap<>();
-        Map<String, AtomicInteger> singleToolSameArgumentFailureCount = new HashMap<>();
+        Map<String, AtomicInteger> singleToolCallCount = new ConcurrentHashMap<>();
+        Map<String, AtomicInteger> singleToolSameArgumentFailureCount = new ConcurrentHashMap<>();
         while (true) {
             if (context.getCompressHistoryMessage().get()) {
                 List<AiMessage> tmpList = new ArrayList<>();
@@ -161,82 +168,114 @@ public class AiAgent {
             if (context.getInterrupt().get()) {
                 return ret;
             }
-            boolean isToolCall = false;
+            AtomicBoolean isToolCall = new AtomicBoolean(false);
             if (resp.getFinishReason() == AssistantMessage.FinishReason.TOOL_CALL) {
                 List<ToolCallRequest> toolCallList = resp.getToolCallRequestList();
                 if (toolCallList != null && !toolCallList.isEmpty()) {
+                    CopyOnWriteArrayList<ToolMessage> toolMsgList = new CopyOnWriteArrayList<>();
+                    CountDownLatch latch = new CountDownLatch(toolCallList.size());
                     for (ToolCallRequest toolCall : toolCallList) {
-                        String toolCallId = toolCall.getId();
-                        String name = toolCall.getName();
-                        String arguments = toolCall.getArguments();
+                        Runnable task = () -> {
+                            try {
+                                String toolCallId = toolCall.getId();
+                                String name = toolCall.getName();
+                                String arguments = toolCall.getArguments();
 
-                        if (context.getInterrupt().get()) {
-                            break;
-                        }
+                                if (context.getInterrupt().get()) {
+                                    return;
+                                }
 
-                        isToolCall = true;
+                                isToolCall.set(true);
 
-                        int allCount = allToolCallCount.incrementAndGet();
-                        if (allCount >= context.getMaxAllToolCallCount().get()) {
-                            list.add(new ToolMessage(toolCallId, "error, all tools call count exceed limit count."));
-                            break;
-                        }
+                                int allCount = allToolCallCount.incrementAndGet();
+                                if (allCount >= context.getMaxAllToolCallCount().get()) {
+                                    toolMsgList.add(new ToolMessage(toolCallId, "error, all tools call count exceed limit count."));
+                                    return;
+                                }
 
-                        AtomicInteger counter = singleToolCallCount.computeIfAbsent(name, k -> new AtomicInteger(0));
-                        int singleCount = counter.incrementAndGet();
-                        if (singleCount >= context.getMaxSingleToolCallCount().get()) {
-                            list.add(new ToolMessage(toolCallId, "error, tool [" + name + "] call count exceed limit count."));
-                            continue;
-                        }
+                                AtomicInteger counter = singleToolCallCount.computeIfAbsent(name, k -> new AtomicInteger(0));
+                                int singleCount = counter.incrementAndGet();
+                                if (singleCount >= context.getMaxSingleToolCallCount().get()) {
+                                    toolMsgList.add(new ToolMessage(toolCallId, "error, tool [" + name + "] call count exceed limit count."));
+                                    return;
+                                }
 
-                        String failureKey = name + "##" + arguments;
-                        AtomicInteger failureCounter = singleToolSameArgumentFailureCount.computeIfAbsent(failureKey, k -> new AtomicInteger(0));
-                        if (failureCounter.get() >= context.getMaxSingleToolSameArgumentFailureCount().get()) {
-                            list.add(new ToolMessage(toolCallId, "error, tool [" + name + "] call failure count exceed limit count, please check arguments."));
-                            continue;
-                        }
+                                String failureKey = name + "##" + arguments;
+                                AtomicInteger failureCounter = singleToolSameArgumentFailureCount.computeIfAbsent(failureKey, k -> new AtomicInteger(0));
+                                if (failureCounter.get() >= context.getMaxSingleToolSameArgumentFailureCount().get()) {
+                                    toolMsgList.add(new ToolMessage(toolCallId, "error, tool [" + name + "] call failure count exceed limit count, please check arguments."));
+                                    return;
+                                }
 
-                        String callResult = null;
-                        Throwable callEx = null;
-                        ToolRawDefinition rawDefinition = null;
-                        try {
+                                String callResult = null;
+                                Throwable callEx = null;
+                                ToolRawDefinition rawDefinition = null;
+                                // 设置ThreadLocal,以便在@Tool方法内部获取执行环境变量等
+                                AiAgentContext.CONTEXT.set(context);
+                                try {
 
-                            Map<String, Object> argumentsMap = jsonSerializer.deserializeAsMap(arguments);
-                            rawDefinition = toolMap.get(name);
-                            if (rawDefinition == null) {
-                                throw new IllegalArgumentException("not found this tool [" + name + "], please try others.");
+                                    Map<String, Object> argumentsMap = jsonSerializer.deserializeAsMap(arguments);
+                                    rawDefinition = toolMap.get(name);
+                                    if (rawDefinition == null) {
+                                        throw new IllegalArgumentException("not found this tool [" + name + "], please try others.");
+                                    }
+                                    Object val = ToolRawHelper.invokeTool(rawDefinition, argumentsMap, context.getToolInterceptor());
+                                    if (val instanceof CharSequence) {
+                                        callResult = String.valueOf(val);
+                                    } else {
+                                        String json = jsonSerializer.serialize(val);
+                                        callResult = json;
+                                    }
+                                } catch (Throwable e) {
+                                    callEx = e;
+                                    failureCounter.incrementAndGet();
+                                }finally {
+                                    AiAgentContext.CONTEXT.remove();
+                                }
+                                if (callEx != null) {
+                                    if (callEx instanceof InvocationTargetException) {
+                                        InvocationTargetException ite = (InvocationTargetException) callEx;
+                                        callEx = ite.getTargetException();
+                                    }
+                                    callEx.printStackTrace();
+                                    callResult = "tool [" + name + "] invoke failure! cause by " + callEx.getClass() + ": " + callEx.getMessage();
+                                }
+                                ToolMessage toolMsg = new ToolMessage(toolCallId, callResult);
+                                toolMsg.setRequest(toolCall);
+                                toolMsg.setDefinition(rawDefinition);
+                                toolMsgList.add(toolMsg);
+                            } finally {
+                                latch.countDown();
                             }
-                            Object val = ToolRawHelper.invokeTool(rawDefinition, argumentsMap);
-                            if (val instanceof CharSequence) {
-                                callResult = String.valueOf(val);
+                        };
+
+                        if (context.getEnableParallelToolCall().get()) {
+                            if (context.getToolExecPool() != null) {
+                                context.getToolExecPool().submit(task);
+                            } else if (toolExecPool != null) {
+                                toolExecPool.submit(task);
                             } else {
-                                String json = jsonSerializer.serialize(val);
-                                callResult = json;
+                                DEFAULT_TOOL_POOL.submit(task);
                             }
-                        } catch (Throwable e) {
-                            callEx = e;
-                            failureCounter.incrementAndGet();
+                        } else {
+                            task.run();
                         }
-                        if (callEx != null) {
-                            if (callEx instanceof InvocationTargetException) {
-                                InvocationTargetException ite = (InvocationTargetException) callEx;
-                                callEx = ite.getTargetException();
-                            }
-                            callEx.printStackTrace();
-                            callResult = "tool [" + name + "] invoke failure! cause by " + callEx.getClass() + ": " + callEx.getMessage();
-                        }
-                        ToolMessage toolMsg = new ToolMessage(toolCallId, callResult);
-                        toolMsg.setRequest(toolCall);
-                        toolMsg.setDefinition(rawDefinition);
-                        list.add(toolMsg);
+                    }
 
+                    try {
+                        latch.await();
+                    } catch (InterruptedException e) {
+
+                    }
+                    if (!toolMsgList.isEmpty()) {
+                        list.addAll(toolMsgList);
                     }
                 }
             }
             if (context.getInterrupt().get()) {
                 return ret;
             }
-            if (isToolCall) {
+            if (isToolCall.get()) {
                 continue;
             }
             return ret;

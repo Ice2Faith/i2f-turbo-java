@@ -5,6 +5,9 @@ import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.context.std.IContext;
 import i2f.convert.obj.ObjectConvertor;
+import i2f.invokable.Invocation;
+import i2f.invokable.method.impl.jdk.JdkMethod;
+import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.reflect.RichConverter;
 import i2f.typeof.TypeOf;
 
@@ -173,6 +176,10 @@ public class ToolRawHelper {
     }
 
     public static Object invokeTool(ToolRawDefinition rawDefinition, Map<String, Object> argumentsMap) throws Throwable {
+        return invokeTool(rawDefinition, argumentsMap, null);
+    }
+
+    public static Object invokeTool(ToolRawDefinition rawDefinition, Map<String, Object> argumentsMap, IProxyInvocationHandler handler) throws Throwable {
         try {
             Method bindMethod = rawDefinition.getBindMethod();
             Object[] args = new Object[rawDefinition.getFunctionParameterNames().size()];
@@ -222,8 +229,17 @@ public class ToolRawHelper {
                     target = rawDefinition.getBindClass().newInstance();
                 }
             }
-            Object ret = bindMethod.invoke(target, args);
-            return ret;
+            if (handler != null) {
+                Invocation invocation = new Invocation();
+                invocation.setTarget(target);
+                invocation.setInvokable(new JdkMethod(bindMethod));
+                invocation.setArgs(args);
+                Object ret = handler.invoke(invocation);
+                return ret;
+            } else {
+                Object ret = bindMethod.invoke(target, args);
+                return ret;
+            }
         } catch (InvocationTargetException e) {
             Throwable ex = e.getTargetException();
             if (ex != null) {

@@ -2,11 +2,14 @@ package i2f.ai.std.agent;
 
 import i2f.ai.std.skill.SkillDefinition;
 import i2f.ai.std.skill.SkillsHelper;
+import i2f.proxy.std.IProxyInvocationHandler;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @NoArgsConstructor
 public class AiAgentContext {
     public static final Map<String, SkillDefinition> DEFAULT_SKILLS_MAP = SkillsHelper.scanFileSystemSkills();
+    public static final InheritableThreadLocal<AiAgentContext> CONTEXT=new InheritableThreadLocal<>();
 
     protected final AtomicBoolean interrupt = new AtomicBoolean(false);
 
@@ -38,4 +42,10 @@ public class AiAgentContext {
     protected final AtomicInteger maxSingleToolCallCount = new AtomicInteger(10);
     protected final AtomicInteger maxSingleToolSameArgumentFailureCount = new AtomicInteger(2);
 
+    protected final AtomicBoolean enableParallelToolCall=new AtomicBoolean(true);
+    protected ExecutorService toolExecPool;
+
+    protected IProxyInvocationHandler toolInterceptor;
+
+    protected final ConcurrentHashMap<String,Object> sharedContext=new ConcurrentHashMap<>();
 }
