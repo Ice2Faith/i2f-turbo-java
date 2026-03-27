@@ -4,7 +4,6 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
 import i2f.ai.std.model.AiModel;
@@ -39,38 +38,8 @@ public class Langchain4j8Model implements AiModel {
         this.chatModel = chatModel;
     }
 
-    public static class OpenAiBuilder {
-        protected OpenAiChatModel.OpenAiChatModelBuilder inner = OpenAiChatModel.builder();
-
-        public OpenAiBuilder baseUrl(String baseUrl) {
-            if (baseUrl != null && !baseUrl.isEmpty()) {
-                inner.baseUrl(baseUrl);
-            }
-            return this;
-        }
-
-        public OpenAiBuilder apiKey(String apikey) {
-            if (apikey != null && !apikey.isEmpty()) {
-                inner.apiKey(apikey);
-            }
-            return this;
-        }
-
-        public OpenAiBuilder model(String model) {
-            if (model != null && !model.isEmpty()) {
-                inner.modelName(model);
-            }
-            return this;
-        }
-
-
-        public Langchain4j8Model build() {
-            return new Langchain4j8Model(inner.build());
-        }
-    }
-
-    public static OpenAiBuilder openai() {
-        return new OpenAiBuilder();
+    public static Langchain4j8OpenAiModel.OpenAiBuilder openai() {
+        return new Langchain4j8OpenAiModel.OpenAiBuilder();
     }
 
     @Override
