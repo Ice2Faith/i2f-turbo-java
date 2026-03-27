@@ -6,6 +6,7 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
+import i2f.ai.std.agent.AiAgent;
 import i2f.ai.std.model.AiModel;
 import i2f.ai.std.model.AiRequest;
 import i2f.ai.std.model.message.impl.AssistantMessage;
@@ -36,6 +37,12 @@ public class Langchain4j8Model implements AiModel {
 
     public Langchain4j8Model(ChatLanguageModel chatModel) {
         this.chatModel = chatModel;
+    }
+
+    public static AiAgent agent(Langchain4j8Model model) {
+        return new AiAgent()
+                .model(model)
+                .jsonSerializer(Langchain4j8JsonSerializer.INSTANCE);
     }
 
     public static Langchain4j8OpenAiModel.OpenAiBuilder openai() {

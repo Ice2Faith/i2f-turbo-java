@@ -8,6 +8,7 @@ import com.alibaba.dashscope.common.Message;
 import com.alibaba.dashscope.common.Role;
 import com.alibaba.dashscope.tools.ToolCallBase;
 import com.alibaba.dashscope.tools.ToolCallFunction;
+import i2f.ai.std.agent.AiAgent;
 import i2f.ai.std.model.AiModel;
 import i2f.ai.std.model.AiRequest;
 import i2f.ai.std.model.message.AiMessage;
@@ -40,6 +41,12 @@ public class DashScopeModel implements AiModel {
     protected Generation gen = new Generation();
     protected String apiKey;
     protected String model = DashScopeAi.DEFAULT_MODEL;
+
+    public static AiAgent agent(DashScopeModel model) {
+        return new AiAgent()
+                .model(model)
+                .jsonSerializer(DashScopeJsonSerializer.INSTANCE);
+    }
 
     public DashScopeModel gen(Generation gen) {
         this.gen = gen;
@@ -175,6 +182,7 @@ public class DashScopeModel implements AiModel {
             ret.setText(call.getOutput().getText());
             return ret;
         } else {
+            List<String> textList = new ArrayList<>();
             List<ToolCallRequest> list = new ArrayList<>();
             for (GenerationOutput.Choice choice : choices) {
                 String reason = choice.getFinishReason();
@@ -194,12 +202,14 @@ public class DashScopeModel implements AiModel {
                             list.add(vo);
                         }
                     }
+                } else {
+                    textList.add(message.getContent());
                 }
             }
 
             ret.setToolCallRequestList(list);
-            ret.setFinishReason(AssistantMessage.FinishReason.TOOL_CALL);
-            ret.setText(call.getOutput().getText());
+            ret.setFinishReason(list.isEmpty() ? AssistantMessage.FinishReason.STOP : AssistantMessage.FinishReason.TOOL_CALL);
+            ret.setText(textList.isEmpty() ? call.getOutput().getText() : String.join("\n\n", textList));
         }
 
         return ret;
