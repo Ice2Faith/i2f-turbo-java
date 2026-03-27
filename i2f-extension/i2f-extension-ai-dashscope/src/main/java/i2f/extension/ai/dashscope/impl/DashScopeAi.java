@@ -9,6 +9,8 @@ import com.alibaba.dashscope.tools.ToolCallBase;
 import com.alibaba.dashscope.tools.ToolCallFunction;
 import com.alibaba.dashscope.utils.JsonUtils;
 import com.google.gson.reflect.TypeToken;
+import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.ai.std.tool.ToolRawHelper;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.ai.dashscope.tool.DashScopeToolDefinition;
 import i2f.extension.ai.dashscope.tool.DashScopeToolHelper;
@@ -155,7 +157,9 @@ public class DashScopeAi {
                                 Throwable callEx = null;
                                 try {
                                     DashScopeToolDefinition definition = toolMap.get(name);
-                                    Method bindMethod = definition.getBindMethod();
+                                    if(definition==null){
+                                        throw new IllegalArgumentException("not found this tool ["+name+"], please try others.");
+                                    }
                                     String arguments = function.getArguments();
                                     String callCounterKey = name + "#" + arguments;
                                     AtomicInteger counter = toolCallCounter.computeIfAbsent(callCounterKey, k -> new AtomicInteger());
@@ -163,59 +167,16 @@ public class DashScopeAi {
                                     if (count > 10) {
                                         throw new IllegalStateException("tool [" + name + "] execute count exceed limit, execute reject!");
                                     }
-                                    Map<String, Object> map = JsonUtils.fromJson(arguments, new TypeToken<Map<String, Object>>() {
+                                    ToolRawDefinition rawDefinition = definition.getRawDefinition();
+                                    Map<String, Object> argumentsMap = JsonUtils.fromJson(arguments, new TypeToken<Map<String, Object>>() {
                                     }.getType());
-                                    Object[] args = new Object[definition.getFunctionParameterNames().size()];
-                                    for (int i = 0; i < args.length; i++) {
-                                        Parameter[] parameters = bindMethod.getParameters();
-                                        Object value = map.get(definition.getFunctionParameterNames().get(i));
-                                        if (i <= parameters.length) {
-                                            if (!TypeOf.instanceOf(value, parameters[i].getType())) {
-                                                if (ObjectConvertor.isDateType(parameters[i].getType())) {
-                                                    Date date = ObjectConvertor.tryParseDate(String.valueOf(value));
-                                                    if (date != null) {
-                                                        value = ObjectConvertor.tryConvertAsType(value, parameters[i].getType());
-                                                    }
-                                                }
-                                            }
-                                            if (!TypeOf.instanceOf(value, parameters[i].getType())) {
-                                                try {
-                                                    // 尝试转换类型为复杂POJO对象
-                                                    Class<?> parameterType = parameters[i].getType();
-                                                    if (!TypeOf.isBaseType(parameterType)) {
-                                                        String json = JsonUtils.toJson(value);
-                                                        value = JsonUtils.fromJson(json, parameterType);
-                                                    }
-                                                } catch (Throwable e) {
-
-                                                }
-                                            }
-
-                                            if (!TypeOf.instanceOf(value, parameters[i].getType())) {
-                                                try {
-                                                    value = ObjectConvertor.tryConvertAsType(value, parameters[i].getType());
-                                                    if (TypeOf.instanceOf(value, parameters[i].getType())) {
-                                                    }
-                                                } catch (Exception e) {
-
-                                                }
-                                            }
-
-                                        }
-                                        args[i] = value;
+                                    Object ret = ToolRawHelper.invokeTool(rawDefinition, argumentsMap);
+                                    if(ret instanceof CharSequence){
+                                        callResult = String.valueOf(ret);
+                                    }else{
+                                        String json = JsonUtils.toJson(ret);
+                                        callResult = json;
                                     }
-
-                                    Object target = definition.getBindTarget();
-                                    if (Modifier.isStatic(bindMethod.getModifiers())) {
-                                        target = null;
-                                    } else {
-                                        if (target == null) {
-                                            target = definition.getBindClass().newInstance();
-                                        }
-                                    }
-                                    Object ret = bindMethod.invoke(target, args);
-                                    String json = JsonUtils.toJson(ret);
-                                    callResult = json;
                                 } catch (Throwable e) {
                                     callEx = e;
                                 }
@@ -224,11 +185,13 @@ public class DashScopeAi {
                                         InvocationTargetException ite = (InvocationTargetException) callEx;
                                         callEx = ite.getTargetException();
                                     }
+                                    callEx.printStackTrace();
                                     callResult = "tool [" + name + "] invoke failure! cause by " + callEx.getClass() + ": " + callEx.getMessage();
                                 }
                                 Message toolMsg = Message.builder()
                                         .role(Role.TOOL.getValue())
                                         .content(callResult)
+                                        .toolCallId(callFunction.getId())
                                         .build();
                                 historyMessageList.add(toolMsg);
                                 isToolCall = true;

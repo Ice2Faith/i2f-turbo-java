@@ -33,6 +33,11 @@
             <artifactId>i2f-convert</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-serialize-std</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>com.alibaba</groupId>

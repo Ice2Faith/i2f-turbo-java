@@ -60,6 +60,11 @@ public class GsonJsonSerializer implements IJsonSerializer {
     }
 
     public <T> T deserialize(String text, TypeToken<T> token) {
-        return getGson().fromJson(text, token.getType());
+        return getGson().fromJson(text, token);
+    }
+
+    @Override
+    public Map<String, Object> deserializeAsMap(String text) {
+        return deserialize(text,new TypeToken<Map<String,Object>>(){});
     }
 }

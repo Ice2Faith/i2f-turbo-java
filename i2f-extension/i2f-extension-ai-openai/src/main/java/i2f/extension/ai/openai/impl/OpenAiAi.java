@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.chat.completions.*;
+import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.ai.std.tool.ToolRawHelper;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.ai.openai.tool.OpenAiToolDefinition;
 import i2f.extension.ai.openai.tool.OpenAiToolHelper;
@@ -141,7 +143,9 @@ public class OpenAiAi {
                                 Throwable callEx = null;
                                 try {
                                     OpenAiToolDefinition definition = toolMap.get(name);
-                                    Method bindMethod = definition.getBindMethod();
+                                    if(definition==null){
+                                        throw new IllegalArgumentException("not found this tool ["+name+"], please try others.");
+                                    }
                                     String arguments = function.arguments();
                                     String callCounterKey = name + "#" + arguments;
                                     AtomicInteger counter = toolCallCounter.computeIfAbsent(callCounterKey, k -> new AtomicInteger());
@@ -149,59 +153,16 @@ public class OpenAiAi {
                                     if (count > 10) {
                                         throw new IllegalStateException("tool [" + name + "] execute count exceed limit, execute reject!");
                                     }
-                                    Map<String, Object> map = fromJson(arguments, new TypeReference<Map<String, Object>>() {
+                                    ToolRawDefinition rawDefinition = definition.getRawDefinition();
+                                    Map<String, Object> argumentsMap = fromJson(arguments, new TypeReference<Map<String, Object>>() {
                                     });
-                                    Object[] args = new Object[definition.getFunctionParameterNames().size()];
-                                    for (int i = 0; i < args.length; i++) {
-                                        Parameter[] parameters = bindMethod.getParameters();
-                                        Object value = map.get(definition.getFunctionParameterNames().get(i));
-                                        if (i <= parameters.length) {
-                                            if (!TypeOf.instanceOf(value, parameters[i].getType())) {
-                                                if (ObjectConvertor.isDateType(parameters[i].getType())) {
-                                                    Date date = ObjectConvertor.tryParseDate(String.valueOf(value));
-                                                    if (date != null) {
-                                                        value = ObjectConvertor.tryConvertAsType(value, parameters[i].getType());
-                                                    }
-                                                }
-                                            }
-                                            if (!TypeOf.instanceOf(value, parameters[i].getType())) {
-                                                try {
-                                                    // 尝试转换类型为复杂POJO对象
-                                                    Class<?> parameterType = parameters[i].getType();
-                                                    if (!TypeOf.isBaseType(parameterType)) {
-                                                        String json = toJson(value);
-                                                        value = fromJson(json, parameterType);
-                                                    }
-                                                } catch (Throwable e) {
-
-                                                }
-                                            }
-
-                                            if (!TypeOf.instanceOf(value, parameters[i].getType())) {
-                                                try {
-                                                    value = ObjectConvertor.tryConvertAsType(value, parameters[i].getType());
-                                                    if (TypeOf.instanceOf(value, parameters[i].getType())) {
-                                                    }
-                                                } catch (Exception e) {
-
-                                                }
-                                            }
-
-                                        }
-                                        args[i] = value;
+                                    Object ret = ToolRawHelper.invokeTool(rawDefinition,argumentsMap);
+                                    if(ret instanceof CharSequence){
+                                        callResult = String.valueOf(ret);
+                                    }else{
+                                        String json = toJson(ret);
+                                        callResult = json;
                                     }
-
-                                    Object target = definition.getBindTarget();
-                                    if (Modifier.isStatic(bindMethod.getModifiers())) {
-                                        target = null;
-                                    } else {
-                                        if (target == null) {
-                                            target = definition.getBindClass().newInstance();
-                                        }
-                                    }
-                                    Object ret = bindMethod.invoke(target, args);
-                                    String json = toJson(ret);
-                                    callResult = json;
                                 } catch (Throwable e) {
                                     callEx = e;
                                 }
@@ -210,6 +171,7 @@ public class OpenAiAi {
                                         InvocationTargetException ite = (InvocationTargetException) callEx;
                                         callEx = ite.getTargetException();
                                     }
+                                    callEx.printStackTrace();
                                     callResult = "tool [" + name + "] invoke failure! cause by " + callEx.getClass() + ": " + callEx.getMessage();
                                 }
                                 historyMessageList.add(ChatCompletionMessageParam.ofTool(ChatCompletionToolMessageParam.builder()

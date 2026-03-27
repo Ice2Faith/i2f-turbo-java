@@ -44,4 +44,9 @@ public class FastJsonSerializer implements IJsonSerializer {
         return (Map<String, Object>) deserialize(json, new TypeReference<Map<String, Object>>() {
         });
     }
+
+    @Override
+    public Map<String, Object> deserializeAsMap(String text) {
+        return deserialize(text,new TypeReference<Map<String, Object>>(){});
+    }
 }

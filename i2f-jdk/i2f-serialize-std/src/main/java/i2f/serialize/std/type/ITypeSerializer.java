@@ -2,6 +2,8 @@ package i2f.serialize.std.type;
 
 import i2f.serialize.std.ISerializer;
 
+import java.util.Map;
+
 /**
  * @author Ice2Faith
  * @date 2023/6/27 17:24
@@ -14,5 +16,9 @@ public interface ITypeSerializer<E, D> extends ISerializer<E, D> {
 
     default D deserialize(E enc, Object type) {
         return deserialize(enc);
+    }
+
+    default Map<String,Object> deserializeAsMap(E enc){
+        throw new UnsupportedOperationException("un-implements deserialize as map");
     }
 }
