@@ -9,6 +9,7 @@ import i2f.ai.std.tool.test.TestSchemaPojo;
 import i2f.ai.std.tool.test.TestToolComponent;
 import i2f.context.impl.ListableContext;
 import i2f.extension.ai.langchain4j8.impl.Langchain4j8ChatAiProvider;
+import i2f.extension.ai.langchain4j8.tool.Langchain4j8JsonSchemaAnnotationResolver;
 import i2f.extension.ai.langchain4j8.tool.Langchain4j8ToolDefinition;
 import i2f.extension.ai.langchain4j8.tool.Langchain4j8ToolHelper;
 
@@ -21,7 +22,7 @@ import java.util.Map;
  */
 public class TestLangchain4j8Ai {
     public static void main(String[] args) throws Exception {
-        Map<String, Object> schema = JsonSchema.getTypeJsonSchema(TestSchemaPojo.class);
+        Map<String, Object> schema = JsonSchema.getTypeJsonSchema(Langchain4j8JsonSchemaAnnotationResolver.INSTANCE, TestSchemaPojo.class);
         System.out.println(schema);
 
         Map<String, Langchain4j8ToolDefinition> map = Langchain4j8ToolHelper.parseTools(TestToolComponent.class);
