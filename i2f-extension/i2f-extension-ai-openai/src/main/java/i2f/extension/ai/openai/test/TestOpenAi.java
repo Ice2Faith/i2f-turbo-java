@@ -6,6 +6,7 @@ import i2f.ai.std.skill.SkillDefinition;
 import i2f.ai.std.skill.SkillsHelper;
 import i2f.ai.std.skill.SkillsTools;
 import i2f.ai.std.tool.schema.JsonSchema;
+import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.ai.std.tool.test.TestSchemaPojo;
 import i2f.ai.std.tool.test.TestToolComponent;
 import i2f.context.impl.ListableContext;
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 public class TestOpenAi {
     public static void main(String[] args) throws Exception {
-        Map<String, Object> schema = JsonSchema.getTypeJsonSchema(TestSchemaPojo.class);
+        Map<String, Object> schema = JsonSchema.getTypeJsonSchema(JsonSchemaAnnotationResolver.INSTANCE, TestSchemaPojo.class);
         System.out.println(schema);
 
         Map<String, OpenAiToolDefinition> map = OpenAiToolHelper.parseTools(TestToolComponent.class);

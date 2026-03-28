@@ -4,6 +4,7 @@ package i2f.ai.std.tool.test;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchema;
+import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 
 import java.util.Map;
 
@@ -14,10 +15,10 @@ import java.util.Map;
  */
 public class TestRawTool {
     public static void main(String[] args) {
-        Map<String, Object> schema = JsonSchema.getTypeJsonSchema(TestSchemaPojo.class);
+        Map<String, Object> schema = JsonSchema.getTypeJsonSchema(JsonSchemaAnnotationResolver.INSTANCE, TestSchemaPojo.class);
         System.out.println(schema);
 
-        Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(TestToolComponent.class);
+        Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(JsonSchemaAnnotationResolver.INSTANCE, TestToolComponent.class);
         System.out.println(map);
     }
 }

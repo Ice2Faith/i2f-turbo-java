@@ -1,10 +1,11 @@
 package i2f.extension.ai.langchain4j8.tool;
 
-import i2f.ai.std.tool.ToolRawDefinition;
-import i2f.ai.std.tool.ToolRawHelper;
-import i2f.context.std.IContext;
 import dev.langchain4j.agent.tool.ToolParameters;
 import dev.langchain4j.agent.tool.ToolSpecification;
+import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.ai.std.tool.ToolRawHelper;
+import i2f.ai.std.tool.schema.JsonSchema;
+import i2f.context.std.IContext;
 
 import java.util.*;
 
@@ -16,7 +17,7 @@ import java.util.*;
 public class Langchain4j8ToolHelper {
 
     public static Map<String, Langchain4j8ToolDefinition> parseTools(IContext context) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(context);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(Langchain4j8JsonSchemaAnnotationResolver.INSTANCE, context);
         Map<String, Langchain4j8ToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -25,7 +26,7 @@ public class Langchain4j8ToolHelper {
     }
 
     public static Map<String, Langchain4j8ToolDefinition> parseTools(Collection<Object> beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(Langchain4j8JsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, Langchain4j8ToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -34,7 +35,7 @@ public class Langchain4j8ToolHelper {
     }
 
     public static Map<String, Langchain4j8ToolDefinition> parseTools(Object... beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(Langchain4j8JsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, Langchain4j8ToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -66,7 +67,7 @@ public class Langchain4j8ToolHelper {
 
         Map<String, Object> functionSchema = definition.getFunctionJsonSchema();
 
-        Map<String, Map<String, Object>> parametersSchema = (Map<String, Map<String, Object>>) functionSchema.get("parameters");
+        Map<String, Map<String, Object>> parametersSchema = (Map<String, Map<String, Object>>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
 
         ToolSpecification function = ToolSpecification.builder()
                 .name(definition.getFunctionName())

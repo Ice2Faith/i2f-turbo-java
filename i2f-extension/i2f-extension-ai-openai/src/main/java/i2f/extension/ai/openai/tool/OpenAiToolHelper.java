@@ -7,6 +7,8 @@ import com.openai.models.chat.completions.ChatCompletionFunctionTool;
 import com.openai.models.chat.completions.ChatCompletionTool;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
+import i2f.ai.std.tool.schema.JsonSchema;
+import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.context.std.IContext;
 
 import java.util.*;
@@ -20,7 +22,7 @@ public class OpenAiToolHelper {
 
 
     public static Map<String, OpenAiToolDefinition> parseTools(IContext context) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(context);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(JsonSchemaAnnotationResolver.INSTANCE, context);
         Map<String, OpenAiToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -29,7 +31,7 @@ public class OpenAiToolHelper {
     }
 
     public static Map<String, OpenAiToolDefinition> parseTools(Collection<Object> beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(JsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, OpenAiToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -38,7 +40,7 @@ public class OpenAiToolHelper {
     }
 
     public static Map<String, OpenAiToolDefinition> parseTools(Object... beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(JsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, OpenAiToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -70,7 +72,7 @@ public class OpenAiToolHelper {
 
         Map<String, Object> functionSchema = definition.getFunctionJsonSchema();
 
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get("parameters");
+        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
 
         ChatCompletionTool tool = ChatCompletionTool.ofFunction(ChatCompletionFunctionTool.builder()
                 .function(FunctionDefinition.builder()

@@ -9,6 +9,7 @@ import i2f.ai.std.tool.test.TestToolComponent;
 import i2f.extension.ai.langchain4j8.impl.Langchain4j8Ai;
 import i2f.extension.ai.langchain4j8.model.Langchain4j8JsonSerializer;
 import i2f.extension.ai.langchain4j8.model.Langchain4j8Model;
+import i2f.extension.ai.langchain4j8.tool.Langchain4j8JsonSchemaAnnotationResolver;
 
 /**
  * @author Ice2Faith
@@ -27,7 +28,7 @@ public class TestLangchain4j8Agent {
 
         AiAgentResponse resp = agent.generate(new AiRequest()
                         .user("北京的今天的天气怎么样，并且给出今天的日期，最后告诉我历史上的今天发生了什么")
-                        .tools(ToolRawHelper.parseTools(new TestToolComponent()))
+                        .tools(ToolRawHelper.parseTools(Langchain4j8JsonSchemaAnnotationResolver.INSTANCE, new TestToolComponent()))
                 ,new AiAgentContext());
         System.out.println(resp);
     }

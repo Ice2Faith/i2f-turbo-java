@@ -15,6 +15,7 @@ import i2f.ai.std.skill.SkillsHelper;
 import i2f.ai.std.skill.SkillsTools;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
+import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,6 +41,7 @@ public class AiAgent {
     protected volatile AiModel model;
     protected volatile RagWorker ragWorker;
     protected volatile IJsonSerializer jsonSerializer;
+    protected JsonSchemaAnnotationResolver jsonSchemaAnnotationResolver = JsonSchemaAnnotationResolver.INSTANCE;
     protected volatile ExecutorService toolExecPool = DEFAULT_TOOL_POOL;
 
     public AiAgent model(AiModel model) {
@@ -54,6 +56,11 @@ public class AiAgent {
 
     public AiAgent jsonSerializer(IJsonSerializer jsonSerializer) {
         this.jsonSerializer = jsonSerializer;
+        return this;
+    }
+
+    public AiAgent jsonSchemaAnnotationResolver(JsonSchemaAnnotationResolver jsonSchemaAnnotationResolver) {
+        this.jsonSchemaAnnotationResolver = jsonSchemaAnnotationResolver;
         return this;
     }
 
@@ -107,7 +114,7 @@ public class AiAgent {
             String system = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(context.getSkillsMap());
             messageList.add(0, new SystemMessage(system));
 
-            Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(new SkillsTools());
+            Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(jsonSchemaAnnotationResolver, new SkillsTools());
             for (Map.Entry<String, ToolRawDefinition> entry : map.entrySet()) {
                 toolMap.computeIfAbsent(entry.getKey(), k -> entry.getValue());
             }
@@ -150,7 +157,7 @@ public class AiAgent {
             if (ragWorker != null) {
                 RagTools tool = new RagTools();
                 tool.setWorker(ragWorker);
-                Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(tool);
+                Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(jsonSchemaAnnotationResolver, tool);
                 for (Map.Entry<String, ToolRawDefinition> entry : map.entrySet()) {
                     toolMap.computeIfAbsent(entry.getKey(), k -> entry.getValue());
                 }

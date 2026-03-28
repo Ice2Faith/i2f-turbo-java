@@ -7,6 +7,8 @@ import com.alibaba.dashscope.utils.JsonUtils;
 import com.google.gson.JsonObject;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
+import i2f.ai.std.tool.schema.JsonSchema;
+import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.context.std.IContext;
 
 import java.util.*;
@@ -19,7 +21,7 @@ import java.util.*;
 public class DashScopeToolHelper {
 
     public static Map<String, DashScopeToolDefinition> parseTools(IContext context) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(context);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(JsonSchemaAnnotationResolver.INSTANCE, context);
         Map<String, DashScopeToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -28,7 +30,7 @@ public class DashScopeToolHelper {
     }
 
     public static Map<String, DashScopeToolDefinition> parseTools(Collection<Object> beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(JsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, DashScopeToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -37,7 +39,7 @@ public class DashScopeToolHelper {
     }
 
     public static Map<String, DashScopeToolDefinition> parseTools(Object... beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(JsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, DashScopeToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -69,7 +71,7 @@ public class DashScopeToolHelper {
 
         Map<String, Object> functionSchema = definition.getFunctionJsonSchema();
 
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get("parameters");
+        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
         String json = JsonUtils.toJson(parametersSchema);
         JsonObject jsonObject = JsonUtils.parseString(json).getAsJsonObject();
         ToolFunction function = ToolFunction.builder().function(
