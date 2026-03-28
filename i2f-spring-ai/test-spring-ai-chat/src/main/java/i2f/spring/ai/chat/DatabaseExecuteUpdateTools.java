@@ -1,6 +1,6 @@
 package i2f.spring.ai.chat;
 
-import i2f.spring.ai.tool.annotations.AiTools;
+import i2f.ai.std.tool.annotations.Tools;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.parser.CCJSqlParser;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Data
-@AiTools
+@Tools
 public class DatabaseExecuteUpdateTools {
 
     @Autowired

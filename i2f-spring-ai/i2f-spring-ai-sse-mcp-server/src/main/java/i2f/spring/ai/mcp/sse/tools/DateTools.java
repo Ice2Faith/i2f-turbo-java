@@ -1,6 +1,6 @@
 package i2f.spring.ai.mcp.sse.tools;
 
-import i2f.spring.ai.tool.annotations.AiTools;
+import i2f.ai.std.tool.annotations.Tools;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2025/6/6 20:19
  * @desc
  */
-@AiTools
+@Tools
 @Component
 public class DateTools {
 

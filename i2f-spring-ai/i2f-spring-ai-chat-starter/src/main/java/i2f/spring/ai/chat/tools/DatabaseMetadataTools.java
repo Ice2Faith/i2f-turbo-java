@@ -1,5 +1,6 @@
 package i2f.spring.ai.chat.tools;
 
+import i2f.ai.std.tool.annotations.Tools;
 import i2f.database.metadata.data.ColumnMeta;
 import i2f.database.metadata.data.IndexColumnMeta;
 import i2f.database.metadata.data.IndexMeta;
@@ -8,7 +9,6 @@ import i2f.database.metadata.impl.DatabaseMetadataProviders;
 import i2f.database.metadata.std.DatabaseMetadataProvider;
 import i2f.database.type.DatabaseType;
 import i2f.lru.LruMap;
-import i2f.spring.ai.tool.annotations.AiTools;
 import lombok.Data;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @desc
  */
 @Data
-@AiTools
+@Tools
 public class DatabaseMetadataTools {
     private final AtomicReference<String> cacheDatabaseType = new AtomicReference<>();
     private final AtomicReference<String> cacheAllTables = new AtomicReference<>();

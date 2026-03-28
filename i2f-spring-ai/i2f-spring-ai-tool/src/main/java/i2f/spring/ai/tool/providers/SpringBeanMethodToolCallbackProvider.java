@@ -1,6 +1,6 @@
 package i2f.spring.ai.tool.providers;
 
-import i2f.spring.ai.tool.annotations.AiTools;
+import i2f.ai.std.tool.annotations.Tools;
 import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
@@ -37,7 +37,7 @@ public class SpringBeanMethodToolCallbackProvider implements ToolCallbackProvide
 
     public ToolCallback[] getCallbacks() {
         List<ToolCallback> list = new ArrayList<>();
-        Map<String, Object> beanMap = applicationContext.getBeansWithAnnotation(AiTools.class);
+        Map<String, Object> beanMap = applicationContext.getBeansWithAnnotation(Tools.class);
         for (Map.Entry<String, Object> entry : beanMap.entrySet()) {
             Object bean = entry.getValue();
             try {
