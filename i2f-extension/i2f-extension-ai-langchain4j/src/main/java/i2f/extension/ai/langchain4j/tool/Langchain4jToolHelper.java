@@ -4,6 +4,7 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.*;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
+import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.context.std.IContext;
 
 import java.util.*;
@@ -16,7 +17,7 @@ import java.util.*;
 public class Langchain4jToolHelper {
 
     public static Map<String, Langchain4jToolDefinition> parseTools(IContext context) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(context);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(Langchain4jJsonSchemaAnnotationResolver.INSTANCE, context);
         Map<String, Langchain4jToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -25,7 +26,7 @@ public class Langchain4jToolHelper {
     }
 
     public static Map<String, Langchain4jToolDefinition> parseTools(Collection<Object> beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(Langchain4jJsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, Langchain4jToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -34,7 +35,7 @@ public class Langchain4jToolHelper {
     }
 
     public static Map<String, Langchain4jToolDefinition> parseTools(Object... beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(Langchain4jJsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, Langchain4jToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -66,7 +67,7 @@ public class Langchain4jToolHelper {
 
         Map<String, Object> functionSchema = definition.getFunctionJsonSchema();
 
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get("parameters");
+        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
 
         ToolSpecification function = ToolSpecification.builder()
                 .name(definition.getFunctionName())
@@ -81,11 +82,11 @@ public class Langchain4jToolHelper {
     }
 
     public static JsonSchemaElement functionParameters2ObjectSchema(Map<String, Object> parameters) {
-        String type = (String) parameters.get("type");
-        String description = (String) parameters.get("description");
-        if ("object".equals(type)) {
+        String type = (String) parameters.get(JsonSchema.SchemaField.TYPE);
+        String description = (String) parameters.get(JsonSchema.SchemaField.DESCRIPTION);
+        if (JsonSchema.SchemaType.OBJECT.equals(type)) {
             Map<String, JsonSchemaElement> properties = new HashMap<>();
-            Map<String, Object> next = (Map<String, Object>) parameters.get("properties");
+            Map<String, Object> next = (Map<String, Object>) parameters.get(JsonSchema.SchemaField.PROPERTIES);
             for (Map.Entry<String, Object> entry : next.entrySet()) {
                 properties.put(entry.getKey(), functionParameters2ObjectSchema((Map<String, Object>) entry.getValue()));
             }
@@ -93,14 +94,14 @@ public class Langchain4jToolHelper {
                     .description(description)
                     .addProperties(properties)
                     .build();
-        } else if ("array".equals(type)) {
-            Map<String, Object> next = (Map<String, Object>) parameters.get("items");
+        } else if (JsonSchema.SchemaType.ARRAY.equals(type)) {
+            Map<String, Object> next = (Map<String, Object>) parameters.get(JsonSchema.SchemaField.ITEMS);
             return JsonArraySchema.builder()
                     .description(description)
                     .items(functionParameters2ObjectSchema(next))
                     .build();
-        } else if ("string".equals(type)) {
-            List<String> next = (List<String>) parameters.get("enum");
+        } else if (JsonSchema.SchemaType.STRING.equals(type)) {
+            List<String> next = (List<String>) parameters.get(JsonSchema.SchemaField.ENUM);
             if (next != null) {
                 return JsonEnumSchema.builder()
                         .description(description)
@@ -110,15 +111,15 @@ public class Langchain4jToolHelper {
             return JsonStringSchema.builder()
                     .description(description)
                     .build();
-        } else if ("number".equals(type)) {
+        } else if (JsonSchema.SchemaType.NUMBER.equals(type)) {
             return JsonNumberSchema.builder()
                     .description(description)
                     .build();
-        } else if ("boolean".equals(type)) {
+        } else if (JsonSchema.SchemaType.BOOLEAN.equals(type)) {
             return JsonBooleanSchema.builder()
                     .description(description)
                     .build();
-        } else if ("integer".equals(type)) {
+        } else if (JsonSchema.SchemaType.INTEGER.equals(type)) {
             return JsonIntegerSchema.builder()
                     .description(description)
                     .build();

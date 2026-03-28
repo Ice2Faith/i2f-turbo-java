@@ -10,6 +10,7 @@ import i2f.ai.std.tool.test.TestSchemaPojo;
 import i2f.ai.std.tool.test.TestToolComponent;
 import i2f.context.impl.ListableContext;
 import i2f.spring.ai.impl.SpringAiChatAiProvider;
+import i2f.spring.ai.tool.SpringAiJsonSchemaAnnotationResolver;
 import i2f.spring.ai.tool.SpringAiToolDefinition;
 import i2f.spring.ai.tool.SpringAiToolHelper;
 
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 public class TestSpringAI {
     public static void main(String[] args) throws Exception {
-        Map<String, Object> schema = JsonSchema.getTypeJsonSchema(TestSchemaPojo.class);
+        Map<String, Object> schema = JsonSchema.getTypeJsonSchema(SpringAiJsonSchemaAnnotationResolver.INSTANCE, TestSchemaPojo.class);
         System.out.println(schema);
 
         Map<String, SpringAiToolDefinition> map = SpringAiToolHelper.parseTools(TestToolComponent.class);

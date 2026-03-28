@@ -3,6 +3,7 @@ package i2f.spring.ai.tool;
 
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
+import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.context.std.IContext;
 import i2f.spring.ai.model.SpringAiJsonSerializer;
 import org.springframework.ai.tool.ToolCallback;
@@ -19,7 +20,7 @@ public class SpringAiToolHelper {
 
 
     public static Map<String, SpringAiToolDefinition> parseTools(IContext context) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(context);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(SpringAiJsonSchemaAnnotationResolver.INSTANCE, context);
         Map<String, SpringAiToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -28,7 +29,7 @@ public class SpringAiToolHelper {
     }
 
     public static Map<String, SpringAiToolDefinition> parseTools(Collection<Object> beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(SpringAiJsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, SpringAiToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -37,7 +38,7 @@ public class SpringAiToolHelper {
     }
 
     public static Map<String, SpringAiToolDefinition> parseTools(Object... beans) {
-        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(beans);
+        Map<String, ToolRawDefinition> rawMap = ToolRawHelper.parseTools(SpringAiJsonSchemaAnnotationResolver.INSTANCE, beans);
         Map<String, SpringAiToolDefinition> ret = new LinkedHashMap<>();
         for (Map.Entry<String, ToolRawDefinition> entry : rawMap.entrySet()) {
             ret.put(entry.getKey(), fromRaw(entry.getValue()));
@@ -69,7 +70,7 @@ public class SpringAiToolHelper {
 
         Map<String, Object> functionSchema = definition.getFunctionJsonSchema();
 
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get("parameters");
+        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
 
 
         ToolDefinition def = ToolDefinition.builder()
