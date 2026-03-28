@@ -7,17 +7,12 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.chat.completions.*;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
-import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.ai.openai.tool.OpenAiToolDefinition;
 import i2f.extension.ai.openai.tool.OpenAiToolHelper;
-import i2f.typeof.TypeOf;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -143,8 +138,8 @@ public class OpenAiAi {
                                 Throwable callEx = null;
                                 try {
                                     OpenAiToolDefinition definition = toolMap.get(name);
-                                    if(definition==null){
-                                        throw new IllegalArgumentException("not found this tool ["+name+"], please try others.");
+                                    if (definition == null) {
+                                        throw new IllegalArgumentException("not found this tool [" + name + "], please try others.");
                                     }
                                     String arguments = function.arguments();
                                     String callCounterKey = name + "#" + arguments;
@@ -156,10 +151,10 @@ public class OpenAiAi {
                                     ToolRawDefinition rawDefinition = definition.getRawDefinition();
                                     Map<String, Object> argumentsMap = fromJson(arguments, new TypeReference<Map<String, Object>>() {
                                     });
-                                    Object ret = ToolRawHelper.invokeTool(rawDefinition,argumentsMap);
-                                    if(ret instanceof CharSequence){
+                                    Object ret = ToolRawHelper.invokeTool(rawDefinition, argumentsMap);
+                                    if (ret instanceof CharSequence) {
                                         callResult = String.valueOf(ret);
-                                    }else{
+                                    } else {
                                         String json = toJson(ret);
                                         callResult = json;
                                     }

@@ -1,8 +1,7 @@
 package i2f.ai.std.tool;
 
-import i2f.ai.std.tool.annotations.Tool;
-import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.schema.JsonSchema;
+import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.context.std.IContext;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.invokable.Invocation;
@@ -25,47 +24,7 @@ import java.util.function.Function;
  */
 public class ToolRawHelper {
 
-    public static List<Object> filterToolsObject(Collection<Object> list) {
-        List<Object> ret = new ArrayList<>();
-        for (Object obj : list) {
-            if (isToolsObject(obj)) {
-                ret.add(obj);
-            }
-        }
-        return ret;
-    }
-
-    public static boolean isToolsObject(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        Class<?> clazz = obj.getClass();
-        return isToolsClass(clazz);
-    }
-
-    public static boolean isToolsClass(Class<?> clazz) {
-        if (clazz == null) {
-            return false;
-        }
-        Tools ann = clazz.getAnnotation(Tools.class);
-        if (ann == null) {
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean isToolMethod(Method method) {
-        if (method == null) {
-            return false;
-        }
-        Tool ann = method.getAnnotation(Tool.class);
-        if (ann == null) {
-            return false;
-        }
-        return true;
-    }
-
-    public static <T, R> List<R> convertTools(Map<String, ToolRawDefinition> list, Function<ToolRawDefinition, R> convertor) {
+    public static <R> List<R> convertTools(Map<String, ToolRawDefinition> list, Function<ToolRawDefinition, R> convertor) {
         List<R> ret = new ArrayList<>();
         for (Map.Entry<String, ToolRawDefinition> entry : list.entrySet()) {
             ToolRawDefinition definition = entry.getValue();
@@ -77,7 +36,7 @@ public class ToolRawHelper {
         return ret;
     }
 
-    public static <T, R> List<R> convertTools(Collection<ToolRawDefinition> list, Function<ToolRawDefinition, R> convertor) {
+    public static <R> List<R> convertTools(Collection<ToolRawDefinition> list, Function<ToolRawDefinition, R> convertor) {
         List<R> ret = new ArrayList<>();
         for (ToolRawDefinition definition : list) {
             R item = convertor.apply(definition);
@@ -88,7 +47,10 @@ public class ToolRawHelper {
         return ret;
     }
 
-    public static Map<String, ToolRawDefinition> parseTools(IContext context) {
+    public static Map<String, ToolRawDefinition> parseTools(JsonSchemaAnnotationResolver resolver, IContext context) {
+        if (resolver == null) {
+            resolver = JsonSchemaAnnotationResolver.INSTANCE;
+        }
         Map<String, ToolRawDefinition> ret = new LinkedHashMap<>();
         List<Object> list = context.getAllBeans();
         for (Object item : list) {
@@ -98,35 +60,35 @@ public class ToolRawHelper {
                 for (ToolRawDefinition definition : tools) {
                     ret.put(definition.getFunctionName(), definition);
                 }
-            } else if (isToolsObject(item)) {
-                Map<String, ToolRawDefinition> map = parseTools(item);
+            } else if (resolver.isToolsObject(item)) {
+                Map<String, ToolRawDefinition> map = parseTools(resolver, item);
                 ret.putAll(map);
             }
         }
         return ret;
     }
 
-    public static Map<String, ToolRawDefinition> parseTools(Collection<Object> beans) {
+    public static Map<String, ToolRawDefinition> parseTools(JsonSchemaAnnotationResolver resolver, Collection<Object> beans) {
         Map<String, ToolRawDefinition> ret = new LinkedHashMap<>();
         for (Object bean : beans) {
-            Map<String, ToolRawDefinition> next = parseTools(bean);
+            Map<String, ToolRawDefinition> next = parseTools(resolver, bean);
             ret.putAll(next);
         }
         return ret;
     }
 
-    public static Map<String, ToolRawDefinition> parseTools(Object... beans) {
+    public static Map<String, ToolRawDefinition> parseTools(JsonSchemaAnnotationResolver resolver, Object... beans) {
         Map<String, ToolRawDefinition> ret = new LinkedHashMap<>();
         for (Object bean : beans) {
-            Map<String, ToolRawDefinition> next = parseTools(bean);
+            Map<String, ToolRawDefinition> next = parseTools(resolver, bean);
             ret.putAll(next);
         }
         return ret;
     }
 
-    public static Map<String, ToolRawDefinition> parseTools(Object bean) {
+    public static Map<String, ToolRawDefinition> parseTools(JsonSchemaAnnotationResolver resolver, Object bean) {
         Class<?> clazz = bean.getClass();
-        Map<String, ToolRawDefinition> ret = parseTools(clazz);
+        Map<String, ToolRawDefinition> ret = parseTools(resolver, clazz);
         for (Map.Entry<String, ToolRawDefinition> entry : ret.entrySet()) {
             ToolRawDefinition definition = entry.getValue();
             definition.setBindTarget(bean);
@@ -134,14 +96,17 @@ public class ToolRawHelper {
         return ret;
     }
 
-    public static Map<String, ToolRawDefinition> parseTools(Class<?> clazz) {
+    public static Map<String, ToolRawDefinition> parseTools(JsonSchemaAnnotationResolver resolver, Class<?> clazz) {
+        if (resolver == null) {
+            resolver = JsonSchemaAnnotationResolver.INSTANCE;
+        }
         Map<String, ToolRawDefinition> ret = new LinkedHashMap<>();
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            if (!isToolMethod(method)) {
+            if (!resolver.isToolMethod(method)) {
                 continue;
             }
-            ToolRawDefinition definition = getToolDefinition(method);
+            ToolRawDefinition definition = getToolDefinition(resolver, method);
             if (definition == null) {
                 continue;
             }
@@ -151,17 +116,20 @@ public class ToolRawHelper {
         return ret;
     }
 
-    public static ToolRawDefinition getToolDefinition(Method method) {
+    public static ToolRawDefinition getToolDefinition(JsonSchemaAnnotationResolver resolver, Method method) {
+        if (resolver == null) {
+            resolver = JsonSchemaAnnotationResolver.INSTANCE;
+        }
         int modifiers = method.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
             return null;
         }
         List<String> parameterNames = new ArrayList<>();
-        Map<String, Object> functionSchema = JsonSchema.getFunctionJsonSchema(method, parameterNames);
+        Map<String, Object> functionSchema = JsonSchema.getFunctionJsonSchema(resolver, method, parameterNames);
 
-        String name = (String) functionSchema.get("name");
-        String description = (String) functionSchema.get("description");
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get("parameters");
+        String name = (String) functionSchema.get(JsonSchema.SchemaField.NAME);
+        String description = (String) functionSchema.get(JsonSchema.SchemaField.DESCRIPTION);
+        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
 
         ToolRawDefinition definition = new ToolRawDefinition();
         definition.setFunctionJsonSchema(functionSchema);

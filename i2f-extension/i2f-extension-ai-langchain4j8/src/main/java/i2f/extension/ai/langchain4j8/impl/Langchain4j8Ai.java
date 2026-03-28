@@ -9,17 +9,12 @@ import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
-import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.ai.langchain4j8.tool.Langchain4j8ToolDefinition;
 import i2f.extension.ai.langchain4j8.tool.Langchain4j8ToolHelper;
-import i2f.typeof.TypeOf;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -119,8 +114,8 @@ public class Langchain4j8Ai {
                         Throwable callEx = null;
                         try {
                             Langchain4j8ToolDefinition definition = toolMap.get(name);
-                            if(definition==null){
-                                throw new IllegalArgumentException("not found this tool ["+name+"], please try others.");
+                            if (definition == null) {
+                                throw new IllegalArgumentException("not found this tool [" + name + "], please try others.");
                             }
                             String arguments = function.arguments();
                             String callCounterKey = name + "#" + arguments;
@@ -133,9 +128,9 @@ public class Langchain4j8Ai {
                             Map<String, Object> argumentsMap = fromJson(arguments, new TypeToken<Map<String, Object>>() {
                             });
                             Object ret = ToolRawHelper.invokeTool(rawDefinition, argumentsMap);
-                            if(ret instanceof CharSequence){
+                            if (ret instanceof CharSequence) {
                                 callResult = String.valueOf(ret);
-                            }else{
+                            } else {
                                 String json = toJson(ret);
                                 callResult = json;
                             }
