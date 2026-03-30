@@ -2,8 +2,7 @@ package i2f.ai.std.service.proxy;
 
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.context.std.INamingContext;
-
-import java.lang.reflect.Proxy;
+import i2f.proxy.JdkProxyUtil;
 
 /**
  * @author Ice2Faith
@@ -20,6 +19,6 @@ public class AiServices {
     }
 
     public static <T> T create(Class<T> type, AiServiceDynamicProxyHandler handler) {
-        return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, handler);
+        return JdkProxyUtil.proxy(type, handler);
     }
 }

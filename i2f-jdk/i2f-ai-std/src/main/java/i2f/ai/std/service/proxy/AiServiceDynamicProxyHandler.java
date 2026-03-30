@@ -10,7 +10,10 @@ import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.context.std.INamingContext;
+import i2f.invokable.IInvokable;
+import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.match.regex.RegexUtil;
+import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 import lombok.Data;
@@ -20,7 +23,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
@@ -32,7 +34,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class AiServiceDynamicProxyHandler implements InvocationHandler {
+public class AiServiceDynamicProxyHandler implements IProxyInvocationHandler {
     protected INamingContext context;
     protected JsonSchemaAnnotationResolver resolver = JsonSchemaAnnotationResolver.INSTANCE;
 
@@ -46,7 +48,13 @@ public class AiServiceDynamicProxyHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, IInvokable invokable, Object... args) throws Throwable {
+
+        if (!(invokable instanceof JdkMethod)) {
+            throw new IllegalArgumentException("only supports JdkMethod");
+        }
+        JdkMethod jdkMethod = (JdkMethod) invokable;
+        Method method = jdkMethod.getMethod();
 
         // 处理默认方法，default 实现的方法不进行代理
         // 这里就允许使用默认方法实现一些 Tools(function-calling) 方法
@@ -489,4 +497,6 @@ public class AiServiceDynamicProxyHandler implements InvocationHandler {
             throw new IllegalArgumentException("un-support return type: " + returnType);
         }
     }
+
+
 }
