@@ -1,0 +1,89 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.ai",
+      "type": "i2f.springboot.ai.autoconfiguration.SpringAiServiceAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.autoconfiguration.SpringAiServiceAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.proxy",
+      "type": "i2f.springboot.ai.proxy.SpringAiServiceProxyInterfaceAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.proxy.SpringAiServiceProxyInterfaceAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.ai.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai.",
+      "sourceType": "i2f.springboot.ai.autoconfiguration.SpringAiServiceAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.model.dashscope.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai dashscope.",
+      "sourceType": "i2f.springboot.ai.autoconfiguration.SpringAiServiceAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.json-serializer.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai agent json serializer.",
+      "sourceType": "i2f.springboot.ai.autoconfiguration.SpringAiServiceAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.json-schema-annotation-resolver.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai agent json schema annotation resolver.",
+      "sourceType": "i2f.springboot.ai.autoconfiguration.SpringAiServiceAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.agent.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai agent.",
+      "sourceType": "i2f.springboot.ai.autoconfiguration.SpringAiServiceAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.proxy.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai service.",
+      "sourceType": "i2f.springboot.ai.proxy.SpringAiServiceProxyInterfaceAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.proxy.handler.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai proxy handler.",
+      "sourceType": "i2f.springboot.ai.proxy.SpringAiServiceProxyInterfaceAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}
