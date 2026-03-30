@@ -3,7 +3,7 @@ package i2f.ai.std.skill;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -15,7 +15,7 @@ import java.util.List;
 public class SkillDefinition {
     protected String name;
     protected String description;
-    protected List<String> tags;
+    protected Set<String> tags;
     protected String version;
     protected String author;
 }

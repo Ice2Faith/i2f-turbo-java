@@ -1,4 +1,7 @@
-package i2f.ai.std.tool.annotations;
+package i2f.ai.std.service.annotations;
+
+
+import i2f.ai.std.agent.AiAgent;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,16 +11,14 @@ import java.lang.annotation.Target;
 
 /**
  * @author Ice2Faith
- * @date 2026/3/19 10:50
+ * @date 2026/3/30 8:51
  * @desc
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Tool {
+public @interface AiAgents {
 
     String value() default "";
 
-    String description();
-
-    String[] tags() default {};
+    Class<? extends AiAgent> clazz() default AiAgent.class;
 }

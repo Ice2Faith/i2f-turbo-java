@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -23,4 +24,5 @@ public class ToolRawDefinition {
     protected Method bindMethod;
     protected Class<?> bindClass;
     protected Object bindTarget;
+    protected Set<String> tags;
 }

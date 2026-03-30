@@ -7,6 +7,9 @@ import i2f.ai.std.tool.annotations.Tools;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -70,6 +73,27 @@ public class JsonSchemaAnnotationResolver {
             }
         }
         return null;
+    }
+
+    public List<String> getToolMethodTags(Method method) {
+        if (!isToolMethod(method)) {
+            return new ArrayList<>();
+        }
+        List<String> ret = new ArrayList<>();
+        Tool ann = method.getAnnotation(Tool.class);
+        if (ann != null) {
+            if (ann.tags() != null && ann.tags().length != 0) {
+                ret.addAll(Arrays.asList(ann.tags()));
+            }
+        }
+        Class<?> declaringClass = method.getDeclaringClass();
+        Tools classAnn = declaringClass.getAnnotation(Tools.class);
+        if (classAnn != null) {
+            if (classAnn.tags() != null && classAnn.tags().length != 0) {
+                ret.addAll(Arrays.asList(classAnn.tags()));
+            }
+        }
+        return ret;
     }
 
     public String getToolParameterName(Parameter parameter) {

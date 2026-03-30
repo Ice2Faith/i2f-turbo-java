@@ -6,9 +6,7 @@ import i2f.proxy.std.IProxyInvocationHandler;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,8 +29,11 @@ public class AiAgentContext {
     protected boolean enableRag = true;
     protected int ragTopCount = 5;
     protected boolean enableRagAct = true;
+    protected boolean enableStructOutput = false;
+    protected Class<?> outputType = null;
 
     protected Map<String, SkillDefinition> skillsMap = new HashMap<>(DEFAULT_SKILLS_MAP);
+    protected Set<String> includeSkillTags = new HashSet<>();
 
     protected final AtomicInteger maxKeepMessageCount = new AtomicInteger(20);
     protected final AtomicBoolean keepFirstUserMessage = new AtomicBoolean(true);
@@ -70,8 +71,23 @@ public class AiAgentContext {
         return this;
     }
 
+    public AiAgentContext enableStructOutput(boolean enableStructOutput) {
+        this.enableStructOutput = enableStructOutput;
+        return this;
+    }
+
+    public AiAgentContext outputType(Class<?> outputType) {
+        this.outputType = outputType;
+        return this;
+    }
+
     public AiAgentContext skillsMap(Map<String, SkillDefinition> skillsMap) {
         this.skillsMap = skillsMap;
+        return this;
+    }
+
+    public AiAgentContext includeSkillTags(Set<String> includeSkillTags) {
+        this.includeSkillTags = includeSkillTags;
         return this;
     }
 
@@ -98,6 +114,23 @@ public class AiAgentContext {
         for (SkillDefinition definition : list) {
             skillsMap.put(definition.getName(), definition);
         }
+        return this;
+    }
+
+
+    public AiAgentContext skillTags(String... tags) {
+        if (includeSkillTags == null) {
+            includeSkillTags = new LinkedHashSet<>();
+        }
+        includeSkillTags.addAll(Arrays.asList(tags));
+        return this;
+    }
+
+    public AiAgentContext skillTags(Collection<String> tags) {
+        if (includeSkillTags == null) {
+            includeSkillTags = new LinkedHashSet<>();
+        }
+        includeSkillTags.addAll(tags);
         return this;
     }
 

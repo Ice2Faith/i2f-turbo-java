@@ -140,6 +140,8 @@ public class ToolRawHelper {
         definition.setBindMethod(method);
         definition.setBindClass(method.getDeclaringClass());
         definition.setBindTarget(null);
+        definition.setTags(new HashSet<>(resolver.getToolMethodTags(method)));
+
         return definition;
     }
 

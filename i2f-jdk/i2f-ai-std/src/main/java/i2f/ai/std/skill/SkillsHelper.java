@@ -75,7 +75,7 @@ public class SkillsHelper {
                     } else if ("description".equalsIgnoreCase(attrName)) {
                         definition.setDescription(attrValue);
                     } else if ("tags".equalsIgnoreCase(attrName)) {
-                        List<String> tags = new ArrayList<>();
+                        Set<String> tags = new LinkedHashSet<>();
                         String[] tagArr = attrValue.split(",");
                         for (String tag : tagArr) {
                             tag = tag.trim();
