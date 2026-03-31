@@ -1,5 +1,6 @@
 package i2f.ai.std.rag;
 
+import i2f.ai.std.rag.impl.SimpleCutRagTextSplitter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -49,6 +50,10 @@ public class RagWorker {
     public List<RagEmbedding> similar(String content, int topN) {
         RagEmbedding embedding = model.embed(content);
         return store.similar(embedding, topN);
+    }
+
+    public void loadDefaultDocuments() throws IOException {
+        RagHelper.loadDocuments(this, new SimpleCutRagTextSplitter());
     }
 
     public void loadDefaultDocuments(RagTextSplitter splitter) throws IOException {
