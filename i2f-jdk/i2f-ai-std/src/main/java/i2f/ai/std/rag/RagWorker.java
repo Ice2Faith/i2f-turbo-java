@@ -3,6 +3,7 @@ package i2f.ai.std.rag;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -48,5 +49,9 @@ public class RagWorker {
     public List<RagEmbedding> similar(String content, int topN) {
         RagEmbedding embedding = model.embed(content);
         return store.similar(embedding, topN);
+    }
+
+    public void loadDefaultDocuments(RagTextSplitter splitter) throws IOException {
+        RagHelper.loadDocuments(this, splitter);
     }
 }
