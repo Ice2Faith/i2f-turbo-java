@@ -7,6 +7,7 @@ import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import i2f.ai.std.rag.RagEmbedding;
 import i2f.ai.std.rag.RagEmbeddingStore;
 import i2f.ai.std.rag.RagVector;
@@ -14,7 +15,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,12 +26,19 @@ import java.util.List;
 @NoArgsConstructor
 public class Langchain4j8RagEmbeddingStore implements RagEmbeddingStore {
     protected EmbeddingStore<TextSegment> store;
-    public Langchain4j8RagEmbeddingStore(EmbeddingStore<TextSegment> store){
-        this.store=store;
+
+    public Langchain4j8RagEmbeddingStore(EmbeddingStore<TextSegment> store) {
+        this.store = store;
     }
+
+    public static Langchain4j8RagEmbeddingStore inMemory() {
+        InMemoryEmbeddingStore<TextSegment> store = new InMemoryEmbeddingStore<>();
+        return new Langchain4j8RagEmbeddingStore(store);
+    }
+
     @Override
     public String store(RagEmbedding embedding) {
-        Embedding vo=new Embedding(embedding.getVector().toFlatArray());
+        Embedding vo = new Embedding(embedding.getVector().toFlatArray());
         String id = store.add(vo, new TextSegment(embedding.getContent(), new Metadata(embedding.getMetadata())));
         embedding.setId(id);
         return embedding.getId();
@@ -44,7 +51,7 @@ public class Langchain4j8RagEmbeddingStore implements RagEmbeddingStore {
 
     @Override
     public List<RagEmbedding> similar(RagVector vector, int topN) {
-        List<RagEmbedding> ret=new ArrayList<>();
+        List<RagEmbedding> ret = new ArrayList<>();
         EmbeddingSearchResult<TextSegment> result = store.search(EmbeddingSearchRequest.builder()
                 .queryEmbedding(new Embedding(vector.toFlatArray()))
                 .maxResults(topN)
@@ -54,7 +61,7 @@ public class Langchain4j8RagEmbeddingStore implements RagEmbeddingStore {
             String id = match.embeddingId();
             Embedding embedding = match.embedding();
             TextSegment segment = match.embedded();
-            RagEmbedding vo=new RagEmbedding();
+            RagEmbedding vo = new RagEmbedding();
             vo.setId(id);
             vo.setVector(RagVector.fromFloatArray(embedding.vector()));
             vo.setContent(segment.text());
