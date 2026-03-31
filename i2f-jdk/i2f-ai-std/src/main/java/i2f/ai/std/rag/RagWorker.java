@@ -1,6 +1,6 @@
 package i2f.ai.std.rag;
 
-import i2f.ai.std.rag.impl.SimpleCutRagTextSplitter;
+import i2f.ai.std.rag.impl.SimpleRecursiveRagTextSplitter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -53,7 +53,7 @@ public class RagWorker {
     }
 
     public void loadDefaultDocuments() throws IOException {
-        RagHelper.loadDocuments(this, new SimpleCutRagTextSplitter());
+        RagHelper.loadDocuments(this, new SimpleRecursiveRagTextSplitter());
     }
 
     public void loadDefaultDocuments(RagTextSplitter splitter) throws IOException {
