@@ -63,6 +63,7 @@ public class SimpleRecursiveRagTextSplitter implements RagTextSplitter {
 
         if (separatorIndex < 0 || separatorIndex > separatorsRegex.length) {
             ret.add(text);
+            return;
         }
         String splitRegex = separatorsRegex[separatorIndex];
         if (splitRegex.isEmpty()) {
@@ -86,6 +87,7 @@ public class SimpleRecursiveRagTextSplitter implements RagTextSplitter {
     public void splitRecursive(String text, int separatorIndex, List<String> ret) {
         if (separatorIndex >= separatorsRegex.length) {
             ret.add(text);
+            return;
         }
 
         int overlapSize = (int) (maxSegmentSizeInChars * maxOverlapRate);
