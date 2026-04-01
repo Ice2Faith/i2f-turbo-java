@@ -1,1 +1,2 @@
 i2f.springcloud.config.server.ConfigServerAutoConfiguration
+i2f.springcloud.config.server.EnvironmentControllerNativeVersionResponseAdvice

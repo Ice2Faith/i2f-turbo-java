@@ -1,1 +1,2 @@
 i2f.springcloud.config.client.ConfigClientAutoConfiguration
+i2f.springcloud.config.client.EnvironmentPullBaseWithVersionCompareIntervalRefresher
