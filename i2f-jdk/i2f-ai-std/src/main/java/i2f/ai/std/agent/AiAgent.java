@@ -100,178 +100,182 @@ public class AiAgent {
 
     public AiAgentResponse generate(AiRequest request, AiAgentContext ctx) {
         AiAgentContext context = ctx == null ? new AiAgentContext() : ctx;
-
-        AiAgentResponse ret = new AiAgentResponse();
-        ret.setContext(context);
-        ret.setMessageList(new ArrayList<>(request.getMessageList()));
-        ret.setToolMap(new ConcurrentHashMap<>());
-        if (request.getToolMap() != null) {
-            ret.getToolMap().putAll(request.getToolMap());
-        }
-
-        List<AiMessage> messageList = ret.getMessageList();
-        Map<String, ToolRawDefinition> toolMap = ret.getToolMap();
-
-        // 移除不包含 tag 的工具
-        filterToolsByRule(toolMap, context.getTagsFilterChain());
-
-
-        // 处理结构化输出需求
-        if (context.isEnableStructOutput()) {
-            Class<?> outputType = context.getOutputType();
-            injectStructOutputPrompt(outputType, messageList);
-        }
-
-        // 处理技能
-        if (context.isEnableSkills()) {
-            if (context.getSkillsMap() == null) {
-                context.setSkillsMap(new HashMap<>());
+        // 设置ThreadLocal,以便在@Tool方法内部获取执行环境变量等
+        // 能够在线程中获取用户的角色、权限等绑定的信息，以允许在工具调用等场景中使用
+        AiAgentContext.CONTEXT.set(context);
+        try {
+            AiAgentResponse ret = new AiAgentResponse();
+            ret.setContext(context);
+            ret.setMessageList(new ArrayList<>(request.getMessageList()));
+            ret.setToolMap(new ConcurrentHashMap<>());
+            if (request.getToolMap() != null) {
+                ret.getToolMap().putAll(request.getToolMap());
             }
-            Map<String, SkillDefinition> skillsMap = new LinkedHashMap<>(context.getSkillsMap());
-            // 移除不包含 tag 的技能
-            filterSkillsByRule(skillsMap, context.getTagsFilterChain());
+
+            List<AiMessage> messageList = ret.getMessageList();
+            Map<String, ToolRawDefinition> toolMap = ret.getToolMap();
+
+            // 移除不包含 tag 的工具
+            filterToolsByRule(toolMap, context.getTagsFilterChain());
 
 
-            // 有技能才需要注入相关工具和提示词
-            if (!skillsMap.isEmpty()) {
-                injectSkillsPromptAndTools(skillsMap, messageList, toolMap);
+            // 处理结构化输出需求
+            if (context.isEnableStructOutput()) {
+                Class<?> outputType = context.getOutputType();
+                injectStructOutputPrompt(outputType, messageList);
             }
-        }
 
-        // 处理RAG被动知识检索
-        if (context.isEnableRag()) {
-            injectUserQuestionRagPrompt(messageList, context.getRagTopCount());
-        }
+            // 处理技能
+            if (context.isEnableSkills()) {
+                if (context.getSkillsMap() == null) {
+                    context.setSkillsMap(new HashMap<>());
+                }
+                Map<String, SkillDefinition> skillsMap = new LinkedHashMap<>(context.getSkillsMap());
+                // 移除不包含 tag 的技能
+                filterSkillsByRule(skillsMap, context.getTagsFilterChain());
 
-        // 处理工具化的RAG主动检索
-        if (context.isEnableRagAct()) {
-            injectRagTools(toolMap);
-        }
 
-        AtomicInteger allToolCallCount = new AtomicInteger(0);
-        Map<String, AtomicInteger> singleToolCallCount = new ConcurrentHashMap<>();
-        Map<String, AtomicInteger> singleToolSameArgumentFailureCount = new ConcurrentHashMap<>();
-        // Re-Act 循环
-        while (true) {
-            compressOrDropHistoryMessage(messageList, context);
-
-            AiRequest modelReq = new AiRequest();
-            modelReq.setMessageList(new ArrayList<>(messageList));
-            modelReq.setToolMap(new TreeMap<>(ret.getToolMap()));
-            AssistantMessage resp = model.generate(modelReq);
-            messageList.add(resp);
-
-            // 中断只有在执行过一次之后才进行，也就是至少让LLM回答一次
-            if (context.getInterrupt().get()) {
-                return ret;
-            }
-            // 处理 function-calling 调用
-            AtomicBoolean isToolCall = new AtomicBoolean(false);
-            if (resp.getFinishReason() == AssistantMessage.FinishReason.TOOL_CALL) {
-                List<ToolCallRequest> toolCallList = resp.getToolCallRequestList();
-                if (toolCallList != null && !toolCallList.isEmpty()) {
-                    CopyOnWriteArrayList<ToolMessage> toolMsgList = new CopyOnWriteArrayList<>();
-                    CountDownLatch latch = new CountDownLatch(toolCallList.size());
-                    for (ToolCallRequest toolCall : toolCallList) {
-                        Runnable task = () -> {
-                            try {
-                                String toolCallId = toolCall.getId();
-                                String name = toolCall.getName();
-                                String arguments = toolCall.getArguments();
-
-                                if (context.getInterrupt().get()) {
-                                    return;
-                                }
-
-                                isToolCall.set(true);
-
-                                int allCount = allToolCallCount.incrementAndGet();
-                                if (allCount >= context.getMaxAllToolCallCount().get()) {
-                                    toolMsgList.add(new ToolMessage(toolCallId, "error, all tools call count exceed limit count."));
-                                    return;
-                                }
-
-                                AtomicInteger counter = singleToolCallCount.computeIfAbsent(name, k -> new AtomicInteger(0));
-                                int singleCount = counter.incrementAndGet();
-                                if (singleCount >= context.getMaxSingleToolCallCount().get()) {
-                                    toolMsgList.add(new ToolMessage(toolCallId, "error, tool [" + name + "] call count exceed limit count."));
-                                    return;
-                                }
-
-                                String failureKey = name + "##" + arguments;
-                                AtomicInteger failureCounter = singleToolSameArgumentFailureCount.computeIfAbsent(failureKey, k -> new AtomicInteger(0));
-                                if (failureCounter.get() >= context.getMaxSingleToolSameArgumentFailureCount().get()) {
-                                    toolMsgList.add(new ToolMessage(toolCallId, "error, tool [" + name + "] call failure count exceed limit count, please check arguments."));
-                                    return;
-                                }
-
-                                String callResult = null;
-                                Throwable callEx = null;
-                                ToolRawDefinition rawDefinition = null;
-                                // 设置ThreadLocal,以便在@Tool方法内部获取执行环境变量等
-                                AiAgentContext.CONTEXT.set(context);
-                                try {
-                                    Object val = callTool(toolCall, toolMap, context.getToolInterceptor());
-                                    if (val instanceof CharSequence) {
-                                        callResult = String.valueOf(val);
-                                    } else {
-                                        String json = jsonSerializer.serialize(val);
-                                        callResult = json;
-                                    }
-                                } catch (Throwable e) {
-                                    callEx = e;
-                                    failureCounter.incrementAndGet();
-                                } finally {
-                                    AiAgentContext.CONTEXT.remove();
-                                }
-                                if (callEx != null) {
-                                    if (callEx instanceof InvocationTargetException) {
-                                        InvocationTargetException ite = (InvocationTargetException) callEx;
-                                        callEx = ite.getTargetException();
-                                    }
-                                    callEx.printStackTrace();
-                                    callResult = "tool [" + name + "] invoke failure! cause by " + callEx.getClass() + ": " + callEx.getMessage();
-                                }
-                                ToolMessage toolMsg = new ToolMessage(toolCallId, callResult);
-                                toolMsg.setRequest(toolCall);
-                                toolMsg.setDefinition(rawDefinition);
-                                toolMsgList.add(toolMsg);
-                            } finally {
-                                latch.countDown();
-                            }
-                        };
-
-                        if (context.getEnableParallelToolCall().get()) {
-                            if (context.getToolExecPool() != null) {
-                                context.getToolExecPool().submit(task);
-                            } else if (toolExecPool != null) {
-                                toolExecPool.submit(task);
-                            } else {
-                                DEFAULT_TOOL_POOL.submit(task);
-                            }
-                        } else {
-                            task.run();
-                        }
-                    }
-
-                    try {
-                        latch.await();
-                    } catch (InterruptedException e) {
-
-                    }
-                    if (!toolMsgList.isEmpty()) {
-                        messageList.addAll(toolMsgList);
-                    }
+                // 有技能才需要注入相关工具和提示词
+                if (!skillsMap.isEmpty()) {
+                    injectSkillsPromptAndTools(skillsMap, messageList, toolMap);
                 }
             }
-            if (context.getInterrupt().get()) {
+
+            // 处理RAG被动知识检索
+            if (context.isEnableRag()) {
+                injectUserQuestionRagPrompt(messageList, context.getRagTopCount());
+            }
+
+            // 处理工具化的RAG主动检索
+            if (context.isEnableRagAct()) {
+                injectRagTools(toolMap);
+            }
+
+            AtomicInteger allToolCallCount = new AtomicInteger(0);
+            Map<String, AtomicInteger> singleToolCallCount = new ConcurrentHashMap<>();
+            Map<String, AtomicInteger> singleToolSameArgumentFailureCount = new ConcurrentHashMap<>();
+            // Re-Act 循环
+            while (true) {
+                compressOrDropHistoryMessage(messageList, context);
+
+                AiRequest modelReq = new AiRequest();
+                modelReq.setMessageList(new ArrayList<>(messageList));
+                modelReq.setToolMap(new TreeMap<>(ret.getToolMap()));
+                AssistantMessage resp = model.generate(modelReq);
+                messageList.add(resp);
+
+                // 中断只有在执行过一次之后才进行，也就是至少让LLM回答一次
+                if (context.getInterrupt().get()) {
+                    return ret;
+                }
+                // 处理 function-calling 调用
+                AtomicBoolean isToolCall = new AtomicBoolean(false);
+                if (resp.getFinishReason() == AssistantMessage.FinishReason.TOOL_CALL) {
+                    List<ToolCallRequest> toolCallList = resp.getToolCallRequestList();
+                    if (toolCallList != null && !toolCallList.isEmpty()) {
+                        CopyOnWriteArrayList<ToolMessage> toolMsgList = new CopyOnWriteArrayList<>();
+                        CountDownLatch latch = new CountDownLatch(toolCallList.size());
+                        for (ToolCallRequest toolCall : toolCallList) {
+                            Runnable task = () -> {
+                                try {
+                                    String toolCallId = toolCall.getId();
+                                    String name = toolCall.getName();
+                                    String arguments = toolCall.getArguments();
+
+                                    if (context.getInterrupt().get()) {
+                                        return;
+                                    }
+
+                                    isToolCall.set(true);
+
+                                    int allCount = allToolCallCount.incrementAndGet();
+                                    if (allCount >= context.getMaxAllToolCallCount().get()) {
+                                        toolMsgList.add(new ToolMessage(toolCallId, "error, all tools call count exceed limit count."));
+                                        return;
+                                    }
+
+                                    AtomicInteger counter = singleToolCallCount.computeIfAbsent(name, k -> new AtomicInteger(0));
+                                    int singleCount = counter.incrementAndGet();
+                                    if (singleCount >= context.getMaxSingleToolCallCount().get()) {
+                                        toolMsgList.add(new ToolMessage(toolCallId, "error, tool [" + name + "] call count exceed limit count."));
+                                        return;
+                                    }
+
+                                    String failureKey = name + "##" + arguments;
+                                    AtomicInteger failureCounter = singleToolSameArgumentFailureCount.computeIfAbsent(failureKey, k -> new AtomicInteger(0));
+                                    if (failureCounter.get() >= context.getMaxSingleToolSameArgumentFailureCount().get()) {
+                                        toolMsgList.add(new ToolMessage(toolCallId, "error, tool [" + name + "] call failure count exceed limit count, please check arguments."));
+                                        return;
+                                    }
+
+                                    String callResult = null;
+                                    Throwable callEx = null;
+                                    ToolRawDefinition rawDefinition = null;
+
+                                    try {
+                                        Object val = callTool(toolCall, toolMap, context.getToolInterceptor());
+                                        if (val instanceof CharSequence) {
+                                            callResult = String.valueOf(val);
+                                        } else {
+                                            String json = jsonSerializer.serialize(val);
+                                            callResult = json;
+                                        }
+                                    } catch (Throwable e) {
+                                        callEx = e;
+                                        failureCounter.incrementAndGet();
+                                    }
+                                    if (callEx != null) {
+                                        if (callEx instanceof InvocationTargetException) {
+                                            InvocationTargetException ite = (InvocationTargetException) callEx;
+                                            callEx = ite.getTargetException();
+                                        }
+                                        callEx.printStackTrace();
+                                        callResult = "tool [" + name + "] invoke failure! cause by " + callEx.getClass() + ": " + callEx.getMessage();
+                                    }
+                                    ToolMessage toolMsg = new ToolMessage(toolCallId, callResult);
+                                    toolMsg.setRequest(toolCall);
+                                    toolMsg.setDefinition(rawDefinition);
+                                    toolMsgList.add(toolMsg);
+                                } finally {
+                                    latch.countDown();
+                                }
+                            };
+
+                            if (context.getEnableParallelToolCall().get()) {
+                                if (context.getToolExecPool() != null) {
+                                    context.getToolExecPool().submit(task);
+                                } else if (toolExecPool != null) {
+                                    toolExecPool.submit(task);
+                                } else {
+                                    DEFAULT_TOOL_POOL.submit(task);
+                                }
+                            } else {
+                                task.run();
+                            }
+                        }
+
+                        try {
+                            latch.await();
+                        } catch (InterruptedException e) {
+
+                        }
+                        if (!toolMsgList.isEmpty()) {
+                            messageList.addAll(toolMsgList);
+                        }
+                    }
+                }
+                if (context.getInterrupt().get()) {
+                    return ret;
+                }
+                if (isToolCall.get()) {
+                    continue;
+                }
                 return ret;
             }
-            if (isToolCall.get()) {
-                continue;
-            }
-            return ret;
+        } finally {
+            AiAgentContext.CONTEXT.remove();
         }
+
     }
 
     public Object callTool(ToolCallRequest request, Map<String, ToolRawDefinition> toolMap, IProxyInvocationHandler interceptor) throws Throwable {
