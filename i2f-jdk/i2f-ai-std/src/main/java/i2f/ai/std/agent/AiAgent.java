@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
@@ -112,7 +113,7 @@ public class AiAgent {
         Map<String, ToolRawDefinition> toolMap = ret.getToolMap();
 
         // 移除不包含 tag 的工具
-        filterToolsByIncludeTags(toolMap, request.getIncludeToolsTags());
+        filterToolsByRule(toolMap, context.getTagsFilterChain());
 
 
         // 处理结构化输出需求
@@ -128,7 +129,7 @@ public class AiAgent {
             }
             Map<String, SkillDefinition> skillsMap = new LinkedHashMap<>(context.getSkillsMap());
             // 移除不包含 tag 的技能
-            filterSkillsByIncludeTags(skillsMap, context.getIncludeSkillTags());
+            filterSkillsByRule(skillsMap, context.getTagsFilterChain());
 
 
             // 有技能才需要注入相关工具和提示词
@@ -378,8 +379,8 @@ public class AiAgent {
         }
     }
 
-    public void filterSkillsByIncludeTags(Map<String, SkillDefinition> skillsMap, Set<String> includeTags) {
-        if (includeTags == null || includeTags.isEmpty()) {
+    public void filterSkillsByRule(Map<String, SkillDefinition> skillsMap, List<Predicate<Set<String>>> tagsFilterChain) {
+        if (tagsFilterChain == null || tagsFilterChain.isEmpty()) {
             return;
         }
         if (skillsMap == null || skillsMap.isEmpty()) {
@@ -390,11 +391,10 @@ public class AiAgent {
             SkillDefinition definition = entry.getValue();
             Set<String> tags = definition.getTags();
             if (tags != null && !tags.isEmpty()) {
-                boolean include = false;
-                for (String tag : tags) {
-                    if (includeTags.contains(tag)) {
-                        include = true;
-                        break;
+                boolean include = true;
+                for (Predicate<Set<String>> predicate : tagsFilterChain) {
+                    if (!predicate.test(tags)) {
+                        include = false;
                     }
                 }
                 if (!include) {
@@ -409,8 +409,8 @@ public class AiAgent {
         }
     }
 
-    public void filterToolsByIncludeTags(Map<String, ToolRawDefinition> toolMap, Collection<String> includeTags) {
-        if (includeTags == null || includeTags.isEmpty()) {
+    public void filterToolsByRule(Map<String, ToolRawDefinition> toolMap, List<Predicate<Set<String>>> tagsFilterChain) {
+        if (tagsFilterChain == null || tagsFilterChain.isEmpty()) {
             return;
         }
         if (toolMap == null || toolMap.isEmpty()) {
@@ -421,11 +421,10 @@ public class AiAgent {
             ToolRawDefinition definition = entry.getValue();
             Set<String> tags = definition.getTags();
             if (tags != null && !tags.isEmpty()) {
-                boolean include = false;
-                for (String tag : tags) {
-                    if (includeTags.contains(tag)) {
-                        include = true;
-                        break;
+                boolean include = true;
+                for (Predicate<Set<String>> predicate : tagsFilterChain) {
+                    if (!predicate.test(tags)) {
+                        include = false;
                     }
                 }
                 if (!include) {
