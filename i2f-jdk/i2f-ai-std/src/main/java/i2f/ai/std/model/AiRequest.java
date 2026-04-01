@@ -64,7 +64,7 @@ public class AiRequest {
         if (toolMap == null) {
             toolMap = new LinkedHashMap<>();
         }
-        toolMap.put(definition.getFunctionName(), definition);
+        toolMap.put(definition.getName(), definition);
         return this;
     }
 
@@ -81,7 +81,7 @@ public class AiRequest {
             toolMap = new LinkedHashMap<>();
         }
         for (ToolRawDefinition definition : list) {
-            toolMap.put(definition.getFunctionName(), definition);
+            toolMap.put(definition.getName(), definition);
         }
         return this;
     }

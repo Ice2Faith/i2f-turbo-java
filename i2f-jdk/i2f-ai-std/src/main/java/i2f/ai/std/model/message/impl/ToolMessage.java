@@ -18,7 +18,7 @@ public class ToolMessage implements AiMessage {
     protected String text;
     protected ToolCallRequest request;
     protected ToolRawDefinition definition;
-    protected Object rawMessage;
+    protected transient Object rawMessage;
 
     public ToolMessage(String text) {
         this.text = text;

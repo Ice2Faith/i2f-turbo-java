@@ -18,6 +18,7 @@ import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
+import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.typeof.TypeOf;
 import lombok.Data;
@@ -111,51 +112,13 @@ public class AiAgent {
         Map<String, ToolRawDefinition> toolMap = ret.getToolMap();
 
         // 移除不包含 tag 的工具
-        if (!request.getIncludeToolsTags().isEmpty()) {
+        filterToolsByIncludeTags(toolMap, request.getIncludeToolsTags());
 
-            Set<String> removeKeys = new HashSet<>();
-            for (Map.Entry<String, ToolRawDefinition> entry : toolMap.entrySet()) {
-                ToolRawDefinition definition = entry.getValue();
-                Set<String> tags = definition.getTags();
-                if (tags != null && !tags.isEmpty()) {
-                    boolean include = false;
-                    for (String tag : tags) {
-                        if (request.getIncludeToolsTags().contains(tag)) {
-                            include = true;
-                            break;
-                        }
-                    }
-                    if (!include) {
-                        removeKeys.add(entry.getKey());
-                    }
-                }
-            }
-            if (!removeKeys.isEmpty()) {
-                for (String key : removeKeys) {
-                    toolMap.remove(key);
-                }
-            }
-
-        }
 
         // 处理结构化输出需求
         if (context.isEnableStructOutput()) {
             Class<?> outputType = context.getOutputType();
-            if (outputType != null
-                    && !Object.class.equals(outputType)
-                    && !TypeOf.typeOfAny(outputType, CharSequence.class, Void.class)) {
-                Map<String, Object> outputSchema = JsonSchema.getTypeJsonSchema(jsonSchemaAnnotationResolver, outputType);
-                String outputSchemaJson = jsonSerializer.serialize(outputSchema);
-                StringBuilder builder = new StringBuilder();
-                builder.append("# 最终输出约束\n" +
-                                "- 思考过程中或中间过程可以使用随意格式进行答复\n" +
-                                "- 但是确定并检查了输出最终答复的时候，必须严格按照下面的JSON格式进行答复\n" +
-                                "- 答复必须是标准JSON的内容，不能包含markdown标记，不能包含除了JSON之外多余的描述性信息\n" +
-                                "- 输出的JSON格式约束如下：\n" +
-                                "").append(outputSchemaJson)
-                        .append("\n");
-                messageList.add(0, new SystemMessage(builder.toString()));
-            }
+            injectStructOutputPrompt(outputType, messageList);
         }
 
         // 处理技能
@@ -165,122 +128,32 @@ public class AiAgent {
             }
             Map<String, SkillDefinition> skillsMap = new LinkedHashMap<>(context.getSkillsMap());
             // 移除不包含 tag 的技能
-            if (!context.getIncludeSkillTags().isEmpty()) {
-                Set<String> removeKeys = new HashSet<>();
-                for (Map.Entry<String, SkillDefinition> entry : skillsMap.entrySet()) {
-                    SkillDefinition definition = entry.getValue();
-                    Set<String> tags = definition.getTags();
-                    if (tags != null && !tags.isEmpty()) {
-                        boolean include = false;
-                        for (String tag : tags) {
-                            if (context.getIncludeSkillTags().contains(tag)) {
-                                include = true;
-                                break;
-                            }
-                        }
-                        if (!include) {
-                            removeKeys.add(entry.getKey());
-                        }
-                    }
-                }
-                if (!removeKeys.isEmpty()) {
-                    for (String key : removeKeys) {
-                        skillsMap.remove(key);
-                    }
-                }
+            filterSkillsByIncludeTags(skillsMap, context.getIncludeSkillTags());
 
-            }
 
             // 有技能才需要注入相关工具和提示词
             if (!skillsMap.isEmpty()) {
-                String system = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(skillsMap);
-                messageList.add(0, new SystemMessage(system));
-
-                Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(jsonSchemaAnnotationResolver, new SkillsTools());
-                for (Map.Entry<String, ToolRawDefinition> entry : map.entrySet()) {
-                    toolMap.computeIfAbsent(entry.getKey(), k -> entry.getValue());
-                }
+                injectSkillsPromptAndTools(skillsMap, messageList, toolMap);
             }
         }
 
         // 处理RAG被动知识检索
         if (context.isEnableRag()) {
-            if (ragWorker != null) {
-                for (int i = messageList.size() - 1; i >= 0; i--) {
-                    AiMessage item = messageList.get(i);
-                    if (item instanceof UserMessage) {
-                        UserMessage msg = (UserMessage) item;
-                        String text = msg.getText();
-                        List<RagEmbedding> list = ragWorker.similar(text, context.getRagTopCount());
-                        if (!list.isEmpty()) {
-                            StringBuilder builder = new StringBuilder();
-
-                            builder.append("# 相关参考资料").append("\n");
-                            for (int j = 0; j < list.size(); j++) {
-                                RagEmbedding embedding = list.get(j);
-                                String content = embedding.getContent();
-                                if (j > 0) {
-                                    builder.append("\n");
-                                }
-                                builder.append("-------------------------------------").append("\n");
-                                builder.append("## 参考资料 ").append(j + 1).append("\n");
-                                builder.append(content).append("\n");
-                            }
-                            if (i + 1 < messageList.size()) {
-                                messageList.add(i + 1, new SystemMessage(builder.toString()));
-                            } else {
-                                messageList.add(new SystemMessage(builder.toString()));
-                            }
-                        }
-                        break;
-                    }
-                }
-
-            }
+            injectUserQuestionRagPrompt(messageList, context.getRagTopCount());
         }
 
         // 处理工具化的RAG主动检索
         if (context.isEnableRagAct()) {
-            if (ragWorker != null) {
-                RagTools tool = new RagTools();
-                tool.setWorker(ragWorker);
-                Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(jsonSchemaAnnotationResolver, tool);
-                for (Map.Entry<String, ToolRawDefinition> entry : map.entrySet()) {
-                    toolMap.computeIfAbsent(entry.getKey(), k -> entry.getValue());
-                }
-            }
+            injectRagTools(toolMap);
         }
-        // 获取第一条用户消息，用于后续的消息裁剪与压缩
-        int firstUserMessageIndex = 0;
-        for (AiMessage item : messageList) {
-            if (item instanceof UserMessage) {
-                break;
-            }
-            firstUserMessageIndex++;
-        }
+
         AtomicInteger allToolCallCount = new AtomicInteger(0);
         Map<String, AtomicInteger> singleToolCallCount = new ConcurrentHashMap<>();
         Map<String, AtomicInteger> singleToolSameArgumentFailureCount = new ConcurrentHashMap<>();
         // Re-Act 循环
         while (true) {
-            // 处理历史消息压缩
-            if (context.getCompressHistoryMessage().get()) {
-                List<AiMessage> tmpList = new ArrayList<>();
-                while (messageList.size() >= context.getCompressHistoryCount().get()) {
-                    tmpList.add(messageList.remove(firstUserMessageIndex));
-                }
-                if (!tmpList.isEmpty()) {
-                    tmpList.add(new UserMessage("总结上述对话内容"));
-                    AiRequest tmpReq = new AiRequest();
-                    tmpReq.setMessageList(tmpList);
-                    AssistantMessage result = model.generate(tmpReq);
-                    messageList.add(result);
-                }
-            }
-            // 嘴里历史消息截断
-            while (messageList.size() > context.getMaxKeepMessageCount().get()) {
-                messageList.remove(context.getKeepFirstUserMessage().get() ? firstUserMessageIndex + 1 : firstUserMessageIndex);
-            }
+            compressOrDropHistoryMessage(messageList, context);
+
             AiRequest modelReq = new AiRequest();
             modelReq.setMessageList(new ArrayList<>(messageList));
             modelReq.setToolMap(new TreeMap<>(ret.getToolMap()));
@@ -337,13 +210,7 @@ public class AiAgent {
                                 // 设置ThreadLocal,以便在@Tool方法内部获取执行环境变量等
                                 AiAgentContext.CONTEXT.set(context);
                                 try {
-
-                                    Map<String, Object> argumentsMap = jsonSerializer.deserializeAsMap(arguments);
-                                    rawDefinition = toolMap.get(name);
-                                    if (rawDefinition == null) {
-                                        throw new IllegalArgumentException("not found this tool [" + name + "], please try others.");
-                                    }
-                                    Object val = ToolRawHelper.invokeTool(rawDefinition, argumentsMap, context.getToolInterceptor());
+                                    Object val = callTool(toolCall, toolMap, context.getToolInterceptor());
                                     if (val instanceof CharSequence) {
                                         callResult = String.valueOf(val);
                                     } else {
@@ -404,5 +271,197 @@ public class AiAgent {
             }
             return ret;
         }
+    }
+
+    public Object callTool(ToolCallRequest request, Map<String, ToolRawDefinition> toolMap, IProxyInvocationHandler interceptor) throws Throwable {
+        String name = request.getName();
+        String arguments = request.getArguments();
+
+        Map<String, Object> argumentsMap = jsonSerializer.deserializeAsMap(arguments);
+        ToolRawDefinition rawDefinition = toolMap.get(name);
+        if (rawDefinition == null) {
+            return callToolNotFoundDefinition(request, toolMap, interceptor);
+        }
+        Object val = ToolRawHelper.invokeTool(rawDefinition, argumentsMap, interceptor);
+        return val;
+    }
+
+    public Object callToolNotFoundDefinition(ToolCallRequest request, Map<String, ToolRawDefinition> toolMap, IProxyInvocationHandler interceptor) throws Throwable {
+        String name = request.getName();
+        throw new IllegalArgumentException("not found this tool [" + name + "], please try others.");
+    }
+
+    public void compressOrDropHistoryMessage(List<AiMessage> messageList, AiAgentContext context) {
+        // 获取第一条用户消息，用于后续的消息裁剪与压缩
+        int firstUserMessageIndex = 0;
+        for (AiMessage item : messageList) {
+            if (item instanceof UserMessage) {
+                break;
+            }
+            firstUserMessageIndex++;
+        }
+        // 处理历史消息压缩
+        if (context.getCompressHistoryMessage().get()) {
+            List<AiMessage> tmpList = new ArrayList<>();
+            while (messageList.size() >= context.getCompressHistoryCount().get()) {
+                tmpList.add(messageList.remove(firstUserMessageIndex));
+            }
+            if (!tmpList.isEmpty()) {
+                tmpList.add(new UserMessage("总结上述对话内容"));
+                AiRequest tmpReq = new AiRequest();
+                tmpReq.setMessageList(tmpList);
+                AssistantMessage result = model.generate(tmpReq);
+                messageList.add(result);
+            }
+        }
+        // 嘴里历史消息截断
+        while (messageList.size() > context.getMaxKeepMessageCount().get()) {
+            messageList.remove(context.getKeepFirstUserMessage().get() ? firstUserMessageIndex + 1 : firstUserMessageIndex);
+        }
+    }
+
+    public void injectRagTools(Map<String, ToolRawDefinition> toolMap) {
+        if (ragWorker == null) {
+            return;
+        }
+        RagTools tool = new RagTools();
+        tool.setWorker(ragWorker);
+        Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(jsonSchemaAnnotationResolver, tool);
+        for (Map.Entry<String, ToolRawDefinition> entry : map.entrySet()) {
+            toolMap.computeIfAbsent(entry.getKey(), k -> entry.getValue());
+        }
+    }
+
+    public void injectUserQuestionRagPrompt(List<AiMessage> messageList, int topN) {
+        if (messageList == null || messageList.isEmpty()) {
+            return;
+        }
+        if (ragWorker == null) {
+            return;
+        }
+        AiMessage lastMessage = messageList.get(messageList.size() - 1);
+        if (!(lastMessage instanceof UserMessage)) {
+            return;
+        }
+        UserMessage msg = (UserMessage) lastMessage;
+        String text = msg.getText();
+        List<RagEmbedding> list = ragWorker.similar(text, topN);
+        if (list.isEmpty()) {
+            return;
+        }
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("# 相关参考资料").append("\n");
+        for (int j = 0; j < list.size(); j++) {
+            RagEmbedding embedding = list.get(j);
+            String content = embedding.getContent();
+            if (j > 0) {
+                builder.append("\n");
+            }
+            builder.append("-------------------------------------").append("\n");
+            builder.append("## 参考资料 ").append(j + 1).append("\n");
+            builder.append(content).append("\n");
+        }
+
+        messageList.add(new SystemMessage(builder.toString()));
+
+
+    }
+
+    private void injectSkillsPromptAndTools(Map<String, SkillDefinition> skillsMap, List<AiMessage> messageList, Map<String, ToolRawDefinition> toolMap) {
+        String system = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(skillsMap);
+        messageList.add(0, new SystemMessage(system));
+
+        Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(jsonSchemaAnnotationResolver, new SkillsTools());
+        for (Map.Entry<String, ToolRawDefinition> entry : map.entrySet()) {
+            toolMap.computeIfAbsent(entry.getKey(), k -> entry.getValue());
+        }
+    }
+
+    public void filterSkillsByIncludeTags(Map<String, SkillDefinition> skillsMap, Set<String> includeTags) {
+        if (includeTags == null || includeTags.isEmpty()) {
+            return;
+        }
+        if (skillsMap == null || skillsMap.isEmpty()) {
+            return;
+        }
+        Set<String> removeKeys = new HashSet<>();
+        for (Map.Entry<String, SkillDefinition> entry : skillsMap.entrySet()) {
+            SkillDefinition definition = entry.getValue();
+            Set<String> tags = definition.getTags();
+            if (tags != null && !tags.isEmpty()) {
+                boolean include = false;
+                for (String tag : tags) {
+                    if (includeTags.contains(tag)) {
+                        include = true;
+                        break;
+                    }
+                }
+                if (!include) {
+                    removeKeys.add(entry.getKey());
+                }
+            }
+        }
+        if (!removeKeys.isEmpty()) {
+            for (String key : removeKeys) {
+                skillsMap.remove(key);
+            }
+        }
+    }
+
+    public void filterToolsByIncludeTags(Map<String, ToolRawDefinition> toolMap, Collection<String> includeTags) {
+        if (includeTags == null || includeTags.isEmpty()) {
+            return;
+        }
+        if (toolMap == null || toolMap.isEmpty()) {
+            return;
+        }
+        Set<String> removeKeys = new HashSet<>();
+        for (Map.Entry<String, ToolRawDefinition> entry : toolMap.entrySet()) {
+            ToolRawDefinition definition = entry.getValue();
+            Set<String> tags = definition.getTags();
+            if (tags != null && !tags.isEmpty()) {
+                boolean include = false;
+                for (String tag : tags) {
+                    if (includeTags.contains(tag)) {
+                        include = true;
+                        break;
+                    }
+                }
+                if (!include) {
+                    removeKeys.add(entry.getKey());
+                }
+            }
+        }
+        if (!removeKeys.isEmpty()) {
+            for (String key : removeKeys) {
+                toolMap.remove(key);
+            }
+        }
+    }
+
+    public void injectStructOutputPrompt(Class<?> outputType, List<AiMessage> messageList) {
+        if (outputType == null) {
+            return;
+        }
+        if (Object.class.equals(outputType)) {
+            return;
+        }
+        if (TypeOf.typeOfAny(outputType, CharSequence.class, Void.class)) {
+            return;
+        }
+
+        Map<String, Object> outputSchema = JsonSchema.getTypeJsonSchema(jsonSchemaAnnotationResolver, outputType);
+        String outputSchemaJson = jsonSerializer.serialize(outputSchema);
+        StringBuilder builder = new StringBuilder();
+        builder.append("# 最终输出约束\n" +
+                        "- 思考过程中或中间过程可以使用随意格式进行答复\n" +
+                        "- 但是确定并检查了输出最终答复的时候，必须严格按照下面的JSON格式进行答复\n" +
+                        "- 答复必须是标准JSON的内容，不能包含markdown标记，不能包含除了JSON之外多余的描述性信息\n" +
+                        "- 输出的JSON格式约束如下：\n" +
+                        "").append(outputSchemaJson)
+                .append("\n");
+        messageList.add(0, new SystemMessage(builder.toString()));
+
     }
 }
