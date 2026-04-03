@@ -141,12 +141,12 @@ public void updateProfile(Long userId) {
 
 在 SpEL 表达式中可使用以下变量：
 
-| 变量名    | 类型                          | 说明            |
-|--------|-----------------------------|---------------|
-| `user` | `IRabcLoginUser`            | 当前登录用户对象      |
-| `auth` | `RbacCheckPermissionHelper` | RBAC 权限检查辅助工具 |
-| `jp`   | `JoinPoint`                 | AspectJ 连接点对象 |
-| `args` | `Object[]`                  | 方法参数数组        |
+| 变量名    | 类型                          | 说明                                                        |
+|--------|-----------------------------|-----------------------------------------------------------|
+| `user` | `IRabcLoginUser`            | 当前登录用户对象，根据具体的 CheckPermissionContextProvider 判断实际类型      |
+| `auth` | `RbacCheckPermissionHelper` | RBAC 权限检查辅助工具，根据具体的 CheckPermissionContextProvider 判断实际类型 |
+| `jp`   | `JoinPoint`                 | AspectJ 连接点对象                                             |
+| `args` | `Object[]`                  | 方法参数数组                                                    |
 
 ## RbacCheckPermissionHelper 方法
 
