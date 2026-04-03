@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
@@ -32,8 +33,9 @@ public class AiAgentContext {
     protected boolean enableStructOutput = false;
     protected Class<?> outputType = null;
 
+    protected List<Predicate<Set<String>>> tagsFilterChain = new ArrayList<>();
+
     protected Map<String, SkillDefinition> skillsMap = new HashMap<>(DEFAULT_SKILLS_MAP);
-    protected Set<String> includeSkillTags = new HashSet<>();
 
     protected final AtomicInteger maxKeepMessageCount = new AtomicInteger(20);
     protected final AtomicBoolean keepFirstUserMessage = new AtomicBoolean(true);
@@ -81,15 +83,26 @@ public class AiAgentContext {
         return this;
     }
 
+    public AiAgentContext tagsFilterChain(List<Predicate<Set<String>>> tagsFilterChain) {
+        this.tagsFilterChain = tagsFilterChain;
+        return this;
+    }
+
+    public AiAgentContext addTagsFilter(Predicate<Set<String>> tagsFilter) {
+        if (this.tagsFilterChain == null) {
+            this.tagsFilterChain = new ArrayList<>();
+        }
+        if (tagsFilter != null) {
+            this.tagsFilterChain.add(tagsFilter);
+        }
+        return this;
+    }
+
     public AiAgentContext skillsMap(Map<String, SkillDefinition> skillsMap) {
         this.skillsMap = skillsMap;
         return this;
     }
 
-    public AiAgentContext includeSkillTags(Set<String> includeSkillTags) {
-        this.includeSkillTags = includeSkillTags;
-        return this;
-    }
 
     public AiAgentContext skill(SkillDefinition definition) {
         if (skillsMap == null) {
@@ -114,23 +127,6 @@ public class AiAgentContext {
         for (SkillDefinition definition : list) {
             skillsMap.put(definition.getName(), definition);
         }
-        return this;
-    }
-
-
-    public AiAgentContext skillTags(String... tags) {
-        if (includeSkillTags == null) {
-            includeSkillTags = new LinkedHashSet<>();
-        }
-        includeSkillTags.addAll(Arrays.asList(tags));
-        return this;
-    }
-
-    public AiAgentContext skillTags(Collection<String> tags) {
-        if (includeSkillTags == null) {
-            includeSkillTags = new LinkedHashSet<>();
-        }
-        includeSkillTags.addAll(tags);
         return this;
     }
 

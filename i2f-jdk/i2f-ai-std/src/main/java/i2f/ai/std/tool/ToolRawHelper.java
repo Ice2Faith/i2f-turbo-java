@@ -58,7 +58,7 @@ public class ToolRawHelper {
                 ToolRawDefinitionsProvider provider = (ToolRawDefinitionsProvider) item;
                 List<ToolRawDefinition> tools = provider.getTools();
                 for (ToolRawDefinition definition : tools) {
-                    ret.put(definition.getFunctionName(), definition);
+                    ret.put(definition.getName(), definition);
                 }
             } else if (resolver.isToolsObject(item)) {
                 Map<String, ToolRawDefinition> map = parseTools(resolver, item);
@@ -111,7 +111,7 @@ public class ToolRawHelper {
                 continue;
             }
             definition.setBindClass(clazz);
-            ret.put(definition.getFunctionName(), definition);
+            ret.put(definition.getName(), definition);
         }
         return ret;
     }
@@ -132,11 +132,11 @@ public class ToolRawHelper {
         Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
 
         ToolRawDefinition definition = new ToolRawDefinition();
-        definition.setFunctionJsonSchema(functionSchema);
-        definition.setFunctionName(name);
-        definition.setFunctionDescription(description);
-        definition.setFunctionParametersJsonSchema(parametersSchema);
-        definition.setFunctionParameterNames(parameterNames);
+        definition.setJsonSchema(functionSchema);
+        definition.setName(name);
+        definition.setDescription(description);
+        definition.setParametersJsonSchema(parametersSchema);
+        definition.setParameterNames(parameterNames);
         definition.setBindMethod(method);
         definition.setBindClass(method.getDeclaringClass());
         definition.setBindTarget(null);
@@ -152,10 +152,10 @@ public class ToolRawHelper {
     public static Object invokeTool(ToolRawDefinition rawDefinition, Map<String, Object> argumentsMap, IProxyInvocationHandler handler) throws Throwable {
         try {
             Method bindMethod = rawDefinition.getBindMethod();
-            Object[] args = new Object[rawDefinition.getFunctionParameterNames().size()];
+            Object[] args = new Object[rawDefinition.getParameterNames().size()];
             for (int i = 0; i < args.length; i++) {
                 Parameter[] parameters = bindMethod.getParameters();
-                Object value = argumentsMap.get(rawDefinition.getFunctionParameterNames().get(i));
+                Object value = argumentsMap.get(rawDefinition.getParameterNames().get(i));
                 if (i <= parameters.length) {
                     if (!TypeOf.instanceOf(value, parameters[i].getType())) {
                         if (ObjectConvertor.isDateType(parameters[i].getType())) {

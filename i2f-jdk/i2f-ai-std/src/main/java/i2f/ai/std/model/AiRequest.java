@@ -19,7 +19,6 @@ import java.util.*;
 public class AiRequest {
     protected List<AiMessage> messageList;
     protected Map<String, ToolRawDefinition> toolMap;
-    protected Set<String> includeToolsTags;
 
     public AiRequest messageList(List<AiMessage> messageList) {
         this.messageList = messageList;
@@ -28,11 +27,6 @@ public class AiRequest {
 
     public AiRequest toolMap(Map<String, ToolRawDefinition> toolMap) {
         this.toolMap = toolMap;
-        return this;
-    }
-
-    public AiRequest includeToolsTags(Set<String> includeToolsTags) {
-        this.includeToolsTags = includeToolsTags;
         return this;
     }
 
@@ -64,7 +58,7 @@ public class AiRequest {
         if (toolMap == null) {
             toolMap = new LinkedHashMap<>();
         }
-        toolMap.put(definition.getFunctionName(), definition);
+        toolMap.put(definition.getName(), definition);
         return this;
     }
 
@@ -81,24 +75,9 @@ public class AiRequest {
             toolMap = new LinkedHashMap<>();
         }
         for (ToolRawDefinition definition : list) {
-            toolMap.put(definition.getFunctionName(), definition);
+            toolMap.put(definition.getName(), definition);
         }
         return this;
     }
 
-    public AiRequest toolTags(String... tags) {
-        if (includeToolsTags == null) {
-            includeToolsTags = new LinkedHashSet<>();
-        }
-        includeToolsTags.addAll(Arrays.asList(tags));
-        return this;
-    }
-
-    public AiRequest toolTags(Collection<String> tags) {
-        if (includeToolsTags == null) {
-            includeToolsTags = new LinkedHashSet<>();
-        }
-        includeToolsTags.addAll(tags);
-        return this;
-    }
 }

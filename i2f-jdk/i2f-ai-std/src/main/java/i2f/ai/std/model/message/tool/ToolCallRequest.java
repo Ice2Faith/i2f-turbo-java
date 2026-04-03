@@ -14,5 +14,5 @@ public class ToolCallRequest {
     protected String id;
     protected String name;
     protected String arguments;
-    protected Object rawRequest;
+    protected transient Object rawRequest;
 }

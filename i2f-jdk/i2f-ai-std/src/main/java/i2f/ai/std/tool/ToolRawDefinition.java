@@ -16,13 +16,13 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 public class ToolRawDefinition {
-    protected Map<String, Object> functionJsonSchema;
-    protected String functionName;
-    protected String functionDescription;
-    protected Map<String, Object> functionParametersJsonSchema;
-    protected List<String> functionParameterNames;
-    protected Method bindMethod;
-    protected Class<?> bindClass;
-    protected Object bindTarget;
+    protected Map<String, Object> jsonSchema;
+    protected String name;
+    protected String description;
+    protected Map<String, Object> parametersJsonSchema;
+    protected List<String> parameterNames;
+    protected transient Method bindMethod;
+    protected transient Class<?> bindClass;
+    protected transient Object bindTarget;
     protected Set<String> tags;
 }
