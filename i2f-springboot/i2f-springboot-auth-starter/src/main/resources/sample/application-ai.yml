@@ -1,6 +1,0 @@
-# ai 配置
-i2f:
-  springboot:
-    ai:
-      enable: true
-

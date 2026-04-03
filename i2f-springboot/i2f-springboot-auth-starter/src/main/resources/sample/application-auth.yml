@@ -1,0 +1,9 @@
+# auth 配置
+i2f:
+  springboot:
+    auth:
+      permission:
+        aspect:
+          enable: true
+        aspect-order: -999
+

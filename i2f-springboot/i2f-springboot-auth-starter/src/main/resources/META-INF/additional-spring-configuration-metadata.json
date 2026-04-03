@@ -15,7 +15,7 @@
       "defaultValue": true
     },
     {
-      "name": "i2f.springboot.auth.permission",
+      "name": "i2f.springboot.auth.permission.aspect-order",
       "type": "java.lang.Integer",
       "description": "permission aspect order, default is -999.",
       "sourceType": "i2f.springboot.auth.permission.properties.CheckPermissionProperties",
