@@ -12,7 +12,9 @@ import java.util.Set;
 public interface ParamsConsts {
 
     // 全局部分
-    String STACK_LOCK = "stack_lock";
+    String LOCK = "lock"; // 任务级别的锁
+    String EXECUTOR_LOCK = "executorLock"; // 执行器级别的锁
+    String JVM_LOCK = "jvmLock"; // JVM级别的锁
 
     String CONTEXT = "context";
     String ENVIRONMENT = "env";
@@ -79,7 +81,9 @@ public interface ParamsConsts {
 
     // 这些值，将会始终保存在上下文中，也就是每个params中都应该存在这些键值
     String[] KEEP_NAMES = {
-            STACK_LOCK,
+            LOCK,
+            EXECUTOR_LOCK,
+            JVM_LOCK,
 
             CONTEXT,
             ENVIRONMENT,

@@ -93,8 +93,12 @@ import java.util.function.Supplier;
 @Data
 public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalScriptProvider {
     public static transient final LruMap<String, Object> staticLru = new LruMap<>(4096);
-    protected transient final AtomicReference<ProcedureNode> procedureNodeHolder = new AtomicReference<>();
     protected transient final LruMap<String, Object> executorLru = new LruMap<>(4096);
+
+    public static transient final ReentrantLock jvmLock = new ReentrantLock();
+    protected final ReentrantLock executorLock = new ReentrantLock();
+
+    protected transient final AtomicReference<ProcedureNode> procedureNodeHolder = new AtomicReference<>();
     protected final ConcurrentHashMap<String, CopyOnWriteArrayList<ExecutorNode>> nodes = new ConcurrentHashMap<>();
     protected final ConcurrentHashMap<String, FeatureFunction> featuresMap = new ConcurrentHashMap<>();
     protected final CopyOnWriteArrayList<EvalScriptProvider> evalScriptProviders = new CopyOnWriteArrayList<>();
@@ -800,7 +804,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     public Map<String, Object> createParamsInner() {
         Map<String, Object> ret = new LinkedHashMap<>();
-        ret.put(ParamsConsts.STACK_LOCK, new ReentrantLock());
+        ret.put(ParamsConsts.LOCK, new ReentrantLock());
+        ret.put(ParamsConsts.EXECUTOR_LOCK, executorLock);
+        ret.put(ParamsConsts.JVM_LOCK, jvmLock);
 
         ret.put(ParamsConsts.CONTEXT, getNamingContext());
         ret.put(ParamsConsts.ENVIRONMENT, getEnvironment());
@@ -972,7 +978,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         Map<String, Object> callParams = createParams();
 
         // clone params
-        callParams.put(ParamsConsts.STACK_LOCK, context.get(ParamsConsts.STACK_LOCK));
+        callParams.put(ParamsConsts.LOCK, context.get(ParamsConsts.LOCK));
 
         callParams.put(ParamsConsts.CONTEXT, context.get(ParamsConsts.CONTEXT));
         callParams.put(ParamsConsts.ENVIRONMENT, context.get(ParamsConsts.ENVIRONMENT));
@@ -1118,7 +1124,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         String radixText = node.getTagAttrMap().get(AttrConsts.RADIX);
         if (radixText != null && !radixText.isEmpty()) {
             try {
-                Object radixObj = attrValue(AttrConsts.RADIX, FeatureConsts.VISIT, node, params);
+                Object radixObj = attrValue(AttrConsts.RADIX, FeatureConsts.INT, node, params);
                 if (radixObj != null) {
                     radixObj = ObjectConvertor.tryConvertAsType(radixObj, Integer.class);
                     if (radixObj instanceof Integer) {

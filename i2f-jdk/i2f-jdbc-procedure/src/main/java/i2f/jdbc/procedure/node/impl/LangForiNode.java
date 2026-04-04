@@ -46,6 +46,8 @@ public class LangForiNode extends AbstractExecutorNode {
         String itemName = node.getTagAttrMap().get(AttrConsts.ITEM);
         String firstName = node.getTagAttrMap().get(AttrConsts.FIRST);
         String indexName = node.getTagAttrMap().get(AttrConsts.INDEX);
+        boolean enclose = executor.toBoolean(executor.attrValue(AttrConsts.ENCLOSE, FeatureConsts.BOOLEAN, node, context));
+
         if (itemName == null || itemName.isEmpty()) {
             itemName = AttrConsts.ITEM;
         }
@@ -81,7 +83,7 @@ public class LangForiNode extends AbstractExecutorNode {
 
         boolean isFirst = true;
         int index = 0;
-        for (int j = begin; j < end; j += incr) {
+        for (int j = begin; (enclose ? j <= end : j < end); j += incr) {
             long bts = SystemClock.currentTimeMillis();
 
             pointContext.put(POINT_KEY_BEGIN_TS, bts);
