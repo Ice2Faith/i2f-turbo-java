@@ -475,9 +475,14 @@ public class AiServiceDynamicProxyHandler implements IProxyInvocationHandler {
         if (enableSkill != null) {
             agentContext.enableSkills(enableSkill);
         }
-        agentContext.setIncludeSkillTags(includeSkillTags);
+        agentContext.addSkillTagsFilter((tags) -> {
+            return AiAgentContext.hasAnyTagsFilter(tags, includeSkillTags);
+        });
 
-        request.setIncludeToolsTags(includeToolTags);
+        agentContext.addSkillTagsFilter((tags) -> {
+            return AiAgentContext.hasAnyTagsFilter(tags, includeToolTags);
+        });
+
 
         AiAgentResponse response = agent.generate(request, agentContext);
 

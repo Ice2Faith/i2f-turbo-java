@@ -116,7 +116,7 @@ public class AiAgent {
             Map<String, ToolRawDefinition> toolMap = ret.getToolMap();
 
             // 移除不包含 tag 的工具
-            filterToolsByRule(toolMap, context.getTagsFilterChain());
+            filterToolsByRule(toolMap, context.getToolTagsFilterChain());
 
 
             // 处理结构化输出需求
@@ -132,7 +132,7 @@ public class AiAgent {
                 }
                 Map<String, SkillDefinition> skillsMap = new LinkedHashMap<>(context.getSkillsMap());
                 // 移除不包含 tag 的技能
-                filterSkillsByRule(skillsMap, context.getTagsFilterChain());
+                filterSkillsByRule(skillsMap, context.getSkillTagsFilterChain());
 
 
                 // 有技能才需要注入相关工具和提示词
