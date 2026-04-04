@@ -242,6 +242,7 @@ eval-ts使用TinyScript引擎进行处理
 
     <!--
     使用value指定的模版进行渲染输出,同样支持tag属性标签
+    value默认以render访问，等价于 value.render，如果没有定义value属性，则将标签内部的内容进行渲染输出
     tag默认以字符串方式解析，等价于 tag.string
      -->
     <lang-printf tag="" value.body-xml.trim=""/>
@@ -319,7 +320,7 @@ eval-ts使用TinyScript引擎进行处理
     <lang-format value="" pattern="" result=""/>
     <!-- 举例 -->
     <script-segment id="demo">
-        <lang-format result="v_str" value="12.125" pattern="%.2f"/>
+        <lang-format result="v_str" value.double="12.125" pattern="%.2f"/>
         <lang-format result="v_str" value="v_money" pattern="your account has %.2f$"/>
         <lang-format result="v_str" value.date-now="" pattern="yyyy-MM-dd"/>
     </script-segment>
@@ -519,6 +520,7 @@ eval-ts使用TinyScript引擎进行处理
     <!--
     lang-开头的表示语言的基本语句，这个就是对应if语句，test表示判定条件语句
     test默认以test访问，等价于 test.test
+    datasource可选的属性，当test.dialect进行数据库方言判断时，需要配合datasource属性对数据源判断是否符合方言
      -->
     <lang-if test="">
 
@@ -547,6 +549,10 @@ eval-ts使用TinyScript引擎进行处理
         <lang-if test='v_str.contains("VAR")'>
             <lang-return value.int="-1"/>
         </lang-if>
+
+        <lang-if test.dialect="mysql,gbase" datasource="primary">
+            <lang-return/>
+        </lang-if>
     </script-segment>
 
     <!-- 对应的就是if-else-if这种语句或者Switch这种分支语句 -->
@@ -571,6 +577,9 @@ eval-ts使用TinyScript引擎进行处理
             </lang-when>
             <lang-when test="v_grade==0">
                 <lang-set result="v_grade_color" value.string="skyblue"/>
+            </lang-when>
+            <lang-when test.dialect="mysql,gbase" datasource="slave">
+                <lang-set result="v_grade_color" value.string="green"/>
             </lang-when>
             <lang-otherwise>
                 <lang-set result="v_grade_color" value.string="red"/>
@@ -602,7 +611,7 @@ eval-ts使用TinyScript引擎进行处理
     </script-segment>
 
     <!--
-    对应一个计数型循环，表示从begin数开始每次增加incr的步长直到end结束，item表示迭代变量的名称
+    对应一个计数型循环，表示从begin数开始每次增加incr的步长直到end结束，item表示迭代变量的名称，默认左闭右开区间[begin,end)
     begin默认值为0，可缺省
     incr默认值为1，可缺省
     item默认值为item，可缺省
@@ -614,8 +623,9 @@ eval-ts使用TinyScript引擎进行处理
     item以string访问，不支持修饰符
     first以string访问，不支持修饰符
     index以string访问，不支持修饰符
+    enclose以boolean访问，默认false，表示是否包含结束值，是否闭区间[begin,end]
      -->
-    <lang-fori begin="" end="" incr="" item="" first="" index="">
+    <lang-fori begin="" end="" incr="" item="" first="" index="" enclose="false">
 
     </lang-fori>
     <!-- 举例 -->
@@ -632,6 +642,10 @@ eval-ts使用TinyScript引擎进行处理
         </lang-fori>
 
         <lang-fori end.int="100" >
+            <lang-set result="v_count" value.eval="v_count+1"/>
+        </lang-fori>
+
+        <lang-fori begin.int="0" end.int="10" incr.int="1" enclose="true">
             <lang-set result="v_count" value.eval="v_count+1"/>
         </lang-fori>
     </script-segment>
@@ -955,13 +969,14 @@ eval-ts使用TinyScript引擎进行处理
     delay默认以long访问，表示重试前等待的睡眠时间，默认为30
     time-unit默认以string访问，表示延迟睡眠的事件单位，为TimeUnit枚举的字符串字面值，默认为MILLISECONDS
     incr默认以double访问，表示延迟睡眠的增长倍率系数，默认为1
+    max-delay默认以long访问，表示delay能够达到的最大值，防止因为incr导致的指数级退避时间过长
     特别的，
     允许在 lang-retry 中使用 lang-continue 继续重试
     使用 lang-break 跳出重试循环
     使用 lang-return 直接返回，也会跳出重试循环
     因此，你可以根据自己的状态位，配合 lang-break/lang-continue 决定是否继续重试
     -->
-    <lang-retry result="" count="" type="" delay="" time-unit="" incr="">
+    <lang-retry result="" count="" type="" delay="" time-unit="" incr="" max-delay="">
 
     </lang-retry>
     <!-- 举例 -->
@@ -981,9 +996,10 @@ eval-ts使用TinyScript引擎进行处理
     </script-segment>
 
     <!--
-    对应synchronized关键字,允许指定target，不指定则对当前节点的上下文的global同步
-    因为global对象在整个过程调用树期间都市同一个实例
-    如果要对app应用级别进行同步，可以使用executor对象
+    对应synchronized关键字,允许指定target，不指定则对当前节点的上下文的lock同步
+    因为lock对象在整个过程调用树期间都市同一个实例
+    如果要对执行器级别进行同步，可以使用executor对象或者executorLock对象
+    如果要对jvm级别进行同步，可以使用jvmLock对象或者staticLru对象
     等价于 synchronized(target)
     target默认以visit访问，等价于 target.visit
      -->
@@ -992,7 +1008,19 @@ eval-ts使用TinyScript引擎进行处理
     </lang-synchronized>
     <!-- 举例 -->
     <script-segment id="demo">
-        <lang-synchronized target="global">
+        <lang-synchronized>
+            <sql-update script="v_sql"/>
+        </lang-synchronized>
+
+        <lang-synchronized target="lock">
+            <sql-update script="v_sql"/>
+        </lang-synchronized>
+
+        <lang-synchronized target="executorLock">
+            <sql-update script="v_sql"/>
+        </lang-synchronized>
+
+        <lang-synchronized target="jvmLock">
             <sql-update script="v_sql"/>
         </lang-synchronized>
     </script-segment>
@@ -1003,7 +1031,7 @@ eval-ts使用TinyScript引擎进行处理
     允许使用result获取锁对象，VALUE都会被String.valueOf转换为锁键，因此请合理使用锁键VALUE
     同时，需要避免产生非常多的锁对象，导致产生大量的锁实例，无法释放，导致内存泄漏或者OOM
     VALUE默认以string访问，等价于 value.visit
-    type默认以string访问，用于指定特定的 ILockProvider, 不指定则使用默认的Jdk锁实现
+    type默认以string访问，用于指定特定的 ILockProvider, 不指定则使用默认的Jdk锁实现，是执行器级别的
     test默认以eval访问，用于指定是否开启锁，默认开启
    -->
     <lang-lock result="" value="" type="" test="">
@@ -1011,13 +1039,22 @@ eval-ts使用TinyScript引擎进行处理
     </lang-lock>
     <!-- 举例 -->
     <script-segment id="demo">
-        <lang-lock value="global">
+        <lang-lock value="user">
+            <sql-update script="v_sql"/>
+        </lang-lock>
+
+        <lang-lock value.visit="v_lock_key">
+            <sql-update script="v_sql"/>
+        </lang-lock>
+
+        <lang-lock value.render="redis:lock:$!{v_biz_id}" type="redis">
             <sql-update script="v_sql"/>
         </lang-lock>
     </script-segment>
 
     <!--
     调用type指定类型的AI工具，传入的提示词为value，大模型输出的结果保存到result中
+    当没有value属性的时候，value的值就是标签内部的文本
     允许使用role指定系统提示词，也就是基本的角色设定
     type实际上是需要对应一个 ChatAiProvider 类型的bean在上下文namingContext中
     当有指定role的情况下，type对应的就应该是 RoleChatAiProvider 类型的bean
@@ -1035,19 +1072,30 @@ eval-ts使用TinyScript引擎进行处理
             你是一个熟悉SQL的数据库DBA，熟悉Oracle数据库。如何重建序列以设置起始值？
         </lang-ai>
 
+        <lang-ai result="v_answer" type="lanchain4j" value.string="怎么删除Oracle的表">
+        </lang-ai>
+
         <lang-render result="v_question">
             你是一个熟悉SQL的数据库DBA，熟悉Oracle数据库。请专业的回答以下问题：$!{v_user_msg}
         </lang-render>
         <lang-ai result="v_answer" value="v_question" type="spring"/>
+
+        <lang-ai result="v_answer" type="dashscope"
+                 value.string="怎么删除Oracle的表"
+                 role.string="你是一个数据库专家，根据用户提问回答问题，给出对应的SQL语句并且给出语句的解释">
+        </lang-ai>
     </script-segment>
 
     <!--
     注册一个名为name的事件监听器，监听的事件类型为type指定，事件对象保存到target指定的变量中
+    通过这种方式注册的时间监听器，属于内部监听器，生命周期仅在一次执行链中，
+    不管是同步事件还是异步事件，都以同步方式运行
     name默认以string进行访问，表示监听器的名称，同名的监听器重复注册会被覆盖
     type默认以string进行访问，表示接受的事件类型
     target默认以string进下访问，表示事件对象存放的变量名
+    params-share默认以boolean访问，表示当时间触发是，是否共享事件触发时的上下文，默认false表示不共享，在独立上下文中运行
     -->
-    <lang-listener name="" type="" target="">
+    <lang-listener name="" type="" target="" params-share="">
 
     </lang-listener>
     <!-- 举例 -->

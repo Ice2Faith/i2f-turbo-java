@@ -171,10 +171,23 @@
         <!ATTLIST lang-format-date pattern CDATA #IMPLIED>
         <!ATTLIST lang-format-date result CDATA #REQUIRED>
 
+        <!ATTLIST lang-format-date value.visit CDATA #IMPLIED>
+        <!ATTLIST lang-format-date value.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-format-date value.date-now CDATA #IMPLIED>
+
         <!ELEMENT lang-format (ANY|EMPTY)>
         <!ATTLIST lang-format value CDATA #IMPLIED>
         <!ATTLIST lang-format pattern CDATA #IMPLIED>
         <!ATTLIST lang-format result CDATA #REQUIRED>
+
+        <!ATTLIST lang-format value.visit CDATA #IMPLIED>
+        <!ATTLIST lang-format value.eval-ts CDATA #IMPLIED>
+        <!ATTLIST lang-format value.date-now CDATA #IMPLIED>
+        <!ATTLIST lang-format value.int CDATA #IMPLIED>
+        <!ATTLIST lang-format value.long CDATA #IMPLIED>
+        <!ATTLIST lang-format value.double CDATA #IMPLIED>
+        <!ATTLIST lang-format value.float CDATA #IMPLIED>
+        <!ATTLIST lang-format value.string CDATA #IMPLIED>
 
         <!ELEMENT lang-string-join (ANY|EMPTY)>
         <!ATTLIST lang-string-join separator CDATA #IMPLIED>
@@ -471,6 +484,7 @@
         <!ATTLIST lang-if test CDATA #IMPLIED>
         <!ATTLIST lang-if datasource CDATA #IMPLIED>
 
+        <!ATTLIST lang-if test.visit CDATA #IMPLIED>
         <!ATTLIST lang-if test.boolean CDATA #IMPLIED>
         <!ATTLIST lang-if test.dialect CDATA #IMPLIED>
         <!ATTLIST lang-if test.eval-ts CDATA #IMPLIED>
@@ -506,6 +520,7 @@
         <!ATTLIST lang-fori item CDATA #IMPLIED>
         <!ATTLIST lang-fori first CDATA #IMPLIED>
         <!ATTLIST lang-fori index CDATA #IMPLIED>
+        <!ATTLIST lang-fori enclose CDATA #IMPLIED>
 
         <!ATTLIST lang-fori begin.int CDATA #IMPLIED>
         <!ATTLIST lang-fori end.int CDATA #IMPLIED>
@@ -830,6 +845,7 @@
         <!ATTLIST lang-retry delay CDATA #IMPLIED>
         <!ATTLIST lang-retry time-unit CDATA #IMPLIED>
         <!ATTLIST lang-retry incr CDATA #IMPLIED>
+        <!ATTLIST lang-retry max-delay CDATA #IMPLIED>
 
         <!ELEMENT lang-synchronized (ANY|EMPTY)>
         <!ATTLIST lang-synchronized target CDATA #IMPLIED>
@@ -873,6 +889,7 @@
         <!ATTLIST lang-listener name CDATA #IMPLIED>
         <!ATTLIST lang-listener type CDATA #IMPLIED>
         <!ATTLIST lang-listener target CDATA #IMPLIED>
+        <!ATTLIST lang-listener params-share CDATA #IMPLIED>
 
         <!ELEMENT sql-query-row (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*
@@ -928,7 +945,6 @@
         <!ATTLIST sql-update datasource CDATA #IMPLIED>
         <!ATTLIST sql-update script CDATA #IMPLIED>
         <!ATTLIST sql-update result CDATA #IMPLIED>
-        <!ATTLIST sql-update result-type CDATA #IMPLIED>
 
         <!ATTLIST sql-update datasource.visit CDATA #IMPLIED>
         <!ATTLIST sql-update datasource.visit.string CDATA #IMPLIED>
@@ -1098,6 +1114,11 @@
         <!ATTLIST lang-latch count CDATA #IMPLIED>
         <!ATTLIST lang-latch result CDATA #REQUIRED>
 
+        <!ATTLIST lang-latch count.int CDATA #IMPLIED>
+        <!ATTLIST lang-latch count.visit CDATA #IMPLIED>
+        <!ATTLIST lang-latch count.eval CDATA #IMPLIED>
+        <!ATTLIST lang-latch count.eval-ts CDATA #IMPLIED>
+
         <!ELEMENT lang-async-all (ANY|EMPTY)>
         <!ATTLIST lang-async-all await CDATA #IMPLIED>
 
@@ -1198,6 +1219,7 @@
         <!ATTLIST etl-transform source.string CDATA #IMPLIED>
         <!ATTLIST etl-transform source.render CDATA #IMPLIED>
         <!ATTLIST etl-transform source.int CDATA #IMPLIED>
+        <!ATTLIST etl-transform source.date-now CDATA #IMPLIED>
 
         <!ELEMENT etl-load (EMPTY)>
         <!ATTLIST etl-load datasource CDATA #IMPLIED>
