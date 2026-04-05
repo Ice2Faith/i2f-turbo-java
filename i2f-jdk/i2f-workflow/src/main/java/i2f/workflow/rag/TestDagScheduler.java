@@ -44,7 +44,7 @@ public class TestDagScheduler {
              * 最终输出序列：abec
              * 因为 d 不在调度器中
              */
-            d.setStatus(DagNodeStatus.SUCCESS);
+            //d.setStatus(DagNodeStatus.SUCCESS);
 
             /**
              * 情况2
