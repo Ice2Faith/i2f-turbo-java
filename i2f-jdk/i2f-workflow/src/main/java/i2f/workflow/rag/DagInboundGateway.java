@@ -13,5 +13,5 @@ import java.util.List;
  */
 @FunctionalInterface
 public interface DagInboundGateway {
-    DagStatus test(List<DagInboundNode> nodes);
+    DagNodeStatus test(List<DagInboundNode> nodes);
 }

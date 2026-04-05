@@ -8,61 +8,67 @@ import java.util.List;
  * @desc
  */
 public class DagInboundGateways {
-    public static DagStatus allSuccess(List<DagInboundNode> nodes) {
+    public static DagNodeStatus allSuccess(List<DagInboundNode> nodes) {
         if (nodes == null || nodes.isEmpty()) {
-            return DagStatus.SUCCESS;
+            return DagNodeStatus.SUCCESS;
         }
         for (DagInboundNode inboundNode : nodes) {
-            DagStatus edgeStatus = inboundNode.getEdgeStatus();
-            if (edgeStatus == DagStatus.PENDING) {
-                return DagStatus.PENDING;
+            DagEdgeStatus edgeStatus = inboundNode.getEdgeStatus();
+            if (edgeStatus == DagEdgeStatus.PENDING) {
+                return DagNodeStatus.PENDING;
             }
-            if (edgeStatus == DagStatus.FAILURE) {
-                return DagStatus.FAILURE;
+            if (edgeStatus == DagEdgeStatus.FAILURE || edgeStatus == DagEdgeStatus.SKIP) {
+                return DagNodeStatus.FAILURE;
             }
         }
-        return DagStatus.SUCCESS;
+        return DagNodeStatus.SUCCESS;
     }
 
-    public static DagStatus anySuccess(List<DagInboundNode> nodes) {
+    public static DagNodeStatus anySuccess(List<DagInboundNode> nodes) {
         if (nodes == null || nodes.isEmpty()) {
-            return DagStatus.SUCCESS;
+            return DagNodeStatus.SUCCESS;
         }
         for (DagInboundNode inboundNode : nodes) {
-            DagStatus edgeStatus = inboundNode.getEdgeStatus();
-            if (edgeStatus == DagStatus.PENDING) {
-                return DagStatus.PENDING;
+            DagEdgeStatus edgeStatus = inboundNode.getEdgeStatus();
+            if (edgeStatus == DagEdgeStatus.PENDING) {
+                return DagNodeStatus.PENDING;
             }
-            if (edgeStatus == DagStatus.SUCCESS) {
-                return DagStatus.SUCCESS;
+            if (edgeStatus == DagEdgeStatus.SKIP) {
+                continue;
+            }
+            if (edgeStatus == DagEdgeStatus.SUCCESS) {
+                return DagNodeStatus.SUCCESS;
             }
         }
-        return DagStatus.FAILURE;
+        return DagNodeStatus.FAILURE;
     }
 
     public static DagInboundGateway leastSuccessCount(int count) {
         return (nodes) -> {
             if (nodes == null || nodes.isEmpty()) {
-                return DagStatus.SUCCESS;
+                return DagNodeStatus.SUCCESS;
             }
             boolean hasPending = false;
             int cnt = 0;
             for (DagInboundNode inboundNode : nodes) {
-                DagStatus edgeStatus = inboundNode.getEdgeStatus();
-                if (edgeStatus == DagStatus.PENDING) {
+                DagEdgeStatus edgeStatus = inboundNode.getEdgeStatus();
+                if (edgeStatus == DagEdgeStatus.PENDING) {
                     hasPending = true;
                 }
-                if (edgeStatus == DagStatus.SUCCESS) {
+                if (edgeStatus == DagEdgeStatus.SKIP) {
+                    continue;
+                }
+                if (edgeStatus == DagEdgeStatus.SUCCESS) {
                     cnt++;
                     if (cnt >= count) {
-                        return DagStatus.SUCCESS;
+                        return DagNodeStatus.SUCCESS;
                     }
                 }
             }
             if (hasPending) {
-                return DagStatus.PENDING;
+                return DagNodeStatus.PENDING;
             }
-            return DagStatus.FAILURE;
+            return DagNodeStatus.FAILURE;
         };
     }
 }

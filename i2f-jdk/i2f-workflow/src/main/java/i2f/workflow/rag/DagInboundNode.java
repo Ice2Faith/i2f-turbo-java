@@ -14,5 +14,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class DagInboundNode {
     protected DagNode node;
-    protected DagStatus edgeStatus;
+    protected DagEdgeStatus edgeStatus;
 }

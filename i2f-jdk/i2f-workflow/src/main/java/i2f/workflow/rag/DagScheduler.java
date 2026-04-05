@@ -34,7 +34,7 @@ public class DagScheduler implements Runnable {
         // 2. 逐层执行
         for (List<String> layer : layers) {
             // 为当前层创建一个 Latch，数量等于当前层的任务数
-
+            boolean hasWaiting = false;
             Set<String> pendingList = new LinkedHashSet<>(layer);
             while (!pendingList.isEmpty()) {
 
@@ -44,7 +44,8 @@ public class DagScheduler implements Runnable {
                 // 3. 提交当前层的所有任务到线程池
                 for (String taskId : pendingList) {
                     DagNode node = nodes.get(taskId);
-                    if (node.getStatus() != DagStatus.PENDING) {
+                    if (node.getStatus() != DagNodeStatus.PENDING
+                            && node.getStatus() != DagNodeStatus.CONTINUE) {
                         removeList.add(taskId);
                         continue;
                     }
@@ -53,16 +54,16 @@ public class DagScheduler implements Runnable {
                     Set<String> dependencies = node.getDependencies();
                     for (String dependTaskId : dependencies) {
                         DagNode dependNode = nodes.get(dependTaskId);
-                        DagStatus dependStatus = dependNode.getStatus();
-                        DagStatus edgeStatus = dependStatus;
-                        if (dependStatus == DagStatus.SUCCESS) {
+                        DagNodeStatus dependNodeStatus = dependNode.getStatus();
+                        DagEdgeStatus edgeStatus = DagEdgeStatus.of(dependNodeStatus);
+                        if (dependNodeStatus == DagNodeStatus.SUCCESS) {
                             // 如果执行成功，则查找边，判断边上的条件是否满足，不满足的话这条边就应该变为 SKIP 跳过
                             List<DagEdge> outboundEdges = edges.get(dependTaskId);
                             for (DagEdge outboundEdge : outboundEdges) {
                                 if (outboundEdge.getToId().equals(taskId)) {
                                     boolean ok = outboundEdge.getCondition().test(dependNode.getResult());
                                     if (!ok) {
-                                        edgeStatus = DagStatus.SKIP;
+                                        edgeStatus = DagEdgeStatus.SKIP;
                                     }
                                     break;
                                 }
@@ -74,18 +75,22 @@ public class DagScheduler implements Runnable {
                         inboundNode.setEdgeStatus(edgeStatus);
                         inboundNodes.add(inboundNode);
                     }
-                    DagStatus status = inboundGateway.test(inboundNodes);
-                    if (status != DagStatus.SUCCESS) {
+                    DagNodeStatus status = inboundGateway.test(inboundNodes);
+                    if (status != DagNodeStatus.SUCCESS) {
                         removeList.add(taskId);
                     }
-                    if (status == DagStatus.PENDING) {
-                        node.setStatus(DagStatus.PENDING);
-                    } else if (status == DagStatus.FAILURE) {
-                        throw new IllegalStateException("task [" + taskId + "] run failed！");
-                    } else if (status == DagStatus.SUCCESS) {
-                        taskList.add(new AbstractMap.SimpleEntry<>(node, inboundNodes));
-                    } else if (status == DagStatus.SKIP) {
-                        node.setStatus(DagStatus.SKIP);
+                    if (status == DagNodeStatus.FAILURE) {
+                        throw new IllegalStateException("task [" + taskId + "] inbound check failed！");
+                    } else if (status == DagNodeStatus.SUCCESS) {
+                        if (node.getType() == DagNodeType.HUMAN
+                                && node.getStatus() == DagNodeStatus.PENDING) {
+                            hasWaiting = true;
+                            node.setStatus(DagNodeStatus.WAITING);
+                        } else {
+                            taskList.add(new AbstractMap.SimpleEntry<>(node, inboundNodes));
+                        }
+                    } else {
+                        node.setStatus(status);
                     }
 
                 }
@@ -99,10 +104,10 @@ public class DagScheduler implements Runnable {
                         try {
                             Object result = task.call(inboundList);
                             node.setResult(result);
-                            node.setStatus(DagStatus.SUCCESS);
+                            node.setStatus(DagNodeStatus.SUCCESS);
                         } catch (Throwable e) {
                             node.setError(e);
-                            node.setStatus(DagStatus.FAILURE);
+                            node.setStatus(DagNodeStatus.FAILURE);
                         } finally {
                             latch.countDown();
                         }
@@ -123,40 +128,56 @@ public class DagScheduler implements Runnable {
                 }
 
             }
+            if (hasWaiting) {
+                break;
+            }
         }
     }
 
     public DagScheduler addNode(String id, Runnable task) {
-        return addNode(id, task, null);
+        return addNode(id, task, null, null);
     }
 
-    public DagScheduler addNode(String id, Runnable task, DagInboundGateway inboundGateway) {
+    public DagScheduler addNode(String id, Runnable task, DagNodeType type) {
+        return addNode(id, task, type, null);
+    }
+
+    public DagScheduler addNode(String id, Runnable task, DagNodeType type, DagInboundGateway inboundGateway) {
         return addNode(id, () -> {
             task.run();
             return null;
-        }, inboundGateway);
+        }, type, inboundGateway);
     }
 
     public DagScheduler addNode(String id, Callable<?> task) {
-        return addNode(id, task, null);
+        return addNode(id, task, null, null);
     }
 
-    public DagScheduler addNode(String id, Callable<?> task, DagInboundGateway inboundGateway) {
+    public DagScheduler addNode(String id, Callable<?> task, DagNodeType type) {
+        return addNode(id, task, type, null);
+    }
+
+    public DagScheduler addNode(String id, Callable<?> task, DagNodeType type, DagInboundGateway inboundGateway) {
         return addNode(id, (list) -> {
             return task.call();
-        }, inboundGateway);
+        }, type, inboundGateway);
     }
 
     public DagScheduler addNode(String id, DagTask<?> task) {
-        return addNode(id, task, null);
+        return addNode(id, task, null, null);
     }
 
-    public DagScheduler addNode(String id, DagTask<?> task, DagInboundGateway inboundGateway) {
+    public DagScheduler addNode(String id, DagTask<?> task, DagNodeType type) {
+        return addNode(id, task, type, null);
+    }
+
+    public DagScheduler addNode(String id, DagTask<?> task, DagNodeType type, DagInboundGateway inboundGateway) {
         DagNode node = new DagNode();
         node.setId(id);
         node.setTask(task);
         node.setInboundGateway(inboundGateway == null ? DagInboundGateways::allSuccess : inboundGateway);
-        node.setStatus(DagStatus.PENDING);
+        node.setType(type == null ? DagNodeType.AUTO : type);
+        node.setStatus(DagNodeStatus.PENDING);
         nodes.put(id, node);
         return this;
     }

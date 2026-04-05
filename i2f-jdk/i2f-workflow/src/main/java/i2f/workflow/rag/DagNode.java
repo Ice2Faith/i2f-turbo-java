@@ -19,7 +19,8 @@ public class DagNode {
     protected String id;
     protected DagTask<?> task;
     protected Set<String> dependencies = new LinkedHashSet<>();
-    protected DagStatus status = DagStatus.PENDING;
+    protected DagNodeType type = DagNodeType.AUTO;
+    protected DagNodeStatus status = DagNodeStatus.PENDING;
     protected Object result;
     protected Throwable error;
     protected DagInboundGateway inboundGateway = DagInboundGateways::allSuccess;
