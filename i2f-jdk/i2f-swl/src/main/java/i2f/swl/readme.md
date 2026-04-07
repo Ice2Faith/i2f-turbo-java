@@ -19,12 +19,9 @@
 
 ## 数据载荷清单
 
-- clientAsymSign
-    - 客户端的公钥签名，用于确定与客户端配对的公钥
-    - 作用是用来查找请求对应的客户端公钥
-- serverAsymSign
-    - 服务端的公钥签名，用于确定请求发出时使用的服务端公钥
-    - 作用是用于确定使用了哪个服务端公钥
+- certId
+    - 握手成功后的证书ID，用于进行证书管理
+    - 作用是用来查找请求对应的证书的公私钥
 - randomKey
     - 对称加密的秘钥，用于进行对称加密算法进行加解密
     - randomKey=asym.encrypt(key,asymPublicKey)
@@ -52,10 +49,13 @@
 
 ## 运行原理
 
-- 双方生成各自非对称密钥对
-    - 服务端可在项目启动时初始化自身密钥对 serverPublicKey,serverPrivateKey
-    - 客户端可在页面初始化时初始化自身密钥对 clientPublicKey,clientPrivateKey
-- 交换双方公钥
+- 系统初始化配置
+    - 系统使用生成一对非对称秘钥，作为交换密钥对 swapKeyPair
+    - 交换秘钥的私钥 swapPrivateKey 保存在服务端配置文件中
+    - 交换秘钥的公钥 swapPublicKey 保存在客户端的JS文件中
+- 交换会话公钥
+    - 客户端生成自己的密钥对 clientKeyPair
+    - 客户端使用交换公钥 swapPublicKey
     - 客户端携带自身公钥 clientPublicKey 请求服务端
     - 服务端计算客户端公钥签名 clientAsymSign=digest.sign(clientPublicKey)
     - 服务端以键值对方式保存这个客户端公钥，key=clientAsymSign,value=clientPublicKey
